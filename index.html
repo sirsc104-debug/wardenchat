@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- page:start -->
+<title>Claude Code Clicker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Martian+Mono:wdth,wght@87.5..112.5,400..700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<!-- head:end -->
+</head>
+<body data-view="left">
+<!-- body:start -->
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" id="brandMark"></span>
+      <span class="brand-name">Claude Code <em>Clicker</em></span>
+    </div>
+    <button class="ticker" id="ticker" type="button" title="Next headline">
+      <span class="ticker-tag">News</span>
+      <span class="ticker-text" id="tickerText"></span>
+    </button>
+    <div class="top-actions">
+      <button class="btn ghost" id="btnSave" type="button">Save</button>
+      <button class="btn ghost" id="btnSound" type="button" aria-pressed="false">Sound off</button>
+    </div>
+  </header>
+
+  <main class="panes">
+    <section class="pane pane-left" id="paneLeft" aria-label="Generate tokens">
+      <canvas id="stage" tabindex="0" role="button" aria-label="The sparkle. Click it, or press Enter, to generate tokens."></canvas>
+      <div class="bank" aria-live="off">
+        <div class="bank-count" id="bankCount">0</div>
+        <div class="bank-label">tokens</div>
+        <div class="bank-rate" id="bankRate">per second: 0</div>
+      </div>
+      <div class="buffs" id="buffs"></div>
+      <div class="spinner" aria-hidden="true">
+        <span class="spin-glyph" id="spinGlyph">✻</span>
+        <span id="spinVerb"></span>
+        <span class="spin-meta" id="spinMeta"></span>
+      </div>
+    </section>
+
+    <section class="pane pane-mid" id="paneMid" aria-label="Menu">
+      <nav class="tabs" id="tabs" role="tablist">
+        <button type="button" role="tab" data-tab="workspace" aria-selected="true">Workspace</button>
+        <button type="button" role="tab" data-tab="stats" aria-selected="false">Stats</button>
+        <button type="button" role="tab" data-tab="achievements" aria-selected="false">Achievements <span class="tab-count" id="achCount"></span></button>
+        <button type="button" role="tab" data-tab="terminal" aria-selected="false" id="tabTerminal" hidden>Terminal</button>
+        <button type="button" role="tab" data-tab="memory" aria-selected="false">Memory</button>
+        <button type="button" role="tab" data-tab="options" aria-selected="false">Options</button>
+      </nav>
+      <div class="tab-body">
+        <div class="tab-panel" id="panel-workspace" role="tabpanel">
+          <div class="ws-empty" id="wsEmpty">
+            <p class="ws-title">Your workspace is empty.</p>
+            <p>Buy an Autocomplete or hire an Intern from the Store and they will set up here, one lane per building type.</p>
+          </div>
+          <canvas id="workspace" aria-label="Your buildings at work"></canvas>
+        </div>
+        <div class="tab-panel" id="panel-stats" role="tabpanel" hidden></div>
+        <div class="tab-panel" id="panel-achievements" role="tabpanel" hidden></div>
+        <div class="tab-panel" id="panel-terminal" role="tabpanel" hidden></div>
+        <div class="tab-panel" id="panel-memory" role="tabpanel" hidden></div>
+        <div class="tab-panel" id="panel-options" role="tabpanel" hidden></div>
+      </div>
+    </section>
+
+    <aside class="pane pane-right" id="paneRight" aria-label="Store">
+      <div class="store-head">
+        <h2>Store</h2>
+        <div class="seg" role="group" aria-label="Buy or sell">
+          <button type="button" data-mode="buy" aria-pressed="true">Buy</button>
+          <button type="button" data-mode="sell" aria-pressed="false">Sell</button>
+        </div>
+        <div class="seg" role="group" aria-label="How many">
+          <button type="button" data-amt="1" aria-pressed="true">×1</button>
+          <button type="button" data-amt="10" aria-pressed="false">×10</button>
+          <button type="button" data-amt="100" aria-pressed="false">×100</button>
+        </div>
+      </div>
+      <div class="store-label"><span>Upgrades</span><button type="button" class="btn tiny" id="buyAll" hidden>Buy all</button></div>
+      <div class="upgrades" id="upgrades"></div>
+      <div class="store-label"><span>Buildings</span></div>
+      <div class="buildings" id="buildings"></div>
+    </aside>
+  </main>
+
+  <nav class="mobile-nav" id="mobileNav" aria-label="Sections">
+    <button type="button" data-view="left" aria-pressed="true">Sparkle</button>
+    <button type="button" data-view="right" aria-pressed="false">Store</button>
+    <button type="button" data-view="mid" aria-pressed="false">Menu</button>
+  </nav>
+</div>
+
+<div class="fx" id="fx"></div>
+<div class="tooltip" id="tooltip" role="tooltip" hidden></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="js/data.js"></script>
+<script src="js/content.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/render.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/panels.js"></script>
+<script src="js/main.js"></script>
+<!-- body:end -->
+</body>
+</html>
