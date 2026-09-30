@@ -127,7 +127,15 @@ const BUILDINGS = [
     id: 'autocomplete', name: 'Autocomplete', plural: 'Autocompletes', cost: 15, tps: 0.1, color: '#8FB3D9',
     desc: 'Finishes your lines before you do. Taps the sparkle every ten seconds.',
     ach: ['Tab Tab Tab', 'Autopilot', 'Predictive Text', 'Finish My Sentences'],
-    icon: [{ d: 'M9 3L9 26L14.5 21L18.5 29.5L22 28L18 19.5L25 19.5Z', f: '#F4EEE6', s: '#2A2230', w: 1.6 }],
+    // A pointing hand, index finger up (fingertip at 12.5, 2).
+    icon: [
+      {
+        d: 'M10 15V4.5A2.5 2.5 0 0 1 15 4.5V13A2.3 2.3 0 0 1 19.6 13A2.2 2.2 0 0 1 24 14A2 2 0 0 1 28 15.5V22' +
+          'C28 26.5 25 30 20.5 30H15.5C12.5 30 11 28.5 9.5 26.5L4.2 19.5C3 17.8 5.2 15.8 7 17.2L10 19.5Z',
+        f: '#F4EEE6', s: '#2A2230', w: 1.5,
+      },
+      { d: 'M15 13V18.5M19.6 13V18.5M24 14V19', s: '#9C8F99', w: 1.2 },
+    ],
   },
   {
     id: 'intern', name: 'Intern', plural: 'Interns', cost: 100, tps: 1, color: '#6C8EBF',

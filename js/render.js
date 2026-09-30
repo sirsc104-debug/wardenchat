@@ -136,7 +136,7 @@ const Stage = {
     this.R = Math.max(56, Math.min(w * 0.29, h * 0.23));
     this.sparkle = centredCache(this.R * 1.02, paintSparkle);
     this.shine = centredCache(this.R * 2.7, paintShine);
-    this.cursorSize = clamp(this.R * 0.2, 14, 22);
+    this.cursorSize = clamp(this.R * 0.23, 16, 26);
     this.cursor = makeSprite(BUILDINGS[0].icon, this.cursorSize);
   },
   pop(x, y, v) {
@@ -249,7 +249,7 @@ const Stage = {
       c.save();
       c.translate(this.cx + Math.cos(a) * rad, this.cy + Math.sin(a) * rad);
       c.rotate(a - Math.PI / 2);
-      c.drawImage(spr, -s * 0.28, -s * 0.09, s, s);
+      c.drawImage(spr, -s * (12.5 / 32), -s * (2 / 32), s, s); // fingertip touches the ring
       c.restore();
     }
   },
