@@ -44,6 +44,7 @@ function start(snapshot) {
   Workspace.init($('#workspace'));
   Panels.init();
   Dev.init();
+  BlackHole.init();
 
   on('achievement', a => {
     Panels.achDirty = true;

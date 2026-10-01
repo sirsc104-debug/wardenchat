@@ -717,7 +717,6 @@ const UI = {
     }
     if ((this.slow += dt) >= 0.5) {
       this.slow = 0;
-      BlackHole.check();
       Tip.refresh();
       Panels.refresh();
     }

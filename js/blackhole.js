@@ -9,10 +9,13 @@ const BH = { collapse: 2.4, suck: 1.6, black: [2.6, 3.6], fall: [3.8, 11.4], fla
 
 const BlackHole = {
   running: false,
-  check() {
-    if (this.running || G.blackhole || document.hidden || allTimeEarned() < BH_AT) return;
-    if (performance.now() < 2500) return; // let the page settle first
-    this.start();
+  // The event never starts on its own: once you qualify, it waits for your next click,
+  // so nobody misses it by being away from the keyboard.
+  ready() { return !this.running && !G.blackhole && !document.hidden && allTimeEarned() >= BH_AT; },
+  init() {
+    const go = () => { if (this.ready()) setTimeout(() => { if (this.ready()) this.start(); }, 0); };
+    document.addEventListener('pointerdown', go, true);
+    on('clicked', go); // keyboard clicks on the sparkle count too
   },
   start() {
     if (this.running) return;
