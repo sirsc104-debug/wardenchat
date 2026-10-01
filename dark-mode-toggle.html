@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Toggle</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; min-height: 100%; background: #fff; }
+    body { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; }
+    body.dark { background: #000; }
+    button { width: 52px; height: 30px; padding: 3px; border: 0; border-radius: 999px; background: #ccc; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    button::before { content: ""; display: block; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: transform 150ms ease; }
+    button[aria-checked="true"] { background: #555; }
+    button[aria-checked="true"]::before { transform: translateX(22px); }
+    button:focus-visible { outline: 2px solid #888; outline-offset: 5px; }
+    @media (prefers-reduced-motion: reduce) { button::before { transition: none; } }
+  </style>
+</head>
+<body>
+  <button type="button" role="switch" aria-label="Dark mode" aria-checked="false"></button>
+  <script>
+    const toggle = document.querySelector('button');
+    toggle.addEventListener('click', () => {
+      const on = toggle.getAttribute('aria-checked') !== 'true';
+      toggle.setAttribute('aria-checked', String(on));
+      document.body.classList.toggle('dark', on);
+      document.documentElement.style.backgroundColor = on ? '#000' : '#fff';
+    });
+  </script>
+</body>
+</html>
