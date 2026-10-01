@@ -15,6 +15,22 @@ function upgIcon(u) {
 }
 const TK = '<span class="tk" aria-hidden="true">✻</span>';
 
+// Gold pointer skins: [icon parts, hotspot x, hotspot y, fallback cursor].
+const GOLD_INK = '#4A2F10', GOLD_FILL = '#F2C57C';
+const goldLine = (d, w) => [{ d, s: GOLD_INK, w: w + 2.4 }, { d, s: GOLD_FILL, w }];
+const GOLD_ARROW = { d: 'M6 3L6 25L11.5 20L15.5 28.5L19 27L15 18.5L22 18.5Z', f: GOLD_FILL, s: GOLD_INK, w: 1.6 };
+const GOLD_SKINS = {
+  arrow: [[GOLD_ARROW], 6, 3, 'default'],
+  hand: [BIG_HAND, 12, 2, 'pointer'],
+  text: [goldLine('M11.5 5.5H20.5M16 5.5V26.5M11.5 26.5H20.5', 2.4), 16, 16, 'text'],
+  noentry: [[...goldLine(C(16, 16, 10), 3), ...goldLine('M9 23L23 9', 3)], 16, 16, 'not-allowed'],
+  crosshair: [[...goldLine('M16 3V11M16 21V29M3 16H11M21 16H29', 2.2), ...goldLine(C(16, 16, 5.5), 2)], 16, 16, 'crosshair'],
+  help: [[{ ...GOLD_ARROW, d: 'M4 2L4 20L8.5 16L11.5 22.5L14 21.5L11 15L16.5 15Z' },
+    { d: C(23.5, 23.5, 7), f: GOLD_FILL, s: GOLD_INK, w: 1.4 },
+    { d: 'M21.2 21.8C21.2 19.6 25.8 19.6 25.8 21.9C25.8 23.6 23.5 23.6 23.5 25.4', s: GOLD_INK, w: 1.6 },
+    { d: C(23.5, 27.8, 0.8), f: GOLD_INK }], 4, 2, 'help'],
+};
+
 // ---------- sound (synthesised, off by default) ----------
 const Sound = {
   ctx: null,
@@ -478,20 +494,71 @@ const UI = {
       el.classList.toggle('sell', sell);
     }
   },
-  // From 100 Autocompletes on, the player's own mouse pointer becomes the gold hand.
+  // From 100 Autocompletes on, every mouse pointer gets a gold skin, and clicks play a quick gold tap.
   refreshCursor() {
     const gold = G.owned[0] >= HAND_GROUP_AT;
     if (gold === this.goldCursor) return;
-    if (!this.cursorCss) {
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">${BIG_HAND.map(p =>
-        `<path d="${p.d}" fill="${p.f || 'none'}"${p.s ? ` stroke="${p.s}" stroke-width="${p.w || 1.5}" stroke-linecap="round" stroke-linejoin="round"` : ''}/>`).join('')}</svg>`;
-      this.cursorCss = `url("data:image/svg+xml,${encodeURIComponent(svg)}") 12 2, pointer`; // hotspot = fingertip
-      document.documentElement.style.setProperty('--gold-cursor', this.cursorCss);
-    }
+    if (!this.skinCss) this.initGoldCursor();
     const first = this.goldCursor === undefined;
     this.goldCursor = gold;
     document.body.classList.toggle('gold-cursor', gold);
-    if (gold && !first) toast({ icon: BIG_HAND, kicker: 'Golden touch', title: 'Your cursor turned gold', text: 'You own 100 Autocompletes. Every click now comes from a golden hand.', kind: 'gold' });
+    if (gold) this.setSkin(this.skin || 'arrow', true);
+    if (gold && !first) toast({ icon: BIG_HAND, kicker: 'Golden touch', title: 'Your cursor turned gold', text: 'You own 100 Autocompletes. Every pointer is gold now, and every click lands with a golden tap.', kind: 'gold' });
+  },
+  initGoldCursor() {
+    const svg = parts => `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">${parts.map(p =>
+      `<path d="${p.d}" fill="${p.f || 'none'}"${p.s ? ` stroke="${p.s}" stroke-width="${p.w || 1.5}" stroke-linecap="round" stroke-linejoin="round"` : ''}/>`).join('')}</svg>`;
+    this.skinSvg = {};
+    this.skinCss = {};
+    for (const [name, [parts, hx, hy, fallback]] of Object.entries(GOLD_SKINS)) {
+      this.skinSvg[name] = svg(parts);
+      this.skinCss[name] = `url("data:image/svg+xml,${encodeURIComponent(this.skinSvg[name])}") ${hx} ${hy}, ${fallback}`;
+    }
+    this.tapEl = document.createElement('div');
+    this.tapEl.className = 'gold-tap';
+    this.tapEl.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(this.tapEl);
+    document.addEventListener('pointermove', e => { if (this.goldCursor && e.pointerType === 'mouse') this.setSkin(this.skinFor(e.target)); }, { passive: true });
+    document.addEventListener('pointerdown', e => {
+      if (!this.goldCursor || e.pointerType !== 'mouse' || e.button !== 0) return;
+      this.setSkin(this.skinFor(e.target));
+      this.goldTap(e.clientX, e.clientY);
+    }, true);
+  },
+  // Which pointer the browser would normally show over this element.
+  skinFor(el) {
+    if (!el || !el.closest) return 'arrow';
+    if (el.closest('textarea, input[type="text"], input[type="number"]')) return 'text';
+    if (el.closest('.bug')) return 'crosshair';
+    if (el.closest('[disabled], [aria-disabled="true"]')) return 'noentry';
+    if (el.closest('.ach')) return 'help';
+    if (el.id === 'stage') return Stage.hover ? 'hand' : 'arrow';
+    if (el.closest('button, a, label, select, input, [role="tab"]')) return 'hand';
+    return 'arrow';
+  },
+  setSkin(name, force) {
+    if (name === this.skin && !force) return;
+    this.skin = name;
+    document.documentElement.style.setProperty('--gold-cursor', this.skinCss[name]);
+  },
+  // A fast version of the circle hands' tap: wind up, slam, wobble, plus a shockwave at the click point.
+  goldTap(x, y) {
+    if (stillMode()) return;
+    const [, hx, hy] = GOLD_SKINS[this.skin];
+    const el = this.tapEl;
+    el.innerHTML = this.skinSvg[this.skin];
+    el.style.cssText = `left:${x - hx}px;top:${y - hy}px;transform-origin:${hx}px ${hy}px`;
+    el.classList.remove('go');
+    void el.offsetWidth;
+    el.classList.add('go');
+    document.body.classList.add('cursor-hidden');
+    clearTimeout(this.tapTimer);
+    this.tapTimer = setTimeout(() => { el.classList.remove('go'); document.body.classList.remove('cursor-hidden'); }, 300);
+    const ring = document.createElement('span');
+    ring.className = 'gold-ring';
+    ring.style.cssText = `left:${x}px;top:${y}px`;
+    document.body.appendChild(ring);
+    setTimeout(() => ring.remove(), 600);
   },
   frame(dt) {
     this.refreshBank();

@@ -665,7 +665,32 @@ body.dev-on .brand-name::after {
 
 /* ---------- gold mouse pointer (100+ Autocompletes) ---------- */
 body.gold-cursor,
-body.gold-cursor *:not(input):not(textarea):not(select) { cursor: var(--gold-cursor) !important; }
+body.gold-cursor * { cursor: var(--gold-cursor) !important; }
+body.gold-cursor.cursor-hidden,
+body.gold-cursor.cursor-hidden * { cursor: none !important; }
+.gold-tap { position: fixed; z-index: 80; width: 32px; height: 32px; pointer-events: none; display: none; }
+.gold-tap svg { display: block; filter: drop-shadow(0 0 4px rgba(242, 197, 124, .7)); }
+.gold-tap.go { display: block; animation: goldTap .28s cubic-bezier(.3, .7, .4, 1) both; }
+.gold-ring {
+  position: fixed;
+  z-index: 79;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border: 2.5px solid var(--gold);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(242, 197, 124, .7);
+  animation: goldRing .5s ease-out .12s both;
+}
+@keyframes goldTap {
+  0% { transform: none; }
+  30% { transform: translate(2px, 4px) rotate(-14deg) scale(1.2); }
+  55% { transform: rotate(4deg) scale(.8); }
+  78% { transform: rotate(-3deg) scale(1.06); }
+  100% { transform: none; }
+}
+@keyframes goldRing { from { transform: scale(.4); opacity: 1; } to { transform: scale(4.2); opacity: 0; border-width: .5px; } }
 
 /* ---------- small screens: one pane at a time ---------- */
 .mobile-nav { display: none; }
