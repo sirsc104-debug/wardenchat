@@ -478,6 +478,21 @@ const UI = {
       el.classList.toggle('sell', sell);
     }
   },
+  // From 100 Autocompletes on, the player's own mouse pointer becomes the gold hand.
+  refreshCursor() {
+    const gold = G.owned[0] >= HAND_GROUP_AT;
+    if (gold === this.goldCursor) return;
+    if (!this.cursorCss) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">${BIG_HAND.map(p =>
+        `<path d="${p.d}" fill="${p.f || 'none'}"${p.s ? ` stroke="${p.s}" stroke-width="${p.w || 1.5}" stroke-linecap="round" stroke-linejoin="round"` : ''}/>`).join('')}</svg>`;
+      this.cursorCss = `url("data:image/svg+xml,${encodeURIComponent(svg)}") 12 2, pointer`; // hotspot = fingertip
+      document.documentElement.style.setProperty('--gold-cursor', this.cursorCss);
+    }
+    const first = this.goldCursor === undefined;
+    this.goldCursor = gold;
+    document.body.classList.toggle('gold-cursor', gold);
+    if (gold && !first) toast({ icon: BIG_HAND, kicker: 'Golden touch', title: 'Your cursor turned gold', text: 'You own 100 Autocompletes. Every click now comes from a golden hand.', kind: 'gold' });
+  },
   frame(dt) {
     this.refreshBank();
     Spinner.frame(dt);
@@ -486,6 +501,7 @@ const UI = {
       this.fast = 0;
       this.refreshStore();
       this.refreshBuffs();
+      this.refreshCursor();
       Panels.fastRefresh();
     }
     if ((this.slow += dt) >= 0.5) {
