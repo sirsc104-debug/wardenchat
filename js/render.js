@@ -63,6 +63,24 @@ const BIG_HAND = [
   { ...BUILDINGS[0].icon[1], _p: null, s: '#B9853A' },
 ];
 
+// Gold-hand tap curve for one cycle (phase 0..1): offset outward in sparkle radii, size, and tilt in radians.
+const GOLD_SLAM = 0.11;
+function goldTap(p) {
+  if (p < 0.08) { // wind up: lean back and tilt
+    const e = Math.sin((p / 0.08) * Math.PI / 2);
+    return { off: e * 0.12, scale: 1 - e * 0.06, tilt: -e * 0.35 };
+  }
+  if (p < GOLD_SLAM) { // slam in
+    const e = (p - 0.08) / (GOLD_SLAM - 0.08);
+    return { off: 0.12 - e * 0.3, scale: 0.94 + e * 0.26, tilt: -0.35 + e * 0.35 };
+  }
+  if (p < 0.32) { // recoil with a wobble
+    const e = (p - GOLD_SLAM) / (0.32 - GOLD_SLAM), ease = 1 - Math.pow(1 - e, 3);
+    return { off: -0.18 * (1 - ease), scale: 1.2 - 0.2 * ease, tilt: Math.sin(e * Math.PI * 3) * 0.1 * (1 - e) };
+  }
+  return { off: 0, scale: 1, tilt: 0 };
+}
+
 const RAY_LENS = [1, 0.8, 0.93, 0.76, 0.98, 0.84, 0.9, 0.78, 1, 0.82, 0.95, 0.8];
 function paintSparkle(ctx, R) {
   const g = ctx.createRadialGradient(0, 0, R * 0.08, 0, 0, R);
@@ -112,7 +130,7 @@ function paintShine(ctx, R) {
 // ---------- the sparkle stage (left pane) ----------
 const Stage = {
   init(cv) {
-    Object.assign(this, { cv, ctx: cv.getContext('2d'), t: 0, w: 0, h: 0, squish: 0, hover: false, hs: 1, spin: 0, parts: [], floats: [], rain: [] });
+    Object.assign(this, { cv, ctx: cv.getContext('2d'), t: 0, w: 0, h: 0, squish: 0, hover: false, hs: 1, spin: 0, parts: [], floats: [], rain: [], waves: [], goldPrev: new Float32Array(HANDS_PER_RING * HAND_RINGS).fill(-1) });
     new ResizeObserver(() => this.resize()).observe(cv);
     cv.addEventListener('contextrestored', () => this.resize());
     this.resize();
@@ -232,6 +250,7 @@ const Stage = {
     c.drawImage(sp, -s2 / 2, -s2 / 2, s2, s2);
     c.restore();
 
+    this.drawWaves(dt);
     this.drawParticles(dt);
     this.drawFlow(t, still);
     this.drawFloats(dt);
@@ -282,16 +301,63 @@ const Stage = {
       const isBig = i < big, size = isBig ? this.bigSize : this.cursorSize, spr = isBig ? this.bigCursor : this.cursor;
       const ring = Math.floor(i / perRing), k = i % perRing;
       const a = (k / perRing) * Math.PI * 2 + ring * (Math.PI / perRing) + (still ? 0 : t * 0.04 * (ring % 2 ? -1 : 1));
-      // Each hand taps the sparkle once every ten seconds, staggered around the circle.
-      const phase = (t / 10 + k / perRing + ring * 0.33) % 1;
-      const push = still ? 0 : phase < 0.06 ? Math.sin((phase / 0.06) * Math.PI) * this.R * 0.08 : 0;
-      const rad = r0 + ring * gap - push;
+      let rad = r0 + ring * gap, scale = 1, tilt = 0;
+      if (!still && isBig) {
+        // Gold hands: wind up, slam, wobble back. The taps roll around each circle as a wave every 6 seconds.
+        const phase = (t / 6 + k / perRing + ring * 0.33) % 1, m = goldTap(phase);
+        rad += m.off * this.R;
+        scale = m.scale;
+        tilt = m.tilt;
+        const prev = this.goldPrev[i];
+        if (prev >= 0 && prev < GOLD_SLAM && phase >= GOLD_SLAM && phase - prev < 0.5) this.slam(a, rad, ring);
+        this.goldPrev[i] = phase;
+      } else if (!still) {
+        // Small hands tap once every ten seconds, staggered around the circle.
+        const phase = (t / 10 + k / perRing + ring * 0.33) % 1;
+        if (phase < 0.06) rad -= Math.sin((phase / 0.06) * Math.PI) * this.R * 0.08;
+      }
+      const sz = size * scale;
       c.save();
       c.translate(this.cx + Math.cos(a) * rad, this.cy + Math.sin(a) * rad);
-      c.rotate(a - Math.PI / 2);
-      c.drawImage(spr, -size * (12.5 / 32), -size * (2 / 32), size, size); // fingertip touches the circle
+      c.rotate(a - Math.PI / 2 + tilt);
+      c.drawImage(spr, -sz * (12.5 / 32), -sz * (2 / 32), sz, sz); // fingertip touches the circle
       c.restore();
     }
+  },
+  // A gold hand just landed its tap: shockwave ring plus a few sparks at the fingertip.
+  slam(a, rad, ring) {
+    const x = this.cx + Math.cos(a) * rad, y = this.cy + Math.sin(a) * rad;
+    this.waves.push({ x, y, life: 0, max: 0.55, big: ring === 0 ? 1 : 0.85 });
+    if (this.waves.length > 60) this.waves.shift();
+    if (!G.settings.particles) return;
+    for (let j = 0; j < 3; j++) {
+      const ang = a + Math.PI + (Math.random() - 0.5) * 1.6, sp = 70 + Math.random() * 90;
+      this.parts.push({
+        x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 40, life: 0, max: 0.45 + Math.random() * 0.25,
+        rot: Math.random() * 6, vr: (Math.random() - 0.5) * 12, size: 2.5 + Math.random() * 2.5, col: '#F2C57C',
+      });
+    }
+  },
+  drawWaves(dt) {
+    if (!this.waves.length) return;
+    const c = this.ctx;
+    this.waves = this.waves.filter(w => (w.life += dt) < w.max);
+    for (const w of this.waves) {
+      const p = w.life / w.max, ease = 1 - Math.pow(1 - p, 3);
+      const r = (3 + ease * this.R * 0.2) * w.big;
+      c.globalAlpha = (1 - p) * 0.9;
+      c.strokeStyle = '#F2C57C';
+      c.lineWidth = 3 * (1 - p) + 0.6;
+      c.beginPath();
+      c.arc(w.x, w.y, r, 0, Math.PI * 2);
+      c.stroke();
+      c.globalAlpha = (1 - p) * 0.35;
+      c.fillStyle = '#FFE7B8';
+      c.beginPath();
+      c.arc(w.x, w.y, r * 0.45, 0, Math.PI * 2);
+      c.fill();
+    }
+    c.globalAlpha = 1;
   },
   drawParticles(dt) {
     const c = this.ctx;
