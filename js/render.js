@@ -54,6 +54,15 @@ function centredCache(R, paint) {
   return c;
 }
 
+const HAND_GROUP_AT = 100; // start grouping hands at this many Autocompletes
+const HAND_GROUP = 10;     // Autocompletes per big hand
+const HANDS_PER_RING = 25;
+const HAND_RINGS = 3;
+const BIG_HAND = [
+  { ...BUILDINGS[0].icon[0], _p: null, f: '#F2C57C', s: '#4A2F10' },
+  { ...BUILDINGS[0].icon[1], _p: null, s: '#B9853A' },
+];
+
 const RAY_LENS = [1, 0.8, 0.93, 0.76, 0.98, 0.84, 0.9, 0.78, 1, 0.82, 0.95, 0.8];
 function paintSparkle(ctx, R) {
   const g = ctx.createRadialGradient(0, 0, R * 0.08, 0, 0, R);
@@ -141,11 +150,14 @@ const Stage = {
     this.cv.width = Math.round(w * r);
     this.cv.height = Math.round(h * r);
     this.ctx.setTransform(r, 0, 0, r, 0, 0);
-    this.R = Math.max(56, Math.min(w * 0.29, h * 0.23));
+    this.R = Math.max(52, Math.min(w * 0.25, h * 0.215));
     this.sparkle = centredCache(this.R * 1.02, paintSparkle);
     this.shine = centredCache(this.R * 2.7, paintShine);
     this.cursorSize = clamp(this.R * 0.23, 16, 26);
     this.cursor = makeSprite(BUILDINGS[0].icon, this.cursorSize);
+    // From 100 Autocompletes on, each gold hand stands for 10 of them.
+    this.bigSize = Math.round(this.cursorSize * 1.45);
+    this.bigCursor = makeSprite(BIG_HAND, this.bigSize);
   },
   pop(x, y, v) {
     if (G.settings.particles) {
@@ -176,7 +188,7 @@ const Stage = {
     if (this.cv.clientWidth !== this.w || this.cv.clientHeight !== this.h) this.resize();
     if (this.ctx.isContextLost && this.ctx.isContextLost()) return;
     // Make sure the cached images still exist; rebuild them if the browser dropped them.
-    if (lostCanvas(this.sparkle) || lostCanvas(this.shine) || lostCanvas(this.cursor)) this.resize();
+    if (lostCanvas(this.sparkle) || lostCanvas(this.shine) || lostCanvas(this.cursor) || lostCanvas(this.bigCursor)) this.resize();
     if (!Number.isFinite(this.spin)) this.spin = 0;
     const c = this.ctx, still = stillMode();
     this.t += dt;
@@ -247,21 +259,37 @@ const Stage = {
       c.restore();
     }
   },
+  // Hands orbiting the sparkle. Under 100 Autocompletes: one small hand each, 50 per circle.
+  // From 100 on: one big gold hand per 10 (25 per circle, up to 3 circles), plus the remaining 0-9 as small hands.
   drawCursors(t, still) {
-    const n = Math.min(G.owned[0], 150);
-    if (!n) return;
-    const c = this.ctx, s = this.cursorSize, spr = this.cursor;
+    const owned = G.owned[0];
+    if (!owned) return;
+    let perRing, big, small;
+    if (owned < HAND_GROUP_AT) {
+      perRing = 50; big = 0; small = owned;
+    } else {
+      perRing = HANDS_PER_RING;
+      big = Math.min(HANDS_PER_RING * HAND_RINGS, Math.floor(owned / HAND_GROUP));
+      small = Math.min(owned % HAND_GROUP, HANDS_PER_RING * HAND_RINGS - big);
+    }
+    const n = big + small, rings = Math.ceil(n / perRing);
+    const c = this.ctx, biggest = big ? this.bigSize : this.cursorSize;
+    // Spread the circles over the space around the sparkle so the outer one never leaves the panel.
+    const r0 = this.R * 1.12;
+    const room = Math.min(this.cx, this.h - this.cy, this.cy - 24) - biggest * 0.95;
+    const gap = rings > 1 ? clamp((room - r0) / (rings - 1), this.R * 0.13, this.R * 0.3) : 0;
     for (let i = 0; i < n; i++) {
-      const ring = Math.floor(i / 50), k = i % 50;
-      const a = (k / 50) * Math.PI * 2 + ring * 0.063 + (still ? 0 : t * 0.04);
-      // Each cursor taps the sparkle once every ten seconds, staggered around the ring.
-      const phase = (t / 10 + k / 50 + ring * 0.33) % 1;
+      const isBig = i < big, size = isBig ? this.bigSize : this.cursorSize, spr = isBig ? this.bigCursor : this.cursor;
+      const ring = Math.floor(i / perRing), k = i % perRing;
+      const a = (k / perRing) * Math.PI * 2 + ring * (Math.PI / perRing) + (still ? 0 : t * 0.04 * (ring % 2 ? -1 : 1));
+      // Each hand taps the sparkle once every ten seconds, staggered around the circle.
+      const phase = (t / 10 + k / perRing + ring * 0.33) % 1;
       const push = still ? 0 : phase < 0.06 ? Math.sin((phase / 0.06) * Math.PI) * this.R * 0.08 : 0;
-      const rad = this.R * (1.2 + ring * 0.19) - push;
+      const rad = r0 + ring * gap - push;
       c.save();
       c.translate(this.cx + Math.cos(a) * rad, this.cy + Math.sin(a) * rad);
       c.rotate(a - Math.PI / 2);
-      c.drawImage(spr, -s * (12.5 / 32), -s * (2 / 32), s, s); // fingertip touches the ring
+      c.drawImage(spr, -size * (12.5 / 32), -size * (2 / 32), size, size); // fingertip touches the circle
       c.restore();
     }
   },
