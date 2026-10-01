@@ -15,6 +15,14 @@ function upgIcon(u) {
 }
 const TK = '<span class="tk" aria-hidden="true">✻</span>';
 
+// How each rarity tier of Eureka token looks: 1 = common gold, 2 = rare ice-blue, 3 = legendary violet and gold.
+const EUREKA_GLYPH = {
+  1: GLYPH.gold,
+  2: [{ d: GLYPH.gold[0].d, s: '#9FE3FF', w: 3.1 }, { d: C(16, 16, 3.4), f: '#F2FBFF' }],
+  3: [{ d: GLYPH.gold[0].d, s: '#E2A6FF', w: 3.4 }, { d: C(16, 16, 4.2), f: '#F2C57C' }],
+};
+const EUREKA_COLOR = { 1: '#F2C57C', 2: '#9FE3FF', 3: '#E2A6FF' };
+
 // Gold pointer skins: [icon parts, hotspot x, hotspot y, fallback cursor].
 const GOLD_INK = '#4A2F10', GOLD_FILL = '#F2C57C';
 const goldLine = (d, w) => [{ d, s: GOLD_INK, w: w + 2.4 }, { d, s: GOLD_FILL, w }];
@@ -60,6 +68,7 @@ const Sound = {
   buy() { this.tone(660, 0.08, { type: 'square', vol: 0.02 }); this.tone(990, 0.1, { type: 'square', vol: 0.018, at: 0.06 }); },
   ach() { [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.2, { vol: 0.04, at: i * 0.07 })); },
   eureka() { [1318, 1568, 2093, 2637].forEach((f, i) => this.tone(f, 0.28, { vol: 0.025, at: i * 0.05 })); },
+  legendary() { [784, 1175, 1568, 2349, 3136].forEach((f, i) => this.tone(f, 0.4, { vol: 0.022, at: i * 0.07 })); },
   squash() { this.tone(200, 0.16, { type: 'sawtooth', vol: 0.035, to: 55 }); },
   fail() { this.tone(240, 0.3, { type: 'sawtooth', vol: 0.03, to: 110 }); },
 };
@@ -178,23 +187,27 @@ function toast({ icon = GLYPH.sparkle, kicker = '', title, text = '', kind = '',
 const FX = {
   eureka: null, bug: null, chain: 0, hungry: [],
   init() { this.layer = $('#fx'); },
-  spawnEureka(force) {
+  spawnEureka(force, wantTier) {
     const life = EUREKA_LIFE * D.eurekaLife;
+    if (this.eureka && wantTier) this.removeEureka();
     if (this.eureka) { if (force) this.eureka.t = life; return; }
+    const eff = wantTier ? eurekaRollTier(wantTier) : eurekaRoll(), tier = eurekaTier(eff);
     const el = document.createElement('button');
     el.type = 'button';
-    el.className = 'eureka';
-    el.setAttribute('aria-label', 'Eureka token. Click it for a bonus.');
-    el.innerHTML = svgIcon(GLYPH.gold);
+    el.className = `eureka t${tier}`;
+    el.setAttribute('aria-label', `${EUREKA_TIERS[tier]} Eureka token. Click it before it vanishes.`);
+    el.innerHTML = svgIcon(EUREKA_GLYPH[tier]);
+    if (tier === 3) Sound.legendary();
     el.style.left = rand(0.1, 0.9) * innerWidth + 'px';
     el.style.top = rand(0.18, 0.82) * innerHeight + 'px';
     el.addEventListener('click', () => {
       if (!this.eureka) return;
-      const out = eurekaEffect();
-      this.burst(el, '#F2C57C');
+      const out = eurekaEffect(eff);
+      this.burst(el, EUREKA_COLOR[tier]);
       this.removeEureka();
       Sound.eureka();
-      toast({ icon: out.bad ? GLYPH.bug : GLYPH.gold, kicker: out.bad ? 'Eureka backfired' : 'Eureka', title: out.title, text: out.text, kind: out.bad ? 'bad' : 'gold' });
+      const kicker = out.bad ? 'Eureka backfired' : tier > 1 ? `${EUREKA_TIERS[tier]} Eureka` : 'Eureka';
+      toast({ icon: out.bad ? GLYPH.bug : EUREKA_GLYPH[tier], kicker, title: out.title, text: out.text, kind: out.bad ? 'bad' : tier === 3 ? 'legend' : tier === 2 ? 'rare' : 'gold' });
       UI.refreshStore();
       if (this.chain > 0) {
         this.chain--;
@@ -557,25 +570,50 @@ const UI = {
     }
   },
   // From 100 Autocompletes on, every mouse pointer gets a gold skin, and clicks play a quick gold tap.
+  // Cursor tier: 0 = normal, 1 = gold (100+ Autocompletes), 2 = shimmering rainbow (500+).
   refreshCursor() {
-    const gold = G.owned[0] >= HAND_GROUP_AT;
-    if (gold === this.goldCursor) return;
+    const owned = G.owned[0], tier = owned >= RAINBOW_AT ? 2 : owned >= HAND_GROUP_AT ? 1 : 0;
+    if (tier === this.cursorTier) return;
     if (!this.skinCss) this.initGoldCursor();
-    const first = this.goldCursor === undefined;
-    this.goldCursor = gold;
-    document.body.classList.toggle('gold-cursor', gold);
-    if (gold) this.setSkin(this.skin || 'arrow', true);
-    if (gold && !first) toast({ icon: BIG_HAND, kicker: 'Golden touch', title: 'Your cursor turned gold', text: 'You own 100 Autocompletes. Every pointer is gold now, and every click lands with a golden tap.', kind: 'gold' });
+    const first = this.cursorTier === undefined, up = !first && tier > this.cursorTier;
+    this.cursorTier = tier;
+    this.goldCursor = tier > 0;
+    document.body.classList.toggle('gold-cursor', tier > 0);
+    if (tier > 0) this.setSkin(this.skin || 'arrow', true);
+    if (up && tier === 1) toast({ icon: BIG_HAND, kicker: 'Golden touch', title: 'Your cursor turned gold', text: 'You own 100 Autocompletes. Every pointer is gold now, and clicking the sparkle lands with a golden tap.', kind: 'gold' });
+    if (up && tier === 2) toast({ icon: BIG_HAND, kicker: 'Rainbow touch', title: 'Your cursor turned rainbow', text: 'You own 500 Autocompletes. Every pointer shimmers now, and clicking the sparkle sets off a rainbow burst.', kind: 'legend' });
   },
   initGoldCursor() {
-    const svg = parts => `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">${parts.map(p =>
+    const RB_INK = '#2A1D3A';
+    const toSvg = (parts, defs = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">${defs}${parts.map(p =>
       `<path d="${p.d}" fill="${p.f || 'none'}"${p.s ? ` stroke="${p.s}" stroke-width="${p.w || 1.5}" stroke-linecap="round" stroke-linejoin="round"` : ''}/>`).join('')}</svg>`;
+    // Rainbow skins: gold fills become a rainbow gradient, gold outlines become deep violet.
+    const rbMap = { [GOLD_FILL]: 'url(#rb)', '#F2C57C': 'url(#rb)', [GOLD_INK]: RB_INK, '#B9853A': 'rgba(42,29,58,.55)' };
+    const rbParts = parts => parts.map(p => ({ ...p, f: p.f && (rbMap[p.f] || p.f), s: p.s && (rbMap[p.s] || p.s) }));
+    const rbDefs = k => `<defs><linearGradient id="rb" gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="30" y2="30" gradientTransform="rotate(${k * 45} 16 16)">` +
+      RB_STOPS.map((c, i) => `<stop offset="${(i / (RB_STOPS.length - 1)).toFixed(3)}" stop-color="${c}"/>`).join('') + '</linearGradient></defs>';
+    const css = (svgText, hx, hy, fallback) => `url("data:image/svg+xml,${encodeURIComponent(svgText)}") ${hx} ${hy}, ${fallback}`;
     this.skinSvg = {};
     this.skinCss = {};
+    this.rbSvg = {};
+    this.rbCss = {};
     for (const [name, [parts, hx, hy, fallback]] of Object.entries(GOLD_SKINS)) {
-      this.skinSvg[name] = svg(parts);
-      this.skinCss[name] = `url("data:image/svg+xml,${encodeURIComponent(this.skinSvg[name])}") ${hx} ${hy}, ${fallback}`;
+      this.skinSvg[name] = toSvg(parts);
+      this.skinCss[name] = css(this.skinSvg[name], hx, hy, fallback);
+      this.rbSvg[name] = [];
+      this.rbCss[name] = [];
+      for (let k = 0; k < 8; k++) {
+        this.rbSvg[name].push(toSvg(rbParts(parts), rbDefs(k)));
+        this.rbCss[name].push(css(this.rbSvg[name][k], hx, hy, fallback));
+      }
     }
+    this.rbFrame = 0;
+    // The rainbow pointer shimmers by stepping through 8 gradient angles.
+    setInterval(() => {
+      if (this.cursorTier !== 2 || document.hidden) return;
+      this.rbFrame = (this.rbFrame + 1) % 8;
+      this.applySkin();
+    }, 150);
     this.tapEl = document.createElement('div');
     this.tapEl.className = 'gold-tap';
     this.tapEl.setAttribute('aria-hidden', 'true');
@@ -584,10 +622,10 @@ const UI = {
     document.addEventListener('pointerdown', e => {
       if (!this.goldCursor || e.pointerType !== 'mouse' || e.button !== 0) return;
       this.setSkin(this.skinFor(e.target));
-      // The gold tap only plays when the click lands on the sparkle itself.
+      // The tap animation only plays when the click lands on the sparkle itself.
       if (e.target.id !== 'stage') return;
       const p = Stage.local(e);
-      if (Stage.hit(p.x, p.y)) this.goldTap(e.clientX, e.clientY);
+      if (Stage.hit(p.x, p.y)) this.cursorTier === 2 ? this.rainbowTap(e.clientX, e.clientY) : this.goldTap(e.clientX, e.clientY);
     }, true);
   },
   // Which pointer the browser would normally show over this element.
@@ -604,26 +642,51 @@ const UI = {
   setSkin(name, force) {
     if (name === this.skin && !force) return;
     this.skin = name;
-    document.documentElement.style.setProperty('--gold-cursor', this.skinCss[name]);
+    this.applySkin();
   },
-  // A fast version of the circle hands' tap: wind up, slam, wobble, plus a shockwave at the click point.
-  goldTap(x, y) {
-    if (stillMode()) return;
+  applySkin() {
+    const css = this.cursorTier === 2 ? this.rbCss[this.skin][this.rbFrame] : this.skinCss[this.skin];
+    document.documentElement.style.setProperty('--gold-cursor', css);
+  },
+  // Shows an animated copy of the current pointer at the click point, hiding the real one meanwhile.
+  playTap(x, y, svgText, cls, ms) {
     const [, hx, hy] = GOLD_SKINS[this.skin];
     const el = this.tapEl;
-    el.innerHTML = this.skinSvg[this.skin];
+    el.innerHTML = svgText;
     el.style.cssText = `left:${x - hx}px;top:${y - hy}px;transform-origin:${hx}px ${hy}px`;
-    el.classList.remove('go');
+    el.className = 'gold-tap';
     void el.offsetWidth;
-    el.classList.add('go');
+    el.className = `gold-tap go ${cls}`;
     document.body.classList.add('cursor-hidden');
     clearTimeout(this.tapTimer);
-    this.tapTimer = setTimeout(() => { el.classList.remove('go'); document.body.classList.remove('cursor-hidden'); }, 300);
+    this.tapTimer = setTimeout(() => { el.className = 'gold-tap'; document.body.classList.remove('cursor-hidden'); }, ms);
+  },
+  ring(x, y, cls = '', style = '') {
     const ring = document.createElement('span');
-    ring.className = 'gold-ring';
-    ring.style.cssText = `left:${x}px;top:${y}px`;
+    ring.className = `gold-ring ${cls}`;
+    ring.style.cssText = `left:${x}px;top:${y}px;${style}`;
     document.body.appendChild(ring);
-    setTimeout(() => ring.remove(), 600);
+    setTimeout(() => ring.remove(), 900);
+  },
+  // Gold tier: a fast version of the circle hands' tap, plus a gold shockwave.
+  goldTap(x, y) {
+    if (stillMode()) return;
+    this.playTap(x, y, this.skinSvg[this.skin], '', 300);
+    this.ring(x, y);
+  },
+  // Rainbow tier: wind-up, slam and a full spin while the colours cycle, three rainbow shockwaves and a ring of sparks.
+  rainbowTap(x, y) {
+    if (stillMode()) return;
+    this.playTap(x, y, this.rbSvg[this.skin][this.rbFrame], 'rb', 470);
+    [0, 3, 5].forEach((k, i) => this.ring(x, y, 'rb', `--rc:${RB_STOPS[k]};animation-delay:${0.12 + i * 0.07}s`));
+    if (!G.settings.particles) return;
+    for (let i = 0; i < 12; i++) {
+      const p = document.createElement('span'), a = (i / 12) * Math.PI * 2, d = rand(50, 95);
+      p.className = 'fx-spark';
+      p.style.cssText = `left:${x}px;top:${y}px;--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px;--c:${RB_STOPS[i % RB_STOPS.length]};animation-delay:.12s`;
+      FX.layer.appendChild(p);
+      setTimeout(() => p.remove(), 900);
+    }
   },
   frame(dt) {
     this.refreshBank();

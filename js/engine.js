@@ -294,14 +294,31 @@ const EUREKA = [
   } },
 ];
 
-function eurekaEffect() {
-  G.goldenClicks++;
+// Rarity tier from an effect's weight: 1 = common (10%), 2 = rare (5%), 3 = legendary (2%).
+const eurekaTier = e => (e.w >= 10 ? 1 : e.w >= 5 ? 2 : 3);
+const EUREKA_TIERS = { 1: 'Common', 2: 'Rare', 3: 'Legendary' };
+
+// The effect is rolled when the token appears, so the token can show how rare it is.
+function eurekaRoll() {
   const pool = EUREKA.filter(e => !e.ok || safe(e.ok));
   let r = Math.random() * pool.reduce((sum, e) => sum + e.w, 0), eff = pool[0];
   for (const e of pool) { if ((r -= e.w) < 0) { eff = e; break; } }
+  return eff;
+}
+
+// Roll an effect from one rarity tier only (used by the Dev tab).
+function eurekaRollTier(tier) {
+  const pool = EUREKA.filter(e => eurekaTier(e) === tier && (!e.ok || safe(e.ok)));
+  return pool.length ? pick(pool) : eurekaRoll();
+}
+
+function eurekaEffect(eff) {
+  G.goldenClicks++;
+  // If the rolled effect stopped being possible while the token was up, roll again.
+  if (!eff || (eff.ok && !safe(eff.ok))) eff = eurekaRoll();
   const [title, text] = eff.run(D.effDur);
   recompute();
-  return { title, text, id: eff.id, bad: !!eff.bad };
+  return { title, text, id: eff.id, bad: !!eff.bad, tier: eurekaTier(eff) };
 }
 
 function bugReward(golden) {

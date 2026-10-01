@@ -66,6 +66,7 @@ const Dev = {
         ['+1 of each', () => every(1)],
         ['+10 of each', () => every(10)],
         ['+100 of each', () => every(100)],
+        ['+500 of each', () => every(500)],
         ['Remove all', () => { G.owned.fill(0); return 'All buildings removed'; }],
       ]],
       ['Upgrades', [
@@ -79,6 +80,8 @@ const Dev = {
       ]],
       ['Eureka and bugs', [
         ['Spawn Eureka token', () => { FX.spawnEureka(true); return 'A Eureka token appeared'; }],
+        ['Spawn rare Eureka', () => { FX.spawnEureka(true, 2); return 'A rare (5%) Eureka token appeared'; }],
+        ['Spawn legendary Eureka', () => { FX.spawnEureka(true, 3); return 'A legendary (2%) Eureka token appeared'; }],
         ['Token Rain', () => { FX.tokenRain(16); return 'Token Rain started'; }],
         ['Spawn bug', () => { FX.spawnBug(false); return 'A bug is crawling'; }],
         ['Spawn golden bug', () => { FX.spawnBug(true); return 'A golden bug is crawling'; }],
