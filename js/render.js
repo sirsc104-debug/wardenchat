@@ -82,6 +82,16 @@ function goldTap(p) {
   return { off: 0, scale: 1, tilt: 0 };
 }
 
+// Recolour an icon in gold: each colour keeps its brightness but moves onto a dark-gold → gold → cream ramp.
+const GOLD_RAMP = [[74, 47, 16], [184, 128, 50], [242, 197, 124], [255, 241, 210]];
+function goldColor(hex) {
+  const n = parseInt(hex.slice(1), 16), r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const L = clamp((0.299 * r + 0.587 * g + 0.114 * b) / 255, 0, 1) * (GOLD_RAMP.length - 1);
+  const k = Math.min(GOLD_RAMP.length - 2, Math.floor(L)), f = L - k, A = GOLD_RAMP[k], B = GOLD_RAMP[k + 1];
+  return '#' + A.map((v, j) => Math.round(v + (B[j] - v) * f).toString(16).padStart(2, '0')).join('');
+}
+const goldParts = parts => parts.map(p => ({ ...p, _p: null, f: p.f && goldColor(p.f), s: p.s && goldColor(p.s) }));
+
 const RAY_LENS = [1, 0.8, 0.93, 0.76, 0.98, 0.84, 0.9, 0.78, 1, 0.82, 0.95, 0.8];
 function paintSparkle(ctx, R) {
   const g = ctx.createRadialGradient(0, 0, R * 0.08, 0, 0, R);
@@ -436,7 +446,7 @@ const Workspace = {
     this.sprites[i] = { c, r };
     return c;
   },
-  // The "ten in one" version: bigger icon on a gold glow (Autocompletes use the gold hand).
+  // The "ten in one" version: a bigger, all-gold icon on a gold glow (Autocompletes use the gold hand).
   bigSprite(i) {
     const r = dpr(), key = i + 'big', s = this.sprites[key];
     if (s && s.r === r && !lostCanvas(s.c)) return s.c;
@@ -457,7 +467,7 @@ const Workspace = {
     x.ellipse(size / 2, size - 6, size * 0.34, 3.2, 0, 0, Math.PI * 2);
     x.stroke();
     x.translate(size * 0.12, size * 0.06);
-    drawParts(x, i === 0 ? BIG_HAND : BUILDINGS[i].icon, size * 0.76);
+    drawParts(x, i === 0 ? BIG_HAND : (BUILDINGS[i].gold || (BUILDINGS[i].gold = goldParts(BUILDINGS[i].icon))), size * 0.76);
     this.sprites[key] = { c, r };
     return c;
   },
@@ -497,9 +507,8 @@ const Workspace = {
       c.fillStyle = 'rgba(0,0,0,.35)';
       c.fillRect(0, y0 + R - 2, W, 2);
 
-      // Under 100 owned: one icon each. From 100: one big gold icon per 10, then the remaining 1-9 as normal icons.
-      const grouped = n >= HAND_GROUP_AT;
-      let big = grouped ? Math.floor(n / HAND_GROUP) : 0, small = grouped ? n % HAND_GROUP : n;
+      // Every 10 of a building become one big gold icon; the remaining 1-9 stay as normal icons.
+      let big = Math.floor(n / HAND_GROUP), small = n % HAND_GROUP;
       const room = W - 56;
       if (big) big = Math.min(big, Math.floor(room / 12));
       small = Math.min(small, 140);
