@@ -522,7 +522,10 @@ const UI = {
     document.addEventListener('pointerdown', e => {
       if (!this.goldCursor || e.pointerType !== 'mouse' || e.button !== 0) return;
       this.setSkin(this.skinFor(e.target));
-      this.goldTap(e.clientX, e.clientY);
+      // The gold tap only plays when the click lands on the sparkle itself.
+      if (e.target.id !== 'stage') return;
+      const p = Stage.local(e);
+      if (Stage.hit(p.x, p.y)) this.goldTap(e.clientX, e.clientY);
     }, true);
   },
   // Which pointer the browser would normally show over this element.
