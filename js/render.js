@@ -507,8 +507,9 @@ const Workspace = {
       c.fillStyle = 'rgba(0,0,0,.35)';
       c.fillRect(0, y0 + R - 2, W, 2);
 
-      // Every 10 of a building become one big gold icon; the remaining 1-9 stay as normal icons.
-      let big = Math.floor(n / HAND_GROUP), small = n % HAND_GROUP;
+      // Under 100 owned: one normal icon each. From 100: every 10 become one big gold icon, the remaining 1-9 stay normal.
+      const grouped = n >= HAND_GROUP_AT;
+      let big = grouped ? Math.floor(n / HAND_GROUP) : 0, small = grouped ? n % HAND_GROUP : n;
       const room = W - 56;
       if (big) big = Math.min(big, Math.floor(room / 12));
       small = Math.min(small, 140);

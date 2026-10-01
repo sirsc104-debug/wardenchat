@@ -26,7 +26,7 @@ Progress saves to `localStorage` every 30 seconds and when you leave the page. U
 | Achievements | 139 in total, some hidden. Each adds 4% **Flow**, which Engineer upgrades turn into production. Flow rises as a tide under the sparkle. |
 | Terminal | Owning a Subagent unlocks slash commands (`/ship-it`, `/ultrathink`, `/eureka`, `/init`) that spend regenerating Focus and can backfire. |
 | Memory (prestige) | `/compact` resets the run for prestige levels based on all-time tokens (+1% production each) and memories to spend on a permanent CLAUDE.md upgrade tree. |
-| Presentation | Canvas-rendered sparkle with shine, orbiting pointing hands (from 100 Autocompletes on, each gold hand is 10, with 25 per circle and up to 3 circles), code rain that thickens with production, click particles, floating numbers, a workspace view of every building at work (each all-gold icon stands for 10 of that building, with the remaining 1-9 shown normally), a news ticker, and a Claude Code-style status spinner. |
+| Presentation | Canvas-rendered sparkle with shine, orbiting pointing hands (from 100 Autocompletes on, each gold hand is 10, with 25 per circle and up to 3 circles), code rain that thickens with production, click particles, floating numbers, a workspace view of every building at work (from 100 of a building on, each all-gold icon stands for 10, with the remaining 1-9 shown normally), a news ticker, and a Claude Code-style status spinner. |
 | Quality of life | Offline production, save export/import, number formats, optional synthesized sound, reduced-motion support, keyboard play (focus the sparkle, press Enter), and a phone layout. |
 
 ## Developer cheats
