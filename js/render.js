@@ -338,7 +338,7 @@ const Stage = {
     }
   },
   // Hands orbiting the sparkle. Under 100 Autocompletes: one small hand each, 50 per circle.
-  // From 100: one gold hand per 10. From 500: one rainbow hand per 50, then gold tens, then small ones.
+  // From 100: one gold hand per 10 (white leftovers hidden). From 500: one rainbow hand per 50 (gold and white hidden).
   // Big hands sit 25 per circle, up to 3 circles.
   drawCursors(t, still) {
     const owned = G.owned[0];
@@ -352,6 +352,8 @@ const Stage = {
       if (owned >= RAINBOW_AT) { rb = Math.min(slots, Math.floor(owned / RAINBOW_GROUP)); rest = owned % RAINBOW_GROUP; }
       big = Math.min(slots - rb, Math.floor(rest / HAND_GROUP));
       small = Math.min(slots - rb - big, rest % HAND_GROUP);
+      // Around the sparkle, only the highest hand type you have unlocked is shown.
+      if (rb) { big = 0; small = 0; } else if (big) small = 0;
     }
     const n = rb + big + small, rings = Math.ceil(n / perRing);
     const c = this.ctx, biggest = rb ? this.rbSize : big ? this.bigSize : this.cursorSize;
