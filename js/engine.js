@@ -33,6 +33,7 @@ function freshGame() {
     settings: { numbers: 'words', particles: true, floaters: true, sound: false, motion: true },
     stats: { maxTps: 0 },
     dev: { on: false, mult: 1, free: false, fastEureka: false, infFocus: false },
+    blackhole: false, theme: 'classic', // the one-time Event Horizon event and the clicker style it unlocks
   });
 }
 let G = freshGame();
@@ -458,6 +459,8 @@ function load(str, applyOffline) {
   Object.assign(g.settings, o.settings || {});
   Object.assign(g.stats, o.stats || {});
   Object.assign(g.dev, o.dev || {});
+  g.blackhole = !!o.blackhole;
+  g.theme = g.blackhole && o.theme === 'horizon' ? 'horizon' : 'classic';
   G = g;
   if (o.timers) { T.eureka = num(o.timers.eureka, T.eureka); T.bug = num(o.timers.bug, T.bug); }
   recompute();

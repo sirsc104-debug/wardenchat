@@ -70,6 +70,8 @@ const Sound = {
   eureka() { [1318, 1568, 2093, 2637].forEach((f, i) => this.tone(f, 0.28, { vol: 0.025, at: i * 0.05 })); },
   legendary() { [784, 1175, 1568, 2349, 3136].forEach((f, i) => this.tone(f, 0.4, { vol: 0.022, at: i * 0.07 })); },
   pop() { this.tone(880 + Math.random() * 200, 0.09, { type: 'sine', vol: 0.05, to: 1500 }); },
+  rumble() { this.tone(70, 2.4, { type: 'sawtooth', vol: 0.05, to: 28 }); this.tone(110, 2.2, { type: 'triangle', vol: 0.03, at: 0.3, to: 40 }); },
+  boom() { this.tone(90, 1.2, { type: 'sawtooth', vol: 0.07, to: 30 }); [523, 784, 1047, 1568].forEach((f, i) => this.tone(f, 0.6, { vol: 0.03, at: 0.1 + i * 0.08 })); },
   squash() { this.tone(200, 0.16, { type: 'sawtooth', vol: 0.035, to: 55 }); },
   fail() { this.tone(240, 0.3, { type: 'sawtooth', vol: 0.03, to: 110 }); },
 };
@@ -715,6 +717,7 @@ const UI = {
     }
     if ((this.slow += dt) >= 0.5) {
       this.slow = 0;
+      BlackHole.check();
       Tip.refresh();
       Panels.refresh();
     }

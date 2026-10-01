@@ -91,6 +91,8 @@ const Dev = {
         ['+10 prestige levels', () => { G.prestige += 10; G.memories += 10; return '+10 prestige levels and memories'; }],
         ['+1,000 memories', () => { G.memories += 1000; return '+1,000 memories'; }],
         ['Learn all memories', () => { MEMORY.forEach(m => G.mem.add(m.id)); return 'Every CLAUDE.md upgrade learned'; }],
+        ['Play black hole event', () => { BlackHole.start(); return 'Black hole event started'; }],
+        ['Reset black hole event', () => { G.blackhole = false; G.theme = 'classic'; applyTheme(); Panels.syncOptions(); return 'Black hole event reset (it plays again at 1 trillion all-time tokens)'; }],
         ['Unlock Terminal', () => { if (!G.owned[5]) G.owned[5] = 1; recompute(); G.focus = D.focusMax; return 'Terminal unlocked with full Focus'; }],
       ]],
     ];

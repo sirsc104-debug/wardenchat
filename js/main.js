@@ -37,6 +37,7 @@ function start(snapshot) {
     if (stored) tryLoad(stored, true);
   }
   recompute();
+  applyTheme();
 
   UI.init();
   Stage.init($('#stage'));
@@ -63,6 +64,7 @@ function start(snapshot) {
     UI.refreshStore(true);
     Panels.refresh(true);
     Dev.sync();
+    applyTheme();
   });
 
   if (offline && offline.gain > 0) {

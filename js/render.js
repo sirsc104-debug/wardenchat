@@ -168,11 +168,45 @@ function paintSparkle(ctx, R) {
   ctx.fillRect(-R, -R, R * 2, R * 2);
   ctx.globalCompositeOperation = 'source-over';
 }
+// Event Horizon style: dark rays with a glowing orange rim around a black core and photon ring.
+function paintHorizonSparkle(ctx, R) {
+  ctx.lineCap = 'round';
+  const rays = (width, style) => RAY_LENS.forEach((len, i) => {
+    const a = -Math.PI / 2 + (i * Math.PI * 2) / 12 + (i % 2 ? 0.035 : -0.02);
+    const w = R * (i % 3 === 0 ? 0.19 : 0.165) + width;
+    ctx.strokeStyle = style;
+    ctx.lineWidth = w;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * R * 0.1, Math.sin(a) * R * 0.1);
+    ctx.lineTo(Math.cos(a) * (len * R - w / 2), Math.sin(a) * (len * R - w / 2));
+    ctx.stroke();
+  });
+  ctx.shadowColor = 'rgba(255,122,26,.9)';
+  ctx.shadowBlur = R * 0.12;
+  rays(R * 0.05, '#FF7A1A');
+  ctx.shadowBlur = 0;
+  const g = ctx.createRadialGradient(0, 0, R * 0.1, 0, 0, R);
+  g.addColorStop(0, '#050506');
+  g.addColorStop(0.6, '#26262B');
+  g.addColorStop(1, '#3A3A41');
+  rays(0, g);
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 0.27, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#FFB070';
+  ctx.lineWidth = R * 0.035;
+  ctx.shadowColor = 'rgba(255,140,40,1)';
+  ctx.shadowBlur = R * 0.15;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+const isHorizon = () => G.theme === 'horizon';
 function paintShine(ctx, R) {
-  const n = 14;
+  const n = 14, col = isHorizon() ? '255,138,40' : '242,197,124';
   const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
-  g.addColorStop(0, 'rgba(242,197,124,.34)');
-  g.addColorStop(1, 'rgba(242,197,124,0)');
+  g.addColorStop(0, `rgba(${col},.34)`);
+  g.addColorStop(1, `rgba(${col},0)`);
   ctx.fillStyle = g;
   for (let i = 0; i < n; i++) {
     const a = (i * Math.PI * 2) / n;
@@ -227,7 +261,8 @@ const Stage = {
     this.cv.height = Math.round(h * r);
     this.ctx.setTransform(r, 0, 0, r, 0, 0);
     this.R = Math.max(52, Math.min(w * 0.25, h * 0.215));
-    this.sparkle = centredCache(this.R * 1.02, paintSparkle);
+    this.style = G.theme;
+    this.sparkle = centredCache(this.R * 1.02, isHorizon() ? paintHorizonSparkle : paintSparkle);
     this.shine = centredCache(this.R * 2.7, paintShine);
     this.cursorSize = clamp(this.R * 0.23, 16, 26);
     this.cursor = makeSprite(BUILDINGS[0].icon, this.cursorSize);
@@ -258,7 +293,7 @@ const Stage = {
     return {
       x: Math.random() * this.w, y: anywhere ? Math.random() * this.h : -20, vy: 25 + Math.random() * 55,
       rot: (Math.random() - 0.5) * 0.6, vr: (Math.random() - 0.5) * 0.4, size: Math.round(10 + Math.random() * 9),
-      a: 0.05 + Math.random() * 0.12, g: pick(RAIN_GLYPHS), col: Math.random() < 0.3 ? '#D97757' : '#F3E9DF',
+      a: 0.05 + Math.random() * 0.12, g: pick(RAIN_GLYPHS), col: Math.random() < 0.3 ? (isHorizon() ? '#FF7A1A' : '#D97757') : (isHorizon() ? '#9A9AA2' : '#F3E9DF'),
     };
   },
   frame(dt) {
@@ -268,6 +303,8 @@ const Stage = {
     // Make sure the cached images still exist; rebuild them if the browser dropped them.
     if (lostCanvas(this.sparkle) || lostCanvas(this.shine) || lostCanvas(this.cursor) || lostCanvas(this.bigCursor)) this.resize();
     if (!Number.isFinite(this.spin)) this.spin = 0;
+    if (this.style !== G.theme) { this.resize(); this.rain.length = 0; }
+    const horizon = isHorizon();
     const c = this.ctx, still = stillMode();
     this.t += dt;
     const t = this.t;
@@ -279,9 +316,10 @@ const Stage = {
     const boost = D.buffProd > 1 ? 1 : 0;
     const glowR = this.R * (1.9 + boost * 0.25 + (still ? 0 : Math.sin(t * 1.3) * 0.06));
     const g = c.createRadialGradient(this.cx, this.cy, this.R * 0.2, this.cx, this.cy, glowR);
-    g.addColorStop(0, boost ? 'rgba(242,197,124,.5)' : 'rgba(217,119,87,.42)');
-    g.addColorStop(0.5, 'rgba(217,119,87,.12)');
-    g.addColorStop(1, 'rgba(217,119,87,0)');
+    const glow = horizon ? '255,122,26' : '217,119,87';
+    g.addColorStop(0, boost ? 'rgba(242,197,124,.5)' : `rgba(${glow},.42)`);
+    g.addColorStop(0.5, `rgba(${glow},.12)`);
+    g.addColorStop(1, `rgba(${glow},0)`);
     c.fillStyle = g;
     c.fillRect(this.cx - glowR, this.cy - glowR, glowR * 2, glowR * 2);
 
@@ -296,12 +334,13 @@ const Stage = {
     c.drawImage(sh, -ss * 0.4, -ss * 0.4, ss * 0.8, ss * 0.8);
     c.restore();
 
+    if (horizon) this.drawDisk(t, still);
     this.drawCursors(t, still);
 
     // The sparkle itself: breathes, squishes on click, grows on hover, spins faster with production.
     this.squish *= Math.exp(-dt * 10);
     this.hs += ((this.hover ? 1.04 : 1) - this.hs) * Math.min(1, dt * 10);
-    const sc = this.hs + (still ? 0 : Math.sin(t * 1.6) * 0.012) - this.squish * 0.07;
+    const sc = (this.hs + (still ? 0 : Math.sin(t * 1.6) * 0.012) - this.squish * 0.07) * (1 - (this.collapse || 0) * 0.65);
     if (!still) this.spin += dt * (0.05 + Math.min(0.5, Math.log10(D.tps + 1) * 0.03)) * (1 + boost);
     const sp = this.sparkle, s2 = sp.size * sc;
     c.save();
@@ -309,6 +348,13 @@ const Stage = {
     c.rotate(this.spin);
     c.drawImage(sp, -s2 / 2, -s2 / 2, s2, s2);
     c.restore();
+    // While the black hole event starts, the sparkle darkens as it collapses.
+    if (this.collapse > 0) {
+      c.fillStyle = `rgba(0,0,0,${this.collapse * 0.85})`;
+      c.beginPath();
+      c.arc(this.cx, this.cy, s2 * 0.45, 0, Math.PI * 2);
+      c.fill();
+    }
 
     this.drawWaves(dt);
     this.drawParticles(dt);
@@ -404,6 +450,24 @@ const Stage = {
       this.rbFrames.size = this.rbSize;
     }
     return this.rbFrames[f];
+  },
+  // Event Horizon style: a tilted accretion disk swirling around the sparkle.
+  drawDisk(t, still) {
+    const c = this.ctx, R = this.R;
+    c.save();
+    c.translate(this.cx, this.cy);
+    c.rotate(-0.32);
+    c.lineCap = 'butt';
+    for (const [k, w, a, dash] of [[1.75, 0.16, 0.22, 0.9], [1.45, 0.08, 0.42, 0.6], [1.22, 0.04, 0.7, 0.35]]) {
+      c.strokeStyle = `rgba(255,${120 + k * 30 | 0},40,${a})`;
+      c.lineWidth = R * w;
+      c.setLineDash([R * dash, R * dash * 0.12, R * dash * 0.35, R * dash * 0.08]);
+      c.lineDashOffset = still ? 0 : -t * R * (0.9 / k);
+      c.beginPath();
+      c.ellipse(0, 0, R * k, R * k * 0.3, 0, 0, Math.PI * 2);
+      c.stroke();
+    }
+    c.restore();
   },
   // ----- Flow bubbles: they rise out of the tide; pop one for 15 s of production times your Flow. -----
   bubbleAt(x, y) {
@@ -562,8 +626,9 @@ const Stage = {
       c.fillStyle = col;
       c.fill();
     };
-    layer(6, 60, 1.1, 7, 'rgba(242,197,124,.13)');
-    layer(5, 48, -1.4, 0, 'rgba(217,119,87,.30)');
+    const hz = isHorizon();
+    layer(6, 60, 1.1, 7, hz ? 'rgba(154,154,162,.13)' : 'rgba(242,197,124,.13)');
+    layer(5, 48, -1.4, 0, hz ? 'rgba(255,122,26,.28)' : 'rgba(217,119,87,.30)');
   },
 };
 
