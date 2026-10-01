@@ -65,6 +65,7 @@ const BIG_HAND = [
 
 // Gold-hand tap curve for one cycle (phase 0..1): offset outward in sparkle radii, size, and tilt in radians.
 const GOLD_SLAM = 0.11;
+const BIG_LANE_ICON = 46;
 function goldTap(p) {
   if (p < 0.08) { // wind up: lean back and tilt
     const e = Math.sin((p / 0.08) * Math.PI / 2);
@@ -435,6 +436,31 @@ const Workspace = {
     this.sprites[i] = { c, r };
     return c;
   },
+  // The "ten in one" version: bigger icon on a gold glow (Autocompletes use the gold hand).
+  bigSprite(i) {
+    const r = dpr(), key = i + 'big', s = this.sprites[key];
+    if (s && s.r === r && !lostCanvas(s.c)) return s.c;
+    const size = BIG_LANE_ICON, c = document.createElement('canvas');
+    c.width = c.height = Math.ceil(size * r);
+    const x = c.getContext('2d');
+    c._ctx = x;
+    x.scale(r, r);
+    const g = x.createRadialGradient(size / 2, size / 2, 2, size / 2, size / 2, size / 2);
+    g.addColorStop(0, 'rgba(242,197,124,.55)');
+    g.addColorStop(0.6, 'rgba(242,197,124,.18)');
+    g.addColorStop(1, 'rgba(242,197,124,0)');
+    x.fillStyle = g;
+    x.fillRect(0, 0, size, size);
+    x.strokeStyle = 'rgba(242,197,124,.85)';
+    x.lineWidth = 1.5;
+    x.beginPath();
+    x.ellipse(size / 2, size - 6, size * 0.34, 3.2, 0, 0, Math.PI * 2);
+    x.stroke();
+    x.translate(size * 0.12, size * 0.06);
+    drawParts(x, i === 0 ? BIG_HAND : BUILDINGS[i].icon, size * 0.76);
+    this.sprites[key] = { c, r };
+    return c;
+  },
   layout() {
     const list = [];
     for (let i = 0; i < N; i++) if (G.owned[i] > 0) list.push(i);
@@ -471,20 +497,35 @@ const Workspace = {
       c.fillStyle = 'rgba(0,0,0,.35)';
       c.fillRect(0, y0 + R - 2, W, 2);
 
-      const spr = this.sprite(i), size = 30, shown = Math.min(n, 140);
-      const step = Math.max(5, Math.min(34, (W - 48) / Math.max(1, shown)));
-      for (let j = 0; j < shown; j++) {
-        const h1 = hash(i * 1000 + j), h2 = hash(i * 7 + j * 13);
+      // Under 100 owned: one icon each. From 100: one big gold icon per 10, then the remaining 1-9 as normal icons.
+      const grouped = n >= HAND_GROUP_AT;
+      let big = grouped ? Math.floor(n / HAND_GROUP) : 0, small = grouped ? n % HAND_GROUP : n;
+      const room = W - 56;
+      if (big) big = Math.min(big, Math.floor(room / 12));
+      small = Math.min(small, 140);
+      const units = big + small * 0.7, step = Math.max(6, Math.min(46, room / Math.max(1, units)));
+      const spr = this.sprite(i), bigSpr = big ? this.bigSprite(i) : null;
+      let x = 12;
+      for (let j = 0; j < big + small; j++) {
+        const isBig = j < big, h1 = hash(i * 1000 + j), h2 = hash(i * 7 + j * 13);
         const bob = still ? 0 : Math.sin(t * 2.2 + j * 1.7 + i) * 1.6;
-        const hop = still ? 0 : Math.pow(Math.max(0, Math.sin(t * 0.9 + h1 * 40)), 30) * 7;
-        const x = 14 + j * step + (h1 - 0.5) * Math.min(step, 8);
-        const y = y0 + 30 + (h2 - 0.5) * 14 - bob - hop;
-        c.drawImage(spr, x, y, size, size);
+        if (isBig) {
+          // Big icons pulse in a wave that rolls along the lane every 4 seconds.
+          const ph = (t / 4 - j / Math.max(big, 1) + i * 0.13) % 1, p = ph < 0 ? ph + 1 : ph;
+          const pulse = still || p > 0.12 ? 0 : Math.sin((p / 0.12) * Math.PI);
+          const size = BIG_LANE_ICON * (1 + pulse * 0.16);
+          c.drawImage(bigSpr, x - (size - BIG_LANE_ICON) / 2, y0 + 20 + (h2 - 0.5) * 8 - bob - pulse * 6 - (size - BIG_LANE_ICON) / 2, size, size);
+          x += step;
+        } else {
+          const hop = still ? 0 : Math.pow(Math.max(0, Math.sin(t * 0.9 + h1 * 40)), 30) * 7;
+          c.drawImage(spr, x + (h1 - 0.5) * Math.min(step, 8), y0 + 30 + (h2 - 0.5) * 14 - bob - hop, 30, 30);
+          x += step * 0.7;
+        }
       }
 
       // Little sparks of output drifting up from the lane.
       if (!still && Math.random() < dt * Math.min(n, 30) * 0.12) {
-        this.bits.push({ x: 20 + Math.random() * Math.min(W - 40, shown * step), y: y0 + 34, life: 0, col: b.color });
+        this.bits.push({ x: 20 + Math.random() * Math.min(W - 40, Math.max(20, x - 12)), y: y0 + 34, life: 0, col: b.color });
       }
 
       const label = `${n === 1 ? b.name : b.plural} × ${n.toLocaleString('en-US')}`;
