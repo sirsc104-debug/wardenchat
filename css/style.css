@@ -631,6 +631,38 @@ textarea { display: block; width: 100%; margin-top: 6px; padding: 10px; border-r
 select { padding: 7px 10px; border-radius: 8px; }
 .about { margin: 8px 0 0; padding-top: 14px; border-top: 1px solid var(--line); color: var(--faint); font-size: 12px; }
 
+/* ---------- dev cheats ---------- */
+body.dev-on .brand-name::after {
+  content: 'DEV';
+  margin-left: 8px;
+  padding: 3px 6px 2px;
+  vertical-align: 3px;
+  font: 700 9.5px/1 var(--mono);
+  letter-spacing: .12em;
+  color: #1a1322;
+  background: var(--lilac);
+  border-radius: 4px;
+}
+.tabs [data-tab="dev"] { color: var(--lilac); }
+.dev-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+.dev-head p { margin: 0; max-width: 60ch; }
+.dev-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.dev-card { padding: 14px; background: #1b1418; border: 1px solid rgba(184, 164, 227, .3); border-radius: 12px; }
+.dev-card h4 { margin: 0 0 10px; font: 720 14px/1.2 var(--display); color: var(--lilac); }
+.dev-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.dev-field { display: grid; gap: 4px; margin-bottom: 8px; font-size: 12px; color: var(--muted); }
+.dev-field input, .dev-field select {
+  width: 100%;
+  padding: 7px 10px;
+  color: var(--text);
+  background: var(--sunk);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  font: 400 12px/1.4 var(--mono);
+}
+.dev-msg { margin: 8px 0 0; font-size: 12px; min-height: 1em; }
+.dev-msg.bad { color: var(--no); }
+
 /* ---------- small screens: one pane at a time ---------- */
 .mobile-nav { display: none; }
 @media (max-width: 999px) {
@@ -683,3 +715,5 @@ select { padding: 7px 10px; border-radius: 8px; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition: none !important; }
   .drop { animation-duration: var(--d) !important; }
 }
+.dev-card .check { flex-wrap: nowrap; align-items: flex-start; }
+.dev-card .check input { flex: none; margin-top: 2px; }

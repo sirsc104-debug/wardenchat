@@ -16,6 +16,7 @@ function start(snapshot) {
   Stage.init($('#stage'));
   Workspace.init($('#workspace'));
   Panels.init();
+  Dev.init();
 
   on('achievement', a => {
     Panels.achDirty = true;
@@ -34,6 +35,7 @@ function start(snapshot) {
     UI.refreshSoundButton();
     UI.refreshStore(true);
     Panels.refresh(true);
+    Dev.sync();
   });
 
   if (offline && offline.gain > 0) {

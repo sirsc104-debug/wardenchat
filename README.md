@@ -29,6 +29,10 @@ Progress saves to `localStorage` every 30 seconds and when you leave the page. U
 | Presentation | Canvas-rendered sparkle with shine, orbiting cursors, code rain that thickens with production, click particles, floating numbers, a workspace view of every building at work, a news ticker, and a Claude Code-style status spinner. |
 | Quality of life | Offline production, save export/import, number formats, optional synthesized sound, reduced-motion support, keyboard play (focus the sparkle, press Enter), and a phone layout. |
 
+## Developer cheats
+
+Type `0987` anywhere on the page (outside a text box) to show a **Dev** tab, and type it again to hide it. It has 27 one-click cheats (tokens, time warp, buildings, upgrades, achievements, Eureka tokens, bugs, prestige), fields to set exact token and building counts, a picker that triggers any of the 18 Eureka effects, and toggles for a production multiplier, free shopping, a Eureka token every 5 seconds and infinite Focus. A DEV badge shows next to the title while it's on.
+
 ## Files
 
 ```
@@ -40,6 +44,7 @@ js/engine.js      game state, economy, buffs, prestige, save/load
 js/render.js      canvas: sparkle stage and workspace lanes
 js/ui.js          store, tooltips, toasts, Eureka tokens, bugs, ticker, spinner, sound
 js/panels.js      Stats, Achievements, Terminal, Memory and Options tabs
+js/dev.js         hidden Dev tab with cheats (type 0987)
 js/main.js        boot, main loop, autosave
 ```
 

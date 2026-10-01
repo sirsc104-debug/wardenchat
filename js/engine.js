@@ -32,6 +32,7 @@ function freshGame() {
     compacts: 0, prestige: 0, memories: 0, mem: new Set(), gameStart: Date.now(),
     settings: { numbers: 'words', particles: true, floaters: true, sound: false, motion: true },
     stats: { maxTps: 0 },
+    dev: { on: false, mult: 1, free: false, fastEureka: false, infFocus: false },
   });
 }
 let G = freshGame();
@@ -89,7 +90,7 @@ function recompute() {
   D.prestigeBonus = G.prestige * 0.01 * (hasMem('deep') ? 1.5 : 1);
   D.gpct = gpct;
   D.flowMult = flowMult;
-  D.mult = (1 + gpct / 100) * flowMult * (1 + D.prestigeBonus);
+  D.mult = (1 + gpct / 100) * flowMult * (1 + D.prestigeBonus) * (G.dev.on ? G.dev.mult : 1);
 
   let raw = 0;
   for (let i = 0; i < N; i++) raw += G.owned[i] * D.each[i];
@@ -120,7 +121,9 @@ function earn(n) {
   G.earned = Math.min(Number.MAX_VALUE, G.earned + n);
 }
 
+const devFree = () => G.dev.on && G.dev.free;
 function bulkCost(i, n) {
+  if (devFree()) return 0;
   const base = BUILDINGS[i].cost * D.bldDiscount * D.buffCost, o = G.owned[i];
   return Math.ceil((base * (Math.pow(1.15, o + n) - Math.pow(1.15, o))) / 0.15);
 }
@@ -130,7 +133,7 @@ function sellValue(i, n) {
   const base = BUILDINGS[i].cost * D.bldDiscount;
   return Math.floor(((base * (Math.pow(1.15, o) - Math.pow(1.15, o - n))) / 0.15) * 0.25);
 }
-const upgCost = u => Math.ceil(u.cost * D.upgDiscount);
+const upgCost = u => (devFree() ? 0 : Math.ceil(u.cost * D.upgDiscount));
 
 function buyBuilding(i, n) {
   const cost = bulkCost(i, n);
@@ -376,6 +379,8 @@ function update(dt) {
     if (G.buffs.some(b => b.t <= 0)) { G.buffs = G.buffs.filter(b => b.t > 0); recompute(); }
   }
   if (D.focusMax) G.focus = Math.min(D.focusMax, G.focus + D.focusRegen * dt);
+  if (G.dev.on && G.dev.infFocus) G.focus = D.focusMax;
+  if (G.dev.on && G.dev.fastEureka) T.eureka = Math.min(T.eureka, 5);
 
   T.eureka -= dt;
   if (T.eureka <= 0) { T.eureka = eurekaDelay(); emit('spawnEureka', false); }
@@ -417,6 +422,7 @@ function load(str, applyOffline) {
     .map(b => ({ key: b.key, name: String(b.name || ''), t: num(b.t), dur: num(b.dur, num(b.t)), prod: num(b.prod, 1), click: num(b.click, 1), cost: num(b.cost, 1) }));
   Object.assign(g.settings, o.settings || {});
   Object.assign(g.stats, o.stats || {});
+  Object.assign(g.dev, o.dev || {});
   G = g;
   if (o.timers) { T.eureka = num(o.timers.eureka, T.eureka); T.bug = num(o.timers.bug, T.bug); }
   recompute();
