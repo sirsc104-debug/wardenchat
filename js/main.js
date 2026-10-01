@@ -1,7 +1,33 @@
 'use strict';
 /* Claude Code Clicker: boot, main loop, autosave and global events. */
 
+// If the page is swapped or duplicated underneath the running game (for example a live update
+// arriving while it is open), save and reload once instead of drawing onto detached elements.
+const HEAL_KEY = 'claude-code-clicker/healed-at';
+let healing = false;
+function heal(reason) {
+  if (healing) return;
+  let last = 0;
+  try { last = +sessionStorage.getItem(HEAL_KEY) || 0; } catch (e) { /* storage blocked */ }
+  if (Date.now() - last < 15000) { console.error('Page still inconsistent after a reload:', reason); return; }
+  healing = true;
+  console.warn('Reloading to repair the page:', reason);
+  try { sessionStorage.setItem(HEAL_KEY, String(Date.now())); } catch (e) { /* storage blocked */ }
+  save();
+  location.reload();
+}
+function pageProblem(app) {
+  if (!app.isConnected || document.querySelectorAll('#app').length !== 1) return 'app container replaced';
+  if (!Stage.cv.isConnected || document.getElementById('stage') !== Stage.cv) return 'sparkle canvas replaced';
+  if (!Workspace.cv.isConnected) return 'workspace canvas replaced';
+  if (document.querySelectorAll('.term').length > 1 || document.querySelectorAll('#panel-terminal').length !== 1) return 'panels duplicated';
+  return '';
+}
+
+let started = false;
 function start(snapshot) {
+  if (started) return heal('started twice');
+  started = true;
   let offline = null;
   const tryLoad = (str, applyOffline) => {
     try { offline = load(str, applyOffline); return true; } catch (e) { console.warn('Save not loaded:', e); return false; }
@@ -75,6 +101,8 @@ function start(snapshot) {
   requestAnimationFrame(loop);
 
   setInterval(save, 30000);
+  const app = document.getElementById('app');
+  setInterval(() => { const why = pageProblem(app); if (why) heal(why); }, 1000);
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) return save();
     // Coming back to the tab: redraw the cached images in case the browser discarded them.
