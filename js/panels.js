@@ -57,7 +57,8 @@ const Panels = {
     ].map(r => row(...r)).join('');
     const mults = [
       ['Upgrades', `+${D.gpct}%`],
-      ['Flow', `${Math.round(D.flow * 100)}% → ×${D.flowMult.toFixed(2)}`],
+      ['Flow', `${Math.round(D.flow * 100)}% → +${+(D.flowBonus * 100).toFixed(1)}%, engineers ×${D.flowMult.toFixed(2)}`],
+      ['Flow bubbles popped', G.bubbles.toLocaleString('en-US')],
       ['Prestige', `level ${G.prestige} → +${Math.round(D.prestigeBonus * 100)}%`],
       ['Total multiplier', `×${D.mult.toFixed(2)}`],
     ].map(r => row(...r)).join('');
@@ -89,7 +90,7 @@ const Panels = {
     $('#panel-achievements').innerHTML =
       `<div class="ach-head"><div class="ach-count"><b>${n}</b> of ${ACHIEVEMENTS.length} unlocked</div>` +
       `<div class="meter"><span style="width:${((n / ACHIEVEMENTS.length) * 100).toFixed(1)}%"></span></div>` +
-      `<p class="muted">Flow <b>${pct}%</b>. Every achievement adds 4% Flow, which the rising tide under the sparkle shows. Engineer upgrades turn Flow into production.</p></div>` +
+      `<p class="muted">Flow <b>${pct}%</b>. Every achievement adds 4% Flow, shown as the rising tide under the sparkle. Each 1% Flow gives +0.25% production, Engineer upgrades multiply that, and Flow bubbles rise from the tide more often the higher it gets. Pop them for tokens.</p></div>` +
       `<div class="ach-grid">${tiles}</div>`;
   },
   achTip(a) {

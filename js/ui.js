@@ -69,6 +69,7 @@ const Sound = {
   ach() { [523, 659, 784, 1047].forEach((f, i) => this.tone(f, 0.2, { vol: 0.04, at: i * 0.07 })); },
   eureka() { [1318, 1568, 2093, 2637].forEach((f, i) => this.tone(f, 0.28, { vol: 0.025, at: i * 0.05 })); },
   legendary() { [784, 1175, 1568, 2349, 3136].forEach((f, i) => this.tone(f, 0.4, { vol: 0.022, at: i * 0.07 })); },
+  pop() { this.tone(880 + Math.random() * 200, 0.09, { type: 'sine', vol: 0.05, to: 1500 }); },
   squash() { this.tone(200, 0.16, { type: 'sawtooth', vol: 0.035, to: 55 }); },
   fail() { this.tone(240, 0.3, { type: 'sawtooth', vol: 0.03, to: 110 }); },
 };
@@ -140,6 +141,16 @@ function buffTip(key) {
 function eurekaTip(id) {
   const e = EUREKA.find(x => x.id === id);
   return tipHead(svgIcon(e.bad ? GLYPH.bug : GLYPH.gold), e.name, `Eureka effect · ${e.w}% chance`) + `<div class="tip-desc">${esc(e.desc)}</div>`;
+}
+function flowTip() {
+  const pct = Math.round(D.flow * 100), n = G.achievements.size;
+  const engineers = UPGRADES.filter(u => u.kind === 'flow' && G.upgrades.has(u.id)).length;
+  const every = Math.round(clamp(45 / (1 + D.flow), 6, 45));
+  return tipHead(svgIcon(GLYPH.people), `Flow ${pct}%`, `${n} achievement${n === 1 ? '' : 's'} × 4% each`) +
+    `<div class="tip-desc">Flow is the tide under the sparkle. It rises with every achievement you unlock.</div>` +
+    `<div class="tip-stats">Production <b>+${+(D.flowBonus * 100).toFixed(1)}%</b> (0.25% per 1% Flow).<br>` +
+    (engineers ? `Engineer upgrades (${engineers}) multiply that by <b>×${D.flowMult.toFixed(2)}</b>.<br>` : 'Engineer upgrades in the Store turn Flow into even more production.<br>') +
+    (pct ? `A Flow bubble rises about every <b>${every}s</b>. Pop it for <b>${fmt(bubbleValue())}</b> tokens.` : 'Unlock an achievement to start Flow bubbles rising.') + '</div>';
 }
 function tipHead(icon, name, tag, cost, can) {
   return `<div class="tip-head">${icon}<div><div class="tip-name">${esc(name)}</div><div class="tip-tag">${tag}</div></div>` +
@@ -421,6 +432,7 @@ const UI = {
     this.bindStore();
     this.bindChrome();
     bindTips($('#buffs'), '.buff', el => buffTip(el.dataset.key));
+    bindTips($('#paneLeft'), '#flowTag', () => flowTip());
     this.refreshStore(true);
     this.refreshBank();
   },
@@ -697,6 +709,8 @@ const UI = {
       this.refreshStore();
       this.refreshBuffs();
       this.refreshCursor();
+      const ft = $('#flowTag'), label = `Flow ${Math.round(D.flow * 100)}%`;
+      if (ft.lastElementChild.textContent !== label) ft.lastElementChild.textContent = label;
       Panels.fastRefresh();
     }
     if ((this.slow += dt) >= 0.5) {

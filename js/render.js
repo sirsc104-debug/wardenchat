@@ -187,17 +187,18 @@ function paintShine(ctx, R) {
 // ---------- the sparkle stage (left pane) ----------
 const Stage = {
   init(cv) {
-    Object.assign(this, { cv, ctx: cv.getContext('2d'), t: 0, w: 0, h: 0, squish: 0, hover: false, hs: 1, spin: 0, parts: [], floats: [], rain: [], waves: [], goldPrev: new Float32Array(HANDS_PER_RING * HAND_RINGS).fill(-1) });
+    Object.assign(this, { cv, ctx: cv.getContext('2d'), t: 0, w: 0, h: 0, squish: 0, hover: false, hs: 1, spin: 0, parts: [], floats: [], rain: [], waves: [], bubbles: [], bubbleT: 8, flowLevel: 0, goldPrev: new Float32Array(HANDS_PER_RING * HAND_RINGS).fill(-1) });
     new ResizeObserver(() => this.resize()).observe(cv);
     cv.addEventListener('contextrestored', () => this.resize());
     this.resize();
     cv.addEventListener('pointerdown', e => {
       const p = this.local(e);
+      if (this.popAt(p.x, p.y)) { e.preventDefault(); return; }
       if (this.hit(p.x, p.y)) { e.preventDefault(); this.clickAt(p.x, p.y); }
     });
     cv.addEventListener('pointermove', e => {
       const p = this.local(e);
-      this.hover = this.hit(p.x, p.y);
+      this.hover = this.hit(p.x, p.y) || !!this.bubbleAt(p.x, p.y);
       cv.style.cursor = this.hover ? 'pointer' : 'default';
     });
     cv.addEventListener('pointerleave', () => { this.hover = false; });
@@ -312,6 +313,7 @@ const Stage = {
     this.drawWaves(dt);
     this.drawParticles(dt);
     this.drawFlow(t, still);
+    this.drawBubbles(dt, t, still);
     this.drawFloats(dt);
   },
   drawRain(dt, still) {
@@ -403,6 +405,67 @@ const Stage = {
     }
     return this.rbFrames[f];
   },
+  // ----- Flow bubbles: they rise out of the tide; pop one for 15 s of production times your Flow. -----
+  bubbleAt(x, y) {
+    for (let i = this.bubbles.length - 1; i >= 0; i--) {
+      const b = this.bubbles[i];
+      if (Math.hypot(x - b.x, y - b.y) < b.r + 8) return b;
+    }
+    return null;
+  },
+  popAt(x, y) {
+    const b = this.bubbleAt(x, y);
+    if (!b) return false;
+    this.bubbles.splice(this.bubbles.indexOf(b), 1);
+    const gain = popBubble();
+    this.floats.push({ x: b.x, y: b.y - 8, text: '+' + fmt(gain), life: 0, max: 1.4, col: '#8FD3B6' });
+    if (G.settings.particles) {
+      for (let j = 0; j < 10; j++) {
+        const a = (j / 10) * Math.PI * 2, sp = 90 + Math.random() * 80;
+        this.parts.push({ x: b.x, y: b.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 60, life: 0, max: 0.5, rot: 0, vr: 6, size: 3, col: j % 2 ? '#8FD3B6' : '#F3E9DF' });
+      }
+    }
+    Sound.pop();
+    return true;
+  },
+  drawBubbles(dt, t, still) {
+    if (D.flow > 0 && (this.bubbleT -= dt) <= 0) {
+      this.bubbleT = bubbleDelay();
+      if (this.bubbles.length < 6) {
+        const r = clamp(this.R * 0.13, 11, 20) * rand(0.9, 1.25);
+        const bx = rand(0.12, 0.88) * this.w;
+        this.bubbles.push({ bx, x: bx, y: this.h - this.flowLevel * 0.6, r, vy: rand(26, 40), ph: Math.random() * 6, life: 0 });
+      }
+    }
+    if (!this.bubbles.length) return;
+    const c = this.ctx;
+    this.bubbles = this.bubbles.filter(b => b.y > 70);
+    for (const b of this.bubbles) {
+      b.life += dt;
+      b.y -= b.vy * dt;
+      const x = b.bx + (still ? 0 : Math.sin(t * 1.8 + b.ph) * 10), grow = Math.min(1, b.life * 3);
+      b.x = x; // hit-testing follows the wobble
+      const r = b.r * grow, fade = Math.min(1, (b.y - 70) / 60);
+      c.globalAlpha = fade;
+      const g = c.createRadialGradient(x - r * 0.35, b.y - r * 0.35, r * 0.1, x, b.y, r);
+      g.addColorStop(0, 'rgba(255,255,255,.55)');
+      g.addColorStop(0.45, 'rgba(143,211,182,.18)');
+      g.addColorStop(1, 'rgba(143,211,182,.45)');
+      c.fillStyle = g;
+      c.strokeStyle = 'rgba(190,240,215,.9)';
+      c.lineWidth = 1.6;
+      c.beginPath();
+      c.arc(x, b.y, r, 0, Math.PI * 2);
+      c.fill();
+      c.stroke();
+      c.fillStyle = '#F2C57C';
+      c.font = `600 ${Math.round(r * 0.9)}px 'Segoe UI Symbol', 'Apple Symbols', 'DejaVu Sans', sans-serif`;
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.fillText('✻', x, b.y + 1);
+    }
+    c.globalAlpha = 1;
+  },
   // A big hand just landed its tap: shockwave ring plus sparks at the fingertip (rainbow ones go bigger).
   slam(a, rad, ring, rainbow) {
     const x = this.cx + Math.cos(a) * rad, y = this.cy + Math.sin(a) * rad;
@@ -477,7 +540,7 @@ const Stage = {
       c.lineWidth = 4;
       c.strokeStyle = 'rgba(20,12,16,.85)';
       c.strokeText(f.text, f.x, f.y);
-      c.fillStyle = '#F3E9DF';
+      c.fillStyle = f.col || '#F3E9DF';
       c.fillText(f.text, f.x, f.y);
     }
     c.globalAlpha = 1;
@@ -486,6 +549,7 @@ const Stage = {
   drawFlow(t, still) {
     const c = this.ctx, w = this.w, h = this.h;
     const level = h * (0.035 + Math.min(1, D.flow / 5) * 0.16);
+    this.flowLevel = level;
     const layer = (amp, len, speed, off, col) => {
       c.beginPath();
       c.moveTo(0, h);

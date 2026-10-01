@@ -49,6 +49,8 @@ const plural = (n, word) => `${n === 1 ? 'one' : fmtWords(n)} ${word}${n === 1 ?
 BUILDINGS.forEach((b, i) => [1, 50, 100, 200].forEach((n, k) =>
   ach(`b${i}_${k}`, b.ach[k], `Own <b>${n === 1 ? 'one' : n}</b> ${n === 1 ? b.name : b.plural}.`, { b: i }, () => G.owned[i] >= n)));
 
+[[1, 'In the Flow'], [50, 'Bubble Wrap'], [250, 'Flow State']]
+  .forEach(([n, name], k) => ach(`bub${k}`, name, `Pop <b>${plural(n, 'Flow bubble')}</b>.`, { g: 'people' }, () => G.bubbles >= n));
 ach('fullstack', 'Full Stack', 'Own at least <b>one</b> of every building.', { g: 'stack' }, () => G.owned.every(x => x >= 1));
 ach('crossfn', 'Cross-functional Team', 'Own at least <b>50</b> of every building.', { g: 'people' }, () => G.owned.every(x => x >= 50));
 ach('vanilla', 'Vanilla JS', 'Generate <b>one million</b> tokens in a run without buying any upgrades.', { g: 'star' }, () => G.earned >= 1e6 && G.upgrades.size === 0);
@@ -94,6 +96,11 @@ const NEWS = [
   [owns(11), 'Developer receives a code review from next Tuesday. Approves.'],
   [owns(12), 'The Singularity has arrived. It would like to schedule a quick sync.'],
   [owns(13), 'Multiverse fork finds a timeline where the meeting was an email.'],
+  [owns(14), 'Infinite Context finally remembers where you left your keys.'],
+  [owns(15), 'Agent Civilization holds its first election. All candidates promise better docs.'],
+  [owns(16), 'Astronomers name a new nebula after a missing semicolon.'],
+  [owns(17), 'Reality Refactor renames gravity to downwardAttraction. Nothing falls over.'],
+  [owns(18), 'Claude Prime awakens, reads the whole codebase, and says it is honestly pretty good.'],
   [() => G.earned >= 1e6, 'Your repository trends online. Comments are mostly about the font.'],
   [() => G.earned >= 1e9, 'Economists propose replacing the gold standard with the token standard.'],
   [() => G.earned >= 1e12, 'Tokens now classified as a renewable resource.'],

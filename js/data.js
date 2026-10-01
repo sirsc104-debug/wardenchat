@@ -287,6 +287,65 @@ const BUILDINGS = [
       { d: STAR(6, 24, 4, 2.4, 0.8), f: '#8FD3B6' },
     ],
   },
+  {
+    id: 'infcontext', name: 'Infinite Context', plural: 'Infinite Contexts', cost: 2.6e16, tps: 2.1e10, color: '#5EC8FF',
+    desc: 'A context window with no edges. Remembers every line of code ever written, including yours from 2009.',
+    ach: ['Never Forget', 'Total Recall', 'The Whole Repo at Once', 'Boundless'],
+    icon: [
+      { d: RR(3, 5, 26, 22, 3), f: '#1E2A3A', s: '#5EC8FF', w: 1.5 },
+      { d: 'M3.5 10.5H28.5', s: '#5EC8FF', w: 1.2 },
+      { d: C(6.5, 7.8, 0.9) + C(9.5, 7.8, 0.9), f: '#5EC8FF' },
+      { d: 'M10 18.5C10 15.3 13.5 15.3 16 18.5S22 21.7 22 18.5S18.5 15.3 16 18.5S10 21.7 10 18.5Z', s: '#BDEBFF', w: 2.2 },
+    ],
+  },
+  {
+    id: 'civilization', name: 'Agent Civilization', plural: 'Agent Civilizations', cost: 3.1e17, tps: 1.5e11, color: '#8FD3B6',
+    desc: 'Millions of agents with their own cities, standups and very strong opinions about naming conventions.',
+    ach: ['First Settlement', 'Agent Nation', 'Planetary Union', 'Galactic Federation'],
+    icon: [
+      { d: 'M2 28.5H30', s: '#5FAF8F', w: 2.2 },
+      { d: 'M16 7V3.8M7 15V12.5M25 15V12.5', s: '#C9C2D6', w: 1.4 },
+      { d: C(16, 3.3, 1.5), f: '#D97757' },
+      { d: RR(2, 15, 10, 9, 2.5) + RR(20, 15, 10, 9, 2.5), f: '#C9C2D6' },
+      { d: RR(10, 7, 12, 12, 3), f: '#EDE6F7' },
+      { d: RR(12, 19, 8, 9, 1.5) + RR(4.5, 24, 5, 4, 1) + RR(22.5, 24, 5, 4, 1), f: '#B7AEC8' },
+      { d: RR(4, 17.5, 6, 4, 1.2) + RR(22, 17.5, 6, 4, 1.2) + RR(12.5, 10, 7, 5, 1.5), f: '#231A2E' },
+      { d: C(14.5, 12.5, 1) + C(17.5, 12.5, 1) + C(6, 19.5, 0.7) + C(8, 19.5, 0.7) + C(24, 19.5, 0.7) + C(26, 19.5, 0.7), f: '#8FD3B6' },
+    ],
+  },
+  {
+    id: 'nebula', name: 'Token Nebula', plural: 'Token Nebulae', cost: 7.1e18, tps: 1.1e12, color: '#E77BFF',
+    desc: 'A swirling cloud of raw tokens where new sentences are born.',
+    ach: ['Stardust', 'Cosmic Cloud', 'Galaxy Brain', 'Universe of Discourse'],
+    icon: [
+      { d: C(16, 16, 13.5), f: '#2A1A3A' },
+      { d: 'M16 16C16 11 22 10 24 14C26 19 19 24 13 22C6 19 7 9 14 6.5', s: '#E77BFF', w: 2.4 },
+      { d: 'M16 16C16 21 10 22 8 18C6 13 13 8 19 10C26 13 25 23 18 25.5', s: '#8B7BFF', w: 2.4 },
+      { d: C(16, 16, 2.7), f: '#FFF1D2' },
+      { d: C(7.5, 8, 0.8) + C(25, 24, 0.9) + C(25.5, 8.5, 0.7) + C(7, 24.5, 0.6), f: '#FFFFFF' },
+    ],
+  },
+  {
+    id: 'refactor', name: 'Reality Refactor', plural: 'Reality Refactors', cost: 1.2e20, tps: 8.3e12, color: '#FFB35E',
+    desc: 'Cleans up the laws of physics. Gravity is now a configurable dependency.',
+    ach: ['Hello, Universe', 'Physics Patch', 'Constants Renamed', 'Clean Architecture of Everything'],
+    icon: [
+      { d: C(14, 17.5, 10.5), f: '#FFB35E' },
+      { d: 'M5 14C9.5 16 18 16 23.5 12.5M4.5 20.5C10 22.5 18.5 22.5 24.5 19', s: '#E0823A', w: 1.6 },
+      { d: 'M20.5 5A4.6 4.6 0 0 0 26.6 11.2L29.5 14.1L26.2 17.4L23.3 14.5A4.6 4.6 0 0 1 17.1 8.4L19.5 10.8L22.8 7.5Z', f: '#D8D2E0', s: '#5A4E66', w: 1.1 },
+    ],
+  },
+  {
+    id: 'prime', name: 'Claude Prime', plural: 'Claude Primes', cost: 1.9e21, tps: 6.4e13, color: '#D97757',
+    desc: 'The original sparkle, fully awakened. It writes, it reviews, it ships, and it says thank you.',
+    ach: ['Awakening', 'Prime Directive', 'Sparkle Supreme', 'The Final Token'],
+    icon: [
+      { d: C(16, 17.5, 13), s: '#F2C57C', w: 1.2 },
+      { d: BURST(16, 17.5, 12, 2.6, [11, 8.5, 10, 8, 11, 9, 10, 8.2, 11, 8.8, 10.4, 8.5]), s: '#D97757', w: 2.8 },
+      { d: C(16, 17.5, 2.8), f: '#FBC3A6' },
+      { d: 'M10 6.5L12 2.8L14.5 5.2L16 1.5L17.5 5.2L20 2.8L22 6.5Z', f: '#F2C57C', s: '#8B5E3C', w: 0.8 },
+    ],
+  },
 ];
 
 // ---------- upgrades ----------

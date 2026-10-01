@@ -28,7 +28,7 @@ function freshRun() {
 }
 function freshGame() {
   return Object.assign(freshRun(), {
-    prevEarned: 0, clicks: 0, achievements: new Set(), goldenClicks: 0, bugsSquashed: 0, spellsCast: 0,
+    prevEarned: 0, clicks: 0, achievements: new Set(), goldenClicks: 0, bugsSquashed: 0, spellsCast: 0, bubbles: 0,
     compacts: 0, prestige: 0, memories: 0, mem: new Set(), gameStart: Date.now(),
     settings: { numbers: 'words', particles: true, floaters: true, sound: false, motion: true },
     stats: { maxTps: 0 },
@@ -40,7 +40,7 @@ let G = freshGame();
 // Derived values, rebuilt by recompute() whenever something that affects them changes.
 const D = {
   each: Array(N).fill(0), mult: 1, raw: 0, tpsBase: 0, tps: 0, click: 1, clickBase: 1, clickPct: 0,
-  flow: 0, flowMult: 1, gpct: 0, prestigeBonus: 0, buffProd: 1, buffClick: 1,
+  flow: 0, flowMult: 1, flowBonus: 0, gpct: 0, prestigeBonus: 0, buffProd: 1, buffClick: 1,
   eurekaFreq: 1, eurekaLife: 1, effDur: 1, bugMult: 1, bugFreq: 1,
   bldDiscount: 1, upgDiscount: 1, buffCost: 1, offline: 0.1, focusMax: 0, focusRegen: 0,
 };
@@ -49,6 +49,17 @@ const D = {
 // Eureka tokens are rare: the first one takes about 4-10 minutes.
 const EUREKA_RARITY = 5;
 const T = { eureka: rand(45, 120) * EUREKA_RARITY, bug: rand(120, 240), ach: 1 };
+
+// ---------- Flow ----------
+const FLOW_PROD = 0.25;            // production bonus per 100% Flow
+const bubbleDelay = () => clamp(45 / (1 + D.flow), 6, 45) * rand(0.7, 1.3); // seconds between Flow bubbles
+const bubbleValue = () => Math.max(D.tps * 15, 10) * (1 + D.flow);         // 15 s of production, times Flow
+function popBubble() {
+  const gain = bubbleValue();
+  earn(gain);
+  G.bubbles++;
+  return gain;
+}
 
 const hasUpg = id => G.upgrades.has(id);
 const hasMem = id => G.mem.has(id);
@@ -92,7 +103,9 @@ function recompute() {
   D.prestigeBonus = G.prestige * 0.01 * (hasMem('deep') ? 1.5 : 1);
   D.gpct = gpct;
   D.flowMult = flowMult;
-  D.mult = (1 + gpct / 100) * flowMult * (1 + D.prestigeBonus) * (G.dev.on ? G.dev.mult : 1);
+  // Flow itself: +0.25% production for every 1% Flow (4% Flow per achievement), on top of the Engineer upgrades.
+  D.flowBonus = D.flow * FLOW_PROD;
+  D.mult = (1 + gpct / 100) * flowMult * (1 + D.flowBonus) * (1 + D.prestigeBonus) * (G.dev.on ? G.dev.mult : 1);
 
   let raw = 0;
   for (let i = 0; i < N; i++) raw += G.owned[i] * D.each[i];
@@ -432,7 +445,7 @@ function load(str, applyOffline) {
   if (!o || typeof o !== 'object' || !Array.isArray(o.owned)) throw new Error('That is not a Claude Code Clicker save.');
   const num = (v, d = 0) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
   const g = freshGame();
-  for (const k of ['tokens', 'earned', 'handmade', 'prevEarned', 'clicks', 'goldenClicks', 'bugsSquashed', 'spellsCast',
+  for (const k of ['tokens', 'earned', 'handmade', 'prevEarned', 'clicks', 'goldenClicks', 'bugsSquashed', 'spellsCast', 'bubbles',
     'compacts', 'prestige', 'memories', 'focus', 'runStart', 'gameStart']) g[k] = num(o[k], g[k]);
   g.owned = BUILDINGS.map((_, i) => Math.max(0, Math.floor(num(o.owned[i]))));
   g.producedBy = BUILDINGS.map((_, i) => num((o.producedBy || [])[i]));
