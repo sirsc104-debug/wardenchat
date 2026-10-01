@@ -28,10 +28,15 @@ function drawParts(ctx, parts, size) {
   }
   ctx.restore();
 }
+// The browser may silently discard a canvas's pixels (GPU memory pressure, long background tabs).
+// Offscreen caches keep their context so we can notice and rebuild them.
+const lostCanvas = c => !c || !c.width || (c._ctx && typeof c._ctx.isContextLost === 'function' && c._ctx.isContextLost());
+
 function makeSprite(parts, size) {
   const r = dpr(), c = document.createElement('canvas');
   c.width = c.height = Math.ceil(size * r);
   const x = c.getContext('2d');
+  c._ctx = x;
   x.scale(r, r);
   drawParts(x, parts, size);
   return c;
@@ -41,6 +46,7 @@ function centredCache(R, paint) {
   const r = dpr(), s = Math.ceil(R * 2 + 8), c = document.createElement('canvas');
   c.width = c.height = Math.ceil(s * r);
   const x = c.getContext('2d');
+  c._ctx = x;
   x.scale(r, r);
   x.translate(s / 2, s / 2);
   paint(x, R);
@@ -99,6 +105,7 @@ const Stage = {
   init(cv) {
     Object.assign(this, { cv, ctx: cv.getContext('2d'), t: 0, w: 0, h: 0, squish: 0, hover: false, hs: 1, spin: 0, parts: [], floats: [], rain: [] });
     new ResizeObserver(() => this.resize()).observe(cv);
+    cv.addEventListener('contextrestored', () => this.resize());
     this.resize();
     cv.addEventListener('pointerdown', e => {
       const p = this.local(e);
@@ -121,6 +128,7 @@ const Stage = {
   hit(x, y) { return Math.hypot(x - this.cx, y - this.cy) < this.R * 0.95; },
   clickAt(x, y) {
     const v = clickSparkle();
+    Spinner.made += v;
     this.squish = 1;
     this.pop(x, y, v);
     Sound.click();
@@ -166,6 +174,10 @@ const Stage = {
   frame(dt) {
     if (!this.cv.clientWidth) return;
     if (this.cv.clientWidth !== this.w || this.cv.clientHeight !== this.h) this.resize();
+    if (this.ctx.isContextLost && this.ctx.isContextLost()) return;
+    // Make sure the cached images still exist; rebuild them if the browser dropped them.
+    if (lostCanvas(this.sparkle) || lostCanvas(this.shine) || lostCanvas(this.cursor)) this.resize();
+    if (!Number.isFinite(this.spin)) this.spin = 0;
     const c = this.ctx, still = stillMode();
     this.t += dt;
     const t = this.t;
@@ -319,10 +331,12 @@ const Workspace = {
   ROW: 78,
   init(cv) {
     Object.assign(this, { cv, ctx: cv.getContext('2d'), sprites: {}, bits: [], t: 0, sig: '' });
+    cv.addEventListener('contextrestored', () => this.refresh());
   },
+  refresh() { this.sprites = {}; this.sig = ''; },
   sprite(i) {
     const r = dpr(), s = this.sprites[i];
-    if (s && s.r === r) return s.c;
+    if (s && s.r === r && !lostCanvas(s.c)) return s.c;
     const c = makeSprite(BUILDINGS[i].icon, 30);
     this.sprites[i] = { c, r };
     return c;
@@ -346,7 +360,7 @@ const Workspace = {
   },
   frame(dt) {
     const list = this.layout();
-    if (!list.length || !this.w) return;
+    if (!list.length || !this.w || (this.ctx.isContextLost && this.ctx.isContextLost())) return;
     const c = this.ctx, W = this.w, R = this.ROW, still = stillMode();
     const t = (this.t += dt);
     c.clearRect(0, 0, W, this.h);

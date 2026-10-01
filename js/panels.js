@@ -69,6 +69,9 @@ const Panels = {
     $('#panel-stats').innerHTML =
       `<h3 class="sec">General</h3><dl class="stat-list">${general}</dl>` +
       `<h3 class="sec">Multipliers</h3><dl class="stat-list">${mults}</dl>` +
+      `<h3 class="sec">Eureka effects</h3><div class="tbl-wrap"><table class="bt odds"><thead><tr><th>Effect</th><th>Chance</th><th>Available now</th></tr></thead><tbody>` +
+      EUREKA.map(e => `<tr><td>${esc(e.name)}</td><td>${e.w}%</td><td>${!e.ok || safe(e.ok) ? 'Yes' : 'Not yet'}</td></tr>`).join('') +
+      `</tbody></table></div><p class="muted odds-note">If an effect is not available yet, the others share its chance.</p>` +
       `<h3 class="sec">Buildings</h3>` +
       (rows ? `<div class="tbl-wrap"><table class="bt"><thead><tr><th>Building</th><th>Owned</th><th>Each/s</th><th>Total/s</th><th>Share</th><th>Made</th></tr></thead><tbody>${rows}</tbody></table></div>`
         : '<p class="muted">Buy your first building from the Store to see its numbers here.</p>');

@@ -23,7 +23,9 @@ function start(snapshot) {
     toast({ icon: iconParts(a.icon), kicker: 'Achievement unlocked', title: esc(a.name), text: a.desc, kind: 'mint' });
   });
   on('spawnEureka', force => FX.spawnEureka(force));
-  on('spawnBug', () => FX.spawnBug());
+  on('spawnBug', golden => FX.spawnBug(golden));
+  on('tokenRain', n => FX.tokenRain(n));
+  on('eurekaChain', n => { FX.chain += n; });
   on('reset', () => {
     Spinner.pick();
     Workspace.sig = '';
@@ -49,21 +51,34 @@ function start(snapshot) {
   });
 
   let last = performance.now();
+  // One failing step must never stop the loop (that would freeze or blank the game).
+  const step = (name, fn) => {
+    try { fn(); } catch (e) {
+      console.error(`${name} failed:`, e);
+      if (name === 'stage') Stage.resize();
+      if (name === 'workspace') Workspace.refresh();
+    }
+  };
   const loop = now => {
+    requestAnimationFrame(loop);
     const dt = Math.min(86400, Math.max(0, (now - last) / 1000));
     last = now;
-    update(dt);
-    FX.update(Math.min(dt, 0.25));
     const vdt = Math.min(dt, 0.1);
-    Stage.frame(vdt);
-    if (Panels.workspaceVisible()) Workspace.frame(vdt);
-    UI.frame(dt);
-    requestAnimationFrame(loop);
+    step('update', () => update(dt));
+    step('fx', () => FX.update(Math.min(dt, 0.25)));
+    step('stage', () => Stage.frame(vdt));
+    step('workspace', () => { if (Panels.workspaceVisible()) Workspace.frame(vdt); });
+    step('ui', () => UI.frame(dt));
   };
   requestAnimationFrame(loop);
 
   setInterval(save, 30000);
-  document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return save();
+    // Coming back to the tab: redraw the cached images in case the browser discarded them.
+    Stage.resize();
+    Workspace.refresh();
+  });
   window.addEventListener('pagehide', save);
 
   // Keep progress when the page is live-reloaded inside the artifact viewer.

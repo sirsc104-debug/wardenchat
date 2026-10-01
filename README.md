@@ -21,7 +21,7 @@ Progress saves to `localStorage` every 30 seconds and when you leave the page. U
 | --- | --- |
 | Buildings | 14 types from Autocomplete (15 tokens) to Multiverse Fork (2.1 quadrillion), each 15% pricier per purchase. Buy or sell in batches of 1, 10 or 100. |
 | Upgrades | About 200: 11 tiers per building, Autocomplete multi-cursor upgrades, click upgrades, global production boosts, Flow engineers, Eureka and bug upgrades. |
-| Eureka tokens | Golden sparkles appear at random. Click one for **Vibe Coding** (×7 production), **Lucky Commit** (instant tokens), **Keyboard on Fire** (×777 clicks) or a building **Hyperfocus**. |
+| Eureka tokens | Golden sparkles appear at random with 18 possible effects. Common (10% each): Vibe Coding, Lucky Commit, Hot Reload, Pair Programming, Green Build. Uncommon (5% each): Keyboard on Fire, Building Hyperfocus, Token Rain, Bug Report, Code Review Approved, Deep Thought, Focus Restored, Hiring Spree. Rare (2% each): Singularity Spike, Time Skip, Golden Chain, Double Down, Full Send. The odds are listed on the Stats tab. |
 | Bugs | Bugs crawl across the screen. Squash them for a minute of production. |
 | Achievements | 139 in total, some hidden. Each adds 4% **Flow**, which Engineer upgrades turn into production. Flow rises as a tide under the sparkle. |
 | Terminal | Owning a Subagent unlocks slash commands (`/ship-it`, `/ultrathink`, `/eureka`, `/init`) that spend regenerating Focus and can backfire. |

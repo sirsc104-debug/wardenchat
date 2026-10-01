@@ -148,7 +148,7 @@ function toast({ icon = GLYPH.sparkle, kicker = '', title, text = '', kind = '',
 
 // ---------- Eureka tokens and bugs (full-screen effects layer) ----------
 const FX = {
-  eureka: null, bug: null,
+  eureka: null, bug: null, chain: 0,
   init() { this.layer = $('#fx'); },
   spawnEureka(force) {
     const life = 13 * D.eurekaLife;
@@ -168,6 +168,10 @@ const FX = {
       Sound.eureka();
       toast({ icon: GLYPH.gold, kicker: 'Eureka', title: out.title, text: out.text, kind: 'gold' });
       UI.refreshStore();
+      if (this.chain > 0) {
+        this.chain--;
+        setTimeout(() => this.spawnEureka(true), 700);
+      }
     });
     this.layer.appendChild(el);
     this.eureka = { el, t: life };
@@ -179,29 +183,57 @@ const FX = {
     el.classList.add('gone');
     setTimeout(() => el.remove(), 250);
   },
-  spawnBug() {
-    if (this.bug) return;
+  spawnBug(golden) {
+    if (this.bug) {
+      if (golden) { this.bug.golden = true; this.bug.el.classList.add('golden'); this.bug.t = 0; }
+      return;
+    }
     const el = document.createElement('button');
     el.type = 'button';
-    el.className = 'bug';
-    el.setAttribute('aria-label', 'A bug. Squash it for a bonus.');
+    el.className = golden ? 'bug golden' : 'bug';
+    el.setAttribute('aria-label', golden ? 'A golden bug. Squash it for a big bonus.' : 'A bug. Squash it for a bonus.');
     el.innerHTML = svgIcon(GLYPH.bug);
     const fromLeft = Math.random() < 0.5, W = innerWidth, H = innerHeight;
     this.bug = {
       el, t: 0, dur: rand(9, 13), x0: fromLeft ? -40 : W + 40, x1: fromLeft ? W + 40 : -40,
-      y: rand(0.25, 0.8) * H, amp: rand(20, 60), freq: rand(1.2, 2.4),
+      y: rand(0.25, 0.8) * H, amp: rand(20, 60), freq: rand(1.2, 2.4), golden: !!golden,
     };
     el.addEventListener('pointerdown', e => {
       e.preventDefault();
       if (!this.bug) return;
-      const gain = bugReward();
-      this.burst(el, '#7FB069');
+      const golden = this.bug.golden, gain = bugReward(golden);
+      this.burst(el, golden ? '#F2C57C' : '#7FB069');
       Sound.squash();
-      toast({ icon: GLYPH.bug, kicker: 'Bug squashed', title: `+${fmt(gain)} tokens`, text: 'One less thing in the issue tracker.', kind: 'mint', life: 3600 });
+      toast({ icon: golden ? GLYPH.gold : GLYPH.bug, kicker: golden ? 'Golden bug squashed' : 'Bug squashed', title: `+${fmt(gain)} tokens`,
+        text: golden ? 'Ten minutes of production, straight from the bug bounty.' : 'One less thing in the issue tracker.', kind: golden ? 'gold' : 'mint', life: 3600 });
       this.bug.el.remove();
       this.bug = null;
     });
     this.layer.appendChild(el);
+  },
+  // Token Rain: golden tokens fall down the screen; each one caught is worth 20 seconds of production.
+  tokenRain(n) {
+    const H = innerHeight;
+    for (let i = 0; i < n; i++) {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'drop';
+      el.setAttribute('aria-label', 'Falling token. Click to catch it.');
+      el.innerHTML = svgIcon(GLYPH.gold);
+      el.style.cssText = `left:${rand(0.05, 0.92) * innerWidth}px;--fall:${H + 120}px;--d:${rand(4, 6.5).toFixed(2)}s;--delay:${(i * 0.32).toFixed(2)}s;--r:${rand(-200, 200).toFixed(0)}deg`;
+      el.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        if (el.classList.contains('caught')) return;
+        const gain = Math.max(D.tps * 20, 30) * luckMult();
+        earn(gain);
+        el.classList.add('caught');
+        el.dataset.gain = '+' + fmt(gain);
+        Sound.click();
+        setTimeout(() => el.remove(), 600);
+      });
+      el.addEventListener('animationend', e => { if (e.animationName === 'fall') el.remove(); });
+      this.layer.appendChild(el);
+    }
   },
   burst(el, col) {
     const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
@@ -263,10 +295,11 @@ const Spinner = {
     Object.assign(this, { f: 0, acc: 0, txt: 0, glyph: $('#spinGlyph'), verbEl: $('#spinVerb'), meta: $('#spinMeta') });
     this.pick();
   },
-  pick() { this.verb = pick(VERBS); this.vt = 0; this.base = G.earned; },
+  pick() { this.verb = pick(VERBS); this.vt = 0; this.made = 0; },
   frame(dt) {
     const idle = G.earned === 0;
     this.vt += dt;
+    this.made += D.tps * dt;
     if ((this.acc += dt) > 0.11 && !idle && !stillMode()) {
       this.acc = 0;
       this.f = (this.f + 1) % SPIN_FRAMES.length;
@@ -282,7 +315,7 @@ const Spinner = {
       return;
     }
     this.verbEl.textContent = this.verb + '…';
-    this.meta.textContent = `(${Math.floor(this.vt)}s · ↑ ${fmt(Math.max(0, G.earned - this.base))} tokens · esc to interrupt)`;
+    this.meta.textContent = `(${Math.floor(this.vt)}s · ↑ ${fmt(this.made)} tokens · esc to interrupt)`;
   },
 };
 
