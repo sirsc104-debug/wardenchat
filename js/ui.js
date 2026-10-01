@@ -595,17 +595,16 @@ const UI = {
     document.body.classList.toggle('gold-cursor', tier > 0);
     if (tier > 0) this.setSkin(this.skin || 'arrow', true);
     if (up && tier === 1) toast({ icon: BIG_HAND, kicker: 'Golden touch', title: 'Your cursor turned gold', text: 'You own 100 Autocompletes. Every pointer is gold now, and clicking the sparkle lands with a golden tap.', kind: 'gold' });
-    if (up && tier === 2) toast({ icon: BIG_HAND, kicker: 'Rainbow touch', title: 'Your cursor turned rainbow', text: 'You own 500 Autocompletes. Every pointer shimmers now, and clicking the sparkle sets off a rainbow burst.', kind: 'legend' });
+    if (up && tier === 2) toast({ icon: BIG_HAND, kicker: 'Event horizon touch', title: 'Your cursor fell into a black hole', text: 'You own 500 Autocompletes. Every pointer is dark and glowing now, and clicking the sparkle collapses space around it.', kind: 'legend' });
   },
   initGoldCursor() {
-    const RB_INK = '#2A1D3A';
     const toSvg = (parts, defs = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">${defs}${parts.map(p =>
       `<path d="${p.d}" fill="${p.f || 'none'}"${p.s ? ` stroke="${p.s}" stroke-width="${p.w || 1.5}" stroke-linecap="round" stroke-linejoin="round"` : ''}/>`).join('')}</svg>`;
-    // Rainbow skins: gold fills become a rainbow gradient, gold outlines become deep violet.
-    const rbMap = { [GOLD_FILL]: 'url(#rb)', '#F2C57C': 'url(#rb)', [GOLD_INK]: RB_INK, '#B9853A': 'rgba(42,29,58,.55)' };
+    // Black hole skins: gold fills become near-black with a sweeping orange glint, outlines turn orange.
+    const rbMap = { [GOLD_FILL]: 'url(#rb)', '#F2C57C': 'url(#rb)', [GOLD_INK]: '#FF7A1A', '#B9853A': 'rgba(255,122,26,.65)' };
     const rbParts = parts => parts.map(p => ({ ...p, f: p.f && (rbMap[p.f] || p.f), s: p.s && (rbMap[p.s] || p.s) }));
     const rbDefs = k => `<defs><linearGradient id="rb" gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="30" y2="30" gradientTransform="rotate(${k * 45} 16 16)">` +
-      RB_STOPS.map((c, i) => `<stop offset="${(i / (RB_STOPS.length - 1)).toFixed(3)}" stop-color="${c}"/>`).join('') + '</linearGradient></defs>';
+      '<stop offset="0" stop-color="#060608"/><stop offset=".55" stop-color="#26262B"/><stop offset=".8" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FFB070"/></linearGradient></defs>';
     const css = (svgText, hx, hy, fallback) => `url("data:image/svg+xml,${encodeURIComponent(svgText)}") ${hx} ${hy}, ${fallback}`;
     this.skinSvg = {};
     this.skinCss = {};
@@ -688,16 +687,18 @@ const UI = {
     this.playTap(x, y, this.skinSvg[this.skin], '', 300);
     this.ring(x, y);
   },
-  // Rainbow tier: wind-up, slam and a full spin while the colours cycle, three rainbow shockwaves and a ring of sparks.
+  // Black hole tier: wind-up, slam and a full spin, rings that collapse inward, sparks pulled into the click,
+  // then one orange flash outward.
   rainbowTap(x, y) {
     if (stillMode()) return;
     this.playTap(x, y, this.rbSvg[this.skin][this.rbFrame], 'rb', 470);
-    [0, 3, 5].forEach((k, i) => this.ring(x, y, 'rb', `--rc:${RB_STOPS[k]};animation-delay:${0.12 + i * 0.07}s`));
+    ['#FF7A1A', '#9A9AA2', '#FFB070'].forEach((col, i) => this.ring(x, y, 'void', `--rc:${col};animation-delay:${i * 0.06}s`));
+    this.ring(x, y, 'rb', '--rc:#FF7A1A;animation-delay:.34s');
     if (!G.settings.particles) return;
     for (let i = 0; i < 12; i++) {
-      const p = document.createElement('span'), a = (i / 12) * Math.PI * 2, d = rand(50, 95);
+      const p = document.createElement('span'), a = (i / 12) * Math.PI * 2, d = rand(55, 95);
       p.className = 'fx-spark';
-      p.style.cssText = `left:${x}px;top:${y}px;--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px;--c:${RB_STOPS[i % RB_STOPS.length]};animation-delay:.12s`;
+      p.style.cssText = `left:${x + Math.cos(a) * d}px;top:${y + Math.sin(a) * d}px;--dx:${-Math.cos(a) * d}px;--dy:${-Math.sin(a) * d}px;--c:${i % 2 ? '#9A9AA2' : '#FF7A1A'}`;
       FX.layer.appendChild(p);
       setTimeout(() => p.remove(), 900);
     }

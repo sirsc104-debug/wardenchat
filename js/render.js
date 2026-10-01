@@ -93,11 +93,11 @@ function goldColor(hex) {
 }
 const goldParts = parts => parts.map(p => ({ ...p, _p: null, f: p.f && goldColor(p.f), s: p.s && goldColor(p.s) }));
 
-// ----- rainbow tier (from 500 of a building, every 50 become one rainbow icon) -----
+// ----- black hole tier (from 500 of a building, every 50 become one black hole icon) -----
 const RAINBOW_AT = 500, RAINBOW_GROUP = 50, RB_FRAMES = 12;
-const RB_STOPS = ['#FF5E6C', '#FFB35E', '#FFE45E', '#6EE7A0', '#5EC8FF', '#8B7BFF', '#E77BFF'];
+const RB_STOPS = ['#FF7A1A', '#9A9AA2', '#FFB070', '#3A3A41', '#FF9A4D', '#C8C8CE', '#FF7A1A']; // orange and grey sparks/rings
 const RB_SLAM = 0.1;
-// Rainbow-hand tap: deeper wind-up, harder slam, a twisting recoil.
+// Black-hole-hand tap: deeper wind-up, harder slam, a twisting recoil.
 function rainbowTap(p) {
   if (p < 0.07) {
     const e = Math.sin((p / 0.07) * Math.PI / 2);
@@ -113,28 +113,36 @@ function rainbowTap(p) {
   }
   return { off: 0, scale: 1, tilt: 0 };
 }
-// Light grey version of an icon, so a rainbow wash on top keeps the shading.
-function greyColor(hex) {
+// Near-black version of an icon (keeps its shading), for the black hole tier.
+function voidColor(hex) {
   const n = parseInt(hex.slice(1), 16), L = (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
-  const v = (k, lo, hi) => Math.round(lo + (hi - lo) * Math.pow(L, 0.7)).toString(16).padStart(2, '0');
-  return '#' + v(0, 46, 255) + v(1, 36, 255) + v(2, 56, 255);
+  const v = (lo, hi) => Math.round(lo + (hi - lo) * Math.pow(L, 0.8)).toString(16).padStart(2, '0');
+  return '#' + v(6, 74) + v(6, 74) + v(8, 82);
 }
-const greyParts = parts => parts.map(p => ({ ...p, _p: null, f: p.f && greyColor(p.f), s: p.s && greyColor(p.s) }));
-// One frame of a shimmering rainbow icon; the gradient turns a little each frame.
-function rainbowSprite(parts, size, frame) {
-  const r = dpr(), c = document.createElement('canvas');
-  c.width = c.height = Math.ceil(size * r);
+const voidParts = parts => parts.map(p => ({ ...p, _p: null, f: p.f && voidColor(p.f), s: p.s && voidColor(p.s) }));
+// One frame of a black hole icon: a dark silhouette whose orange glow pulses from frame to frame.
+function voidSprite(parts, size, frame) {
+  const r = dpr(), pad = size * 0.14, full = size + pad * 2, c = document.createElement('canvas');
+  c.width = c.height = Math.ceil(full * r);
   const x = c.getContext('2d');
   c._ctx = x;
   x.scale(r, r);
-  drawParts(x, parts._grey || (parts._grey = greyParts(parts)), size);
+  x.translate(pad, pad);
+  const pulse = 0.65 + 0.35 * Math.sin((frame / RB_FRAMES) * Math.PI * 2);
+  x.shadowColor = `rgba(255,122,26,${0.75 + 0.25 * pulse})`;
+  x.shadowBlur = size * 0.16 * pulse * r;
+  drawParts(x, parts._void || (parts._void = voidParts(parts)), size);
+  x.shadowBlur = 0;
+  // A thin orange rim on top so the silhouette reads against dark backgrounds.
   x.globalCompositeOperation = 'source-atop';
-  x.globalAlpha = 0.74;
-  const a = (frame / RB_FRAMES) * Math.PI * 2, m = size / 2, R = size * 0.7;
-  const g = x.createLinearGradient(m - Math.cos(a) * R, m - Math.sin(a) * R, m + Math.cos(a) * R, m + Math.sin(a) * R);
-  RB_STOPS.forEach((col, k) => g.addColorStop(k / (RB_STOPS.length - 1), col));
+  x.globalAlpha = 0.28 * pulse;
+  const g = x.createLinearGradient(0, 0, size, size);
+  g.addColorStop(0, '#FF9A4D');
+  g.addColorStop(0.5, 'rgba(255,122,26,0)');
+  g.addColorStop(1, '#FF7A1A');
   x.fillStyle = g;
-  x.fillRect(0, 0, size, size);
+  x.fillRect(-pad, -pad, full, full);
+  c.pad = pad / full; // share of the canvas that is glow padding on each side
   return c;
 }
 
@@ -437,15 +445,18 @@ const Stage = {
       c.save();
       c.translate(this.cx + Math.cos(a) * rad, this.cy + Math.sin(a) * rad);
       c.rotate(a - Math.PI / 2 + tilt);
-      if (flash > 0) { c.shadowColor = 'rgba(255,255,255,.95)'; c.shadowBlur = 16 * Math.max(0, flash); }
-      c.drawImage(spr, -sz * (12.5 / 32), -sz * (2 / 32), sz, sz); // fingertip touches the circle
+      if (flash > 0) { c.shadowColor = 'rgba(255,122,26,1)'; c.shadowBlur = 18 * Math.max(0, flash); }
+      if (kind === 2) {
+        const out = sz / (1 - 2 * spr.pad), off = spr.pad * out; // black hole hands carry glow padding
+        c.drawImage(spr, -sz * (12.5 / 32) - off, -sz * (2 / 32) - off, out, out);
+      } else c.drawImage(spr, -sz * (12.5 / 32), -sz * (2 / 32), sz, sz); // fingertip touches the circle
       c.restore();
     }
   },
   rbSprite(f) {
     const r = dpr();
     if (!this.rbFrames || this.rbFrames.r !== r || this.rbFrames.size !== this.rbSize || lostCanvas(this.rbFrames[f])) {
-      this.rbFrames = Array.from({ length: RB_FRAMES }, (_, k) => rainbowSprite(BUILDINGS[0].icon, this.rbSize, k));
+      this.rbFrames = Array.from({ length: RB_FRAMES }, (_, k) => voidSprite(BUILDINGS[0].icon, this.rbSize, k));
       this.rbFrames.r = r;
       this.rbFrames.size = this.rbSize;
     }
@@ -552,7 +563,7 @@ const Stage = {
     for (const w of this.waves) {
       const p = w.life / w.max, ease = 1 - Math.pow(1 - p, 3);
       const r = (3 + ease * this.R * 0.2) * w.big;
-      const rings = w.rainbow ? [[RB_STOPS[0], 1], [RB_STOPS[3], 0.74], [RB_STOPS[5], 0.5]] : [['#F2C57C', 1]];
+      const rings = w.rainbow ? [['#FF7A1A', 1], ['#9A9AA2', 0.74], ['#FFB070', 0.5]] : [['#F2C57C', 1]];
       for (const [col, k] of rings) {
         c.globalAlpha = (1 - p) * 0.9;
         c.strokeStyle = col;
@@ -562,7 +573,7 @@ const Stage = {
         c.stroke();
       }
       c.globalAlpha = (1 - p) * 0.35;
-      c.fillStyle = w.rainbow ? '#FFFFFF' : '#FFE7B8';
+      c.fillStyle = w.rainbow ? '#000000' : '#FFE7B8';
       c.beginPath();
       c.arc(w.x, w.y, r * 0.45, 0, Math.PI * 2);
       c.fill();
@@ -647,7 +658,7 @@ const Workspace = {
     this.sprites[i] = { c, r };
     return c;
   },
-  // The "fifty in one" version: a shimmering rainbow icon on a white glow with a rainbow base ring.
+  // The "fifty in one" version: a dark, orange-glowing icon over a black core with a spinning accretion ring.
   rbLaneSprite(i, f) {
     const r = dpr(), key = `${i}rb${f}`, s = this.sprites[key];
     if (s && s.r === r && !lostCanvas(s.c)) return s.c;
@@ -657,19 +668,22 @@ const Workspace = {
     c._ctx = x;
     x.scale(r, r);
     const g = x.createRadialGradient(size / 2, size / 2, 2, size / 2, size / 2, size / 2);
-    g.addColorStop(0, 'rgba(255,255,255,.5)');
-    g.addColorStop(0.55, 'rgba(200,170,255,.2)');
-    g.addColorStop(1, 'rgba(200,170,255,0)');
+    g.addColorStop(0, 'rgba(0,0,0,.85)');
+    g.addColorStop(0.5, 'rgba(255,122,26,.22)');
+    g.addColorStop(1, 'rgba(255,122,26,0)');
     x.fillStyle = g;
     x.fillRect(0, 0, size, size);
-    const lg = x.createLinearGradient(0, 0, size, 0), off = f / RB_FRAMES;
-    RB_STOPS.forEach((col, k) => lg.addColorStop((k / RB_STOPS.length + off) % 1, col));
-    x.strokeStyle = lg;
-    x.lineWidth = 2;
+    // Accretion ring at the base; its dashes rotate from frame to frame.
+    x.strokeStyle = '#FF7A1A';
+    x.lineWidth = 2.2;
+    x.setLineDash([7, 3, 3, 2]);
+    x.lineDashOffset = -(f / RB_FRAMES) * 30;
     x.beginPath();
-    x.ellipse(size / 2, size - 6, size * 0.36, 3.4, 0, 0, Math.PI * 2);
+    x.ellipse(size / 2, size - 6, size * 0.38, 3.6, 0, 0, Math.PI * 2);
     x.stroke();
-    x.drawImage(rainbowSprite(BUILDINGS[i].icon, size * 0.78, f), size * 0.11, size * 0.04, size * 0.78, size * 0.78);
+    x.setLineDash([]);
+    const spr = voidSprite(BUILDINGS[i].icon, size * 0.7, f), out = size * 0.7 / (1 - 2 * spr.pad);
+    x.drawImage(spr, (size - out) / 2, size * 0.42 - out / 2, out, out);
     this.sprites[key] = { c, r };
     return c;
   },

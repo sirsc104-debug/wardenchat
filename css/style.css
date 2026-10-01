@@ -766,14 +766,16 @@ body.gold-cursor.cursor-hidden * { cursor: none !important; }
   animation: goldRing .5s ease-out .12s both;
 }
 .gold-tap.go.rb { animation: rainbowTap .46s cubic-bezier(.3, .7, .4, 1) both; }
-.gold-tap.go.rb svg { filter: drop-shadow(0 0 6px rgba(255, 255, 255, .8)); }
+.gold-tap.go.rb svg { filter: drop-shadow(0 0 7px rgba(255, 122, 26, .95)); }
+.gold-ring.void { width: 40px; height: 40px; margin: -20px 0 0 -20px; border-color: var(--rc); background: radial-gradient(circle, rgba(0, 0, 0, .7), rgba(0, 0, 0, 0) 70%); box-shadow: 0 0 14px var(--rc); animation: voidRing .36s cubic-bezier(.5, 0, .9, .5) both; }
+@keyframes voidRing { from { transform: scale(3.4); opacity: 0; } 25% { opacity: 1; } to { transform: scale(.1); opacity: .9; } }
 .gold-ring.rb { border-color: var(--rc); box-shadow: 0 0 12px var(--rc); animation-duration: .6s; }
 @keyframes rainbowTap {
-  0% { transform: none; filter: hue-rotate(0deg); }
+  0% { transform: none; }
   24% { transform: translate(3px, 5px) rotate(-24deg) scale(1.32); }
   42% { transform: rotate(10deg) scale(.72); }
   80% { transform: rotate(350deg) scale(1.12); }
-  100% { transform: rotate(360deg); filter: hue-rotate(360deg); }
+  100% { transform: rotate(360deg); }
 }
 @keyframes goldTap {
   0% { transform: none; }
