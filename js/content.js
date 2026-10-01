@@ -127,11 +127,11 @@ const SPELLS = [
     desc: 'Deploy right now: gain 30 minutes of production, up to 15% of your bank.',
     run(fail) {
       if (fail) {
-        const loss = Math.min(G.tokens * 0.15, D.tps * 900);
+        const loss = Math.min(G.tokens * 0.15, D.tpsGross * 900);
         G.tokens -= loss;
         return { ok: false, msg: `Deploy rolled back. Lost ${fmt(loss)} tokens.` };
       }
-      const gain = Math.min(G.tokens * 0.15, D.tps * 1800) + 7;
+      const gain = Math.min(G.tokens * 0.15, D.tpsGross * 1800) + 7;
       earn(gain);
       return { ok: true, msg: `Shipped to production. +${fmt(gain)} tokens.` };
     },

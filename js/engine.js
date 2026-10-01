@@ -40,7 +40,7 @@ let G = freshGame();
 
 // Derived values, rebuilt by recompute() whenever something that affects them changes.
 const D = {
-  each: Array(N).fill(0), mult: 1, raw: 0, tpsBase: 0, tps: 0, click: 1, clickBase: 1, clickPct: 0,
+  each: Array(N).fill(0), mult: 1, raw: 0, tpsBase: 0, tpsGross: 0, bugsEating: 0, tps: 0, click: 1, clickBase: 1, clickPct: 0,
   flow: 0, flowMult: 1, flowBonus: 0, gpct: 0, prestigeBonus: 0, buffProd: 1, buffClick: 1,
   eurekaFreq: 1, eurekaLife: 1, effDur: 1, bugMult: 1, bugFreq: 1,
   bldDiscount: 1, upgDiscount: 1, buffCost: 1, offline: 0.1, focusMax: 0, focusRegen: 0,
@@ -54,12 +54,21 @@ const T = { eureka: rand(45, 120) * EUREKA_RARITY, bug: rand(120, 240), ach: 1 }
 // ---------- Flow ----------
 const FLOW_PROD = 0.25;            // production bonus per 100% Flow
 const bubbleDelay = () => clamp(45 / (1 + D.flow), 6, 45) * rand(0.7, 1.3); // seconds between Flow bubbles
-const bubbleValue = () => Math.max(D.tps * 15, 10) * (1 + D.flow);         // 15 s of production, times Flow
+const bubbleValue = () => Math.max(D.tpsGross * 15, 10) * (1 + D.flow);         // 15 s of production, times Flow
 function popBubble() {
   const gain = bubbleValue();
   earn(gain);
   G.bubbles++;
   return gain;
+}
+
+// Bugs currently eating at the sparkle (set by the bug layer).
+const INFEST_ZERO_AT = 9;
+let bugsEating = 0;
+function setBugsEating(n) {
+  if (n === bugsEating) return;
+  bugsEating = n;
+  recompute();
 }
 
 const hasUpg = id => G.upgrades.has(id);
@@ -118,11 +127,14 @@ function recompute() {
   D.buffCost = bcost;
   D.buffProd = bp;
   D.buffClick = bc;
-  D.tps = D.tpsBase * bp;
+  // Bugs clinging to the sparkle each eat 1/9 of production: 9 bugs = 0 per second, 10 = negative.
+  D.tpsGross = D.tpsBase * bp;
+  D.bugsEating = bugsEating;
+  D.tps = D.tpsGross * (1 - bugsEating / INFEST_ZERO_AT);
 
   D.clickBase = Math.pow(2, x2) + add;
   D.clickPct = clickPct;
-  D.click = (D.clickBase + (D.tps * clickPct) / 100) * bc * (hasMem('muscle') ? 1.25 : 1);
+  D.click = (D.clickBase + (D.tpsGross * clickPct) / 100) * bc * (hasMem('muscle') ? 1.25 : 1);
 
   const s = G.owned[5];
   D.focusMax = s > 0 ? Math.floor(10 + 4 * Math.pow(s, 0.7)) : 0;
@@ -218,7 +230,7 @@ const bugDelay = () => rand(180, 360) / D.bugFreq;
 // Every Eureka effect with its weight. Weights are percentages: five at 10%, eight at 5%, five at 2%.
 // An effect whose `ok` check fails right now is skipped and the rest are re-weighted.
 const secs = d => `${Math.round(d)} seconds`;
-const INFEST_BUGS = 4, INFEST_TIME = 11, INFEST_RATE = 0.003; // bugs, seconds on screen, share of bank eaten per bug per second
+const INFEST_BUGS = 10, INFEST_TIME = 45; // bugs per infestation, seconds before leftover bugs give up
 const luckMult = () => (hasMem('golden') ? 1.1 : 1);
 const EUREKA = [
   // ----- common (10% each) -----
@@ -227,7 +239,7 @@ const EUREKA = [
     return ['Vibe Coding!', `Production <b>×7</b> for ${secs(77 * d)}.`];
   } },
   { id: 'lucky', name: 'Lucky Commit', desc: 'Instantly gain 15 minutes of production, up to 15% of your bank.', w: 10, run() {
-    const g = (Math.min(G.tokens * 0.15, D.tps * 900) + 13) * luckMult();
+    const g = (Math.min(G.tokens * 0.15, D.tpsGross * 900) + 13) * luckMult();
     earn(g);
     return ['Lucky Commit!', `<b>+${fmt(g)}</b> tokens.`];
   } },
@@ -235,10 +247,10 @@ const EUREKA = [
     addBuff('hotreload', 'Hot Reload', 120 * d, { prod: 3 });
     return ['Hot Reload!', `Production <b>×3</b> for ${secs(120 * d)}.`];
   } },
-  { id: 'infest', name: 'Bug Infestation', desc: 'Bad luck: 4 hungry bugs crawl in and each eats 0.3% of your bank per second. Squash them to stop them and get back what they ate.', w: 10, bad: true, run() {
+  { id: 'infest', name: 'Bug Infestation', desc: 'Bad luck: 10 bugs run from the screen edges to the sparkle. Each one that reaches it eats 1/9 of your production (9 bugs = nothing, 10 = your bank drains). Squashing a bug stops it, but you get nothing back. Leftover bugs leave after 45 seconds.', w: 10, bad: true, run() {
     emit('infestation', INFEST_BUGS);
     addBuff('infest', 'Bug Infestation', INFEST_TIME, { bad: true });
-    return ['Bug Infestation!', `${INFEST_BUGS} hungry bugs are eating your tokens. <b>Squash them</b> to get their meal back.`];
+    return ['Bug Infestation!', `${INFEST_BUGS} bugs are running for the sparkle. Each one that reaches it eats <b>1/9</b> of your production. <b>Squash them!</b>`];
   } },
   { id: 'greenbuild', name: 'Green Build', desc: 'Buildings cost 20% less for 60 seconds.', w: 10, run(d) {
     addBuff('greenbuild', 'Green Build', 60 * d, { cost: 0.8 });
@@ -288,7 +300,7 @@ const EUREKA = [
     return ['Singularity Spike!', `Production <b>×666</b> for ${secs(6 * d)}.`];
   } },
   { id: 'timeskip', name: 'Time Skip', desc: 'Instantly gain 2 hours of production.', w: 2, run() {
-    const g = (D.tps * 7200 + 13) * luckMult();
+    const g = (D.tpsGross * 7200 + 13) * luckMult();
     earn(g);
     return ['Time Skip!', `The Git Time Machine fetched <b>2 hours</b> of production: <b>+${fmt(g)}</b> tokens.`];
   } },
@@ -297,7 +309,7 @@ const EUREKA = [
     return ['Golden Chain!', '<b>Three more</b> Eureka tokens are on their way.'];
   } },
   { id: 'double', name: 'Double Down', desc: 'Your bank grows by its own size, up to 2 hours of production.', w: 2, run() {
-    const g = (Math.min(G.tokens, D.tps * 7200) + 13) * luckMult();
+    const g = (Math.min(G.tokens, D.tpsGross * 7200) + 13) * luckMult();
     earn(g);
     return ['Double Down!', `Your bank grew by <b>+${fmt(g)}</b> tokens (up to 2 hours of production).`];
   } },
@@ -337,7 +349,7 @@ function eurekaEffect(eff) {
 
 function bugReward(golden) {
   G.bugsSquashed++;
-  const gain = Math.max(D.tps * 60, 25) * D.bugMult * (golden ? 10 : 1);
+  const gain = Math.max(D.tpsGross * 60, 25) * D.bugMult * (golden ? 10 : 1);
   earn(gain);
   return gain;
 }
@@ -405,6 +417,7 @@ function update(dt) {
     G.tokens = Number.isNaN(G.tokens) ? 0 : Math.min(G.tokens, Number.MAX_VALUE);
     G.earned = Number.isNaN(G.earned) ? G.tokens : Math.min(G.earned, Number.MAX_VALUE);
   }
+  if (D.tps < 0) G.tokens = Math.max(0, G.tokens + D.tps * dt); // a full infestation drains the bank
   if (D.tps > 0) {
     earn(D.tps * dt);
     const k = D.mult * D.buffProd * dt;

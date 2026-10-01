@@ -265,53 +265,100 @@ const FX = {
     });
     this.layer.appendChild(el);
   },
-  // Bug Infestation: red bugs crawl across and eat a share of the bank every second until squashed.
+  // Bug Infestation: bugs pour in from random points on the screen edge and run for the sparkle.
+  // Each bug that reaches it clings to the rim and eats 1/9 of production until squashed (no refund).
+  sparkleTarget() {
+    const cv = Stage.cv;
+    if (cv && cv.clientWidth) {
+      const r = cv.getBoundingClientRect();
+      return { x: r.left + Stage.cx, y: r.top + Stage.cy, ring: Stage.R * 0.82 };
+    }
+    return { x: innerWidth / 2, y: innerHeight / 2, ring: 70 };
+  },
   infestation(n) {
-    const W = innerWidth, H = innerHeight;
+    const W = innerWidth, H = innerHeight, tgt = this.sparkleTarget();
     for (let i = 0; i < n; i++) {
       const el = document.createElement('button');
       el.type = 'button';
       el.className = 'bug hungry';
-      el.setAttribute('aria-label', 'A hungry bug eating your tokens. Squash it to get them back.');
-      el.innerHTML = `<span class="bug-body">${svgIcon(GLYPH.bug)}</span><span class="bug-ate"></span>`;
-      const fromLeft = Math.random() < 0.5;
+      el.setAttribute('aria-label', 'A hungry bug heading for the sparkle. Squash it.');
+      el.innerHTML = `<span class="bug-body">${svgIcon(GLYPH.bug)}</span>`;
+      // A random point just outside one of the four screen edges.
+      const side = Math.floor(Math.random() * 4), u = Math.random();
+      const x = side === 0 ? u * W : side === 1 ? W + 30 : side === 2 ? u * W : -30;
+      const y = side === 0 ? -30 : side === 1 ? u * H : side === 2 ? H + 30 : u * H;
       const b = {
-        el, t: -i * 0.6, dur: INFEST_TIME, x0: fromLeft ? -40 : W + 40, x1: fromLeft ? W + 40 : -40,
-        y: rand(0.2, 0.85) * H, amp: rand(20, 70), freq: rand(1.4, 2.8), ate: 0,
+        el, x, y, t: -i * 0.28, state: 'run', speed: rand(120, 175), wob: rand(0, 6),
+        slot: Math.atan2(y - tgt.y, x - tgt.x) + rand(-0.35, 0.35), // where on the rim it will cling
       };
       el.addEventListener('pointerdown', e => {
         e.preventDefault();
         if (b.dead) return;
         b.dead = true;
-        G.tokens += b.ate;
         G.bugsSquashed++;
         this.burst(el, '#E0645C');
         Sound.squash();
-        toast({ icon: GLYPH.bug, kicker: 'Hungry bug squashed', title: `+${fmt(b.ate)} tokens back`, text: 'It coughed up everything it ate.', kind: 'mint', life: 2600 });
         el.remove();
       });
-      el.style.transform = `translate(${b.x0}px,${b.y}px)`;
+      el.style.transform = `translate(${x}px,${y}px)`;
       this.layer.appendChild(el);
       this.hungry.push(b);
     }
+    this.infestTotal = (this.infestTotal || 0) + n;
+    this.infestOverlay(true);
+  },
+  infestOverlay(on) {
+    if (!this.redEl) {
+      this.redEl = document.createElement('div');
+      this.redEl.className = 'infest-overlay';
+      this.redEl.innerHTML = '<div class="infest-banner"><span class="infest-title">Bug infestation</span><span class="infest-info"></span></div>';
+      document.body.appendChild(this.redEl);
+    }
+    this.redEl.classList.toggle('on', on);
   },
   updateHungry(dt) {
+    const tgt = this.sparkleTarget();
+    let eating = 0;
     for (const b of this.hungry) {
       if (b.dead) continue;
       b.t += dt;
       if (b.t < 0) continue;
-      const p = b.t / b.dur;
-      if (p >= 1) { b.dead = true; b.el.remove(); continue; }
-      const bite = Math.min(G.tokens, G.tokens * INFEST_RATE * dt);
-      G.tokens -= bite;
-      b.ate += bite;
-      b.el.lastElementChild.textContent = b.ate >= 1 ? '-' + fmt(b.ate) : '';
-      const x = b.x0 + (b.x1 - b.x0) * p, y = b.y + Math.sin(b.t * b.freq) * b.amp;
-      const ang = Math.atan2(Math.cos(b.t * b.freq) * b.amp * b.freq, (b.x1 - b.x0) / b.dur) + Math.PI / 2;
-      b.el.style.transform = `translate(${x}px,${y}px)`;
+      if (b.t > INFEST_TIME && b.state !== 'flee') { b.state = 'flee'; b.el.classList.remove('eating'); }
+      let ang;
+      if (b.state === 'eat') {
+        eating++;
+        const a = b.slot + Math.sin(b.t * 7 + b.wob) * 0.04;
+        b.x = tgt.x + Math.cos(a) * tgt.ring;
+        b.y = tgt.y + Math.sin(a) * tgt.ring;
+        ang = a + Math.PI * 1.5; // head toward the centre of the sparkle
+      } else {
+        const gx = b.state === 'flee' ? b.x + (b.x - tgt.x) : tgt.x + Math.cos(b.slot) * tgt.ring;
+        const gy = b.state === 'flee' ? b.y + (b.y - tgt.y) : tgt.y + Math.sin(b.slot) * tgt.ring;
+        const dx = gx - b.x, dy = gy - b.y, d = Math.hypot(dx, dy) || 1;
+        const zig = Math.sin(b.t * 9 + b.wob) * 0.45; // scurrying zig-zag
+        const vx = dx / d, vy = dy / d, step = Math.min(d, b.speed * (b.state === 'flee' ? 1.4 : 1) * dt);
+        b.x += (vx - vy * zig) * step;
+        b.y += (vy + vx * zig) * step;
+        ang = Math.atan2(vy, vx) + Math.PI / 2;
+        if (b.state === 'run' && d < 4) { b.state = 'eat'; b.el.classList.add('eating'); }
+        if (b.state === 'flee' && (b.x < -60 || b.y < -60 || b.x > innerWidth + 60 || b.y > innerHeight + 60)) { b.dead = true; b.el.remove(); }
+      }
+      b.el.style.transform = `translate(${b.x}px,${b.y}px)`;
       b.el.firstElementChild.style.transform = `rotate(${ang}rad)`;
     }
     this.hungry = this.hungry.filter(b => !b.dead);
+    setBugsEating(eating);
+    const left = this.hungry.length;
+    if (!left) {
+      this.infestTotal = 0;
+      this.infestOverlay(false);
+      if (G.buffs.some(b => b.key === 'infest')) { G.buffs = G.buffs.filter(b => b.key !== 'infest'); recompute(); }
+      return;
+    }
+    const info = this.redEl.querySelector('.infest-info');
+    const text = `${left} bug${left === 1 ? '' : 's'} loose · ${eating} eating · ${fmt(D.tps)}/s`;
+    if (info.textContent !== text) info.textContent = text;
+    this.redEl.classList.toggle('severe', eating >= INFEST_ZERO_AT);
   },
   // Token Rain: golden tokens fall down the screen; each one caught is worth 20 seconds of production.
   tokenRain(n) {
@@ -326,7 +373,7 @@ const FX = {
       el.addEventListener('pointerdown', e => {
         e.preventDefault();
         if (el.classList.contains('caught')) return;
-        const gain = Math.max(D.tps * 20, 30) * luckMult();
+        const gain = Math.max(D.tpsGross * 20, 30) * luckMult();
         earn(gain);
         el.classList.add('caught');
         el.dataset.gain = '+' + fmt(gain);
@@ -350,7 +397,7 @@ const FX = {
     }
   },
   update(dt) {
-    if (this.hungry.length) this.updateHungry(dt);
+    if (this.hungry.length || bugsEating) this.updateHungry(dt);
     if (this.eureka) {
       this.eureka.t -= dt;
       this.eureka.el.classList.toggle('fading', this.eureka.t < 1);
@@ -524,7 +571,7 @@ const UI = {
     const rate = $('#bankRate');
     rate.textContent = `per second: ${fmt(D.tps)}${D.buffProd !== 1 ? `  (×${+D.buffProd.toFixed(2)})` : ''}`;
     rate.classList.toggle('hot', D.buffProd > 1);
-    rate.classList.toggle('cold', D.buffProd < 1);
+    rate.classList.toggle('cold', D.buffProd < 1 || D.bugsEating > 0);
   },
   refreshBuffs() {
     const box = $('#buffs');
