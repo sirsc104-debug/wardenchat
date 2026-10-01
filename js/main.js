@@ -52,6 +52,7 @@ function start(snapshot) {
   on('spawnEureka', force => FX.spawnEureka(force));
   on('spawnBug', golden => FX.spawnBug(golden));
   on('tokenRain', n => FX.tokenRain(n));
+  on('infestation', n => FX.infestation(n));
   on('eurekaChain', n => { FX.chain += n; });
   on('reset', () => {
     Spinner.pick();

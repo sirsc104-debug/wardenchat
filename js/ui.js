@@ -120,6 +120,18 @@ function flashTip(el, fn) {
   touchTipTimer = setTimeout(() => Tip.hide(), 2600);
 }
 
+const effectDesc = b => b.desc || (EUREKA.find(e => e.id === b.key) || {}).desc || '';
+function buffTip(key) {
+  const b = G.buffs.find(x => x.key === key);
+  if (!b) return '';
+  const bad = b.prod < 1 || b.bad;
+  return tipHead(svgIcon(bad ? GLYPH.bug : GLYPH.gold), b.name, `${bad ? 'Bad effect' : 'Active effect'} · ${Math.ceil(b.t)}s left`) +
+    `<div class="tip-desc">${esc(effectDesc(b))}</div>`;
+}
+function eurekaTip(id) {
+  const e = EUREKA.find(x => x.id === id);
+  return tipHead(svgIcon(e.bad ? GLYPH.bug : GLYPH.gold), e.name, `Eureka effect · ${e.w}% chance`) + `<div class="tip-desc">${esc(e.desc)}</div>`;
+}
 function tipHead(icon, name, tag, cost, can) {
   return `<div class="tip-head">${icon}<div><div class="tip-name">${esc(name)}</div><div class="tip-tag">${tag}</div></div>` +
     (cost != null ? `<div class="tip-cost ${can ? '' : 'no'}">${TK}${fmt(cost)}</div>` : '') + '</div>';
@@ -164,10 +176,10 @@ function toast({ icon = GLYPH.sparkle, kicker = '', title, text = '', kind = '',
 
 // ---------- Eureka tokens and bugs (full-screen effects layer) ----------
 const FX = {
-  eureka: null, bug: null, chain: 0,
+  eureka: null, bug: null, chain: 0, hungry: [],
   init() { this.layer = $('#fx'); },
   spawnEureka(force) {
-    const life = 13 * D.eurekaLife;
+    const life = EUREKA_LIFE * D.eurekaLife;
     if (this.eureka) { if (force) this.eureka.t = life; return; }
     const el = document.createElement('button');
     el.type = 'button';
@@ -182,7 +194,7 @@ const FX = {
       this.burst(el, '#F2C57C');
       this.removeEureka();
       Sound.eureka();
-      toast({ icon: GLYPH.gold, kicker: 'Eureka', title: out.title, text: out.text, kind: 'gold' });
+      toast({ icon: out.bad ? GLYPH.bug : GLYPH.gold, kicker: out.bad ? 'Eureka backfired' : 'Eureka', title: out.title, text: out.text, kind: out.bad ? 'bad' : 'gold' });
       UI.refreshStore();
       if (this.chain > 0) {
         this.chain--;
@@ -227,6 +239,54 @@ const FX = {
     });
     this.layer.appendChild(el);
   },
+  // Bug Infestation: red bugs crawl across and eat a share of the bank every second until squashed.
+  infestation(n) {
+    const W = innerWidth, H = innerHeight;
+    for (let i = 0; i < n; i++) {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'bug hungry';
+      el.setAttribute('aria-label', 'A hungry bug eating your tokens. Squash it to get them back.');
+      el.innerHTML = `<span class="bug-body">${svgIcon(GLYPH.bug)}</span><span class="bug-ate"></span>`;
+      const fromLeft = Math.random() < 0.5;
+      const b = {
+        el, t: -i * 0.6, dur: INFEST_TIME, x0: fromLeft ? -40 : W + 40, x1: fromLeft ? W + 40 : -40,
+        y: rand(0.2, 0.85) * H, amp: rand(20, 70), freq: rand(1.4, 2.8), ate: 0,
+      };
+      el.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        if (b.dead) return;
+        b.dead = true;
+        G.tokens += b.ate;
+        G.bugsSquashed++;
+        this.burst(el, '#E0645C');
+        Sound.squash();
+        toast({ icon: GLYPH.bug, kicker: 'Hungry bug squashed', title: `+${fmt(b.ate)} tokens back`, text: 'It coughed up everything it ate.', kind: 'mint', life: 2600 });
+        el.remove();
+      });
+      el.style.transform = `translate(${b.x0}px,${b.y}px)`;
+      this.layer.appendChild(el);
+      this.hungry.push(b);
+    }
+  },
+  updateHungry(dt) {
+    for (const b of this.hungry) {
+      if (b.dead) continue;
+      b.t += dt;
+      if (b.t < 0) continue;
+      const p = b.t / b.dur;
+      if (p >= 1) { b.dead = true; b.el.remove(); continue; }
+      const bite = Math.min(G.tokens, G.tokens * INFEST_RATE * dt);
+      G.tokens -= bite;
+      b.ate += bite;
+      b.el.lastElementChild.textContent = b.ate >= 1 ? '-' + fmt(b.ate) : '';
+      const x = b.x0 + (b.x1 - b.x0) * p, y = b.y + Math.sin(b.t * b.freq) * b.amp;
+      const ang = Math.atan2(Math.cos(b.t * b.freq) * b.amp * b.freq, (b.x1 - b.x0) / b.dur) + Math.PI / 2;
+      b.el.style.transform = `translate(${x}px,${y}px)`;
+      b.el.firstElementChild.style.transform = `rotate(${ang}rad)`;
+    }
+    this.hungry = this.hungry.filter(b => !b.dead);
+  },
   // Token Rain: golden tokens fall down the screen; each one caught is worth 20 seconds of production.
   tokenRain(n) {
     const H = innerHeight;
@@ -264,9 +324,10 @@ const FX = {
     }
   },
   update(dt) {
+    if (this.hungry.length) this.updateHungry(dt);
     if (this.eureka) {
       this.eureka.t -= dt;
-      this.eureka.el.classList.toggle('fading', this.eureka.t < 2.5);
+      this.eureka.el.classList.toggle('fading', this.eureka.t < 1);
       if (this.eureka.t <= 0) this.removeEureka();
     }
     const b = this.bug;
@@ -346,6 +407,7 @@ const UI = {
     Spinner.init();
     this.bindStore();
     this.bindChrome();
+    bindTips($('#buffs'), '.buff', el => buffTip(el.dataset.key));
     this.refreshStore(true);
     this.refreshBank();
   },
@@ -442,7 +504,7 @@ const UI = {
     const sig = G.buffs.map(b => b.key).join();
     if (sig !== box.dataset.sig) {
       box.dataset.sig = sig;
-      box.innerHTML = G.buffs.map(b => `<div class="buff ${b.prod < 1 ? 'bad' : ''}" data-key="${esc(b.key)}"><span class="buff-name">${esc(b.name)}</span><span class="buff-t"></span></div>`).join('');
+      box.innerHTML = G.buffs.map(b => `<div class="buff ${b.prod < 1 || b.bad ? 'bad' : ''}" tabindex="0" data-key="${esc(b.key)}"><span class="buff-name">${esc(b.name)}</span><span class="buff-t"></span></div>`).join('');
     }
     for (const el of box.children) {
       const b = G.buffs.find(x => x.key === el.dataset.key);

@@ -46,7 +46,9 @@ const D = {
 };
 
 // Countdown timers (seconds).
-const T = { eureka: rand(45, 120), bug: rand(120, 240), ach: 1 };
+// Eureka tokens are rare: the first one takes about 4-10 minutes.
+const EUREKA_RARITY = 5;
+const T = { eureka: rand(45, 120) * EUREKA_RARITY, bug: rand(120, 240), ach: 1 };
 
 const hasUpg = id => G.upgrades.has(id);
 const hasMem = id => G.mem.has(id);
@@ -189,100 +191,103 @@ function addBuff(key, name, dur, eff) {
     ex.t = Math.max(ex.t, dur);
     ex.dur = Math.max(ex.dur, dur);
   } else {
-    G.buffs.push({ key, name, t: dur, dur, prod: eff.prod || 1, click: eff.click || 1, cost: eff.cost || 1 });
+    G.buffs.push({ key, name, t: dur, dur, prod: eff.prod || 1, click: eff.click || 1, cost: eff.cost || 1, desc: eff.desc || '', bad: !!eff.bad });
   }
   recompute();
 }
 
 // ---------- Eureka tokens (golden) and bugs ----------
-const eurekaDelay = () => rand(90, 240) / D.eurekaFreq;
+const eurekaDelay = () => (rand(90, 240) * EUREKA_RARITY) / D.eurekaFreq;
+const EUREKA_LIFE = 3; // seconds on screen before it vanishes (Lucky Day and Serendipity extend it)
 const bugDelay = () => rand(180, 360) / D.bugFreq;
 
 // Every Eureka effect with its weight. Weights are percentages: five at 10%, eight at 5%, five at 2%.
 // An effect whose `ok` check fails right now is skipped and the rest are re-weighted.
 const secs = d => `${Math.round(d)} seconds`;
+const INFEST_BUGS = 4, INFEST_TIME = 11, INFEST_RATE = 0.003; // bugs, seconds on screen, share of bank eaten per bug per second
 const luckMult = () => (hasMem('golden') ? 1.1 : 1);
 const EUREKA = [
   // ----- common (10% each) -----
-  { id: 'frenzy', name: 'Vibe Coding', w: 10, run(d) {
+  { id: 'frenzy', name: 'Vibe Coding', desc: 'Production ×7 for 77 seconds.', w: 10, run(d) {
     addBuff('frenzy', 'Vibe Coding', 77 * d, { prod: 7 });
     return ['Vibe Coding!', `Production <b>×7</b> for ${secs(77 * d)}.`];
   } },
-  { id: 'lucky', name: 'Lucky Commit', w: 10, run() {
+  { id: 'lucky', name: 'Lucky Commit', desc: 'Instantly gain 15 minutes of production, up to 15% of your bank.', w: 10, run() {
     const g = (Math.min(G.tokens * 0.15, D.tps * 900) + 13) * luckMult();
     earn(g);
     return ['Lucky Commit!', `<b>+${fmt(g)}</b> tokens.`];
   } },
-  { id: 'hotreload', name: 'Hot Reload', w: 10, run(d) {
+  { id: 'hotreload', name: 'Hot Reload', desc: 'Production ×3 for 2 minutes.', w: 10, run(d) {
     addBuff('hotreload', 'Hot Reload', 120 * d, { prod: 3 });
     return ['Hot Reload!', `Production <b>×3</b> for ${secs(120 * d)}.`];
   } },
-  { id: 'pair', name: 'Pair Programming', w: 10, run(d) {
-    addBuff('pair', 'Pair Programming', 30 * d, { click: 15 });
-    return ['Pair Programming!', `Clicking power <b>×15</b> for ${secs(30 * d)}.`];
+  { id: 'infest', name: 'Bug Infestation', desc: 'Bad luck: 4 hungry bugs crawl in and each eats 0.3% of your bank per second. Squash them to stop them and get back what they ate.', w: 10, bad: true, run() {
+    emit('infestation', INFEST_BUGS);
+    addBuff('infest', 'Bug Infestation', INFEST_TIME, { bad: true });
+    return ['Bug Infestation!', `${INFEST_BUGS} hungry bugs are eating your tokens. <b>Squash them</b> to get their meal back.`];
   } },
-  { id: 'greenbuild', name: 'Green Build', w: 10, run(d) {
+  { id: 'greenbuild', name: 'Green Build', desc: 'Buildings cost 20% less for 60 seconds.', w: 10, run(d) {
     addBuff('greenbuild', 'Green Build', 60 * d, { cost: 0.8 });
     return ['Green Build!', `Buildings cost <b>20% less</b> for ${secs(60 * d)}.`];
   } },
   // ----- uncommon (5% each) -----
-  { id: 'clickfrenzy', name: 'Keyboard on Fire', w: 5, run(d) {
+  { id: 'clickfrenzy', name: 'Keyboard on Fire', desc: 'Clicking power ×777 for 13 seconds.', w: 5, run(d) {
     addBuff('clickfrenzy', 'Keyboard on Fire', 13 * d, { click: 777 });
     return ['Keyboard on Fire!', `Clicking power <b>×777</b> for ${secs(13 * d)}.`];
   } },
-  { id: 'hyper', name: 'Building Hyperfocus', w: 5, ok: () => G.owned.some(n => n >= 10), run(d) {
+  { id: 'hyper', name: 'Building Hyperfocus', desc: 'A building type you own at least 10 of boosts production by +10% per building for 30 seconds.', w: 5, ok: () => G.owned.some(n => n >= 10), run(d) {
     const i = pick(BUILDINGS.map((_, k) => k).filter(k => G.owned[k] >= 10)), n = G.owned[i];
-    addBuff('hyper' + i, `${BUILDINGS[i].name} Hyperfocus`, 30 * d, { prod: 1 + n * 0.1 });
+    addBuff('hyper' + i, `${BUILDINGS[i].name} Hyperfocus`, 30 * d, { prod: 1 + n * 0.1, desc: `Your ${n} ${BUILDINGS[i].plural} boost production by +${n * 10}%.` });
     return [`${BUILDINGS[i].name} Hyperfocus!`, `Your ${n} ${BUILDINGS[i].plural} boost production by <b>+${n * 10}%</b> for ${secs(30 * d)}.`];
   } },
-  { id: 'rain', name: 'Token Rain', w: 5, run() {
+  { id: 'rain', name: 'Token Rain', desc: '16 golden tokens fall down the screen. Each one you catch is worth 20 seconds of production.', w: 5, run() {
     emit('tokenRain', 16);
     return ['Token Rain!', 'Golden tokens are falling. Click them before they hit the floor.'];
   } },
-  { id: 'goldbug', name: 'Bug Report', w: 5, run() {
+  { id: 'goldbug', name: 'Bug Report', desc: 'A golden bug crawls across the screen. Squash it for 10 minutes of production.', w: 5, run() {
     emit('spawnBug', true);
     return ['Bug Report!', 'A golden bug is loose. Squash it for <b>10 minutes</b> of production.'];
   } },
-  { id: 'review', name: 'Code Review Approved', w: 5, ok: () => visibleUpgrades().length > 0, run() {
+  { id: 'review', name: 'Code Review Approved', desc: 'Your cheapest available upgrade is installed for free.', w: 5, ok: () => visibleUpgrades().length > 0, run() {
     const u = visibleUpgrades()[0];
     G.upgrades.add(u.id);
     recompute();
     return ['Code Review Approved!', `<b>${u.name}</b> was installed for free.`];
   } },
-  { id: 'deepthought', name: 'Deep Thought', w: 5, run(d) {
+  { id: 'deepthought', name: 'Deep Thought', desc: 'Production ×2 for 3 minutes.', w: 5, run(d) {
     addBuff('deepthought', 'Deep Thought', 180 * d, { prod: 2 });
     return ['Deep Thought!', `Production <b>×2</b> for ${secs(180 * d)}.`];
   } },
-  { id: 'focus', name: 'Focus Restored', w: 5, ok: () => D.focusMax > 0 && G.focus < D.focusMax - 1, run() {
+  { id: 'focus', name: 'Focus Restored', desc: 'Refills your slash command Focus.', w: 5, ok: () => D.focusMax > 0 && G.focus < D.focusMax - 1, run() {
     G.focus = D.focusMax;
     return ['Focus Restored!', 'Your slash command Focus is <b>full</b> again.'];
   } },
-  { id: 'hiring', name: 'Hiring Spree', w: 5, ok: () => totalOwned() > 0, run() {
+  { id: 'hiring', name: 'Hiring Spree', desc: 'One free building of every type you already own.', w: 5, ok: () => totalOwned() > 0, run() {
     let k = 0;
     for (let i = 0; i < N; i++) if (G.owned[i] > 0) { G.owned[i]++; k++; }
     recompute();
     return ['Hiring Spree!', `<b>One free building</b> of each of your ${k} building type${k === 1 ? '' : 's'}.`];
   } },
   // ----- rare (2% each) -----
-  { id: 'spike', name: 'Singularity Spike', w: 2, run(d) {
+  { id: 'spike', name: 'Singularity Spike', desc: 'Production ×666 for 6 seconds.', w: 2, run(d) {
     addBuff('spike', 'Singularity Spike', 6 * d, { prod: 666 });
     return ['Singularity Spike!', `Production <b>×666</b> for ${secs(6 * d)}.`];
   } },
-  { id: 'timeskip', name: 'Time Skip', w: 2, run() {
+  { id: 'timeskip', name: 'Time Skip', desc: 'Instantly gain 2 hours of production.', w: 2, run() {
     const g = (D.tps * 7200 + 13) * luckMult();
     earn(g);
     return ['Time Skip!', `The Git Time Machine fetched <b>2 hours</b> of production: <b>+${fmt(g)}</b> tokens.`];
   } },
-  { id: 'chain', name: 'Golden Chain', w: 2, run() {
+  { id: 'chain', name: 'Golden Chain', desc: 'Three more Eureka tokens appear, one after another.', w: 2, run() {
     emit('eurekaChain', 3);
     return ['Golden Chain!', '<b>Three more</b> Eureka tokens are on their way.'];
   } },
-  { id: 'double', name: 'Double Down', w: 2, run() {
+  { id: 'double', name: 'Double Down', desc: 'Your bank grows by its own size, up to 2 hours of production.', w: 2, run() {
     const g = (Math.min(G.tokens, D.tps * 7200) + 13) * luckMult();
     earn(g);
     return ['Double Down!', `Your bank grew by <b>+${fmt(g)}</b> tokens (up to 2 hours of production).`];
   } },
-  { id: 'fullsend', name: 'Full Send', w: 2, run(d) {
+  { id: 'fullsend', name: 'Full Send', desc: 'Vibe Coding (production ×7) and Keyboard on Fire (clicking ×777) at the same time.', w: 2, run(d) {
     addBuff('frenzy', 'Vibe Coding', 77 * d, { prod: 7 });
     addBuff('clickfrenzy', 'Keyboard on Fire', 13 * d, { click: 777 });
     return ['Full Send!', '<b>Vibe Coding</b> and <b>Keyboard on Fire</b> at the same time.'];
@@ -296,7 +301,7 @@ function eurekaEffect() {
   for (const e of pool) { if ((r -= e.w) < 0) { eff = e; break; } }
   const [title, text] = eff.run(D.effDur);
   recompute();
-  return { title, text, id: eff.id };
+  return { title, text, id: eff.id, bad: !!eff.bad };
 }
 
 function bugReward(golden) {
@@ -334,7 +339,7 @@ function compact() {
   if (hasMem('starter')) G.owned[0] = 10;
   if (hasMem('onboarding')) G.owned[1] = 5;
   recompute();
-  T.eureka = rand(45, 120);
+  T.eureka = rand(45, 120) * EUREKA_RARITY;
   emit('reset');
   return gain;
 }
@@ -419,7 +424,7 @@ function load(str, applyOffline) {
   g.mem = new Set((o.mem || []).filter(id => MEM[id]));
   g.buffs = (Array.isArray(o.buffs) ? o.buffs : [])
     .filter(b => b && typeof b.key === 'string' && num(b.t) > 0)
-    .map(b => ({ key: b.key, name: String(b.name || ''), t: num(b.t), dur: num(b.dur, num(b.t)), prod: num(b.prod, 1), click: num(b.click, 1), cost: num(b.cost, 1) }));
+    .map(b => ({ key: b.key, name: String(b.name || ''), t: num(b.t), dur: num(b.dur, num(b.t)), prod: num(b.prod, 1), click: num(b.click, 1), cost: num(b.cost, 1), desc: String(b.desc || ''), bad: !!b.bad }));
   Object.assign(g.settings, o.settings || {});
   Object.assign(g.stats, o.stats || {});
   Object.assign(g.dev, o.dev || {});

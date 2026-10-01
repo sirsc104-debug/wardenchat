@@ -134,10 +134,10 @@ const SPELLS = [
     desc: 'Think harder: production ×2 for 60 seconds.',
     run(fail) {
       if (fail) {
-        addBuff('overthink', 'Overthinking', 30, { prod: 0.5 });
+        addBuff('overthink', 'Overthinking', 30, { prod: 0.5, desc: 'A /ultrathink backfired: production is halved.' });
         return { ok: false, msg: 'Overthought it. Production halved for 30 seconds.' };
       }
-      addBuff('ultrathink', 'Ultrathink', 60, { prod: 2 });
+      addBuff('ultrathink', 'Ultrathink', 60, { prod: 2, desc: 'From /ultrathink: production ×2.' });
       return { ok: true, msg: 'Thinking very hard. Production ×2 for 60 seconds.' };
     },
   },
