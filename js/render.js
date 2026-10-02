@@ -255,6 +255,16 @@ function paintHorizonSparkle(ctx, R) {
   ctx.shadowBlur = 0;
 }
 const isHorizon = () => G.theme === 'horizon';
+// How each tide looks: tier 0 uses the theme's own colours; every tier after adds something new.
+const TIDE_LOOK = [
+  {},
+  { back: 'rgba(255,224,150,.15)', front: 'rgba(242,197,124,.36)', crest: 'rgba(255,241,210,.7)' },
+  { back: 'rgba(143,211,182,.15)', front: 'rgba(70,185,145,.36)', crest: 'rgba(205,255,232,.8)', glints: '#E2FFF2', deep: 'rgba(40,120,95,.18)' },
+  { back: 'rgba(190,160,255,.16)', front: 'rgba(135,95,230,.38)', crest: 'rgba(232,218,255,.85)', glints: '#F3EAFF', deep: 'rgba(80,50,160,.2)', glow: '150,110,240' },
+  { back: 'rgba(175,232,255,.18)', front: 'rgba(70,170,225,.4)', crest: '#FFFFFF', glints: '#FFFFFF', deep: 'rgba(30,90,140,.22)', glow: '110,205,255' },
+  { back: 'rgba(255,160,70,.18)', front: 'rgba(255,90,30,.42)', crest: 'rgba(255,224,165,.9)', glints: '#FFD9A0', deep: 'rgba(140,30,10,.26)', glow: '255,110,30', embers: true },
+  { back: 'rgba(255,255,255,.1)', front: 'rgba(255,255,255,.3)', crest: 'rgba(255,255,255,.9)', glints: '#FFFFFF', deep: 'rgba(60,30,90,.25)', glow: '255,150,220', embers: true, prism: true },
+];
 function paintShine(ctx, R) {
   const n = 14, col = isHorizon() ? '255,138,40' : '242,197,124';
   const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
@@ -422,7 +432,7 @@ const Stage = {
     Events.draw(c, this, dt, t);
     this.drawWaves(dt);
     this.drawParticles(dt);
-    this.drawFlow(t, still);
+    this.drawFlow(t, still, dt);
     this.drawBubbles(dt, t, still);
     this.drawFloats(dt);
   },
@@ -691,26 +701,104 @@ const Stage = {
     c.globalAlpha = 1;
   },
   // "Flow" rises from the bottom as you unlock achievements.
-  drawFlow(t, still) {
-    const c = this.ctx, w = this.w, h = this.h;
-    const level = h * (0.035 + Math.min(1, D.flow / 5) * 0.16);
+  drawFlow(t, still, dt) {
+    const c = this.ctx, w = this.w, h = this.h, hz = isHorizon();
+    const tier = tideTier(), look = TIDE_LOOK[tier];
+    if (this.tide == null) this.tide = tier;
+    else if (tier !== this.tide) { if (tier > this.tide) this.tideUp(tier); this.tide = tier; }
+    // Rise smoothly toward the level for this much Flow; after an upgrade the tide drains back to the bottom.
+    const target = h * (0.035 + tideFrac() * 0.16);
+    this.tideLvl = this.tideLvl == null || !Number.isFinite(this.tideLvl) ? target : this.tideLvl + (target - this.tideLvl) * Math.min(1, dt * 2.2);
+    this.surge = Math.max(0, (this.surge || 0) - dt / 1.8);
+    const p = 1 - this.surge, bump = this.surge > 0 ? Math.sin(Math.PI * Math.min(1, p * 1.6)) * h * 0.2 : 0;
+    const level = this.tideLvl + bump;
     this.flowLevel = level;
-    const layer = (amp, len, speed, off, col) => {
+    const tt = still ? 0 : t;
+    const surf = (x, amp, len, speed, off) => h - level - off + Math.sin(x / len + tt * speed) * amp + Math.sin(x / (len * 0.43) - tt * speed * 1.7) * amp * 0.4;
+    const layer = (amp, len, speed, off, fill, crest) => {
       c.beginPath();
       c.moveTo(0, h);
-      for (let x = 0; x <= w + 10; x += 10) {
-        const tt = still ? 0 : t * speed;
-        c.lineTo(x, h - level - off + Math.sin(x / len + tt) * amp + Math.sin(x / (len * 0.43) - tt * 1.7) * amp * 0.4);
-      }
-      c.lineTo(w, h);
+      for (let x = 0; x <= w + 10; x += 10) c.lineTo(x, surf(x, amp, len, speed, off));
+      c.lineTo(w + 10, h);
       c.closePath();
-      c.fillStyle = col;
+      c.fillStyle = fill;
       c.fill();
+      if (crest) {
+        c.beginPath();
+        for (let x = 0; x <= w + 10; x += 10) c[x ? 'lineTo' : 'moveTo'](x, surf(x, amp, len, speed, off));
+        c.strokeStyle = crest;
+        c.lineWidth = 1.6;
+        c.stroke();
+      }
     };
-    const hz = isHorizon();
-    layer(6, 60, 1.1, 7, hz ? 'rgba(154,154,162,.13)' : 'rgba(242,197,124,.13)');
-    layer(5, 48, -1.4, 0, hz ? 'rgba(255,122,26,.28)' : 'rgba(217,119,87,.30)');
+    // A soft glow hanging over the stronger tides.
+    if (look.glow) {
+      const gy = h - level - 10, g = c.createLinearGradient(0, gy - 70, 0, gy + 10);
+      g.addColorStop(0, `rgba(${look.glow},0)`);
+      g.addColorStop(1, `rgba(${look.glow},${0.16 + (still ? 0 : Math.sin(t * 1.4) * 0.04)})`);
+      c.fillStyle = g;
+      c.fillRect(0, gy - 70, w, 80);
+    }
+    const back = tier ? look.back : hz ? 'rgba(154,154,162,.13)' : 'rgba(242,197,124,.13)';
+    let front = tier ? look.front : hz ? 'rgba(255,122,26,.28)' : 'rgba(217,119,87,.30)';
+    if (look.prism) {
+      // The last tide cycles through every colour as it rolls.
+      front = c.createLinearGradient(0, 0, w, 0);
+      for (let k = 0; k <= 6; k++) front.addColorStop(k / 6, `hsla(${(k * 60 + (still ? 0 : t * 50)) % 360},85%,62%,.42)`);
+    }
+    if (look.deep) layer(8, 80, 0.7, 15, look.deep);
+    layer(6, 60, 1.1, 7, back);
+    layer(5, 48, -1.4, 0, front, look.crest);
+    // Right after an upgrade the new tide flashes bright as it crashes back down.
+    if (this.surge > 0) layer(5, 48, -1.4, 0, `rgba(255,255,255,${this.surge * 0.3})`);
+
+    if (look.glints && !still) {
+      // Glints riding the surface.
+      const n = 5 + tier * 2;
+      c.fillStyle = look.glints;
+      for (let k = 0; k < n; k++) {
+        const x = (((hash(k * 31) * w + t * (14 + hash(k) * 18) * (k % 2 ? 1 : -1)) % w) + w) % w;
+        const y = surf(x, 5, 48, -1.4, 0) - 3, a = Math.max(0, Math.sin(t * 2.6 + k * 1.7)), r = 1.2 + a * 2.4;
+        c.globalAlpha = a;
+        c.beginPath();
+        c.moveTo(x, y - r * 1.8); c.lineTo(x + r * 0.45, y - r * 0.45); c.lineTo(x + r * 1.8, y); c.lineTo(x + r * 0.45, y + r * 0.45);
+        c.lineTo(x, y + r * 1.8); c.lineTo(x - r * 0.45, y + r * 0.45); c.lineTo(x - r * 1.8, y); c.lineTo(x - r * 0.45, y - r * 0.45);
+        c.closePath();
+        c.fill();
+      }
+      c.globalAlpha = 1;
+    }
+    if (look.embers && !still) {
+      // Embers (and, on the Prism Tide, colour sparks) drifting up off the surface.
+      for (let k = 0; k < 14; k++) {
+        const ph = (t * (0.18 + hash(k + 5) * 0.12) + hash(k)) % 1, x = hash(k * 7) * w + Math.sin(t * 1.3 + k) * 12;
+        const y = surf(x, 5, 48, -1.4, 0) - ph * 90;
+        c.globalAlpha = (1 - ph) * 0.9;
+        c.fillStyle = look.prism ? `hsl(${(k * 47 + t * 60) % 360},90%,70%)` : k % 3 ? '#FFB45E' : '#FFE2A8';
+        c.beginPath();
+        c.arc(x, y, 1.4 + (1 - ph) * 1.4, 0, Math.PI * 2);
+        c.fill();
+      }
+      c.globalAlpha = 1;
+    }
   },
+  // The tide filled up: it surges, splashes, and comes back as the next kind of tide.
+  tideUp(tier) {
+    this.surge = 1;
+    const look = TIDE_LOOK[tier], col = TIDES[tier].dot;
+    if (G.settings.particles && !stillMode()) {
+      for (let k = 0; k < 46; k++) {
+        const x = Math.random() * this.w;
+        this.parts.push({
+          x, y: this.h - this.flowLevel - 4, vx: rand(-90, 90), vy: -rand(260, 560), life: 0, max: rand(0.8, 1.4),
+          rot: Math.random() * 6, vr: rand(-6, 6), size: rand(3, 6), col: k % 3 ? col : look.crest || '#FFF1D2',
+        });
+      }
+    }
+    Sound.ach();
+    toast({ icon: GLYPH.people, kicker: 'The tide turned', title: TIDES[tier].name, text: `Flow reached ${tier * TIDE_STEP * 100}%, so the tide starts again as a ${TIDES[tier].name}. Flow bubbles are now worth +${tier * 10}%.`, kind: 'mint', life: 5000 });
+  },
+
 };
 
 // ---------- the workspace (middle pane): one lane per building type ----------

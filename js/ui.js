@@ -145,14 +145,16 @@ function eurekaTip(id) {
   return tipHead(svgIcon(e.bad ? GLYPH.bug : GLYPH.gold), e.name, `Eureka effect · ${e.w}% chance`) + `<div class="tip-desc">${esc(e.desc)}</div>`;
 }
 function flowTip() {
-  const pct = Math.round(D.flow * 100), n = G.achievements.size;
+  const pct = Math.round(D.flow * 100), n = G.achievements.size, tier = tideTier();
   const engineers = UPGRADES.filter(u => u.kind === 'flow' && G.upgrades.has(u.id)).length;
   const every = Math.round(clamp(45 / (1 + D.flow), 6, 45));
   return tipHead(svgIcon(GLYPH.people), `Flow ${pct}%`, `${n} achievement${n === 1 ? '' : 's'} × 4% each`) +
-    `<div class="tip-desc">Flow is the tide under the sparkle. It rises with every achievement you unlock.</div>` +
+    `<div class="tip-desc">Flow is the tide under the sparkle. It rises with every achievement you unlock, and every 100% it starts again at the bottom as a stronger tide.</div>` +
     `<div class="tip-stats">Production <b>+${+(D.flowBonus * 100).toFixed(1)}%</b> (0.25% per 1% Flow).<br>` +
     (engineers ? `Engineer upgrades (${engineers}) multiply that by <b>×${D.flowMult.toFixed(2)}</b>.<br>` : 'Engineer upgrades in the Store turn Flow into even more production.<br>') +
-    (pct ? `A Flow bubble rises about every <b>${every}s</b>. Pop it for <b>${fmt(bubbleValue())}</b> tokens.` : 'Unlock an achievement to start Flow bubbles rising.') + '</div>';
+    (pct ? `A Flow bubble rises about every <b>${every}s</b>. Pop it for <b>${fmt(bubbleValue())}</b> tokens.` : 'Unlock an achievement to start Flow bubbles rising.') + '<br>' +
+    `Tide: <b style="color:${TIDES[tier].dot}">${TIDES[tier].name}</b> (${tier + 1} of ${TIDES.length})` + (tier ? `, Flow bubbles +${tier * 10}%` : '') + '. ' +
+    (tier < TIDES.length - 1 ? `${Math.round(tideFrac() * 100)}% full; the ${TIDES[tier + 1].name} comes in at ${(tier + 1) * TIDE_STEP * 100}% Flow.` : `The last and brightest tide, ${Math.round(tideFrac() * 100)}% full.`) + '</div>';
 }
 function tipHead(icon, name, tag, cost, can) {
   return `<div class="tip-head">${icon}<div><div class="tip-name">${esc(name)}</div><div class="tip-tag">${tag}</div></div>` +
@@ -803,6 +805,8 @@ const UI = {
       this.refreshCursor();
       const ft = $('#flowTag'), label = `Flow ${Math.round(D.flow * 100)}%`;
       if (ft.lastElementChild.textContent !== label) ft.lastElementChild.textContent = label;
+      const dot = TIDES[tideTier()].dot;
+      if (ft.dataset.dot !== dot) { ft.dataset.dot = dot; ft.firstElementChild.style.setProperty('--tide', dot); }
       Panels.fastRefresh();
     }
     if ((this.slow += dt) >= 0.5) {

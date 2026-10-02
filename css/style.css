@@ -236,7 +236,7 @@ b { font-weight: 700; }
   cursor: help;
 }
 .flow-tag:hover { border-color: var(--mint); }
-.flow-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 8px var(--mint); animation: twinkle 1.4s ease-in-out infinite alternate; }
+.flow-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--tide, var(--mint)); box-shadow: 0 0 8px var(--tide, var(--mint)); animation: twinkle 1.4s ease-in-out infinite alternate; }
 .spin-glyph { display: inline-block; width: 1.2em; font-family: var(--symbol); color: var(--clay); }
 .spin-meta { color: var(--muted); }
 

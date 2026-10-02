@@ -77,6 +77,12 @@ const Dev = {
       ['Achievements', [
         ['Unlock all', () => { ACHIEVEMENTS.forEach(a => G.achievements.add(a.id)); return `All ${ACHIEVEMENTS.length} achievements unlocked`; }],
         ['Reset', () => { G.achievements.clear(); return 'Achievements reset'; }],
+        ['Next Flow tide', () => {
+          const want = tideTier() + 1;
+          if (want >= TIDES.length) return 'Already on the last tide';
+          for (const a of ACHIEVEMENTS) { if (D.flow >= want * TIDE_STEP) break; if (!G.achievements.has(a.id)) { G.achievements.add(a.id); recompute(); } }
+          return tideTier() >= want ? `Flow ${Math.round(D.flow * 100)}%: ${TIDES[tideTier()].name}` : 'Not enough achievements left for the next tide';
+        }],
       ]],
       ['Eureka and bugs', [
         ['Spawn Eureka token', () => { FX.spawnEureka(true); return 'A Eureka token appeared'; }],

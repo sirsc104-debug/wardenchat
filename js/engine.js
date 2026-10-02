@@ -93,7 +93,16 @@ const T = { eureka: rand(45, 120) * EUREKA_RARITY, bug: rand(120, 240), ach: 1 }
 // ---------- Flow ----------
 const FLOW_PROD = 0.25;            // production bonus per 100% Flow
 const bubbleDelay = () => clamp(45 / (1 + D.flow), 6, 45) * rand(0.7, 1.3); // seconds between Flow bubbles
-const bubbleValue = () => Math.max(D.tpsGross * 15, 10) * (1 + D.flow);         // 15 s of production, times Flow
+// The tide rises through each 100% of Flow, then drops back to the bottom as the next, stronger kind of tide.
+const TIDE_STEP = 1;
+const TIDES = [
+  { name: 'Clay Tide', dot: '#D97757' }, { name: 'Gold Tide', dot: '#F2C57C' }, { name: 'Mint Tide', dot: '#8FD3B6' },
+  { name: 'Lilac Tide', dot: '#B79CFF' }, { name: 'Crystal Tide', dot: '#9FE3FF' }, { name: 'Ember Tide', dot: '#FF8A3D' },
+  { name: 'Prism Tide', dot: '#FF9AD5' },
+];
+const tideTier = () => clamp(Math.floor(D.flow / TIDE_STEP + 1e-9), 0, TIDES.length - 1);
+const tideFrac = () => clamp((D.flow - tideTier() * TIDE_STEP) / TIDE_STEP, 0, 1); // how full the current tide is
+const bubbleValue = () => Math.max(D.tpsGross * 15, 10) * (1 + D.flow) * (1 + 0.1 * tideTier()); // 15 s of production, times Flow, +10% per tide
 function popBubble() {
   const gain = bubbleValue();
   earn(gain);
