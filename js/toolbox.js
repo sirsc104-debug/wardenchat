@@ -12,8 +12,9 @@ const Toolbox = {
   init() {
     const panel = $('#panel-toolbox');
     panel.innerHTML = '<nav class="tb-nav" id="tbNav" aria-label="Toolbox"></nav><div class="tb-body" id="tbBody"></div>';
-    panel.addEventListener('click', e => {
-      const b = e.target.closest('[data-tool]');
+    // Only the nav buttons switch tools; the body also carries data-tool, so clicks there must not re-render it.
+    $('#tbNav').addEventListener('click', e => {
+      const b = e.target.closest('button[data-tool]');
       if (!b) return;
       this.cur = b.dataset.tool;
       Tip.hide();
