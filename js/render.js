@@ -67,6 +67,7 @@ const BIG_HAND = [
 const GOLD_SLAM = 0.11;
 const BIG_LANE_ICON = 46;
 const RB_LANE_ICON = 54;
+const DIA_LANE_ICON = 58;
 function goldTap(p) {
   if (p < 0.08) { // wind up: lean back and tilt
     const e = Math.sin((p / 0.08) * Math.PI / 2);
@@ -97,6 +98,50 @@ const goldParts = parts => parts.map(p => ({ ...p, _p: null, f: p.f && goldColor
 const RAINBOW_AT = 500, RAINBOW_GROUP = 50, RB_FRAMES = 12;
 const RB_STOPS = ['#FF7A1A', '#9A9AA2', '#FFB070', '#3A3A41', '#FF9A4D', '#C8C8CE', '#FF7A1A']; // orange and grey sparks/rings
 const RB_SLAM = 0.1;
+// ----- diamond tier (from 5,000 of a building, every 500 become one diamond icon) -----
+const DIAMOND_AT = 5000, DIAMOND_GROUP = 500;
+const DIA_RAMP = [[20, 60, 90], [70, 170, 220], [180, 235, 255], [255, 255, 255]];
+function iceColor(hex) {
+  const n = parseInt(hex.slice(1), 16), L = clamp((0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255, 0, 1) * 3;
+  const k = Math.min(2, Math.floor(L)), f = L - k, A = DIA_RAMP[k], B = DIA_RAMP[k + 1];
+  return '#' + A.map((v, j) => Math.round(v + (B[j] - v) * f).toString(16).padStart(2, '0')).join('');
+}
+const iceParts = parts => parts.map(p => ({ ...p, _p: null, f: p.f && iceColor(p.f), s: p.s && iceColor(p.s) }));
+// One frame of a diamond icon: icy colours, a cyan glow, a light band sweeping across, and twinkling glints.
+function diamondSprite(parts, size, frame) {
+  const r = dpr(), pad = size * 0.16, full = size + pad * 2, c = document.createElement('canvas');
+  c.width = c.height = Math.ceil(full * r);
+  const x = c.getContext('2d');
+  c._ctx = x;
+  x.scale(r, r);
+  x.translate(pad, pad);
+  x.shadowColor = 'rgba(150,230,255,.95)';
+  x.shadowBlur = size * 0.14 * r;
+  drawParts(x, parts._ice || (parts._ice = iceParts(parts)), size);
+  x.shadowBlur = 0;
+  x.globalCompositeOperation = 'source-atop';
+  const pos = (frame / RB_FRAMES) * 1.6 - 0.3;
+  const g = x.createLinearGradient(0, 0, size, size);
+  g.addColorStop(clamp(pos - 0.12, 0, 1), 'rgba(255,255,255,0)');
+  g.addColorStop(clamp(pos, 0, 1), 'rgba(255,255,255,.85)');
+  g.addColorStop(clamp(pos + 0.12, 0, 1), 'rgba(255,255,255,0)');
+  x.fillStyle = g;
+  x.fillRect(-pad, -pad, full, full);
+  x.globalCompositeOperation = 'source-over';
+  // Glints: four-point stars that come and go.
+  const glint = (gx, gy, s) => {
+    if (s <= 0) return;
+    x.fillStyle = '#FFFFFF';
+    x.beginPath();
+    x.moveTo(gx, gy - s); x.lineTo(gx + s * 0.22, gy - s * 0.22); x.lineTo(gx + s, gy); x.lineTo(gx + s * 0.22, gy + s * 0.22);
+    x.lineTo(gx, gy + s); x.lineTo(gx - s * 0.22, gy + s * 0.22); x.lineTo(gx - s, gy); x.lineTo(gx - s * 0.22, gy - s * 0.22);
+    x.fill();
+  };
+  glint(size * 0.85, size * 0.12, size * 0.16 * Math.max(0, Math.sin((frame / RB_FRAMES) * Math.PI * 2)));
+  glint(size * 0.15, size * 0.8, size * 0.12 * Math.max(0, Math.sin((frame / RB_FRAMES) * Math.PI * 2 + 2.5)));
+  c.pad = pad / full;
+  return c;
+}
 // Black-hole-hand tap: deeper wind-up, harder slam, a twisting recoil.
 function rainbowTap(p) {
   if (p < 0.07) {
@@ -235,12 +280,12 @@ const Stage = {
     this.resize();
     cv.addEventListener('pointerdown', e => {
       const p = this.local(e);
-      if (this.popAt(p.x, p.y)) { e.preventDefault(); return; }
+      if (Events.hit(p.x, p.y, this) || this.popAt(p.x, p.y)) { e.preventDefault(); return; }
       if (this.hit(p.x, p.y)) { e.preventDefault(); this.clickAt(p.x, p.y); }
     });
     cv.addEventListener('pointermove', e => {
       const p = this.local(e);
-      this.hover = this.hit(p.x, p.y) || !!this.bubbleAt(p.x, p.y);
+      this.hover = Events.hover(p.x, p.y, this) || this.hit(p.x, p.y) || !!this.bubbleAt(p.x, p.y);
       cv.style.cursor = this.hover ? 'pointer' : 'default';
     });
     cv.addEventListener('pointerleave', () => { this.hover = false; });
@@ -255,6 +300,11 @@ const Stage = {
   hit(x, y) { return Math.hypot(x - this.cx, y - this.cy) < this.R * 0.95; },
   clickAt(x, y) {
     const v = clickSparkle();
+    if (!v) {
+      // Rate limited (or the Hands Off challenge): the click does nothing.
+      this.floats.push({ x, y: y - 12, text: rateLimited() ? '429' : '+0', life: 0, max: 0.9, col: '#FF6B60' });
+      return;
+    }
     Spinner.made += v;
     this.squish = 1;
     this.pop(x, y, v);
@@ -278,6 +328,8 @@ const Stage = {
     this.bigSize = Math.round(this.cursorSize * 1.45);
     this.bigCursor = makeSprite(BIG_HAND, this.bigSize);
     this.rbSize = Math.round(this.cursorSize * 1.7);
+    this.diaSize = Math.round(this.cursorSize * 1.85);
+    this.diaFrames = null;
     this.rbFrames = null;
   },
   pop(x, y, v) {
@@ -364,6 +416,7 @@ const Stage = {
       c.fill();
     }
 
+    Events.draw(c, this, dt, t);
     this.drawWaves(dt);
     this.drawParticles(dt);
     this.drawFlow(t, still);
@@ -400,8 +453,11 @@ const Stage = {
     const owned = G.owned[0];
     if (!owned) return;
     const slots = HANDS_PER_RING * HAND_RINGS;
-    let perRing = HANDS_PER_RING, rb = 0, big = 0, small;
-    if (owned < HAND_GROUP_AT) {
+    let perRing = HANDS_PER_RING, dia = 0, rb = 0, big = 0, small;
+    if (owned >= DIAMOND_AT) {
+      // Only the highest hand type is shown: one diamond hand per 500.
+      dia = Math.min(slots, Math.floor(owned / DIAMOND_GROUP)); small = 0;
+    } else if (owned < HAND_GROUP_AT) {
       perRing = 50; small = owned;
     } else {
       let rest = owned;
@@ -411,30 +467,30 @@ const Stage = {
       // Around the sparkle, only the highest hand type you have unlocked is shown.
       if (rb) { big = 0; small = 0; } else if (big) small = 0;
     }
-    const n = rb + big + small, rings = Math.ceil(n / perRing);
-    const c = this.ctx, biggest = rb ? this.rbSize : big ? this.bigSize : this.cursorSize;
+    const n = dia + rb + big + small, rings = Math.ceil(n / perRing);
+    const c = this.ctx, biggest = dia ? this.diaSize : rb ? this.rbSize : big ? this.bigSize : this.cursorSize;
     // Spread the circles over the space around the sparkle so the outer one never leaves the panel.
     const r0 = this.R * 1.12;
     const room = Math.min(this.cx, this.h - this.cy, this.cy - 24) - biggest * 0.95;
     const gap = rings > 1 ? clamp((room - r0) / (rings - 1), this.R * 0.13, this.R * 0.3) : 0;
     const frame = Math.floor(t * 9) % RB_FRAMES;
     for (let i = 0; i < n; i++) {
-      const kind = i < rb ? 2 : i < rb + big ? 1 : 0;
-      const size = kind === 2 ? this.rbSize : kind === 1 ? this.bigSize : this.cursorSize;
-      const spr = kind === 2 ? this.rbSprite((frame + i) % RB_FRAMES) : kind === 1 ? this.bigCursor : this.cursor;
+      const kind = dia ? 3 : i < rb ? 2 : i < rb + big ? 1 : 0;
+      const size = kind === 3 ? this.diaSize : kind === 2 ? this.rbSize : kind === 1 ? this.bigSize : this.cursorSize;
+      const spr = kind === 3 ? this.diaSprite((frame + i) % RB_FRAMES) : kind === 2 ? this.rbSprite((frame + i) % RB_FRAMES) : kind === 1 ? this.bigCursor : this.cursor;
       const ring = Math.floor(i / perRing), k = i % perRing;
       const a = (k / perRing) * Math.PI * 2 + ring * (Math.PI / perRing) + (still ? 0 : t * 0.04 * (ring % 2 ? -1 : 1));
       let rad = r0 + ring * gap, scale = 1, tilt = 0, flash = 0;
       if (!still && kind > 0) {
         // Gold hands: wind up, slam, wobble, as a wave every 6 s. Rainbow hands: a harder spin-slam every 5 s.
-        const period = kind === 2 ? 5 : 6, slamAt = kind === 2 ? RB_SLAM : GOLD_SLAM;
-        const phase = (t / period + k / perRing + ring * 0.33) % 1, m = kind === 2 ? rainbowTap(phase) : goldTap(phase);
+        const period = kind === 3 ? 4 : kind === 2 ? 5 : 6, slamAt = kind >= 2 ? RB_SLAM : GOLD_SLAM;
+        const phase = (t / period + k / perRing + ring * 0.33) % 1, m = kind >= 2 ? rainbowTap(phase) : goldTap(phase);
         rad += m.off * this.R;
         scale = m.scale;
         tilt = m.tilt;
-        if (kind === 2 && phase > slamAt - 0.01 && phase < slamAt + 0.12) flash = 1 - Math.abs(phase - slamAt - 0.03) / 0.09;
+        if (kind >= 2 && phase > slamAt - 0.01 && phase < slamAt + 0.12) flash = 1 - Math.abs(phase - slamAt - 0.03) / 0.09;
         const prev = this.goldPrev[i];
-        if (prev >= 0 && prev < slamAt && phase >= slamAt && phase - prev < 0.5) this.slam(a, rad, ring, kind === 2);
+        if (prev >= 0 && prev < slamAt && phase >= slamAt && phase - prev < 0.5) this.slam(a, rad, ring, kind);
         this.goldPrev[i] = phase;
       } else if (!still) {
         // Small hands tap once every ten seconds, staggered around the circle.
@@ -445,13 +501,22 @@ const Stage = {
       c.save();
       c.translate(this.cx + Math.cos(a) * rad, this.cy + Math.sin(a) * rad);
       c.rotate(a - Math.PI / 2 + tilt);
-      if (flash > 0) { c.shadowColor = 'rgba(255,122,26,1)'; c.shadowBlur = 18 * Math.max(0, flash); }
-      if (kind === 2) {
+      if (flash > 0) { c.shadowColor = kind === 3 ? 'rgba(200,245,255,1)' : 'rgba(255,122,26,1)'; c.shadowBlur = 18 * Math.max(0, flash); }
+      if (kind >= 2) {
         const out = sz / (1 - 2 * spr.pad), off = spr.pad * out; // black hole hands carry glow padding
         c.drawImage(spr, -sz * (12.5 / 32) - off, -sz * (2 / 32) - off, out, out);
       } else c.drawImage(spr, -sz * (12.5 / 32), -sz * (2 / 32), sz, sz); // fingertip touches the circle
       c.restore();
     }
+  },
+  diaSprite(f) {
+    const r = dpr();
+    if (!this.diaFrames || this.diaFrames.r !== r || this.diaFrames.size !== this.diaSize || lostCanvas(this.diaFrames[f])) {
+      this.diaFrames = Array.from({ length: RB_FRAMES }, (_, k) => diamondSprite(BUILDINGS[0].icon, this.diaSize, k));
+      this.diaFrames.r = r;
+      this.diaFrames.size = this.diaSize;
+    }
+    return this.diaFrames[f];
   },
   rbSprite(f) {
     const r = dpr();
@@ -542,9 +607,9 @@ const Stage = {
     c.globalAlpha = 1;
   },
   // A big hand just landed its tap: shockwave ring plus sparks at the fingertip (rainbow ones go bigger).
-  slam(a, rad, ring, rainbow) {
-    const x = this.cx + Math.cos(a) * rad, y = this.cy + Math.sin(a) * rad;
-    this.waves.push({ x, y, life: 0, max: rainbow ? 0.75 : 0.55, big: (ring === 0 ? 1 : 0.85) * (rainbow ? 1.45 : 1), rainbow });
+  slam(a, rad, ring, kind) {
+    const x = this.cx + Math.cos(a) * rad, y = this.cy + Math.sin(a) * rad, rainbow = kind >= 2;
+    this.waves.push({ x, y, life: 0, max: rainbow ? 0.75 : 0.55, big: (ring === 0 ? 1 : 0.85) * (kind === 3 ? 1.7 : rainbow ? 1.45 : 1), rainbow, kind });
     if (this.waves.length > 70) this.waves.shift();
     if (!G.settings.particles) return;
     for (let j = 0; j < (rainbow ? 6 : 3); j++) {
@@ -552,7 +617,7 @@ const Stage = {
       this.parts.push({
         x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 40, life: 0, max: 0.45 + Math.random() * 0.3,
         rot: Math.random() * 6, vr: (Math.random() - 0.5) * 12, size: 2.5 + Math.random() * (rainbow ? 3.5 : 2.5),
-        col: rainbow ? RB_STOPS[(j + ring) % RB_STOPS.length] : '#F2C57C',
+        col: kind === 3 ? (j % 2 ? '#FFFFFF' : '#9FE3FF') : rainbow ? RB_STOPS[(j + ring) % RB_STOPS.length] : '#F2C57C',
       });
     }
   },
@@ -563,7 +628,8 @@ const Stage = {
     for (const w of this.waves) {
       const p = w.life / w.max, ease = 1 - Math.pow(1 - p, 3);
       const r = (3 + ease * this.R * 0.2) * w.big;
-      const rings = w.rainbow ? [['#FF7A1A', 1], ['#9A9AA2', 0.74], ['#FFB070', 0.5]] : [['#F2C57C', 1]];
+      const rings = w.kind === 3 ? [['#FFFFFF', 1], ['#9FE3FF', 0.78], ['#5EC8FF', 0.56]]
+        : w.rainbow ? [['#FF7A1A', 1], ['#9A9AA2', 0.74], ['#FFB070', 0.5]] : [['#F2C57C', 1]];
       for (const [col, k] of rings) {
         c.globalAlpha = (1 - p) * 0.9;
         c.strokeStyle = col;
@@ -573,7 +639,7 @@ const Stage = {
         c.stroke();
       }
       c.globalAlpha = (1 - p) * 0.35;
-      c.fillStyle = w.rainbow ? '#000000' : '#FFE7B8';
+      c.fillStyle = w.kind === 3 ? '#DFF7FF' : w.rainbow ? '#000000' : '#FFE7B8';
       c.beginPath();
       c.arc(w.x, w.y, r * 0.45, 0, Math.PI * 2);
       c.fill();
@@ -656,6 +722,35 @@ const Workspace = {
     if (s && s.r === r && !lostCanvas(s.c)) return s.c;
     const c = makeSprite(BUILDINGS[i].icon, 30);
     this.sprites[i] = { c, r };
+    return c;
+  },
+  // The "five hundred in one" version: an icy, glinting icon on a faceted gem base.
+  diaLaneSprite(i, f) {
+    const r = dpr(), key = `${i}dia${f}`, s = this.sprites[key];
+    if (s && s.r === r && !lostCanvas(s.c)) return s.c;
+    const size = DIA_LANE_ICON, c = document.createElement('canvas');
+    c.width = c.height = Math.ceil(size * r);
+    const x = c.getContext('2d');
+    c._ctx = x;
+    x.scale(r, r);
+    const g = x.createRadialGradient(size / 2, size / 2, 2, size / 2, size / 2, size / 2);
+    g.addColorStop(0, 'rgba(220,250,255,.55)');
+    g.addColorStop(0.6, 'rgba(94,200,255,.18)');
+    g.addColorStop(1, 'rgba(94,200,255,0)');
+    x.fillStyle = g;
+    x.fillRect(0, 0, size, size);
+    // Faceted gem base.
+    const bx = size / 2, by = size - 7;
+    x.fillStyle = 'rgba(159,227,255,.35)';
+    x.strokeStyle = '#DFF7FF';
+    x.lineWidth = 1.2;
+    x.beginPath();
+    x.moveTo(bx - size * 0.36, by); x.lineTo(bx - size * 0.24, by - 4); x.lineTo(bx + size * 0.24, by - 4); x.lineTo(bx + size * 0.36, by); x.lineTo(bx, by + 5); x.closePath();
+    x.fill();
+    x.stroke();
+    const spr = diamondSprite(BUILDINGS[i].icon, size * 0.68, f), out = size * 0.68 / (1 - 2 * spr.pad);
+    x.drawImage(spr, (size - out) / 2, size * 0.42 - out / 2, out, out);
+    this.sprites[key] = { c, r };
     return c;
   },
   // The "fifty in one" version: a dark, orange-glowing icon over a black core with a spinning accretion ring.
@@ -750,24 +845,37 @@ const Workspace = {
 
       // Under 100 owned: one normal icon each. From 100: every 10 become one big gold icon.
       // From 500: every 50 become one rainbow icon first, then gold tens, then the remaining 1-9 as normal icons.
-      let rb = 0, big = 0, small = n;
+      let dia = 0, rb = 0, big = 0, small = n;
       if (n >= HAND_GROUP_AT) {
         let rest = n;
-        if (n >= RAINBOW_AT) { rb = Math.floor(n / RAINBOW_GROUP); rest = n % RAINBOW_GROUP; }
+        if (n >= DIAMOND_AT) { dia = Math.floor(rest / DIAMOND_GROUP); rest %= DIAMOND_GROUP; }
+        if (n >= RAINBOW_AT) { rb = Math.floor(rest / RAINBOW_GROUP); rest %= RAINBOW_GROUP; }
         big = Math.floor(rest / HAND_GROUP);
         small = rest % HAND_GROUP;
       }
       const room = W - 56;
+      if (dia) dia = Math.min(dia, Math.floor(room / 16));
       if (rb) rb = Math.min(rb, Math.floor(room / 14));
       small = Math.min(small, 140);
-      const units = rb * 1.25 + big + small * 0.7, step = Math.max(6, Math.min(46, room / Math.max(1, units)));
+      const units = dia * 1.4 + rb * 1.25 + big + small * 0.7, step = Math.max(6, Math.min(46, room / Math.max(1, units)));
       const spr = this.sprite(i), bigSpr = big ? this.bigSprite(i) : null;
       const frame = Math.floor(t * 8) % RB_FRAMES;
       let x = 12;
-      for (let j = 0; j < rb + big + small; j++) {
-        const kind = j < rb ? 2 : j < rb + big ? 1 : 0, h1 = hash(i * 1000 + j), h2 = hash(i * 7 + j * 13);
+      for (let j = 0; j < dia + rb + big + small; j++) {
+        const kind = j < dia ? 3 : j < dia + rb ? 2 : j < dia + rb + big ? 1 : 0, h1 = hash(i * 1000 + j), h2 = hash(i * 7 + j * 13);
         const bob = still ? 0 : Math.sin(t * 2.2 + j * 1.7 + i) * 1.6;
-        if (kind === 2) {
+        if (kind === 3) {
+          // Diamond icons float higher, glint, and flip in a fast wave along the lane every 2.5 seconds.
+          const ph = (t / 2.5 - j / Math.max(dia, 1) + i * 0.21) % 1, p = ph < 0 ? ph + 1 : ph;
+          const pulse = still || p > 0.18 ? 0 : Math.sin((p / 0.18) * Math.PI);
+          const size = DIA_LANE_ICON * (1 + pulse * 0.25);
+          c.save();
+          c.translate(x + DIA_LANE_ICON / 2, y0 + 10 + DIA_LANE_ICON / 2 - bob * 1.5 - pulse * 9);
+          c.scale(still ? 1 : Math.cos(pulse * Math.PI), 1); // a quick coin-flip
+          c.drawImage(this.diaLaneSprite(i, (frame + j) % RB_FRAMES), -size / 2, -size / 2, size, size);
+          c.restore();
+          x += step * 1.4;
+        } else if (kind === 2) {
           // Rainbow icons shimmer, sway, and do a big pulse-and-spin in a wave along the lane every 3 seconds.
           const ph = (t / 3 - j / Math.max(rb, 1) + i * 0.17) % 1, p = ph < 0 ? ph + 1 : ph;
           const pulse = still || p > 0.16 ? 0 : Math.sin((p / 0.16) * Math.PI);

@@ -94,6 +94,23 @@ const Dev = {
         ['Play black hole event', () => { BlackHole.start(); return 'Black hole event started'; }],
         ['Reset black hole event', () => { G.blackhole = false; G.theme = 'classic'; applyTheme(); Panels.syncOptions(); return 'Black hole event reset (it plays on your next click once you are past 1 trillion all-time tokens)'; }],
         ['Unlock Terminal', () => { if (!G.owned[5]) G.owned[5] = 1; recompute(); G.focus = D.focusMax; return 'Terminal unlocked with full Focus'; }],
+        ['Complete current challenge', () => { if (!G.challenge) return 'No challenge running'; G.earned = Math.max(G.earned, CHALLENGES.find(c => c.id === G.challenge).goal); return 'Challenge goal reached (completes within a second)'; }],
+      ]],
+      ['Toolbox', [
+        ['Unlock all tools', () => { for (const i of [2, 3, 4, 5, 6]) if (!G.owned[i]) G.owned[i] = 1; return 'Garden, Exchange, Models, Missions and Duck unlocked'; }],
+        ['Grow all plants', () => { G.garden.plots.forEach(p => { if (p) p.at = Math.min(p.at, Date.now() - Garden.growSec(p.seed) * 1000 - 1000); }); Garden.stateSig = ''; return 'Every plant is mature'; }],
+        ['Discover all seeds', () => { G.garden.known = Object.keys(SEEDS); return 'Every package can be planted'; }],
+        ['Next market tick', () => { G.market.next = Date.now(); return 'Prices update now'; }],
+        ['Refill model swaps', () => { G.models.swaps = MAX_SWAPS; return 'Model swaps refilled'; }],
+        ['Finish all missions', () => { G.missions.active.forEach(a => { a.end = Date.now() - 1; }); return 'Every mission is ready to collect'; }],
+        ['Duck +1 level', () => { if (G.duck.level < 10) G.duck.level++; return `Duck is level ${G.duck.level}`; }],
+        ['+10 compute credits', () => { G.credits += 10; return '+10 compute credits'; }],
+      ]],
+      ['Events', [
+        ['Pull request', () => { if (!Events.pr) Events.pullRequest(); return 'A pull request popped up'; }],
+        ['Rate Limited', () => { Events.rateLimit(); return 'Rate limited for 10 seconds'; }],
+        ['Spawn memory leak', () => { G.leaks.list.push({ a: rand(0, 6.28), ate: 0, born: 0 }); return 'A memory leak appeared'; }],
+        ['Seasonal item', () => { Events.season = currentSeason(); Events.spawnItem(); return Events.season ? 'A seasonal item is flying by' : 'No season active (pick one in Toggles)'; }],
       ]],
     ];
   },
@@ -132,6 +149,7 @@ const Dev = {
       check('devFree', 'Free shopping (buildings and upgrades cost nothing)') +
       check('devFast', 'A Eureka token every 5 seconds') +
       check('devFocus', 'Infinite Focus for slash commands') +
+      `<label class="check" for="devSeason">Season <select id="devSeason"><option value="auto">Calendar</option><option value="hackathon">Hackathon Week</option><option value="launch">Launch Week</option><option value="none">No season</option></select></label>` +
       `</div></section></div>`;
 
     const panel = $('#panel-dev');
@@ -155,6 +173,7 @@ const Dev = {
     bind('#devFree', 'free', 'Free shopping');
     bind('#devFast', 'fastEureka', 'Fast Eureka tokens');
     bind('#devFocus', 'infFocus', 'Infinite Focus');
+    $('#devSeason').addEventListener('change', e => { G.dev.season = e.target.value; this.done(`Season: ${e.target.selectedOptions[0].textContent}`); });
   },
   msg(text, bad) {
     const el = $('#devMsg');
@@ -188,5 +207,6 @@ const Dev = {
     $('#devFree').checked = G.dev.free;
     $('#devFast').checked = G.dev.fastEureka;
     $('#devFocus').checked = G.dev.infFocus;
+    $('#devSeason').value = G.dev.season || 'auto';
   },
 };

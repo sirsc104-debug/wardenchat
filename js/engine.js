@@ -18,6 +18,43 @@ function emit(ev, ...args) {
   }
 }
 
+// ---------- systems registry ----------
+// Bigger systems (garden, exchange, models, missions, duck, events) register here. Each may keep its own
+// saved state (key/fresh/load) and may adjust the economy through optional hooks read by recompute():
+//   each(eachArray), prod(), click(), costOf(i), upgCost(), eureka(), effDur(), flow(), away(i), drain(), offline()
+const SYSTEMS = [];
+function registerSystem(sys) {
+  SYSTEMS.push(sys);
+  if (sys.key && !(sys.key in G)) G[sys.key] = sys.fresh();
+}
+const modProduct = (fn, ...a) => SYSTEMS.reduce((p, m) => p * (m[fn] ? m[fn](...a) : 1), 1);
+const modSum = (fn, ...a) => SYSTEMS.reduce((t, m) => t + (m[fn] ? m[fn](...a) : 0), 0);
+const awayOf = i => modSum('away', i); // buildings busy elsewhere (Subagents on missions) do not produce
+
+// ---------- challenge runs (/compact with a rule) ----------
+const CHALLENGES = [
+  { id: 'noclick', name: 'Hands Off', rule: 'Clicking the sparkle gives nothing.', goal: 1e9,
+    reward: 'Idle Mastery', perk: 'Production +10% forever.' },
+  { id: 'noupgrade', name: 'Vanilla Only', rule: 'You cannot buy upgrades.', goal: 1e9,
+    reward: 'Raw Talent', perk: 'Buildings cost 5% less forever.' },
+  { id: 'halfspeed', name: 'Rate Limited Run', rule: 'All production is halved.', goal: 1e10,
+    reward: 'Throughput', perk: 'Clicking +25% and production +5% forever.' },
+];
+const inChallenge = id => G.challenge === id;
+const challengeDone = id => G.challengesDone.includes(id);
+
+// ---------- daily compute credits and building levels ----------
+const DAY_MS = 86400000;
+const levelCost = i => G.levels[i] + 1;
+function levelUp(i) {
+  const cost = levelCost(i);
+  if (!G.owned[i] || G.credits < cost) return false;
+  G.credits -= cost;
+  G.levels[i]++;
+  recompute();
+  return true;
+}
+
 // ---------- state ----------
 function freshRun() {
   return {
@@ -32,8 +69,10 @@ function freshGame() {
     compacts: 0, prestige: 0, memories: 0, mem: new Set(), gameStart: Date.now(),
     settings: { numbers: 'words', particles: true, floaters: true, sound: false, motion: true },
     stats: { maxTps: 0 },
-    dev: { on: false, mult: 1, free: false, fastEureka: false, infFocus: false },
+    dev: { on: false, mult: 1, free: false, fastEureka: false, infFocus: false, season: 'auto' },
     blackhole: false, theme: 'classic', // the one-time Event Horizon event and the clicker style it unlocks
+    challenge: null, challengesDone: [],
+    credits: 1, creditAt: Date.now(), levels: Array(N).fill(0),
   });
 }
 let G = freshGame();
@@ -83,10 +122,14 @@ function recompute() {
   const doubles = Array(N).fill(0);
   D.eurekaFreq = 1; D.eurekaLife = 1; D.effDur = 1; D.bugMult = 1; D.bugFreq = 1;
 
+  const synergies = [];
+  let upClick = 1;
   for (const id of G.upgrades) {
     const u = UPG[id];
     if (!u) continue;
     switch (u.kind) {
+      case 'synergy': synergies.push(u); break;
+      case 'clickmult': upClick *= u.m; break;
       case 'tier': doubles[u.b]++; break;
       case 'cursor': if (u.x2) x2++; fingers += u.fingers; fm *= u.fm; break;
       case 'click': clickPct += 1; break;
@@ -109,16 +152,31 @@ function recompute() {
   for (let i = 1; i < N; i++) {
     D.each[i] = BUILDINGS[i].tps * Math.pow(2, doubles[i]) * (i === 2 && hasMem('duck') ? 1.5 : 1);
   }
+  // Synergies: building A +1% per B owned, B +0.2% per A owned.
+  for (const u of synergies) {
+    D.each[u.a] *= 1 + 0.01 * G.owned[u.b];
+    D.each[u.b] *= 1 + 0.002 * G.owned[u.a];
+  }
+  // Building levels from compute credits: +1% each.
+  for (let i = 0; i < N; i++) if (G.levels[i]) D.each[i] *= 1 + 0.01 * G.levels[i];
+  for (const m of SYSTEMS) if (m.each) m.each(D.each);
+  D.costMul = BUILDINGS.map((_, i) => modProduct('costOf', i) * (challengeDone('noupgrade') ? 0.95 : 1));
+  D.upgDiscount *= modProduct('upgCost');
+  D.eurekaFreq *= modProduct('eureka');
+  D.effDur *= modProduct('effDur');
+  D.bugMult *= modProduct('bugMult');
+  D.offline = Math.min(1, D.offline + modSum('offline'));
 
   D.prestigeBonus = G.prestige * 0.01 * (hasMem('deep') ? 1.5 : 1);
   D.gpct = gpct;
   D.flowMult = flowMult;
   // Flow itself: +0.25% production for every 1% Flow (4% Flow per achievement), on top of the Engineer upgrades.
-  D.flowBonus = D.flow * FLOW_PROD;
-  D.mult = (1 + gpct / 100) * flowMult * (1 + D.flowBonus) * (1 + D.prestigeBonus) * (G.dev.on ? G.dev.mult : 1);
+  D.flowBonus = D.flow * FLOW_PROD * modProduct('flow');
+  const challengeMult = (inChallenge('halfspeed') ? 0.5 : 1) * (challengeDone('noclick') ? 1.1 : 1) * (challengeDone('halfspeed') ? 1.05 : 1);
+  D.mult = (1 + gpct / 100) * flowMult * (1 + D.flowBonus) * (1 + D.prestigeBonus) * challengeMult * modProduct('prod') * (G.dev.on ? G.dev.mult : 1);
 
   let raw = 0;
-  for (let i = 0; i < N; i++) raw += G.owned[i] * D.each[i];
+  for (let i = 0; i < N; i++) raw += Math.max(0, G.owned[i] - awayOf(i)) * D.each[i];
   D.raw = raw;
   D.tpsBase = raw * D.mult;
 
@@ -130,11 +188,13 @@ function recompute() {
   // Bugs clinging to the sparkle each eat 1/9 of production: 9 bugs = 0 per second, 10 = negative.
   D.tpsGross = D.tpsBase * bp;
   D.bugsEating = bugsEating;
-  D.tps = D.tpsGross * (1 - bugsEating / INFEST_ZERO_AT);
+  D.drain = modSum('drain');
+  D.tps = D.tpsGross * (1 - bugsEating / INFEST_ZERO_AT - D.drain);
 
   D.clickBase = Math.pow(2, x2) + add;
   D.clickPct = clickPct;
-  D.click = (D.clickBase + (D.tpsGross * clickPct) / 100) * bc * (hasMem('muscle') ? 1.25 : 1);
+  D.click = (D.clickBase + (D.tpsGross * clickPct) / 100) * bc * upClick * (hasMem('muscle') ? 1.25 : 1) *
+    (challengeDone('halfspeed') ? 1.25 : 1) * modProduct('click');
 
   const s = G.owned[5];
   D.focusMax = s > 0 ? Math.floor(10 + 4 * Math.pow(s, 0.7)) : 0;
@@ -152,7 +212,7 @@ function earn(n) {
 const devFree = () => G.dev.on && G.dev.free;
 function bulkCost(i, n) {
   if (devFree()) return 0;
-  const base = BUILDINGS[i].cost * D.bldDiscount * D.buffCost, o = G.owned[i];
+  const base = BUILDINGS[i].cost * D.bldDiscount * D.buffCost * (D.costMul ? D.costMul[i] : 1), o = G.owned[i];
   return Math.ceil((base * (Math.pow(1.15, o + n) - Math.pow(1.15, o))) / 0.15);
 }
 function sellValue(i, n) {
@@ -173,7 +233,7 @@ function buyBuilding(i, n) {
   return true;
 }
 function sellBuilding(i, n) {
-  n = Math.min(n, G.owned[i]);
+  n = Math.min(n, G.owned[i] - awayOf(i));
   if (n <= 0) return false;
   G.tokens += sellValue(i, n);
   G.owned[i] -= n;
@@ -184,7 +244,7 @@ function sellBuilding(i, n) {
 }
 function buyUpgrade(id) {
   const u = UPG[id];
-  if (!u || hasUpg(id) || !safe(u.unlock)) return false;
+  if (!u || hasUpg(id) || !safe(u.unlock) || inChallenge('noupgrade')) return false;
   const cost = upgCost(u);
   if (G.tokens < cost) return false;
   G.tokens -= cost;
@@ -198,8 +258,12 @@ const visibleUpgrades = () =>
 
 // ---------- clicking ----------
 const recentClicks = [];
+// Rate Limited event: the sparkle ignores clicks until this time (performance.now()).
+let clickBlockedUntil = 0;
+const rateLimited = () => performance.now() < clickBlockedUntil;
 function clickSparkle() {
-  const v = D.click;
+  if (rateLimited()) { emit('blockedClick'); return 0; }
+  const v = inChallenge('noclick') ? 0 : D.click;
   earn(v);
   G.handmade += v;
   G.clicks++;
@@ -387,6 +451,19 @@ function compact() {
   return gain;
 }
 
+// Start a challenge: /compact as normal, then play the new run under the challenge rule.
+function startChallenge(id) {
+  if (!CHALLENGES.some(c => c.id === id) || G.challenge) return 0;
+  const gain = compact();
+  G.challenge = id;
+  recompute();
+  return gain;
+}
+function abandonChallenge() {
+  G.challenge = null;
+  recompute();
+}
+
 function buyMemory(id) {
   const m = MEM[id];
   if (!m || hasMem(id) || G.memories < m.cost || !m.req.every(hasMem)) return false;
@@ -435,9 +512,21 @@ function update(dt) {
   if (T.eureka <= 0) { T.eureka = eurekaDelay(); emit('spawnEureka', false); }
   T.bug -= dt;
   if (T.bug <= 0) { T.bug = bugDelay(); if (G.earned >= 500) emit('spawnBug'); }
+  for (const m of SYSTEMS) if (m.tick) m.tick(dt);
   T.ach -= dt;
   if (T.ach <= 0) {
     T.ach = 1;
+    // One compute credit per real day, even while the game is closed.
+    while (Date.now() - G.creditAt >= DAY_MS) { G.credits++; G.creditAt += DAY_MS; emit('credit'); }
+    if (G.challenge) {
+      const c = CHALLENGES.find(x => x.id === G.challenge);
+      if (c && G.earned >= c.goal) {
+        G.challenge = null;
+        if (!G.challengesDone.includes(c.id)) G.challengesDone.push(c.id);
+        recompute();
+        emit('challengeDone', c);
+      }
+    }
     if (D.clickPct) recompute(); // click value follows tps
     G.stats.maxTps = Math.max(G.stats.maxTps, D.tps);
     checkAchievements();
@@ -472,6 +561,15 @@ function load(str, applyOffline) {
   Object.assign(g.settings, o.settings || {});
   Object.assign(g.stats, o.stats || {});
   Object.assign(g.dev, o.dev || {});
+  g.challenge = CHALLENGES.some(c => c.id === o.challenge) ? o.challenge : null;
+  g.challengesDone = (Array.isArray(o.challengesDone) ? o.challengesDone : []).filter(id => CHALLENGES.some(c => c.id === id));
+  g.credits = Math.max(0, Math.floor(num(o.credits, 1)));
+  g.creditAt = num(o.creditAt, Date.now());
+  g.levels = BUILDINGS.map((_, i) => Math.max(0, Math.floor(num((o.levels || [])[i]))));
+  for (const sys of SYSTEMS) {
+    if (!sys.key) continue;
+    try { g[sys.key] = o[sys.key] ? sys.load(o[sys.key]) : sys.fresh(); } catch (e) { console.warn('Reset', sys.key, e); g[sys.key] = sys.fresh(); }
+  }
   g.blackhole = !!o.blackhole;
   g.theme = g.blackhole && o.theme === 'horizon' ? 'horizon' : 'classic';
   G = g;
@@ -510,6 +608,7 @@ function importSave(text) {
 }
 function wipeSave() {
   G = freshGame();
+  for (const sys of SYSTEMS) if (sys.key) G[sys.key] = sys.fresh();
   recompute();
   try { localStorage.removeItem(SAVE_KEY); } catch (e) { /* storage unavailable */ }
   emit('reset');

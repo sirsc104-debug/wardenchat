@@ -177,7 +177,12 @@ function bldTip(i) {
     stats = `<div class="tip-stats">Each ${esc(b.name)} makes <b>${fmt(each)}</b> tokens/s.</div>`;
   }
   const tag = `Building · owned ${n.toLocaleString('en-US')}${sell ? ` · sells ${Math.min(amt, n)} for` : amt > 1 ? ` · buy ${amt}` : ''}`;
-  return tipHead(svgIcon(b.icon), b.name, tag, cost, sell ? n > 0 : G.tokens >= cost) + `<div class="tip-desc">${esc(b.desc)}</div>` + stats;
+  const lv = G.levels[i], away = awayOf(i);
+  const extra = (lv || away || UI.mode === 'level')
+    ? `<div class="tip-stats">${lv ? `Level <b>${lv}</b>: +${lv}% output.<br>` : ''}${away ? `<b>${away}</b> away on missions (not producing).<br>` : ''}` +
+      `${UI.mode === 'level' ? `Level up for <b>⚡${levelCost(i)}</b> compute credit${levelCost(i) === 1 ? '' : 's'} (you have ${G.credits}).` : ''}</div>`
+    : '';
+  return tipHead(svgIcon(b.icon), b.name, tag, UI.mode === 'level' ? null : cost, sell ? n > 0 : G.tokens >= cost) + `<div class="tip-desc">${esc(b.desc)}</div>` + stats + extra;
 }
 
 // ---------- toasts ----------
@@ -482,6 +487,7 @@ const UI = {
     this.bindChrome();
     bindTips($('#buffs'), '.buff', el => buffTip(el.dataset.key));
     bindTips($('#paneLeft'), '#flowTag', () => flowTip());
+    bindTips(document.querySelector('.brand'), '#seasonPill', () => Events.seasonTip());
     this.refreshStore(true);
     this.refreshBank();
   },
@@ -510,7 +516,7 @@ const UI = {
       const el = e.target.closest('.bld[data-i]');
       if (!el) return;
       const i = +el.dataset.i;
-      const ok = this.mode === 'sell' ? sellBuilding(i, this.amt) : buyBuilding(i, this.amt);
+      const ok = this.mode === 'level' ? levelUp(i) : this.mode === 'sell' ? sellBuilding(i, this.amt) : buyBuilding(i, this.amt);
       if (ok) {
         Sound.buy();
         el.classList.remove('bump');
@@ -596,6 +602,7 @@ const UI = {
       upBox.innerHTML = list.length
         ? list.map(u => `<button class="upg" type="button" data-id="${u.id}" aria-label="${esc(u.name)}">${upgIcon(u)}</button>`).join('')
         : '<p class="empty-note">New upgrades appear here as your workspace grows.</p>';
+      if (inChallenge('noupgrade')) upBox.insertAdjacentHTML('afterbegin', '<p class="empty-note">Vanilla Only challenge: upgrades are locked this run.</p>');
     }
     for (const el of upBox.children) {
       const u = UPG[el.dataset.id];
@@ -611,29 +618,35 @@ const UI = {
       this.bldSig = `${shown}:${maxRev}`;
       bBox.innerHTML = BUILDINGS.slice(0, shown).map((b, i) => i <= maxRev
         ? `<button class="bld" type="button" data-i="${i}" style="--bc:${b.color}"><span class="bld-ico">${svgIcon(b.icon)}</span>` +
-          `<span class="bld-main"><span class="bld-name">${esc(b.name)}</span><span class="bld-cost">${TK}<span class="bld-cost-v"></span></span></span>` +
+          `<span class="bld-main"><span class="bld-name">${esc(b.name)} <span class="bld-lv"></span></span><span class="bld-cost">${TK}<span class="bld-cost-v"></span></span></span>` +
           `<span class="bld-owned"></span></button>`
         : `<div class="bld mystery" aria-hidden="true"><span class="bld-ico">${svgIcon(b.icon)}</span>` +
           `<span class="bld-main"><span class="bld-name">???</span><span class="bld-cost">${TK}${fmt(b.cost)}</span></span><span class="bld-owned"></span></div>`).join('');
     }
-    const sell = this.mode === 'sell';
+    const sell = this.mode === 'sell', lvl = this.mode === 'level';
     for (const el of bBox.querySelectorAll('.bld[data-i]')) {
       const i = +el.dataset.i;
-      const cost = sell ? sellValue(i, this.amt) : bulkCost(i, this.amt);
-      const can = sell ? G.owned[i] > 0 : G.tokens >= cost;
-      const txt = (sell ? '+' : '') + fmt(cost);
+      const cost = lvl ? levelCost(i) : sell ? sellValue(i, this.amt) : bulkCost(i, this.amt);
+      const can = lvl ? G.owned[i] > 0 && G.credits >= cost : sell ? G.owned[i] - awayOf(i) > 0 : G.tokens >= cost;
+      const txt = lvl ? `⚡${cost} credit${cost === 1 ? '' : 's'} → Lv ${G.levels[i] + 1}` : (sell ? '+' : '') + fmt(cost);
+      const lv = el.querySelector('.bld-lv'), lvTxt = G.levels[i] ? `Lv ${G.levels[i]}` : '';
+      if (lv.textContent !== lvTxt) lv.textContent = lvTxt;
       const cv = el.querySelector('.bld-cost-v'), ov = el.querySelector('.bld-owned');
       if (cv.textContent !== txt) cv.textContent = txt;
       const own = G.owned[i] ? G.owned[i].toLocaleString('en-US') : '';
       if (ov.textContent !== own) ov.textContent = own;
       el.classList.toggle('no', !can);
       el.classList.toggle('sell', sell);
+      el.classList.toggle('lvl', lvl);
     }
+    const cb = $('#creditsBar'), next = DAY_MS - (Date.now() - G.creditAt);
+    const ctext = `⚡ ${G.credits} compute credit${G.credits === 1 ? '' : 's'} · next in ${fmtTime(next / 1000)}`;
+    if (cb.textContent !== ctext) cb.textContent = ctext;
   },
   // From 100 Autocompletes on, every mouse pointer gets a gold skin, and clicks play a quick gold tap.
   // Cursor tier: 0 = normal, 1 = gold (100+ Autocompletes), 2 = shimmering rainbow (500+).
   refreshCursor() {
-    const owned = G.owned[0], tier = owned >= RAINBOW_AT ? 2 : owned >= HAND_GROUP_AT ? 1 : 0;
+    const owned = G.owned[0], tier = owned >= DIAMOND_AT ? 3 : owned >= RAINBOW_AT ? 2 : owned >= HAND_GROUP_AT ? 1 : 0;
     if (tier === this.cursorTier) return;
     if (!this.skinCss) this.initGoldCursor();
     const first = this.cursorTier === undefined, up = !first && tier > this.cursorTier;
@@ -642,6 +655,7 @@ const UI = {
     document.body.classList.toggle('gold-cursor', tier > 0);
     if (tier > 0) this.setSkin(this.skin || 'arrow', true);
     if (up && tier === 1) toast({ icon: BIG_HAND, kicker: 'Golden touch', title: 'Your cursor turned gold', text: 'You own 100 Autocompletes. Every pointer is gold now, and clicking the sparkle lands with a golden tap.', kind: 'gold' });
+    if (up && tier === 3) toast({ icon: BIG_HAND, kicker: 'Diamond touch', title: 'Your cursor turned to diamond', text: 'You own 5,000 Autocompletes. Every pointer glitters now, and clicking the sparkle shatters crystal everywhere.', kind: 'rare' });
     if (up && tier === 2) toast({ icon: BIG_HAND, kicker: 'Event horizon touch', title: 'Your cursor fell into a black hole', text: 'You own 500 Autocompletes. Every pointer is dark and glowing now, and clicking the sparkle collapses space around it.', kind: 'legend' });
   },
   initGoldCursor() {
@@ -657,20 +671,31 @@ const UI = {
     this.skinCss = {};
     this.rbSvg = {};
     this.rbCss = {};
+    this.diaSvg = {};
+    this.diaCss = {};
+    // Diamond skins: icy white-to-cyan fill with a moving glint and deep blue outlines.
+    const diaMap = { [GOLD_FILL]: 'url(#dg)', '#F2C57C': 'url(#dg)', [GOLD_INK]: '#1F4E66', '#B9853A': 'rgba(31,78,102,.6)' };
+    const diaParts = parts => parts.map(p => ({ ...p, f: p.f && (diaMap[p.f] || p.f), s: p.s && (diaMap[p.s] || p.s) }));
+    const diaDefs = k => `<defs><linearGradient id="dg" gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="30" y2="30" gradientTransform="rotate(${k * 45} 16 16)">` +
+      '<stop offset="0" stop-color="#E9FBFF"/><stop offset=".45" stop-color="#9FE3FF"/><stop offset=".55" stop-color="#FFFFFF"/><stop offset="1" stop-color="#5EC8FF"/></linearGradient></defs>';
     for (const [name, [parts, hx, hy, fallback]] of Object.entries(GOLD_SKINS)) {
       this.skinSvg[name] = toSvg(parts);
       this.skinCss[name] = css(this.skinSvg[name], hx, hy, fallback);
       this.rbSvg[name] = [];
       this.rbCss[name] = [];
+      this.diaSvg[name] = [];
+      this.diaCss[name] = [];
       for (let k = 0; k < 8; k++) {
         this.rbSvg[name].push(toSvg(rbParts(parts), rbDefs(k)));
         this.rbCss[name].push(css(this.rbSvg[name][k], hx, hy, fallback));
+        this.diaSvg[name].push(toSvg(diaParts(parts), diaDefs(k)));
+        this.diaCss[name].push(css(this.diaSvg[name][k], hx, hy, fallback));
       }
     }
     this.rbFrame = 0;
     // The rainbow pointer shimmers by stepping through 8 gradient angles.
     setInterval(() => {
-      if (this.cursorTier !== 2 || document.hidden) return;
+      if (this.cursorTier < 2 || document.hidden) return;
       this.rbFrame = (this.rbFrame + 1) % 8;
       this.applySkin();
     }, 150);
@@ -685,7 +710,10 @@ const UI = {
       // The tap animation only plays when the click lands on the sparkle itself.
       if (e.target.id !== 'stage') return;
       const p = Stage.local(e);
-      if (Stage.hit(p.x, p.y)) this.cursorTier === 2 ? this.rainbowTap(e.clientX, e.clientY) : this.goldTap(e.clientX, e.clientY);
+      if (!Stage.hit(p.x, p.y)) return;
+      if (this.cursorTier === 3) this.diamondTap(e.clientX, e.clientY);
+      else if (this.cursorTier === 2) this.rainbowTap(e.clientX, e.clientY);
+      else this.goldTap(e.clientX, e.clientY);
     }, true);
   },
   // Which pointer the browser would normally show over this element.
@@ -705,7 +733,7 @@ const UI = {
     this.applySkin();
   },
   applySkin() {
-    const css = this.cursorTier === 2 ? this.rbCss[this.skin][this.rbFrame] : this.skinCss[this.skin];
+    const css = this.cursorTier === 3 ? this.diaCss[this.skin][this.rbFrame] : this.cursorTier === 2 ? this.rbCss[this.skin][this.rbFrame] : this.skinCss[this.skin];
     document.documentElement.style.setProperty('--gold-cursor', css);
   },
   // Shows an animated copy of the current pointer at the click point, hiding the real one meanwhile.
@@ -733,6 +761,20 @@ const UI = {
     if (stillMode()) return;
     this.playTap(x, y, this.skinSvg[this.skin], '', 300);
     this.ring(x, y);
+  },
+  // Diamond tier: the spin-slam, then crystal rings bursting outward and shards flying in every direction.
+  diamondTap(x, y) {
+    if (stillMode()) return;
+    this.playTap(x, y, this.diaSvg[this.skin][this.rbFrame], 'rb dia', 470);
+    ['#FFFFFF', '#9FE3FF', '#5EC8FF'].forEach((col, i) => this.ring(x, y, 'rb', `--rc:${col};animation-delay:${0.12 + i * 0.06}s`));
+    if (!G.settings.particles) return;
+    for (let i = 0; i < 16; i++) {
+      const p = document.createElement('span'), a = (i / 16) * Math.PI * 2 + rand(-0.15, 0.15), d = rand(60, 120);
+      p.className = 'fx-spark shard';
+      p.style.cssText = `left:${x}px;top:${y}px;--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px;--c:${i % 2 ? '#FFFFFF' : '#9FE3FF'};--rot:${(a * 180) / Math.PI}deg;animation-delay:.12s`;
+      FX.layer.appendChild(p);
+      setTimeout(() => p.remove(), 900);
+    }
   },
   // Black hole tier: wind-up, slam and a full spin, rings that collapse inward, sparks pulled into the click,
   // then one orange flash outward.

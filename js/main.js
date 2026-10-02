@@ -42,6 +42,7 @@ function start(snapshot) {
   UI.init();
   Stage.init($('#stage'));
   Workspace.init($('#workspace'));
+  Toolbox.init();
   Panels.init();
   Dev.init();
   BlackHole.init();
@@ -56,6 +57,12 @@ function start(snapshot) {
   on('tokenRain', n => FX.tokenRain(n));
   on('infestation', n => FX.infestation(n));
   on('eurekaChain', n => { FX.chain += n; });
+  on('challengeDone', c => {
+    Sound.legendary();
+    toast({ icon: GLYPH.compress, kicker: 'Challenge complete', title: `${esc(c.name)}: ${esc(c.reward)}`, text: `${esc(c.perk)} The run continues with normal rules.`, kind: 'legend', life: 9000 });
+    Panels.refresh(true);
+  });
+  on('credit', () => toast({ icon: GLYPH.bolt, kicker: 'Compute credit', title: `+1 credit (you have ${G.credits})`, text: 'Spend credits in the Store\'s Level mode to level up a building (+1% each level).', kind: 'lilac' }));
   on('reset', () => {
     Spinner.pick();
     Workspace.sig = '';

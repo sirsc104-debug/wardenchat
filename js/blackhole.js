@@ -27,7 +27,7 @@ const BlackHole = {
     ov.className = 'bh-overlay';
     ov.innerHTML =
       `<div class="bh-tab"><span class="bh-dot"></span><span class="bh-title">Event Horizon</span>` +
-      `<span class="bh-count" id="bhCount"></span><button type="button" class="bh-skip" id="bhSkip">Skip ›</button></div>` +
+      `<span class="bh-count" id="bhCount"></span><span class="bh-prog"><span id="bhProg"></span></span><button type="button" class="bh-skip" id="bhSkip">Skip ›</button></div>` +
       `<canvas class="bh-canvas"></canvas><div class="bh-caption" id="bhCaption"></div><div class="bh-flash"></div>`;
     document.body.appendChild(ov);
     this.ov = ov;
@@ -48,6 +48,9 @@ const BlackHole = {
     this.consumed = 0;
     this.burst = [];
     this.rings = [];
+    this.gwaves = [];
+    this.sparks = [];
+    this.gwT = 0;
     this.buildItems();
     this.stars = Array.from({ length: 170 }, () => this.newStar(true));
     document.getElementById('app').classList.add('bh-shake');
@@ -163,6 +166,24 @@ const BlackHole = {
 
     c.clearRect(0, 0, W, H);
     const R = this.holeR(t);
+    // Camera shake: builds while the hole collapses, kicks hard at the flash, then settles.
+    let shake = 0;
+    if (t > BH.fall[1] && t < BH.flash) shake = ((t - BH.fall[1]) / (BH.flash - BH.fall[1])) * 14;
+    else if (t >= BH.flash) shake = Math.max(0, 22 * (1 - (t - BH.flash) / 1.2));
+    c.save();
+    if (shake) c.translate(rand(-shake, shake), rand(-shake, shake));
+    // Nebula clouds drifting behind everything while the tab is open.
+    if (bg > 0.05) {
+      const neb = [[0.25, 0.3, '120,60,200'], [0.75, 0.65, '20,120,160'], [0.6, 0.2, '200,90,30']];
+      for (const [nx, ny, col] of neb) {
+        const ox = Math.sin(t * 0.2 + nx * 9) * 40, oy = Math.cos(t * 0.17 + ny * 7) * 30, rad = Math.max(W, H) * 0.45;
+        const g = c.createRadialGradient(nx * W + ox, ny * H + oy, 0, nx * W + ox, ny * H + oy, rad);
+        g.addColorStop(0, `rgba(${col},${0.16 * bg})`);
+        g.addColorStop(1, `rgba(${col},0)`);
+        c.fillStyle = g;
+        c.fillRect(0, 0, W, H);
+      }
+    }
 
     // Vignette closing in during the collapse.
     if (t < BH.black[1]) {
@@ -185,7 +206,21 @@ const BlackHole = {
       c.globalAlpha = 1;
     }
 
+    // Gravitational waves ripple outward while the hole feeds.
+    if (t >= BH.fall[0] && t < BH.flash && (this.gwT -= dt) <= 0) { this.gwT = 1.1; this.gwaves.push({ life: 0 }); }
+    this.gwaves = this.gwaves.filter(w => (w.life += dt) < 2.2);
+    for (const w of this.gwaves) {
+      c.globalAlpha = 0.22 * (1 - w.life / 2.2);
+      c.strokeStyle = '#C8C8CE';
+      c.lineWidth = 2;
+      c.beginPath();
+      c.arc(cx, cy, R * 1.4 + w.life * Math.max(W, H) * 0.35, 0, Math.PI * 2);
+      c.stroke();
+    }
+    c.globalAlpha = 1;
+    if (R > 0 && bg > 0.05 && t < BH.flash) this.drawLensing(c, cx, cy, R, t, bg);
     if (R > 0) this.drawHole(c, cx, cy, R, t, 'back');
+    if (R > 0 && t >= BH.fall[0] - 0.5 && t < BH.flash) this.drawJets(c, cx, cy, R, t);
 
     // Buildings spiral in, stretching toward the hole, and vanish past the horizon.
     if (t >= BH.fall[0] && t < BH.flash) {
@@ -198,6 +233,18 @@ const BlackHole = {
         const a = it.a0 + e * e * 7;
         const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r;
         const sc = 1 - e * 0.85;
+        // Motion trail from where it was last frame.
+        if (it.px != null && r > R) {
+          c.strokeStyle = 'rgba(255,190,120,.35)';
+          c.lineWidth = Math.max(1, it.size * sc * 0.18);
+          c.lineCap = 'round';
+          c.beginPath();
+          c.moveTo(it.px - (x - it.px) * 3, it.py - (y - it.py) * 3);
+          c.lineTo(x, y);
+          c.stroke();
+        }
+        it.px = x;
+        it.py = y;
         c.save();
         c.translate(x, y);
         c.rotate(a);
@@ -239,7 +286,54 @@ const BlackHole = {
         const a = Math.random() * Math.PI * 2, v = rand(250, 950);
         this.burst.push({ spr: it.spr, size: it.size, x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, rot: 0, vr: rand(-8, 8), life: 0, max: rand(1.6, 2.6) });
       }
-      for (let k = 0; k < 4; k++) this.rings.push({ x: cx, y: cy, life: -k * 0.12, r0: 30 + k * 40, big: true });
+      for (let k = 0; k < 6; k++) this.rings.push({ x: cx, y: cy, life: -k * 0.1, r0: 30 + k * 40, big: true, col: ['#FF7A1A', '#FFFFFF', '#C9A9FF', '#FFB070', '#5EC8FF', '#FF7A1A'][k] });
+      const cols = ['#FF7A1A', '#FFB070', '#FFFFFF', '#C9A9FF', '#5EC8FF'];
+      for (let k = 0; k < 320; k++) {
+        const a = Math.random() * Math.PI * 2, v = rand(150, 1400);
+        this.sparks.push({ x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0, max: rand(0.8, 2.4), col: pick(cols), s: rand(1.5, 3.5) });
+      }
+    }
+    // Supernova: rotating light rays and an expanding nebula right after the flash.
+    if (t >= BH.flash && t < BH.flash + 2.8) {
+      const e = (t - BH.flash) / 2.8, fade = 1 - e;
+      const neb = c.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * (0.2 + e * 0.9));
+      neb.addColorStop(0, `rgba(255,240,220,${0.55 * fade})`);
+      neb.addColorStop(0.3, `rgba(255,122,26,${0.4 * fade})`);
+      neb.addColorStop(0.6, `rgba(150,80,220,${0.22 * fade})`);
+      neb.addColorStop(1, 'rgba(0,0,0,0)');
+      c.fillStyle = neb;
+      c.fillRect(0, 0, W, H);
+      c.save();
+      c.translate(cx, cy);
+      c.rotate(t * 0.6);
+      const len = Math.hypot(W, H);
+      for (let k = 0; k < 24; k++) {
+        const a = (k / 24) * Math.PI * 2, wdt = 0.05 + (k % 3) * 0.02;
+        const g = c.createLinearGradient(0, 0, Math.cos(a) * len, Math.sin(a) * len);
+        g.addColorStop(0, `rgba(255,255,255,${0.5 * fade})`);
+        g.addColorStop(0.3, `rgba(255,170,90,${0.25 * fade})`);
+        g.addColorStop(1, 'rgba(255,122,26,0)');
+        c.fillStyle = g;
+        c.beginPath();
+        c.moveTo(0, 0);
+        c.arc(0, 0, len, a - wdt, a + wdt);
+        c.closePath();
+        c.fill();
+      }
+      c.restore();
+    }
+    if (this.sparks.length) {
+      this.sparks = this.sparks.filter(p => (p.life += dt) < p.max);
+      for (const p of this.sparks) {
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vx *= 0.97;
+        p.vy *= 0.97;
+        c.globalAlpha = 1 - p.life / p.max;
+        c.fillStyle = p.col;
+        c.fillRect(p.x, p.y, p.s, p.s);
+      }
+      c.globalAlpha = 1;
     }
     if (this.burst.length) {
       this.burst = this.burst.filter(p => (p.life += dt) < p.max);
@@ -260,16 +354,19 @@ const BlackHole = {
     }
     for (const g of this.rings.filter(g => g.big && g.life > 0)) {
       c.globalAlpha = Math.max(0, 1 - g.life / 0.5);
-      c.strokeStyle = '#FF7A1A';
+      c.strokeStyle = g.col || '#FF7A1A';
       c.lineWidth = 6;
       c.beginPath();
       c.arc(g.x, g.y, g.r0 + g.life * Math.max(W, H) * 1.6, 0, Math.PI * 2);
       c.stroke();
     }
     c.globalAlpha = 1;
+    c.restore(); // end of camera shake
 
     const total = this.total.toLocaleString('en-US');
     this.count.textContent = `${Math.min(this.total, Math.round(this.consumed)).toLocaleString('en-US')} of ${total} buildings consumed`;
+    const done = this.items.filter(it => it.done).length / Math.max(1, this.items.length);
+    this.ov.querySelector('#bhProg').style.width = `${(t >= BH.flash ? 1 : done) * 100}%`;
     this.setCaption(
       t < BH.suck ? 'The sparkle is collapsing under its own weight…'
         : t < BH.fall[0] ? 'Everything is falling in.'
@@ -277,7 +374,52 @@ const BlackHole = {
             : t < BH.flash ? 'Critical mass…'
               : '…and it all comes back out.');
   },
+  // Starlight bent around the hole: short bright arcs hugging the photon sphere.
+  drawLensing(c, cx, cy, R, t, bg) {
+    c.save();
+    c.translate(cx, cy);
+    c.lineCap = 'round';
+    for (let k = 0; k < 34; k++) {
+      const rr = R * (1.25 + ((k * 37) % 70) / 100), a0 = k * 2.39 + t * (0.25 + (k % 5) * 0.05), len = 0.12 + (k % 4) * 0.08;
+      c.strokeStyle = `rgba(235,235,245,${(0.25 + (k % 3) * 0.15) * bg})`;
+      c.lineWidth = 1 + (k % 2);
+      c.beginPath();
+      c.arc(0, 0, rr, a0, a0 + len);
+      c.stroke();
+    }
+    // Einstein ring.
+    c.strokeStyle = `rgba(255,220,180,${0.35 * bg})`;
+    c.lineWidth = 1.5;
+    c.beginPath();
+    c.arc(0, 0, R * 1.32 + Math.sin(t * 3) * 2, 0, Math.PI * 2);
+    c.stroke();
+    c.restore();
+  },
+  // Relativistic jets out of both poles, perpendicular to the disk.
+  drawJets(c, cx, cy, R, t) {
+    const grow = clamp((t - (BH.fall[0] - 0.5)) / 1.5, 0, 1), pulse = 0.75 + 0.25 * Math.sin(t * 9);
+    const len = Math.max(this.W, this.H) * 0.6 * grow;
+    c.save();
+    c.translate(cx, cy);
+    c.rotate(-0.28 - Math.PI / 2);
+    for (const dir of [1, -1]) {
+      const g = c.createLinearGradient(0, 0, len * dir, 0);
+      g.addColorStop(0, `rgba(230,245,255,${0.85 * pulse})`);
+      g.addColorStop(0.25, `rgba(140,200,255,${0.45 * pulse})`);
+      g.addColorStop(1, 'rgba(140,200,255,0)');
+      c.fillStyle = g;
+      c.beginPath();
+      c.moveTo(0, -R * 0.12);
+      c.lineTo(len * dir, -R * 0.45);
+      c.lineTo(len * dir, R * 0.45);
+      c.lineTo(0, R * 0.12);
+      c.closePath();
+      c.fill();
+    }
+    c.restore();
+  },
   drawHole(c, cx, cy, R, t, layer) {
+    const spin = t > BH.fall[1] ? 1 + (t - BH.fall[1]) * 6 : 1; // the disk whirls faster as the hole collapses
     c.save();
     c.translate(cx, cy);
     if (layer === 'back') {
@@ -290,10 +432,15 @@ const BlackHole = {
       c.rotate(-0.28);
       c.lineCap = 'butt';
       for (const [k, w, a] of [[2.7, 0.55, 0.35], [2.1, 0.3, 0.6], [1.6, 0.14, 0.9]]) {
-        c.strokeStyle = `rgba(255,${110 + k * 25 | 0},40,${a})`;
+        // Doppler beaming: the side spinning toward us is brighter.
+        const dg = c.createLinearGradient(-R * k, 0, R * k, 0);
+        dg.addColorStop(0, `rgba(255,236,200,${Math.min(1, a * 1.5)})`);
+        dg.addColorStop(0.5, `rgba(255,${110 + k * 25 | 0},40,${a})`);
+        dg.addColorStop(1, `rgba(150,50,20,${a * 0.5})`);
+        c.strokeStyle = dg;
         c.lineWidth = R * w;
         c.setLineDash([R * 1.1, R * 0.09, R * 0.4, R * 0.06]);
-        c.lineDashOffset = -t * R * (2.2 / k);
+        c.lineDashOffset = -t * R * (2.2 / k) * spin;
         c.beginPath();
         c.ellipse(0, 0, R * k, R * k * 0.27, 0, Math.PI, Math.PI * 2); // far half of the disk, behind the hole
         c.stroke();
@@ -312,10 +459,15 @@ const BlackHole = {
       c.rotate(-0.28);
       c.lineCap = 'butt';
       for (const [k, w, a] of [[2.7, 0.55, 0.35], [2.1, 0.3, 0.6], [1.6, 0.14, 0.9]]) {
-        c.strokeStyle = `rgba(255,${110 + k * 25 | 0},40,${a})`;
+        // Doppler beaming: the side spinning toward us is brighter.
+        const dg = c.createLinearGradient(-R * k, 0, R * k, 0);
+        dg.addColorStop(0, `rgba(255,236,200,${Math.min(1, a * 1.5)})`);
+        dg.addColorStop(0.5, `rgba(255,${110 + k * 25 | 0},40,${a})`);
+        dg.addColorStop(1, `rgba(150,50,20,${a * 0.5})`);
+        c.strokeStyle = dg;
         c.lineWidth = R * w;
         c.setLineDash([R * 1.1, R * 0.09, R * 0.4, R * 0.06]);
-        c.lineDashOffset = -t * R * (2.2 / k);
+        c.lineDashOffset = -t * R * (2.2 / k) * spin;
         c.beginPath();
         c.ellipse(0, 0, R * k, R * k * 0.27, 0, 0, Math.PI); // near half, in front of the hole
         c.stroke();

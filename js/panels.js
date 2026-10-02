@@ -27,14 +27,19 @@ const Panels = {
     const termOn = G.owned[5] > 0;
     if (term.hidden === termOn) term.hidden = !termOn;
     if (!termOn && this.tab === 'terminal') return this.show('workspace');
+    const tb = $('#tabToolbox'), tbOn = Toolbox.anyUnlocked();
+    if (tb.hidden === tbOn) tb.hidden = !tbOn;
+    tb.classList.toggle('attn', Toolbox.needsAttention());
     if (!force && !this.visible()) return;
     if (this.tab === 'stats') this.stats();
     else if (this.tab === 'achievements' && (force || this.achDirty)) this.achievements();
     else if (this.tab === 'memory') this.memory(force);
+    else if (this.tab === 'toolbox') Toolbox.refresh(force);
     else if (this.tab === 'options' && $('#optThemeRow').hidden === G.blackhole) this.syncOptions();
   },
   fastRefresh() {
     if (this.tab === 'terminal' && this.visible()) this.terminalTick();
+    if (this.tab === 'toolbox' && this.visible()) Toolbox.fast();
   },
 
   // ---------- stats ----------
@@ -142,7 +147,7 @@ const Panels = {
   // ---------- memory (prestige) ----------
   memory(force) {
     const pending = pendingPrestige();
-    const sig = [G.prestige, G.memories, pending, [...G.mem].join(), this.armed].join('|');
+    const sig = [G.prestige, G.memories, pending, [...G.mem].join(), this.armed, G.challenge, G.challengesDone.join(), this.armedChallenge].join('|');
     if (force || sig !== this.memSig) {
       this.memSig = sig;
       const cards = MEMORY.map(m => {
@@ -162,14 +167,53 @@ const Panels = {
         `<div class="compact-box"><div><h3 class="sec">Compact the conversation</h3><p>Running <code>/compact</code> summarizes this run into memories. Prestige levels come from all-time tokens: the first needs 1 trillion, and each level after that needs more. ` +
         `You keep achievements, prestige and memories. Tokens, buildings and upgrades start over.</p></div>` +
         `<button type="button" class="btn compact ${this.armed ? 'armed' : ''}" id="btnCompact">${this.armed ? `Confirm: compact for +${pending}` : '/compact'}</button></div>` +
-        `<h3 class="sec">CLAUDE.md</h3><p class="muted">Memories you learn here stay with you across every compaction.</p><div class="mem-grid">${cards}</div>`;
+        `<h3 class="sec">CLAUDE.md</h3><p class="muted">Memories you learn here stay with you across every compaction.</p><div class="mem-grid">${cards}</div>` +
+        this.challengeHtml();
     }
     const lvl = prestigeFor(allTimeEarned()), lo = Math.pow(lvl, 3) * 1e12, hi = Math.pow(lvl + 1, 3) * 1e12;
     const bar = $('#memBar'), next = $('#memNext');
     if (bar) bar.style.width = `${clamp(((allTimeEarned() - lo) / (hi - lo)) * 100, 0, 100)}%`;
+    const cbar = $('#chalBar'), c = CHALLENGES.find(x => x.id === G.challenge);
+    if (cbar && c) {
+      cbar.style.width = `${clamp((G.earned / c.goal) * 100, 0, 100)}%`;
+      $('#chalText').textContent = `${fmt(G.earned)} of ${fmt(c.goal)} tokens this run`;
+    }
     if (next) next.textContent = `Next level at ${fmt(hi)} all-time tokens`;
   },
+  challengeHtml() {
+    const active = CHALLENGES.find(c => c.id === G.challenge);
+    const cards = CHALLENGES.map(c => {
+      const done = challengeDone(c.id), on = G.challenge === c.id, armed = this.armedChallenge === c.id;
+      const btn = on ? `<button type="button" class="btn" data-chal-abandon>Abandon challenge</button>`
+        : G.challenge ? '' : `<button type="button" class="btn compact ${armed ? 'armed' : ''}" data-chal="${c.id}">${armed ? `Confirm: /compact into ${esc(c.name)}` : 'Start challenge'}</button>`;
+      return `<div class="chal-card ${done ? 'done' : ''} ${on ? 'on' : ''}"><div class="mem-name">${esc(c.name)}</div>` +
+        `<div class="mem-desc"><b>Rule:</b> ${esc(c.rule)}<br><b>Goal:</b> generate ${fmtWords(c.goal)} tokens in the challenge run.</div>` +
+        `<div class="mem-cost">${done ? 'Completed · ' : 'Reward · '}${esc(c.reward)}: ${esc(c.perk)}</div>${btn}</div>`;
+    }).join('');
+    return `<h3 class="sec">Challenge runs</h3><p class="muted">Starting a challenge runs /compact (you still get your prestige) and starts a new run under a rule. ` +
+      `Reach the goal to earn a special memory with a permanent perk.</p>` +
+      (active ? `<div class="chal-progress"><div class="meter"><span id="chalBar"></span></div><div class="mem-sub" id="chalText"></div></div>` : '') +
+      `<div class="mem-grid">${cards}</div>`;
+  },
   onMemoryClick(e) {
+    const ab = e.target.closest('[data-chal-abandon]');
+    if (ab) { abandonChallenge(); toast({ icon: GLYPH.compress, title: 'Challenge abandoned', text: 'The run continues with normal rules.' }); return this.memory(true); }
+    const cb = e.target.closest('[data-chal]');
+    if (cb) {
+      const id = cb.dataset.chal;
+      if (this.armedChallenge !== id) {
+        clearTimeout(this.chalTimer);
+        this.armedChallenge = id;
+        this.chalTimer = setTimeout(() => { this.armedChallenge = null; this.memory(true); }, 5000);
+        return this.memory(true);
+      }
+      clearTimeout(this.chalTimer);
+      this.armedChallenge = null;
+      const gain = startChallenge(id), c = CHALLENGES.find(x => x.id === id);
+      toast({ icon: GLYPH.compress, kicker: 'Challenge started', title: esc(c.name), text: `${esc(c.rule)} Goal: ${fmtWords(c.goal)} tokens.${gain ? ` (+${gain} prestige from the compaction.)` : ''}`, kind: 'lilac', life: 7000 });
+      UI.refreshStore(true);
+      return this.memory(true);
+    }
     if (e.target.closest('#btnCompact')) {
       if (!this.armed) {
         this.armed = setTimeout(() => { this.armed = null; this.memory(true); }, 5000);

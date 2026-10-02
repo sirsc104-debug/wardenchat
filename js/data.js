@@ -483,3 +483,43 @@ BUG_UPGRADES.forEach(([name, req, cost, eff, desc, q], k) => UPGRADES.push({
   id: `b${k}`, kind: 'bug', name, cost, desc, q, ...eff,
   req: `Squash ${req} bugs`, unlock: () => G.bugsSquashed >= req, icon: { g: 'bug', tier: k + 2 },
 }));
+
+// Synergies: pairs of buildings that boost each other (A +1% per B owned, B +0.2% per A owned).
+const SYNERGIES = [
+  [1, 2, 'Rubber Duck Mentorship', 'Every intern gets a duck. Every duck gets an intern.'],
+  [0, 3, 'Lint on Type', 'Red squiggles before you even finish the word.'],
+  [1, 4, 'Intern-proof Pipelines', 'You cannot merge on red. Yes, even you.'],
+  [3, 4, 'Pre-commit Hooks', 'The linter now runs before anything can go wrong.'],
+  [5, 6, 'Tool Use', 'Subagents with a toolbelt are subagents with a plan.'],
+  [5, 2, 'Agentic Debugging', 'The subagent explains the bug to the duck. The duck nods.'],
+  [7, 8, 'Liquid Cooling', 'The GPUs finally stopped melting the racks.'],
+  [8, 9, 'Solar Datacenters', 'Free power, if you do not mind the commute.'],
+  [10, 11, 'Quantum Bisect', 'Every commit is both the bad one and not, until you look.'],
+  [12, 13, 'Recursive Branching', 'Every branch forks a universe that forks a branch.'],
+  [14, 15, 'Shared Memory', 'A civilization with a perfect memory never repeats a meeting.'],
+  [16, 18, 'Starborn Claude', 'Born from tokens, returning to tokens.'],
+  [17, 11, 'Retroactive Refactor', 'Clean up the code before it was ever written.'],
+];
+SYNERGIES.forEach(([a, b, name, q], k) => {
+  const A = BUILDINGS[a], B = BUILDINGS[b];
+  UPGRADES.push({
+    id: `s${k}`, kind: 'synergy', a, b, name, q, cost: Math.max(A.cost, B.cost) * 1000,
+    desc: `${A.plural} gain <b>+1%</b> for each ${B.name} you own, and ${B.plural} gain <b>+0.2%</b> for each ${A.name}.`,
+    req: `Own 15 ${A.plural} and 15 ${B.plural}`, unlock: () => G.owned[a] >= 15 && G.owned[b] >= 15,
+    icon: { b: a, tier: 6 },
+  });
+});
+
+// Limited-time upgrades: only on sale during their season (bought ones are kept forever).
+const SEASON_UPGRADES = [
+  ['hackathon', 'All-Nighter', 1e6, { kind: 'global', pct: 15 }, 'Token production <b>+15%</b>.', 'Sleep is a feature request for next sprint.'],
+  ['hackathon', 'Free Pizza', 5e6, { kind: 'clickmult', m: 1.5 }, 'Clicking is <b>50%</b> stronger.', 'Fuelled by cold margherita.'],
+  ['launch', 'Launch Hype', 1e6, { kind: 'global', pct: 15 }, 'Token production <b>+15%</b>.', 'Number one on the front page, briefly.'],
+  ['launch', 'Press Kit', 5e6, { kind: 'golden', freq: 1.2 }, 'Eureka tokens appear <b>20%</b> more often.', 'Logos in four sizes and a very confident quote.'],
+];
+SEASON_UPGRADES.forEach(([season, name, cost, eff, desc, q], k) => UPGRADES.push({
+  id: `z${k}`, name, cost, desc, q, ...eff, season,
+  req: `Only during ${season === 'hackathon' ? 'Hackathon Week' : 'Launch Week'}`,
+  unlock: () => typeof currentSeason === 'function' && currentSeason() === season,
+  icon: { g: 'star', tier: season === 'hackathon' ? 4 : 7 },
+}));
