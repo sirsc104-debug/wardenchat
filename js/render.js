@@ -314,11 +314,13 @@ const Stage = {
   resize() {
     const r = dpr(), w = this.cv.clientWidth, h = this.cv.clientHeight;
     if (!w || !h) return;
-    Object.assign(this, { w, h, cx: w / 2, cy: h * 0.52 });
+    // In the full-screen view the sparkle is smaller and centred between the counter and the bottom bar, leaving room for the workstations.
+    this.full = document.body.classList.contains('full-view');
+    Object.assign(this, { w, h, cx: w / 2, cy: this.full ? (118 + h - 46) / 2 : h * 0.52 });
     this.cv.width = Math.round(w * r);
     this.cv.height = Math.round(h * r);
     this.ctx.setTransform(r, 0, 0, r, 0, 0);
-    this.R = Math.max(52, Math.min(w * 0.25, h * 0.215));
+    this.R = this.full ? clamp(Math.min(w, h) * 0.11, 46, 108) : Math.max(52, Math.min(w * 0.25, h * 0.215));
     this.style = G.theme;
     this.sparkle = centredCache(this.R * 1.02, isHorizon() ? paintHorizonSparkle : paintSparkle);
     this.shine = centredCache(this.R * 2.7, paintShine);
@@ -395,6 +397,7 @@ const Stage = {
     c.restore();
 
     if (horizon) this.drawDisk(t, still);
+    if (this.full) City.draw(this, dt, t, still);
     this.drawCursors(t, still);
 
     // The sparkle itself: breathes, squishes on click, grows on hover, spins faster with production.
@@ -471,7 +474,8 @@ const Stage = {
     const c = this.ctx, biggest = dia ? this.diaSize : rb ? this.rbSize : big ? this.bigSize : this.cursorSize;
     // Spread the circles over the space around the sparkle so the outer one never leaves the panel.
     const r0 = this.R * 1.12;
-    const room = Math.min(this.cx, this.h - this.cy, this.cy - 24) - biggest * 0.95;
+    let room = Math.min(this.cx, this.h - this.cy, this.cy - 24) - biggest * 0.95;
+    if (this.full) room = Math.min(room, this.R * 2.1); // keep the hands inside the ring of workstations
     const gap = rings > 1 ? clamp((room - r0) / (rings - 1), this.R * 0.13, this.R * 0.3) : 0;
     const frame = Math.floor(t * 9) % RB_FRAMES;
     for (let i = 0; i < n; i++) {

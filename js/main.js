@@ -46,6 +46,8 @@ function start(snapshot) {
   Panels.init();
   Dev.init();
   BlackHole.init();
+  FullView.init();
+  FullView.label();
 
   on('achievement', a => {
     Panels.achDirty = true;

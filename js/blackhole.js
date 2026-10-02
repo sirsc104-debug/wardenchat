@@ -19,6 +19,7 @@ const BlackHole = {
   },
   start() {
     if (this.running) return;
+    if (typeof FullView !== 'undefined') FullView.exit();
     this.running = true;
     Tip.hide();
     if (stillMode()) return this.quick();

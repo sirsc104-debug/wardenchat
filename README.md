@@ -33,6 +33,7 @@ Progress saves to `localStorage` every 30 seconds and when you leave the page. U
 | Presentation | Canvas-rendered sparkle with shine, orbiting pointing hands (from 100 Autocompletes on, each gold hand is 10, with 25 per circle and up to 3 circles, and from then on every mouse pointer gets a gold skin and each click on the sparkle lands with a quick gold tap and shockwave), code rain that thickens with production, click particles, floating numbers, a workspace view of every building at work (from 100 of a building on, each all-gold icon stands for 10, with the remaining 1-9 shown normally), a news ticker, and a Claude Code-style status spinner. |
 | Black hole tier | From 500 of a building, every 50 show as one black hole icon in the workspace: a dark, orange-glowing silhouette over a black core with a spinning accretion ring (then gold tens, then single icons). From 500 Autocompletes, black hole hands (50 each) take over the circles with a harder spin-slam and orange-and-grey shockwaves (the circles only ever show the highest hand type you have), every pointer skin turns dark with orange outlines and a sweeping glint, and clicking the sparkle collapses rings inward before an orange flash. |
 | Event Horizon | On your first click after all-time tokens reach 1 trillion (including saves already past it), the sparkle collapses into a black hole, the screen shakes and gets sucked in, and a fullscreen Event Horizon tab shows every building you own spiralling (with motion trails) through nebula clouds, gravitational waves, lensing arcs and twin jets into a Doppler-bright accretion disk, before a supernova blasts it all back out. Afterwards the game switches to a black, orange and grey Event Horizon style with a black-hole sparkle and accretion disk. It changes the look only; switch styles any time in Options. |
+| Full screen | The **Full screen** button under the sparkle opens a view where the sparkle fills the window and every building you own (not just the Autocomplete hands) runs its own workstation on a ring around it: its crew hops at work in its tier (single, gold, black hole or diamond icons), streams tokens into the sparkle along glowing links, and reports what each 3-second work cycle made. The sparkle stays clickable; press Esc or Exit full screen to go back. |
 | Quality of life | Offline production, save export/import, number formats, optional synthesized sound, reduced-motion support, keyboard play (focus the sparkle, press Enter), and a phone layout. |
 
 ## Developer cheats
@@ -57,6 +58,7 @@ js/models.js      Model Picker
 js/missions.js    Subagent Missions
 js/duck.js        Pet Rubber Duck
 js/events.js      Rate Limited, Pull Requests, memory leaks, seasons
+js/fullview.js    full-screen view of every building at work
 js/dev.js         hidden Dev tab with cheats (type 0987)
 js/blackhole.js   the one-time Event Horizon event and style
 js/main.js        boot, main loop, autosave
