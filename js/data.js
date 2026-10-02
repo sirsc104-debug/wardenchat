@@ -38,6 +38,8 @@ function fmtLong(n) {
 }
 
 // Static wording for descriptions ("10 million"), independent of the number setting.
+// Compact cost labels: 600, 3K, 20K.
+const fmtShort = n => (n >= 1e6 ? `${+(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${+(n / 1e3).toFixed(1)}K` : String(n));
 function fmtWords(n) {
   if (n < 1e6) return n.toLocaleString('en-US');
   const tier = Math.floor(Math.log10(n) / 3);

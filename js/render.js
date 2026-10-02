@@ -318,6 +318,10 @@ const Stage = {
     Spinner.made += v;
     this.squish = 1;
     this.pop(x, y, v);
+    if (lastCrit) {
+      this.floats.push({ x, y: y - 44, text: 'CRITICAL ×25', life: 0, max: 1.3, col: '#F2C57C' });
+      this.waves.push({ x: this.cx, y: this.cy, life: 0, max: 0.7, big: 6 });
+    }
     Sound.click();
     emit('clicked');
   },

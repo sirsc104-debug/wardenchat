@@ -10,6 +10,10 @@ const Panels = {
     bindTips($('#panel-achievements'), '.ach', el => this.achTip(ACH[el.dataset.id]));
     bindTips($('#panel-stats'), '.odds-row', el => eurekaTip(el.dataset.eff));
     $('#panel-memory').addEventListener('click', e => this.onMemoryClick(e));
+    // Hovering a node previews it in the inspector; leaving the board shows the selected node again.
+    $('#panel-memory').addEventListener('pointerover', e => { const n = e.target.closest('.mt-node'); if (n) this.showInspect(n.dataset.mem); });
+    $('#panel-memory').addEventListener('pointerout', e => { if (e.target.closest('#mtBoard') && !e.relatedTarget?.closest?.('#mtBoard')) this.showInspect(this.memSel); });
+    $('#panel-memory').addEventListener('focusin', e => { const n = e.target.closest('.mt-node'); if (n) this.showInspect(n.dataset.mem); });
     this.refresh(true);
   },
   show(tab) {
@@ -147,30 +151,29 @@ const Panels = {
   // ---------- memory (prestige) ----------
   memory(force) {
     const pending = pendingPrestige();
-    const sig = [G.prestige, G.memories, pending, [...G.mem].join(), this.armed, G.challenge, G.challengesDone.join(), this.armedChallenge].join('|');
+    const sig = [G.prestige, G.memories, pending, [...G.mem].join(), this.armed, this.armedRewrite, this.memSel, G.challenge, G.challengesDone.join(), this.armedChallenge].join('|');
     if (force || sig !== this.memSig) {
       this.memSig = sig;
-      const cards = MEMORY.map(m => {
-        const owned = hasMem(m.id), reqOk = m.req.every(hasMem);
-        const state = owned ? 'owned' : !reqOk ? 'locked' : G.memories >= m.cost ? 'can' : 'poor';
-        const label = owned ? 'Remembered' : !reqOk ? `Requires ${m.req.map(r => MEM[r].name).join(' + ')}` : state === 'can' ? 'Click to learn' : 'Not enough memories';
-        return `<button type="button" class="mem-card ${state}" data-mem="${m.id}" ${state === 'can' ? '' : 'aria-disabled="true"'}>` +
-          `<span class="mem-name">${esc(m.name)}</span><span class="mem-cost">${m.cost.toLocaleString('en-US')} memor${m.cost === 1 ? 'y' : 'ies'}</span>` +
-          `<span class="mem-desc">${esc(m.desc)}</span><span class="mem-state">${label}</span></button>`;
-      }).join('');
+      if (!MEM[this.memSel]) this.memSel = (MEMORY.find(m => memState(m) === 'can') || MEMORY.find(m => memState(m) === 'poor') || MEMORY[0]).id;
+      const keepScroll = $('#panel-memory').scrollTop;
       $('#panel-memory').innerHTML =
         `<div class="mem-hero">` +
-        `<div class="mem-stat"><div class="mem-num">${G.prestige.toLocaleString('en-US')}</div><div class="mem-lab">Prestige level</div><div class="mem-sub">+${Math.round(D.prestigeBonus * 100)}% production</div></div>` +
+        `<div class="mem-stat"><div class="mem-num">${G.prestige.toLocaleString('en-US')}</div><div class="mem-lab">Prestige level</div><div class="mem-sub">+${Math.round(D.prestigeBonus * 100).toLocaleString('en-US')}% production</div></div>` +
         `<div class="mem-stat"><div class="mem-num">${G.memories.toLocaleString('en-US')}</div><div class="mem-lab">Memories to spend</div><div class="mem-sub">One per level gained</div></div>` +
         `<div class="mem-stat"><div class="mem-num gain">+${pending.toLocaleString('en-US')}</div><div class="mem-lab">Levels from /compact</div><div class="mem-sub" id="memNext"></div></div></div>` +
         `<div class="meter lilac"><span id="memBar"></span></div>` +
-        `<div class="compact-box"><div><h3 class="sec">Compact the conversation</h3><p>Running <code>/compact</code> summarizes this run into memories. Prestige levels come from all-time tokens: the first needs 1 trillion, and each level after that needs more. ` +
+        `<div class="compact-box"><div><h3 class="sec">Compact the conversation</h3><p>Running <code>/compact</code> summarizes this run into memories. Prestige levels come from all-time tokens: the first needs ${fmtWords(PRESTIGE_BASE)}, and each level after that needs more. ` +
         `You keep achievements, prestige and memories. Tokens, buildings and upgrades start over.</p></div>` +
-        `<button type="button" class="btn compact ${this.armed ? 'armed' : ''}" id="btnCompact">${this.armed ? `Confirm: compact for +${pending}` : '/compact'}</button></div>` +
-        `<h3 class="sec">CLAUDE.md</h3><p class="muted">Memories you learn here stay with you across every compaction.</p><div class="mem-grid">${cards}</div>` +
-        this.challengeHtml();
+        `<button type="button" class="btn compact ${this.armed ? 'armed' : ''}" id="btnCompact">${this.armed ? `Confirm: compact for +${pending.toLocaleString('en-US')}` : '/compact'}</button></div>` +
+        this.treeHtml() + this.challengeHtml();
+      $('#panel-memory').scrollTop = keepScroll;
+      this.drawEdges();
+      if (!this.treeObs && window.ResizeObserver) {
+        this.treeObs = new ResizeObserver(() => this.drawEdges());
+        this.treeObs.observe($('#panel-memory'));
+      }
     }
-    const lvl = prestigeFor(allTimeEarned()), lo = Math.pow(lvl, 3) * 1e12, hi = Math.pow(lvl + 1, 3) * 1e12;
+    const lvl = prestigeFor(allTimeEarned()), lo = Math.pow(lvl, 3) * PRESTIGE_BASE, hi = Math.pow(lvl + 1, 3) * PRESTIGE_BASE;
     const bar = $('#memBar'), next = $('#memNext');
     if (bar) bar.style.width = `${clamp(((allTimeEarned() - lo) / (hi - lo)) * 100, 0, 100)}%`;
     const cbar = $('#chalBar'), c = CHALLENGES.find(x => x.id === G.challenge);
@@ -179,6 +182,85 @@ const Panels = {
       $('#chalText').textContent = `${fmt(G.earned)} of ${fmt(c.goal)} tokens this run`;
     }
     if (next) next.textContent = `Next level at ${fmt(hi)} all-time tokens`;
+  },
+  memIcon(m) { return svgIcon(typeof m.icon === 'number' ? BUILDINGS[m.icon].icon : GLYPH[m.icon]); },
+  treeHtml() {
+    const rows = Math.max(...MEMORY.map(m => m.row));
+    const routes = ROUTES.map((r, k) => {
+      const all = MEMORY.filter(m => m.route === r.id), have = all.filter(m => hasMem(m.id)).length;
+      return `<div class="mt-route" style="--rc:${r.color}"><span class="mt-route-name">${esc(r.name)}</span>` +
+        `<span class="mt-route-blurb">${esc(r.blurb)}</span><span class="mt-route-count">${have}/${all.length}</span></div>`;
+    }).join('');
+    const nodes = MEMORY.map(m => {
+      const r = ROUTES.findIndex(x => x.id === m.route), st = memState(m);
+      return `<button type="button" class="mt-node ${st}${m.cap ? ' cap' : ''}${this.memSel === m.id ? ' sel' : ''}" data-mem="${m.id}" ` +
+        `style="--route:${r};--col:${m.col};--row:${m.row};--rc:${ROUTES[r].color}" aria-label="${esc(m.name)}: ${esc(m.desc)}" aria-pressed="${this.memSel === m.id}">` +
+        `${this.memIcon(m)}${st === 'owned' ? '' : `<span class="mt-tag">${fmtShort(m.cost)}</span>`}</button>`;
+    }).join('');
+    // An "or" marker sits between the two sides of each fork.
+    const forks = ROUTES.map((r, k) => {
+      const pair = MEMORY.filter(m => m.route === r.id && m.excl);
+      return pair.length ? `<span class="mt-or" style="--route:${k};--row:${pair[0].row}">or</span>` : '';
+    }).join('');
+    const spent = G.memSpent;
+    return `<section class="mt" aria-label="CLAUDE.md memory tree">` +
+      `<div class="mt-head"><div><h3 class="sec">CLAUDE.md</h3><p class="muted">What you learn here stays through every /compact. Each route forks once, so pick a side; ` +
+      `rewriting CLAUDE.md gives back every memory you spent so you can try another path.</p></div>` +
+      `<button type="button" class="btn tiny ${this.armedRewrite ? 'armed' : ''}" id="btnRewrite" ${spent ? '' : 'disabled'}>${this.armedRewrite ? `Confirm: refund ${spent.toLocaleString('en-US')}` : 'Rewrite CLAUDE.md'}</button></div>` +
+      `<div class="mt-routes">${routes}</div>` +
+      `<div class="mt-board" id="mtBoard" style="--rows:${rows}"><div class="mt-lanes" aria-hidden="true">${ROUTES.map(r => `<span style="--rc:${r.color}"></span>`).join('')}</div>` +
+      `<svg class="mt-edges" id="mtEdges" aria-hidden="true"></svg>` +
+      `<div class="mt-root" id="mtRoot">${svgIcon(GLYPH.sparkle)}<span>CLAUDE.md</span></div>${forks}${nodes}</div>` +
+      `<div class="mt-inspect" id="mtInspect" aria-live="polite">${this.inspectHtml(this.memSel)}</div></section>`;
+  },
+  inspectHtml(id) {
+    const m = MEM[id];
+    if (!m) return '';
+    const r = ROUTES.find(x => x.id === m.route), st = memState(m);
+    const names = ids => ids.map(x => MEM[x].name);
+    const fork = m.excl ? MEMORY.find(o => o.excl === m.excl && o.id !== m.id) : null;
+    const kicker = [r.name, `Tier ${m.row}`, m.cap ? 'Capstone' : m.excl ? `Fork: this or ${fork.name}` : ''].filter(Boolean).join(' · ');
+    let foot;
+    if (st === 'owned') foot = `<span class="mt-status good">In your CLAUDE.md</span>`;
+    else if (st === 'excluded') foot = `<span class="mt-status">You took ${esc(fork.name)} on this fork. Rewrite CLAUDE.md to switch.</span>`;
+    else if (st === 'locked') {
+      const need = [...names(m.req.filter(x => !hasMem(x)))];
+      if (m.any.length && !m.any.some(hasMem)) need.push(names(m.any).join(' or '));
+      foot = `<span class="mt-status">Requires ${esc(need.join(' and '))}</span>`;
+    } else if (st === 'poor') foot = `<span class="mt-status">Need ${(m.cost - G.memories).toLocaleString('en-US')} more memor${m.cost - G.memories === 1 ? 'y' : 'ies'}</span>`;
+    else foot = `<button type="button" class="btn mt-learn" data-learn="${m.id}">Learn for ${m.cost.toLocaleString('en-US')} memor${m.cost === 1 ? 'y' : 'ies'}</button>`;
+    return `<div class="mt-insp ${st}" style="--rc:${r.color}"><div class="mt-insp-icon">${this.memIcon(m)}</div><div class="mt-insp-body">` +
+      `<div class="mt-kicker">${esc(kicker)}</div><div class="mt-insp-name">${esc(m.name)}</div><p class="mt-insp-desc">${esc(m.desc)}</p>` +
+      `<div class="mt-insp-foot"><span class="mt-cost">${m.cost.toLocaleString('en-US')} memor${m.cost === 1 ? 'y' : 'ies'}</span>${foot}</div></div></div>`;
+  },
+  // Connect each node to its parents, measured from the laid-out board so the lines fit at any width.
+  drawEdges() {
+    const board = $('#mtBoard'), svg = $('#mtEdges');
+    if (!board || !svg || !board.offsetWidth) return;
+    const b = board.getBoundingClientRect();
+    const at = el => { const r = el.getBoundingClientRect(); return { x: r.left - b.left + r.width / 2, y: r.top - b.top + r.height / 2 }; };
+    const pos = { root: at($('#mtRoot')) };
+    board.querySelectorAll('.mt-node').forEach(el => { pos[el.dataset.mem] = at(el); });
+    svg.setAttribute('viewBox', `0 0 ${b.width} ${b.height}`);
+    let out = '';
+    for (const m of MEMORY) {
+      const parents = [...m.req, ...m.any];
+      if (!parents.length) parents.push('root');
+      const col = ROUTES.find(r => r.id === m.route).color, st = memState(m);
+      for (const pid of parents) {
+        const p = pos[pid], q = pos[m.id];
+        if (!p || !q) continue;
+        const pOwned = pid === 'root' || hasMem(pid);
+        const cls = st === 'owned' && pOwned ? 'on' : pOwned && st !== 'excluded' ? 'open' : 'off';
+        const my = (p.y + q.y) / 2;
+        out += `<path class="${cls}" d="M${p.x.toFixed(1)} ${p.y.toFixed(1)} C${p.x.toFixed(1)} ${my.toFixed(1)} ${q.x.toFixed(1)} ${my.toFixed(1)} ${q.x.toFixed(1)} ${q.y.toFixed(1)}" style="--rc:${col}"/>`;
+      }
+    }
+    svg.innerHTML = out;
+  },
+  showInspect(id) {
+    const box = $('#mtInspect');
+    if (box && MEM[id] && box.dataset.id !== id) { box.dataset.id = id; box.innerHTML = this.inspectHtml(id); }
   },
   challengeHtml() {
     const active = CHALLENGES.find(c => c.id === G.challenge);
@@ -225,13 +307,28 @@ const Panels = {
       toast({ icon: GLYPH.compress, kicker: 'Conversation compacted', title: gain ? `+${gain} prestige level${gain === 1 ? '' : 's'}` : 'Fresh start', text: gain ? `You now have ${G.memories} memories to spend.` : 'No levels gained this time, but the slate is clean.', kind: 'lilac', life: 6000 });
       return this.memory(true);
     }
-    const card = e.target.closest('[data-mem]');
-    if (card && buyMemory(card.dataset.mem)) {
-      Sound.ach();
-      toast({ icon: GLYPH.compress, kicker: 'Added to CLAUDE.md', title: esc(MEM[card.dataset.mem].name), text: esc(MEM[card.dataset.mem].desc), kind: 'lilac' });
-      this.memory(true);
+    if (e.target.closest('#btnRewrite')) {
+      if (!this.armedRewrite) {
+        this.armedRewrite = setTimeout(() => { this.armedRewrite = null; this.memory(true); }, 5000);
+        return this.memory(true);
+      }
+      clearTimeout(this.armedRewrite);
+      this.armedRewrite = null;
+      const back = rewriteMemories();
+      toast({ icon: GLYPH.compress, kicker: 'CLAUDE.md rewritten', title: `${back.toLocaleString('en-US')} memories refunded`, text: 'Every route is open again. Pick a new path.', kind: 'lilac' });
       UI.refreshStore(true);
+      return this.memory(true);
     }
+    const learn = e.target.closest('[data-learn]');
+    if (learn && buyMemory(learn.dataset.learn)) {
+      const m = MEM[learn.dataset.learn];
+      Sound.ach();
+      toast({ icon: GLYPH.compress, kicker: 'Added to CLAUDE.md', title: esc(m.name), text: esc(m.desc), kind: 'lilac' });
+      UI.refreshStore(true);
+      return this.memory(true);
+    }
+    const node = e.target.closest('.mt-node');
+    if (node) { this.memSel = node.dataset.mem; this.memory(true); }
   },
 
   // ---------- options ----------

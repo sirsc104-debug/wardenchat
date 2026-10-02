@@ -176,20 +176,57 @@ const SPELLS = [
   },
 ];
 
-// ---------- memory upgrades (bought with memories earned from /compact) ----------
-const MEMORY = [
-  { id: 'resume', name: 'Session Resume', cost: 1, req: [], desc: 'Earn 50% of your production while the game is closed, up from 10%.' },
-  { id: 'batch', name: 'Batch Mode', cost: 3, req: [], desc: 'Adds a "Buy all" button to the upgrade shelf.' },
-  { id: 'starter', name: 'Starter Kit', cost: 5, req: [], desc: 'Start every run with 10 free Autocompletes.' },
-  { id: 'instinct', name: 'Eureka Instinct', cost: 7, req: [], desc: 'Eureka tokens appear 10% more often.' },
-  { id: 'muscle', name: 'Muscle Memory', cost: 10, req: [], desc: 'Clicking is 25% more powerful.' },
-  { id: 'duck', name: 'Heirloom Duck', cost: 20, req: ['starter'], desc: 'Rubber Ducks produce 50% more.' },
-  { id: 'discount', name: 'Bulk Discount', cost: 25, req: [], desc: 'All buildings cost 5% less.' },
-  { id: 'onboarding', name: 'Onboarding Docs', cost: 50, req: ['starter'], desc: 'Start every run with 5 free Interns.' },
-  { id: 'quiet', name: 'Quiet Terminal', cost: 50, req: [], desc: 'Focus for slash commands refills 25% faster.' },
-  { id: 'streak', name: 'Lucky Streak', cost: 77, req: ['instinct'], desc: 'Eureka effects last 10% longer.' },
-  { id: 'background', name: 'Background Agents', cost: 100, req: ['resume'], desc: 'Earn 90% of your production while the game is closed.' },
-  { id: 'coupons', name: 'Upgrade Coupons', cost: 100, req: ['discount'], desc: 'All upgrades cost 5% less.' },
-  { id: 'golden', name: 'Golden Memory', cost: 777, req: ['streak'], desc: 'Eureka tokens appear 10% more often and Lucky Commits pay 10% more.' },
-  { id: 'deep', name: 'Deep Context', cost: 1000, req: ['background', 'coupons'], desc: 'Each prestige level counts 50% more toward production.' },
+// ---------- CLAUDE.md: the memory tree (bought with memories earned from /compact) ----------
+// Four routes branch from the root. Each has a fork where you pick one of two nodes; "any" means either parent unlocks it.
+// col is the offset from the route's centre line (-1 left, 0 centre, 1 right); icon is a GLYPH name or a building index.
+const ROUTES = [
+  { id: 'arch', name: 'Architect', color: '#E08A6A', blurb: 'Raw production' },
+  { id: 'hands', name: 'Hands-on', color: '#F2C57C', blurb: 'Clicking power' },
+  { id: 'luck', name: 'Serendipity', color: '#B79CFF', blurb: 'Eureka, Flow and bugs' },
+  { id: 'ops', name: 'Operations', color: '#8FD3B6', blurb: 'Offline, costs and head starts' },
 ];
+const MEMORY = [
+  { id: 'arch1', route: 'arch', row: 1, col: 0, cost: 1, icon: 'up', name: 'Clean Architecture', desc: 'Production +10%.' },
+  { id: 'duck', route: 'arch', row: 2, col: -1, cost: 8, req: ['arch1'], icon: 2, name: 'Heirloom Duck', desc: 'Rubber Ducks produce twice as much.' },
+  { id: 'mentor', route: 'arch', row: 2, col: 1, cost: 8, req: ['arch1'], icon: 1, name: 'Mentorship', desc: 'Interns produce twice as much.' },
+  { id: 'arch2', route: 'arch', row: 3, col: 0, cost: 25, req: ['arch1'], icon: 'stack', name: 'Design Docs', desc: 'Production +15%.' },
+  { id: 'mono', route: 'arch', row: 4, col: -1, cost: 120, req: ['arch2'], excl: 'arch', icon: 'stack', name: 'Monolith', desc: 'Your most-owned building type produces 3 times as much.' },
+  { id: 'micro', route: 'arch', row: 4, col: 1, cost: 120, req: ['arch2'], excl: 'arch', icon: 'people', name: 'Microservices', desc: 'Production +3% for every building type you own (up to +57%).' },
+  { id: 'compound', route: 'arch', row: 5, col: 0, cost: 600, any: ['mono', 'micro'], icon: 'up', name: 'Compound Interest', desc: 'Production +4% for every /compact you have ever run.' },
+  { id: 'deep', route: 'arch', row: 6, col: 0, cost: 3000, req: ['compound'], icon: 'compress', name: 'Deep Context', desc: 'Each prestige level gives +2% production instead of +1%.' },
+  { id: 'eternal', route: 'arch', row: 7, col: 0, cost: 20000, req: ['deep'], icon: 'sparkle', cap: true, name: 'Eternal Context', desc: 'Each prestige level gives +3% production.' },
+
+  { id: 'muscle', route: 'hands', row: 1, col: 0, cost: 1, icon: 0, name: 'Muscle Memory', desc: 'Clicking +50%.' },
+  { id: 'carpal', route: 'hands', row: 2, col: -1, cost: 8, req: ['muscle'], icon: 'bolt', name: 'Hot Keys', desc: 'Every click also earns 1% of your production per second.' },
+  { id: 'tap', route: 'hands', row: 2, col: 1, cost: 8, req: ['muscle'], icon: 0, name: 'Tap Rhythm', desc: 'Autocompletes produce 50% more.' },
+  { id: 'ten', route: 'hands', row: 3, col: 0, cost: 25, req: ['muscle'], icon: 0, name: 'Ten Fingers', desc: 'Clicking ×2.' },
+  { id: 'ghost', route: 'hands', row: 4, col: -1, cost: 120, req: ['ten'], excl: 'hands', icon: 'prompt', name: 'Ghost Clicker', desc: 'Clicks the sparkle for you 3 times a second, even while you are away from the keyboard (not during Hands Off).' },
+  { id: 'combo', route: 'hands', row: 4, col: 1, cost: 120, req: ['ten'], excl: 'hands', icon: 'bolt', name: 'Combo Chain', desc: 'Every 25th click is a critical click worth 25 times as much.' },
+  { id: 'zone', route: 'hands', row: 5, col: 0, cost: 600, any: ['ghost', 'combo'], icon: 'star', name: 'In the Zone', desc: 'Clicks are worth 3 times as much while a good Eureka effect is running.' },
+  { id: 'thousand', route: 'hands', row: 6, col: 0, cost: 3000, req: ['zone'], icon: 0, name: 'Thousand Fingers', desc: 'Clicking ×3.' },
+  { id: 'godhand', route: 'hands', row: 7, col: 0, cost: 20000, req: ['thousand'], icon: 'gold', cap: true, name: 'Hand of Claude', desc: 'Clicking ×5, and every click earns another 2% of your production per second.' },
+
+  { id: 'instinct', route: 'luck', row: 1, col: 0, cost: 1, icon: 'sparkle', name: 'Eureka Instinct', desc: 'Eureka tokens appear 15% more often.' },
+  { id: 'streak', route: 'luck', row: 2, col: -1, cost: 8, req: ['instinct'], icon: 'clock', name: 'Lucky Streak', desc: 'Eureka effects last 20% longer.' },
+  { id: 'bugnet', route: 'luck', row: 2, col: 1, cost: 8, req: ['instinct'], icon: 'bug', name: 'Bug Net', desc: 'Squashed bugs pay twice as much.' },
+  { id: 'clover', route: 'luck', row: 3, col: 0, cost: 25, req: ['instinct'], icon: 'star', name: 'Four-Leaf Clover', desc: 'Eureka tokens appear another 15% more often.' },
+  { id: 'golden', route: 'luck', row: 4, col: -1, cost: 120, req: ['clover'], excl: 'luck', icon: 'gold', name: 'Golden Memory', desc: 'Eureka tokens appear 20% more often and Lucky Commits pay 50% more.' },
+  { id: 'tidal', route: 'luck', row: 4, col: 1, cost: 120, req: ['clover'], excl: 'luck', icon: 'people', name: 'Tidal Memory', desc: "Flow's production bonus is 50% stronger and Flow bubbles are worth 50% more." },
+  { id: 'linger', route: 'luck', row: 5, col: 0, cost: 600, any: ['golden', 'tidal'], icon: 'clock', name: 'Lingering Light', desc: 'Eureka tokens stay on screen 2 seconds longer.' },
+  { id: 'foam', route: 'luck', row: 6, col: 0, cost: 3000, req: ['linger'], icon: 'people', name: 'Foam Party', desc: 'Flow bubbles rise twice as often and are worth twice as much.' },
+  { id: 'serendip', route: 'luck', row: 7, col: 0, cost: 20000, req: ['foam'], icon: 'sparkle', cap: true, name: 'Serendipity', desc: 'Eureka tokens appear twice as often.' },
+
+  { id: 'resume', route: 'ops', row: 1, col: 0, cost: 1, icon: 'clock', name: 'Session Resume', desc: 'Earn 50% of your production while the game is closed, up from 10%.' },
+  { id: 'batch', route: 'ops', row: 2, col: -1, cost: 5, req: ['resume'], icon: 'stack', name: 'Batch Mode', desc: 'Adds a "Buy all" button to the upgrade shelf.' },
+  { id: 'quiet', route: 'ops', row: 2, col: 1, cost: 8, req: ['resume'], icon: 'prompt', name: 'Quiet Terminal', desc: 'Focus for slash commands refills 50% faster.' },
+  { id: 'starter', route: 'ops', row: 3, col: 0, cost: 25, req: ['resume'], icon: 0, name: 'Starter Kit', desc: 'Start every run with 25 Autocompletes.' },
+  { id: 'background', route: 'ops', row: 4, col: -1, cost: 120, req: ['starter'], excl: 'ops', icon: 'clock', name: 'Background Agents', desc: 'Earn 100% of your production while the game is closed.' },
+  { id: 'onboarding', route: 'ops', row: 4, col: 1, cost: 120, req: ['starter'], excl: 'ops', icon: 1, name: 'Onboarding Docs', desc: 'Start every run with 15 Interns and 10 Rubber Ducks.' },
+  { id: 'discount', route: 'ops', row: 5, col: 0, cost: 600, any: ['background', 'onboarding'], icon: 'key', name: 'Bulk Discount', desc: 'Buildings cost 10% less.' },
+  { id: 'coupons', route: 'ops', row: 6, col: -1, cost: 3000, req: ['discount'], icon: 'key', name: 'Upgrade Coupons', desc: 'Upgrades cost 10% less.' },
+  { id: 'cache', route: 'ops', row: 6, col: 1, cost: 3000, req: ['discount'], icon: 'compress', name: 'Warm Cache', desc: 'Keep 10% of every building through /compact.' },
+  { id: 'hotcache', route: 'ops', row: 7, col: 0, cost: 20000, req: ['cache'], icon: 'sparkle', cap: true, name: 'Hot Cache', desc: 'Keep 25% of every building through /compact.' },
+];
+MEMORY.forEach(m => { m.req = m.req || []; m.any = m.any || []; });
+// What each memory cost before the tree was rebuilt, so rewriting an old save refunds what was actually paid.
+const LEGACY_MEM_COST = { resume: 1, batch: 3, starter: 5, instinct: 7, muscle: 10, duck: 20, discount: 25, onboarding: 50, quiet: 50, streak: 77, background: 100, coupons: 100, golden: 777, deep: 1000 };

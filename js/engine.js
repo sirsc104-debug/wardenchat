@@ -66,7 +66,7 @@ function freshRun() {
 function freshGame() {
   return Object.assign(freshRun(), {
     prevEarned: 0, clicks: 0, achievements: new Set(), goldenClicks: 0, bugsSquashed: 0, spellsCast: 0, bubbles: 0,
-    compacts: 0, prestige: 0, memories: 0, mem: new Set(), gameStart: Date.now(),
+    compacts: 0, prestige: 0, memories: 0, memSpent: 0, mem: new Set(), gameStart: Date.now(),
     settings: { numbers: 'words', particles: true, floaters: true, sound: false, motion: true },
     stats: { maxTps: 0 },
     dev: { on: false, mult: 1, free: false, fastEureka: false, infFocus: false, season: 'auto' },
@@ -80,7 +80,7 @@ let G = freshGame();
 // Derived values, rebuilt by recompute() whenever something that affects them changes.
 const D = {
   each: Array(N).fill(0), mult: 1, raw: 0, tpsBase: 0, tpsGross: 0, bugsEating: 0, tps: 0, click: 1, clickBase: 1, clickPct: 0,
-  flow: 0, flowMult: 1, flowBonus: 0, gpct: 0, prestigeBonus: 0, buffProd: 1, buffClick: 1,
+  flow: 0, flowMult: 1, flowBonus: 0, gpct: 0, prestigeBonus: 0, memProd: 1, ghost: 0, buffProd: 1, buffClick: 1,
   eurekaFreq: 1, eurekaLife: 1, effDur: 1, bugMult: 1, bugFreq: 1,
   bldDiscount: 1, upgDiscount: 1, buffCost: 1, offline: 0.1, focusMax: 0, focusRegen: 0,
 };
@@ -92,7 +92,7 @@ const T = { eureka: rand(45, 120) * EUREKA_RARITY, bug: rand(120, 240), ach: 1 }
 
 // ---------- Flow ----------
 const FLOW_PROD = 0.25;            // production bonus per 100% Flow
-const bubbleDelay = () => clamp(45 / (1 + D.flow), 6, 45) * rand(0.7, 1.3); // seconds between Flow bubbles
+const bubbleDelay = () => (clamp(45 / (1 + D.flow), 6, 45) * rand(0.7, 1.3)) / memMul(['foam', 2]); // seconds between Flow bubbles
 // The tide rises through each 100% of Flow, then drops back to the bottom as the next, stronger kind of tide.
 const TIDE_STEP = 1;
 const TIDES = [
@@ -102,7 +102,7 @@ const TIDES = [
 ];
 const tideTier = () => clamp(Math.floor(D.flow / TIDE_STEP + 1e-9), 0, TIDES.length - 1);
 const tideFrac = () => clamp((D.flow - tideTier() * TIDE_STEP) / TIDE_STEP, 0, 1); // how full the current tide is
-const bubbleValue = () => Math.max(D.tpsGross * 15, 10) * (1 + D.flow) * (1 + 0.1 * tideTier()); // 15 s of production, times Flow, +10% per tide
+const bubbleValue = () => Math.max(D.tpsGross * 15, 10) * (1 + D.flow) * (1 + 0.1 * tideTier()) * memMul(['tidal', 1.5], ['foam', 2]); // 15 s of production, times Flow, +10% per tide
 function popBubble() {
   const gain = bubbleValue();
   earn(gain);
@@ -121,6 +121,7 @@ function setBugsEating(n) {
 
 const hasUpg = id => G.upgrades.has(id);
 const hasMem = id => G.mem.has(id);
+const memMul = (...pairs) => pairs.reduce((v, [id, k]) => (hasMem(id) ? v * k : v), 1);
 const totalOwned = () => G.owned.reduce((a, b) => a + b, 0);
 const allTimeEarned = () => G.prevEarned + G.earned;
 const safe = fn => { try { return fn(); } catch (e) { return false; } };
@@ -148,18 +149,29 @@ function recompute() {
       case 'bug': D.bugMult *= u.bugMult || 1; D.bugFreq *= u.bugFreq || 1; break;
     }
   }
-  if (hasMem('instinct')) D.eurekaFreq *= 1.1;
-  if (hasMem('golden')) D.eurekaFreq *= 1.1;
-  if (hasMem('streak')) D.effDur *= 1.1;
-  D.bldDiscount = hasMem('discount') ? 0.95 : 1;
-  D.upgDiscount = hasMem('coupons') ? 0.95 : 1;
-  D.offline = hasMem('background') ? 0.9 : hasMem('resume') ? 0.5 : 0.1;
+  // CLAUDE.md memories.
+  D.eurekaFreq *= memMul(['instinct', 1.15], ['clover', 1.15], ['golden', 1.2], ['serendip', 2]);
+  D.eurekaLife *= hasMem('linger') ? (EUREKA_LIFE + 2) / EUREKA_LIFE : 1;
+  D.effDur *= memMul(['streak', 1.2]);
+  D.bugMult *= memMul(['bugnet', 2]);
+  D.bldDiscount = memMul(['discount', 0.9]);
+  D.upgDiscount = memMul(['coupons', 0.9]);
+  D.offline = hasMem('background') ? 1 : hasMem('resume') ? 0.5 : 0.1;
 
   // Multi-cursor: +X per non-Autocomplete building, for each Autocomplete and each click.
   const add = fingers * fm * (totalOwned() - G.owned[0]);
   D.each[0] = 0.1 * Math.pow(2, x2) + add;
   for (let i = 1; i < N; i++) {
-    D.each[i] = BUILDINGS[i].tps * Math.pow(2, doubles[i]) * (i === 2 && hasMem('duck') ? 1.5 : 1);
+    D.each[i] = BUILDINGS[i].tps * Math.pow(2, doubles[i]);
+  }
+  D.each[0] *= memMul(['tap', 1.5]);
+  D.each[1] *= memMul(['mentor', 2]);
+  D.each[2] *= memMul(['duck', 2]);
+  if (hasMem('mono')) {
+    // Monolith: the building type you own the most of (the later one on a tie) produces 3x.
+    let top = -1;
+    for (let i = 0; i < N; i++) if (G.owned[i] && (top < 0 || G.owned[i] >= G.owned[top])) top = i;
+    if (top >= 0) D.each[top] *= 3;
   }
   // Synergies: building A +1% per B owned, B +0.2% per A owned.
   for (const u of synergies) {
@@ -176,13 +188,15 @@ function recompute() {
   D.bugMult *= modProduct('bugMult');
   D.offline = Math.min(1, D.offline + modSum('offline'));
 
-  D.prestigeBonus = G.prestige * 0.01 * (hasMem('deep') ? 1.5 : 1);
+  D.prestigeBonus = G.prestige * (hasMem('eternal') ? 0.03 : hasMem('deep') ? 0.02 : 0.01);
+  const types = G.owned.filter(n => n > 0).length;
+  D.memProd = memMul(['arch1', 1.1], ['arch2', 1.15]) * (hasMem('micro') ? 1 + 0.03 * types : 1) * (hasMem('compound') ? 1 + 0.04 * G.compacts : 1);
   D.gpct = gpct;
   D.flowMult = flowMult;
   // Flow itself: +0.25% production for every 1% Flow (4% Flow per achievement), on top of the Engineer upgrades.
-  D.flowBonus = D.flow * FLOW_PROD * modProduct('flow');
+  D.flowBonus = D.flow * FLOW_PROD * modProduct('flow') * memMul(['tidal', 1.5]);
   const challengeMult = (inChallenge('halfspeed') ? 0.5 : 1) * (challengeDone('noclick') ? 1.1 : 1) * (challengeDone('halfspeed') ? 1.05 : 1);
-  D.mult = (1 + gpct / 100) * flowMult * (1 + D.flowBonus) * (1 + D.prestigeBonus) * challengeMult * modProduct('prod') * (G.dev.on ? G.dev.mult : 1);
+  D.mult = (1 + gpct / 100) * flowMult * (1 + D.flowBonus) * (1 + D.prestigeBonus) * D.memProd * challengeMult * modProduct('prod') * (G.dev.on ? G.dev.mult : 1);
 
   let raw = 0;
   for (let i = 0; i < N; i++) raw += Math.max(0, G.owned[i] - awayOf(i)) * D.each[i];
@@ -201,13 +215,17 @@ function recompute() {
   D.tps = D.tpsGross * (1 - bugsEating / INFEST_ZERO_AT - D.drain);
 
   D.clickBase = Math.pow(2, x2) + add;
+  clickPct += (hasMem('carpal') ? 1 : 0) + (hasMem('godhand') ? 2 : 0);
   D.clickPct = clickPct;
-  D.click = (D.clickBase + (D.tpsGross * clickPct) / 100) * bc * upClick * (hasMem('muscle') ? 1.25 : 1) *
+  D.click = (D.clickBase + (D.tpsGross * clickPct) / 100) * bc * upClick * memMul(['muscle', 1.5], ['ten', 2], ['thousand', 3], ['godhand', 5]) *
     (challengeDone('halfspeed') ? 1.25 : 1) * modProduct('click');
 
   const s = G.owned[5];
   D.focusMax = s > 0 ? Math.floor(10 + 4 * Math.pow(s, 0.7)) : 0;
-  D.focusRegen = (0.1 + D.focusMax * 0.004) * (hasMem('quiet') ? 1.25 : 1);
+  D.focusRegen = (0.1 + D.focusMax * 0.004) * memMul(['quiet', 1.5]);
+  // Ghost Clicker: three clicks a second, counted as production.
+  D.ghost = hasMem('ghost') && !inChallenge('noclick') ? D.click * 3 : 0;
+  D.tps += D.ghost;
   G.focus = Math.min(G.focus, D.focusMax);
 }
 
@@ -270,9 +288,14 @@ const recentClicks = [];
 // Rate Limited event: the sparkle ignores clicks until this time (performance.now()).
 let clickBlockedUntil = 0;
 const rateLimited = () => performance.now() < clickBlockedUntil;
+let lastCrit = false;
 function clickSparkle() {
   if (rateLimited()) { emit('blockedClick'); return 0; }
-  const v = inChallenge('noclick') ? 0 : D.click;
+  let v = inChallenge('noclick') ? 0 : D.click;
+  // Combo Chain: every 25th click is critical. In the Zone: clicks triple during a good Eureka effect.
+  lastCrit = hasMem('combo') && (G.clicks + 1) % 25 === 0;
+  if (lastCrit) v *= 25;
+  if (hasMem('zone') && G.buffs.some(b => !b.bad && (b.prod > 1 || b.click > 1))) v *= 3;
   earn(v);
   G.handmade += v;
   G.clicks++;
@@ -304,7 +327,7 @@ const bugDelay = () => rand(180, 360) / D.bugFreq;
 // An effect whose `ok` check fails right now is skipped and the rest are re-weighted.
 const secs = d => `${Math.round(d)} seconds`;
 const INFEST_BUGS = 10, INFEST_TIME = 45; // bugs per infestation, seconds before leftover bugs give up
-const luckMult = () => (hasMem('golden') ? 1.1 : 1);
+const luckMult = () => memMul(['golden', 1.5]);
 const EUREKA = [
   // ----- common (10% each) -----
   { id: 'frenzy', name: 'Vibe Coding', desc: 'Production ×7 for 77 seconds.', w: 10, run(d) {
@@ -442,7 +465,8 @@ function castSpell(id) {
 }
 
 // ---------- prestige (/compact) ----------
-const prestigeFor = total => Math.floor(Math.cbrt(total / 1e12));
+const PRESTIGE_BASE = 1e9; // all-time tokens for the first level; level n needs n^3 times this
+const prestigeFor = total => Math.floor(Math.cbrt(total / PRESTIGE_BASE));
 const pendingPrestige = () => Math.max(0, prestigeFor(allTimeEarned()) - G.prestige);
 
 function compact() {
@@ -451,9 +475,12 @@ function compact() {
   G.memories += gain;
   G.compacts++;
   G.prevEarned += G.earned;
+  const keep = hasMem('hotcache') ? 0.25 : hasMem('cache') ? 0.1 : 0, kept = G.owned.map(n => Math.floor(n * keep));
   Object.assign(G, freshRun());
-  if (hasMem('starter')) G.owned[0] = 10;
-  if (hasMem('onboarding')) G.owned[1] = 5;
+  G.owned = kept;
+  const atLeast = (i, n) => { G.owned[i] = Math.max(G.owned[i], n); };
+  if (hasMem('starter')) atLeast(0, 25);
+  if (hasMem('onboarding')) { atLeast(1, 15); atLeast(2, 10); }
   recompute();
   T.eureka = rand(45, 120) * EUREKA_RARITY;
   emit('reset');
@@ -473,13 +500,30 @@ function abandonChallenge() {
   recompute();
 }
 
+// Where a memory stands: owned, open (can be learned now or once you have the memories), locked, or excluded by a fork choice.
+function memState(m) {
+  if (hasMem(m.id)) return 'owned';
+  if (m.excl && MEMORY.some(o => o.excl === m.excl && o.id !== m.id && hasMem(o.id))) return 'excluded';
+  if (!m.req.every(hasMem) || (m.any.length && !m.any.some(hasMem))) return 'locked';
+  return G.memories >= m.cost ? 'can' : 'poor';
+}
 function buyMemory(id) {
   const m = MEM[id];
-  if (!m || hasMem(id) || G.memories < m.cost || !m.req.every(hasMem)) return false;
+  if (!m || memState(m) !== 'can') return false;
   G.memories -= m.cost;
+  G.memSpent += m.cost;
   G.mem.add(id);
   recompute();
   return true;
+}
+// Rewrite CLAUDE.md: forget every memory and get back everything spent on them.
+function rewriteMemories() {
+  const back = G.memSpent;
+  G.memories += back;
+  G.memSpent = 0;
+  G.mem.clear();
+  recompute();
+  return back;
 }
 
 // ---------- achievements ----------
@@ -558,12 +602,14 @@ function load(str, applyOffline) {
   const num = (v, d = 0) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
   const g = freshGame();
   for (const k of ['tokens', 'earned', 'handmade', 'prevEarned', 'clicks', 'goldenClicks', 'bugsSquashed', 'spellsCast', 'bubbles',
-    'compacts', 'prestige', 'memories', 'focus', 'runStart', 'gameStart']) g[k] = num(o[k], g[k]);
+    'compacts', 'prestige', 'memories', 'memSpent', 'focus', 'runStart', 'gameStart']) g[k] = num(o[k], g[k]);
   g.owned = BUILDINGS.map((_, i) => Math.max(0, Math.floor(num(o.owned[i]))));
   g.producedBy = BUILDINGS.map((_, i) => num((o.producedBy || [])[i]));
   g.upgrades = new Set((o.upgrades || []).filter(id => UPG[id]));
   g.achievements = new Set((o.achievements || []).filter(id => ACH[id]));
   g.mem = new Set((o.mem || []).filter(id => MEM[id]));
+  // Saves from before the tree was rebuilt did not track spending: count it at the old prices.
+  if (typeof o.memSpent !== 'number') g.memSpent = [...g.mem].reduce((t, id) => t + (LEGACY_MEM_COST[id] || MEM[id].cost), 0);
   g.buffs = (Array.isArray(o.buffs) ? o.buffs : [])
     .filter(b => b && typeof b.key === 'string' && num(b.t) > 0)
     .map(b => ({ key: b.key, name: String(b.name || ''), t: num(b.t), dur: num(b.dur, num(b.t)), prod: num(b.prod, 1), click: num(b.click, 1), cost: num(b.cost, 1), desc: String(b.desc || ''), bad: !!b.bad }));
