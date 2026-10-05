@@ -70,7 +70,7 @@ function freshGame() {
     settings: { numbers: 'words', particles: true, floaters: true, sound: false, motion: true },
     stats: { maxTps: 0 },
     dev: { on: false, mult: 1, free: false, fastEureka: false, infFocus: false, season: 'auto' },
-    blackhole: false, theme: 'classic', // the one-time Event Horizon event and the clicker style it unlocks
+    blackhole: false, supernova: false, theme: 'classic', // the one-time Event Horizon (1T) and Supernova (100 Qa) events and the clicker styles they unlock
     challenge: null, challengesDone: [],
     credits: 1, creditAt: Date.now(), levels: Array(N).fill(0),
   });
@@ -626,7 +626,8 @@ function load(str, applyOffline) {
     try { g[sys.key] = o[sys.key] ? sys.load(o[sys.key]) : sys.fresh(); } catch (e) { console.warn('Reset', sys.key, e); g[sys.key] = sys.fresh(); }
   }
   g.blackhole = !!o.blackhole;
-  g.theme = g.blackhole && o.theme === 'horizon' ? 'horizon' : 'classic';
+  g.supernova = g.blackhole && !!o.supernova;
+  g.theme = g.blackhole && o.theme === 'horizon' ? 'horizon' : g.supernova && o.theme === 'supernova' ? 'supernova' : 'classic';
   G = g;
   if (o.timers) { T.eureka = num(o.timers.eureka, T.eureka); T.bug = num(o.timers.bug, T.bug); }
   recompute();

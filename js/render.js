@@ -255,6 +255,47 @@ function paintHorizonSparkle(ctx, R) {
   ctx.shadowBlur = 0;
 }
 const isHorizon = () => G.theme === 'horizon';
+const isSupernova = () => G.theme === 'supernova';
+// Supernova style: a white-hot pulsar core with cyan-to-magenta rays.
+function paintSupernovaSparkle(ctx, R) {
+  ctx.lineCap = 'round';
+  const rays = (width, style, blur, glow) => RAY_LENS.forEach((len, i) => {
+    const a = -Math.PI / 2 + (i * Math.PI * 2) / 12 + (i % 2 ? 0.035 : -0.02);
+    const w = R * (i % 3 === 0 ? 0.19 : 0.165) + width;
+    ctx.strokeStyle = style;
+    ctx.lineWidth = w;
+    ctx.shadowColor = glow || 'transparent';
+    ctx.shadowBlur = blur || 0;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * R * 0.1, Math.sin(a) * R * 0.1);
+    ctx.lineTo(Math.cos(a) * (len * R - w / 2), Math.sin(a) * (len * R - w / 2));
+    ctx.stroke();
+  });
+  rays(R * 0.06, '#FF5FB8', R * 0.16, 'rgba(255,95,184,.9)');
+  const g = ctx.createRadialGradient(0, 0, R * 0.1, 0, 0, R);
+  g.addColorStop(0, '#FFFFFF');
+  g.addColorStop(0.35, '#BDF4FF');
+  g.addColorStop(0.75, '#5EC8FF');
+  g.addColorStop(1, '#7A5CFF');
+  rays(0, g);
+  ctx.shadowBlur = 0;
+  const core = ctx.createRadialGradient(0, 0, 0, 0, 0, R * 0.3);
+  core.addColorStop(0, '#FFFFFF');
+  core.addColorStop(0.6, '#DFF9FF');
+  core.addColorStop(1, '#5EE6FF');
+  ctx.fillStyle = core;
+  ctx.shadowColor = 'rgba(160,240,255,1)';
+  ctx.shadowBlur = R * 0.3;
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 0.24, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = '#FFD27A';
+  ctx.lineWidth = R * 0.025;
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 0.29, 0, Math.PI * 2);
+  ctx.stroke();
+}
 // How each tide looks: tier 0 uses the theme's own colours; every tier after adds something new.
 const TIDE_LOOK = [
   {},
@@ -266,7 +307,7 @@ const TIDE_LOOK = [
   { back: 'rgba(255,255,255,.1)', front: 'rgba(255,255,255,.3)', crest: 'rgba(255,255,255,.9)', glints: '#FFFFFF', deep: 'rgba(60,30,90,.25)', glow: '255,150,220', embers: true, prism: true },
 ];
 function paintShine(ctx, R) {
-  const n = 14, col = isHorizon() ? '255,138,40' : '242,197,124';
+  const n = 14, col = isHorizon() ? '255,138,40' : isSupernova() ? '140,225,255' : '242,197,124';
   const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
   g.addColorStop(0, `rgba(${col},.34)`);
   g.addColorStop(1, `rgba(${col},0)`);
@@ -336,7 +377,7 @@ const Stage = {
     this.ctx.setTransform(r, 0, 0, r, 0, 0);
     this.R = this.full ? clamp(Math.min(w, h) * 0.11, 46, 108) : Math.max(52, Math.min(w * 0.25, h * 0.215));
     this.style = G.theme;
-    this.sparkle = centredCache(this.R * 1.02, isHorizon() ? paintHorizonSparkle : paintSparkle);
+    this.sparkle = centredCache(this.R * 1.02, isHorizon() ? paintHorizonSparkle : isSupernova() ? paintSupernovaSparkle : paintSparkle);
     this.shine = centredCache(this.R * 2.7, paintShine);
     this.cursorSize = clamp(this.R * 0.23, 16, 26);
     this.cursor = makeSprite(BUILDINGS[0].icon, this.cursorSize);
@@ -369,7 +410,7 @@ const Stage = {
     return {
       x: Math.random() * this.w, y: anywhere ? Math.random() * this.h : -20, vy: 25 + Math.random() * 55,
       rot: (Math.random() - 0.5) * 0.6, vr: (Math.random() - 0.5) * 0.4, size: Math.round(10 + Math.random() * 9),
-      a: 0.05 + Math.random() * 0.12, g: pick(RAIN_GLYPHS), col: Math.random() < 0.3 ? (isHorizon() ? '#FF7A1A' : '#D97757') : (isHorizon() ? '#9A9AA2' : '#F3E9DF'),
+      a: 0.05 + Math.random() * 0.12, g: pick(RAIN_GLYPHS), col: Math.random() < 0.3 ? (isHorizon() ? '#FF7A1A' : isSupernova() ? pick(['#FF5FB8', '#5EE6FF', '#FFD27A']) : '#D97757') : (isHorizon() ? '#9A9AA2' : isSupernova() ? '#AFC0F0' : '#F3E9DF'),
     };
   },
   frame(dt) {
@@ -392,7 +433,7 @@ const Stage = {
     const boost = D.buffProd > 1 ? 1 : 0;
     const glowR = this.R * (1.9 + boost * 0.25 + (still ? 0 : Math.sin(t * 1.3) * 0.06));
     const g = c.createRadialGradient(this.cx, this.cy, this.R * 0.2, this.cx, this.cy, glowR);
-    const glow = horizon ? '255,122,26' : '217,119,87';
+    const glow = horizon ? '255,122,26' : isSupernova() ? '94,200,255' : '217,119,87';
     g.addColorStop(0, boost ? 'rgba(242,197,124,.5)' : `rgba(${glow},.42)`);
     g.addColorStop(0.5, `rgba(${glow},.12)`);
     g.addColorStop(1, `rgba(${glow},0)`);
@@ -411,13 +452,14 @@ const Stage = {
     c.restore();
 
     if (horizon) this.drawDisk(t, still);
+    if (isSupernova()) this.drawPulsar(t, still);
     if (this.full) City.draw(this, dt, t, still);
     this.drawCursors(t, still);
 
     // The sparkle itself: breathes, squishes on click, grows on hover, spins faster with production.
     this.squish *= Math.exp(-dt * 10);
     this.hs += ((this.hover ? 1.04 : 1) - this.hs) * Math.min(1, dt * 10);
-    const sc = (this.hs + (still ? 0 : Math.sin(t * 1.6) * 0.012) - this.squish * 0.07) * (1 - (this.collapse || 0) * 0.65);
+    const sc = (this.hs + (still ? 0 : Math.sin(t * 1.6) * 0.012) - this.squish * 0.07) * (1 - (this.collapse || 0) * 0.65) * (1 + (this.swell || 0) * 0.45);
     if (!still) this.spin += dt * (0.05 + Math.min(0.5, Math.log10(D.tps + 1) * 0.03)) * (1 + boost);
     const sp = this.sparkle, s2 = sp.size * sc;
     c.save();
@@ -425,6 +467,17 @@ const Stage = {
     c.rotate(this.spin);
     c.drawImage(sp, -s2 / 2, -s2 / 2, s2, s2);
     c.restore();
+    // While the supernova event starts, the sparkle swells into a red giant.
+    if (this.swell > 0) {
+      const rr = s2 * (0.32 + this.swell * 0.55), g2 = c.createRadialGradient(this.cx, this.cy, rr * 0.1, this.cx, this.cy, rr);
+      g2.addColorStop(0, `rgba(255,236,190,${this.swell})`);
+      g2.addColorStop(0.45, `rgba(255,120,50,${this.swell * 0.95})`);
+      g2.addColorStop(1, 'rgba(160,30,20,0)');
+      c.fillStyle = g2;
+      c.beginPath();
+      c.arc(this.cx, this.cy, rr, 0, Math.PI * 2);
+      c.fill();
+    }
     // While the black hole event starts, the sparkle darkens as it collapses.
     if (this.collapse > 0) {
       c.fillStyle = `rgba(0,0,0,${this.collapse * 0.85})`;
@@ -562,7 +615,40 @@ const Stage = {
       c.stroke();
     }
     c.restore();
+  },  // Supernova style: the remnant nebula ring and two pulsar beams sweeping like a lighthouse.
+  drawPulsar(t, still) {
+    const c = this.ctx, R = this.R, ang = still ? 0.6 : t * 1.6;
+    c.save();
+    c.translate(this.cx, this.cy);
+    // Filament ring.
+    c.lineCap = 'round';
+    for (let k = 0; k < 40; k++) {
+      const a = k * 0.157 + (still ? 0 : t * 0.03), r0 = R * (1.55 + hash(k) * 0.25), len = R * (0.18 + hash(k + 9) * 0.3);
+      c.strokeStyle = k % 3 === 0 ? 'rgba(255,95,184,.22)' : k % 3 === 1 ? 'rgba(94,230,255,.2)' : 'rgba(255,210,122,.16)';
+      c.lineWidth = 1.2 + hash(k + 3) * 1.6;
+      c.beginPath();
+      c.moveTo(Math.cos(a) * r0, Math.sin(a) * r0);
+      c.quadraticCurveTo(Math.cos(a + 0.08) * (r0 + len * 0.6), Math.sin(a + 0.08) * (r0 + len * 0.6), Math.cos(a + 0.03) * (r0 + len), Math.sin(a + 0.03) * (r0 + len));
+      c.stroke();
+    }
+    // Beams.
+    c.rotate(ang);
+    const len = Math.hypot(this.w, this.h);
+    for (const dir of [0, Math.PI]) {
+      const g = c.createLinearGradient(0, 0, Math.cos(dir) * len * 0.6, Math.sin(dir) * len * 0.6);
+      g.addColorStop(0, 'rgba(220,250,255,.32)');
+      g.addColorStop(0.35, 'rgba(94,230,255,.1)');
+      g.addColorStop(1, 'rgba(94,230,255,0)');
+      c.fillStyle = g;
+      c.beginPath();
+      c.moveTo(0, 0);
+      c.arc(0, 0, len, dir - 0.07, dir + 0.07);
+      c.closePath();
+      c.fill();
+    }
+    c.restore();
   },
+
   // ----- Flow bubbles: they rise out of the tide; pop one for 15 s of production times your Flow. -----
   bubbleAt(x, y) {
     for (let i = this.bubbles.length - 1; i >= 0; i--) {
@@ -743,8 +829,9 @@ const Stage = {
       c.fillStyle = g;
       c.fillRect(0, gy - 70, w, 80);
     }
-    const back = tier ? look.back : hz ? 'rgba(154,154,162,.13)' : 'rgba(242,197,124,.13)';
-    let front = tier ? look.front : hz ? 'rgba(255,122,26,.28)' : 'rgba(217,119,87,.30)';
+    const sn = isSupernova();
+    const back = tier ? look.back : hz ? 'rgba(154,154,162,.13)' : sn ? 'rgba(94,230,255,.12)' : 'rgba(242,197,124,.13)';
+    let front = tier ? look.front : hz ? 'rgba(255,122,26,.28)' : sn ? 'rgba(255,95,184,.26)' : 'rgba(217,119,87,.30)';
     if (look.prism) {
       // The last tide cycles through every colour as it rolls.
       front = c.createLinearGradient(0, 0, w, 0);

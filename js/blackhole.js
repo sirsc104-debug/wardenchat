@@ -495,5 +495,7 @@ const BlackHole = {
 // Applies the saved clicker style to the page.
 function applyTheme() {
   document.body.classList.toggle('theme-horizon', G.theme === 'horizon');
+  document.body.classList.toggle('theme-supernova', G.theme === 'supernova');
+  document.body.classList.toggle('theme-dark', G.theme === 'horizon' || G.theme === 'supernova');
   if (typeof Stage !== 'undefined' && Stage.cv) Stage.resize();
 }

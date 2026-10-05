@@ -34,11 +34,12 @@ Progress saves to `localStorage` every 30 seconds and when you leave the page. U
 | Black hole tier | From 500 of a building, every 50 show as one black hole icon in the workspace: a dark, orange-glowing silhouette over a black core with a spinning accretion ring (then gold tens, then single icons). From 500 Autocompletes, black hole hands (50 each) take over the circles with a harder spin-slam and orange-and-grey shockwaves (the circles only ever show the highest hand type you have), every pointer skin turns dark with orange outlines and a sweeping glint, and clicking the sparkle collapses rings inward before an orange flash. |
 | Event Horizon | On your first click after all-time tokens reach 1 trillion (including saves already past it), the sparkle collapses into a black hole, the screen shakes and gets sucked in, and a fullscreen Event Horizon tab shows every building you own spiralling (with motion trails) through nebula clouds, gravitational waves, lensing arcs and twin jets into a Doppler-bright accretion disk, before a supernova blasts it all back out. Afterwards the game switches to a black, orange and grey Event Horizon style with a black-hole sparkle and accretion disk. It changes the look only; switch styles any time in Options. |
 | Full screen | The **Full screen** button under the sparkle opens a view where the sparkle fills the window and every building you own (not just the Autocomplete hands) runs its own workstation on a ring around it: its crew hops at work in its tier (single, gold, black hole or diamond icons), streams tokens into the sparkle along glowing links, and reports what each 3-second work cycle made. The sparkle stays clickable; press Esc or Exit full screen to go back. |
+| Supernova | On your first click after all-time tokens reach 100 quadrillion (always after the Event Horizon), the sparkle overheats and swells into a red giant that engulfs the page. A fullscreen Supernova tab shows every building you own orbiting the star as it grows, fused into heavier elements (H → He → C → O → Ne → Si → Fe) as the star swallows its orbit. Then the iron core collapses, the star explodes in a nebula of magenta, cyan and gold filaments that blasts your buildings back out, and a pulsar is born. Afterwards the game switches to the Supernova style: deep navy panels, magenta and cyan accents, and a pulsar sparkle with sweeping beams. Like the Event Horizon it changes the look only; switch styles any time in Options. |
 | Quality of life | Offline production, save export/import, number formats, optional synthesized sound, reduced-motion support, keyboard play (focus the sparkle, press Enter), and a phone layout. |
 
 ## Developer cheats
 
-Type `0987` anywhere on the page (outside a text box) to show a **Dev** tab, and type it again to hide it. It has 46 one-click cheats (tokens, time warp, buildings, upgrades, achievements, Eureka tokens, bugs, Flow tides, prestige, challenges, every Toolbox system, compute credits, and each event), fields to set exact token and building counts, a picker that triggers any of the 18 Eureka effects, and a season picker, and toggles for a production multiplier, free shopping, a Eureka token every 5 seconds and infinite Focus. A DEV badge shows next to the title while it's on.
+Type `0987` anywhere on the page (outside a text box) to show a **Dev** tab, and type it again to hide it. It has 48 one-click cheats (tokens, time warp, buildings, upgrades, achievements, Eureka tokens, bugs, Flow tides, prestige, both one-time events, challenges, every Toolbox system, compute credits, and each event), fields to set exact token and building counts, a picker that triggers any of the 18 Eureka effects, and a season picker, and toggles for a production multiplier, free shopping, a Eureka token every 5 seconds and infinite Focus. A DEV badge shows next to the title while it's on.
 
 ## Files
 
@@ -61,6 +62,7 @@ js/events.js      Rate Limited, Pull Requests, memory leaks, seasons
 js/fullview.js    full-screen view of every building at work
 js/dev.js         hidden Dev tab with cheats (type 0987)
 js/blackhole.js   the one-time Event Horizon event and style
+js/supernova.js   the one-time Supernova event at 100 quadrillion
 js/main.js        boot, main loop, autosave
 ```
 

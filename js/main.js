@@ -46,6 +46,7 @@ function start(snapshot) {
   Panels.init();
   Dev.init();
   BlackHole.init();
+  Supernova.init();
   FullView.init();
   FullView.label();
 

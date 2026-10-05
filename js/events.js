@@ -70,7 +70,7 @@ const Events = {
     // Random events (only while someone is watching).
     if ((this.next -= dt) <= 0) {
       this.next = rand(150, 330);
-      if (!document.hidden && D.tpsGross > 0 && !(typeof BlackHole !== 'undefined' && BlackHole.running) && !this.pr) {
+      if (!document.hidden && D.tpsGross > 0 && !(typeof BlackHole !== 'undefined' && BlackHole.running) && !(typeof Supernova !== 'undefined' && Supernova.running) && !this.pr) {
         Math.random() < 0.3 ? this.rateLimit() : this.pullRequest();
       }
     }

@@ -220,7 +220,7 @@ const FullView = {
     document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && this.on && this.api) { this.api = false; this.exit(); } });
   },
   enter() {
-    if (typeof BlackHole !== 'undefined' && BlackHole.running) return;
+    if ((typeof BlackHole !== 'undefined' && BlackHole.running) || (typeof Supernova !== 'undefined' && Supernova.running)) return;
     this.on = true;
     document.body.classList.add('full-view');
     this.label();

@@ -39,7 +39,7 @@ const Panels = {
     else if (this.tab === 'achievements' && (force || this.achDirty)) this.achievements();
     else if (this.tab === 'memory') this.memory(force);
     else if (this.tab === 'toolbox') Toolbox.refresh(force);
-    else if (this.tab === 'options' && $('#optThemeRow').hidden === G.blackhole) this.syncOptions();
+    else if (this.tab === 'options' && ($('#optThemeRow').hidden === G.blackhole || $('#optThemeSn').hidden === G.supernova)) this.syncOptions();
   },
   fastRefresh() {
     if (this.tab === 'terminal' && this.visible()) this.terminalTick();
@@ -340,7 +340,7 @@ const Panels = {
       `<textarea id="saveText" rows="4" spellcheck="false" placeholder="Export puts your save code here. Paste a code here to import it."></textarea>` +
       `<div class="opt-row"><button type="button" class="btn" id="optExport">Export</button><button type="button" class="btn" id="optCopy">Copy code</button><button type="button" class="btn" id="optImport">Import code</button><span class="muted" id="optMsg"></span></div>` +
       `<h3 class="sec">Display</h3><div class="opt-col">${check('optParticles', 'Click particles')}${check('optFloaters', 'Floating numbers')}${check('optMotion', 'Background motion')}${check('optSound', 'Sound effects')}` +
-      `<label class="check" for="optTheme" id="optThemeRow" hidden>Clicker style <select id="optTheme"><option value="classic">Classic</option><option value="horizon">Event Horizon</option></select></label>` +
+      `<label class="check" for="optTheme" id="optThemeRow" hidden>Clicker style <select id="optTheme"><option value="classic">Classic</option><option value="horizon">Event Horizon</option><option value="supernova" id="optThemeSn">Supernova</option></select></label>` +
       `<label class="check" for="optNumbers">Big numbers <select id="optNumbers"><option value="words">Words (1.234 million)</option><option value="short">Short (1.23M)</option><option value="sci">Scientific (1.23e6)</option></select></label></div>` +
       `<h3 class="sec">Start over</h3><div class="opt-row"><button type="button" class="btn danger" id="optWipe">Wipe save</button><span class="muted">Deletes everything, including prestige.</span></div>` +
       `<p class="about">Claude Code Clicker is a fan-made idle game about working with Claude Code. It is not an official Anthropic product.</p></section>`;
@@ -374,7 +374,10 @@ const Panels = {
     bindCheck('#optMotion', 'motion');
     bindCheck('#optSound', 'sound', () => { if (G.settings.sound) Sound.ensure(); UI.refreshSoundButton(); });
     $('#optNumbers').addEventListener('change', e => { G.settings.numbers = e.target.value; });
-    $('#optTheme').addEventListener('change', e => { if (G.blackhole) { G.theme = e.target.value; applyTheme(); save(); } });
+    $('#optTheme').addEventListener('change', e => {
+      const v = e.target.value;
+      if (v === 'classic' || (v === 'horizon' && G.blackhole) || (v === 'supernova' && G.supernova)) { G.theme = v; applyTheme(); save(); }
+    });
     this.syncOptions();
   },
   syncOptions() {
@@ -384,6 +387,7 @@ const Panels = {
     $('#optSound').checked = G.settings.sound;
     $('#optNumbers').value = G.settings.numbers;
     $('#optThemeRow').hidden = !G.blackhole;
+    $('#optThemeSn').hidden = $('#optThemeSn').disabled = !G.supernova;
     $('#optTheme').value = G.theme;
   },
 };
