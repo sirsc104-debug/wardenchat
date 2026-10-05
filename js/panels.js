@@ -26,10 +26,7 @@ const Panels = {
   visible() { return $('#paneMid').getClientRects().length > 0; },
   workspaceVisible() { return this.tab === 'workspace' && this.visible(); },
   refresh(force) {
-    const got = G.achievements.size, frac = got / ACHIEVEMENTS.length;
-    $('#achCount').textContent = `${got}/${ACHIEVEMENTS.length}`;
-    $('#achProg').style.width = `${(frac * 100).toFixed(1)}%`;
-    $('#achCount').parentElement.title = `${got} of ${ACHIEVEMENTS.length} achievements (${Math.floor(frac * 100)}%)`;
+    $('#achCount').textContent = `${G.achievements.size}/${ACHIEVEMENTS.length}`;
     const term = $('#tabTerminal');
     const termOn = G.owned[5] > 0;
     if (term.hidden === termOn) term.hidden = !termOn;
@@ -109,7 +106,15 @@ const Panels = {
   achTip(a) {
     const got = G.achievements.has(a.id), secret = a.hidden && !got;
     return tipHead(got ? svgIcon(iconParts(a.icon)) : svgIcon(GLYPH.star, 'dim'), secret ? '???' : a.name, got ? 'Achievement · unlocked' : 'Achievement · locked') +
-      `<div class="tip-desc">${secret ? 'A hidden achievement. Keep playing to find it.' : a.desc}</div>`;
+      `<div class="tip-desc">${secret ? 'A hidden achievement. Keep playing to find it.' : a.desc}</div>` + (secret ? '' : this.achProgress(a, got));
+  },
+  // Progress toward an achievement's goal, as a bar with the numbers under it.
+  achProgress(a, got) {
+    if (!a.prog) return '';
+    const [v, goal, f] = a.prog(), frac = got ? 1 : clamp(v / goal, 0, 1);
+    const pct = got ? 100 : Math.min(99, Math.floor(frac * 100));
+    return `<div class="tip-prog ${got ? 'done' : ''}"><div class="meter"><span style="width:${(frac * 100).toFixed(1)}%"></span></div>` +
+      `<div class="tip-prog-txt"><span>${got ? 'Complete' : `${f(Math.min(v, goal))} / ${f(goal)}`}</span><b>${pct}%</b></div></div>`;
   },
 
   // ---------- terminal (slash commands) ----------

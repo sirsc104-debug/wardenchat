@@ -3,8 +3,15 @@
 
 // ---------- achievements ----------
 const ACHIEVEMENTS = [];
+// check is either a yes/no function or { value, goal } (goal may be a function); the latter also shows progress on hover.
 function ach(id, name, desc, icon, check, hidden = false) {
-  ACHIEVEMENTS.push({ id, name, desc, icon, check, hidden });
+  let prog = null;
+  if (typeof check !== 'function') {
+    const { value, goal, test, format } = check, g = typeof goal === 'function' ? goal : () => goal;
+    prog = () => [Math.max(0, value()), g(), format || fmt];
+    check = test || (() => value() >= g());
+  }
+  ACHIEVEMENTS.push({ id, name, desc, icon, check, hidden, prog });
 }
 const plural = (n, word) => `${n === 1 ? 'one' : fmtWords(n)} ${word}${n === 1 ? '' : 's'}`;
 
@@ -14,50 +21,50 @@ const plural = (n, word) => `${n === 1 ? 'one' : fmtWords(n)} ${word}${n === 1 ?
   [1e13, 'Legacy Code'], [1e14, 'Load-bearing Library'], [1e15, 'Critical Infrastructure'], [1e16, 'Civilization Dependency'],
   [1e18, 'Tokenomics'], [1e20, 'Heat Death Postponed'], [1e22, 'The Great Autocomplete'], [1e24, 'Everything Is Tokens'],
   [1e27, 'Token Omniverse'], [1e30, 'Beyond Numbers'],
-].forEach(([n, name], k) => ach(`tok${k}`, name, `Generate <b>${plural(n, 'token')}</b> in a single run.`, { g: 'sparkle' }, () => G.earned >= n));
+].forEach(([n, name], k) => ach(`tok${k}`, name, `Generate <b>${plural(n, 'token')}</b> in a single run.`, { g: 'sparkle' }, { value: () => G.earned, goal: n }));
 
 [
   [1, 'Warm Start'], [10, 'Tokens on Tap'], [100, 'Streaming Response'], [1e3, 'Firehose'], [1e4, 'Rate Limit Who?'],
   [1e5, 'High Throughput'], [1e6, 'Megastream'], [1e7, 'Token Tsunami'], [1e8, 'Bandwidth Bandit'], [1e9, 'Gigathought'],
   [1e10, 'Torrent of Thought'], [1e12, 'Teraflop Tokens'], [1e14, 'Unmetered'], [1e16, 'Unbounded'],
-].forEach(([n, name], k) => ach(`tps${k}`, name, `Reach <b>${plural(n, 'token')}</b> per second.`, { g: 'bolt' }, () => D.tps >= n));
+].forEach(([n, name], k) => ach(`tps${k}`, name, `Reach <b>${plural(n, 'token')}</b> per second.`, { g: 'bolt' }, { value: () => D.tps, goal: n }));
 
 [[1, 'Click'], [100, 'Clicky'], [1e3, 'Clickbait'], [1e4, 'Carpal Tunnel'], [5e4, 'Keyboard Warrior'], [1e5, 'Click Singularity']]
-  .forEach(([n, name], k) => ach(`clk${k}`, name, `Click the sparkle <b>${n === 1 ? 'once' : fmtWords(n) + ' times'}</b>.`, { b: 0 }, () => G.clicks >= n));
+  .forEach(([n, name], k) => ach(`clk${k}`, name, `Click the sparkle <b>${n === 1 ? 'once' : fmtWords(n) + ' times'}</b>.`, { b: 0 }, { value: () => G.clicks, goal: n }));
 
 [[1e3, 'Hand-written'], [1e5, 'Artisanal Code'], [1e7, 'Bespoke Bytes'], [1e9, 'Handcrafted'], [1e11, 'Human in the Loop'], [1e13, 'Manual Override'], [1e15, 'Fingers of Legend']]
-  .forEach(([n, name], k) => ach(`hand${k}`, name, `Generate <b>${plural(n, 'token')}</b> by clicking in one run.`, { g: 'key' }, () => G.handmade >= n));
+  .forEach(([n, name], k) => ach(`hand${k}`, name, `Generate <b>${plural(n, 'token')}</b> by clicking in one run.`, { g: 'key' }, { value: () => G.handmade, goal: n }));
 
 [[1, 'Eureka!'], [7, 'Lucky Seven'], [27, 'Serendipitous'], [77, 'Golden Hour'], [777, 'Midas Prompt']]
-  .forEach(([n, name], k) => ach(`gold${k}`, name, `Click <b>${plural(n, 'Eureka token')}</b>.`, { g: 'gold' }, () => G.goldenClicks >= n));
+  .forEach(([n, name], k) => ach(`gold${k}`, name, `Click <b>${plural(n, 'Eureka token')}</b>.`, { g: 'gold' }, { value: () => G.goldenClicks, goal: n }));
 
 [[1, 'Squash'], [10, 'Bug Hunter'], [50, 'Exterminator'], [200, 'Zero Known Issues']]
-  .forEach(([n, name], k) => ach(`bug${k}`, name, `Squash <b>${plural(n, 'bug')}</b>.`, { g: 'bug' }, () => G.bugsSquashed >= n));
+  .forEach(([n, name], k) => ach(`bug${k}`, name, `Squash <b>${plural(n, 'bug')}</b>.`, { g: 'bug' }, { value: () => G.bugsSquashed, goal: n }));
 
 [[10, 'Upgrade Available'], [25, 'Dependency Bump'], [50, 'Major Version'], [100, 'Rewrite It in Rust'], [200, 'Ship of Theseus']]
-  .forEach(([n, name], k) => ach(`upg${k}`, name, `Buy <b>${n}</b> upgrades in one run.`, { g: 'up' }, () => G.upgrades.size >= n));
+  .forEach(([n, name], k) => ach(`upg${k}`, name, `Buy <b>${n}</b> upgrades in one run.`, { g: 'up' }, { value: () => G.upgrades.size, goal: n }));
 
 [[100, 'Small Team'], [500, 'Startup'], [1000, 'Scale-up'], [2000, 'Enterprise'], [4000, 'Megacorp']]
-  .forEach(([n, name], k) => ach(`own${k}`, name, `Own <b>${fmtWords(n)}</b> buildings at once.`, { g: 'stack' }, () => totalOwned() >= n));
+  .forEach(([n, name], k) => ach(`own${k}`, name, `Own <b>${fmtWords(n)}</b> buildings at once.`, { g: 'stack' }, { value: () => totalOwned(), goal: n }));
 
 [[1, 'Context Compacted'], [5, 'Summarized Again'], [25, 'Infinite Context']]
-  .forEach(([n, name], k) => ach(`cmp${k}`, name, `Run <b>/compact</b> ${n === 1 ? 'once' : n + ' times'}.`, { g: 'compress' }, () => G.compacts >= n));
+  .forEach(([n, name], k) => ach(`cmp${k}`, name, `Run <b>/compact</b> ${n === 1 ? 'once' : n + ' times'}.`, { g: 'compress' }, { value: () => G.compacts, goal: n }));
 
 [[1, 'First Command'], [50, 'Power User'], [200, 'Shell Wizard']]
-  .forEach(([n, name], k) => ach(`cmd${k}`, name, `Run <b>${plural(n, 'slash command')}</b>.`, { g: 'prompt' }, () => G.spellsCast >= n));
+  .forEach(([n, name], k) => ach(`cmd${k}`, name, `Run <b>${plural(n, 'slash command')}</b>.`, { g: 'prompt' }, { value: () => G.spellsCast, goal: n }));
 
 BUILDINGS.forEach((b, i) => [1, 50, 100, 200].forEach((n, k) =>
-  ach(`b${i}_${k}`, b.ach[k], `Own <b>${n === 1 ? 'one' : n}</b> ${n === 1 ? b.name : b.plural}.`, { b: i }, () => G.owned[i] >= n)));
+  ach(`b${i}_${k}`, b.ach[k], `Own <b>${n === 1 ? 'one' : n}</b> ${n === 1 ? b.name : b.plural}.`, { b: i }, { value: () => G.owned[i], goal: n })));
 
 [[1, 'In the Flow'], [50, 'Bubble Wrap'], [250, 'Flow State']]
-  .forEach(([n, name], k) => ach(`bub${k}`, name, `Pop <b>${plural(n, 'Flow bubble')}</b>.`, { g: 'people' }, () => G.bubbles >= n));
-ach('fullstack', 'Full Stack', 'Own at least <b>one</b> of every building.', { g: 'stack' }, () => G.owned.every(x => x >= 1));
-ach('crossfn', 'Cross-functional Team', 'Own at least <b>50</b> of every building.', { g: 'people' }, () => G.owned.every(x => x >= 50));
-ach('vanilla', 'Vanilla JS', 'Generate <b>one million</b> tokens in a run without buying any upgrades.', { g: 'star' }, () => G.earned >= 1e6 && G.upgrades.size === 0);
+  .forEach(([n, name], k) => ach(`bub${k}`, name, `Pop <b>${plural(n, 'Flow bubble')}</b>.`, { g: 'people' }, { value: () => G.bubbles, goal: n }));
+ach('fullstack', 'Full Stack', 'Own at least <b>one</b> of every building.', { g: 'stack' }, { value: () => G.owned.filter(x => x >= 1).length, goal: BUILDINGS.length });
+ach('crossfn', 'Cross-functional Team', 'Own at least <b>50</b> of every building.', { g: 'people' }, { value: () => G.owned.filter(x => x >= 50).length, goal: BUILDINGS.length });
+ach('vanilla', 'Vanilla JS', 'Generate <b>one million</b> tokens in a run without buying any upgrades.', { g: 'star' }, { value: () => (G.upgrades.size ? 0 : G.earned), goal: 1e6, test: () => G.earned >= 1e6 && G.upgrades.size === 0 });
 ach('combo', 'Combo Breaker', 'Have <b>Vibe Coding</b> and <b>Keyboard on Fire</b> active at the same time.', { g: 'bolt' },
   () => G.buffs.some(b => b.key === 'frenzy') && G.buffs.some(b => b.key === 'clickfrenzy'));
-ach('cache', 'Cache Hit', 'Hold <b>one hour</b> of production in the bank (at 10+ tokens per second).', { g: 'stack' }, () => D.tps >= 10 && G.tokens >= D.tps * 3600);
-ach('marathon', 'Long Session', 'Keep the game open for <b>one hour</b>.', { g: 'clock' }, () => sessionSeconds() >= 3600);
+ach('cache', 'Cache Hit', 'Hold <b>one hour</b> of production in the bank (at 10+ tokens per second).', { g: 'stack' }, { value: () => G.tokens, goal: () => Math.max(10, D.tps) * 3600, test: () => D.tps >= 10 && G.tokens >= D.tps * 3600 });
+ach('marathon', 'Long Session', 'Keep the game open for <b>one hour</b>.', { g: 'clock' }, { value: () => sessionSeconds(), goal: 3600, format: fmtTime });
 ach('rage', 'Rage Clicking', 'Click the sparkle <b>15 times</b> within one second.', { b: 0 }, () => false, true);
 ach('sold', "Buyer's Remorse", 'Sell a building.', { g: 'up' }, () => false, true);
 ach('news', 'Read the Changelog', 'Click the news ticker.', { g: 'star' }, () => false, true);

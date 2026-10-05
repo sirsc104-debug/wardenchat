@@ -271,10 +271,6 @@ b { font-weight: 700; }
 .tabs button:hover { color: var(--text); }
 .tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--clay); }
 .tab-count { margin-left: 4px; font: 500 10px/1 var(--mono); color: var(--faint); }
-/* Slim progress bar under the Achievements tab label. */
-.tabs button { position: relative; }
-.tab-prog { position: absolute; left: 8px; right: 8px; bottom: 4px; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; pointer-events: none; }
-.tab-prog span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--mint), var(--gold)); transition: width .4s; }
 .tab-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 .tab-panel { padding: 18px 16px 28px; }
 #panel-workspace { padding: 0; }
@@ -663,6 +659,13 @@ table.bt { width: 100%; border-collapse: collapse; font: 400 11.5px/1.3 var(--mo
 .ach-count { font: 700 16px/1.2 var(--display); }
 .ach-count b { color: var(--mint); font-family: var(--mono); }
 .ach-pct { margin-left: 6px; font: 600 12px/1 var(--mono); color: var(--faint); }
+.tip-prog { margin-top: 10px; }
+.tip-prog .meter { height: 6px; }
+.tip-prog .meter span { transition: none; background: linear-gradient(90deg, var(--mint), var(--gold)); }
+.tip-prog.done .meter span { background: var(--mint); }
+.tip-prog-txt { display: flex; justify-content: space-between; gap: 10px; margin-top: 5px; font: 500 10.5px/1.3 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tip-prog-txt b { color: var(--text); font-weight: 650; }
+.tip-prog.done .tip-prog-txt, .tip-prog.done .tip-prog-txt b { color: var(--mint); }
 .ach-head p { margin: 0; max-width: 62ch; }
 .ach-head p b { color: var(--text); }
 .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; }
