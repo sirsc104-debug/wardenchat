@@ -26,7 +26,10 @@ const Panels = {
   visible() { return $('#paneMid').getClientRects().length > 0; },
   workspaceVisible() { return this.tab === 'workspace' && this.visible(); },
   refresh(force) {
-    $('#achCount').textContent = `${G.achievements.size}/${ACHIEVEMENTS.length}`;
+    const got = G.achievements.size, frac = got / ACHIEVEMENTS.length;
+    $('#achCount').textContent = `${got}/${ACHIEVEMENTS.length}`;
+    $('#achProg').style.width = `${(frac * 100).toFixed(1)}%`;
+    $('#achCount').parentElement.title = `${got} of ${ACHIEVEMENTS.length} achievements (${Math.floor(frac * 100)}%)`;
     const term = $('#tabTerminal');
     const termOn = G.owned[5] > 0;
     if (term.hidden === termOn) term.hidden = !termOn;
@@ -98,7 +101,7 @@ const Panels = {
       return `<button type="button" class="ach ${got ? 'got' : ''}" data-id="${a.id}" aria-label="${got || !a.hidden ? esc(a.name) : 'Hidden achievement'}">${got ? svgIcon(iconParts(a.icon)) : '<span class="q">?</span>'}</button>`;
     }).join('');
     $('#panel-achievements').innerHTML =
-      `<div class="ach-head"><div class="ach-count"><b>${n}</b> of ${ACHIEVEMENTS.length} unlocked</div>` +
+      `<div class="ach-head"><div class="ach-count"><b>${n}</b> of ${ACHIEVEMENTS.length} unlocked <span class="ach-pct">${Math.floor((n / ACHIEVEMENTS.length) * 100)}%</span></div>` +
       `<div class="meter"><span style="width:${((n / ACHIEVEMENTS.length) * 100).toFixed(1)}%"></span></div>` +
       `<p class="muted">Flow <b>${pct}%</b>. Every achievement adds 4% Flow, shown as the rising tide under the sparkle. Each 1% Flow gives +0.25% production, Engineer upgrades multiply that, and Flow bubbles rise from the tide more often the higher it gets. Pop them for tokens.</p></div>` +
       `<div class="ach-grid">${tiles}</div>`;
