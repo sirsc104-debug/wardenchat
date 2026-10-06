@@ -91,6 +91,7 @@
     G.state = 'title';
     Scene.reset();
     [el.hud, el.track, el.card, el.pause, el.over, el.countdown].forEach(e => e.classList.add('hidden'));
+    el.card.classList.remove('blur');
     el.title.classList.remove('hidden');
     document.querySelectorAll('[data-best]').forEach(b => {
       const r = bests[b.dataset.best];
@@ -141,7 +142,7 @@
     G.timeLeft = G.mode.time;
     G.lastTick = Math.ceil(G.timeLeft);
     G.state = 'question';
-    el.card.classList.remove('hidden', 'swap');
+    el.card.classList.remove('hidden', 'swap', 'blur', 'shake');
     void el.card.offsetWidth;
     el.card.classList.add('swap');
     el.qCat.textContent = `${G.q.cat.icon} ${G.q.cat.name}`;
