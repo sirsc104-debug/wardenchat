@@ -316,3 +316,13 @@ button { font-family: inherit; cursor: pointer; }
 #banner.dive { top: 600px; padding: 10px 18px; border-radius: 24px; background: rgba(6,12,30,0.55); backdrop-filter: blur(4px); }
 #banner.dive .b-icon { font-size: 56px; display: inline-block; vertical-align: middle; }
 #banner.dive .b-name { font-size: 52px; }
+
+/* ---------- Dive length picker ---------- */
+.type-toggle { align-items: center; }
+.dive-len { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0 8px 0 14px; border-left: 2px solid var(--panel-edge); }
+.dive-len-label { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.dive-len-btns { display: flex; gap: 4px; }
+.dive-len-btns button { font-size: 17px; font-weight: 700; padding: 5px 12px; border-radius: 12px; border: 2px solid var(--panel-edge); background: transparent; color: var(--ink); }
+.dive-len-btns button:hover { background: rgba(255,255,255,0.1); }
+.dive-len-btns button:focus-visible { outline: 3px solid var(--cool); outline-offset: 2px; }
+.dive-len-btns button.active { background: var(--cool); border-color: var(--cool); color: #052033; }

@@ -9,7 +9,7 @@ Plain HTML, CSS and JavaScript with no build step. Open `brain-rocket/index.html
 Pick one with the switch on the home screen; each has its own Owen (Easy), Medium and Hard modes and its own best scores.
 
 - **🚀 Rocket.** Fly from the launch pad past the Moon, Mars and the outer planets to the edge of the universe. Every question has its own timer; running out of time burns a fuel cell, and the game ends when they're gone.
-- **🌊 Submarine.** A 60-second dive. There are no lives and skips are unlimited, so it's all about how deep you get before the clock runs out: past the coral reef, the Titanic, hydrothermal vents and Challenger Deep, then drilling through the crust, the mantle and the core to the other side of the world. The speed bonus counts seconds per question (Owen ×2 within 6 s, ×1.5 within 12 s; Medium 5/10 s; Hard 4/8 s), and the game moves straight on after each answer because the clock never stops. Skipping jumps straight to the next question (and resets your streak).
+- **🌊 Submarine.** A timed dive: pick 30, 60 or 120 seconds next to the switch (each length keeps its own best scores). There are no lives and skips are unlimited, so it's all about how deep you get before the clock runs out: past the coral reef, the Titanic, hydrothermal vents and Challenger Deep, then drilling through the crust, the mantle and the core to the other side of the world. The speed bonus counts seconds per question (Owen ×2 within 6 s, ×1.5 within 12 s; Medium 5/10 s; Hard 4/8 s), and the game moves straight on after each answer because the clock never stops. Skipping jumps straight to the next question (and resets your streak).
 
 ## How it plays
 

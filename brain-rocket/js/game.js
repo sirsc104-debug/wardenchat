@@ -7,7 +7,9 @@
     medium: { id: 'medium', label: 'Medium',      time: 20, lives: 3, mult: 1.5, skips: 3, fast: [5, 10] },
     hard:   { id: 'hard',   label: 'Hard',        time: 12, lives: 3, mult: 2,   skips: 2, fast: [4, 8] }
   };
-  const DIVE_TIME = 60;
+  const DIVE_LENGTHS = [30, 60, 120];
+  let diveLen = 60;
+  try { const v = +localStorage.getItem('brainRocket.dive'); if (DIVE_LENGTHS.includes(v)) diveLen = v; } catch (e) { /* ignore */ }
 
   const fmtKm = km => {
     const LY = 9.461e12;
@@ -40,13 +42,13 @@
     sub: {
       id: 'sub', scene: SubScene, stops: DEPTHS, fmt: fmtDepth, from: 'deep', distLabel: 'Depth',
       marker: '🤿', down: true, go: 'DIVE!', firstTag: '🌊 DIVE!', reached: 'YOU DOVE TO', notYet: 'Not dived yet',
-      tagline: 'You have 60 seconds. Every answer drives your submarine deeper. How far down can you get?',
+      tagline: 'You have {n} seconds. Every answer drives your submarine deeper. How far down can you get?',
       fast: '<b>⚡ Be fast.</b> Answer each question within a few seconds for ×2 or ×1.5.',
-      rule: '<b>⏱️ Beat the clock.</b> One 60-second dive. No lives to lose and unlimited skips.',
+      rule: '<b>⏱️ Beat the clock.</b> One {n}-second dive. No lives to lose and unlimited skips.',
       info: {
-        easy: '60-second dive<br>unlimited skips · everyday topics',
-        medium: '60-second dive<br>unlimited skips · mixed topics',
-        hard: '60-second dive<br>unlimited skips · expert topics'
+        easy: '{n}-second dive<br>unlimited skips · everyday topics',
+        medium: '{n}-second dive<br>unlimited skips · mixed topics',
+        hard: '{n}-second dive<br>unlimited skips · expert topics'
       }
     }
   };
@@ -79,7 +81,8 @@
   let bests = {};
   try { bests = JSON.parse(localStorage.getItem('brainRocket.bests') || '{}') || {}; } catch (e) { bests = {}; }
   function saveBests() { try { localStorage.setItem('brainRocket.bests', JSON.stringify(bests)); } catch (e) { /* ignore */ } }
-  const bestKey = (type, mode) => (type === 'rocket' ? mode : `${type}:${mode}`);
+  // Rocket: 'easy'. Submarine: 'sub:easy' for 60-second dives (the original length), 'sub:easy:30' otherwise.
+  const bestKey = (type, mode, len) => (type === 'rocket' ? mode : len === 60 ? `${type}:${mode}` : `${type}:${mode}:${len}`);
 
   // ---- Distance helpers -------------------------------------------------
   function kmAt(alt) {
@@ -140,12 +143,18 @@
       b.classList.toggle('active', b.dataset.type === id);
       b.setAttribute('aria-pressed', b.dataset.type === id ? 'true' : 'false');
     });
-    $('tagline').textContent = J.tagline;
-    $('ruleLast').innerHTML = J.rule;
+    const n = s => s.replace('{n}', diveLen);
+    $('tagline').textContent = n(J.tagline);
+    $('ruleLast').innerHTML = n(J.rule);
+    $('diveLen').classList.toggle('hidden', id !== 'sub');
+    document.querySelectorAll('#diveLen button').forEach(b => {
+      const on = +b.dataset.len === diveLen;
+      b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
     $('ruleFast').innerHTML = J.fast;
-    document.querySelectorAll('.mode-card').forEach(c => { c.querySelector('.mode-info').innerHTML = J.info[c.dataset.mode]; });
+    document.querySelectorAll('.mode-card').forEach(c => { c.querySelector('.mode-info').innerHTML = n(J.info[c.dataset.mode]); });
     document.querySelectorAll('[data-best]').forEach(b => {
-      const r = bests[bestKey(id, b.dataset.best)];
+      const r = bests[bestKey(id, b.dataset.best, diveLen)];
       b.textContent = r ? `Best: ${r.score.toLocaleString()} · ${r.icon} ${r.place}` : J.notYet;
     });
     el.title.dataset.type = id;
@@ -170,7 +179,7 @@
     Object.assign(G, {
       state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive ? Infinity : mode.lives, streak: 0, bestStreak: 0,
       qNum: 0, skips: dive ? Infinity : mode.skips, used: new Set(), seen: Quiz.newRun(), q: null, correct: 0, bestAnswer: null,
-      launched: false, diveLeft: DIVE_TIME, qElapsed: 0, lastTick: DIVE_TIME
+      launched: false, diveTime: diveLen, diveLeft: diveLen, qElapsed: 0, lastTick: diveLen
     });
     S.reset();
     S.setStreak(0);
@@ -352,7 +361,7 @@
       G.state = 'over';
       el.card.classList.add('hidden');
       const place = placeAt(G.score);
-      const key = bestKey(G.type, G.mode.id);
+      const key = bestKey(G.type, G.mode.id, G.diveTime);
       const prev = bests[key];
       const isBest = !prev || G.score > prev.score;
       if (isBest && G.score > 0) {
@@ -374,7 +383,7 @@
         <div class="stat"><div class="s-label">Correct answers</div><div class="s-value">${G.correct}</div></div>
         <div class="stat"><div class="s-label">Best streak</div><div class="s-value">${G.bestStreak} 🔥</div></div>
         <div class="stat wide"><div class="s-label">Best answer</div><div class="s-value">${ba ? `<span class="tier-${ba.tier}">${escapeHtml(ba.text)}</span> · ${Quiz.TIER_NAMES[ba.tier]} · +${ba.pts.toLocaleString()}` : '—'}</div></div>
-        <div class="stat wide"><div class="s-label">Mode</div><div class="s-value">${isDive() ? 'Submarine' : 'Rocket'} · ${G.mode.label}${prev ? ` · previous best ${prev.score.toLocaleString()}` : ''}</div></div>`;
+        <div class="stat wide"><div class="s-label">Mode</div><div class="s-value">${isDive() ? `Submarine (${G.diveTime}s)` : 'Rocket'} · ${G.mode.label}${prev ? ` · previous best ${prev.score.toLocaleString()}` : ''}</div></div>`;
       el.over.classList.remove('hidden');
       $('btnAgain').focus();
     }, 2600);
@@ -468,7 +477,7 @@
   function updateTimer() {
     const sp = speedMult();
     if (isDive()) {
-      el.timerFill.style.width = (Math.max(0, G.diveLeft / DIVE_TIME) * 100) + '%';
+      el.timerFill.style.width = (Math.max(0, G.diveLeft / G.diveTime) * 100) + '%';
       el.timerSecs.textContent = `${Math.max(0, Math.ceil(G.diveLeft))}s of dive left`;
       el.timer.classList.toggle('low', G.diveLeft <= 10);
     } else {
@@ -546,6 +555,12 @@
   document.addEventListener('fullscreenchange', fit);
 
   document.querySelectorAll('.type-btn').forEach(b => b.addEventListener('click', () => { Sound.click(); setType(b.dataset.type); }));
+  document.querySelectorAll('#diveLen button').forEach(b => b.addEventListener('click', () => {
+    Sound.click();
+    diveLen = +b.dataset.len;
+    try { localStorage.setItem('brainRocket.dive', diveLen); } catch (e) { /* ignore */ }
+    setType('sub');
+  }));
   document.querySelectorAll('.mode-card').forEach(b => b.addEventListener('click', () => { Sound.click(); start(b.dataset.mode); }));
   el.form.addEventListener('submit', e => { e.preventDefault(); submit(); });
   el.skip.addEventListener('click', skip);
