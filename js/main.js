@@ -48,6 +48,7 @@ function start(snapshot) {
   BlackHole.init();
   Supernova.init();
   FullView.init();
+  Popout.init();
   FullView.label();
 
   on('achievement', a => {
@@ -105,6 +106,7 @@ function start(snapshot) {
     requestAnimationFrame(loop);
     const dt = Math.min(86400, Math.max(0, (now - last) / 1000));
     last = now;
+    if (Popout.away) return; // paused while the game runs in another window
     const vdt = Math.min(dt, 0.1);
     step('update', () => update(dt));
     step('fx', () => FX.update(Math.min(dt, 0.25)));
@@ -126,12 +128,13 @@ function start(snapshot) {
   window.addEventListener('pagehide', save);
 
   // Keep progress when the page is live-reloaded inside the artifact viewer.
-  try { if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(() => ({ save: serialize() })); } catch (e) { /* not in a live viewer */ }
+  try { if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(() => ({ save: Popout.away && Popout.latest ? Popout.latest : serialize() })); } catch (e) { /* not in a live viewer */ }
 }
 
 (function boot() {
   const hot = window.claude && window.claude.hot;
-  const go = data => start(data && data.save);
+  const handoff = Popout.takeHandoff(); // a save handed over by "New window"
+  const go = data => start(handoff || (data && data.save));
   if (hot && typeof hot.ready === 'function') {
     try { hot.ready(go); return; } catch (e) { /* fall through to a normal start */ }
   }

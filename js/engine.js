@@ -644,6 +644,7 @@ function load(str, applyOffline) {
 }
 
 function save() {
+  if (typeof Popout !== 'undefined' && Popout.away) return false; // another window is playing; it sends its saves here
   try { localStorage.setItem(SAVE_KEY, serialize()); return true; } catch (e) { return false; }
 }
 function readSave() {

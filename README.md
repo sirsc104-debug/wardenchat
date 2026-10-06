@@ -35,7 +35,7 @@ Progress saves to `localStorage` every 30 seconds and when you leave the page. U
 | Event Horizon | On your first click after all-time tokens reach 1 trillion (including saves already past it), the sparkle collapses into a black hole, the screen shakes and gets sucked in, and a fullscreen Event Horizon tab shows every building you own spiralling (with motion trails) through nebula clouds, gravitational waves, lensing arcs and twin jets into a Doppler-bright accretion disk, before a supernova blasts it all back out. Afterwards the game switches to a black, orange and grey Event Horizon style with a black-hole sparkle and accretion disk. It changes the look only; switch styles any time in Options. |
 | Full screen | The **Full screen** button under the sparkle opens a view where the sparkle fills the window and every building you own (not just the Autocomplete hands) runs its own workstation on a ring around it: its crew hops at work in its tier (single, gold, black hole or diamond icons), streams tokens into the sparkle along glowing links, and reports what each 3-second work cycle made. The sparkle stays clickable; press Esc or Exit full screen to go back. |
 | Supernova | On your first click after all-time tokens reach 100 quadrillion (always after the Event Horizon), the sparkle overheats and swells into a red giant that engulfs the page. A fullscreen Supernova tab shows every building you own orbiting the star as it grows, fused into heavier elements (H → He → C → O → Ne → Si → Fe) as the star swallows its orbit. Then the iron core collapses, the star explodes in a nebula of magenta, cyan and gold filaments that blasts your buildings back out, and a pulsar is born. Afterwards the game switches to the Supernova style: deep navy panels, magenta and cyan accents, and a pulsar sparkle with sweeping beams. Like the Event Horizon it changes the look only; switch styles any time in Options. |
-| Quality of life | Offline production, save export/import, number formats, optional synthesized sound, reduced-motion support, keyboard play (focus the sparkle, press Enter), and a phone layout. |
+| Quality of life | A **New window** button (top right) opens the game in its own window and carries your save over; the original window pauses so the two never overwrite each other, receives the new window's progress every few seconds, and picks up again when you close it (or click Play here instead). Offline production, save export/import, number formats, optional synthesized sound, reduced-motion support, keyboard play (focus the sparkle, press Enter), and a phone layout. |
 
 ## Developer cheats
 
@@ -63,6 +63,7 @@ js/fullview.js    full-screen view of every building at work
 js/dev.js         hidden Dev tab with cheats (type 0987)
 js/blackhole.js   the one-time Event Horizon event and style
 js/supernova.js   the one-time Supernova event at 100 quadrillion
+js/popout.js      the New window handoff
 js/main.js        boot, main loop, autosave
 ```
 
