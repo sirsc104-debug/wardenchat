@@ -1,12 +1,23 @@
-/* Brain Rocket — answer lists.
- * Each line: "<tier> Name/alias/alias".
- * Tier 1 = everyone says it (Common), 5 = very niche (Legendary).
+/* Brain Rocket — question topics and answer lists.
+ *
+ * Each topic: { id, name, icon, level, q, list, strip? }
+ *   level  1 = everyday (Owen/Easy), 2 = mixed, 3 = expert
+ *   q      the question; **double stars** mark the highlighted words
+ *   noun   used for letter questions: "Name a <noun> that starts with B"
+ *   strip  extra words players may add that should be ignored ("dog" in "beagle dog")
+ *   list   one answer per line as "<tier> Name/alias/alias", or a whole tier per line
+ *          as "<tier>: Name/alias, Name, Name".
+ * Tier 1 = everyone says it (Common) … 5 = very niche (Legendary).
+ * The other topic files add to TOPICS with topic({...}).
  */
 'use strict';
 
-const RAW_CATEGORIES = {
+const TOPICS = [];
+const topic = t => TOPICS.push(t);
+
+const BASE_TOPICS = {
   countries: {
-    name: 'Countries', noun: 'country', icon: '🌍',
+    name: 'Countries', noun: 'country', icon: '🌍', level: 1, q: 'Name a **country**.',
     list: `
 1 United States/America/USA/US/United States of America
 1 China
@@ -212,7 +223,7 @@ const RAW_CATEGORIES = {
   },
 
   animals: {
-    name: 'Animals', noun: 'animal', icon: '🐾',
+    name: 'Animals', noun: 'animal', icon: '🐾', level: 1, q: 'Name an **animal**.',
     list: `
 1 Dog/Puppy
 1 Cat/Kitten
@@ -593,7 +604,7 @@ const RAW_CATEGORIES = {
   },
 
   fruitveg: {
-    name: 'Fruit & Veg', noun: 'fruit or vegetable', icon: '🍓',
+    name: 'Fruit & Veg', noun: 'fruit or vegetable', icon: '🍓', level: 1, q: 'Name a **fruit or vegetable**.',
     list: `
 1 Apple
 1 Banana
@@ -787,7 +798,7 @@ const RAW_CATEGORIES = {
   },
 
   sports: {
-    name: 'Sports', noun: 'sport', icon: '🏅',
+    name: 'Sports', noun: 'sport', icon: '🏅', level: 1, q: 'Name a **sport**.',
     list: `
 1 Soccer/Football
 1 Basketball
@@ -964,7 +975,7 @@ const RAW_CATEGORIES = {
   },
 
   capitals: {
-    name: 'Capital Cities', noun: 'capital city', icon: '🏛️',
+    name: 'Capital Cities', noun: 'capital city', icon: '🏛️', level: 2, q: 'Name the **capital city** of any country.',
     list: `
 1 London
 1 Paris
@@ -1170,7 +1181,7 @@ const RAW_CATEGORIES = {
   },
 
   elements: {
-    name: 'Chemical Elements', noun: 'chemical element', icon: '⚗️',
+    name: 'Chemical Elements', noun: 'chemical element', icon: '⚗️', level: 3, q: 'Name a **chemical element**.',
     list: `
 1 Hydrogen
 1 Helium
@@ -1293,6 +1304,8 @@ const RAW_CATEGORIES = {
 `
   }
 };
+
+Object.entries(BASE_TOPICS).forEach(([id, t]) => topic({ id, ...t }));
 
 /* Places the rocket passes. `pts` is the score needed to reach it; `alt` is where it sits
  * in the scene (the game maps score to altitude between these pairs). */

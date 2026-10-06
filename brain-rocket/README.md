@@ -6,22 +6,20 @@ Plain HTML, CSS and JavaScript with no build step. Open `brain-rocket/index.html
 
 ## How it plays
 
-- Each question gives you letter clues, for example: *Name a country that starts with A and has an I in it.*
-- **Niche answers score more.** Every answer has a rarity: Common 10, Uncommon 25, Rare 50, Epic 100, Legendary 200 points. "America" is Common; "Kyrgyzstan" is Epic.
+- **92 question topics.** Most questions name a topic: *What's a breed of dog?*, *Name a type of home security system*, *Name a job that involves operating a vehicle*, *Name a way of scoring in sports*. About a third are letter questions that add clues to a big topic: *Name a breed of dog that starts with B and has an N in it.*
+- **Niche answers score more.** Every answer has a rarity: Common 10, Uncommon 25, Rare 50, Epic 100, Legendary 200 points. "Labrador" is Common; "Xoloitzcuintli" is Epic.
 - **Speed multiplier:** answer in the first quarter of the timer for ×2, in the first half for ×1.5.
 - **Streak multiplier:** each correct answer in a row adds ×0.25, up to ×3. Your rocket's flame changes colour at streaks of 3, 5 and 8.
 - **Deepest cut:** give one of the rarest possible answers to a question (Rare or better) for an extra ×1.5.
 - Wrong guesses are free. Running out of time burns a fuel cell; run out of fuel cells and the game ends. Skips are limited and reset your streak.
-- Reusing an answer you already gave this run scores half.
-- Small typos are forgiven ("Albaina" counts as Albania), and plurals work.
+- Reusing an answer you already gave this run scores half. Topics don't repeat until you've seen them all.
+- Answers are forgiving: small typos ("Chihuahuha"), plurals ("touchdowns"), extra words ("golden retriever dog", "oak tree") and answers inside a phrase ("a big golden retriever") all count.
 
-| Mode | Time per question | Fuel cells | Skips | Points | Clues |
+| Mode | Time per question | Fuel cells | Skips | Points | Topics |
 | --- | --- | --- | --- | --- | --- |
-| Owen (Easy) | 30 s | 5 | 5 | ×1 | One or two (starts with, has a letter, ends with) |
-| Medium | 20 s | 3 | 3 | ×1.5 | Two (adds "has no E", length, double letters) |
-| Hard | 12 s | 3 | 2 | ×2 | Two or three, including exact letter counts |
-
-Categories: countries, animals, fruit & veg, sports, capital cities (Medium and Hard) and chemical elements (Medium and Hard). Each question is generated so it has enough valid answers for its mode.
+| Owen (Easy) | 30 s | 5 | 5 | ×1 | Everyday: animals, colours, pizza toppings, toys, the beach… |
+| Medium | 20 s | 3 | 3 | ×1.5 | Mixed: jobs, superheroes, cheeses, landmarks, Pokémon… |
+| Hard | 12 s | 3 | 2 | ×2 | Mostly expert: constellations, bones, composers, knots… |
 
 Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the browser.
 
@@ -29,10 +27,11 @@ Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the b
 
 | File | What it does |
 | --- | --- |
-| `js/data.js` | Answer lists with rarity tiers, and the milestones (score needed, place in the scene, real distance) |
-| `js/questions.js` | Builds questions from letter rules and checks answers |
+| `js/data.js` | The topic format, the original six topics, and the milestones (score needed, place in the scene, real distance) |
+| `js/topics-everyday.js`, `js/topics-mixed.js`, `js/topics-expert.js` | The other 86 topics with their answers and rarity tiers |
+| `js/questions.js` | Picks topic and letter questions and checks answers |
 | `js/scene.js` | The canvas world: sky, ground, planets, decorations, rocket, particles |
 | `js/game.js` | Game flow, scoring, HUD, popups and screens |
 | `js/audio.js` | Synthesized sound effects (no audio files) |
 
-To change how rare an answer is, edit the number at the start of its line in `js/data.js`. To rename a mode, edit `MODES` in `js/game.js` and its card in `index.html`.
+To change how rare an answer is, move it to a different tier line in its topic. To add a topic, copy any `topic({...})` block. To rename a mode, edit `MODES` in `js/game.js` and its card in `index.html`.

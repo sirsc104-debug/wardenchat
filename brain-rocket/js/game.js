@@ -76,7 +76,7 @@
   // ---- Game state -------------------------------------------------------
   const G = {
     state: 'title', mode: null, score: 0, shown: 0, lives: 0, streak: 0, bestStreak: 0, qNum: 0,
-    skips: 0, used: new Set(), seen: new Set(), q: null, timeLeft: 0, lastTick: 0,
+    skips: 0, used: new Set(), seen: Quiz.newRun(), q: null, timeLeft: 0, lastTick: 0,
     correct: 0, bestAnswer: null, launched: false, timers: []
   };
   const later = (fn, ms) => { const id = setTimeout(fn, ms); G.timers.push(id); return id; };
@@ -105,7 +105,7 @@
     const mode = MODES[modeId];
     Object.assign(G, {
       state: 'countdown', mode, score: 0, shown: 0, lives: mode.lives, streak: 0, bestStreak: 0, qNum: 0,
-      skips: mode.skips, used: new Set(), seen: new Set(), q: null, correct: 0, bestAnswer: null, launched: false
+      skips: mode.skips, used: new Set(), seen: Quiz.newRun(), q: null, correct: 0, bestAnswer: null, launched: false
     });
     Scene.reset();
     Scene.setStreak(0);
@@ -146,7 +146,7 @@
     el.card.classList.add('swap');
     el.qCat.textContent = `${G.q.cat.icon} ${G.q.cat.name}`;
     el.qNum.textContent = `Question ${G.qNum}`;
-    el.qText.innerHTML = G.q.text + '.';
+    el.qText.innerHTML = G.q.text;
     el.feedback.textContent = '';
     el.feedback.className = 'feedback';
     el.reveal.classList.add('hidden');
