@@ -315,11 +315,13 @@
     S.setStreak(0);
     Sound.skip();
     renderStreak();
+    // The dive clock never stops, so Submarine goes straight to the next question.
+    if (isDive()) return nextQuestion();
     el.feedback.className = 'feedback';
     el.feedback.textContent = '⏭ Skipped — your streak resets.';
     showReveal('One answer that would have worked:', Quiz.examples(G.q));
     lockCard();
-    later(nextQuestion, isDive() ? 1300 : 2400);
+    later(nextQuestion, 2400);
   }
 
   function lockCard() {
@@ -361,6 +363,7 @@
       }
       $('newBest').classList.toggle('hidden', !(isBest && G.score > 0));
       $('overTitle').textContent = isDive() ? "Time's up!" : 'Out of fuel!';
+      $('btnAgain').textContent = isDive() ? '🌊 Dive again' : '🚀 Fly again';
       const dist = J.fmt(kmAt(altFor(G.score)));
       $('overReached').innerHTML = isDive()
         ? `You dove to <b>${place.icon} ${place.name}</b> — ${dist} deep.`
