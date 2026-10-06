@@ -29,7 +29,14 @@ const Quiz = (function () {
       if (!line) continue;
       const group = line.match(/^([1-5]):\s*(.*)$/);
       if (group) {
-        for (const e of group[2].split(',')) if (e.trim()) entries.push([+group[1], e.trim()]);
+        for (const part of group[2].split(',')) {
+          const e = part.trim();
+          if (!e) continue;
+          // "London @1908,1948,2012": the extra years belong to the answer before them.
+          if (/^\d{4}(-\d{4})?$/.test(e) && entries.length && /@[\d,-]+$/.test(entries[entries.length - 1][1])) {
+            entries[entries.length - 1][1] += ',' + e;
+          } else entries.push([+group[1], e]);
+        }
       } else if (/^[1-5] /.test(line)) {
         entries.push([+line[0], line.slice(2).trim()]);
       }
@@ -37,20 +44,44 @@ const Quiz = (function () {
     return entries;
   }
 
+  // "Toy Story @1995", "London @1908,1948,2012", "Woodrow Wilson @1913-1921"
+  function parseYears(text) {
+    const m = text.match(/\s*@([\d,\s-]+)$/);
+    if (!m) return [text, null];
+    const spans = m[1].split(',').map(p => p.trim()).filter(Boolean).map(p => {
+      const [a, b] = p.split('-').map(Number);
+      return [a, b || a];
+    });
+    return [text.slice(0, m.index), spans];
+  }
+
   const TOPIC = {};
   for (const t of TOPICS) {
-    const entities = [];
+    let entities = [];
     const index = new Map();
-    for (const [tier, text] of parseList(t.list)) {
-      const names = text.split('/').map(s => s.trim()).filter(Boolean);
-      const ent = { id: entities.length, name: names[0], tier, variants: [] };
-      for (const n of names) {
-        const v = { raw: n, norm: norm(n), key: keyOf(n), letters: letters(n) };
-        if (!v.key || index.has(v.key)) continue;   // first (most common) wins
-        ent.variants.push(v);
-        index.set(v.key, { ent, v });
+    const add = ent => {
+      const own = { ...ent, id: entities.length, variants: [] };
+      for (const v of ent.variants) {
+        if (index.has(v.key)) continue;   // first (most common) wins
+        own.variants.push(v);
+        index.set(v.key, { ent: own, v });
       }
-      if (ent.variants.length) entities.push(ent);
+      if (own.variants.length) entities.push(own);
+    };
+    if (t.from) {
+      // A narrower version of another topic: "Name a country in Africa".
+      const only = new Set(t.only.split(',').map(n => keyOf(n)).filter(Boolean));
+      for (const ent of TOPIC[t.from].entities) if (only.has(keyOf(ent.name))) add(ent);
+    } else {
+      for (const [tier, text] of parseList(t.list)) {
+        const [body, years] = parseYears(text);
+        const names = body.split('/').map(n => n.trim()).filter(Boolean);
+        if (!names.length) continue;
+        add({
+          name: names[0], tier, years,
+          variants: names.map(n => ({ raw: n, norm: norm(n), key: keyOf(n), letters: letters(n) })).filter(v => v.key)
+        });
+      }
     }
     const strip = (t.strip || []).map(norm);
     TOPIC[t.id] = { ...t, entities, index, strip, html: t.q.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>') };
@@ -61,7 +92,8 @@ const Quiz = (function () {
   const AN = new Set('aefhilmnorsx'.split(''));
   const L = l => `<span class="ltr">${l.toUpperCase()}</span>`;
   const article = l => (AN.has(l) ? 'an' : 'a');                // before a letter: "an S"
-  const articleFor = w => (/^[aeiou]/i.test(w) ? 'an' : 'a');   // before a word: "an animal"
+  // Before a word: "an animal", but "a US president", "a unit".
+  const articleFor = w => (/^(us\b|uni|use|eu|one)/i.test(w) ? 'a' : /^[aeiou]/i.test(w) ? 'an' : 'a');
   const count = (s, l) => s.split(l).length - 1;
 
   const RULES = {
@@ -73,8 +105,11 @@ const Quiz = (function () {
     minlen:   { test: (v, c) => v.letters.length >= c.n,                    text: c => `is <b>${c.n}+ letters</b> long`,     why: c => `is shorter than ${c.n} letters` },
     double:   { test: v => /(.)\1/.test(v.letters),                         text: () => `has a <b>double letter</b> (like EE or LL)`, why: () => `has no double letter` },
     words:    { test: v => v.norm.includes(' '),                            text: () => `is <b>more than one word</b>`,      why: () => `is only one word` },
-    twice:    { test: (v, c) => count(v.letters, c.l) >= 2,                 text: c => `has ${L(c.l)} at least <b>twice</b>`, why: c => `doesn't have two ${c.l.toUpperCase()}s` }
+    twice:    { test: (v, c) => count(v.letters, c.l) >= 2,                 text: c => `has ${L(c.l)} at least <b>twice</b>`, why: c => `doesn't have two ${c.l.toUpperCase()}s` },
+    years:    { test: (v, c, ent) => !!ent.years && ent.years.some(([f, to]) => f <= c.b && to >= c.a),
+                why: (c, ent) => ent.years ? `${(c.why || 'is from {y}').replace('{y}', fmtYears(ent.years))}, not between ${c.a} and ${c.b}` : `isn't one we have a date for` }
   };
+  const fmtYears = ys => ys.map(([a, b]) => (a === b ? `${a}` : `${a}–${b}`)).join(', ');
 
   function makeRule(type, k, v, used, rng) {
     const pick = arr => arr[Math.floor(rng() * arr.length)];
@@ -112,7 +147,11 @@ const Quiz = (function () {
              [['double', 'start'], 1], [['words', 'start'], 0.8], [['end', 'len'], 1.5], [['start', 'twice'], 1],
              [['contains', 'end', 'without'], 1]]
   };
-  const LETTER_SHARE = { easy: 0.3, medium: 0.33, hard: 0.35 };
+  // How often each special style comes up; the rest are plain topic questions.
+  const LETTER_SHARE = { easy: 0.25, medium: 0.27, hard: 0.27 };
+  const YEAR_SHARE = { easy: 0.08, medium: 0.18, hard: 0.3 };
+  const YEAR_WIDTHS = { easy: [20, 30], medium: [10, 15, 20], hard: [5, 10] };
+  const YEAR_MIN = { easy: 5, medium: 4, hard: 3 };
   const MIN_ANSWERS = { easy: 6, medium: 4, hard: 2 };
   // How often each topic level comes up in each mode.
   const LEVEL_WEIGHTS = { easy: [0, 1, 0.12, 0], medium: [0, 0.6, 1, 0.35], hard: [0, 0.3, 1, 1] };
@@ -124,11 +163,11 @@ const Quiz = (function () {
     return pairs[pairs.length - 1][0];
   }
 
-  const passes = (v, rules) => rules.every(c => RULES[c.type].test(v, c));
+  const passes = (v, rules, ent) => rules.every(c => RULES[c.type].test(v, c, ent));
   function answersFor(topic, rules) {
     const out = [];
     for (const ent of topic.entities) {
-      const v = rules.length ? ent.variants.find(x => passes(x, rules)) : ent.variants[0];
+      const v = rules.length ? ent.variants.find(x => passes(x, rules, ent)) : ent.variants[0];
       if (v) out.push({ ent, v });
     }
     return out;
@@ -186,16 +225,64 @@ const Quiz = (function () {
     return null;
   }
 
-  function newRun() { return { topics: new Set(), letterTopics: new Set(), sigs: new Set() }; }
+  function yearQuestion(mode, seen, rng) {
+    const dated = t => t.years && t.entities.filter(e => e.years).length >= 15;
+    for (let attempt = 0; attempt < 200; attempt++) {
+      const topic = pickTopic(mode, seen.yearTopics, rng, dated);
+      const pool = topic.entities.filter(e => e.years && (mode !== 'easy' || e.tier <= 3));
+      const ent = pool[Math.floor(rng() * pool.length)];
+      const span = ent.years[Math.floor(rng() * ent.years.length)];
+      const y = span[0] + Math.floor(rng() * (span[1] - span[0] + 1));
+      const widths = YEAR_WIDTHS[mode];
+      const w = widths[Math.floor(rng() * widths.length)];
+      const step = w >= 10 ? 10 : 5;
+      let a = Math.floor((y - Math.floor(rng() * w)) / step) * step;
+      let b = a + w;
+      if (b > 2026) { b = 2026; a = b - w; }
+      const rules = [{ type: 'years', a, b, why: topic.yearWhy }];
+      const sig = topic.id + '|' + a + '-' + b;
+      if (seen.sigs.has(sig)) continue;
+      const answers = answersFor(topic, rules);
+      if (answers.length < YEAR_MIN[mode]) continue;
+      if (mode !== 'hard' && !answers.some(x => x.ent.tier <= 3)) continue;
+      seen.sigs.add(sig);
+      seen.yearTopics.add(topic.id);
+      const noun = topic.yearNoun || topic.noun;
+      const when = topic.years.replace('{a}', `<b>${a}</b>`).replace('{b}', `<b>${b}</b>`);
+      return finish(topic, rules, `Name ${articleFor(noun)} <b>${noun}</b> ${when}.`, sig);
+    }
+    return null;
+  }
+
+  /* Remember what came up in recent games so a new game starts with fresh topics. */
+  const SAVE_KEY = 'brainRocket.seen';
+  function newRun() {
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') || {}; } catch (e) { saved = {}; }
+    const set = k => new Set(Array.isArray(saved[k]) ? saved[k] : []);
+    return { topics: set('topics'), letterTopics: set('letterTopics'), yearTopics: set('yearTopics'), sigs: set('sigs') };
+  }
+  function remember(seen) {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify({
+        topics: [...seen.topics], letterTopics: [...seen.letterTopics], yearTopics: [...seen.yearTopics],
+        sigs: [...seen.sigs].slice(-400)
+      }));
+    } catch (e) { /* storage blocked: only this game remembers */ }
+  }
 
   function generate(mode, seen, rng = Math.random) {
-    if (rng() < LETTER_SHARE[mode]) {
-      const q = letterQuestion(mode, seen, rng);
-      if (q) return q;
+    const r = rng();
+    let q = null;
+    if (r < YEAR_SHARE[mode]) q = yearQuestion(mode, seen, rng);
+    else if (r < YEAR_SHARE[mode] + LETTER_SHARE[mode]) q = letterQuestion(mode, seen, rng);
+    if (!q) {
+      const topic = pickTopic(mode, seen.topics, rng);
+      seen.topics.add(topic.id);
+      q = finish(topic, [], topic.html, topic.id);
     }
-    const topic = pickTopic(mode, seen.topics, rng);
-    seen.topics.add(topic.id);
-    return finish(topic, [], topic.html, topic.id);
+    remember(seen);
+    return q;
   }
 
   // ---- Answer checking --------------------------------------------------
@@ -264,19 +351,18 @@ const Quiz = (function () {
     if (keyOf(input).length < 1) return { ok: false, reason: 'Type an answer first!' };
     const hit = find(q.cat, input);
     if (!hit) return { ok: false, reason: `Hmm, "${input.trim()}" isn't on our list for this one. Try another!` };
-    const failed = q.rules.find(c => !RULES[c.type].test(hit.v, c));
-    if (failed) return { ok: false, reason: `${hit.v.raw} ${RULES[failed.type].why(failed)}.`, near: true };
+    const failed = q.rules.find(c => !RULES[c.type].test(hit.v, c, hit.ent));
+    if (failed) return { ok: false, reason: `${hit.v.raw} ${RULES[failed.type].why(failed, hit.ent)}.`, near: true };
     return { ok: true, ent: hit.ent, v: hit.v, fuzzy: hit.fuzzy };
   }
 
-  /* A few example answers for the reveal: the rarest ones plus a common one. */
-  function examples(q, n = 4) {
-    const sorted = q.answers.slice().sort((a, b) => b.ent.tier - a.ent.tier || Math.random() - 0.5);
-    const picks = sorted.slice(0, n - 1);
-    const rest = sorted.slice(n - 1);
-    const common = rest[rest.length - 1];
-    if (common) picks.push(common);
-    return picks.map(a => ({ text: a.v.raw, tier: a.ent.tier }));
+  /* One common answer for the reveal after a skip or timeout, so rare answers stay a secret. */
+  function examples(q) {
+    if (!q.answers.length) return [];
+    const low = Math.min(...q.answers.map(a => a.ent.tier));
+    const pool = q.answers.filter(a => a.ent.tier === low);
+    const a = pool[Math.floor(Math.random() * pool.length)];
+    return [{ text: a.v.raw, tier: a.ent.tier }];
   }
 
   return { TOPIC, TIER_POINTS, TIER_NAMES, generate, check, examples, keyOf, newRun };

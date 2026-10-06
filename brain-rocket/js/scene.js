@@ -366,6 +366,17 @@ const Scene = (function () {
       ctx.restore();
     },
     moon(x, y, r) {
+      // The cow that jumped over the moon: it leaps over the top from left to right,
+      // then loops back round behind the moon, so its path never jumps.
+      const a = Math.PI - st.t * 0.9;
+      const behind = Math.sin(a) < 0;
+      const cow = () => drawCow(
+        x + Math.cos(a) * r * 1.35,
+        y - Math.sin(a) * r * (behind ? 0.5 : 1.35),
+        0.625 + 0.075 * Math.sin(a),
+        -a + Math.PI / 2
+      );
+      if (behind) cow();
       halo(x, y, r, 'rgba(230,230,255,0.25)');
       sphere(x, y, r, '#f4f4f0', '#9a9aa4');
       ctx.fillStyle = 'rgba(110,110,125,0.45)';
@@ -373,10 +384,7 @@ const Scene = (function () {
         ctx.beginPath(); ctx.arc(x + c[0] * r, y + c[1] * r, c[2] * r, 0, TAU); ctx.fill();
       });
       shade(x, y, r);
-      // the cow that jumped over the moon
-      const ph = (st.t * 0.25) % 1;
-      const cx = x + Math.cos(Math.PI * (1 - ph)) * r * 1.35, cy = y - Math.sin(Math.PI * ph) * r * 1.35;
-      drawCow(cx, cy, 0.7, ph * 4);
+      if (!behind) cow();
       // flag
       ctx.fillStyle = '#ddd'; ctx.fillRect(x + r * 0.2, y - r * 0.98 - 30, 2, 30);
       ctx.fillStyle = '#ff5d73'; ctx.fillRect(x + r * 0.2 + 2, y - r * 0.98 - 30, 18, 11);

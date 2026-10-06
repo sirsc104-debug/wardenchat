@@ -209,8 +209,7 @@
 
     el.feedback.className = 'feedback ok';
     el.feedback.innerHTML = `✅ <b class="tier-${tier}">${escapeHtml(res.v.raw)}</b> — ${Quiz.TIER_NAMES[tier]}!` + (res.fuzzy ? ' <span style="opacity:.7">(close enough!)</span>' : '');
-    const ex = Quiz.examples(G.q, 3).filter(a => Quiz.keyOf(a.text) !== res.v.key);
-    showReveal(tier >= G.q.maxTier ? 'You found one of the rarest answers! Others:' : 'Rarer answers you could have used:', ex);
+    el.reveal.classList.add('hidden');
 
     renderStreak();
     el.score.parentElement.classList.remove('bump'); void el.score.offsetWidth; el.score.parentElement.classList.add('bump');
@@ -230,7 +229,7 @@
     renderStreak();
     el.feedback.className = 'feedback';
     el.feedback.textContent = G.lives > 0 ? "⏰ Time's up! You lost a fuel cell." : "⏰ Time's up! That was your last fuel cell…";
-    showReveal('You could have said:', Quiz.examples(G.q, 4));
+    showReveal('You could have said:', Quiz.examples(G.q));
     popup('-1 ⛽', "TIME'S UP", 0, [], true);
     lockCard();
     later(() => (G.lives > 0 ? nextQuestion() : gameOver()), 3000);
@@ -246,7 +245,7 @@
     renderStreak();
     el.feedback.className = 'feedback';
     el.feedback.textContent = '⏭ Skipped — your streak resets.';
-    showReveal('Answers that would have worked:', Quiz.examples(G.q, 4));
+    showReveal('One answer that would have worked:', Quiz.examples(G.q));
     lockCard();
     later(nextQuestion, 2400);
   }
