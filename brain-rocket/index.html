@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brain Rocket</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="viewport">
+  <div id="stage">
+    <canvas id="scene" aria-hidden="true"></canvas>
+
+    <!-- In-game HUD -->
+    <div id="hud" class="hidden">
+      <div class="hud-pill score-pill">
+        <span class="pill-label">Score</span>
+        <span class="pill-value" id="hudScore">0</span>
+      </div>
+      <div class="hud-pill alt-pill">
+        <span class="pill-label">Altitude</span>
+        <span class="pill-value" id="hudAlt">0 km</span>
+        <span class="pill-sub" id="hudNext">Next stop: ☁️ The Clouds</span>
+      </div>
+      <div class="hud-spacer"></div>
+      <div class="hud-pill streak-pill" id="streakPill">
+        <span class="pill-label">Streak</span>
+        <span class="pill-value"><span id="hudStreak">0</span> <span class="flame">🔥</span></span>
+        <span class="pill-sub" id="hudMult">next ×1.00</span>
+      </div>
+      <div class="hud-pill fuel-pill">
+        <span class="pill-label">Fuel</span>
+        <span class="fuel" id="hudFuel"></span>
+      </div>
+      <button class="icon-btn" id="btnPause" type="button" title="Pause (Esc)" aria-label="Pause">⏸</button>
+    </div>
+
+    <!-- Journey track on the left -->
+    <div id="track" class="hidden" aria-hidden="true">
+      <div class="track-line"><div class="track-fill" id="trackFill"></div></div>
+      <div id="trackStops"></div>
+      <div class="track-rocket" id="trackRocket">🚀</div>
+    </div>
+
+    <!-- Question card -->
+    <div id="card" class="hidden">
+      <div class="card-top">
+        <span class="chip" id="qCat">🌍 Countries</span>
+        <span class="q-num" id="qNum">Question 1</span>
+      </div>
+      <div class="q-text" id="qText"></div>
+      <div class="timer">
+        <div class="timer-track">
+          <div class="zone zone-x2"></div>
+          <div class="zone zone-x15"></div>
+          <div class="timer-fill" id="timerFill"></div>
+        </div>
+        <div class="timer-info">
+          <span class="speed-badge" id="speedBadge">⚡ ×2 speed</span>
+          <span class="timer-secs" id="timerSecs">30</span>
+        </div>
+      </div>
+      <form id="answerForm" autocomplete="off">
+        <input id="answer" type="text" maxlength="40" spellcheck="false" autocapitalize="off" placeholder="Type your answer…" aria-label="Your answer">
+        <button type="submit" class="go-btn" id="goBtn">🚀 LAUNCH</button>
+      </form>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+      <div class="reveal hidden" id="reveal"></div>
+      <div class="card-bottom">
+        <button type="button" class="skip-btn" id="skipBtn">Skip ⏭ <span id="skipCount">3</span></button>
+        <div class="legend">
+          <span class="t1">Common 10</span>
+          <span class="t2">Uncommon 25</span>
+          <span class="t3">Rare 50</span>
+          <span class="t4">Epic 100</span>
+          <span class="t5">Legendary 200</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="popups"></div>
+    <div id="banner" class="hidden"></div>
+    <div id="countdown" class="hidden"></div>
+
+    <!-- Title screen -->
+    <div id="title" class="screen">
+      <div class="title-panel">
+        <h1 class="logo"><span>BRAIN</span><span>ROCKET</span></h1>
+        <p class="tagline">Answer questions to fuel your rocket. Fly from the launch pad to the Moon, Mars… and beyond!</p>
+        <div class="modes">
+          <button type="button" class="mode-card mode-easy" data-mode="easy">
+            <span class="mode-icon">🧒</span>
+            <span class="mode-name">OWEN</span>
+            <span class="mode-tag">Easy</span>
+            <span class="mode-info">30s per question<br>5 fuel cells · one or two clues</span>
+            <span class="mode-best" data-best="easy"></span>
+          </button>
+          <button type="button" class="mode-card mode-medium" data-mode="medium">
+            <span class="mode-icon">🚀</span>
+            <span class="mode-name">MEDIUM</span>
+            <span class="mode-tag">×1.5 points</span>
+            <span class="mode-info">20s per question<br>3 fuel cells · two clues</span>
+            <span class="mode-best" data-best="medium"></span>
+          </button>
+          <button type="button" class="mode-card mode-hard" data-mode="hard">
+            <span class="mode-icon">☄️</span>
+            <span class="mode-name">HARD</span>
+            <span class="mode-tag">×2 points</span>
+            <span class="mode-info">12s per question<br>3 fuel cells · tricky clues</span>
+            <span class="mode-best" data-best="hard"></span>
+          </button>
+        </div>
+        <div class="how">
+          <div><b>🤓 Be niche.</b> “America” is a tiny boost. “Kyrgyzstan” sends you flying.</div>
+          <div><b>⚡ Be fast.</b> Answer in the first quarter of the timer for ×2, first half for ×1.5.</div>
+          <div><b>🔥 Keep a streak.</b> Every correct answer in a row adds ×0.25, up to ×3.</div>
+          <div><b>⛽ Don't run dry.</b> Running out of time burns a fuel cell. Wrong guesses are free.</div>
+        </div>
+      </div>
+      <div class="corner-btns">
+        <button class="icon-btn" id="btnSound" type="button" title="Sound on/off" aria-label="Toggle sound">🔊</button>
+        <button class="icon-btn" id="btnFull" type="button" title="Fullscreen" aria-label="Toggle fullscreen">⛶</button>
+      </div>
+    </div>
+
+    <!-- Pause -->
+    <div id="pause" class="screen hidden">
+      <div class="dialog">
+        <h2>Paused</h2>
+        <p>The timer is frozen. Take a breath, astronaut.</p>
+        <div class="dialog-btns">
+          <button type="button" class="big-btn" id="btnResume">▶ Resume</button>
+          <button type="button" class="big-btn ghost" id="btnQuit">Quit to menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game over -->
+    <div id="over" class="screen hidden">
+      <div class="dialog over-dialog">
+        <div class="new-best hidden" id="newBest">🏆 NEW BEST!</div>
+        <h2>Out of fuel!</h2>
+        <p class="over-reached" id="overReached"></p>
+        <div class="stats" id="overStats"></div>
+        <div class="dialog-btns">
+          <button type="button" class="big-btn" id="btnAgain">🚀 Fly again</button>
+          <button type="button" class="big-btn ghost" id="btnMenu">Change mode</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/questions.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
