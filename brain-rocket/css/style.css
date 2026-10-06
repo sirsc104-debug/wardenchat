@@ -287,3 +287,32 @@ button { font-family: inherit; cursor: pointer; }
 @keyframes count { 0% { opacity: 0; transform: scale(2.2); } 25% { opacity: 1; transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: scale(0.7); } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+/* ---------- Rocket / Submarine switch ---------- */
+.title-panel .logo { font-size: 104px; }
+.tagline { margin: 12px auto 16px; }
+.type-toggle { display: inline-flex; gap: 8px; padding: 6px; margin-bottom: 18px; border-radius: 24px; background: var(--panel); border: 2px solid var(--panel-edge); }
+.type-btn {
+  display: grid; grid-template-columns: auto auto; grid-template-rows: auto auto; column-gap: 10px; align-items: center; text-align: left;
+  padding: 8px 20px; border-radius: 18px; border: 0; background: transparent; color: var(--muted); transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+.type-btn:hover { color: var(--ink); }
+.type-btn:focus-visible { outline: 3px solid var(--cool); outline-offset: 2px; }
+.type-btn.active { background: linear-gradient(#ffe27a, #ffb52e); color: #3b2300; transform: scale(1.03); }
+.type-icon { grid-row: span 2; font-size: 34px; }
+.type-name { font-size: 24px; font-weight: 700; line-height: 1; }
+.type-sub { font-size: 14px; font-weight: 600; opacity: 0.85; }
+#title[data-type="sub"] .logo span:first-child { text-shadow: 0 8px 0 #0b3a6b, 0 0 40px rgba(79,209,255,0.8); }
+
+/* ---------- Submarine HUD ---------- */
+.time-pill { min-width: 150px; }
+.time-pill .pill-value { color: var(--cool); }
+.time-pill.low { border-color: var(--hot); box-shadow: 0 0 24px rgba(255,93,115,0.6); }
+.time-pill.low .pill-value { color: var(--hot); animation: bump 1s ease infinite; }
+#track.down .track-fill { top: 0; bottom: auto; background: linear-gradient(to bottom, #4fd1ff, #1a4f9e, #ff8a3c, #ffd23f); }
+#track.down .track-rocket { transform: none; }
+#card.dive .zone { display: none; }
+#card.dive .timer-fill { background: linear-gradient(90deg, #ff5d73, #4fd1ff 40%, #7de8ff); }
+#banner.dive { top: 600px; padding: 10px 18px; border-radius: 24px; background: rgba(6,12,30,0.55); backdrop-filter: blur(4px); }
+#banner.dive .b-icon { font-size: 56px; display: inline-block; vertical-align: middle; }
+#banner.dive .b-name { font-size: 52px; }

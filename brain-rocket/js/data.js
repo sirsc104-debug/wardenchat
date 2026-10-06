@@ -1328,3 +1328,25 @@ const MILESTONES = [
   { alt: 25000, pts: 41000,  name: 'Andromeda Galaxy',      icon: '🌀', km: 2.4e19, body: 'andromeda', bx: 360, r: 330 },
   { alt: 32000, pts: 50000,  name: 'Edge of the Universe',  icon: '♾️', km: 4.4e23, body: 'edge', bx: 480, r: 360 }
 ];
+
+/* Places the submarine passes on its dive. Same fields as MILESTONES; `km` is depth. */
+const DEPTHS = [
+  { alt: 0,    pts: 0,    name: 'The Surface',             icon: '🌊', km: 0 },
+  { alt: 60,   pts: 60,   name: 'Coral Reef',              icon: '🪸', km: 0.03, body: 'reef' },
+  { alt: 150,  pts: 150,  name: 'The Twilight Zone',       icon: '🌆', km: 0.2 },
+  { alt: 260,  pts: 260,  name: 'Deepest Scuba Dive',      icon: '🤿', km: 0.332, body: 'diver' },
+  { alt: 400,  pts: 400,  name: 'The Midnight Zone',       icon: '🌑', km: 1 },
+  { alt: 550,  pts: 550,  name: 'Sperm Whale Depths',      icon: '🐋', km: 2, body: 'spermwhale' },
+  { alt: 700,  pts: 700,  name: 'Hydrothermal Vents',      icon: '♨️', km: 2.5, body: 'vents' },
+  { alt: 850,  pts: 850,  name: 'Wreck of the Titanic',    icon: '🚢', km: 3.8, body: 'titanic' },
+  { alt: 1000, pts: 1000, name: 'The Abyss',               icon: '🕳️', km: 4 },
+  { alt: 1300, pts: 1300, name: 'The Hadal Zone',          icon: '🦐', km: 6 },
+  { alt: 1700, pts: 1700, name: 'Challenger Deep',         icon: '📍', km: 10.935, body: 'seabed' },
+  { alt: 2200, pts: 2200, name: 'Deepest Hole Ever Dug',   icon: '🕳️', km: 12.262, body: 'borehole' },
+  { alt: 2700, pts: 2700, name: "Earth's Mantle",          icon: '🔥', km: 50 },
+  { alt: 3500, pts: 3500, name: 'Diamond Zone',            icon: '💎', km: 160, body: 'diamonds' },
+  { alt: 4500, pts: 4500, name: 'The Outer Core',          icon: '🟠', km: 2890 },
+  { alt: 5600, pts: 5600, name: 'The Inner Core',          icon: '🟡', km: 5150 },
+  { alt: 7000, pts: 7000, name: 'Centre of the Earth',     icon: '🌕', km: 6371, body: 'centre' },
+  { alt: 9000, pts: 9000, name: 'Other Side of the World', icon: '🌏', km: 12742 }
+];

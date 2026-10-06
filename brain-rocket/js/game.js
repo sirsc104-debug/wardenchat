@@ -1,19 +1,66 @@
-/* Brain Rocket — game flow, scoring and UI. */
+/* Brain Rocket — game flow, scoring and UI for both Rocket and Submarine modes. */
 'use strict';
 
 (function () {
   const MODES = {
-    easy:   { id: 'easy',   label: 'Owen (Easy)', time: 30, lives: 5, mult: 1,   skips: 5 },
-    medium: { id: 'medium', label: 'Medium',      time: 20, lives: 3, mult: 1.5, skips: 3 },
-    hard:   { id: 'hard',   label: 'Hard',        time: 12, lives: 3, mult: 2,   skips: 2 }
+    easy:   { id: 'easy',   label: 'Owen (Easy)', time: 30, lives: 5, mult: 1,   skips: 5, fast: [6, 12] },
+    medium: { id: 'medium', label: 'Medium',      time: 20, lives: 3, mult: 1.5, skips: 3, fast: [5, 10] },
+    hard:   { id: 'hard',   label: 'Hard',        time: 12, lives: 3, mult: 2,   skips: 2, fast: [4, 8] }
   };
+  const DIVE_TIME = 60;
+
+  const fmtKm = km => {
+    const LY = 9.461e12;
+    if (km < 10) return km.toFixed(1) + ' km';
+    if (km < 1e6) return Math.round(km).toLocaleString() + ' km';
+    if (km < 1e9) return (km / 1e6).toFixed(1) + ' million km';
+    if (km < 1e12) return (km / 1e9).toFixed(1) + ' billion km';
+    const ly = km / LY;
+    if (ly < 1) return (km / 1e12).toFixed(1) + ' trillion km';
+    if (ly < 1e6) return Math.round(ly).toLocaleString() + ' light-years';
+    if (ly < 1e9) return (ly / 1e6).toFixed(1) + ' million light-years';
+    return (ly / 1e9).toFixed(1) + ' billion light-years';
+  };
+  const fmtDepth = km => (km < 20 ? Math.round(km * 1000).toLocaleString() + ' m' : Math.round(km).toLocaleString() + ' km');
+
+  // The two ways to play. Everything that differs between them lives here.
+  const TYPES = {
+    rocket: {
+      id: 'rocket', scene: Scene, stops: MILESTONES, fmt: fmtKm, from: 'from Earth', distLabel: 'Altitude',
+      marker: '🚀', down: false, go: 'GO!', firstTag: '🚀 LIFTOFF!', reached: 'YOU REACHED', notYet: 'Not flown yet',
+      tagline: 'Answer questions to fuel your rocket. Fly from the launch pad to the Moon, Mars… and beyond!',
+      fast: '<b>⚡ Be fast.</b> Answer in the first quarter of the timer for ×2, first half for ×1.5.',
+      rule: '<b>⛽ Don\'t run dry.</b> Running out of time burns a fuel cell. Wrong guesses are free.',
+      info: {
+        easy: '30s per question<br>5 fuel cells · everyday topics',
+        medium: '20s per question<br>3 fuel cells · mixed topics',
+        hard: '12s per question<br>3 fuel cells · expert topics'
+      }
+    },
+    sub: {
+      id: 'sub', scene: SubScene, stops: DEPTHS, fmt: fmtDepth, from: 'deep', distLabel: 'Depth',
+      marker: '🤿', down: true, go: 'DIVE!', firstTag: '🌊 DIVE!', reached: 'YOU DOVE TO', notYet: 'Not dived yet',
+      tagline: 'You have 60 seconds. Every answer drives your submarine deeper. How far down can you get?',
+      fast: '<b>⚡ Be fast.</b> Answer each question within a few seconds for ×2 or ×1.5.',
+      rule: '<b>⏱️ Beat the clock.</b> One 60-second dive. No lives to lose and unlimited skips.',
+      info: {
+        easy: '60-second dive<br>unlimited skips · everyday topics',
+        medium: '60-second dive<br>unlimited skips · mixed topics',
+        hard: '60-second dive<br>unlimited skips · expert topics'
+      }
+    }
+  };
+  let J = TYPES.rocket;   // the current way to play
+  let S = J.scene;        // its scene
+  try { if (localStorage.getItem('brainRocket.type') === 'sub') { J = TYPES.sub; S = J.scene; } } catch (e) { /* ignore */ }
 
   const $ = id => document.getElementById(id);
   const stage = $('stage');
   const el = {
     hud: $('hud'), track: $('track'), card: $('card'), title: $('title'), pause: $('pause'), over: $('over'),
-    score: $('hudScore'), alt: $('hudAlt'), next: $('hudNext'), streak: $('hudStreak'), mult: $('hudMult'),
-    streakPill: $('streakPill'), fuel: $('hudFuel'), qCat: $('qCat'), qNum: $('qNum'), qText: $('qText'),
+    score: $('hudScore'), alt: $('hudAlt'), altLabel: $('hudAltLabel'), next: $('hudNext'), streak: $('hudStreak'), mult: $('hudMult'),
+    streakPill: $('streakPill'), fuel: $('hudFuel'), fuelPill: $('fuelPill'), timePill: $('timePill'), time: $('hudTime'),
+    qCat: $('qCat'), qNum: $('qNum'), qText: $('qText'),
     timer: document.querySelector('.timer'), timerFill: $('timerFill'), timerSecs: $('timerSecs'), speed: $('speedBadge'),
     form: $('answerForm'), input: $('answer'), go: $('goBtn'), feedback: $('feedback'), reveal: $('reveal'),
     skip: $('skipBtn'), skipCount: $('skipCount'), popups: $('popups'), banner: $('banner'), countdown: $('countdown'),
@@ -25,16 +72,18 @@
     const s = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
     stage.style.transform = `scale(${s}) translate(-50%, -50%)`;
     Scene.resize(s);
+    SubScene.resize(s);
   }
 
   // ---- Saved bests ------------------------------------------------------
   let bests = {};
   try { bests = JSON.parse(localStorage.getItem('brainRocket.bests') || '{}') || {}; } catch (e) { bests = {}; }
   function saveBests() { try { localStorage.setItem('brainRocket.bests', JSON.stringify(bests)); } catch (e) { /* ignore */ } }
+  const bestKey = (type, mode) => (type === 'rocket' ? mode : `${type}:${mode}`);
 
   // ---- Distance helpers -------------------------------------------------
   function kmAt(alt) {
-    const M = MILESTONES;
+    const M = J.stops;
     if (alt <= 0) return 0;
     for (let i = 0; i < M.length - 1; i++) {
       const a = M[i], b = M[i + 1];
@@ -47,21 +96,9 @@
     const last = M[M.length - 1];
     return last.km * Math.exp((alt - last.alt) / 2500);
   }
-  function fmtKm(km) {
-    const LY = 9.461e12;
-    if (km < 10) return km.toFixed(1) + ' km';
-    if (km < 1e6) return Math.round(km).toLocaleString() + ' km';
-    if (km < 1e9) return (km / 1e6).toFixed(1) + ' million km';
-    if (km < 1e12) return (km / 1e9).toFixed(1) + ' billion km';
-    const ly = km / LY;
-    if (ly < 1) return (km / 1e12).toFixed(1) + ' trillion km';
-    if (ly < 1e6) return Math.round(ly).toLocaleString() + ' light-years';
-    if (ly < 1e9) return (ly / 1e6).toFixed(1) + ' million light-years';
-    return (ly / 1e9).toFixed(1) + ' billion light-years';
-  }
-  // Score -> scene altitude, linear between milestones.
+  // Score -> scene position, linear between stops.
   function altFor(score) {
-    const M = MILESTONES;
+    const M = J.stops;
     for (let i = 0; i < M.length - 1; i++) {
       const a = M[i], b = M[i + 1];
       if (score < b.pts) return a.alt + (score - a.pts) * (b.alt - a.alt) / (b.pts - a.pts);
@@ -69,34 +106,59 @@
     const a = M[M.length - 2], b = M[M.length - 1];
     return b.alt + (score - b.pts) * (b.alt - a.alt) / (b.pts - a.pts);
   }
-  const placeAt = score => { let m = MILESTONES[0]; for (const x of MILESTONES) if (score >= x.pts) m = x; return m; };
-  const nextPlace = score => MILESTONES.find(m => m.pts > score);
-  const nextByAlt = alt => MILESTONES.find(m => m.alt > alt);
+  const placeAt = score => { let m = J.stops[0]; for (const x of J.stops) if (score >= x.pts) m = x; return m; };
+  const nextPlace = score => J.stops.find(m => m.pts > score);
+  const nextByAlt = alt => J.stops.find(m => m.alt > alt);
 
   // ---- Game state -------------------------------------------------------
   const G = {
-    state: 'title', mode: null, score: 0, shown: 0, lives: 0, streak: 0, bestStreak: 0, qNum: 0,
-    skips: 0, used: new Set(), seen: Quiz.newRun(), q: null, timeLeft: 0, lastTick: 0,
+    state: 'title', mode: null, type: 'rocket', score: 0, shown: 0, lives: 0, streak: 0, bestStreak: 0, qNum: 0,
+    skips: 0, used: new Set(), seen: Quiz.newRun(), q: null, timeLeft: 0, lastTick: 0, diveLeft: 0, qElapsed: 0,
     correct: 0, bestAnswer: null, launched: false, timers: []
   };
   const later = (fn, ms) => { const id = setTimeout(fn, ms); G.timers.push(id); return id; };
   const clearLater = () => { G.timers.forEach(clearTimeout); G.timers = []; };
+  const isDive = () => G.type === 'sub';
 
   const streakMult = n => Math.min(3, 1 + 0.25 * Math.max(0, n - 1));
-  const speedMult = frac => (frac >= 0.75 ? 2 : frac >= 0.5 ? 1.5 : 1);
+  // Rocket: by how much of the question timer is left. Submarine: by seconds taken on this question.
+  function speedMult() {
+    if (isDive()) {
+      const [x2, x15] = G.mode.fast;
+      return G.qElapsed <= x2 ? 2 : G.qElapsed <= x15 ? 1.5 : 1;
+    }
+    const frac = G.timeLeft / G.mode.time;
+    return frac >= 0.75 ? 2 : frac >= 0.5 ? 1.5 : 1;
+  }
 
   // ---- Title screen -----------------------------------------------------
+  function setType(id) {
+    J = TYPES[id];
+    if (S !== J.scene) { S = J.scene; S.reset(); }
+    try { localStorage.setItem('brainRocket.type', id); } catch (e) { /* ignore */ }
+    document.querySelectorAll('.type-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.type === id);
+      b.setAttribute('aria-pressed', b.dataset.type === id ? 'true' : 'false');
+    });
+    $('tagline').textContent = J.tagline;
+    $('ruleLast').innerHTML = J.rule;
+    $('ruleFast').innerHTML = J.fast;
+    document.querySelectorAll('.mode-card').forEach(c => { c.querySelector('.mode-info').innerHTML = J.info[c.dataset.mode]; });
+    document.querySelectorAll('[data-best]').forEach(b => {
+      const r = bests[bestKey(id, b.dataset.best)];
+      b.textContent = r ? `Best: ${r.score.toLocaleString()} · ${r.icon} ${r.place}` : J.notYet;
+    });
+    el.title.dataset.type = id;
+  }
+
   function showTitle() {
     clearLater();
     G.state = 'title';
-    Scene.reset();
+    S.reset();
     [el.hud, el.track, el.card, el.pause, el.over, el.countdown].forEach(e => e.classList.add('hidden'));
     el.card.classList.remove('blur');
     el.title.classList.remove('hidden');
-    document.querySelectorAll('[data-best]').forEach(b => {
-      const r = bests[b.dataset.best];
-      b.textContent = r ? `Best: ${r.score.toLocaleString()} · ${r.icon} ${r.place}` : 'Not flown yet';
-    });
+    setType(J.id);
   }
 
   // ---- Start a run ------------------------------------------------------
@@ -104,31 +166,40 @@
     Sound.unlock();
     clearLater();
     const mode = MODES[modeId];
+    const dive = J.id === 'sub';
     Object.assign(G, {
-      state: 'countdown', mode, score: 0, shown: 0, lives: mode.lives, streak: 0, bestStreak: 0, qNum: 0,
-      skips: mode.skips, used: new Set(), seen: Quiz.newRun(), q: null, correct: 0, bestAnswer: null, launched: false
+      state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive ? Infinity : mode.lives, streak: 0, bestStreak: 0,
+      qNum: 0, skips: dive ? Infinity : mode.skips, used: new Set(), seen: Quiz.newRun(), q: null, correct: 0, bestAnswer: null,
+      launched: false, diveLeft: DIVE_TIME, qElapsed: 0, lastTick: DIVE_TIME
     });
-    Scene.reset();
-    Scene.setStreak(0);
+    S.reset();
+    S.setStreak(0);
     el.title.classList.add('hidden');
     el.over.classList.add('hidden');
     el.pause.classList.add('hidden');
     el.hud.classList.remove('hidden');
     el.track.classList.remove('hidden');
     el.card.classList.add('hidden');
+    el.track.classList.toggle('down', dive);
+    el.card.classList.toggle('dive', dive);
+    el.fuelPill.classList.toggle('hidden', dive);
+    el.timePill.classList.toggle('hidden', !dive);
+    el.altLabel.textContent = J.distLabel;
+    el.trackRocket.textContent = J.marker;
     buildTrack();
     renderFuel();
     renderStreak();
+    renderDiveClock();
     updateHud(0);
 
-    const steps = ['3', '2', '1', 'GO!'];
+    const steps = ['3', '2', '1', J.go];
     steps.forEach((txt, i) => later(() => {
       el.countdown.classList.remove('hidden', 'tick');
       void el.countdown.offsetWidth;
       el.countdown.textContent = txt;
       el.countdown.classList.add('tick');
-      if (txt === 'GO!') { Sound.go(); Scene.setIgnite(0.5); }
-      else { Sound.count(); Scene.setIgnite(0.25 + i * 0.25); }
+      if (txt === J.go) { Sound.go(); S.setIgnite(0.5); }
+      else { Sound.count(); S.setIgnite(0.25 + i * 0.25); }
       if (i === 0) Sound.rumble(3);
     }, i * 800));
     later(() => { el.countdown.classList.add('hidden'); nextQuestion(); }, steps.length * 800);
@@ -137,10 +208,12 @@
   // ---- Questions --------------------------------------------------------
   function nextQuestion() {
     if (G.lives <= 0) return gameOver();
+    if (isDive() && G.diveLeft <= 0) return gameOver();
     G.qNum++;
     G.q = Quiz.generate(G.mode.id, G.seen);
     G.timeLeft = G.mode.time;
-    G.lastTick = Math.ceil(G.timeLeft);
+    G.qElapsed = 0;
+    if (!isDive()) G.lastTick = Math.ceil(G.timeLeft);
     G.state = 'question';
     el.card.classList.remove('hidden', 'swap', 'blur', 'shake');
     void el.card.offsetWidth;
@@ -155,7 +228,7 @@
     el.input.disabled = false;
     el.go.disabled = false;
     el.skip.disabled = G.skips <= 0;
-    el.skipCount.textContent = G.skips;
+    el.skipCount.textContent = isDive() ? '∞' : G.skips;
     updateTimer();
     el.input.focus();
   }
@@ -175,12 +248,11 @@
   }
 
   function correct(res) {
-    const frac = G.timeLeft / G.mode.time;
     const tier = res.ent.tier;
+    const sp = speedMult();
     G.streak++;
     G.bestStreak = Math.max(G.bestStreak, G.streak);
     G.correct++;
-    const sp = speedMult(frac);
     const stm = streakMult(G.streak);
     const deep = tier >= 3 && tier === G.q.maxTier ? 1.5 : 1;
     const repeat = G.used.has(G.q.cat.id + ':' + res.ent.id) ? 0.5 : 1;
@@ -190,16 +262,15 @@
 
     if (!G.bestAnswer || pts > G.bestAnswer.pts) G.bestAnswer = { text: res.v.raw, tier, pts };
 
-    // Rocket!
-    Scene.setStreak(G.streak);
-    Scene.boostTo(altFor(G.score), tier);
-    const rs = Scene.rocketScreen();
-    Scene.burst(rs.x, rs.y + 60, ['', '#ffffff', '#6fe08a', '#4fb3ff', '#c77dff', '#ffc531'][tier], 20 + tier * 12);
-    if (tier >= 4) Scene.confetti(tier === 5 ? 140 : 60);
+    S.setStreak(G.streak);
+    S.boostTo(altFor(G.score), tier);
+    const rs = S.rocketScreen();
+    S.burst(rs.x, rs.y + 60, ['', '#ffffff', '#6fe08a', '#4fb3ff', '#c77dff', '#ffc531'][tier], 20 + tier * 12);
+    if (tier >= 4) S.confetti(tier === 5 ? 140 : 60);
     Sound.boost(tier);
 
     const tags = [];
-    if (!G.launched) { tags.push(['🚀 LIFTOFF!', '#fff']); G.launched = true; }
+    if (!G.launched) { tags.push([J.firstTag, '#fff']); G.launched = true; }
     if (sp > 1) tags.push([sp === 2 ? '⚡ ×2 Lightning' : '⚡ ×1.5 Quick', sp === 2 ? '#ffd23f' : '#4fd1ff']);
     if (stm > 1) tags.push([`🔥 ×${stm.toFixed(2).replace(/0$/, '')} Streak`, '#ff9a3c']);
     if (deep > 1) tags.push(['🤓 ×1.5 Deepest cut', '#c77dff']);
@@ -215,15 +286,16 @@
     el.score.parentElement.classList.remove('bump'); void el.score.offsetWidth; el.score.parentElement.classList.add('bump');
     lockCard();
     G.state = 'reveal';
-    later(nextQuestion, tier >= 4 ? 2300 : 1900);
+    // The dive clock keeps running, so Submarine moves on quickly.
+    later(nextQuestion, isDive() ? (tier >= 4 ? 1100 : 800) : (tier >= 4 ? 2300 : 1900));
   }
 
   function timeout() {
     G.state = 'reveal';
     G.lives--;
     G.streak = 0;
-    Scene.setStreak(0);
-    Scene.sputter();
+    S.setStreak(0);
+    S.sputter();
     Sound.timeout();
     renderFuel(true);
     renderStreak();
@@ -237,17 +309,17 @@
 
   function skip() {
     if (G.state !== 'question' || G.skips <= 0) return;
-    G.skips--;
+    if (!isDive()) G.skips--;
     G.state = 'reveal';
     G.streak = 0;
-    Scene.setStreak(0);
+    S.setStreak(0);
     Sound.skip();
     renderStreak();
     el.feedback.className = 'feedback';
     el.feedback.textContent = '⏭ Skipped — your streak resets.';
     showReveal('One answer that would have worked:', Quiz.examples(G.q));
     lockCard();
-    later(nextQuestion, 2400);
+    later(nextQuestion, isDive() ? 1300 : 2400);
   }
 
   function lockCard() {
@@ -268,29 +340,38 @@
     clearLater();
     G.state = 'dying';
     lockCard();
-    Scene.die();
+    S.die();
     Sound.gameOver();
+    if (isDive()) {
+      el.feedback.className = 'feedback';
+      el.feedback.textContent = '⏱️ Time\'s up! Surfacing…';
+    }
     later(() => {
       G.state = 'over';
       el.card.classList.add('hidden');
       const place = placeAt(G.score);
-      const prev = bests[G.mode.id];
+      const key = bestKey(G.type, G.mode.id);
+      const prev = bests[key];
       const isBest = !prev || G.score > prev.score;
       if (isBest && G.score > 0) {
-        bests[G.mode.id] = { score: G.score, place: place.name, icon: place.icon };
+        bests[key] = { score: G.score, place: place.name, icon: place.icon };
         saveBests();
         Sound.best();
-        Scene.confetti(200);
+        S.confetti(200);
       }
       $('newBest').classList.toggle('hidden', !(isBest && G.score > 0));
-      $('overReached').innerHTML = `You reached <b>${place.icon} ${place.name}</b> — ${fmtKm(kmAt(altFor(G.score)))} from Earth.`;
+      $('overTitle').textContent = isDive() ? "Time's up!" : 'Out of fuel!';
+      const dist = J.fmt(kmAt(altFor(G.score)));
+      $('overReached').innerHTML = isDive()
+        ? `You dove to <b>${place.icon} ${place.name}</b> — ${dist} deep.`
+        : `You reached <b>${place.icon} ${place.name}</b> — ${dist} from Earth.`;
       const ba = G.bestAnswer;
       $('overStats').innerHTML = `
         <div class="stat"><div class="s-label">Score</div><div class="s-value" style="color:var(--accent)">${G.score.toLocaleString()}</div></div>
         <div class="stat"><div class="s-label">Correct answers</div><div class="s-value">${G.correct}</div></div>
         <div class="stat"><div class="s-label">Best streak</div><div class="s-value">${G.bestStreak} 🔥</div></div>
         <div class="stat wide"><div class="s-label">Best answer</div><div class="s-value">${ba ? `<span class="tier-${ba.tier}">${escapeHtml(ba.text)}</span> · ${Quiz.TIER_NAMES[ba.tier]} · +${ba.pts.toLocaleString()}` : '—'}</div></div>
-        <div class="stat wide"><div class="s-label">Mode</div><div class="s-value">${G.mode.label}${prev ? ` · previous best ${prev.score.toLocaleString()}` : ''}</div></div>`;
+        <div class="stat wide"><div class="s-label">Mode</div><div class="s-value">${isDive() ? 'Submarine' : 'Rocket'} · ${G.mode.label}${prev ? ` · previous best ${prev.score.toLocaleString()}` : ''}</div></div>`;
       el.over.classList.remove('hidden');
       $('btnAgain').focus();
     }, 2600);
@@ -315,11 +396,17 @@
   // ---- HUD rendering ----------------------------------------------------
   function renderFuel(lost) {
     el.fuel.innerHTML = '';
+    if (isDive()) return;
     for (let i = 0; i < G.mode.lives; i++) {
       const c = document.createElement('span');
       c.className = 'cell' + (i >= G.lives ? ' empty' : '') + (lost && i === G.lives ? ' lost' : '');
       el.fuel.appendChild(c);
     }
+  }
+
+  function renderDiveClock() {
+    el.time.textContent = Math.max(0, Math.ceil(G.diveLeft));
+    el.timePill.classList.toggle('low', G.diveLeft <= 10);
   }
 
   function renderStreak() {
@@ -332,8 +419,8 @@
 
   function buildTrack() {
     el.trackStops.innerHTML = '';
-    const n = MILESTONES.length;
-    MILESTONES.forEach((m, i) => {
+    const n = J.stops.length;
+    J.stops.forEach((m, i) => {
       const d = document.createElement('div');
       d.className = 'stop';
       d.style.top = trackY(i / (n - 1)) + 'px';
@@ -341,10 +428,11 @@
       el.trackStops.appendChild(d);
     });
   }
-  const trackY = f => 24 + (1 - f) * (856 - 48);
+  // Rocket climbs the track bottom to top; the submarine goes top to bottom.
+  const trackY = f => 24 + (J.down ? f : 1 - f) * (856 - 48);
 
   function trackFrac(alt) {
-    const M = MILESTONES, n = M.length;
+    const M = J.stops, n = M.length;
     for (let i = 0; i < n - 1; i++) {
       if (alt < M[i + 1].alt) return (i + (alt - M[i].alt) / (M[i + 1].alt - M[i].alt)) / (n - 1);
     }
@@ -356,32 +444,37 @@
     G.shown += (G.score - G.shown) * Math.min(1, dt * 5);
     if (Math.abs(G.score - G.shown) < 0.5) G.shown = G.score;
     el.score.textContent = Math.round(G.shown).toLocaleString();
-    const alt = Scene.alt;
+    const alt = S.alt;
     if (Math.abs(alt - lastHudAlt) > 0.01 || dt === 0) {
       lastHudAlt = alt;
-      el.alt.textContent = fmtKm(kmAt(alt));
+      el.alt.textContent = J.fmt(kmAt(alt));
       const f = trackFrac(alt);
       el.trackFill.style.height = (f * 100) + '%';
       el.trackRocket.style.top = trackY(f) + 'px';
       const stops = el.trackStops.children;
       const nxt = nextByAlt(alt);
       for (let i = 0; i < stops.length; i++) {
-        stops[i].classList.toggle('reached', MILESTONES[i].alt <= alt);
-        stops[i].classList.toggle('next', MILESTONES[i] === nxt);
+        stops[i].classList.toggle('reached', J.stops[i].alt <= alt);
+        stops[i].classList.toggle('next', J.stops[i] === nxt);
       }
     }
     const np = nextPlace(G.score);
-    el.next.textContent = np ? `Next stop: ${np.icon} ${np.name} · ${(np.pts - G.score).toLocaleString()} pts` : '∞ Beyond everything!';
+    el.next.textContent = np ? `Next stop: ${np.icon} ${np.name} · ${(np.pts - G.score).toLocaleString()} pts` : (J.down ? '∞ Deeper than anyone!' : '∞ Beyond everything!');
   }
 
   function updateTimer() {
-    const frac = Math.max(0, G.timeLeft / G.mode.time);
-    el.timerFill.style.width = (frac * 100) + '%';
-    el.timerSecs.textContent = Math.ceil(G.timeLeft) + 's';
-    const sp = speedMult(frac);
+    const sp = speedMult();
+    if (isDive()) {
+      el.timerFill.style.width = (Math.max(0, G.diveLeft / DIVE_TIME) * 100) + '%';
+      el.timerSecs.textContent = `${Math.max(0, Math.ceil(G.diveLeft))}s of dive left`;
+      el.timer.classList.toggle('low', G.diveLeft <= 10);
+    } else {
+      el.timerFill.style.width = (Math.max(0, G.timeLeft / G.mode.time) * 100) + '%';
+      el.timerSecs.textContent = Math.ceil(G.timeLeft) + 's';
+      el.timer.classList.toggle('low', G.timeLeft <= 5);
+    }
     el.speed.textContent = sp === 2 ? '⚡ ×2 speed bonus' : sp === 1.5 ? '⚡ ×1.5 speed bonus' : 'No speed bonus';
     el.speed.className = 'speed-badge' + (sp === 2 ? '' : sp === 1.5 ? ' x15' : ' x1');
-    el.timer.classList.toggle('low', G.timeLeft <= 5);
   }
 
   // ---- Popups and banners --------------------------------------------
@@ -389,7 +482,8 @@
     const d = document.createElement('div');
     d.className = 'popup' + (tier === 5 ? ' legendary' : '') + (miss ? ' miss' : '');
     d.style.left = '760px';
-    d.style.top = '380px';
+    d.style.top = isDive() ? '430px' : '380px';
+    if (isDive()) d.style.left = '600px';
     const col = ['#ff5d73', 'var(--t1)', 'var(--t2)', 'var(--t3)', 'var(--t4)', 'var(--t5)'][tier];
     d.innerHTML = `<div class="pts" style="color:${col}">${big}</div>` +
       `<div class="rarity" style="color:${col}">${label.toUpperCase()}</div>` +
@@ -401,9 +495,10 @@
   function milestone(m) {
     if (G.state === 'title' || G.state === 'over') return;
     Sound.milestone();
-    Scene.confetti(m.body ? 160 : 70);
+    S.confetti(m.body ? 160 : 70);
     el.banner.classList.remove('hidden');
-    el.banner.innerHTML = `<span class="b-icon">${m.icon}</span><div class="b-small">YOU REACHED</div><div class="b-name">${m.name}</div><div class="b-dist">${fmtKm(m.km)} from Earth</div>`;
+    el.banner.classList.toggle('dive', isDive());
+    el.banner.innerHTML = `<span class="b-icon">${m.icon}</span><div class="b-small">${J.reached}</div><div class="b-name">${m.name}</div><div class="b-dist">${J.fmt(m.km)} ${J.from}</div>`;
     el.banner.style.animation = 'none'; void el.banner.offsetWidth; el.banner.style.animation = '';
     clearTimeout(milestone.t);
     milestone.t = setTimeout(() => el.banner.classList.add('hidden'), 3300);
@@ -416,10 +511,19 @@
   function frame(now) {
     const dt = Math.min(0.05, (now - lastT) / 1000);
     lastT = now;
-    if (G.state !== 'paused') Scene.update(dt);
-    Scene.draw();
+    if (G.state !== 'paused') S.update(dt);
+    S.draw();
     if (G.state !== 'title') updateHud(dt);
-    if (G.state === 'question') {
+    if (isDive() && (G.state === 'question' || G.state === 'reveal')) {
+      // One clock for the whole dive. It runs during the short reveals too.
+      G.diveLeft -= dt;
+      if (G.state === 'question') G.qElapsed += dt;
+      const s = Math.ceil(G.diveLeft);
+      if (s < G.lastTick) { G.lastTick = s; if (s <= 10 && s > 0) Sound.tick(s <= 5); }
+      renderDiveClock();
+      updateTimer();
+      if (G.diveLeft <= 0) { G.diveLeft = 0; renderDiveClock(); updateTimer(); gameOver(); }
+    } else if (G.state === 'question') {
       G.timeLeft -= dt;
       const s = Math.ceil(G.timeLeft);
       if (s < G.lastTick) { G.lastTick = s; if (s <= 5 && s > 0) Sound.tick(s <= 3); }
@@ -431,11 +535,14 @@
 
   // ---- Wiring -----------------------------------------------------------
   Scene.init($('scene'));
-  Scene.onMilestone(milestone);
+  SubScene.init($('scene'));
+  Scene.onMilestone(m => { if (S === Scene) milestone(m); });
+  SubScene.onMilestone(m => { if (S === SubScene) milestone(m); });
   fit();
   window.addEventListener('resize', fit);
   document.addEventListener('fullscreenchange', fit);
 
+  document.querySelectorAll('.type-btn').forEach(b => b.addEventListener('click', () => { Sound.click(); setType(b.dataset.type); }));
   document.querySelectorAll('.mode-card').forEach(b => b.addEventListener('click', () => { Sound.click(); start(b.dataset.mode); }));
   el.form.addEventListener('submit', e => { e.preventDefault(); submit(); });
   el.skip.addEventListener('click', skip);

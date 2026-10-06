@@ -4,6 +4,13 @@ A 16:9 quiz game where your rocket only climbs when you answer. Start on the lau
 
 Plain HTML, CSS and JavaScript with no build step. Open `brain-rocket/index.html` in a browser (or serve the folder with `python3 -m http.server`). The stage scales to any window size and keeps a 16:9 shape; the ⛶ button goes fullscreen.
 
+## Two ways to play
+
+Pick one with the switch on the home screen; each has its own Owen (Easy), Medium and Hard modes and its own best scores.
+
+- **🚀 Rocket.** Fly from the launch pad past the Moon, Mars and the outer planets to the edge of the universe. Every question has its own timer; running out of time burns a fuel cell, and the game ends when they're gone.
+- **🌊 Submarine.** A 60-second dive. There are no lives and skips are unlimited, so it's all about how deep you get before the clock runs out: past the coral reef, the Titanic, hydrothermal vents and Challenger Deep, then drilling through the crust, the mantle and the core to the other side of the world. The speed bonus counts seconds per question (Owen ×2 within 6 s, ×1.5 within 12 s; Medium 5/10 s; Hard 4/8 s), and the game moves straight on after each answer because the clock never stops.
+
 ## How it plays
 
 - **160 question topics, in three styles.**
@@ -32,12 +39,13 @@ Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the b
 
 | File | What it does |
 | --- | --- |
-| `js/data.js` | The topic format, the original six topics, and the milestones (score needed, place in the scene, real distance) |
+| `js/data.js` | The topic format, the original six topics, and the stops for each journey (`MILESTONES` for Rocket, `DEPTHS` for Submarine) |
 | `js/topics-everyday.js`, `js/topics-mixed.js`, `js/topics-expert.js`, `js/topics-more.js` | The other topics with their answers and rarity tiers |
 | `js/topics-years.js` | Topics whose answers carry years, for year questions (`Toy Story @1995`) |
 | `js/questions.js` | Picks topic, letter and year questions and checks answers |
-| `js/scene.js` | The canvas world: sky, ground, planets, decorations, rocket, particles |
-| `js/game.js` | Game flow, scoring, HUD, popups and screens |
+| `js/scene.js` | The Rocket world: sky, ground, planets, decorations, rocket, particles |
+| `js/subscene.js` | The Submarine world: ocean zones, sea life, wrecks, the trench, rock, mantle and core |
+| `js/game.js` | Game flow, scoring, HUD, popups and screens for both ways to play |
 | `js/audio.js` | Synthesized sound effects (no audio files) |
 
 To change how rare an answer is, move it to a different tier line in its topic. To add a topic, copy any `topic({...})` block. To rename a mode, edit `MODES` in `js/game.js` and its card in `index.html`.
