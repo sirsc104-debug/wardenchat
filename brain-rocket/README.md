@@ -11,6 +11,8 @@ Pick one with the switch on the home screen; each has its own Owen (Easy), Mediu
 - **🚀 Rocket.** Fly from the launch pad past the Moon, Mars and the outer planets to the edge of the universe. Every question has its own timer; running out of time burns a fuel cell, and the game ends when they're gone.
 - **🌊 Submarine.** A timed dive: pick 30, 60 or 120 seconds next to the switch (each length keeps its own best scores). There are no lives and skips are unlimited, so it's all about how deep you get before the clock runs out: past the coral reef, the Titanic, hydrothermal vents and Challenger Deep, then drilling through the crust, the mantle and the core to the other side of the world. The speed bonus counts seconds per question (Owen ×2 within 6 s, ×1.5 within 12 s; Medium 5/10 s; Hard 4/8 s), and the game moves straight on after each answer because the clock never stops. Skipping jumps straight to the next question (and resets your streak).
 
+**💀 Ultra Hard** is a fourth mode for both. It uses Hard's expert questions (×2.5 points), but while each question is on screen the rocket falls back down and the submarine floats back up, and the drift gets faster the further you've gone (12 points a second plus 3% of your score). Rocket keeps your highest point as your result; Submarine counts where you are when the clock runs out.
+
 ## How it plays
 
 - **160 question topics, in three styles.**

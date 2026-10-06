@@ -903,7 +903,7 @@ const Scene = (function () {
     if (!st.onPad) {
       x += Math.sin(st.t * 1.3) * 5;
       y += Math.sin(st.t * 2.1) * 7;
-      tilt = Math.sin(st.t * 1.7) * 0.035;
+      tilt = Math.sin(st.t * 1.7) * 0.035 + (st.vel < -8 ? Math.sin(st.t * 9) * 0.06 : 0);
     } else if (st.ignite > 0) {
       x += (Math.random() - 0.5) * 3 * st.ignite;
     }
@@ -1134,7 +1134,9 @@ const Scene = (function () {
     st.armAngle += ((st.onPad && st.ignite <= 0 ? 0 : 1.3) - st.armAngle) * Math.min(1, dt * 3);
 
     st.kick = Math.max(0, st.kick - dt * 1.2);
-    const want = st.dead ? 0 : (st.onPad ? st.ignite * 0.45 : 0.32) + clamp(st.vel / 650, 0, 1.3) + st.kick * 0.6;
+    // Falling back (Ultra Hard): the engine splutters to a weak flame.
+    const falling = st.vel < -8;
+    const want = st.dead ? 0 : falling ? 0.1 + Math.random() * 0.1 : (st.onPad ? st.ignite * 0.45 : 0.32) + clamp(st.vel / 650, 0, 1.3) + st.kick * 0.6;
     st.thrust += (want - st.thrust) * Math.min(1, dt * 8);
     if (st.sputter > 0) st.sputter -= dt;
     if (st.dead) st.deadT += dt;
@@ -1220,6 +1222,7 @@ const Scene = (function () {
     get target() { return st.target; },
     setIgnite(v) { st.ignite = v; if (v) st.shake = Math.max(st.shake, 0.2); },
     setStreak(n) { st.streak = n; },
+    setTarget(alt) { st.target = alt; },
     boostTo(alt, power) {
       st.target = alt;
       st.ignite = 0;

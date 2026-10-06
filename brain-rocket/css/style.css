@@ -326,3 +326,16 @@ button { font-family: inherit; cursor: pointer; }
 .dive-len-btns button:hover { background: rgba(255,255,255,0.1); }
 .dive-len-btns button:focus-visible { outline: 3px solid var(--cool); outline-offset: 2px; }
 .dive-len-btns button.active { background: var(--cool); border-color: var(--cool); color: #052033; }
+
+/* ---------- Ultra Hard ---------- */
+.title-panel { width: 920px; }
+.modes { gap: 14px; }
+.mode-card { width: 216px; padding: 18px 12px 16px; }
+.mode-name { font-size: 34px; }
+.mode-info { font-size: 15px; }
+.mode-ultra { background: linear-gradient(160deg, #7a3cff, #2a0f5c); border-color: rgba(255,120,200,0.6); }
+.mode-ultra .mode-icon { animation-delay: -1.2s; }
+.mode-ultra .mode-tag { background: rgba(255,80,160,0.45); }
+.alt-pill.drifting { border-color: var(--hot); box-shadow: 0 0 22px rgba(255,93,115,0.55); }
+.alt-pill.drifting .pill-sub { color: #ffb3bf; font-weight: 600; }
+#title { padding-right: 36px; }

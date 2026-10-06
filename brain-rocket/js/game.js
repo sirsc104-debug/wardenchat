@@ -5,7 +5,9 @@
   const MODES = {
     easy:   { id: 'easy',   label: 'Owen (Easy)', time: 30, lives: 5, mult: 1,   skips: 5, fast: [6, 12] },
     medium: { id: 'medium', label: 'Medium',      time: 20, lives: 3, mult: 1.5, skips: 3, fast: [5, 10] },
-    hard:   { id: 'hard',   label: 'Hard',        time: 12, lives: 3, mult: 2,   skips: 2, fast: [4, 8] }
+    hard:   { id: 'hard',   label: 'Hard',        time: 12, lives: 3, mult: 2,   skips: 2, fast: [4, 8] },
+    // Ultra: Hard questions, but you slide back (rocket falls, sub floats up) while each question is up.
+    ultra:  { id: 'ultra',  label: 'Ultra Hard',  time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'hard', drift: true }
   };
   const DIVE_LENGTHS = [30, 60, 120];
   let diveLen = 60;
@@ -36,7 +38,8 @@
       info: {
         easy: '30s per question<br>5 fuel cells · everyday topics',
         medium: '20s per question<br>3 fuel cells · mixed topics',
-        hard: '12s per question<br>3 fuel cells · expert topics'
+        hard: '12s per question<br>3 fuel cells · expert topics',
+        ultra: '12s per question<br>you fall between answers!'
       }
     },
     sub: {
@@ -48,7 +51,8 @@
       info: {
         easy: '{n}-second dive<br>unlimited skips · everyday topics',
         medium: '{n}-second dive<br>unlimited skips · mixed topics',
-        hard: '{n}-second dive<br>unlimited skips · expert topics'
+        hard: '{n}-second dive<br>unlimited skips · expert topics',
+        ultra: '{n}-second dive<br>you float up between answers!'
       }
     }
   };
@@ -117,11 +121,14 @@
   const G = {
     state: 'title', mode: null, type: 'rocket', score: 0, shown: 0, lives: 0, streak: 0, bestStreak: 0, qNum: 0,
     skips: 0, used: new Set(), seen: Quiz.newRun(), q: null, timeLeft: 0, lastTick: 0, diveLeft: 0, qElapsed: 0,
-    correct: 0, bestAnswer: null, launched: false, timers: []
+    correct: 0, bestAnswer: null, launched: false, peak: 0, reached: new Set(), timers: []
   };
   const later = (fn, ms) => { const id = setTimeout(fn, ms); G.timers.push(id); return id; };
   const clearLater = () => { G.timers.forEach(clearTimeout); G.timers = []; };
   const isDive = () => G.type === 'sub';
+
+  // How fast Ultra slides you back, in points per second. It gets harsher the further you've gone.
+  const driftRate = () => 12 + 0.03 * G.score;
 
   const streakMult = n => Math.min(3, 1 + 0.25 * Math.max(0, n - 1));
   // Rocket: by how much of the question timer is left. Submarine: by seconds taken on this question.
@@ -179,7 +186,7 @@
     Object.assign(G, {
       state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive ? Infinity : mode.lives, streak: 0, bestStreak: 0,
       qNum: 0, skips: dive ? Infinity : mode.skips, used: new Set(), seen: Quiz.newRun(), q: null, correct: 0, bestAnswer: null,
-      launched: false, diveTime: diveLen, diveLeft: diveLen, qElapsed: 0, lastTick: diveLen
+      launched: false, peak: 0, reached: new Set(), diveTime: diveLen, diveLeft: diveLen, qElapsed: 0, lastTick: diveLen
     });
     S.reset();
     S.setStreak(0);
@@ -219,7 +226,7 @@
     if (G.lives <= 0) return gameOver();
     if (isDive() && G.diveLeft <= 0) return gameOver();
     G.qNum++;
-    G.q = Quiz.generate(G.mode.id, G.seen);
+    G.q = Quiz.generate(G.mode.quiz || G.mode.id, G.seen);
     G.timeLeft = G.mode.time;
     G.qElapsed = 0;
     if (!isDive()) G.lastTick = Math.ceil(G.timeLeft);
@@ -268,6 +275,7 @@
     G.used.add(G.q.cat.id + ':' + res.ent.id);
     const pts = Math.max(1, Math.round(Quiz.TIER_POINTS[tier] * G.mode.mult * sp * stm * deep * repeat));
     G.score += pts;
+    G.peak = Math.max(G.peak, G.score);
 
     if (!G.bestAnswer || pts > G.bestAnswer.pts) G.bestAnswer = { text: res.v.raw, tier, pts };
 
@@ -360,26 +368,28 @@
     later(() => {
       G.state = 'over';
       el.card.classList.add('hidden');
-      const place = placeAt(G.score);
+      // Rocket counts the highest point reached; Submarine counts where you are when time runs out.
+      const result = Math.round(isDive() ? G.score : G.peak);
+      const place = placeAt(result);
       const key = bestKey(G.type, G.mode.id, G.diveTime);
       const prev = bests[key];
-      const isBest = !prev || G.score > prev.score;
-      if (isBest && G.score > 0) {
-        bests[key] = { score: G.score, place: place.name, icon: place.icon };
+      const isBest = !prev || result > prev.score;
+      if (isBest && result > 0) {
+        bests[key] = { score: result, place: place.name, icon: place.icon };
         saveBests();
         Sound.best();
         S.confetti(200);
       }
-      $('newBest').classList.toggle('hidden', !(isBest && G.score > 0));
+      $('newBest').classList.toggle('hidden', !(isBest && result > 0));
       $('overTitle').textContent = isDive() ? "Time's up!" : 'Out of fuel!';
       $('btnAgain').textContent = isDive() ? '🌊 Dive again' : '🚀 Fly again';
-      const dist = J.fmt(kmAt(altFor(G.score)));
+      const dist = J.fmt(kmAt(altFor(result)));
       $('overReached').innerHTML = isDive()
         ? `You dove to <b>${place.icon} ${place.name}</b> — ${dist} deep.`
         : `You reached <b>${place.icon} ${place.name}</b> — ${dist} from Earth.`;
       const ba = G.bestAnswer;
       $('overStats').innerHTML = `
-        <div class="stat"><div class="s-label">Score</div><div class="s-value" style="color:var(--accent)">${G.score.toLocaleString()}</div></div>
+        <div class="stat"><div class="s-label">${G.mode.drift && !isDive() ? 'Highest score' : 'Score'}</div><div class="s-value" style="color:var(--accent)">${result.toLocaleString()}</div></div>
         <div class="stat"><div class="s-label">Correct answers</div><div class="s-value">${G.correct}</div></div>
         <div class="stat"><div class="s-label">Best streak</div><div class="s-value">${G.bestStreak} 🔥</div></div>
         <div class="stat wide"><div class="s-label">Best answer</div><div class="s-value">${ba ? `<span class="tier-${ba.tier}">${escapeHtml(ba.text)}</span> · ${Quiz.TIER_NAMES[ba.tier]} · +${ba.pts.toLocaleString()}` : '—'}</div></div>
@@ -471,7 +481,10 @@
       }
     }
     const np = nextPlace(G.score);
-    el.next.textContent = np ? `Next stop: ${np.icon} ${np.name} · ${(np.pts - G.score).toLocaleString()} pts` : (J.down ? '∞ Deeper than anyone!' : '∞ Beyond everything!');
+    const drift = G.mode && G.mode.drift && G.state === 'question' && G.score > 0;
+    el.alt.parentElement.classList.toggle('drifting', !!drift);
+    if (drift) { el.next.textContent = `${J.down ? '⬆️ Floating up' : '⬇️ Falling'} ${Math.round(driftRate()).toLocaleString()} pts/s — answer!`; return; }
+    el.next.textContent = np ? `Next stop: ${np.icon} ${np.name} · ${Math.ceil(np.pts - G.score).toLocaleString()} pts` : (J.down ? '∞ Deeper than anyone!' : '∞ Beyond everything!');
   }
 
   function updateTimer() {
@@ -506,6 +519,8 @@
 
   function milestone(m) {
     if (G.state === 'title' || G.state === 'over') return;
+    if (G.reached.has(m.name)) return;   // in Ultra you can pass a stop more than once
+    G.reached.add(m.name);
     Sound.milestone();
     S.confetti(m.body ? 160 : 70);
     el.banner.classList.remove('hidden');
@@ -526,6 +541,10 @@
     if (G.state !== 'paused') S.update(dt);
     S.draw();
     if (G.state !== 'title') updateHud(dt);
+    if (G.mode && G.mode.drift && G.state === 'question' && G.score > 0) {
+      G.score = Math.max(0, G.score - driftRate() * dt);
+      S.setTarget(altFor(G.score));
+    }
     if (isDive() && (G.state === 'question' || G.state === 'reveal')) {
       // One clock for the whole dive. It runs during the short reveals too.
       G.diveLeft -= dt;

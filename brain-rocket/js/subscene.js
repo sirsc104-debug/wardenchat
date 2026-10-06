@@ -612,7 +612,7 @@ const SubScene = (function () {
     let x = SX, y = SY, tilt = 0;
     x += Math.sin(st.t * 1.1) * 6;
     y += Math.sin(st.t * 1.7) * 6;
-    tilt = Math.sin(st.t * 1.3) * 0.03 + clamp(st.vel / 1500, 0, 0.35);
+    tilt = Math.sin(st.t * 1.3) * 0.03 + clamp(st.vel / 1500, -0.25, 0.35);
     if (st.dead) { tilt = Math.sin(st.t * 2) * 0.05; y += -Math.min(st.deadT * 15, 40); }
     return { x, y, tilt };
   }
@@ -816,6 +816,7 @@ const SubScene = (function () {
     get alt() { return st.cam; },
     setIgnite(v) { st.ignite = v; },
     setStreak(n) { st.streak = n; },
+    setTarget(d) { st.target = d; },
     boostTo(d, power) {
       st.target = d;
       st.ignite = 0;
