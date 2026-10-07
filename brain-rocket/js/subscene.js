@@ -11,7 +11,8 @@ const SubScene = (function () {
   let canvas, ctx, pxScale = 1;
   const st = {
     cam: 0, target: 0, vel: 0, t: 0, thrust: 0, ignite: 0, dead: false, deadT: 0,
-    shake: 0, streak: 0, kick: 0, prop: 0, emitB: 0, flash: 0
+    shake: 0, streak: 0, kick: 0, prop: 0, emitB: 0, flash: 0,
+    crash: null   // bad word: turn nose-up and rocket back to the surface
   };
   const parts = [];   // bubbles, debris, sparks (world-anchored)
   const fx = [];      // confetti, rings (screen space)
@@ -614,6 +615,21 @@ const SubScene = (function () {
     y += Math.sin(st.t * 1.7) * 6;
     tilt = Math.sin(st.t * 1.3) * 0.03 + clamp(st.vel / 1500, -0.25, 0.35);
     if (st.dead) { tilt = Math.sin(st.t * 2) * 0.05; y += -Math.min(st.deadT * 15, 40); }
+    if (st.crash) {
+      const c = st.crash;
+      const f = clamp(c.t / FLIP, 0, 1);
+      tilt = lerp(c.tilt0, -Math.PI / 2, f * f * (3 - 2 * f));
+      if (!c.breach) x += (Math.random() - 0.5) * 4 * clamp(c.p * 2, 0, 1);
+      else if (!c.landed) {
+        // out of the water, up and over, then a belly flop
+        y += -BREACH_V * c.since + 0.5 * BREACH_G * c.since * c.since;
+        tilt = -Math.PI / 2 + c.since * 1.6;
+      } else {
+        const s = c.since - c.landT;
+        tilt = lerp(-Math.PI / 2 + c.landT * 1.6, 0.18, clamp(s * 2, 0, 1)) + Math.sin(st.t * 2.4) * 0.06;
+        y += Math.sin(st.t * 2.1) * 4 - 20;
+      }
+    }
     return { x, y, tilt };
   }
 
@@ -669,7 +685,10 @@ const SubScene = (function () {
       if (i === 2) {
         ctx.fillStyle = '#ffd7a8'; ctx.beginPath(); ctx.arc(wx, wy + 3, 6, 0, TAU); ctx.fill();
         ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(wx - 2, wy + 2, 1, 0, TAU); ctx.arc(wx + 2, wy + 2, 1, 0, TAU); ctx.fill();
-        ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(wx, wy + 4, 2, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+        ctx.strokeStyle = '#222'; ctx.lineWidth = 1; ctx.beginPath();
+        if (st.crash) ctx.arc(wx, wy + 7, 2, 1.15 * Math.PI, 1.85 * Math.PI);
+        else ctx.arc(wx, wy + 4, 2, 0.15 * Math.PI, 0.85 * Math.PI);
+        ctx.stroke();
       }
       ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.beginPath(); ctx.ellipse(wx - 5, wy - 5, 3, 2, -0.6, 0, TAU); ctx.fill();
     });
@@ -688,6 +707,7 @@ const SubScene = (function () {
   function emit(dt, m) {
     const p = subPose();
     const tailX = p.x - 150 * Math.cos(p.tilt), tailY = p.y - 150 * Math.sin(p.tilt);
+    if (st.crash && st.crash.breach) return;   // no bubbles in the air
     const rate = (st.dead ? 2 : 6 + st.thrust * 50 + st.ignite * 30);
     st.emitB += rate * dt;
     while (st.emitB >= 1) {
@@ -699,17 +719,43 @@ const SubScene = (function () {
     }
   }
 
+  // ---- Crash (a bad word) ------------------------------------------------
+  // Turn nose-up, race back up at an ever-faster rate, and burst out of the sea.
+  const FLIP = 0.8, BREACH_V = 820, BREACH_G = 1800;
+  function updateCrash(dt) {
+    const c = st.crash;
+    c.t += dt;
+    if (c.breach) {
+      c.since += dt;
+      if (!c.landed && c.since > 2 * BREACH_V / BREACH_G) { c.landed = true; c.landT = c.since; splash(0.7); st.shake = 0.6; }
+      return;
+    }
+    if (c.t < FLIP) return;
+    c.p = Math.min(1, (c.t - FLIP) / c.dur);
+    st.cam = c.top * (1 - Math.pow(c.p, 3));
+    if (c.p >= 1) { st.cam = 0; c.breach = true; c.since = 0; splash(1); st.shake = 1.2; st.flash = 0.5; }
+  }
+  function splash(power) {
+    const y = sy(0), x = SX;
+    for (let i = 0; i < 120 * power; i++) {
+      const a = rand(Math.PI * 1.1, Math.PI * 1.9), sp = rand(200, 900) * power;
+      parts.push({ k: 'drop', x: x + rand(-70, 70), y: y + rand(-4, 6), vx: Math.cos(a) * sp * 0.6, vy: Math.sin(a) * sp, life: rand(0.8, 1.6), max: 1.6, size: rand(3, 8), color: Math.random() < 0.6 ? '#e8f8ff' : '#8fd6ff' });
+    }
+    fx.push({ k: 'ring', x, y, r: 380 * power, life: 0.7, max: 0.7, vx: 0, vy: 0, color: '#e8f8ff' });
+  }
+
   function update(dt) {
     st.t += dt;
     const prev = st.cam;
-    if (!st.dead) {
+    if (st.crash) updateCrash(dt);
+    else if (!st.dead) {
       st.cam += (st.target - st.cam) * (1 - Math.exp(-dt * 2.4));
       if (Math.abs(st.target - st.cam) < 0.02) st.cam = st.target;
     } else st.deadT += dt;
     const dy = (st.cam - prev) * K;
     st.vel = dt > 0 ? dy / dt : 0;
     st.kick = Math.max(0, st.kick - dt * 1.2);
-    st.thrust += ((st.dead ? 0 : 0.3 + clamp(st.vel / 600, 0, 1.2) + st.kick * 0.6 + st.ignite) - st.thrust) * Math.min(1, dt * 6);
+    st.thrust += ((st.crash ? (st.crash.breach ? 0 : 1.5) : st.dead ? 0 : 0.3 + clamp(st.vel / 600, 0, 1.2) + st.kick * 0.6 + st.ignite) - st.thrust) * Math.min(1, dt * 6);
     st.prop += dt * (st.dead ? 0.5 : 4 + st.thrust * 30);
     st.shake = Math.max(0, st.shake - dt * 2.5);
     st.flash = Math.max(0, st.flash - dt * 2);
@@ -722,6 +768,7 @@ const SubScene = (function () {
       if (q.life <= 0) { parts.splice(i, 1); continue; }
       q.x += q.vx * dt; q.y += q.vy * dt - dy;
       if (q.k === 'bubble') { q.vx *= 0.97; q.x += Math.sin(st.t * 4 + q.size) * 0.4; }
+      else if (q.k === 'drop') q.vy += 1500 * dt;
     }
     for (let i = fx.length - 1; i >= 0; i--) {
       const f = fx[i];
@@ -730,7 +777,7 @@ const SubScene = (function () {
       f.x += f.vx * dt; f.y += f.vy * dt;
       if (f.k === 'confetti') { f.vy += 200 * dt; f.vx *= 0.99; f.rot += f.vr * dt; }
     }
-    const lineV = Math.max(st.vel, st.kick * 900);
+    const lineV = Math.max(Math.abs(st.vel), st.kick * 900);
     if (lineV > 250) {
       for (let i = 0; i < Math.min(6, lineV / 300); i++) {
         if (Math.random() < 0.5) lines.push({ x: rand(0, W), y: rand(0, H + 200), len: 80 + lineV * 0.12, w: rand(1, 3), a: clamp(lineV / 2500, 0.08, 0.45), life: 0.6 });
@@ -764,7 +811,10 @@ const SubScene = (function () {
     // bubbles and debris
     for (const q of parts) {
       const a = q.life / q.max;
-      if (q.k === 'bubble') {
+      if (q.k === 'drop') {
+        ctx.globalAlpha = Math.min(1, a * 1.5); ctx.fillStyle = q.color;
+        ctx.beginPath(); ctx.arc(q.x, q.y, q.size, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+      } else if (q.k === 'bubble') {
         ctx.strokeStyle = `rgba(255,255,255,${0.7 * a})`; ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.arc(q.x, q.y, q.size, 0, TAU); ctx.stroke();
       } else {
@@ -810,7 +860,7 @@ const SubScene = (function () {
     update, draw,
     reset() {
       st.cam = 0; st.target = 0; st.dead = false; st.deadT = 0; st.thrust = 0; st.ignite = 0;
-      st.streak = 0; st.kick = 0;
+      st.streak = 0; st.kick = 0; st.crash = null;
       parts.length = 0; fx.length = 0; lines.length = 0;
     },
     get alt() { return st.cam; },
@@ -828,6 +878,15 @@ const SubScene = (function () {
     },
     sputter() { st.shake = 0.4; },
     die() { st.dead = true; st.deadT = 0; },
+    crash() {
+      const top = st.cam;
+      const dur = 0.8 + Math.min(1.4, Math.log10(1 + top) * 0.4);
+      st.crash = { t: 0, p: 0, top, dur, tilt0: subPose().tilt, breach: false, landed: false, since: 0, landT: 0 };
+      st.ignite = 0;
+      st.shake = Math.max(st.shake, 0.4);
+    },
+    get crashDone() { return !!(st.crash && st.crash.landed && st.crash.since - st.crash.landT > 1.2); },
+    get crashBoom() { return !!(st.crash && st.crash.breach); },
     confetti(n = 160) {
       const cols = ['#ff5d73', '#ffd23f', '#4fd1ff', '#7ddc6f', '#b04dff', '#ff9a3c'];
       for (let i = 0; i < n; i++) {

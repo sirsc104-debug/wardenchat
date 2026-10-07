@@ -133,7 +133,8 @@
   // How fast Ultra slides you back, in points per second. It gets harsher the further you've gone.
   const driftRate = () => 12 + 0.03 * G.score;
 
-  const streakMult = n => Math.min(3, 1 + 0.25 * Math.max(0, n - 1));
+  const streakMult = n => Math.min(5, 1 + 0.25 * Math.max(0, n - 1));
+  const HINT_COST = 0.8;   // each hint takes 20% off that answer's points (and ends your streak)
   // Rocket: by how much of the question timer is left. Submarine: by seconds taken on this question.
   function speedMult() {
     if (isDive()) {
@@ -192,7 +193,7 @@
     Object.assign(G, {
       state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive ? Infinity : mode.lives, streak: 0, bestStreak: 0,
       qNum: 0, skips: dive ? Infinity : mode.skips, used: new Set(), seen: Quiz.newRun(), q: null, correct: 0, bestAnswer: null,
-      launched: false, peak: 0, reached: new Set(), diveTime: diveLen, diveLeft: diveLen, qElapsed: 0, lastTick: diveLen
+      launched: false, peak: 0, reached: new Set(), crashed: false, boomed: false, diveTime: diveLen, diveLeft: diveLen, qElapsed: 0, lastTick: diveLen
     });
     S.reset();
     S.setStreak(0);
@@ -256,7 +257,7 @@
     el.hint.classList.add('hidden');
     el.hintBtn.classList.toggle('hidden', G.mode.id !== 'easy');
     el.hintBtn.disabled = false;
-    el.hintBtn.textContent = '💡 Hint';
+    el.hintBtn.textContent = '💡 Hint (−20%)';
     updateTimer();
     el.input.focus();
   }
@@ -265,6 +266,9 @@
     if (G.state !== 'question') return;
     const res = Quiz.check(G.q, el.input.value);
     if (!res.ok) {
+      // A real answer for this topic is never rude (Tit is a bird, Ass is a donkey), even when it breaks the letter rule.
+      const real = Quiz.check({ cat: G.q.cat, rules: [] }, el.input.value).ok;
+      if (!real && BadWords.test(el.input.value)) return crash();
       el.feedback.textContent = res.reason;
       el.feedback.className = 'feedback';
       el.card.classList.remove('shake'); void el.card.offsetWidth; el.card.classList.add('shake');
@@ -285,7 +289,9 @@
     const deep = tier >= 3 && tier === G.q.maxTier ? 1.5 : 1;
     const repeat = G.used.has(G.q.cat.id + ':' + res.ent.id) ? 0.5 : 1;
     G.used.add(G.q.cat.id + ':' + res.ent.id);
-    const pts = Math.max(1, Math.round(Quiz.TIER_POINTS[tier] * G.mode.mult * sp * stm * deep * repeat));
+    const hints = G.hint ? G.hint.shown : 0;
+    const hm = Math.pow(HINT_COST, hints);
+    const pts = Math.max(1, Math.round(Quiz.TIER_POINTS[tier] * G.mode.mult * sp * stm * deep * repeat * hm));
     G.score += pts;
     G.peak = Math.max(G.peak, G.score);
 
@@ -305,6 +311,7 @@
     if (deep > 1) tags.push(['🤓 ×1.5 Deepest cut', '#c77dff']);
     if (G.mode.mult > 1) tags.push([`×${G.mode.mult} ${G.mode.tag || G.mode.label}`, '#ffffff']);
     if (repeat < 1) tags.push(['♻️ ×0.5 Repeat', '#b9c3e6']);
+    if (hints) tags.push([`💡 ×${+hm.toFixed(2)} ${hints} hint${hints > 1 ? 's' : ''}`, '#ffe08a']);
     popup(`+${pts.toLocaleString()}`, Quiz.TIER_NAMES[tier], tier, tags);
 
     el.feedback.className = 'feedback ok';
@@ -368,13 +375,38 @@
       if (!/[A-Za-z]/.test(ch)) return ch === ' ' ? '\u00a0\u00a0' : ch;
       return n++ < G.hint.shown ? ch.toUpperCase() : '_';
     }).join(' ');
-    el.hint.innerHTML = `💡 Try: <span class="hint-word">${escapeHtml(pattern)}</span>`;
+    el.hint.innerHTML = `💡 Try: <span class="hint-word">${escapeHtml(pattern)}</span>` +
+      ` <span class="hint-cost">−${Math.round((1 - Math.pow(HINT_COST, G.hint.shown)) * 100)}% points</span>`;
+    if (G.streak) { G.streak = 0; S.setStreak(0); renderStreak(); }
     el.hint.classList.remove('hidden');
     const done = G.hint.shown >= Math.max(1, Math.ceil(letters / 2));
-    el.hintBtn.textContent = done ? '💡 No more hints' : '💡 Another letter';
+    el.hintBtn.textContent = done ? '💡 No more hints' : '💡 Another letter (−20%)';
     el.hintBtn.disabled = done;
     Sound.click();
     el.input.focus();
+  }
+
+  // A rude word: the rocket flips and nose-dives into the Earth; the sub turns round and shoots back to the surface.
+  function crash() {
+    clearLater();
+    G.state = 'crashing';
+    G.crashed = true;
+    G.crashedFrom = Math.round(isDive() ? G.score : G.peak);
+    G.crashPlace = placeAt(Math.round(G.score));
+    lockCard();
+    G.streak = 0;
+    S.setStreak(0);
+    renderStreak();
+    G.score = 0;   // the score drains away as you go
+    el.banner.classList.add('hidden');
+    el.feedback.className = 'feedback bad';
+    el.feedback.textContent = isDive() ? '🚫 We don\'t say that! Your sub is turning back…' : '🚫 We don\'t say that! Your rocket is turning around…';
+    el.reveal.classList.add('hidden');
+    el.hint.classList.add('hidden');
+    el.card.classList.remove('shake'); void el.card.offsetWidth; el.card.classList.add('shake');
+    Sound.wrong();
+    later(() => Sound.dive(), 700);
+    S.crash();
   }
 
   function lockCard() {
@@ -394,11 +426,11 @@
   // ---- Game over --------------------------------------------------------
   function gameOver() {
     clearLater();
+    const crashed = G.crashed;
     G.state = 'dying';
     lockCard();
-    S.die();
-    Sound.gameOver();
-    if (isDive()) {
+    if (!crashed) { S.die(); Sound.gameOver(); }
+    if (isDive() && !crashed) {
       el.feedback.className = 'feedback';
       el.feedback.textContent = '⏱️ Time\'s up! Surfacing…';
     }
@@ -406,7 +438,7 @@
       G.state = 'over';
       el.card.classList.add('hidden');
       // Rocket counts the highest point reached; Submarine counts where you are when time runs out.
-      const result = Math.round(isDive() ? G.score : G.peak);
+      const result = crashed ? 0 : Math.round(isDive() ? G.score : G.peak);
       const place = placeAt(result);
       const key = bestKey(G.type, G.mode.id, G.diveTime);
       const prev = bests[key];
@@ -418,22 +450,27 @@
         S.confetti(200);
       }
       $('newBest').classList.toggle('hidden', !(isBest && result > 0));
-      $('overTitle').textContent = isDive() ? "Time's up!" : 'Out of fuel!';
+      $('overTitle').textContent = crashed ? (isDive() ? '🫧 Back to the surface!' : '💥 Crashed!') : isDive() ? "Time's up!" : 'Out of fuel!';
       $('btnAgain').textContent = isDive() ? '🌊 Dive again' : '🚀 Fly again';
       const dist = J.fmt(kmAt(altFor(result)));
-      $('overReached').innerHTML = isDive()
+      const cp = G.crashPlace;
+      $('overReached').innerHTML = crashed
+        ? (isDive()
+          ? `You typed a word we don't say, so your sub shot back up from <b>${cp.icon} ${cp.name}</b>. Score lost!`
+          : `You typed a word we don't say, so your rocket nose-dived from <b>${cp.icon} ${cp.name}</b> into the Earth. Score lost!`)
+        : isDive()
         ? `You dove to <b>${place.icon} ${place.name}</b> — ${dist} deep.`
         : `You reached <b>${place.icon} ${place.name}</b> — ${dist} from Earth.`;
       const ba = G.bestAnswer;
       $('overStats').innerHTML = `
-        <div class="stat"><div class="s-label">${G.mode.drift && !isDive() ? 'Highest score' : 'Score'}</div><div class="s-value" style="color:var(--accent)">${result.toLocaleString()}</div></div>
+        <div class="stat"><div class="s-label">${G.mode.drift && !isDive() ? 'Highest score' : 'Score'}</div><div class="s-value" style="color:var(--accent)">${result.toLocaleString()}${crashed && G.crashedFrom ? ` <s class="lost">${G.crashedFrom.toLocaleString()}</s>` : ''}</div></div>
         <div class="stat"><div class="s-label">Correct answers</div><div class="s-value">${G.correct}</div></div>
         <div class="stat"><div class="s-label">Best streak</div><div class="s-value">${G.bestStreak} 🔥</div></div>
         <div class="stat wide"><div class="s-label">Best answer</div><div class="s-value">${ba ? `<span class="tier-${ba.tier}">${escapeHtml(ba.text)}</span> · ${Quiz.TIER_NAMES[ba.tier]} · +${ba.pts.toLocaleString()}` : '—'}</div></div>
         <div class="stat wide"><div class="s-label">Mode</div><div class="s-value">${isDive() ? `Submarine (${G.diveTime}s)` : 'Rocket'} · ${G.mode.label}${prev ? ` · previous best ${prev.score.toLocaleString()}` : ''}</div></div>`;
       el.over.classList.remove('hidden');
       $('btnAgain').focus();
-    }, 2600);
+    }, crashed ? 300 : 2600);
   }
 
   // ---- Pause ------------------------------------------------------------
@@ -582,7 +619,10 @@
       G.score = Math.max(0, G.score - driftRate() * dt);
       S.setTarget(altFor(G.score));
     }
-    if (isDive() && (G.state === 'question' || G.state === 'reveal')) {
+    if (G.state === 'crashing') {
+      if (S.crashBoom && !G.boomed) { G.boomed = true; if (isDive()) Sound.splash(); else Sound.boom(); }
+      if (S.crashDone) gameOver();
+    } else if (isDive() && (G.state === 'question' || G.state === 'reveal')) {
       // One clock for the whole dive. It runs during the short reveals too.
       G.diveLeft -= dt;
       if (G.state === 'question') G.qElapsed += dt;

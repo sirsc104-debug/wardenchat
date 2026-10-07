@@ -80,6 +80,10 @@ const Sound = (function () {
       tone(311, 0.45, { type: 'square', vol: 0.12, delay: 0.22 });
       noise(0.5, { vol: 0.25, freq: 400, delay: 0.1, sweepTo: 80 });
     },
+    // bad word: a falling whistle, then a big boom (rocket) or a splash (sub)
+    dive() { tone(1400, 1.6, { type: 'sine', vol: 0.12, slide: -1100, attack: 0.2 }); },
+    boom() { noise(1.8, { vol: 0.5, freq: 220, sweepTo: 50 }); tone(70, 1.2, { type: 'sawtooth', vol: 0.2, slide: -40 }); },
+    splash() { noise(1.1, { vol: 0.4, freq: 1800, sweepTo: 300 }); },
     skip() { tone(500, 0.15, { type: 'triangle', vol: 0.12, slide: -200 }); },
     milestone() {
       [0, 2, 4, 7].forEach((n, i) => tone(notes[n] / 2, 0.3, { type: 'square', vol: 0.1, delay: i * 0.12 }));

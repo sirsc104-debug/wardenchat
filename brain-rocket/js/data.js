@@ -264,7 +264,7 @@ const BASE_TOPICS = {
 1 Bee
 1 Butterfly
 1 Ant
-1 Donkey
+1 Donkey/Ass
 1 Camel
 1 Gorilla
 1 Hippopotamus/Hippo

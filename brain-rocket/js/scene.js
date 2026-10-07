@@ -13,7 +13,8 @@ const Scene = (function () {
   const st = {
     cam: 0, target: 0, vel: 0, t: 0, thrust: 0, onPad: true, ignite: 0,
     dead: false, deadT: 0, shake: 0, sputter: 0, dip: 0, dipV: 0, streak: 0,
-    emitF: 0, emitS: 0, kick: 0, armAngle: 0, flash: 0
+    emitF: 0, emitS: 0, kick: 0, armAngle: 0, flash: 0,
+    crash: null   // bad word: flip over, plunge into the ground, explode
   };
   const parts = [];   // flame, smoke, sparks (world-anchored)
   const fx = [];      // screen-space: confetti, shooting stars, rings
@@ -908,6 +909,13 @@ const Scene = (function () {
       x += (Math.random() - 0.5) * 3 * st.ignite;
     }
     y += st.dip;
+    if (st.crash) {
+      const c = st.crash;
+      const f = clamp(c.t / FLIP, 0, 1);
+      tilt += (f * f * (3 - 2 * f)) * Math.PI;
+      y += Math.pow(clamp(c.p, 0, 1), 3) * 34;   // nose into the dirt
+      x += (Math.random() - 0.5) * 4 * clamp(c.p * 2, 0, 1);
+    }
     if (st.dead && !st.onPad) {
       tilt += Math.min(st.deadT * 0.9, 2.2);
       y += st.deadT * st.deadT * 60;
@@ -945,6 +953,7 @@ const Scene = (function () {
   }
 
   function drawRocket() {
+    if (st.crash && st.crash.boom) return;
     const pose = rocketPose();
     ctx.save();
     ctx.translate(pose.x, pose.y - 95);
@@ -997,7 +1006,7 @@ const Scene = (function () {
     ctx.beginPath(); ctx.arc(-2.3, -102, 1.1, 0, TAU); ctx.arc(2.3, -102, 1.1, 0, TAU); ctx.fill();
     ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
     ctx.beginPath();
-    if (st.dead || st.sputter > 0) ctx.arc(0, -96.5, 2, Math.PI * 1.15, Math.PI * 1.85);
+    if (st.dead || st.sputter > 0 || st.crash) ctx.arc(0, -96.5, 2, Math.PI * 1.15, Math.PI * 1.85);
     else ctx.arc(0, -100.5, 2.2, 0.15 * Math.PI, 0.85 * Math.PI);
     ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.beginPath(); ctx.ellipse(-6, -112, 4, 2.5, -0.6, 0, TAU); ctx.fill();
@@ -1041,6 +1050,10 @@ const Scene = (function () {
           life: rand(1.6, 2.6), max: 2.6, size: rand(18, 30), grow: rand(30, 60), color: '#ffffff'
         });
       }
+    }
+    if (st.crash && st.crash.boom && st.crash.since < 2.5 && Math.random() < dt * 30) {
+      // a column of black smoke rising from the crater
+      parts.push({ k: 'smoke', x: RX + rand(-30, 30), y: BASE + 30, vx: rand(-25, 25), vy: rand(-180, -90), life: 2.4, max: 2.4, size: rand(16, 26), grow: 50, color: '#2c2a30' });
     }
     if (st.dead && Math.random() < dt * 20) {
       parts.push({ k: 'smoke', x: nz.x, y: nz.y, vx: rand(-30, 30), vy: rand(-80, -20), life: 1.8, max: 1.8, size: 14, grow: 40, color: '#3a3a44' });
@@ -1120,11 +1133,51 @@ const Scene = (function () {
     ctx.restore();
   }
 
+  // ---- Crash (a bad word) ----------------------------------------------
+  // Flip nose-down, then dive at an ever-faster rate until the ground, then boom.
+  const FLIP = 0.8;
+  function updateCrash(dt) {
+    const c = st.crash;
+    c.t += dt;
+    if (c.boom) { c.since += dt; return; }
+    if (c.t < FLIP) {
+      // a little hop first if we're sitting on (or near) the pad, so there's room to turn over
+      const f = c.t / FLIP;
+      st.cam = c.from + c.hop * Math.sin(f * Math.PI / 2);
+      return;
+    }
+    c.p = Math.min(1, (c.t - FLIP) / c.dur);
+    st.cam = c.top * (1 - Math.pow(c.p, 3));
+    if (c.p >= 1) boom();
+  }
+  function boom() {
+    const c = st.crash;
+    c.boom = true; c.since = 0;
+    st.cam = 0; st.thrust = 0;
+    st.flash = 1; st.shake = 1.6;
+    const x = RX, y = BASE + 20;
+    const fire = ['#ff3d00', '#ff8a00', '#ffd23f', '#ffffff'];
+    for (let i = 0; i < 140; i++) {
+      const a = rand(Math.PI, TAU), sp = rand(80, 620);
+      parts.push({ k: 'flame', x: x + rand(-20, 20), y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.9, life: rand(0.5, 1.2), max: 1.2, size: rand(16, 40), color: fire[i % fire.length] });
+    }
+    for (let i = 0; i < 70; i++) {
+      const a = rand(Math.PI * 1.05, Math.PI * 1.95), sp = rand(200, 700);
+      parts.push({ k: 'spark', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.6, 1.3), max: 1.3, size: rand(2, 5), color: Math.random() < 0.5 ? '#ffd23f' : '#ff6a00' });
+    }
+    for (let i = 0; i < 40; i++) {
+      parts.push({ k: 'smoke', x: x + rand(-80, 80), y: y - rand(0, 60), vx: rand(-160, 160), vy: rand(-160, -30), life: rand(1.8, 3), max: 3, size: rand(24, 44), grow: rand(40, 80), color: '#33303a' });
+    }
+    fx.push({ k: 'ring', x, y, r: 520, life: 0.7, max: 0.7, color: '#ffd23f' });
+    fx.push({ k: 'ring', x, y, r: 300, life: 0.5, max: 0.5, color: '#ffffff' });
+  }
+
   // ---- Main update / draw ----------------------------------------------
   function update(dt) {
     st.t += dt;
     const prev = st.cam;
-    if (!st.dead) {
+    if (st.crash) updateCrash(dt);
+    else if (!st.dead) {
       st.cam += (st.target - st.cam) * (1 - Math.exp(-dt * 2.1));
       if (Math.abs(st.target - st.cam) < 0.02) st.cam = st.target;
     }
@@ -1136,7 +1189,7 @@ const Scene = (function () {
     st.kick = Math.max(0, st.kick - dt * 1.2);
     // Falling back (Ultra Hard): the engine splutters to a weak flame.
     const falling = st.vel < -8;
-    const want = st.dead ? 0 : falling ? 0.1 + Math.random() * 0.1 : (st.onPad ? st.ignite * 0.45 : 0.32) + clamp(st.vel / 650, 0, 1.3) + st.kick * 0.6;
+    const want = st.crash ? (st.crash.boom ? 0 : st.crash.t < FLIP * 0.6 ? 0.15 : 1.5) : st.dead ? 0 : falling ? 0.1 + Math.random() * 0.1 : (st.onPad ? st.ignite * 0.45 : 0.32) + clamp(st.vel / 650, 0, 1.3) + st.kick * 0.6;
     st.thrust += (want - st.thrust) * Math.min(1, dt * 8);
     if (st.sputter > 0) st.sputter -= dt;
     if (st.dead) st.deadT += dt;
@@ -1151,7 +1204,7 @@ const Scene = (function () {
     emit(dt);
     updateParts(dt, dy);
 
-    const lineV = Math.max(st.vel, st.kick * 900);
+    const lineV = Math.max(Math.abs(st.vel), st.kick * 900);
     if (lineV > 250) {
       const n = Math.min(6, lineV / 300);
       for (let i = 0; i < n; i++) {
@@ -1214,7 +1267,7 @@ const Scene = (function () {
     },
     update, draw,
     reset() {
-      st.cam = 0; st.target = 0; st.onPad = true; st.ignite = 0; st.dead = false; st.deadT = 0;
+      st.cam = 0; st.target = 0; st.onPad = true; st.ignite = 0; st.dead = false; st.deadT = 0; st.crash = null;
       st.thrust = 0; st.streak = 0; st.dip = 0; st.dipV = 0; st.sputter = 0;
       parts.length = 0; fx.length = 0; lines.length = 0;
     },
@@ -1234,6 +1287,17 @@ const Scene = (function () {
     },
     sputter() { st.sputter = 0.9; st.shake = 0.6; st.dipV = 260; },
     die() { st.dead = true; st.deadT = 0; st.shake = 0.8; },
+    crash() {
+      const hop = Math.max(0, 70 - st.cam);
+      const top = st.cam + hop;
+      // Longer falls take a bit longer, but even from deep space it's over in a few seconds.
+      const dur = 0.9 + Math.min(1.5, Math.log10(1 + top) * 0.4);
+      st.crash = { t: 0, p: 0, from: st.cam, hop, top, dur, boom: false, since: 0 };
+      st.onPad = false; st.ignite = 0; st.sputter = 0; st.dip = 0; st.dipV = 0;
+      st.shake = Math.max(st.shake, 0.4);
+    },
+    get crashDone() { return !!(st.crash && st.crash.boom && st.crash.since > 1.8); },
+    get crashBoom() { return !!(st.crash && st.crash.boom); },
     confetti(n = 160) {
       const cols = ['#ff5d73', '#ffd23f', '#4fd1ff', '#7ddc6f', '#b04dff', '#ff9a3c'];
       for (let i = 0; i < n; i++) {

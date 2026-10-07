@@ -1,4 +1,4 @@
-# Brain Rocket
+# SirSC's Brain Rocket
 
 A 16:9 quiz game where your rocket only climbs when you answer. Start on the launch pad and fly past the clouds, the Moon, Mars, the outer planets, nebulae and galaxies, all the way to the edge of the universe.
 
@@ -23,11 +23,12 @@ Pick one with the switch on the home screen; each has its own Owen (Easy), Mediu
 - **Fresh games.** The game remembers which topics you've had recently (in this browser), so a new game starts with ones you haven't seen.
 - **Niche answers score more.** Every answer has a rarity: Common 10, Uncommon 25, Rare 50, Epic 100, Legendary 200 points. "Labrador" is Common; "Xoloitzcuintli" is Epic.
 - **Speed multiplier:** answer in the first quarter of the timer for ×2, in the first half for ×1.5.
-- **Streak multiplier:** each correct answer in a row adds ×0.25, up to ×3. Your rocket's flame changes colour at streaks of 3, 5 and 8.
+- **Streak multiplier:** each correct answer in a row adds ×0.25, up to ×5. Your rocket's flame changes colour at streaks of 3, 5 and 8.
 - **Deepest cut:** give one of the rarest possible answers to a question (Rare or better) for an extra ×1.5.
-- **Hints on Owen (Easy).** The 💡 Hint button shows the first letter of a Common answer with blanks for the rest (P _ _ _ _); press again for another letter, up to half the word.
+- **Hints on Owen (Easy).** The 💡 Hint button shows the first letter of a Common answer with blanks for the rest (P _ _ _ _); press again for another letter, up to half the word. Each letter costs 20% of that answer's points (one hint ×0.8, two ×0.64…) and ends your streak.
 - Wrong guesses are free. Running out of time burns a fuel cell; run out of fuel cells and the game ends. Skips are limited and reset your streak.
 - Reusing an answer you already gave this run scores half.
+- **No rude words.** Type a swear word or slur as an answer and the run is over: the rocket flips nose-down and speeds up all the way into the Earth (boom), or the submarine turns round and shoots back up out of the sea. You score 0 and no best is saved. Real answers are never treated as rude, so "Blue tit" for a bird, "Ass" for an animal or "Moby Dick" for a book all count as normal.
 - Answers are forgiving: small typos ("Chihuahuha"), plurals ("touchdowns"), extra words ("golden retriever dog", "oak tree") and answers inside a phrase ("a big golden retriever") all count.
 
 | Mode | Time per question | Fuel cells | Skips | Points | Topics |
@@ -48,6 +49,7 @@ Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the b
 | `js/questions.js` | Picks topic, letter and year questions and checks answers |
 | `js/scene.js` | The Rocket world: sky, ground, planets, decorations, rocket, particles |
 | `js/subscene.js` | The Submarine world: ocean zones, sea life, wrecks, the trench, rock, mantle and core |
+| `js/badwords.js` | The rude-word check (lists are ROT13-encoded; only runs after an answer is rejected) |
 | `js/game.js` | Game flow, scoring, HUD, popups and screens for both ways to play |
 | `js/audio.js` | Synthesized sound effects (no audio files) |
 
