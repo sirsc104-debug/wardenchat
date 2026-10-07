@@ -131,7 +131,9 @@
   const isDive = () => G.type === 'sub';
 
   // How fast Ultra slides you back, in points per second. It gets harsher the further you've gone.
-  const driftRate = () => 12 + 0.03 * G.score;
+  // A parachute (Rocket only, inside the atmosphere) cuts that to 30%.
+  const CHUTE_SLOW = 0.7;
+  const driftRate = () => (12 + 0.03 * G.score) * (1 - CHUTE_SLOW * (isDive() ? 0 : S.chute));
 
   const streakMult = n => Math.min(5, 1 + 0.25 * Math.max(0, n - 1));
   const HINT_COST = 0.8;   // each hint takes 20% off that answer's points (and ends your streak)
@@ -557,7 +559,7 @@
     const np = nextPlace(G.score);
     const drift = G.mode && G.mode.drift && G.state === 'question' && G.score > 0;
     el.alt.parentElement.classList.toggle('drifting', !!drift);
-    if (drift) { el.next.textContent = `${J.down ? '⬆️ Floating up' : '⬇️ Falling'} ${Math.round(driftRate()).toLocaleString()} pts/s — answer!`; return; }
+    if (drift) { el.next.textContent = `${J.down ? '⬆️ Floating up' : S.chute > 0.5 ? '🪂 Parachute!' : '⬇️ Falling'} ${Math.round(driftRate()).toLocaleString()} pts/s — answer!`; return; }
     el.next.textContent = np ? `Next stop: ${np.icon} ${np.name} · ${Math.ceil(np.pts - G.score).toLocaleString()} pts` : (J.down ? '∞ Deeper than anyone!' : '∞ Beyond everything!');
   }
 
@@ -612,6 +614,7 @@
   function frame(now) {
     const dt = Math.min(0.05, (now - lastT) / 1000);
     lastT = now;
+    if (!isDive()) S.setChute(!!(G.mode && G.mode.drift) && G.state !== 'title');
     if (G.state !== 'paused') S.update(dt);
     S.draw();
     if (G.state !== 'title') updateHud(dt);

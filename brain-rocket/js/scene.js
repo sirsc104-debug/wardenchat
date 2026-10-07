@@ -14,8 +14,11 @@ const Scene = (function () {
     cam: 0, target: 0, vel: 0, t: 0, thrust: 0, onPad: true, ignite: 0,
     dead: false, deadT: 0, shake: 0, sputter: 0, dip: 0, dipV: 0, streak: 0,
     emitF: 0, emitS: 0, kick: 0, armAngle: 0, flash: 0,
-    crash: null   // bad word: flip over, plunge into the ground, explode
+    crash: null,  // bad word: flip over, plunge into the ground, explode
+    chuteOK: false, chute: 0, chuteOn: false   // Ultra Hard parachute (opens while falling in the atmosphere)
   };
+  const ATMOSPHERE = 330;   // alt of "Outer Space"; parachutes only work below this
+  const loose = [];         // parachutes that came off when the rocket climbed again
   const parts = [];   // flame, smoke, sparks (world-anchored)
   const fx = [];      // screen-space: confetti, shooting stars, rings
   const lines = [];   // speed lines
@@ -904,7 +907,7 @@ const Scene = (function () {
     if (!st.onPad) {
       x += Math.sin(st.t * 1.3) * 5;
       y += Math.sin(st.t * 2.1) * 7;
-      tilt = Math.sin(st.t * 1.7) * 0.035 + (st.vel < -8 ? Math.sin(st.t * 9) * 0.06 : 0);
+      tilt = Math.sin(st.t * 1.7) * 0.035 + (st.vel < -8 ? Math.sin(st.t * 9) * 0.06 * (1 - st.chute * 0.8) : 0);
     } else if (st.ignite > 0) {
       x += (Math.random() - 0.5) * 3 * st.ignite;
     }
@@ -952,6 +955,75 @@ const Scene = (function () {
     ctx.restore();
   }
 
+  // ---- Parachute ----------------------------------------------------------
+  // Drawn from the attach point (0, 0) upward. o = how far open (0 = packed streamer, 1 = full canopy).
+  function drawCanopy(o, t, cut) {
+    const e = 1 - Math.pow(1 - clamp(o, 0, 1), 3);
+    const w = 34 + 196 * e, h = 90 + 120 * e, dome = 18 + 62 * e;
+    const sway = Math.sin(t * 1.6) * 10 * e;
+    const top = -h;
+    const n = 6;
+    // shroud lines
+    ctx.strokeStyle = 'rgba(240,240,250,0.85)'; ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const x = -w / 2 + (w * i) / n + sway;
+      if (cut) { ctx.moveTo(x, top); ctx.lineTo(x * 0.3 + Math.sin(t * 3 + i) * 6, top + 70); }
+      else { ctx.moveTo(0, 0); ctx.lineTo(x, top); }
+    }
+    ctx.stroke();
+    // canopy panels, alternating red and white, with a puffed bottom edge
+    for (let i = 0; i < n; i++) {
+      const x0 = -w / 2 + (w * i) / n + sway, x1 = x0 + w / n;
+      ctx.fillStyle = i % 2 ? '#ffffff' : '#ff4d5e';
+      ctx.beginPath();
+      ctx.moveTo(x0, top);
+      const peak = top - dome;
+      const k0 = Math.sin((i / n) * Math.PI), k1 = Math.sin(((i + 1) / n) * Math.PI);
+      ctx.lineTo(x0 + (0 - x0) * 0.08, top - dome * k0 * 0.95);
+      ctx.quadraticCurveTo((x0 + x1) / 2, peak - 6 * e - dome * 0.15 * Math.max(k0, k1), x1 + (0 - x1) * 0.08, top - dome * k1 * 0.95);
+      ctx.lineTo(x1, top);
+      ctx.quadraticCurveTo((x0 + x1) / 2, top - 10 * e, x0, top);
+      ctx.fill();
+    }
+    // shading
+    ctx.fillStyle = 'rgba(0,0,40,0.12)';
+    ctx.beginPath(); ctx.ellipse(sway + w * 0.18, top - dome * 0.45, w * 0.32, dome * 0.5, 0, 0, TAU); ctx.fill();
+  }
+
+  function drawLoose() {
+    for (const c of loose) {
+      ctx.save();
+      ctx.globalAlpha = clamp(c.life / 0.8, 0, 1);
+      ctx.translate(c.x, c.y); ctx.rotate(c.rot);
+      drawCanopy(c.o, st.t + c.seed, true);
+      ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // Unclip the parachute: it keeps its place in the world and drifts off as the rocket climbs away.
+  function dropChute() {
+    if (st.chute <= 0.05) { st.chute = 0; st.chuteOn = false; return; }
+    const pose = rocketPose();
+    const cx = pose.x + Math.sin(pose.tilt) * 101, cy = pose.y - 95 - Math.cos(pose.tilt) * 101;
+    loose.push({ x: cx, y: cy, rot: pose.tilt, vr: rand(-0.6, 0.6), vx: rand(-90, 90), vy: rand(-30, 10), o: st.chute, life: 3, seed: rand(0, 9) });
+    st.chute = 0; st.chuteOn = false;
+  }
+
+  function updateChute(dt, dy) {
+    if (st.chuteOK && !st.crash && !st.onPad && st.cam < ATMOSPHERE && st.vel < -4) st.chuteOn = true;
+    if (st.chuteOn && (st.vel > 30 || st.cam > ATMOSPHERE + 10 || !st.chuteOK || st.crash || st.dead)) dropChute();
+    st.chute = st.chuteOn ? Math.min(1, st.chute + dt * 1.6) : 0;
+    for (let i = loose.length - 1; i >= 0; i--) {
+      const c = loose[i];
+      c.life -= dt;
+      if (c.life <= 0) { loose.splice(i, 1); continue; }
+      c.x += c.vx * dt; c.y += c.vy * dt + dy; c.rot += c.vr * dt;
+      c.vx *= 0.99; c.o = Math.max(0.35, c.o - dt * 0.4);
+    }
+  }
+
   function drawRocket() {
     if (st.crash && st.crash.boom) return;
     const pose = rocketPose();
@@ -959,6 +1031,7 @@ const Scene = (function () {
     ctx.translate(pose.x, pose.y - 95);
     ctx.rotate(pose.tilt);
     ctx.translate(0, 95);
+    if (st.chute > 0) { ctx.save(); ctx.translate(0, -196); drawCanopy(st.chute, st.t); ctx.restore(); }
     // flame
     if (st.thrust > 0.02) {
       const sput = st.sputter > 0 && Math.random() < 0.5 ? 0.2 : 1;
@@ -1201,6 +1274,7 @@ const Scene = (function () {
     st.shake = Math.max(0, st.shake - dt * 2.5);
     st.flash = Math.max(0, st.flash - dt * 2);
 
+    updateChute(dt, dy);
     emit(dt);
     updateParts(dt, dy);
 
@@ -1244,6 +1318,7 @@ const Scene = (function () {
     drawGround();
     drawParts('smoke');
     drawLines();
+    drawLoose();
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; drawParts('flame'); ctx.restore();
     drawRocket();
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; drawParts('spark'); ctx.restore();
@@ -1268,6 +1343,7 @@ const Scene = (function () {
     update, draw,
     reset() {
       st.cam = 0; st.target = 0; st.onPad = true; st.ignite = 0; st.dead = false; st.deadT = 0; st.crash = null;
+      st.chute = 0; st.chuteOn = false; loose.length = 0;
       st.thrust = 0; st.streak = 0; st.dip = 0; st.dipV = 0; st.sputter = 0;
       parts.length = 0; fx.length = 0; lines.length = 0;
     },
@@ -1276,6 +1352,9 @@ const Scene = (function () {
     setIgnite(v) { st.ignite = v; if (v) st.shake = Math.max(st.shake, 0.2); },
     setStreak(n) { st.streak = n; },
     setTarget(alt) { st.target = alt; },
+    // Ultra Hard: allow a parachute to open when falling in the atmosphere. chute = how open it is (0..1).
+    setChute(ok) { st.chuteOK = ok; },
+    get chute() { return st.chute; },
     boostTo(alt, power) {
       st.target = alt;
       st.ignite = 0;
@@ -1293,6 +1372,7 @@ const Scene = (function () {
       // Longer falls take a bit longer, but even from deep space it's over in a few seconds.
       const dur = 0.9 + Math.min(1.5, Math.log10(1 + top) * 0.4);
       st.crash = { t: 0, p: 0, from: st.cam, hop, top, dur, boom: false, since: 0 };
+      dropChute();
       st.onPad = false; st.ignite = 0; st.sputter = 0; st.dip = 0; st.dipV = 0;
       st.shake = Math.max(st.shake, 0.4);
     },
