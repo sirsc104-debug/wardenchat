@@ -418,3 +418,18 @@ button { font-family: inherit; cursor: pointer; }
 .type-toggle .type-name { font-size: 22px; white-space: nowrap; }
 .type-toggle .type-sub { font-size: 13px; white-space: nowrap; }
 .type-toggle .dive-len { padding: 0 4px 0 10px; }
+
+/* ---- Warden Chat promo (home screen, bottom left) ---------------------------- */
+.promo-btn {
+  position: absolute; left: 24px; bottom: 24px; display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px 8px 10px; border-radius: 18px; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 2px solid var(--panel-edge); box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  transition: transform 0.15s, border-color 0.15s;
+}
+.promo-btn:hover { transform: translateY(-2px); border-color: var(--cool); }
+.promo-btn:focus-visible { outline: 3px solid var(--cool); outline-offset: 3px; }
+.promo-icon { font-size: 26px; }
+.promo-text { display: flex; flex-direction: column; line-height: 1.1; }
+.promo-text b { font-size: 18px; }
+.promo-text small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.promo-arrow { font-size: 16px; color: var(--cool); font-weight: 700; }

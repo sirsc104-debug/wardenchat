@@ -40,6 +40,8 @@ Pick one with the switch on the home screen. Rocket and Submarine each have thei
 | Medium | 20 s | 3 | 3 | ×1.5 | Mixed: jobs, superheroes, cheeses, landmarks, Pokémon… |
 | Hard | 12 s | 3 | 2 | ×2 | Mostly expert: constellations, bones, composers, knots… |
 
+The home screen has a small **💬 Warden Chat** button in the bottom-left corner that opens [Warden Chat](https://warden-chat.xsirsc.chatgpt.site/) (another site by the same author) in a new tab.
+
 Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the browser.
 
 ## Files
