@@ -14,7 +14,7 @@ const Challenge = (function () {
 
   // The check also covers the question bank, so a code made on an older or newer version of the
   // game (with different questions) is refused rather than quietly giving everyone different ones.
-  const bank = () => Object.values(Quiz.TOPIC).reduce((s, t) => s + t.id + t.entities.length, '');
+  const bank = () => Object.values(Quiz.TOPIC).reduce((s, t) => s + t.id + t.entities.length + '/' + t.entities.filter(e => e.years).length, '');
   function check(mode, len, seed) {
     let h = 2166136261;
     const s = `drill|${mode}|${len}|${seed}|${bank()}`;
