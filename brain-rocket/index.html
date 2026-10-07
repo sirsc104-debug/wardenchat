@@ -71,10 +71,14 @@
         <input id="answer" type="text" maxlength="40" spellcheck="false" autocapitalize="off" placeholder="Type your answer…" aria-label="Your answer">
         <button type="submit" class="go-btn" id="goBtn">🚀 LAUNCH</button>
       </form>
+      <div class="hint hidden" id="hint" aria-live="polite"></div>
       <div class="feedback" id="feedback" aria-live="polite"></div>
       <div class="reveal hidden" id="reveal"></div>
       <div class="card-bottom">
-        <button type="button" class="skip-btn" id="skipBtn">Skip ⏭ <span id="skipCount">3</span></button>
+        <div class="card-btns">
+          <button type="button" class="skip-btn" id="skipBtn">Skip ⏭ <span id="skipCount">3</span></button>
+          <button type="button" class="skip-btn hint-btn hidden" id="hintBtn">💡 Hint</button>
+        </div>
         <div class="legend">
           <span class="t1">Common 10</span>
           <span class="t2">Uncommon 25</span>

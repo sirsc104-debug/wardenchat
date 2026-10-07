@@ -72,7 +72,7 @@
     qCat: $('qCat'), qNum: $('qNum'), qText: $('qText'),
     timer: document.querySelector('.timer'), timerFill: $('timerFill'), timerSecs: $('timerSecs'), speed: $('speedBadge'),
     form: $('answerForm'), input: $('answer'), go: $('goBtn'), feedback: $('feedback'), reveal: $('reveal'),
-    skip: $('skipBtn'), skipCount: $('skipCount'), popups: $('popups'), banner: $('banner'), countdown: $('countdown'),
+    skip: $('skipBtn'), skipCount: $('skipCount'), hint: $('hint'), hintBtn: $('hintBtn'), popups: $('popups'), banner: $('banner'), countdown: $('countdown'),
     trackStops: $('trackStops'), trackFill: $('trackFill'), trackRocket: $('trackRocket')
   };
 
@@ -251,6 +251,12 @@
     el.go.disabled = false;
     el.skip.disabled = G.skips <= 0;
     el.skipCount.textContent = isDive() ? '∞' : G.skips;
+    // Hints are only on Owen (Easy).
+    G.hint = null;
+    el.hint.classList.add('hidden');
+    el.hintBtn.classList.toggle('hidden', G.mode.id !== 'easy');
+    el.hintBtn.disabled = false;
+    el.hintBtn.textContent = '💡 Hint';
     updateTimer();
     el.input.focus();
   }
@@ -347,7 +353,32 @@
     later(nextQuestion, 2400);
   }
 
+  // Each press shows one more letter of a Common answer: "B _ _ _ _ _", then "B E _ _ _ _"...
+  function hint() {
+    if (G.state !== 'question' || G.mode.id !== 'easy') return;
+    if (!G.hint) {
+      const low = Math.min(...G.q.answers.map(a => a.ent.tier));
+      const pool = G.q.answers.filter(a => a.ent.tier === low);
+      G.hint = { word: pool[Math.floor(Math.random() * pool.length)].v.raw, shown: 0 };
+    }
+    const letters = G.hint.word.replace(/[^A-Za-z]/g, '').length;
+    G.hint.shown = Math.min(G.hint.shown + 1, Math.max(1, Math.ceil(letters / 2)));
+    let n = 0;
+    const pattern = [...G.hint.word].map(ch => {
+      if (!/[A-Za-z]/.test(ch)) return ch === ' ' ? '\u00a0\u00a0' : ch;
+      return n++ < G.hint.shown ? ch.toUpperCase() : '_';
+    }).join(' ');
+    el.hint.innerHTML = `💡 Try: <span class="hint-word">${escapeHtml(pattern)}</span>`;
+    el.hint.classList.remove('hidden');
+    const done = G.hint.shown >= Math.max(1, Math.ceil(letters / 2));
+    el.hintBtn.textContent = done ? '💡 No more hints' : '💡 Another letter';
+    el.hintBtn.disabled = done;
+    Sound.click();
+    el.input.focus();
+  }
+
   function lockCard() {
+    el.hintBtn.disabled = true;
     el.input.disabled = true;
     el.go.disabled = true;
     el.skip.disabled = true;
@@ -608,6 +639,7 @@
   });
   el.form.addEventListener('submit', e => { e.preventDefault(); submit(); });
   el.skip.addEventListener('click', skip);
+  el.hintBtn.addEventListener('click', hint);
   $('btnPause').addEventListener('click', pause);
   $('btnResume').addEventListener('click', resume);
   $('btnQuit').addEventListener('click', showTitle);

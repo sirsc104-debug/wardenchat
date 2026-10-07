@@ -209,11 +209,3 @@ topic({ id: 'playground', name: 'Playground', noun: 'playground thing', icon: 'ð
 4: Witch's Hat, Cableway, Inclusive Swing, Talk Tube, Musical Chimes, Sensory Panel, Bouldering Rock, Log Pile, Pendulum Swing, Gyro Spinner, Cocoon
 5: Pea Gravel, Embankment Slide, Plank Bridge, Chain Ladder, Overhead Ladder, Horizontal Ladder
 ` });
-
-topic({ id: 'drinks', name: 'Drinks', noun: 'drink', icon: 'ðŸ¥¤', level: 1, q: 'Name a **drink** (no alcohol!).', list: `
-1: Water, Milk, Orange Juice, Apple Juice, Juice, Coke/Cola, Lemonade, Tea, Coffee, Hot Chocolate/Hot Cocoa/Cocoa, Smoothie, Milkshake
-2: Pepsi, Sprite, Fanta, Iced Tea, Chocolate Milk, Strawberry Milk, Squash/Cordial, Ginger Ale, Root Beer, Sparkling Water/Fizzy Water, Soda/Pop/Fizzy Drink, Energy Drink, Sports Drink, Gatorade, Lucozade, Red Bull, Coconut Water, Dr Pepper, 7 Up/Seven Up, Mountain Dew, Grape Juice, Cranberry Juice, Pineapple Juice, Tomato Juice, Bubble Tea/Boba/Boba Tea, Slushie/Slush/Slurpee, Iced Coffee, Frappuccino, Latte, Cappuccino, Green Tea
-3: Ribena, Irn Bru, Tango, Vimto, Capri Sun, Kool-Aid/Kool Aid, Snapple, Arizona, Tonic Water, Soda Water/Club Soda, Cream Soda, Ginger Beer, Dandelion and Burdock, Horchata, Lassi, Mango Lassi, Kombucha, Matcha, Chai, Herbal Tea, Peppermint Tea, Chamomile Tea, Rooibos, Oat Milk, Almond Milk, Soy Milk, Buttermilk, Eggnog, Apple Cider/Cider, Limeade, Agua Fresca, Mocktail, Shirley Temple, Arnold Palmer, Mulled Apple Juice, Espresso, Americano, Mocha, Ovaltine, Horlicks, Milo, Bovril, Yakult, Vitamin Water
-4: Tamarind Juice, Sugarcane Juice, Jamaica/Agua de Jamaica/Hibiscus Tea, Atole, Champurrado, Tejuino, Chicha Morada, Mate/Yerba Mate, Guarana/Guarana Antarctica, Inca Kola, Ayran, Doogh, Kefir, Salep, Sahlab, Sikhye, Barley Tea, Genmaicha, Hojicha, Thai Iced Tea, Teh Tarik, Milo Dinosaur, Calamansi Juice, Sarsaparilla, Birch Beer, Moxie, Tizer, Shloer, Elderflower Cordial/Elderflower, Sherbet, Rose Milk, Badam Milk, Jigarthanda, Nimbu Pani, Aam Panna, Jaljeera
-5: Kvass, Tepache, Switchel, Shrub, Posset, Sbiten, Mauby, Sorrel, Kompot, Uzvar, Sea Moss Drink, Boza, Sobia, Sharbat, Falooda, Bandrek, Wedang Jahe
-` });

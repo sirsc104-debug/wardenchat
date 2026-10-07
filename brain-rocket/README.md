@@ -15,7 +15,7 @@ Pick one with the switch on the home screen; each has its own Owen (Easy), Mediu
 
 ## How it plays
 
-- **160 question topics, in three styles.**
+- **159 question topics, in three styles.**
   - *Topic questions* (most of the game): *What's a breed of dog?*, *Name a type of home security system*, *Name a job that involves operating a vehicle*, *Name a country in Africa*.
   - *Letter questions* (about a quarter): *Name a breed of dog that starts with B and has an N in it.*
   - *Year questions* (rare on Owen, about a third of Hard): *Name an animated movie released between 1990 and 2005*, *Name a US president in office at any time between 1880 and 1890*. They use movies, video games, consoles, inventions, TV shows, books, bands, toys, board games, Olympic host cities and US presidents. A wrong-year answer tells you its year.
@@ -25,6 +25,7 @@ Pick one with the switch on the home screen; each has its own Owen (Easy), Mediu
 - **Speed multiplier:** answer in the first quarter of the timer for ×2, in the first half for ×1.5.
 - **Streak multiplier:** each correct answer in a row adds ×0.25, up to ×3. Your rocket's flame changes colour at streaks of 3, 5 and 8.
 - **Deepest cut:** give one of the rarest possible answers to a question (Rare or better) for an extra ×1.5.
+- **Hints on Owen (Easy).** The 💡 Hint button shows the first letter of a Common answer with blanks for the rest (P _ _ _ _); press again for another letter, up to half the word.
 - Wrong guesses are free. Running out of time burns a fuel cell; run out of fuel cells and the game ends. Skips are limited and reset your streak.
 - Reusing an answer you already gave this run scores half.
 - Answers are forgiving: small typos ("Chihuahuha"), plurals ("touchdowns"), extra words ("golden retriever dog", "oak tree") and answers inside a phrase ("a big golden retriever") all count.

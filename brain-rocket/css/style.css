@@ -365,3 +365,11 @@ button { font-family: inherit; cursor: pointer; }
 .ultra-pick .up-name { font-size: 17px; min-width: 60px; }
 .ultra-pick .up-sub { font-size: 11px; }
 .ultra-pick .mode-best:empty { display: none; }
+
+/* ---------- Hints (Owen / Easy) ---------- */
+.card-btns { display: flex; gap: 8px; }
+.hint-btn { color: #ffe27a; border-color: rgba(255,226,122,0.45); }
+.hint-btn:hover:not(:disabled) { background: rgba(255,226,122,0.15); }
+.hint { margin-top: 12px; font-size: 20px; color: #ffe27a; font-weight: 600; animation: fade-up 0.3s ease; }
+.hint-word { font-size: 26px; letter-spacing: 0.06em; color: #fff; white-space: pre-wrap; }
+.skip-btn { white-space: nowrap; }
