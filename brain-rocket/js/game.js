@@ -3,14 +3,14 @@
 
 (function () {
   const MODES = {
-    easy:   { id: 'easy',   label: 'Owen (Easy)', time: 30, lives: 5, mult: 1,   skips: 5, fast: [6, 12] },
-    medium: { id: 'medium', label: 'Medium',      time: 20, lives: 3, mult: 1.5, skips: 3, fast: [5, 10] },
-    hard:   { id: 'hard',   label: 'Hard',        time: 12, lives: 3, mult: 2,   skips: 2, fast: [4, 8] },
+    easy:   { id: 'easy',   label: 'Owen (Easy)', time: 30, lives: 5, mult: 1,   skips: 5, fast: [6, 12], tank: 30 },
+    medium: { id: 'medium', label: 'Medium',      time: 20, lives: 3, mult: 1.5, skips: 3, fast: [5, 10], tank: 20 },
+    hard:   { id: 'hard',   label: 'Hard',        time: 12, lives: 3, mult: 2,   skips: 2, fast: [4, 8], tank: 12 },
     // Ultra: Hard questions, but you slide back (rocket falls, sub floats up) while each question is up.
     // Ultra comes with a choice of question difficulty; everything else is the same.
-    'ultra-easy':   { id: 'ultra-easy',   label: 'Ultra Hard · easy questions',   tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'easy',   drift: true },
-    'ultra-medium': { id: 'ultra-medium', label: 'Ultra Hard · medium questions', tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'medium', drift: true },
-    ultra:          { id: 'ultra',        label: 'Ultra Hard · hard questions',   tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'hard',   drift: true }
+    'ultra-easy':   { id: 'ultra-easy',   label: 'Ultra Hard · easy questions',   tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'easy',   drift: true, tank: 7 },
+    'ultra-medium': { id: 'ultra-medium', label: 'Ultra Hard · medium questions', tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'medium', drift: true, tank: 7 },
+    ultra:          { id: 'ultra',        label: 'Ultra Hard · hard questions',   tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'hard',   drift: true, tank: 7 }
   };
   const DIVE_LENGTHS = [30, 60, 120];
   let diveLen = 60;
@@ -38,6 +38,7 @@
       tagline: 'Answer questions to fuel your rocket. Fly from the launch pad to the Moon, Mars… and beyond!',
       fast: '<b>⚡ Be fast.</b> Answer in the first quarter of the timer for ×2, first half for ×1.5.',
       rule: '<b>⛽ Don\'t run dry.</b> Running out of time burns a fuel cell. Wrong guesses are free.',
+      endless: '∞ Beyond everything!',
       again: '🚀 Fly again', overTitle: 'Out of fuel!', crashTitle: '💥 Crashed!', name: () => 'Rocket',
       turning: 'Your rocket is turning back…',
       crashLine: p => `Your rocket nose-dived from <b>${p}</b> into the Earth. Score lost!`,
@@ -55,6 +56,7 @@
       tagline: 'You have {n} seconds. Every answer drives your submarine deeper. How far down can you get?',
       fast: '<b>⚡ Be fast.</b> Answer each question within a few seconds for ×2 or ×1.5.',
       rule: '<b>⏱️ Beat the clock.</b> One {n}-second dive. No lives to lose and unlimited skips.',
+      leftText: 's of dive left', endless: '∞ Deeper than anyone!', outText: '⏱️ Time\'s up! Surfacing…',
       again: '🌊 Dive again', overTitle: "Time's up!", crashTitle: '🫧 Back to the surface!', name: n => `Submarine (${n}s)`,
       turning: 'Your sub is turning back…',
       crashLine: p => `Your sub shot back up from <b>${p}</b>. Score lost!`,
@@ -74,11 +76,33 @@
     reached: 'YOU DRILLED TO', notYet: 'Not drilled yet',
     tagline: 'Drill to the centre of the Earth! Share a code so your friends get the exact same questions, then compare scores.',
     rule: '<b>🎟️ Same code, same questions.</b> Everyone with the code gets the same questions in the same order. Unlimited skips.',
-    timeLabel: 'Drill time', again: '⛏️ Drill again', crashTitle: '💥 Blasted out!', name: n => `Drill Challenge (${n}s)`,
+    timeLabel: 'Drill time', leftText: 's left', outText: '⏱️ Time\'s up!', again: '⛏️ Drill again', crashTitle: '💥 Blasted out!', name: n => `Drill Challenge (${n}s)`,
     turning: 'Your drill is turning back…',
     crashLine: p => `Your drill spun round and shot out of the ground from <b>${p}</b>. Score lost!`,
     reachedLine: (p, dist) => `You drilled down to <b>${p}</b> — ${dist} deep.`
   };
+  // World Race: always driving, burning fuel. Answers refill the tank; overfilling it fires a rocket booster.
+  TYPES.race = {
+    ...TYPES.sub,
+    id: 'race', scene: RaceScene, stops: RACE_STOPS, fmt: km => Math.round(km).toLocaleString() + ' km', from: 'driven', distLabel: 'Distance',
+    marker: '🏎️', down: false, go: 'GO!', firstTag: '🏁 GO!', reached: 'YOU REACHED', notYet: 'Not raced yet',
+    tagline: 'Race around the world on one tank! Answer to refuel. Overfill the tank and a rocket booster kicks in.',
+    fast: '<b>⚡ Be fast.</b> Answer each question within a few seconds for ×2 or ×1.5.',
+    rule: '<b>⛽ Keep the tank full.</b> You burn fuel every second. Answers refill it; run dry and the race is over.',
+    timeLabel: 'Fuel', leftText: 's of fuel left', outText: '⛽ Out of fuel!', endless: '🏁 Around the world! Keep going…',
+    again: '🏎️ Race again', overTitle: 'Out of fuel!', crashTitle: '💥 Wrong way!', name: () => 'World Race',
+    turning: 'Your car is turning around…',
+    crashLine: p => `Your car spun round near <b>${p}</b> and raced the wrong way until it crashed. Score lost!`,
+    reachedLine: (p, dist) => `You drove to <b>${p}</b> — ${dist} on the road.`,
+    info: {
+      easy: '30-second fuel tank<br>everyday topics',
+      medium: '20-second fuel tank<br>mixed topics',
+      hard: '12-second fuel tank<br>expert topics',
+      ultra: '7-second fuel tank!<br>pick question difficulty'
+    }
+  };
+  const TYPE_ORDER = ['rocket', 'sub', 'drill', 'race'];
+  const CRUISE_PTS = 6;   // World Race: points a second just for driving
   let J = TYPES.rocket;   // the current way to play
   let S = J.scene;        // its scene
   try { const t = localStorage.getItem('brainRocket.type'); if (TYPES[t]) { J = TYPES[t]; S = J.scene; } } catch (e) { /* ignore */ }
@@ -103,6 +127,8 @@
     Scene.resize(s);
     SubScene.resize(s);
     DrillScene.resize(s);
+    RaceScene.resize(s);
+    const old = $('sceneOld'); if (old) { old.width = $('scene').width; old.height = $('scene').height; }
   }
 
   // ---- Saved bests ------------------------------------------------------
@@ -110,7 +136,7 @@
   try { bests = JSON.parse(localStorage.getItem('brainRocket.bests') || '{}') || {}; } catch (e) { bests = {}; }
   function saveBests() { try { localStorage.setItem('brainRocket.bests', JSON.stringify(bests)); } catch (e) { /* ignore */ } }
   // Rocket: 'easy'. Submarine: 'sub:easy' for 60-second dives (the original length), 'sub:easy:30' otherwise.
-  const bestKey = (type, mode, len) => (type === 'rocket' ? mode : len === 60 ? `${type}:${mode}` : `${type}:${mode}:${len}`);
+  const bestKey = (type, mode, len) => (type === 'rocket' ? mode : type === 'race' ? `race:${mode}` : len === 60 ? `${type}:${mode}` : `${type}:${mode}:${len}`);
 
   // ---- Distance helpers -------------------------------------------------
   function kmAt(alt) {
@@ -152,10 +178,13 @@
   const clearLater = () => { G.timers.forEach(clearTimeout); G.timers = []; };
   // Submarine and Drill Challenge both run on one clock with unlimited skips.
   const isDive = () => G.type !== 'rocket';
+  // When the clock turns red and starts ticking: 10s for a dive, a third of the tank for a race.
+  const lowAt = () => (G.type === 'race' ? Math.min(5, Math.ceil(G.diveTime / 3)) : 10);
 
   // How fast Ultra slides you back, in points per second. It gets harsher the further you've gone.
   // A parachute (Rocket only, inside the atmosphere) cuts that to 30%.
   const CHUTE_SLOW = 0.7;
+  const drifts = () => !!(G.mode && G.mode.drift) && G.type !== 'race';
   const driftRate = () => (12 + 0.03 * G.score) * (1 - CHUTE_SLOW * (S === Scene ? Scene.chute : 0));
 
   const streakMult = n => Math.min(5, 1 + 0.25 * Math.max(0, n - 1));
@@ -171,9 +200,14 @@
   }
 
   // ---- Title screen -----------------------------------------------------
-  function setType(id) {
+  // Switching tabs slides the old world out and the new one in, in step with the tab highlight.
+  function setType(id, animate) {
+    const from = TYPE_ORDER.indexOf(J.id), to = TYPE_ORDER.indexOf(id);
     J = TYPES[id];
-    if (S !== J.scene) { S = J.scene; S.reset(); }
+    if (S !== J.scene) {
+      if (animate && from !== to) slideScenes(to > from ? 1 : -1);
+      S = J.scene; S.reset();
+    }
     try { localStorage.setItem('brainRocket.type', id); } catch (e) { /* ignore */ }
     document.querySelectorAll('.type-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.type === id);
@@ -182,7 +216,9 @@
     const n = s => s.replace('{n}', diveLen);
     $('tagline').textContent = n(J.tagline);
     $('ruleLast').innerHTML = n(J.rule);
-    $('diveLen').classList.toggle('hidden', id !== 'sub');
+    $('diveLen').classList.toggle('open', id === 'sub');
+    $('diveLen').setAttribute('aria-hidden', id === 'sub' ? 'false' : 'true');
+    document.querySelectorAll('#diveLen button').forEach(b => { b.tabIndex = id === 'sub' ? 0 : -1; });
     document.querySelectorAll('#diveLen button').forEach(b => {
       const on = +b.dataset.len === diveLen;
       b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -197,8 +233,36 @@
       else b.textContent = r ? `Best: ${r.score.toLocaleString()} · ${r.icon} ${r.place}` : J.notYet;
     });
     el.title.dataset.type = id;
+    moveGlider(animate);
   }
 
+  // The yellow highlight behind the active tab slides from tab to tab.
+  function moveGlider(animate) {
+    const glider = $('typeGlider'), btn = document.querySelector('.type-btn.active');
+    if (!glider || !btn || !btn.offsetWidth) return;
+    glider.classList.toggle('instant', !animate);
+    glider.style.width = btn.offsetWidth + 'px';
+    glider.style.transform = `translateX(${btn.offsetLeft}px)`;
+    // the Dive length menu hangs under the Submarine tab
+    const sub = document.querySelector('.type-btn[data-type="sub"]'), menu = $('diveLen');
+    menu.style.left = (sub.offsetLeft + sub.offsetWidth / 2) + 'px';
+  }
+
+  function slideScenes(dir) {
+    const main = $('scene'), old = $('sceneOld');
+    old.width = main.width; old.height = main.height;
+    old.getContext('2d').drawImage(main, 0, 0);
+    for (const c of [main, old]) { c.classList.remove('sliding'); }
+    old.style.transform = 'translateX(0)';
+    main.style.transform = `translateX(${dir * 100}%)`;
+    old.classList.remove('hidden');
+    void main.offsetWidth;
+    for (const c of [main, old]) c.classList.add('sliding');
+    old.style.transform = `translateX(${-dir * 100}%)`;
+    main.style.transform = 'translateX(0)';
+    clearTimeout(slideScenes.t);
+    slideScenes.t = setTimeout(() => { old.classList.add('hidden'); main.classList.remove('sliding'); old.classList.remove('sliding'); }, 600);
+  }
   function showTitle() {
     clearLater();
     G.state = 'title';
@@ -218,14 +282,15 @@
     clearLater();
     const ch = challenge || null;
     if (ch) setType('drill');
-    const len = ch ? ch.len : diveLen;   // a challenge sets its own time; the Submarine choice is left alone
     const mode = MODES[modeId];
+    // a challenge sets its own time (the Submarine choice is left alone); a race uses the mode's fuel tank
+    const len = ch ? ch.len : J.id === 'race' ? mode.tank : diveLen;
     const dive = J.id !== 'rocket';
     Object.assign(G, {
       state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive ? Infinity : mode.lives, streak: 0, bestStreak: 0,
       qNum: 0, skips: dive ? Infinity : mode.skips, used: new Set(), seen: ch ? Quiz.freshRun() : Quiz.newRun(), q: null,
       challenge: ch, rng: ch ? Challenge.rng(ch.seed) : Math.random, correct: 0, bestAnswer: null,
-      launched: false, peak: 0, reached: new Set(), crashed: false, boomed: false, diveTime: len, diveLeft: len, qElapsed: 0, lastTick: len
+      launched: false, peak: 0, reached: new Set(), crashed: false, boomed: false, boost: null, diveTime: len, diveLeft: len, qElapsed: 0, lastTick: len
     });
     S.reset();
     S.setStreak(0);
@@ -344,6 +409,7 @@
     if (deep > 1) tags.push(['🤓 ×1.5 Deepest cut', '#c77dff']);
     if (G.mode.mult > 1) tags.push([`×${G.mode.mult} ${G.mode.tag || G.mode.label}`, '#ffffff']);
     if (repeat < 1) tags.push(['♻️ ×0.5 Repeat', '#b9c3e6']);
+    if (G.type === 'race') refuel(pts, tags);
     if (hints) tags.push([`💡 ×${+hm.toFixed(2)} ${hints} hint${hints > 1 ? 's' : ''}`, '#ffe08a']);
     popup(`+${pts.toLocaleString()}`, Quiz.TIER_NAMES[tier], tier, tags);
 
@@ -357,6 +423,21 @@
     G.state = 'reveal';
     // The dive clock keeps running, so Submarine moves on quickly.
     later(nextQuestion, isDive() ? (tier >= 4 ? 1100 : 800) : (tier >= 4 ? 2300 : 1900));
+  }
+
+  // World Race: points become fuel. Whatever doesn't fit in the tank fires the rocket booster,
+  // which adds bonus distance over a few seconds; the more it overflowed, the bigger the boost.
+  function refuel(pts, tags) {
+    const gain = pts / (G.mode.mult * 4);
+    const room = G.diveTime - G.diveLeft;
+    if (gain <= room) { G.diveLeft += gain; tags.push([`⛽ +${gain.toFixed(1)}s fuel`, '#7ddc6f']); return; }
+    const over = gain - room;
+    G.diveLeft = G.diveTime;
+    const dur = Math.min(6, 1.2 + over * 0.12);
+    const bonus = Math.round(over * G.mode.mult * 2);
+    G.boost = { left: dur, rate: bonus / dur };
+    S.setBoost(Math.min(1.5, 0.5 + over / 20));
+    tags.push(['⛽ Tank full!', '#7ddc6f'], [`🚀 Booster +${bonus.toLocaleString()}`, '#ff9a3c']);
   }
 
   function timeout() {
@@ -465,7 +546,7 @@
     if (!crashed) { S.die(); Sound.gameOver(); }
     if (isDive() && !crashed) {
       el.feedback.className = 'feedback';
-      el.feedback.textContent = J.id === 'sub' ? '⏱️ Time\'s up! Surfacing…' : '⏱️ Time\'s up!';
+      el.feedback.textContent = J.outText;
     }
     later(() => {
       G.state = 'over';
@@ -491,7 +572,7 @@
       $('overReached').innerHTML = crashed ? J.crashLine(`${cp.icon} ${cp.name}`) : J.reachedLine(`${place.icon} ${place.name}`, dist);
       const ba = G.bestAnswer;
       $('overStats').innerHTML = `
-        <div class="stat"><div class="s-label">${G.mode.drift && !isDive() ? 'Highest score' : 'Score'}</div><div class="s-value" style="color:var(--accent)">${result.toLocaleString()}${crashed && G.crashedFrom ? ` <s class="lost">${G.crashedFrom.toLocaleString()}</s>` : ''}</div></div>
+        <div class="stat"><div class="s-label">${drifts() && !isDive() ? 'Highest score' : 'Score'}</div><div class="s-value" style="color:var(--accent)">${result.toLocaleString()}${crashed && G.crashedFrom ? ` <s class="lost">${G.crashedFrom.toLocaleString()}</s>` : ''}</div></div>
         <div class="stat"><div class="s-label">Correct answers</div><div class="s-value">${G.correct}</div></div>
         <div class="stat"><div class="s-label">Best streak</div><div class="s-value">${G.bestStreak} 🔥</div></div>
         <div class="stat wide"><div class="s-label">Best answer</div><div class="s-value">${ba ? `<span class="tier-${ba.tier}">${escapeHtml(ba.text)}</span> · ${Quiz.TIER_NAMES[ba.tier]} · +${ba.pts.toLocaleString()}` : '—'}</div></div>
@@ -531,7 +612,7 @@
 
   function renderDiveClock() {
     el.time.textContent = Math.max(0, Math.ceil(G.diveLeft));
-    el.timePill.classList.toggle('low', G.diveLeft <= 10);
+    el.timePill.classList.toggle('low', G.diveLeft <= lowAt());
   }
 
   function renderStreak() {
@@ -584,18 +665,18 @@
       }
     }
     const np = nextPlace(G.score);
-    const drift = G.mode && G.mode.drift && G.state === 'question' && G.score > 0;
+    const drift = drifts() && G.state === 'question' && G.score > 0;
     el.alt.parentElement.classList.toggle('drifting', !!drift);
     if (drift) { el.next.textContent = `${J.down ? '⬆️ Floating up' : Scene.chute > 0.5 && S === Scene ? '🪂 Parachute!' : '⬇️ Falling'} ${Math.round(driftRate()).toLocaleString()} pts/s — answer!`; return; }
-    el.next.textContent = np ? `Next stop: ${np.icon} ${np.name} · ${Math.ceil(np.pts - G.score).toLocaleString()} pts` : (J.down ? '∞ Deeper than anyone!' : '∞ Beyond everything!');
+    el.next.textContent = np ? `Next stop: ${np.icon} ${np.name} · ${Math.ceil(np.pts - G.score).toLocaleString()} pts` : J.endless;
   }
 
   function updateTimer() {
     const sp = speedMult();
     if (isDive()) {
       el.timerFill.style.width = (Math.max(0, G.diveLeft / G.diveTime) * 100) + '%';
-      el.timerSecs.textContent = `${Math.max(0, Math.ceil(G.diveLeft))}s of dive left`;
-      el.timer.classList.toggle('low', G.diveLeft <= 10);
+      el.timerSecs.textContent = `${Math.max(0, Math.ceil(G.diveLeft))}${J.leftText}`;
+      el.timer.classList.toggle('low', G.diveLeft <= lowAt());
     } else {
       el.timerFill.style.width = (Math.max(0, G.timeLeft / G.mode.time) * 100) + '%';
       el.timerSecs.textContent = Math.ceil(G.timeLeft) + 's';
@@ -646,7 +727,7 @@
     if (G.state !== 'paused') S.update(dt);
     S.draw();
     if (G.state !== 'title') updateHud(dt);
-    if (G.mode && G.mode.drift && G.state === 'question' && G.score > 0) {
+    if (drifts() && G.state === 'question' && G.score > 0) {
       G.score = Math.max(0, G.score - driftRate() * dt);
       S.setTarget(altFor(G.score));
     }
@@ -657,8 +738,15 @@
       // One clock for the whole dive. It runs during the short reveals too.
       G.diveLeft -= dt;
       if (G.state === 'question') G.qElapsed += dt;
+      if (G.type === 'race') {
+        // always driving: a little distance every second, more while the booster burns
+        let add = CRUISE_PTS * dt;
+        if (G.boost) { const t = Math.min(dt, G.boost.left); add += G.boost.rate * t; G.boost.left -= dt; if (G.boost.left <= 0) G.boost = null; }
+        G.score += add; G.peak = Math.max(G.peak, G.score);
+        S.setTarget(altFor(G.score));
+      }
       const s = Math.ceil(G.diveLeft);
-      if (s < G.lastTick) { G.lastTick = s; if (s <= 10 && s > 0) Sound.tick(s <= 5); }
+      if (s < G.lastTick) { G.lastTick = s; if (s <= lowAt() && s > 0) Sound.tick(s <= lowAt() / 2); }
       renderDiveClock();
       updateTimer();
       if (G.diveLeft <= 0) { G.diveLeft = 0; renderDiveClock(); updateTimer(); gameOver(); }
@@ -733,14 +821,18 @@
   Scene.init($('scene'));
   SubScene.init($('scene'));
   DrillScene.init($('scene'));
+  RaceScene.init($('scene'));
   Scene.onMilestone(m => { if (S === Scene) milestone(m); });
   SubScene.onMilestone(m => { if (S === SubScene) milestone(m); });
   DrillScene.onMilestone(m => { if (S === DrillScene) milestone(m); });
+  RaceScene.onMilestone(m => { if (S === RaceScene) milestone(m); });
   fit();
   window.addEventListener('resize', fit);
   document.addEventListener('fullscreenchange', fit);
 
-  document.querySelectorAll('.type-btn').forEach(b => b.addEventListener('click', () => { Sound.click(); setType(b.dataset.type); }));
+  document.querySelectorAll('.type-btn').forEach(b => b.addEventListener('click', () => { if (b.dataset.type === J.id) return; Sound.click(); setType(b.dataset.type, true); }));
+  window.addEventListener('resize', () => moveGlider(false));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => moveGlider(false));
   document.querySelectorAll('#diveLen button').forEach(b => b.addEventListener('click', () => {
     Sound.click();
     diveLen = +b.dataset.len;

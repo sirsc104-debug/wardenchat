@@ -30,7 +30,11 @@ button { font-family: inherit; cursor: pointer; }
   border-radius: 6px;
   user-select: none;
 }
-#scene { position: absolute; inset: 0; width: 1600px; height: 900px; display: block; }
+#scene, #sceneOld { position: absolute; inset: 0; width: 1600px; height: 900px; display: block; }
+#sceneOld.hidden { display: none; }
+/* tab switch: the old world slides out as the new one slides in, timed with the tab highlight */
+:root { --slide: 0.55s cubic-bezier(.65,0,.35,1); }
+#scene.sliding, #sceneOld.sliding { transition: transform var(--slide); }
 
 .hidden { display: none !important; }
 
@@ -433,3 +437,27 @@ button { font-family: inherit; cursor: pointer; }
 .promo-text b { font-size: 18px; }
 .promo-text small { font-size: 12px; color: var(--muted); font-weight: 600; }
 .promo-arrow { font-size: 16px; color: var(--cool); font-weight: 700; }
+
+/* ---- Title layout: the logo, tagline and tab bar sit in the same place in every mode ---- */
+#title { align-items: flex-start; padding-top: 48px; }
+#title .tagline { min-height: 62px; display: flex; align-items: center; justify-content: center; margin: 10px auto 12px; }
+.type-toggle { position: relative; display: inline-grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 0; isolation: isolate; }
+.type-toggle .type-btn { position: relative; z-index: 1; padding: 8px 10px; column-gap: 7px; background: transparent !important; transform: none !important; transition: color 0.3s; }
+.type-toggle .type-btn.active { color: #3b2300; }
+.type-glider {
+  position: absolute; left: 0; top: 6px; bottom: 6px; z-index: 0; border-radius: 18px;
+  background: linear-gradient(#ffe27a, #ffb52e); box-shadow: 0 4px 14px rgba(255,180,40,0.45);
+  transition: transform var(--slide), width var(--slide);
+}
+.type-glider.instant { transition: none; }
+.type-extra { position: relative; height: 60px; }
+.type-extra .dive-len {
+  position: absolute; top: 6px; transform: translate(-50%, -14px); opacity: 0; pointer-events: none;
+  flex-direction: column; padding: 6px 12px 8px; border: 2px solid var(--panel-edge); border-radius: 18px; background: var(--panel);
+  transition: transform 0.35s cubic-bezier(.2,1.3,.4,1), opacity 0.25s;
+}
+.type-extra .dive-len::before { content: ''; position: absolute; left: 50%; top: -9px; margin-left: -8px; border: 8px solid transparent; border-top: 0; border-bottom-color: var(--panel-edge); }
+.type-extra .dive-len.open { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; transition-delay: 0.25s; }
+#title[data-type="race"] .logo span:first-child { text-shadow: 0 8px 0 #3a3d46, 0 0 40px rgba(255,210,63,0.6); }
+.type-toggle .type-name { font-size: 20px; }
+.type-toggle .type-icon { font-size: 27px; }
