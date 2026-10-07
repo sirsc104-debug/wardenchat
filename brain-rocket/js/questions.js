@@ -190,7 +190,8 @@ const Quiz = (function () {
     let pool = ALL.filter(t => W[t.level] > 0 && (!filter || filter(t)));
     let fresh = pool.filter(t => !used.has(t.id));
     if (!fresh.length) { pool.forEach(t => used.delete(t.id)); fresh = pool; }
-    return weighted(fresh.map(t => [t, W[t.level]]), rng);
+    // A topic can set `weight` to come up more or less often than others at its level.
+    return weighted(fresh.map(t => [t, W[t.level] * (t.weight ?? 1)]), rng);
   }
 
   function letterQuestion(mode, seen, rng) {

@@ -1,9 +1,10 @@
 /* Brain Rocket — Daniel Hand High School (DHHS, Madison CT) topics, from the 2026–27 student handbook.
-   Level 1 so they come up in every mode. `letters: true` lets a smaller topic also get letter questions
+   Level 1 so they come up in every mode, but at a tenth of the usual rate. `letters: true` lets a smaller topic also get letter questions
    ("Name a room or place at DHHS that starts with C"). Nicknames go in as aliases after a slash. */
 'use strict';
 
-const DHHS = { name: 'DHHS', icon: '🐯', level: 1 };
+// weight 0.075: DHHS questions come up 90% less often than a normal topic.
+const DHHS = { name: 'DHHS', icon: '🐯', level: 1, weight: 0.075 };
 
 topic({ ...DHHS, id: 'dhhs-depts', noun: 'department at DHHS', letters: true, q: 'Name a **department at DHHS**.', strip: ['department', 'dept'], list: `
 1: Math/Maths/Mathematics, English/ELA, Science
