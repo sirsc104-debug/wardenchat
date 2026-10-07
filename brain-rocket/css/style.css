@@ -339,3 +339,29 @@ button { font-family: inherit; cursor: pointer; }
 .alt-pill.drifting { border-color: var(--hot); box-shadow: 0 0 22px rgba(255,93,115,0.55); }
 .alt-pill.drifting .pill-sub { color: #ffb3bf; font-weight: 600; }
 #title { padding-right: 36px; }
+
+/* ---------- Ultra question difficulty ---------- */
+.mode-ultra { cursor: pointer; }
+.mode-ultra:focus-visible { outline: 3px solid #ff9ad5; outline-offset: 3px; }
+.ultra-hint { font-size: 13px; font-weight: 600; margin-top: 6px; color: #ffd6f0; }
+.ultra-picks { display: none; flex-direction: column; gap: 6px; width: 100%; margin-top: 6px; }
+.mode-ultra.open { transform: translateY(-8px) scale(1.04); }
+.mode-ultra.open .mode-info, .mode-ultra.open .ultra-hint { display: none; }
+.mode-ultra.open .ultra-picks { display: flex; animation: fade-up 0.25s ease; }
+.ultra-pick {
+  display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 8px; align-items: center; text-align: left;
+  padding: 6px 10px; border-radius: 14px; border: 2px solid rgba(255,255,255,0.35); background: rgba(0,0,0,0.25); color: #fff;
+  transition: background 0.15s, transform 0.15s;
+}
+.ultra-pick:hover, .ultra-pick:focus-visible { background: rgba(255,120,200,0.45); transform: scale(1.03); outline: none; }
+.ultra-pick .up-name { grid-row: span 2; font-size: 20px; font-weight: 700; min-width: 66px; }
+.ultra-pick .up-sub { font-size: 12px; opacity: 0.9; }
+.ultra-pick .mode-best { margin: 0; min-height: 0; font-size: 12px; }
+
+.mode-ultra.open .mode-icon { font-size: 40px; }
+.mode-ultra.open .mode-name { font-size: 28px; }
+.ultra-picks { gap: 5px; }
+.ultra-pick { padding: 4px 9px; grid-template-columns: auto 1fr; }
+.ultra-pick .up-name { font-size: 17px; min-width: 60px; }
+.ultra-pick .up-sub { font-size: 11px; }
+.ultra-pick .mode-best:empty { display: none; }

@@ -7,7 +7,10 @@
     medium: { id: 'medium', label: 'Medium',      time: 20, lives: 3, mult: 1.5, skips: 3, fast: [5, 10] },
     hard:   { id: 'hard',   label: 'Hard',        time: 12, lives: 3, mult: 2,   skips: 2, fast: [4, 8] },
     // Ultra: Hard questions, but you slide back (rocket falls, sub floats up) while each question is up.
-    ultra:  { id: 'ultra',  label: 'Ultra Hard',  time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'hard', drift: true }
+    // Ultra comes with a choice of question difficulty; everything else is the same.
+    'ultra-easy':   { id: 'ultra-easy',   label: 'Ultra Hard · easy questions',   tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'easy',   drift: true },
+    'ultra-medium': { id: 'ultra-medium', label: 'Ultra Hard · medium questions', tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'medium', drift: true },
+    ultra:          { id: 'ultra',        label: 'Ultra Hard · hard questions',   tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'hard',   drift: true }
   };
   const DIVE_LENGTHS = [30, 60, 120];
   let diveLen = 60;
@@ -162,7 +165,8 @@
     document.querySelectorAll('.mode-card').forEach(c => { c.querySelector('.mode-info').innerHTML = n(J.info[c.dataset.mode]); });
     document.querySelectorAll('[data-best]').forEach(b => {
       const r = bests[bestKey(id, b.dataset.best, diveLen)];
-      b.textContent = r ? `Best: ${r.score.toLocaleString()} · ${r.icon} ${r.place}` : J.notYet;
+      if (b.closest('.ultra-pick')) b.textContent = r ? `Best ${r.score.toLocaleString()}` : '';
+      else b.textContent = r ? `Best: ${r.score.toLocaleString()} · ${r.icon} ${r.place}` : J.notYet;
     });
     el.title.dataset.type = id;
   }
@@ -174,6 +178,8 @@
     [el.hud, el.track, el.card, el.pause, el.over, el.countdown].forEach(e => e.classList.add('hidden'));
     el.card.classList.remove('blur');
     el.title.classList.remove('hidden');
+    const u = document.querySelector('.mode-ultra');
+    u.classList.remove('open'); u.setAttribute('aria-expanded', 'false');
     setType(J.id);
   }
 
@@ -291,7 +297,7 @@
     if (sp > 1) tags.push([sp === 2 ? '⚡ ×2 Lightning' : '⚡ ×1.5 Quick', sp === 2 ? '#ffd23f' : '#4fd1ff']);
     if (stm > 1) tags.push([`🔥 ×${stm.toFixed(2).replace(/0$/, '')} Streak`, '#ff9a3c']);
     if (deep > 1) tags.push(['🤓 ×1.5 Deepest cut', '#c77dff']);
-    if (G.mode.mult > 1) tags.push([`×${G.mode.mult} ${G.mode.label}`, '#ffffff']);
+    if (G.mode.mult > 1) tags.push([`×${G.mode.mult} ${G.mode.tag || G.mode.label}`, '#ffffff']);
     if (repeat < 1) tags.push(['♻️ ×0.5 Repeat', '#b9c3e6']);
     popup(`+${pts.toLocaleString()}`, Quiz.TIER_NAMES[tier], tier, tags);
 
@@ -580,7 +586,26 @@
     try { localStorage.setItem('brainRocket.dive', diveLen); } catch (e) { /* ignore */ }
     setType('sub');
   }));
-  document.querySelectorAll('.mode-card').forEach(b => b.addEventListener('click', () => { Sound.click(); start(b.dataset.mode); }));
+  document.querySelectorAll('.mode-card:not(.mode-ultra)').forEach(b => b.addEventListener('click', () => { Sound.click(); start(b.dataset.mode); }));
+  // The Ultra card opens to show its three question difficulties.
+  const ultra = document.querySelector('.mode-ultra');
+  const toggleUltra = open => {
+    ultra.classList.toggle('open', open);
+    ultra.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+  ultra.addEventListener('click', e => {
+    const pick = e.target.closest('.ultra-pick');
+    Sound.click();
+    if (pick) start(pick.dataset.mode);
+    else toggleUltra(!ultra.classList.contains('open'));
+  });
+  ultra.addEventListener('keydown', e => {
+    if (e.target === ultra && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      toggleUltra(!ultra.classList.contains('open'));
+      if (ultra.classList.contains('open')) ultra.querySelector('.ultra-pick').focus();
+    }
+  });
   el.form.addEventListener('submit', e => { e.preventDefault(); submit(); });
   el.skip.addEventListener('click', skip);
   $('btnPause').addEventListener('click', pause);

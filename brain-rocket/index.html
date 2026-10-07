@@ -128,13 +128,18 @@
             <span class="mode-info">12s per question<br>3 fuel cells · expert topics</span>
             <span class="mode-best" data-best="hard"></span>
           </button>
-          <button type="button" class="mode-card mode-ultra" data-mode="ultra">
+          <div class="mode-card mode-ultra" data-mode="ultra" role="group" aria-label="Ultra Hard: choose question difficulty" tabindex="0" aria-expanded="false">
             <span class="mode-icon">💀</span>
             <span class="mode-name">ULTRA</span>
             <span class="mode-tag">×2.5 points</span>
             <span class="mode-info">12s per question<br>you fall between answers!</span>
-            <span class="mode-best" data-best="ultra"></span>
-          </button>
+            <span class="ultra-hint">Click to pick question difficulty</span>
+            <div class="ultra-picks">
+              <button type="button" class="ultra-pick" data-mode="ultra-easy"><span class="up-name">Easy</span><span class="up-sub">everyday questions</span><span class="mode-best" data-best="ultra-easy"></span></button>
+              <button type="button" class="ultra-pick" data-mode="ultra-medium"><span class="up-name">Medium</span><span class="up-sub">mixed questions</span><span class="mode-best" data-best="ultra-medium"></span></button>
+              <button type="button" class="ultra-pick" data-mode="ultra"><span class="up-name">Hard</span><span class="up-sub">expert questions</span><span class="mode-best" data-best="ultra"></span></button>
+            </div>
+          </div>
         </div>
         <div class="how">
           <div><b>🤓 Be niche.</b> Name a dog breed: “Labrador” is a tiny boost. “Xoloitzcuintli” sends you flying.</div>
