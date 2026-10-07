@@ -400,7 +400,7 @@
     G.score = 0;   // the score drains away as you go
     el.banner.classList.add('hidden');
     el.feedback.className = 'feedback bad';
-    el.feedback.textContent = isDive() ? '🚫 We don\'t say that! Your sub is turning back…' : '🚫 We don\'t say that! Your rocket is turning around…';
+    el.feedback.textContent = isDive() ? '🚫 Your sub is turning back…' : '🚫 Your rocket is turning back…';
     el.reveal.classList.add('hidden');
     el.hint.classList.add('hidden');
     el.card.classList.remove('shake'); void el.card.offsetWidth; el.card.classList.add('shake');
@@ -456,8 +456,8 @@
       const cp = G.crashPlace;
       $('overReached').innerHTML = crashed
         ? (isDive()
-          ? `You typed a word we don't say, so your sub shot back up from <b>${cp.icon} ${cp.name}</b>. Score lost!`
-          : `You typed a word we don't say, so your rocket nose-dived from <b>${cp.icon} ${cp.name}</b> into the Earth. Score lost!`)
+          ? `Your sub shot back up from <b>${cp.icon} ${cp.name}</b>. Score lost!`
+          : `Your rocket nose-dived from <b>${cp.icon} ${cp.name}</b> into the Earth. Score lost!`)
         : isDive()
         ? `You dove to <b>${place.icon} ${place.name}</b> — ${dist} deep.`
         : `You reached <b>${place.icon} ${place.name}</b> — ${dist} from Earth.`;
