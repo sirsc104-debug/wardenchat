@@ -291,51 +291,84 @@ const RaceScene = (function () {
 
   // ---- Near scenery, road, bridges -------------------------------------------------
   const vAlt = x => st.cam + (x - CARX) / KX;   // what distance a screen x shows
-  function drawTrees() {
-    const off = st.drive * 0.55 + st.cam * KX * 0.3;
-    const spacing = 170;
+  // ---- The roadside: terrain that scrolls with the road --------------------------------
+  // Land, sea and tunnel under the road are a stream of stretches that come in from the right and
+  // move at road speed, so bridges, shores and trees glide past as one piece instead of flickering.
+  const stream = { base: null, edge: null, marks: [] };
+  const terrainHere = () => ({ t: isTunnel(st.cam) ? 'tunnel' : isSea(st.cam) ? 'sea' : 'land', biome: biomeAt(st.cam) });
+  function updateStream(dx) {
+    const now = terrainHere();
+    if (!stream.base) { stream.base = now; stream.edge = now; }
+    if (!st.crash && (now.t !== stream.edge.t || now.biome !== stream.edge.biome)) {
+      stream.marks.push({ x: W + 220, t: now.t, biome: now.biome });
+      stream.edge = now;
+    }
+    for (const m of stream.marks) m.x -= dx;
+    while (stream.marks.length && stream.marks[0].x < -1200) stream.base = stream.marks.shift();
+  }
+  function spans() {
+    const out = [];
+    let x0 = -3000, cur = stream.base || terrainHere();
+    for (const m of stream.marks) { out.push({ x0, x1: m.x, t: cur.t, biome: cur.biome }); x0 = m.x; cur = m; }
+    out.push({ x0, x1: 1e6, t: cur.t, biome: cur.biome });
+    return out;
+  }
+  const spanAt = (list, x) => list.find(sp => x >= sp.x0 && x < sp.x1) || list[list.length - 1];
+  // 0 = dry land, 1 = open water, easing across ~160px either side of each shoreline
+  function wetness(list, x) {
+    const sea = spanAt(list, x).t === 'sea';
+    let d = Infinity;
+    for (let k = 1; k < list.length; k++) {
+      const a = list[k - 1], b = list[k];
+      if ((a.t === 'sea') !== (b.t === 'sea')) d = Math.min(d, Math.abs(x - b.x0));
+    }
+    const k = Math.min(0.5, d / 320);
+    return sea ? 0.5 + k : 0.5 - k;
+  }
+
+  function drawTrees(list) {
+    const spacing = 170, off = st.drive;
     const i0 = Math.floor((off - 200) / spacing), i1 = Math.floor((off + W + 200) / spacing);
     for (let i = i0; i <= i1; i++) {
       if (hash(i) < 0.35) continue;
       const x = i * spacing - off + hash(i + 7) * 60;
-      const a = vAlt(x);
-      if (isSea(a) || isTunnel(a)) continue;
-      const kind = BIOMES[biomeAt(a)].tree, s = 0.8 + hash(i + 3) * 0.6, y = ROAD_TOP + 2;
+      const sp = spanAt(list, x);
+      if (sp.t !== 'land' || wetness(list, x) > 0.3) continue;
+      const biome = sp.biome, kind = BIOMES[biome].tree, s = 0.8 + hash(i + 3) * 0.6, y = ROAD_TOP + 2;
       switch (kind) {
         case 'round': rect(x - 5 * s, y - 50 * s, 10 * s, 50 * s, '#6b4a2a'); blob(x, y - 70 * s, 32 * s, '#3d8a45'); blob(x - 18 * s, y - 58 * s, 22 * s, '#46a050'); break;
         case 'cypress': rect(x - 3, y - 20 * s, 6, 20 * s, '#6b4a2a'); ctx.fillStyle = '#2f6a3a'; ctx.beginPath(); ctx.ellipse(x, y - 70 * s, 14 * s, 55 * s, 0, 0, TAU); ctx.fill(); break;
         case 'palm': rect(x - 4, y - 110 * s, 8, 110 * s, '#8a6a3a'); for (let k = 0; k < 5; k++) { const ang = k / 5 * Math.PI + Math.PI; ctx.strokeStyle = '#3d8a3a'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(x, y - 110 * s); ctx.quadraticCurveTo(x + Math.cos(ang) * 30 * s, y - 130 * s, x + Math.cos(ang) * 55 * s, y - 95 * s + Math.sin(ang) * -10); ctx.stroke(); } break;
         case 'cactus': rect(x - 7, y - 70 * s, 14, 70 * s, '#4f8a4a'); rect(x - 24 * s, y - 50 * s, 10, 24 * s, '#4f8a4a'); rect(x - 24 * s, y - 34 * s, 20 * s, 10, '#4f8a4a'); rect(x + 14 * s, y - 60 * s, 10, 28 * s, '#4f8a4a'); break;
         case 'acacia': rect(x - 4, y - 60 * s, 8, 60 * s, '#6b4a2a'); ctx.fillStyle = '#5a7a30'; ctx.beginPath(); ctx.ellipse(x, y - 66 * s, 50 * s, 14 * s, 0, 0, TAU); ctx.fill(); break;
-        case 'pine': rect(x - 4, y - 16 * s, 8, 16 * s, '#6b4a2a'); poly([[x - 26 * s, y - 16 * s], [x, y - 90 * s], [x + 26 * s, y - 16 * s]], biomeAt(a) === 'snow' ? '#3a6a52' : '#2f6a3a'); if (biomeAt(a) === 'snow') poly([[x - 10 * s, y - 62 * s], [x, y - 90 * s], [x + 10 * s, y - 62 * s]], '#f4f8fb'); break;
+        case 'pine': rect(x - 4, y - 16 * s, 8, 16 * s, '#6b4a2a'); poly([[x - 26 * s, y - 16 * s], [x, y - 90 * s], [x + 26 * s, y - 16 * s]], biome === 'snow' ? '#3a6a52' : '#2f6a3a'); if (biome === 'snow') poly([[x - 10 * s, y - 62 * s], [x, y - 90 * s], [x + 10 * s, y - 62 * s]], '#f4f8fb'); break;
         case 'gum': rect(x - 4, y - 70 * s, 8, 70 * s, '#d8cfc0'); blob(x, y - 80 * s, 26 * s, '#7a9a6a'); blob(x + 16 * s, y - 70 * s, 18 * s, '#8aa878'); break;
       }
     }
   }
 
-  function drawRoad(w) {
-    // the ground (or water) column by column, so coastlines line up with the world
-    for (let x = -20; x < W + 20; x += 20) rect(x, ROAD_TOP - 6, 21, H - ROAD_TOP + 6, BIOMES[biomeAt(vAlt(x + 10))].ground);
-    // the shore: sand, then water, sloping smoothly down from the land instead of a straight cut
+  function drawRoad(w, list) {
+    // ground under and below the road
+    for (let x = -20; x < W + 20; x += 20) rect(x, ROAD_TOP - 6, 21, H - ROAD_TOP + 6, BIOMES[spanAt(list, x + 10).biome].ground);
+    // the shore: sand, then water, sloping smoothly from the land
     const shore = [];
-    for (let x = -20; x <= W + 20; x += 10) shore.push([x, clamp((1 - landness(x)) * 2.2, 0, 1)]);
+    for (let x = -20; x <= W + 20; x += 10) shore.push([x, wetness(list, x)]);
     if (shore.some(([, wet]) => wet > 0)) {
       ctx.fillStyle = '#e9d49a';
       ctx.beginPath(); ctx.moveTo(-20, H + 5);
-      for (const [x, wet] of shore) ctx.lineTo(x, lerp(H + 5, ROAD_BOT - 4, clamp(wet * 1.5, 0, 1)));
+      for (const [x, wet] of shore) ctx.lineTo(x, lerp(H + 5, ROAD_BOT - 4, clamp(wet * 1.6, 0, 1)));
       ctx.lineTo(W + 20, H + 5); ctx.fill();
       const g = ctx.createLinearGradient(0, ROAD_BOT, 0, H);
       g.addColorStop(0, '#2f7fc4'); g.addColorStop(1, '#174a85');
       ctx.fillStyle = g;
       ctx.beginPath(); ctx.moveTo(-20, H + 5);
-      for (const [x, wet] of shore) ctx.lineTo(x, lerp(H + 5, ROAD_BOT, clamp((wet - 0.25) / 0.75, 0, 1)));
+      for (const [x, wet] of shore) ctx.lineTo(x, lerp(H + 5, ROAD_BOT, clamp((wet - 0.3) / 0.5, 0, 1)));
       ctx.lineTo(W + 20, H + 5); ctx.fill();
-    }
-    // waves under bridges
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    for (let i = 0; i < 40; i++) {
-      const x = ((i * 97 - st.drive * 0.9) % (W + 100) + W + 100) % (W + 100) - 50;
-      if (isSea(vAlt(x))) ctx.fillRect(x, 850 + (i % 4) * 12, 26, 3);
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      for (let i = 0; i < 40; i++) {
+        const x = ((i * 97 - st.drive * 0.9) % (W + 100) + W + 100) % (W + 100) - 50;
+        if (wetness(list, x) > 0.85) ctx.fillRect(x, 868 + (i % 3) * 10, 26, 3);
+      }
     }
     // the road
     rect(-30, ROAD_TOP, W + 60, ROAD_BOT - ROAD_TOP, '#4a4d57');
@@ -344,42 +377,62 @@ const RaceScene = (function () {
     ctx.fillStyle = '#f4f4f0';
     const dash = 120, doff = st.drive % dash;
     for (let x = -doff; x < W + dash; x += dash) { ctx.fillRect(x, ROAD_TOP + 50, 60, 5); ctx.fillRect(x, ROAD_BOT - 46, 60, 5); }
-    // bridge rails, towers and cables over water
-    const toff = st.drive % 600;
-    for (let x = -toff; x < W + 600; x += 600) {
-      if (!isSea(vAlt(x))) continue;
-      rect(x - 8, ROAD_TOP - 230, 16, 230, '#c0392b');
-      rect(x - 14, ROAD_TOP - 236, 28, 12, '#a02a20');
-      ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.moveTo(x, ROAD_TOP - 226); ctx.quadraticCurveTo(x + 300, ROAD_TOP - 40, x + 600, ROAD_TOP - 226); ctx.stroke();
+
+    for (const sp of list) {
+      if (sp.x1 < -900 || sp.x0 > W + 900) continue;
+      if (sp.t === 'sea') drawBridge(sp.x0, sp.x1);
+      else if (sp.t === 'tunnel') drawTunnel(sp.x0, sp.x1);
+    }
+  }
+
+  // A suspension bridge anchored to its own two ends, so every part scrolls together.
+  function drawBridge(x0, x1) {
+    const deck = ROAD_TOP, top = ROAD_TOP - 230, sag = ROAD_TOP - 50;
+    const a = Math.max(x0 - 60, -100), b = Math.min(x1 + 60, W + 100);
+    // deck edge and railing, with a post every 40px counted from the bridge's start
+    rect(a, ROAD_BOT, b - a, 14, '#7a7e8a');
+    rect(a, deck - 18, b - a, 4, '#c8ccd6');
+    for (let x = x0 - 60 + ((a - (x0 - 60)) - ((a - (x0 - 60)) % 40)); x <= b; x += 40) rect(x, deck - 18, 3, 18, '#c8ccd6');
+    // piers at each shore and under every tower
+    for (const px of [x0, x1]) if (px > -100 && px < W + 100) { rect(px - 16, ROAD_BOT, 32, H - ROAD_BOT, '#8a8f99'); rect(px - 24, ROAD_BOT, 48, 10, '#6b7080'); rect(px - 10, deck - 30, 20, 30, '#a3a8b4'); }
+    const towers = [];
+    for (let tx = x0 + 300; tx < x1 - 200; tx += 600) { if (tx > b + 700) break; if (tx > a - 700) towers.push(tx); }
+    // cables: from the shore anchor up to the first tower, tower to tower, down to the far shore
+    const pts = [[x0, deck - 20], ...towers.map(tx => [tx, top + 4])];
+    if (x1 < W + 800) pts.push([x1, deck - 20]);
+    ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 3;
+    for (let k = 0; k < pts.length - 1; k++) {
+      const [ax, ay] = pts[k], [bx, by] = pts[k + 1];
+      if (bx < -50 || ax > W + 50) continue;
+      const cx = (ax + bx) / 2, cy = Math.max(ay, by) + (sag - Math.max(ay, by)) * 0.9;
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo(cx, cy, bx, by); ctx.stroke();
       ctx.lineWidth = 1.5;
-      for (let k = 1; k < 12; k++) { const cx = x + k * 50, t = k / 12, cy = (1 - t) * (1 - t) * (ROAD_TOP - 226) + 2 * (1 - t) * t * (ROAD_TOP - 40) + t * t * (ROAD_TOP - 226); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, ROAD_TOP); ctx.stroke(); }
+      for (let x = ax + 50; x < bx - 10; x += 50) {
+        const t = (x - ax) / (bx - ax), y = (1 - t) * (1 - t) * ay + 2 * (1 - t) * t * cy + t * t * by;
+        if (y < deck - 18) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, deck - 18); ctx.stroke(); }
+      }
+      ctx.lineWidth = 3;
     }
-    for (let x = -40; x < W + 40; x += 40) {
-      if (!isSea(vAlt(x + 20))) continue;
-      // a concrete ramp and pier where the bridge leaves (or reaches) the shore
-      const l = isSea(vAlt(x - 20)), r = isSea(vAlt(x + 60));
-      if (!l || !r) { const px = l ? x + 30 : x - 10; rect(px - 14, ROAD_BOT, 28, H - ROAD_BOT, '#8a8f99'); rect(px - 20, ROAD_BOT, 40, 10, '#6b7080'); }
-      rect(x, ROAD_TOP - 18, 41, 4, '#c8ccd6');
-      rect(x + ((-st.drive % 40) + 40) % 40, ROAD_TOP - 18, 3, 18, '#c8ccd6');
+    for (const tx of towers) {
+      if (tx < -40 || tx > W + 40) continue;
+      rect(tx - 8, top, 16, deck - top, '#c0392b'); rect(tx - 14, top - 6, 28, 12, '#a02a20');
+      rect(tx - 12, ROAD_BOT, 24, H - ROAD_BOT, '#8a8f99');
     }
-    // the Channel Tunnel: a lit tube under the sea, with a concrete portal at each end
-    for (let x = -40; x < W + 40; x += 40) {
-      if (!isTunnel(vAlt(x + 20))) continue;
-      const g2 = ctx.createLinearGradient(0, ROAD_TOP - 260, 0, ROAD_TOP);
-      g2.addColorStop(0, '#2a2f3a'); g2.addColorStop(0.5, '#3c4352'); g2.addColorStop(1, '#22262f');
-      rect(x, -30, 41, 120, '#1f6fae');                      // the sea far above
-      rect(x, 86, 41, ROAD_TOP - 86, '#3a2f27');             // rock under the seabed
-      rect(x, 86, 41, 8, '#c9b48a');
-      rect(x, ROAD_TOP - 300, 41, 300, g2);                  // the tube
-      rect(x, ROAD_TOP - 304, 41, 8, '#8a8f99');
-      const l = isTunnel(vAlt(x - 20)), r = isTunnel(vAlt(x + 60));
-      if (!l || !r) { rect(l ? x + 20 : x, ROAD_TOP - 330, 22, 330, '#a3a8b4'); rect(l ? x + 20 : x, ROAD_TOP - 340, 22, 12, '#6b7080'); }
-    }
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    for (let i = 0; i < 10; i++) { const x = ((i * 173 - st.drive * 0.3) % W + W) % W; if (isTunnel(vAlt(x))) ctx.fillRect(x, 80 + (i % 4) * 90, 30, 3); }
-    const loff = st.drive % 160;
-    for (let x = -loff; x < W + 160; x += 160) if (isTunnel(vAlt(x))) { rect(x - 18, ROAD_TOP - 290, 36, 6, '#ffe9a0'); blob(x, ROAD_TOP - 280, 30, 'rgba(255,233,160,0.12)'); }
+  }
+
+  // The Channel Tunnel: a lit tube under the seabed with a concrete portal at each end.
+  function drawTunnel(x0, x1) {
+    const a = Math.max(x0, -40), b = Math.min(x1, W + 40);
+    if (b <= a) return;
+    rect(a, -30, b - a, 120, '#1f6fae');
+    rect(a, 86, b - a, ROAD_TOP - 86, '#3a2f27');
+    rect(a, 86, b - a, 8, '#c9b48a');
+    const g2 = ctx.createLinearGradient(0, ROAD_TOP - 260, 0, ROAD_TOP);
+    g2.addColorStop(0, '#2a2f3a'); g2.addColorStop(0.5, '#3c4352'); g2.addColorStop(1, '#22262f');
+    rect(a, ROAD_TOP - 300, b - a, 300, g2);
+    rect(a, ROAD_TOP - 304, b - a, 8, '#8a8f99');
+    for (let x = x0 + 80; x < b; x += 160) if (x > a) { rect(x - 18, ROAD_TOP - 290, 36, 6, '#ffe9a0'); blob(x, ROAD_TOP - 280, 30, 'rgba(255,233,160,0.12)'); }
+    for (const px of [x0, x1]) if (px > -60 && px < W + 60) { rect(px - 12, ROAD_TOP - 330, 24, 330, '#a3a8b4'); rect(px - 16, ROAD_TOP - 340, 32, 12, '#6b7080'); }
   }
 
   // ---- Other cars ---------------------------------------------------------------------
@@ -589,6 +642,7 @@ const RaceScene = (function () {
     } else { st.deadT += dt; st.speed *= Math.exp(-dt * 1.6); }
     const dx = st.speed * dt;
     st.drive += dx;
+    updateStream(dx);
     st.vel = dt > 0 ? (st.cam - prev) * KX / dt : 0;
     st.kick = Math.max(0, st.kick - dt * 1.2);
     st.boost = Math.max(0, st.boost - dt * 0.5);
@@ -650,8 +704,9 @@ const RaceScene = (function () {
     drawBack(w, lands);
     drawLandmarks();
     drawHills(w, lands);
-    drawTrees();
-    drawRoad(w);
+    const list = spans();
+    drawTrees(list);
+    drawRoad(w, list);
     drawTraffic(0);
     for (const q of parts) if (q.k === 'smoke') { ctx.globalAlpha = (q.life / q.max) * 0.5; blob(q.x, q.y, q.size, q.color); }
     ctx.globalAlpha = 1;
@@ -696,6 +751,7 @@ const RaceScene = (function () {
       st.cam = 0; st.target = 0; st.dead = false; st.deadT = 0; st.boost = 0; st.kick = 0; st.ignite = 0;
       st.streak = 0; st.crash = null; st.speed = CRUISE;
       parts.length = 0; fx.length = 0; traffic.length = 0;
+      stream.base = null; stream.edge = null; stream.marks.length = 0;
     },
     get alt() { return st.cam; },
     setIgnite(v) { st.ignite = v; },
