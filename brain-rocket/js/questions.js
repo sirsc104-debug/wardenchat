@@ -13,6 +13,8 @@ const Quiz = (function () {
     return String(s).toLowerCase()
       .normalize('NFD').replace(/[̀-ͯ]/g, '')
       .replace(/&/g, ' and ')
+      .replace(/\+/g, ' plus ')                          // C++, Disney+, a B+ grade
+      .replace(/\b([a-z])-(?=\s|$)/g, '$1 minus')       // an A- grade, so it isn't the same as A
       .replace(/['’`.]/g, '')
       .replace(/[^a-z0-9]+/g, ' ')
       .trim()
@@ -193,7 +195,8 @@ const Quiz = (function () {
 
   function letterQuestion(mode, seen, rng) {
     const min = MIN_ANSWERS[mode];
-    const big = t => t.entities.length >= 40;
+    // Letter questions need a big answer list, or a topic marked `letters` (like the DHHS ones).
+    const big = t => t.entities.length >= 40 || (t.letters && t.entities.length >= 12);
     for (let attempt = 0; attempt < 300; attempt++) {
       const topic = pickTopic(mode, seen.letterTopics, rng, big);
       const types = weighted(LETTER_TEMPLATES[mode], rng);
