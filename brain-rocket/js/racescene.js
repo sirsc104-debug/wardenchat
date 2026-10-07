@@ -103,10 +103,18 @@ const RaceScene = (function () {
     return k * k * (3 - 2 * k);
   }
 
-  function drawFar(w) {
-    const off = st.cam * KX * 0.12 + st.drive * 0.04;
+  // The back of the scene: open sea and distant mountains. Everything here keeps drifting by
+  // while the car drives, a little slower the further away it is.
+  const backOff = () => st.cam * KX * 0.12 + st.drive * 0.06;
+  const hillOff = () => st.cam * KX * 0.35 + st.drive * 0.16;
+  function landSamples() {
+    const out = [];
+    for (let x = -30; x <= W + 30; x += 30) out.push([x, landness(x)]);
+    return out;
+  }
+  function drawBack(w, lands) {
+    const off = backOff();
     const b = BIOMES[biomeAt(st.cam)];
-    // the open sea is always there behind the hills; it shows wherever the land drops away
     const g = ctx.createLinearGradient(0, 560, 0, ROAD_TOP);
     g.addColorStop(0, '#3d8fd1'); g.addColorStop(1, '#1f5fa0');
     rect(-30, 560, W + 60, ROAD_TOP - 560 + 4, g);
@@ -117,15 +125,18 @@ const RaceScene = (function () {
       poly([[sx - 60, 572], [sx + 60, 572], [sx + 48, 588], [sx - 48, 588]], '#33394a');
       rect(sx - 20, 556, 40, 16, '#e8e8f0'); rect(sx - 4, 540, 8, 16, '#e8364f');
     }
-    const lands = [];
-    for (let x = -30; x <= W + 30; x += 30) lands.push([x, landness(x)]);
     ctx.fillStyle = mixc(b.far, '#ffffff', w.amt('fog') * 0.5);
     ctx.beginPath(); ctx.moveTo(-30, 641);
     for (const [x, L] of lands) { const u = (x + off) * 0.004; const top = 520 - Math.abs(Math.sin(u)) * 90 - Math.sin(u * 2.7) * 30; ctx.lineTo(x, lerp(641, top, L)); }
     ctx.lineTo(W + 30, 641); ctx.fill();
+  }
+  // Rolling hills in front of the city skylines, sloping down to the water at the coast.
+  function drawHills(w, lands) {
+    const off = hillOff();
+    const b = BIOMES[biomeAt(st.cam)];
     ctx.fillStyle = b.hill;
     ctx.beginPath(); ctx.moveTo(-30, ROAD_TOP + 1);
-    for (const [x, L] of lands) { const u = (x + off * 2.2) * 0.006; const top = 610 - Math.abs(Math.sin(u + 1)) * 50; ctx.lineTo(x, lerp(ROAD_TOP + 1, Math.min(top, 641), Math.min(1, L * 1.4))); }
+    for (const [x, L] of lands) { const u = (x + off) * 0.006; const top = 642 - Math.abs(Math.sin(u + 1)) * 40; ctx.lineTo(x, lerp(ROAD_TOP + 1, top, Math.min(1, L * 1.4))); }
     ctx.lineTo(W + 30, ROAD_TOP + 1); ctx.fill();
   }
 
@@ -260,15 +271,21 @@ const RaceScene = (function () {
       palm(x + 250); palm(x + 340);
     }
   };
+  // City skylines sit in the middle distance: behind the hills, in front of the far mountains,
+  // each on its own patch of land so a harbour city never floats on the sea.
   function drawLandmarks() {
-    const p = 0.45, y = 640;
+    const p = 0.85, y = 640;
     for (const s of RACE_STOPS) {
       const a = near(s.alt);
       const x = CARX + 260 + (a - st.cam) * KX * p;
       // each city's skyline only shows around that city, so neighbours never overlap
       const fade = clamp(1.6 - Math.abs(a - st.cam) / 260, 0, 1);
       if (fade <= 0 || x < -700 || x > W + 700) continue;
-      ctx.save(); ctx.globalAlpha *= fade; LAND[s.land](x, y); ctx.restore();
+      ctx.save(); ctx.globalAlpha *= fade;
+      ctx.fillStyle = BIOMES[s.biome].hill;
+      ctx.beginPath(); ctx.ellipse(x, y + 18, 440, 42, 0, Math.PI, 0); ctx.lineTo(x + 440, ROAD_TOP); ctx.lineTo(x - 440, ROAD_TOP); ctx.fill();
+      LAND[s.land](x, y);
+      ctx.restore();
     }
   }
 
@@ -298,18 +315,21 @@ const RaceScene = (function () {
 
   function drawRoad(w) {
     // the ground (or water) column by column, so coastlines line up with the world
-    for (let x = -40; x < W + 40; x += 40) {
-      const a = vAlt(x + 20);
-      if (isSea(a)) {
-        const g = ctx.createLinearGradient(0, ROAD_BOT, 0, H);
-        g.addColorStop(0, '#2f7fc4'); g.addColorStop(1, '#174a85');
-        rect(x, ROAD_TOP - 6, 41, H - ROAD_TOP + 6, g);
-      } else {
-        const b = BIOMES[biomeAt(a)];
-        // a sandy beach where the land meets the sea
-        const L = landness(x + 20);
-        rect(x, ROAD_TOP - 6, 41, H - ROAD_TOP + 6, L < 1 ? mixc('#e9d49a', b.ground, clamp(L * 1.6, 0, 1)) : b.ground);
-      }
+    for (let x = -20; x < W + 20; x += 20) rect(x, ROAD_TOP - 6, 21, H - ROAD_TOP + 6, BIOMES[biomeAt(vAlt(x + 10))].ground);
+    // the shore: sand, then water, sloping smoothly down from the land instead of a straight cut
+    const shore = [];
+    for (let x = -20; x <= W + 20; x += 10) shore.push([x, clamp((1 - landness(x)) * 2.2, 0, 1)]);
+    if (shore.some(([, wet]) => wet > 0)) {
+      ctx.fillStyle = '#e9d49a';
+      ctx.beginPath(); ctx.moveTo(-20, H + 5);
+      for (const [x, wet] of shore) ctx.lineTo(x, lerp(H + 5, ROAD_BOT - 4, clamp(wet * 1.5, 0, 1)));
+      ctx.lineTo(W + 20, H + 5); ctx.fill();
+      const g = ctx.createLinearGradient(0, ROAD_BOT, 0, H);
+      g.addColorStop(0, '#2f7fc4'); g.addColorStop(1, '#174a85');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.moveTo(-20, H + 5);
+      for (const [x, wet] of shore) ctx.lineTo(x, lerp(H + 5, ROAD_BOT, clamp((wet - 0.25) / 0.75, 0, 1)));
+      ctx.lineTo(W + 20, H + 5); ctx.fill();
     }
     // waves under bridges
     ctx.fillStyle = 'rgba(255,255,255,0.35)';
@@ -626,8 +646,10 @@ const RaceScene = (function () {
     g.addColorStop(0, w.top); g.addColorStop(1, w.bot);
     rect(-30, -30, W + 60, H + 60, g);
     drawWeatherBack(w);
-    drawFar(w);
-    ctx.save(); ctx.globalAlpha = 0.45 + 0.55 * landness(CARX + 260); drawLandmarks(); ctx.restore();
+    const lands = landSamples();
+    drawBack(w, lands);
+    drawLandmarks();
+    drawHills(w, lands);
     drawTrees();
     drawRoad(w);
     drawTraffic(0);

@@ -102,7 +102,7 @@
     }
   };
   const TYPE_ORDER = ['rocket', 'sub', 'drill', 'race'];
-  const CRUISE_PTS = 6;   // World Race: points a second just for driving
+  const CRUISE_PTS = 12;  // World Race: points a second just for driving
   let J = TYPES.rocket;   // the current way to play
   let S = J.scene;        // its scene
   try { const t = localStorage.getItem('brainRocket.type'); if (TYPES[t]) { J = TYPES[t]; S = J.scene; } } catch (e) { /* ignore */ }
