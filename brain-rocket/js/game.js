@@ -285,12 +285,14 @@
     const mode = MODES[modeId];
     // a challenge sets its own time (the Submarine choice is left alone); a race uses the mode's fuel tank
     const len = ch ? ch.len : J.id === 'race' ? mode.tank : diveLen;
+    // World Race starts with 10 seconds in the tank (or a full tank if it holds less), so early answers refuel
+    const startFuel = J.id === 'race' ? Math.min(10, len) : len;
     const dive = J.id !== 'rocket';
     Object.assign(G, {
       state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive ? Infinity : mode.lives, streak: 0, bestStreak: 0,
       qNum: 0, skips: dive ? Infinity : mode.skips, used: new Set(), seen: ch ? Quiz.freshRun() : Quiz.newRun(), q: null,
       challenge: ch, rng: ch ? Challenge.rng(ch.seed) : Math.random, correct: 0, bestAnswer: null,
-      launched: false, peak: 0, reached: new Set(), crashed: false, boomed: false, boost: null, diveTime: len, diveLeft: len, qElapsed: 0, lastTick: len
+      launched: false, peak: 0, reached: new Set(), crashed: false, boomed: false, boost: null, diveTime: len, diveLeft: startFuel, qElapsed: 0, lastTick: startFuel
     });
     S.reset();
     S.setStreak(0);

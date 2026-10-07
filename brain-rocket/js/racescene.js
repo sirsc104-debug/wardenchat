@@ -90,31 +90,43 @@ const RaceScene = (function () {
     mountain:  { ground: '#8a9a6a', hill: '#7a8a6a', far: '#a3a9b4', tree: 'pine' }
   };
 
+  // 0 out at sea, rising to 1 a few hundred pixels inland, so hills slope down to the water
+  // instead of stopping dead at the coast.
+  function landness(x) {
+    const a = vAlt(x), p = lapPos(a);
+    let d = Infinity;
+    for (const [f, t] of RACE_SEAS) {
+      if (p >= f && p <= t) return 0;
+      d = Math.min(d, Math.abs(p - f), Math.abs(p - t));
+    }
+    const k = clamp(d * KX / 380, 0, 1);
+    return k * k * (3 - 2 * k);
+  }
+
   function drawFar(w) {
-    // distant hills (or open sea) far behind everything
     const off = st.cam * KX * 0.12 + st.drive * 0.04;
-    const sea = isSea(st.cam);
     const b = BIOMES[biomeAt(st.cam)];
-    if (sea) {
-      const g = ctx.createLinearGradient(0, 520, 0, ROAD_TOP);
-      g.addColorStop(0, '#3d8fd1'); g.addColorStop(1, '#1f5fa0');
-      rect(-30, 560, W + 60, ROAD_TOP - 560 + 4, g);
-      ctx.fillStyle = 'rgba(255,255,255,0.25)';
-      for (let i = 0; i < 18; i++) { const x = ((i * 137 - off * 2) % (W + 200) + W + 200) % (W + 200) - 100; ctx.fillRect(x, 590 + (i % 5) * 22, 40, 2); }
-      // a ship on the horizon
-      const sx = ((900 - off * 0.6) % (W + 400) + W + 400) % (W + 400) - 200;
+    // the open sea is always there behind the hills; it shows wherever the land drops away
+    const g = ctx.createLinearGradient(0, 560, 0, ROAD_TOP);
+    g.addColorStop(0, '#3d8fd1'); g.addColorStop(1, '#1f5fa0');
+    rect(-30, 560, W + 60, ROAD_TOP - 560 + 4, g);
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    for (let i = 0; i < 18; i++) { const x = ((i * 137 - off * 2) % (W + 200) + W + 200) % (W + 200) - 100; ctx.fillRect(x, 590 + (i % 5) * 22, 40, 2); }
+    const sx = ((900 - off * 0.6) % (W + 400) + W + 400) % (W + 400) - 200;
+    if (landness(sx) < 0.2) {
       poly([[sx - 60, 572], [sx + 60, 572], [sx + 48, 588], [sx - 48, 588]], '#33394a');
       rect(sx - 20, 556, 40, 16, '#e8e8f0'); rect(sx - 4, 540, 8, 16, '#e8364f');
-      return;
     }
+    const lands = [];
+    for (let x = -30; x <= W + 30; x += 30) lands.push([x, landness(x)]);
     ctx.fillStyle = mixc(b.far, '#ffffff', w.amt('fog') * 0.5);
-    ctx.beginPath(); ctx.moveTo(-30, 640);
-    for (let x = -30; x <= W + 30; x += 30) { const u = (x + off) * 0.004; ctx.lineTo(x, 520 - Math.abs(Math.sin(u)) * 90 - Math.sin(u * 2.7) * 30); }
-    ctx.lineTo(W + 30, 640); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-30, 641);
+    for (const [x, L] of lands) { const u = (x + off) * 0.004; const top = 520 - Math.abs(Math.sin(u)) * 90 - Math.sin(u * 2.7) * 30; ctx.lineTo(x, lerp(641, top, L)); }
+    ctx.lineTo(W + 30, 641); ctx.fill();
     ctx.fillStyle = b.hill;
-    ctx.beginPath(); ctx.moveTo(-30, ROAD_TOP);
-    for (let x = -30; x <= W + 30; x += 30) { const u = (x + off * 2.2) * 0.006; ctx.lineTo(x, 610 - Math.abs(Math.sin(u + 1)) * 50); }
-    ctx.lineTo(W + 30, ROAD_TOP); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-30, ROAD_TOP + 1);
+    for (const [x, L] of lands) { const u = (x + off * 2.2) * 0.006; const top = 610 - Math.abs(Math.sin(u + 1)) * 50; ctx.lineTo(x, lerp(ROAD_TOP + 1, Math.min(top, 641), Math.min(1, L * 1.4))); }
+    ctx.lineTo(W + 30, ROAD_TOP + 1); ctx.fill();
   }
 
   // ---- Landmarks -------------------------------------------------------------------
@@ -294,7 +306,9 @@ const RaceScene = (function () {
         rect(x, ROAD_TOP - 6, 41, H - ROAD_TOP + 6, g);
       } else {
         const b = BIOMES[biomeAt(a)];
-        rect(x, ROAD_TOP - 6, 41, H - ROAD_TOP + 6, b.ground);
+        // a sandy beach where the land meets the sea
+        const L = landness(x + 20);
+        rect(x, ROAD_TOP - 6, 41, H - ROAD_TOP + 6, L < 1 ? mixc('#e9d49a', b.ground, clamp(L * 1.6, 0, 1)) : b.ground);
       }
     }
     // waves under bridges
@@ -323,7 +337,9 @@ const RaceScene = (function () {
     }
     for (let x = -40; x < W + 40; x += 40) {
       if (!isSea(vAlt(x + 20))) continue;
-      rect(x, ROAD_BOT, 41, 14, '#7a7e8a');
+      // a concrete ramp and pier where the bridge leaves (or reaches) the shore
+      const l = isSea(vAlt(x - 20)), r = isSea(vAlt(x + 60));
+      if (!l || !r) { const px = l ? x + 30 : x - 10; rect(px - 14, ROAD_BOT, 28, H - ROAD_BOT, '#8a8f99'); rect(px - 20, ROAD_BOT, 40, 10, '#6b7080'); }
       rect(x, ROAD_TOP - 18, 41, 4, '#c8ccd6');
       rect(x + ((-st.drive % 40) + 40) % 40, ROAD_TOP - 18, 3, 18, '#c8ccd6');
     }
@@ -611,7 +627,7 @@ const RaceScene = (function () {
     rect(-30, -30, W + 60, H + 60, g);
     drawWeatherBack(w);
     drawFar(w);
-    if (!isSea(st.cam)) drawLandmarks(); else { ctx.save(); ctx.globalAlpha = 0.5; drawLandmarks(); ctx.restore(); }
+    ctx.save(); ctx.globalAlpha = 0.45 + 0.55 * landness(CARX + 260); drawLandmarks(); ctx.restore();
     drawTrees();
     drawRoad(w);
     drawTraffic(0);
