@@ -32,7 +32,7 @@
         <span class="pill-sub" id="hudMult">next ×1.00</span>
       </div>
       <div class="hud-pill time-pill hidden" id="timePill">
-        <span class="pill-label">Dive time</span>
+        <span class="pill-label" id="hudTimeLabel">Dive time</span>
         <span class="pill-value" id="hudTime">60</span>
       </div>
       <div class="hud-pill fuel-pill" id="fuelPill">
@@ -99,8 +99,9 @@
         <h1 class="logo"><span class="logo-brain"><i class="logo-by">SirSC's</i>BRAIN</span><span>ROCKET</span></h1>
         <p class="tagline" id="tagline">Answer questions to fuel your rocket. Fly from the launch pad to the Moon, Mars… and beyond!</p>
         <div class="type-toggle" role="group" aria-label="Choose how to play">
-          <button type="button" class="type-btn active" data-type="rocket" aria-pressed="true"><span class="type-icon">🚀</span><span class="type-name">Rocket</span><span class="type-sub">Fly up to space · fuel cells</span></button>
-          <button type="button" class="type-btn" data-type="sub" aria-pressed="false"><span class="type-icon">🌊</span><span class="type-name">Submarine</span><span class="type-sub">Timed dive · unlimited skips</span></button>
+          <button type="button" class="type-btn active" data-type="rocket" aria-pressed="true"><span class="type-icon">🚀</span><span class="type-name">Rocket</span><span class="type-sub">Fly up to space</span></button>
+          <button type="button" class="type-btn" data-type="sub" aria-pressed="false"><span class="type-icon">🌊</span><span class="type-name">Submarine</span><span class="type-sub">Timed dive</span></button>
+          <button type="button" class="type-btn" data-type="drill" aria-pressed="false"><span class="type-icon">⛏️</span><span class="type-name">Drill Challenge</span><span class="type-sub">Play friends with a code</span></button>
           <div class="dive-len" id="diveLen" role="group" aria-label="Dive length">
             <span class="dive-len-label">Dive length</span>
             <div class="dive-len-btns">
@@ -142,6 +143,36 @@
               <button type="button" class="ultra-pick" data-mode="ultra-easy"><span class="up-name">Easy</span><span class="up-sub">everyday questions</span><span class="mode-best" data-best="ultra-easy"></span></button>
               <button type="button" class="ultra-pick" data-mode="ultra-medium"><span class="up-name">Medium</span><span class="up-sub">mixed questions</span><span class="mode-best" data-best="ultra-medium"></span></button>
               <button type="button" class="ultra-pick" data-mode="ultra"><span class="up-name">Hard</span><span class="up-sub">expert questions</span><span class="mode-best" data-best="ultra"></span></button>
+            </div>
+          </div>
+        </div>
+        <!-- Drill Challenge: share a code, everyone gets the same questions -->
+        <div class="ch-panel hidden" id="chPanel">
+          <form class="ch-box" id="chJoinForm" autocomplete="off">
+            <h3>🎟️ Got a code?</h3>
+            <input id="chInput" maxlength="12" placeholder="8 characters" spellcheck="false" autocapitalize="characters" aria-label="Challenge code" aria-describedby="chPreview">
+            <div class="ch-preview" id="chPreview" aria-live="polite">Type the code a friend sent you.</div>
+            <button type="submit" class="big-btn" id="chJoin" disabled>⛏️ Play this code</button>
+          </form>
+          <div class="ch-box">
+            <h3>📣 Host a challenge</h3>
+            <div class="ch-row" id="chMode" role="group" aria-label="Difficulty">
+              <button type="button" data-mode="easy">🧒 Owen</button>
+              <button type="button" data-mode="medium">Medium</button>
+              <button type="button" data-mode="hard">Hard</button>
+            </div>
+            <div class="ch-row" id="chLen" role="group" aria-label="Drill time">
+              <button type="button" data-len="30">30 seconds</button>
+              <button type="button" data-len="60">60 seconds</button>
+              <button type="button" data-len="120">120 seconds</button>
+            </div>
+            <div class="ch-made">
+              <span class="ch-code empty" id="chCode" aria-live="polite">— — — —</span>
+              <button type="button" class="ch-copy" id="chCopy" disabled>📋 Copy</button>
+            </div>
+            <div class="ch-host-btns">
+              <button type="button" class="big-btn ghost" id="chMake">🎲 Make a code</button>
+              <button type="button" class="big-btn" id="chPlayMine" disabled>⛏️ Play it</button>
             </div>
           </div>
         </div>
@@ -196,7 +227,9 @@
 <script src="js/audio.js"></script>
 <script src="js/scene.js"></script>
 <script src="js/subscene.js"></script>
+<script src="js/drillscene.js"></script>
 <script src="js/badwords.js"></script>
+<script src="js/challenge.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>

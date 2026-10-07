@@ -38,6 +38,10 @@
       tagline: 'Answer questions to fuel your rocket. Fly from the launch pad to the Moon, Mars… and beyond!',
       fast: '<b>⚡ Be fast.</b> Answer in the first quarter of the timer for ×2, first half for ×1.5.',
       rule: '<b>⛽ Don\'t run dry.</b> Running out of time burns a fuel cell. Wrong guesses are free.',
+      again: '🚀 Fly again', overTitle: 'Out of fuel!', crashTitle: '💥 Crashed!', name: () => 'Rocket',
+      turning: 'Your rocket is turning back…',
+      crashLine: p => `Your rocket nose-dived from <b>${p}</b> into the Earth. Score lost!`,
+      reachedLine: (p, dist) => `You reached <b>${p}</b> — ${dist} from Earth.`,
       info: {
         easy: '30s per question<br>5 fuel cells · everyday topics',
         medium: '20s per question<br>3 fuel cells · mixed topics',
@@ -51,6 +55,10 @@
       tagline: 'You have {n} seconds. Every answer drives your submarine deeper. How far down can you get?',
       fast: '<b>⚡ Be fast.</b> Answer each question within a few seconds for ×2 or ×1.5.',
       rule: '<b>⏱️ Beat the clock.</b> One {n}-second dive. No lives to lose and unlimited skips.',
+      again: '🌊 Dive again', overTitle: "Time's up!", crashTitle: '🫧 Back to the surface!', name: n => `Submarine (${n}s)`,
+      turning: 'Your sub is turning back…',
+      crashLine: p => `Your sub shot back up from <b>${p}</b>. Score lost!`,
+      reachedLine: (p, dist) => `You dove to <b>${p}</b> — ${dist} deep.`,
       info: {
         easy: '{n}-second dive<br>unlimited skips · everyday topics',
         medium: '{n}-second dive<br>unlimited skips · mixed topics',
@@ -59,9 +67,21 @@
       }
     }
   };
+  // Drill Challenge: a timed race to the centre of the Earth, played from a code so friends get the same questions.
+  TYPES.drill = {
+    ...TYPES.sub,
+    id: 'drill', scene: DrillScene, stops: DRILL_STOPS, from: 'deep', marker: '⛏️', go: 'DRILL!', firstTag: '⛏️ DRILL!',
+    reached: 'YOU DRILLED TO', notYet: 'Not drilled yet',
+    tagline: 'Drill to the centre of the Earth! Share a code so your friends get the exact same questions, then compare scores.',
+    rule: '<b>🎟️ Same code, same questions.</b> Everyone with the code gets the same questions in the same order. Unlimited skips.',
+    timeLabel: 'Drill time', again: '⛏️ Drill again', crashTitle: '💥 Blasted out!', name: n => `Drill Challenge (${n}s)`,
+    turning: 'Your drill is turning back…',
+    crashLine: p => `Your drill spun round and shot out of the ground from <b>${p}</b>. Score lost!`,
+    reachedLine: (p, dist) => `You drilled down to <b>${p}</b> — ${dist} deep.`
+  };
   let J = TYPES.rocket;   // the current way to play
   let S = J.scene;        // its scene
-  try { if (localStorage.getItem('brainRocket.type') === 'sub') { J = TYPES.sub; S = J.scene; } } catch (e) { /* ignore */ }
+  try { const t = localStorage.getItem('brainRocket.type'); if (TYPES[t]) { J = TYPES[t]; S = J.scene; } } catch (e) { /* ignore */ }
 
   const $ = id => document.getElementById(id);
   const stage = $('stage');
@@ -82,6 +102,7 @@
     stage.style.transform = `scale(${s}) translate(-50%, -50%)`;
     Scene.resize(s);
     SubScene.resize(s);
+    DrillScene.resize(s);
   }
 
   // ---- Saved bests ------------------------------------------------------
@@ -124,11 +145,13 @@
   const G = {
     state: 'title', mode: null, type: 'rocket', score: 0, shown: 0, lives: 0, streak: 0, bestStreak: 0, qNum: 0,
     skips: 0, used: new Set(), seen: Quiz.newRun(), q: null, timeLeft: 0, lastTick: 0, diveLeft: 0, qElapsed: 0,
-    correct: 0, bestAnswer: null, launched: false, peak: 0, reached: new Set(), timers: []
+    correct: 0, bestAnswer: null, launched: false, peak: 0, reached: new Set(), timers: [],
+    challenge: null, rng: Math.random   // a challenge code fixes the question order for everyone
   };
   const later = (fn, ms) => { const id = setTimeout(fn, ms); G.timers.push(id); return id; };
   const clearLater = () => { G.timers.forEach(clearTimeout); G.timers = []; };
-  const isDive = () => G.type === 'sub';
+  // Submarine and Drill Challenge both run on one clock with unlimited skips.
+  const isDive = () => G.type !== 'rocket';
 
   // How fast Ultra slides you back, in points per second. It gets harsher the further you've gone.
   // A parachute (Rocket only, inside the atmosphere) cuts that to 30%.
@@ -165,6 +188,8 @@
       b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
     $('ruleFast').innerHTML = J.fast;
+    $('chPanel').classList.toggle('hidden', id !== 'drill');
+    if (id === 'drill') renderHost();
     document.querySelectorAll('.mode-card').forEach(c => { c.querySelector('.mode-info').innerHTML = n(J.info[c.dataset.mode]); });
     document.querySelectorAll('[data-best]').forEach(b => {
       const r = bests[bestKey(id, b.dataset.best, diveLen)];
@@ -187,15 +212,20 @@
   }
 
   // ---- Start a run ------------------------------------------------------
-  function start(modeId) {
+  // challenge: a decoded code ({type, mode, len, seed}), or nothing for a normal game.
+  function start(modeId, challenge) {
     Sound.unlock();
     clearLater();
+    const ch = challenge || null;
+    if (ch) setType('drill');
+    const len = ch ? ch.len : diveLen;   // a challenge sets its own time; the Submarine choice is left alone
     const mode = MODES[modeId];
-    const dive = J.id === 'sub';
+    const dive = J.id !== 'rocket';
     Object.assign(G, {
       state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive ? Infinity : mode.lives, streak: 0, bestStreak: 0,
-      qNum: 0, skips: dive ? Infinity : mode.skips, used: new Set(), seen: Quiz.newRun(), q: null, correct: 0, bestAnswer: null,
-      launched: false, peak: 0, reached: new Set(), crashed: false, boomed: false, diveTime: diveLen, diveLeft: diveLen, qElapsed: 0, lastTick: diveLen
+      qNum: 0, skips: dive ? Infinity : mode.skips, used: new Set(), seen: ch ? Quiz.freshRun() : Quiz.newRun(), q: null,
+      challenge: ch, rng: ch ? Challenge.rng(ch.seed) : Math.random, correct: 0, bestAnswer: null,
+      launched: false, peak: 0, reached: new Set(), crashed: false, boomed: false, diveTime: len, diveLeft: len, qElapsed: 0, lastTick: len
     });
     S.reset();
     S.setStreak(0);
@@ -210,6 +240,7 @@
     el.fuelPill.classList.toggle('hidden', dive);
     el.timePill.classList.toggle('hidden', !dive);
     el.altLabel.textContent = J.distLabel;
+    $('hudTimeLabel').textContent = J.timeLabel || 'Dive time';
     el.trackRocket.textContent = J.marker;
     buildTrack();
     renderFuel();
@@ -235,7 +266,7 @@
     if (G.lives <= 0) return gameOver();
     if (isDive() && G.diveLeft <= 0) return gameOver();
     G.qNum++;
-    G.q = Quiz.generate(G.mode.quiz || G.mode.id, G.seen);
+    G.q = Quiz.generate(G.mode.quiz || G.mode.id, G.seen, G.rng);
     G.timeLeft = G.mode.time;
     G.qElapsed = 0;
     if (!isDive()) G.lastTick = Math.ceil(G.timeLeft);
@@ -244,7 +275,7 @@
     void el.card.offsetWidth;
     el.card.classList.add('swap');
     el.qCat.textContent = `${G.q.cat.icon} ${G.q.cat.name}`;
-    el.qNum.textContent = `Question ${G.qNum}`;
+    el.qNum.innerHTML = `Question ${G.qNum}` + (G.challenge ? ` · <span class="ch-tag">🎟️ ${G.challenge.code}</span>` : '');
     el.qText.innerHTML = G.q.text;
     el.feedback.textContent = '';
     el.feedback.className = 'feedback';
@@ -402,7 +433,7 @@
     G.score = 0;   // the score drains away as you go
     el.banner.classList.add('hidden');
     el.feedback.className = 'feedback bad';
-    el.feedback.textContent = isDive() ? '🚫 Your sub is turning back…' : '🚫 Your rocket is turning back…';
+    el.feedback.textContent = `🚫 ${J.turning}`;
     el.reveal.classList.add('hidden');
     el.hint.classList.add('hidden');
     el.card.classList.remove('shake'); void el.card.offsetWidth; el.card.classList.add('shake');
@@ -434,7 +465,7 @@
     if (!crashed) { S.die(); Sound.gameOver(); }
     if (isDive() && !crashed) {
       el.feedback.className = 'feedback';
-      el.feedback.textContent = '⏱️ Time\'s up! Surfacing…';
+      el.feedback.textContent = J.id === 'sub' ? '⏱️ Time\'s up! Surfacing…' : '⏱️ Time\'s up!';
     }
     later(() => {
       G.state = 'over';
@@ -442,7 +473,8 @@
       // Rocket counts the highest point reached; Submarine counts where you are when time runs out.
       const result = crashed ? 0 : Math.round(isDive() ? G.score : G.peak);
       const place = placeAt(result);
-      const key = bestKey(G.type, G.mode.id, G.diveTime);
+      // A challenge keeps its own best per code, so you can see if you beat yourself on the same questions.
+      const key = G.challenge ? `drill:${G.challenge.code}` : bestKey(G.type, G.mode.id, G.diveTime);
       const prev = bests[key];
       const isBest = !prev || result > prev.score;
       if (isBest && result > 0) {
@@ -452,24 +484,19 @@
         S.confetti(200);
       }
       $('newBest').classList.toggle('hidden', !(isBest && result > 0));
-      $('overTitle').textContent = crashed ? (isDive() ? '🫧 Back to the surface!' : '💥 Crashed!') : isDive() ? "Time's up!" : 'Out of fuel!';
-      $('btnAgain').textContent = isDive() ? '🌊 Dive again' : '🚀 Fly again';
+      $('overTitle').textContent = crashed ? J.crashTitle : J.overTitle;
+      $('btnAgain').textContent = J.again;
       const dist = J.fmt(kmAt(altFor(result)));
       const cp = G.crashPlace;
-      $('overReached').innerHTML = crashed
-        ? (isDive()
-          ? `Your sub shot back up from <b>${cp.icon} ${cp.name}</b>. Score lost!`
-          : `Your rocket nose-dived from <b>${cp.icon} ${cp.name}</b> into the Earth. Score lost!`)
-        : isDive()
-        ? `You dove to <b>${place.icon} ${place.name}</b> — ${dist} deep.`
-        : `You reached <b>${place.icon} ${place.name}</b> — ${dist} from Earth.`;
+      $('overReached').innerHTML = crashed ? J.crashLine(`${cp.icon} ${cp.name}`) : J.reachedLine(`${place.icon} ${place.name}`, dist);
       const ba = G.bestAnswer;
       $('overStats').innerHTML = `
         <div class="stat"><div class="s-label">${G.mode.drift && !isDive() ? 'Highest score' : 'Score'}</div><div class="s-value" style="color:var(--accent)">${result.toLocaleString()}${crashed && G.crashedFrom ? ` <s class="lost">${G.crashedFrom.toLocaleString()}</s>` : ''}</div></div>
         <div class="stat"><div class="s-label">Correct answers</div><div class="s-value">${G.correct}</div></div>
         <div class="stat"><div class="s-label">Best streak</div><div class="s-value">${G.bestStreak} 🔥</div></div>
         <div class="stat wide"><div class="s-label">Best answer</div><div class="s-value">${ba ? `<span class="tier-${ba.tier}">${escapeHtml(ba.text)}</span> · ${Quiz.TIER_NAMES[ba.tier]} · +${ba.pts.toLocaleString()}` : '—'}</div></div>
-        <div class="stat wide"><div class="s-label">Mode</div><div class="s-value">${isDive() ? `Submarine (${G.diveTime}s)` : 'Rocket'} · ${G.mode.label}${prev ? ` · previous best ${prev.score.toLocaleString()}` : ''}</div></div>`;
+        ${G.challenge ? `<div class="stat wide"><div class="s-label">Challenge code</div><div class="s-value"><span class="ch-tag">🎟️ ${G.challenge.code}</span> · everyone with this code got the same questions</div></div>` : ''}
+        <div class="stat wide"><div class="s-label">Mode</div><div class="s-value">${J.name(G.diveTime)} · ${G.mode.label}${prev ? ` · previous best ${prev.score.toLocaleString()}` : ''}</div></div>`;
       el.over.classList.remove('hidden');
       $('btnAgain').focus();
     }, crashed ? 300 : 2600);
@@ -624,7 +651,7 @@
       S.setTarget(altFor(G.score));
     }
     if (G.state === 'crashing') {
-      if (S.crashBoom && !G.boomed) { G.boomed = true; if (isDive()) Sound.splash(); else Sound.boom(); }
+      if (S.crashBoom && !G.boomed) { G.boomed = true; if (J.id === 'sub') Sound.splash(); else Sound.boom(); }
       if (S.crashDone) gameOver();
     } else if (isDive() && (G.state === 'question' || G.state === 'reveal')) {
       // One clock for the whole dive. It runs during the short reveals too.
@@ -645,11 +672,70 @@
     requestAnimationFrame(frame);
   }
 
+  // ---- Drill Challenge codes ----------------------------------------------
+  const ch = {
+    input: $('chInput'), preview: $('chPreview'), join: $('chJoin'),
+    code: $('chCode'), copy: $('chCopy'), make: $('chMake'), play: $('chPlayMine'),
+    host: { len: 60, mode: 'medium' }, made: null
+  };
+  const describe = c => `⛏️ ${MODES[c.mode].label} · ${c.len}-second drill`;
+
+  function renderHost() {
+    const mark = (sel, on) => document.querySelectorAll(sel).forEach(b => {
+      const a = on(b); b.classList.toggle('active', a); b.setAttribute('aria-pressed', a ? 'true' : 'false');
+    });
+    mark('#chLen button', b => +b.dataset.len === ch.host.len);
+    mark('#chMode button', b => b.dataset.mode === ch.host.mode);
+    // A code you made stays until you change a setting, so you never share one that doesn't match.
+    if (ch.made && (ch.made.mode !== ch.host.mode || ch.made.len !== ch.host.len)) ch.made = null;
+    ch.code.textContent = ch.made ? ch.made.code : '— — — —';
+    ch.code.classList.toggle('empty', !ch.made);
+    ch.copy.disabled = !ch.made; ch.copy.textContent = '📋 Copy';
+    ch.play.disabled = !ch.made;
+    ch.make.textContent = ch.made ? '🎲 New code' : '🎲 Make a code';
+  }
+  function checkInput() {
+    const raw = ch.input.value.replace(/[^0-9a-z]/gi, '');
+    const say = (cls, text) => { ch.preview.className = 'ch-preview' + (cls ? ' ' + cls : ''); ch.preview.textContent = text; };
+    ch.join.disabled = true;
+    if (!raw) { say('', 'Type the code a friend sent you.'); return null; }
+    if (raw.length < 8) { say('', `${raw.length} of 8 characters…`); return null; }
+    const d = Challenge.decode(raw);
+    if (d.error) { say('bad', d.error); return null; }
+    say('ok', `✅ ${describe(d)}`);
+    ch.join.disabled = false;
+    return d;
+  }
+
+  ch.input.addEventListener('input', checkInput);
+  $('chJoinForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const d = checkInput();
+    if (d) { Sound.click(); start(d.mode, d); }
+  });
+  document.querySelectorAll('#chLen button').forEach(b => b.addEventListener('click', () => { Sound.click(); ch.host.len = +b.dataset.len; renderHost(); }));
+  document.querySelectorAll('#chMode button').forEach(b => b.addEventListener('click', () => { Sound.click(); ch.host.mode = b.dataset.mode; renderHost(); }));
+  ch.make.addEventListener('click', () => {
+    Sound.click();
+    ch.made = Challenge.decode(Challenge.encode({ ...ch.host, seed: Challenge.newSeed() }));
+    renderHost();
+  });
+  const selectCode = () => { const r = document.createRange(); r.selectNodeContents(ch.code); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); };
+  ch.copy.addEventListener('click', () => {
+    if (!ch.made) return;
+    const done = ok => { ch.copy.textContent = ok ? '✅ Copied' : '⌨️ Ctrl+C'; };
+    try { navigator.clipboard.writeText(ch.made.code).then(() => done(true), () => { selectCode(); done(false); }); }
+    catch (e) { selectCode(); done(false); }
+  });
+  ch.play.addEventListener('click', () => { if (ch.made) { Sound.click(); start(ch.made.mode, ch.made); } });
+
   // ---- Wiring -----------------------------------------------------------
   Scene.init($('scene'));
   SubScene.init($('scene'));
+  DrillScene.init($('scene'));
   Scene.onMilestone(m => { if (S === Scene) milestone(m); });
   SubScene.onMilestone(m => { if (S === SubScene) milestone(m); });
+  DrillScene.onMilestone(m => { if (S === DrillScene) milestone(m); });
   fit();
   window.addEventListener('resize', fit);
   document.addEventListener('fullscreenchange', fit);
@@ -687,7 +773,7 @@
   $('btnPause').addEventListener('click', pause);
   $('btnResume').addEventListener('click', resume);
   $('btnQuit').addEventListener('click', showTitle);
-  $('btnAgain').addEventListener('click', () => start(G.mode.id));
+  $('btnAgain').addEventListener('click', () => start(G.mode.id, G.challenge));
   $('btnMenu').addEventListener('click', showTitle);
 
   const soundBtn = $('btnSound');

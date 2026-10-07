@@ -1350,3 +1350,24 @@ const DEPTHS = [
   { alt: 7000, pts: 7000, name: 'Centre of the Earth',     icon: '🌕', km: 6371, body: 'centre' },
   { alt: 9000, pts: 9000, name: 'Other Side of the World', icon: '🌏', km: 12742 }
 ];
+
+/* Places the drill passes on its way to the centre of the Earth (Drill Challenge). `km` is depth. */
+const DRILL_STOPS = [
+  { alt: 0,    pts: 0,    name: 'The Surface',             icon: '🌱', km: 0 },
+  { alt: 50,   pts: 50,   name: 'Worm Burrows',            icon: '🪱', km: 0.0005 },
+  { alt: 110,  pts: 110,  name: 'City Pipes',              icon: '🚰', km: 0.003 },
+  { alt: 180,  pts: 180,  name: 'Subway Tunnel',           icon: '🚇', km: 0.03, body: 'subway' },
+  { alt: 270,  pts: 270,  name: 'Dinosaur Fossils',        icon: '🦖', km: 0.1, body: 'dino' },
+  { alt: 390,  pts: 390,  name: 'Crystal Caves',           icon: '💠', km: 0.4, body: 'cave' },
+  { alt: 540,  pts: 540,  name: 'Deepest Gold Mine',       icon: '⛏️', km: 4, body: 'mine' },
+  { alt: 700,  pts: 700,  name: 'Solid Bedrock',           icon: '🪨', km: 8 },
+  { alt: 880,  pts: 880,  name: 'Deepest Hole Ever Dug',   icon: '🕳️', km: 12.262, body: 'borehole' },
+  { alt: 1080, pts: 1080, name: 'Bottom of the Crust',     icon: '🧱', km: 35 },
+  { alt: 1350, pts: 1350, name: 'The Upper Mantle',        icon: '🔥', km: 100 },
+  { alt: 1650, pts: 1650, name: 'Diamond Zone',            icon: '💎', km: 160, body: 'diamonds' },
+  { alt: 2050, pts: 2050, name: 'The Lower Mantle',        icon: '🌋', km: 660 },
+  { alt: 2650, pts: 2650, name: 'The Outer Core',          icon: '🟠', km: 2890 },
+  { alt: 3350, pts: 3350, name: 'The Inner Core',          icon: '🟡', km: 5150 },
+  { alt: 4200, pts: 4200, name: 'Centre of the Earth',     icon: '🎯', km: 6371, body: 'centre' },
+  { alt: 6000, pts: 6000, name: 'Other Side of the World', icon: '🌏', km: 12742 }
+];

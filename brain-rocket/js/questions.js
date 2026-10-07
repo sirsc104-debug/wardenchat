@@ -262,7 +262,10 @@ const Quiz = (function () {
     const set = k => new Set(Array.isArray(saved[k]) ? saved[k] : []);
     return { topics: set('topics'), letterTopics: set('letterTopics'), yearTopics: set('yearTopics'), sigs: set('sigs') };
   }
+  // A blank memory, for challenge codes: everyone must start from the same place.
+  const freshRun = () => ({ topics: new Set(), letterTopics: new Set(), yearTopics: new Set(), sigs: new Set(), noSave: true });
   function remember(seen) {
+    if (seen.noSave) return;   // a challenge game doesn't touch your own topic memory
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify({
         topics: [...seen.topics], letterTopics: [...seen.letterTopics], yearTopics: [...seen.yearTopics],
@@ -365,5 +368,5 @@ const Quiz = (function () {
     return [{ text: a.v.raw, tier: a.ent.tier }];
   }
 
-  return { TOPIC, TIER_POINTS, TIER_NAMES, generate, check, examples, keyOf, newRun };
+  return { TOPIC, TIER_POINTS, TIER_NAMES, generate, check, examples, keyOf, newRun, freshRun };
 })();
