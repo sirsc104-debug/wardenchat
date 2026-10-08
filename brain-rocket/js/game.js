@@ -75,7 +75,7 @@
     id: 'drill', scene: DrillScene, stops: DRILL_STOPS, from: 'deep', marker: '⛏️', go: 'DRILL!', firstTag: '⛏️ DRILL!',
     reached: 'YOU DRILLED TO', notYet: 'Not drilled yet',
     tagline: 'Drill to the centre of the Earth! Share a code so your friends get the exact same questions, then compare scores.',
-    rule: '<b>🎟️ Same code, same questions.</b> Everyone with the code gets the same questions in the same order. Unlimited skips.',
+    rule: '<b>🎟️ Same code, same questions.</b> Friends with your code get the exact same questions, in order.',
     timeLabel: 'Drill time', leftText: 's left', outText: '⏱️ Time\'s up!', again: '⛏️ Drill again', crashTitle: '💥 Blasted out!', name: n => `Drill Challenge (${n}s)`,
     turning: 'Your drill is turning back…',
     crashLine: p => `Your drill spun round and shot out of the ground from <b>${p}</b>. Score lost!`,
@@ -182,6 +182,7 @@
   function setType(id, animate) {
     const from = TYPE_ORDER.indexOf(J.id), to = TYPE_ORDER.indexOf(id);
     J = TYPES[id];
+    if (animate && from !== to) blurRules();
     if (S !== J.scene) {
       if (animate && from !== to) slideScenes(to > from ? 1 : -1);
       S = J.scene; S.reset();
@@ -224,6 +225,14 @@
     // the Dive length menu hangs under the Submarine tab
     const sub = document.querySelector('.type-btn[data-type="sub"]'), menu = $('diveLen');
     menu.style.left = (sub.offsetLeft + sub.offsetWidth / 2) + 'px';
+  }
+
+  // The rules box blurs while the worlds slide past, then sharpens with the new mode's rules.
+  function blurRules() {
+    const how = document.querySelector('.title-panel .how');
+    how.classList.add('switching');
+    clearTimeout(blurRules.t);
+    blurRules.t = setTimeout(() => how.classList.remove('switching'), 450);
   }
 
   function slideScenes(dir) {

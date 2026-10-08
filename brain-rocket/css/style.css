@@ -460,3 +460,11 @@ button { font-family: inherit; cursor: pointer; }
 .type-extra .dive-len.open { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; transition-delay: 0.25s; }
 .type-toggle .type-name { font-size: 20px; }
 .type-toggle .type-icon { font-size: 27px; }
+
+/* The mode cards and the Drill Challenge panel share one fixed-height slot, so the rules box
+   underneath sits in the same place in every mode. It blurs while the scene slides across. */
+.title-panel .modes, .title-panel .ch-panel { height: 284px; margin-bottom: 0; box-sizing: border-box; }
+.title-panel .modes { align-items: flex-start; }
+.title-panel .ch-preview { min-height: 44px; }
+.title-panel .how { margin-top: 18px; height: 128px; box-sizing: border-box; align-content: center; transition: filter 0.25s, opacity 0.25s; }
+.title-panel .how.switching { filter: blur(5px); opacity: 0.55; }

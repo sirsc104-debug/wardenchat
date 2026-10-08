@@ -42,7 +42,7 @@ Pick one with the switch on the home screen. Rocket and Submarine each have thei
 
 The home screen has a small **💬 Warden Chat** button in the bottom-left corner that opens [Warden Chat](https://warden-chat.xsirsc.chatgpt.site/) (another site by the same author) in a new tab.
 
-The home screen keeps the logo and the tab bar in the same place in every mode. Switching tabs slides the highlight to the new tab while the background world slides across in step; picking Submarine drops down its Dive length menu just under the Submarine tab.
+The home screen keeps the logo and the tab bar in the same place in every mode. Switching tabs slides the highlight to the new tab while the background world slides across in step and the rules box blurs, then sharpens with the new rules; picking Submarine drops down its Dive length menu just under the Submarine tab.
 
 Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the browser.
 
