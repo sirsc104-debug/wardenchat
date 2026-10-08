@@ -1,4 +1,4 @@
-/* Brain Rocket — the Drill Challenge world: a drill boring through the Earth to its centre
+/* Brain Rocket — the Play With Friends world: a drill boring through the Earth to its centre
    (same API as Scene and SubScene). */
 'use strict';
 

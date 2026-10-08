@@ -103,18 +103,7 @@
           <span class="type-glider" id="typeGlider" aria-hidden="true"></span>
           <button type="button" class="type-btn active" data-type="rocket" aria-pressed="true"><span class="type-icon">🚀</span><span class="type-name">Rocket</span><span class="type-sub">Fly up to space</span></button>
           <button type="button" class="type-btn" data-type="sub" aria-pressed="false"><span class="type-icon">🌊</span><span class="type-name">Submarine</span><span class="type-sub">Timed dive</span></button>
-          <button type="button" class="type-btn" data-type="drill" aria-pressed="false"><span class="type-icon">⛏️</span><span class="type-name">Drill Challenge</span><span class="type-sub">Play friends with a code</span></button>
-        </div>
-        <!-- room for the Dive length menu, so it never covers anything -->
-        <div class="type-extra">
-          <div class="dive-len" id="diveLen" role="group" aria-label="Dive length" aria-hidden="true">
-            <span class="dive-len-label">Dive length</span>
-            <div class="dive-len-btns">
-              <button type="button" data-len="30" aria-pressed="false">30s</button>
-              <button type="button" data-len="60" aria-pressed="true" class="active">60s</button>
-              <button type="button" data-len="120" aria-pressed="false">120s</button>
-            </div>
-          </div>
+          <button type="button" class="type-btn" data-type="drill" aria-pressed="false"><span class="type-icon">⛏️</span><span class="type-name">Play With Friends</span><span class="type-sub">Drill race with a code</span></button>
         </div>
         <div class="modes">
           <button type="button" class="mode-card mode-easy" data-mode="easy">
@@ -150,8 +139,17 @@
               <button type="button" class="ultra-pick" data-mode="ultra"><span class="up-name">Hard</span><span class="up-sub">expert questions</span><span class="mode-best" data-best="ultra"></span></button>
             </div>
           </div>
+          <!-- Submarine: after picking a difficulty, pick how long the dive is -->
+          <div class="time-pick hidden" id="timePick" role="dialog" aria-label="Choose your dive length">
+            <button type="button" class="tp-close" id="tpClose" aria-label="Back">✕</button>
+            <span class="tp-title">⏱️ How long?</span>
+            <span class="tp-mode" id="tpMode"></span>
+            <button type="button" class="tp-len" data-len="30"><b>30s</b><small></small></button>
+            <button type="button" class="tp-len" data-len="60"><b>60s</b><small></small></button>
+            <button type="button" class="tp-len" data-len="120"><b>120s</b><small></small></button>
+          </div>
         </div>
-        <!-- Drill Challenge: share a code, everyone gets the same questions -->
+        <!-- Play With Friends: share a code, everyone gets the same questions -->
         <div class="ch-panel hidden" id="chPanel">
           <form class="ch-box" id="chJoinForm" autocomplete="off">
             <h3>🎟️ Got a code?</h3>

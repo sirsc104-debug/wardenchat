@@ -209,11 +209,18 @@ button { font-family: inherit; cursor: pointer; }
 .logo span { display: block; }
 .logo .logo-brain { display: inline-block; position: relative; }
 .logo .logo-by {
-  position: absolute; left: -34px; top: -8px;
+  position: absolute; left: -30px; top: 16px; z-index: 2;
   font-size: 30px; font-style: normal; line-height: 1; font-weight: 700; letter-spacing: 0.04em; color: #ffd23f;
   text-shadow: 0 3px 0 #8a2b1a, 0 0 14px rgba(255,210,63,0.55);
   transform: rotate(-30deg); transform-origin: left bottom; white-space: nowrap;
+  animation: by-pulse 1.6s ease-in-out infinite;
 }
+/* "SirSC's" sits just over the corner of the B and gently pulses bigger and smaller */
+@keyframes by-pulse {
+  0%, 100% { transform: rotate(-30deg) scale(1); }
+  50% { transform: rotate(-30deg) scale(1.16); }
+}
+@media (prefers-reduced-motion: reduce) { .logo .logo-by { animation: none; } }
 .logo span:first-child { color: #fff; text-shadow: 0 8px 0 #2b3a8a, 0 0 40px rgba(79,209,255,0.6); }
 .logo span:last-child { background: linear-gradient(#ffe27a, #ff7a3c); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 8px 0 #8a2b1a); animation: float 3s ease-in-out infinite; }
 .tagline { font-size: 24px; margin: 18px auto 26px; max-width: 680px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,40,0.7); }
@@ -388,7 +395,7 @@ button { font-family: inherit; cursor: pointer; }
 .hint-word { font-size: 26px; letter-spacing: 0.06em; color: #fff; white-space: pre-wrap; }
 .skip-btn { white-space: nowrap; }
 
-/* ---- Drill Challenge ------------------------------------------------------- */
+/* ---- Play With Friends ------------------------------------------------------- */
 .ch-panel { display: grid; grid-template-columns: 1fr 1.2fr; gap: 14px; text-align: left; margin-bottom: 16px; animation: card-in 0.5s cubic-bezier(.2,1.3,.4,1); }
 .ch-panel.hidden { display: none; }
 .ch-box { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 16px 18px; border-radius: 24px; background: var(--panel); border: 2px solid var(--panel-edge); }
@@ -461,10 +468,31 @@ button { font-family: inherit; cursor: pointer; }
 .type-toggle .type-name { font-size: 20px; }
 .type-toggle .type-icon { font-size: 27px; }
 
-/* The mode cards and the Drill Challenge panel share one fixed-height slot, so the rules box
+/* The mode cards and the Play With Friends panel share one fixed-height slot, so the rules box
    underneath sits in the same place in every mode. It blurs while the scene slides across. */
 .title-panel .modes, .title-panel .ch-panel { height: 284px; margin-bottom: 0; box-sizing: border-box; }
 .title-panel .modes { align-items: flex-start; }
 .title-panel .ch-preview { min-height: 44px; }
 .title-panel .how { margin-top: 18px; height: 128px; box-sizing: border-box; align-content: center; transition: filter 0.25s, opacity 0.25s; }
 .title-panel .how.switching { filter: blur(5px); opacity: 0.55; }
+
+/* ---- Submarine: pick a dive length after picking a difficulty ---------------- */
+.modes { position: relative; }
+.time-pick {
+  position: absolute; z-index: 5; display: flex; flex-direction: column; align-items: stretch; gap: 8px;
+  padding: 16px 14px; border-radius: 26px; box-sizing: border-box;
+  background: linear-gradient(160deg, #1d7fc4, #0b3a6b); border: 3px solid rgba(160,230,255,0.7);
+  box-shadow: 0 14px 0 rgba(0,0,0,0.3), 0 24px 40px rgba(0,0,0,0.35);
+  transform: translateY(-8px) scale(1.04); opacity: 0; transition: opacity 0.2s;
+}
+.time-pick.open { opacity: 1; animation: fade-up 0.25s ease; }
+.tp-title { font-size: 24px; font-weight: 700; text-align: center; }
+.tp-mode { font-size: 13px; font-weight: 600; color: #bfe9ff; text-align: center; margin-top: -6px; }
+.tp-len { display: flex; flex-direction: column; align-items: center; padding: 8px; border-radius: 16px; border: 2px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1); color: #fff; }
+.tp-len b { font-size: 26px; line-height: 1; }
+.tp-len small { font-size: 12px; color: #bfe9ff; font-weight: 600; margin-top: 2px; }
+.tp-len:hover, .tp-len:focus-visible { background: #4fd1ff; color: #052033; outline: none; }
+.tp-len:hover small, .tp-len:focus-visible small { color: #052033; }
+.tp-len.last { border-color: #ffd23f; }
+.tp-close { position: absolute; right: 10px; top: 10px; width: 30px; height: 30px; border-radius: 10px; border: 0; background: rgba(255,255,255,0.15); color: #fff; font-size: 14px; }
+.tp-close:hover { background: rgba(255,255,255,0.3); }

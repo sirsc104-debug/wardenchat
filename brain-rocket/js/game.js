@@ -53,30 +53,30 @@
     sub: {
       id: 'sub', scene: SubScene, stops: DEPTHS, fmt: fmtDepth, from: 'deep', distLabel: 'Depth',
       marker: '🤿', down: true, go: 'DIVE!', firstTag: '🌊 DIVE!', reached: 'YOU DOVE TO', notYet: 'Not dived yet',
-      tagline: 'You have {n} seconds. Every answer drives your submarine deeper. How far down can you get?',
+      tagline: 'Pick a 30, 60 or 120-second dive. Every answer drives your submarine deeper. How far down can you get?',
       fast: '<b>⚡ Be fast.</b> Answer each question within a few seconds for ×2 or ×1.5.',
-      rule: '<b>⏱️ Beat the clock.</b> One {n}-second dive. No lives to lose and unlimited skips.',
+      rule: '<b>⏱️ Beat the clock.</b> One timed dive. No lives to lose and unlimited skips.',
       leftText: 's of dive left', endless: '∞ Deeper than anyone!', outText: '⏱️ Time\'s up! Surfacing…',
       again: '🌊 Dive again', overTitle: "Time's up!", crashTitle: '🫧 Back to the surface!', name: n => `Submarine (${n}s)`,
       turning: 'Your sub is turning back…',
       crashLine: p => `Your sub shot back up from <b>${p}</b>. Score lost!`,
       reachedLine: (p, dist) => `You dove to <b>${p}</b> — ${dist} deep.`,
       info: {
-        easy: '{n}-second dive<br>unlimited skips · everyday topics',
-        medium: '{n}-second dive<br>unlimited skips · mixed topics',
-        hard: '{n}-second dive<br>unlimited skips · expert topics',
-        ultra: '{n}-second dive<br>you float up between answers!'
+        easy: '30, 60 or 120s dive<br>unlimited skips · everyday topics',
+        medium: '30, 60 or 120s dive<br>unlimited skips · mixed topics',
+        hard: '30, 60 or 120s dive<br>unlimited skips · expert topics',
+        ultra: '30, 60 or 120s dive<br>you float up between answers!'
       }
     }
   };
-  // Drill Challenge: a timed race to the centre of the Earth, played from a code so friends get the same questions.
+  // Play With Friends: a timed race to the centre of the Earth, played from a code so friends get the same questions.
   TYPES.drill = {
     ...TYPES.sub,
     id: 'drill', scene: DrillScene, stops: DRILL_STOPS, from: 'deep', marker: '⛏️', go: 'DRILL!', firstTag: '⛏️ DRILL!',
     reached: 'YOU DRILLED TO', notYet: 'Not drilled yet',
     tagline: 'Drill to the centre of the Earth! Share a code so your friends get the exact same questions, then compare scores.',
     rule: '<b>🎟️ Same code, same questions.</b> Friends with your code get the exact same questions, in order.',
-    timeLabel: 'Drill time', leftText: 's left', outText: '⏱️ Time\'s up!', again: '⛏️ Drill again', crashTitle: '💥 Blasted out!', name: n => `Drill Challenge (${n}s)`,
+    timeLabel: 'Drill time', leftText: 's left', outText: '⏱️ Time\'s up!', again: '⛏️ Drill again', crashTitle: '💥 Blasted out!', name: n => `Play With Friends (${n}s drill)`,
     turning: 'Your drill is turning back…',
     crashLine: p => `Your drill spun round and shot out of the ground from <b>${p}</b>. Score lost!`,
     reachedLine: (p, dist) => `You drilled down to <b>${p}</b> — ${dist} deep.`
@@ -154,7 +154,7 @@
   };
   const later = (fn, ms) => { const id = setTimeout(fn, ms); G.timers.push(id); return id; };
   const clearLater = () => { G.timers.forEach(clearTimeout); G.timers = []; };
-  // Submarine and Drill Challenge both run on one clock with unlimited skips.
+  // Submarine and Play With Friends both run on one clock with unlimited skips.
   const isDive = () => G.type !== 'rocket';
   // When the dive clock turns red and starts ticking.
   const lowAt = () => 10;
@@ -182,7 +182,6 @@
   function setType(id, animate) {
     const from = TYPE_ORDER.indexOf(J.id), to = TYPE_ORDER.indexOf(id);
     J = TYPES[id];
-    if (animate && from !== to) blurRules();
     if (S !== J.scene) {
       if (animate && from !== to) slideScenes(to > from ? 1 : -1);
       S = J.scene; S.reset();
@@ -194,22 +193,20 @@
     });
     const n = s => s.replace('{n}', diveLen);
     $('tagline').textContent = n(J.tagline);
-    $('ruleLast').innerHTML = n(J.rule);
-    $('diveLen').classList.toggle('open', id === 'sub');
-    $('diveLen').setAttribute('aria-hidden', id === 'sub' ? 'false' : 'true');
-    document.querySelectorAll('#diveLen button').forEach(b => { b.tabIndex = id === 'sub' ? 0 : -1; });
-    document.querySelectorAll('#diveLen button').forEach(b => {
-      const on = +b.dataset.len === diveLen;
-      b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
-    });
-    $('ruleFast').innerHTML = J.fast;
+    // the rules box only changes its text once it's fully blurred
+    const fastText = J.fast, ruleText = n(J.rule);
+    const rules = () => { $('ruleFast').innerHTML = fastText; $('ruleLast').innerHTML = ruleText; };
+    if (animate && from !== to) blurRules(rules); else rules();
+    closeTimePick();
     $('chPanel').classList.toggle('hidden', id !== 'drill');
     if (id === 'drill') renderHost();
     document.querySelectorAll('.mode-card').forEach(c => { c.querySelector('.mode-info').innerHTML = n(J.info[c.dataset.mode]); });
     document.querySelectorAll('[data-best]').forEach(b => {
-      const r = bests[bestKey(id, b.dataset.best, diveLen)];
-      if (b.closest('.ultra-pick')) b.textContent = r ? `Best ${r.score.toLocaleString()}` : '';
-      else b.textContent = r ? `Best: ${r.score.toLocaleString()} · ${r.icon} ${r.place}` : J.notYet;
+      // Submarine keeps a best for each dive length; the card shows the best of them
+      const r = id === 'sub' ? bestDive(b.dataset.best) : bests[bestKey(id, b.dataset.best, diveLen)];
+      const len = r && r.len ? ` (${r.len}s)` : '';
+      if (b.closest('.ultra-pick')) b.textContent = r ? `Best ${r.score.toLocaleString()}${len}` : '';
+      else b.textContent = r ? `Best: ${r.score.toLocaleString()} · ${r.icon} ${r.place}${len}` : J.notYet;
     });
     el.title.dataset.type = id;
     moveGlider(animate);
@@ -222,17 +219,50 @@
     glider.classList.toggle('instant', !animate);
     glider.style.width = btn.offsetWidth + 'px';
     glider.style.transform = `translateX(${btn.offsetLeft}px)`;
-    // the Dive length menu hangs under the Submarine tab
-    const sub = document.querySelector('.type-btn[data-type="sub"]'), menu = $('diveLen');
-    menu.style.left = (sub.offsetLeft + sub.offsetWidth / 2) + 'px';
   }
 
-  // The rules box blurs while the worlds slide past, then sharpens with the new mode's rules.
-  function blurRules() {
+  const bestDive = mode => DIVE_LENGTHS.map(len => bests[bestKey('sub', mode, len)] && { ...bests[bestKey('sub', mode, len)], len })
+    .filter(Boolean).sort((a, b) => b.score - a.score)[0];
+
+  // Submarine: after you pick a difficulty, a picker covers that card and asks how long to dive.
+  const tp = { box: $('timePick'), mode: null, card: null };
+  function openTimePick(card, modeId) {
+    const box = tp.box;
+    tp.mode = modeId; tp.card = card;
+    box.style.left = card.offsetLeft + 'px'; box.style.top = card.offsetTop + 'px';
+    box.style.width = card.offsetWidth + 'px'; box.style.height = card.offsetHeight + 'px';
+    $('tpMode').textContent = MODES[modeId].label;
+    box.querySelectorAll('.tp-len').forEach(b => {
+      const len = +b.dataset.len, r = bests[bestKey('sub', modeId, len)];
+      b.querySelector('small').textContent = r ? `Best ${r.score.toLocaleString()}` : 'Not dived yet';
+      b.classList.toggle('last', len === diveLen);
+    });
+    box.classList.remove('hidden');
+    void box.offsetWidth; box.classList.add('open');
+    box.querySelector(`.tp-len[data-len="${diveLen}"]`).focus();
+  }
+  function closeTimePick() {
+    if (!tp.box || tp.box.classList.contains('hidden')) return;
+    tp.box.classList.add('hidden'); tp.box.classList.remove('open');
+    tp.mode = null; tp.card = null;
+  }
+  const timePickOpen = () => !tp.box.classList.contains('hidden');
+  // Every way to pick a difficulty comes through here.
+  function chooseMode(card, modeId) {
+    if (J.id === 'sub') openTimePick(card, modeId);
+    else start(modeId);
+  }
+
+  // The rules box blurs while the worlds slide past, swaps its text once fully blurred, then sharpens.
+  const BLUR_MS = 250;   // matches the .how filter transition in style.css
+  function blurRules(swap) {
     const how = document.querySelector('.title-panel .how');
     how.classList.add('switching');
-    clearTimeout(blurRules.t);
-    blurRules.t = setTimeout(() => how.classList.remove('switching'), 450);
+    clearTimeout(blurRules.t); clearTimeout(blurRules.t2);
+    blurRules.t = setTimeout(() => {
+      swap();
+      blurRules.t2 = setTimeout(() => how.classList.remove('switching'), 40);
+    }, BLUR_MS + 20);
   }
 
   function slideScenes(dir) {
@@ -723,7 +753,7 @@
     requestAnimationFrame(frame);
   }
 
-  // ---- Drill Challenge codes ----------------------------------------------
+  // ---- Play With Friends codes ----------------------------------------------
   const ch = {
     input: $('chInput'), preview: $('chPreview'), join: $('chJoin'),
     code: $('chCode'), copy: $('chCopy'), make: $('chMake'), play: $('chPlayMine'),
@@ -794,13 +824,19 @@
   document.querySelectorAll('.type-btn').forEach(b => b.addEventListener('click', () => { if (b.dataset.type === J.id) return; Sound.click(); setType(b.dataset.type, true); }));
   window.addEventListener('resize', () => moveGlider(false));
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => moveGlider(false));
-  document.querySelectorAll('#diveLen button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.mode-card:not(.mode-ultra)').forEach(b => b.addEventListener('click', () => { Sound.click(); chooseMode(b, b.dataset.mode); }));
+  tp.box.querySelectorAll('.tp-len').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
     Sound.click();
     diveLen = +b.dataset.len;
-    try { localStorage.setItem('brainRocket.dive', diveLen); } catch (e) { /* ignore */ }
-    setType('sub');
+    try { localStorage.setItem('brainRocket.dive', diveLen); } catch (err) { /* ignore */ }
+    const mode = tp.mode;
+    closeTimePick();
+    start(mode);
   }));
-  document.querySelectorAll('.mode-card:not(.mode-ultra)').forEach(b => b.addEventListener('click', () => { Sound.click(); start(b.dataset.mode); }));
+  $('tpClose').addEventListener('click', e => { e.stopPropagation(); Sound.click(); closeTimePick(); });
+  tp.box.addEventListener('click', e => e.stopPropagation());
+  document.addEventListener('click', e => { if (timePickOpen() && !e.target.closest('.mode-card')) closeTimePick(); });
   // The Ultra card opens to show its three question difficulties.
   const ultra = document.querySelector('.mode-ultra');
   const toggleUltra = open => {
@@ -810,7 +846,7 @@
   ultra.addEventListener('click', e => {
     const pick = e.target.closest('.ultra-pick');
     Sound.click();
-    if (pick) start(pick.dataset.mode);
+    if (pick) chooseMode(ultra, pick.dataset.mode);
     else toggleUltra(!ultra.classList.contains('open'));
   });
   ultra.addEventListener('keydown', e => {
@@ -840,6 +876,7 @@
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
+      if (G.state === 'title' && timePickOpen()) { closeTimePick(); return; }
       if (G.state === 'question') pause();
       else if (G.state === 'paused') resume();
       return;

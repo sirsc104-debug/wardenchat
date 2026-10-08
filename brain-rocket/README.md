@@ -9,9 +9,9 @@ Plain HTML, CSS and JavaScript with no build step. Open `brain-rocket/index.html
 Pick one with the switch on the home screen. Rocket and Submarine each have their own Owen (Easy), Medium, Hard and Ultra Hard modes and their own best scores.
 
 - **🚀 Rocket.** Fly from the launch pad past the Moon, Mars and the outer planets to the edge of the universe. Every question has its own timer; running out of time burns a fuel cell, and the game ends when they're gone.
-- **🌊 Submarine.** A timed dive: pick 30, 60 or 120 seconds next to the switch (each length keeps its own best scores). There are no lives and skips are unlimited, so it's all about how deep you get before the clock runs out: past the coral reef, the Titanic, hydrothermal vents and Challenger Deep, then drilling through the crust, the mantle and the core to the other side of the world. The speed bonus counts seconds per question (Owen ×2 within 6 s, ×1.5 within 12 s; Medium 5/10 s; Hard 4/8 s), and the game moves straight on after each answer because the clock never stops. Skipping jumps straight to the next question (and resets your streak).
+- **🌊 Submarine.** A timed dive: pick a difficulty, then choose a 30, 60 or 120-second dive in the picker that pops up over the card (each length keeps its own best scores; it works the same for Ultra Hard after you pick its question difficulty). There are no lives and skips are unlimited, so it's all about how deep you get before the clock runs out: past the coral reef, the Titanic, hydrothermal vents and Challenger Deep, then drilling through the crust, the mantle and the core to the other side of the world. The speed bonus counts seconds per question (Owen ×2 within 6 s, ×1.5 within 12 s; Medium 5/10 s; Hard 4/8 s), and the game moves straight on after each answer because the clock never stops. Skipping jumps straight to the next question (and resets your streak).
 
-- **⛏️ Drill Challenge.** Play against friends without being online together. The host picks a difficulty (Owen, Medium or Hard) and a time (30, 60 or 120 seconds) and makes an **8-character code** (like `JMZQJA4C`). Everyone who types that code gets **exactly the same questions in the same order**, plays on their own, and compares scores afterwards. It plays like Submarine (one clock, unlimited skips), but in its own world: a drill boring down past worms and roots, city pipes, a subway tunnel, dinosaur fossils, crystal caves, the deepest gold mine and the deepest hole ever dug, then through the mantle, the diamond zone and the liquid outer core to the centre of the Earth. The code also carries a check, so a typo is caught instead of quietly starting a different game, and a code only works on the same version of the game (same question bank). Your best on each code is saved, so you can see if you beat yourself.
+- **⛏️ Play With Friends** (a drill race). Play against friends without being online together. The host picks a difficulty (Owen, Medium or Hard) and a time (30, 60 or 120 seconds) and makes an **8-character code** (like `JMZQJA4C`). Everyone who types that code gets **exactly the same questions in the same order**, plays on their own, and compares scores afterwards. It plays like Submarine (one clock, unlimited skips), but in its own world: a drill boring down past worms and roots, city pipes, a subway tunnel, dinosaur fossils, crystal caves, the deepest gold mine and the deepest hole ever dug, then through the mantle, the diamond zone and the liquid outer core to the centre of the Earth. The code also carries a check, so a typo is caught instead of quietly starting a different game, and a code only works on the same version of the game (same question bank). Your best on each code is saved, so you can see if you beat yourself.
 
 **💀 Ultra Hard** is a fourth mode for Rocket and Submarine. Click its card to pick the question difficulty (Easy, Medium or Hard questions, each with its own best scores). It pays ×2.5 points, but while each question is on screen the rocket falls back down and the submarine floats back up, and the drift gets faster the further you've gone (12 points a second plus 3% of your score). In Rocket, a 🪂 parachute pops out of the nose whenever you start falling inside Earth's atmosphere (below Outer Space), cutting the fall to 30% so it's much harder to drop all the way back to the launch pad. It comes off when you climb again and a new one opens the next time you fall. The submarine has no parachute. Rocket keeps your highest point as your result; Submarine counts where you are when the clock runs out.
 
@@ -42,7 +42,7 @@ Pick one with the switch on the home screen. Rocket and Submarine each have thei
 
 The home screen has a small **💬 Warden Chat** button in the bottom-left corner that opens [Warden Chat](https://warden-chat.xsirsc.chatgpt.site/) (another site by the same author) in a new tab.
 
-The home screen keeps the logo and the tab bar in the same place in every mode. Switching tabs slides the highlight to the new tab while the background world slides across in step and the rules box blurs, then sharpens with the new rules; picking Submarine drops down its Dive length menu just under the Submarine tab.
+The home screen keeps the logo and the tab bar in the same place in every mode. Switching tabs slides the highlight to the new tab while the background world slides across in step and the rules box blurs, then sharpens with the new rules.
 
 Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the browser.
 
@@ -50,14 +50,14 @@ Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the b
 
 | File | What it does |
 | --- | --- |
-| `js/data.js` | The topic format, the original six topics, and the stops for each journey (`MILESTONES` for Rocket, `DEPTHS` for Submarine, `DRILL_STOPS` for Drill Challenge) |
+| `js/data.js` | The topic format, the original six topics, and the stops for each journey (`MILESTONES` for Rocket, `DEPTHS` for Submarine, `DRILL_STOPS` for Play With Friends) |
 | `js/topics-everyday.js`, `js/topics-mixed.js`, `js/topics-expert.js`, `js/topics-more.js` | The other topics with their answers and rarity tiers |
 | `js/topics-dhhs.js` | The Daniel Hand High School (DHHS) topics |
 | `js/topics-years.js` | Topics whose answers carry years, for year questions (`Toy Story @1995`) |
 | `js/questions.js` | Picks topic, letter and year questions and checks answers |
 | `js/scene.js` | The Rocket world: sky, ground, planets, decorations, rocket, particles |
-| `js/drillscene.js` | The Drill Challenge world: soil, pipes, subway, fossils, caves, mine, bedrock, mantle and core |
-| `js/challenge.js` | Drill Challenge codes: packs difficulty, time and a question seed into 8 characters, and seeds the question order |
+| `js/drillscene.js` | The Play With Friends world: soil, pipes, subway, fossils, caves, mine, bedrock, mantle and core |
+| `js/challenge.js` | Play With Friends codes: packs difficulty, time and a question seed into 8 characters, and seeds the question order |
 | `js/subscene.js` | The Submarine world: ocean zones, sea life, wrecks, the trench, rock, mantle and core |
 | `js/badwords.js` | The rude-word check (lists are ROT13-encoded; only runs after an answer is rejected) |
 | `js/game.js` | Game flow, scoring, HUD, popups and screens for both ways to play |

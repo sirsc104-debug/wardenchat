@@ -1,4 +1,4 @@
-/* Brain Rocket — Drill Challenge codes. An 8-character code holds everything a friend needs to
+/* Brain Rocket — Play With Friends codes. An 8-character code holds everything a friend needs to
    get exactly the same questions in the same order: the difficulty, the drill time and a question
    seed, plus a check so a typo is caught instead of starting a different game.
 
