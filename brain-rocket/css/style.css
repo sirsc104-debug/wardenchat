@@ -507,3 +507,5 @@ button { font-family: inherit; cursor: pointer; }
 .tp-close { right: 8px; top: 8px; width: 26px; height: 26px; font-size: 12px; }
 #title[data-type="elev"] .logo span:first-child { text-shadow: 0 8px 0 #4a3a6a, 0 0 40px rgba(255,210,120,0.6); }
 .time-pill.bump { animation: bump 0.4s ease; }
+/* breathing room between the tab bar and the cards, so a lifted card never overlaps the bar */
+.title-panel .modes, .title-panel .ch-panel { margin-top: 30px; }
