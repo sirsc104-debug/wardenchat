@@ -1,18 +1,16 @@
-/* Brain Rocket — the Elevator world: a glass elevator climbing a tower that never ends, with
-   rooms on every floor that get stranger the higher you go (same API as the other scenes).
-   The building reacts to the elevator's power: lights dim and flicker, emergency lights spin,
-   people pull out torches, sparks fly and the floor numbers glitch. */
+/* Brain Rocket — the Elevator world: a glass elevator riding up the outside of a tower that never
+   ends, in an open sky like the Rocket's. The strangeness happens around the tower: things leaning
+   out of windows, sitting on ledges and floating past, with a big set piece at every milestone.
+   The tower reacts to the elevator's power: windows go dark, warning lights blink, sparks fly. */
 'use strict';
 
 const ElevScene = (function () {
   const W = 1600, H = 900;
-  const K = 3;              // screen pixels per point
-  const CX = 580;           // shaft centre
-  const SY = 470;           // elevator car centre
-  const BAND = 60;          // points per floor band on screen
-  const FH = BAND * K;      // 180px per floor band
-  const BL = 150, BR = 1010; // building edges
-  const SH = 70;            // half the shaft width
+  const K = 3;               // screen pixels per point
+  const SY = 520;            // elevator car centre (screen y)
+  const TL = 360, TR = 560;  // the tower's left and right walls
+  const CX = TR + 62;        // the car rides the tower's right-hand wall
+  const ROW = 30;            // window rows, in pixels
   const TAU = Math.PI * 2;
 
   let canvas, ctx, pxScale = 1;
@@ -33,9 +31,10 @@ const ElevScene = (function () {
   const blob = (x, y, r, c) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); };
   const rect = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); };
   const poly = (pts, c) => { ctx.fillStyle = c; ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.fill(); };
+  const wrapX = (x, m = 260) => { const span = W + m * 2; return ((((x + m) % span) + span) % span) - m; };
+  const sy = (a, p = 1) => SY + (st.cam - a) * K * p;     // a point's screen y (p = parallax)
+  const dim = () => (st.dead ? 0.15 : st.power) * st.flick; // how lit the tower is
 
-  const stopAt = a => { let s = ELEV_STOPS[0]; for (const x of ELEV_STOPS) if (a >= x.alt) s = x; return s; };
-  // floor number at a point, like the HUD counter (grows faster and faster up the tower)
   function floorAt(a) {
     const M = ELEV_STOPS;
     if (a <= 0) return 1;
@@ -46,57 +45,106 @@ const ElevScene = (function () {
     const L = M[M.length - 1];
     return L.km * Math.exp((a - L.alt) / 2500);
   }
-  const slabY = b => SY + 75 + (st.cam - b * BAND) * K;   // bottom of floor band b
-  const dim = () => (st.dead ? 0.2 : st.power) * st.flick;  // how lit the building is
 
-  // ---- Sky outside the tower -----------------------------------------------
+  // ---- Sky --------------------------------------------------------------------
   const SKY = [
-    [0, '#6fc0ff', '#d6f0ff'], [3000, '#8fb8f0', '#f4f8ff'], [8000, '#3c4fa8', '#9db4f0'],
-    [14500, '#0b1030', '#2a2f6a'], [21000, '#2a0f3a', '#5a2a7a'], [25000, '#0a2a3a', '#1a5a6a']
+    [0, '#5fb4ff', '#cfeeff'], [2500, '#7fc0ff', '#f2f8ff'], [6000, '#5a7ad8', '#c4d4ff'],
+    [10000, '#2a3a8a', '#7a8ad8'], [14500, '#0b1030', '#262c66'], [21000, '#2a0f3a', '#5a2a7a'], [25000, '#081f2e', '#18506a']
   ];
   function skyCols(a) {
-    if (a >= 30000) { const h = (a * 0.02 + st.t * 20) % 360; return [`hsl(${h},60%,18%)`, `hsl(${(h + 60) % 360},70%,35%)`]; }
+    if (a >= 30000) { const h = (a * 0.02 + st.t * 20) % 360; return [`hsl(${h},55%,16%)`, `hsl(${(h + 60) % 360},65%,32%)`]; }
     let i = 0; while (i < SKY.length - 2 && a > SKY[i + 1][0]) i++;
     const s = SKY[i], e = SKY[i + 1], t = clamp((a - s[0]) / (e[0] - s[0]), 0, 1);
     return [mixc(s[1], e[1], t), mixc(s[2], e[2], t)];
   }
-  function drawSky() {
-    const [top, bot] = skyCols(st.cam);
-    const g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, top); g.addColorStop(1, bot);
-    rect(-30, -30, W + 60, H + 60, g);
+  function drawStars() {
+    const a = clamp((st.cam - 9000) / 4000, 0, 1);
+    if (a <= 0) return;
+    for (let i = 0; i < 140; i++) {
+      const y = ((hash(i) * 2400 + st.cam * K * 0.05) % 1000) - 50;
+      ctx.fillStyle = `rgba(255,255,255,${a * (0.5 + 0.5 * Math.sin(st.t * 2 + i))})`;
+      ctx.fillRect(hash(i + 9) * W, y, i % 7 ? 2 : 3, i % 7 ? 2 : 3);
+    }
+  }
+  function drawSun() {
+    const y = sy(-80, 0.04);
+    if (y < -200) return;
+    blob(1300, y - 330, 60, `rgba(255,248,210,${clamp(1 - st.cam / 8000, 0, 1) * 0.95})`);
+  }
+
+  // ---- The city at the bottom -----------------------------------------------------
+  function drawCity() {
+    const gy = sy(0) + 80;
+    if (gy - 400 > H) return;
+    // far skyline, then near buildings, then the street
+    const fy = SY + 80 + st.cam * K * 0.35;
+    for (let i = 0; i < 16; i++) { const h = 120 + hash(i) * 220, x = i * 110 - 40; rect(x, fy - h, 90, h + 600, '#9fb4d8'); }
+    const ny = SY + 80 + st.cam * K * 0.7;
+    for (let i = 0; i < 12; i++) {
+      const h = 90 + hash(i + 30) * 160, x = i * 150 - 60;
+      if (x > TL - 140 && x < TR + 160) continue;
+      rect(x, ny - h, 120, h + 600, '#6b7fae');
+      ctx.fillStyle = 'rgba(255,233,150,0.7)';
+      for (let r = 0; r < h / 26 - 1; r++) for (let c = 0; c < 4; c++) if (hash(i * 31 + r * 7 + c) > 0.45) ctx.fillRect(x + 12 + c * 26, ny - h + 14 + r * 26, 12, 14);
+    }
+    rect(-30, gy, W + 60, H, '#5a5d66');
+    rect(-30, gy, W + 60, 8, '#9aa0ad');
+    ctx.fillStyle = '#f4f4f0'; for (let x = 0; x < W; x += 120) ctx.fillRect(x, gy + 50, 60, 6);
+    for (const tx of [120, 260, 1080, 1220]) { rect(tx - 4, gy - 60, 8, 60, '#6b4a2a'); blob(tx, gy - 76, 28, '#3d8a45'); }
+  }
+
+  // ---- The tower ----------------------------------------------------------------
+  function towerColour() {
     const a = st.cam;
-    // stars from the edge of space up
-    const starA = clamp((a - 9000) / 4000, 0, 1);
-    if (starA > 0) {
-      ctx.fillStyle = `rgba(255,255,255,${starA})`;
-      for (let i = 0; i < 120; i++) { const y = ((hash(i) * 2000 + a * K * 0.05) % 1000) - 50; ctx.fillRect(hash(i + 9) * W, y, 2, 2); }
-    }
-    // clouds drifting past lower down
-    const cloudA = clamp(1 - Math.abs(a - 2500) / 3000, 0, 1);
-    if (cloudA > 0) {
-      for (let i = 0; i < 8; i++) {
-        const x = ((hash(i) * 2200 + st.t * (10 + i * 3)) % (W + 400)) - 200;
-        const y = ((hash(i + 4) * 1800 + a * K * 0.3) % 1100) - 100;
-        for (const [dx, dy, r] of [[0, 0, 50], [50, 10, 40], [-46, 12, 38], [16, -26, 38]]) blob(x + dx, y + dy, r, `rgba(255,255,255,${0.85 * cloudA})`);
+    if (a < 6000) return ['#7f93b8', '#a9bbd8'];
+    if (a < 14500) return ['#6f6aa8', '#9a94d0'];
+    if (a < 30000) return ['#4a4f7a', '#7a80b8'];
+    const h = (a * 0.03) % 360; return [`hsl(${h},35%,45%)`, `hsl(${(h + 40) % 360},45%,62%)`];
+  }
+  function drawTower() {
+    const base = sy(0) + 80;
+    const top = -40, bottom = Math.min(H + 40, base);
+    if (bottom <= top) return;
+    const [c1, c2] = towerColour();
+    const g = ctx.createLinearGradient(TL, 0, TR, 0);
+    g.addColorStop(0, c1); g.addColorStop(0.55, c2); g.addColorStop(1, c1);
+    rect(TL, top, TR - TL, bottom - top, g);
+    // window rows scroll past as the elevator climbs; how many are lit follows the power
+    const off = ((st.cam * K) % ROW + ROW) % ROW;
+    const rowBase = Math.floor(st.cam * K / ROW);
+    const lit = dim();
+    for (let y = top - ROW + off, r = 0; y < bottom; y += ROW, r++) {
+      const row = rowBase - r + Math.floor((SY - top) / ROW);
+      for (let c = 0; c < 5; c++) {
+        const on = hash(row * 13.1 + c * 7.7) < lit * 0.95 + 0.02;
+        const x = TL + 14 + c * 37;
+        rect(x, y + 6, 26, 18, on ? (hash(row + c) > 0.85 ? '#fff3c0' : '#ffe08a') : '#24304a');
+        if (on && lit > 0.5) rect(x, y + 6, 26, 4, 'rgba(255,255,255,0.35)');
       }
     }
-    // crazy things floating by out in space
-    if (a > 14000) {
-      const kinds = a > 25000 ? ['duck', 'duck', 'planet'] : a > 21000 ? ['candy', 'planet', 'candy'] : ['planet', 'astro', 'planet'];
-      for (let i = 0; i < 6; i++) {
-        const x = ((hash(i + 20) * 2600 + st.t * (14 + i * 4)) % (W + 300)) - 150;
-        const y = ((hash(i + 30) * 2400 + a * K * 0.2) % 1100) - 100;
-        const k = kinds[i % kinds.length], s = 0.6 + hash(i + 40) * 0.8;
-        if (k === 'planet') { blob(x, y, 40 * s, `hsl(${(i * 70 + a * 0.01) % 360},60%,55%)`); ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(x, y, 64 * s, 14 * s, -0.3, 0, TAU); ctx.stroke(); }
-        if (k === 'candy') { blob(x, y, 34 * s, `hsl(${(i * 50) % 360},80%,70%)`); ctx.strokeStyle = '#fff'; ctx.lineWidth = 5 * s; ctx.beginPath(); ctx.arc(x, y, 22 * s, 0, 4); ctx.stroke(); }
-        if (k === 'duck') drawDuck(x, y, s * 1.3, i);
-        if (k === 'astro') drawPerson(x, y, s, '#f4f4f8', true, i);
-      }
+    // the edges of the tower, and a rail for the elevator
+    rect(TL - 6, top, 8, bottom - top, 'rgba(0,0,0,0.25)');
+    rect(TR - 2, top, 10, bottom - top, '#3a3f52');
+    rect(TR + 8, top, 6, bottom - top, '#8a8f9a');
+    ctx.fillStyle = '#5c6478';
+    for (let y = top - 40 + ((st.cam * K) % 40 + 40) % 40; y < bottom; y += 40) ctx.fillRect(TR + 6, y, 10, 4);
+    // red warning lights on the tower's corner; they blink fast when the power is low
+    const fast = dim() < 0.35;
+    for (let y = top + (((st.cam * K) % 260) + 260) % 260; y < bottom; y += 260) {
+      const on = Math.sin(st.t * (fast ? 12 : 3) + y) > 0;
+      blob(TL, y, 5, on ? '#ff3b3b' : '#5a1a1a');
+      if (on) blob(TL, y, fast ? 22 : 14, 'rgba(255,50,50,0.3)');
+    }
+    // the entrance at the bottom
+    if (base < H + 100) {
+      rect(TL + 50, base - 70, 100, 70, '#2a2f3a');
+      rect(TL + 56, base - 64, 40, 64, '#bfe4ff'); rect(TL + 104, base - 64, 40, 64, '#bfe4ff');
+      rect(TL + 30, base - 84, 140, 14, '#c0392b');
+      ctx.fillStyle = '#fff'; ctx.font = '700 12px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('SKY TOWER', TL + 100, base - 73);
     }
   }
 
-  // ---- Little people and things --------------------------------------------
+  // ---- Little characters ---------------------------------------------------------
   function drawPerson(x, y, s, shirt, floaty, seed) {
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
     if (floaty) ctx.rotate(Math.sin(st.t + seed) * 0.4);
@@ -106,14 +154,7 @@ const ElevScene = (function () {
     blob(0, -48, 10, '#ffd7a8');
     ctx.strokeStyle = shirt; ctx.lineWidth = 5; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(-8, -34); ctx.lineTo(-18, -18); ctx.stroke();
-    // waving at the elevator, or holding up a torch when the power is low
-    if (dim() < 0.45 && !floaty) {
-      ctx.beginPath(); ctx.moveTo(8, -34); ctx.lineTo(20, -36); ctx.stroke();
-      rect(18, -40, 12, 7, '#555');
-      ctx.fillStyle = 'rgba(255,240,180,0.35)'; ctx.beginPath(); ctx.moveTo(30, -38); ctx.lineTo(110, -70); ctx.lineTo(110, -6); ctx.closePath(); ctx.fill();
-    } else {
-      ctx.beginPath(); ctx.moveTo(8, -34); ctx.lineTo(18 + wave * 4, -52 - wave * 6); ctx.stroke();
-    }
+    ctx.beginPath(); ctx.moveTo(8, -34); ctx.lineTo(18 + wave * 4, -52 - wave * 6); ctx.stroke();
     blob(-3.5, -50, 1.4, '#222'); blob(3.5, -50, 1.4, '#222');
     ctx.restore();
   }
@@ -133,336 +174,401 @@ const ElevScene = (function () {
     ctx.restore();
   }
 
-  // ---- Rooms --------------------------------------------------------------------
-  // Each draws inside its box (x, y = top-left, w, h); `k` is a per-room random seed.
-  const ROOMS = {
-    lobby(x, y, w, h, k) {
-      rect(x, y, w, h, '#efe3c8');
-      rect(x, y + h - 14, w, 14, '#b8946a');
-      rect(x + w * 0.2, y + h - 64, w * 0.5, 50, '#8a5a3a'); rect(x + w * 0.2, y + h - 70, w * 0.5, 8, '#c9a06a');
-      blob(x + w * 0.85, y + h - 46, 22, '#3d8a45'); rect(x + w * 0.85 - 10, y + h - 30, 20, 16, '#b05a2a');
-      blob(x + w / 2, y + 22, 14, '#ffe9a0');
-      drawPerson(x + w * 0.45, y + h - 64, 1, '#c0392b', false, k);
-    },
-    cafe(x, y, w, h, k) {
-      rect(x, y, w, h, '#f6e4d0');
-      rect(x, y + h - 12, w, 12, '#8a6a4a');
-      for (let i = 0; i < 2; i++) { const tx = x + w * (0.3 + i * 0.4); rect(tx - 30, y + h - 50, 60, 6, '#6b4a2a'); rect(tx - 3, y + h - 46, 6, 34, '#6b4a2a'); rect(tx - 8, y + h - 62, 16, 12, '#fff'); ctx.strokeStyle = 'rgba(200,200,200,0.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(tx, y + h - 64); ctx.quadraticCurveTo(tx + 6 * Math.sin(st.t * 3 + i), y + h - 80, tx, y + h - 94); ctx.stroke(); }
-      drawPerson(x + w * 0.5, y + h - 12, 0.9, '#2f7bff', false, k);
-    },
-    office(x, y, w, h, k) {
-      rect(x, y, w, h, '#dfe6ee');
-      rect(x, y + h - 12, w, 12, '#7d8596');
-      for (let i = 0; i < 2; i++) {
-        const dx = x + w * (0.25 + i * 0.45);
-        rect(dx - 40, y + h - 52, 80, 6, '#8a6a4a'); rect(dx - 36, y + h - 46, 6, 34, '#6b4a2a'); rect(dx + 30, y + h - 46, 6, 34, '#6b4a2a');
-        rect(dx - 18, y + h - 84, 36, 26, '#2a2f3a'); rect(dx - 15, y + h - 81, 30, 20, Math.sin(st.t * 2 + i + k) > 0 ? '#5fb4ff' : '#7fd3ff');
-        drawPerson(dx + 22, y + h - 12, 0.85, ['#7a5cff', '#2f9a5a', '#e8364f'][(i + Math.floor(k * 3)) % 3], false, k + i);
+  // ---- Things around the tower ----------------------------------------------------
+  // Like the Rocket's sky: each zone has its own mix of things drifting past or clinging to the tower.
+  const ZONES = [
+    { to: 300,   d: 1.2, types: { birds: 3, balloon: 1.5, washer: 1, flag: 1 } },
+    { to: 600,   d: 1.2, types: { monkey: 3, vine: 2, parrot: 2 } },
+    { to: 1000,  d: 1.2, types: { fish: 3, bubbles: 2, jelly: 1 } },
+    { to: 1500,  d: 1.0, types: { ptero: 3, bone: 1.5 } },
+    { to: 2200,  d: 1.2, types: { cat: 4, yarn: 1.5 } },
+    { to: 3000,  d: 1.4, types: { ball: 4, balloon: 2 } },
+    { to: 4000,  d: 1.3, types: { cloud: 4, birds: 1 } },
+    { to: 5200,  d: 1.2, types: { raincloud: 3, umbrella: 2 } },
+    { to: 6600,  d: 1.2, types: { furniture: 4 } },
+    { to: 8200,  d: 1.0, types: { gull: 2, barrel: 2, cloud: 1 } },
+    { to: 10000, d: 1.0, types: { island: 3, cloud: 1 } },
+    { to: 12000, d: 1.0, types: { ember: 3, island: 1 } },
+    { to: 14500, d: 1.3, types: { book: 4 } },
+    { to: 17500, d: 1.0, types: { sat: 3, astro: 2 } },
+    { to: 21000, d: 1.0, types: { astro: 2, rock: 2, sat: 1 } },
+    { to: 25000, d: 1.2, types: { candy: 4 } },
+    { to: 30000, d: 1.4, types: { duck: 4 } },
+    { to: 1e12,  d: 1.4, types: { shard: 3, duck: 1, candy: 1 } }
+  ];
+  const zoneAt = a => ZONES.find(z => a < z.to);
+  const CHUNK = 120;
+  const chunkCache = new Map();
+  function chunk(ci) {
+    if (chunkCache.has(ci)) return chunkCache.get(ci);
+    if (chunkCache.size > 300) chunkCache.clear();
+    const seed = ci * 9173 + 7;
+    const zone = zoneAt(ci * CHUNK + CHUNK / 2);
+    const pairs = Object.entries(zone.types), total = pairs.reduce((s, p) => s + p[1], 0);
+    const out = [];
+    const n = Math.floor(zone.d + hash(seed) * 1.5);
+    for (let i = 0; i < n; i++) {
+      const h = k => hash(seed + i * 17 + k);
+      let r = h(1) * total, type = pairs[0][0];
+      for (const [t, w] of pairs) { if ((r -= w) <= 0) { type = t; break; } }
+      // keep things clear of the tower and elevator; most go out in the open sky
+      const side = h(2) < 0.22 ? 'left' : 'right';
+      // most of the right-hand sky sits under the question card while playing, so favour the strip beside the car
+      const x = type === 'washer' ? TL + 50 + h(3) * (TR - TL - 100)
+        : side === 'left' ? 30 + h(3) * (TL - 120)
+        : h(9) < 0.6 ? CX + 130 + h(3) * 220 : CX + 130 + h(3) * (W - CX - 150);
+      out.push({ type, a: ci * CHUNK + h(4) * CHUNK, x, s: 0.7 + h(5) * 0.6, seed: h(6) * 100, dir: h(7) < 0.5 ? -1 : 1, p: 0.75 + h(8) * 0.3 });
+    }
+    chunkCache.set(ci, out);
+    return out;
+  }
+
+  function drawThing(o, x, y) {
+    const s = o.s, t = st.t + o.seed;
+    ctx.save(); ctx.translate(x, y);
+    switch (o.type) {
+      case 'birds':
+        ctx.strokeStyle = '#3a3d46'; ctx.lineWidth = 2.5;
+        for (let i = 0; i < 3; i++) { const bx = i * 26 * s, by = (i % 2) * 12, f = Math.sin(t * 8 + i) * 6; ctx.beginPath(); ctx.moveTo(bx - 10, by - f); ctx.quadraticCurveTo(bx - 4, by - 6, bx, by); ctx.quadraticCurveTo(bx + 4, by - 6, bx + 10, by - f); ctx.stroke(); }
+        break;
+      case 'balloon': {
+        const col = `hsl(${(o.seed * 37) % 360},80%,60%)`;
+        ctx.strokeStyle = '#555'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(0, 20 * s); ctx.quadraticCurveTo(6, 40 * s, 0, 60 * s); ctx.stroke();
+        ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, 0, 18 * s, 22 * s, 0, 0, TAU); ctx.fill();
+        break;
       }
-    },
-    gym(x, y, w, h, k) {
-      rect(x, y, w, h, '#e8eef6');
-      rect(x, y + h - 12, w, 12, '#3a3d46');
-      rect(x + w * 0.2, y + h - 30, 110, 14, '#555'); rect(x + w * 0.2 + 96, y + h - 80, 8, 54, '#777');
-      ctx.save(); ctx.translate(x + w * 0.2 + 50, y + h - 30); ctx.translate(0, Math.abs(Math.sin(st.t * 8)) * -4); drawPerson(0, 0, 0.9, '#ff8a1a', false, k); ctx.restore();
-      rect(x + w * 0.7, y + h - 26, 60, 6, '#888'); blob(x + w * 0.7, y + h - 23, 12, '#333'); blob(x + w * 0.7 + 60, y + h - 23, 12, '#333');
-    },
-    jungle(x, y, w, h, k) {
-      rect(x, y, w, h, '#3f8a4a');
-      for (let i = 0; i < 6; i++) blob(x + (i / 5) * w, y + h - 10, 40, '#2f6a3a');
-      ctx.strokeStyle = '#5a7a30'; ctx.lineWidth = 5;
-      for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(x + w * (0.15 + i * 0.25), y); ctx.quadraticCurveTo(x + w * (0.2 + i * 0.25), y + h * 0.4, x + w * (0.15 + i * 0.25), y + h * 0.7); ctx.stroke(); }
-      const sw = Math.sin(st.t * 2 + k * 6) * 0.6, mx = x + w * 0.5;
-      ctx.save(); ctx.translate(mx, y); ctx.rotate(sw);
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, h * 0.45); ctx.stroke();
-      blob(0, h * 0.5, 14, '#7a5030'); blob(0, h * 0.5 - 16, 10, '#7a5030'); blob(0, h * 0.5 - 16, 6, '#d9b080');
-      ctx.restore();
-    },
-    aquarium(x, y, w, h, k) {
-      const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, '#4fc3e8'); g.addColorStop(1, '#1677b8');
-      rect(x, y, w, h, g);
-      for (let i = 0; i < 5; i++) {
-        const fx2 = x + ((hash(i + k * 10) * w + st.t * (30 + i * 10)) % w), fy = y + 20 + hash(i + 3) * (h - 50);
-        ctx.fillStyle = ['#ff8a1a', '#ffd23f', '#ff5d73', '#c77dff', '#7ddc6f'][i];
-        ctx.beginPath(); ctx.ellipse(fx2, fy, 14, 8, 0, 0, TAU); ctx.fill(); poly([[fx2 - 12, fy], [fx2 - 22, fy - 7], [fx2 - 22, fy + 7]], ctx.fillStyle);
+      case 'washer':
+        ctx.strokeStyle = '#555'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-40, -200); ctx.lineTo(-40, 0); ctx.moveTo(40, -200); ctx.lineTo(40, 0); ctx.stroke();
+        rect(-50, 0, 100, 10, '#8a8f9a'); drawPerson(0, 0, 0.9, '#2f7bff', false, o.seed);
+        break;
+      case 'flag':
+        rect(0, -60, 4, 60, '#ddd'); poly([[4, -60], [40 + Math.sin(t * 6) * 4, -52], [4, -42]], `hsl(${(o.seed * 50) % 360},70%,55%)`);
+        break;
+      case 'monkey': {
+        ctx.strokeStyle = '#5a7a30'; ctx.lineWidth = 4;
+        const sw = Math.sin(t * 2) * 0.6;
+        ctx.rotate(sw); ctx.beginPath(); ctx.moveTo(0, -120); ctx.lineTo(0, 0); ctx.stroke();
+        blob(0, 10, 14, '#7a5030'); blob(0, -6, 10, '#7a5030'); blob(0, -6, 6, '#d9b080');
+        break;
       }
-      const sx = x + ((st.t * 60 + k * 300) % (w + 200)) - 100, sy2 = y + h * 0.6;
-      ctx.fillStyle = '#7d8a9c'; ctx.beginPath(); ctx.ellipse(sx, sy2, 50, 16, 0, 0, TAU); ctx.fill();
-      poly([[sx - 6, sy2 - 14], [sx + 10, sy2 - 36], [sx + 16, sy2 - 12]], '#7d8a9c'); poly([[sx - 46, sy2], [sx - 68, sy2 - 16], [sx - 64, sy2 + 14]], '#7d8a9c');
-      blob(sx + 34, sy2 - 4, 2.4, '#111');
-      ctx.fillStyle = 'rgba(255,255,255,0.5)'; for (let i = 0; i < 6; i++) { const by = y + h - ((st.t * 40 + i * 30) % h); blob(x + 20 + i * w / 6, by, 3, 'rgba(255,255,255,0.5)'); }
+      case 'vine':
+        ctx.strokeStyle = '#3d8a3a'; ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.moveTo(0, -150); ctx.quadraticCurveTo(20 * Math.sin(t), -60, 0, 0); ctx.stroke();
+        for (let i = 0; i < 5; i++) { ctx.fillStyle = '#4fae57'; ctx.beginPath(); ctx.ellipse(6, -140 + i * 30, 10, 5, 0.5, 0, TAU); ctx.fill(); }
+        break;
+      case 'parrot': {
+        const f = Math.sin(t * 10) * 10;
+        ctx.scale(o.dir, 1);
+        ctx.fillStyle = '#e8364f'; ctx.beginPath(); ctx.ellipse(0, 0, 18 * s, 9 * s, 0, 0, TAU); ctx.fill();
+        poly([[-4, 0], [-14, -14 - f], [8, -4]], '#2f7bff'); poly([[14, -4], [24, 0], [14, 4]], '#ffd23f');
+        break;
+      }
+      case 'fish': {
+        const fx2 = Math.sin(t * 0.5) * 40;
+        ctx.fillStyle = ['#ff8a1a', '#ffd23f', '#4fd1ff', '#c77dff'][Math.floor(o.seed) % 4];
+        ctx.beginPath(); ctx.ellipse(fx2, 0, 24 * s, 12 * s, 0, 0, TAU); ctx.fill();
+        poly([[fx2 - 20 * s, 0], [fx2 - 36 * s, -12 * s], [fx2 - 36 * s, 12 * s]], ctx.fillStyle);
+        blob(fx2 + 12 * s, -3, 2.5, '#222');
+        break;
+      }
+      case 'bubbles':
+        for (let i = 0; i < 6; i++) { ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(Math.sin(t + i) * 10, -((t * 30 + i * 20) % 120), 4 + i, 0, TAU); ctx.stroke(); }
+        break;
+      case 'jelly':
+        ctx.fillStyle = 'rgba(255,150,220,0.7)'; ctx.beginPath(); ctx.arc(0, 0, 22 * s, Math.PI, 0); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,150,220,0.7)'; ctx.lineWidth = 2;
+        for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(i * 8, 0); ctx.quadraticCurveTo(i * 8 + Math.sin(t * 3 + i) * 6, 20, i * 8, 40 * s); ctx.stroke(); }
+        break;
+      case 'ptero': {
+        const f = Math.sin(t * 5) * 18;
+        ctx.scale(o.dir * s, s);
+        poly([[0, 0], [-60, -10 - f], [-20, 6]], '#8a6a4a'); poly([[0, 0], [60, -10 - f], [20, 6]], '#8a6a4a');
+        poly([[10, -6], [44, -14], [14, 4]], '#9a7a5a'); poly([[-6, -4], [-24, -18], [-4, 2]], '#9a7a5a');
+        break;
+      }
+      case 'bone':
+        ctx.rotate(t * 0.5); rect(-22, -4, 44, 8, '#f2e8d0'); for (const e of [-1, 1]) { blob(e * 22, -5, 6, '#f2e8d0'); blob(e * 22, 5, 6, '#f2e8d0'); }
+        break;
+      case 'cat':
+        drawCat(0, 0, 1.1 * s, ['#ff9a3c', '#3a3d46', '#f4f4f0', '#9aa2b4'][Math.floor(o.seed) % 4], o.seed);
+        if (o.seed % 2 < 1) { ctx.strokeStyle = '#555'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(0, -40); ctx.lineTo(0, -120); ctx.stroke(); blob(0, -130, 16, '#ff5d73'); }
+        break;
+      case 'yarn':
+        blob(0, 0, 16 * s, '#e8364f'); ctx.strokeStyle = '#a0202f'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 10 * s, t, t + 3); ctx.stroke();
+        break;
+      case 'ball':
+        blob(0, -Math.abs(Math.sin(t * 2)) * 40, 18 * s, ['#e8364f', '#2f7bff', '#ffd23f', '#7ddc6f', '#c77dff'][Math.floor(o.seed) % 5]);
+        break;
+      case 'cloud':
+        for (const [dx, dy, r] of [[0, 0, 44], [48, 8, 36], [-44, 10, 34], [14, -24, 34]]) blob(dx * s, dy * s, r * s, 'rgba(255,255,255,0.92)');
+        break;
+      case 'raincloud':
+        for (const [dx, dy, r] of [[0, 0, 40], [44, 6, 32], [-40, 8, 30]]) blob(dx * s, dy * s, r * s, '#7a8696');
+        ctx.strokeStyle = 'rgba(200,220,255,0.8)'; ctx.lineWidth = 2; ctx.beginPath();
+        for (let i = 0; i < 10; i++) { const rx = -50 + i * 10, ry = 30 + ((t * 200 + i * 23) % 90); ctx.moveTo(rx, ry); ctx.lineTo(rx - 3, ry + 10); }
+        ctx.stroke();
+        break;
+      case 'umbrella':
+        ctx.rotate(Math.sin(t) * 0.3); ctx.fillStyle = `hsl(${(o.seed * 60) % 360},70%,55%)`;
+        ctx.beginPath(); ctx.arc(0, 0, 28 * s, Math.PI, 0); ctx.fill(); rect(-1.5, 0, 3, 34 * s, '#555');
+        break;
+      case 'furniture':
+        ctx.rotate(t * 0.6 * o.dir);
+        if (o.seed % 3 < 1) { rect(-30, -6, 60, 8, '#8a6a4a'); rect(-26, 2, 6, 24, '#6b4a2a'); rect(20, 2, 6, 24, '#6b4a2a'); }
+        else if (o.seed % 3 < 2) { rect(-22, -16, 44, 32, '#c9a06a'); rect(-16, -10, 32, 20, '#7fd3ff'); }
+        else { rect(-14, -30, 28, 30, '#e8364f'); rect(-14, 0, 28, 8, '#a0202f'); }
+        break;
+      case 'gull':
+        ctx.strokeStyle = '#f4f4f0'; ctx.lineWidth = 3; const f = Math.sin(t * 7) * 8;
+        ctx.beginPath(); ctx.moveTo(-16, -f); ctx.quadraticCurveTo(-6, -8, 0, 0); ctx.quadraticCurveTo(6, -8, 16, -f); ctx.stroke();
+        break;
+      case 'barrel':
+        ctx.rotate(t * 0.8); rect(-14, -18, 28, 36, '#8a5a2a'); rect(-14, -10, 28, 4, '#555'); rect(-14, 6, 28, 4, '#555');
+        break;
+      case 'island': {
+        const bob = Math.sin(t * 1.4) * 8;
+        ctx.translate(0, bob); ctx.scale(s, s);
+        poly([[-60, 0], [60, 0], [14, 50], [-18, 40]], '#8a6a4a'); rect(-60, -10, 120, 12, '#5fae4f');
+        rect(-3, -70, 6, 60, '#8a6a3a');
+        for (let k = 0; k < 4; k++) { ctx.strokeStyle = '#3d8a3a'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(0, -70); ctx.quadraticCurveTo((k - 1.5) * 20, -86, (k - 1.5) * 34, -62); ctx.stroke(); }
+        break;
+      }
+      case 'ember':
+        blob(0, -((t * 40) % 200), 5 * s, '#ffb52e'); blob(20, -((t * 50 + 60) % 200), 4 * s, '#ff6a1a');
+        break;
+      case 'book': {
+        const f = Math.sin(t * 10) * 14;
+        ctx.fillStyle = `hsl(${(o.seed * 40) % 360},60%,55%)`;
+        poly([[0, 0], [-22 * s, -f], [-22 * s, 12 - f], [0, 12]], ctx.fillStyle);
+        poly([[0, 0], [22 * s, -f], [22 * s, 12 - f], [0, 12]], ctx.fillStyle);
+        rect(-1, 0, 2, 12, '#fff');
+        break;
+      }
+      case 'sat':
+        ctx.rotate(t * 0.3); rect(-12, -10, 24, 20, '#d9dce6'); rect(-50, -6, 34, 12, '#2f5fa0'); rect(16, -6, 34, 12, '#2f5fa0');
+        break;
+      case 'astro':
+        drawPerson(0, 0, 1.1 * s, '#f4f4f8', true, o.seed);
+        ctx.strokeStyle = 'rgba(160,220,255,0.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, -53 * s, 16 * s, 0, TAU); ctx.stroke();
+        break;
+      case 'rock':
+        ctx.rotate(t * 0.4); poly([[-20, -6], [-8, -20], [14, -16], [22, 4], [6, 18], [-16, 14]], '#9a9aa4');
+        break;
+      case 'candy':
+        blob(0, 0, 30 * s, `hsl(${(o.seed * 47 + st.t * 10) % 360},80%,68%)`);
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 5 * s; ctx.beginPath(); ctx.arc(0, 0, 18 * s, t, t + 4); ctx.stroke();
+        break;
+      case 'duck':
+        drawDuck(0, 0, 1.2 * s, o.seed);
+        break;
+      case 'shard':
+        ctx.rotate(t * 0.5 * o.dir);
+        poly([[0, -30 * s], [18 * s, 10 * s], [-16 * s, 20 * s]], `hsla(${(o.seed * 50 + st.t * 60) % 360},80%,70%,0.85)`);
+        break;
+    }
+    ctx.restore();
+  }
+  // onTower: the window washers hang on the tower itself, so they draw after it, at its speed
+  function drawThings(onTower) {
+    const c0 = Math.floor((st.cam - 260) / CHUNK), c1 = Math.floor((st.cam + 260) / CHUNK);
+    for (let ci = c0; ci <= c1; ci++) {
+      if (ci < 0) continue;
+      for (const o of chunk(ci)) {
+        if ((o.type === 'washer') !== onTower) continue;
+        const y = sy(o.a, onTower ? 1 : o.p);
+        if (y < -220 || y > H + 220) continue;
+        const drift = ['birds', 'balloon', 'parrot', 'fish', 'jelly', 'ptero', 'cloud', 'raincloud', 'gull', 'island', 'book', 'sat', 'astro', 'candy', 'duck', 'shard', 'furniture', 'umbrella', 'barrel', 'rock'].includes(o.type);
+        const x = drift ? wrapX(o.x + o.dir * st.t * 20 * o.s, 300) : o.x;
+        if (!onTower && x > TL - 80 && x < CX + 120) continue;
+        drawThing(o, x, y);
+      }
+    }
+  }
+
+  // ---- Big set pieces at the milestones (they lean out of the tower or float beside it) -------
+  const FEATURE = {
+    "The Jungle Floor"(y) {
+      ctx.strokeStyle = '#3d8a3a'; ctx.lineWidth = 6;
+      for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(TL + 20 + i * 40, y - 140); ctx.quadraticCurveTo(TL + 30 + i * 40 + Math.sin(st.t + i) * 10, y - 60, TL + 20 + i * 40, y + 10); ctx.stroke(); }
+      for (let i = 0; i < 8; i++) blob(TL + 20 + i * 25, y - 140, 22, '#4fae57');
     },
-    dino(x, y, w, h, k) {
-      rect(x, y, w, h, '#e9dcc0');
-      rect(x, y + h - 12, w, 12, '#a88a5a');
-      const dx = x + w * 0.5 + Math.sin(st.t * 0.8 + k) * w * 0.2, dy = y + h - 12, step = Math.sin(st.t * 4) * 6;
+    "The Aquarium Floor"(y) {
+      // a whole floor of the tower is one giant fish tank
+      const g = ctx.createLinearGradient(0, y - 120, 0, y);
+      g.addColorStop(0, '#4fc3e8'); g.addColorStop(1, '#1677b8');
+      rect(TL + 6, y - 120, TR - TL - 12, 120, g);
+      const sx = TL + 30 + ((st.t * 40) % (TR - TL - 60));
+      ctx.fillStyle = '#7d8a9c'; ctx.beginPath(); ctx.ellipse(sx, y - 60, 40, 13, 0, 0, TAU); ctx.fill();
+      poly([[sx - 4, y - 72], [sx + 8, y - 92], [sx + 14, y - 70]], '#7d8a9c'); blob(sx + 26, y - 63, 2, '#111');
+      for (let i = 0; i < 4; i++) { ctx.fillStyle = ['#ff8a1a', '#ffd23f', '#ff5d73', '#c77dff'][i]; ctx.beginPath(); ctx.ellipse(TL + 30 + ((st.t * (30 + i * 12) + i * 50) % (TR - TL - 60)), y - 100 + i * 22, 9, 5, 0, 0, TAU); ctx.fill(); }
+    },
+    "Dinosaur Museum"(y) {
+      // a T. rex leaning out of a window
+      const x = TL - 10, bob = Math.sin(st.t * 1.6) * 6;
       ctx.fillStyle = '#5a9a4a';
-      ctx.beginPath(); ctx.ellipse(dx, dy - 50, 46, 26, -0.2, 0, TAU); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(dx - 40, dy - 50); ctx.quadraticCurveTo(dx - 90, dy - 40, dx - 110, dy - 60); ctx.lineTo(dx - 40, dy - 40); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(dx + 50, dy - 92, 30, 18, -0.2, 0, TAU); ctx.fill();
-      rect(dx + 30, dy - 86, 14, 30, '#5a9a4a');
-      rect(dx - 20 + step, dy - 30, 14, 30, '#4a8a3a'); rect(dx + 10 - step, dy - 30, 14, 30, '#4a8a3a');
-      blob(dx + 62, dy - 98, 3, '#111');
-      ctx.fillStyle = '#fff'; for (let i = 0; i < 4; i++) poly([[dx + 52 + i * 7, dy - 82], [dx + 55 + i * 7, dy - 76], [dx + 58 + i * 7, dy - 82]], '#fff');
+      ctx.beginPath(); ctx.ellipse(x - 40, y - 80 + bob, 70, 34, -0.2, 0, TAU); ctx.fill();
+      rect(x - 10, y - 70 + bob, 40, 26, '#5a9a4a');
+      blob(x - 70, y - 92 + bob, 5, '#111');
+      for (let i = 0; i < 6; i++) poly([[x - 100 + i * 12, y - 56 + bob], [x - 95 + i * 12, y - 44 + bob], [x - 90 + i * 12, y - 56 + bob]], '#fff');
+      ctx.strokeStyle = '#4a8a3a'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(x - 30, y - 50 + bob); ctx.lineTo(x - 40, y - 30 + bob); ctx.stroke();
     },
-    cats(x, y, w, h, k) {
-      rect(x, y, w, h, '#ffe4ef');
-      rect(x, y + h - 12, w, 12, '#c98aa8');
+    "The Cat Kingdom"(y) {
+      rect(TL - 40, y - 10, TR - TL + 80, 10, '#8a8f9a');
       const cols = ['#ff9a3c', '#3a3d46', '#f4f4f0', '#9aa2b4', '#d9a440'];
-      for (let i = 0; i < 5; i++) drawCat(x + 30 + i * (w - 60) / 4, y + h - 12 - (i % 2) * 40, 0.9, cols[(i + Math.floor(k * 5)) % 5], i + k);
-      blob(x + w * 0.5 + Math.sin(st.t * 2) * 30, y + h - 22, 10, '#e8364f');
-      rect(x + w * 0.1, y + h * 0.35, 60, 8, '#8a5a3a');
+      for (let i = 0; i < 6; i++) drawCat(TL - 20 + i * 44, y - 10, 1, cols[i % 5], i);
+      // a king cat with a crown
+      drawCat(TL + 90, y - 140, 2, '#ff9a3c', 9); poly([[TL + 104, y - 214], [TL + 112, y - 234], [TL + 120, y - 218], [TL + 128, y - 236], [TL + 136, y - 214]], '#ffd23f');
     },
-    ballpit(x, y, w, h, k) {
-      rect(x, y, w, h, '#fff6e0');
-      const cols = ['#e8364f', '#2f7bff', '#ffd23f', '#7ddc6f', '#c77dff', '#ff8a1a'];
-      for (let i = 0; i < 70; i++) { const bx = x + 8 + hash(i + k * 7) * (w - 16), by = y + h - 10 - hash(i * 3 + k) * 60 + Math.sin(st.t * 3 + i) * 2; blob(bx, by, 9, cols[i % 6]); }
-      const jy = y + h - 80 - Math.abs(Math.sin(st.t * 3 + k)) * 50;
-      drawPerson(x + w * 0.4, jy, 0.9, '#2f9a5a', false, k);
+    "Ball Pit Floor"(y) {
+      const cols = ['#e8364f', '#2f7bff', '#ffd23f', '#7ddc6f', '#c77dff'];
+      for (let i = 0; i < 26; i++) { const t2 = (st.t * 0.8 + i * 0.13) % 1.6; blob(TL - 10 - t2 * 120 * hash(i), y - 60 + t2 * t2 * 180 - t2 * 160, 12, cols[i % 5]); }
     },
-    disco(x, y, w, h, k) {
-      rect(x, y, w, h, '#1a1030');
-      for (let i = 0; i < 8; i++) { const cx = x + (i + 0.5) * w / 8; rect(cx - w / 16 + 1, y + h - 16, w / 8 - 2, 16, `hsl(${(i * 45 + st.t * 200) % 360},80%,60%)`); }
-      blob(x + w / 2, y + 26, 18, '#ccd'); ctx.save(); ctx.globalCompositeOperation = 'lighter';
-      for (let i = 0; i < 5; i++) { const a = st.t * 2 + i * 1.3; ctx.fillStyle = `hsla(${i * 70},90%,60%,0.25)`; ctx.beginPath(); ctx.moveTo(x + w / 2, y + 26); ctx.lineTo(x + w / 2 + Math.cos(a) * w, y + h); ctx.lineTo(x + w / 2 + Math.cos(a + 0.2) * w, y + h); ctx.fill(); }
-      ctx.restore();
-      for (let i = 0; i < 3; i++) { ctx.save(); ctx.translate(x + w * (0.25 + i * 0.25), y + h - 16 - Math.abs(Math.sin(st.t * 5 + i)) * 10); drawPerson(0, 0, 0.85, `hsl(${i * 120},70%,55%)`, false, i + k); ctx.restore(); }
+    "Inside a Cloud"(y) {
+      for (const [dx, dy, r] of [[-60, 0, 90], [60, -10, 100], [180, 0, 80], [0, -70, 80], [120, -80, 70]]) blob(TL + dx, y + dy, r, 'rgba(255,255,255,0.95)');
     },
-    clouds(x, y, w, h, k) {
-      rect(x, y, w, h, '#bfe4ff');
-      for (let i = 0; i < 4; i++) { const cx = x + ((hash(i + k) * w + st.t * 20) % w), cy = y + 30 + i * 30; for (const [dx, dy, r] of [[0, 0, 26], [26, 6, 20], [-24, 6, 20]]) blob(cx + dx, cy + dy, r, '#fff'); }
-      ctx.save(); ctx.translate(x + w * 0.5, y + h - 30 + Math.sin(st.t * 2) * 8); drawPerson(0, 0, 0.9, '#7a5cff', true, k); ctx.restore();
-    },
-    rain(x, y, w, h, k) {
-      rect(x, y, w, h, '#7d8ea4');
-      for (const [dx, dy, r] of [[0.3, 20, 30], [0.5, 14, 36], [0.7, 22, 28]]) blob(x + w * dx, y + dy, r, '#5a6676');
-      ctx.strokeStyle = 'rgba(210,230,255,0.7)'; ctx.lineWidth = 2; ctx.beginPath();
-      for (let i = 0; i < 26; i++) { const rx = x + hash(i + k) * w, ry = y + 40 + ((st.t * 300 + i * 37) % (h - 50)); ctx.moveTo(rx, ry); ctx.lineTo(rx - 3, ry + 12); }
+    "The Rain Room"(y) {
+      for (const [dx, dy, r] of [[-30, -160, 60], [60, -170, 70], [150, -160, 60]]) blob(TL + dx, y + dy, r, '#6f7c8e');
+      ctx.strokeStyle = 'rgba(200,220,255,0.8)'; ctx.lineWidth = 2; ctx.beginPath();
+      for (let i = 0; i < 30; i++) { const rx = TL - 80 + i * 10, ry = y - 120 + ((st.t * 300 + i * 37) % 200); ctx.moveTo(rx, ry); ctx.lineTo(rx - 3, ry + 14); }
       ctx.stroke();
-      const px = x + w * 0.55; drawPerson(px, y + h - 6, 0.9, '#ffd23f', false, k);
-      ctx.fillStyle = '#e8364f'; ctx.beginPath(); ctx.arc(px, y + h - 66, 30, Math.PI, 0); ctx.fill();
-      rect(x, y + h - 8, w, 8, 'rgba(120,170,230,0.7)');
     },
-    sideways(x, y, w, h, k) {
-      rect(x, y, w, h, '#f0e6ff');
-      // everything is stuck to the left wall
-      ctx.save(); ctx.translate(x + 14, y + h / 2); ctx.rotate(Math.PI / 2);
-      rect(-50, -20, 100, 8, '#8a6a4a'); rect(-30, -60, 60, 40, '#5fb4ff');
-      ctx.restore();
-      ctx.save(); ctx.translate(x + 12, y + h * 0.7); ctx.rotate(Math.PI / 2); drawPerson(0, 0, 0.9, '#2f9a5a', false, k); ctx.restore();
-      ctx.save(); ctx.translate(x + w * 0.6, y + h / 2); ctx.rotate(st.t * 0.6); rect(-26, -18, 52, 36, '#c9a06a'); rect(-20, -12, 40, 24, '#7fd3ff'); ctx.restore();
-      blob(x + w * 0.85, y + 30 + Math.sin(st.t * 2) * 40, 12, '#ff8a1a');
-    },
-    pirate(x, y, w, h, k) {
-      rect(x, y, w, h, '#9fd3ff');
-      for (let i = 0; i < 6; i++) blob(x + i * w / 5, y + h - 4 + Math.sin(st.t * 2 + i) * 4, 26, '#2f7fc4');
-      const bx = x + w * 0.5, by = y + h - 30 + Math.sin(st.t * 1.6) * 4;
-      poly([[bx - 90, by - 20], [bx + 90, by - 20], [bx + 64, by + 14], [bx - 64, by + 14]], '#7a4a2a');
-      rect(bx - 3, by - 120, 6, 100, '#5a3a20');
-      poly([[bx + 3, by - 112], [bx + 70, by - 70], [bx + 3, by - 40]], '#f4f0e6');
-      rect(bx - 3, by - 130, 30, 16, '#222'); blob(bx + 12, by - 122, 4, '#fff');
-      drawPerson(bx - 40, by - 20, 0.8, '#e8364f', false, k);
-    },
-    islands(x, y, w, h, k) {
-      rect(x, y, w, h, '#9fd8ff');
-      for (let i = 0; i < 2; i++) {
-        const ix = x + w * (0.3 + i * 0.4), iy = y + h * (0.55 + i * 0.1) + Math.sin(st.t * 1.4 + i * 2) * 8;
-        poly([[ix - 50, iy], [ix + 50, iy], [ix + 10, iy + 40], [ix - 14, iy + 34]], '#8a6a4a');
-        rect(ix - 50, iy - 8, 100, 10, '#5fae4f');
-        rect(ix - 2, iy - 60, 5, 54, '#8a6a3a'); for (let f = 0; f < 4; f++) { ctx.strokeStyle = '#3d8a3a'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(ix, iy - 60); ctx.quadraticCurveTo(ix + (f - 1.5) * 18, iy - 74, ix + (f - 1.5) * 30, iy - 54); ctx.stroke(); }
-      }
-    },
-    dragon(x, y, w, h, k) {
-      rect(x, y, w, h, '#4a2a3a');
-      for (let i = 0; i < 10; i++) blob(x + hash(i + k) * w, y + h - 6, 10, '#ffd23f');
-      const dx = x + w * 0.35, dy = y + h * 0.55 + Math.sin(st.t * 2) * 6;
-      ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.ellipse(dx, dy, 44, 26, 0.1, 0, TAU); ctx.fill();
-      poly([[dx + 30, dy - 10], [dx + 80, dy - 2], [dx + 30, dy + 14]], '#c0392b');
-      poly([[dx - 10, dy - 24], [dx - 4, dy - 44], [dx + 6, dy - 24]], '#ffd23f');
-      blob(dx + 20, dy - 8, 3, '#fff');
-      const fl = 60 + Math.sin(st.t * 12) * 14;
-      ctx.save(); ctx.globalCompositeOperation = 'lighter';
-      const g = ctx.createLinearGradient(dx + 80, 0, dx + 80 + fl * 2, 0); g.addColorStop(0, '#fff6b0'); g.addColorStop(0.4, '#ff9a1f'); g.addColorStop(1, 'rgba(255,60,20,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(dx + 80, dy); ctx.lineTo(dx + 80 + fl * 2, dy - 30); ctx.lineTo(dx + 80 + fl * 2, dy + 30); ctx.fill();
+    "Sideways Gravity"(y) {
+      // a whole room tipped out of the tower, sideways
+      ctx.save(); ctx.translate(TL - 110, y - 80); ctx.rotate(Math.PI / 2 + Math.sin(st.t) * 0.05);
+      rect(-70, -50, 140, 100, '#f0e6ff'); rect(-60, 20, 80, 8, '#8a6a4a'); rect(-30, -30, 40, 30, '#5fb4ff');
+      drawPerson(30, 40, 1, '#2f9a5a', false, 3);
       ctx.restore();
     },
-    books(x, y, w, h, k) {
-      rect(x, y, w, h, '#5a3a2a');
-      for (let r = 0; r < 2; r++) for (let i = 0; i < 12; i++) rect(x + 10 + i * (w - 20) / 12, y + 20 + r * 60, (w - 20) / 12 - 3, 44, `hsl(${(i * 37 + r * 90) % 360},50%,45%)`);
-      for (let i = 0; i < 4; i++) {
-        const bx = x + ((hash(i + k * 4) * w + st.t * (40 + i * 10)) % w), by = y + h * 0.5 + Math.sin(st.t * 3 + i) * 20, f = Math.sin(st.t * 10 + i) * 14;
-        ctx.fillStyle = `hsl(${i * 80},60%,55%)`;
-        poly([[bx, by], [bx - 18, by - f], [bx - 18, by + 10 - f], [bx, by + 10]], ctx.fillStyle);
-        poly([[bx, by], [bx + 18, by - f], [bx + 18, by + 10 - f], [bx, by + 10]], ctx.fillStyle);
-      }
+    "Pirate Sky Dock"(y) {
+      const bx = TL - 170, by = y - 40 + Math.sin(st.t * 1.4) * 8;
+      poly([[bx - 130, by - 24], [bx + 120, by - 24], [bx + 90, by + 20], [bx - 100, by + 20]], '#7a4a2a');
+      rect(bx - 4, by - 170, 8, 146, '#5a3a20');
+      poly([[bx + 4, by - 160], [bx + 100, by - 100], [bx + 4, by - 50]], '#f4f0e6');
+      rect(bx - 4, by - 186, 40, 20, '#222'); blob(bx + 16, by - 176, 5, '#fff');
+      drawPerson(bx - 60, by - 24, 0.9, '#e8364f', false, 1);
+      ctx.strokeStyle = '#8a6a4a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(bx + 120, by - 20); ctx.lineTo(TL, by - 40); ctx.stroke();
     },
-    space(x, y, w, h, k) {
-      rect(x, y, w, h, '#0b1030');
-      ctx.fillStyle = '#fff'; for (let i = 0; i < 30; i++) ctx.fillRect(x + hash(i + k) * w, y + hash(i + 50 + k) * h, 2, 2);
-      blob(x + w * 0.8, y + h * 0.35, 26, '#4f9ad1'); blob(x + w * 0.8 - 6, y + h * 0.35 - 6, 10, '#7ddc6f');
-      ctx.save(); ctx.translate(x + w * 0.35, y + h * 0.7 + Math.sin(st.t * 1.5 + k) * 12); drawPerson(0, 0, 1, '#f4f4f8', true, k);
-      ctx.strokeStyle = 'rgba(160,220,255,0.8)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, -48, 15, 0, TAU); ctx.stroke(); ctx.restore();
+    "Floating Islands"(y) {
+      for (const [dx, dy, s] of [[-200, -60, 1.4], [-60, -180, 1], [900, -100, 1.3]]) drawThing({ type: 'island', s, seed: dx, dir: 1 }, TL + dx > TR ? CX + dx : TL + dx, y + dy);
     },
-    moon(x, y, w, h, k) {
-      rect(x, y, w, h, '#14182e');
-      rect(x, y + h - 30, w, 30, '#b8b8c0');
-      for (let i = 0; i < 5; i++) { ctx.fillStyle = '#9a9aa4'; ctx.beginPath(); ctx.ellipse(x + 30 + i * (w - 60) / 4, y + h - 16, 18, 5, 0, 0, TAU); ctx.fill(); }
-      rect(x + w * 0.6, y + h - 90, 3, 60, '#ddd'); rect(x + w * 0.6 + 3, y + h - 90, 34, 20, '#e8364f');
-      // a car parked on the moon
-      rect(x + w * 0.15, y + h - 54, 80, 24, '#2f7bff'); blob(x + w * 0.15 + 16, y + h - 30, 9, '#333'); blob(x + w * 0.15 + 64, y + h - 30, 9, '#333');
+    "Dragon's Roost"(y) {
+      // a dragon circling the tower
+      const a = st.t * 0.9, dx = TL - 160 + Math.cos(a) * 120, dy = y - 80 + Math.sin(a) * 40;
+      ctx.save(); ctx.translate(dx, dy); ctx.scale(Math.sin(a) > 0 ? 1 : -1, 1);
+      ctx.fillStyle = '#c0392b'; ctx.beginPath(); ctx.ellipse(0, 0, 60, 24, 0, 0, TAU); ctx.fill();
+      const f = Math.sin(st.t * 6) * 30;
+      poly([[-10, -10], [-50, -60 - f], [30, -12]], '#a02a20');
+      poly([[50, -6], [90, -14], [56, 10]], '#c0392b'); blob(76, -10, 3, '#fff');
+      poly([[-56, 0], [-110, -16], [-100, 14]], '#c0392b');
+      ctx.restore();
     },
-    candy(x, y, w, h, k) {
-      rect(x, y, w, h, '#ffd6ec');
-      for (let i = 0; i < 4; i++) {
-        const lx = x + 30 + i * (w - 60) / 3, ly = y + h - 70;
-        rect(lx - 2, ly, 5, 70, '#fff');
-        blob(lx, ly, 22, `hsl(${(i * 90 + st.t * 30) % 360},80%,65%)`);
-        ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(lx, ly, 13, st.t * 2, st.t * 2 + 4); ctx.stroke();
-      }
-      for (let i = 0; i < 12; i++) blob(x + hash(i + k) * w, y + 10 + hash(i + 7) * 40, 4, ['#ff5d73', '#7ddc6f', '#4fd1ff'][i % 3]);
+    "The Flying Library"(y) {
+      for (let i = 0; i < 12; i++) drawThing({ type: 'book', s: 1, seed: i * 7, dir: 1 }, TL - 60 - (i % 4) * 60 + Math.sin(st.t + i) * 20, y - 40 - Math.floor(i / 4) * 60);
     },
-    ducks(x, y, w, h, k) {
-      const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, '#9fe0ff'); g.addColorStop(1, '#4fb3ff');
-      rect(x, y, w, h, g);
-      for (let i = 0; i < 6; i++) drawDuck(x + 30 + ((i * (w - 40) / 5 + st.t * 15) % (w - 40)), y + h - 26 - (i % 2) * 10, 0.8 + (i % 3) * 0.15, i + k);
-      const big = 1.6 + Math.sin(st.t) * 0.1; drawDuck(x + w * 0.5, y + h * 0.45, big, k);
+    "Edge of Space"(y) {
+      drawThing({ type: 'astro', s: 1.4, seed: 1, dir: 1 }, TL - 120, y - 60);
+      rect(TL - 2, y - 400, 4, 400, 'rgba(200,220,255,0.3)');
     },
-    mirrors(x, y, w, h, k) {
-      // the elevator, reflected forever
-      for (let i = 0; i < 7; i++) {
-        const s = Math.pow(0.78, i), rw = w * s, rh = h * s;
-        rect(x + (w - rw) / 2, y + (h - rh) / 2, rw, rh, `hsl(${(i * 40 + st.t * 40 + k * 60) % 360},60%,${30 + i * 6}%)`);
-      }
-      const s = 0.4; rect(x + w / 2 - 30 * s * 2, y + h / 2 - 40 * s * 2, 60 * s * 2, 80 * s * 2, 'rgba(200,230,255,0.6)');
+    "Moon Parking"(y) {
+      // the Moon, parked right next to the tower
+      const mx = TL - 260, my = y - 80;
+      blob(mx, my, 210, '#d9d9e0');
+      for (const [dx, dy, r] of [[-60, -40, 30], [40, 30, 44], [70, -70, 20], [-40, 90, 26]]) blob(mx + dx, my + dy, r, '#b8b8c4');
+      rect(mx + 150, my - 210, 4, 60, '#ddd'); rect(mx + 154, my - 210, 30, 18, '#e8364f');
+      rect(mx + 40, my - 230, 70, 22, '#2f7bff'); blob(mx + 54, my - 208, 8, '#333'); blob(mx + 96, my - 208, 8, '#333');
+    },
+    "Candy Planets"(y) {
+      blob(TL - 200, y - 60, 120, '#ff9ad5');
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 14; ctx.beginPath(); ctx.arc(TL - 200, y - 60, 80, st.t * 0.5, st.t * 0.5 + 4); ctx.stroke();
+      ctx.strokeStyle = '#7ddc6f'; ctx.lineWidth = 6; ctx.beginPath(); ctx.ellipse(TL - 200, y - 60, 180, 30, -0.3, 0, TAU); ctx.stroke();
+    },
+    "Rubber Duck Galaxy"(y) {
+      drawDuck(TL - 200, y - 80, 5, 1);
+      for (let i = 0; i < 6; i++) drawDuck(TL - 300 + i * 50, y + 40 + (i % 2) * 20, 0.9, i);
+    },
+    "Hall of Mirrors"(y) {
+      // mirrors on both sides of the tower, each showing the elevator again, smaller and smaller
+      const panes = [[TL - 100, 0.62], [TL - 190, 0.5], [TL - 262, 0.4], [TL - 320, 0.32], [CX + 120, 0.62], [CX + 210, 0.5], [CX + 282, 0.4], [CX + 340, 0.32]];
+      panes.forEach(([x, s], i) => {
+        const w = 150 * s, h = 220 * s, top = y - 80 - h / 2;
+        ctx.fillStyle = '#e8c45a'; ctx.beginPath(); ctx.roundRect(x - w / 2 - 6, top - 6, w + 12, h + 12, 10); ctx.fill();
+        const g = ctx.createLinearGradient(x - w / 2, top, x + w / 2, top + h);
+        const hue = (i * 45 + st.t * 40) % 360;
+        g.addColorStop(0, `hsl(${hue},60%,82%)`); g.addColorStop(1, `hsl(${(hue + 80) % 360},55%,62%)`);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(x - w / 2, top, w, h, 6); ctx.fill();
+        ctx.save(); ctx.translate(x, y - 80 + Math.sin(st.t * 2 + i) * 3); ctx.scale(s * 0.8 * (i < 4 ? -1 : 1), s * 0.8);
+        drawCapsule(clamp(dim(), 0.08, 1), false); ctx.restore();
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 4 * s;
+        ctx.beginPath(); ctx.moveTo(x - w * 0.3, top + h * 0.15); ctx.lineTo(x - w * 0.05, top + h * 0.02); ctx.stroke();
+      });
     }
   };
-
-  // ---- The tower -------------------------------------------------------------------
-  function bandRoom(b, side) {
-    const s = stopAt(b * BAND);
-    return s.rooms[Math.floor(hash(b * 2 + side * 7.3) * s.rooms.length)];
-  }
-  function wallCol(b) {
-    const a = b * BAND;
-    if (a < 3000) return '#c9bfae';
-    if (a < 8000) return '#b8c3d8';
-    if (a < 14500) return '#a99ac9';
-    const h = (b * 23) % 360; return `hsl(${h},35%,55%)`;
-  }
-  function drawTower() {
-    const b0 = Math.floor((st.cam * K - (H - SY - 75)) / FH / K * K) - 1;
-    const first = Math.floor((st.cam - (H - SY) / K) / BAND) - 1, last = Math.floor((st.cam + (SY + 75) / K) / BAND) + 1;
-    // the street and the city around the base
-    const groundY = slabY(0);
-    if (groundY < H + 40) {
-      for (let i = 0; i < 12; i++) { const bh = 80 + hash(i) * 200, bx = i < 6 ? i * 26 : BR + 20 + (i - 6) * 100; rect(bx - 20, groundY - bh, i < 6 ? 24 : 80, bh, '#8494b8'); }
-      rect(-30, groundY, W + 60, H, '#5a5d66');
-      rect(-30, groundY, W + 60, 8, '#9aa0ad');
-      ctx.fillStyle = '#f4f4f0'; for (let x = 0; x < W; x += 120) ctx.fillRect(x, groundY + 50, 60, 6);
-    }
-    for (let b = Math.max(0, first); b <= last; b++) {
-      const yb = slabY(b), yt = yb - FH;
-      if (yt > H || yb < -20) continue;
-      rect(BL, yt, BR - BL, FH, wallCol(b));
-      // two rooms each side of the shaft
-      const rooms = [[BL + 12, yt + 12, CX - SH - BL - 24, FH - 26], [CX + SH + 12, yt + 12, BR - CX - SH - 24, FH - 26]];
-      rooms.forEach(([rx, ry, rw, rh], side) => {
-        ctx.save(); ctx.beginPath(); ctx.rect(rx, ry, rw, rh); ctx.clip();
-        ROOMS[bandRoom(b, side)](rx, ry, rw, rh, hash(b + side * 3.1));
-        // the lights in the room go with the power
-        const dark = clamp(1 - dim(), 0, 1) * 0.75;
-        if (dark > 0.01) rect(rx, ry, rw, rh, `rgba(5,5,20,${dark})`);
-        ctx.restore();
-        ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 3; ctx.strokeRect(rx, ry, rw, rh);
-      });
-      // the floor slab with its number by the shaft doors
-      rect(BL - 6, yb - 14, BR - BL + 12, 14, '#6b6f7a');
-      const n = Math.round(floorAt(b * BAND));
-      const glitch = dim() < 0.25 && Math.random() < 0.3;
-      ctx.fillStyle = '#1d2030'; ctx.beginPath(); ctx.roundRect(CX + SH + 14, yt + 10, 78, 26, 6); ctx.fill();
-      ctx.fillStyle = dim() < 0.3 ? '#ff5d5d' : '#7dffb0'; ctx.font = '700 16px Fredoka, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(glitch ? String(Math.floor(Math.random() * 99999)) : n >= 1e6 ? '∞?' : n.toLocaleString(), CX + SH + 53, yt + 29);
-    }
-    // the roof is never reached: the tower just keeps going
-  }
-
-  function drawShaft() {
-    rect(CX - SH, -30, SH * 2, H + 60, '#2a2d38');
-    rect(CX - SH, -30, 6, H + 60, '#4a4f5c'); rect(CX + SH - 6, -30, 6, H + 60, '#4a4f5c');
-    // guide rails with bolts scrolling past
-    ctx.fillStyle = '#6b7080';
-    const off = ((st.cam * K) % 40 + 40) % 40;
-    for (let y = -40 + off; y < H + 40; y += 40) { ctx.fillRect(CX - SH + 10, y, 6, 4); ctx.fillRect(CX + SH - 16, y, 6, 4); }
-    // the counterweight goes down as you go up
-    const cwY = ((-st.cam * K * 0.5) % (H + 400) + H + 400) % (H + 400) - 200;
-    rect(CX + SH - 30, cwY, 18, 90, '#8a8f9a');
-    // emergency lights spin when the power is low
-    if (dim() < 0.35) {
-      for (let y = 60; y < H; y += 220) {
-        const on = Math.sin(st.t * 8 + y) > 0;
-        blob(CX - SH + 14, y, 7, on ? '#ff3b3b' : '#5a1a1a');
-        if (on) blob(CX - SH + 14, y, 24, 'rgba(255,40,40,0.25)');
-      }
+  function drawFeatures() {
+    for (const s of ELEV_STOPS) {
+      const f = FEATURE[s.name];
+      if (!f) continue;
+      const y = sy(s.alt);
+      if (y < -400 || y > H + 400) continue;
+      f(y);
     }
   }
 
+  // ---- The elevator --------------------------------------------------------------------
   function carPose() {
     let x = CX, y = SY, tilt = 0;
-    if (dim() < 0.3 && !st.crash) { x += (Math.random() - 0.5) * 4; y += (Math.random() - 0.5) * 3; }
-    if (st.dead) { y += Math.min(st.deadT * 60, 40); tilt = Math.sin(st.t * 20) * 0.01; }
-    if (st.crash && st.crash.boom) { tilt = Math.min(st.crash.since * 0.8, 0.25); }
+    if (dim() < 0.3 && !st.crash && !st.dead) { x += (Math.random() - 0.5) * 3; y += (Math.random() - 0.5) * 3; }
+    if (st.dead) y += Math.min(st.deadT * 50, 30);
+    if (st.crash && st.crash.boom) tilt = Math.min(st.crash.since * 0.8, 0.25);
     return { x, y, tilt };
+  }
+  // a rounded glass capsule with its operator, drawn at the origin
+  function drawCapsule(lit, sad) {
+    // a rounded glass capsule
+    ctx.fillStyle = '#c9d0dc'; ctx.beginPath(); ctx.roundRect(-58, -82, 116, 164, 22); ctx.fill();
+    const g = ctx.createLinearGradient(-50, 0, 50, 0);
+    g.addColorStop(0, mixc('#24304a', '#bfe9ff', lit)); g.addColorStop(0.5, mixc('#2a3654', '#eaf8ff', lit)); g.addColorStop(1, mixc('#24304a', '#9fd8ff', lit));
+    ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-50, -74, 100, 148, 16); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.beginPath(); ctx.roundRect(-44, -68, 14, 120, 7); ctx.fill();
+    rect(-58, 10, 116, 10, '#8a92a4');
+    // the operator in a bellhop hat
+    const bob = Math.sin(st.t * 3) * 1.5;
+    rect(-16, -10 + bob, 32, 44, '#c0392b'); rect(-5, -6 + bob, 10, 26, '#ffd23f');
+    rect(-16, 34, 13, 30, '#2a2a3a'); rect(3, 34, 13, 30, '#2a2a3a');
+    blob(0, -26 + bob, 15, '#ffd7a8');
+    rect(-13, -46 + bob, 26, 9, '#c0392b'); rect(-15, -38 + bob, 30, 4, '#a02a20');
+    blob(-5, -28 + bob, 2, '#222'); blob(5, -28 + bob, 2, '#222');
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 1.5; ctx.beginPath();
+    if (sad) ctx.arc(0, -16 + bob, 4, 1.15 * Math.PI, 1.85 * Math.PI); else ctx.arc(0, -20 + bob, 4.5, 0.15 * Math.PI, 0.85 * Math.PI);
+    ctx.stroke();
   }
   function drawCar() {
     const p = carPose();
-    // cables up to the top of the shaft (snapped and whipping if the cable broke)
-    ctx.strokeStyle = '#9aa0ad'; ctx.lineWidth = 3;
-    if (st.crash) { ctx.beginPath(); ctx.moveTo(p.x - 8, p.y - 80); ctx.quadraticCurveTo(p.x + 30 * Math.sin(st.t * 10), p.y - 160, p.x - 20, p.y - 240); ctx.stroke(); }
-    else for (const dx of [-8, 8]) { ctx.beginPath(); ctx.moveTo(p.x + dx, -30); ctx.lineTo(p.x + dx, p.y - 80); ctx.stroke(); }
+    // the cable up the side of the tower (whipping loose if it snapped)
+    ctx.strokeStyle = '#3a3f52'; ctx.lineWidth = 3;
+    if (st.crash) { ctx.beginPath(); ctx.moveTo(p.x, p.y - 82); ctx.quadraticCurveTo(p.x + 40 * Math.sin(st.t * 10), p.y - 180, p.x - 20, p.y - 280); ctx.stroke(); }
+    else { ctx.beginPath(); ctx.moveTo(p.x, -40); ctx.lineTo(p.x, p.y - 82); ctx.stroke(); }
     ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.tilt);
-    // the car: steel frame, glass sides, light inside that follows the power
     const lit = clamp(dim(), 0.08, 1);
-    rect(-62, -80, 124, 160, '#55596a');
-    const g = ctx.createLinearGradient(0, -74, 0, 74);
-    g.addColorStop(0, mixc('#2a2a3a', '#fff3c8', lit)); g.addColorStop(1, mixc('#1a1a28', '#f0d89a', lit));
-    rect(-56, -74, 112, 148, g);
-    rect(-56, -74, 112, 6, 'rgba(255,255,255,0.4)');
-    ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(-44, -60); ctx.lineTo(-20, -20); ctx.moveTo(30, -64); ctx.lineTo(48, -36); ctx.stroke();
-    // the operator in a bellhop hat
-    const bob = Math.sin(st.t * 3) * 1.5;
-    rect(-20, 0 + bob, 40, 50, '#c0392b'); rect(-20, 50, 16, 24, '#2a2a3a'); rect(4, 50, 16, 24, '#2a2a3a');
-    rect(-6, 4 + bob, 12, 30, '#ffd23f');
-    blob(0, -16 + bob, 16, '#ffd7a8');
-    rect(-14, -36 + bob, 28, 10, '#c0392b'); rect(-16, -28 + bob, 32, 4, '#a02a20');
-    blob(-5, -18 + bob, 2, '#222'); blob(5, -18 + bob, 2, '#222');
-    ctx.strokeStyle = '#222'; ctx.lineWidth = 1.5; ctx.beginPath();
-    if (st.dead || st.crash || dim() < 0.3) ctx.arc(0, -6 + bob, 4, 1.15 * Math.PI, 1.85 * Math.PI); else ctx.arc(0, -10 + bob, 4.5, 0.15 * Math.PI, 0.85 * Math.PI);
-    ctx.stroke();
-    // button panel
-    rect(36, -20, 14, 40, '#33363f');
-    for (let i = 0; i < 5; i++) blob(43, -14 + i * 8, 2.5, i === Math.floor(st.t * 2) % 5 && lit > 0.3 ? '#ffd23f' : '#777');
-    // the floor counter above the doors
-    rect(-36, -100, 72, 22, '#111');
+    drawCapsule(lit, st.dead || st.crash || dim() < 0.3);
+    // the floor counter on top of the car
+    ctx.fillStyle = '#1d2030'; ctx.beginPath(); ctx.roundRect(-40, -110, 80, 24, 8); ctx.fill();
     const n = Math.round(floorAt(st.cam));
     ctx.fillStyle = lit < 0.3 ? '#ff5d5d' : '#ffb52e'; ctx.font = '700 16px Fredoka, sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(dim() < 0.2 && Math.random() < 0.4 ? '--' : (n >= 1e9 ? '∞' : n.toLocaleString()), 0, -84);
-    poly([[-44, -92], [-38, -98], [-38, -86]], st.vel > 5 ? '#7dffb0' : '#444'); poly([[44, -92], [38, -98], [38, -86]], st.vel < -5 ? '#ff5d5d' : '#444');
+    ctx.fillText(dim() < 0.2 && Math.random() < 0.4 ? '--' : (n >= 1e9 ? '∞' : n.toLocaleString()), 0, -92);
+    poly([[-48, -98], [-42, -106], [-42, -90]], st.vel > 5 ? '#7dffb0' : '#444');
     ctx.restore();
   }
 
-  // ---- Particles -----------------------------------------------------------------------
+  // ---- Particles ---------------------------------------------------------------------------
   function emit(dt) {
     const p = carPose();
-    // sparks from the cables when the power is failing
     if ((dim() < 0.25 || st.dead) && Math.random() < dt * 12) {
-      for (let i = 0; i < 6; i++) parts.push({ k: 'spark', x: p.x + rand(-10, 10), y: p.y - 80, vx: rand(-160, 160), vy: rand(-200, 40), g: 600, life: rand(0.3, 0.7), max: 0.7, size: rand(1.5, 3), color: Math.random() < 0.5 ? '#ffd23f' : '#fff6c0' });
+      for (let i = 0; i < 6; i++) parts.push({ k: 'spark', x: p.x + rand(-10, 10), y: p.y - 82, vx: rand(-160, 160), vy: rand(-200, 40), g: 600, life: rand(0.3, 0.7), max: 0.7, size: rand(1.5, 3), color: Math.random() < 0.5 ? '#ffd23f' : '#fff6c0' });
     }
-    // speed streaks in the shaft
-    if (Math.abs(st.vel) > 200 && Math.random() < dt * 30) parts.push({ k: 'line', x: CX + rand(-SH + 10, SH - 10), y: st.vel > 0 ? -20 : H + 20, vx: 0, vy: st.vel > 0 ? 1600 : -1600, g: 0, life: 0.8, max: 0.8, size: 2, color: 'rgba(255,255,255,0.4)' });
+    if (Math.abs(st.vel) > 220 && Math.random() < dt * 30) parts.push({ k: 'line', x: rand(0, W), y: st.vel > 0 ? -60 : H + 60, vx: 0, vy: st.vel > 0 ? 1800 : -1800, g: 0, life: 0.7, max: 0.7, size: 2, color: 'rgba(255,255,255,0.35)' });
   }
 
-  // ---- Crash (a bad word): the cable snaps and the elevator plunges to the lobby ----------
+  // ---- Crash (a bad word): the cable snaps and the elevator plunges to the street ------------
   function updateCrash(dt) {
     const c = st.crash;
     c.t += dt;
@@ -472,13 +578,13 @@ const ElevScene = (function () {
     st.cam = c.top * (1 - Math.pow(c.p, 3));
     if (c.p >= 1) {
       c.boom = true; c.since = 0; st.cam = 0; st.flash = 1; st.shake = 1.5;
-      for (let i = 0; i < 50; i++) { const a = rand(Math.PI, TAU), sp = rand(100, 500); parts.push({ k: 'dust', x: CX + rand(-60, 60), y: SY + 70, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6, g: 300, life: rand(0.8, 1.6), max: 1.6, size: rand(10, 24), color: '#b8a890' }); }
-      for (let i = 0; i < 40; i++) { const a = rand(0, TAU), sp = rand(150, 500); parts.push({ k: 'spark', x: CX, y: SY + 60, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 500, life: rand(0.4, 0.9), max: 0.9, size: rand(2, 4), color: '#ffd23f' }); }
-      fx.push({ k: 'ring', x: CX, y: SY + 60, r: 420, life: 0.7, max: 0.7, color: '#ffe7b0' });
+      for (let i = 0; i < 50; i++) { const a = rand(Math.PI, TAU), sp = rand(100, 500); parts.push({ k: 'dust', x: CX + rand(-60, 60), y: SY + 80, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6, g: 300, life: rand(0.8, 1.6), max: 1.6, size: rand(10, 24), color: '#b8a890' }); }
+      for (let i = 0; i < 40; i++) { const a = rand(0, TAU), sp = rand(150, 500); parts.push({ k: 'spark', x: CX, y: SY + 70, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: 500, life: rand(0.4, 0.9), max: 0.9, size: rand(2, 4), color: '#ffd23f' }); }
+      fx.push({ k: 'ring', x: CX, y: SY + 70, r: 420, life: 0.7, max: 0.7, color: '#ffe7b0' });
     }
   }
 
-  // ---- Update / draw ---------------------------------------------------------------------
+  // ---- Update / draw --------------------------------------------------------------------------
   function update(dt) {
     st.t += dt;
     const prev = st.cam;
@@ -490,7 +596,7 @@ const ElevScene = (function () {
     st.vel = dt > 0 ? (st.cam - prev) * K / dt : 0;
     st.kick = Math.max(0, st.kick - dt * 1.2);
     st.shake = Math.max(0, st.shake - dt * 2.5);
-    if (dim() < 0.2 && !st.dead) st.shake = Math.max(st.shake, 0.08);
+    if (dim() < 0.2 && !st.dead) st.shake = Math.max(st.shake, 0.06);
     st.flash = Math.max(0, st.flash - dt * 2);
     // lights flicker when the power gets low, more the lower it is
     st.flickT -= dt;
@@ -500,12 +606,13 @@ const ElevScene = (function () {
       st.flickT = rand(0.05, 0.25);
     }
     emit(dt);
+    const dy = (st.cam - prev) * K;
     for (let i = parts.length - 1; i >= 0; i--) {
       const q = parts[i];
       q.life -= dt;
       if (q.life <= 0) { parts.splice(i, 1); continue; }
       q.vy += (q.g || 0) * dt;
-      q.x += q.vx * dt; q.y += q.vy * dt + (st.cam - prev) * K * (q.k === 'line' ? 0 : 1);
+      q.x += q.vx * dt; q.y += q.vy * dt + (q.k === 'line' ? 0 : dy);
       if (q.k === 'dust') q.size += 20 * dt;
     }
     for (let i = fx.length - 1; i >= 0; i--) {
@@ -520,27 +627,34 @@ const ElevScene = (function () {
   function draw() {
     ctx.setTransform(pxScale, 0, 0, pxScale, 0, 0);
     if (st.shake) ctx.translate((Math.random() - 0.5) * st.shake * 16, (Math.random() - 0.5) * st.shake * 16);
-    drawSky();
+    const [top, bot] = skyCols(st.cam);
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, top); g.addColorStop(1, bot);
+    rect(-30, -30, W + 60, H + 60, g);
+    drawStars();
+    drawSun();
+    drawCity();
+    drawThings(false);
     drawTower();
-    drawShaft();
-    // building edge shadows
-    rect(BL - 10, -30, 10, H + 60, 'rgba(0,0,0,0.2)'); rect(BR, -30, 10, H + 60, 'rgba(0,0,0,0.2)');
+    drawThings(true);
+    drawFeatures();
     for (const q of parts) {
       const a = q.life / q.max;
       if (q.k === 'dust') { ctx.globalAlpha = a * 0.6; blob(q.x, q.y, q.size, q.color); }
-      else if (q.k === 'line') { ctx.globalAlpha = a; rect(q.x, q.y, 2, 60, q.color); }
+      else if (q.k === 'line') { ctx.globalAlpha = a; rect(q.x, q.y, 2, 70, q.color); }
     }
     ctx.globalAlpha = 1;
     if (!(st.crash && st.crash.boom && st.crash.since > 1.4)) drawCar();
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     for (const q of parts) if (q.k === 'spark') { ctx.globalAlpha = q.life / q.max; blob(q.x, q.y, q.size, q.color); }
     ctx.restore(); ctx.globalAlpha = 1;
-    // LOW POWER warning on the whole building
-    if (dim() < 0.3 && !st.crash && Math.sin(st.t * 6) > 0) {
-      ctx.fillStyle = 'rgba(255,60,60,0.9)'; ctx.font = '700 26px Fredoka, sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(st.dead ? '⚠ POWER OUT ⚠' : '⚠ LOW POWER ⚠', CX, 160);
+    // a neon LOW POWER sign flickers on the tower
+    if (dim() < 0.3 && !st.crash && Math.sin(st.t * 6) > -0.2) {
+      ctx.fillStyle = '#1d2030'; ctx.beginPath(); ctx.roundRect(TL + 10, 150, TR - TL - 20, 40, 10); ctx.fill();
+      ctx.fillStyle = '#ff4a4a'; ctx.font = '700 22px Fredoka, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(st.dead ? '⚠ POWER OUT' : '⚠ LOW POWER', (TL + TR) / 2, 178);
     }
-    if (st.dead) rect(-30, -30, W + 60, H + 60, `rgba(0,0,10,${Math.min(0.55, st.deadT * 0.5)})`);
+    if (st.dead) rect(-30, -30, W + 60, H + 60, `rgba(0,0,10,${Math.min(0.5, st.deadT * 0.5)})`);
     for (const f of fx) {
       if (f.k === 'confetti') {
         ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.rot);
@@ -575,7 +689,7 @@ const ElevScene = (function () {
     setIgnite(v) { st.ignite = v; },
     setStreak(n) { st.streak = n; },
     setTarget(d) { st.target = d; },
-    // 0..1: the building dims, flickers and panics as this drops
+    // 0..1: the tower dims, flickers and panics as this drops
     setPower(p) { st.power = clamp(p, 0, 1); },
     boostTo(d, power) {
       st.target = d;
@@ -587,7 +701,7 @@ const ElevScene = (function () {
     sputter() {
       st.shake = 0.5; st.flick = 0.3; st.flickT = 0.15;
       const p = carPose();
-      for (let i = 0; i < 12; i++) parts.push({ k: 'spark', x: p.x + rand(-20, 20), y: p.y - 80, vx: rand(-200, 200), vy: rand(-220, 0), g: 600, life: rand(0.3, 0.6), max: 0.6, size: rand(1.5, 3), color: '#ffd23f' });
+      for (let i = 0; i < 12; i++) parts.push({ k: 'spark', x: p.x + rand(-20, 20), y: p.y - 82, vx: rand(-200, 200), vy: rand(-220, 0), g: 600, life: rand(0.3, 0.6), max: 0.6, size: rand(1.5, 3), color: '#ffd23f' });
     },
     die() { st.dead = true; st.deadT = 0; st.shake = 0.8; },
     crash() {
