@@ -3,14 +3,14 @@
 
 (function () {
   const MODES = {
-    easy:   { id: 'easy',   label: 'Owen (Easy)', time: 30, lives: 5, mult: 1,   skips: 5, fast: [6, 12] },
-    medium: { id: 'medium', label: 'Medium',      time: 20, lives: 3, mult: 1.5, skips: 3, fast: [5, 10] },
-    hard:   { id: 'hard',   label: 'Hard',        time: 12, lives: 3, mult: 2,   skips: 2, fast: [4, 8] },
+    easy:   { id: 'easy',   label: 'Owen (Easy)', time: 30, lives: 5, mult: 1,   skips: 5, fast: [6, 12], drain: 5 },
+    medium: { id: 'medium', label: 'Medium',      time: 20, lives: 3, mult: 1.5, skips: 3, fast: [5, 10], drain: 8 },
+    hard:   { id: 'hard',   label: 'Hard',        time: 12, lives: 3, mult: 2,   skips: 2, fast: [4, 8], drain: 12 },
     // Ultra: Hard questions, but you slide back (rocket falls, sub floats up) while each question is up.
     // Ultra comes with a choice of question difficulty; everything else is the same.
-    'ultra-easy':   { id: 'ultra-easy',   label: 'Ultra Hard · easy questions',   tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'easy',   drift: true },
-    'ultra-medium': { id: 'ultra-medium', label: 'Ultra Hard · medium questions', tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'medium', drift: true },
-    ultra:          { id: 'ultra',        label: 'Ultra Hard · hard questions',   tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'hard',   drift: true }
+    'ultra-easy':   { id: 'ultra-easy',   label: 'Ultra Hard · easy questions',   tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'easy',   drift: true, drain: 15 },
+    'ultra-medium': { id: 'ultra-medium', label: 'Ultra Hard · medium questions', tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'medium', drift: true, drain: 15 },
+    ultra:          { id: 'ultra',        label: 'Ultra Hard · hard questions',   tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'hard',   drift: true, drain: 15 }
   };
   const DIVE_LENGTHS = [30, 60, 120];
   let diveLen = 60;
@@ -81,7 +81,28 @@
     crashLine: p => `Your drill spun round and shot out of the ground from <b>${p}</b>. Score lost!`,
     reachedLine: (p, dist) => `You drilled down to <b>${p}</b> — ${dist} deep.`
   };
-  const TYPE_ORDER = ['rocket', 'sub', 'drill'];
+  // Elevator: up a tower that never ends. Power is your life: wrong answers and timeouts drain it,
+  // correct answers recharge a little, and the whole building reacts as it runs low.
+  TYPES.elev = {
+    ...TYPES.rocket,
+    id: 'elev', scene: ElevScene, stops: ELEV_STOPS, fmt: n => 'Floor ' + (n >= 1e9 ? '∞' : Math.max(1, Math.round(n)).toLocaleString()), from: '', distLabel: 'Elevator',
+    marker: '🛗', down: false, go: 'GOING UP!', firstTag: '🛗 GOING UP!', reached: 'YOU REACHED', notYet: 'Not ridden yet',
+    tagline: 'Ride a glass elevator up a tower that never ends. The higher you go, the stranger the floors get!',
+    rule: '<b>⚡ Keep the power on.</b> Wrong answers and timeouts drain power; right ones recharge it. At 0% the lights go out.',
+    timeLabel: 'Power', driftText: '⬇️ Going down', endless: '∞ The tower never ends!',
+    again: '🛗 Ride again', overTitle: 'Power outage!', crashTitle: '💥 Cable snapped!', name: () => 'Elevator',
+    turning: 'The elevator cable is snapping…',
+    crashLine: p => `The cable snapped near <b>${p}</b> and the elevator plunged to the lobby. Score lost!`,
+    reachedLine: (p, dist) => `You rode up to <b>${p}</b> — ${dist}.`,
+    info: {
+      easy: '30s per question<br>wrong answer −5% power',
+      medium: '20s per question<br>wrong answer −8% power',
+      hard: '12s per question<br>wrong answer −12% power',
+      ultra: '12s per question<br>the elevator sinks between answers!'
+    }
+  };
+  const TYPE_ORDER = ['rocket', 'sub', 'drill', 'elev'];
+  const isElev = () => G.type === 'elev';
   let J = TYPES.rocket;   // the current way to play
   let S = J.scene;        // its scene
   try { const t = localStorage.getItem('brainRocket.type'); if (TYPES[t]) { J = TYPES[t]; S = J.scene; } } catch (e) { /* ignore */ }
@@ -106,6 +127,7 @@
     Scene.resize(s);
     SubScene.resize(s);
     DrillScene.resize(s);
+    ElevScene.resize(s);
     const old = $('sceneOld'); if (old) { old.width = $('scene').width; old.height = $('scene').height; }
   }
 
@@ -114,7 +136,7 @@
   try { bests = JSON.parse(localStorage.getItem('brainRocket.bests') || '{}') || {}; } catch (e) { bests = {}; }
   function saveBests() { try { localStorage.setItem('brainRocket.bests', JSON.stringify(bests)); } catch (e) { /* ignore */ } }
   // Rocket: 'easy'. Submarine: 'sub:easy' for 60-second dives (the original length), 'sub:easy:30' otherwise.
-  const bestKey = (type, mode, len) => (type === 'rocket' ? mode : len === 60 ? `${type}:${mode}` : `${type}:${mode}:${len}`);
+  const bestKey = (type, mode, len) => (type === 'rocket' ? mode : type === 'elev' ? `elev:${mode}` : len === 60 ? `${type}:${mode}` : `${type}:${mode}:${len}`);
 
   // ---- Distance helpers -------------------------------------------------
   function kmAt(alt) {
@@ -155,7 +177,7 @@
   const later = (fn, ms) => { const id = setTimeout(fn, ms); G.timers.push(id); return id; };
   const clearLater = () => { G.timers.forEach(clearTimeout); G.timers = []; };
   // Submarine and Play With Friends both run on one clock with unlimited skips.
-  const isDive = () => G.type !== 'rocket';
+  const isDive = () => G.type === 'sub' || G.type === 'drill';
   // When the dive clock turns red and starts ticking.
   const lowAt = () => 10;
 
@@ -301,9 +323,10 @@
     if (ch) setType('drill');
     const mode = MODES[modeId];
     const len = ch ? ch.len : diveLen;   // a challenge sets its own time; the Submarine choice is left alone
-    const dive = J.id !== 'rocket';
+    const dive = J.id === 'sub' || J.id === 'drill';
+    const elev = J.id === 'elev';
     Object.assign(G, {
-      state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive ? Infinity : mode.lives, streak: 0, bestStreak: 0,
+      state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive || elev ? Infinity : mode.lives, power: 100, tried: new Set(), streak: 0, bestStreak: 0,
       qNum: 0, skips: dive ? Infinity : mode.skips, used: new Set(), seen: ch ? Quiz.freshRun() : Quiz.newRun(), q: null,
       challenge: ch, rng: ch ? Challenge.rng(ch.seed) : Math.random, correct: 0, bestAnswer: null,
       launched: false, peak: 0, reached: new Set(), crashed: false, boomed: false, diveTime: len, diveLeft: len, qElapsed: 0, lastTick: len
@@ -318,15 +341,15 @@
     el.card.classList.add('hidden');
     el.track.classList.toggle('down', dive);
     el.card.classList.toggle('dive', dive);
-    el.fuelPill.classList.toggle('hidden', dive);
-    el.timePill.classList.toggle('hidden', !dive);
+    el.fuelPill.classList.toggle('hidden', dive || elev);
+    el.timePill.classList.toggle('hidden', !dive && !elev);
     el.altLabel.textContent = J.distLabel;
     $('hudTimeLabel').textContent = J.timeLabel || 'Dive time';
     el.trackRocket.textContent = J.marker;
     buildTrack();
     renderFuel();
     renderStreak();
-    renderDiveClock();
+    if (elev) renderPower(); else renderDiveClock();
     updateHud(0);
 
     const steps = ['3', '2', '1', J.go];
@@ -383,6 +406,10 @@
       // A real answer for this topic is never rude (Tit is a bird, Ass is a donkey), even when it breaks the letter rule.
       const real = Quiz.check({ cat: G.q.cat, rules: [] }, el.input.value).ok;
       if (!real && BadWords.test(el.input.value)) return crash();
+      if (isElev() && el.input.value.trim()) {
+        const k = Quiz.keyOf(el.input.value);
+        if (!G.tried.has(k)) { G.tried.add(k); if (losePower(G.mode.drain, 'WRONG')) return; }
+      }
       el.feedback.textContent = res.reason;
       el.feedback.className = 'feedback';
       el.card.classList.remove('shake'); void el.card.offsetWidth; el.card.classList.add('shake');
@@ -425,6 +452,7 @@
     if (deep > 1) tags.push(['🤓 ×1.5 Deepest cut', '#c77dff']);
     if (G.mode.mult > 1) tags.push([`×${G.mode.mult} ${G.mode.tag || G.mode.label}`, '#ffffff']);
     if (repeat < 1) tags.push(['♻️ ×0.5 Repeat', '#b9c3e6']);
+    if (isElev() && G.power < 100) { const up = Math.min(100 - G.power, tier * 2); G.power += up; renderPower(); tags.push([`⚡ +${up}% power`, '#7dffb0']); }
     if (hints) tags.push([`💡 ×${+hm.toFixed(2)} ${hints} hint${hints > 1 ? 's' : ''}`, '#ffe08a']);
     popup(`+${pts.toLocaleString()}`, Quiz.TIER_NAMES[tier], tier, tags);
 
@@ -440,7 +468,28 @@
     later(nextQuestion, isDive() ? (tier >= 4 ? 1100 : 800) : (tier >= 4 ? 2300 : 1900));
   }
 
+  // Elevator: lose some power. Returns true if that was the last of it (the game is over).
+  function losePower(n, label) {
+    G.power = Math.max(0, G.power - n);
+    renderPower(true);
+    S.sputter();
+    popup(`-${n}% ⚡`, label, 0, [], true);
+    if (G.power <= 0) { gameOver(); return true; }
+    return false;
+  }
+
   function timeout() {
+    if (isElev()) {
+      G.state = 'reveal';
+      G.streak = 0; S.setStreak(0); renderStreak();
+      Sound.timeout();
+      el.feedback.className = 'feedback';
+      el.feedback.textContent = "⏰ Time's up! The elevator lost power.";
+      showReveal('You could have said:', Quiz.examples(G.q));
+      lockCard();
+      if (!losePower(20, "TIME'S UP")) later(nextQuestion, 2600);
+      return;
+    }
     G.state = 'reveal';
     G.lives--;
     G.streak = 0;
@@ -610,6 +659,12 @@
     }
   }
 
+  function renderPower(hit) {
+    el.time.textContent = `${Math.round(G.power)}%`;
+    el.timePill.classList.toggle('low', G.power <= 25);
+    if (hit) { el.timePill.classList.remove('bump'); void el.timePill.offsetWidth; el.timePill.classList.add('bump'); }
+  }
+
   function renderDiveClock() {
     el.time.textContent = Math.max(0, Math.ceil(G.diveLeft));
     el.timePill.classList.toggle('low', G.diveLeft <= lowAt());
@@ -667,7 +722,7 @@
     const np = nextPlace(G.score);
     const drift = drifts() && G.state === 'question' && G.score > 0;
     el.alt.parentElement.classList.toggle('drifting', !!drift);
-    if (drift) { el.next.textContent = `${J.down ? '⬆️ Floating up' : Scene.chute > 0.5 && S === Scene ? '🪂 Parachute!' : '⬇️ Falling'} ${Math.round(driftRate()).toLocaleString()} pts/s — answer!`; return; }
+    if (drift) { el.next.textContent = `${J.driftText || (J.down ? '⬆️ Floating up' : Scene.chute > 0.5 && S === Scene ? '🪂 Parachute!' : '⬇️ Falling')} ${Math.round(driftRate()).toLocaleString()} pts/s — answer!`; return; }
     el.next.textContent = np ? `Next stop: ${np.icon} ${np.name} · ${Math.ceil(np.pts - G.score).toLocaleString()} pts` : J.endless;
   }
 
@@ -724,6 +779,7 @@
     lastT = now;
     // Check the scene itself, not G.type: on the title screen G.type is whatever the last game was.
     Scene.setChute(S === Scene && !!(G.mode && G.mode.drift) && G.state !== 'title');
+    if (S === ElevScene) ElevScene.setPower(G.state === 'title' || G.type !== 'elev' ? 1 : G.power / 100);
     if (G.state !== 'paused') S.update(dt);
     S.draw();
     if (G.state !== 'title') updateHud(dt);
@@ -814,9 +870,11 @@
   Scene.init($('scene'));
   SubScene.init($('scene'));
   DrillScene.init($('scene'));
+  ElevScene.init($('scene'));
   Scene.onMilestone(m => { if (S === Scene) milestone(m); });
   SubScene.onMilestone(m => { if (S === SubScene) milestone(m); });
   DrillScene.onMilestone(m => { if (S === DrillScene) milestone(m); });
+  ElevScene.onMilestone(m => { if (S === ElevScene) milestone(m); });
   fit();
   window.addEventListener('resize', fit);
   document.addEventListener('fullscreenchange', fit);

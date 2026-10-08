@@ -4,7 +4,7 @@ A 16:9 quiz game where your rocket only climbs when you answer. Start on the lau
 
 Plain HTML, CSS and JavaScript with no build step. Open `brain-rocket/index.html` in a browser (or serve the folder with `python3 -m http.server`). The stage scales to any window size and keeps a 16:9 shape; the ⛶ button goes fullscreen.
 
-## Three ways to play
+## Four ways to play
 
 Pick one with the switch on the home screen. Rocket and Submarine each have their own Owen (Easy), Medium, Hard and Ultra Hard modes and their own best scores.
 
@@ -13,7 +13,9 @@ Pick one with the switch on the home screen. Rocket and Submarine each have thei
 
 - **⛏️ Play With Friends** (a drill race). Play against friends without being online together. The host picks a difficulty (Owen, Medium or Hard) and a time (30, 60 or 120 seconds) and makes an **8-character code** (like `JMZQJA4C`). Everyone who types that code gets **exactly the same questions in the same order**, plays on their own, and compares scores afterwards. It plays like Submarine (one clock, unlimited skips), but in its own world: a drill boring down past worms and roots, city pipes, a subway tunnel, dinosaur fossils, crystal caves, the deepest gold mine and the deepest hole ever dug, then through the mantle, the diamond zone and the liquid outer core to the centre of the Earth. The code also carries a check, so a typo is caught instead of quietly starting a different game, and a code only works on the same version of the game (same question bank). Your best on each code is saved, so you can see if you beat yourself.
 
-**💀 Ultra Hard** is a fourth mode for Rocket and Submarine. Click its card to pick the question difficulty (Easy, Medium or Hard questions, each with its own best scores). It pays ×2.5 points, but while each question is on screen the rocket falls back down and the submarine floats back up, and the drift gets faster the further you've gone (12 points a second plus 3% of your score). In Rocket, a 🪂 parachute pops out of the nose whenever you start falling inside Earth's atmosphere (below Outer Space), cutting the fall to 30% so it's much harder to drop all the way back to the launch pad. It comes off when you climb again and a new one opens the next time you fall. The submarine has no parachute. Rocket keeps your highest point as your result; Submarine counts where you are when the clock runs out.
+- **🛗 Elevator.** Ride a glass elevator up a tower that never ends. Each band of floors gets stranger: offices and a café, a jungle floor, an aquarium with sharks, a dinosaur museum, the Cat Kingdom, ball pits and discos, a room inside a cloud, an indoor rain room, sideways gravity, a pirate sky dock, floating islands, a dragon's roost, a flying library, the edge of space, parking on the Moon, candy planets, a rubber duck galaxy and an endless hall of mirrors. The floor counter climbs faster and faster, on to infinity. **Power is your life:** each different wrong answer drains it (Owen −5%, Medium −8%, Hard −12%, Ultra Hard −15%), a timeout costs 20%, and correct answers recharge it a little (+2% for Common up to +10% for Legendary). The building reacts as power drops: rooms dim, the lights flicker, emergency lights spin, people pull out torches, the floor numbers glitch, sparks fly and a LOW POWER warning flashes. At 0% it's a power outage and the ride is over. On Ultra Hard the elevator sinks between answers.
+
+**💀 Ultra Hard** is a fourth mode for Rocket, Submarine and Elevator. Click its card to pick the question difficulty (Easy, Medium or Hard questions, each with its own best scores). It pays ×2.5 points, but while each question is on screen the rocket falls back down and the submarine floats back up, and the drift gets faster the further you've gone (12 points a second plus 3% of your score). In Rocket, a 🪂 parachute pops out of the nose whenever you start falling inside Earth's atmosphere (below Outer Space), cutting the fall to 30% so it's much harder to drop all the way back to the launch pad. It comes off when you climb again and a new one opens the next time you fall. The submarine has no parachute. Rocket keeps your highest point as your result; Submarine counts where you are when the clock runs out.
 
 ## How it plays
 
@@ -50,7 +52,7 @@ Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the b
 
 | File | What it does |
 | --- | --- |
-| `js/data.js` | The topic format, the original six topics, and the stops for each journey (`MILESTONES` for Rocket, `DEPTHS` for Submarine, `DRILL_STOPS` for Play With Friends) |
+| `js/data.js` | The topic format, the original six topics, and the stops for each journey (`MILESTONES` for Rocket, `DEPTHS` for Submarine, `DRILL_STOPS` for Play With Friends, `ELEV_STOPS` for Elevator) |
 | `js/topics-everyday.js`, `js/topics-mixed.js`, `js/topics-expert.js`, `js/topics-more.js` | The other topics with their answers and rarity tiers |
 | `js/topics-dhhs.js` | The Daniel Hand High School (DHHS) topics |
 | `js/topics-years.js` | Topics whose answers carry years, for year questions (`Toy Story @1995`) |
@@ -58,6 +60,7 @@ Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the b
 | `js/scene.js` | The Rocket world: sky, ground, planets, decorations, rocket, particles |
 | `js/drillscene.js` | The Play With Friends world: soil, pipes, subway, fossils, caves, mine, bedrock, mantle and core |
 | `js/challenge.js` | Play With Friends codes: packs difficulty, time and a question seed into 8 characters, and seeds the question order |
+| `js/elevscene.js` | The Elevator world: the endless tower, its themed floors, the glass elevator and the low-power effects |
 | `js/subscene.js` | The Submarine world: ocean zones, sea life, wrecks, the trench, rock, mantle and core |
 | `js/badwords.js` | The rude-word check (lists are ROT13-encoded; only runs after an answer is rejected) |
 | `js/game.js` | Game flow, scoring, HUD, popups and screens for both ways to play |

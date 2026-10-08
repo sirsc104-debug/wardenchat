@@ -270,7 +270,7 @@ button { font-family: inherit; cursor: pointer; }
 .over-dialog { width: 720px; }
 .over-reached { font-size: 26px !important; color: #fff !important; }
 .over-reached b { color: var(--accent); }
-.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
 .stat { background: rgba(255,255,255,0.07); border-radius: 18px; padding: 12px; }
 .stat .s-label { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
 .stat .s-value { font-size: 30px; font-weight: 700; }
@@ -448,7 +448,7 @@ button { font-family: inherit; cursor: pointer; }
 /* ---- Title layout: the logo, tagline and tab bar sit in the same place in every mode ---- */
 #title { align-items: flex-start; padding-top: 48px; }
 #title .tagline { min-height: 62px; display: flex; align-items: center; justify-content: center; margin: 10px auto 12px; }
-.type-toggle { position: relative; display: inline-grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 0; isolation: isolate; }
+.type-toggle { position: relative; display: inline-grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 0; isolation: isolate; }
 .type-toggle .type-btn { position: relative; z-index: 1; padding: 8px 10px; column-gap: 7px; background: transparent !important; transform: none !important; transition: color 0.3s; }
 .type-toggle .type-btn.active { color: #3b2300; }
 .type-glider {
@@ -505,3 +505,5 @@ button { font-family: inherit; cursor: pointer; }
 .tp-len b { font-size: 22px; }
 .tp-len small { font-size: 11px; }
 .tp-close { right: 8px; top: 8px; width: 26px; height: 26px; font-size: 12px; }
+#title[data-type="elev"] .logo span:first-child { text-shadow: 0 8px 0 #4a3a6a, 0 0 40px rgba(255,210,120,0.6); }
+.time-pill.bump { animation: bump 0.4s ease; }

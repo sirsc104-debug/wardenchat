@@ -1371,3 +1371,27 @@ const DRILL_STOPS = [
   { alt: 4200, pts: 4200, name: 'Centre of the Earth',     icon: '🎯', km: 6371, body: 'centre' },
   { alt: 6000, pts: 6000, name: 'Other Side of the World', icon: '🌏', km: 12742 }
 ];
+
+/* Places the Elevator passes, floor by floor, getting stranger the higher it goes. `km` is the
+   floor number shown on the counter; `rooms` are the kinds of room drawn on floors in that stretch. */
+const ELEV_STOPS = [
+  { alt: 0,     pts: 0,     name: 'The Lobby',          icon: '🛎️', km: 1,      rooms: ['lobby', 'cafe'] },
+  { alt: 120,   pts: 120,   name: 'Office Floors',      icon: '💼', km: 12,     rooms: ['office', 'office', 'cafe', 'gym'] },
+  { alt: 300,   pts: 300,   name: 'The Jungle Floor',   icon: '🐒', km: 25,     rooms: ['jungle', 'office', 'gym'] },
+  { alt: 600,   pts: 600,   name: 'The Aquarium Floor', icon: '🦈', km: 50,     rooms: ['aquarium', 'jungle', 'aquarium'] },
+  { alt: 1000,  pts: 1000,  name: 'Dinosaur Museum',    icon: '🦖', km: 100,    rooms: ['dino', 'aquarium', 'dino'] },
+  { alt: 1500,  pts: 1500,  name: 'The Cat Kingdom',    icon: '🐈', km: 150,    rooms: ['cats', 'dino', 'cats'] },
+  { alt: 2200,  pts: 2200,  name: 'Ball Pit Floor',     icon: '🎈', km: 250,    rooms: ['ballpit', 'cats', 'disco'] },
+  { alt: 3000,  pts: 3000,  name: 'Inside a Cloud',     icon: '☁️', km: 400,    rooms: ['clouds', 'ballpit', 'disco'] },
+  { alt: 4000,  pts: 4000,  name: 'The Rain Room',      icon: '🌧️', km: 600,    rooms: ['rain', 'clouds', 'rain'] },
+  { alt: 5200,  pts: 5200,  name: 'Sideways Gravity',   icon: '🌀', km: 900,    rooms: ['sideways', 'rain', 'sideways'] },
+  { alt: 6600,  pts: 6600,  name: 'Pirate Sky Dock',    icon: '🏴‍☠️', km: 1300,   rooms: ['pirate', 'sideways', 'pirate'] },
+  { alt: 8200,  pts: 8200,  name: 'Floating Islands',   icon: '🏝️', km: 2000,   rooms: ['islands', 'pirate', 'islands'] },
+  { alt: 10000, pts: 10000, name: "Dragon's Roost",     icon: '🐉', km: 3000,   rooms: ['dragon', 'islands', 'books'] },
+  { alt: 12000, pts: 12000, name: 'The Flying Library', icon: '📚', km: 5000,   rooms: ['books', 'dragon', 'books'] },
+  { alt: 14500, pts: 14500, name: 'Edge of Space',      icon: '🚀', km: 8000,   rooms: ['space', 'books', 'space'] },
+  { alt: 17500, pts: 17500, name: 'Moon Parking',       icon: '🌕', km: 12000,  rooms: ['moon', 'space', 'moon'] },
+  { alt: 21000, pts: 21000, name: 'Candy Planets',      icon: '🍭', km: 20000,  rooms: ['candy', 'moon', 'candy'] },
+  { alt: 25000, pts: 25000, name: 'Rubber Duck Galaxy', icon: '🦆', km: 50000,  rooms: ['ducks', 'candy', 'ducks'] },
+  { alt: 30000, pts: 30000, name: 'Hall of Mirrors',    icon: '🪞', km: 100000, rooms: ['mirrors', 'ducks', 'mirrors', 'disco'] }
+];
