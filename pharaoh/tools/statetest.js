@@ -1,0 +1,31 @@
+globalThis.SOTP = {};
+const store = {}; globalThis.localStorage = { getItem: k => store[k] ?? null, setItem: (k, v) => store[k] = v, removeItem: k => delete store[k] };
+for (const f of ['util', 'data', 'battle', 'basegen', 'state']) require('../js/' + f + '.js');
+const { Game, D } = SOTP;
+const S = Game.newGame('Tester');
+console.log('builders', Game.buildersTotal(), 'free', Game.freeBuilders(), 'cap', Game.capacity('gold'), 'obstacles', S.obstacles.length);
+const spot = Game.findSpot(3, 20, 26);
+console.log('place mine', Game.place('goldMine', ...spot));
+console.log('place well', Game.place('goopWell', ...Game.findSpot(3, 26, 20)));
+console.log('place barracks (no builder)', Game.place('barracks', ...Game.findSpot(3, 16, 18)));
+// fast forward 10s
+S.last -= 0; Game.tick(Date.now() + 10000);
+console.log('levels', S.buildings.map(b => b.type + b.level).join(' '));
+console.log('barracks', Game.place('barracks', ...Game.findSpot(3, 16, 18)).ok, 'camp', Game.place('armyCamp', ...Game.findSpot(4, 26, 26)).ok);
+Game.tick(Date.now() + 20000);
+console.log('train', Game.train('spearman', 5), Game.train('archer', 3), 'goop', S.res.goop);
+Game.tick(Date.now() + 120000);
+console.log('army', S.army, 'queue', S.queue, 'mine stored', S.buildings.find(b => b.type === 'goldMine').stored.toFixed(1));
+console.log('upgrade pyramid', Game.upgrade(S.buildings[0]));
+S.nextRaid = Date.now() - 1000; const t0 = Date.now(); Game.tick(Date.now() + 130000);
+console.log('raid', JSON.stringify(S.log[0] && { ...S.log[0], replay: undefined }), Date.now() - t0, 'ms');
+console.log('achievements ready', Game.achievementState().filter(a => a.ready).map(a => a.id));
+// research and troop upgrades
+S.buildings[0].level = 3; S.res.goop = 1e6; S.res.gold = 1e6;
+const tspot = Game.findSpot(3, 24, 24); S.buildings.push({ id: S.uid++, type: 'temple', x: tspot[0], y: tspot[1], level: 2, upgrading: null });
+console.log('research', Game.startResearch('spearman'), 'busy', Game.startResearch('archer').why);
+Game.tick(Date.now() + 10 * 60 * 1000);
+console.log('spearman level', S.troopLevels.spearman, 'research', S.research, 'max', Game.troopMax('spearman'));
+console.log('research beyond temple', Game.startResearch('spearman'), Game.startResearch('spearman').why);
+console.log('builder buy (no gems)', Game.buyBuilder().why); S.res.gems = 1000;
+console.log('buy builder', Game.buyBuilder().ok, Game.buyBuilder().ok, Game.buyBuilder().ok, Game.buyBuilder().why, 'gems left', S.res.gems, 'builders', Game.buildersTotal());

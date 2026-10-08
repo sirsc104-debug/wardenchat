@@ -1,0 +1,17 @@
+<!doctype html><meta charset="utf-8"><body style="margin:0;background:#e6c98f">
+<canvas id="c"></canvas>
+<script src="../js/util.js"></script><script src="../js/data.js"></script><script src="../js/sprites.js"></script>
+<script>
+const { D, Sprites } = SOTP;
+const types = (new URLSearchParams(location.search).get('t') || D.BUILDING_ORDER.join(',')).split(',');
+const cw = 230, ch = 300;
+const c = document.getElementById('c'); c.width = cw * 11; c.height = ch * types.length;
+const ctx = c.getContext('2d');
+types.forEach((t, r) => { for (let l = 1; l <= 11; l++) {
+  const sp = Sprites.sprite(t, l, t === 'wall' ? 3 : 0.7);
+  const x = (l - 1) * cw + cw / 2, y = r * ch + ch - 20 - sp.s * 32;
+  ctx.drawImage(sp.img, x - sp.ax, y - sp.ay, sp.w, sp.h);
+  ctx.fillStyle = '#000'; ctx.font = '12px sans-serif'; ctx.fillText(t + ' ' + l, (l - 1) * cw + 4, r * ch + 14);
+}});
+document.title = 'done';
+</script>
