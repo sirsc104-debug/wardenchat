@@ -1,0 +1,96 @@
+<!-- "We moved" screen, shown on top of the game in the claude.ai artifact only. -->
+<style>
+/* Layout: one centred boarding-pass card over the blurred game, in the game's own night-panel colours. */
+.mv-wrap {
+  --mv-navy: #10173a; --mv-navy-2: #1a2456; --mv-ink: #f4f7ff; --mv-muted: #b9c3e6;
+  --mv-gold: #ffd23f; --mv-orange: #ff8a1a; --mv-cool: #4fd1ff; --mv-edge: rgba(255,255,255,0.14);
+  --mv-display: 'Fredoka', 'Nunito', 'Trebuchet MS', system-ui, sans-serif;
+  position: fixed; inset: 0; z-index: 2147483000; display: grid; place-items: center;
+  padding-inline: 16px; padding-block: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
+  background: rgba(6, 10, 30, 0.55); -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px);
+  font-family: var(--mv-display); color: var(--mv-ink); overflow-y: auto;
+}
+.mv-wrap[hidden] { display: none; }
+.mv-card {
+  position: relative; width: min(540px, 100%); box-sizing: border-box; margin: auto;
+  background: linear-gradient(170deg, var(--mv-navy-2), var(--mv-navy) 60%);
+  border: 1.5px solid var(--mv-edge); border-radius: 28px; padding: 30px 30px 22px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+  text-align: center; display: grid; gap: 18px;
+  animation: mv-in 0.6s cubic-bezier(.2,1.3,.4,1) both;
+}
+@keyframes mv-in { from { transform: translateY(24px) scale(0.94); opacity: 0.4; } to { transform: none; opacity: 1; } }
+.mv-logo { margin: 0; font-weight: 700; line-height: 0.88; letter-spacing: 0.02em; font-size: clamp(40px, 11vw, 60px); }
+.mv-logo span { display: block; }
+.mv-logo .mv-b { color: #fff; text-shadow: 0 4px 0 #2a3170; }
+.mv-logo .mv-r { background: linear-gradient(#ffd23f, #ff8a1a 70%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 4px 0 #8a3a10); }
+.mv-head { margin: 0; font-size: clamp(22px, 5.4vw, 28px); font-weight: 600; text-wrap: balance; }
+.mv-body { margin: -8px auto 0; max-width: 40ch; font-size: 16px; line-height: 1.5; color: var(--mv-muted); font-weight: 400; }
+
+/* the new address, shown like the game's "Next stop" sign */
+.mv-stop {
+  display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 14px; text-align: left;
+  background: rgba(0,0,0,0.28); border: 1.5px dashed rgba(255,210,63,0.45); border-radius: 18px; padding: 14px 16px;
+}
+.mv-rocket { grid-row: span 2; font-size: 34px; line-height: 1; animation: mv-bob 2.4s ease-in-out infinite; }
+@keyframes mv-bob { 50% { transform: translateY(-5px) rotate(-6deg); } }
+.mv-label { font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mv-gold); }
+.mv-url { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.mv-url b { font-weight: 600; font-size: clamp(16px, 4.6vw, 21px); overflow-wrap: anywhere; min-width: 0; user-select: all; }
+.mv-copy {
+  font: 600 13px var(--mv-display); color: var(--mv-ink); background: rgba(255,255,255,0.1); border: 1px solid var(--mv-edge);
+  border-radius: 999px; padding: 6px 12px; cursor: pointer; white-space: nowrap;
+}
+.mv-copy:hover { background: rgba(255,255,255,0.18); }
+
+.mv-go {
+  display: block; text-decoration: none; font: 700 22px var(--mv-display); letter-spacing: 0.02em; color: #3b2300;
+  background: linear-gradient(#ffe27a, #ffb52e); border-radius: 18px; padding: 16px 20px;
+  box-shadow: 0 6px 0 #c9781a, 0 14px 30px rgba(255,170,40,0.3); transition: transform 0.12s, box-shadow 0.12s;
+}
+.mv-go:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #c9781a, 0 18px 34px rgba(255,170,40,0.38); }
+.mv-go:active { transform: translateY(4px); box-shadow: 0 2px 0 #c9781a, 0 8px 18px rgba(255,170,40,0.25); }
+.mv-note { margin: -4px 0 0; font-size: 13px; line-height: 1.45; color: var(--mv-muted); }
+.mv-stay {
+  justify-self: center; font: 500 15px var(--mv-display); color: var(--mv-cool); background: none; border: 0;
+  padding: 6px 10px; margin-top: -6px; border-radius: 10px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+}
+.mv-stay:hover { color: #fff; }
+.mv-wrap :focus-visible { outline: 3px solid var(--mv-cool); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .mv-card, .mv-rocket { animation: none; } .mv-go { transition: none; } }
+</style>
+<div class="mv-wrap" id="mvMoved" role="dialog" aria-modal="true" aria-labelledby="mvHead">
+  <div class="mv-card">
+    <h1 class="mv-logo" aria-label="Brain Rocket"><span class="mv-b">BRAIN</span><span class="mv-r">ROCKET</span></h1>
+    <h2 class="mv-head" id="mvHead">Brain Rocket has a new home!</h2>
+    <p class="mv-body">The game now lives on its own website. Play it there from now on, and share that link with your friends. This old page will only work for a few more days.</p>
+    <div class="mv-stop">
+      <span class="mv-rocket" aria-hidden="true">🚀</span>
+      <span class="mv-label">Next stop</span>
+      <span class="mv-url"><b id="mvUrl">brainrocket.sirsc104.com</b><button type="button" class="mv-copy" id="mvCopy">Copy link</button></span>
+    </div>
+    <a class="mv-go" id="mvGo" href="https://brainrocket.sirsc104.com/" target="_blank" rel="noopener">Launch the new site</a>
+    <p class="mv-note">Best scores from this page don't carry over, so the new site starts you fresh.</p>
+    <button type="button" class="mv-stay" id="mvStay">Keep playing here for a few more days</button>
+  </div>
+</div>
+<script>
+(function () {
+  const wrap = document.getElementById('mvMoved');
+  const close = () => { wrap.hidden = true; window.removeEventListener('keydown', keys, true); };
+  // While the screen is up, keys go to it rather than to the game behind it.
+  function keys(e) {
+    e.stopPropagation();
+    if (e.key === 'Escape') close();
+  }
+  window.addEventListener('keydown', keys, true);
+  document.getElementById('mvStay').addEventListener('click', close);
+  const copy = document.getElementById('mvCopy');
+  copy.addEventListener('click', () => {
+    const done = () => { copy.textContent = 'Copied'; setTimeout(() => { copy.textContent = 'Copy link'; }, 1800); };
+    const select = () => { const r = document.createRange(); r.selectNodeContents(document.getElementById('mvUrl')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); copy.textContent = 'Press Ctrl+C'; };
+    try { navigator.clipboard.writeText('https://brainrocket.sirsc104.com/').then(done, select); } catch (e) { select(); }
+  });
+  document.getElementById('mvGo').focus({ preventScroll: true });
+})();
+</script>
