@@ -102,10 +102,12 @@
     }
   };
   const TYPE_ORDER = ['rocket', 'sub', 'drill', 'elev'];
+  // Elevator is hidden for now: its tab is hidden in index.html, and a saved choice of it falls back to Rocket.
+  const HIDDEN_TYPES = new Set(['elev']);
   const isElev = () => G.type === 'elev';
   let J = TYPES.rocket;   // the current way to play
   let S = J.scene;        // its scene
-  try { const t = localStorage.getItem('brainRocket.type'); if (TYPES[t]) { J = TYPES[t]; S = J.scene; } } catch (e) { /* ignore */ }
+  try { const t = localStorage.getItem('brainRocket.type'); if (TYPES[t] && !HIDDEN_TYPES.has(t)) { J = TYPES[t]; S = J.scene; } } catch (e) { /* ignore */ }
 
   const $ = id => document.getElementById(id);
   const stage = $('stage');

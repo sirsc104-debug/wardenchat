@@ -448,8 +448,9 @@ button { font-family: inherit; cursor: pointer; }
 /* ---- Title layout: the logo, tagline and tab bar sit in the same place in every mode ---- */
 #title { align-items: flex-start; padding-top: 48px; }
 #title .tagline { min-height: 62px; display: flex; align-items: center; justify-content: center; margin: 10px auto 12px; }
-.type-toggle { position: relative; display: inline-grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 0; isolation: isolate; }
+.type-toggle { position: relative; display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; margin-bottom: 0; isolation: isolate; }
 .type-toggle .type-btn { position: relative; z-index: 1; padding: 8px 10px; column-gap: 7px; background: transparent !important; transform: none !important; transition: color 0.3s; }
+.type-toggle .type-btn[hidden] { display: none; }
 .type-toggle .type-btn.active { color: #3b2300; }
 .type-glider {
   position: absolute; left: 0; top: 6px; bottom: 6px; z-index: 0; border-radius: 18px;
