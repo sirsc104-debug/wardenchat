@@ -158,6 +158,50 @@ const ElevScene = (function () {
     blob(-3.5, -50, 1.4, '#222'); blob(3.5, -50, 1.4, '#222');
     ctx.restore();
   }
+  // a monkey hanging by one hand from a vine that hangs from (x, y)
+  function drawMonkey(x, y, s, seed, len = 90) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(st.t * 1.8 + seed) * 0.35); ctx.scale(s, s);
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#3d8a3a'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(5, len / 2, 0, len); ctx.stroke();
+    for (let i = 1; i < 4; i++) { ctx.fillStyle = '#4fae57'; ctx.beginPath(); ctx.ellipse(i % 2 ? 7 : -7, i * len / 4, 9, 4, i % 2 ? 0.5 : -0.5, 0, TAU); ctx.fill(); }
+    const fur = '#7a4a24', face = '#e8c49a', L = len;
+    ctx.strokeStyle = fur; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(0, L); ctx.lineTo(6, L + 26); ctx.stroke();                     // arm up to the vine
+    const wave = Math.sin(st.t * 5 + seed) * 6;
+    ctx.beginPath(); ctx.moveTo(-8, L + 34); ctx.lineTo(-24, L + 44 + wave); ctx.stroke();     // free arm waving
+    ctx.beginPath(); ctx.moveTo(-5, L + 58); ctx.lineTo(-10, L + 74); ctx.moveTo(5, L + 58); ctx.lineTo(11, L + 72); ctx.stroke();
+    ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(8, L + 54); ctx.bezierCurveTo(30, L + 64, 34, L + 36, 20, L + 38); ctx.stroke(); // curly tail
+    ctx.fillStyle = fur; ctx.beginPath(); ctx.ellipse(0, L + 44, 13, 17, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = face; ctx.beginPath(); ctx.ellipse(0, L + 47, 7, 11, 0, 0, TAU); ctx.fill();
+    blob(-15, L + 18, 6, fur); blob(15, L + 18, 6, fur); blob(-15, L + 18, 3, face); blob(15, L + 18, 3, face);
+    blob(0, L + 18, 14, fur);
+    ctx.fillStyle = face; ctx.beginPath(); ctx.ellipse(0, L + 21, 10, 9, 0, 0, TAU); ctx.fill();
+    blob(-4, L + 17, 2.2, '#222'); blob(4, L + 17, 2.2, '#222');
+    ctx.strokeStyle = '#5a3418'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, L + 22, 4, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+    ctx.restore();
+  }
+  // a parrot, flying (wings flapping) or perched
+  function drawParrot(x, y, s, dir, seed, perched) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s * dir, s);
+    const f = perched ? 0 : Math.sin(st.t * 12 + seed) * 12;
+    poly([[-14, 2], [-38, 14], [-34, 2], [-40, 6], [-16, -4]], '#2f7bff');                    // tail
+    ctx.fillStyle = '#e8364f'; ctx.beginPath(); ctx.ellipse(0, 0, 18, 10, perched ? -0.6 : 0, 0, TAU); ctx.fill();
+    blob(14, perched ? -14 : -6, 9, '#e8364f');
+    poly([[20, perched ? -18 : -10], [30, perched ? -12 : -4], [21, perched ? -6 : 0]], '#ffd23f'); // beak
+    blob(16, perched ? -16 : -8, 3, '#fff'); blob(17, perched ? -16 : -8, 1.5, '#111');
+    poly([[-6, -2], [8, -2], [2, -18 - f]], '#ffd23f'); poly([[-4, -2], [6, -2], [0, -14 - f]], '#2fae57'); // wing
+    if (perched) { ctx.strokeStyle = '#555'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-2, 8); ctx.lineTo(-4, 14); ctx.moveTo(4, 8); ctx.lineTo(4, 14); ctx.stroke(); }
+    ctx.restore();
+  }
+  // a big jungle leaf with a midrib, pointing at angle a
+  function drawLeaf(x, y, len, a, col) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(len * 0.5, -len * 0.32, len, 0); ctx.quadraticCurveTo(len * 0.5, len * 0.32, 0, 0); ctx.fill();
+    ctx.strokeStyle = 'rgba(0,40,0,0.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(len * 0.9, 0); ctx.stroke();
+    ctx.restore();
+  }
   function drawDuck(x, y, s, seed) {
     ctx.save(); ctx.translate(x, y + Math.sin(st.t * 2 + seed) * 4); ctx.scale(s, s);
     ctx.fillStyle = '#ffd23f'; ctx.beginPath(); ctx.ellipse(0, 0, 26, 18, 0, 0, TAU); ctx.fill();
@@ -178,7 +222,7 @@ const ElevScene = (function () {
   // Like the Rocket's sky: each zone has its own mix of things drifting past or clinging to the tower.
   const ZONES = [
     { to: 300,   d: 1.2, types: { birds: 3, balloon: 1.5, washer: 1, flag: 1 } },
-    { to: 600,   d: 1.2, types: { monkey: 3, vine: 2, parrot: 2 } },
+    { to: 600,   d: 1.4, types: { monkey: 3, vine: 2, parrot: 2, butterfly: 2 } },
     { to: 1000,  d: 1.2, types: { fish: 3, bubbles: 2, jelly: 1 } },
     { to: 1500,  d: 1.0, types: { ptero: 3, bone: 1.5 } },
     { to: 2200,  d: 1.2, types: { cat: 4, yarn: 1.5 } },
@@ -197,6 +241,7 @@ const ElevScene = (function () {
     { to: 1e12,  d: 1.4, types: { shard: 3, duck: 1, candy: 1 } }
   ];
   const zoneAt = a => ZONES.find(z => a < z.to);
+  const ON_TOWER = new Set(['washer', 'monkey', 'vine']); // these hang on the tower itself, not in the sky
   const CHUNK = 120;
   const chunkCache = new Map();
   function chunk(ci) {
@@ -214,7 +259,7 @@ const ElevScene = (function () {
       // keep things clear of the tower and elevator; most go out in the open sky
       const side = h(2) < 0.22 ? 'left' : 'right';
       // most of the right-hand sky sits under the question card while playing, so favour the strip beside the car
-      const x = type === 'washer' ? TL + 50 + h(3) * (TR - TL - 100)
+      const x = ON_TOWER.has(type) ? TL + 50 + h(3) * (TR - TL - 100)
         : side === 'left' ? 30 + h(3) * (TL - 120)
         : h(9) < 0.6 ? CX + 130 + h(3) * 220 : CX + 130 + h(3) * (W - CX - 150);
       out.push({ type, a: ci * CHUNK + h(4) * CHUNK, x, s: 0.7 + h(5) * 0.6, seed: h(6) * 100, dir: h(7) < 0.5 ? -1 : 1, p: 0.75 + h(8) * 0.3 });
@@ -244,23 +289,28 @@ const ElevScene = (function () {
       case 'flag':
         rect(0, -60, 4, 60, '#ddd'); poly([[4, -60], [40 + Math.sin(t * 6) * 4, -52], [4, -42]], `hsl(${(o.seed * 50) % 360},70%,55%)`);
         break;
-      case 'monkey': {
-        ctx.strokeStyle = '#5a7a30'; ctx.lineWidth = 4;
-        const sw = Math.sin(t * 2) * 0.6;
-        ctx.rotate(sw); ctx.beginPath(); ctx.moveTo(0, -120); ctx.lineTo(0, 0); ctx.stroke();
-        blob(0, 10, 14, '#7a5030'); blob(0, -6, 10, '#7a5030'); blob(0, -6, 6, '#d9b080');
+      case 'monkey':
+        // hangs off a branch sticking out of a window on the tower
+        rect(-16, -4, 32, 7, '#6a4a2a'); drawLeaf(14, -2, 22, -0.5, '#4fae57');
+        drawMonkey(0, 0, 0.8 * s, o.seed, 50);
         break;
-      }
       case 'vine':
-        ctx.strokeStyle = '#3d8a3a'; ctx.lineWidth = 5;
-        ctx.beginPath(); ctx.moveTo(0, -150); ctx.quadraticCurveTo(20 * Math.sin(t), -60, 0, 0); ctx.stroke();
-        for (let i = 0; i < 5; i++) { ctx.fillStyle = '#4fae57'; ctx.beginPath(); ctx.ellipse(6, -140 + i * 30, 10, 5, 0.5, 0, TAU); ctx.fill(); }
+        // ivy hanging down the tower from a window
+        ctx.strokeStyle = '#3d8a3a'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(8 * Math.sin(t), 70, 0, 140); ctx.stroke();
+        for (let i = 0; i < 6; i++) drawLeaf(0, 10 + i * 24, 16, i % 2 ? 0.6 : Math.PI - 0.6, i % 2 ? '#4fae57' : '#3d9a4a');
         break;
-      case 'parrot': {
-        const f = Math.sin(t * 10) * 10;
-        ctx.scale(o.dir, 1);
-        ctx.fillStyle = '#e8364f'; ctx.beginPath(); ctx.ellipse(0, 0, 18 * s, 9 * s, 0, 0, TAU); ctx.fill();
-        poly([[-4, 0], [-14, -14 - f], [8, -4]], '#2f7bff'); poly([[14, -4], [24, 0], [14, 4]], '#ffd23f');
+      case 'parrot':
+        drawParrot(0, 0, s * 1.1, o.dir, o.seed, false);
+        break;
+      case 'butterfly': {
+        const f = Math.abs(Math.sin(t * 9)), c = `hsl(${(o.seed * 47) % 360},85%,62%)`;
+        ctx.rotate(Math.sin(t) * 0.3);
+        for (const d of [-1, 1]) {
+          ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(d * 9 * f * s, -6 * s, 9 * f * s + 1, 11 * s, 0, 0, TAU); ctx.fill();
+          ctx.beginPath(); ctx.ellipse(d * 7 * f * s, 7 * s, 6 * f * s + 1, 7 * s, 0, 0, TAU); ctx.fill();
+        }
+        rect(-1.5 * s, -10 * s, 3 * s, 22 * s, '#2a2a3a');
         break;
       }
       case 'fish': {
@@ -368,16 +418,16 @@ const ElevScene = (function () {
     }
     ctx.restore();
   }
-  // onTower: the window washers hang on the tower itself, so they draw after it, at its speed
+  // onTower: window washers, monkeys and ivy hang on the tower itself, so they draw after it, at its speed
   function drawThings(onTower) {
     const c0 = Math.floor((st.cam - 260) / CHUNK), c1 = Math.floor((st.cam + 260) / CHUNK);
     for (let ci = c0; ci <= c1; ci++) {
       if (ci < 0) continue;
       for (const o of chunk(ci)) {
-        if ((o.type === 'washer') !== onTower) continue;
+        if (ON_TOWER.has(o.type) !== onTower) continue;
         const y = sy(o.a, onTower ? 1 : o.p);
         if (y < -220 || y > H + 220) continue;
-        const drift = ['birds', 'balloon', 'parrot', 'fish', 'jelly', 'ptero', 'cloud', 'raincloud', 'gull', 'island', 'book', 'sat', 'astro', 'candy', 'duck', 'shard', 'furniture', 'umbrella', 'barrel', 'rock'].includes(o.type);
+        const drift = ['birds', 'balloon', 'parrot', 'butterfly', 'fish', 'jelly', 'ptero', 'cloud', 'raincloud', 'gull', 'island', 'book', 'sat', 'astro', 'candy', 'duck', 'shard', 'furniture', 'umbrella', 'barrel', 'rock'].includes(o.type);
         const x = drift ? wrapX(o.x + o.dir * st.t * 20 * o.s, 300) : o.x;
         if (!onTower && x > TL - 80 && x < CX + 120) continue;
         drawThing(o, x, y);
@@ -388,9 +438,27 @@ const ElevScene = (function () {
   // ---- Big set pieces at the milestones (they lean out of the tower or float beside it) -------
   const FEATURE = {
     "The Jungle Floor"(y) {
-      ctx.strokeStyle = '#3d8a3a'; ctx.lineWidth = 6;
-      for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(TL + 20 + i * 40, y - 140); ctx.quadraticCurveTo(TL + 30 + i * 40 + Math.sin(st.t + i) * 10, y - 60, TL + 20 + i * 40, y + 10); ctx.stroke(); }
-      for (let i = 0; i < 8; i++) blob(TL + 20 + i * 25, y - 140, 22, '#4fae57');
+      // one whole floor of the tower has gone wild: leaves burst out of the windows, vines and monkeys hang below
+      const top = y - 130, mid = (TL + TR) / 2;
+      rect(TL + 4, top, TR - TL - 8, 130, '#1e5a2c');
+      for (let i = 0; i < 9; i++) drawLeaf(TL + 14 + i * 22, top + 20 + (i % 3) * 34, 46, -0.4 + (i % 2) * 0.8 - 0.2, i % 2 ? '#3d9a4a' : '#56b85e');
+      // leaves spilling out of both sides
+      for (let i = 0; i < 6; i++) {
+        const sw = Math.sin(st.t * 1.5 + i) * 0.08;
+        drawLeaf(TL + 8, top + 10 + i * 22, 70 - (i % 2) * 18, Math.PI + 0.5 - i * 0.2 + sw, i % 2 ? '#3d9a4a' : '#4fae57');
+        drawLeaf(TR - 8, top + 20 + i * 18, 40, -0.6 + i * 0.25 + sw, i % 2 ? '#3d9a4a' : '#4fae57');
+      }
+      // palm fronds over the top
+      for (let i = 0; i < 7; i++) drawLeaf(mid, top + 4, 80, Math.PI + 0.25 + i * 0.42, i % 2 ? '#3d9a4a' : '#56b85e');
+      // vines hanging below, with monkeys swinging on two of them
+      ctx.strokeStyle = '#3d8a3a'; ctx.lineWidth = 4;
+      for (let i = 0; i < 4; i++) { const vx = TL + 30 + i * 45; ctx.beginPath(); ctx.moveTo(vx, y); ctx.quadraticCurveTo(vx + 10 * Math.sin(st.t + i), y + 50, vx, y + 90 + (i % 2) * 40); ctx.stroke(); }
+      drawMonkey(TL - 40, top + 50, 1, 0, 110);
+      drawMonkey(TL + 120, y, 0.85, 2, 70);
+      drawParrot(TL - 20, top + 8, 1.1, -1, 1, true);
+      // a sign so you know where you are
+      ctx.fillStyle = '#8a5a2a'; ctx.beginPath(); ctx.roundRect(mid - 66, top - 34, 132, 28, 6); ctx.fill();
+      ctx.fillStyle = '#ffe9b0'; ctx.font = '700 15px Fredoka, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('JUNGLE FLOOR', mid, top - 14);
     },
     "The Aquarium Floor"(y) {
       // a whole floor of the tower is one giant fish tank
