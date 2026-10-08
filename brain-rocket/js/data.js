@@ -1371,31 +1371,3 @@ const DRILL_STOPS = [
   { alt: 4200, pts: 4200, name: 'Centre of the Earth',     icon: '🎯', km: 6371, body: 'centre' },
   { alt: 6000, pts: 6000, name: 'Other Side of the World', icon: '🌏', km: 12742 }
 ];
-
-/* World Race: New York, around the world, back to Los Angeles at 50,000 points.
-   `km` is road distance so far, `land` the landmark drawn, `wx` the weather (visual only), `biome` the countryside. */
-const RACE_STOPS = [
-  { alt: 0,     pts: 0,     name: 'New York',       icon: '🗽', km: 0,     land: 'ny',       wx: 'clear',   biome: 'temperate' },
-  { alt: 600,   pts: 600,   name: 'London',         icon: '💂', km: 5570,  land: 'london',   wx: 'rain',    biome: 'temperate' },
-  { alt: 1100,  pts: 1100,  name: 'Paris',          icon: '🗼', km: 6020,  land: 'paris',    wx: 'cloudy',  biome: 'temperate' },
-  { alt: 1800,  pts: 1800,  name: 'Rome',           icon: '🏛️', km: 7440,  land: 'rome',     wx: 'clear',   biome: 'med' },
-  { alt: 2700,  pts: 2700,  name: 'Cairo',          icon: '🐫', km: 9580,  land: 'cairo',    wx: 'heat',    biome: 'desert' },
-  { alt: 3700,  pts: 3700,  name: 'Nairobi',        icon: '🦒', km: 13120, land: 'nairobi',  wx: 'clear',   biome: 'savanna' },
-  { alt: 5000,  pts: 5000,  name: 'Cape Town',      icon: '⛰️', km: 17210, land: 'capetown', wx: 'cloudy',  biome: 'med' },
-  { alt: 6500,  pts: 6500,  name: 'Dubai',          icon: '🏙️', km: 24800, land: 'dubai',    wx: 'sand',    biome: 'desert' },
-  { alt: 8000,  pts: 8000,  name: 'Mumbai',         icon: '🕌', km: 26730, land: 'mumbai',   wx: 'monsoon', biome: 'tropical' },
-  { alt: 10000, pts: 10000, name: 'Bangkok',        icon: '🛕', km: 29750, land: 'bangkok',  wx: 'storm',   biome: 'tropical' },
-  { alt: 12500, pts: 12500, name: 'Beijing',        icon: '🏯', km: 33050, land: 'beijing',  wx: 'snow',    biome: 'snow' },
-  { alt: 15000, pts: 15000, name: 'Tokyo',          icon: '🗻', km: 35150, land: 'tokyo',    wx: 'blossom', biome: 'temperate' },
-  { alt: 18500, pts: 18500, name: 'Sydney',         icon: '🦘', km: 42970, land: 'sydney',   wx: 'clear',   biome: 'scrub' },
-  { alt: 22000, pts: 22000, name: 'Auckland',       icon: '🥝', km: 45130, land: 'auckland', wx: 'rain',    biome: 'temperate' },
-  { alt: 27000, pts: 27000, name: 'Buenos Aires',   icon: '💃', km: 55430, land: 'buenos',   wx: 'cloudy',  biome: 'grass' },
-  { alt: 31000, pts: 31000, name: 'Rio de Janeiro', icon: '🏖️', km: 57400, land: 'rio',      wx: 'clear',   biome: 'tropical' },
-  { alt: 35500, pts: 35500, name: 'Lima',           icon: '🦙', km: 61190, land: 'lima',     wx: 'fog',     biome: 'mountain' },
-  { alt: 40500, pts: 40500, name: 'Mexico City',    icon: '🌮', km: 65420, land: 'mexico',   wx: 'clear',   biome: 'mountain' },
-  { alt: 45500, pts: 45500, name: 'Las Vegas',      icon: '🎰', km: 68050, land: 'vegas',    wx: 'night',   biome: 'desertus' },
-  { alt: 50000, pts: 50000, name: 'Los Angeles',    icon: '🌴', km: 68490, land: 'la',       wx: 'sunset',  biome: 'med' }
-];
-// Water the road crosses on a bridge, and the one tunnel. [from, to, name]
-const RACE_SEAS = [[110, 480, 'Atlantic Ocean'], [2150, 2520, 'Mediterranean Sea'], [5350, 6200, 'Indian Ocean'], [13300, 14500, 'Sea of Japan'], [15500, 18000, 'Pacific Ocean'], [18900, 21500, 'Tasman Sea'], [22500, 26500, 'Pacific Ocean']];
-const RACE_TUNNELS = [[760, 960, 'Channel Tunnel']];

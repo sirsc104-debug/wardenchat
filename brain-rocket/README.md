@@ -4,7 +4,7 @@ A 16:9 quiz game where your rocket only climbs when you answer. Start on the lau
 
 Plain HTML, CSS and JavaScript with no build step. Open `brain-rocket/index.html` in a browser (or serve the folder with `python3 -m http.server`). The stage scales to any window size and keeps a 16:9 shape; the ⛶ button goes fullscreen.
 
-## Four ways to play
+## Three ways to play
 
 Pick one with the switch on the home screen. Rocket and Submarine each have their own Owen (Easy), Medium, Hard and Ultra Hard modes and their own best scores.
 
@@ -13,9 +13,7 @@ Pick one with the switch on the home screen. Rocket and Submarine each have thei
 
 - **⛏️ Drill Challenge.** Play against friends without being online together. The host picks a difficulty (Owen, Medium or Hard) and a time (30, 60 or 120 seconds) and makes an **8-character code** (like `JMZQJA4C`). Everyone who types that code gets **exactly the same questions in the same order**, plays on their own, and compares scores afterwards. It plays like Submarine (one clock, unlimited skips), but in its own world: a drill boring down past worms and roots, city pipes, a subway tunnel, dinosaur fossils, crystal caves, the deepest gold mine and the deepest hole ever dug, then through the mantle, the diamond zone and the liquid outer core to the centre of the Earth. The code also carries a check, so a typo is caught instead of quietly starting a different game, and a code only works on the same version of the game (same question bank). Your best on each code is saved, so you can see if you beat yourself.
 
-- **🏎️ World Race.** Drive around the world, from New York over an Atlantic bridge to London, through the Channel Tunnel to Paris, and on through 20 cities on 6 continents (Rome, Cairo, Nairobi, Cape Town, Dubai, Mumbai, Bangkok, Beijing, Tokyo, Sydney, Auckland, Buenos Aires, Rio, Lima, Mexico City, Las Vegas) to Los Angeles at 50,000 points, then keep going round again. The car never stops and burns fuel every second: Owen gets a 30-second tank, Medium 20, Hard 12 and Ultra Hard 7, and every race starts with 10 seconds in the tank (a full tank on Ultra Hard). Correct answers turn points into fuel; anything that doesn't fit in the tank fires a rocket booster that adds bonus distance (the bigger the overflow, the longer and stronger the boost). Run dry and the race is over. Other traffic shares the road (yellow cabs in New York, red buses and black cabs in London, tuk-tuks in Bangkok), and each city has its own weather, just for looks: rain in London, a sandstorm in Dubai, monsoon in Mumbai, thunderstorms in Bangkok, snow in Beijing, cherry blossom in Tokyo, fog in Lima, night in Las Vegas and a sunset in LA.
-
-**💀 Ultra Hard** is a fourth mode for Rocket, Submarine and World Race (in World Race it means a 7-second tank rather than sliding backwards). Click its card to pick the question difficulty (Easy, Medium or Hard questions, each with its own best scores). It pays ×2.5 points, but while each question is on screen the rocket falls back down and the submarine floats back up, and the drift gets faster the further you've gone (12 points a second plus 3% of your score). In Rocket, a 🪂 parachute pops out of the nose whenever you start falling inside Earth's atmosphere (below Outer Space), cutting the fall to 30% so it's much harder to drop all the way back to the launch pad. It comes off when you climb again and a new one opens the next time you fall. The submarine has no parachute. Rocket keeps your highest point as your result; Submarine counts where you are when the clock runs out.
+**💀 Ultra Hard** is a fourth mode for Rocket and Submarine. Click its card to pick the question difficulty (Easy, Medium or Hard questions, each with its own best scores). It pays ×2.5 points, but while each question is on screen the rocket falls back down and the submarine floats back up, and the drift gets faster the further you've gone (12 points a second plus 3% of your score). In Rocket, a 🪂 parachute pops out of the nose whenever you start falling inside Earth's atmosphere (below Outer Space), cutting the fall to 30% so it's much harder to drop all the way back to the launch pad. It comes off when you climb again and a new one opens the next time you fall. The submarine has no parachute. Rocket keeps your highest point as your result; Submarine counts where you are when the clock runs out.
 
 ## How it plays
 
@@ -52,7 +50,7 @@ Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the b
 
 | File | What it does |
 | --- | --- |
-| `js/data.js` | The topic format, the original six topics, and the stops for each journey (`MILESTONES` for Rocket, `DEPTHS` for Submarine, `DRILL_STOPS` for Drill Challenge, `RACE_STOPS` for World Race) |
+| `js/data.js` | The topic format, the original six topics, and the stops for each journey (`MILESTONES` for Rocket, `DEPTHS` for Submarine, `DRILL_STOPS` for Drill Challenge) |
 | `js/topics-everyday.js`, `js/topics-mixed.js`, `js/topics-expert.js`, `js/topics-more.js` | The other topics with their answers and rarity tiers |
 | `js/topics-dhhs.js` | The Daniel Hand High School (DHHS) topics |
 | `js/topics-years.js` | Topics whose answers carry years, for year questions (`Toy Story @1995`) |
@@ -60,7 +58,6 @@ Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the b
 | `js/scene.js` | The Rocket world: sky, ground, planets, decorations, rocket, particles |
 | `js/drillscene.js` | The Drill Challenge world: soil, pipes, subway, fossils, caves, mine, bedrock, mantle and core |
 | `js/challenge.js` | Drill Challenge codes: packs difficulty, time and a question seed into 8 characters, and seeds the question order |
-| `js/racescene.js` | The World Race world: cities and landmarks, bridges, the Channel Tunnel, traffic, weather and the car |
 | `js/subscene.js` | The Submarine world: ocean zones, sea life, wrecks, the trench, rock, mantle and core |
 | `js/badwords.js` | The rude-word check (lists are ROT13-encoded; only runs after an answer is rejected) |
 | `js/game.js` | Game flow, scoring, HUD, popups and screens for both ways to play |

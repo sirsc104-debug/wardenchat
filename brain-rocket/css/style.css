@@ -441,7 +441,7 @@ button { font-family: inherit; cursor: pointer; }
 /* ---- Title layout: the logo, tagline and tab bar sit in the same place in every mode ---- */
 #title { align-items: flex-start; padding-top: 48px; }
 #title .tagline { min-height: 62px; display: flex; align-items: center; justify-content: center; margin: 10px auto 12px; }
-.type-toggle { position: relative; display: inline-grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 0; isolation: isolate; }
+.type-toggle { position: relative; display: inline-grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 0; isolation: isolate; }
 .type-toggle .type-btn { position: relative; z-index: 1; padding: 8px 10px; column-gap: 7px; background: transparent !important; transform: none !important; transition: color 0.3s; }
 .type-toggle .type-btn.active { color: #3b2300; }
 .type-glider {
@@ -458,6 +458,5 @@ button { font-family: inherit; cursor: pointer; }
 }
 .type-extra .dive-len::before { content: ''; position: absolute; left: 50%; top: -9px; margin-left: -8px; border: 8px solid transparent; border-top: 0; border-bottom-color: var(--panel-edge); }
 .type-extra .dive-len.open { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; transition-delay: 0.25s; }
-#title[data-type="race"] .logo span:first-child { text-shadow: 0 8px 0 #3a3d46, 0 0 40px rgba(255,210,63,0.6); }
 .type-toggle .type-name { font-size: 20px; }
 .type-toggle .type-icon { font-size: 27px; }
