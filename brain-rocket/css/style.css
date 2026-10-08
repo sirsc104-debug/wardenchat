@@ -496,3 +496,12 @@ button { font-family: inherit; cursor: pointer; }
 .tp-len.last { border-color: #ffd23f; }
 .tp-close { position: absolute; right: 10px; top: 10px; width: 30px; height: 30px; border-radius: 10px; border: 0; background: rgba(255,255,255,0.15); color: #fff; font-size: 14px; }
 .tp-close:hover { background: rgba(255,255,255,0.3); }
+
+/* compact enough to fit inside any card, with the ✕ clear of the title */
+.time-pick { padding: 12px 10px 10px; gap: 6px; overflow: hidden; }
+.tp-title { font-size: 20px; padding: 0 28px; line-height: 1.1; }
+.tp-mode { font-size: 12px; margin-top: -4px; }
+.tp-len { flex: 1; min-height: 0; justify-content: center; padding: 4px 6px; }
+.tp-len b { font-size: 22px; }
+.tp-len small { font-size: 11px; }
+.tp-close { right: 8px; top: 8px; width: 26px; height: 26px; font-size: 12px; }
