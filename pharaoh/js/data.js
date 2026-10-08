@@ -15,17 +15,17 @@
   // Materials: every level of every building is drawn in a different stone.
   const MATERIALS = [
     null,
-    { name: 'Mud brick',        base: '#9a6b43', trim: '#6e4a2c', accent: '#c9a27a', glow: null },
-    { name: 'Adobe',            base: '#bf8650', trim: '#8a5a32', accent: '#e2b98a', glow: null },
-    { name: 'Sandstone',        base: '#dcb36d', trim: '#a97f3d', accent: '#f3d79f', glow: null },
-    { name: 'Limestone',        base: '#ebe0c4', trim: '#b8a782', accent: '#fff6df', glow: null },
-    { name: 'Red granite',      base: '#b55a4a', trim: '#7d3428', accent: '#e39a85', glow: null },
-    { name: 'Painted limestone',base: '#f2ebd9', trim: '#2f6fb3', accent: '#c8423a', glow: null },
-    { name: 'Gilded sandstone', base: '#e3c47e', trim: '#d9a520', accent: '#fff1b8', glow: null },
-    { name: 'Lapis',            base: '#2f55a8', trim: '#e2b23a', accent: '#8fb1ff', glow: null },
-    { name: 'Basalt',           base: '#3b3a45', trim: '#e2b23a', accent: '#7a7890', glow: '#ffb84a' },
-    { name: 'Electrum',         base: '#e0cc72', trim: '#fff7cf', accent: '#a98c2a', glow: '#fff1a0' },
-    { name: 'Obsidian',         base: '#261f33', trim: '#3fe0d0', accent: '#e2b23a', glow: '#3fe0d0' },
+    { name: 'Mud brick',        base: '#b0703f', trim: '#7a4422', accent: '#d9a46e', glow: null },
+    { name: 'Adobe',            base: '#d48a4c', trim: '#94542a', accent: '#f0c08a', glow: null },
+    { name: 'Sandstone',        base: '#eab85e', trim: '#b07a2a', accent: '#ffdc94', glow: null },
+    { name: 'Limestone',        base: '#f3e8cc', trim: '#c2a874', accent: '#fffbea', glow: null },
+    { name: 'Red granite',      base: '#cc5a46', trim: '#882e22', accent: '#f0a08a', glow: null },
+    { name: 'Painted limestone',base: '#f7f0de', trim: '#2a6fd0', accent: '#d8402e', glow: null },
+    { name: 'Gilded sandstone', base: '#efc66a', trim: '#f0a812', accent: '#fff1b8', glow: null },
+    { name: 'Lapis',            base: '#2f62d0', trim: '#f2bc2c', accent: '#9cc0ff', glow: null },
+    { name: 'Basalt',           base: '#43414f', trim: '#f2bc2c', accent: '#8a88a0', glow: '#ffb84a' },
+    { name: 'Electrum',         base: '#f2d872', trim: '#fffbe0', accent: '#b8952a', glow: '#fff1a0' },
+    { name: 'Obsidian',         base: '#2c2244', trim: '#3ff0dc', accent: '#f2bc2c', glow: '#3ff0dc' },
   ];
 
   // How many of each building a Pyramid level allows (index 0 = Pyramid 1).
@@ -273,39 +273,39 @@
   const TROOP_ORDER = [];
   function troop(id, o) { o.id = id; T[id] = o; TROOP_ORDER.push(id); return o; }
 
-  troop('spearman', { name: 'Spearman', barracks: 1, housing: 1, hp: 50, dmg: 9, rate: 1, range: 0.6, speed: 1.6, target: 'any', train: 4, cost: 25,
+  troop('spearman', { name: 'Spearman', barracks: 1, housing: 1, hp: 50, dmg: 9, rate: 1, range: 0.6, speed: 1.6, target: 'any', train: 4,
     desc: 'Cheap, brave and quick to train. Attacks whatever is closest.' });
-  troop('archer', { name: 'Archer', barracks: 1, housing: 1, hp: 24, dmg: 8, rate: 1, range: 3.5, speed: 1.6, target: 'any', hitsAir: true, train: 5, cost: 50, proj: 'arrow',
+  troop('archer', { name: 'Archer', barracks: 1, housing: 1, hp: 24, dmg: 8, rate: 1, range: 3.5, speed: 1.6, target: 'any', hitsAir: true, train: 5, proj: 'arrow',
     desc: 'Shoots from behind walls. Fragile, so keep her behind tougher troops.' });
-  troop('tombRobber', { name: 'Tomb Robber', barracks: 2, housing: 1, hp: 32, dmg: 12, rate: 1, range: 0.6, speed: 2.6, target: 'resource', resMult: 2, train: 5, cost: 40,
+  troop('tombRobber', { name: 'Tomb Robber', barracks: 2, housing: 1, hp: 32, dmg: 12, rate: 1, range: 0.6, speed: 2.6, target: 'resource', resMult: 2, train: 5,
     desc: 'Runs straight for gold and goop and does double damage to them.' });
-  troop('shieldBearer', { name: 'Shield Bearer', barracks: 2, housing: 5, hp: 340, dmg: 13, rate: 2, range: 0.8, speed: 1.0, target: 'defense', train: 20, cost: 250,
+  troop('shieldBearer', { name: 'Shield Bearer', barracks: 2, housing: 5, hp: 340, dmg: 13, rate: 2, range: 0.8, speed: 1.0, target: 'defense', train: 20,
     desc: 'A walking wall with a huge bronze shield. Goes for defenses and soaks up damage.' });
-  troop('ramCrew', { name: 'Ram Crew', barracks: 3, housing: 2, hp: 28, dmg: 8, rate: 1, range: 0.5, speed: 2.2, target: 'wall', wallMult: 40, splash: 1.3, suicide: true, train: 12, cost: 300,
+  troop('ramCrew', { name: 'Ram Crew', barracks: 3, housing: 2, hp: 28, dmg: 8, rate: 1, range: 0.5, speed: 2.2, target: 'wall', wallMult: 40, splash: 1.3, suicide: true, train: 12,
     desc: 'Charges the nearest wall with a log ram and smashes it open (breaks the ram too).' });
-  troop('falcon', { name: 'Falcon', barracks: 3, housing: 2, hp: 55, dmg: 30, rate: 1, range: 2, speed: 2.6, target: 'any', air: true, hitsAir: true, train: 10, cost: 200, proj: 'feather',
+  troop('falcon', { name: 'Falcon', barracks: 3, housing: 2, hp: 55, dmg: 30, rate: 1, range: 2, speed: 2.6, target: 'any', air: true, hitsAir: true, train: 10, proj: 'feather',
     desc: 'A trained hunting falcon. Flies over walls but is fragile.' });
-  troop('sandMage', { name: 'Sand Mage', barracks: 4, housing: 4, hp: 80, dmg: 55, rate: 1.5, range: 3, speed: 1.4, target: 'any', hitsAir: true, splash: 0.9, train: 25, cost: 600, proj: 'sandball',
+  troop('sandMage', { name: 'Sand Mage', barracks: 4, housing: 4, hp: 80, dmg: 55, rate: 1.5, range: 3, speed: 1.4, target: 'any', hitsAir: true, splash: 0.9, train: 25, proj: 'sandball',
     desc: 'Hurls whirling sand blasts that hit everything in a small area.' });
-  troop('priestess', { name: 'Priestess of Isis', barracks: 4, housing: 10, hp: 480, heal: 38, rate: 1, range: 4, speed: 1.3, target: 'heal', splash: 2, train: 50, cost: 2500,
+  troop('priestess', { name: 'Priestess of Isis', barracks: 4, housing: 10, hp: 480, heal: 38, rate: 1, range: 4, speed: 1.3, target: 'heal', splash: 2, train: 50,
     desc: 'Heals ground troops around her. She never attacks.' });
-  troop('chariot', { name: 'War Chariot', barracks: 5, housing: 5, hp: 280, dmg: 50, rate: 1, range: 0.7, speed: 2.4, target: 'defense', jumpsWalls: true, train: 30, cost: 800,
+  troop('chariot', { name: 'War Chariot', barracks: 5, housing: 5, hp: 280, dmg: 50, rate: 1, range: 0.7, speed: 2.4, target: 'defense', jumpsWalls: true, train: 30,
     desc: 'Races straight for defenses and leaps over walls.' });
-  troop('camelArcher', { name: 'Camel Archer', barracks: 5, housing: 3, hp: 115, dmg: 32, rate: 1, range: 4.5, speed: 2.3, target: 'any', hitsAir: true, train: 20, cost: 450, proj: 'arrow',
+  troop('camelArcher', { name: 'Camel Archer', barracks: 5, housing: 3, hp: 115, dmg: 32, rate: 1, range: 4.5, speed: 2.3, target: 'any', hitsAir: true, train: 20, proj: 'arrow',
     desc: 'Fast archer with long range, riding a grumpy camel.' });
-  troop('phoenix', { name: 'Phoenix', barracks: 6, housing: 20, hp: 1900, dmg: 150, rate: 1.4, range: 3, speed: 1.9, target: 'any', air: true, hitsAir: true, splash: 0.9, train: 120, cost: 7000, proj: 'fire',
+  troop('phoenix', { name: 'Phoenix', barracks: 6, housing: 20, hp: 1900, dmg: 150, rate: 1.4, range: 3, speed: 1.9, target: 'any', air: true, hitsAir: true, splash: 0.9, train: 120, proj: 'fire',
     desc: 'A blazing firebird that burns everything below it.' });
-  troop('mummy', { name: 'Mummy', barracks: 6, housing: 6, hp: 420, dmg: 42, rate: 1.2, range: 0.7, speed: 1.3, target: 'any', splitOnDeath: 2, train: 40, cost: 1400,
+  troop('mummy', { name: 'Mummy', barracks: 6, housing: 6, hp: 420, dmg: 42, rate: 1.2, range: 0.7, speed: 1.3, target: 'any', splitOnDeath: 2, train: 40,
     desc: 'Shambles forward and splits into two small mummies when it falls.' });
-  troop('warElephant', { name: 'War Elephant', barracks: 7, housing: 25, hp: 4600, dmg: 36, rate: 2, range: 1, speed: 0.9, target: 'defense', deathBlast: 160, splash: 2, train: 160, cost: 8000,
+  troop('warElephant', { name: 'War Elephant', barracks: 7, housing: 25, hp: 4600, dmg: 36, rate: 2, range: 1, speed: 0.9, target: 'defense', deathBlast: 160, splash: 2, train: 160,
     desc: 'An enormous armoured elephant. Takes huge punishment and tramples when it falls.' });
-  troop('anubisWarrior', { name: 'Anubis Warrior', barracks: 8, housing: 25, hp: 2900, dmg: 380, rate: 1.8, range: 0.9, speed: 1.3, target: 'any', train: 170, cost: 9000,
+  troop('anubisWarrior', { name: 'Anubis Warrior', barracks: 8, housing: 25, hp: 2900, dmg: 380, rate: 1.8, range: 0.9, speed: 1.3, target: 'any', train: 170,
     desc: 'A jackal-headed champion whose khopesh splits stone.' });
-  troop('skyBarge', { name: 'Sky Barge', barracks: 9, housing: 6, hp: 420, dmg: 160, rate: 2.5, range: 0.5, speed: 1.3, target: 'defense', air: true, splash: 1.2, train: 45, cost: 1800, proj: 'bomb',
+  troop('skyBarge', { name: 'Sky Barge', barracks: 9, housing: 6, hp: 420, dmg: 160, rate: 2.5, range: 0.5, speed: 1.3, target: 'defense', air: true, splash: 1.2, train: 45, proj: 'bomb',
     desc: 'A flying reed boat that drops fire pots on defenses.' });
-  troop('sobekBrute', { name: 'Sobek Brute', barracks: 10, housing: 15, hp: 2100, dmg: 140, rate: 1.4, range: 1.1, speed: 1.4, target: 'any', splash: 1.5, train: 110, cost: 5000,
+  troop('sobekBrute', { name: 'Sobek Brute', barracks: 10, housing: 15, hp: 2100, dmg: 140, rate: 1.4, range: 1.1, speed: 1.4, target: 'any', splash: 1.5, train: 110,
     desc: 'A crocodile-headed giant whose tail sweeps a wide arc.' });
-  troop('champion', { name: "Pharaoh's Champion", barracks: 11, housing: 30, hp: 4200, dmg: 220, rate: 1, range: 1, speed: 1.6, target: 'any', aura: 0.25, auraRange: 5, train: 240, cost: 12000,
+  troop('champion', { name: "Pharaoh's Champion", barracks: 11, housing: 30, hp: 4200, dmg: 220, rate: 1, range: 1, speed: 1.6, target: 'any', aura: 0.25, auraRange: 5, train: 240,
     desc: 'Leads from the front. Every troop near him hits 25% harder.' });
 
   // Not trainable: spawned when a mummy falls, and used by the Royal Hall guards.
@@ -317,7 +317,6 @@
     if (base == null) return 0;
     return base * Math.pow(TROOP_LEVEL_GROWTH, level - 1);
   }
-  function troopCost(t, level) { return niceRound(T[t].cost * Math.pow(1.08, level - 1)); }
   function troopMaxLevel(templeLevel) { return Math.min(11, 1 + templeLevel); }
   function researchCost(t, level) {
     const tier = Math.min(11, Math.max(T[t].barracks, level - 1));
@@ -381,7 +380,7 @@
   G.D = {
     MAX_PH, MAP, EDGE, MATERIALS, B, BUILDING_ORDER, SHOP_CATS, T, TROOP_ORDER, MINI_MUMMY,
     countAllowed, maxLevel, pyramidFor, upgradeCost, upgradeTime, buildingHp, defenseDmg,
-    storageOf, rateOf, mineCap, troopStat, troopCost, troopMaxLevel, researchCost, researchTime,
+    storageOf, rateOf, mineCap, troopStat, troopMaxLevel, researchCost, researchTime,
     lootFor, NEXT_COST, PH_COST, BUILDER_GEM_COST, START, NAMES, CLAN_NAMES, leagueOf, BUILD_TIME, niceRound,
   };
 })(globalThis.SOTP = globalThis.SOTP || {});

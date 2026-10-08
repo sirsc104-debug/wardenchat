@@ -286,9 +286,7 @@
     const cap = housingCap();
     const need = D.T[type].housing * n;
     if (housingUsed() + queuedHousing() + need > cap) return { ok: false, why: 'Your Army Camps are full.' };
-    const cost = D.troopCost(type, S.troopLevels[type]) * n;
-    const c = costCheck('goop', cost); if (c) return c;
-    S.res.goop -= cost;
+    // Training is free: only camp space and time limit your army.
     const last = S.queue[S.queue.length - 1];
     if (last && last.type === type) last.n += n; else S.queue.push({ type, n });
     if (!S.trainLeft) S.trainLeft = D.T[S.queue[0].type].train;
@@ -299,7 +297,6 @@
     for (let i = S.queue.length - 1; i >= 0; i--) {
       if (S.queue[i].type !== type) continue;
       S.queue[i].n--;
-      S.res.goop += D.troopCost(type, S.troopLevels[type]);
       if (S.queue[i].n <= 0) { S.queue.splice(i, 1); if (i === 0) S.trainLeft = S.queue[0] ? D.T[S.queue[0].type].train : 0; }
       save();
       return;

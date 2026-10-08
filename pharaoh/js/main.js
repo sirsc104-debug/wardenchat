@@ -50,7 +50,7 @@
     start(st) {
       Sound.on = st.sound !== false;
       Game.tick();
-      this.renderer.fit();
+      this.frame_(st.buildings);
       this.mode = 'village';
       UI.hud();
       const fresh = st.log.filter((e) => !e.seen && e.at > (st.lastSeenLog || 0));
@@ -138,6 +138,13 @@
       if (t - this.lastCloud > 60) { this.lastCloud = t; Game.save(); Net.saveCloud(S); }
     },
     layoutChanged() { this.dirtyLayout = true; },
+    // Zoom to the buildings rather than the whole map.
+    frame_(list) {
+      if (!list || !list.length) { this.renderer.fit(); return; }
+      let x0 = 99, y0 = 99, x1 = 0, y1 = 0;
+      for (const b of list) { const s = D.B[b.type].size; x0 = Math.min(x0, b.x); y0 = Math.min(y0, b.y); x1 = Math.max(x1, b.x + s); y1 = Math.max(y1, b.y + s); }
+      this.renderer.fitTo(Math.max(0, x0 - 3), Math.max(0, y0 - 3), Math.min(N, x1 + 3), Math.min(N, y1 + 3));
+    },
 
     draw(t, dt) {
       const r = this.renderer;
@@ -518,7 +525,7 @@
       $('bhud').hidden = false;
       for (const i of $('b-stars').children) i.classList.remove('on');
       this.renderer.particles = []; this.renderer.floaters = [];
-      this.renderer.fit();
+      this.frame_(bt.battle.buildings);
       UI.flash();
       Sound.play('horn');
       UI.battleHud(this); UI.battleCards(this);
@@ -616,7 +623,7 @@
       this.mode = 'village';
       $('bhud').hidden = true; $('hud').hidden = false; $('dock').hidden = false;
       this.renderer.particles = []; this.renderer.floaters = [];
-      this.renderer.fit();
+      this.frame_(Game.get().buildings);
       UI.hud();
     },
   };

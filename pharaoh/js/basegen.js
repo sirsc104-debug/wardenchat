@@ -74,7 +74,9 @@
     }
 
     let walls = D.countAllowed('wall', ph);
-    const wallLevel = () => levelFor('wall', ph, rng, quality);
+    // Real players upgrade walls in batches: one level for most, a few a level behind.
+    const mainWall = levelFor('wall', ph, rng, quality);
+    const wallLevel = () => (rng() < 0.15 ? Math.max(1, mainWall - 1) : mainWall);
     const placeWall = (x, y) => {
       if (walls <= 0 || x < E || y < E || x >= N - E || y >= N - E || grid[y * N + x]) return false;
       add('wall', x, y, wallLevel()); walls--; return true;

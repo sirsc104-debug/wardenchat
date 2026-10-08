@@ -113,7 +113,7 @@
     const has = (t) => Game.byType(t).length > 0;
     let text = null, sub = null;
     if (!has('goldMine')) { text = 'Build a Gold Mine'; sub = 'Open the Shop, then Resources.'; }
-    else if (!has('goopWell')) { text = 'Build a Goop Well'; sub = 'Goop pays for troops.'; }
+    else if (!has('goopWell')) { text = 'Build a Goop Well'; sub = 'Goop pays for research and army buildings.'; }
     else if (!has('ballista')) { text = 'Build a Ballista'; sub = 'Shop, then Defenses. Rivals will attack you!'; }
     else if (!has('barracks')) { text = 'Build a Barracks'; sub = 'Shop, then Army.'; }
     else if (!has('armyCamp')) { text = 'Build an Army Camp'; sub = 'Your troops wait there.'; }
@@ -307,16 +307,15 @@
       const grid = el('div', { class: 'grid' });
       for (const t of D.TROOP_ORDER) {
         const T = D.T[t], lv = S.troopLevels[t], unlocked = Game.troopUnlocked(t);
-        const cost = D.troopCost(t, lv);
         const item = el('div', { class: 'item' + (unlocked ? '' : ' locked') },
           el('span', { class: 'lvl', text: 'Lv ' + lv }), el('span', { class: 'count', text: T.housing }),
           troopCanvas(t, lv, 100, 80), el('span', { class: 'nm', text: T.name }),
-          unlocked ? price('goop', cost) : el('span', { class: 'lock', text: `Barracks ${T.barracks}` }),
+          unlocked ? el('span', { class: 'price free', text: 'Free' }) : el('span', { class: 'lock', text: `Barracks ${T.barracks}` }),
           el('span', { class: 'meta' }, ico('clock'), U.fmtTime(T.train), ' · ', T.air ? 'Flies' : 'Ground'));
         if (unlocked) {
           item.append(el('button', { class: 'item-hit', 'aria-label': 'Train ' + T.name, onclick: () => { const r = Game.train(t, 1); if (!r.ok) toast(r.why, 'bad'); else Sound.play('tap'); refresh(); hud(); } }));
           item.append(el('span', { class: 'sub' },
-            el('button', { class: 'btn small', onclick: (e) => { e.stopPropagation(); let n = 0; for (let i = 0; i < 5; i++) if (Game.train(t, 1).ok) n++; if (!n) toast('Not enough room or goop.', 'bad'); refresh(); hud(); } }, '+5'),
+            el('button', { class: 'btn small', onclick: (e) => { e.stopPropagation(); let n = 0; for (let i = 0; i < 5; i++) if (Game.train(t, 1).ok) n++; if (!n) toast('Your Army Camps are full.', 'bad'); refresh(); hud(); } }, '+5'),
             el('button', { class: 'btn small', onclick: (e) => { e.stopPropagation(); troopInfo(t); } }, 'i')));
         }
         grid.append(item);

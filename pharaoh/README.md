@@ -17,7 +17,7 @@ Your town saves in the browser and keeps running while the game is closed: mines
 
 | System | Details |
 | --- | --- |
-| Resources | **Gold** builds and upgrades most buildings, **Goop** trains troops, pays for research and builds army buildings, and **Gems** speed things up and hire builders. Gems cannot be bought. You earn them by beating rival players (a level 1 beating a level 1 gets 190 gold, 190 goop and 3 gems), clearing palms, rocks and ruins, and finishing goals. |
+| Resources | **Gold** builds and upgrades most buildings, **Goop** pays for Temple research and builds army buildings (training troops is free; only Army Camp space and time limit your army), and **Gems** speed things up and hire builders. Gems cannot be bought. You earn them by beating rival players (a level 1 beating a level 1 gets 190 gold, 190 goop and 3 gems), clearing palms, rocks and ruins, and finishing goals. |
 | Builders | You start with 2 builders. Hire a 3rd, 4th and 5th for 75, 150 and 250 gems. Each builder works on one building at a time. |
 | Pyramid | Your town hall, levels 1 to 11. Each level unlocks new buildings, raises how many of each you can build, and adds a new level to every building. |
 | Buildings | 25 types: Pyramid, Builder's Hut, Gold Mine, Goop Well, Treasury, Goop Jar, Barracks, Army Camp, Temple of Ra, Royal Hall, Ballista, Archer Tower, Catapult, Falcon Perch, Fire Brazier, Eye of Horus, Obelisk of Ra, Anubis Statue, Sphinx, Sun Disk Tower, Wall, Scarab Trap, Quicksand, Falcon Net and Cobra Pit. Every one reaches level 11 at Pyramid 11, and every level is built from a different material (mud brick, adobe, sandstone, limestone, red granite, painted limestone, gilded sandstone, lapis, basalt, electrum and obsidian), with extra details as it grows. |
@@ -39,8 +39,8 @@ A static web page has no server, so friends can only find each other's towns whe
 | `js/battle.js` | The battle simulation: path finding around walls, targeting, defenses, traps, guards and AI army planning. Fixed time step with a seeded random generator, so raids replay exactly. |
 | `js/basegen.js` | Generates rival towns for each Pyramid level |
 | `js/state.js` | Your town: economy, builders, training, research, raids and goals |
-| `js/sprites.js` | Draws every building at every level in code and caches the result |
-| `js/render.js` | The isometric view: ground, the Nile, live animations, troops, projectiles and effects |
+| `js/sprites.js` | Draws every building at every level in code (textured brick and stone, lighting, outlines and cast shadows) and caches the result |
+| `js/render.js` | The isometric view: the oasis lawn, desert and Nile (drawn as textures through the isometric transform), live animations, outlined troop sprites, projectiles, effects, cloud shadows |
 | `js/ui.js`, `js/main.js` | Menus, HUD, input and the game loop |
 | `js/net.js` | Friend codes |
 | `js/sound.js` | Synthesized sound effects |
@@ -52,6 +52,7 @@ node pharaoh/tools/simtest.js        # AI raids against generated towns at every
 node pharaoh/tools/statetest.js      # economy, training, research and builders, headless
 node pharaoh/tools/debugbattle.js 8  # trace one battle at Pyramid 8
 node pharaoh/tools/build-artifact.js out.html   # bundle into one self-contained page
+node pharaoh/tools/play.js shots/town           # screenshots of a town and a battle (needs Playwright)
 ```
 
 `tools/sheet.html` shows every building at all 11 levels side by side.

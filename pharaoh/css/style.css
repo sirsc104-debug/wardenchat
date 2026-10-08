@@ -150,6 +150,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid #fff; outline-off
 .item .nm { font: 800 14px var(--body); }
 .item .meta { font-size: 12px; color: #6b5a3a; display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
 .item .price { display: flex; align-items: center; gap: 4px; font: 800 15px var(--body); }
+.item .price.free { color: var(--green-d); }
 .item.locked { filter: grayscale(0.85); opacity: 0.75; }
 .item .lock { font-size: 12px; font-weight: 700; color: var(--red-d); }
 .item .count { position: absolute; top: 6px; right: 8px; font: 800 12px var(--body); background: rgba(43, 29, 14, 0.8); color: #fff; padding: 1px 6px; border-radius: 8px; }

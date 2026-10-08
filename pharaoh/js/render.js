@@ -46,6 +46,15 @@
       c.x = U.clamp(c.x, -N * HW, N * HW);
       c.y = U.clamp(c.y, -40, N * 2 * HH);
     }
+    // Frame a set of buildings (tile bounding box) nicely on screen.
+    fitTo(x0, y0, x1, y1) {
+      const xs = [U.isoX(x0, y1), U.isoX(x1, y0)], ys = [U.isoY(x0, y0) - 120, U.isoY(x1, y1)];
+      const bw = xs[1] - xs[0], bh = ys[1] - ys[0];
+      this.cam.z = U.clamp(Math.min(this.W / (bw + 160), this.H / (bh + 240)), 0.5, 1.25);
+      this.cam.x = (xs[0] + xs[1]) / 2;
+      this.cam.y = (ys[0] + ys[1]) / 2 + 20 / this.cam.z;
+      this.clampCam();
+    }
     fit() {
       this.cam.z = Math.min(this.W / (N * 64 * 0.82), this.H / (N * 32 * 0.95));
       this.cam.x = 0; this.cam.y = N * HH;
@@ -53,96 +62,155 @@
     }
 
     // ------------------------------------------------------------ ground
+    // The ground is painted as flat square textures in tile space, then drawn
+    // through the isometric (affine) transform so it stays crisp at any zoom.
     buildGround() {
-      const PAD = 10, S = 0.5;
-      const w = (N + PAD * 2) * 64, h = (N + PAD * 2) * 32 + 40;
-      const cv = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w * S, h * S) : Object.assign(document.createElement('canvas'), { width: w * S, height: h * S });
-      const ctx = cv.getContext('2d');
-      ctx.scale(S, S);
-      const ox = w / 2, oy = PAD * 32 * 0 + 20;
-      // in this cache, tile (x, y) maps to ox + (x - y)*32, oy + (x + y + 2*PAD)*16
-      const P = (x, y) => [ox + (x - y) * HW, oy + (x + y + 2 * PAD) * HH];
-      // desert background
-      const g = ctx.createLinearGradient(0, 0, 0, h);
-      g.addColorStop(0, '#e9c98c'); g.addColorStop(1, '#d9b06a');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      const mk = (w, h) => (typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h) : Object.assign(document.createElement('canvas'), { width: w, height: h }));
       const rng = U.makeRng(42);
-      // dune ripples
-      ctx.strokeStyle = 'rgba(170,120,60,0.18)'; ctx.lineWidth = 2;
-      for (let i = 0; i < 160; i++) {
-        const x = rng() * w, y = rng() * h, l = 30 + rng() * 60;
-        ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + l / 2, y - 6, x + l, y); ctx.stroke();
+
+      // Desert, the Nile and its fields: tiles -PAD..N+PAD at TD px per tile.
+      const PAD = 16, TD = 12, DS = (N + PAD * 2) * TD;
+      const desert = mk(DS, DS), d = desert.getContext('2d');
+      const T = (t) => (t + PAD) * TD; // tile -> texture px
+      d.fillStyle = '#e8c48a'; d.fillRect(0, 0, DS, DS);
+      for (let i = 0; i < 900; i++) { // soft dunes
+        const x = rng() * DS, y = rng() * DS, r = 10 + rng() * 50;
+        const g = d.createRadialGradient(x, y, 0, x, y, r);
+        const c = rng() < 0.5 ? '210,160,95' : '245,214,160';
+        g.addColorStop(0, `rgba(${c},0.35)`); g.addColorStop(1, `rgba(${c},0)`);
+        d.fillStyle = g; d.fillRect(x - r, y - r, r * 2, r * 2);
       }
-      // the buildable plateau
-      const poly = (pts, fill) => { ctx.beginPath(); ctx.moveTo(...pts[0]); for (const p of pts.slice(1)) ctx.lineTo(...p); ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); };
-      poly([P(0, 0), P(N, 0), P(N, N), P(0, N)], '#e3c487');
-      poly([P(D.EDGE, D.EDGE), P(N - D.EDGE, D.EDGE), P(N - D.EDGE, N - D.EDGE), P(D.EDGE, N - D.EDGE)], '#ecd39c');
-      // checkerboard tiles, very faint
-      for (let y = D.EDGE; y < N - D.EDGE; y++) for (let x = D.EDGE; x < N - D.EDGE; x++) {
-        if ((x + y) % 2) continue;
-        poly([P(x, y), P(x + 1, y), P(x + 1, y + 1), P(x, y + 1)], 'rgba(205,165,100,0.13)');
+      d.lineWidth = 1.2;
+      for (let i = 0; i < 700; i++) { // wind ripples
+        const x = rng() * DS, y = rng() * DS, l = 10 + rng() * 26;
+        d.strokeStyle = `rgba(180,130,70,${0.12 + rng() * 0.15})`;
+        d.beginPath(); d.moveTo(x, y); d.quadraticCurveTo(x + l / 2, y - 3, x + l, y); d.stroke();
       }
-      // pebbles and tufts
+      for (let i = 0; i < 2500; i++) { d.fillStyle = `rgba(${rng() < 0.5 ? '140,100,60' : '255,240,210'},${0.25 + rng() * 0.35})`; d.fillRect(rng() * DS, rng() * DS, 1.4, 1.4); }
+      // the Nile runs along the bottom-left edge (y = N+3 .. N+6.5)
+      const r0 = T(N + 2.6), r1 = T(N + 6.6);
+      const bank = (y0, y1, c) => { d.fillStyle = c; d.fillRect(0, y0, DS, y1 - y0); };
+      bank(T(N + 1.3), T(N + 2.9), '#86b84a');
+      bank(T(N + 6.3), T(N + 8.3), '#86b84a');
+      const wg = d.createLinearGradient(0, r0, 0, r1);
+      wg.addColorStop(0, '#2e86b8'); wg.addColorStop(0.5, '#3fa6d6'); wg.addColorStop(1, '#2a7aae');
+      d.fillStyle = wg;
+      d.beginPath(); d.moveTo(0, r0);
+      for (let x = 0; x <= DS; x += 12) d.lineTo(x, r0 + Math.sin(x * 0.03) * 3);
+      for (let x = DS; x >= 0; x -= 12) d.lineTo(x, r1 + Math.sin(x * 0.025 + 1) * 3);
+      d.closePath(); d.fill();
+      d.strokeStyle = 'rgba(255,255,255,0.35)'; d.lineWidth = 1.5;
+      for (let x = 0; x <= DS; x += 12) { d.beginPath(); d.arc(x, r0 + Math.sin(x * 0.03) * 3 + 2, 2, 0, Math.PI); d.stroke(); }
+      for (let i = 0; i < 60; i++) { // lily pads
+        const x = rng() * DS, y = U.lerp(r0 + 8, r1 - 8, rng() < 0.5 ? rng() * 0.2 : 0.8 + rng() * 0.2);
+        d.fillStyle = '#4f9a3a'; d.beginPath(); d.arc(x, y, 3 + rng() * 2, 0.4, Math.PI * 2); d.lineTo(x, y); d.fill();
+        if (rng() < 0.4) { d.fillStyle = '#f2a0c0'; d.beginPath(); d.arc(x + 1, y - 1, 1.6, 0, 7); d.fill(); }
+      }
+      // farmland beyond the river
+      for (let i = 0; i < 26; i++) {
+        const x = i * DS / 26, w = DS / 26 - 3;
+        d.fillStyle = ['#9ccc5a', '#b8d86a', '#8fbf4e', '#d8c870'][i % 4];
+        d.fillRect(x, T(N + 8.5), w, T(N + 12) - T(N + 8.5));
+        d.strokeStyle = 'rgba(80,110,30,0.35)'; d.lineWidth = 1;
+        for (let yy = T(N + 8.5) + 4; yy < T(N + 12); yy += 5) { d.beginPath(); d.moveTo(x, yy); d.lineTo(x + w, yy); d.stroke(); }
+      }
+      // reeds on both banks
       for (let i = 0; i < 500; i++) {
-        const x = rng() * (N + 2 * PAD) - PAD, y = rng() * (N + 2 * PAD) - PAD;
-        if (y > N + 1.5 && y < N + 7) continue;
-        const [sx, sy] = P(x, y);
-        if (rng() < 0.7) { ctx.fillStyle = `rgba(150,110,70,${0.2 + rng() * 0.3})`; ctx.beginPath(); ctx.ellipse(sx, sy, 2 + rng() * 2, 1 + rng(), 0, 0, Math.PI * 2); ctx.fill(); }
-        else { ctx.strokeStyle = 'rgba(120,140,60,0.5)'; ctx.lineWidth = 1.4; for (let k = -1; k <= 1; k++) { ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + k * 3, sy - 6); ctx.stroke(); } }
+        const x = rng() * DS, y = rng() < 0.5 ? r0 - rng() * 10 : r1 + rng() * 8;
+        d.strokeStyle = rng() < 0.5 ? '#3f7a24' : '#5f9a32'; d.lineWidth = 1.2;
+        d.beginPath(); d.moveTo(x, y); d.lineTo(x + (rng() - 0.5) * 4, y - 5 - rng() * 5); d.stroke();
       }
-      // the Nile along the bottom-left edge, with green banks
-      const riverA = N + 2.5, riverB = N + 6;
-      poly([P(-PAD, N + 1), P(N + PAD, N + 1), P(N + PAD, riverA), P(-PAD, riverA)], '#7fa84a');
-      poly([P(-PAD, riverA), P(N + PAD, riverA), P(N + PAD, riverB), P(-PAD, riverB)], '#2f7fb0');
-      poly([P(-PAD, riverA + 0.5), P(N + PAD, riverA + 0.5), P(N + PAD, riverB - 0.6), P(-PAD, riverB - 0.6)], '#3a92c4');
-      poly([P(-PAD, riverB), P(N + PAD, riverB), P(N + PAD, riverB + 0.8), P(-PAD, riverB + 0.8)], '#7fa84a');
-      // reeds and papyrus on the banks
-      for (let i = 0; i < 140; i++) {
-        const x = -PAD + rng() * (N + 2 * PAD), y = rng() < 0.5 ? riverA - 0.2 - rng() * 0.8 : riverB + rng() * 0.6;
-        const [sx, sy] = P(x, y);
-        ctx.strokeStyle = rng() < 0.5 ? '#4f7f2a' : '#6f9a3a'; ctx.lineWidth = 1.5;
-        for (let k = 0; k < 3; k++) { ctx.beginPath(); ctx.moveTo(sx + k * 2, sy); ctx.quadraticCurveTo(sx + k * 2 + 2, sy - 8, sx + k * 3 - 2, sy - 13 - rng() * 6); ctx.stroke(); }
-        if (rng() < 0.3) { ctx.fillStyle = '#9ab84a'; ctx.beginPath(); ctx.arc(sx + 2, sy - 17, 3, 0, Math.PI * 2); ctx.fill(); }
-      }
-      // palms around the outside of the plateau
-      const palms = [];
-      for (let i = 0; i < 70; i++) {
+
+      // The oasis lawn you build on: tiles 0..N at TG px per tile.
+      const TG = 32, GS = N * TG;
+      const grass = mk(GS, GS), g = grass.getContext('2d');
+      // wavy outline just inside the map edge
+      const edge = [];
+      const inset = 0.7, steps = 160;
+      for (let i = 0; i < steps; i++) {
+        const t = i / steps, side = Math.floor(t * 4), f = (t * 4) % 1;
+        const L = inset, R = N - inset;
         let x, y;
-        do { x = -PAD + 1 + rng() * (N + 2 * PAD - 2); y = -PAD + 1 + rng() * (N + 2 * PAD - 2); }
-        while ((x > -1.5 && x < N + 1.5 && y > -1.5 && y < N + 1.5) || (y > N + 1.6 && y < N + 7));
-        palms.push([x, y]);
+        if (side === 0) { x = U.lerp(L, R, f); y = L; } else if (side === 1) { x = R; y = U.lerp(L, R, f); } else if (side === 2) { x = U.lerp(R, L, f); y = R; } else { x = L; y = U.lerp(R, L, f); }
+        const wob = Math.sin(i * 0.9) * 0.25 + Math.sin(i * 2.3) * 0.15 + (rng() - 0.5) * 0.15;
+        if (side === 0) y += wob; else if (side === 1) x += wob; else if (side === 2) y += wob; else x += wob;
+        edge.push([x * TG, y * TG]);
       }
-      palms.sort((a, b) => a[0] + a[1] - b[0] - b[1]);
-      for (const [x, y] of palms) {
-        const [sx, sy] = P(x, y);
-        ctx.fillStyle = 'rgba(90,60,20,0.18)'; ctx.beginPath(); ctx.ellipse(sx + 8, sy + 2, 14, 5, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.save(); ctx.translate(sx, sy); Sprites.kit(ctx, 0, 0).palm(0, 0, 0, 30 + rng() * 22, 1 + rng() * 0.4); ctx.restore();
+      const path = () => { g.beginPath(); g.moveTo(...edge[0]); for (const p of edge.slice(1)) g.lineTo(...p); g.closePath(); };
+      // sandy rim shadow under the lawn's edge
+      path(); g.lineWidth = 14; g.strokeStyle = 'rgba(150,105,50,0.35)'; g.stroke();
+      g.save(); path(); g.clip();
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        g.fillStyle = (x + y) % 2 ? '#8acb4c' : '#80c245';
+        g.fillRect(x * TG, y * TG, TG, TG);
       }
-      this.ground = { cv, S, w, h, ox, oy, PAD };
+      for (let i = 0; i < 1400; i++) { // soft lighter and darker patches
+        const x = rng() * GS, y = rng() * GS, r = 12 + rng() * 40;
+        const rg = g.createRadialGradient(x, y, 0, x, y, r);
+        const c = rng() < 0.5 ? '60,120,30' : '190,230,120';
+        rg.addColorStop(0, `rgba(${c},0.14)`); rg.addColorStop(1, `rgba(${c},0)`);
+        g.fillStyle = rg; g.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+      g.lineWidth = 1.3;
+      for (let i = 0; i < 26000; i++) { // grass blades
+        const x = rng() * GS, y = rng() * GS, l = 2 + rng() * 3.5;
+        g.strokeStyle = rng() < 0.5 ? 'rgba(70,130,35,0.55)' : 'rgba(170,220,100,0.5)';
+        g.beginPath(); g.moveTo(x, y); g.lineTo(x + (rng() - 0.5) * 2, y - l); g.stroke();
+      }
+      for (let i = 0; i < 260; i++) { // little flowers
+        const x = rng() * GS, y = rng() * GS;
+        g.fillStyle = ['#fff6d0', '#ffd84a', '#f07aa0', '#ffffff'][Math.floor(rng() * 4)];
+        for (let k = 0; k < 4; k++) { g.beginPath(); g.arc(x + Math.cos(k * 1.57) * 1.6, y + Math.sin(k * 1.57) * 1.6, 1.3, 0, 7); g.fill(); }
+        g.fillStyle = '#e8a020'; g.beginPath(); g.arc(x, y, 0.9, 0, 7); g.fill();
+      }
+      g.restore();
+      path(); g.lineWidth = 3; g.strokeStyle = '#5f9e34'; g.stroke();
+      path(); g.lineWidth = 1.2; g.strokeStyle = 'rgba(200,240,140,0.6)'; g.stroke();
+
+      // Palms dotted around the desert (drawn as sprites so they stand upright).
+      const palms = [];
+      for (let i = 0; i < 90; i++) {
+        let x, y, n = 0;
+        do { x = -PAD + 2 + rng() * (N + 2 * PAD - 4); y = -PAD + 2 + rng() * (N + 2 * PAD - 4); n++; }
+        while (n < 50 && ((x > -1 && x < N + 1 && y > -1 && y < N + 1) || (y > N + 1.6 && y < N + 7.6)));
+        palms.push({ x, y, v: Math.floor(rng() * 3) });
+      }
+      // a grove on the near river bank
+      for (let i = 0; i < 18; i++) palms.push({ x: rng() * N, y: N + 1.4 + rng() * 0.9, v: Math.floor(rng() * 3) });
+      this.ground = { desert, PAD, TD, grass, TG, palms };
+    }
+
+    // Draw a tile-space texture through the isometric transform.
+    drawTexture(img, tile0, px) {
+      const ctx = this.ctx, c = this.cam, z = c.z, dpr = this.dpr;
+      const o = this.toScreen(tile0, tile0);
+      ctx.setTransform(dpr * HW * z / px, dpr * HH * z / px, -dpr * HW * z / px, dpr * HH * z / px, dpr * o[0], dpr * o[1]);
+      ctx.drawImage(img, 0, 0);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     drawGround(t) {
       const ctx = this.ctx, c = this.cam, g = this.ground;
-      // cache pixel (ox + isoX, oy + (x+y+2PAD)*16) = world iso (isoX, isoY)
-      const wx0 = -g.ox, wy0 = -(g.oy + g.PAD * 2 * HH);
-      const sx = (wx0 - c.x) * c.z + this.W / 2, sy = (wy0 - c.y) * c.z + this.H / 2;
-      ctx.drawImage(g.cv, sx, sy, g.w * c.z, g.h * c.z);
-      // water shimmer
+      this.drawTexture(g.desert, -g.PAD, g.TD);
+      this.drawTexture(g.grass, 0, g.TG);
       if (!this.reduced) {
-        ctx.strokeStyle = 'rgba(220,240,255,0.35)'; ctx.lineWidth = 1.2 * c.z;
-        for (let i = 0; i < 26; i++) {
-          const x = -8 + ((i * 7.3 + t * 0.6) % (N + 16));
-          const y = N + 3 + (i % 3) * 0.9;
-          const [a, b] = this.toScreen(x, y), [e, f] = this.toScreen(x + 1.2, y);
+        // water shimmer
+        ctx.strokeStyle = 'rgba(230,248,255,0.45)'; ctx.lineWidth = 1.3 * c.z;
+        for (let i = 0; i < 34; i++) {
+          const x = -14 + ((i * 7.3 + t * 0.6) % (N + 28));
+          const y = N + 3.3 + (i % 4) * 0.8;
+          const [a, b] = this.toScreen(x, y), [e, f] = this.toScreen(x + 1.1, y);
           ctx.beginPath(); ctx.moveTo(a, b); ctx.quadraticCurveTo((a + e) / 2, b - 2 * c.z + Math.sin(t * 3 + i) * 1.5 * c.z, e, f); ctx.stroke();
         }
         // a felucca sailing the Nile
-        const bx = ((t * 0.5) % (N + 30)) - 12, by = N + 4.2;
+        const bx = ((t * 0.5) % (N + 34)) - 14, by = N + 4.6;
         const [x, y] = this.toScreen(bx, by);
         const z = c.z;
-        ctx.fillStyle = '#7a4a24'; ctx.beginPath(); ctx.moveTo(x - 18 * z, y - 6 * z); ctx.quadraticCurveTo(x, y + 6 * z, x + 18 * z, y - 2 * z); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = '#f4ead2'; ctx.beginPath(); ctx.moveTo(x - 2 * z, y - 6 * z); ctx.lineTo(x + 12 * z, y - 32 * z); ctx.lineTo(x + 14 * z, y - 4 * z); ctx.closePath(); ctx.fill();
-        ctx.strokeStyle = '#5a3a1a'; ctx.lineWidth = 1.2 * z; ctx.beginPath(); ctx.moveTo(x, y - 4 * z); ctx.lineTo(x, y - 30 * z); ctx.stroke();
+        ctx.fillStyle = 'rgba(0,40,80,0.25)'; ctx.beginPath(); ctx.ellipse(x, y + 2 * z, 20 * z, 5 * z, 0, 0, 7); ctx.fill();
+        ctx.fillStyle = '#7a4a24'; ctx.strokeStyle = '#3a2210'; ctx.lineWidth = 1.2 * z;
+        ctx.beginPath(); ctx.moveTo(x - 20 * z, y - 7 * z); ctx.quadraticCurveTo(x, y + 6 * z, x + 20 * z, y - 3 * z); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fbf3df'; ctx.beginPath(); ctx.moveTo(x - 3 * z, y - 7 * z); ctx.quadraticCurveTo(x + 8 * z, y - 22 * z, x + 13 * z, y - 36 * z); ctx.lineTo(x + 15 * z, y - 5 * z); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x, y - 4 * z); ctx.lineTo(x, y - 32 * z); ctx.stroke();
       }
     }
 
@@ -167,12 +235,13 @@
       const ctx = this.ctx, t = scene.t;
       ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
       ctx.imageSmoothingEnabled = true;
-      ctx.fillStyle = '#d9b06a'; ctx.fillRect(0, 0, this.W, this.H);
+      ctx.fillStyle = '#e8c48a'; ctx.fillRect(0, 0, this.W, this.H);
       this.drawGround(t);
       if (scene.grid) this.drawGrid(scene);
       if (scene.deployMask) this.drawDeployMask(scene);
 
-      // rubble and ground marks first
+      // rubble and ground marks first, then every cast shadow, then the
+      // buildings, trees and troops back to front
       const items = [];
       for (const b of scene.buildings) {
         if (b.destroyed) { this.drawRubble(b); continue; }
@@ -181,20 +250,72 @@
         items.push({ k: (b.x + s / 2) + (b.y + s / 2) + (D.B[b.type].isTrap ? -50 : 0), b });
       }
       for (const o of scene.obstacles || []) items.push({ k: o.x + o.y + o.size, o });
+      for (const p of this.ground.palms) items.push({ k: p.x + p.y + 0.5, p });
       for (const u of scene.troops || []) if (!u.dead) items.push({ k: u.x + u.y + 0.5 + (u.air ? 3 : 0), u });
       items.sort((a, b) => a.k - b.k);
 
       for (const it of items) {
+        if (it.b) {
+          const b = it.b, def = D.B[b.type];
+          if (b.level > 0 && !b.building && !def.isTrap) this.blitShadow(this.buildingSprite(b, scene), b.x, b.y);
+        } else if (it.o) this.blitShadow(Sprites.sprite(it.o.type, 1, 'o' + it.o.size + (it.o.v || 0), it.o.size), it.o.x, it.o.y);
+        else if (it.p) this.blitShadow(Sprites.sprite('palm', 1, 'o1' + it.p.v, 1), it.p.x, it.p.y);
+      }
+      for (const it of items) {
         if (it.b) this.drawBuilding(it.b, scene);
         else if (it.o) this.drawObstacle(it.o, scene);
+        else if (it.p) this.blit(Sprites.sprite('palm', 1, 'o1' + it.p.v, 1), it.p.x, it.p.y);
         else this.drawTroop(it.u, scene, t);
       }
       if (scene.selected) this.drawSelection(scene.selected, scene);
       if (scene.ghost) this.drawGhost(scene.ghost, scene);
       for (const p of scene.projectiles || []) this.drawProjectile(p, scene);
       this.drawParticles(scene.dt || 0.016);
+      this.drawAtmosphere(t);
       this.drawOverlays(scene);
       this.drawFloaters(scene.dt || 0.016);
+    }
+
+    buildingSprite(b, scene) {
+      const def = D.B[b.type];
+      let extra = 0;
+      if (def.isWall) extra = scene.wallConn ? scene.wallConn(b) : 0;
+      else if (def.stores || def.produces) extra = Math.round((b.fill || 0) * 4) / 4;
+      return Sprites.sprite(b.type, Math.max(1, b.level || 1), extra);
+    }
+    blitShadow(sp, x, y) {
+      const ctx = this.ctx, z = this.cam.z;
+      const [sx, sy] = this.toScreen(x, y);
+      ctx.drawImage(sp.shadow, sx - sp.ax * z, sy - sp.ay * z, sp.w * z, sp.h * z);
+    }
+
+    // Drifting cloud shadows and a warm vignette.
+    drawAtmosphere(t) {
+      const ctx = this.ctx, z = this.cam.z;
+      if (!this.reduced) {
+        if (!this.cloudImg) {
+          const c = typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(256, 128) : Object.assign(document.createElement('canvas'), { width: 256, height: 128 });
+          const x = c.getContext('2d');
+          for (const [cx, cy, r] of [[80, 64, 50], [140, 56, 58], [190, 70, 40], [115, 80, 44]]) {
+            const g = x.createRadialGradient(cx, cy, 0, cx, cy, r);
+            g.addColorStop(0, 'rgba(40,50,20,0.10)'); g.addColorStop(1, 'rgba(40,50,20,0)');
+            x.fillStyle = g; x.fillRect(0, 0, 256, 128);
+          }
+          this.cloudImg = c;
+        }
+        for (let i = 0; i < 4; i++) {
+          const span = N + 40;
+          const tx = ((t * 0.35 + i * span / 4) % span) - 20, ty = -10 + i * 13 + Math.sin(i * 3) * 4;
+          const [sx, sy] = this.toScreen(tx, ty);
+          ctx.drawImage(this.cloudImg, sx - 300 * z, sy - 150 * z, 600 * z, 300 * z);
+        }
+      }
+      if (!this.vignette || this.vignette.w !== this.W || this.vignette.h !== this.H) {
+        const g = ctx.createRadialGradient(this.W / 2, this.H / 2, Math.min(this.W, this.H) * 0.35, this.W / 2, this.H / 2, Math.max(this.W, this.H) * 0.75);
+        g.addColorStop(0, 'rgba(60,30,0,0)'); g.addColorStop(1, 'rgba(60,30,0,0.28)');
+        this.vignette = { g, w: this.W, h: this.H };
+      }
+      ctx.fillStyle = this.vignette.g; ctx.fillRect(0, 0, this.W, this.H);
     }
 
     drawGrid(scene) {
@@ -243,19 +364,13 @@
     }
 
     drawBuilding(b, scene) {
-      const def = D.B[b.type];
-      const lv = Math.max(1, b.level || 1);
-      let extra = 0;
-      if (def.isWall) extra = scene.wallConn ? scene.wallConn(b) : 0;
-      else if (def.stores || def.produces) extra = Math.round((b.fill || 0) * 4) / 4;
-      const sp = Sprites.sprite(b.type, lv, extra);
+      const sp = this.buildingSprite(b, scene);
       if (b.level === 0 || b.building) {
         // new construction: foundation and scaffolding only
         this.drawFoundation(b, scene);
       } else {
-        const flash = b.flash > 0;
         this.blit(sp, b.x, b.y, scene.moving === b ? 0.5 : undefined);
-        if (flash) { this.ctx.globalCompositeOperation = 'lighter'; this.blit(sp, b.x, b.y, 0.25); this.ctx.globalCompositeOperation = 'source-over'; }
+        if (b.flash > 0) { this.ctx.globalCompositeOperation = 'lighter'; this.blit(sp, b.x, b.y, 0.25); this.ctx.globalCompositeOperation = 'source-over'; }
         this.drawLive(b, scene);
       }
       if (b.upgrading && b.level > 0) this.drawScaffold(b, scene);
@@ -383,7 +498,7 @@
           if (scene.researching) { const [x, y] = P(1.5, 1.5, 58); ctx.fillStyle = `rgba(255,200,80,${0.25 + 0.2 * Math.sin(t * 4)})`; ctx.beginPath(); ctx.arc(x, y, 20 * z, 0, 7); ctx.fill(); }
           break;
         case 'ballista': {
-          const [x, y] = P(1.5, 1.5, 14);
+          const [x, y] = P(1.5, 1.5, 22);
           const recoil = b.fired > 0 ? -3 : 0;
           drawTurret(ctx, x, y, z, aim, (c, zz) => {
             c.fillStyle = '#6b4a2a'; c.fillRect(-4 * zz + recoil * zz, -3 * zz, 26 * zz, 6 * zz);           // stock
@@ -481,7 +596,9 @@
       const moving = !idle && !u.attacking && (Math.abs(u.x - (u.px ?? u.x)) + Math.abs(u.y - (u.py ?? u.y)) > 0.001);
       const bob = moving ? Math.abs(Math.sin((u.walk || 0) * 2)) * 2 : 0;
       const by = sy - (hover + bob) * z;
-      drawTroopFigure(ctx, u.type, sx, by, z * 1.3, u.face || 1, t + (u.uid || 0), !!u.attacking, u.level || 1, u.side === 'def');
+      const k = z * 1.35;
+      const img = troopSprite(u.type, u.level || 1, u.side === 'def', u.face || 1, !!u.attacking, t + (u.uid || 0) * 0.37);
+      ctx.drawImage(img, sx - TS_AX * k, by - TS_AY * k, TS_W * k, TS_H * k);
       if (u.hit > 0) { ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = 'rgba(255,80,60,0.4)'; ctx.beginPath(); ctx.arc(sx, by - 8 * z, 8 * z, 0, 7); ctx.fill(); ctx.globalCompositeOperation = 'source-over'; }
       if (!idle && u.hp < u.maxHp) {
         const w = 16 * Math.max(0.8, z), hh = (u.t.housing >= 20 ? 40 : u.t.housing >= 5 ? 30 : 24) * z;
@@ -717,6 +834,33 @@
         }
       }
     }
+  }
+
+  // Troops are drawn once per animation frame into small outlined sprites.
+  const TS_W = 84, TS_H = 76, TS_AX = 42, TS_AY = 64, TS_S = 2;
+  const troopCache = new Map();
+  function troopSprite(type, lvl, guard, face, attacking, t) {
+    const F = 12, K = 24;
+    const fr = Math.floor(t * F) % K;
+    const lb = lvl >= 10 ? 10 : lvl >= 7 ? 7 : lvl >= 4 ? 4 : 1;
+    const key = type + '|' + lb + '|' + (guard ? 1 : 0) + '|' + face + '|' + (attacking ? 1 : 0) + '|' + fr;
+    let c = troopCache.get(key);
+    if (c) return c;
+    const mk = (w, h) => (typeof OffscreenCanvas !== 'undefined' ? new OffscreenCanvas(w, h) : Object.assign(document.createElement('canvas'), { width: w, height: h }));
+    const W = TS_W * TS_S, H = TS_H * TS_S;
+    const art = mk(W, H), a = art.getContext('2d');
+    a.lineCap = 'round'; a.lineJoin = 'round';
+    drawTroopFigure(a, type, TS_AX * TS_S, TS_AY * TS_S, TS_S, face, fr / F, attacking, lb, guard);
+    const sil = mk(W, H), sc = sil.getContext('2d');
+    sc.drawImage(art, 0, 0); sc.globalCompositeOperation = 'source-in'; sc.fillStyle = 'rgba(40,20,6,0.95)'; sc.fillRect(0, 0, W, H);
+    c = mk(W, H);
+    const cc = c.getContext('2d');
+    const o = 1.6 * TS_S;
+    for (const [dx, dy] of [[o, 0], [-o, 0], [0, o], [0, -o], [o * 0.7, o * 0.7], [-o * 0.7, -o * 0.7], [o * 0.7, -o * 0.7], [-o * 0.7, o * 0.7]]) cc.drawImage(sil, dx, dy);
+    cc.drawImage(art, 0, 0);
+    troopCache.set(key, c);
+    if (troopCache.size > 360) troopCache.delete(troopCache.keys().next().value);
+    return c;
   }
 
   // ---------------------------------------------------------------- helpers
