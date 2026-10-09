@@ -37,7 +37,12 @@
     cruise: 12,                      // metres flown each second while a question is up
     speed: t => 2.5 + 0.015 * t,     // how fast the ghost closes in (m/s), t seconds into the chase
     boost: pts => 9 * Math.pow(pts / 10, 0.75),        // metres an answer's points blast you ahead
-    skipCost: t => Math.round(4 * HAUNT.speed(t))       // a skip lets the ghost gain 4 seconds' worth
+    skipCost: t => Math.round(4 * HAUNT.speed(t)),      // a skip lets the ghost gain 4 seconds' worth
+    // Ultra Hard: the chase never freezes, and every so often the ghost lunges. Its eyes flash first;
+    // a right answer during the flash cancels the lunge.
+    lunge: 10,                       // metres it jumps
+    warn: 1.5,                       // seconds of warning
+    lungeGap: () => 8 + Math.random() * 5   // seconds of question time between lunges
   };
   const HALLOWEEN_SHARE = 0.25;      // how often Haunted Flight asks a Halloween question
   const fmtM = m => Math.round(m).toLocaleString() + ' m';
@@ -134,7 +139,7 @@
       easy: `everyday questions · hints<br>${boostRange(1)}`,
       medium: `mixed questions<br>${boostRange(1.5)}`,
       hard: `expert questions<br>${boostRange(2)}`,
-      ultra: ''
+      ultra: `no pauses · it lunges!<br>${boostRange(2.5).replace(' per answer', '')}`
     }
   };
   const TYPE_ORDER = ['rocket', 'sub', 'drill', 'elev', 'haunt'];
@@ -228,7 +233,9 @@
   // How fast Ultra slides you back, in points per second. It gets harsher the further you've gone.
   // A parachute (Rocket only, inside the atmosphere) cuts that to 30%.
   const CHUTE_SLOW = 0.7;
-  const drifts = () => !!(G.mode && G.mode.drift);
+  // Ultra drift (sliding back between answers) is for Rocket and Submarine; Haunted Flight's Ultra has lunges instead.
+  const drifts = () => !!(G.mode && G.mode.drift) && !isHaunt();
+  const hauntUltra = () => isHaunt() && !!(G.mode && G.mode.drift);
   const driftRate = () => (12 + 0.03 * G.score) * (1 - CHUTE_SLOW * (S === Scene ? Scene.chute : 0));
 
   const streakMult = n => Math.min(5, 1 + 0.25 * Math.max(0, n - 1));
@@ -271,7 +278,7 @@
       // Submarine keeps a best for each dive length; the card shows the best of them
       const r = id === 'sub' ? bestDive(b.dataset.best) : bests[bestKey(id, b.dataset.best, diveLen)];
       const len = r && r.len ? ` (${r.len}s)` : '';
-      if (b.closest('.ultra-pick')) b.textContent = r ? `Best ${r.score.toLocaleString()}${len}` : '';
+      if (b.closest('.ultra-pick')) b.textContent = r ? `Best ${r.score.toLocaleString()}${J.unit || ''}${len}` : '';
       else b.textContent = r ? `Best: ${r.score.toLocaleString()}${J.unit || ''} · ${r.icon} ${r.place}${len}` : J.notYet;
     });
     el.title.dataset.type = id;
@@ -373,6 +380,7 @@
     Object.assign(G, {
       state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive || elev || haunt ? Infinity : mode.lives, power: 100, tried: new Set(), streak: 0, bestStreak: 0,
       gap: HAUNT.start, dist: 0, chaseT: 0, closest: null, pauseUsed: false, beatT: 0,
+      lunge: { next: HAUNT.lungeGap(), warn: 0 }, lunges: 0, dodged: 0,
       qNum: 0, skips: dive || haunt ? Infinity : mode.skips, used: new Set(), seen: ch ? Quiz.freshRun() : Quiz.newRun(), q: null,
       challenge: ch, rng: ch ? Challenge.rng(ch.seed) : Math.random, correct: 0, bestAnswer: null,
       launched: false, peak: 0, reached: new Set(), crashed: false, boomed: false, diveTime: len, diveLeft: len, qElapsed: 0, lastTick: len
@@ -508,6 +516,9 @@
 
     S.setStreak(G.streak);
     if (isHaunt()) { S.boostTo(G.dist, tier); S.escape(tier, close); }
+    // Ultra: answering while the ghost's eyes flash cancels its lunge
+    const dodged = isHaunt() && G.lunge.warn > 0;
+    if (dodged) { G.lunge.warn = 0; G.lunge.next = HAUNT.lungeGap(); G.dodged++; S.warn(false); }
     else S.boostTo(altFor(G.score), tier);
     const rs = S.rocketScreen();
     S.burst(rs.x, rs.y + 60, ['', '#ffffff', '#6fe08a', '#4fb3ff', '#c77dff', '#ffc531'][tier], 20 + tier * 12);
@@ -524,6 +535,7 @@
     if (isElev() && G.power < 100) { const up = Math.min(100 - G.power, tier * 2); G.power += up; renderPower(); tags.push([`⚡ +${up}% power`, '#7dffb0']); }
     if (hints) tags.push([`💡 ×${+hm.toFixed(2)} ${hints} hint${hints > 1 ? 's' : ''}`, '#ffe08a']);
     if (close) tags.unshift(['😱 Close escape!', '#ff9a9a']);
+    if (dodged) tags.unshift(['🛡️ Lunge dodged!', '#7dffb0']);
     popup(isHaunt() ? `+${Math.round(metres)} m` : `+${pts.toLocaleString()}`, Quiz.TIER_NAMES[tier], tier, tags);
 
     el.feedback.className = 'feedback ok';
@@ -672,6 +684,7 @@
     G.state = 'dying';
     lockCard();
     if (!crashed) { S.die(); if (isHaunt()) Sound.ghost(); Sound.gameOver(); }
+    if (isHaunt()) S.warn(false);
     if (isHaunt() && !crashed) {
       el.feedback.className = 'feedback bad';
       el.feedback.textContent = '👻 The ghost caught you!';
@@ -711,7 +724,7 @@
         <div class="stat"><div class="s-label">Correct answers</div><div class="s-value">${G.correct}</div></div>
         <div class="stat"><div class="s-label">Closest escape</div><div class="s-value">${G.closest === null ? '—' : G.closest < 10 ? G.closest.toFixed(1) + ' m 😱' : fmtM(G.closest)}</div></div>
         <div class="stat wide"><div class="s-label">Best answer</div><div class="s-value">${ba ? `<span class="tier-${ba.tier}">${escapeHtml(ba.text)}</span> · ${Quiz.TIER_NAMES[ba.tier]} · +${Math.round(ba.metres)} m` : '—'}</div></div>
-        <div class="stat wide"><div class="s-label">Mode</div><div class="s-value">${J.name()} · ${G.mode.label}${prev ? ` · previous best ${fmtM(prev.score)}` : ''}</div></div>`;
+        <div class="stat wide"><div class="s-label">Mode</div><div class="s-value">${J.name()} · ${G.mode.label}${hauntUltra() ? ` · dodged ${G.dodged} of ${G.lunges + G.dodged} lunges` : ''}${prev ? ` · previous best ${fmtM(prev.score)}` : ''}</div></div>`;
         el.over.classList.remove('hidden');
         $('btnAgain').focus();
         return;
@@ -841,8 +854,9 @@
     el.timerFill.style.width = (g / HAUNT.max * 100) + '%';
     el.timerFill.style.background = { safe: '#7ddc6f', near: '#ffb02e', danger: '#ff5d73' }[lvl];
     el.timer.classList.toggle('low', lvl === 'danger');
-    el.speed.textContent = `👻 The ghost is ${fmtM(g)} behind you`;
-    el.speed.className = 'speed-badge chase-' + lvl;
+    const warn = G.lunge && G.lunge.warn > 0;
+    el.speed.textContent = warn ? '👁️ It\'s about to lunge! Answer now!' : `👻 The ghost is ${fmtM(g)} behind you`;
+    el.speed.className = 'speed-badge chase-' + (warn ? 'warn' : lvl);
     el.timerSecs.textContent = `closing at ${HAUNT.speed(G.chaseT).toFixed(1)} m/s`;
     const cost = HAUNT.skipCost(G.chaseT);
     el.skipCount.textContent = `👻 +${cost} m`;
@@ -931,7 +945,8 @@
       if (G.diveLeft <= 0) { G.diveLeft = 0; renderDiveClock(); updateTimer(); gameOver(); }
     } else if (isHaunt()) {
       // The chase only runs while a question is up: countdowns and answer reveals don't cost you.
-      if (G.state === 'question') {
+      // On Ultra Hard it never stops (except for the pause).
+      if (G.state === 'question' || (hauntUltra() && (G.state === 'reveal' || G.state === 'countdown'))) {
         G.chaseT += dt;
         G.gap -= HAUNT.speed(G.chaseT) * dt;
         G.dist += HAUNT.cruise * dt;
@@ -945,6 +960,21 @@
             G.beatT = 1.15 - 0.8 * p;   // the heart beats faster as it gets closer
           }
         } else G.beatT = 0;
+        // Ultra lunges count down only while a question is up, so you always get the whole warning to answer
+        if (hauntUltra() && G.state === 'question') {
+          const L = G.lunge;
+          if (L.warn > 0) {
+            L.warn -= dt;
+            if (L.warn <= 0) {
+              L.warn = 0; L.next = HAUNT.lungeGap(); G.lunges++;
+              G.gap -= HAUNT.lunge;
+              S.warn(false); S.lunge(true); Sound.lunge();
+              popup(`−${HAUNT.lunge} m`, 'LUNGE!', 0, [], true);
+            }
+          } else if ((L.next -= dt) <= 0) {
+            L.warn = HAUNT.warn; S.warn(true); Sound.hiss();
+          }
+        }
         if (G.gap <= 0) { G.gap = 0; gameOver(); }
       }
     } else if (G.state === 'question') {

@@ -320,6 +320,14 @@ const HauntScene = (function () {
       }
     };
     eye(16, -34); eye(46, -36);
+    // Ultra: its eyes flash white-hot just before it lunges
+    if (st.warn && Math.sin(st.t * 22) > -0.3) {
+      for (const [ex, ey] of [[16, -34], [46, -36]]) {
+        glow(ex, ey, 48, 'rgba(255,40,20,A)', 0.75);
+        ctx.fillStyle = '#ff2a14'; ctx.beginPath(); ctx.ellipse(ex, ey, 11, 16, 0, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#fff3a0'; ctx.beginPath(); ctx.ellipse(ex + 2, ey, 4, 7, 0, 0, TAU); ctx.fill();
+      }
+    }
     ctx.fillStyle = '#141420'; ctx.beginPath(); ctx.ellipse(36, 4, 9 + 12 * p, 10 + 16 * p, 0, 0, TAU); ctx.fill();
     ctx.restore();
     // arms reaching for the rocket's fins
@@ -339,7 +347,7 @@ const HauntScene = (function () {
     Object.assign(st, {
       t: st.t || 0, cam: 0, target: 0,
       gap: 60, disp: 60, idle: true, title: true, rx: TITLE_X,
-      thrust: 0.5, kick: 0, surge: 0, shake: 0, flash: 0, pulse: 0, grasp: 0, poof: null, streak: 0,
+      thrust: 0.5, kick: 0, surge: 0, shake: 0, flash: 0, pulse: 0, grasp: 0, poof: null, streak: 0, warn: false, dash: 0,
       dead: false, deadT: 0, crash: null, vel: 0
     });
     parts.length = 0; fx.length = 0;
@@ -348,7 +356,7 @@ const HauntScene = (function () {
 
   const danger = () => (st.title ? 0 : clamp(1 - st.disp / DANGER, 0, 1));
   const ghostPos = () => {
-    let x = st.rx - 165 - st.disp * GPX, y = RY + 10 + Math.sin(st.t * 2.1) * 12;
+    let x = st.rx - 165 - st.disp * GPX + (st.warn ? -14 + Math.sin(st.t * 40) * 3 : 0), y = RY + 10 + Math.sin(st.t * 2.1) * 12;
     if (st.dead) { const w = clamp(st.deadT / 0.9, 0, 1); x = lerp(x, st.rx - 30, w); y = lerp(y, RY + 4, w); }
     return { x, y };
   };
@@ -393,6 +401,7 @@ const HauntScene = (function () {
     st.flash = Math.max(0, st.flash - dt * 2.2);
     st.pulse = Math.max(0, st.pulse - dt * 3);
     st.grasp = Math.max(0, st.grasp - dt * 1.4);
+    st.dash = Math.max(0, st.dash - dt * 2.5);
     if (st.poof) { st.poof.t += dt; if (st.poof.t > 1.2) st.poof = null; }
     st.thrust = st.dead ? (st.deadT < 1.3 ? (Math.random() < 0.5 ? 0 : rand(0.1, 0.5)) : 0) : 0.45 + st.kick * 0.55;
     if (st.dead) st.deadT += dt;
@@ -576,8 +585,16 @@ const HauntScene = (function () {
         for (let i = 0; i < 70; i++) { const a = rand(0, TAU), sp = rand(120, 520); parts.push({ k: 'burstWisp', x: g.x + rand(-60, 60), y: g.y + rand(-60, 40), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, g: -40, life: rand(0.6, 1.2), max: 1.2, size: rand(5, 13), color: Math.random() < 0.5 ? '#ffffff' : '#bfe8ff' }); }
       }
     },
-    // A skip: the ghost lunges forward.
-    lunge() { st.shake = Math.max(st.shake, 0.2); },
+    // The ghost lunges forward (a skip, or an Ultra lunge with a streak of wisps behind it).
+    lunge(big) {
+      st.shake = Math.max(st.shake, big ? 0.5 : 0.2);
+      if (!big) return;
+      st.dash = 1;
+      const g = ghostPos();
+      for (let i = 0; i < 30; i++) parts.push({ k: 'burstWisp', x: g.x - rand(0, 160), y: g.y + rand(-50, 50), vx: -rand(300, 700), vy: rand(-30, 30), life: rand(0.3, 0.6), max: 0.6, size: rand(4, 9), color: '#ffd0d0' });
+      fx.push({ k: 'ring', x: g.x + 60, y: g.y, r: 220, life: 0.45, max: 0.45, color: '#ff9a9a' });
+    },
+    warn(on) { st.warn = on; },
     beat() { st.pulse = 1; },
     sputter() { st.shake = 0.4; },
     die() { st.dead = true; st.deadT = 0; st.shake = 0.6; },

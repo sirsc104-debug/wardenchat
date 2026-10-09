@@ -104,6 +104,9 @@ const Sound = (function () {
       tone(466, 1.5, { type: 'triangle', vol: 0.06, slide: -290, attack: 0.3, delay: 0.06 });
       noise(1.3, { vol: 0.12, freq: 900, sweepTo: 200 });
     },
+    // Ultra Haunted Flight: a rising hiss as its eyes flash, then the lunge
+    hiss() { noise(1.3, { vol: 0.18, freq: 500, sweepTo: 4000 }); tone(300, 1.3, { type: 'sawtooth', vol: 0.05, slide: 500, attack: 0.4 }); },
+    lunge() { noise(0.5, { vol: 0.35, freq: 1800, sweepTo: 200 }); tone(160, 0.5, { type: 'sawtooth', vol: 0.14, slide: -90 }); },
     whoosh() { noise(0.45, { vol: 0.22, freq: 300, sweepTo: 2400 }); tone(220, 0.4, { type: 'sine', vol: 0.08, slide: 180 }); },
     best() { [0, 2, 4, 5, 7].forEach((n, i) => tone(notes[n], 0.2, { type: 'triangle', vol: 0.14, delay: 0.9 + i * 0.09 })); }
   };

@@ -522,7 +522,6 @@ button { font-family: inherit; cursor: pointer; }
 }
 @keyframes ltd-glow { 50% { box-shadow: 0 2px 18px rgba(255,122,26,0.8); transform: translateY(-1px); } }
 @media (prefers-reduced-motion: reduce) { .ltd-badge { animation: none; } }
-#title[data-type="haunt"] .mode-ultra { display: none; }
 #title[data-type="haunt"] .logo span:first-child { text-shadow: 0 8px 0 #3a1460, 0 0 40px rgba(255,140,40,0.75); }
 #title[data-type="haunt"] .tagline { color: #ffd9b0; }
 
@@ -562,3 +561,4 @@ button { font-family: inherit; cursor: pointer; }
 #banner.haunt { left: 0; right: 0; top: 120px; }
 #banner.haunt .b-icon { font-size: 64px; }
 #banner.haunt .b-name { font-size: 52px; }
+.speed-badge.chase-warn { color: #fff6c8; animation: low-pulse 0.25s infinite alternate; }
