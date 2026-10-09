@@ -149,6 +149,8 @@
   const HAUNT_ENDS = new Date(2026, 10, 2);
   const HIDDEN_TYPES = new Set(['elev', ...(Date.now() >= HAUNT_ENDS.getTime() ? ['haunt'] : [])]);
   document.querySelectorAll('.type-btn').forEach(b => { if (HIDDEN_TYPES.has(b.dataset.type)) b.hidden = true; });
+  // While the event runs, the logo wears a witch hat.
+  if (!HIDDEN_TYPES.has('haunt')) document.body.classList.add('halloween');
   const isElev = () => G.type === 'elev';
   const isHaunt = () => G.type === 'haunt';
   let J = TYPES.rocket;   // the current way to play
@@ -283,7 +285,14 @@
     });
     el.title.dataset.type = id;
     moveGlider(animate);
+    syncMusic();
   }
+
+  // Haunted Flight's music plays while its tab is chosen (on the title screen and in the game).
+  // Browsers only allow sound after a click or key press, so it waits for the first one.
+  let gestured = false, musicLvl = 1;
+  function syncMusic() { Sound.music(gestured && J.id === 'haunt'); }
+  ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { if (!gestured) { gestured = true; syncMusic(); } }, true));
 
   // The yellow highlight behind the active tab slides from tab to tab.
   function moveGlider(animate) {
@@ -922,6 +931,8 @@
     if (S === ElevScene) ElevScene.setPower(G.state === 'title' || G.type !== 'elev' ? 1 : G.power / 100);
     if (S === HauntScene) {
       HauntScene.setTitle(G.state === 'title');
+      const chasing = G.state === 'question' || (hauntUltra() && (G.state === 'reveal' || G.state === 'countdown'));
+      if (!chasing && musicLvl !== 1) { musicLvl = 1; Sound.musicLevel(1); }
       if (G.state !== 'title' && isHaunt()) { HauntScene.setGap(G.gap); HauntScene.setTarget(G.dist); }
     }
     if (G.state !== 'paused') S.update(dt);
@@ -952,6 +963,9 @@
         G.dist += HAUNT.cruise * dt;
         G.score = Math.floor(G.dist);
         G.peak = G.score;
+        // the music fades down as the ghost closes in, so the heartbeat takes over
+        const lvl = G.gap < HAUNT.danger ? 0.25 + 0.75 * Math.max(0, G.gap) / HAUNT.danger : 1;
+        if (Math.abs(lvl - musicLvl) > 0.05) { musicLvl = lvl; Sound.musicLevel(lvl); }
         if (G.gap < HAUNT.danger) {
           G.beatT -= dt;
           if (G.beatT <= 0) {

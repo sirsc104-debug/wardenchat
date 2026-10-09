@@ -16,9 +16,9 @@ const Sound = (function () {
     return true;
   }
 
-  function tone(freq, dur, { type = 'sine', vol = 0.3, delay = 0, slide = 0, attack = 0.01 } = {}) {
+  function tone(freq, dur, { type = 'sine', vol = 0.3, delay = 0, slide = 0, attack = 0.01, at = 0, out = null, vibrato = 0 } = {}) {
     if (!ensure() || muted) return;
-    const t = ctx.currentTime + delay;
+    const t = at || ctx.currentTime + delay;
     const o = ctx.createOscillator();
     const g = ctx.createGain();
     o.type = type;
@@ -27,8 +27,61 @@ const Sound = (function () {
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(vol, t + attack);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); g.connect(master);
+    if (vibrato) {
+      const lfo = ctx.createOscillator(), lg = ctx.createGain();
+      lfo.frequency.value = 5.5; lg.gain.value = vibrato;
+      lfo.connect(lg); lg.connect(o.frequency); lfo.start(t); lfo.stop(t + dur + 0.05);
+    }
+    o.connect(g); g.connect(out || master);
     o.start(t); o.stop(t + dur + 0.05);
+  }
+
+  /* ---- Haunted Flight music: a looping spooky tune in D minor, made on the fly ----------------
+     Dm – Bb – Gm – A, eight eighth-notes a bar: a music-box arpeggio, an organ bass, a wobbly
+     "theremin" melody every other time round, and a bell on each new chord. */
+  const M = { on: false, gain: null, echo: null, step: 0, next: 0, timer: null, level: 1 };
+  const hz = n => 440 * Math.pow(2, (n - 69) / 12);   // MIDI note -> Hz
+  const CHORDS = [[50, 53, 57], [46, 50, 53], [43, 46, 50], [45, 49, 52]];   // Dm, Bb, Gm, A
+  const ARP = [0, 1, 2, 3, 2, 1, 0, 1];                                      // up and back down
+  const TUNE = [69, 0, 65, 0, 62, 0, 69, 0, 70, 0, 69, 0, 65, 0, 62, 0, 67, 0, 70, 0, 74, 0, 73, 0, 69, 0, 0, 0, 64, 0, 69, 0];
+  const EIGHTH = 60 / 104 / 2;
+  function musicGraph() {
+    if (M.gain) return;
+    M.gain = ctx.createGain(); M.gain.gain.value = 0;
+    // a little echo makes it feel like a haunted hall
+    const d = ctx.createDelay(1); d.delayTime.value = EIGHTH * 3;
+    const fb = ctx.createGain(); fb.gain.value = 0.32;
+    const wet = ctx.createGain(); wet.gain.value = 0.35;
+    M.gain.connect(master); M.gain.connect(d); d.connect(fb); fb.connect(d); d.connect(wet); wet.connect(master);
+  }
+  function scheduleMusic() {
+    while (M.next < ctx.currentTime + 0.25) {
+      const i = M.step % 32, bar = Math.floor(i / 8), ch = CHORDS[bar], t = M.next, out = M.gain;
+      const k = ARP[i % 8], note = k === 3 ? ch[0] + 12 : ch[k];
+      tone(hz(note + 24), EIGHTH * 1.6, { type: 'triangle', vol: 0.09, at: t, out });                    // music box
+      if (i % 4 === 0) tone(hz(ch[0] - 12), EIGHTH * 3.6, { type: 'sine', vol: 0.16, at: t, out });     // bass
+      if (i % 4 === 0) tone(hz(ch[0]), EIGHTH * 3.6, { type: 'square', vol: 0.025, at: t, out });       // organ
+      if (i % 8 === 0) tone(hz(ch[0] + 36), 1.2, { type: 'sine', vol: 0.05, at: t, out });              // bell
+      const m = TUNE[i];
+      if (m && Math.floor(M.step / 32) % 2 === 1) tone(hz(m), EIGHTH * 1.9, { type: 'sine', vol: 0.11, at: t, out, vibrato: 7, attack: 0.08 });
+      M.step++; M.next += EIGHTH;
+    }
+  }
+  function setMusic(on) {
+    if (on === M.on) return;
+    if (on && !ensure()) return;
+    M.on = on;
+    if (on) {
+      musicGraph();
+      M.step = 0; M.next = ctx.currentTime + 0.1;
+      M.gain.gain.cancelScheduledValues(ctx.currentTime);
+      M.gain.gain.setTargetAtTime(0.9 * M.level, ctx.currentTime, 0.6);
+      scheduleMusic();
+      M.timer = setInterval(scheduleMusic, 100);
+    } else {
+      clearInterval(M.timer); M.timer = null;
+      if (M.gain) { M.gain.gain.cancelScheduledValues(ctx.currentTime); M.gain.gain.setTargetAtTime(0, ctx.currentTime, 0.25); }
+    }
   }
 
   function noise(dur, { vol = 0.3, freq = 800, q = 0.7, delay = 0, sweepTo = 0 } = {}) {
@@ -56,6 +109,14 @@ const Sound = (function () {
 
   return {
     unlock: ensure,
+    // Haunted Flight background music (respects the mute button through the master volume)
+    music: setMusic,
+    get musicOn() { return M.on; },
+    // turn the music down while the heartbeat takes over (1 = full, 0 = silent)
+    musicLevel(x) {
+      M.level = Math.max(0, Math.min(1, x));
+      if (M.on && M.gain) M.gain.gain.setTargetAtTime(0.9 * M.level, ctx.currentTime, 0.3);
+    },
     get muted() { return muted; },
     toggle() {
       muted = !muted;
