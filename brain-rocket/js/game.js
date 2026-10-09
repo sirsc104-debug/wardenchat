@@ -171,15 +171,42 @@
   };
 
   // ---- Stage scaling (always 16:9) ------------------------------------
+  // The 1600×900 core always fits on screen, and the stage stretches the other way to fill the tab,
+  // so there are no black bars. The world picture keeps its shape and covers the whole stage,
+  // trimming a little off its long sides. view maps world coordinates onto the stage.
+  const view = { c: 1, x: 0, y: 0, pan: 0 };
+  const world = $('world'), viewportEl = $('viewport');
   function fit() {
-    const s = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
-    stage.style.transform = `scale(${s}) translate(-50%, -50%)`;
-    Scene.resize(s);
-    SubScene.resize(s);
-    DrillScene.resize(s);
-    ElevScene.resize(s);
-    HauntScene.resize(s);
+    const cs = getComputedStyle(viewportEl);
+    const padL = parseFloat(cs.paddingLeft) || 0, padT = parseFloat(cs.paddingTop) || 0;
+    const vw = viewportEl.clientWidth - padL - (parseFloat(cs.paddingRight) || 0);
+    const vh = viewportEl.clientHeight - padT - (parseFloat(cs.paddingBottom) || 0);
+    if (vw <= 0 || vh <= 0) return;
+    const s = Math.min(vw / 1600, vh / 900);
+    const SW = vw / s, SH = vh / s;
+    stage.style.width = SW + 'px'; stage.style.height = SH + 'px';
+    view.s = s; view.left = padL; view.top = padT;
+    placeStage();
+    const c = Math.max(SW / 1600, SH / 900);
+    view.c = c; view.x = (SW - 1600 * c) / 2; view.y = (SH - 900 * c) / 2;
+    world.style.transform = `translate(${view.x}px, ${view.y}px) scale(${c})`;
+    for (const sc of [Scene, SubScene, DrillScene, ElevScene, HauntScene]) sc.resize(s * c);
     const old = $('sceneOld'); if (old) { old.width = $('scene').width; old.height = $('scene').height; }
+    if (G && G.state !== 'title' && el.track) buildTrack();
+  }
+  const placeStage = () => { stage.style.transform = `translate(${view.left}px, ${view.top + view.pan}px) scale(${view.s})`; };
+  // world coordinates -> stage coordinates (for popups placed near the rocket)
+  const toStage = (x, y) => [view.x + x * view.c, view.y + y * view.c];
+
+  // Phones: when the on-screen keyboard opens, slide the game up so the answer box stays visible.
+  function keyboardPan() {
+    const vv = window.visualViewport;
+    let pan = 0;
+    if (vv && document.activeElement === el.input && vv.height < window.innerHeight - 80) {
+      const r = el.input.getBoundingClientRect();
+      pan = Math.min(0, view.pan + (vv.offsetTop + vv.height - 12) - r.bottom);
+    }
+    if (pan !== view.pan) { view.pan = pan; placeStage(); }
   }
 
   // ---- Saved bests ------------------------------------------------------
@@ -253,10 +280,12 @@
   }
 
   // ---- Title screen -----------------------------------------------------
-  // Switch content immediately; only the small tab highlight animates.
+  // Switching tabs slides the old world out and the new one in, in step with the tab highlight.
   function setType(id, animate) {
+    const from = TYPE_ORDER.indexOf(J.id), to = TYPE_ORDER.indexOf(id);
     J = TYPES[id];
     if (S !== J.scene) {
+      if (animate && from !== to) slideScenes(to > from ? 1 : -1);
       S = J.scene; S.reset();
     }
     try { localStorage.setItem('brainRocket.type', id); } catch (e) { /* ignore */ }
@@ -266,8 +295,10 @@
     });
     const n = s => s.replace('{n}', diveLen);
     $('tagline').textContent = n(J.tagline);
-    $('ruleFast').innerHTML = J.fast;
-    $('ruleLast').innerHTML = n(J.rule);
+    // the rules box only changes its text once it's fully blurred
+    const fastText = J.fast, ruleText = n(J.rule);
+    const rules = () => { $('ruleFast').innerHTML = fastText; $('ruleLast').innerHTML = ruleText; };
+    if (animate && from !== to) blurRules(rules); else rules();
     closeTimePick();
     $('chPanel').classList.toggle('hidden', id !== 'drill');
     if (id === 'drill') renderHost();
@@ -351,6 +382,33 @@
     else start(modeId);
   }
 
+  // The rules box blurs while the worlds slide past, swaps its text once fully blurred, then sharpens.
+  const BLUR_MS = 250;   // matches the .how filter transition in style.css
+  function blurRules(swap) {
+    const how = document.querySelector('.title-panel .how');
+    how.classList.add('switching');
+    clearTimeout(blurRules.t); clearTimeout(blurRules.t2);
+    blurRules.t = setTimeout(() => {
+      swap();
+      blurRules.t2 = setTimeout(() => how.classList.remove('switching'), 40);
+    }, BLUR_MS + 20);
+  }
+
+  function slideScenes(dir) {
+    const main = $('scene'), old = $('sceneOld');
+    old.width = main.width; old.height = main.height;
+    old.getContext('2d').drawImage(main, 0, 0);
+    for (const c of [main, old]) { c.classList.remove('sliding'); }
+    old.style.transform = 'translateX(0)';
+    main.style.transform = `translateX(${dir * 100}%)`;
+    old.classList.remove('hidden');
+    void main.offsetWidth;
+    for (const c of [main, old]) c.classList.add('sliding');
+    old.style.transform = `translateX(${-dir * 100}%)`;
+    main.style.transform = 'translateX(0)';
+    clearTimeout(slideScenes.t);
+    slideScenes.t = setTimeout(() => { old.classList.add('hidden'); main.classList.remove('sliding'); old.classList.remove('sliding'); }, 600);
+  }
   function showTitle() {
     clearLater();
     G.state = 'title';
@@ -804,7 +862,7 @@
     });
   }
   // Rocket climbs the track bottom to top; the submarine goes top to bottom.
-  const trackY = f => 24 + (J.down ? f : 1 - f) * (856 - 48);
+  const trackY = f => 24 + (J.down ? f : 1 - f) * ((el.track.offsetHeight || 856) - 48);
 
   function trackFrac(alt) {
     const M = J.stops, n = M.length;
@@ -882,10 +940,9 @@
   function popup(big, label, tier, tags, miss) {
     const d = document.createElement('div');
     d.className = 'popup' + (tier === 5 ? ' legendary' : '') + (miss ? ' miss' : '');
-    d.style.left = '760px';
-    d.style.top = isDive() ? '430px' : '380px';
-    if (isDive()) d.style.left = '600px';
-    if (isHaunt()) { d.style.left = '1000px'; d.style.top = '120px'; }
+    // where the popup goes, in world coordinates (near the rocket, sub or ghost chase)
+    const [px, py] = toStage(isHaunt() ? 1000 : isDive() ? 600 : 760, isHaunt() ? 120 : isDive() ? 430 : 380);
+    d.style.left = px + 'px'; d.style.top = py + 'px';
     const col = ['#ff5d73', 'var(--t1)', 'var(--t2)', 'var(--t3)', 'var(--t4)', 'var(--t5)'][tier];
     d.innerHTML = `<div class="pts" style="color:${col}">${big}</div>` +
       `<div class="rarity" style="color:${col}">${label.toUpperCase()}</div>` +
@@ -1060,6 +1117,14 @@
   HauntScene.onMilestone(m => { if (S === HauntScene) milestone(m); });
   fit();
   window.addEventListener('resize', fit);
+  window.addEventListener('orientationchange', () => setTimeout(fit, 250));
+  if (window.visualViewport) { visualViewport.addEventListener('resize', keyboardPan); visualViewport.addEventListener('scroll', keyboardPan); }
+  el.input.addEventListener('focus', () => setTimeout(keyboardPan, 300));
+  el.input.addEventListener('blur', () => setTimeout(keyboardPan, 100));
+  // turning a phone upright pauses the game behind the "turn sideways" screen
+  const upright = window.matchMedia('(orientation: portrait) and (pointer: coarse)');
+  const onUpright = () => { if (upright.matches && G.state === 'question') pause(true); };
+  if (upright.addEventListener) upright.addEventListener('change', onUpright); else if (upright.addListener) upright.addListener(onUpright);
   document.addEventListener('fullscreenchange', fit);
 
   document.querySelectorAll('.type-btn').forEach(b => b.addEventListener('click', () => { if (b.dataset.type === J.id) return; setType(b.dataset.type, true); syncMusic(true); }));

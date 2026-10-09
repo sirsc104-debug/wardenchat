@@ -12,8 +12,11 @@
 <body>
 <div id="viewport">
   <div id="stage">
-    <canvas id="scene" aria-hidden="true"></canvas>
-    <canvas id="sceneOld" class="hidden" aria-hidden="true"></canvas>
+    <!-- the world: a 1600×900 picture scaled to cover the whole stage -->
+    <div id="world">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <canvas id="sceneOld" class="hidden" aria-hidden="true"></canvas>
+    </div>
 
     <!-- In-game HUD -->
     <div id="hud" class="hidden">
@@ -69,7 +72,7 @@
         </div>
       </div>
       <form id="answerForm" autocomplete="off">
-        <input id="answer" type="text" maxlength="40" spellcheck="false" autocapitalize="off" placeholder="Type your answer…" aria-label="Your answer">
+        <input id="answer" type="text" maxlength="40" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off" enterkeyhint="go" placeholder="Type your answer…" aria-label="Your answer">
         <button type="submit" class="go-btn" id="goBtn">🚀 LAUNCH</button>
       </form>
       <div class="hint hidden" id="hint" aria-live="polite"></div>
@@ -224,6 +227,12 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- Phones held upright: the game is landscape, so ask to turn it -->
+<div id="rotate" aria-live="polite">
+  <div class="rotate-phone" aria-hidden="true">📱</div>
+  <p><b>Turn your phone sideways</b><br>Brain Rocket plays in landscape.</p>
 </div>
 
 <script src="js/data.js"></script>

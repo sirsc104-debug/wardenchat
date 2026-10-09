@@ -188,10 +188,17 @@ const Quiz = (function () {
   function pickTopic(mode, used, rng, filter) {
     const W = LEVEL_WEIGHTS[mode];
     let pool = ALL.filter(t => W[t.level] > 0 && (!filter || filter(t)));
+    const share = t => W[t.level] * (t.weight ?? 1);
     let fresh = pool.filter(t => !used.has(t.id));
-    if (!fresh.length) { pool.forEach(t => used.delete(t.id)); fresh = pool; }
+    if (!fresh.length) {
+      // A new round of topics. A topic with a small share (DHHS, cities, harder levels on Owen)
+      // only joins the round with that chance, so it really does come up less often.
+      pool.forEach(t => { used.delete(t.id); if (share(t) < 1 && rng() > share(t)) used.add(t.id); });
+      fresh = pool.filter(t => !used.has(t.id));
+      if (!fresh.length) fresh = pool;
+    }
     // A topic can set `weight` to come up more or less often than others at its level.
-    return weighted(fresh.map(t => [t, W[t.level] * (t.weight ?? 1)]), rng);
+    return weighted(fresh.map(t => [t, share(t)]), rng);
   }
 
   function letterQuestion(mode, seen, rng) {

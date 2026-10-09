@@ -2,7 +2,7 @@
 
 A 16:9 quiz game where your rocket only climbs when you answer. Start on the launch pad and fly past the clouds, the Moon, Mars, the outer planets, nebulae and galaxies, all the way to the edge of the universe.
 
-Plain HTML, CSS and JavaScript with no build step. Open `brain-rocket/index.html` in a browser (or serve the folder with `python3 -m http.server`). The stage scales to any window size and keeps a 16:9 shape; the ⛶ button goes fullscreen.
+Plain HTML, CSS and JavaScript with no build step. Open `brain-rocket/index.html` in a browser (or serve the folder with `python3 -m http.server`). The game fills the whole tab at any size with no black bars: its 1600×900 layout always fits and stretches to use the extra width or height, and the world picture behind it keeps its shape and covers the screen. The ⛶ button goes fullscreen. On phones it plays in landscape (holding the phone upright shows a "turn your phone sideways" screen and pauses the game), the game slides up so the answer box stays above the on-screen keyboard, autocorrect is off so it can't change answers, and double-tap zoom and pull-to-refresh are disabled.
 
 ## Ways to play
 
@@ -28,7 +28,7 @@ Pick one with the switch on the home screen. Rocket and Submarine each have thei
 
 ## How it plays
 
-- **182 question topics, in three styles.**
+- **257 question topics, in three styles** (plus 30 Halloween ones for Haunted Flight).
   - *Topic questions* (most of the game): *What's a breed of dog?*, *Name a type of home security system*, *Name a job that involves operating a vehicle*, *Name a country in Africa*.
   - *Letter questions* (about a quarter): *Name a breed of dog that starts with B and has an N in it.*
   - *Year questions* (rare on Owen, about a third of Hard): *Name an animated movie released between 1990 and 2005*, *Name a US president in office at any time between 1880 and 1890*. They use movies, video games, consoles, inventions, TV shows, books, bands, toys, board games, Olympic host cities and US presidents. A wrong-year answer tells you its year.
@@ -67,6 +67,7 @@ Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the b
 | `js/topics-everyday.js`, `js/topics-mixed.js`, `js/topics-expert.js`, `js/topics-more.js` | The other topics with their answers and rarity tiers |
 | `js/topics-dhhs.js` | The Daniel Hand High School (DHHS) topics |
 | `js/topics-halloween.js` | The Halloween topics that the 150 Haunted Flight Halloween questions are built from |
+| `js/topics-extra.js` | Extra answers for 160 topics and 75 more topics (cities in 15 countries, actors, poets, athletes, operas, anime, universities, spacecraft, enzymes, films…), first added with Codex and then re-tiered and cleaned up. City questions come up much less often. |
 | `js/topics-years.js` | Topics whose answers carry years, for year questions (`Toy Story @1995`) |
 | `js/questions.js` | Picks topic, letter and year questions and checks answers |
 | `js/scene.js` | The Rocket world: sky, ground, planets, decorations, rocket, particles |

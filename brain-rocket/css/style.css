@@ -1,4 +1,5 @@
-/* Brain Rocket — a 1600×900 stage scaled to fit any window (16:9, letterboxed). */
+/* Brain Rocket — a 1600×900 game scaled to fit any window. The layout stretches to fill the tab
+   (no black bars) and the world picture behind it keeps its shape, covering the whole stage. */
 :root {
   --ink: #f4f7ff;
   --muted: #b9c3e6;
@@ -17,23 +18,29 @@
 }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; overscroll-behavior: none; }
+body { touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
 body { font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased; }
 button { font-family: inherit; cursor: pointer; }
 
-#viewport { position: fixed; inset: 0; display: grid; place-items: center; background: radial-gradient(circle at 50% 50%, #0b1030, #000 70%); }
+/* the padding keeps the game clear of phone notches and rounded corners */
+#viewport {
+  position: fixed; inset: 0; background: #000;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
 #stage {
-  position: absolute; left: 50%; top: 50%;
-  width: 1600px; height: 900px;
+  position: absolute; left: 0; top: 0;
+  width: 1600px; height: 900px;   /* fit() stretches one of these to fill the tab */
   transform-origin: 0 0;
   overflow: hidden;
-  border-radius: 6px;
-  user-select: none;
+  user-select: none; -webkit-user-select: none;
 }
+#stage input { user-select: text; -webkit-user-select: text; }
+#world { position: absolute; left: 0; top: 0; width: 1600px; height: 900px; transform-origin: 0 0; overflow: hidden; }
 #scene, #sceneOld { position: absolute; inset: 0; width: 1600px; height: 900px; display: block; }
 #sceneOld.hidden { display: none; }
-/* Only the small tab highlight animates; scene changes are immediate. */
-:root { --slide: 0.12s ease-out; }
+/* tab switch: the old world slides out as the new one slides in, timed with the tab highlight */
+:root { --slide: 0.55s cubic-bezier(.65,0,.35,1); }
 #scene.sliding, #sceneOld.sliding { transition: transform var(--slide); }
 
 .hidden { display: none !important; }
@@ -450,7 +457,7 @@ button { font-family: inherit; cursor: pointer; }
 #title { align-items: flex-start; padding-top: 48px; }
 #title .tagline { min-height: 62px; display: flex; align-items: center; justify-content: center; margin: 10px auto 12px; }
 .type-toggle { position: relative; display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; margin-bottom: 0; isolation: isolate; }
-.type-toggle .type-btn { position: relative; z-index: 1; padding: 8px 10px; column-gap: 7px; background: transparent !important; transform: none !important; transition: color 0.12s ease-out; }
+.type-toggle .type-btn { position: relative; z-index: 1; padding: 8px 10px; column-gap: 7px; background: transparent !important; transform: none !important; transition: color 0.3s; }
 .type-toggle .type-btn[hidden] { display: none; }
 .type-toggle .type-btn.active { color: #3b2300; }
 .type-glider {
@@ -471,7 +478,7 @@ button { font-family: inherit; cursor: pointer; }
 .type-toggle .type-icon { font-size: 27px; }
 
 /* The mode cards and the Play With Friends panel share one fixed-height slot, so the rules box
-   underneath sits in the same place in every mode. */
+   underneath sits in the same place in every mode. It blurs while the scene slides across. */
 .title-panel .modes, .title-panel .ch-panel { height: 284px; margin-bottom: 0; box-sizing: border-box; }
 .title-panel .modes { align-items: flex-start; }
 .title-panel .ch-preview { min-height: 44px; }
@@ -588,3 +595,17 @@ button { font-family: inherit; cursor: pointer; }
 .music-toggle:hover { background: rgba(255,255,255,0.18); }
 .music-toggle:focus-visible { outline: 3px solid var(--cool); outline-offset: 2px; }
 .music-toggle.off { color: var(--muted); }
+
+/* ---- Phones held upright: ask to turn sideways ---- */
+#rotate { display: none; }
+@media (orientation: portrait) and (pointer: coarse) {
+  #rotate {
+    position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+    padding: 24px; text-align: center; color: var(--ink); font-size: 20px; line-height: 1.4;
+    background: radial-gradient(circle at 50% 40%, #1d2a6b, #070a1c 75%);
+  }
+  #rotate b { font-size: 26px; }
+  .rotate-phone { font-size: 84px; animation: rotate-hint 2.4s ease-in-out infinite; }
+}
+@keyframes rotate-hint { 0%, 30% { transform: rotate(0deg); } 55%, 85% { transform: rotate(-90deg); } 100% { transform: rotate(0deg); } }
+@media (prefers-reduced-motion: reduce) { .rotate-phone { animation: none; } }
