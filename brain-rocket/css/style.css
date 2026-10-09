@@ -572,9 +572,9 @@ button { font-family: inherit; cursor: pointer; }
 .speed-badge.chase-warn { color: #fff6c8; animation: low-pulse 0.25s infinite alternate; }
 
 /* ---- Halloween event: a witch hat on the logo while Haunted Flight is running ---- */
-/* it sits on top of the T in ROCKET, tipped back at -35°, and floats with the word */
+/* it sits on top of the T in ROCKET, tipped 35° to the right, and floats with the word */
 .logo .logo-rocket { position: relative; }
-.logo-hat { display: none; position: absolute; left: 566px; top: -90px; width: 132px; height: 110px; transform: rotate(-35deg); transform-origin: 50% 86%; filter: drop-shadow(0 6px 0 rgba(26,8,44,0.85)); pointer-events: none; }
+.logo-hat { display: none; position: absolute; left: 556px; top: -90px; width: 132px; height: 110px; transform: rotate(35deg); transform-origin: 50% 86%; filter: drop-shadow(0 6px 0 rgba(26,8,44,0.85)); pointer-events: none; }
 .halloween .logo-hat { display: block; animation: hat-sway 3.2s ease-in-out infinite; }
-@keyframes hat-sway { 50% { transform: rotate(-30deg); } }
+@keyframes hat-sway { 50% { transform: rotate(30deg); } }
 @media (prefers-reduced-motion: reduce) { .halloween .logo-hat { animation: none; } }
