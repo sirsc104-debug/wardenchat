@@ -578,3 +578,12 @@ button { font-family: inherit; cursor: pointer; }
 .halloween .logo-hat { display: block; animation: hat-sway 3.2s ease-in-out infinite; }
 @keyframes hat-sway { 50% { transform: rotate(30deg); } }
 @media (prefers-reduced-motion: reduce) { .halloween .logo-hat { animation: none; } }
+
+/* the pause menu's music switch */
+.music-toggle {
+  display: block; margin: 18px auto 0; padding: 8px 18px; border-radius: 999px; font: 600 18px var(--font);
+  color: var(--ink); background: rgba(255,255,255,0.1); border: 2px solid var(--panel-edge); cursor: pointer;
+}
+.music-toggle:hover { background: rgba(255,255,255,0.18); }
+.music-toggle:focus-visible { outline: 3px solid var(--cool); outline-offset: 2px; }
+.music-toggle.off { color: var(--muted); }

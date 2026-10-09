@@ -502,7 +502,7 @@ const HauntScene = (function () {
     const hidden = st.crash && st.crash.boom;
     if (!hidden) drawRocket(pose.x, pose.y, pose.rot, st.thrust, st.dead || !!st.crash || p > 0.7);
     // the ghost wraps around the rocket when it catches you; otherwise only its hands reach over
-    if (st.dead) drawGhost(g.x, g.y, scale, 0.62, 1, hands);
+    if (st.dead) { drawGhost(g.x, g.y, scale, 0.62, 1, null); drawWrapArms(g, pose, scale); }
     else if (hands && ga > 0.5) drawHands(hands, ga);
     // sparks and speed lines
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
@@ -532,6 +532,25 @@ const HauntScene = (function () {
       }
     }
     if (st.flash > 0) rect(-30, -30, W + 60, H + 60, `rgba(255,255,255,${st.flash * 0.5})`);
+  }
+  // Caught: the arms curl around the outside of the rocket and grip its top and bottom edges,
+  // never reaching through it.
+  function drawWrapArms(g, pose, scale) {
+    const w = clamp(st.deadT / 0.9, 0, 1), c = Math.cos(pose.rot), sn = Math.sin(pose.rot);
+    const at = (lx, ly) => [pose.x + lx * c - ly * sn, pose.y + lx * sn + ly * c];   // rocket-local -> screen
+    ctx.save(); ctx.globalAlpha = 0.9; ctx.strokeStyle = '#eaf4ff'; ctx.lineCap = 'round';
+    for (const side of [-1, 1]) {
+      const sx = g.x - 10 * scale, sy = g.y + side * 64 * scale;           // out of the ghost's top and bottom
+      const [ex, ey] = at(lerp(-110, 40, w), side * lerp(90, 44, w));     // the hand, just outside the hull
+      const [cx, cy] = at(-20, side * 125);                                 // the arm bows wide around it
+      ctx.lineWidth = 16; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo(cx, cy, ex, ey); ctx.stroke();
+      ctx.lineWidth = 5;
+      for (let f = -1; f <= 1; f++) {
+        const [fx, fy] = at(lerp(-110, 40, w) + 6 + f * 7, side * lerp(90, 44, w) - side * 12);   // fingers curl onto the edge
+        ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(fx, fy); ctx.stroke();
+      }
+    }
+    ctx.restore();
   }
   function drawHands(hands, a) {
     ctx.save(); ctx.globalAlpha = a;

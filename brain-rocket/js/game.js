@@ -288,10 +288,16 @@
     syncMusic();
   }
 
-  // Haunted Flight's music plays while its tab is chosen (on the title screen and in the game).
-  // Browsers only allow sound after a click or key press, so it waits for the first one.
+  // Each way to play has its own background music, on the title screen and in the game (Haunted
+  // Flight's is the loudest). Browsers only allow sound after a click or key press, so it waits for one.
   let gestured = false, musicLvl = 1;
-  function syncMusic() { Sound.music(gestured && J.id === 'haunt'); }
+  function syncMusic() { Sound.music(gestured ? J.id : null); renderMusicBtn(); }
+  function renderMusicBtn() {
+    const b = $('btnMusic'); if (!b) return;
+    b.textContent = Sound.musicEnabled ? '🎵 Music: On' : '🎵 Music: Off';
+    b.setAttribute('aria-pressed', Sound.musicEnabled ? 'true' : 'false');
+    b.classList.toggle('off', !Sound.musicEnabled);
+  }
   ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { if (!gestured) { gestured = true; syncMusic(); } }, true));
 
   // The yellow highlight behind the active tab slides from tab to tab.
@@ -1113,6 +1119,7 @@
   el.hintBtn.addEventListener('click', hint);
   $('btnPause').addEventListener('click', pause);
   $('btnResume').addEventListener('click', resume);
+  $('btnMusic').addEventListener('click', () => { Sound.setMusicEnabled(!Sound.musicEnabled, J.id); Sound.click(); renderMusicBtn(); });
   $('btnQuit').addEventListener('click', showTitle);
   $('btnAgain').addEventListener('click', () => start(G.mode.id, G.challenge));
   $('btnMenu').addEventListener('click', showTitle);

@@ -36,57 +36,106 @@ const Sound = (function () {
     o.start(t); o.stop(t + dur + 0.05);
   }
 
-  /* ---- Haunted Flight music: a looping spooky tune in D minor, made on the fly ----------------
-     Dm – Bb – Gm – A, eight eighth-notes a bar: a music-box arpeggio, an organ bass, a wobbly
-     "theremin" melody every other time round, and a bell on each new chord. */
-  const M = { on: false, gain: null, echo: null, step: 0, next: 0, timer: null, level: 1 };
+  /* ---- Background music: a short loop for each way to play, made on the fly -------------------
+     A track is a tempo, a loop length in eighth-notes and a step(i, t, out, E) that plays eighth i
+     at time t (E is one eighth, in seconds). Rocket, Submarine, Play With Friends and Elevator are
+     quiet; Haunted Flight's spooky tune is louder. Music can be switched off on its own (pause menu). */
   const hz = n => 440 * Math.pow(2, (n - 69) / 12);   // MIDI note -> Hz
-  const CHORDS = [[50, 53, 57], [46, 50, 53], [43, 46, 50], [45, 49, 52]];   // Dm, Bb, Gm, A
-  const ARP = [0, 1, 2, 3, 2, 1, 0, 1];                                      // up and back down
-  const TUNE = [69, 0, 65, 0, 62, 0, 69, 0, 70, 0, 69, 0, 65, 0, 62, 0, 67, 0, 70, 0, 74, 0, 73, 0, 69, 0, 0, 0, 64, 0, 69, 0];
-  const EIGHTH = 60 / 104 / 2;
-  function musicGraph() {
-    if (M.gain) return;
-    M.gain = ctx.createGain(); M.gain.gain.value = 0;
-    // a little echo makes it feel like a haunted hall
-    const d = ctx.createDelay(1); d.delayTime.value = EIGHTH * 3;
-    const fb = ctx.createGain(); fb.gain.value = 0.32;
-    const wet = ctx.createGain(); wet.gain.value = 0.35;
-    M.gain.connect(master); M.gain.connect(d); d.connect(fb); fb.connect(d); d.connect(wet); wet.connect(master);
-  }
+  const TRACKS = {
+    // Haunted Flight: Dm – Bb – Gm – A. Music box, organ bass, bells, and a wobbly theremin every other time round.
+    haunt: { bpm: 104, vol: 0.9, echo: 3, fb: 0.32, steps: 64,
+      chords: [[50, 53, 57], [46, 50, 53], [43, 46, 50], [45, 49, 52]],
+      tune: [69, 0, 65, 0, 62, 0, 69, 0, 70, 0, 69, 0, 65, 0, 62, 0, 67, 0, 70, 0, 74, 0, 73, 0, 69, 0, 0, 0, 64, 0, 69, 0],
+      step(i, t, out, E) {
+        const j = i % 32, ch = this.chords[Math.floor(j / 8)], k = [0, 1, 2, 3, 2, 1, 0, 1][j % 8];
+        tone(hz((k === 3 ? ch[0] + 12 : ch[k]) + 24), E * 1.6, { type: 'triangle', vol: 0.09, at: t, out });
+        if (j % 4 === 0) { tone(hz(ch[0] - 12), E * 3.6, { type: 'sine', vol: 0.16, at: t, out }); tone(hz(ch[0]), E * 3.6, { type: 'square', vol: 0.025, at: t, out }); }
+        if (j % 8 === 0) tone(hz(ch[0] + 36), 1.2, { type: 'sine', vol: 0.05, at: t, out });
+        const m = this.tune[j];
+        if (m && i >= 32) tone(hz(m), E * 1.9, { type: 'sine', vol: 0.11, at: t, out, vibrato: 7, attack: 0.08 });
+      } },
+    // Rocket: bright and floaty. Cmaj7 – Am7 – Fmaj7 – G, a twinkly arpeggio over a soft pad.
+    rocket: { bpm: 112, vol: 0.45, echo: 3, fb: 0.28, steps: 32,
+      chords: [[48, 52, 55, 59], [45, 48, 52, 55], [41, 45, 48, 52], [43, 47, 50, 55]],
+      step(i, t, out, E) {
+        const ch = this.chords[Math.floor(i / 8)];
+        tone(hz(ch[[0, 1, 2, 3, 2, 1, 2, 3][i % 8]] + 24), E * 1.4, { type: 'triangle', vol: 0.07, at: t, out });
+        if (i % 8 === 0) for (const n of [ch[0] + 12, ch[2] + 12]) tone(hz(n), E * 7.5, { type: 'sine', vol: 0.035, at: t, out, attack: 0.4 });
+        if (i % 4 === 0) tone(hz(ch[0] - 12), E * 3, { type: 'sine', vol: 0.12, at: t, out });
+        if (i % 8 === 6) tone(hz(ch[3] + 36), 0.6, { type: 'sine', vol: 0.03, at: t, out });
+      } },
+    // Submarine: slow and dreamy, with a deep bass and bubbles. Am – Fmaj7 – Cmaj7 – Em7.
+    sub: { bpm: 72, vol: 0.45, echo: 2, fb: 0.45, steps: 32,
+      chords: [[45, 48, 52, 55], [41, 45, 48, 52], [48, 52, 55, 59], [40, 43, 47, 50]],
+      step(i, t, out, E) {
+        const ch = this.chords[Math.floor(i / 8)];
+        if (i % 8 === 0) {
+          for (const n of ch.slice(1)) tone(hz(n + 12), E * 8, { type: 'sine', vol: 0.03, at: t, out, attack: 1 });
+          tone(hz(ch[0] - 12), E * 6, { type: 'sine', vol: 0.12, at: t, out, attack: 0.2 });
+        }
+        if (i % 2 === 0) tone(hz(ch[(i / 2) % 4] + 24), E * 2.5, { type: 'sine', vol: 0.05, at: t, out, attack: 0.05 });
+        if (i % 8 === 3 || i % 8 === 7) tone(hz(84 + (i * 7) % 12), 0.12, { type: 'sine', vol: 0.03, at: t, out, slide: 600 });
+      } },
+    // Play With Friends: a driving dig beat. Em – C – D – B, chugging bass, clanks and a riff.
+    drill: { bpm: 132, vol: 0.45, echo: 1, fb: 0.15, steps: 32,
+      chords: [[40, 43, 47], [36, 40, 43], [38, 42, 45], [35, 39, 42]],
+      riff: [12, 0, 7, 0, 10, 7, 5, 3],
+      step(i, t, out, E) {
+        const ch = this.chords[Math.floor(i / 8)];
+        tone(hz(ch[0] + (i % 2 ? 12 : 0)), E * 0.8, { type: 'square', vol: 0.03, at: t, out });
+        if (i % 2 === 0) tone(110, 0.15, { type: 'sine', vol: 0.12, at: t, out, slide: -70 });
+        if (i % 4 === 2) noise(0.08, { vol: 0.07, freq: 6000, sweepTo: 3000, at: t, out });
+        const r = this.riff[i % 8];
+        if (r && i >= 16) tone(hz(ch[0] + 12 + r), E * 0.9, { type: 'triangle', vol: 0.05, at: t, out });
+      } },
+    // Elevator: easy-listening lounge music, of course. Fmaj7 – Em7 – Dm7 – G7, vibes, walking bass, brushes.
+    elev: { bpm: 96, vol: 0.45, echo: 2, fb: 0.25, steps: 32,
+      chords: [[53, 57, 60, 64], [52, 55, 59, 62], [50, 53, 57, 60], [43, 47, 50, 53]],
+      bass: [41, 40, 38, 43],
+      tune: [72, 0, 69, 0, 67, 0, 65, 0, 71, 0, 67, 0, 64, 0, 0, 0, 69, 0, 65, 0, 62, 0, 64, 65, 67, 0, 0, 0, 71, 0, 74, 0],
+      step(i, t, out, E) {
+        const bar = Math.floor(i / 8), ch = this.chords[bar], b = this.bass[bar];
+        if ([0, 3, 6].includes(i % 8)) for (const n of ch.slice(0, 3)) tone(hz(n), E * 2, { type: 'sine', vol: 0.03, at: t, out, vibrato: 2 });
+        if (i % 2 === 0) tone(hz(b + [0, 4, 7, 9][(i / 2) % 4]), E * 1.8, { type: 'sine', vol: 0.1, at: t, out });
+        const m = this.tune[i];
+        if (m) tone(hz(m), E * 1.8, { type: 'sine', vol: 0.05, at: t, out, vibrato: 4, attack: 0.03 });
+        if (i % 2 === 1) noise(0.06, { vol: 0.02, freq: 5000, at: t, out });
+      } }
+  };
+  const M = { name: null, track: null, gain: null, step: 0, next: 0, timer: null, level: 1, enabled: true };
+  try { M.enabled = localStorage.getItem('brainRocket.music') !== '0'; } catch (e) { /* storage blocked */ }
   function scheduleMusic() {
+    const T = M.track, E = 60 / T.bpm / 2;
     while (M.next < ctx.currentTime + 0.25) {
-      const i = M.step % 32, bar = Math.floor(i / 8), ch = CHORDS[bar], t = M.next, out = M.gain;
-      const k = ARP[i % 8], note = k === 3 ? ch[0] + 12 : ch[k];
-      tone(hz(note + 24), EIGHTH * 1.6, { type: 'triangle', vol: 0.09, at: t, out });                    // music box
-      if (i % 4 === 0) tone(hz(ch[0] - 12), EIGHTH * 3.6, { type: 'sine', vol: 0.16, at: t, out });     // bass
-      if (i % 4 === 0) tone(hz(ch[0]), EIGHTH * 3.6, { type: 'square', vol: 0.025, at: t, out });       // organ
-      if (i % 8 === 0) tone(hz(ch[0] + 36), 1.2, { type: 'sine', vol: 0.05, at: t, out });              // bell
-      const m = TUNE[i];
-      if (m && Math.floor(M.step / 32) % 2 === 1) tone(hz(m), EIGHTH * 1.9, { type: 'sine', vol: 0.11, at: t, out, vibrato: 7, attack: 0.08 });
-      M.step++; M.next += EIGHTH;
+      T.step(M.step % T.steps, M.next, M.gain, E);
+      M.step++; M.next += E;
     }
   }
-  function setMusic(on) {
-    if (on === M.on) return;
-    if (on && !ensure()) return;
-    M.on = on;
-    if (on) {
-      musicGraph();
-      M.step = 0; M.next = ctx.currentTime + 0.1;
-      M.gain.gain.cancelScheduledValues(ctx.currentTime);
-      M.gain.gain.setTargetAtTime(0.9 * M.level, ctx.currentTime, 0.6);
-      scheduleMusic();
-      M.timer = setInterval(scheduleMusic, 100);
-    } else {
-      clearInterval(M.timer); M.timer = null;
-      if (M.gain) { M.gain.gain.cancelScheduledValues(ctx.currentTime); M.gain.gain.setTargetAtTime(0, ctx.currentTime, 0.25); }
-    }
+  // Fade the old loop out and the new one in. name: a key of TRACKS, or null for silence.
+  function playMusic(name) {
+    const want = M.enabled && TRACKS[name] ? name : null;
+    if (want === M.name) return;
+    if (want && !ensure()) return;
+    if (M.gain) { const g = M.gain; g.gain.cancelScheduledValues(ctx.currentTime); g.gain.setTargetAtTime(0, ctx.currentTime, 0.3); setTimeout(() => g.disconnect(), 2000); }
+    clearInterval(M.timer); M.timer = null; M.gain = null; M.track = null;
+    M.name = want;
+    if (!want) return;
+    const T = M.track = TRACKS[want], E = 60 / T.bpm / 2;
+    // each loop gets its own echo, so it sounds like it's playing somewhere
+    const g = M.gain = ctx.createGain(); g.gain.value = 0;
+    const d = ctx.createDelay(2); d.delayTime.value = E * T.echo;
+    const fb = ctx.createGain(); fb.gain.value = T.fb;
+    const wet = ctx.createGain(); wet.gain.value = 0.35;
+    g.connect(master); g.connect(d); d.connect(fb); fb.connect(d); d.connect(wet); wet.connect(master);
+    g.gain.setTargetAtTime(T.vol * M.level, ctx.currentTime, 0.6);
+    M.step = 0; M.next = ctx.currentTime + 0.1;
+    scheduleMusic();
+    M.timer = setInterval(scheduleMusic, 100);
   }
 
-  function noise(dur, { vol = 0.3, freq = 800, q = 0.7, delay = 0, sweepTo = 0 } = {}) {
+  function noise(dur, { vol = 0.3, freq = 800, q = 0.7, delay = 0, sweepTo = 0, at = 0, out = null } = {}) {
     if (!ensure() || muted) return;
-    const t = ctx.currentTime + delay;
+    const t = at || ctx.currentTime + delay;
     const len = Math.floor(ctx.sampleRate * dur);
     const buf = ctx.createBuffer(1, len, ctx.sampleRate);
     const d = buf.getChannelData(0);
@@ -101,7 +150,7 @@ const Sound = (function () {
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(vol, t + 0.05);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    src.connect(f); f.connect(g); g.connect(master);
+    src.connect(f); f.connect(g); g.connect(out || master);
     src.start(t); src.stop(t + dur);
   }
 
@@ -109,13 +158,21 @@ const Sound = (function () {
 
   return {
     unlock: ensure,
-    // Haunted Flight background music (respects the mute button through the master volume)
-    music: setMusic,
-    get musicOn() { return M.on; },
+    // Background music: music('rocket'), music('haunt') … or music(null). The 🔊 mute button silences it too.
+    music: playMusic,
+    get musicOn() { return !!M.name; },
+    get musicTrack() { return M.name; },
+    // the pause menu's music switch, remembered in this browser
+    get musicEnabled() { return M.enabled; },
+    setMusicEnabled(on, name) {
+      M.enabled = !!on;
+      try { localStorage.setItem('brainRocket.music', on ? '1' : '0'); } catch (e) { /* ignore */ }
+      playMusic(on ? name : null);
+    },
     // turn the music down while the heartbeat takes over (1 = full, 0 = silent)
     musicLevel(x) {
       M.level = Math.max(0, Math.min(1, x));
-      if (M.on && M.gain) M.gain.gain.setTargetAtTime(0.9 * M.level, ctx.currentTime, 0.3);
+      if (M.gain) M.gain.gain.setTargetAtTime(M.track.vol * M.level, ctx.currentTime, 0.3);
     },
     get muted() { return muted; },
     toggle() {
