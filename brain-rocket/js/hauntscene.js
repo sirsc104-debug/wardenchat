@@ -10,7 +10,7 @@ const HauntScene = (function () {
   const RY = 350;            // the rocket's flight line
   const GY = 600;            // the ground line (the question card sits below it)
   const PLAY_X = 1150;       // the rocket's x while playing; it waits further left on the title screen
-  const TITLE_X = 470;
+  const TITLE_X = 580;       // clear of the Bullseye card on the left
   const RS = 0.8;            // rocket scale
   const PXM = 14;            // screen pixels per metre flown, for the nearest layer
   const GPX = 6.2;           // screen pixels per metre between the ghost and the rocket
@@ -388,7 +388,7 @@ const HauntScene = (function () {
   function update(dt) {
     st.t += dt;
     const prev = st.cam;
-    if (st.idle) { st.target += 12 * dt; st.gap = 34 + Math.sin(st.t * 0.5) * 14; }
+    if (st.idle) { st.target += 12 * dt; st.gap = 24 + Math.sin(st.t * 0.5) * 4; }
     if (!st.crash) st.cam += (st.target - st.cam) * (1 - Math.exp(-dt * 3));
     st.vel = dt > 0 ? (st.cam - prev) * PXM / dt : 0;
     st.rx += ((st.title ? TITLE_X : PLAY_X) - st.rx) * (1 - Math.exp(-dt * 2.2));

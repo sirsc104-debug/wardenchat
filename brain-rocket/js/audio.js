@@ -88,6 +88,19 @@ const Sound = (function () {
         const r = this.riff[i % 8];
         if (r && i >= 16) tone(hz(ch[0] + 12 + r), E * 0.9, { type: 'triangle', vol: 0.05, at: t, out });
       } },
+    // Bullseye: a jaunty folk tune for the archery fair, in 6/8. G – C – D – G, Em – C – D – G:
+    // a plucked lute, a recorder melody and a tabor drum.
+    daily: { bpm: 168, vol: 0.4, echo: 3, fb: 0.2, steps: 48,
+      chords: [[43, 47, 50], [48, 52, 55], [50, 54, 57], [43, 47, 50], [40, 43, 47], [48, 52, 55], [50, 54, 57], [43, 47, 50]],
+      tune: [67, 0, 71, 74, 0, 71, 72, 0, 76, 74, 0, 72, 69, 0, 72, 74, 0, 69, 71, 0, 0, 67, 0, 0,
+             64, 0, 67, 71, 0, 67, 72, 0, 71, 69, 0, 72, 74, 0, 72, 69, 0, 66, 67, 0, 0, 0, 0, 0],
+      step(i, t, out, E) {
+        const bar = Math.floor(i / 6), ch = this.chords[bar], k = i % 6;
+        tone(hz(ch[[0, 1, 2, 1, 2, 1][k]] + 12), E * 1.2, { type: 'triangle', vol: 0.06, at: t, out });   // lute
+        if (k === 0 || k === 3) { noise(0.07, { vol: 0.07, freq: 300, at: t, out }); tone(hz(ch[0] - 12), E * 2.5, { type: 'sine', vol: 0.11, at: t, out }); }
+        const m = this.tune[i];
+        if (m) tone(hz(m + 12), E * 1.6, { type: 'sine', vol: 0.06, at: t, out, vibrato: 3, attack: 0.02 });  // recorder
+      } },
     // Elevator: easy-listening lounge music, of course. Fmaj7 – Em7 – Dm7 – G7, vibes, walking bass, brushes.
     elev: { bpm: 96, vol: 0.45, echo: 2, fb: 0.25, steps: 32,
       chords: [[53, 57, 60, 64], [52, 55, 59, 62], [50, 53, 57, 60], [43, 47, 50, 53]],
@@ -225,6 +238,13 @@ const Sound = (function () {
     // Ultra Haunted Flight: a rising hiss as its eyes flash, then the lunge
     hiss() { noise(1.3, { vol: 0.18, freq: 500, sweepTo: 4000 }); tone(300, 1.3, { type: 'sawtooth', vol: 0.05, slide: 500, attack: 0.4 }); },
     lunge() { noise(0.5, { vol: 0.35, freq: 1800, sweepTo: 200 }); tone(160, 0.5, { type: 'sawtooth', vol: 0.14, slide: -90 }); },
+    // Bullseye: the bow twangs, then the arrow thunks in (a bright chime for a bullseye, a dull thud for a miss)
+    arrow() { tone(220, 0.25, { type: 'triangle', vol: 0.12, slide: -60 }); noise(0.35, { vol: 0.12, freq: 2500, sweepTo: 600, delay: 0.05 }); },
+    thunk(off) {
+      noise(0.12, { vol: 0.35, freq: 500, sweepTo: 120 }); tone(110, 0.15, { type: 'sine', vol: 0.2, slide: -40 });
+      if (off === 0) [0, 2, 4, 7].forEach((n, i) => tone(notes[n], 0.25, { type: 'triangle', vol: 0.14, delay: 0.08 + i * 0.08 }));
+      else if (off === 1) tone(notes[2], 0.2, { type: 'triangle', vol: 0.1, delay: 0.08 });
+    },
     whoosh() { noise(0.45, { vol: 0.22, freq: 300, sweepTo: 2400 }); tone(220, 0.4, { type: 'sine', vol: 0.08, slide: 180 }); },
     best() { [0, 2, 4, 5, 7].forEach((n, i) => tone(notes[n], 0.2, { type: 'triangle', vol: 0.14, delay: 0.9 + i * 0.09 })); }
   };

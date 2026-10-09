@@ -12,6 +12,8 @@
     'ultra-medium': { id: 'ultra-medium', label: 'Ultra Hard · medium questions', tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'medium', drift: true, drain: 15 },
     ultra:          { id: 'ultra',        label: 'Ultra Hard · hard questions',   tag: 'Ultra Hard', time: 12, lives: 3, mult: 2.5, skips: 2, fast: [4, 8], quiz: 'hard',   drift: true, drain: 15 }
   };
+  // Bullseye, the daily mode: 15 set questions, 30 seconds each, no fuel to lose.
+  MODES.daily = { id: 'daily', label: 'Daily Bullseye', time: 30, lives: Infinity, mult: 1, skips: Infinity, fast: [6, 12], drain: 0 };
   const DIVE_LENGTHS = [30, 60, 120];
   let diveLen = 60;
   try { const v = +localStorage.getItem('brainRocket.dive'); if (DIVE_LENGTHS.includes(v)) diveLen = v; } catch (e) { /* ignore */ }
@@ -142,6 +144,14 @@
       ultra: `no pauses · it lunges!<br>${boostRange(2.5).replace(' per answer', '')}`
     }
   };
+  // Bullseye: the daily mode, opened from its own card on the home screen rather than a tab.
+  TYPES.daily = {
+    ...TYPES.rocket,
+    id: 'daily', scene: BullScene, distLabel: 'Aim for', go: 'LOOSE!', firstTag: '🏹 LOOSE!',
+    again: '📋 Share result', overTitle: '🎯 Bullseye', crashTitle: '💥 Target down!', name: () => 'Bullseye',
+    turning: 'Your arrow turned around…',
+    crashLine: () => 'Your arrow turned around and knocked the target over. Today\'s score is lost!'
+  };
   const TYPE_ORDER = ['rocket', 'sub', 'drill', 'elev', 'haunt'];
   // Elevator is hidden for now: its tab is hidden in index.html, and a saved choice of it falls back to Rocket.
   // Haunted Flight is a limited-time Halloween event: it disappears once November 1, 2026 is over
@@ -153,6 +163,8 @@
   if (!HIDDEN_TYPES.has('haunt')) document.body.classList.add('halloween');
   const isElev = () => G.type === 'elev';
   const isHaunt = () => G.type === 'haunt';
+  const isDaily = () => G.type === 'daily';
+  let returnType = null;   // the tab to go back to after a Bullseye game
   let J = TYPES.rocket;   // the current way to play
   let S = J.scene;        // its scene
   try { const t = localStorage.getItem('brainRocket.type'); if (TYPES[t] && !HIDDEN_TYPES.has(t)) { J = TYPES[t]; S = J.scene; } } catch (e) { /* ignore */ }
@@ -190,9 +202,10 @@
     const c = Math.max(SW / 1600, SH / 900);
     view.c = c; view.x = (SW - 1600 * c) / 2; view.y = (SH - 900 * c) / 2;
     world.style.transform = `translate(${view.x}px, ${view.y}px) scale(${c})`;
-    for (const sc of [Scene, SubScene, DrillScene, ElevScene, HauntScene]) sc.resize(s * c);
+    for (const sc of [Scene, SubScene, DrillScene, ElevScene, HauntScene, BullScene]) sc.resize(s * c);
     const old = $('sceneOld'); if (old) { old.width = $('scene').width; old.height = $('scene').height; }
     if (G && G.state !== 'title' && el.track) buildTrack();
+    layoutDaily();
   }
   const placeStage = () => { stage.style.transform = `translate(${view.left}px, ${view.top + view.pan}px) scale(${view.s})`; };
   // world coordinates -> stage coordinates (for popups placed near the rocket)
@@ -411,6 +424,7 @@
   }
   function showTitle() {
     clearLater();
+    if (J.id === 'daily') { J = TYPES[returnType] || TYPES.rocket; S = J.scene; }
     G.state = 'title';
     S.reset();
     [el.hud, el.track, el.card, el.pause, el.over, el.countdown].forEach(e => e.classList.add('hidden'));
@@ -419,6 +433,7 @@
     const u = document.querySelector('.mode-ultra');
     u.classList.remove('open'); u.setAttribute('aria-expanded', 'false');
     setType(J.id);
+    renderDaily();
   }
 
   // ---- Start a run ------------------------------------------------------
@@ -433,6 +448,7 @@
     const dive = J.id === 'sub' || J.id === 'drill';
     const elev = J.id === 'elev';
     const haunt = J.id === 'haunt';
+    const daily = J.id === 'daily';
     Object.assign(G, {
       state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive || elev || haunt ? Infinity : mode.lives, power: 100, tried: new Set(), streak: 0, bestStreak: 0,
       gap: HAUNT.start, dist: 0, chaseT: 0, closest: null, pauseUsed: false, beatT: 0,
@@ -454,6 +470,11 @@
     // Haunted Flight: the card runs along the bottom and the HUD shows the chase
     el.card.classList.toggle('haunt', haunt);
     el.hud.classList.toggle('haunt', haunt);
+    el.card.classList.toggle('daily', daily);
+    el.hud.classList.toggle('daily', daily);
+    el.track.classList.toggle('hidden', haunt || daily);
+    el.streakPill.classList.toggle('hidden', daily);
+    $('aimBadge').classList.toggle('hidden', !daily);
     el.countdown.classList.toggle('haunt', haunt);
     el.banner.classList.toggle('haunt', haunt);
     el.timerFill.style.background = '';
@@ -461,17 +482,21 @@
     document.querySelector('.score-pill .pill-label').textContent = haunt ? 'Distance' : 'Score';
     document.querySelectorAll('.legend span').forEach((sp, i) => {
       sp.dataset.base = sp.dataset.base || sp.textContent;
-      sp.textContent = haunt ? `${Quiz.TIER_NAMES[i + 1]} +${Math.round(HAUNT.boost(Quiz.TIER_POINTS[i + 1] * mode.mult))} m` : sp.dataset.base;
+      sp.textContent = haunt ? `${Quiz.TIER_NAMES[i + 1]} +${Math.round(HAUNT.boost(Quiz.TIER_POINTS[i + 1] * mode.mult))} m`
+        : daily ? Quiz.TIER_NAMES[i + 1] : sp.dataset.base;
     });
-    el.fuelPill.classList.toggle('hidden', dive || elev || haunt);
+    el.fuelPill.classList.toggle('hidden', dive || elev || haunt || daily);
     el.timePill.classList.toggle('hidden', !dive && !elev && !haunt);
     el.altLabel.textContent = J.distLabel;
+    el.go.textContent = daily ? '🏹 SHOOT' : '🚀 LAUNCH';
+    el.alt.className = 'pill-value';
     $('hudTimeLabel').textContent = J.timeLabel || 'Dive time';
     el.trackRocket.textContent = J.marker;
     buildTrack();
     renderFuel();
     renderStreak();
     if (elev) renderPower(); else if (haunt) renderChase(); else renderDiveClock();
+    if (daily) { G.bulls = 0; S.clear(); }
     updateHud(0);
 
     const steps = ['3', '2', '1', J.go];
@@ -489,11 +514,13 @@
 
   // ---- Questions --------------------------------------------------------
   function nextQuestion() {
+    if (isDaily() && G.daily.idx >= Daily.COUNT) return gameOver();
     if (G.lives <= 0) return gameOver();
     if (isDive() && G.diveLeft <= 0) return gameOver();
     G.qNum++;
     // Haunted Flight mixes in a Halloween question a quarter of the time
-    G.q = isHaunt() && G.rng() < HALLOWEEN_SHARE ? Quiz.halloween(G.seen, G.rng) : Quiz.generate(G.mode.quiz || G.mode.id, G.seen, G.rng);
+    if (isDaily()) { const item = G.daily.list[G.daily.idx]; G.q = item.q; G.aim = item.aim; G.qNum = G.daily.idx + 1; }
+    else G.q = isHaunt() && G.rng() < HALLOWEEN_SHARE ? Quiz.halloween(G.seen, G.rng) : Quiz.generate(G.mode.quiz || G.mode.id, G.seen, G.rng);
     G.timeLeft = G.mode.time;
     G.qElapsed = 0;
     if (!isDive()) G.lastTick = Math.ceil(G.timeLeft);
@@ -502,7 +529,8 @@
     void el.card.offsetWidth;
     el.card.classList.add('swap');
     el.qCat.textContent = `${G.q.cat.icon} ${G.q.cat.name}`;
-    el.qNum.innerHTML = `Question ${G.qNum}` + (G.challenge ? ` · <span class="ch-tag">🎟️ ${G.challenge.code}</span>` : '');
+    el.qNum.innerHTML = isDaily() ? `${G.qNum} of ${Daily.COUNT}` : `Question ${G.qNum}` + (G.challenge ? ` · <span class="ch-tag">🎟️ ${G.challenge.code}</span>` : '');
+    if (isDaily()) { const ab = $('aimBadge'); ab.className = `aim-badge tier-bg-${G.aim}`; ab.textContent = `🎯 Aim: ${Quiz.TIER_NAMES[G.aim]}`; }
     el.qText.innerHTML = G.q.text;
     el.feedback.textContent = '';
     el.feedback.className = 'feedback';
@@ -511,7 +539,8 @@
     el.input.disabled = false;
     el.go.disabled = false;
     el.skip.disabled = G.skips <= 0;
-    el.skipCount.textContent = isDive() ? '∞' : G.skips;
+    el.skipCount.textContent = isDive() || isDaily() ? '∞' : G.skips;
+    if (isDaily()) el.skipCount.textContent = '(miss)';
     el.skip.classList.remove('risky');
     // Hints are only on Owen (Easy).
     G.hint = null;
@@ -545,6 +574,7 @@
   }
 
   function correct(res) {
+    if (isDaily()) return dailyShot(res);
     const tier = res.ent.tier;
     const sp = isHaunt() ? 1 : speedMult();   // no question timer in Haunted Flight, so no speed bonus
     G.streak++;
@@ -616,7 +646,48 @@
     return false;
   }
 
+  // ---- Bullseye shots ----------------------------------------------------
+  // A right answer lands as many rings out as its rarity is from the aim; a timeout or a pass misses.
+  function dailyShot(res) {
+    const tier = res.ent.tier, off = Math.abs(tier - G.aim), pts = Daily.RING_POINTS[off];
+    G.correct++;
+    if (off === 0) G.bulls++;
+    G.score += pts; G.peak = G.score;
+    Daily.mark(G.daily.rec, off);
+    G.daily.idx++;
+    if (!G.bestAnswer || pts > G.bestAnswer.pts) G.bestAnswer = { text: res.v.raw, tier, pts };
+    lockCard();
+    G.state = 'reveal';
+    Sound.arrow();
+    S.shoot(off, () => {
+      Sound.thunk(off);
+      const ring = ['Bullseye!', '1 ring out', '2 rings out', '3 rings out', '4 rings out'][off];
+      popup(off === 0 ? '🎯 +100' : `+${pts}`, ring, off === 0 ? 5 : 0, [[`You said ${Quiz.TIER_NAMES[tier]}`, `var(--t${tier})`]]);
+      if (off === 0) S.confetti(70);
+    });
+    el.feedback.className = 'feedback ok';
+    el.feedback.innerHTML = `✅ <b class="tier-${tier}">${escapeHtml(res.v.raw)}</b> is ${Quiz.TIER_NAMES[tier]}` +
+      (off === 0 ? ' — dead on! 🎯' : `. You were aiming for ${Quiz.TIER_NAMES[G.aim]}.`);
+    if (off) showReveal(`A ${Quiz.TIER_NAMES[G.aim]} answer:`, Daily.examplesAt(G.q, G.aim));
+    else el.reveal.classList.add('hidden');
+    el.score.parentElement.classList.remove('bump'); void el.score.offsetWidth; el.score.parentElement.classList.add('bump');
+    later(nextQuestion, off ? 2600 : 2000);
+  }
+  function dailyMiss(msg) {
+    G.state = 'reveal';
+    lockCard();
+    Daily.mark(G.daily.rec, -1);
+    G.daily.idx++;
+    Sound.arrow();
+    S.shoot(-1, () => { Sound.thunk(-1); popup('MISS', 'no points', 0, [], true); });
+    el.feedback.className = 'feedback';
+    el.feedback.textContent = msg;
+    showReveal(`A ${Quiz.TIER_NAMES[G.aim]} answer:`, Daily.examplesAt(G.q, G.aim));
+    later(nextQuestion, 2600);
+  }
+
   function timeout() {
+    if (isDaily()) return dailyMiss("⏰ Time's up! That arrow missed the target.");
     if (isElev()) {
       G.state = 'reveal';
       G.streak = 0; S.setStreak(0); renderStreak();
@@ -646,6 +717,7 @@
 
   function skip() {
     if (G.state !== 'question' || G.skips <= 0) return;
+    if (isDaily()) { Sound.skip(); return dailyMiss('⏭ Passed — that arrow misses.'); }
     if (!isDive()) G.skips--;
     G.state = 'reveal';
     G.streak = 0;
@@ -739,6 +811,7 @@
     const crashed = G.crashed;
     G.state = 'dying';
     lockCard();
+    if (isDaily()) { Daily.finish(G.daily.rec, crashed); return dailyOver(crashed); }
     if (!crashed) { S.die(); if (isHaunt()) Sound.ghost(); Sound.gameOver(); }
     if (isHaunt()) S.warn(false);
     if (isHaunt() && !crashed) {
@@ -797,6 +870,103 @@
     }, crashed ? 300 : 2600);
   }
 
+  // Bullseye results: today's target, the grid to share, and the streak.
+  function dailyOver(crashed) {
+    const r = G.daily.rec;
+    later(() => {
+      G.state = 'over';
+      el.card.classList.add('hidden');
+      const prev = bests.daily, isBest = !crashed && (!prev || r.score > prev.score);
+      if (isBest && r.score > 0) { bests.daily = { score: r.score, place: 'Bullseye', icon: '🎯' }; saveBests(); Sound.best(); S.confetti(200); }
+      else if (!crashed) Sound.milestone();
+      $('newBest').classList.toggle('hidden', !(isBest && r.score > 0));
+      $('overTitle').textContent = crashed ? J.crashTitle : `🎯 Bullseye #${r.day}`;
+      $('btnAgain').textContent = '📋 Share result';
+      const bulls = r.marks.filter(m => m === 0).length, st = Daily.streak();
+      $('overReached').innerHTML = crashed ? J.crashLine()
+        : `<b>${r.score.toLocaleString()}</b> of ${Daily.MAX.toLocaleString()} points · ${bulls} bullseye${bulls === 1 ? '' : 's'}. New questions tomorrow!`;
+      $('overStats').innerHTML = `
+        <div class="stat wide daily-grid-stat"><div class="s-label">Your target</div><div class="s-value daily-grid">${Daily.grid(r.marks).replace(/\n/g, '<br>')}</div></div>
+        <div class="stat"><div class="s-label">Score</div><div class="s-value" style="color:var(--accent)">${crashed ? 0 : r.score.toLocaleString()}</div></div>
+        <div class="stat"><div class="s-label">Bullseyes</div><div class="s-value">${bulls} 🎯</div></div>
+        <div class="stat"><div class="s-label">Day streak</div><div class="s-value">${st} 🔥</div></div>
+        <div class="stat"><div class="s-label">Best day</div><div class="s-value">${Math.max(prev ? prev.score : 0, crashed ? 0 : r.score).toLocaleString()}</div></div>`;
+      el.over.classList.remove('hidden');
+      $('btnAgain').focus();
+    }, crashed ? 300 : 1400);
+  }
+
+  // Share the result: the phone's share sheet where there is one, otherwise copy it.
+  function shareDaily(btn) {
+    const r = Daily.today();
+    if (!r || !r.done) return;
+    const text = Daily.shareText(r);
+    const done = msg => { if (btn) { const old = btn.dataset.label || btn.textContent; btn.dataset.label = old; btn.textContent = msg; setTimeout(() => { btn.textContent = old; }, 1800); } };
+    const copy = () => {
+      try { navigator.clipboard.writeText(text).then(() => done('✅ Copied!'), () => fallback()); } catch (e) { fallback(); }
+    };
+    const fallback = () => {
+      const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done('✅ Copied!'); } catch (e) { done('Press Ctrl+C'); }
+      setTimeout(() => ta.remove(), 100);
+    };
+    if (navigator.share && matchMedia('(pointer: coarse)').matches) navigator.share({ text }).catch(copy);
+    else copy();
+  }
+
+  // ---- Bullseye card on the home screen ---------------------------------
+  function startDaily() {
+    Daily.settle();
+    if (Daily.today()) return;           // one go each day
+    Sound.unlock(); Sound.click();
+    returnType = J.id;
+    J = TYPES.daily; S = J.scene; S.reset();
+    const list = Daily.puzzle();
+    G.daily = { list, rec: Daily.begin(), idx: 0 };
+    syncMusic();
+    start('daily');
+  }
+  function renderDaily() {
+    Daily.settle();   // quitting half-way still uses up today's go
+    const r = Daily.today(), st = Daily.streak();
+    $('dcNum').textContent = `#${Daily.dayNumber()} · ${new Date().toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}`;
+    $('dcStreak').textContent = st ? `🔥 ${st}-day streak` : '';
+    const box = $('dcState');
+    if (r && r.done) {
+      const bulls = r.marks.filter(m => m === 0).length;
+      box.innerHTML = `<div class="dc-score"><b>${r.crashed ? 0 : r.score.toLocaleString()}</b><span> / ${Daily.MAX.toLocaleString()}</span></div>
+        <div class="dc-grid" aria-label="${bulls} bullseyes">${Daily.grid(r.marks).replace(/\n/g, '<br>')}</div>
+        <button type="button" class="dc-btn" id="dcShare">📋 Share</button>`;
+      $('dcShare').addEventListener('click', e => { e.stopPropagation(); Sound.click(); shareDaily(e.currentTarget); });
+    } else {
+      box.innerHTML = `<button type="button" class="dc-btn dc-play" id="dcPlay">▶ Play today's ${Daily.COUNT}</button>`;
+      $('dcPlay').addEventListener('click', startDaily);
+    }
+    renderNext();
+    layoutDaily();
+  }
+  function renderNext() {
+    const ms = Daily.msToNextDay(), h = Math.floor(ms / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+    const r = Daily.today();
+    $('dcNext').textContent = r && r.done ? `Next Bullseye in ${h}h ${m}m` : 'New questions every day';
+  }
+  // The card goes underneath the rules on tall screens, and down the left side otherwise.
+  function layoutDaily() {
+    const card = $('dailyCard'), panel = document.querySelector('.title-panel');
+    if (!card || !panel) return;
+    const how = panel.querySelector('.how');
+    const SH = parseFloat(stage.style.height) || 900;
+    const top = how.offsetTop + how.offsetHeight + 22;
+    const below = SH - top - 24 >= 250;   // room for the finished card (score, grid and Share)
+    card.classList.toggle('below', below); card.classList.toggle('side', !below);
+    if (below) Object.assign(card.style, { left: panel.offsetLeft + 'px', top: top + 'px', width: panel.offsetWidth + 'px', height: '' });
+    else Object.assign(card.style, { left: '24px', top: '106px', width: '216px', height: Math.max(420, SH - 106 - 96) + 'px' });
+    // the sound and fullscreen buttons sit centred over the card when it runs down the side
+    const corner = document.querySelector('.corner-btns');
+    if (corner) corner.style.left = below ? '' : (24 + (216 - corner.offsetWidth) / 2) + 'px';
+  }
+
   // ---- Pause ------------------------------------------------------------
   // Haunted Flight gets one pause per run (switching away from the tab always pauses, for free).
   function pause(auto) {
@@ -823,7 +993,7 @@
   // ---- HUD rendering ----------------------------------------------------
   function renderFuel(lost) {
     el.fuel.innerHTML = '';
-    if (isDive()) return;
+    if (isDive() || !isFinite(G.mode.lives)) return;
     for (let i = 0; i < G.mode.lives; i++) {
       const c = document.createElement('span');
       c.className = 'cell' + (i >= G.lives ? ' empty' : '') + (lost && i === G.lives ? ' lost' : '');
@@ -878,6 +1048,13 @@
     if (Math.abs(G.score - G.shown) < 0.5) G.shown = G.score;
     el.score.textContent = Math.round(G.shown).toLocaleString() + (J.unit || '');
     if (isHaunt()) { renderChase(); return; }
+    if (isDaily()) {
+      const aim = G.aim || 0;
+      el.alt.textContent = aim ? Quiz.TIER_NAMES[aim] : '—';
+      el.alt.className = 'pill-value' + (aim ? ` tier-${aim}` : '');
+      el.next.textContent = `Question ${Math.min(G.daily.idx + (G.state === 'question' ? 1 : 0), Daily.COUNT) || 1} of ${Daily.COUNT}`;
+      return;
+    }
     const alt = S.alt;
     if (Math.abs(alt - lastHudAlt) > 0.01 || dt === 0) {
       lastHudAlt = alt;
@@ -922,6 +1099,14 @@
 
   function updateTimer() {
     if (isHaunt()) return renderChase();
+    if (isDaily()) {
+      el.timerFill.style.width = (Math.max(0, G.timeLeft / G.mode.time) * 100) + '%';
+      el.timerSecs.textContent = Math.ceil(G.timeLeft) + 's';
+      el.timer.classList.toggle('low', G.timeLeft <= 5);
+      el.speed.textContent = `🎯 Aim for ${Quiz.TIER_NAMES[G.aim] || ''}`;
+      el.speed.className = `speed-badge tier-${G.aim}`;
+      return;
+    }
     const sp = speedMult();
     if (isDive()) {
       el.timerFill.style.width = (Math.max(0, G.diveLeft / G.diveTime) * 100) + '%';
@@ -941,7 +1126,7 @@
     const d = document.createElement('div');
     d.className = 'popup' + (tier === 5 ? ' legendary' : '') + (miss ? ' miss' : '');
     // where the popup goes, in world coordinates (near the rocket, sub or ghost chase)
-    const [px, py] = toStage(isHaunt() ? 1000 : isDive() ? 600 : 760, isHaunt() ? 120 : isDive() ? 430 : 380);
+    const [px, py] = isDaily() ? toStage(BullScene.TX + BullScene.R + 170, 250) : toStage(isHaunt() ? 1000 : isDive() ? 600 : 760, isHaunt() ? 120 : isDive() ? 430 : 380);
     d.style.left = px + 'px'; d.style.top = py + 'px';
     const col = ['#ff5d73', 'var(--t1)', 'var(--t2)', 'var(--t3)', 'var(--t4)', 'var(--t5)'][tier];
     d.innerHTML = `<div class="pts" style="color:${col}">${big}</div>` +
@@ -1110,6 +1295,7 @@
   DrillScene.init($('scene'));
   ElevScene.init($('scene'));
   HauntScene.init($('scene'));
+  BullScene.init($('scene'));
   Scene.onMilestone(m => { if (S === Scene) milestone(m); });
   SubScene.onMilestone(m => { if (S === SubScene) milestone(m); });
   DrillScene.onMilestone(m => { if (S === DrillScene) milestone(m); });
@@ -1169,7 +1355,7 @@
   $('btnResume').addEventListener('click', resume);
   $('btnMusic').addEventListener('click', () => { Sound.setMusicEnabled(!Sound.musicEnabled, J.id); Sound.click(); renderMusicBtn(); });
   $('btnQuit').addEventListener('click', showTitle);
-  $('btnAgain').addEventListener('click', () => start(G.mode.id, G.challenge));
+  $('btnAgain').addEventListener('click', e => { if (isDaily()) { Sound.click(); shareDaily(e.currentTarget); } else start(G.mode.id, G.challenge); });
   $('btnMenu').addEventListener('click', showTitle);
 
   const soundBtn = $('btnSound');
@@ -1210,6 +1396,10 @@
   el.skip.title = 'Skip (tap Ctrl)';
   document.addEventListener('visibilitychange', () => { controlSkipArmed = false; if (document.hidden) pause(true); });
 
+  // a Bullseye left half-way last time counts as played; keep the card's countdown fresh
+  Daily.settle();
+  setInterval(() => { if (G.state === 'title') { if (!Daily.today() && $('dcShare')) renderDaily(); else renderNext(); } }, 30000);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutDaily);
   showTitle();
   requestAnimationFrame(frame);
 })();

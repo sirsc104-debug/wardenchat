@@ -57,6 +57,7 @@
     <div id="card" class="hidden">
       <div class="card-top">
         <span class="chip" id="qCat">🌍 Countries</span>
+        <span class="aim-badge hidden" id="aimBadge"></span>
         <span class="q-num" id="qNum">Question 1</span>
       </div>
       <div class="q-text" id="qText"></div>
@@ -191,6 +192,19 @@
           <div id="ruleLast"><b>⛽ Don't run dry.</b> Running out of time burns a fuel cell. Wrong guesses are free.</div>
         </div>
       </div>
+      <!-- Bullseye, the daily mode: under the rules on tall screens, down the left side otherwise -->
+      <div class="daily-card side" id="dailyCard">
+        <div class="dc-ribbon">DAILY</div>
+        <div class="dc-target" aria-hidden="true"><i></i></div>
+        <div class="dc-text">
+          <div class="dc-title">BULLSEYE</div>
+          <div class="dc-num" id="dcNum">#1</div>
+          <p class="dc-how">15 questions, new every day. Each one names a rarity — <b>aim for it exactly</b> to hit the bullseye.</p>
+          <div class="dc-streak" id="dcStreak"></div>
+        </div>
+        <div class="dc-state" id="dcState"></div>
+        <div class="dc-next" id="dcNext"></div>
+      </div>
       <a class="promo-btn" id="promoWarden" href="https://chat.sirsc104.com/" target="_blank" rel="noopener" title="Warden Chat — another site by SirSC">
         <span class="promo-icon">💬</span><span class="promo-text"><b>Warden Chat</b><small>Private messaging · try it</small></span><span class="promo-arrow">↗</span>
       </a>
@@ -251,8 +265,10 @@
 <script src="js/drillscene.js"></script>
 <script src="js/elevscene.js"></script>
 <script src="js/hauntscene.js"></script>
+<script src="js/bullscene.js"></script>
 <script src="js/badwords.js"></script>
 <script src="js/challenge.js"></script>
+<script src="js/daily.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>
