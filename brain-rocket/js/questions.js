@@ -348,23 +348,29 @@ const Quiz = (function () {
     return prev[b.length];
   }
 
-  function exact(topic, k) {
+  function exact(topic, text) {
+    const k = keyOf(text);
     if (topic.index.has(k)) return topic.index.get(k);
     // Plurals and singulars: "pancake" / "pancakes", "tomatoes", "berries".
     const tries = [k.replace(/es$/, ''), k.replace(/s$/, ''), k + 's', k + 'es', k.replace(/ies$/, 'y'), k.replace(/y$/, 'ies')];
-    for (const t of tries) if (t !== k && topic.index.has(t)) return topic.index.get(t);
+    for (const t of tries) if (t !== k && topic.index.has(t)) {
+      const hit = topic.index.get(t);
+      // A recognized singular/plural is the player's answer, not a typo.
+      // Preserve its letters: "shoe" must not be checked as "shoes".
+      return { ent: hit.ent, v: { raw: text, norm: norm(text), key: k, letters: letters(text) } };
+    }
     return null;
   }
 
   function find(topic, input) {
     const n = norm(input);
-    let hit = exact(topic, keyOf(n));
+    let hit = exact(topic, n);
     if (hit) return { ...hit, fuzzy: false };
     // Drop words players often add ("beagle dog", "oak tree").
     if (topic.strip.length) {
       const words = n.split(' ').filter(w => !topic.strip.includes(w));
       if (words.length) {
-        hit = exact(topic, keyOf(words.join(' ')));
+        hit = exact(topic, words.join(' '));
         if (hit) return { ...hit, fuzzy: false };
       }
     }

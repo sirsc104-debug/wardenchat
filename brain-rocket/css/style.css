@@ -32,8 +32,8 @@ button { font-family: inherit; cursor: pointer; }
 }
 #scene, #sceneOld { position: absolute; inset: 0; width: 1600px; height: 900px; display: block; }
 #sceneOld.hidden { display: none; }
-/* tab switch: the old world slides out as the new one slides in, timed with the tab highlight */
-:root { --slide: 0.55s cubic-bezier(.65,0,.35,1); }
+/* Only the small tab highlight animates; scene changes are immediate. */
+:root { --slide: 0.12s ease-out; }
 #scene.sliding, #sceneOld.sliding { transition: transform var(--slide); }
 
 .hidden { display: none !important; }
@@ -450,7 +450,7 @@ button { font-family: inherit; cursor: pointer; }
 #title { align-items: flex-start; padding-top: 48px; }
 #title .tagline { min-height: 62px; display: flex; align-items: center; justify-content: center; margin: 10px auto 12px; }
 .type-toggle { position: relative; display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; margin-bottom: 0; isolation: isolate; }
-.type-toggle .type-btn { position: relative; z-index: 1; padding: 8px 10px; column-gap: 7px; background: transparent !important; transform: none !important; transition: color 0.3s; }
+.type-toggle .type-btn { position: relative; z-index: 1; padding: 8px 10px; column-gap: 7px; background: transparent !important; transform: none !important; transition: color 0.12s ease-out; }
 .type-toggle .type-btn[hidden] { display: none; }
 .type-toggle .type-btn.active { color: #3b2300; }
 .type-glider {
@@ -471,7 +471,7 @@ button { font-family: inherit; cursor: pointer; }
 .type-toggle .type-icon { font-size: 27px; }
 
 /* The mode cards and the Play With Friends panel share one fixed-height slot, so the rules box
-   underneath sits in the same place in every mode. It blurs while the scene slides across. */
+   underneath sits in the same place in every mode. */
 .title-panel .modes, .title-panel .ch-panel { height: 284px; margin-bottom: 0; box-sizing: border-box; }
 .title-panel .modes { align-items: flex-start; }
 .title-panel .ch-preview { min-height: 44px; }

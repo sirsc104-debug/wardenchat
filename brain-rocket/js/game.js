@@ -253,12 +253,10 @@
   }
 
   // ---- Title screen -----------------------------------------------------
-  // Switching tabs slides the old world out and the new one in, in step with the tab highlight.
+  // Switch content immediately; only the small tab highlight animates.
   function setType(id, animate) {
-    const from = TYPE_ORDER.indexOf(J.id), to = TYPE_ORDER.indexOf(id);
     J = TYPES[id];
     if (S !== J.scene) {
-      if (animate && from !== to) slideScenes(to > from ? 1 : -1);
       S = J.scene; S.reset();
     }
     try { localStorage.setItem('brainRocket.type', id); } catch (e) { /* ignore */ }
@@ -268,10 +266,8 @@
     });
     const n = s => s.replace('{n}', diveLen);
     $('tagline').textContent = n(J.tagline);
-    // the rules box only changes its text once it's fully blurred
-    const fastText = J.fast, ruleText = n(J.rule);
-    const rules = () => { $('ruleFast').innerHTML = fastText; $('ruleLast').innerHTML = ruleText; };
-    if (animate && from !== to) blurRules(rules); else rules();
+    $('ruleFast').innerHTML = J.fast;
+    $('ruleLast').innerHTML = n(J.rule);
     closeTimePick();
     $('chPanel').classList.toggle('hidden', id !== 'drill');
     if (id === 'drill') renderHost();
@@ -290,15 +286,29 @@
 
   // Each way to play has its own background music, on the title screen and in the game (Haunted
   // Flight's is the loudest). Browsers only allow sound after a click or key press, so it waits for one.
-  let gestured = false, musicLvl = 1;
-  function syncMusic() { Sound.music(gestured ? J.id : null); renderMusicBtn(); }
+  let gestured = false, musicLvl = 1, musicQueued = false, menuClickQueued = false;
+  function syncMusic(playClick = false) {
+    renderMusicBtn();
+    menuClickQueued = menuClickQueued || playClick;
+    if (!gestured || musicQueued) return;
+    musicQueued = true;
+    // AudioContext startup can block the first click. Let the selected tab paint
+    // first, then give that frame time to present before starting audio. Read J so rapid clicks
+    // coalesce to the final tab instead of starting tracks for stale selections.
+    requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => {
+      musicQueued = false;
+      Sound.music(J.id);
+      if (menuClickQueued) Sound.click();
+      menuClickQueued = false;
+    }, 150)));
+  }
   function renderMusicBtn() {
     const b = $('btnMusic'); if (!b) return;
     b.textContent = Sound.musicEnabled ? '🎵 Music: On' : '🎵 Music: Off';
     b.setAttribute('aria-pressed', Sound.musicEnabled ? 'true' : 'false');
     b.classList.toggle('off', !Sound.musicEnabled);
   }
-  ['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { if (!gestured) { gestured = true; syncMusic(); } }, true));
+  ['click', 'keydown'].forEach(ev => document.addEventListener(ev, () => { if (!gestured) { gestured = true; syncMusic(); } }, true));
 
   // The yellow highlight behind the active tab slides from tab to tab.
   function moveGlider(animate) {
@@ -341,33 +351,6 @@
     else start(modeId);
   }
 
-  // The rules box blurs while the worlds slide past, swaps its text once fully blurred, then sharpens.
-  const BLUR_MS = 250;   // matches the .how filter transition in style.css
-  function blurRules(swap) {
-    const how = document.querySelector('.title-panel .how');
-    how.classList.add('switching');
-    clearTimeout(blurRules.t); clearTimeout(blurRules.t2);
-    blurRules.t = setTimeout(() => {
-      swap();
-      blurRules.t2 = setTimeout(() => how.classList.remove('switching'), 40);
-    }, BLUR_MS + 20);
-  }
-
-  function slideScenes(dir) {
-    const main = $('scene'), old = $('sceneOld');
-    old.width = main.width; old.height = main.height;
-    old.getContext('2d').drawImage(main, 0, 0);
-    for (const c of [main, old]) { c.classList.remove('sliding'); }
-    old.style.transform = 'translateX(0)';
-    main.style.transform = `translateX(${dir * 100}%)`;
-    old.classList.remove('hidden');
-    void main.offsetWidth;
-    for (const c of [main, old]) c.classList.add('sliding');
-    old.style.transform = `translateX(${-dir * 100}%)`;
-    main.style.transform = 'translateX(0)';
-    clearTimeout(slideScenes.t);
-    slideScenes.t = setTimeout(() => { old.classList.add('hidden'); main.classList.remove('sliding'); old.classList.remove('sliding'); }, 600);
-  }
   function showTitle() {
     clearLater();
     G.state = 'title';
@@ -1079,7 +1062,7 @@
   window.addEventListener('resize', fit);
   document.addEventListener('fullscreenchange', fit);
 
-  document.querySelectorAll('.type-btn').forEach(b => b.addEventListener('click', () => { if (b.dataset.type === J.id) return; Sound.click(); setType(b.dataset.type, true); }));
+  document.querySelectorAll('.type-btn').forEach(b => b.addEventListener('click', () => { if (b.dataset.type === J.id) return; setType(b.dataset.type, true); syncMusic(true); }));
   window.addEventListener('resize', () => moveGlider(false));
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => moveGlider(false));
   document.querySelectorAll('.mode-card:not(.mode-ultra)').forEach(b => b.addEventListener('click', () => { Sound.click(); chooseMode(b, b.dataset.mode); }));
@@ -1133,7 +1116,14 @@
     else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
   });
 
+  // A bare Control tap skips on release. Chords such as Ctrl+A/C/V stay intact.
+  let controlSkipArmed = false;
   document.addEventListener('keydown', e => {
+    if (e.key === 'Control') {
+      if (!e.repeat) controlSkipArmed = G.state === 'question' && !e.altKey && !e.shiftKey && !e.metaKey;
+      return;
+    }
+    controlSkipArmed = false;
     if (e.key === 'Escape') {
       if (G.state === 'title' && timePickOpen()) { closeTimePick(); return; }
       if (G.state === 'question') pause();
@@ -1144,7 +1134,16 @@
       el.input.focus();
     }
   });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
+  document.addEventListener('keyup', e => {
+    if (e.key !== 'Control') return;
+    const armed = controlSkipArmed;
+    controlSkipArmed = false;
+    if (armed && G.state === 'question') skip();
+  });
+  document.addEventListener('pointerdown', () => { controlSkipArmed = false; });
+  window.addEventListener('blur', () => { controlSkipArmed = false; });
+  el.skip.title = 'Skip (tap Ctrl)';
+  document.addEventListener('visibilitychange', () => { controlSkipArmed = false; if (document.hidden) pause(true); });
 
   showTitle();
   requestAnimationFrame(frame);
