@@ -270,11 +270,12 @@ button { font-family: inherit; cursor: pointer; }
 .over-dialog { width: 720px; }
 .over-reached { font-size: 26px !important; color: #fff !important; }
 .over-reached b { color: var(--accent); }
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
-.stat { background: rgba(255,255,255,0.07); border-radius: 18px; padding: 12px; }
+/* small stats share each row evenly (3 or 4 of them); wide ones take a whole row */
+.stats { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+.stat { flex: 1 1 0; min-width: 0; background: rgba(255,255,255,0.07); border-radius: 18px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; gap: 4px; }
 .stat .s-label { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
 .stat .s-value { font-size: 30px; font-weight: 700; }
-.stat.wide { grid-column: span 3; }
+.stat.wide { flex-basis: 100%; }
 .stat.wide .s-value { font-size: 24px; }
 .new-best { display: inline-block; font-size: 26px; font-weight: 700; color: #3b2300; background: linear-gradient(#ffe27a, #ffb52e); padding: 6px 20px; border-radius: 999px; margin-bottom: 10px; animation: bump 0.6s ease 3; }
 
