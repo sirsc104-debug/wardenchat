@@ -139,7 +139,11 @@
   };
   const TYPE_ORDER = ['rocket', 'sub', 'drill', 'elev', 'haunt'];
   // Elevator is hidden for now: its tab is hidden in index.html, and a saved choice of it falls back to Rocket.
-  const HIDDEN_TYPES = new Set(['elev']);
+  // Haunted Flight is a limited-time Halloween event: it disappears once November 1, 2026 is over
+  // (midnight in the player's own time zone).
+  const HAUNT_ENDS = new Date(2026, 10, 2);
+  const HIDDEN_TYPES = new Set(['elev', ...(Date.now() >= HAUNT_ENDS.getTime() ? ['haunt'] : [])]);
+  document.querySelectorAll('.type-btn').forEach(b => { if (HIDDEN_TYPES.has(b.dataset.type)) b.hidden = true; });
   const isElev = () => G.type === 'elev';
   const isHaunt = () => G.type === 'haunt';
   let J = TYPES.rocket;   // the current way to play
