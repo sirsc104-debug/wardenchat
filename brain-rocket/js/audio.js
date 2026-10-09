@@ -93,6 +93,18 @@ const Sound = (function () {
     gameOver() {
       [392, 370, 349, 262].forEach((f, i) => tone(f, i === 3 ? 0.9 : 0.35, { type: 'triangle', vol: 0.16, delay: i * 0.32, slide: i === 3 ? -80 : 0 }));
     },
+    // Haunted Flight: a heartbeat that gets louder as the ghost closes in, its wail, and a skip whoosh
+    heartbeat(p = 0) {
+      const v = 0.14 + 0.2 * p;
+      tone(64, 0.14, { type: 'sine', vol: v, attack: 0.005 });
+      tone(54, 0.18, { type: 'sine', vol: v * 0.8, delay: 0.17, attack: 0.005 });
+    },
+    ghost() {
+      tone(440, 1.5, { type: 'sine', vol: 0.12, slide: -280, attack: 0.3 });
+      tone(466, 1.5, { type: 'triangle', vol: 0.06, slide: -290, attack: 0.3, delay: 0.06 });
+      noise(1.3, { vol: 0.12, freq: 900, sweepTo: 200 });
+    },
+    whoosh() { noise(0.45, { vol: 0.22, freq: 300, sweepTo: 2400 }); tone(220, 0.4, { type: 'sine', vol: 0.08, slide: 180 }); },
     best() { [0, 2, 4, 5, 7].forEach((n, i) => tone(notes[n], 0.2, { type: 'triangle', vol: 0.14, delay: 0.9 + i * 0.09 })); }
   };
 })();

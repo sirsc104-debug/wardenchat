@@ -1395,3 +1395,18 @@ const ELEV_STOPS = [
   { alt: 25000, pts: 25000, name: 'Rubber Duck Galaxy', icon: '🦆', km: 50000 },
   { alt: 30000, pts: 30000, name: 'Hall of Mirrors',    icon: '🪞', km: 100000 }
 ];
+
+/* Haunted Flight (limited time): places you fly past while the ghost chases you. `alt`, `pts` and
+   `km` are all the distance flown, in metres. */
+const HAUNT_STOPS = [
+  { alt: 0,    pts: 0,    km: 0,    name: 'The Pumpkin Patch',   icon: '🎃' },
+  { alt: 400,  pts: 400,  km: 400,  name: 'The Corn Maze',       icon: '🌽' },
+  { alt: 900,  pts: 900,  km: 900,  name: 'The Graveyard',       icon: '🪦' },
+  { alt: 1500, pts: 1500, km: 1500, name: 'The Dark Forest',     icon: '🌲' },
+  { alt: 2200, pts: 2200, km: 2200, name: "The Witch's Hollow",  icon: '🧙' },
+  { alt: 3000, pts: 3000, km: 3000, name: 'The Bat Caves',       icon: '🦇' },
+  { alt: 4000, pts: 4000, km: 4000, name: 'The Haunted Mansion', icon: '🏚️' },
+  { alt: 5200, pts: 5200, km: 5200, name: 'The Blood Moon',      icon: '🌕' },
+  { alt: 6600, pts: 6600, km: 6600, name: 'The Spirit Realm',    icon: '🔮' },
+  { alt: 8500, pts: 8500, km: 8500, name: 'Beyond the Veil',     icon: '💀' }
+];

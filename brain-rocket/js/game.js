@@ -28,6 +28,22 @@
     if (ly < 1e9) return (ly / 1e6).toFixed(1) + ' million light-years';
     return (ly / 1e9).toFixed(1) + ' billion light-years';
   };
+  // Haunted Flight (limited time): outrun a ghost. All distances are in metres.
+  const HAUNT = {
+    start: 60,                       // your head start
+    max: 150,                        // the furthest ahead of the ghost you can get
+    danger: 40,                      // closer than this, the heartbeat starts and the world darkens
+    close: 10,                       // a right answer when it's closer than this is a close escape
+    cruise: 12,                      // metres flown each second while a question is up
+    speed: t => 2.5 + 0.015 * t,     // how fast the ghost closes in (m/s), t seconds into the chase
+    boost: pts => 9 * Math.pow(pts / 10, 0.75),        // metres an answer's points blast you ahead
+    skipCost: t => Math.round(4 * HAUNT.speed(t))       // a skip lets the ghost gain 4 seconds' worth
+  };
+  const HALLOWEEN_SHARE = 0.25;      // how often Haunted Flight asks a Halloween question
+  const fmtM = m => Math.round(m).toLocaleString() + ' m';
+  const fmtTime = sec => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+  const boostRange = mult => `+${Math.round(HAUNT.boost(10 * mult))} m to +${Math.round(HAUNT.boost(200 * mult))} m per answer`;
+
   const fmtDepth = km => (km < 20 ? Math.round(km * 1000).toLocaleString() + ' m' : Math.round(km).toLocaleString() + ' km');
 
   // The two ways to play. Everything that differs between them lives here.
@@ -101,10 +117,31 @@
       ultra: '12s per question<br>the elevator sinks between answers!'
     }
   };
-  const TYPE_ORDER = ['rocket', 'sub', 'drill', 'elev'];
+  // Haunted Flight: a limited-time Halloween mode. No timer, no fuel: survive until the ghost reaches you.
+  TYPES.haunt = {
+    ...TYPES.rocket,
+    id: 'haunt', scene: HauntScene, stops: HAUNT_STOPS, fmt: fmtM, from: 'flown', distLabel: 'Ghost behind', unit: ' m',
+    marker: '👻', go: 'FLY!', firstTag: '👻 RUN!', reached: 'YOU FLEW PAST', notYet: 'Not flown yet',
+    tagline: '🎃 Limited time! A ghost is chasing your rocket. Every right answer blasts you ahead. How far can you get?',
+    fast: '<b>👻 Outrun the ghost.</b> It closes in while you think and slowly speeds up. Rarer answers push it further back.',
+    rule: '<b>⏭ Skips cost distance.</b> Skip as often as you like, but the ghost jumps closer each time. Wrong guesses are free.',
+    timeLabel: 'Survived', endless: '∞ Beyond everything!',
+    again: '👻 Fly again', overTitle: '👻 Caught!', crashTitle: '👻 Gobbled!', name: () => 'Haunted Flight',
+    turning: 'Your rocket is turning back…',
+    crashLine: p => `Your rocket turned around and flew straight into the ghost near <b>${p}</b>. Score lost!`,
+    reachedLine: (p, dist) => `The ghost caught you near <b>${p}</b> after ${dist}.`,
+    info: {
+      easy: `everyday questions · hints<br>${boostRange(1)}`,
+      medium: `mixed questions<br>${boostRange(1.5)}`,
+      hard: `expert questions<br>${boostRange(2)}`,
+      ultra: ''
+    }
+  };
+  const TYPE_ORDER = ['rocket', 'sub', 'drill', 'elev', 'haunt'];
   // Elevator is hidden for now: its tab is hidden in index.html, and a saved choice of it falls back to Rocket.
   const HIDDEN_TYPES = new Set(['elev']);
   const isElev = () => G.type === 'elev';
+  const isHaunt = () => G.type === 'haunt';
   let J = TYPES.rocket;   // the current way to play
   let S = J.scene;        // its scene
   try { const t = localStorage.getItem('brainRocket.type'); if (TYPES[t] && !HIDDEN_TYPES.has(t)) { J = TYPES[t]; S = J.scene; } } catch (e) { /* ignore */ }
@@ -130,6 +167,7 @@
     SubScene.resize(s);
     DrillScene.resize(s);
     ElevScene.resize(s);
+    HauntScene.resize(s);
     const old = $('sceneOld'); if (old) { old.width = $('scene').width; old.height = $('scene').height; }
   }
 
@@ -138,7 +176,7 @@
   try { bests = JSON.parse(localStorage.getItem('brainRocket.bests') || '{}') || {}; } catch (e) { bests = {}; }
   function saveBests() { try { localStorage.setItem('brainRocket.bests', JSON.stringify(bests)); } catch (e) { /* ignore */ } }
   // Rocket: 'easy'. Submarine: 'sub:easy' for 60-second dives (the original length), 'sub:easy:30' otherwise.
-  const bestKey = (type, mode, len) => (type === 'rocket' ? mode : type === 'elev' ? `elev:${mode}` : len === 60 ? `${type}:${mode}` : `${type}:${mode}:${len}`);
+  const bestKey = (type, mode, len) => (type === 'rocket' ? mode : type === 'elev' || type === 'haunt' ? `${type}:${mode}` : len === 60 ? `${type}:${mode}` : `${type}:${mode}:${len}`);
 
   // ---- Distance helpers -------------------------------------------------
   function kmAt(alt) {
@@ -230,7 +268,7 @@
       const r = id === 'sub' ? bestDive(b.dataset.best) : bests[bestKey(id, b.dataset.best, diveLen)];
       const len = r && r.len ? ` (${r.len}s)` : '';
       if (b.closest('.ultra-pick')) b.textContent = r ? `Best ${r.score.toLocaleString()}${len}` : '';
-      else b.textContent = r ? `Best: ${r.score.toLocaleString()} · ${r.icon} ${r.place}${len}` : J.notYet;
+      else b.textContent = r ? `Best: ${r.score.toLocaleString()}${J.unit || ''} · ${r.icon} ${r.place}${len}` : J.notYet;
     });
     el.title.dataset.type = id;
     moveGlider(animate);
@@ -327,9 +365,11 @@
     const len = ch ? ch.len : diveLen;   // a challenge sets its own time; the Submarine choice is left alone
     const dive = J.id === 'sub' || J.id === 'drill';
     const elev = J.id === 'elev';
+    const haunt = J.id === 'haunt';
     Object.assign(G, {
-      state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive || elev ? Infinity : mode.lives, power: 100, tried: new Set(), streak: 0, bestStreak: 0,
-      qNum: 0, skips: dive ? Infinity : mode.skips, used: new Set(), seen: ch ? Quiz.freshRun() : Quiz.newRun(), q: null,
+      state: 'countdown', mode, type: J.id, score: 0, shown: 0, lives: dive || elev || haunt ? Infinity : mode.lives, power: 100, tried: new Set(), streak: 0, bestStreak: 0,
+      gap: HAUNT.start, dist: 0, chaseT: 0, closest: null, pauseUsed: false, beatT: 0,
+      qNum: 0, skips: dive || haunt ? Infinity : mode.skips, used: new Set(), seen: ch ? Quiz.freshRun() : Quiz.newRun(), q: null,
       challenge: ch, rng: ch ? Challenge.rng(ch.seed) : Math.random, correct: 0, bestAnswer: null,
       launched: false, peak: 0, reached: new Set(), crashed: false, boomed: false, diveTime: len, diveLeft: len, qElapsed: 0, lastTick: len
     });
@@ -339,19 +379,31 @@
     el.over.classList.add('hidden');
     el.pause.classList.add('hidden');
     el.hud.classList.remove('hidden');
-    el.track.classList.remove('hidden');
+    el.track.classList.toggle('hidden', haunt);
     el.card.classList.add('hidden');
     el.track.classList.toggle('down', dive);
     el.card.classList.toggle('dive', dive);
-    el.fuelPill.classList.toggle('hidden', dive || elev);
-    el.timePill.classList.toggle('hidden', !dive && !elev);
+    // Haunted Flight: the card runs along the bottom and the HUD shows the chase
+    el.card.classList.toggle('haunt', haunt);
+    el.hud.classList.toggle('haunt', haunt);
+    el.countdown.classList.toggle('haunt', haunt);
+    el.banner.classList.toggle('haunt', haunt);
+    el.timerFill.style.background = '';
+    $('btnPause').disabled = false;
+    document.querySelector('.score-pill .pill-label').textContent = haunt ? 'Distance' : 'Score';
+    document.querySelectorAll('.legend span').forEach((sp, i) => {
+      sp.dataset.base = sp.dataset.base || sp.textContent;
+      sp.textContent = haunt ? `${Quiz.TIER_NAMES[i + 1]} +${Math.round(HAUNT.boost(Quiz.TIER_POINTS[i + 1] * mode.mult))} m` : sp.dataset.base;
+    });
+    el.fuelPill.classList.toggle('hidden', dive || elev || haunt);
+    el.timePill.classList.toggle('hidden', !dive && !elev && !haunt);
     el.altLabel.textContent = J.distLabel;
     $('hudTimeLabel').textContent = J.timeLabel || 'Dive time';
     el.trackRocket.textContent = J.marker;
     buildTrack();
     renderFuel();
     renderStreak();
-    if (elev) renderPower(); else renderDiveClock();
+    if (elev) renderPower(); else if (haunt) renderChase(); else renderDiveClock();
     updateHud(0);
 
     const steps = ['3', '2', '1', J.go];
@@ -372,7 +424,8 @@
     if (G.lives <= 0) return gameOver();
     if (isDive() && G.diveLeft <= 0) return gameOver();
     G.qNum++;
-    G.q = Quiz.generate(G.mode.quiz || G.mode.id, G.seen, G.rng);
+    // Haunted Flight mixes in a Halloween question a quarter of the time
+    G.q = isHaunt() && G.rng() < HALLOWEEN_SHARE ? Quiz.halloween(G.seen, G.rng) : Quiz.generate(G.mode.quiz || G.mode.id, G.seen, G.rng);
     G.timeLeft = G.mode.time;
     G.qElapsed = 0;
     if (!isDive()) G.lastTick = Math.ceil(G.timeLeft);
@@ -391,6 +444,7 @@
     el.go.disabled = false;
     el.skip.disabled = G.skips <= 0;
     el.skipCount.textContent = isDive() ? '∞' : G.skips;
+    el.skip.classList.remove('risky');
     // Hints are only on Owen (Easy).
     G.hint = null;
     el.hint.classList.add('hidden');
@@ -424,7 +478,7 @@
 
   function correct(res) {
     const tier = res.ent.tier;
-    const sp = speedMult();
+    const sp = isHaunt() ? 1 : speedMult();   // no question timer in Haunted Flight, so no speed bonus
     G.streak++;
     G.bestStreak = Math.max(G.bestStreak, G.streak);
     G.correct++;
@@ -435,13 +489,22 @@
     const hints = G.hint ? G.hint.shown : 0;
     const hm = Math.pow(HINT_COST, hints);
     const pts = Math.max(1, Math.round(Quiz.TIER_POINTS[tier] * G.mode.mult * sp * stm * deep * repeat * hm));
-    G.score += pts;
+    // Haunted Flight: the points become metres. You fly that far and the ghost falls that far behind.
+    const metres = isHaunt() ? HAUNT.boost(pts) : 0;
+    const before = G.gap, close = isHaunt() && before < HAUNT.close;
+    if (isHaunt()) {
+      G.gap = Math.min(HAUNT.max, G.gap + metres);
+      G.dist += metres;
+      G.score = Math.floor(G.dist);
+      if (G.closest === null || before < G.closest) G.closest = before;
+    } else G.score += pts;
     G.peak = Math.max(G.peak, G.score);
 
-    if (!G.bestAnswer || pts > G.bestAnswer.pts) G.bestAnswer = { text: res.v.raw, tier, pts };
+    if (!G.bestAnswer || pts > G.bestAnswer.pts) G.bestAnswer = { text: res.v.raw, tier, pts, metres };
 
     S.setStreak(G.streak);
-    S.boostTo(altFor(G.score), tier);
+    if (isHaunt()) { S.boostTo(G.dist, tier); S.escape(tier, close); }
+    else S.boostTo(altFor(G.score), tier);
     const rs = S.rocketScreen();
     S.burst(rs.x, rs.y + 60, ['', '#ffffff', '#6fe08a', '#4fb3ff', '#c77dff', '#ffc531'][tier], 20 + tier * 12);
     if (tier >= 4) S.confetti(tier === 5 ? 140 : 60);
@@ -456,7 +519,8 @@
     if (repeat < 1) tags.push(['♻️ ×0.5 Repeat', '#b9c3e6']);
     if (isElev() && G.power < 100) { const up = Math.min(100 - G.power, tier * 2); G.power += up; renderPower(); tags.push([`⚡ +${up}% power`, '#7dffb0']); }
     if (hints) tags.push([`💡 ×${+hm.toFixed(2)} ${hints} hint${hints > 1 ? 's' : ''}`, '#ffe08a']);
-    popup(`+${pts.toLocaleString()}`, Quiz.TIER_NAMES[tier], tier, tags);
+    if (close) tags.unshift(['😱 Close escape!', '#ff9a9a']);
+    popup(isHaunt() ? `+${Math.round(metres)} m` : `+${pts.toLocaleString()}`, Quiz.TIER_NAMES[tier], tier, tags);
 
     el.feedback.className = 'feedback ok';
     el.feedback.innerHTML = `✅ <b class="tier-${tier}">${escapeHtml(res.v.raw)}</b> — ${Quiz.TIER_NAMES[tier]}!` + (res.fuzzy ? ' <span style="opacity:.7">(close enough!)</span>' : '');
@@ -466,8 +530,8 @@
     el.score.parentElement.classList.remove('bump'); void el.score.offsetWidth; el.score.parentElement.classList.add('bump');
     lockCard();
     G.state = 'reveal';
-    // The dive clock keeps running, so Submarine moves on quickly.
-    later(nextQuestion, isDive() ? (tier >= 4 ? 1100 : 800) : (tier >= 4 ? 2300 : 1900));
+    // The dive clock keeps running, so Submarine moves on quickly. The ghost waits while you watch the escape.
+    later(nextQuestion, isDive() ? (tier >= 4 ? 1100 : 800) : isHaunt() ? (tier >= 4 ? 1600 : 1100) : (tier >= 4 ? 2300 : 1900));
   }
 
   // Elevator: lose some power. Returns true if that was the last of it (the game is over).
@@ -518,6 +582,15 @@
     renderStreak();
     // The dive clock never stops, so Submarine goes straight to the next question.
     if (isDive()) return nextQuestion();
+    // Haunted Flight: unlimited skips, but the ghost jumps closer each time (the button shows how much).
+    if (isHaunt()) {
+      const cost = HAUNT.skipCost(G.chaseT);
+      G.gap -= cost;
+      S.lunge(); Sound.whoosh();
+      popup(`−${cost} m`, 'GHOST GAINS', 0, [], true);
+      if (G.gap <= 0) { G.gap = 0; return gameOver(); }
+      return nextQuestion();
+    }
     el.feedback.className = 'feedback';
     el.feedback.textContent = '⏭ Skipped — your streak resets.';
     showReveal('One answer that would have worked:', Quiz.examples(G.q));
@@ -594,7 +667,12 @@
     const crashed = G.crashed;
     G.state = 'dying';
     lockCard();
-    if (!crashed) { S.die(); Sound.gameOver(); }
+    if (!crashed) { S.die(); if (isHaunt()) Sound.ghost(); Sound.gameOver(); }
+    if (isHaunt() && !crashed) {
+      el.feedback.className = 'feedback bad';
+      el.feedback.textContent = '👻 The ghost caught you!';
+      renderChase();
+    }
     if (isDive() && !crashed) {
       el.feedback.className = 'feedback';
       el.feedback.textContent = J.outText;
@@ -618,10 +696,22 @@
       $('newBest').classList.toggle('hidden', !(isBest && result > 0));
       $('overTitle').textContent = crashed ? J.crashTitle : J.overTitle;
       $('btnAgain').textContent = J.again;
-      const dist = J.fmt(kmAt(altFor(result)));
+      const dist = isHaunt() ? fmtM(result) : J.fmt(kmAt(altFor(result)));
       const cp = G.crashPlace;
       $('overReached').innerHTML = crashed ? J.crashLine(`${cp.icon} ${cp.name}`) : J.reachedLine(`${place.icon} ${place.name}`, dist);
       const ba = G.bestAnswer;
+      if (isHaunt()) {
+        $('overStats').innerHTML = `
+        <div class="stat"><div class="s-label">Distance</div><div class="s-value" style="color:var(--accent)">${fmtM(result)}${crashed && G.crashedFrom ? ` <s class="lost">${fmtM(G.crashedFrom)}</s>` : ''}</div></div>
+        <div class="stat"><div class="s-label">Survived</div><div class="s-value">${fmtTime(G.chaseT)}</div></div>
+        <div class="stat"><div class="s-label">Correct answers</div><div class="s-value">${G.correct}</div></div>
+        <div class="stat"><div class="s-label">Closest escape</div><div class="s-value">${G.closest === null ? '—' : G.closest < 10 ? G.closest.toFixed(1) + ' m 😱' : fmtM(G.closest)}</div></div>
+        <div class="stat wide"><div class="s-label">Best answer</div><div class="s-value">${ba ? `<span class="tier-${ba.tier}">${escapeHtml(ba.text)}</span> · ${Quiz.TIER_NAMES[ba.tier]} · +${Math.round(ba.metres)} m` : '—'}</div></div>
+        <div class="stat wide"><div class="s-label">Mode</div><div class="s-value">${J.name()} · ${G.mode.label}${prev ? ` · previous best ${fmtM(prev.score)}` : ''}</div></div>`;
+        el.over.classList.remove('hidden');
+        $('btnAgain').focus();
+        return;
+      }
       $('overStats').innerHTML = `
         <div class="stat"><div class="s-label">${drifts() && !isDive() ? 'Highest score' : 'Score'}</div><div class="s-value" style="color:var(--accent)">${result.toLocaleString()}${crashed && G.crashedFrom ? ` <s class="lost">${G.crashedFrom.toLocaleString()}</s>` : ''}</div></div>
         <div class="stat"><div class="s-label">Correct answers</div><div class="s-value">${G.correct}</div></div>
@@ -635,8 +725,15 @@
   }
 
   // ---- Pause ------------------------------------------------------------
-  function pause() {
+  // Haunted Flight gets one pause per run (switching away from the tab always pauses, for free).
+  function pause(auto) {
     if (G.state !== 'question') return;
+    if (isHaunt() && auto !== true) {
+      if (G.pauseUsed) return;
+      G.pauseUsed = true;
+      $('btnPause').disabled = true;
+    }
+    $('pauseText').textContent = isHaunt() ? (G.pauseUsed ? 'The ghost is frozen. That was your one pause for this run.' : 'The ghost is frozen while you\'re away.') : 'The timer is frozen. Take a breath, astronaut.';
     G.state = 'paused';
     el.card.classList.add('blur');
     el.pause.classList.remove('hidden');
@@ -706,7 +803,8 @@
   function updateHud(dt) {
     G.shown += (G.score - G.shown) * Math.min(1, dt * 5);
     if (Math.abs(G.score - G.shown) < 0.5) G.shown = G.score;
-    el.score.textContent = Math.round(G.shown).toLocaleString();
+    el.score.textContent = Math.round(G.shown).toLocaleString() + (J.unit || '');
+    if (isHaunt()) { renderChase(); return; }
     const alt = S.alt;
     if (Math.abs(alt - lastHudAlt) > 0.01 || dt === 0) {
       lastHudAlt = alt;
@@ -728,7 +826,28 @@
     el.next.textContent = np ? `Next stop: ${np.icon} ${np.name} · ${Math.ceil(np.pts - G.score).toLocaleString()} pts` : J.endless;
   }
 
+  // Haunted Flight: the ghost meter on the card, the HUD pills and the skip price, all from the gap.
+  function renderChase() {
+    const g = Math.max(0, G.gap), lvl = g < HAUNT.close ? 'danger' : g < HAUNT.danger ? 'near' : 'safe';
+    el.alt.textContent = fmtM(g);
+    el.alt.parentElement.dataset.chase = lvl;
+    const np = nextPlace(G.score);
+    el.next.textContent = np ? `Next: ${np.icon} ${np.name} · ${fmtM(np.pts - G.score)}` : J.endless;
+    el.time.textContent = fmtTime(G.chaseT);
+    el.timerFill.style.width = (g / HAUNT.max * 100) + '%';
+    el.timerFill.style.background = { safe: '#7ddc6f', near: '#ffb02e', danger: '#ff5d73' }[lvl];
+    el.timer.classList.toggle('low', lvl === 'danger');
+    el.speed.textContent = `👻 The ghost is ${fmtM(g)} behind you`;
+    el.speed.className = 'speed-badge chase-' + lvl;
+    el.timerSecs.textContent = `closing at ${HAUNT.speed(G.chaseT).toFixed(1)} m/s`;
+    const cost = HAUNT.skipCost(G.chaseT);
+    el.skipCount.textContent = `👻 +${cost} m`;
+    el.skip.title = cost >= g ? 'Skipping now lets the ghost catch you!' : `Skipping lets the ghost ${cost} m closer`;
+    el.skip.classList.toggle('risky', G.state === 'question' && cost >= g);
+  }
+
   function updateTimer() {
+    if (isHaunt()) return renderChase();
     const sp = speedMult();
     if (isDive()) {
       el.timerFill.style.width = (Math.max(0, G.diveLeft / G.diveTime) * 100) + '%';
@@ -750,6 +869,7 @@
     d.style.left = '760px';
     d.style.top = isDive() ? '430px' : '380px';
     if (isDive()) d.style.left = '600px';
+    if (isHaunt()) { d.style.left = '1000px'; d.style.top = '120px'; }
     const col = ['#ff5d73', 'var(--t1)', 'var(--t2)', 'var(--t3)', 'var(--t4)', 'var(--t5)'][tier];
     d.innerHTML = `<div class="pts" style="color:${col}">${big}</div>` +
       `<div class="rarity" style="color:${col}">${label.toUpperCase()}</div>` +
@@ -782,6 +902,10 @@
     // Check the scene itself, not G.type: on the title screen G.type is whatever the last game was.
     Scene.setChute(S === Scene && !!(G.mode && G.mode.drift) && G.state !== 'title');
     if (S === ElevScene) ElevScene.setPower(G.state === 'title' || G.type !== 'elev' ? 1 : G.power / 100);
+    if (S === HauntScene) {
+      HauntScene.setTitle(G.state === 'title');
+      if (G.state !== 'title' && isHaunt()) { HauntScene.setGap(G.gap); HauntScene.setTarget(G.dist); }
+    }
     if (G.state !== 'paused') S.update(dt);
     S.draw();
     if (G.state !== 'title') updateHud(dt);
@@ -801,6 +925,24 @@
       renderDiveClock();
       updateTimer();
       if (G.diveLeft <= 0) { G.diveLeft = 0; renderDiveClock(); updateTimer(); gameOver(); }
+    } else if (isHaunt()) {
+      // The chase only runs while a question is up: countdowns and answer reveals don't cost you.
+      if (G.state === 'question') {
+        G.chaseT += dt;
+        G.gap -= HAUNT.speed(G.chaseT) * dt;
+        G.dist += HAUNT.cruise * dt;
+        G.score = Math.floor(G.dist);
+        G.peak = G.score;
+        if (G.gap < HAUNT.danger) {
+          G.beatT -= dt;
+          if (G.beatT <= 0) {
+            const p = 1 - Math.max(0, G.gap) / HAUNT.danger;
+            Sound.heartbeat(p); S.beat();
+            G.beatT = 1.15 - 0.8 * p;   // the heart beats faster as it gets closer
+          }
+        } else G.beatT = 0;
+        if (G.gap <= 0) { G.gap = 0; gameOver(); }
+      }
     } else if (G.state === 'question') {
       G.timeLeft -= dt;
       const s = Math.ceil(G.timeLeft);
@@ -873,10 +1015,12 @@
   SubScene.init($('scene'));
   DrillScene.init($('scene'));
   ElevScene.init($('scene'));
+  HauntScene.init($('scene'));
   Scene.onMilestone(m => { if (S === Scene) milestone(m); });
   SubScene.onMilestone(m => { if (S === SubScene) milestone(m); });
   DrillScene.onMilestone(m => { if (S === DrillScene) milestone(m); });
   ElevScene.onMilestone(m => { if (S === ElevScene) milestone(m); });
+  HauntScene.onMilestone(m => { if (S === HauntScene) milestone(m); });
   fit();
   window.addEventListener('resize', fit);
   document.addEventListener('fullscreenchange', fit);
@@ -945,7 +1089,7 @@
       el.input.focus();
     }
   });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
 
   showTitle();
   requestAnimationFrame(frame);

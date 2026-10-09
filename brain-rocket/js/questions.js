@@ -258,22 +258,58 @@ const Quiz = (function () {
     return null;
   }
 
+  /* Halloween (Haunted Flight only): a fixed pool of 150 questions from the Halloween topics. Each
+     topic gives its plain question, and the bigger ones add "… that starts with B" questions for
+     letters with plenty of answers, including some everyday ones. */
+  const HALLOWEEN_SIZE = 150;
+  const HALLOWEEN_POOL = (function () {
+    const topics = ALL.filter(t => t.halloween);
+    const pool = topics.map(t => ({ topic: t, rules: [] }));
+    const extra = topics.map(t => {
+      if (t.entities.length < 40) return [];
+      const by = {};
+      for (const e of t.entities) { const l = e.variants[0].letters[0]; if (l) (by[l] = by[l] || []).push(e); }
+      return Object.keys(by)
+        .map(l => ({ l, n: answersFor(t, [{ type: 'start', l }]).length, easy: answersFor(t, [{ type: 'start', l }]).filter(a => a.ent.tier <= 2).length }))
+        .filter(x => x.n >= 5 && x.easy >= 2)
+        .sort((a, b) => b.n - a.n || (a.l < b.l ? -1 : 1))
+        .map(x => ({ topic: t, rules: [{ type: 'start', l: x.l }] }));
+    });
+    // take letter questions round-robin across topics so no one topic crowds the pool
+    for (let i = 0; pool.length < HALLOWEEN_SIZE && extra.some(e => e.length > i); i++) {
+      for (const e of extra) if (e[i] && pool.length < HALLOWEEN_SIZE) pool.push(e[i]);
+    }
+    return pool;
+  })();
+  function halloween(seen, rng = Math.random) {
+    let open = HALLOWEEN_POOL.map((_, i) => i).filter(i => !seen.hw.has(i));
+    if (!open.length) { seen.hw.clear(); open = HALLOWEEN_POOL.map((_, i) => i); }
+    // never the same Halloween topic twice in a row
+    const fresh = open.filter(i => HALLOWEEN_POOL[i].topic.id !== seen.hwLast);
+    const pick = (fresh.length ? fresh : open)[Math.floor(rng() * (fresh.length ? fresh : open).length)];
+    seen.hw.add(pick); seen.hwLast = HALLOWEEN_POOL[pick].topic.id;
+    const { topic, rules } = HALLOWEEN_POOL[pick];
+    const text = rules.length ? `Name ${articleFor(topic.noun)} <b>${topic.noun}</b> that ${RULES.start.text(rules[0])}.` : topic.html;
+    remember(seen);
+    return finish(topic, rules, text, 'hw|' + pick);
+  }
+
   /* Remember what came up in recent games so a new game starts with fresh topics. */
   const SAVE_KEY = 'brainRocket.seen';
   function newRun() {
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') || {}; } catch (e) { saved = {}; }
     const set = k => new Set(Array.isArray(saved[k]) ? saved[k] : []);
-    return { topics: set('topics'), letterTopics: set('letterTopics'), yearTopics: set('yearTopics'), sigs: set('sigs') };
+    return { topics: set('topics'), letterTopics: set('letterTopics'), yearTopics: set('yearTopics'), sigs: set('sigs'), hw: set('hw') };
   }
   // A blank memory, for challenge codes: everyone must start from the same place.
-  const freshRun = () => ({ topics: new Set(), letterTopics: new Set(), yearTopics: new Set(), sigs: new Set(), noSave: true });
+  const freshRun = () => ({ topics: new Set(), letterTopics: new Set(), yearTopics: new Set(), sigs: new Set(), hw: new Set(), noSave: true });
   function remember(seen) {
     if (seen.noSave) return;   // a challenge game doesn't touch your own topic memory
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify({
         topics: [...seen.topics], letterTopics: [...seen.letterTopics], yearTopics: [...seen.yearTopics],
-        sigs: [...seen.sigs].slice(-400)
+        sigs: [...seen.sigs].slice(-400), hw: [...(seen.hw || [])]
       }));
     } catch (e) { /* storage blocked: only this game remembers */ }
   }
@@ -372,5 +408,5 @@ const Quiz = (function () {
     return [{ text: a.v.raw, tier: a.ent.tier }];
   }
 
-  return { TOPIC, TIER_POINTS, TIER_NAMES, generate, check, examples, keyOf, newRun, freshRun };
+  return { TOPIC, TIER_POINTS, TIER_NAMES, generate, halloween, HALLOWEEN_POOL, check, examples, keyOf, newRun, freshRun };
 })();

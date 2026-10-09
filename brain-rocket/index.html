@@ -105,6 +105,7 @@
           <button type="button" class="type-btn" data-type="sub" aria-pressed="false"><span class="type-icon">🌊</span><span class="type-name">Submarine</span><span class="type-sub">Timed dive</span></button>
           <button type="button" class="type-btn" data-type="drill" aria-pressed="false"><span class="type-icon">⛏️</span><span class="type-name">Play With Friends</span><span class="type-sub">Drill race with a code</span></button>
           <button type="button" class="type-btn" data-type="elev" aria-pressed="false" hidden><span class="type-icon">🛗</span><span class="type-name">Elevator</span><span class="type-sub">Keep the power on</span></button>
+          <button type="button" class="type-btn type-haunt" data-type="haunt" aria-pressed="false"><span class="type-icon">👻</span><span class="type-name">Haunted Flight</span><span class="type-sub">Outrun the ghost</span><span class="ltd-badge">Limited time</span></button>
         </div>
         <div class="modes">
           <button type="button" class="mode-card mode-easy" data-mode="easy">
@@ -200,7 +201,7 @@
     <div id="pause" class="screen hidden">
       <div class="dialog">
         <h2>Paused</h2>
-        <p>The timer is frozen. Take a breath, astronaut.</p>
+        <p id="pauseText">The timer is frozen. Take a breath, astronaut.</p>
         <div class="dialog-btns">
           <button type="button" class="big-btn" id="btnResume">▶ Resume</button>
           <button type="button" class="big-btn ghost" id="btnQuit">Quit to menu</button>
@@ -231,12 +232,14 @@
 <script src="js/topics-years.js"></script>
 <script src="js/topics-more.js"></script>
 <script src="js/topics-dhhs.js"></script>
+<script src="js/topics-halloween.js"></script>
 <script src="js/questions.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/scene.js"></script>
 <script src="js/subscene.js"></script>
 <script src="js/drillscene.js"></script>
 <script src="js/elevscene.js"></script>
+<script src="js/hauntscene.js"></script>
 <script src="js/badwords.js"></script>
 <script src="js/challenge.js"></script>
 <script src="js/game.js"></script>
