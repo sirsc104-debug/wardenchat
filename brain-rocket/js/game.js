@@ -957,7 +957,10 @@
     if (!card || !panel) return;
     const how = panel.querySelector('.how');
     const SH = parseFloat(stage.style.height) || 900;
-    const top = how.offsetTop + how.offsetHeight + 22;
+    // measure from the title screen itself: while the panel's intro animation runs, it (not the
+    // screen) is the rules box's offsetParent
+    let top = how.offsetHeight + 22;
+    for (let e = how; e && e !== card.offsetParent; e = e.offsetParent) top += e.offsetTop;
     const below = SH - top - 24 >= 250;   // room for the finished card (score, grid and Share)
     card.classList.toggle('below', below); card.classList.toggle('side', !below);
     if (below) Object.assign(card.style, { left: panel.offsetLeft + 'px', top: top + 'px', width: panel.offsetWidth + 'px', height: '' });
@@ -1400,6 +1403,7 @@
   Daily.settle();
   setInterval(() => { if (G.state === 'title') { if (!Daily.today() && $('dcShare')) renderDaily(); else renderNext(); } }, 30000);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutDaily);
+  document.querySelector('.title-panel').addEventListener('animationend', layoutDaily);
   showTitle();
   requestAnimationFrame(frame);
 })();
