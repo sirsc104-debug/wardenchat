@@ -59,6 +59,8 @@ The home screen keeps the logo and the tab bar in the same place in every mode. 
 
 **Background music.** Every way to play has its own quiet looping tune, made on the fly with Web Audio (no music files): a bright, floaty arpeggio for Rocket, a slow dreamy tune with bubbles for Submarine, a driving dig beat for Play With Friends, a skipping 6/8 folk tune for Bullseye, and lounge "elevator music" for the Elevator. Haunted Flight's spooky tune is louder. The music follows the tab you've chosen, on the title screen and in the game, and starts after your first click or key press. Turn it off (or back on) with **🎵 Music** in the pause menu; that choice is remembered in the browser, and the 🔊 button still mutes everything.
 
+**Startup intro.** The page opens with the SirSC104 producer-tag intro (about 3.7 seconds, with sound made in code). If the browser blocks sound until you interact, it shows PRESS ANY KEY first. A key or click during the animation skips it, and the game doesn't get any input until it's gone. It is the `<script id="sirsc104-intro">` block at the top of `<body>` in `index.html`, copied unchanged from `sirsc-intro.html`: don't edit it.
+
 Keys: **Enter** submits, **Esc** pauses. Best scores per mode are saved in the browser.
 
 ## Files
