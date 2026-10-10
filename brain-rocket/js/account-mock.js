@@ -128,7 +128,7 @@
   const CODE = '23456789ABCDEFGHJKMNPQRSTVWXYZ';
   const newCode = db => { let c; do { c = Array.from({ length: 6 }, () => CODE[Math.floor(Math.random() * CODE.length)]).join(''); } while (db.races.some(r => r.code === c && /lobby|racing/.test(r.status))); return c; };
   const iso = t => (t ? new Date(t).toISOString() : null);
-  const pace = id => 22 + ([...id].reduce((a, c) => a + c.charCodeAt(0), 0) % 40);   // points a second
+  const pace = id => 60 + ([...id].reduce((a, c) => a + c.charCodeAt(0), 0) % 90);   // points a second
   function settleRace(db, r, human) {
     const t = Date.now();
     if (r.status === 'lobby') {

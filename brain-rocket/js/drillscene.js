@@ -640,6 +640,118 @@ const DrillScene = (function () {
     }
   }
 
+  // ---- Rivals in a live race: their own hole and a smaller drill, each in its own lane -----------
+  // Lanes sit either side of your drill, inside the part of the world the window shows (between the
+  // depth track and the question card), farthest from your drill first. Each rival keeps its lane
+  // number for the whole race; the lanes themselves move if the window is resized.
+  let view = { xMin: 0, xMax: W, cardLeft: 970, trackRight: 110 };
+  let LANES = [];
+  function layLanes() {
+    const gap = 115, out = [];
+    for (let x = SX + 130; x <= view.cardLeft - 60; x += gap) out.push(x);
+    for (let x = SX - 130; x >= view.trackRight + 60; x -= gap) out.push(x);
+    LANES = out.sort((a, b) => Math.abs(b - SX) - Math.abs(a - SX)).slice(0, 4);
+  }
+  layLanes();
+  function setView(v) { view = v; layLanes(); }
+  const RIVAL_COLOURS = [['#3f8cff', '#9fd0ff'], ['#2fbf71', '#a8f0c8'], ['#b04dff', '#e3b8ff'], ['#ff5d8f', '#ffc2d6']];
+  const R_SCALE = 0.62;
+  let rivals = [];           // { id, name, depth, shown, label, crashed, finished, lane, colour }
+  function setRivals(list) {
+    const keep = new Map(rivals.map(r => [r.id, r]));
+    const used = new Set(list.map(x => keep.get(x.id)).filter(Boolean).map(r => r.lane));
+    rivals = list.slice(0, 4).map(x => {
+      let r = keep.get(x.id);
+      if (!r) {
+        const lane = [0, 1, 2, 3].find(i => !used.has(i));
+        used.add(lane);
+        r = { id: x.id, lane, shown: x.depth, colour: RIVAL_COLOURS[lane % RIVAL_COLOURS.length] };
+      }
+      return Object.assign(r, { name: x.name, depth: x.depth, label: x.label, crashed: !!x.crashed, finished: !!x.finished });
+    }).filter(r => r.lane !== undefined);
+  }
+  function updateRivals(dt) {
+    // ease toward the latest depth from the server, so a rival glides down instead of jumping
+    for (const r of rivals) {
+      const goal = r.crashed ? 0 : r.depth;
+      r.shown += (goal - r.shown) * (1 - Math.exp(-dt * (r.crashed ? 3 : 1.6)));
+    }
+  }
+  function rivalShaft(x, bottom) {
+    const top = Math.max(-20, sy(0) - 4);
+    if (bottom <= top) return;
+    const half = 60 * R_SCALE;
+    ctx.fillStyle = '#140d09';
+    ctx.beginPath();
+    const edge = (y, side) => x + side * (half + hash(Math.floor(dAt(y) / 3) + side * 50 + x) * 7);
+    ctx.moveTo(edge(top, -1), top);
+    for (let y = top; y <= bottom; y += 10) ctx.lineTo(edge(y, -1), y);
+    for (let y = bottom; y >= top; y -= 10) ctx.lineTo(edge(y, 1), y);
+    ctx.fill();
+    const g = ctx.createLinearGradient(x - half, 0, x + half, 0);
+    g.addColorStop(0, 'rgba(0,0,0,0.45)'); g.addColorStop(0.5, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.45)');
+    ctx.fillStyle = g; ctx.fillRect(x - half - 6, top, half * 2 + 12, bottom - top);
+  }
+  function rivalDrill(r, x, tipY) {
+    const [c1, c2] = r.colour;
+    ctx.save();
+    ctx.translate(x + (r.finished || r.crashed ? 0 : (Math.random() - 0.5) * 0.8), tipY - 105 * R_SCALE + Math.sin(st.t * 2.2 + r.lane) * 2);
+    if (r.crashed) ctx.rotate(Math.PI * 0.5);
+    ctx.scale(R_SCALE, R_SCALE);
+    const bg = ctx.createLinearGradient(-48, 0, 48, 0);
+    bg.addColorStop(0, c1); bg.addColorStop(0.4, c2); bg.addColorStop(1, c1);
+    ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect(-48, -112, 96, 124, 18); ctx.fill();
+    ctx.fillStyle = '#2b2f3a'; ctx.beginPath(); ctx.roundRect(-30, -96, 60, 44, 11); ctx.fill();
+    const wg = ctx.createLinearGradient(0, -92, 0, -56);
+    wg.addColorStop(0, '#9fe0ff'); wg.addColorStop(1, '#1d4fa0');
+    ctx.fillStyle = wg; ctx.beginPath(); ctx.roundRect(-25, -91, 50, 34, 8); ctx.fill();
+    blob(0, -68, 8, '#ffd7a8');
+    ctx.fillStyle = c2; ctx.beginPath(); ctx.arc(0, -72, 9.5, Math.PI, 0); ctx.fill();
+    ctx.fillStyle = '#3e4352'; ctx.beginPath(); ctx.roundRect(-56, 10, 112, 16, 6); ctx.fill();
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(-50, 24); ctx.lineTo(50, 24); ctx.lineTo(0, 105); ctx.closePath();
+    ctx.fillStyle = '#9aa2b4'; ctx.fill(); ctx.clip();
+    ctx.strokeStyle = '#6b7385'; ctx.lineWidth = 7;
+    const sp = r.finished || r.crashed ? 0 : (st.t * 40 * 3) % 22;
+    for (let i = -2; i < 7; i++) { const yy = 24 + i * 22 + sp; ctx.beginPath(); ctx.moveTo(-60, yy - 18); ctx.lineTo(60, yy + 12); ctx.stroke(); }
+    ctx.restore();
+    ctx.restore();
+  }
+  function tag(x, y, text, colour, arrow) {
+    ctx.font = '700 17px Fredoka, Nunito, sans-serif';
+    const w = ctx.measureText(text).width + 22, h = 28;
+    ctx.fillStyle = 'rgba(14,20,48,0.86)';
+    ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, 14); ctx.fill();
+    ctx.strokeStyle = colour; ctx.lineWidth = 2.5; ctx.stroke();
+    if (arrow) {
+      ctx.fillStyle = colour; ctx.beginPath();
+      const ay = arrow > 0 ? y + h / 2 + 2 : y - h / 2 - 2;
+      ctx.moveTo(x - 9, ay); ctx.lineTo(x + 9, ay); ctx.lineTo(x, ay + arrow * 11); ctx.fill();
+    }
+    ctx.fillStyle = '#f4f7ff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, x, y + 1);
+  }
+  function drawRivals() {
+    if (!rivals.length) return;
+    const byX = LANES.slice().sort((a, b) => a - b);
+    for (const r of rivals) {
+      if (r.lane >= LANES.length) continue;   // a narrow window has fewer lanes: the board still shows them
+      const x = LANES[r.lane], tipY = sy(r.shown), name = r.name.length > 12 ? r.name.slice(0, 11) + '…' : r.name;
+      const mark = r.crashed ? ' 💥' : r.finished ? ' ✓' : '';
+      if (r.crashed) {
+        // blasted back out: lying on its side on the surface
+        const gy = sy(0);
+        if (gy > -60 && gy < H + 60) { rivalDrill(r, x, gy - 20); tag(x, gy - 110, name + mark, r.colour[0]); }
+        continue;
+      }
+      rivalShaft(x, Math.min(H + 20, tipY - 4));
+      const stag = byX.indexOf(x) % 2 ? 38 : 0;    // neighbouring lanes' tags sit one above the other
+      if (tipY > H + 10) tag(x, H - 90 - stag, `▼ ${name} · ${r.label}${mark}`, r.colour[0]);           // deeper than you can see
+      else if (tipY < 80) { if (sy(0) < 60) tag(x, 150 + stag, `▲ ${name} · ${r.label}${mark}`, r.colour[0]); } // behind you
+      else { rivalDrill(r, x, tipY); tag(x, tipY - 105 * R_SCALE - 92 * R_SCALE - 26, `${name} · ${r.label}${mark}`, r.colour[0], 1); }
+    }
+  }
+
   // ---- The drill --------------------------------------------------------------
   const BITS = [['#c9d0dc', '#7d8596'], ['#ffd76a', '#c99a10'], ['#bff4ff', '#4fb3ff'], ['#e6b3ff', '#9b4dff']];
   const bitColours = () => BITS[st.streak >= 8 ? 3 : st.streak >= 5 ? 2 : st.streak >= 3 ? 1 : 0];
@@ -774,6 +886,7 @@ const DrillScene = (function () {
 
   // ---- Update / draw -----------------------------------------------------------------
   function update(dt) {
+    updateRivals(dt);
     st.t += dt;
     const prev = st.cam;
     if (st.crash) updateCrash(dt);
@@ -830,6 +943,7 @@ const DrillScene = (function () {
     drawFeatures();
     drawSky();
     drawShaft();
+    drawRivals();
 
     // heat haze deep down
     const m = mirror(st.cam);
@@ -892,7 +1006,9 @@ const DrillScene = (function () {
       st.cam = 0; st.target = 0; st.dead = false; st.deadT = 0; st.thrust = 0; st.ignite = 0;
       st.streak = 0; st.kick = 0; st.crash = null;
       parts.length = 0; fx.length = 0; lines.length = 0;
+      rivals = [];
     },
+    setRivals, setView,
     get alt() { return st.cam; },
     setIgnite(v) { st.ignite = v; if (v) st.shake = Math.max(st.shake, 0.15); },
     setStreak(n) { st.streak = n; },

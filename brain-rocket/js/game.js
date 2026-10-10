@@ -203,10 +203,15 @@
     view.c = c; view.x = (SW - 1600 * c) / 2; view.y = (SH - 900 * c) / 2;
     world.style.transform = `translate(${view.x}px, ${view.y}px) scale(${c})`;
     for (const sc of [Scene, SubScene, DrillScene, ElevScene, HauntScene, BullScene]) sc.resize(s * c);
+    // the part of the drill world you can actually see, left of the question card (for rivals' lanes)
+    DrillScene.setView({ xMin: -view.x / c, xMax: (SW - view.x) / c, cardLeft: (SW - 30 - 600 - view.x) / c, trackRight: (110 - view.x) / c });
     const old = $('sceneOld'); if (old) { old.width = $('scene').width; old.height = $('scene').height; }
     if (G && G.state !== 'title' && el.track) buildTrack();
     layoutDaily();
   }
+  // belt and braces for browsers without overflow: clip: the stage never stays scrolled
+  stage.addEventListener('scroll', () => { if (stage.scrollLeft || stage.scrollTop) { stage.scrollLeft = 0; stage.scrollTop = 0; } });
+  viewportEl.addEventListener('scroll', () => { if (viewportEl.scrollLeft || viewportEl.scrollTop) { viewportEl.scrollLeft = 0; viewportEl.scrollTop = 0; } });
   const placeStage = () => { stage.style.transform = `translate(${view.left}px, ${view.top + view.pan}px) scale(${view.s})`; };
   // world coordinates -> stage coordinates (for popups placed near the rocket)
   const toStage = (x, y) => [view.x + x * view.c, view.y + y * view.c];
@@ -1274,6 +1279,8 @@
     score: () => Math.round(G.score),
     correct: () => G.correct,
     trackTop: score => trackY(trackFrac(altFor(score))),
+    depthOf: score => Math.max(0, altFor(score)),               // where a score sits in the drill world
+    depthText: score => J.fmt(kmAt(Math.max(0, altFor(score)))),
     showTitle
   };
 

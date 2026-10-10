@@ -316,7 +316,7 @@ const Race = (function () {
   const marks = document.createElement('div');
   marks.className = 'race-marks';
   $('track').appendChild(marks);
-  function showBoard(on) { board.classList.toggle('hidden', !on); marks.classList.toggle('hidden', !on); if (!on) marks.innerHTML = ''; }
+  function showBoard(on) { board.classList.toggle('hidden', !on); marks.classList.toggle('hidden', !on); if (!on) { marks.innerHTML = ''; DrillScene.setRivals([]); } }
   function standings() {
     const mine = me();
     return race.players.map(p => {
@@ -331,6 +331,10 @@ const Race = (function () {
     const shown = rows.filter((p, i) => i < 4 || p.me);
     board.innerHTML = `<div class="rb-h">🏁 LIVE RACE${race.round > 1 ? ` · ROUND ${race.round}` : ''} <span>${esc(race.code)}</span></div>` + shown.map(p => [p, rows.indexOf(p)]).map(([p, i]) =>
       `<div class="rb-row${p.me ? ' me' : ''}${p.left ? ' left' : ''}"><span class="rb-rank">${p.left ? '–' : i + 1}</span>${avatar(p.username)}<span class="rb-name">${p.me ? 'You' : esc(p.username)}</span><span class="rb-score">${p.left ? 'left' : n(p.score)}</span><span class="rb-flag">${p.crashed ? '💥' : p.finished ? '✓' : ''}</span></div>`).join('');
+    // the rivals' own holes and drills, in the order they joined so nobody swaps lanes
+    DrillScene.setRivals(race.players.filter(p => p.user_id !== me() && !p.left).map(p => ({
+      id: p.user_id, name: p.username, depth: BRGame.depthOf(p.score), label: BRGame.depthText(p.score), crashed: p.crashed, finished: p.finished
+    })));
     marks.innerHTML = rows.filter(p => !p.me && !p.left).map(p => `<span class="race-mark" style="top:${BRGame.trackTop(p.score)}px" title="${esc(p.username)}">${esc(String(p.username)[0].toUpperCase())}</span>`).join('');
   }
   // the board follows your own score between server replies

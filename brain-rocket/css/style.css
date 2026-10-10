@@ -30,6 +30,7 @@ button { font-family: inherit; cursor: pointer; }
 }
 #stage {
   position: absolute; left: 0; top: 0;
+  overflow: hidden; overflow: clip;   /* clip: nothing (a focused button, the oversized world) can scroll the game sideways */
   width: 1600px; height: 900px;   /* fit() stretches one of these to fill the tab */
   transform-origin: 0 0;
   overflow: hidden;
