@@ -92,13 +92,13 @@
       }
     }
   };
-  // Play With Friends: a timed race to the centre of the Earth, played from a code so friends get the same questions.
+  // Play With Friends: a live race to the centre of the Earth (js/race.js runs the lobby and the live board).
   TYPES.drill = {
     ...TYPES.sub,
     id: 'drill', scene: DrillScene, stops: DRILL_STOPS, from: 'deep', marker: '⛏️', go: 'DRILL!', firstTag: '⛏️ DRILL!',
     reached: 'YOU DRILLED TO', notYet: 'Not drilled yet',
-    tagline: 'Drill to the centre of the Earth! Share a code so your friends get the exact same questions, then compare scores.',
-    rule: '<b>🎟️ Same code, same questions.</b> Friends with your code get the exact same questions, in order.',
+    tagline: 'Race your friends live to the centre of the Earth! Everyone gets the same questions at the same time.',
+    rule: '<b>🏁 Live race.</b> Same questions, same clock, for up to 8 friends. The deepest drill wins.',
     timeLabel: 'Drill time', leftText: 's left', outText: '⏱️ Time\'s up!', again: '⛏️ Drill again', crashTitle: '💥 Blasted out!', name: n => `Play With Friends (${n}s drill)`,
     turning: 'Your drill is turning back…',
     crashLine: p => `Your drill spun round and shot out of the ground from <b>${p}</b>. Score lost!`,
@@ -316,7 +316,7 @@
     if (animate && from !== to) blurRules(rules); else rules();
     closeTimePick();
     $('chPanel').classList.toggle('hidden', id !== 'drill');
-    if (id === 'drill') renderHost();
+    if (id === 'drill') Race.renderPanel();
     document.querySelectorAll('.mode-card').forEach(c => { c.querySelector('.mode-info').innerHTML = n(J.info[c.dataset.mode]); });
     document.querySelectorAll('[data-best]').forEach(b => {
       // Submarine keeps a best for each dive length; the card shows the best of them
@@ -436,6 +436,7 @@
     u.classList.remove('open'); u.setAttribute('aria-expanded', 'false');
     setType(J.id);
     renderDaily();
+    Race.onTitle();
   }
 
   // ---- Start a run ------------------------------------------------------
@@ -456,7 +457,7 @@
       gap: HAUNT.start, dist: 0, chaseT: 0, closest: null, pauseUsed: false, beatT: 0,
       lunge: { next: HAUNT.lungeGap(), warn: 0 }, lunges: 0, dodged: 0,
       qNum: 0, skips: dive || haunt ? Infinity : mode.skips, used: new Set(), seen: ch ? Quiz.freshRun() : Quiz.newRun(), q: null,
-      challenge: ch, rng: ch ? Challenge.rng(ch.seed) : Math.random, correct: 0, bestAnswer: null,
+      challenge: ch, race: (ch && ch.race) || null, rng: ch ? Challenge.rng(ch.seed) : Math.random, correct: 0, bestAnswer: null,
       launched: false, peak: 0, reached: new Set(), crashed: false, boomed: false, diveTime: len, diveLeft: len, qElapsed: 0, lastTick: len
     });
     S.reset();
@@ -481,6 +482,7 @@
     el.banner.classList.toggle('haunt', haunt);
     el.timerFill.style.background = '';
     $('btnPause').disabled = false;
+    $('btnPause').classList.toggle('hidden', !!G.race);   // a live race can't be paused
     document.querySelector('.score-pill .pill-label').textContent = haunt ? 'Distance' : 'Score';
     document.querySelectorAll('.legend span').forEach((sp, i) => {
       sp.dataset.base = sp.dataset.base || sp.textContent;
@@ -531,7 +533,7 @@
     void el.card.offsetWidth;
     el.card.classList.add('swap');
     el.qCat.textContent = `${G.q.cat.icon} ${G.q.cat.name}`;
-    el.qNum.innerHTML = isDaily() ? `${G.qNum} of ${Daily.COUNT}` : `Question ${G.qNum}` + (G.challenge ? ` · <span class="ch-tag">🎟️ ${G.challenge.code}</span>` : '');
+    el.qNum.innerHTML = isDaily() ? `${G.qNum} of ${Daily.COUNT}` : `Question ${G.qNum}` + (G.race ? ` · <span class="ch-tag">🏁 Race ${G.challenge.code}</span>` : G.challenge ? ` · <span class="ch-tag">🎟️ ${G.challenge.code}</span>` : '');
     if (isDaily()) { const ab = $('aimBadge'); ab.className = `aim-badge tier-bg-${G.aim}`; ab.textContent = `🎯 Aim: ${Quiz.TIER_NAMES[G.aim]}`; }
     el.qText.innerHTML = G.q.text;
     el.feedback.textContent = '';
@@ -814,6 +816,7 @@
     G.state = 'dying';
     lockCard();
     if (isDaily()) { Daily.finish(G.daily.rec, crashed); return dailyOver(crashed); }
+    if (G.race) return raceOver(crashed);
     if (!crashed) { S.die(); if (isHaunt()) Sound.ghost(); Sound.gameOver(); }
     if (isHaunt()) S.warn(false);
     if (isHaunt() && !crashed) {
@@ -870,6 +873,25 @@
       el.over.classList.remove('hidden');
       $('btnAgain').focus();
     }, crashed ? 300 : 2600);
+  }
+
+  // Race results: your own best still counts, then js/race.js shows everyone's finish.
+  function raceOver(crashed) {
+    if (!crashed) { S.die(); Sound.gameOver(); el.feedback.className = 'feedback'; el.feedback.textContent = J.outText; }
+    later(() => {
+      G.state = 'over';
+      el.card.classList.add('hidden');
+      const result = crashed ? 0 : Math.round(G.score), place = placeAt(result);
+      const key = bestKey(G.type, G.mode.id, G.diveTime), prev = bests[key];
+      const isBest = !crashed && result > 0 && (!prev || result > prev.score);
+      if (isBest) { bests[key] = { score: result, place: place.name, icon: place.icon }; saveBests(); }
+      $('newBest').classList.toggle('hidden', !isBest);
+      const cp = G.crashPlace;
+      Race.over({
+        score: result, correct: G.correct, crashed,
+        line: crashed ? J.crashLine(`${cp.icon} ${cp.name}`) : J.reachedLine(`${place.icon} ${place.name}`, J.fmt(kmAt(altFor(result))))
+      });
+    }, crashed ? 300 : 1500);
   }
 
   // Bullseye results: today's target, the grid to share, and the streak.
@@ -975,7 +997,7 @@
   // ---- Pause ------------------------------------------------------------
   // Haunted Flight gets one pause per run (switching away from the tab always pauses, for free).
   function pause(auto) {
-    if (G.state !== 'question') return;
+    if (G.state !== 'question' || G.race) return;
     if (isHaunt() && auto !== true) {
       if (G.pauseUsed) return;
       G.pauseUsed = true;
@@ -1182,8 +1204,10 @@
       if (S.crashBoom && !G.boomed) { G.boomed = true; if (J.id === 'sub') Sound.splash(); else Sound.boom(); }
       if (S.crashDone) gameOver();
     } else if (isDive() && (G.state === 'question' || G.state === 'reveal')) {
-      // One clock for the whole dive. It runs during the short reveals too.
-      G.diveLeft -= dt;
+      // One clock for the whole dive. It runs during the short reveals too. A race runs on the
+      // shared clock, so switching tabs never buys extra time.
+      if (G.race) G.diveLeft = Math.max(0, (G.race.endLocal - Date.now()) / 1000);
+      else G.diveLeft -= dt;
       if (G.state === 'question') G.qElapsed += dt;
       const s = Math.ceil(G.diveLeft);
       if (s < G.lastTick) { G.lastTick = s; if (s <= lowAt() && s > 0) Sound.tick(s <= lowAt() / 2); }
@@ -1237,62 +1261,21 @@
     requestAnimationFrame(frame);
   }
 
-  // ---- Play With Friends codes ----------------------------------------------
-  const ch = {
-    input: $('chInput'), preview: $('chPreview'), join: $('chJoin'),
-    code: $('chCode'), copy: $('chCopy'), make: $('chMake'), play: $('chPlayMine'),
-    host: { len: 60, mode: 'medium' }, made: null
+  // ---- Hooks for the live race (js/race.js) ---------------------------------------
+  window.BRGame = {
+    // start the drill so its countdown ends on the shared start time; endLocal is the shared end
+    startRace(r) {
+      setType('drill');
+      start(r.mode, { type: 'drill', mode: r.mode, len: r.len, seed: r.seed, code: r.code, race: { id: r.raceId, endLocal: r.endLocal } });
+    },
+    get racing() { return !!G.race && ['countdown', 'question', 'reveal', 'crashing', 'dying'].includes(G.state); },
+    get raceId() { return G.race ? G.race.id : null; },
+    get state() { return G.state; },
+    score: () => Math.round(G.score),
+    correct: () => G.correct,
+    trackTop: score => trackY(trackFrac(altFor(score))),
+    showTitle
   };
-  const describe = c => `⛏️ ${MODES[c.mode].label} · ${c.len}-second drill`;
-
-  function renderHost() {
-    const mark = (sel, on) => document.querySelectorAll(sel).forEach(b => {
-      const a = on(b); b.classList.toggle('active', a); b.setAttribute('aria-pressed', a ? 'true' : 'false');
-    });
-    mark('#chLen button', b => +b.dataset.len === ch.host.len);
-    mark('#chMode button', b => b.dataset.mode === ch.host.mode);
-    // A code you made stays until you change a setting, so you never share one that doesn't match.
-    if (ch.made && (ch.made.mode !== ch.host.mode || ch.made.len !== ch.host.len)) ch.made = null;
-    ch.code.textContent = ch.made ? ch.made.code : '— — — —';
-    ch.code.classList.toggle('empty', !ch.made);
-    ch.copy.disabled = !ch.made; ch.copy.textContent = '📋 Copy';
-    ch.play.disabled = !ch.made;
-    ch.make.textContent = ch.made ? '🎲 New code' : '🎲 Make a code';
-  }
-  function checkInput() {
-    const raw = ch.input.value.replace(/[^0-9a-z]/gi, '');
-    const say = (cls, text) => { ch.preview.className = 'ch-preview' + (cls ? ' ' + cls : ''); ch.preview.textContent = text; };
-    ch.join.disabled = true;
-    if (!raw) { say('', 'Type the code a friend sent you.'); return null; }
-    if (raw.length < 8) { say('', `${raw.length} of 8 characters…`); return null; }
-    const d = Challenge.decode(raw);
-    if (d.error) { say('bad', d.error); return null; }
-    say('ok', `✅ ${describe(d)}`);
-    ch.join.disabled = false;
-    return d;
-  }
-
-  ch.input.addEventListener('input', checkInput);
-  $('chJoinForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const d = checkInput();
-    if (d) { Sound.click(); start(d.mode, d); }
-  });
-  document.querySelectorAll('#chLen button').forEach(b => b.addEventListener('click', () => { Sound.click(); ch.host.len = +b.dataset.len; renderHost(); }));
-  document.querySelectorAll('#chMode button').forEach(b => b.addEventListener('click', () => { Sound.click(); ch.host.mode = b.dataset.mode; renderHost(); }));
-  ch.make.addEventListener('click', () => {
-    Sound.click();
-    ch.made = Challenge.decode(Challenge.encode({ ...ch.host, seed: Challenge.newSeed() }));
-    renderHost();
-  });
-  const selectCode = () => { const r = document.createRange(); r.selectNodeContents(ch.code); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); };
-  ch.copy.addEventListener('click', () => {
-    if (!ch.made) return;
-    const done = ok => { ch.copy.textContent = ok ? '✅ Copied' : '⌨️ Ctrl+C'; };
-    try { navigator.clipboard.writeText(ch.made.code).then(() => done(true), () => { selectCode(); done(false); }); }
-    catch (e) { selectCode(); done(false); }
-  });
-  ch.play.addEventListener('click', () => { if (ch.made) { Sound.click(); start(ch.made.mode, ch.made); } });
 
   // ---- Wiring -----------------------------------------------------------
   Scene.init($('scene'));
@@ -1360,7 +1343,12 @@
   $('btnResume').addEventListener('click', resume);
   $('btnMusic').addEventListener('click', () => { Sound.setMusicEnabled(!Sound.musicEnabled, J.id); Sound.click(); renderMusicBtn(); });
   $('btnQuit').addEventListener('click', showTitle);
-  $('btnAgain').addEventListener('click', e => { if (isDaily()) { Sound.click(); shareDaily(e.currentTarget); } else start(G.mode.id, G.challenge); });
+  $('btnMenu').addEventListener('click', e => { if (G.race) { e.stopImmediatePropagation(); Sound.click(); Race.leave(); } }, true);
+  $('btnAgain').addEventListener('click', e => {
+    if (G.race) { Sound.click(); Race.again(); }
+    else if (isDaily()) { Sound.click(); shareDaily(e.currentTarget); }
+    else start(G.mode.id, G.challenge);
+  });
   $('btnMenu').addEventListener('click', showTitle);
 
   const soundBtn = $('btnSound');

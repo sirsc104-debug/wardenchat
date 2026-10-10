@@ -277,6 +277,8 @@ const Account = (function () {
     onExpired(fn) { onExpired = fn; },
     useTransport(fn) { transport = fn; },
     init, changed, syncNow: sync, loadFriends,
+    // call any br_* function as the signed-in player (the race uses this)
+    rpc: (fn, params) => rpc(fn, params),
     signIn: (username, password) => auth('password', { email: identity(username), password }).then(signedIn),
     // Creates a Warden Chat account (Warden Chat's database makes the profile from the username).
     signUp(username, password) {
