@@ -20,7 +20,7 @@
  * Paste this whole <script> block as the first thing inside the game page's <body>.
  *
  * Optional attributes on the <script> tag:
- *   data-sound="off"        silent version, no "press any key" gate
+ *   data-sound="off"        silent version; still waits for a click
  *   data-once="session"     only play once per browser tab session
  *
  * Games can wait for it to finish:
@@ -150,7 +150,7 @@
       '</div>' +
     '</div>' +
     '<div class="ss-flash"></div>' +
-    '<div class="ss-gate" hidden><button type="button">PRESS ANY KEY</button></div>';
+    '<div class="ss-gate" hidden><button type="button">TAP OR CLICK TO START</button></div>';
 
   (document.body || document.documentElement).appendChild(root);
 
@@ -172,10 +172,15 @@
     var browserKey = e.type.indexOf('key') === 0 && (e.ctrlKey || e.metaKey || e.altKey || /^F\d+$/.test(e.key));
     e.stopImmediatePropagation();
     if (!browserKey && e.cancelable && e.type !== 'wheel') e.preventDefault();
+    if (state === 'gate') {
+      // Canceled touch events may suppress the browser's synthetic click.
+      // Start on release too, so touch/pen input never depends on that click.
+      if (e.type === 'touchend' || (e.type === 'pointerup' && (e.button == null || e.button === 0)) || e.type === 'click') begin();
+      return;
+    }
     var trigger = (e.type === 'keydown' && !browserKey && !e.repeat) || e.type === 'pointerdown' || e.type === 'touchstart';
     if (!trigger) return;
-    if (state === 'gate') begin();
-    else if (state === 'playing' && performance.now() - startedAt > 500) leave(0.25);
+    if (state === 'playing' && performance.now() - startedAt > 500) leave(0.25);
   }
   INPUTS.forEach(function (t) { window.addEventListener(t, guard, { capture: true, passive: false }); });
 
@@ -370,6 +375,8 @@
 
   function begin() {
     if (state !== 'idle' && state !== 'gate') return;
+    if (SOUND) initAudio();
+    if (ac && ac.state !== 'running') ac.resume();
     state = 'playing';
     api.playing = true;
     gate.hidden = true;
@@ -428,17 +435,10 @@
 
   api.skip = function () { if (state === 'gate' || state === 'idle') { state = 'playing'; } leave(0.25); };
 
-  // Sound needs a user gesture in browsers. If audio is already allowed, play straight away;
-  // otherwise show the "press any key" gate — that press unlocks the sound.
-  if (SOUND) initAudio();
-  if (ac && ac.state !== 'running') {
-    state = 'gate';
-    gate.hidden = false;
-    // Some browsers allow audio without a gesture after the page has been interacted with before.
-    ac.onstatechange = function () { if (ac.state === 'running' && state === 'gate') begin(); };
-  } else {
-    begin();
-  }
+  // Always wait for the first click, even when this tab already allows audio.
+  // Create/unlock audio only inside that gesture, never during page loading.
+  state = 'gate';
+  gate.hidden = false;
 })();
 </script>
 <!-- ===================== SIRSC104 INTRO :: END ===================== -->
