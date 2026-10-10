@@ -27,7 +27,7 @@ if demo: srcs.insert(srcs.index('js/account.js') + 1, 'js/account-mock.js')
 for s in srcs: assert '</script' not in rd(s).lower()
 js = ''.join(f'<script>\n{rd(s)}\n</script>\n' for s in srcs)
 name = 'brain-rocket-accounts-demo.html' if demo else 'brain-rocket.html'
-open(os.path.join(out, name), 'w').write(f'''<title>Brain Rocket</title>
+open(os.path.join(out, name), 'w').write(f'''<title>{'Brain Rocket accounts preview' if demo else 'Brain Rocket'}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
