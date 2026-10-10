@@ -215,8 +215,10 @@
   function keyboardPan() {
     const vv = window.visualViewport;
     let pan = 0;
-    if (vv && document.activeElement === el.input && vv.height < window.innerHeight - 80) {
-      const r = el.input.getBoundingClientRect();
+    // the answer box, or a box in the account dialog
+    const a = document.activeElement, typing = a && a.tagName === 'INPUT' && a.type !== 'checkbox' && stage.contains(a);
+    if (vv && typing && vv.height < window.innerHeight - 80) {
+      const r = a.getBoundingClientRect();
       pan = Math.min(0, view.pan + (vv.offsetTop + vv.height - 12) - r.bottom);
     }
     if (pan !== view.pan) { view.pan = pan; placeStage(); }
@@ -225,7 +227,7 @@
   // ---- Saved bests ------------------------------------------------------
   let bests = {};
   try { bests = JSON.parse(localStorage.getItem('brainRocket.bests') || '{}') || {}; } catch (e) { bests = {}; }
-  function saveBests() { try { localStorage.setItem('brainRocket.bests', JSON.stringify(bests)); } catch (e) { /* ignore */ } }
+  function saveBests() { try { localStorage.setItem('brainRocket.bests', JSON.stringify(bests)); } catch (e) { /* ignore */ } Account.changed(); }
   // Rocket: 'easy'. Submarine: 'sub:easy' for 60-second dives (the original length), 'sub:easy:30' otherwise.
   const bestKey = (type, mode, len) => (type === 'rocket' ? mode : type === 'elev' || type === 'haunt' ? `${type}:${mode}` : len === 60 ? `${type}:${mode}` : `${type}:${mode}:${len}`);
 
@@ -1308,8 +1310,8 @@
   window.addEventListener('resize', fit);
   window.addEventListener('orientationchange', () => setTimeout(fit, 250));
   if (window.visualViewport) { visualViewport.addEventListener('resize', keyboardPan); visualViewport.addEventListener('scroll', keyboardPan); }
-  el.input.addEventListener('focus', () => setTimeout(keyboardPan, 300));
-  el.input.addEventListener('blur', () => setTimeout(keyboardPan, 100));
+  stage.addEventListener('focusin', () => setTimeout(keyboardPan, 300));
+  stage.addEventListener('focusout', () => setTimeout(keyboardPan, 100));
   // turning a phone upright pauses the game behind the "turn sideways" screen
   const upright = window.matchMedia('(orientation: portrait) and (pointer: coarse)');
   const onUpright = () => { if (upright.matches && G.state === 'question') pause(true); };
@@ -1404,6 +1406,11 @@
   setInterval(() => { if (G.state === 'title') { if (!Daily.today() && $('dcShare')) renderDaily(); else renderNext(); } }, 30000);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(layoutDaily);
   document.querySelector('.title-panel').addEventListener('animationend', layoutDaily);
+  // Progress arrived from your account (another device, or the first sign-in): show it.
+  window.addEventListener('br-progress', () => {
+    try { bests = JSON.parse(localStorage.getItem('brainRocket.bests') || '{}') || {}; } catch (e) { bests = {}; }
+    if (G.state === 'title') { setType(J.id); renderDaily(); }
+  });
   showTitle();
   requestAnimationFrame(frame);
 })();

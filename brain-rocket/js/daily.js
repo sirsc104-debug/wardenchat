@@ -51,7 +51,7 @@ const Daily = (function () {
 
   // ---- Today's result: { day, done, crashed, marks: [rings off per shot, -1 for a miss], score } ----
   const load = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
-  const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } };
+  const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ignore */ } if (typeof Account !== 'undefined') Account.changed(); };
   const scoreOf = marks => marks.reduce((s, m) => s + (m >= 0 ? RING_POINTS[m] : 0), 0);
 
   function today() { const r = load(KEY); return r && r.day === dayNumber() ? r : null; }
