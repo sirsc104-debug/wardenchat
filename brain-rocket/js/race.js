@@ -71,6 +71,7 @@ const Race = (function () {
     const s = Account.status;
     if (s === 'checking') panel.innerHTML = card('⏳', 'Connecting…', 'Getting the race server ready.');
     else if (s === 'unavailable') panel.innerHTML = card('📡', "Can't reach the race server", "Live races need the Brain Rocket server, and it can't be reached right now. Check your connection, then try again.", '<button type="button" class="big-btn ghost" data-race="retry">↻ Try again</button>');
+    else if (s === 'restricted') panel.innerHTML = card('🚫', 'Races are off for your account', `Your Warden Chat account is ${Account.restriction && Account.restriction.status === 'banned' ? 'banned' : 'suspended'}, so you can’t race right now.`);
     else if (s === 'signedOut') panel.innerHTML = card('🏁', 'Race your friends live', 'Everyone gets the same questions at the same time, and you watch each other drill down. Races need a <span class="wc-badge">💬 Warden Chat</span> account.',
       '<button type="button" class="big-btn" data-race="signin">Sign in</button><button type="button" class="big-btn ghost" data-race="signup">Create an account</button>');
     else if (invitesState === 'not_deployed') panel.innerHTML = card('🚧', 'Live races are almost here', 'The race server is being switched on. Check back soon!');

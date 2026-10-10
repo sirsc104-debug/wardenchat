@@ -277,6 +277,7 @@ const AccountUI = (function () {
       setBusy(true, 'Signing in…');
       return Account.signIn(v.username, v.password).then(r => {
         setBusy(false); close();
+        if (r.restricted) return;   // the banned screen takes over
         toast(r.synced ? `✅ Signed in as <b>${esc(r.user.username)}</b>. Your progress is synced.` : `Signed in as <b>${esc(r.user.username)}</b>. Your progress will sync when it can.`, r.synced ? 'good' : '');
       }, e => fail(e));
     },
@@ -364,7 +365,13 @@ const AccountUI = (function () {
   // ---- Keeping everything up to date ---------------------------------------------------
   function renderChip() {
     const s = Account.status;
-    if (s === 'signedIn') {
+    if (s === 'restricted') {
+      const u = Account.user.username, word = Account.restriction.status === 'banned' ? 'Banned' : 'Suspended';
+      chip.className = 'acct-chip in restricted';
+      chip.innerHTML = `${avatar(u)}<span class="acct-chip-name">${esc(u)}</span><span class="acct-ban-tag">${word}</span>`;
+      chip.title = `${u} · account ${word.toLowerCase()} on Warden Chat`;
+      chip.setAttribute('aria-label', `Your account, ${u}, is ${word.toLowerCase()}`);
+    } else if (s === 'signedIn') {
       const [cls] = SYNC_TEXT[Account.sync], u = Account.user.username, req = Account.friends ? Account.friends.incoming.length : 0;
       chip.className = 'acct-chip in ' + cls;
       chip.innerHTML = `${avatar(u)}<span class="acct-chip-name">${esc(u)}</span><span class="acct-dot" aria-hidden="true"></span>${req ? `<span class="acct-badge" title="${req} friend request${req === 1 ? '' : 's'}">${req}</span>` : ''}`;
@@ -379,7 +386,7 @@ const AccountUI = (function () {
   }
   function renderNote() {
     const s = Account.status;
-    note.className = 'acct-note' + (s === 'unavailable' || s === 'checking' ? ' hidden' : '');
+    note.className = 'acct-note' + (s === 'unavailable' || s === 'checking' || s === 'restricted' ? ' hidden' : '');
     if (s === 'signedOut') note.innerHTML = '<button type="button" class="acct-link" data-open="signin">Sign in with Warden Chat</button> to keep your scores on every device.';
     else if (s === 'signedIn') {
       const u = esc(Account.user.username);
@@ -429,7 +436,69 @@ const AccountUI = (function () {
     }
     if (Account.status !== 'signedIn' && ['profile', 'signout', 'friends'].includes(view) && !busy) close();
   }
-  chip.addEventListener('click', () => { click(); open(Account.status === 'signedIn' ? 'profile' : 'signin'); });
+  chip.addEventListener('click', () => { click(); if (Account.status === 'restricted') showBan(true); else open(Account.status === 'signedIn' ? 'profile' : 'signin'); });
+
+  // ---- "You've been banned": an admin suspended or banned this account on Warden Chat ----------
+  const ban = document.createElement('div');
+  ban.id = 'acctBan'; ban.className = 'screen hidden';
+  ban.innerHTML = '<div class="dialog ban-dialog" role="alertdialog" aria-modal="true" aria-labelledby="banTitle" aria-describedby="banText"></div>';
+  stage.appendChild(ban);
+  const banBox = ban.firstChild;
+  let banWanted = false;
+  function renderBan() {
+    const r = Account.restriction, u = Account.user;
+    if (!r || !u) return;
+    const banned = r.status === 'banned', deleting = r.status === 'deleting';
+    const until = r.until ? new Date(r.until).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : null;
+    banBox.innerHTML = `
+      <div class="ban-icon" aria-hidden="true">${deleting ? '🗑️' : '🚫'}</div>
+      <h2 id="banTitle">${deleting ? 'Account being deleted' : banned ? 'You’ve been banned' : 'You’ve been suspended'}</h2>
+      <p class="ban-text" id="banText">${deleting ? `Your Warden Chat account <b>${esc(u.username)}</b> is being deleted.`
+        : `An admin has ${banned ? 'banned' : 'suspended'} your Warden Chat account <b>${esc(u.username)}</b>.`}</p>
+      ${r.reason && !deleting ? `<div class="ban-reason"><span class="ban-label">Reason</span>${esc(r.reason)}</div>` : ''}
+      <p class="ban-when">${deleting ? '' : banned ? 'This ban doesn’t end on its own.' : until ? `Until <b>${esc(until)}</b>.` : 'It lasts until an admin lifts it.'}</p>
+      <p class="ban-what">While it’s ${deleting ? 'being deleted' : banned ? 'banned' : 'suspended'}, you can’t sync progress, use friends or race. You can still play Brain Rocket as a guest.</p>
+      <div class="dialog-btns"><button type="button" class="big-btn" data-ban="guest">Sign out and play as a guest</button>${banned || deleting ? '' : '<button type="button" class="big-btn ghost" data-ban="check">↻ Check again</button>'}</div>
+      <p class="ban-msg" role="status"></p>`;
+  }
+  // Mid-game it waits for the results or the home screen, so nobody loses a run to it.
+  const calm = () => typeof BRGame === 'undefined' || ['title', 'over', 'paused'].includes(BRGame.state);
+  function showBan(force) {
+    banWanted = true;
+    if (!force && !calm()) return;
+    close(); renderBan();
+    ban.classList.remove('hidden');
+    setTimeout(() => { const b = banBox.querySelector('.big-btn'); if (b) b.focus(); }, 30);
+  }
+  function hideBan() { banWanted = false; ban.classList.add('hidden'); }
+  setInterval(() => { if (banWanted && ban.classList.contains('hidden') && Account.status === 'restricted' && calm()) showBan(); }, 500);
+  banBox.addEventListener('click', e => {
+    const b = e.target.closest('[data-ban]');
+    if (!b || b.disabled) return;
+    click();
+    const msg = banBox.querySelector('.ban-msg');
+    banBox.querySelectorAll('button').forEach(x => { x.disabled = true; });
+    if (b.dataset.ban === 'guest') {
+      Account.signOut(false).then(() => { hideBan(); toast('Signed out. You’re playing as a guest.'); });
+    } else {
+      msg.textContent = 'Checking…';
+      Account.recheck().then(state => {
+        if (state === 'restricted') { renderBan(); banBox.querySelector('.ban-msg').textContent = 'Still ' + (Account.restriction.status === 'banned' ? 'banned' : 'suspended') + '.'; }
+        else { hideBan(); toast('✅ Your account is back. Welcome back!', 'good'); }
+      }, () => { banBox.querySelectorAll('button').forEach(x => { x.disabled = false; }); msg.textContent = "Couldn't check right now. Try again in a moment."; });
+    }
+  });
+  // there's no getting past it except the two buttons (Escape and clicks outside do nothing)
+  ban.addEventListener('keydown', e => {
+    if (e.key === 'Escape') e.stopPropagation();
+    if (e.key !== 'Tab') return;
+    const f = [...banBox.querySelectorAll('button')].filter(x => !x.disabled);
+    if (!f.length) return;
+    if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+  });
+  Account.onRestricted(() => showBan());
+  Account.on(() => { if (Account.status !== 'restricted' && banWanted) hideBan(); });
   [note, board, toastEl].forEach(x => x.addEventListener('click', e => {
     const o = e.target.closest('[data-open]');
     if (o) { click(); toastEl.className = 'acct-toast'; open(o.dataset.open); }

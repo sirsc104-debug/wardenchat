@@ -5,7 +5,9 @@
    back-end half, specified in ACCOUNTS-API.md. Until they exist (br_ping answers), Account.status
    stays 'unavailable', the account button stays hidden and the game saves on this device only.
 
-   Changing a password and deleting an account happen on Warden Chat, not here.
+   Changing a password and deleting an account happen on Warden Chat, not here. An account an admin
+   has suspended or banned on Warden Chat gets status 'restricted' (with the admin's reason), and
+   the account screens show a "you've been banned" screen instead of signing it out.
 
    What syncs: best scores (brainRocket.bests), today's Bullseye (brainRocket.daily, so one go a
    day holds across devices) and the Bullseye day streak. Sound, music, the last tab and the topic
@@ -30,7 +32,7 @@ const Account = (function () {
   // Warden Chat's own rules, so mistakes are caught before asking the server
   const RULES = { nameMin: 3, nameMax: 24, nameRe: /^[a-zA-Z0-9_.-]+$/, passwordMin: 10 };
 
-  const st = { status: 'checking', user: null, sync: 'idle', lastSync: 0, error: null, friends: null };
+  const st = { status: 'checking', user: null, sync: 'idle', lastSync: 0, error: null, friends: null, restriction: null };
   const listeners = new Set();
   const emit = () => listeners.forEach(fn => { try { fn(st); } catch (e) { /* a listener's problem */ } });
 
@@ -122,7 +124,41 @@ const Account = (function () {
       if (code === 'unauthorized' && !anon && !force) return go(true);      // token went stale: refresh once
       throw new ApiError(code, r.status, (r.data && r.data.message) || '');
     });
-    return go(false).catch(e => { if (e.code === 'unauthorized' && !anon) expired(); throw e; });
+    return go(false).catch(e => {
+      if (e.code === 'unauthorized' && !anon) return refused().then(() => { throw e; });
+      throw e;
+    });
+  }
+  // The br_* functions refuse a suspended or banned account the same way as an expired sign-in, so
+  // ask Warden Chat which it is (my_account_state works for restricted accounts too).
+  function accountState() {
+    if (!sess) return Promise.resolve(null);
+    return call('POST', '/rest/v1/rpc/my_account_state', {}, sess.access_token)
+      .then(r => (r.status === 200 && r.data && r.data.active === false ? r.data : null));
+  }
+  let refusing = null;   // several calls refused at once share one check
+  function refused() {
+    if (st.status === 'restricted') return Promise.resolve();
+    if (!refusing) refusing = accountState().then(info => (info ? restricted(info) : expired()), e => { if (!e.offline) expired(); })
+      .finally(() => { refusing = null; });
+    return refusing;
+  }
+  let onRestricted = null;
+  function restricted(info) {
+    clearTimeout(pushTimer);
+    Object.assign(st, { status: 'restricted', sync: 'idle', error: null, friends: null,
+      restriction: { status: info.status || 'suspended', reason: info.reason || '', until: info.restrictedUntil || null } });
+    emit();
+    if (onRestricted) onRestricted(st.restriction);
+  }
+  // "Check again": back to normal if an admin has lifted it.
+  function recheck() {
+    if (st.status !== 'restricted' || !sess) return Promise.resolve(st.status);
+    return token(true).then(() => accountState()).then(info => {
+      if (info) { restricted(info); return 'restricted'; }
+      st.restriction = null;
+      return signedIn(sess.user).then(() => st.status);
+    });
   }
 
   // ---- The synced progress document ---------------------------------------------------
@@ -230,12 +266,12 @@ const Account = (function () {
   // ---- Signing in and out ---------------------------------------------------------------
   function signedIn(user) {
     st.status = 'signedIn'; st.user = user; st.lastSync = load(SYNC_KEY) || 0; emit();
-    return sync().then(ok => ({ user, synced: ok }));
+    return sync().then(ok => ({ user, synced: ok, restricted: st.status === 'restricted' }));
   }
   function signedOut() {
     clearTimeout(pushTimer);
     sess = null; save(SESSION_KEY, null); save(SYNC_KEY, null);
-    Object.assign(st, { status: 'signedOut', user: null, lastSync: 0, sync: 'idle', error: null, friends: null });
+    Object.assign(st, { status: 'signedOut', user: null, lastSync: 0, sync: 'idle', error: null, friends: null, restriction: null });
     emit();
   }
   let onExpired = null;
@@ -265,6 +301,7 @@ const Account = (function () {
   // Coming back online or back to the tab: catch up.
   window.addEventListener('online', () => { if (st.status === 'signedIn') sync(); else if (st.status === 'unavailable') { st.status = 'checking'; init(); } });
   document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && st.status === 'restricted') { recheck().catch(() => {}); return; }
     if (document.hidden || st.status !== 'signedIn') return;
     if (st.sync !== 'synced' || Date.now() - st.lastSync > 60000) sync(); else loadFriends();
   });
@@ -273,6 +310,8 @@ const Account = (function () {
     CONFIG, RULES, ApiError, merge,
     get status() { return st.status; }, get user() { return st.user; }, get sync() { return st.sync; },
     get lastSync() { return st.lastSync; }, get error() { return st.error; }, get friends() { return st.friends; },
+    get restriction() { return st.restriction; },
+    onRestricted(fn) { onRestricted = fn; }, recheck,
     on(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     onExpired(fn) { onExpired = fn; },
     useTransport(fn) { transport = fn; },
