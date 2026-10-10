@@ -70,6 +70,13 @@
     const fn = path.replace('/rest/v1/rpc/', ''), me = db.tokens[(headers.Authorization || '').slice(7)];
     if (fn === 'br_ping') return R(200, true);
     if (!me) return R(401, { code: 'PGRST301', message: 'JWT expired' });
+    // Warden Chat's own function: works for suspended accounts too
+    if (fn === 'my_account_state') {
+      const u = byId(db, me), sus = u.restricted;
+      return R(200, { active: !sus, status: sus ? sus.status : 'active', reason: sus ? sus.reason : null, restrictedUntil: sus ? sus.until : null });
+    }
+    // like Codex's br_assert_session: a suspended or banned account is refused as not signed in
+    if (byId(db, me).restricted) return fail('br_not_signed_in');
     if (fn === 'br_get_progress') { const p = db.progress[me]; return R(200, { doc: p ? p.doc : null, rev: p ? p.rev : 0 }); }
     if (fn === 'br_save_progress') {
       const p = db.progress[me] || { rev: 0, doc: null };
@@ -259,7 +266,7 @@
   const bar = document.createElement('div');
   bar.id = 'mockBar';
   bar.innerHTML = '<b>DEMO</b> <span class="mk-hint">Pretend Warden Chat accounts ·</span> try <code>demo</code> / <code>rocket12345</code>' +
-    ' <button type="button" data-m="offline"></button> <button type="button" data-m="friend">👥 A friend answers</button> <button type="button" data-m="invite">📨 Get a race invite</button> <button type="button" data-m="racer">🤖 Add a racer</button> <button type="button" data-m="wipe">↺ Start over</button>';
+    ' <button type="button" data-m="offline"></button> <button type="button" data-m="friend">👥 A friend answers</button> <button type="button" data-m="invite">📨 Get a race invite</button> <button type="button" data-m="racer">🤖 Add a racer</button> <button type="button" data-m="ban">🚫 Suspend me</button> <button type="button" data-m="wipe">↺ Start over</button>';
   const style = document.createElement('style');
   style.textContent = '#mockBar{position:fixed;left:0;right:0;bottom:4px;margin:0 auto;width:max-content;z-index:40;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;' +
     'max-width:calc(100% - 16px);padding:6px 10px;border-radius:12px;background:rgba(10,14,34,.92);border:1px solid #ffd23f;color:#f4f7ff;font:13px/1.3 system-ui,sans-serif}' +
@@ -309,6 +316,17 @@
       if (!who || r.players.length >= 8) { AccountUI.toast('The race is full.', 'warn'); return; }
       r.players.push({ user_id: who.id, score: 0, correct: 0, finished: false, crashed: false, left: false, joined: Date.now() });
       save(db); return;
+    }
+    if (m === 'ban') {
+      // what an admin does on Warden Chat: suspend (with a reason) or lift it
+      const me = Account.user && byName(db, Account.user.username);
+      if (!me) { AccountUI.toast('Sign in first, then try this.', 'warn'); return; }
+      me.restricted = me.restricted ? null : { status: 'suspended', reason: 'Sending rude messages in group chats.', until: null };
+      save(db);
+      e.target.textContent = me.restricted ? '✅ Unsuspend me' : '🚫 Suspend me';
+      AccountUI.toast(me.restricted ? 'An admin suspended you. Brain Rocket notices on its next sync (or play something).' : 'Suspension lifted. Press “Check again”.', 'warn');
+      Account.syncNow();
+      return;
     }
     if (m === 'wipe') {
       ['brainRocket.mockServer', 'brainRocket.session', 'brainRocket.lastSync', 'brainRocket.bests', 'brainRocket.daily', 'brainRocket.dailyStreak'].forEach(k => localStorage.removeItem(k));

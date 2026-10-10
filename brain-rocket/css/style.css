@@ -908,3 +908,20 @@ button { font-family: inherit; cursor: pointer; }
 .rr-vote { font-size: 15px; font-weight: 700; color: var(--muted); min-width: 64px; text-align: right; }
 .rr-vote.yes { color: var(--good); }
 .race-gate .big-btn { white-space: nowrap; }
+
+/* ---- "You've been banned" (an admin suspended or banned the Warden Chat account) ---- */
+#acctBan { justify-content: center; padding: 0; z-index: 40; background: rgba(30,4,10,0.78); backdrop-filter: blur(5px); animation: fade 0.3s; }
+.ban-dialog { width: 640px; min-width: 0; border-color: rgba(255,93,115,0.55); box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 0 6px rgba(255,93,115,0.12); }
+.ban-icon { font-size: 76px; line-height: 1; margin-bottom: 6px; }
+.ban-dialog h2 { font-size: 50px; color: #ff8a9b; }
+.ban-text { font-size: 22px !important; color: var(--ink) !important; margin: 10px 0; }
+.ban-reason { text-align: left; font-size: 21px; line-height: 1.4; padding: 14px 18px; border-radius: 16px; background: rgba(255,93,115,0.12); border: 2px solid rgba(255,93,115,0.35); overflow-wrap: anywhere; }
+.ban-label { display: block; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #ff9aa9; margin-bottom: 2px; }
+.ban-when { font-size: 19px !important; margin: 12px 0 4px; }
+.ban-when:empty { display: none; }
+.ban-what { font-size: 18px !important; margin: 4px 0 0; }
+.ban-dialog .big-btn { font-size: 20px; padding: 12px 20px; white-space: nowrap; }
+.ban-dialog .big-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+.ban-msg { font-size: 17px !important; min-height: 22px; margin: 10px 0 0; }
+.acct-chip.restricted { border-color: rgba(255,93,115,0.6); }
+.acct-ban-tag { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #fff; background: #c4202f; padding: 3px 8px; border-radius: 999px; }
