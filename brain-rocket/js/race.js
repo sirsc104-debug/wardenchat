@@ -14,7 +14,7 @@ const Race = (function () {
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const n = v => Number(v || 0).toLocaleString();
   const click = () => { if (typeof Sound !== 'undefined') Sound.click(); };
-  const avatar = name => `<span class="acct-avatar" aria-hidden="true">${esc(String(name || '?')[0].toUpperCase())}</span>`;
+  const avatar = name => ProfilePictures.html(name);
   const MODE_NAME = { easy: '🧒 Owen', medium: 'Medium', hard: 'Hard' };
   const LENS = [30, 60, 120], MAX = 8, POLL = 1500;
   const CODE_CHARS = '23456789ABCDEFGHJKMNPQRSTVWXYZ';

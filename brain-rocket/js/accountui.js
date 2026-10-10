@@ -94,7 +94,7 @@ const AccountUI = (function () {
     if (t.crashed) return '💥 0 today';
     return `🎯 <b>${n(t.score)}</b> today${t.bulls ? ` · ${t.bulls} bullseye${t.bulls === 1 ? '' : 's'}` : ''}`;
   }
-  const avatar = (name, cls) => `<span class="acct-avatar${cls ? ' ' + cls : ''}" aria-hidden="true">${esc(String(name || '?')[0].toUpperCase())}</span>`;
+  const avatar = (name, cls) => ProfilePictures.html(name, cls);
 
   // ---- Building the dialog ---------------------------------------------------------
   function field(name, label, type, attrs, hint) {
@@ -150,7 +150,7 @@ const AccountUI = (function () {
           <div class="stat"><div class="s-label">Today's Bullseye</div><div class="s-value">${td && td.done ? n(td.crashed ? 0 : td.score) : '—'}</div></div>
         </div>
         <div class="dialog-btns"><button type="button" class="big-btn ghost acct-friends-btn" data-go="friends">👥 Friends${f ? ` (${nf})` : ''}${req ? `<span class="acct-badge">${req}</span>` : ''}</button><button type="button" class="big-btn" data-go="signout">Sign out</button></div>
-        <p class="acct-foot small">To change your password or delete your account, go to ${chatLink('Warden Chat')}.</p>`;
+        <p class="acct-foot small">To change your picture or password, or delete your account, go to ${chatLink('Warden Chat')}.</p>`;
     },
     signout: () => `${head('Sign out?', 'Your progress stays saved to your account. Warden Chat stays signed in.')}
       <label class="acct-check"><input type="checkbox" name="clear"> <span>Also remove it from this device<small>Pick this on a shared or school computer.</small></span></label>

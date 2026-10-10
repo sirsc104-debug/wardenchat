@@ -279,6 +279,14 @@ const Account = (function () {
     init, changed, syncNow: sync, loadFriends,
     // call any br_* function as the signed-in player (the race uses this)
     rpc: (fn, params) => rpc(fn, params),
+    pictureUrls(usernames) {
+      const go = force => token(force).then(t => call('POST', '/functions/v1/br-avatars', { usernames }, t)).then(r => {
+        if (r.status === 401 && !force) return go(true);
+        if (r.status !== 200 || !Array.isArray(r.data && r.data.pictures)) throw new ApiError('pictures_unavailable', r.status);
+        return r.data.pictures;
+      });
+      return go(false);
+    },
     signIn: (username, password) => auth('password', { email: identity(username), password }).then(signedIn),
     // Creates a Warden Chat account (Warden Chat's database makes the profile from the username).
     signUp(username, password) {

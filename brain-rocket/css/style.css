@@ -908,3 +908,7 @@ button { font-family: inherit; cursor: pointer; }
 .rr-vote { font-size: 15px; font-weight: 700; color: var(--muted); min-width: 64px; text-align: right; }
 .rr-vote.yes { color: var(--good); }
 .race-gate .big-btn { white-space: nowrap; }
+
+/* Warden profile pictures retain the existing avatar sizes and initials fallback. */
+.acct-avatar[data-br-avatar] { position: relative; overflow: hidden; flex-shrink: 0; }
+.acct-avatar[data-br-avatar] img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
