@@ -89,8 +89,7 @@ const Race = (function () {
           ${row('raceMode', [['easy', '🧒 Owen'], ['medium', 'Medium'], ['hard', 'Hard']], v => v === host.mode)}
           ${row('raceLen', LENS.map(l => [l, `${l} seconds`]), v => +v === host.len)}
           <div class="race-pick" id="racePick">${pickList()}</div>
-          <div class="ch-host-btns"><button type="button" class="big-btn" data-race="create">🏁 Create a race</button></div>
-          <p class="race-host-note">You'll get a 6-letter code too, for anyone else. Up to ${MAX} racers.</p>
+          <div class="ch-host-btns"><button type="button" class="big-btn" data-race="create" title="You also get a 6-letter code for anyone else. Up to ${MAX} racers.">🏁 Create a race</button></div>
         </div>`;
       renderInvites();
     }
@@ -99,7 +98,7 @@ const Race = (function () {
   function pickList() {
     const f = Account.friends;
     if (!f) { Account.loadFriends().then(() => { const b = $('racePick'); if (b) b.innerHTML = pickList(); }); return '<span class="race-pick-note">Loading your friends…</span>'; }
-    if (!f.friends.length) return `<span class="race-pick-note">Add friends from your account (top right) to invite them here. You'll also get a code to share. Up to ${MAX} racers.</span>`;
+    if (!f.friends.length) return '<span class="race-pick-note">No friends yet? Add them from your account, top right.</span>';
     const ids = new Set(f.friends.map(x => x.user_id));
     [...picked].forEach(id => { if (!ids.has(id)) picked.delete(id); });
     return '<span class="race-pick-label">Invite:</span>' + f.friends.map(x => `<button type="button" class="race-chip${picked.has(x.user_id) ? ' on' : ''}" data-pick="${esc(x.user_id)}" aria-pressed="${picked.has(x.user_id)}">${picked.has(x.user_id) ? '✓ ' : ''}${esc(x.username)}</button>`).join('');
@@ -108,7 +107,7 @@ const Race = (function () {
     const box = $('raceInvites');
     if (!box) return;
     box.innerHTML = invites.length
-      ? '<h4 class="race-inv-h">📨 Invites</h4>' + invites.map(i => `<div class="race-inv">${avatar(i.from_username)}<span class="race-inv-text"><b>${esc(i.from_username)}</b> invited you<small>${esc(describe(i))} · ${i.players} in</small></span>
+      ? '<h4 class="race-inv-h">📨 Invites</h4>' + invites.map(i => `<div class="race-inv">${avatar(i.from_username)}<span class="race-inv-text"><b>${esc(i.from_username)}</b> invited you<small>${esc(MODE_NAME[i.mode] || i.mode)} · ${i.len}s · ${i.players} in</small></span>
           <button type="button" class="fr-btn yes" data-race="join" data-code="${esc(i.code)}">Join</button><button type="button" class="fr-btn subtle" data-race="decline" data-id="${esc(i.race_id)}" aria-label="Decline">✕</button></div>`).join('')
       : '<p class="race-inv-none">No invites right now. Friends can invite you from their race lobby.</p>';
     tabBadge();

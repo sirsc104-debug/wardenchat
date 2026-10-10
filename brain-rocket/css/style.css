@@ -841,7 +841,8 @@ button { font-family: inherit; cursor: pointer; }
 #raceCode:focus { outline: none; border-color: var(--accent); }
 #raceCode::placeholder { font-size: 20px; letter-spacing: 0.04em; color: rgba(185,195,230,0.6); }
 #raceJoinForm .ch-preview { min-height: 0; }
-.race-invites { display: flex; flex-direction: column; gap: 6px; max-height: 128px; overflow-y: auto; }
+.race-invites { display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
+.race-inv { flex: none; }
 .race-inv-h { margin: 2px 0 0; font-size: 15px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .race-inv { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 14px; background: rgba(255,210,63,0.12); border: 1px solid rgba(255,210,63,0.35); }
 .race-inv .acct-avatar { width: 32px; height: 32px; font-size: 18px; }
@@ -894,7 +895,10 @@ button { font-family: inherit; cursor: pointer; }
 .rr-score { font-size: 21px; font-weight: 700; color: var(--accent); }
 .rr-wait { font-size: 17px; color: var(--muted); margin-top: 4px; }
 #btnAgain:disabled { opacity: 0.5; cursor: default; transform: none; }
-.race-pick { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; max-height: 92px; overflow-y: auto; }
+.race-pick { display: flex; flex-wrap: nowrap; gap: 6px; align-items: center; min-height: 34px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+.race-chip, .race-pick-label { flex: none; }
+.race-pick-note { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.race-panel .ch-box { min-height: 0; overflow: hidden; }
 .race-pick-label { font-size: 16px; font-weight: 600; color: var(--muted); }
 .race-pick-note { font-size: 16px; color: var(--muted); line-height: 1.35; }
 .race-chip { font: inherit; font-size: 16px; font-weight: 600; padding: 5px 12px; border-radius: 999px; border: 2px solid var(--panel-edge); background: transparent; color: var(--ink); }
