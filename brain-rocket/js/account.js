@@ -88,6 +88,7 @@ const Account = (function () {
 
   // ---- The Warden Chat session -------------------------------------------------------
   let sess = load(SESSION_KEY);
+  let sessionEpoch = 0;
   function keep(r) {
     const u = r.user || (sess && sess.user) || {};
     const meta = u.user_metadata || {};
@@ -100,7 +101,10 @@ const Account = (function () {
     return sess.user;
   }
   function auth(grant, body) {
+    if (grant === 'password') sessionEpoch++;
+    const boundary = sessionEpoch;
     return call('POST', '/auth/v1/token?grant_type=' + grant, body).then(r => {
+      if (boundary !== sessionEpoch) throw new ApiError('session_changed');
       if (r.status === 200 && r.data && r.data.access_token) return keep(r.data);
       throw new ApiError(errorCode(r, 'auth'), r.status);
     });
@@ -118,6 +122,7 @@ const Account = (function () {
   }
   // Call one of the br_* database functions as the signed-in player (or anonymously).
   function rpc(fn, params, anon) {
+    const boundary = sessionEpoch;
     const go = force => (anon ? Promise.resolve(null) : token(force)).then(t => call('POST', '/rest/v1/rpc/' + fn, params || {}, t)).then(r => {
       if (r.status >= 200 && r.status < 300) return r.data;
       const code = errorCode(r, 'rpc');
@@ -125,7 +130,7 @@ const Account = (function () {
       throw new ApiError(code, r.status, (r.data && r.data.message) || '');
     });
     return go(false).catch(e => {
-      if (e.code === 'unauthorized' && !anon) return refused().then(() => { throw e; });
+      if (e.code === 'unauthorized' && !anon && boundary === sessionEpoch) return refused().then(() => { throw e; });
       throw e;
     });
   }
@@ -139,12 +144,17 @@ const Account = (function () {
   let refusing = null;   // several calls refused at once share one check
   function refused() {
     if (st.status === 'restricted') return Promise.resolve();
-    if (!refusing) refusing = accountState().then(info => (info ? restricted(info) : expired()), e => { if (!e.offline) expired(); })
-      .finally(() => { refusing = null; });
+    if (!refusing) {
+      const boundary = sessionEpoch;
+      const task = accountState().then(info => { if (boundary === sessionEpoch) return info ? restricted(info) : expired(); },
+        e => { if (boundary === sessionEpoch && !e.offline) expired(); }).finally(() => { if (refusing === task) refusing = null; });
+      refusing = task;
+    }
     return refusing;
   }
   let onRestricted = null;
   function restricted(info) {
+    if (!sess || !st.user) return;
     clearTimeout(pushTimer);
     Object.assign(st, { status: 'restricted', sync: 'idle', error: null, friends: null,
       restriction: { status: info.status || 'suspended', reason: info.reason || '', until: info.restrictedUntil || null } });
@@ -154,11 +164,13 @@ const Account = (function () {
   // "Check again": back to normal if an admin has lifted it.
   function recheck() {
     if (st.status !== 'restricted' || !sess) return Promise.resolve(st.status);
-    return token(true).then(() => accountState()).then(info => {
+    const boundary = sessionEpoch;
+    return token(true).then(() => boundary === sessionEpoch ? accountState() : null).then(info => {
+      if (boundary !== sessionEpoch) return st.status;
       if (info) { restricted(info); return 'restricted'; }
       st.restriction = null;
       return signedIn(sess.user).then(() => st.status);
-    });
+    }).catch(e => { if (boundary !== sessionEpoch) return st.status; throw e; });
   }
 
   // ---- The synced progress document ---------------------------------------------------
@@ -269,6 +281,7 @@ const Account = (function () {
     return sync().then(ok => ({ user, synced: ok, restricted: st.status === 'restricted' }));
   }
   function signedOut() {
+    sessionEpoch++; refusing = null;
     clearTimeout(pushTimer);
     sess = null; save(SESSION_KEY, null); save(SYNC_KEY, null);
     Object.assign(st, { status: 'signedOut', user: null, lastSync: 0, sync: 'idle', error: null, friends: null, restriction: null });
@@ -329,7 +342,9 @@ const Account = (function () {
     signIn: (username, password) => auth('password', { email: identity(username), password }).then(signedIn),
     // Creates a Warden Chat account (Warden Chat's database makes the profile from the username).
     signUp(username, password) {
+      const boundary = ++sessionEpoch;
       return call('POST', '/auth/v1/signup', { email: identity(username), password, data: { username: username.trim() } }).then(r => {
+        if (boundary !== sessionEpoch) throw new ApiError('session_changed');
         if (r.status >= 200 && r.status < 300 && r.data && r.data.access_token) return signedIn(keep(r.data));
         if (r.status >= 200 && r.status < 300) throw new ApiError('confirm_enabled', r.status);   // project still wants email confirmation
         throw new ApiError(errorCode(r, 'auth'), r.status);

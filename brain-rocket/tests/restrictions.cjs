@@ -1,17 +1,17 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 function account(initial){
- let state=initial;const storage=new Map();
+ let state=initial,heldState=null,heldAuth=null;const storage=new Map();
  const context=vm.createContext({window:{addEventListener(){},dispatchEvent(){}},document:{addEventListener(){}},localStorage:{getItem:k=>storage.get(k),setItem:(k,v)=>storage.set(k,v),removeItem:k=>storage.delete(k)},Date,Set,Map,Promise,JSON,Math,CustomEvent:class{},setTimeout:()=>0,clearTimeout(){}});
  vm.runInContext(fs.readFileSync(path.join(__dirname,'../js/account.js'),'utf8')+'\nglobalThis.account=Account',context);
  const a=context.account;
  a.useTransport(async(method,url)=>{
-  if(url.includes('/auth/v1/token'))return {status:200,data:{access_token:'fixture',refresh_token:'refresh',expires_in:3600,user:{id:'actor',user_metadata:{username:'Actor'}}}};
-  if(url.endsWith('/my_account_state'))return {status:200,data:state};
+  if(url.includes('/auth/v1/token')){if(heldAuth)await heldAuth;return {status:200,data:{access_token:'fixture',refresh_token:'refresh',expires_in:3600,user:{id:'actor',user_metadata:{username:'Actor'}}}};}
+  if(url.endsWith('/my_account_state'))return heldState ? heldState : {status:200,data:state};
   if(url.includes('/br_')&&state.active===false)return {status:400,data:{message:'br_not_signed_in',code:'P0001'}};
   if(url.endsWith('/br_get_progress'))return {status:200,data:{doc:{bests:{},daily:{},dailyStreak:null},rev:1}};
   return {status:200,data:{}};
  });
- return {a,set:s=>state=s};
+ return {a,set:s=>state=s,delayState:()=>{let resolve;const snapshot=state;heldState=new Promise(r=>resolve=r);return ()=>resolve({status:200,data:snapshot});},delayAuth:()=>{let resolve;heldAuth=new Promise(r=>resolve=r);return resolve;}};
 }
 test('real bans and suspensions retain reason; lifting restriction resumes sync even when blind-banned',async()=>{
  for(const status of ['suspended','banned']){
@@ -23,4 +23,16 @@ test('real bans and suspensions retain reason; lifting restriction resumes sync 
 test('blind ban alone never restricts a Brain Rocket account',async()=>{
  const {a}=account({active:true,status:'active',forceLightTheme:true,blindBanAt:new Date().toISOString()});
  assert.equal((await a.signIn('Actor','fixture')).restricted,false);assert.equal(a.status,'signedIn');assert.equal(a.restriction,null);
+});
+test('a delayed restriction recheck cannot reopen a signed-out account',async()=>{
+ const {a,delayState}=account({active:false,status:'suspended',reason:'Fixture'});
+ await a.signIn('Actor','fixture');const release=delayState();const check=a.recheck();
+ await new Promise(r=>setImmediate(r));await a.signOut(false);assert.equal(a.status,'signedOut');
+ release();await check;assert.equal(a.status,'signedOut');assert.equal(a.user,null);assert.equal(a.restriction,null);
+});
+test('a delayed refresh cannot recreate a session after guest sign-out',async()=>{
+ const {a,delayAuth}=account({active:false,status:'suspended',reason:'Fixture'});
+ await a.signIn('Actor','fixture');const release=delayAuth(),check=a.recheck();
+ await new Promise(r=>setImmediate(r));await a.signOut(false);release();await check;
+ await a.init();assert.equal(a.status,'signedOut');assert.equal(a.user,null);
 });
