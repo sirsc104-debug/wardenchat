@@ -7,7 +7,8 @@
   const DIFFS = {
     owen:   { name: 'Owen (Easy)', time: 15, lives: 3, mult: 1 },
     medium: { name: 'Medium',      time: 10, lives: 2, mult: 1.5 },
-    hard:   { name: 'Hard',        time: 7,  lives: 1, mult: 2 }
+    hard:   { name: 'Hard',        time: 7,  lives: 1, mult: 2 },
+    ultra:  { name: 'Ultra',       time: 5,  lives: 1, mult: 2.5 }
   };
 
   // How far the balloon climbs for a right answer, in metres, by how close the numbers were
@@ -30,7 +31,7 @@
   ];
 
   // ---- Saving (best scores) ----------------------------------------------
-  let best = { owen: 0, medium: 0, hard: 0 };
+  let best = { owen: 0, medium: 0, hard: 0, ultra: 0 };
   try { Object.assign(best, JSON.parse(localStorage.getItem('a2o.best') || '{}')); } catch (e) { /* storage blocked */ }
   function saveBest() { try { localStorage.setItem('a2o.best', JSON.stringify(best)); } catch (e) { /* ignore */ } }
 
@@ -117,7 +118,7 @@
       photoWon: 0, photoLost: 0, used: new Set(), pstate: { pendingPhoto: false },
       left: null, right_: null, timeLeft: d.time, phase: 'ask', paused: false, killer: null, stop: -1
     };
-    G.left = Pairs.first();
+    G.left = Pairs.first(diff);
     G.used.add(G.left.id);
     G.right_ = Pairs.next(G.left, diff, G.used, G.pstate);
     G.used.add(G.right_.id);

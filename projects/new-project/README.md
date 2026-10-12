@@ -15,6 +15,9 @@ Plain HTML, CSS and JavaScript with no build step. Open `index.html` in a browse
 | Owen (Easy) | 15 s | 3 | 1.6× to 8× apart | ×1 |
 | Medium | 10 s | 2 | 1.25× to 5× apart | ×1.5 |
 | Hard | 7 s | 1 | 1.05× to 4× apart | ×2 |
+| 💀 Ultra | 5 s | 1 | Always within 10 of each other | ×2.5 |
+
+**Ultra** is the close-call mode: every matchup is two numbers 1 to 10 apart (Wayne Gretzky's 99 against 100 US senators, 1886 against 1889). Both numbers have to be exact, or a measurement converted from an exact fact: rounding can make two numbers look equal but never changes which is bigger, so converted numbers are fine as long as they don't tie. There are no ties in Ultra (a tie would be a free point), and every card that comes up has another close partner waiting, so the chain never runs dry. About 420 cards can come up in Ultra.
 
 - **Closer calls score more:** Common 10 (10× apart or more), Uncommon 25 (3–10×), Rare 50 (1.5–3×), Epic 100 (closer than 1.5×), Legendary 200 (photo finish).
 - **📸 Photo finish.** Now and then (about 1 in 16 matchups on Owen, 1 in 12 on Medium, 1 in 8 on Hard), the two numbers tie or are only a few apart: 168 hours in a week against 169 towns in Connecticut. The reveal races up, then crawls the last few numbers one at a time with a drum roll. Win and it's confetti and Legendary points; lose and it's a sad trombone and "Lost by ONE." A tie counts as right whichever way you pick.
@@ -27,9 +30,9 @@ Plain HTML, CSS and JavaScript with no build step. Open `index.html` in a browse
 
 ## The facts
 
-`js/facts.js` has 189 facts in 17 categories: Animals, Human Body, Food & Brands, Games & Toys, Movies & TV, Places, Space, Time & Math, Sports, USA, Years, Music & Words, Dinosaurs, Ocean, Tech, Vehicles, and Earth & Weather.
+There are 429 facts in 20 categories: Animals, Human Body, Food & Brands, Games & Toys, Movies & TV, Places, Space, Time & Math, Sports, USA, Years, Music & Words, Dinosaurs, Ocean, Tech, Vehicles, Earth & Weather, Pokédex Numbers, Jersey Numbers and Famous Numbers. `js/facts.js` has the first 189; `js/facts-close.js` has 240 more, picked so lots of them land within 10 of each other (Pokédex numbers, jersey numbers, famous addresses, game rules, sports clocks and court sizes, and 46 more years). They're what Ultra is built from, and they come up in every other mode too.
 
-**Same question, different units.** Every measurement (a height, length, weight, speed, temperature, length of time or amount of liquid) comes up in every unit that reads sensibly: the Empire State Building is 1,454 feet, but also 443 meters, 44,318 centimeters, 17,448 inches, 485 yards or 0.28 miles; a cheetah is 70 mph, 113 km/h or 31.3 meters per second. The same fact can come back later in a run in a different unit. With the units, the 189 facts make 533 cards and 77 photo-finish pairs. Matchups pick a fact first and then one of its units, so measurements don't crowd out everything else.
+**Same question, different units.** Every measurement (a height, length, weight, speed, temperature, length of time or amount of liquid) comes up in every unit that reads sensibly: the Empire State Building is 1,454 feet, but also 443 meters, 44,318 centimeters, 17,448 inches, 485 yards or 0.28 miles; a cheetah is 70 mph, 113 km/h or 31.3 meters per second. The same fact can come back later in a run in a different unit. With the units, the 429 facts make 864 cards and over 1,100 photo-finish pairs. Matchups pick a fact first and then one of its units, so measurements don't crowd out everything else.
 
 **Accuracy matters more here than in a normal quiz.** The number is the whole question, so one wrong fact makes a player lose unfairly. The rules:
 
@@ -49,8 +52,10 @@ To add a fact, add a line to `js/facts.js` in the right category. If two exact f
 | --- | --- |
 | `index.html` | The screens: home, game, pause, results |
 | `css/style.css` | Styles, in Brain Rocket's look (Fredoka, navy panels, bright cards) |
-| `js/facts.js` | The facts and categories |
-| `js/pairs.js` | Picks matchups: difficulty bands, photo finishes, scoring tiers |
+| `js/facts.js` | The first 189 facts, the categories and the units |
+| `js/facts-close.js` | 240 more facts that sit close together (Ultra's main supply) |
+| `js/cards.js` | Turns the facts into cards: each fact, plus each measurement in its other units |
+| `js/pairs.js` | Picks matchups: difficulty bands, Ultra's within-10 chains, photo finishes, scoring tiers |
 | `js/scene.js` | The balloon world on a canvas: orchard, barn, kites, birds, clouds, planes, stratosphere |
 | `js/audio.js` | Sound effects and the two music loops, made with Web Audio (no sound files) |
 | `js/game.js` | The game: rounds, the count-up reveal, scoring, lives, the rail, music switching, results and sharing |

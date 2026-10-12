@@ -77,6 +77,39 @@ const Pairs = (function () {
     return pool.filter(o => unrelated(f, o) && isPhoto(f, o));
   }
 
+  /* ---- Ultra: every matchup is within 10 -----------------------------------------------
+   * Both numbers have to be trustworthy to the last digit: an exact fact, or a measurement
+   * converted from one (rounding never changes which of two numbers is bigger, it can only make
+   * them look equal, so a converted number never meets an equal one). No ties: a tie would be a
+   * free point. */
+  const ULTRA_GAP = 10;
+  const trusted = c => !!(c.x || c.xs);
+  function ultraPair(a, b) {
+    if (!unrelated(a, b) || !trusted(a) || !trusted(b)) return false;
+    const gap = Math.abs(a.n - b.n);
+    return gap > 0 && gap <= ULTRA_GAP;
+  }
+  let ultraMap = null;           // card id -> its Ultra partners, worked out the first time Ultra is played
+  function ultraPartners(c) {
+    if (!ultraMap) {
+      ultraMap = new Map();
+      const ok = CARDS.filter(trusted).sort((a, b) => a.n - b.n);
+      for (const c0 of ok) ultraMap.set(c0.id, []);
+      for (let i = 0; i < ok.length; i++) {
+        for (let j = i + 1; j < ok.length && ok[j].n - ok[i].n <= ULTRA_GAP; j++) {
+          if (ultraPair(ok[i], ok[j])) { ultraMap.get(ok[i].id).push(ok[j]); ultraMap.get(ok[j].id).push(ok[i]); }
+        }
+      }
+    }
+    return ultraMap.get(c.id) || [];
+  }
+  // A partner that itself has somewhere to go next, so the chain never runs dry.
+  function nextUltra(left, used) {
+    const all = ultraPartners(left).filter(c => ultraPartners(c).some(o => o.base !== left.base));
+    const fresh = all.filter(c => !used.has(c.id));
+    return pickByFact(fresh.length ? fresh : all.length ? all : ultraPartners(left));
+  }
+
   /* A match for the left card.
    *   left     the card on the left
    *   diff     'owen' | 'medium' | 'hard'
@@ -84,6 +117,8 @@ const Pairs = (function () {
    *   state    { pendingPhoto } carried between calls
    * Returns the card for the right side. */
   function next(left, diff, used, state) {
+    if (diff === 'ultra' && ultraPartners(left).length) return nextUltra(left, used);
+    if (diff === 'ultra') diff = 'hard';     // (never expected: a card with no close partner falls back to Hard)
     let pool = CARDS.filter(f => !used.has(f.id) && f.base !== left.base);
     if (pool.length < 40) {            // nearly used everything: start over (but not the card on screen)
       used.clear(); used.add(left.id);
@@ -110,10 +145,11 @@ const Pairs = (function () {
     return pickByFact(cands);
   }
 
-  // A first card: a fact in its own unit, not a year.
-  function first() {
+  // A first card: a fact in its own unit, not a year (on Ultra: one with plenty of close partners).
+  function first(diff) {
+    if (diff === 'ultra') return pickByFact(CARDS.filter(f => !f.year && !f.converted && trusted(f) && ultraPartners(f).length >= 3));
     return pickByFact(CARDS.filter(f => !f.year && !f.converted));
   }
 
-  return { TIERS, ratio, isPhoto, tierOf, next, first };
+  return { TIERS, ratio, isPhoto, tierOf, next, first, ultraPartners };
 })();
