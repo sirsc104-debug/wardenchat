@@ -12,32 +12,34 @@ Plain HTML, CSS and JavaScript with no build step. Open `index.html` in a browse
 
 | Mode | Time per pick | Lives | Numbers | Points |
 | --- | --- | --- | --- | --- |
-| Owen (Easy) | 15 s | 3 | At least 3× apart | ×1 |
-| Medium | 10 s | 2 | 1.3× to 40× apart | ×1.5 |
+| Owen (Easy) | 15 s | 3 | 1.6× to 8× apart | ×1 |
+| Medium | 10 s | 2 | 1.25× to 5× apart | ×1.5 |
 | Hard | 7 s | 1 | 1.05× to 4× apart | ×2 |
 
 - **Closer calls score more:** Common 10 (10× apart or more), Uncommon 25 (3–10×), Rare 50 (1.5–3×), Epic 100 (closer than 1.5×), Legendary 200 (photo finish).
 - **📸 Photo finish.** Now and then (about 1 in 16 matchups on Owen, 1 in 12 on Medium, 1 in 8 on Hard), the two numbers tie or are only a few apart: 168 hours in a week against 169 towns in Connecticut. The reveal races up, then crawls the last few numbers one at a time with a drum roll. Win and it's confetti and Legendary points; lose and it's a sad trombone and "Lost by ONE." A tie counts as right whichever way you pick.
 - **Streaks:** each right answer in a row adds ×0.25, up to ×5. **Speed:** picking in the first quarter of the timer gives ×2, in the first half ×1.5.
 - A wrong pick or running out of time costs a life (🎈). When they're gone, the results show your altitude, right answers, best streak, photo finishes and the matchup that got you. **📋 Share** copies it.
-- **Altitude** is your score × 3 metres, with stops on the rail: Treetops, Rooftops, Kite Height, the Birds, Burj Khalifa Height, the Clouds, the Mountain Peaks, Mount Everest, the Jet Planes, the Stratosphere, the Balloon World Record (21,027 m), the Weather Balloons and the Edge of Space.
+- **Altitude** goes up with each right answer, by how close the numbers were: Common 40 m, Uncommon 60 m, Rare 90 m, Epic 130 m, Legendary 200 m, plus 8% for each answer in your streak (up to +80%). It doesn't depend on the difficulty. Stops on the rail: Treetops, Rooftops, Kite Height, the Birds, Burj Khalifa Height, the Clouds, the Mountain Peaks, Mount Everest, the Jet Planes, the Stratosphere, the Balloon World Record (21,027 m), the Weather Balloons and the Edge of Space.
 - Best scores per mode are saved in the browser. **Esc** pauses.
 
-**Background music**, made on the fly with Web Audio the way Brain Rocket does it (no music files). **Breeze** plays on the launch field and in the lower sky: an F–Dm–B♭–C ukulele strum with a bouncy bass, a shaker and a whistled tune every other time round. **Sky** fades in once the balloon passes the jet planes (11 km): slow, floaty pads with twinkles. The music starts on the first click or key press, drops back for a photo finish's drum roll, goes quieter while paused, and follows the 🔊 mute button. Turn it off with **🎵** on the home screen or **🎵 Music** in the pause menu; that choice is remembered in the browser.
+**Background music**, made on the fly with Web Audio the way Brain Rocket does it (no music files). **Breeze** plays on the launch field and in the lower sky: an F–Dm–B♭–C ukulele strum with a bouncy bass, a shaker and a whistled tune every other time round. **Sky** fades in once the balloon reaches the mountain peaks (5,000 m): slow, floaty pads with twinkles. The music starts on the first click or key press, drops back for a photo finish's drum roll, goes quieter while paused, and follows the 🔊 mute button. Turn it off with **🎵** on the home screen or **🎵 Music** in the pause menu; that choice is remembered in the browser.
 
 ## The facts
 
-`js/facts.js` has 110 facts in 12 categories. That makes over 5,000 possible matchups, 35 of them photo finishes.
+`js/facts.js` has 189 facts in 17 categories: Animals, Human Body, Food & Brands, Games & Toys, Movies & TV, Places, Space, Time & Math, Sports, USA, Years, Music & Words, Dinosaurs, Ocean, Tech, Vehicles, and Earth & Weather.
+
+**Same question, different units.** Every measurement (a height, length, weight, speed, temperature, length of time or amount of liquid) comes up in every unit that reads sensibly: the Empire State Building is 1,454 feet, but also 443 meters, 44,318 centimeters, 17,448 inches, 485 yards or 0.28 miles; a cheetah is 70 mph, 113 km/h or 31.3 meters per second. The same fact can come back later in a run in a different unit. With the units, the 189 facts make 533 cards and 77 photo-finish pairs. Matchups pick a fact first and then one of its units, so measurements don't crowd out everything else.
 
 **Accuracy matters more here than in a normal quiz.** The number is the whole question, so one wrong fact makes a player lose unfairly. The rules:
 
 - **Never put the number in the question.** "The number of Route 66" or "Dalmatians in 101 Dalmatians" answers itself.
-- Every fact gets the most natural unit, always shown on the card, and one fixed number (a blue whale's weight is always 165 tons).
-- `x: 1` marks a fact as **exact and unchanging** (88 piano keys, 206 bones). Only exact facts can meet in a photo finish, because when the gap is 1, a slightly-off number would flip the answer.
+- Every fact has its own unit and one fixed number (a blue whale's weight is 165 tons), and the unit is always shown on the card. Converted numbers are rounded to what the card shows (approximate facts to three significant figures, so "about 165 tons" becomes 150,000,000 grams, not 149,685,482), and the game judges the numbers exactly as shown.
+- `x: 1` marks a fact as **exact and unchanging** (88 piano keys, 206 bones). Only exact facts can meet in a photo finish, because when the gap is 1, a slightly-off number would flip the answer. A measurement in a converted unit is rounded, so it never counts as exact.
 - Facts that are approximate or can change (store counts, speeds, calories) say so in their note ("About", "As of 2025"). They only meet numbers at least 10% away from them.
 - `src` records where a number came from when it was looked up.
 
-Facts checked online for this version: Big Mac 580 calories (McDonald's US), Jersey Mike's about 145 locations in New Jersey (2025 reports), blue whale up to about 330,000 lb (NOAA), a can of Coke 140 calories and 39 g sugar, Krispy Kreme Original Glazed about 190 calories, Minnesota 11,842 lakes (Minnesota DNR). The rest are well-established facts, but **read through the list** before sharing it widely. McDonald's fries were left out because sources disagreed.
+Facts checked online for this version: Big Mac 580 calories (McDonald's US), Jersey Mike's about 145 locations in New Jersey (2025 reports), blue whale up to about 330,000 lb (NOAA), a can of Coke 140 calories and 39 g sugar, Krispy Kreme Original Glazed about 190 calories, Minnesota 11,842 lakes (Minnesota DNR). The rest, including everything in the new categories, are well-established facts written from memory, so **read through the list** before sharing it widely. McDonald's fries were left out because sources disagreed.
 
 To add a fact, add a line to `js/facts.js` in the right category. If two exact facts land within a few of each other, they become a photo finish automatically.
 
@@ -57,6 +59,10 @@ To add a fact, add a line to `js/facts.js` in the right category. If two exact f
 ## Publishing as an Artifact
 
 `python3 build-artifact.py OUT.html` bundles the game into one page for a claude.ai Artifact: the CSS and every script inlined, without the `<html>`/`<head>`/`<body>` tags the Artifact host adds itself. Rebuild and republish after changing anything. In an Artifact, **📋 Share** copies the results (the phone share sheet only opens when the game runs on its own page).
+
+## Easter egg
+
+Every so often, the rocket from Brain Rocket launches up through the sky behind the game, with the little pilot in its window. It always shows up when you get 10 right in a row.
 
 ## Not built yet
 

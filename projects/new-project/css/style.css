@@ -51,7 +51,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
   position: absolute; right: 28px; top: 10px; bottom: 24px; width: 1020px;
   display: flex; flex-direction: column; align-items: center;
 }
-.logo { position: relative; text-align: center; line-height: 0.86; margin-top: 18px; animation: drop-in 0.6s cubic-bezier(.2,1.4,.4,1); }
+.logo { position: relative; text-align: center; line-height: 0.86; margin-top: 44px; animation: drop-in 0.6s cubic-bezier(.2,1.4,.4,1); }
 .logo-l1, .logo-l2 { font-weight: 700; letter-spacing: 0.02em; }
 .logo-apples, .logo-l2 {
   background-clip: text; -webkit-background-clip: text; color: transparent;
@@ -63,20 +63,22 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
   text-shadow: 0 3px 0 #1b2550, 0 0 3px #1b2550;
 }
 .logo-l2 { font-size: 132px; background-image: linear-gradient(#ffd166, #ff8a1f 55%, #f25c05); }
+/* "SirSC's" sits on top of the title's first letters, like Brain Rocket's, pulsing bigger and smaller */
 .logo-by {
-  position: absolute; left: -96px; top: -2px; font-size: 40px; font-weight: 700; transform: rotate(-14deg);
+  position: absolute; left: 10px; top: -40px; font-size: 44px; font-weight: 700; z-index: 1;
+  transform: rotate(-14deg); transform-origin: 50% 60%; animation: by-pulse 1.6s ease-in-out infinite;
   background: linear-gradient(#ffe36b, #ff9f1c); background-clip: text; -webkit-background-clip: text; color: transparent;
   filter: drop-shadow(0 2px 0 #1b2550);
 }
 .logo-fruit { position: absolute; font-size: 72px; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.3)); animation: float 3s ease-in-out infinite; }
 .logo-fruit-a { right: -92px; top: 0; }
 .logo-fruit-o { right: -60px; bottom: -10px; animation-delay: -1.5s; }
-.tagline { margin: 12px 0 18px; font-size: 25px; text-align: center; line-height: 1.3; text-shadow: 0 2px 6px rgba(10,20,60,0.55); }
+.tagline { margin: 10px 0 14px; font-size: 25px; text-align: center; line-height: 1.3; text-shadow: 0 2px 6px rgba(10,20,60,0.55); }
 .tagline b { color: var(--accent); }
 
 .modes { display: flex; gap: 22px; }
 .mode {
-  width: 300px; height: 296px; border-radius: 28px; border: 4px solid rgba(255,255,255,0.75);
+  width: 300px; height: 280px; border-radius: 28px; border: 4px solid rgba(255,255,255,0.75);
   display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 14px;
   box-shadow: 0 10px 0 rgba(0,0,0,0.18), 0 14px 30px rgba(0,0,0,0.25);
   transition: transform 0.15s;
@@ -93,7 +95,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 .mode-best { margin-top: auto; font-weight: 700; font-size: 19px; color: #fff6c8; }
 
 .rules {
-  margin-top: 24px; width: 100%; background: var(--panel); border: 2px solid var(--panel-edge);
+  margin-top: 18px; width: 100%; background: var(--panel); border: 2px solid var(--panel-edge);
   border-radius: 24px; padding: 18px 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 30px;
   font-size: 19px; line-height: 1.35; color: var(--muted); backdrop-filter: blur(6px);
 }
@@ -268,6 +270,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 
 /* ---------- Animations ---------- */
 @keyframes drop-in { from { transform: translateY(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes by-pulse { 0%, 100% { transform: rotate(-14deg) scale(1); } 50% { transform: rotate(-14deg) scale(1.18); } }
 @keyframes float { 50% { transform: translateY(-12px) rotate(6deg); } }
 @keyframes bump { 40% { transform: scale(1.25); } }
 @keyframes flicker { to { transform: scale(1.15) rotate(6deg); } }
@@ -283,5 +286,5 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
   80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-30px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .logo-fruit, .cnum.hidden-num, .photo-banner, .rail-stop.next { animation: none; }
+  .logo-by, .logo-fruit, .cnum.hidden-num, .photo-banner, .rail-stop.next { animation: none; }
 }

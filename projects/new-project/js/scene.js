@@ -327,6 +327,86 @@ const Scene = (function () {
     ctx.restore();
   }
 
+  // ---- Easter egg: the rocket from Brain Rocket, flying past ------------------
+  // Same shapes and colours as Brain Rocket's rocket, drawn nose-up around its nozzle at (0, 0).
+  function brainRocket() {
+    // flame
+    const L = 70 * (1 + Math.sin(st.t * 40) * 0.08 + Math.sin(st.t * 23) * 0.06);
+    const layer = (w, l, col) => {
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.moveTo(-w, 0); ctx.quadraticCurveTo(-w * 1.1, l * 0.45, 0, l);
+      ctx.quadraticCurveTo(w * 1.1, l * 0.45, w, 0); ctx.closePath(); ctx.fill();
+    };
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    layer(17, L, '#ff7a1a'); layer(11, L * 0.72, '#ffd23f'); layer(5, L * 0.4, '#ffffff');
+    ctx.restore();
+    // fins
+    for (const d of [-1, 1]) {
+      ctx.fillStyle = '#e8364f';
+      ctx.beginPath(); ctx.moveTo(d * 32, -70); ctx.lineTo(d * 66, -12); ctx.lineTo(d * 66, 8); ctx.lineTo(d * 30, -16); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#b8243b';
+      ctx.beginPath(); ctx.moveTo(d * 66, -12); ctx.lineTo(d * 66, 8); ctx.lineTo(d * 56, 2); ctx.closePath(); ctx.fill();
+    }
+    // nozzle
+    const ng = ctx.createLinearGradient(-26, 0, 26, 0);
+    ng.addColorStop(0, '#4a5060'); ng.addColorStop(0.5, '#9aa2b4'); ng.addColorStop(1, '#3e4352');
+    ctx.fillStyle = ng;
+    ctx.beginPath(); ctx.moveTo(-18, -18); ctx.lineTo(18, -18); ctx.lineTo(25, 0); ctx.lineTo(-25, 0); ctx.closePath(); ctx.fill();
+    // body, with the red nose cone and stripes
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(-31, -16); ctx.lineTo(-35, -110);
+    ctx.quadraticCurveTo(-35, -165, 0, -200); ctx.quadraticCurveTo(35, -165, 35, -110);
+    ctx.lineTo(31, -16); ctx.closePath();
+    const bg = ctx.createLinearGradient(-35, 0, 35, 0);
+    bg.addColorStop(0, '#b9c1d4'); bg.addColorStop(0.35, '#ffffff'); bg.addColorStop(1, '#a7b0c4');
+    ctx.fillStyle = bg; ctx.fill(); ctx.clip();
+    ctx.fillStyle = '#e8364f'; ctx.fillRect(-40, -210, 80, 62);
+    ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(-20, -210, 10, 62);
+    ctx.fillStyle = '#e8364f'; ctx.fillRect(-40, -46, 80, 10);
+    ctx.fillStyle = '#2a3350'; ctx.fillRect(-40, -34, 80, 4);
+    ctx.restore();
+    // window and its little pilot, waving hello
+    ctx.fillStyle = '#7b8499'; ctx.beginPath(); ctx.arc(0, -105, 19, 0, TAU); ctx.fill();
+    const wg = ctx.createRadialGradient(-5, -110, 2, 0, -105, 15);
+    wg.addColorStop(0, '#7fd3ff'); wg.addColorStop(1, '#173a8a');
+    ctx.fillStyle = wg; ctx.beginPath(); ctx.arc(0, -105, 14, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#ffd7a8'; ctx.beginPath(); ctx.arc(0, -101, 6.5, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#222';
+    ctx.beginPath(); ctx.arc(-2.3, -102, 1.1, 0, TAU); ctx.arc(2.3, -102, 1.1, 0, TAU); ctx.fill();
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(0, -100.5, 2.2, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.beginPath(); ctx.ellipse(-6, -112, 4, 2.5, -0.6, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#c62a42'; ctx.fillRect(-4, -60, 8, 66);
+  }
+
+  // It shows up rarely on its own (and the game sends it when you hit a 10 streak).
+  let egg = null, eggWait = rand(40, 90);
+  function launchEgg() {
+    if (egg) return;
+    // it launches up through the open sky on the left, where the matchup panel doesn't cover it
+    // (and to one side of the balloon, so its smoke trail doesn't cross it)
+    const right = Math.min(540, W * 0.33);
+    const x = Math.random() < 0.5 ? rand(50, Math.max(60, BX - 160)) : rand(Math.min(right - 10, BX + 160), right);
+    egg = { x, y: H + 60, vx: (x < BX ? 1 : -1) * rand(20, 90), vy: -rand(330, 420), s: rand(0.4, 0.5), trail: 0 };
+  }
+  function drawEgg(dt) {
+    eggWait -= dt;
+    if (eggWait <= 0) { eggWait = rand(70, 160); if (Math.random() < 0.45) launchEgg(); }
+    if (!egg) return;
+    egg.x += egg.vx * dt; egg.y += egg.vy * dt;
+    const ang = Math.atan2(egg.vy, egg.vx) + Math.PI / 2;    // the nose points along its path
+    egg.trail += dt;
+    while (egg.trail > 0.03) {
+      egg.trail -= 0.03;
+      fx.push({ kind: 'puff', x: egg.x - Math.sin(ang) * -6, y: egg.y + Math.cos(ang) * 6, vx: rand(-15, 15), vy: rand(-15, 15), life: 1.2, max: 1.2, r: rand(5, 9) * egg.s * 2 });
+    }
+    ctx.save(); ctx.translate(egg.x, egg.y); ctx.rotate(ang); ctx.scale(egg.s, egg.s);
+    brainRocket();
+    ctx.restore();
+    if (egg.x < -300 || egg.x > W + 300 || egg.y < -400) egg = null;
+  }
+
   function drawDecor() {
     const top = st.cam + (BASE + 200), bot = st.cam - (H - BASE) - 200;
     for (let ci = Math.max(1, Math.floor(bot / CHUNK)); ci <= Math.floor(top / CHUNK); ci++) {
@@ -447,6 +527,10 @@ const Scene = (function () {
         p.vy += 260 * dt; p.vx *= 0.99; p.rot += p.vr * dt;
         ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.globalAlpha = Math.min(1, a * 2);
         ctx.fillStyle = p.c; ctx.fillRect(-p.r, -p.r * 0.5, p.r * 2, p.r); ctx.restore();
+      } else if (p.kind === 'puff') {
+        p.r += 14 * dt;
+        ctx.globalAlpha = a * 0.7; ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill();
       } else if (p.kind === 'smoke') {
         p.r += 30 * dt;
         ctx.globalAlpha = a * 0.6; ctx.fillStyle = '#7d8597';
@@ -477,6 +561,7 @@ const Scene = (function () {
     drawStars();
     drawSun();
     drawDecor();
+    drawEgg(dt);
     drawGround();
     drawBalloon();
     drawFx(dt);
@@ -509,6 +594,7 @@ const Scene = (function () {
         fx.push({ kind: 'confetti', x: x == null ? rand(0, W) : x + rand(-100, 100), y: x == null ? rand(-60, -10) : H * 0.4, vx: rand(-160, 160), vy: x == null ? rand(40, 180) : rand(-520, -200), rot: rand(0, TAU), vr: rand(-8, 8), life: 2.6, max: 2.6, c: cols[i % cols.length], r: rand(4, 7) });
       }
     },
+    rocket: launchEgg,
     balloonX: () => BX
   };
 })();

@@ -10,8 +10,9 @@
     hard:   { name: 'Hard',        time: 7,  lives: 1, mult: 2 }
   };
 
-  // Altitude is the score times this, in metres.
-  const M_PER_POINT = 3;
+  // How far the balloon climbs for a right answer, in metres, by how close the numbers were
+  // (Common to Legendary). It doesn't depend on the difficulty, and a streak adds 8% a step, up to 80%.
+  const CLIMB = [40, 60, 90, 130, 200];
   const STOPS = [
     { alt: 20,     name: 'The Treetops',         ic: '🌳' },
     { alt: 60,     name: 'The Rooftops',         ic: '🏠' },
@@ -37,7 +38,9 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
   const commas = n => Math.round(n).toLocaleString('en-US');
-  const numText = f => f.show || (f.year ? String(f.n) : commas(f.n));
+  const decimalsOf = n => (String(n).split('.')[1] || '').length;
+  const fmtNum = (v, dec) => v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+  const numText = f => f.show || (f.year ? String(f.n) : fmtNum(f.n, decimalsOf(f.n)));
   const withUnit = f => numText(f) + (f.u ? ' ' + f.u : '');
   const fmtAlt = m => (m < 10000 ? commas(m) + ' m' : (m / 1000).toFixed(1) + ' km');
   const pickOne = a => a[Math.floor(Math.random() * a.length)];
@@ -85,7 +88,7 @@
   function toggleSound() { Sound.setMuted(!Sound.isMuted()); syncSoundButtons(); Sound.click(); }
 
   // Music: Breeze down low, Sky once the balloon is past the jet planes.
-  const SKY_ALT = 11000;
+  const SKY_ALT = 5000;
   const trackNow = () => (G && G.alt >= SKY_ALT ? 'sky' : 'breeze');
   let musicStarted = false;
   function startMusic() {          // browsers only allow sound after a click or key press
@@ -235,7 +238,8 @@
     const el = $('cardR').querySelector('.cnum');
     el.classList.remove('hidden-num');
     $('cardR').classList.add('counting');
-    const show = v => { el.textContent = f.year ? String(Math.round(v)) : commas(v); };
+    const dec = decimalsOf(f.n);
+    const show = v => { el.textContent = f.year ? String(Math.round(v)) : fmtNum(v, dec); };
     const big = f.n > 1e12;
     const crawlFrom = photo ? Math.max(0, Math.max(Math.min(f.n, other.n) - 3, f.n - 8)) : f.n;
     const fastTo = photo ? crawlFrom : f.n;
@@ -311,6 +315,7 @@
       const T = Pairs.TIERS[tier];
       const speed = usedFrac < 0.25 ? 2 : usedFrac < 0.5 ? 1.5 : 1;
       const streakMult = Math.min(5, 1 + 0.25 * G.streak);
+      const climb = Math.round(CLIMB[tier] * (1 + 0.08 * Math.min(G.streak, 10)));
       pts = Math.round(T.pts * G.d.mult * speed * streakMult);
       G.streak++; G.right++;
       G.bestStreak = Math.max(G.bestStreak, G.streak);
@@ -318,6 +323,7 @@
       if (G.d.mult > 1) parts.push(`×${G.d.mult} ${G.diff}`);
       if (speed > 1) parts.push(`×${speed} speed`);
       if (streakMult > 1) parts.push(`×${streakMult.toFixed(2)} streak`);
+      parts.push(`🎈 up ${climb} m`);
       ptsText = parts.join(' &nbsp;·&nbsp; ');
       if (photo) {
         G.photoWon++;
@@ -336,7 +342,8 @@
       $('cardR').classList.add('right-ans');
       Scene.burn(photo ? 2.2 : 1.3);
       Sound.burner();
-      addScore(pts);
+      addScore(pts, climb);
+      if (G.streak === 10) setTimeout(() => Scene.rocket(), 900);   // a visitor from Brain Rocket
     } else {
       G.lives--; G.streak = 0;
       G.killer = { L, R, g, photo, gap };
@@ -371,10 +378,10 @@
     else advance();
   }
 
-  function addScore(pts) {
+  function addScore(pts, climb) {
     const before = G.alt;
     G.score += pts;
-    G.alt = G.score * M_PER_POINT;
+    G.alt += climb;
     Scene.setAlt(G.alt);
     if (musicStarted) Sound.music(trackNow());
     const pill = document.querySelector('.score-pill');

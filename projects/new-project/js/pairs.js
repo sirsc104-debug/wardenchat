@@ -1,8 +1,9 @@
 /* Apples to Oranges — picking matchups.
  *
  * How hard a matchup is depends only on how close the two numbers are (the bigger one
- * divided by the smaller one). Owen gets numbers far apart, Hard gets them close.
+ * divided by the smaller one). Owen gets numbers a fair way apart, Hard gets them close.
  * Every so often a "photo finish" comes up: two exact numbers that tie or are a few apart.
+ * Matchups are picked from CARDS (facts.js): every fact, plus each measurement in its other units.
  */
 'use strict';
 
@@ -17,7 +18,7 @@ const Pairs = (function () {
   ];
 
   // Which closeness each difficulty draws from, as [smallest, biggest] ratio.
-  const BANDS = { owen: [3, Infinity], medium: [1.3, 40], hard: [1.05, 4] };
+  const BANDS = { owen: [1.6, 8], medium: [1.25, 5], hard: [1.05, 4] };
   // Chance that the next matchup tries to be a photo finish.
   const PHOTO_CHANCE = { owen: 1 / 16, medium: 1 / 11, hard: 1 / 7 };
 
@@ -44,13 +45,13 @@ const Pairs = (function () {
   }
 
   // Facts from the same category are too related to meet, except years
-  // (Toy Story against the first Pokémon games is fair and fun).
+  // (Toy Story against the first Pokémon games is fair and fun). A fact never meets itself.
   function unrelated(a, b) {
-    return a !== b && (a.c !== b.c || a.c === 'years');
+    return a.base !== b.base && (a.c !== b.c || a.c === 'years');
   }
 
-  // Could this pair come up at all? An approximate number needs a clear gap, so
-  // "about 70 mph" never decides a matchup by a hair.
+  // Could this pair come up at all? An approximate or converted number needs a clear gap,
+  // so "about 70 mph" never decides a matchup by a hair.
   function fair(a, b) {
     if (!unrelated(a, b)) return false;
     if (isPhoto(a, b)) return true;
@@ -61,27 +62,38 @@ const Pairs = (function () {
 
   const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 
+  // Pick a fact first, then one of its units, so a measurement with eight units
+  // comes up about as often as a plain count.
+  function pickByFact(cards) {
+    const byBase = new Map();
+    for (const c of cards) {
+      if (!byBase.has(c.base)) byBase.set(c.base, []);
+      byBase.get(c.base).push(c);
+    }
+    return pick(pick([...byBase.values()]));
+  }
+
   function photoPartners(f, pool) {
     return pool.filter(o => unrelated(f, o) && isPhoto(f, o));
   }
 
   /* A match for the left card.
-   *   left     the fact on the left
+   *   left     the card on the left
    *   diff     'owen' | 'medium' | 'hard'
-   *   used     Set of fact ids already shown this run
+   *   used     Set of card ids already shown this run (the same fact can come back in another unit)
    *   state    { pendingPhoto } carried between calls
-   * Returns the fact for the right card. */
+   * Returns the card for the right side. */
   function next(left, diff, used, state) {
-    let pool = FACTS.filter(f => !used.has(f.id) && f !== left);
-    if (pool.length < 12) {            // nearly used everything: start over (but not the card on screen)
+    let pool = CARDS.filter(f => !used.has(f.id) && f.base !== left.base);
+    if (pool.length < 40) {            // nearly used everything: start over (but not the card on screen)
       used.clear(); used.add(left.id);
-      pool = FACTS.filter(f => f !== left);
+      pool = CARDS.filter(f => f.base !== left.base);
     }
 
     // Photo finish: on a lucky roll (or one left over from last time), if this card has a near-twin.
     if (state.pendingPhoto || Math.random() < PHOTO_CHANCE[diff]) {
       const twins = photoPartners(left, pool);
-      if (twins.length) { state.pendingPhoto = false; return pick(twins); }
+      if (twins.length) { state.pendingPhoto = false; return pickByFact(twins); }
       state.pendingPhoto = true;       // this card has none: steer toward one that does
     }
 
@@ -92,15 +104,15 @@ const Pairs = (function () {
     if (!cands.length) cands = pool;
 
     if (state.pendingPhoto) {
-      const setUp = cands.filter(f => photoPartners(f, pool).some(o => o !== left));
-      if (setUp.length) return pick(setUp);
+      const setUp = cands.filter(f => f.x && photoPartners(f, pool).some(o => o.base !== left.base));
+      if (setUp.length) return pickByFact(setUp);
     }
-    return pick(cands);
+    return pickByFact(cands);
   }
 
-  // A first card that has somewhere to go.
+  // A first card: a fact in its own unit, not a year.
   function first() {
-    return pick(FACTS.filter(f => !f.year));
+    return pickByFact(CARDS.filter(f => !f.year && !f.converted));
   }
 
   return { TIERS, ratio, isPhoto, tierOf, next, first };
