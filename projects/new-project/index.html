@@ -2,15 +2,152 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>New Project</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Apples to Oranges</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<main class="page">
-  <h1>New Project</h1>
-  <p id="status">Loading…</p>
-</main>
-<script src="js/main.js"></script>
+<div id="viewport">
+<div id="stage">
+  <canvas id="scene"></canvas>
+
+  <!-- ===== Home ===== -->
+  <div id="home">
+    <div class="corner-btns">
+      <button class="round-btn" id="btnSound" type="button" title="Sound on/off" aria-label="Sound on/off">🔊</button>
+      <button class="round-btn" id="btnFull" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+    </div>
+
+    <div class="home-main">
+      <div class="logo" aria-label="SirSC's Apples to Oranges">
+        <span class="logo-by">SirSC's</span>
+        <div class="logo-l1"><span class="logo-apples">APPLES</span> <span class="logo-to">to</span></div>
+        <div class="logo-l2">ORANGES</div>
+        <span class="logo-fruit logo-fruit-a" aria-hidden="true">🍎</span>
+        <span class="logo-fruit logo-fruit-o" aria-hidden="true">🍊</span>
+      </div>
+      <p class="tagline">Two totally unrelated numbers. Is the next one <b>higher</b> or <b>lower</b>?<br>Every right answer lifts your balloon higher into the sky.</p>
+
+      <div class="modes">
+        <button class="mode mode-owen" data-diff="owen" type="button">
+          <span class="mode-ic">🧒</span>
+          <span class="mode-name">OWEN</span>
+          <span class="mode-pill">Easy</span>
+          <span class="mode-desc">15s per pick · 3 lives<br>numbers far apart</span>
+          <span class="mode-best" data-best="owen">Not flown yet</span>
+        </button>
+        <button class="mode mode-medium" data-diff="medium" type="button">
+          <span class="mode-ic">🎈</span>
+          <span class="mode-name">MEDIUM</span>
+          <span class="mode-pill">×1.5 points</span>
+          <span class="mode-desc">10s per pick · 2 lives<br>closer numbers</span>
+          <span class="mode-best" data-best="medium">Not flown yet</span>
+        </button>
+        <button class="mode mode-hard" data-diff="hard" type="button">
+          <span class="mode-ic">⚡</span>
+          <span class="mode-name">HARD</span>
+          <span class="mode-pill">×2 points</span>
+          <span class="mode-desc">7s per pick · 1 life<br>really close numbers</span>
+          <span class="mode-best" data-best="hard">Not flown yet</span>
+        </button>
+      </div>
+
+      <div class="rules">
+        <div><b>🍎🍊 Apples to oranges.</b> A blue whale against Jersey Mike's. Ignore the units: just say if the number on the right is higher or lower.</div>
+        <div><b>🎯 Close calls pay.</b> The closer the two numbers, the more it's worth: Common 10 up to Legendary 200.</div>
+        <div><b>📸 Photo finish!</b> Sometimes they're a tie or only 1 apart. Get it right and celebrate. Get it wrong… sorry.</div>
+        <div><b>🔥 Keep a streak.</b> Each right answer in a row adds ×0.25, up to ×5. Pick in the first quarter of the timer for ×2.</div>
+      </div>
+    </div>
+    <div class="version">v0.1</div>
+  </div>
+
+  <!-- ===== Game ===== -->
+  <div id="game" class="hidden">
+    <div id="rail" aria-hidden="true"></div>
+
+    <div id="hud">
+      <div class="hud-pill score-pill"><span class="pill-label">Score</span><span class="pill-value" id="hudScore">0</span></div>
+      <div class="hud-pill alt-pill"><span class="pill-label">Altitude</span><span class="pill-value" id="hudAlt">0 m</span><span class="pill-sub" id="hudNext"></span></div>
+      <div class="hud-spacer"></div>
+      <div class="hud-pill streak-pill" id="streakPill"><span class="pill-label">Streak</span><span class="pill-value"><span id="hudStreak">0</span> <span class="flame">🔥</span></span><span class="pill-sub" id="hudMult">next ×1.00</span></div>
+      <div class="hud-pill lives-pill"><span class="pill-label">Lives</span><div class="lives" id="hudLives"></div></div>
+      <button class="hud-pill pause-btn" id="btnPause" type="button" aria-label="Pause">⏸</button>
+    </div>
+
+    <div id="reached" class="hidden">
+      <div class="reached-ic" id="reachedIc"></div>
+      <div class="reached-kicker">You reached</div>
+      <div class="reached-name" id="reachedName"></div>
+      <div class="reached-sub" id="reachedSub"></div>
+    </div>
+
+    <div id="panel">
+      <div class="panel-top">
+        <div class="prompt">Is the right one <b class="hi-word">higher</b> or <b class="lo-word">lower</b>?</div>
+        <div class="qcount" id="qcount">Matchup 1</div>
+      </div>
+      <div class="cards">
+        <div class="card card-l" id="cardL"></div>
+        <div class="vs">VS</div>
+        <div class="card card-r" id="cardR"></div>
+        <div class="photo-banner hidden" id="photoBanner">📸 PHOTO FINISH</div>
+      </div>
+      <div class="timer-row">
+        <div class="timer"><div class="timer-fill" id="timerFill"></div></div>
+        <div class="timer-sub"><span id="speedLabel"></span><span id="timerSecs"></span></div>
+      </div>
+      <div class="result" id="result">
+        <div class="result-quip" id="resultQuip"></div>
+        <div class="result-line" id="resultLine"></div>
+        <div class="result-pts" id="resultPts"></div>
+      </div>
+      <div class="legend">
+        <span>Closer numbers score more:</span>
+        <span class="t1">● Common 10</span><span class="t2">● Uncommon 25</span><span class="t3">● Rare 50</span><span class="t4">● Epic 100</span><span class="t5">● Legendary 200</span>
+      </div>
+    </div>
+    <div id="flash"></div>
+  </div>
+
+  <!-- ===== Pause ===== -->
+  <div id="pause" class="modal hidden">
+    <div class="modal-box">
+      <h2>Paused</h2>
+      <button class="big-btn go" id="btnResume" type="button">▶ Resume</button>
+      <button class="big-btn" id="btnPauseSound" type="button">🔊 Sound on</button>
+      <button class="big-btn quiet" id="btnQuit" type="button">Quit to home</button>
+    </div>
+  </div>
+
+  <!-- ===== Game over ===== -->
+  <div id="over" class="modal hidden">
+    <div class="modal-box over-box">
+      <div class="over-kicker" id="overKicker">Medium</div>
+      <h2 id="overTitle">Out of hot air!</h2>
+      <div class="over-score" id="overScore">0</div>
+      <div class="over-best" id="overBest"></div>
+      <div class="over-stats" id="overStats"></div>
+      <div class="over-killer" id="overKiller"></div>
+      <div class="over-btns">
+        <button class="big-btn go" id="btnAgain" type="button">↻ Play again</button>
+        <button class="big-btn" id="btnShare" type="button">📋 Share</button>
+        <button class="big-btn quiet" id="btnHome" type="button">Home</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="rotate"><div>📱↻<br>Turn your phone sideways</div></div>
+</div>
+</div>
+
+<script src="js/facts.js"></script>
+<script src="js/pairs.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/game.js"></script>
 </body>
 </html>
