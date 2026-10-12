@@ -1,0 +1,31 @@
+:root {
+  --bg: #faf9f5;
+  --fg: #1f1e1d;
+  --muted: #6b6a66;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1f1e1d;
+    --fg: #f0eee6;
+    --muted: #a3a19a;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 16px;
+}
+
+#status { color: var(--muted); }
