@@ -25,10 +25,11 @@ Plain HTML, CSS and JavaScript with no build step. Open `index.html` in a browse
 
 ## The facts
 
-`js/facts.js` has 110 facts in 12 categories. That makes over 5,000 possible matchups, 44 of them photo finishes.
+`js/facts.js` has 110 facts in 12 categories. That makes over 5,000 possible matchups, 35 of them photo finishes.
 
 **Accuracy matters more here than in a normal quiz.** The number is the whole question, so one wrong fact makes a player lose unfairly. The rules:
 
+- **Never put the number in the question.** "The number of Route 66" or "Dalmatians in 101 Dalmatians" answers itself.
 - Every fact gets the most natural unit, always shown on the card, and one fixed number (a blue whale's weight is always 165 tons).
 - `x: 1` marks a fact as **exact and unchanging** (88 piano keys, 206 bones). Only exact facts can meet in a photo finish, because when the gap is 1, a slightly-off number would flip the answer.
 - Facts that are approximate or can change (store counts, speeds, calories) say so in their note ("About", "As of 2025"). They only meet numbers at least 10% away from them.
