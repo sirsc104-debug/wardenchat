@@ -91,6 +91,42 @@ const Sound = (function () {
         }
         if (i % 2 === 0) tone(hz(ch[(i / 2) % 4] + 24), E * 2.5, { type: 'sine', vol: 0.045, t, out, attack: 0.04 });
         if (i % 8 === 5) tone(hz(ch[3] + 36), 0.9, { type: 'sine', vol: 0.025, t, out });
+      } },
+    // Real Size, the dragon ride: an adventure theme. D – Bm – G – A, a harp, timpani and a horn tune.
+    dragon: { bpm: 100, vol: 0.5, echo: 3, fb: 0.3, steps: 64,
+      chords: [[50, 54, 57], [47, 50, 54], [43, 47, 50], [45, 49, 52]],
+      tune: [74, 0, 0, 76, 78, 0, 74, 0, 71, 0, 0, 74, 76, 0, 0, 0, 67, 0, 71, 74, 79, 0, 78, 76, 76, 0, 0, 0, 73, 0, 0, 0],
+      step(i, t, out, E) {
+        const j = i % 32, ch = this.chords[Math.floor(j / 8)], k = j % 8;
+        tone(hz(ch[[0, 1, 2, 1][k % 4]] + 12 + (k >= 4 ? 12 : 0)), E * 1.2, { type: 'triangle', vol: 0.04, t, out });   // harp
+        if (k === 0) { tone(hz(ch[0] - 12), 0.5, { type: 'sine', vol: 0.18, t, out, to: hz(ch[0] - 14) }); noise(0.12, { vol: 0.08, freq: 140, type: 'lowpass', t, out }); }
+        if (k === 4) tone(hz(ch[0] - 12), 0.3, { type: 'sine', vol: 0.1, t, out });
+        const m = this.tune[j];
+        if (m && i >= 32) tone(hz(m - 12), E * 2.2, { type: 'triangle', vol: 0.08, t, out, vibrato: 4, attack: 0.06 });   // horn
+      } },
+    // Guess the Number, the endless tree: a skippy plucked tune with a woodblock and a flute.
+    forest: { bpm: 124, vol: 0.45, echo: 2, fb: 0.2, steps: 64,
+      chords: [[55, 59, 62], [52, 55, 59], [48, 52, 55], [50, 54, 57]],
+      tune: [79, 0, 76, 79, 81, 0, 79, 0, 76, 0, 74, 0, 72, 74, 76, 0, 74, 0, 72, 0, 71, 72, 74, 0, 79, 0, 78, 0, 74, 0, 0, 0],
+      step(i, t, out, E) {
+        const j = i % 32, ch = this.chords[Math.floor(j / 8)], k = j % 8;
+        if (k % 2 === 0) tone(hz(ch[(k / 2) % 3] + 12), 0.12, { type: 'triangle', vol: 0.06, t, out });   // pizzicato
+        if (k === 0 || k === 4) tone(hz(ch[0] - 12), E * 1.4, { type: 'sine', vol: 0.12, t, out });
+        if (k % 2 === 1) noise(0.03, { vol: 0.05, freq: 2200, q: 6, t, out });   // woodblock
+        const m = this.tune[j];
+        if (m && i >= 32) tone(hz(m), E * 1.6, { type: 'sine', vol: 0.05, t, out, vibrato: 5, attack: 0.03 });   // flute
+      } },
+    // Halloween: a spooky waltz-ish loop in E minor. Music box, organ bass, bells and a wobbly theremin.
+    spooky: { bpm: 100, vol: 0.85, echo: 3, fb: 0.35, steps: 64,
+      chords: [[52, 55, 59], [48, 52, 55], [45, 48, 52], [47, 51, 54]],
+      tune: [71, 0, 67, 0, 64, 0, 71, 0, 72, 0, 71, 0, 67, 0, 64, 0, 69, 0, 72, 0, 76, 0, 75, 0, 71, 0, 0, 0, 66, 0, 71, 0],
+      step(i, t, out, E) {
+        const j = i % 32, ch = this.chords[Math.floor(j / 8)], k = [0, 1, 2, 3, 2, 1, 0, 1][j % 8];
+        tone(hz((k === 3 ? ch[0] + 12 : ch[k]) + 24), E * 1.6, { type: 'triangle', vol: 0.08, t, out });   // music box
+        if (j % 4 === 0) { tone(hz(ch[0] - 12), E * 3.6, { type: 'sine', vol: 0.15, t, out }); tone(hz(ch[0]), E * 3.6, { type: 'square', vol: 0.022, t, out }); }
+        if (j % 8 === 0) tone(hz(ch[0] + 36), 1.2, { type: 'sine', vol: 0.05, t, out });   // bell
+        const m = this.tune[j];
+        if (m && i >= 32) tone(hz(m), E * 1.9, { type: 'sine', vol: 0.1, t, out, vibrato: 8, attack: 0.08 });   // theremin
       } }
   };
   const M = { name: null, track: null, gain: null, step: 0, next: 0, timer: null, level: 1, enabled: true };
@@ -180,6 +216,16 @@ const Sound = (function () {
       tone(1567.98, 0.6, { type: 'sine', vol: 0.15, at: 0.36, to: 2093 });
     },
     timeout() { tone(440, 0.5, { type: 'square', vol: 0.08, to: 220 }); },
+    // Halloween: the heartbeat as the ghost gets close, and its hiss before a lunge
+    heartbeat() {
+      tone(60, 0.16, { type: 'sine', vol: 0.5, to: 40 });
+      tone(56, 0.16, { type: 'sine', vol: 0.4, at: 0.22, to: 38 });
+    },
+    hiss() { noise(0.9, { vol: 0.22, freq: 4500, type: 'highpass' }); tone(220, 0.8, { type: 'sawtooth', vol: 0.05, to: 120 }); },
+    caught() { tone(300, 1.2, { type: 'sawtooth', vol: 0.1, to: 60 }); noise(1.2, { vol: 0.2, freq: 300, type: 'lowpass' }); },
+    escape() { [523.25, 783.99, 1046.5].forEach((f, i) => tone(f, 0.2, { type: 'square', vol: 0.08, at: i * 0.07 })); },
+    roar() { tone(180, 0.6, { type: 'sawtooth', vol: 0.09, to: 90 }); noise(0.6, { vol: 0.16, freq: 500, q: 0.5 }); },
+    chirp() { tone(1600, 0.08, { type: 'sine', vol: 0.08, to: 2200 }); tone(1800, 0.08, { type: 'sine', vol: 0.06, at: 0.1, to: 2400 }); },
     milestone() {
       [783.99, 987.77, 1174.66, 1567.98].forEach((f, i) => tone(f, 0.3, { type: 'triangle', vol: 0.12, at: i * 0.08 }));
     },

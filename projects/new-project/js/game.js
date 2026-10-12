@@ -1,39 +1,172 @@
-/* Apples to Oranges — the game: screens, matchups, the reveal, scoring and saving bests. */
+/* Apples to Oranges — the game: the mode picker, the four ways to play, the reveal, scoring and bests.
+ *
+ *   classic  🎈 Higher or lower. The hot-air balloon climbs with every right answer.
+ *   size     🐉 Real Size. Two measurements in different units: which is really bigger? A dragon ride.
+ *   guess    🐿️ Guess the Number. One card at a time; the squirrel climbs a tree that never ends.
+ *   haunt    🎃 Halloween (limited time). Higher or lower while a ghost chases the jack-o'-lantern balloon.
+ */
 'use strict';
 
 (function () {
   const $ = id => document.getElementById(id);
 
-  const DIFFS = {
+  // ---- The modes --------------------------------------------------------------------------
+  // The Halloween event ends once November 1, 2026 is over, in the player's own time zone.
+  const HAUNT_ENDS = new Date(2026, 10, 2);
+  const EVENT_ON = Date.now() < HAUNT_ENDS.getTime();
+
+  const BASE_DIFFS = {
     owen:   { name: 'Owen (Easy)', time: 15, lives: 3, mult: 1 },
     medium: { name: 'Medium',      time: 10, lives: 2, mult: 1.5 },
     hard:   { name: 'Hard',        time: 7,  lives: 1, mult: 2 },
     ultra:  { name: 'Ultra',       time: 5,  lives: 1, mult: 2.5 }
   };
+  const GUESS_TIME = { owen: 20, medium: 20, hard: 20, ultra: 15 };
+  // Halloween: how far the ghost lunges on a wrong answer, by difficulty (metres)
+  const LUNGE = { owen: 15, medium: 20, hard: 25, ultra: 30 };
+  // Halloween: how far a right answer pushes you ahead before the difficulty and streak (Common to Legendary)
+  const PUSH = [8, 16, 27, 46, 77];
 
-  // How far the balloon climbs for a right answer, in metres, by how close the numbers were
-  // (Common to Legendary). It doesn't depend on the difficulty, and a streak adds 8% a step, up to 80%.
+  const TYPES = {
+    classic: {
+      world: 'classic', lifeIcon: '🎈', lifeName: 'Lives', heightLabel: 'Altitude',
+      tagline: 'Two totally unrelated numbers. Is the next one <b>higher</b> or <b>lower</b>?<br>Every right answer lifts your balloon higher into the sky.',
+      rules: [
+        '<b>🍎🍊 Apples to oranges.</b> A blue whale against Jersey Mike’s. Ignore the units: just say if the number on the right is higher or lower.',
+        '<b>🎯 Close calls pay.</b> The closer the two numbers, the more it’s worth: Common 10 up to Legendary 200.',
+        '<b>📸 Photo finish!</b> Sometimes they’re a tie or only 1 apart. Get it right and celebrate. Get it wrong… sorry.',
+        '<b>🔥 Keep a streak.</b> Each right answer in a row adds ×0.25, up to ×5. Pick in the first quarter of the timer for ×2.'
+      ],
+      info: {
+        owen: '15s per pick · 3 lives<br>numbers 1.6× to 8× apart',
+        medium: '10s per pick · 2 lives<br>closer numbers',
+        hard: '7s per pick · 1 life<br>really close numbers',
+        ultra: '5s per pick · 1 life<br>always within 10'
+      }
+    },
+    size: {
+      world: 'size', lifeIcon: '🔥', lifeName: 'Fire', heightLabel: 'Altitude',
+      tagline: 'Same kind of thing, different units. Which one is <b>actually bigger</b>?<br>Every right answer lifts your dragon higher.',
+      rules: [
+        '<b>📏 Real size.</b> 555 feet against 330 meters: the bigger number isn’t always the bigger thing. Pick what’s really bigger.',
+        '<b>🪤 Watch for traps.</b> When the smaller thing has the bigger number, a right answer pays ×1.5.',
+        '<b>🎯 Close calls pay.</b> The closer the real sizes, the more it’s worth: within 10% is Legendary.',
+        '<b>🔥 Keep a streak.</b> Each right answer in a row adds ×0.25, up to ×5. Pick in the first quarter of the timer for ×2.'
+      ],
+      info: {
+        owen: '15s per pick · 3 lives<br>sizes 2× apart or more',
+        medium: '10s per pick · 2 lives<br>closer, about half traps',
+        hard: '7s per pick · 1 life<br>within 2×, mostly traps',
+        ultra: '5s per pick · 1 life<br>within 10%'
+      }
+    },
+    guess: {
+      world: 'guess', lifeIcon: '🌰', lifeName: 'Acorns', heightLabel: 'Height',
+      tagline: 'One number at a time. <b>How close can you guess it?</b><br>Every good guess sends your squirrel up a tree that never ends.',
+      rules: [
+        '<b>🎯 Get close.</b> Within 1% is a Bullseye (200). Within 5%, 10%, 25% and 50% still score. Years count in years off.',
+        '<b>🌰 Mind your acorns.</b> A guess more than 50% off (or out of time) drops an acorn. No acorns left, no more climbing.',
+        '<b>🐿️ Owen, Medium, Hard.</b> Owen picks from four answers, Medium slides, Hard and Ultra type the number.',
+        '<b>🔥 Keep a streak.</b> Each scoring guess in a row adds ×0.25, up to ×5. Answer in the first quarter of the timer for ×2.'
+      ],
+      info: {
+        owen: 'pick from 4 answers<br>20s · 3 acorns',
+        medium: 'slide to your guess<br>20s · 2 acorns',
+        hard: 'type the number<br>20s · 1 acorn',
+        ultra: 'type it, within 5%<br>15s · 1 acorn'
+      }
+    },
+    haunt: {
+      world: 'haunt', heightLabel: 'Distance',
+      tagline: '🎃 Limited time! A ghost is chasing your balloon. Every right answer<br>blasts you ahead. How far can you get?',
+      rules: [
+        '<b>👻 Outrun the ghost.</b> It closes in while you think, and slowly speeds up. Closer calls push it further back.',
+        '<b>🎃 Halloween facts.</b> Every matchup has one: candy, spooky movies, monsters, pumpkins and more.',
+        '<b>💥 Wrong answers hurt.</b> The ghost lunges closer: 15 m on Owen, 20 on Medium, 25 on Hard, 30 on Ultra.',
+        '<b>🔥 Keep a streak.</b> Each right answer in a row pushes harder. No timer and no lives: just get as far as you can.'
+      ],
+      info: {
+        owen: '+8 m to +77 m per answer<br>wrong: it lunges 15 m',
+        medium: '+12 m to +115 m per answer<br>wrong: it lunges 20 m',
+        hard: '+16 m to +154 m per answer<br>wrong: it lunges 25 m',
+        ultra: 'within 10 · never pauses<br>and it lunges on its own!'
+      }
+    }
+  };
+  const TYPE_ORDER = ['classic', 'size', 'guess', 'haunt'].filter(t => t !== 'haunt' || EVENT_ON);
+
+  // How far the climbers go for a right answer, in metres, by how close it was (Common to Legendary).
+  // It doesn't depend on the difficulty; a streak adds 8% a step, up to 80%.
   const CLIMB = [40, 60, 90, 130, 200];
-  const STOPS = [
-    { alt: 20,     name: 'The Treetops',         ic: '🌳' },
-    { alt: 60,     name: 'The Rooftops',         ic: '🏠' },
-    { alt: 150,    name: 'Kite Height',          ic: '🪁' },
-    { alt: 400,    name: 'The Birds',            ic: '🐦' },
-    { alt: 828,    name: 'Burj Khalifa Height',  ic: '🏙️' },
-    { alt: 2000,   name: 'The Clouds',           ic: '☁️' },
-    { alt: 5000,   name: 'The Mountain Peaks',   ic: '🏔️' },
-    { alt: 8849,   name: 'Mount Everest',        ic: '🗻' },
-    { alt: 11000,  name: 'The Jet Planes',       ic: '✈️' },
-    { alt: 15000,  name: 'The Stratosphere',     ic: '🌌' },
-    { alt: 21027,  name: 'The Balloon World Record', ic: '🏆', sub: 'Vijaypat Singhania flew a hot-air balloon to 21,027 m in 2005' },
-    { alt: 35000,  name: 'The Weather Balloons', ic: '🎈' },
-    { alt: 100000, name: 'The Edge of Space',    ic: '🚀' }
-  ];
+  const GUESS_CLIMB = [0, 40, 60, 90, 130, 200];
 
-  // ---- Saving (best scores) ----------------------------------------------
-  let best = { owen: 0, medium: 0, hard: 0, ultra: 0 };
-  try { Object.assign(best, JSON.parse(localStorage.getItem('a2o.best') || '{}')); } catch (e) { /* storage blocked */ }
-  function saveBest() { try { localStorage.setItem('a2o.best', JSON.stringify(best)); } catch (e) { /* ignore */ } }
+  const STOPS = {
+    classic: [
+      { alt: 20,     name: 'The Treetops',         ic: '🌳' },
+      { alt: 60,     name: 'The Rooftops',         ic: '🏠' },
+      { alt: 150,    name: 'Kite Height',          ic: '🪁' },
+      { alt: 400,    name: 'The Birds',            ic: '🐦' },
+      { alt: 828,    name: 'Burj Khalifa Height',  ic: '🏙️' },
+      { alt: 2000,   name: 'The Clouds',           ic: '☁️' },
+      { alt: 5000,   name: 'The Mountain Peaks',   ic: '🏔️' },
+      { alt: 8849,   name: 'Mount Everest',        ic: '🗻' },
+      { alt: 11000,  name: 'The Jet Planes',       ic: '✈️' },
+      { alt: 15000,  name: 'The Stratosphere',     ic: '🌌' },
+      { alt: 21027,  name: 'The Balloon World Record', ic: '🏆', sub: 'Vijaypat Singhania flew a hot-air balloon to 21,027 m in 2005' },
+      { alt: 35000,  name: 'The Weather Balloons', ic: '🎈' },
+      { alt: 100000, name: 'The Edge of Space',    ic: '🚀' }
+    ],
+    size: [
+      { alt: 20,    name: 'The Village Rooftops', ic: '🏘️' },
+      { alt: 70,    name: 'The Castle Towers',    ic: '🏰' },
+      { alt: 180,   name: 'The Waterfall Cliffs', ic: '💧' },
+      { alt: 500,   name: 'The Mountain Pass',    ic: '⛰️' },
+      { alt: 1200,  name: 'The Floating Islands', ic: '🏝️' },
+      { alt: 2500,  name: 'The Clouds',           ic: '☁️' },
+      { alt: 5000,  name: 'The Sky Castle',       ic: '🏯' },
+      { alt: 12000, name: 'Above the Storm',      ic: '⛈️' },
+      { alt: 18000, name: 'The Dragon’s Peak', ic: '🐲' },
+      { alt: 25000, name: 'The Northern Lights',  ic: '🌌' },
+      { alt: 40000, name: 'The Stars',            ic: '✨' }
+    ],
+    guess: [
+      { alt: 20,    name: 'The Bird Feeder',      ic: '🐦' },
+      { alt: 60,    name: 'The First Branch',     ic: '🌿' },
+      { alt: 150,   name: 'The Owl’s Hollow',  ic: '🦉' },
+      { alt: 350,   name: 'The Woodpecker’s Door', ic: '🚪' },
+      { alt: 700,   name: 'Above the Forest',     ic: '🌲' },
+      { alt: 1500,  name: 'The Autumn Leaves',    ic: '🍂' },
+      { alt: 2500,  name: 'Into the Fog',         ic: '🌫️' },
+      { alt: 5000,  name: 'The Cloud Branches',   ic: '☁️' },
+      { alt: 10000, name: 'The Sky Nest',         ic: '🪺' },
+      { alt: 15000, name: 'The Jet Stream',       ic: '✈️' },
+      { alt: 40000, name: 'The Edge of Space',    ic: '🚀', sub: 'And the tree keeps going' }
+    ],
+    haunt: [
+      { alt: 0,    name: 'The Pumpkin Patch',  ic: '🎃' },
+      { alt: 400,  name: 'The Corn Maze',      ic: '🌽' },
+      { alt: 900,  name: 'The Graveyard',      ic: '🪦' },
+      { alt: 1500, name: 'The Dark Forest',    ic: '🌲' },
+      { alt: 2300, name: 'The Witch’s Hollow', ic: '🧙' },
+      { alt: 3200, name: 'The Bat Caves',      ic: '🦇' },
+      { alt: 4300, name: 'The Haunted Mansion', ic: '🏚️' },
+      { alt: 5600, name: 'The Blood Moon',     ic: '🌕' },
+      { alt: 7200, name: 'The Spirit Realm',   ic: '👻' },
+      { alt: 9000, name: 'Beyond the Veil',    ic: '🌀' }
+    ]
+  };
+
+  // ---- Saving (best scores, and the last tab) ----------------------------------------------
+  // best[type][difficulty]: the best score (Halloween: the best distance, in metres)
+  const best = { classic: {}, size: {}, guess: {}, haunt: {} };
+  try {
+    Object.assign(best, JSON.parse(localStorage.getItem('a2o.best2') || '{}'));
+    const old = JSON.parse(localStorage.getItem('a2o.best') || 'null');   // bests from before there were modes
+    if (old && !Object.keys(best.classic).length) best.classic = old;
+  } catch (e) { /* storage blocked */ }
+  function saveBest() { try { localStorage.setItem('a2o.best2', JSON.stringify(best)); } catch (e) { /* ignore */ } }
+  let type = 'classic';
+  try { const t = localStorage.getItem('a2o.type'); if (TYPE_ORDER.includes(t)) type = t; } catch (e) { /* ignore */ }
 
   // ---- Formatting ----------------------------------------------------------
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -44,7 +177,18 @@
   const numText = f => f.show || (f.year ? String(f.n) : fmtNum(f.n, decimalsOf(f.n)));
   const withUnit = f => numText(f) + (f.u ? ' ' + f.u : '');
   const fmtAlt = m => (m < 10000 ? commas(m) + ' m' : (m / 1000).toFixed(1) + ' km');
+  const fmtTime = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
   const pickOne = a => a[Math.floor(Math.random() * a.length)];
+  const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
+  // a guess or slider value, rounded to something readable
+  function niceVal(v, card) {
+    if (card.year) return Math.round(v);
+    if (v >= 1000) { const p = Math.pow(10, Math.floor(Math.log10(v)) - 2); return Math.round(v / p) * p; }
+    if (v >= 100) return Math.round(v);
+    if (v >= 10) return Math.round(v * 10) / 10;
+    return Math.round(v * 100) / 100;
+  }
+  const valText = (v, card) => (card.year ? String(Math.round(v)) : fmtNum(v, decimalsOf(v)));
 
   function textSize(s) { return s.length > 46 ? 25 : s.length > 32 ? 29 : 34; }
   function numSize(s) { return s.length <= 6 ? 90 : s.length <= 9 ? 76 : s.length <= 13 ? 56 : 36; }
@@ -59,25 +203,11 @@
     stage.style.width = w + 'px'; stage.style.height = h + 'px';
     stage.style.transform = `scale(${scale})`;
     Scene.resize(w, h, scale);
+    placeGlider(true);
   }
   window.addEventListener('resize', fit);
 
-  // ---- Home ----------------------------------------------------------------
-  function showBests() {
-    document.querySelectorAll('[data-best]').forEach(el => {
-      const b = best[el.dataset.best];
-      el.textContent = b ? 'Best: ' + commas(b) : 'Not flown yet';
-    });
-  }
-  function goHome() {
-    G = null;
-    $('game').classList.add('hidden'); $('over').classList.add('hidden'); $('pause').classList.add('hidden');
-    $('home').classList.remove('hidden');
-    showBests();
-    Scene.setAlt(0);
-    Sound.musicLevel(1);
-    if (musicStarted) Sound.music('breeze');
-  }
+  // ---- Sound and music ---------------------------------------------------------
   function syncSoundButtons() {
     const m = Sound.isMuted();
     $('btnSound').textContent = m ? '🔇' : '🔊';
@@ -87,10 +217,13 @@
     $('btnPauseMusic').textContent = on ? '🎵 Music on' : '🎵 Music off';
   }
   function toggleSound() { Sound.setMuted(!Sound.isMuted()); syncSoundButtons(); Sound.click(); }
-
-  // Music: Breeze down low, Sky once the balloon is past the jet planes.
-  const SKY_ALT = 5000;
-  const trackNow = () => (G && G.alt >= SKY_ALT ? 'sky' : 'breeze');
+  // Every mode has its own tune. Classic switches to the dreamy Sky tune high up.
+  const trackNow = () => {
+    if (type === 'size') return 'dragon';
+    if (type === 'guess') return 'forest';
+    if (type === 'haunt') return 'spooky';
+    return G && G.alt >= 5000 ? 'sky' : 'breeze';
+  };
   let musicStarted = false;
   function startMusic() {          // browsers only allow sound after a click or key press
     if (musicStarted) return;
@@ -105,6 +238,65 @@
     syncSoundButtons();
   }
 
+  // ---- Home: the mode picker -------------------------------------------------------------
+  function placeGlider(instant) {
+    const btn = document.querySelector(`.type-btn[data-type="${type}"]`), gl = $('typeGlider');
+    if (!btn || !gl) return;
+    gl.classList.toggle('instant', !!instant);
+    gl.style.width = btn.offsetWidth + 'px';
+    gl.style.transform = `translateX(${btn.offsetLeft}px)`;
+    if (instant) { void gl.offsetWidth; gl.classList.remove('instant'); }
+  }
+  function bestText(t, diff) {
+    const b = best[t][diff];
+    if (!b) return t === 'haunt' ? 'Not flown yet' : t === 'guess' ? 'Not climbed yet' : 'Not flown yet';
+    return 'Best: ' + (t === 'haunt' ? fmtAlt(b) : commas(b));
+  }
+  function showModeCards() {
+    const T = TYPES[type];
+    document.querySelectorAll('.mode').forEach(c => {
+      const d = c.dataset.diff;
+      c.querySelector('.mode-desc').innerHTML = T.info[d];
+      c.querySelector('.mode-best').textContent = bestText(type, d);
+    });
+  }
+  function rulesHTML() { return TYPES[type].rules.map(r => `<div>${r}</div>`).join(''); }
+  // Switching tabs: the highlight glides over, the world slides across in the same direction,
+  // and the rules box blurs, changes its text while it's blurred, then sharpens.
+  function setType(t, animate) {
+    const from = TYPE_ORDER.indexOf(type), to = TYPE_ORDER.indexOf(t);
+    type = t;
+    try { localStorage.setItem('a2o.type', t); } catch (e) { /* ignore */ }
+    document.querySelectorAll('.type-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.type === t);
+      b.setAttribute('aria-pressed', b.dataset.type === t ? 'true' : 'false');
+    });
+    placeGlider(!animate);
+    Scene.setWorld(TYPES[t].world, animate && from !== to ? (to > from ? 1 : -1) : 0);
+    if (t === 'haunt') Scene.chase({ gap: 26, dist: 0, play: false, reset: true });
+    $('tagline').innerHTML = `<span>${TYPES[t].tagline}</span>`;
+    showModeCards();
+    const rules = $('rules');
+    if (animate && from !== to) {
+      rules.classList.add('switching');
+      clearTimeout(setType.t1); clearTimeout(setType.t2);
+      setType.t1 = setTimeout(() => { rules.innerHTML = rulesHTML(); setType.t2 = setTimeout(() => rules.classList.remove('switching'), 40); }, 270);
+    } else rules.innerHTML = rulesHTML();
+    if (musicStarted) Sound.music(trackNow());
+  }
+
+  function goHome() {
+    G = null;
+    $('game').classList.add('hidden'); $('over').classList.add('hidden'); $('pause').classList.add('hidden');
+    $('home').classList.remove('hidden');
+    Scene.setAlt(0);
+    if (type === 'haunt') Scene.chase({ play: false, gap: 26, warn: 0 });
+    showModeCards();
+    placeGlider(true);
+    Sound.musicLevel(1);
+    if (musicStarted) Sound.music(trackNow());
+  }
+
   // ---- A run ----------------------------------------------------------------
   let G = null;
 
@@ -112,90 +304,153 @@
     Sound.unlock(); Sound.click();
     startMusic();
     Sound.musicLevel(1);
-    const d = DIFFS[diff];
+    const base = BASE_DIFFS[diff];
+    const d = Object.assign({}, base, type === 'guess' ? { time: GUESS_TIME[diff] } : {});
     G = {
-      diff, d, score: 0, alt: 0, lives: d.lives, streak: 0, bestStreak: 0, right: 0, asked: 0,
-      photoWon: 0, photoLost: 0, used: new Set(), pstate: { pendingPhoto: false },
-      left: null, right_: null, timeLeft: d.time, phase: 'ask', paused: false, killer: null, stop: -1
+      type, diff, d, score: 0, alt: 0, lives: d.lives, streak: 0, bestStreak: 0, right: 0, asked: 0,
+      photoWon: 0, photoLost: 0, traps: 0, bullseyes: 0, used: new Set(), pstate: { pendingPhoto: false },
+      left: null, right_: null, card: null, timeLeft: d.time, phase: 'ask', paused: false, killer: null,
+      // Halloween chase
+      gap: 60, dist: 0, qtime: 0, survived: 0, closest: Infinity, pausesLeft: 1, lungeIn: 8 + Math.random() * 5, warn: 0, dodged: 0, beatIn: 0
     };
-    G.left = Pairs.first(diff);
-    G.used.add(G.left.id);
-    G.right_ = Pairs.next(G.left, diff, G.used, G.pstate);
-    G.used.add(G.right_.id);
-
     $('home').classList.add('hidden'); $('over').classList.add('hidden');
     $('game').classList.remove('hidden');
     Scene.setAlt(0, true);
+    setupPanel();
     buildRail();
     renderLives();
+    if (type === 'guess') {
+      G.card = Pairs.nextGuess(G.used);
+    } else if (type === 'size') {
+      G.left = Pairs.firstSize(diff); G.used.add(G.left.id);
+      G.right_ = Pairs.nextSize(G.left, diff, G.used); G.used.add(G.right_.id);
+    } else {
+      G.left = Pairs.first(diff, type); G.used.add(G.left.id);
+      G.right_ = Pairs.next(G.left, diff, G.used, G.pstate, type); G.used.add(G.right_.id);
+    }
+    if (type === 'haunt') Scene.chase({ gap: 60, dist: 0, play: true, warn: 0, reset: true });
     updateHud();
-    renderCards(true);
+    if (type === 'guess') renderGuess(); else renderCards(true);
     newRound();
-    Sound.music('breeze');
+    Sound.music(trackNow());
+  }
+
+  // The panel changes shape with the mode: two cards, one card and an answer box, or the Halloween strip.
+  function setupPanel() {
+    const p = $('panel');
+    p.classList.toggle('strip', type === 'haunt');
+    $('cardsRow').classList.toggle('hidden', type === 'guess');
+    $('guessWrap').classList.toggle('hidden', type !== 'guess');
+    $('timerRow').classList.toggle('hidden', type === 'haunt');
+    $('chaseRow').classList.toggle('hidden', type !== 'haunt');
+    $('rail').classList.toggle('hidden', type === 'haunt');
+    $('livesPill').classList.toggle('hidden', type === 'haunt');
+    $('timePill').classList.toggle('hidden', type !== 'haunt');
+    $('hudScoreLabel').textContent = type === 'haunt' ? 'Distance' : 'Score';
+    $('hudAltLabel').textContent = type === 'haunt' ? 'Ghost behind' : TYPES[type].heightLabel;
+    $('hudLivesLabel').textContent = TYPES[type].lifeName || 'Lives';
+    $('prompt').innerHTML = type === 'size' ? 'Is the right one actually <b class="hi-word">bigger</b> or <b class="lo-word">smaller</b>?'
+      : type === 'guess' ? 'What’s the <b class="hi-word">number</b>?'
+      : 'Is the right one <b class="hi-word">higher</b> or <b class="lo-word">lower</b>?';
+    $('legend').innerHTML = type === 'guess'
+      ? '<span>How close you get:</span><span class="t1">● 50% · 10</span><span class="t2">● 25% · 25</span><span class="t3">● 10% · 50</span><span class="t4">● 5% · 100</span><span class="t5">● 1% · Bullseye 200</span>'
+      : type === 'haunt'
+        ? `<span>Pushes the ghost back:</span>${Pairs.TIERS.map((T, i) => `<span class="${T.cls}">● ${T.name} +${Math.round(PUSH[i] * G.d.mult)} m</span>`).join('')}`
+        : `<span>${type === 'size' ? 'Closer sizes' : 'Closer numbers'} score more:</span><span class="t1">● Common 10</span><span class="t2">● Uncommon 25</span><span class="t3">● Rare 50</span><span class="t4">● Epic 100</span><span class="t5">● Legendary 200</span>`;
   }
 
   function newRound() {
     G.asked++;
     G.phase = 'ask';
     G.timeLeft = G.d.time;
-    $('qcount').textContent = 'Matchup ' + G.asked;
+    $('qcount').textContent = (type === 'guess' ? 'Number ' : 'Matchup ') + G.asked;
     $('result').className = 'result';
     $('resultQuip').textContent = ''; $('resultLine').textContent = ''; $('resultPts').textContent = '';
     $('photoBanner').classList.add('hidden');
+    if (type === 'guess') focusField();
   }
 
-  function cardHTML(f, hidden) {
+  function cardHTML(f, hidden, inline) {
     const cat = CATS[f.c];
     const t = cap(f.t), num = numText(f);
+    const lbl = type === 'size' ? ['▲ Bigger', '▼ Smaller'] : ['▲ Higher', '▼ Lower'];
     return `<div class="chip"><span class="chip-ic">${cat.icon}</span>${esc(cat.name)}</div>
       <div class="ctext" style="font-size:${textSize(t)}px">${esc(t)}</div>
       <div class="cnum${hidden ? ' hidden-num' : ''}" style="font-size:${numSize(num)}px">${hidden ? '?' : esc(num)}</div>
       <div class="cunit">${esc(f.u)}</div>
+      ${type === 'size' ? '<div class="cconv"></div>' : ''}
       <div class="cnote">${hidden ? '' : esc(f.note || '')}</div>
-      ${hidden ? `<div class="choices">
-        <button class="btn-hi" type="button" data-g="higher">▲ Higher</button>
-        <button class="btn-lo" type="button" data-g="lower">▼ Lower</button>
+      ${hidden && inline ? `<div class="choices">
+        <button class="btn-hi" type="button" data-g="higher">${lbl[0]}</button>
+        <button class="btn-lo" type="button" data-g="lower">${lbl[1]}</button>
       </div>` : ''}`;
   }
 
   function renderCards(first) {
     const L = $('cardL'), R = $('cardR');
+    const strip = type === 'haunt';
     L.className = 'card card-l'; R.className = 'card card-r' + (first ? '' : ' in');
-    L.innerHTML = cardHTML(G.left, false);
-    R.innerHTML = cardHTML(G.right_, true);
-    R.querySelectorAll('[data-g]').forEach(b => b.addEventListener('click', () => guess(b.dataset.g)));
+    L.innerHTML = cardHTML(G.left, false, !strip);
+    R.innerHTML = cardHTML(G.right_, true, !strip);
+    R.style.setProperty('--shift', (L.offsetLeft - R.offsetLeft) + 'px');
+    const sc = $('stripChoices');
+    sc.className = 'strip-choices';
+    sc.innerHTML = strip ? '<button class="btn-hi" type="button" data-g="higher">▲ Higher</button><button class="btn-lo" type="button" data-g="lower">▼ Lower</button>' : '';
+    document.querySelectorAll('#cardR [data-g], #stripChoices [data-g]').forEach(b => b.addEventListener('click', () => pick(b.dataset.g)));
   }
 
   // ---- HUD -----------------------------------------------------------------
   function buildRail() {
-    $('rail').innerHTML = STOPS.slice().reverse().map((s, i) =>
-      `<div class="rail-stop" data-i="${STOPS.length - 1 - i}" title="${esc(s.name)} · ${fmtAlt(s.alt)}">${s.ic}</div>`).join('');
+    const S = STOPS[type];
+    $('rail').innerHTML = S.slice().reverse().map((s, i) =>
+      `<div class="rail-stop" data-i="${S.length - 1 - i}" title="${esc(s.name)} · ${fmtAlt(s.alt)}">${s.ic}</div>`).join('');
   }
   function renderLives() {
-    $('hudLives').innerHTML = Array.from({ length: G.d.lives }, (_, i) => `<span class="${i < G.lives ? '' : 'gone'}">🎈</span>`).join('');
+    if (type === 'haunt') return;
+    $('hudLives').innerHTML = Array.from({ length: G.d.lives }, (_, i) => `<span class="${i < G.lives ? '' : 'gone'}">${TYPES[type].lifeIcon}</span>`).join('');
   }
   function updateHud() {
-    $('hudScore').textContent = commas(G.score);
-    $('hudAlt').textContent = fmtAlt(G.alt);
-    const next = STOPS.find(s => s.alt > G.alt);
-    $('hudNext').textContent = next ? `Next stop: ${next.ic} ${next.name} · ${fmtAlt(next.alt)}` : 'Higher than anyone has ever gone!';
     $('hudStreak').textContent = G.streak;
     $('hudMult').textContent = 'next ×' + Math.min(5, 1 + 0.25 * G.streak).toFixed(2);
     const sp = $('streakPill');
     sp.classList.toggle('hot', G.streak >= 3);
     sp.classList.toggle('blazing', G.streak >= 8);
+    if (type === 'haunt') { updateChaseHud(); return; }
+    const S = STOPS[type];
+    $('hudScore').textContent = commas(G.score);
+    $('hudAlt').textContent = fmtAlt(G.alt);
+    const next = S.find(s => s.alt > G.alt);
+    $('hudNext').textContent = next ? `Next stop: ${next.ic} ${next.name} · ${fmtAlt(next.alt)}`
+      : type === 'guess' ? 'The tree keeps going…' : 'Higher than anyone has ever gone!';
     document.querySelectorAll('.rail-stop').forEach(el => {
       const i = +el.dataset.i;
-      el.classList.toggle('done', STOPS[i].alt <= G.alt);
-      el.classList.toggle('next', next === STOPS[i]);
+      el.classList.toggle('done', S[i].alt <= G.alt);
+      el.classList.toggle('next', next === S[i]);
     });
+  }
+  function updateChaseHud() {
+    const gap = Math.max(0, G.gap);
+    $('hudScore').textContent = fmtAlt(G.dist);
+    const alt = $('hudAlt');
+    alt.textContent = Math.round(gap) + ' m';
+    alt.className = 'pill-value ' + (gap > 60 ? 'danger-ok' : gap > 30 ? 'danger-mid' : 'danger-high');
+    const next = STOPS.haunt.find(s => s.alt > G.dist);
+    $('hudNext').textContent = next ? `Next: ${next.ic} ${next.name} · ${commas(next.alt - G.dist)} m` : 'Further than anyone has flown!';
+    $('hudTime').textContent = fmtTime(G.survived);
+    const fill = $('chaseFill');
+    fill.style.width = clamp(gap / 150, 0, 1) * 100 + '%';
+    fill.className = 'chase-fill' + (gap > 60 ? '' : gap > 30 ? ' mid' : ' high');
+    const ct = $('chaseText');
+    ct.textContent = G.warn > 0 ? '👻 It’s about to lunge! Answer now!' : `👻 The ghost is ${Math.round(gap)} m behind you`;
+    ct.classList.toggle('warn', G.warn > 0);
+    $('chaseSpeed').textContent = `closing at ${ghostSpeed().toFixed(1)} m/s`;
   }
 
   function showReached(s) {
     const el = $('reached');
     $('reachedIc').textContent = s.ic;
     $('reachedName').textContent = s.name;
-    $('reachedSub').textContent = s.sub || fmtAlt(s.alt) + ' up';
+    $('reachedSub').textContent = s.sub || (type === 'haunt' ? commas(s.alt) + ' m flown' : fmtAlt(s.alt) + ' up');
     el.classList.add('hidden'); void el.offsetWidth; el.classList.remove('hidden');
     clearTimeout(showReached.t);
     showReached.t = setTimeout(() => el.classList.add('hidden'), 2900);
@@ -203,28 +458,76 @@
     Scene.confetti(60, Scene.balloonX());
   }
 
+  // ---- The Halloween chase -------------------------------------------------------------
+  // The ghost closes in while a matchup is up, starting at 2.5 m/s and speeding up 0.9 m/s every minute.
+  // The balloon flies 12 m every second a matchup is up. You can be at most 150 m ahead.
+  const ghostSpeed = () => 2.5 + 0.9 * (G.qtime / 60);
+  function chaseTick(dt) {
+    const asking = G.phase === 'ask';
+    const ultra = G.diff === 'ultra';
+    if (!asking && !ultra) return;           // the chase freezes while an answer plays out (except on Ultra)
+    if (asking) G.qtime += dt;
+    G.survived += dt;
+    G.gap -= ghostSpeed() * dt;
+    G.dist += 12 * dt;
+    // Ultra: every 8 to 13 seconds of question time the ghost lunges, after a 1.5 second warning
+    if (ultra && asking) {
+      if (G.warn > 0) {
+        G.warn -= dt;
+        if (G.warn <= 0) { G.warn = 0; G.gap -= 10; Sound.bad(); G.lungeIn = 8 + Math.random() * 5; }
+      } else if ((G.lungeIn -= dt) <= 0) { G.warn = 1.5; Sound.hiss(); }
+    }
+    // the heartbeat speeds up as it gets close, and the music fades so you can hear it
+    if (G.gap < 40) {
+      G.beatIn -= dt;
+      if (G.beatIn <= 0) { Sound.heartbeat(); G.beatIn = 0.45 + Math.max(0, G.gap) / 40 * 0.8; }
+    }
+    Sound.musicLevel(clamp(G.gap / 40, 0.15, 1));
+    const before = G.distShown || 0;
+    G.distShown = G.dist;
+    const passed = STOPS.haunt.filter(s => s.alt > before && s.alt <= G.dist);
+    if (passed.length) showReached(passed[passed.length - 1]);
+    Scene.chase({ gap: Math.max(0, G.gap), dist: G.dist, warn: G.warn > 0 ? 1 : 0 });
+    updateChaseHud();
+    if (G.gap <= 0) caught();
+  }
+  function caught() {
+    if (G.phase === 'over') return;
+    G.phase = 'over';
+    G.gap = 0;
+    Scene.caught();
+    Sound.caught();
+    Sound.musicLevel(0.3);
+    setTimeout(() => { if (G) gameOver(); }, 1600);
+  }
+
   // ---- Timer loop ----------------------------------------------------------
   const portrait = window.matchMedia('(orientation: portrait) and (pointer: coarse)');
   let last = performance.now();
+  let homeDist = 0;
   function loop(now) {
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
-    if (G && G.phase === 'ask' && !G.paused && !portrait.matches) {
+    const running = G && !G.paused && !portrait.matches;
+    if (running && G.type === 'haunt' && G.phase !== 'over') chaseTick(dt);
+    if (running && G.type !== 'haunt' && G.phase === 'ask') {
       G.timeLeft -= dt;
-      if (G.timeLeft <= 0) { G.timeLeft = 0; reveal(null); }
+      if (G.timeLeft <= 0) { G.timeLeft = 0; if (G.type === 'guess') submitGuess(null); else reveal(null); }
     }
-    if (G && G.phase === 'ask') {
+    if (G && G.type !== 'haunt' && G.phase === 'ask') {
       const frac = G.timeLeft / G.d.time;
       $('timerFill').style.transform = `scaleX(${frac})`;
       $('timerSecs').textContent = Math.ceil(G.timeLeft) + 's';
       const used = 1 - frac;
       $('speedLabel').textContent = used < 0.25 ? '⚡ ×2 speed bonus' : used < 0.5 ? '⚡ ×1.5 speed bonus' : '';
     }
+    // the Halloween title screen: the balloon drifts along with the ghost behind it
+    if (!G && type === 'haunt') { homeDist += 12 * dt; Scene.chase({ dist: homeDist, gap: 26 + Math.sin(now / 900) * 6 }); }
     requestAnimationFrame(loop);
   }
 
-  // ---- Guess and reveal ----------------------------------------------------
-  function guess(g) {
+  // ---- Higher or lower (Classic, Halloween) and bigger or smaller (Real Size) ------------------
+  function pick(g) {
     if (!G || G.phase !== 'ask' || G.paused) return;
     Sound.click();
     reveal(g);
@@ -233,12 +536,12 @@
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const frame = () => new Promise(r => requestAnimationFrame(r));
 
-  // Count the hidden number up on the right card. A photo finish races most of the way,
-  // then crawls the last few numbers one at a time, slower and slower.
-  async function countUp(f, other, photo) {
-    const el = $('cardR').querySelector('.cnum');
+  // Count the hidden number up. A photo finish races most of the way, then crawls the last few
+  // numbers one at a time, slower and slower.
+  async function countUp(card, f, other, photo) {
+    const el = card.querySelector('.cnum');
     el.classList.remove('hidden-num');
-    $('cardR').classList.add('counting');
+    card.classList.add('counting');
     const dec = decimalsOf(f.n);
     const show = v => { el.textContent = f.year ? String(Math.round(v)) : fmtNum(v, dec); };
     const big = f.n > 1e12;
@@ -273,11 +576,11 @@
       await wait(350);
     }
     el.textContent = numText(f);
-    $('cardR').classList.remove('counting');
+    card.classList.remove('counting');
     // the buttons shrink to just your pick, making room for the note under the number
-    $('cardR').classList.add('revealed');
-    const note = $('cardR').querySelector('.cnote');
-    note.textContent = f.note || '';
+    card.classList.add('revealed');
+    const note = card.querySelector('.cnote');
+    if (note) note.textContent = f.note || '';
   }
 
   function flash() {
@@ -285,7 +588,18 @@
     el.classList.remove('go'); void el.offsetWidth; el.classList.add('go');
   }
 
+  const SIZE_VERB = { len: ['is longer than', 'is shorter than'], mass: ['is heavier than', 'is lighter than'], speed: ['is faster than', 'is slower than'], temp: ['is hotter than', 'is colder than'], time: ['is longer than', 'is shorter than'], vol: ['holds more than', 'holds less than'] };
+  function convText(R, L) {
+    const v = Units.round(Units.fromBase(R.real, L.mk));
+    return fmtNum(v, decimalsOf(v)) + ' ' + Units.name(L.mk);
+  }
   function sentence(L, R) {
+    if (type === 'size') {
+      const [hi, lo] = L.real > R.real ? [L, R] : [R, L];
+      const loText = lo === R ? `${withUnit(R)} = ${convText(R, L)}` : withUnit(L);
+      const hiText = hi === R ? `${withUnit(R)} = ${convText(R, L)}` : withUnit(L);
+      return `${cap(hi.t)} (${hiText}) ${SIZE_VERB[L.dim][0]} ${lo.t} (${loText}).`;
+    }
     if (L.n === R.n) return `${cap(L.t)} and ${R.t} are both ${numText(L)}!`;
     const [hi, lo] = L.n > R.n ? [L, R] : [R, L];
     return `${cap(hi.t)} (${withUnit(hi)}) beats ${lo.t} (${withUnit(lo)}).`;
@@ -295,39 +609,44 @@
     const L = G.left, R = G.right_;
     const run = G;
     G.phase = 'reveal';
-    const usedFrac = 1 - G.timeLeft / G.d.time;
-    const photo = Pairs.isPhoto(L, R), tie = L.n === R.n;
-    const ok = !!g && (tie || (g === 'higher' ? R.n > L.n : R.n < L.n));
+    const size = type === 'size', haunt = type === 'haunt';
+    const usedFrac = haunt ? 1 : 1 - G.timeLeft / G.d.time;
+    const photo = !size && Pairs.isPhoto(L, R), tie = !size && L.n === R.n;
+    const ok = !!g && (size ? (g === 'higher') === (R.real > L.real) : (tie || (g === 'higher' ? R.n > L.n : R.n < L.n)));
     const gap = Math.abs(L.n - R.n);
+    const trap = size && Pairs.isTrap(L, R);
+    const dodge = haunt && G.warn > 0 && ok;
 
-    const choices = $('cardR').querySelector('.choices');
-    if (choices) {
-      choices.classList.add('locked');
-      const btn = choices.querySelector(`[data-g="${g}"]`);
+    const box = haunt ? $('stripChoices') : $('cardR').querySelector('.choices');
+    if (box) {
+      box.classList.add('locked');
+      const btn = box.querySelector(`[data-g="${g}"]`);
       if (btn) btn.classList.add('chosen');
     }
     if (!g) Sound.timeout();
 
-    await countUp(R, L, photo);
+    await countUp($('cardR'), R, L, photo);
     if (G !== run) return;            // quit during the reveal
+    if (size) { $('cardR').querySelector('.cconv').textContent = '= ' + convText(R, L); $('cardR').classList.add('has-conv'); }
 
     const res = $('result'), quip = $('resultQuip');
     let pts = 0, quipText, quipCls, ptsText = '';
     if (ok) {
-      const tier = Pairs.tierOf(L, R);
+      const tier = size ? Pairs.sizeTier(L, R) : Pairs.tierOf(L, R);
       const T = Pairs.TIERS[tier];
       const speed = usedFrac < 0.25 ? 2 : usedFrac < 0.5 ? 1.5 : 1;
       const streakMult = Math.min(5, 1 + 0.25 * G.streak);
+      const trapMult = trap ? 1.5 : 1;
+      pts = Math.round(T.pts * G.d.mult * speed * streakMult * trapMult);
       const climb = Math.round(CLIMB[tier] * (1 + 0.08 * Math.min(G.streak, 10)));
-      pts = Math.round(T.pts * G.d.mult * speed * streakMult);
       G.streak++; G.right++;
       G.bestStreak = Math.max(G.bestStreak, G.streak);
-      const parts = [`<span class="${T.cls}">+${commas(pts)} · ${T.name}</span>`];
+      if (trap) G.traps++;
+      const parts = [`<span class="${T.cls}">${haunt ? '' : '+' + commas(pts) + ' · '}${T.name}</span>`];
       if (G.d.mult > 1) parts.push(`×${G.d.mult} ${G.diff}`);
       if (speed > 1) parts.push(`×${speed} speed`);
       if (streakMult > 1) parts.push(`×${streakMult.toFixed(2)} streak`);
-      parts.push(`🎈 up ${climb} m`);
-      ptsText = parts.join(' &nbsp;·&nbsp; ');
+      if (trap) parts.push('🪤 ×1.5 trap');
       if (photo) {
         G.photoWon++;
         quipText = tie ? 'IT’S A TIE?! Both answers count!' : gap === 1 ? 'PHOTO FINISH! By ONE!' : `PHOTO FINISH! By ${gap}!`;
@@ -336,19 +655,38 @@
         Scene.confetti(160);
         flash();
       } else {
-        quipText = tier === 3 ? pickOne(['So close!', 'Nailed it!', 'Close call!', 'Ooh, nice!'])
+        quipText = trap ? pickOne(['🪤 Trap dodged!', '🪤 Not fooled!', '🪤 Nice catch!'])
+          : tier >= 3 ? pickOne(['So close!', 'Nailed it!', 'Close call!', 'Ooh, nice!'])
           : tier === 2 ? pickOne(['Nice!', 'Good call!', 'Yep!', 'Correct!'])
           : pickOne(['Easy!', 'Obviously.', 'Too easy.', 'Yep!']);
         quipCls = 'q-good';
         Sound.good(tier);
       }
       $('cardR').classList.add('right-ans');
-      Scene.burn(photo ? 2.2 : 1.3);
-      Sound.burner();
-      addScore(pts, climb);
-      if (G.streak === 10) setTimeout(() => Scene.rocket(), 900);   // a visitor from Brain Rocket
+      if (haunt) {
+        // the points push the ghost back (no speed bonus in the chase)
+        const push = Math.round(PUSH[tier] * G.d.mult * streakMult);
+        const closeCall = G.gap < 10;
+        G.closest = Math.min(G.closest, Math.max(0, G.gap));
+        G.gap = Math.min(150, G.gap + push);
+        G.dist += push;
+        G.score += pts;
+        parts.push(`👻 pushed back ${push} m`);
+        if (dodge) { G.warn = 0; G.dodged++; G.lungeIn = 8 + Math.random() * 5; quipText = '🛡️ Lunge dodged!'; }
+        else if (closeCall) { quipText = '😱 Close escape!'; Sound.escape(); }
+        if (tier === 4) Scene.blast();
+        Scene.burn(1.3);
+        Scene.chase({ gap: G.gap, dist: G.dist, warn: 0 });
+        updateChaseHud();
+      } else {
+        parts.push(`${TYPES[type].lifeIcon === '🔥' ? '🐉' : '🎈'} up ${climb} m`);
+        if (size) { Sound.roar(); Scene.burn(1.6); } else { Scene.burn(photo ? 2.2 : 1.3); Sound.burner(); }
+        addScore(pts, climb);
+        if (G.streak === 10) setTimeout(() => Scene.rocket(), 900);   // a visitor from Brain Rocket
+      }
+      ptsText = parts.join(' &nbsp;·&nbsp; ');
     } else {
-      G.lives--; G.streak = 0;
+      G.streak = 0;
       G.killer = { L, R, g, photo, gap };
       if (photo) {
         G.photoLost++;
@@ -356,16 +694,26 @@
         quipCls = 'q-bad';
         Sound.photoLose();
       } else {
-        quipText = !g ? 'Too slow!' : Pairs.ratio(L, R) >= 10 ? 'Not even close!' : pickOne(['Nope!', 'Oof!', 'Wrong way!']);
+        quipText = !g ? 'Too slow!' : trap ? '🪤 It was a trap!' : (size ? Pairs.realRatio(L, R) : Pairs.ratio(L, R)) >= 10 ? 'Not even close!' : pickOne(['Nope!', 'Oof!', 'Wrong way!']);
         quipCls = 'q-bad';
         if (g) Sound.bad();
       }
       $('cardR').classList.add('wrong-ans');
       Scene.dip();
-      renderLives();
-      const lifeEls = $('hudLives').children;
-      if (lifeEls[G.lives]) lifeEls[G.lives].classList.add('pop');
-      updateHud();
+      if (haunt) {
+        const lunge = LUNGE[G.diff];
+        G.gap -= lunge;
+        ptsText = `<span class="t0">👻 The ghost lunges ${lunge} m closer!</span>`;
+        Sound.hiss();
+        Scene.chase({ gap: Math.max(0, G.gap) });
+        updateChaseHud();
+      } else {
+        G.lives--;
+        renderLives();
+        const lifeEls = $('hudLives').children;
+        if (lifeEls[G.lives]) lifeEls[G.lives].classList.add('pop');
+        updateHud();
+      }
     }
     quip.className = 'result-quip ' + quipCls;
     quip.textContent = quipText;
@@ -374,10 +722,11 @@
     res.classList.remove('pop'); void res.offsetWidth; res.classList.add('pop');
 
     if (photo) setTimeout(() => { if (G === run && !G.paused) Sound.musicLevel(1); }, 1800);
+    if (haunt && G.gap <= 0) { caught(); return; }
     await wait(photo ? 2700 : ok ? 1500 : 2100);
-    if (G !== run) return;
+    if (G !== run || G.phase === 'over') return;
     while (G.paused) { await wait(100); if (G !== run) return; }
-    if (G.lives <= 0) gameOver();
+    if (!haunt && G.lives <= 0) gameOver();
     else advance();
   }
 
@@ -389,7 +738,7 @@
     if (musicStarted) Sound.music(trackNow());
     const pill = document.querySelector('.score-pill');
     pill.classList.remove('bump'); void pill.offsetWidth; pill.classList.add('bump');
-    const passed = STOPS.filter(s => s.alt > before && s.alt <= G.alt);
+    const passed = STOPS[type].filter(s => s.alt > before && s.alt <= G.alt);
     if (passed.length) setTimeout(() => { if (G) showReached(passed[passed.length - 1]); }, 700);
     updateHud();
   }
@@ -400,53 +749,209 @@
     await wait(430);
     if (!G) return;
     G.left = G.right_;
-    G.right_ = Pairs.next(G.left, G.diff, G.used, G.pstate);
+    if (type === 'size') {
+      let next = Pairs.nextSize(G.left, G.diff, G.used);
+      if (!next) { G.left = Pairs.firstSize(G.diff); next = Pairs.nextSize(G.left, G.diff, G.used); }
+      G.right_ = next;
+    } else {
+      G.right_ = Pairs.next(G.left, G.diff, G.used, G.pstate, type);
+    }
     G.used.add(G.right_.id);
     renderCards(false);
     newRound();
   }
 
-  // ---- Game over and sharing -----------------------------------------------
-  function shareText() {
-    const reached = STOPS.filter(s => s.alt <= G.alt).pop();
-    const lines = [
-      `🍎 Apples to Oranges 🍊 (${G.d.name})`,
-      `${commas(G.score)} points · ${G.right} right · best streak ${G.bestStreak}`,
-      `🎈 ${reached ? 'Reached ' + reached.name : 'Never left the ground'} (${fmtAlt(G.alt)})`
-    ];
-    if (G.photoWon || G.photoLost) lines.push(`📸 Photo finishes: ${G.photoWon} won, ${G.photoLost} lost`);
-    const k = G.killer;
-    if (k) {
-      lines.push(k.photo
-        ? `💀 Lost by ${k.gap === 1 ? 'ONE' : k.gap}: ${k.L.t} (${numText(k.L)}) vs ${k.R.t} (${numText(k.R)})`
-        : `💀 Taken down by ${k.L.t} (${numText(k.L)}) vs ${k.R.t} (${numText(k.R)})`);
+  // ---- Guess the Number ---------------------------------------------------------------
+  function renderGuess() {
+    const c = G.card, cat = CATS[c.c], t = cap(c.t);
+    const card = $('cardG');
+    card.className = 'card card-g';
+    card.innerHTML = `<div class="chip"><span class="chip-ic">${cat.icon}</span>${esc(cat.name)}</div>
+      <div class="ctext" style="font-size:${textSize(t) + 2}px">${esc(t)}</div>
+      <div class="cnum hidden-num" style="font-size:96px">?</div>
+      <div class="cunit">${esc(c.u)}</div>
+      <div class="cnote"></div>`;
+    const box = $('guessInput');
+    box.className = 'guess-input';
+    const unit = c.u ? `<div class="g-unit">${esc(c.u)}</div>` : '';
+    if (G.diff === 'owen') {
+      G.choices = Pairs.guessChoices(c);
+      box.innerHTML = `<div class="g-label">Pick the right number</div><div class="g-choices">${G.choices.map((v, i) =>
+        `<button class="g-choice" type="button" data-v="${v}"><span class="k">${i + 1}</span>${esc(valText(v, c))}</button>`).join('')}</div>${unit}`;
+      box.querySelectorAll('.g-choice').forEach(b => b.addEventListener('click', () => submitGuess(+b.dataset.v)));
+    } else if (G.diff === 'medium') {
+      G.range = Pairs.guessRange(c);
+      box.innerHTML = `<div class="g-label">Slide to your guess</div><div class="g-value" id="gValue"></div>${unit}
+        <input class="g-slider" id="gSlider" type="range" min="0" max="1000" value="500" aria-label="Your guess">
+        <div class="g-ends"><span>${esc(valText(niceVal(G.range.lo, c), c))}</span><span>${esc(valText(niceVal(G.range.hi, c), c))}</span></div>
+        <button class="g-submit" id="gSubmit" type="button">✔ Guess</button>`;
+      const sl = $('gSlider');
+      const show = () => { $('gValue').textContent = valText(sliderValue(), c); };
+      sl.addEventListener('input', show); show();
+      $('gSubmit').addEventListener('click', () => submitGuess(sliderValue()));
+    } else {
+      box.innerHTML = `<div class="g-label">${G.diff === 'ultra' ? 'Type it. Only within 5% counts!' : 'Type your guess'}</div>
+        <input class="g-field" id="gField" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="?" aria-label="Your guess">${unit}
+        <button class="g-submit" id="gSubmit" type="button">✔ Guess</button>`;
+      $('gSubmit').addEventListener('click', () => submitGuess(fieldValue()));
+      $('gField').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submitGuess(fieldValue()); } });
     }
+  }
+  function sliderValue() {
+    const p = (+$('gSlider').value) / 1000, r = G.range;
+    const v = r.log ? r.lo * Math.pow(r.hi / r.lo, p) : r.lo + (r.hi - r.lo) * p;
+    return niceVal(v, G.card);
+  }
+  function fieldValue() {
+    const raw = ($('gField').value || '').replace(/[,\s]/g, '');
+    return raw === '' ? NaN : Number(raw);
+  }
+  function focusField() { const f = $('gField'); if (f) setTimeout(() => f.focus(), 50); }
+
+  async function submitGuess(v) {
+    if (!G || G.type !== 'guess' || G.phase !== 'ask' || G.paused) return;
+    if (v !== null && !(v >= 0)) { const f = $('gField'); if (f) { f.classList.remove('shake'); void f.offsetWidth; f.style.borderColor = '#ff5d73'; } return; }
+    const run = G, c = G.card;
+    G.phase = 'reveal';
+    Sound.click();
+    const usedFrac = 1 - G.timeLeft / G.d.time;
+    const box = $('guessInput');
+    box.classList.add('g-locked');
+    let r;
+    if (v === null) r = { tier: 0, off: 'Out of time' };
+    else if (G.diff === 'owen') r = v === c.n ? { tier: 4, off: 'Right answer!' } : { tier: 0, off: Pairs.scoreGuess(c, v, 'hard').off };
+    else r = Pairs.scoreGuess(c, v, G.diff);
+    if (G.diff === 'owen') box.querySelectorAll('.g-choice').forEach(b => {
+      const bv = +b.dataset.v;
+      b.classList.add(bv === c.n ? 'right' : bv === v ? 'wrong' : 'dim');
+    });
+    if (v === null) Sound.timeout();
+
+    await countUp($('cardG'), c, c, false);
+    if (G !== run) return;
+    // where your guess landed, next to the answer
+    if (v !== null && G.diff !== 'owen') {
+      const lo = c.year ? Math.min(v, c.n) - 10 : Math.min(v, c.n) / 2, hi = c.year ? Math.max(v, c.n) + 10 : Math.max(v, c.n) * 1.6;
+      const pos = x => (c.year ? (x - lo) / (hi - lo) : Math.log(Math.max(x, lo) / lo) / Math.log(hi / lo)) * 100;
+      const track = document.createElement('div');
+      track.className = 'g-track';
+      track.innerHTML = `<div class="ans" style="left:${clamp(pos(c.n), 0, 100)}%"><span class="tag">Answer</span></div><div class="you" style="left:${clamp(pos(v), 0, 100)}%"><span class="tag">You: ${esc(valText(v, c))}</span></div>`;
+      box.appendChild(track);
+    }
+
+    const T = Pairs.GUESS_TIERS[r.tier];
+    let ptsText = '', quipText, quipCls;
+    if (r.tier > 0) {
+      const speed = usedFrac < 0.25 ? 2 : usedFrac < 0.5 ? 1.5 : 1;
+      const streakMult = Math.min(5, 1 + 0.25 * G.streak);
+      const pts = Math.round(T.pts * G.d.mult * speed * streakMult);
+      const climb = Math.round(GUESS_CLIMB[r.tier] * (1 + 0.08 * Math.min(G.streak, 10)));
+      G.streak++; G.right++;
+      G.bestStreak = Math.max(G.bestStreak, G.streak);
+      const parts = [`<span class="${T.cls}">+${commas(pts)} · ${G.diff === 'owen' ? 'Right!' : T.name}</span>`];
+      if (G.d.mult > 1) parts.push(`×${G.d.mult} ${G.diff}`);
+      if (speed > 1) parts.push(`×${speed} speed`);
+      if (streakMult > 1) parts.push(`×${streakMult.toFixed(2)} streak`);
+      parts.push(`🐿️ up ${climb} m`);
+      ptsText = parts.join(' &nbsp;·&nbsp; ');
+      if (r.tier === 5) { G.bullseyes++; quipText = '🎯 BULLSEYE! A golden acorn!'; quipCls = 'q-photo'; Scene.gold(); Scene.confetti(140); Sound.photoWin(); flash(); }
+      else { quipText = G.diff === 'owen' ? pickOne(['Right!', 'Yep!', 'Got it!']) : { 4: 'So close!', 3: 'Close!', 2: 'Not bad!', 1: 'Close-ish…' }[r.tier]; quipCls = 'q-good'; Sound.good(Math.min(4, r.tier)); Sound.chirp(); }
+      $('cardG').classList.add('right-ans');
+      Scene.burn(1.2);
+      addScore(pts, climb);
+      if (G.streak === 10) setTimeout(() => Scene.rocket(), 900);
+    } else {
+      G.streak = 0;
+      G.lives--;
+      G.killer = { card: c, v };
+      quipText = v === null ? 'Too slow!' : pickOne(['Way off!', 'Not quite!', 'Oof!']);
+      quipCls = 'q-bad';
+      ptsText = `<span class="t0">🌰 Dropped an acorn</span>`;
+      if (v !== null) Sound.bad();
+      $('cardG').classList.add('wrong-ans');
+      Scene.dip();
+      renderLives();
+      const lifeEls = $('hudLives').children;
+      if (lifeEls[G.lives]) lifeEls[G.lives].classList.add('pop');
+      updateHud();
+    }
+    const res = $('result');
+    $('resultQuip').className = 'result-quip ' + quipCls;
+    $('resultQuip').textContent = quipText;
+    $('resultLine').textContent = `${cap(c.t)}: ${withUnit(c)}.` + (v === null ? '' : ` You guessed ${valText(v, c)}: ${r.off}.`);
+    $('resultPts').innerHTML = ptsText;
+    res.classList.remove('pop'); void res.offsetWidth; res.classList.add('pop');
+
+    await wait(r.tier === 5 ? 2600 : r.tier > 0 ? 2000 : 2400);
+    if (G !== run) return;
+    while (G.paused) { await wait(100); if (G !== run) return; }
+    if (G.lives <= 0) { gameOver(); return; }
+    G.card = Pairs.nextGuess(G.used);
+    renderGuess();
+    $('cardG').classList.add('in');
+    newRound();
+  }
+
+  // ---- Game over and sharing -----------------------------------------------
+  const TITLE = { classic: 'Apples to Oranges', size: 'Apples to Oranges: Real Size', guess: 'Apples to Oranges: Guess the Number', haunt: 'Apples to Oranges: Halloween' };
+  function result() { return G.type === 'haunt' ? Math.round(G.dist) : G.score; }
+  function killerText(plain) {
+    const k = G.killer;
+    if (!k) return '';
+    if (G.type === 'guess') {
+      const c = k.card;
+      return plain ? `💀 ${cap(c.t)}: ${numText(c)}${k.v == null ? ' (ran out of time)' : `, I guessed ${valText(k.v, c)}`}`
+        : `💀 ${esc(cap(c.t))}: <b>${esc(withUnit(c))}</b>${k.v == null ? ' (ran out of time)' : `. You guessed <b>${esc(valText(k.v, c))}</b>`}`;
+    }
+    const L = k.L, R = k.R;
+    const lead = k.g ? (k.photo ? `Lost by ${k.gap === 1 ? 'ONE' : k.gap}` : 'Taken down by') : 'Ran out of time on';
+    return plain ? `💀 ${lead}: ${L.t} (${withUnit(L)}) vs ${R.t} (${withUnit(R)})`
+      : `💀 ${lead}: ${esc(cap(L.t))} (<b>${esc(withUnit(L))}</b>) vs ${esc(R.t)} (<b>${esc(withUnit(R))}</b>)`;
+  }
+  function shareText() {
+    const lines = [`🍎 ${TITLE[G.type]} 🍊 (${G.d.name})`];
+    if (G.type === 'haunt') {
+      lines.push(`🎃 Flew ${fmtAlt(G.dist)} before the ghost caught me · survived ${fmtTime(G.survived)}`);
+      lines.push(`${G.right} right · best streak ${G.bestStreak}` + (isFinite(G.closest) ? ` · closest escape ${Math.round(G.closest)} m` : ''));
+    } else {
+      const reached = STOPS[G.type].filter(s => s.alt <= G.alt).pop();
+      lines.push(`${commas(G.score)} points · ${G.right} right · best streak ${G.bestStreak}`);
+      lines.push(`${G.type === 'size' ? '🐉' : G.type === 'guess' ? '🐿️' : '🎈'} ${reached ? 'Reached ' + reached.name : 'Never left the ground'} (${fmtAlt(G.alt)})`);
+      if (G.photoWon || G.photoLost) lines.push(`📸 Photo finishes: ${G.photoWon} won, ${G.photoLost} lost`);
+      if (G.bullseyes) lines.push(`🎯 Bullseyes: ${G.bullseyes}`);
+    }
+    const k = killerText(true);
+    if (k) lines.push(k);
     return lines.join('\n');
   }
 
   function gameOver() {
     G.phase = 'over';
-    Sound.over();
-    const isBest = G.score > (best[G.diff] || 0);
-    if (isBest) { best[G.diff] = G.score; saveBest(); }
-    const reached = STOPS.filter(s => s.alt <= G.alt).pop();
-
-    $('overKicker').textContent = G.d.name;
-    $('overTitle').textContent = G.right === 0 ? 'Never left the ground!' : 'Out of hot air!';
-    $('overScore').textContent = commas(G.score);
-    const ob = $('overBest');
-    ob.className = 'over-best' + (isBest && G.score > 0 ? ' new' : '');
-    ob.textContent = isBest && G.score > 0 ? '🏆 New best!' : best[G.diff] ? 'Best: ' + commas(best[G.diff]) : '';
+    if (G.type !== 'haunt') Sound.over();
+    const score = result();
+    const isBest = score > (best[G.type][G.diff] || 0);
+    if (isBest) { best[G.type][G.diff] = score; saveBest(); }
+    $('overKicker').textContent = `${{ classic: 'Classic', size: 'Real Size', guess: 'Guess the Number', haunt: 'Halloween' }[G.type]} · ${G.d.name}`;
     const stat = (v, l) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`;
-    $('overStats').innerHTML =
-      stat(fmtAlt(G.alt), reached ? esc(reached.name) : 'On the ground') +
-      stat(G.right, 'Right answers') +
-      stat(G.bestStreak, 'Best streak') +
-      stat(`${G.photoWon}/${G.photoWon + G.photoLost}`, 'Photo finishes won');
-    const k = G.killer;
-    $('overKiller').innerHTML = k
-      ? `💀 ${k.g ? (k.photo ? `Lost by <b>${k.gap === 1 ? 'ONE' : k.gap}</b>` : 'Taken down by') : 'Ran out of time on'}: ${esc(cap(k.L.t))} (<b>${esc(withUnit(k.L))}</b>) vs ${esc(k.R.t)} (<b>${esc(withUnit(k.R))}</b>)`
-      : '';
+    if (G.type === 'haunt') {
+      $('overTitle').textContent = '👻 Caught!';
+      $('overScore').textContent = fmtAlt(G.dist);
+      $('overStats').innerHTML = stat(fmtTime(G.survived), 'Survived') + stat(G.right, 'Right answers') + stat(G.bestStreak, 'Best streak')
+        + stat(isFinite(G.closest) ? Math.round(G.closest) + ' m' : '–', 'Closest escape');
+    } else {
+      const reached = STOPS[G.type].filter(s => s.alt <= G.alt).pop();
+      $('overTitle').textContent = G.right === 0 ? 'Never left the ground!' : { classic: 'Out of hot air!', size: 'Out of fire!', guess: 'Out of acorns!' }[G.type];
+      $('overScore').textContent = commas(G.score);
+      $('overStats').innerHTML =
+        stat(fmtAlt(G.alt), reached ? esc(reached.name) : 'On the ground') +
+        stat(G.right, G.type === 'guess' ? 'Scoring guesses' : 'Right answers') +
+        stat(G.bestStreak, 'Best streak') +
+        (G.type === 'guess' ? stat(G.bullseyes, 'Bullseyes') : G.type === 'size' ? stat(G.traps, 'Traps dodged') : stat(`${G.photoWon}/${G.photoWon + G.photoLost}`, 'Photo finishes won'));
+    }
+    const ob = $('overBest');
+    ob.className = 'over-best' + (isBest && score > 0 ? ' new' : '');
+    ob.textContent = isBest && score > 0 ? '🏆 New best!' : best[G.type][G.diff] ? 'Best: ' + (G.type === 'haunt' ? fmtAlt(best[G.type][G.diff]) : commas(best[G.type][G.diff])) : '';
+    $('overKiller').innerHTML = killerText(false);
     $('btnShare').textContent = '📋 Share';
     setTimeout(() => $('over').classList.remove('hidden'), 500);
   }
@@ -469,15 +974,27 @@
   }
 
   // ---- Pause ---------------------------------------------------------------
-  function setPaused(p) {
+  // Halloween gives you one pause per run (switching away from the tab always pauses).
+  function setPaused(p, forced) {
     if (!G || G.phase === 'over') return;
+    if (p && G.type === 'haunt' && !forced) {
+      if (G.pausesLeft <= 0) return;
+      G.pausesLeft--;
+    }
     G.paused = p;
     $('pause').classList.toggle('hidden', !p);
+    $('pauseNote').classList.toggle('hidden', !(G.type === 'haunt' && G.pausesLeft <= 0));
+    $('btnPause').disabled = G.type === 'haunt' && G.pausesLeft <= 0 && !p;
     Sound.musicLevel(p ? 0.35 : 1);
     syncSoundButtons();
+    if (!p && G.type === 'guess') focusField();
   }
 
   // ---- Wiring --------------------------------------------------------------
+  document.querySelectorAll('.type-btn').forEach(b => {
+    if (!TYPE_ORDER.includes(b.dataset.type)) b.hidden = true;
+    b.addEventListener('click', () => { startMusic(); if (b.dataset.type !== type) { Sound.click(); setType(b.dataset.type, true); } });
+  });
   document.querySelectorAll('.mode').forEach(b => b.addEventListener('click', () => start(b.dataset.diff)));
   $('btnSound').addEventListener('click', toggleSound);
   $('btnPauseSound').addEventListener('click', toggleSound);
@@ -497,18 +1014,31 @@
   $('btnShare').addEventListener('click', share);
 
   document.addEventListener('keydown', e => {
-    if (!G) return;
-    if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') { if (G.phase !== 'over') setPaused(!G.paused); return; }
+    if (!G) {
+      // on the title screen, ← and → switch modes
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        const i = TYPE_ORDER.indexOf(type) + (e.key === 'ArrowRight' ? 1 : -1);
+        if (TYPE_ORDER[i]) setType(TYPE_ORDER[i], true);
+      }
+      return;
+    }
+    if (e.key === 'Escape' || ((e.key === 'p' || e.key === 'P') && G.type !== 'guess')) { if (G.phase !== 'over') setPaused(!G.paused); return; }
     if (G.paused) return;
-    if (G.phase === 'over') { if (e.key === 'Enter') start(G.diff); return; }
-    if (['ArrowUp', 'w', 'W', 'h', 'H'].includes(e.key)) { e.preventDefault(); guess('higher'); }
-    else if (['ArrowDown', 's', 'S', 'l', 'L'].includes(e.key)) { e.preventDefault(); guess('lower'); }
+    if (G.phase === 'over') { if (e.key === 'Enter' && !$('over').classList.contains('hidden')) start(G.diff); return; }
+    if (G.type === 'guess') {
+      if (G.diff === 'owen' && G.phase === 'ask' && /^[1-4]$/.test(e.key) && G.choices) submitGuess(G.choices[+e.key - 1]);
+      else if (G.diff === 'medium' && G.phase === 'ask' && e.key === 'Enter') submitGuess(sliderValue());
+      return;
+    }
+    if (['ArrowUp', 'w', 'W', 'h', 'H'].includes(e.key)) { e.preventDefault(); pick('higher'); }
+    else if (['ArrowDown', 's', 'S', 'l', 'L'].includes(e.key)) { e.preventDefault(); pick('lower'); }
   });
-  document.addEventListener('visibilitychange', () => { if (document.hidden && G && G.phase === 'ask') setPaused(true); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden && G && G.phase !== 'over' && !G.paused) setPaused(true, true); });
 
-  Scene.init($('scene'));
+  Scene.init($('scene'), $('sceneOld'));
   fit();
-  showBests();
+  if (EVENT_ON) document.body.classList.add('halloween');
+  setType(type, false);
   syncSoundButtons();
   requestAnimationFrame(loop);
 })();
