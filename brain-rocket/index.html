@@ -20,7 +20,7 @@
  * Paste this whole <script> block as the first thing inside the game page's <body>.
  *
  * Optional attributes on the <script> tag:
- *   data-sound="off"        silent version; still waits for a click
+ *   data-sound="off"        silent version, no "press any key" gate
  *   data-once="session"     only play once per browser tab session
  *
  * Games can wait for it to finish:
@@ -97,19 +97,30 @@
     '#sirsc-intro .ss-pen{fill:#fff;opacity:0}' +
     '#sirsc-intro .ss-wave{position:absolute;left:50%;top:50%;width:92%;aspect-ratio:1/1;border:3px solid ' + CYAN + ';border-radius:50%;' +
       'transform:translate(-50%,-50%) scale(.6);opacity:0;box-shadow:0 0 30px ' + CYAN + ',inset 0 0 30px ' + CYAN + '}' +
-    '#sirsc-intro .ss-sig{display:flex;flex-direction:column;align-items:center;gap:2px}' +
+    '#sirsc-intro .ss-sig{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px}' +
     '#sirsc-intro .ss-name{font-weight:800;font-size:clamp(22px,6.2vmin,46px);line-height:1;letter-spacing:.22em;margin-right:-.22em;' +
       'color:#eafffd;text-shadow:0 0 18px rgba(25,245,228,.45);clip-path:inset(-20% 100% -20% 0);white-space:nowrap}' +
     '#sirsc-intro .ss-name b{color:' + CYAN + ';font-weight:800}' +
     '#sirsc-intro .ss-flourish{width:min(46vmin,300px);height:auto;overflow:visible;display:block}' +
     '#sirsc-intro .ss-flourish path{fill:none;stroke:' + CYAN + ';stroke-width:3;stroke-linecap:round;stroke-dasharray:1 2;stroke-dashoffset:1}' +
     '#sirsc-intro .ss-flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,#bffff8 0,rgba(25,245,228,.35) 35%,transparent 70%);opacity:0;pointer-events:none}' +
-    '#sirsc-intro .ss-gate{position:absolute;inset:0;display:grid;place-items:center;cursor:pointer}' +
-    '#sirsc-intro .ss-gate[hidden]{display:none}' +
-    '#sirsc-intro .ss-gate button{all:unset;cursor:pointer;color:' + CYAN + ';font-weight:600;font-size:13px;letter-spacing:.38em;' +
-      'padding:15px 22px 15px 28px;border:1px solid rgba(25,245,228,.35);border-radius:999px;animation:ss-pulse 1.8s ease-in-out infinite}' +
-    '#sirsc-intro .ss-gate button:focus-visible{outline:2px solid ' + CYAN + ';outline-offset:4px}' +
-    '@keyframes ss-pulse{0%,100%{opacity:.45;box-shadow:0 0 0 rgba(25,245,228,0)}50%{opacity:1;box-shadow:0 0 24px rgba(25,245,228,.25)}}';
+    // "Eyes in the dark" start screen (shown only when the browser needs a key press to allow sound)
+    '#sirsc-intro.ss-gating{cursor:pointer}' +
+    '#sirsc-intro .ss-fog{position:absolute;inset:-40%;background:radial-gradient(circle at 50% 50%,rgba(25,245,228,.075),transparent 42%);' +
+      'animation:ss-breathe 5s ease-in-out infinite;pointer-events:none}' +
+    '#sirsc-intro .ss-geye{fill:' + CYAN + ';transform-box:fill-box;transform-origin:center}' +
+    '#sirsc-intro .ss-cta{all:unset;position:absolute;top:0;left:50%;transform:translateX(-50%);cursor:pointer;display:flex;flex-direction:column;' +
+      'align-items:center;gap:14px;padding:10px 18px;border-radius:14px;opacity:0;animation:ss-fade 1.2s 1.4s both}' +
+    '#sirsc-intro .ss-cta:focus-visible{outline:2px solid ' + CYAN + ';outline-offset:6px}' +
+    '#sirsc-intro .ss-label{font-weight:700;font-size:clamp(13px,2.3vmin,17px);letter-spacing:.42em;margin-right:-.42em;white-space:nowrap;' +
+      'color:transparent;-webkit-background-clip:text;background-clip:text;background-size:250% 100%;' +
+      'background-image:linear-gradient(90deg,rgba(25,245,228,.4) 0 40%,#fff 50%,rgba(25,245,228,.4) 60% 100%);animation:ss-shimmer 3s ease-in-out infinite}' +
+    '#sirsc-intro .ss-sound{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.32em;margin-right:-.32em;color:rgba(234,255,253,.32);white-space:nowrap}' +
+    '#sirsc-intro .ss-sound svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}' +
+    '@keyframes ss-shimmer{0%{background-position:100% 0}55%,100%{background-position:0% 0}}' +
+    '@keyframes ss-breathe{0%,100%{opacity:.55}50%{opacity:1}}' +
+    '@keyframes ss-fade{from{opacity:0}to{opacity:1}}' +
+    '@media (prefers-reduced-motion:reduce){#sirsc-intro .ss-label,#sirsc-intro .ss-fog{animation:none}#sirsc-intro .ss-label{color:' + CYAN + '}}';
 
   var svgNS = 'http://www.w3.org/2000/svg';
   var lines = T.strokes.map(function (s) {
@@ -149,15 +160,13 @@
         '</svg>' +
       '</div>' +
     '</div>' +
-    '<div class="ss-flash"></div>' +
-    '<div class="ss-gate" hidden><button type="button">TAP OR CLICK TO START</button></div>';
+    '<div class="ss-flash"></div>';
 
   (document.body || document.documentElement).appendChild(root);
 
   var $ = function (sel) { return root.querySelector(sel); };
   var $$ = function (sel) { return Array.prototype.slice.call(root.querySelectorAll(sel)); };
   var stage = $('.ss-stage'), mark = $('.ss-mark'), logo = $('.ss-logo'), pen = $('.ss-pen');
-  var gate = $('.ss-gate');
   var strokeEls = T.strokes.map(function (s) { return $('.ss-' + s[0]); });
 
   /* ------------------------------------------------------- input guard */
@@ -165,6 +174,8 @@
   var state = 'idle'; // idle → gate → playing → leaving → gone
   var startedAt = 0, leaveTimer = 0;
   var INPUTS = ['keydown', 'keyup', 'keypress', 'pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click', 'touchstart', 'touchend', 'contextmenu', 'wheel'];
+  // Keys that never count as "any key" (they still don't reach the game while the intro is up).
+  var IGNORED = ['Tab', 'Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Escape', 'ContextMenu', 'NumLock', 'ScrollLock'];
 
   function guard(e) {
     if (state === 'gone') return;
@@ -172,15 +183,11 @@
     var browserKey = e.type.indexOf('key') === 0 && (e.ctrlKey || e.metaKey || e.altKey || /^F\d+$/.test(e.key));
     e.stopImmediatePropagation();
     if (!browserKey && e.cancelable && e.type !== 'wheel') e.preventDefault();
-    if (state === 'gate') {
-      // Canceled touch events may suppress the browser's synthetic click.
-      // Start on release too, so touch/pen input never depends on that click.
-      if (e.type === 'touchend' || (e.type === 'pointerup' && (e.button == null || e.button === 0)) || e.type === 'click') begin();
-      return;
-    }
-    var trigger = (e.type === 'keydown' && !browserKey && !e.repeat) || e.type === 'pointerdown' || e.type === 'touchstart';
+    var trigger = (e.type === 'keydown' && !browserKey && !e.repeat && IGNORED.indexOf(e.key) === -1) ||
+      e.type === 'pointerdown' || e.type === 'touchstart';
     if (!trigger) return;
-    if (state === 'playing' && performance.now() - startedAt > 500) leave(0.25);
+    if (state === 'gate') begin();
+    else if (state === 'playing' && performance.now() - startedAt > 500) leave(0.25);
   }
   INPUTS.forEach(function (t) { window.addEventListener(t, guard, { capture: true, passive: false }); });
 
@@ -288,8 +295,17 @@
     });
   }
 
+  // Start-screen press: a low "whoom" as the eyes close. (The glint is saved for the finale, when they open.)
+  function whoom(t) {
+    var o = ac.createOscillator(), g = ac.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.6);
+    env(g, t, 0.55, 0.006, 0.6);
+    o.connect(g); send(g, 1, 0.3); o.start(t); o.stop(t + 0.7);
+  }
+
   function scheduleAudio(t0) {
-    buildGraph();
+    if (!master) buildGraph();
     T.strokes.forEach(function (s, i) {
       if (s[3]) scribble(t0 + s[1], s[2]);
       if (i > 1) tick(t0 + s[1], 900 + i * 220);
@@ -373,14 +389,106 @@
 
   /* ---------------------------------------------------------- lifecycle */
 
+  /* ------------------------------------- start screen: eyes in the dark */
+
+  var gateAlive = false, blinkTimer = 0, onLook = null;
+
+  function showGate() {
+    var touchOnly = matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches;
+    root.classList.add('ss-gating');
+    root.removeAttribute('role');
+    mark.insertAdjacentHTML('afterbegin', '<div class="ss-fog"></div>');
+    mark.insertAdjacentHTML('beforeend',
+      '<svg class="ss-geyes" viewBox="0 0 1024 1024" aria-hidden="true"><g class="ss-look" filter="url(#ss-glow)">' +
+        '<path class="ss-geye" d="' + PATHS.eyeR + '"/><path class="ss-geye" d="' + PATHS.eyeL + '"/></g></svg>');
+    $('.ss-sig').insertAdjacentHTML('beforeend',
+      '<button class="ss-cta" type="button"><span class="ss-label">' + (touchOnly ? 'TAP TO START' : 'PRESS ANY KEY') + '</span>' +
+        '<span class="ss-sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/>' +
+        '<path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>SOUND ON</span></button>');
+
+    // The eyes drift, follow the cursor, and blink now and then.
+    gateAlive = true;
+    var look = $('.ss-look'), eyes = $$('.ss-geye');
+    var tx = 0, ty = 0, x = 0, y = 0, idle = true, t0 = performance.now();
+    onLook = function (e) {
+      idle = false;
+      tx = (e.clientX / innerWidth - 0.5) * 36;
+      ty = (e.clientY / innerHeight - 0.5) * 22;
+    };
+    window.addEventListener('pointermove', onLook);
+    (function follow() {
+      if (!gateAlive) return;
+      if (idle && !reduced) { var s = (performance.now() - t0) / 1000; tx = Math.sin(s * 0.7) * 10; ty = Math.sin(s * 0.45) * 4; }
+      x += (tx - x) * 0.08; y += (ty - y) * 0.08;
+      look.setAttribute('transform', 'translate(' + x.toFixed(2) + ' ' + y.toFixed(2) + ')');
+      requestAnimationFrame(follow);
+    })();
+    (function blink() {
+      blinkTimer = setTimeout(function () {
+        if (!gateAlive) return;
+        var twice = Math.random() < 0.25;
+        eyes.forEach(function (eye) {
+          eye.animate(twice
+            ? [{ transform: 'scaleY(1)' }, { transform: 'scaleY(.08)', offset: .2 }, { transform: 'scaleY(1)', offset: .4 },
+               { transform: 'scaleY(.08)', offset: .6 }, { transform: 'scaleY(1)' }]
+            : [{ transform: 'scaleY(1)' }, { transform: 'scaleY(.08)', offset: .45 }, { transform: 'scaleY(1)' }],
+            { duration: twice ? 380 : 170, easing: 'ease-in-out' });
+        });
+        blink();
+      }, 2400 + Math.random() * 3200);
+    })();
+  }
+
+  // On press the eyes blink, reopen, then slowly close; a beat of darkness, then the signature begins.
+  // (They flare open at the end of the intro.) Times in ms from the press:
+  var EXIT = { reopened: 180, closeFrom: 330, shut: 570, gone: 630, pause: 500 };
+
+  // Returns ms until the intro should start.
+  function exitGate() {
+    gateAlive = false;
+    clearTimeout(blinkTimer);
+    window.removeEventListener('pointermove', onLook);
+    root.classList.remove('ss-gating');
+    root.setAttribute('role', 'img');
+    var ms = function (n) { return reduced ? 1 : n; };
+    var at = function (t) { return t / EXIT.gone; };
+    $('.ss-cta').animate([{ opacity: 1, transform: 'translateX(-50%)' }, { opacity: 0, transform: 'translateX(-50%) translateY(8px)' }],
+      { duration: ms(260), easing: 'ease-out', fill: 'forwards' });
+    $$('.ss-geye').forEach(function (eye) {
+      eye.animate([
+        { transform: 'scaleY(1)', opacity: 1, easing: 'ease-in' },                                  // blink…
+        { transform: 'scaleY(.06)', opacity: 1, offset: at(80), easing: 'ease-out' },
+        { transform: 'scaleY(1)', opacity: 1, offset: at(EXIT.reopened) },                         // …reopen
+        { transform: 'scaleY(1)', opacity: 1, offset: at(EXIT.closeFrom), easing: 'ease-in' },      // slow close
+        { transform: 'scaleY(.06)', opacity: 1, offset: at(EXIT.shut) },
+        { transform: 'scaleY(.06)', opacity: 0 }                                                   // gone
+      ], { duration: ms(EXIT.gone), fill: 'forwards' });
+    });
+    $('.ss-fog').animate([{ opacity: 1 }, { opacity: 1, offset: at(EXIT.closeFrom) }, { opacity: 0 }],
+      { duration: ms(EXIT.gone), easing: 'ease-out', fill: 'forwards' });
+    setTimeout(function () {
+      ['.ss-fog', '.ss-geyes', '.ss-cta'].forEach(function (s) { var el = $(s); if (el) el.remove(); });
+    }, ms(EXIT.gone + 50));
+    return reduced ? 0 : EXIT.gone + EXIT.pause;
+  }
+
+  /* ---------------------------------------------------------- lifecycle */
+
   function begin() {
     if (state !== 'idle' && state !== 'gate') return;
-    if (SOUND) initAudio();
-    if (ac && ac.state !== 'running') ac.resume();
+    var fromGate = state === 'gate';
     state = 'playing';
     api.playing = true;
-    gate.hidden = true;
     startedAt = Infinity; // no skipping until the show has started
+    var delay = 0;
+    if (fromGate) {
+      if (ac) {
+        ac.resume();
+        if (!master) buildGraph();
+        whoom(ac.currentTime + (reduced ? 0.02 : EXIT.closeFrom / 1000)); // lands with the slow close
+      }
+      delay = exitGate();
+    }
     var go = function () {
       startedAt = performance.now() + LEAD * 1000;
       if (ac) {
@@ -391,7 +499,7 @@
       requestAnimationFrame(frame);
       leaveTimer = setTimeout(function () { leave(T.end - T.out); }, (T.out + LEAD) * 1000);
     };
-    requestAnimationFrame(go);
+    setTimeout(function () { requestAnimationFrame(go); }, delay);
   }
 
   function leave(dur) {
@@ -410,6 +518,9 @@
   function finish() {
     state = 'gone';
     api.playing = false;
+    gateAlive = false;
+    clearTimeout(blinkTimer);
+    if (onLook) window.removeEventListener('pointermove', onLook);
     anims.forEach(function (a) { a.cancel(); });
     INPUTS.forEach(function (t) { window.removeEventListener(t, guard, { capture: true }); });
     root.remove();
@@ -435,10 +546,17 @@
 
   api.skip = function () { if (state === 'gate' || state === 'idle') { state = 'playing'; } leave(0.25); };
 
-  // Always wait for the first click, even when this tab already allows audio.
-  // Create/unlock audio only inside that gesture, never during page loading.
-  state = 'gate';
-  gate.hidden = false;
+  // Sound needs a user gesture in browsers. If audio is already allowed, play straight away;
+  // otherwise show the "eyes in the dark" start screen — that press unlocks the sound.
+  if (SOUND) initAudio();
+  if (ac && ac.state !== 'running') {
+    state = 'gate';
+    showGate();
+    // Some browsers allow audio without a gesture after the page has been interacted with before.
+    ac.onstatechange = function () { if (ac.state === 'running' && state === 'gate') begin(); };
+  } else {
+    begin();
+  }
 })();
 </script>
 <!-- ===================== SIRSC104 INTRO :: END ===================== -->
