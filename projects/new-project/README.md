@@ -38,6 +38,7 @@ Every mode has Owen (Easy), Medium (×1.5 points), Hard (×2) and Ultra (×2.5),
 - **Closer calls score more:** Common 10 (10× apart or more), Uncommon 25 (3–10×), Rare 50 (1.5–3×), Epic 100 (closer), Legendary 200 (photo finish).
 - **📸 Photo finish.** Now and then the two numbers tie or are a few apart: 168 hours in a week against 169 towns in Connecticut. The reveal crawls the last few numbers one at a time with a drum roll. A tie counts as right whichever way you pick.
 - **Streaks** add ×0.25 a step, up to ×5. **Speed:** the first quarter of the timer gives ×2, the first half ×1.5.
+- **The balloon is fruit.** Each time the page loads it's an apple or an orange, 50/50, and 1 apple in 20 has a worm poking out of its side. (Add `?fruit=apple`, `?fruit=orange` or `?fruit=worm` to the address to pick one when testing.)
 - **Your score is your height:** the balloon rises along Classic's map, from the Orchard to the Edge of Space (see **The maps**).
 
 ## 🐉 Real Size: the dragon ride

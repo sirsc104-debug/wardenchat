@@ -865,7 +865,88 @@ const Scene = (function () {
     ctx.restore();
   }
 
-  const BALLOON_COLORS = ['#ff9a1f', '#ff4d6d', '#ffd23f', '#ff4d6d'];
+  // Classic's balloon is fruit, picked once when the page loads: half the time an apple, half the
+  // time an orange. One apple in twenty has a worm living in it.
+  const FORCE = (location.search.match(/[?&]fruit=(apple|orange|worm)/) || [])[1];
+  const FRUIT = FORCE ? (FORCE === 'orange' ? 'orange' : 'apple') : Math.random() < 0.5 ? 'apple' : 'orange';
+  const WORM = FORCE ? FORCE === 'worm' : FRUIT === 'apple' && Math.random() < 0.05;
+
+  // The fruit envelope, around (cx, mouthY) like envelope(): the mouth at mouthY, the fruit above it.
+  function fruitEnvelope(cx, mouth) {
+    const R = 108, cy = mouth - 140;
+    ctx.save();
+    ctx.beginPath();
+    if (FRUIT === 'apple') {
+      // two shoulders with a dip at the top where the stem goes
+      ctx.moveTo(cx - 22, mouth);
+      ctx.bezierCurveTo(cx - 74, mouth - 8, cx - R * 1.18, cy + 72, cx - R * 1.12, cy - 8);
+      ctx.bezierCurveTo(cx - R * 1.06, cy - R * 0.98, cx - 34, cy - R * 1.08, cx, cy - R * 0.8);
+      ctx.bezierCurveTo(cx + 34, cy - R * 1.08, cx + R * 1.06, cy - R * 0.98, cx + R * 1.12, cy - 8);
+      ctx.bezierCurveTo(cx + R * 1.18, cy + 72, cx + 74, mouth - 8, cx + 22, mouth);
+    } else {
+      ctx.moveTo(cx - 22, mouth);
+      ctx.bezierCurveTo(cx - 64, mouth - 18, cx - R * 1.1, cy + 66, cx - R * 1.08, cy);
+      ctx.arc(cx, cy, R * 1.08, Math.PI, 0);
+      ctx.bezierCurveTo(cx + R * 1.1, cy + 66, cx + 64, mouth - 18, cx + 22, mouth);
+    }
+    ctx.closePath();
+    const g = ctx.createRadialGradient(cx - 40, cy - 40, 10, cx, cy + 10, R * 1.4);
+    if (FRUIT === 'apple') { g.addColorStop(0, '#ff7a7a'); g.addColorStop(0.45, '#ec2f3c'); g.addColorStop(1, '#a8162a'); }
+    else { g.addColorStop(0, '#ffc75a'); g.addColorStop(0.45, '#ff9a1f'); g.addColorStop(1, '#d9650a'); }
+    ctx.fillStyle = g; ctx.fill();
+    ctx.clip();
+    if (FRUIT === 'orange') {
+      // the dimpled peel
+      ctx.fillStyle = 'rgba(190,80,0,0.22)';
+      for (let i = 0; i < 70; i++) {
+        const a = i * 2.39996, r = R * 1.05 * Math.sqrt((i + 0.5) / 70);
+        ctx.beginPath(); ctx.arc(cx + Math.cos(a) * r, cy + 10 + Math.sin(a) * r * 1.05, 2.4, 0, TAU); ctx.fill();
+      }
+    } else {
+      // apple streaks
+      ctx.strokeStyle = 'rgba(255,210,120,0.18)'; ctx.lineWidth = 3;
+      ctx.beginPath(); for (const dx of [-60, -30, 30, 60]) { ctx.moveTo(cx + dx * 0.4, cy - R * 0.8); ctx.quadraticCurveTo(cx + dx * 1.3, cy, cx + dx * 0.5, mouth - 10); } ctx.stroke();
+    }
+    // shine
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath(); ctx.ellipse(cx - 52, cy - 38, 16, 30, -0.5, 0, TAU); ctx.fill();
+    ctx.restore();
+    // stem and leaf
+    const top = FRUIT === 'apple' ? cy - R * 0.8 : cy - R * 1.08;
+    const sway = Math.sin(st.t * 1.3) * 0.08;
+    if (FRUIT === 'apple') {
+      ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 7; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(cx, top + 8); ctx.quadraticCurveTo(cx + 2, top - 20, cx + 12, top - 34); ctx.stroke();
+    } else {
+      ctx.fillStyle = '#3f7a22'; ctx.beginPath(); ctx.arc(cx, top + 4, 7, 0, TAU); ctx.fill();
+    }
+    ctx.save(); ctx.translate(cx + 6, top - (FRUIT === 'apple' ? 18 : 2)); ctx.rotate(-0.5 + sway);
+    ctx.fillStyle = '#4caf50'; ctx.beginPath(); ctx.ellipse(26, 0, 28, 12, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = '#2e7d32'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(2, 0); ctx.lineTo(50, 0); ctx.stroke();
+    ctx.restore();
+    if (WORM) { ctx.save(); ctx.translate(cx + 70, cy + 6); ctx.scale(1.4, 1.4); drawWorm(0, 0); ctx.restore(); }
+  }
+  // The worm, poking out of a hole in the apple's side, wiggling and smiling
+  function drawWorm(x, y) {
+    ctx.fillStyle = '#5a1418'; ctx.beginPath(); ctx.ellipse(x, y, 13, 10, 0, 0, TAU); ctx.fill();
+    const peek = 0.75 + 0.25 * Math.sin(st.t * 0.9);
+    const seg = [];
+    for (let i = 0; i < 5; i++) {
+      const k = i / 4;
+      seg.push([x + 10 + k * 34 * peek + Math.sin(st.t * 4 + i) * 3, y - k * 30 * peek + Math.sin(st.t * 3 + i * 0.8) * 4 * k]);
+    }
+    for (let i = 0; i < seg.length; i++) {
+      ctx.fillStyle = i % 2 ? '#9ad85a' : '#86c84a';
+      ctx.beginPath(); ctx.arc(seg[i][0], seg[i][1], 10 - i * 0.4, 0, TAU); ctx.fill();
+    }
+    const [hx, hy] = seg[seg.length - 1];
+    ctx.fillStyle = '#a6e066'; ctx.beginPath(); ctx.arc(hx + 2, hy - 4, 12, 0, TAU); ctx.fill();
+    const blink = (st.t % 4) < 0.12;
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(hx - 2, hy - 8, 4, 0, TAU); ctx.arc(hx + 7, hy - 8, 4, 0, TAU); ctx.fill();
+    if (!blink) { ctx.fillStyle = '#1b1430'; ctx.beginPath(); ctx.arc(hx - 1, hy - 7, 2, 0, TAU); ctx.arc(hx + 8, hy - 7, 2, 0, TAU); ctx.fill(); }
+    ctx.strokeStyle = '#2b5a1a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(hx + 3, hy - 2, 5, 0.2 * Math.PI, 0.8 * Math.PI); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,120,140,0.6)'; ctx.beginPath(); ctx.arc(hx - 5, hy - 1, 2.5, 0, TAU); ctx.arc(hx + 11, hy - 1, 2.5, 0, TAU); ctx.fill();
+  }
 
   function drawBalloon() {
     const air = st.cam > 4 || st.target > 0;
@@ -887,9 +968,9 @@ const Scene = (function () {
     ctx.fillStyle = fg;
     ctx.beginPath(); ctx.moveTo(cx - 9, by - 92); ctx.quadraticCurveTo(cx, by - 92 - fl * 1.2, cx + 9, by - 92); ctx.fill();
 
-    envelope(cx, mouth, BALLOON_COLORS);
+    fruitEnvelope(cx, mouth);
     // skirt
-    ctx.fillStyle = '#c23a52';
+    ctx.fillStyle = FRUIT === 'apple' ? '#8a1424' : '#c2560a';
     ctx.beginPath(); ctx.moveTo(cx - 22, mouth); ctx.lineTo(cx + 22, mouth); ctx.lineTo(cx + 17, mouth + 14); ctx.lineTo(cx - 17, mouth + 14); ctx.fill();
     // ropes
     ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 2;
