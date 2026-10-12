@@ -23,6 +23,8 @@ Plain HTML, CSS and JavaScript with no build step. Open `index.html` in a browse
 - **Altitude** is your score × 3 metres, with stops on the rail: Treetops, Rooftops, Kite Height, the Birds, Burj Khalifa Height, the Clouds, the Mountain Peaks, Mount Everest, the Jet Planes, the Stratosphere, the Balloon World Record (21,027 m), the Weather Balloons and the Edge of Space.
 - Best scores per mode are saved in the browser. **Esc** pauses.
 
+**Background music**, made on the fly with Web Audio the way Brain Rocket does it (no music files). **Breeze** plays on the launch field and in the lower sky: an F–Dm–B♭–C ukulele strum with a bouncy bass, a shaker and a whistled tune every other time round. **Sky** fades in once the balloon passes the jet planes (11 km): slow, floaty pads with twinkles. The music starts on the first click or key press, drops back for a photo finish's drum roll, goes quieter while paused, and follows the 🔊 mute button. Turn it off with **🎵** on the home screen or **🎵 Music** in the pause menu; that choice is remembered in the browser.
+
 ## The facts
 
 `js/facts.js` has 110 facts in 12 categories. That makes over 5,000 possible matchups, 35 of them photo finishes.
@@ -48,9 +50,14 @@ To add a fact, add a line to `js/facts.js` in the right category. If two exact f
 | `js/facts.js` | The facts and categories |
 | `js/pairs.js` | Picks matchups: difficulty bands, photo finishes, scoring tiers |
 | `js/scene.js` | The balloon world on a canvas: orchard, barn, kites, birds, clouds, planes, stratosphere |
-| `js/audio.js` | Sound effects made with Web Audio (no sound files) |
-| `js/game.js` | The game: rounds, the count-up reveal, scoring, lives, the rail, results and sharing |
+| `js/audio.js` | Sound effects and the two music loops, made with Web Audio (no sound files) |
+| `js/game.js` | The game: rounds, the count-up reveal, scoring, lives, the rail, music switching, results and sharing |
+| `build-artifact.py` | Bundles everything into one page for publishing as an Artifact |
+
+## Publishing as an Artifact
+
+`python3 build-artifact.py OUT.html` bundles the game into one page for a claude.ai Artifact: the CSS and every script inlined, without the `<html>`/`<head>`/`<body>` tags the Artifact host adds itself. Rebuild and republish after changing anything. In an Artifact, **📋 Share** copies the results (the phone share sheet only opens when the game runs on its own page).
 
 ## Not built yet
 
-Music, a daily mode with a share grid, more facts (and a local Madison/DHHS set), and racing friends through Warden Chat.
+A daily mode with a share grid, more facts (and a local Madison/DHHS set), and racing friends through Warden Chat.

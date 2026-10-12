@@ -71,19 +71,43 @@
     $('home').classList.remove('hidden');
     showBests();
     Scene.setAlt(0);
+    Sound.musicLevel(1);
+    if (musicStarted) Sound.music('breeze');
   }
   function syncSoundButtons() {
     const m = Sound.isMuted();
     $('btnSound').textContent = m ? '🔇' : '🔊';
     $('btnPauseSound').textContent = m ? '🔇 Sound off' : '🔊 Sound on';
+    const on = Sound.musicEnabled();
+    $('btnMusic').classList.toggle('off', !on);
+    $('btnPauseMusic').textContent = on ? '🎵 Music on' : '🎵 Music off';
   }
   function toggleSound() { Sound.setMuted(!Sound.isMuted()); syncSoundButtons(); Sound.click(); }
+
+  // Music: Breeze down low, Sky once the balloon is past the jet planes.
+  const SKY_ALT = 11000;
+  const trackNow = () => (G && G.alt >= SKY_ALT ? 'sky' : 'breeze');
+  let musicStarted = false;
+  function startMusic() {          // browsers only allow sound after a click or key press
+    if (musicStarted) return;
+    musicStarted = true;
+    Sound.unlock();
+    Sound.music(trackNow());
+  }
+  function toggleMusic() {
+    startMusic();
+    Sound.setMusicEnabled(!Sound.musicEnabled());
+    Sound.music(trackNow());
+    syncSoundButtons();
+  }
 
   // ---- A run ----------------------------------------------------------------
   let G = null;
 
   function start(diff) {
     Sound.unlock(); Sound.click();
+    startMusic();
+    Sound.musicLevel(1);
     const d = DIFFS[diff];
     G = {
       diff, d, score: 0, alt: 0, lives: d.lives, streak: 0, bestStreak: 0, right: 0, asked: 0,
@@ -103,6 +127,7 @@
     updateHud();
     renderCards(true);
     newRound();
+    Sound.music('breeze');
   }
 
   function newRound() {
@@ -227,6 +252,7 @@
       await frame();
     }
     if (photo) {
+      Sound.musicLevel(0.15);
       $('photoBanner').classList.remove('hidden');
       flash();
       const steps = f.n - crawlFrom;
@@ -337,6 +363,7 @@
     $('resultPts').innerHTML = ptsText;
     res.classList.remove('pop'); void res.offsetWidth; res.classList.add('pop');
 
+    if (photo) setTimeout(() => { if (G === run && !G.paused) Sound.musicLevel(1); }, 1800);
     await wait(photo ? 2700 : ok ? 1500 : 2100);
     if (G !== run) return;
     while (G.paused) { await wait(100); if (G !== run) return; }
@@ -349,6 +376,7 @@
     G.score += pts;
     G.alt = G.score * M_PER_POINT;
     Scene.setAlt(G.alt);
+    if (musicStarted) Sound.music(trackNow());
     const pill = document.querySelector('.score-pill');
     pill.classList.remove('bump'); void pill.offsetWidth; pill.classList.add('bump');
     const passed = STOPS.filter(s => s.alt > before && s.alt <= G.alt);
@@ -417,7 +445,7 @@
     const text = shareText();
     let done = false;
     try {
-      if (navigator.share && window.matchMedia('(pointer: coarse)').matches) { await navigator.share({ text }); done = true; }
+      if (navigator.share && window.self === window.top && window.matchMedia('(pointer: coarse)').matches) { await navigator.share({ text }); done = true; }
     } catch (e) { /* cancelled */ }
     if (!done) {
       try { await navigator.clipboard.writeText(text); done = true; } catch (e) {
@@ -435,6 +463,7 @@
     if (!G || G.phase === 'over') return;
     G.paused = p;
     $('pause').classList.toggle('hidden', !p);
+    Sound.musicLevel(p ? 0.35 : 1);
     syncSoundButtons();
   }
 
@@ -442,6 +471,10 @@
   document.querySelectorAll('.mode').forEach(b => b.addEventListener('click', () => start(b.dataset.diff)));
   $('btnSound').addEventListener('click', toggleSound);
   $('btnPauseSound').addEventListener('click', toggleSound);
+  $('btnMusic').addEventListener('click', toggleMusic);
+  $('btnPauseMusic').addEventListener('click', toggleMusic);
+  document.addEventListener('pointerdown', startMusic, { once: true });
+  document.addEventListener('keydown', startMusic, { once: true });
   $('btnFull').addEventListener('click', () => {
     if (document.fullscreenElement) document.exitFullscreen();
     else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
