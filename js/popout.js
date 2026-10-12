@@ -24,7 +24,8 @@ const Popout = {
     try { flagged = sessionStorage.getItem(CHILD_FLAG) === '1'; } catch (e) { /* storage blocked */ }
     this.child = !!(window.opener && flagged);
     this.btn = $('#btnPopout');
-    this.btn.hidden = this.child;
+    // Hidden in the new window itself, and in the single-file build (an embed has no address to reopen).
+    this.btn.hidden = this.child || !!window.CCC_EMBED;
     this.btn.addEventListener('click', () => this.open());
     addEventListener('message', e => this.onMessage(e));
     if (this.child) {

@@ -37,6 +37,12 @@ Progress saves to `localStorage` every 30 seconds and when you leave the page. U
 | Supernova | On your first click after all-time tokens reach 100 quadrillion (always after the Event Horizon), the sparkle overheats and swells into a red giant that engulfs the page. A fullscreen Supernova tab shows every building you own orbiting the star as it grows, fused into heavier elements (H → He → C → O → Ne → Si → Fe) as the star swallows its orbit. Then the iron core collapses, the star explodes in a nebula of magenta, cyan and gold filaments that blasts your buildings back out, and a pulsar is born. Afterwards the game switches to the Supernova style: deep navy panels, magenta and cyan accents, and a pulsar sparkle with sweeping beams. Like the Event Horizon it changes the look only; switch styles any time in Options. |
 | Quality of life | A **New window** button (top right) opens the game in its own window and carries your save over; the original window pauses so the two never overwrite each other, receives the new window's progress every few seconds, and picks up again when you close it (or click Play here instead). Offline production, save export/import, number formats, optional synthesized sound, reduced-motion support, keyboard play (focus the sparkle, press Enter), and a phone layout. |
 
+## Single-file build (Google Sites)
+
+`dist/claude-code-clicker.html` is the whole game in one self-contained file. To put it on a Google Site, open the file in a text editor, copy everything, then in Google Sites choose **Insert → Embed → Embed code**, paste it, and click **Next → Insert**. Drag the embed's corners to make it big (about 1200 × 800 works well). Progress saves in each visitor's own browser. The New window button is hidden in this build because an embed has no address to reopen.
+
+Rebuild it after changing the game with `node tools/build-single.js` (it minifies when the optional `terser` and `csso` packages can be found, for example through `NODE_PATH`).
+
 ## Developer cheats
 
 Type `0987` anywhere on the page (outside a text box) to show a **Dev** tab, and type it again to hide it. It has 48 one-click cheats (tokens, time warp, buildings, upgrades, achievements, Eureka tokens, bugs, Flow tides, prestige, both one-time events, challenges, every Toolbox system, compute credits, and each event), fields to set exact token and building counts, a picker that triggers any of the 18 Eureka effects, and a season picker, and toggles for a production multiplier, free shopping, a Eureka token every 5 seconds and infinite Focus. A DEV badge shows next to the title while it's on.
@@ -65,6 +71,7 @@ js/blackhole.js   the one-time Event Horizon event and style
 js/supernova.js   the one-time Supernova event at 100 quadrillion
 js/popout.js      the New window handoff
 js/main.js        boot, main loop, autosave
+tools/build-single.js   builds dist/claude-code-clicker.html
 ```
 
 This is a fan-made game and is not an official Anthropic product.
