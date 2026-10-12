@@ -65,7 +65,7 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 .logo-l2 { font-size: 132px; background-image: linear-gradient(#ffd166, #ff8a1f 55%, #f25c05); }
 /* "SirSC's" sits on top of the title's first letters, like Brain Rocket's, pulsing bigger and smaller */
 .logo-by {
-  position: absolute; left: 10px; top: -40px; font-size: 44px; font-weight: 700; z-index: 1;
+  position: absolute; left: 34px; top: -20px; font-size: 44px; font-weight: 700; z-index: 1;
   transform: rotate(-14deg); transform-origin: 50% 60%; animation: by-pulse 1.6s ease-in-out infinite;
   background: linear-gradient(#ffe36b, #ff9f1c); background-clip: text; -webkit-background-clip: text; color: transparent;
   filter: drop-shadow(0 2px 0 #1b2550);
