@@ -1362,9 +1362,26 @@
   const syncSound = () => { soundBtn.textContent = Sound.muted ? '🔇' : '🔊'; };
   syncSound();
   soundBtn.addEventListener('click', () => { Sound.toggle(); syncSound(); Sound.click(); });
-  $('btnFull').addEventListener('click', () => {
+  // Fullscreen where the page is allowed it. Embedded somewhere that blocks it (a Google Sites embed,
+  // a sandboxed frame), the button opens the game in a new tab instead: the live site, or this same
+  // page when it already is the live site shown in a frame.
+  const fullBtn = $('btnFull');
+  const PLAY_URL = 'https://brainrocket.sirsc104.com/';
+  const newTabUrl = () => (/^https?:$/.test(location.protocol) && /(^|\.)sirsc104\.com$/.test(location.hostname) ? location.href.split('#')[0] : PLAY_URL);
+  function openNewTab() {
+    const a = document.createElement('a');
+    a.href = newTabUrl(); a.target = '_blank'; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  function setNewTabMode() {
+    fullBtn.textContent = '↗'; fullBtn.classList.add('newtab');
+    fullBtn.title = 'Open in a new tab'; fullBtn.setAttribute('aria-label', 'Open Brain Rocket in a new tab');
+  }
+  if (!document.fullscreenEnabled || !document.documentElement.requestFullscreen) setNewTabMode();
+  fullBtn.addEventListener('click', () => {
+    if (fullBtn.classList.contains('newtab')) { Sound.click(); return openNewTab(); }
     if (document.fullscreenElement) document.exitFullscreen();
-    else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+    else document.documentElement.requestFullscreen().catch(() => { setNewTabMode(); openNewTab(); });
   });
 
   // A bare Control tap skips on release. Chords such as Ctrl+A/C/V stay intact.
