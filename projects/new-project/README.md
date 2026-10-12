@@ -4,6 +4,10 @@ A number game where the two numbers have nothing to do with each other: a blue w
 
 Plain HTML, CSS and JavaScript with no build step. Open `index.html` in a browser, or serve the folder with `python3 -m http.server`. Like Brain Rocket, it's a 1600×900 layout that stretches to fill the window, and phones play it sideways.
 
+## The intro
+
+Every visit starts with the SirSC104 producer tag from `sirsc-intro-eyes.html`: two glowing eyes in the dark and **PRESS ANY KEY** (**TAP TO START** on phones). The press is always needed, even when the browser would let sound play on its own, so the signature's sound and the game's music always start together. Then the pen draws the logo, it stamps down, "SirSC104" writes in, and it fades into the game; the music starts as it ends. A press during the signature skips it, and the game can't be clicked until it's gone. The intro is the `<script id="sirsc104-intro">` block at the top of `index.html`'s `<body>`; the one change from the original is that its start screen always shows.
+
 ## Picking a mode
 
 The home screen keeps the logo, tagline and tab bar in the same place in every mode. Switching tabs works like Brain Rocket's: the yellow highlight glides to the new tab while the world slides across in the same direction (the old picture is captured and pushed out one side as the new world comes in from the other), and the rules box blurs, changes its text while blurred, then sharpens. The tagline, the four difficulty cards and their best scores change to the new mode. The game remembers your last tab, and on the title screen ← and → switch tabs too.
@@ -34,7 +38,7 @@ Every mode has Owen (Easy), Medium (×1.5 points), Hard (×2) and Ultra (×2.5),
 - **Closer calls score more:** Common 10 (10× apart or more), Uncommon 25 (3–10×), Rare 50 (1.5–3×), Epic 100 (closer), Legendary 200 (photo finish).
 - **📸 Photo finish.** Now and then the two numbers tie or are a few apart: 168 hours in a week against 169 towns in Connecticut. The reveal crawls the last few numbers one at a time with a drum roll. A tie counts as right whichever way you pick.
 - **Streaks** add ×0.25 a step, up to ×5. **Speed:** the first quarter of the timer gives ×2, the first half ×1.5.
-- **Altitude** goes up 40 to 200 m per right answer by how close it was, plus 8% for each answer in your streak (up to +80%). Stops: Treetops, Rooftops, Kite Height, the Birds, Burj Khalifa Height, the Clouds, the Mountain Peaks, Mount Everest, the Jet Planes, the Stratosphere, the Balloon World Record (21,027 m), the Weather Balloons and the Edge of Space.
+- **Your score is your height:** the balloon rises along Classic's map, from the Orchard to the Edge of Space (see **The maps**).
 
 ## 🐉 Real Size: the dragon ride
 
@@ -50,7 +54,7 @@ Every mode has Owen (Easy), Medium (×1.5 points), Hard (×2) and Ultra (×2.5),
 | Ultra | 5 s | 1 | within 10% | over half |
 
 - Scoring goes by how close the real sizes are; within 10% is Legendary. A right answer makes the dragon breathe fire and climb; a wrong one makes it sneeze smoke and dip.
-- Stops: the Village Rooftops, the Castle Towers, the Waterfall Cliffs, the Mountain Pass, the Floating Islands, the Clouds, the Sky Castle, Above the Storm, the Dragon's Peak, the Northern Lights and the Stars. On the way: floating islands with waterfalls, storm clouds with lightning, a castle in the clouds and the northern lights.
+- Your score flies the dragon along its map, from the Dragon's Rock past castle flags, cliffs, floating islands, a sky castle, storms and a sunset to the Dragon Star.
 
 ## 🐿️ Guess the Number: the endless tree
 
@@ -62,26 +66,62 @@ Every mode has Owen (Easy), Medium (×1.5 points), Hard (×2) and Ultra (×2.5),
 - **How close:** within 1% is a 🎯 **Bullseye** (200, and the squirrel finds a golden acorn), within 5% 100, 10% 50, 25% 25, 50% 10. Years count in years off (exact, 1, 3, 5, 10). On Owen a right pick is worth 100.
 - **🌰 Acorns are lives:** 3 on Owen, 2 on Medium, 1 on Hard and Ultra. A guess more than 50% off, or running out of time (20 s, 15 s on Ultra), drops an acorn.
 - After each guess a track shows where your guess landed next to the answer. Any fact can come up, in any of its units.
-- Stops: the Bird Feeder, the First Branch, the Owl's Hollow, the Woodpecker's Door, Above the Forest, the Autumn Leaves, Into the Fog, the Cloud Branches, the Sky Nest, the Jet Stream and the Edge of Space, and the tree keeps going. Leaves turn from green to autumn colours to frost the higher you climb.
+- Your score climbs the squirrel up its map, from the Roots to the Moon Acorn, and the tree keeps going. What grows on the trunk changes with the location (bird feeders, owls, a woodpecker, flower boxes, lanterns, a squirrel village, a giant egg, icicles, a satellite dish), and the leaves turn from green to autumn colours, pale cloud leaves, frost, then violet.
 
 ## 🎃 Halloween: the jack-o'-lantern balloon (limited time)
 
 Follows Brain Rocket's Haunted Flight. The jack-o'-lantern balloon flies right across a Halloween night with a ghost coming from behind, and the cards run along the bottom so the chase gets the whole width.
 
-- **No timer and no lives:** you survive until the ghost catches you, and your result is how far you flew.
+- **No timer and no lives:** you survive until the ghost catches you. You score 12 points for every second you stay ahead, plus the points for each right answer (no speed bonus), and your score takes you along the Halloween map.
 - **The chase.** You start 60 m ahead. While a matchup is up, the ghost closes in at 2.5 m/s, speeding up 0.9 m/s every minute. The balloon flies 12 m a second the whole time. A right answer pushes you ahead by how close it was (Common +8 m up to Legendary +77 m, times the difficulty and your streak), up to 150 m ahead.
 - **Wrong answers:** the ghost lunges closer: 25 m on Owen, 30 on Medium, 35 on Hard, 40 on Ultra. There are no skips.
 - **The danger shows.** The "Ghost behind" readout and the bar under the cards go green, orange, then red. Inside 40 m the night darkens, the ghost's eyes glow, its hands reach for the basket, a heartbeat speeds up and the music fades. A right answer under 10 m is a 😱 close escape; a Legendary answer blasts the ghost into wisps.
-- **Caught:** the ghost wraps around the balloon and the candle inside goes out. The results show distance, survival time, right answers and your closest escape.
+- **Caught:** the ghost wraps around the balloon and the candle inside goes out. The results show your score, where you got to, survival time, right answers and your closest escape.
 - **Fair:** while an answer plays out, the ghost keeps its distance. Nothing stops moving: the balloon flies on and the night keeps scrolling. You get one pause per run (switching away from the tab always pauses).
 - **Ultra:** matchups within 10, the ghost never lets up, not even while an answer plays out, and every 8 to 13 seconds the ghost lunges 20 m after a 1.5-second red-eyed warning. A right answer during the warning dodges it (🛡️).
 - **Halloween facts.** Every matchup puts one of 115 Halloween facts (candy, spooky movies, monsters and myths, spooky shows and games, pumpkins and haunts, creepy critters) against a regular fact. They never come up in the other modes.
-- Stops along the way: the Pumpkin Patch, the Corn Maze, the Graveyard, the Dark Forest, the Witch's Hollow, the Bat Caves, the Haunted Mansion, the Blood Moon, the Spirit Realm and Beyond the Veil. The tab has a **LIMITED TIME** badge that fades from orange into a sliding rainbow.
+- The tab has a **LIMITED TIME** badge that fades from orange into a sliding rainbow.
 - **The event ends on its own:** once November 1, 2026 is over (midnight in the player's time zone), the tab disappears and anyone who last played it lands on Classic. Change `HAUNT_ENDS` in `js/game.js` to move the date.
+
+## The maps
+
+Three rules hold in every mode:
+
+1. **Every mode has exactly 20 locations.**
+2. **Your score is where you are, and 50,000 is the target.** The 20th location is at 50,000 points. Reaching it is announced (🏆 50,000!) and starts **♾️ infinite mode**: the map keeps going, through the 20th location and then, from 55,000, into the mode's own endless art, with the side rail glowing.
+3. **You see where you are.** Each location has its own sky colours and its own things drawn around you, and some have a landmark. At the Bird Flocks the sky is full of birds; at the Burj Khalifa the tower rises past you; at Mount Everest you pass the summit with its prayer flags.
+
+| # | Points | 🎈 Classic | 🐉 Real Size | 🐿️ Guess the Number | 🎃 Halloween |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 0 | 🍎 The Orchard | 🐉 The Dragon's Rock | 🌱 The Roots | 🎃 The Pumpkin Patch |
+| 2 | 350 | 🪁 The Kite Festival | 🏰 The Castle Flags | 🐦 The Bird Feeder | 🌽 The Corn Maze |
+| 3 | 1,100 | 🐦 The Bird Flocks | 💧 The Waterfall Cliffs | 🍄 The Mushroom Shelves | 🧑‍🌾 The Scarecrow Field |
+| 4 | 2,200 | 🎈 The Balloon Festival | 🦅 The Eagle Nests | 🦉 The Owl's Hollow | 🚜 The Haunted Hayride |
+| 5 | 3,500 | 🏙️ The Skyscraper Tops | 🏝️ The Floating Islands | 🚪 The Woodpecker's Door | 🪦 The Graveyard |
+| 6 | 5,200 | 🗼 The Burj Khalifa | 🌈 The Rainbow Bridge | 🪺 The Bird Nests | ⚰️ The Crypts |
+| 7 | 7,000 | ☁️ The Fluffy Clouds | 🐑 The Cloud Sheep | 🦋 The Butterfly Garden | 🌲 The Dark Forest |
+| 8 | 9,000 | 🌈 The Rainbow | 🌀 The Wind Spirits | 🌲 Above the Forest | 🕸️ The Spider Woods |
+| 9 | 11,500 | 🛩️ The Blimp Lane | 🏯 The Sky Castle | 🏮 The Lantern Branches | 🧙 The Witch's Hollow |
+| 10 | 14,000 | ⛈️ The Thunderstorm | 💎 The Crystal Spires | 🍂 The Autumn Leaves | 🧪 The Potion Shop |
+| 11 | 17,000 | 🦅 The Eagle's Sky | ⛈️ The Storm Front | 🏡 The Squirrel Village | 🦇 The Bat Caves |
+| 12 | 20,000 | 🏔️ The Mountain Peaks | ⚡ Above the Storm | 🌫️ Into the Fog | 🐺 The Wolf Hill |
+| 13 | 23,000 | 🗻 Mount Everest | 🐲 The Dragon Roost | ☁️ The Cloud Branches | 🏚️ The Haunted Mansion |
+| 14 | 26,000 | ✈️ The Jet Planes | 🌅 The Sunset Sky | 🪁 The Kite Tangle | 🌊 The Ghost Lake |
+| 15 | 30,000 | 💨 The Fighter Jets | 🌙 The Moonrise | 🥚 The Sky Nest | 💀 The Skeleton Dance |
+| 16 | 33,500 | 🌡️ The Weather Balloons | 🌌 The Northern Lights | ✈️ The Jet Stream | 🌕 The Blood Moon |
+| 17 | 37,500 | 🌌 The Northern Lights | 🌠 The Shooting Stars | ❄️ The Frozen Branches | 🏺 The Mummy Tomb |
+| 18 | 41,500 | 🛰️ The Satellites | ✨ The Star Bridge | 🌌 The Northern Lights | 🧛 The Vampire Castle |
+| 19 | 45,500 | 🧑‍🚀 The Space Station | 🌕 The Moon's Doorstep | 🛰️ The Satellite Branch | 👻 The Spirit Realm |
+| 20 | 50,000 | 🚀 The Edge of Space | 🌟 The Dragon Star | 🌕 The Moon Acorn | 🌀 Beyond the Veil |
+| ♾️ | 55,000+ | ♾️ The Endless Sky | ♾️ The Endless Night | ♾️ The Tree That Never Ends | ♾️ The Endless Night |
+
+In the climbing modes every location gets the same height on screen, so the climb moves at the same pace however far apart the points are, and the sky changes colour on the way (Classic goes from morning blue to the black of space with the Earth's curve below; Real Size has a stormy noon and a sunset before the night; Guess the Number has a lantern-lit dusk, autumn, fog and frost). The HUD shows the location you're in and the next one, the rail on the left has all 20, and each new location gets a banner. On Halloween the props along the ground change as you get to each location (new ones come in from the right) and the sky fades over; the Bat Caves and the Vampire Castle fill the sky with bats, and the Blood Moon turns the moon red.
+
+Everything about the maps is in `js/map.js`: the 20 points, the locations, their icons, what's drawn at each and the landmarks. The scene and the game both read it.
 
 ## Music and sound
 
-Every mode has its own loop, made on the fly with Web Audio like Brain Rocket's (no music files): **Breeze** (a ukulele strum) and **Sky** (floaty pads above 5,000 m) for Classic, an adventure theme with harp, timpani and a horn for the dragon, a skippy plucked tune with a woodblock and flute for the squirrel, and a spooky E-minor loop (music box, organ, bells and a wobbly theremin) for Halloween. The music follows the tab you've chosen, starts on the first click or key press, drops back for drum rolls and the ghost's heartbeat, and goes quieter while paused. **🎵** on the home screen or in the pause menu turns it off; **🔊** mutes everything.
+Every mode has its own loop, made on the fly with Web Audio like Brain Rocket's (no music files): **Breeze** (a ukulele strum) and **Sky** (floaty pads from the Fluffy Clouds up) for Classic, an adventure theme with harp, timpani and a horn for the dragon, a skippy plucked tune with a woodblock and flute for the squirrel, and a spooky E-minor loop (music box, organ, bells and a wobbly theremin) for Halloween. The music follows the tab you've chosen, starts on the first click or key press, drops back for drum rolls and the ghost's heartbeat, and goes quieter while paused. **🎵** on the home screen or in the pause menu turns it off; **🔊** mutes everything.
 
 ## The facts
 
@@ -109,12 +149,13 @@ Checked online: Big Mac 580 calories, Jersey Mike's about 145 New Jersey locatio
 
 | File | What it does |
 | --- | --- |
-| `index.html` | The screens: home with the mode picker, game, pause, results |
+| `index.html` | The SirSC104 intro, then the screens: home with the mode picker, game, pause, results |
 | `css/style.css` | Styles in Brain Rocket's look, the tab bar and its glider, the Guess the Number box and the Halloween strip |
 | `js/facts*.js` | The facts (above) |
 | `js/cards.js` | Turns facts into cards (each measurement in its other units) and knows each one's real size |
 | `js/pairs.js` | Picks matchups for every mode: difficulty bands, Ultra's within-10 chains, photo finishes, Real Size traps, Guess the Number choices, slider and scoring |
-| `js/scene.js` | The four worlds on a canvas, and the slide between them |
+| `js/map.js` | The four maps: 20 locations each, the 50,000 target, infinite mode, and what's drawn at each location |
+| `js/scene.js` | The four worlds on a canvas (every location's sky, decor and landmarks), and the slide between them |
 | `js/audio.js` | Sound effects and the music loops |
 | `js/game.js` | The mode picker, every mode's rounds and reveals, the Halloween chase, scoring, results and sharing |
 | `build-artifact.py` | Bundles everything into one page for publishing as an Artifact |

@@ -31,7 +31,7 @@
 
   const TYPES = {
     classic: {
-      world: 'classic', lifeIcon: '🎈', lifeName: 'Lives', heightLabel: 'Altitude',
+      world: 'classic', lifeIcon: '🎈', lifeName: 'Lives',
       tagline: 'Two totally unrelated numbers. Is the next one <b>higher</b> or <b>lower</b>?<br>Every right answer lifts your balloon higher into the sky.',
       rules: [
         '<b>🍎🍊 Apples to oranges.</b> A blue whale against Jersey Mike’s. Ignore the units: just say if the number on the right is higher or lower.',
@@ -47,7 +47,7 @@
       }
     },
     size: {
-      world: 'size', lifeIcon: '🔥', lifeName: 'Fire', heightLabel: 'Altitude',
+      world: 'size', lifeIcon: '🔥', lifeName: 'Fire',
       tagline: 'Same kind of thing, different units. Which one is <b>actually bigger</b>?<br>Every right answer lifts your dragon higher.',
       rules: [
         '<b>📏 Real size.</b> 555 feet against 330 meters: the bigger number isn’t always the bigger thing. Pick what’s really bigger.',
@@ -63,7 +63,7 @@
       }
     },
     guess: {
-      world: 'guess', lifeIcon: '🌰', lifeName: 'Acorns', heightLabel: 'Height',
+      world: 'guess', lifeIcon: '🌰', lifeName: 'Acorns',
       tagline: 'One number at a time. <b>How close can you guess it?</b><br>Every good guess sends your squirrel up a tree that never ends.',
       rules: [
         '<b>🎯 Get close.</b> Within 1% is a Bullseye (200). Within 5%, 10%, 25% and 50% still score. Years count in years off.',
@@ -79,7 +79,7 @@
       }
     },
     haunt: {
-      world: 'haunt', heightLabel: 'Distance',
+      world: 'haunt',
       tagline: '🎃 Limited time! A ghost is chasing your balloon. Every right answer<br>blasts you ahead. How far can you get?',
       rules: [
         '<b>👻 Outrun the ghost.</b> It closes in while you think, and slowly speeds up. Closer calls push it further back.',
@@ -97,74 +97,20 @@
   };
   const TYPE_ORDER = ['classic', 'size', 'guess', 'haunt'].filter(t => t !== 'haunt' || EVENT_ON);
 
-  // How far the climbers go for a right answer, in metres, by how close it was (Common to Legendary).
-  // It doesn't depend on the difficulty; a streak adds 8% a step, up to 80%.
-  const CLIMB = [40, 60, 90, 130, 200];
-  const GUESS_CLIMB = [0, 40, 60, 90, 130, 200];
-
-  const STOPS = {
-    classic: [
-      { alt: 20,     name: 'The Treetops',         ic: '🌳' },
-      { alt: 60,     name: 'The Rooftops',         ic: '🏠' },
-      { alt: 150,    name: 'Kite Height',          ic: '🪁' },
-      { alt: 400,    name: 'The Birds',            ic: '🐦' },
-      { alt: 828,    name: 'Burj Khalifa Height',  ic: '🏙️' },
-      { alt: 2000,   name: 'The Clouds',           ic: '☁️' },
-      { alt: 5000,   name: 'The Mountain Peaks',   ic: '🏔️' },
-      { alt: 8849,   name: 'Mount Everest',        ic: '🗻' },
-      { alt: 11000,  name: 'The Jet Planes',       ic: '✈️' },
-      { alt: 15000,  name: 'The Stratosphere',     ic: '🌌' },
-      { alt: 21027,  name: 'The Balloon World Record', ic: '🏆', sub: 'Vijaypat Singhania flew a hot-air balloon to 21,027 m in 2005' },
-      { alt: 35000,  name: 'The Weather Balloons', ic: '🎈' },
-      { alt: 100000, name: 'The Edge of Space',    ic: '🚀' }
-    ],
-    size: [
-      { alt: 20,    name: 'The Village Rooftops', ic: '🏘️' },
-      { alt: 70,    name: 'The Castle Towers',    ic: '🏰' },
-      { alt: 180,   name: 'The Waterfall Cliffs', ic: '💧' },
-      { alt: 500,   name: 'The Mountain Pass',    ic: '⛰️' },
-      { alt: 1200,  name: 'The Floating Islands', ic: '🏝️' },
-      { alt: 2500,  name: 'The Clouds',           ic: '☁️' },
-      { alt: 5000,  name: 'The Sky Castle',       ic: '🏯' },
-      { alt: 12000, name: 'Above the Storm',      ic: '⛈️' },
-      { alt: 18000, name: 'The Dragon’s Peak', ic: '🐲' },
-      { alt: 25000, name: 'The Northern Lights',  ic: '🌌' },
-      { alt: 40000, name: 'The Stars',            ic: '✨' }
-    ],
-    guess: [
-      { alt: 20,    name: 'The Bird Feeder',      ic: '🐦' },
-      { alt: 60,    name: 'The First Branch',     ic: '🌿' },
-      { alt: 150,   name: 'The Owl’s Hollow',  ic: '🦉' },
-      { alt: 350,   name: 'The Woodpecker’s Door', ic: '🚪' },
-      { alt: 700,   name: 'Above the Forest',     ic: '🌲' },
-      { alt: 1500,  name: 'The Autumn Leaves',    ic: '🍂' },
-      { alt: 2500,  name: 'Into the Fog',         ic: '🌫️' },
-      { alt: 5000,  name: 'The Cloud Branches',   ic: '☁️' },
-      { alt: 10000, name: 'The Sky Nest',         ic: '🪺' },
-      { alt: 15000, name: 'The Jet Stream',       ic: '✈️' },
-      { alt: 40000, name: 'The Edge of Space',    ic: '🚀', sub: 'And the tree keeps going' }
-    ],
-    haunt: [
-      { alt: 0,    name: 'The Pumpkin Patch',  ic: '🎃' },
-      { alt: 400,  name: 'The Corn Maze',      ic: '🌽' },
-      { alt: 900,  name: 'The Graveyard',      ic: '🪦' },
-      { alt: 1500, name: 'The Dark Forest',    ic: '🌲' },
-      { alt: 2300, name: 'The Witch’s Hollow', ic: '🧙' },
-      { alt: 3200, name: 'The Bat Caves',      ic: '🦇' },
-      { alt: 4300, name: 'The Haunted Mansion', ic: '🏚️' },
-      { alt: 5600, name: 'The Blood Moon',     ic: '🌕' },
-      { alt: 7200, name: 'The Spirit Realm',   ic: '👻' },
-      { alt: 9000, name: 'Beyond the Veil',    ic: '🌀' }
-    ]
-  };
+  // ---- The maps ------------------------------------------------------------------------
+  // Each mode's 20 locations are in js/map.js. Your score is where you are on the map: the 20th
+  // location is at 50,000 points, the target, and reaching it starts infinite mode.
+  const placeName = (t, score) => { const p = mapPlace(t, score); return `${p.stop.ic} ${p.stop.name}`; };
 
   // ---- Saving (best scores, and the last tab) ----------------------------------------------
-  // best[type][difficulty]: the best score (Halloween: the best distance, in metres)
+  // best[type][difficulty]: the best score
   const best = { classic: {}, size: {}, guess: {}, haunt: {} };
   try {
     Object.assign(best, JSON.parse(localStorage.getItem('a2o.best2') || '{}'));
     const old = JSON.parse(localStorage.getItem('a2o.best') || 'null');   // bests from before there were modes
     if (old && !Object.keys(best.classic).length) best.classic = old;
+    // Halloween bests used to be metres flown; now every mode keeps its best score
+    if (!localStorage.getItem('a2o.hauntScore')) { best.haunt = {}; localStorage.setItem('a2o.hauntScore', '1'); localStorage.setItem('a2o.best2', JSON.stringify(best)); }
   } catch (e) { /* storage blocked */ }
   function saveBest() { try { localStorage.setItem('a2o.best2', JSON.stringify(best)); } catch (e) { /* ignore */ } }
   let type = 'classic';
@@ -178,7 +124,6 @@
   const fmtNum = (v, dec) => v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
   const numText = f => f.show || (f.year ? String(f.n) : fmtNum(f.n, decimalsOf(f.n)));
   const withUnit = f => numText(f) + (f.u ? ' ' + f.u : '');
-  const fmtAlt = m => (m < 10000 ? commas(m) + ' m' : (m / 1000).toFixed(1) + ' km');
   const fmtTime = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
   const pickOne = a => a[Math.floor(Math.random() * a.length)];
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -219,12 +164,12 @@
     $('btnPauseMusic').textContent = on ? '🎵 Music on' : '🎵 Music off';
   }
   function toggleSound() { Sound.setMuted(!Sound.isMuted()); syncSoundButtons(); Sound.click(); }
-  // Every mode has its own tune. Classic switches to the dreamy Sky tune high up.
+  // Every mode has its own tune. Classic switches to the dreamy Sky tune once you reach the clouds.
   const trackNow = () => {
     if (type === 'size') return 'dragon';
     if (type === 'guess') return 'forest';
     if (type === 'haunt') return 'spooky';
-    return G && G.alt >= 5000 ? 'sky' : 'breeze';
+    return G && mapPlace('classic', G.score).i >= 6 ? 'sky' : 'breeze';
   };
   let musicStarted = false;
   function startMusic() {          // browsers only allow sound after a click or key press
@@ -252,7 +197,7 @@
   function bestText(t, diff) {
     const b = best[t][diff];
     if (!b) return t === 'haunt' ? 'Not flown yet' : t === 'guess' ? 'Not climbed yet' : 'Not flown yet';
-    return 'Best: ' + (t === 'haunt' ? fmtAlt(b) : commas(b));
+    return 'Best: ' + commas(b);
   }
   function showModeCards() {
     const T = TYPES[type];
@@ -275,7 +220,7 @@
     });
     placeGlider(!animate);
     Scene.setWorld(TYPES[t].world, animate && from !== to ? (to > from ? 1 : -1) : 0);
-    if (t === 'haunt') Scene.chase({ gap: 26, dist: 0, play: false, reset: true });
+    if (t === 'haunt') Scene.chase({ gap: 26, dist: 0, score: 0, play: false, reset: true });
     $('tagline').innerHTML = `<span>${TYPES[t].tagline}</span>`;
     showModeCards();
     const rules = $('rules');
@@ -292,7 +237,7 @@
     $('game').classList.add('hidden'); $('over').classList.add('hidden'); $('pause').classList.add('hidden');
     $('home').classList.remove('hidden');
     Scene.setAlt(0);
-    if (type === 'haunt') Scene.chase({ play: false, gap: 26, warn: 0 });
+    if (type === 'haunt') Scene.chase({ play: false, gap: 26, warn: 0, score: 0 });
     showModeCards();
     placeGlider(true);
     Sound.musicLevel(1);
@@ -309,7 +254,7 @@
     const base = BASE_DIFFS[diff];
     const d = Object.assign({}, base, type === 'guess' ? { time: GUESS_TIME[diff] } : {});
     G = {
-      type, diff, d, score: 0, alt: 0, lives: d.lives, streak: 0, bestStreak: 0, right: 0, asked: 0,
+      type, diff, d, score: 0, scoreSeen: 0, lives: d.lives, streak: 0, bestStreak: 0, right: 0, asked: 0,
       photoWon: 0, photoLost: 0, traps: 0, bullseyes: 0, used: new Set(), pstate: { pendingPhoto: false },
       left: null, right_: null, card: null, timeLeft: d.time, phase: 'ask', paused: false, killer: null,
       // Halloween chase
@@ -330,7 +275,7 @@
       G.left = Pairs.first(diff, type); G.used.add(G.left.id);
       G.right_ = Pairs.next(G.left, diff, G.used, G.pstate, type); G.used.add(G.right_.id);
     }
-    if (type === 'haunt') Scene.chase({ gap: 60, dist: 0, play: true, warn: 0, reset: true });
+    if (type === 'haunt') Scene.chase({ gap: 60, dist: 0, score: 0, play: true, warn: 0, reset: true });
     updateHud();
     if (type === 'guess') renderGuess(); else renderCards(true);
     newRound();
@@ -348,8 +293,9 @@
     $('rail').classList.toggle('hidden', type === 'haunt');
     $('livesPill').classList.toggle('hidden', type === 'haunt');
     $('timePill').classList.toggle('hidden', type !== 'haunt');
-    $('hudScoreLabel').textContent = type === 'haunt' ? 'Distance' : 'Score';
-    $('hudAltLabel').textContent = type === 'haunt' ? 'Ghost behind' : TYPES[type].heightLabel;
+    $('hudScoreLabel').textContent = 'Score';
+    $('hudAltLabel').textContent = type === 'haunt' ? 'Ghost behind' : 'Location';
+    $('hudAlt').className = 'pill-value' + (type === 'haunt' ? '' : ' loc');
     $('hudLivesLabel').textContent = TYPES[type].lifeName || 'Lives';
     $('prompt').innerHTML = type === 'size' ? 'Is the right one actually <b class="hi-word">bigger</b> or <b class="lo-word">smaller</b>?'
       : type === 'guess' ? 'What’s the <b class="hi-word">number</b>?'
@@ -403,9 +349,10 @@
 
   // ---- HUD -----------------------------------------------------------------
   function buildRail() {
-    const S = STOPS[type];
+    const S = MAPS[type].stops;
+    $('rail').classList.remove('infinite');
     $('rail').innerHTML = S.slice().reverse().map((s, i) =>
-      `<div class="rail-stop" data-i="${S.length - 1 - i}" title="${esc(s.name)} · ${fmtAlt(s.alt)}">${s.ic}</div>`).join('');
+      `<div class="rail-stop" data-i="${S.length - 1 - i}" title="${esc(s.name)} · ${commas(s.at)}">${s.ic}</div>`).join('');
   }
   function renderLives() {
     if (type === 'haunt') return;
@@ -418,26 +365,27 @@
     sp.classList.toggle('hot', G.streak >= 3);
     sp.classList.toggle('blazing', G.streak >= 8);
     if (type === 'haunt') { updateChaseHud(); return; }
-    const S = STOPS[type];
+    const S = MAPS[type].stops;
     $('hudScore').textContent = commas(G.score);
-    $('hudAlt').textContent = fmtAlt(G.alt);
-    const next = S.find(s => s.alt > G.alt);
-    $('hudNext').textContent = next ? `Next stop: ${next.ic} ${next.name} · ${fmtAlt(next.alt)}`
-      : type === 'guess' ? 'The tree keeps going…' : 'Higher than anyone has ever gone!';
+    $('hudAlt').textContent = placeName(type, G.score);
+    const next = S.find(s => s.at > G.score);
+    $('hudNext').textContent = next ? `Next: ${next.ic} ${next.name} at ${commas(next.at)}`
+      : `♾️ Infinite mode · ${commas(G.score - MAP_TARGET)} past the target`;
     document.querySelectorAll('.rail-stop').forEach(el => {
       const i = +el.dataset.i;
-      el.classList.toggle('done', S[i].alt <= G.alt);
+      el.classList.toggle('done', S[i].at <= G.score);
       el.classList.toggle('next', next === S[i]);
     });
+    $('rail').classList.toggle('infinite', G.score >= MAP_TARGET);
   }
   function updateChaseHud() {
     const gap = Math.max(0, G.gap);
-    $('hudScore').textContent = fmtAlt(G.dist);
+    $('hudScore').textContent = commas(G.score);
     const alt = $('hudAlt');
     alt.textContent = Math.round(gap) + ' m';
     alt.className = 'pill-value ' + (gap > 60 ? 'danger-ok' : gap > 30 ? 'danger-mid' : 'danger-high');
-    const next = STOPS.haunt.find(s => s.alt > G.dist);
-    $('hudNext').textContent = next ? `Next: ${next.ic} ${next.name} · ${commas(next.alt - G.dist)} m` : 'Further than anyone has flown!';
+    const next = MAPS.haunt.stops.find(s => s.at > G.score);
+    $('hudNext').textContent = placeName('haunt', G.score) + (next ? ` · next ${next.ic} at ${commas(next.at)}` : ' · ♾️ infinite mode');
     $('hudTime').textContent = fmtTime(G.survived);
     const fill = $('chaseFill');
     fill.style.width = clamp(gap / 150, 0, 1) * 100 + '%';
@@ -448,11 +396,12 @@
     $('chaseSpeed').textContent = `closing at ${ghostSpeed().toFixed(1)} m/s`;
   }
 
-  function showReached(s) {
+  function showReached(s, kicker, sub) {
     const el = $('reached');
     $('reachedIc').textContent = s.ic;
+    el.querySelector('.reached-kicker').textContent = kicker || 'You reached';
     $('reachedName').textContent = s.name;
-    $('reachedSub').textContent = s.sub || (type === 'haunt' ? commas(s.alt) + ' m flown' : fmtAlt(s.alt) + ' up');
+    $('reachedSub').textContent = sub || commas(s.at) + ' points';
     el.classList.add('hidden'); void el.offsetWidth; el.classList.remove('hidden');
     clearTimeout(showReached.t);
     showReached.t = setTimeout(() => el.classList.add('hidden'), 2900);
@@ -460,9 +409,28 @@
     Scene.confetti(60, Scene.balloonX());
   }
 
+  // Moving from one score to another: announce the location you got to. Hitting 50,000 starts
+  // infinite mode.
+  function arrive(before, after, delay) {
+    const M = MAPS[type];
+    const passed = M.stops.concat(M.infinite).filter(s => s.at > before && s.at <= after);
+    if (!passed.length) return;
+    const target = before < MAP_TARGET && after >= MAP_TARGET;
+    const show = () => {
+      if (!G) return;
+      if (target) {
+        showReached(M.stops[19], '🏆 50,000! You reached', '♾️ Infinite mode: the map keeps going');
+        Scene.confetti(200);
+        flash();
+      } else showReached(passed[passed.length - 1]);
+    };
+    if (delay) setTimeout(show, delay); else show();
+  }
+
   // ---- The Halloween chase -------------------------------------------------------------
   // The ghost closes in while a matchup is up, starting at 2.5 m/s and speeding up 0.9 m/s every minute.
-  // The balloon flies 12 m every second, the whole time. You can be at most 150 m ahead.
+  // The balloon flies 12 m every second, the whole time (and scores 12 points a second for it).
+  // You can be at most 150 m ahead.
   // While an answer plays out, the ghost keeps its distance (on Ultra it never lets up).
   const ghostSpeed = () => 2.5 + 0.9 * (G.qtime / 60);
   function chaseTick(dt) {
@@ -485,11 +453,11 @@
       if (G.beatIn <= 0) { Sound.heartbeat(); G.beatIn = 0.45 + Math.max(0, G.gap) / 40 * 0.8; }
     }
     Sound.musicLevel(clamp(G.gap / 40, 0.15, 1));
-    const before = G.distShown || 0;
-    G.distShown = G.dist;
-    const passed = STOPS.haunt.filter(s => s.alt > before && s.alt <= G.dist);
-    if (passed.length) showReached(passed[passed.length - 1]);
-    Scene.chase({ gap: Math.max(0, G.gap), dist: G.dist, warn: G.warn > 0 ? 1 : 0 });
+    // the score goes up 12 a second while you fly, and every right answer adds its points
+    G.score += 12 * dt;
+    arrive(G.scoreSeen, G.score);
+    G.scoreSeen = G.score;
+    Scene.chase({ gap: Math.max(0, G.gap), dist: G.dist, score: G.score, warn: G.warn > 0 ? 1 : 0 });
     updateChaseHud();
     if (G.gap <= 0) caught();
   }
@@ -640,11 +608,10 @@
       const streakMult = Math.min(5, 1 + 0.25 * G.streak);
       const trapMult = trap ? 1.5 : 1;
       pts = Math.round(T.pts * G.d.mult * speed * streakMult * trapMult);
-      const climb = Math.round(CLIMB[tier] * (1 + 0.08 * Math.min(G.streak, 10)));
       G.streak++; G.right++;
       G.bestStreak = Math.max(G.bestStreak, G.streak);
       if (trap) G.traps++;
-      const parts = [`<span class="${T.cls}">${haunt ? '' : '+' + commas(pts) + ' · '}${T.name}</span>`];
+      const parts = [`<span class="${T.cls}">+${commas(pts)} · ${T.name}</span>`];
       if (G.d.mult > 1) parts.push(`×${G.d.mult} ${G.diff}`);
       if (speed > 1) parts.push(`×${speed} speed`);
       if (streakMult > 1) parts.push(`×${streakMult.toFixed(2)} streak`);
@@ -681,9 +648,8 @@
         Scene.chase({ gap: G.gap, dist: G.dist, warn: 0 });
         updateChaseHud();
       } else {
-        parts.push(`${TYPES[type].lifeIcon === '🔥' ? '🐉' : '🎈'} up ${climb} m`);
         if (size) { Sound.roar(); Scene.burn(1.6); } else { Scene.burn(photo ? 2.2 : 1.3); Sound.burner(); }
-        addScore(pts, climb);
+        addScore(pts);
         if (G.streak === 10) setTimeout(() => Scene.rocket(), 900);   // a visitor from Brain Rocket
       }
       ptsText = parts.join(' &nbsp;·&nbsp; ');
@@ -732,16 +698,15 @@
     else advance();
   }
 
-  function addScore(pts, climb) {
-    const before = G.alt;
+  // Points move you along the map.
+  function addScore(pts) {
+    const before = G.score;
     G.score += pts;
-    G.alt += climb;
-    Scene.setAlt(G.alt);
+    Scene.setAlt(G.score);
     if (musicStarted) Sound.music(trackNow());
     const pill = document.querySelector('.score-pill');
     pill.classList.remove('bump'); void pill.offsetWidth; pill.classList.add('bump');
-    const passed = STOPS[type].filter(s => s.alt > before && s.alt <= G.alt);
-    if (passed.length) setTimeout(() => { if (G) showReached(passed[passed.length - 1]); }, 700);
+    arrive(before, G.score, 700);
     updateHud();
   }
 
@@ -847,20 +812,18 @@
       const speed = usedFrac < 0.25 ? 2 : usedFrac < 0.5 ? 1.5 : 1;
       const streakMult = Math.min(5, 1 + 0.25 * G.streak);
       const pts = Math.round(T.pts * G.d.mult * speed * streakMult);
-      const climb = Math.round(GUESS_CLIMB[r.tier] * (1 + 0.08 * Math.min(G.streak, 10)));
       G.streak++; G.right++;
       G.bestStreak = Math.max(G.bestStreak, G.streak);
       const parts = [`<span class="${T.cls}">+${commas(pts)} · ${G.diff === 'owen' ? 'Right!' : T.name}</span>`];
       if (G.d.mult > 1) parts.push(`×${G.d.mult} ${G.diff}`);
       if (speed > 1) parts.push(`×${speed} speed`);
       if (streakMult > 1) parts.push(`×${streakMult.toFixed(2)} streak`);
-      parts.push(`🐿️ up ${climb} m`);
       ptsText = parts.join(' &nbsp;·&nbsp; ');
       if (r.tier === 5) { G.bullseyes++; quipText = '🎯 BULLSEYE! A golden acorn!'; quipCls = 'q-photo'; Scene.gold(); Scene.confetti(140); Sound.photoWin(); flash(); }
       else { quipText = G.diff === 'owen' ? pickOne(['Right!', 'Yep!', 'Got it!']) : { 4: 'So close!', 3: 'Close!', 2: 'Not bad!', 1: 'Close-ish…' }[r.tier]; quipCls = 'q-good'; Sound.good(Math.min(4, r.tier)); Sound.chirp(); }
       $('cardG').classList.add('right-ans');
       Scene.burn(1.2);
-      addScore(pts, climb);
+      addScore(pts);
       if (G.streak === 10) setTimeout(() => Scene.rocket(), 900);
     } else {
       G.streak = 0;
@@ -896,7 +859,7 @@
 
   // ---- Game over and sharing -----------------------------------------------
   const TITLE = { classic: 'Apples to Oranges', size: 'Apples to Oranges: Real Size', guess: 'Apples to Oranges: Guess the Number', haunt: 'Apples to Oranges: Halloween' };
-  function result() { return G.type === 'haunt' ? Math.round(G.dist) : G.score; }
+  function result() { return Math.round(G.score); }
   function killerText(plain) {
     const k = G.killer;
     if (!k) return '';
@@ -913,12 +876,12 @@
   function shareText() {
     const lines = [`🍎 ${TITLE[G.type]} 🍊 (${G.d.name})`];
     if (G.type === 'haunt') {
-      lines.push(`🎃 Flew ${fmtAlt(G.dist)} before the ghost caught me · survived ${fmtTime(G.survived)}`);
+      lines.push(`🎃 ${commas(G.score)} points before the ghost caught me · survived ${fmtTime(G.survived)}`);
+      lines.push(`📍 Reached ${placeName('haunt', G.score)}` + (G.score >= MAP_TARGET ? ' · ♾️ infinite mode' : ''));
       lines.push(`${G.right} right · best streak ${G.bestStreak}` + (isFinite(G.closest) ? ` · closest escape ${Math.round(G.closest)} m` : ''));
     } else {
-      const reached = STOPS[G.type].filter(s => s.alt <= G.alt).pop();
       lines.push(`${commas(G.score)} points · ${G.right} right · best streak ${G.bestStreak}`);
-      lines.push(`${G.type === 'size' ? '🐉' : G.type === 'guess' ? '🐿️' : '🎈'} ${reached ? 'Reached ' + reached.name : 'Never left the ground'} (${fmtAlt(G.alt)})`);
+      lines.push(`${G.type === 'size' ? '🐉' : G.type === 'guess' ? '🐿️' : '🎈'} ${G.score > 0 ? 'Reached ' + placeName(G.type, G.score) : 'Never left the ground'}` + (G.score >= MAP_TARGET ? ' · ♾️ infinite mode' : ''));
       if (G.photoWon || G.photoLost) lines.push(`📸 Photo finishes: ${G.photoWon} won, ${G.photoLost} lost`);
       if (G.bullseyes) lines.push(`🎯 Bullseyes: ${G.bullseyes}`);
     }
@@ -937,22 +900,23 @@
     const stat = (v, l) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`;
     if (G.type === 'haunt') {
       $('overTitle').textContent = '👻 Caught!';
-      $('overScore').textContent = fmtAlt(G.dist);
-      $('overStats').innerHTML = stat(fmtTime(G.survived), 'Survived') + stat(G.right, 'Right answers') + stat(G.bestStreak, 'Best streak')
+      const here = mapPlace('haunt', G.score).stop;
+      $('overScore').textContent = commas(score);
+      $('overStats').innerHTML = stat(here.ic, esc(here.name)) + stat(fmtTime(G.survived), 'Survived') + stat(G.right, 'Right answers')
         + stat(isFinite(G.closest) ? Math.round(G.closest) + ' m' : '–', 'Closest escape');
     } else {
-      const reached = STOPS[G.type].filter(s => s.alt <= G.alt).pop();
+      const here = mapPlace(G.type, G.score).stop;
       $('overTitle').textContent = G.right === 0 ? 'Never left the ground!' : { classic: 'Out of hot air!', size: 'Out of fire!', guess: 'Out of acorns!' }[G.type];
       $('overScore').textContent = commas(G.score);
       $('overStats').innerHTML =
-        stat(fmtAlt(G.alt), reached ? esc(reached.name) : 'On the ground') +
+        stat(here.ic, G.score > 0 ? esc(here.name) : 'On the ground') +
         stat(G.right, G.type === 'guess' ? 'Scoring guesses' : 'Right answers') +
         stat(G.bestStreak, 'Best streak') +
         (G.type === 'guess' ? stat(G.bullseyes, 'Bullseyes') : G.type === 'size' ? stat(G.traps, 'Traps dodged') : stat(`${G.photoWon}/${G.photoWon + G.photoLost}`, 'Photo finishes won'));
     }
     const ob = $('overBest');
     ob.className = 'over-best' + (isBest && score > 0 ? ' new' : '');
-    ob.textContent = isBest && score > 0 ? '🏆 New best!' : best[G.type][G.diff] ? 'Best: ' + (G.type === 'haunt' ? fmtAlt(best[G.type][G.diff]) : commas(best[G.type][G.diff])) : '';
+    ob.textContent = isBest && score > 0 ? '🏆 New best!' : best[G.type][G.diff] ? 'Best: ' + commas(best[G.type][G.diff]) : '';
     $('overKiller').innerHTML = killerText(false);
     $('btnShare').textContent = '📋 Share';
     setTimeout(() => $('over').classList.remove('hidden'), 500);
@@ -1004,6 +968,8 @@
   $('btnPauseMusic').addEventListener('click', toggleMusic);
   document.addEventListener('pointerdown', startMusic, { once: true });
   document.addEventListener('keydown', startMusic, { once: true });
+  // The SirSC intro's start screen always takes a press, so the music can start as soon as it ends.
+  if (window.SirSCIntro) SirSCIntro.done.then(startMusic);
   $('btnFull').addEventListener('click', () => {
     if (document.fullscreenElement) document.exitFullscreen();
     else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
