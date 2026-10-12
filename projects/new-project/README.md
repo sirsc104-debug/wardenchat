@@ -69,12 +69,12 @@ Every mode has Owen (Easy), Medium (×1.5 points), Hard (×2) and Ultra (×2.5),
 Follows Brain Rocket's Haunted Flight. The jack-o'-lantern balloon flies right across a Halloween night with a ghost coming from behind, and the cards run along the bottom so the chase gets the whole width.
 
 - **No timer and no lives:** you survive until the ghost catches you, and your result is how far you flew.
-- **The chase.** You start 60 m ahead. While a matchup is up, the ghost closes in at 2.5 m/s, speeding up 0.9 m/s every minute, and the balloon flies 12 m a second. A right answer pushes you ahead by how close it was (Common +8 m up to Legendary +77 m, times the difficulty and your streak), up to 150 m ahead.
-- **Wrong answers:** the ghost lunges closer: 15 m on Owen, 20 on Medium, 25 on Hard, 30 on Ultra. There are no skips.
+- **The chase.** You start 60 m ahead. While a matchup is up, the ghost closes in at 2.5 m/s, speeding up 0.9 m/s every minute. The balloon flies 12 m a second the whole time. A right answer pushes you ahead by how close it was (Common +8 m up to Legendary +77 m, times the difficulty and your streak), up to 150 m ahead.
+- **Wrong answers:** the ghost lunges closer: 25 m on Owen, 30 on Medium, 35 on Hard, 40 on Ultra. There are no skips.
 - **The danger shows.** The "Ghost behind" readout and the bar under the cards go green, orange, then red. Inside 40 m the night darkens, the ghost's eyes glow, its hands reach for the basket, a heartbeat speeds up and the music fades. A right answer under 10 m is a 😱 close escape; a Legendary answer blasts the ghost into wisps.
 - **Caught:** the ghost wraps around the balloon and the candle inside goes out. The results show distance, survival time, right answers and your closest escape.
-- **Fair:** the chase freezes while an answer plays out, and you get one pause per run (switching away from the tab always pauses).
-- **Ultra:** matchups within 10, the chase never freezes, and every 8 to 13 seconds the ghost lunges 10 m after a 1.5-second red-eyed warning. A right answer during the warning dodges it (🛡️).
+- **Fair:** while an answer plays out, the ghost keeps its distance. Nothing stops moving: the balloon flies on and the night keeps scrolling. You get one pause per run (switching away from the tab always pauses).
+- **Ultra:** matchups within 10, the ghost never lets up, not even while an answer plays out, and every 8 to 13 seconds the ghost lunges 20 m after a 1.5-second red-eyed warning. A right answer during the warning dodges it (🛡️).
 - **Halloween facts.** Every matchup puts one of 115 Halloween facts (candy, spooky movies, monsters and myths, spooky shows and games, pumpkins and haunts, creepy critters) against a regular fact. They never come up in the other modes.
 - Stops along the way: the Pumpkin Patch, the Corn Maze, the Graveyard, the Dark Forest, the Witch's Hollow, the Bat Caves, the Haunted Mansion, the Blood Moon, the Spirit Realm and Beyond the Veil. The tab has a **LIMITED TIME** badge that fades from orange into a sliding rainbow.
 - **The event ends on its own:** once November 1, 2026 is over (midnight in the player's time zone), the tab disappears and anyone who last played it lands on Classic. Change `HAUNT_ENDS` in `js/game.js` to move the date.

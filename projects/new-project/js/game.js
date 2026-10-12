@@ -23,7 +23,9 @@
   };
   const GUESS_TIME = { owen: 20, medium: 20, hard: 20, ultra: 15 };
   // Halloween: how far the ghost lunges on a wrong answer, by difficulty (metres)
-  const LUNGE = { owen: 15, medium: 20, hard: 25, ultra: 30 };
+  const LUNGE = { owen: 25, medium: 30, hard: 35, ultra: 40 };
+  // Ultra: how far the ghost's own surprise lunge jumps (metres)
+  const ULTRA_LUNGE = 20;
   // Halloween: how far a right answer pushes you ahead before the difficulty and streak (Common to Legendary)
   const PUSH = [8, 16, 27, 46, 77];
 
@@ -82,13 +84,13 @@
       rules: [
         '<b>👻 Outrun the ghost.</b> It closes in while you think, and slowly speeds up. Closer calls push it further back.',
         '<b>🎃 Halloween facts.</b> Every matchup has one: candy, spooky movies, monsters, pumpkins and more.',
-        '<b>💥 Wrong answers hurt.</b> The ghost lunges closer: 15 m on Owen, 20 on Medium, 25 on Hard, 30 on Ultra.',
+        '<b>💥 Wrong answers hurt.</b> The ghost lunges closer: 25 m on Owen, 30 on Medium, 35 on Hard, 40 on Ultra.',
         '<b>🔥 Keep a streak.</b> Each right answer in a row pushes harder. No timer and no lives: just get as far as you can.'
       ],
       info: {
-        owen: '+8 m to +77 m per answer<br>wrong: it lunges 15 m',
-        medium: '+12 m to +115 m per answer<br>wrong: it lunges 20 m',
-        hard: '+16 m to +154 m per answer<br>wrong: it lunges 25 m',
+        owen: '+8 m to +77 m per answer<br>wrong: it lunges 25 m',
+        medium: '+12 m to +115 m per answer<br>wrong: it lunges 30 m',
+        hard: '+16 m to +154 m per answer<br>wrong: it lunges 35 m',
         ultra: 'within 10 · never pauses<br>and it lunges on its own!'
       }
     }
@@ -460,21 +462,21 @@
 
   // ---- The Halloween chase -------------------------------------------------------------
   // The ghost closes in while a matchup is up, starting at 2.5 m/s and speeding up 0.9 m/s every minute.
-  // The balloon flies 12 m every second a matchup is up. You can be at most 150 m ahead.
+  // The balloon flies 12 m every second, the whole time. You can be at most 150 m ahead.
+  // While an answer plays out, the ghost keeps its distance (on Ultra it never lets up).
   const ghostSpeed = () => 2.5 + 0.9 * (G.qtime / 60);
   function chaseTick(dt) {
     const asking = G.phase === 'ask';
     const ultra = G.diff === 'ultra';
-    if (!asking && !ultra) return;           // the chase freezes while an answer plays out (except on Ultra)
     if (asking) G.qtime += dt;
     G.survived += dt;
-    G.gap -= ghostSpeed() * dt;
+    if (asking || ultra) G.gap -= ghostSpeed() * dt;
     G.dist += 12 * dt;
     // Ultra: every 8 to 13 seconds of question time the ghost lunges, after a 1.5 second warning
     if (ultra && asking) {
       if (G.warn > 0) {
         G.warn -= dt;
-        if (G.warn <= 0) { G.warn = 0; G.gap -= 10; Sound.bad(); G.lungeIn = 8 + Math.random() * 5; }
+        if (G.warn <= 0) { G.warn = 0; G.gap -= ULTRA_LUNGE; Sound.bad(); G.lungeIn = 8 + Math.random() * 5; }
       } else if ((G.lungeIn -= dt) <= 0) { G.warn = 1.5; Sound.hiss(); }
     }
     // the heartbeat speeds up as it gets close, and the music fades so you can hear it
