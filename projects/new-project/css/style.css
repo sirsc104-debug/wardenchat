@@ -193,6 +193,8 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 .choices button.chosen { outline: 5px solid #fff; outline-offset: 2px; }
 .choices.locked button { pointer-events: none; }
 .choices.locked button:not(.chosen) { opacity: 0.35; }
+.card.revealed .choices button { height: 50px; font-size: 22px; transition: height 0.25s, font-size 0.25s; }
+.card.revealed .choices button:not(.chosen) { display: none; }
 .kbd { font-size: 14px; opacity: 0.7; font-weight: 500; }
 
 .vs {

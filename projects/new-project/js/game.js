@@ -273,6 +273,8 @@
     }
     el.textContent = numText(f);
     $('cardR').classList.remove('counting');
+    // the buttons shrink to just your pick, making room for the note under the number
+    $('cardR').classList.add('revealed');
     const note = $('cardR').querySelector('.cnote');
     note.textContent = f.note || '';
   }
