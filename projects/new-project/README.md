@@ -127,7 +127,7 @@ Every mode has its own loop, made on the fly with Web Audio like Brain Rocket's 
 
 ## The facts
 
-There are 997 facts in 34 categories (plus the Years Ago category the year facts also come up in), making about 3,000 cards once every measurement is shown in its other units and every year as years ago and days ago.
+There are 997 facts in 31 categories (plus the Years Ago category the year facts also come up in), making about 3,000 cards once every measurement is shown in its other units and every year as years ago and days ago.
 
 | File | Facts |
 | --- | --- |
