@@ -167,7 +167,7 @@ Checked online: Big Mac 580 calories, Jersey Mike's about 145 New Jersey locatio
 | `js/game.js` | The mode picker, every mode's rounds and reveals, the Halloween chase, scoring, results and sharing |
 | `build-artifact.py` | Bundles everything into one page for publishing as an Artifact |
 
-`python3 build-artifact.py OUT.html` makes that page: the CSS and every script inlined, without the `<html>`/`<head>`/`<body>` tags the Artifact host adds. In an Artifact, **📋 Share** copies the results.
+`dist/apples-to-oranges.html` is the whole game in one file, ready to download and open in any browser; rebuild it with `python3 build-artifact.py dist/apples-to-oranges.html --standalone`. `python3 build-artifact.py OUT.html` makes the Artifact version: the CSS and every script inlined, without the `<html>`/`<head>`/`<body>` tags the Artifact host adds. In an Artifact, **📋 Share** copies the results.
 
 ## Easter egg
 
