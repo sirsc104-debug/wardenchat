@@ -15,7 +15,7 @@ The home screen keeps the logo, tagline and tab bar in the same place in every m
 | Tab | Vehicle | The question |
 | --- | --- | --- |
 | 🎈 **Classic** | A hot-air balloon, up through the sky | Is the number on the right higher or lower? |
-| 🐉 **Real Size** | A dragon, up from a castle valley | Same kind of thing, different units: which is really bigger? |
+| 🐉 **Real Size** | A dragon, up from a castle valley | Two lengths, both in centimeters: which is bigger? |
 | 🐿️ **Guess the Number** | A squirrel, up a tree that never ends | What's the hidden number? |
 | 🎃 **Halloween** (limited time) | A jack-o'-lantern balloon, sideways, chased by a ghost | Higher or lower, before the ghost catches you |
 
@@ -44,18 +44,17 @@ Every mode has Owen (Easy), Medium (×1.25 points), Hard (×1.5) and Ultra (×1.
 
 ## 🐉 Real Size: the dragon ride
 
-- Both cards measure the same kind of thing (two heights, two weights, two speeds, two temperatures, two lengths of time or two amounts of liquid) in **different units**. Pick **▲ Bigger** or **▼ Smaller**: is the right one *actually* bigger? 555 feet looks bigger than 330 meters, but it isn't.
-- After the number counts up, a tag converts it into the left card's unit ("= 169 meters"), and the result says why, in words that fit: "…is longer than", "…is heavier than", "…is hotter than", "…holds more than".
-- **🪤 Traps** are matchups where the smaller thing has the bigger number. A right answer on a trap pays ×1.5.
+- **Everything is in centimeters.** Both cards are a length (a height, a length or a distance) measured in cm, so there are no units to convert: pick **▲ Bigger** or **▼ Smaller**. A mountain or a road trip in centimeters gets huge, so read every digit.
+- Real Size uses the 94 length facts. Weights, speeds, temperatures, times and volumes can't be shown in cm, so they only come up in the other modes.
 
-| | Time per pick | Lives (🔥) | Real sizes | Traps |
-| --- | --- | --- | --- | --- |
-| Owen | 15 s | 3 | 2× apart or more | about 1 in 3 |
-| Medium | 10 s | 2 | 1.4× to 4× | about half |
-| Hard | 7 s | 1 | 1.1× to 2× | about 3 in 5 |
-| Ultra | 5 s | 1 | within 10% | over half |
+| | Time per pick | Lives (🔥) | Sizes |
+| --- | --- | --- | --- |
+| Owen | 15 s | 3 | 2× apart or more |
+| Medium | 10 s | 2 | 1.4× to 4× |
+| Hard | 7 s | 1 | 1.1× to 2× |
+| Ultra | 5 s | 1 | within 25% (as close as the facts allow) |
 
-- Scoring goes by how close the real sizes are; within 10% is Legendary. A right answer makes the dragon breathe fire and climb; a wrong one makes it sneeze smoke and dip.
+- Scoring goes by how close the two are; within 10% is Legendary, and the results count your close calls. A right answer makes the dragon breathe fire and climb; a wrong one makes it sneeze smoke and dip.
 - Your score flies the dragon along its map, from the Dragon's Rock past castle flags, cliffs, floating islands, a sky castle, storms and a sunset to the Dragon Star.
 
 ## 🐿️ Guess the Number: the endless tree
@@ -133,7 +132,7 @@ There are 657 facts in 26 categories, making 1,633 cards once every measurement 
 | --- | --- |
 | `js/facts.js` | The first 189: animals, the body, food, games, movies, places, space, sports, years and more |
 | `js/facts-close.js` | 240 that sit close together (Pokédex and jersey numbers, famous numbers, game rules, sports clocks, years): Ultra's main supply |
-| `js/facts-more.js` | 113 more, mostly measurements (buildings, mountains, animals, speeds, temperatures, how long things last): Real Size's main supply |
+| `js/facts-more.js` | 113 more, mostly measurements (buildings, mountains, animals, speeds, temperatures, how long things last); its lengths are Real Size's main supply |
 | `js/facts-halloween.js` | 115 Halloween facts, only for the Halloween event |
 
 **Same question, different units.** Every measurement comes up in every unit that reads sensibly: the Empire State Building is 1,454 feet, but also 443 meters, 44,318 centimeters, 485 yards or 0.28 miles. Converted numbers are rounded to what the card shows (approximate facts to three significant figures) and the game judges the numbers as shown.
@@ -155,7 +154,7 @@ Checked online: Big Mac 580 calories, Jersey Mike's about 145 New Jersey locatio
 | `css/style.css` | Styles in Brain Rocket's look, the tab bar and its glider, the Guess the Number box and the Halloween strip |
 | `js/facts*.js` | The facts (above) |
 | `js/cards.js` | Turns facts into cards (each measurement in its other units) and knows each one's real size |
-| `js/pairs.js` | Picks matchups for every mode: difficulty bands, Ultra's within-10 chains, photo finishes, Real Size traps, Guess the Number choices, slider and scoring |
+| `js/pairs.js` | Picks matchups for every mode: difficulty bands, Ultra's within-10 chains, photo finishes, Real Size's centimeter matchups, Guess the Number choices, slider and scoring |
 | `js/map.js` | The four maps: 20 locations each, the 50,000 target, infinite mode, and what's drawn at each location |
 | `js/scene.js` | The four worlds on a canvas (every location's sky, decor and landmarks), and the slide between them |
 | `js/audio.js` | Sound effects and the music loops |

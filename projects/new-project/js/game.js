@@ -49,18 +49,18 @@
     },
     size: {
       world: 'size', lifeIcon: '🔥', lifeName: 'Fire',
-      tagline: 'Same kind of thing, different units. Which one is <b>actually bigger</b>?<br>Every right answer lifts your dragon higher.',
+      tagline: 'Two lengths, both in centimeters. Which one is <b>bigger</b>?<br>Every right answer lifts your dragon higher.',
       rules: [
-        '<b>📏 Real size.</b> 555 feet against 330 meters: the bigger number isn’t always the bigger thing. Pick what’s really bigger.',
-        '<b>🪤 Watch for traps.</b> When the smaller thing has the bigger number, a right answer pays ×1.5.',
+        '<b>📏 Everything in centimeters.</b> Heights, lengths and distances, every one measured in cm. Pick the one that’s bigger.',
+        '<b>🔢 Big numbers.</b> A mountain or a road trip in centimeters gets huge, so read every digit.',
         '<b>🎯 Close calls pay.</b> The closer the real sizes, the more it’s worth: within 10% is Legendary. Within 5%? A <b>Tie!</b> button appears, but it’s only right if they’re exactly equal.',
         '<b>🔥 Keep a streak.</b> Each right answer in a row adds ×0.25, up to ×5. Pick in the first quarter of the timer for ×2.'
       ],
       info: {
         owen: '15s per pick · 3 lives<br>sizes 2× apart or more',
-        medium: '10s per pick · 2 lives<br>closer, about half traps',
-        hard: '7s per pick · 1 life<br>within 2×, mostly traps',
-        ultra: '5s per pick · 1 life<br>within 10%'
+        medium: '10s per pick · 2 lives<br>sizes 1.4× to 4× apart',
+        hard: '7s per pick · 1 life<br>within 2×',
+        ultra: '5s per pick · 1 life<br>within 25%'
       }
     },
     guess: {
@@ -301,7 +301,7 @@
     $('hudAltLabel').textContent = type === 'haunt' ? 'Ghost behind' : 'Location';
     $('hudAlt').className = 'pill-value' + (type === 'haunt' ? '' : ' loc');
     $('hudLivesLabel').textContent = TYPES[type].lifeName || 'Lives';
-    $('prompt').innerHTML = type === 'size' ? 'Is the right one actually <b class="hi-word">bigger</b> or <b class="lo-word">smaller</b>?'
+    $('prompt').innerHTML = type === 'size' ? 'Is the right one <b class="hi-word">bigger</b> or <b class="lo-word">smaller</b>?'
       : type === 'guess' ? 'What’s the <b class="hi-word">number</b>?'
       : 'Is the right one <b class="hi-word">higher</b> or <b class="lo-word">lower</b>?';
     $('legend').innerHTML = type === 'guess'
@@ -596,8 +596,8 @@
   function sentence(L, R) {
     if (type === 'size') {
       const [hi, lo] = L.real > R.real ? [L, R] : [R, L];
-      const loText = lo === R ? `${withUnit(R)} = ${convText(R, L)}` : withUnit(L);
-      const hiText = hi === R ? `${withUnit(R)} = ${convText(R, L)}` : withUnit(L);
+      const conv = c => (c === R && R.mk !== L.mk ? `${withUnit(R)} = ${convText(R, L)}` : withUnit(c));
+      const loText = conv(lo), hiText = conv(hi);
       return `${cap(hi.t)} (${hiText}) ${SIZE_VERB[L.dim][0]} ${lo.t} (${loText}).`;
     }
     if (L.n === R.n) return `${cap(L.t)} and ${R.t} are both ${numText(L)}!`;
@@ -632,7 +632,7 @@
 
     await countUp($('cardR'), R, L, photo);
     if (G !== run) return;            // quit during the reveal
-    if (size) { $('cardR').querySelector('.cconv').textContent = '= ' + convText(R, L); $('cardR').classList.add('has-conv'); }
+    if (size && R.mk !== L.mk) { $('cardR').querySelector('.cconv').textContent = '= ' + convText(R, L); $('cardR').classList.add('has-conv'); }
 
     const res = $('result'), quip = $('resultQuip');
     let pts = 0, quipText, quipCls, ptsText = '';
@@ -646,6 +646,7 @@
       G.streak++; G.right++;
       G.bestStreak = Math.max(G.bestStreak, G.streak);
       if (trap) G.traps++;
+      if (size && tier >= 3) G.closeCalls = (G.closeCalls || 0) + 1;
       const parts = [`<span class="${T.cls}">+${commas(pts)} · ${T.name}</span>`];
       if (G.d.mult > 1) parts.push(`×${G.d.mult} ${G.diff}`);
       if (speed > 1) parts.push(`×${speed} speed`);
@@ -960,7 +961,7 @@
         stat(here.ic, G.score > 0 ? esc(here.name) : 'On the ground') +
         stat(G.right, G.type === 'guess' ? 'Scoring guesses' : 'Right answers') +
         stat(G.bestStreak, 'Best streak') +
-        (G.type === 'guess' ? stat(G.bullseyes, 'Bullseyes') : G.type === 'size' ? stat(G.traps, 'Traps dodged') : stat(`${G.photoWon}/${G.photoWon + G.photoLost}`, 'Photo finishes won'));
+        (G.type === 'guess' ? stat(G.bullseyes, 'Bullseyes') : G.type === 'size' ? stat(G.closeCalls || 0, 'Close calls won') : stat(`${G.photoWon}/${G.photoWon + G.photoLost}`, 'Photo finishes won'));
     }
     const ob = $('overBest');
     ob.className = 'over-best' + (isBest && score > 0 ? ' new' : '');

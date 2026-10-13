@@ -171,16 +171,17 @@ const Pairs = (function () {
   }
 
   /* ---- Real Size: which is really bigger? -------------------------------------------------
-   * Two measurements of the same kind (two heights, two weights…) in different units. The
-   * difficulty sets how close the real sizes are and how often the bigger number belongs to the
-   * smaller thing (a trap): 555 feet looks bigger than 330 meters, but it isn't. */
-  const SIZE_BANDS = { owen: [2, 60], medium: [1.4, 4], hard: [1.1, 2], ultra: [1.02, 1.1] };
+   * Two lengths (heights, lengths, distances), both in centimeters. The difficulty sets how
+   * close the two are. (Traps, where the bigger number is the smaller thing, can only happen
+   * across different units, so they no longer come up.) */
+  const SIZE_BANDS = { owen: [2, 60], medium: [1.4, 4], hard: [1.1, 2], ultra: [1.02, 1.25] };   // with only lengths in cm, few pairs are within 10%
   const TRAP_CHANCE = { owen: 1 / 3, medium: 1 / 2, hard: 2 / 3, ultra: 0.85 };
-  const SIZE_CARDS = CARDS.filter(c => c.dim && !c.hw);
+  // Every Real Size card is a length in centimeters, so both numbers are always in the same unit.
+  const SIZE_CARDS = CARDS.filter(c => c.dim === 'len' && c.mk === 'cm' && !c.hw);
   const realRatio = (a, b) => Math.max(a.real, b.real) / Math.min(a.real, b.real);
   const isTrap = (a, b) => Math.sign(a.n - b.n) !== Math.sign(a.real - b.real);
   function sizeFair(a, b) {
-    if (a.base === b.base || a.dim !== b.dim || a.mk === b.mk) return false;
+    if (a.base === b.base || a.dim !== b.dim) return false;
     const r = realRatio(a, b);
     if (r < 1.02) return false;                         // too close for rounding to be fair
     return (trusted(a) && trusted(b)) || r >= 1.1;      // approximate sizes need a clear gap
@@ -211,7 +212,7 @@ const Pairs = (function () {
     return pick(near.slice(0, 5));
   }
   function firstSize(diff) {
-    const start = SIZE_CARDS.filter(c => !c.converted);
+    const start = SIZE_CARDS;
     const [lo, hi] = SIZE_BANDS[diff];
     return pickByFact(start.filter(c => SIZE_CARDS.some(o => sizeFair(c, o) && realRatio(c, o) >= lo && realRatio(c, o) <= hi)));
   }
