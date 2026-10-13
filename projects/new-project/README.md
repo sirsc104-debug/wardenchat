@@ -19,10 +19,11 @@ The home screen keeps the logo, tagline and tab bar in the same place in every m
 | 🐿️ **Guess the Number** | A squirrel, up a tree that never ends | What's the hidden number? |
 | 🎃 **Halloween** (limited time) | A jack-o'-lantern balloon, sideways, chased by a ghost | Higher or lower, before the ghost catches you |
 
-Every mode has Owen (Easy), Medium (×1.25 points), Hard (×1.5) and Ultra (×1.75), and its own best score for each. (On Halloween a right answer also pushes the ghost back harder on the higher difficulties: ×1.5 on Medium, ×2 on Hard, ×2.5 on Ultra.)
+Every mode has Owen (Easy) 🧒, Medium (×1.25 points), Hard (×1.5) and Ultra (×1.75) 💀, and its own best score for each. Medium and Hard wear each mode's own emoji: 🍎 and 🍊 in Classic, 🔥 and 🐉 in Real Size, 🌰 and 🐿️ in Guess the Number, 🎃 and 👻 on Halloween. (On Halloween a right answer also pushes the ghost back harder on the higher difficulties: ×1.5 on Medium, ×2 on Hard, ×2.5 on Ultra.)
 
 ## 🎈 Classic
 
+- **The first question.** In a brand-new browser (nothing saved yet), the very first Classic question is the one the game is built around: Jersey Mike's locations in New Jersey against a blue whale's weight in tons.
 - **Two cards.** The left card shows its number; the right card shows what it counts and the unit, but the number is hidden. Pick **▲ Higher** or **▼ Lower** (or ↑/↓). The hidden number counts up, the right card slides over to the left, and a new card comes in.
 - **Totally unrelated.** Two facts from the same category never meet. The one exception is years: Toy Story against the first Pokémon games is a fair fight.
 - **Difficulty is closeness**, the bigger number divided by the smaller:
@@ -126,7 +127,7 @@ Every mode has its own loop, made on the fly with Web Audio like Brain Rocket's 
 
 ## The facts
 
-There are 657 facts in 26 categories, making 1,633 cards once every measurement is shown in its other units.
+There are 997 facts in 34 categories (plus the Years Ago category the year facts also come up in), making about 3,000 cards once every measurement is shown in its other units and every year as years ago and days ago.
 
 | File | Facts |
 | --- | --- |
@@ -134,6 +135,7 @@ There are 657 facts in 26 categories, making 1,633 cards once every measurement 
 | `js/facts-close.js` | 240 that sit close together (Pokédex and jersey numbers, famous numbers, game rules, sports clocks, years): Ultra's main supply |
 | `js/facts-more.js` | 113 more, mostly measurements (buildings, mountains, animals, speeds, temperatures, how long things last); its lengths are Real Size's main supply |
 | `js/facts-halloween.js` | 115 Halloween facts, only for the Halloween event |
+| `js/facts-500.js` | 340 new facts (of a planned 500) in old and eight new categories: Bugs & Insects, Science, Books & Comics, History, Plants & Trees, plus Countries & Flags, World Records and Art & Museums (still empty). Researched online; the few textbook or definitional values that weren't say so in `src` |
 
 **Same question, different units.** Every measurement comes up in every unit that reads sensibly: the Empire State Building is 1,454 feet, but also 443 meters, 44,318 centimeters, 485 yards or 0.28 miles. Converted numbers are rounded to what the card shows (approximate facts to three significant figures) and the game judges the numbers as shown.
 

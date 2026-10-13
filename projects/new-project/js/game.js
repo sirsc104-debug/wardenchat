@@ -32,7 +32,7 @@
 
   const TYPES = {
     classic: {
-      world: 'classic', lifeIcon: '🎈', lifeName: 'Lives',
+      world: 'classic', icons: { medium: '🍎', hard: '🍊' }, lifeIcon: '🎈', lifeName: 'Lives',
       tagline: 'Two totally unrelated numbers. Is the next one <b>higher</b> or <b>lower</b>?<br>Every right answer lifts your balloon higher into the sky.',
       rules: [
         '<b>🍎🍊 Apples to oranges.</b> A blue whale against Jersey Mike’s. Ignore the units: just say if the number on the right is higher or lower.',
@@ -48,7 +48,7 @@
       }
     },
     size: {
-      world: 'size', lifeIcon: '🔥', lifeName: 'Fire',
+      world: 'size', icons: { medium: '🔥', hard: '🐉' }, lifeIcon: '🔥', lifeName: 'Fire',
       tagline: 'Two lengths, both in centimeters. Which one is <b>bigger</b>?<br>Every right answer lifts your dragon higher.',
       rules: [
         '<b>📏 Everything in centimeters.</b> Heights, lengths and distances, every one measured in cm. Pick the one that’s bigger.',
@@ -64,7 +64,7 @@
       }
     },
     guess: {
-      world: 'guess', lifeIcon: '🌰', lifeName: 'Acorns',
+      world: 'guess', icons: { medium: '🌰', hard: '🐿️' }, lifeIcon: '🌰', lifeName: 'Acorns',
       tagline: 'One number at a time. <b>How close can you guess it?</b><br>Every good guess sends your squirrel up a tree that never ends.',
       rules: [
         '<b>🎯 Get close.</b> Within 1% is a Bullseye (200). Within 5%, 10%, 25% and 50% still score. Years count in years off.',
@@ -80,7 +80,7 @@
       }
     },
     haunt: {
-      world: 'haunt',
+      world: 'haunt', icons: { medium: '🎃', hard: '👻' },
       tagline: '🎃 Limited time! A ghost is chasing your balloon. Every right answer<br>blasts you ahead. How far can you get?',
       rules: [
         '<b>👻 Outrun the ghost.</b> It closes in while you think, and slowly speeds up. Closer calls push it further back.',
@@ -102,6 +102,11 @@
   // Each mode's 20 locations are in js/map.js. Your score is where you are on the map: the 20th
   // location is at 50,000 points, the target, and reaching it starts infinite mode.
   const placeName = (t, score) => { const p = mapPlace(t, score); return `${p.stop.ic} ${p.stop.name}`; };
+
+  // (Checked before anything below writes to storage.) A brand-new browser (nothing saved yet) gets the game's signature matchup as its very first
+  // Classic question: Jersey Mike's in New Jersey against a blue whale's weight in tons.
+  let firstMatchup = false;
+  try { firstMatchup = !['a2o.best2', 'a2o.best', 'a2o.type', 'a2o.firstMatch'].some(k => localStorage.getItem(k)); } catch (e) { /* storage blocked */ }
 
   // ---- Saving (best scores, and the last tab) ----------------------------------------------
   // best[type][difficulty]: the best score
@@ -205,6 +210,8 @@
     document.querySelectorAll('.mode').forEach(c => {
       const d = c.dataset.diff;
       c.querySelector('.mode-desc').innerHTML = T.info[d];
+      // Owen 🧒 and Ultra 💀 stay the same everywhere; Medium and Hard wear the mode's own emoji
+      if (T.icons[d]) c.querySelector('.mode-ic').textContent = T.icons[d];
       c.querySelector('.mode-best').textContent = bestText(type, d);
     });
   }
@@ -276,8 +283,15 @@
       G.left = Pairs.firstSize(diff); G.used.add(G.left.id);
       G.right_ = Pairs.nextSize(G.left, diff, G.used); G.used.add(G.right_.id);
     } else {
-      G.left = Pairs.first(diff, type); G.used.add(G.left.id);
-      G.right_ = Pairs.next(G.left, diff, G.used, G.pstate, type); G.used.add(G.right_.id);
+      const sig = firstMatchup && type === 'classic' && [CARDS.find(c => c.id === 'jerseymikes'), CARDS.find(c => c.id === 'whale@ton')];
+      if (sig && sig[0] && sig[1]) {
+        firstMatchup = false;
+        try { localStorage.setItem('a2o.firstMatch', '1'); } catch (e) { /* ignore */ }
+        G.left = sig[0]; G.right_ = sig[1];
+      } else {
+        G.left = Pairs.first(diff, type); G.right_ = Pairs.next(G.left, diff, G.used, G.pstate, type);
+      }
+      G.used.add(G.left.id); G.used.add(G.right_.id);
     }
     if (type === 'haunt') Scene.chase({ gap: 60, dist: 0, score: 0, play: true, warn: 0, reset: !replay, rewind: replay });
     updateHud();
