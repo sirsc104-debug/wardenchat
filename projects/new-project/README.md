@@ -19,7 +19,7 @@ The home screen keeps the logo, tagline and tab bar in the same place in every m
 | 🐿️ **Guess the Number** | A squirrel, up a tree that never ends | What's the hidden number? |
 | 🎃 **Halloween** (limited time) | A jack-o'-lantern balloon, sideways, chased by a ghost | Higher or lower, before the ghost catches you |
 
-Every mode has Owen (Easy), Medium (×1.5 points), Hard (×2) and Ultra (×2.5), and its own best score for each.
+Every mode has Owen (Easy), Medium (×1.25 points), Hard (×1.5) and Ultra (×1.75), and its own best score for each. (On Halloween a right answer also pushes the ghost back harder on the higher difficulties: ×1.5 on Medium, ×2 on Hard, ×2.5 on Ultra.)
 
 ## 🎈 Classic
 

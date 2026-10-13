@@ -16,10 +16,11 @@
   const EVENT_ON = Date.now() < HAUNT_ENDS.getTime();
 
   const BASE_DIFFS = {
-    owen:   { name: 'Owen (Easy)', time: 15, lives: 3, mult: 1 },
-    medium: { name: 'Medium',      time: 10, lives: 2, mult: 1.5 },
-    hard:   { name: 'Hard',        time: 7,  lives: 1, mult: 2 },
-    ultra:  { name: 'Ultra',       time: 5,  lives: 1, mult: 2.5 }
+    // mult: the points multiplier. push: how much harder a right answer shoves the Halloween ghost back.
+    owen:   { name: 'Owen (Easy)', time: 15, lives: 3, mult: 1,    push: 1 },
+    medium: { name: 'Medium',      time: 10, lives: 2, mult: 1.25, push: 1.5 },
+    hard:   { name: 'Hard',        time: 7,  lives: 1, mult: 1.5,  push: 2 },
+    ultra:  { name: 'Ultra',       time: 5,  lives: 1, mult: 1.75, push: 2.5 }
   };
   const GUESS_TIME = { owen: 20, medium: 20, hard: 20, ultra: 15 };
   // Halloween: how far the ghost lunges on a wrong answer, by difficulty (metres)
@@ -306,7 +307,7 @@
     $('legend').innerHTML = type === 'guess'
       ? '<span>How close you get:</span><span class="t1">● 50% · 10</span><span class="t2">● 25% · 25</span><span class="t3">● 10% · 50</span><span class="t4">● 5% · 100</span><span class="t5">● 1% · Bullseye 200</span>'
       : type === 'haunt'
-        ? `<span>Pushes the ghost back:</span>${Pairs.TIERS.map((T, i) => `<span class="${T.cls}">● ${T.name} +${Math.round(PUSH[i] * G.d.mult)} m</span>`).join('')}`
+        ? `<span>Pushes the ghost back:</span>${Pairs.TIERS.map((T, i) => `<span class="${T.cls}">● ${T.name} +${Math.round(PUSH[i] * G.d.push)} m</span>`).join('')}`
         : `<span>${type === 'size' ? 'Closer sizes' : 'Closer numbers'} score more:</span><span class="t1">● Common 10</span><span class="t2">● Uncommon 25</span><span class="t3">● Rare 50</span><span class="t4">● Epic 100</span><span class="t5">● Legendary 200</span>`;
   }
 
@@ -637,7 +638,7 @@
       $('cardR').classList.add('right-ans');
       if (haunt) {
         // the points push the ghost back (no speed bonus in the chase)
-        const push = Math.round(PUSH[tier] * G.d.mult * streakMult);
+        const push = Math.round(PUSH[tier] * G.d.push * streakMult);
         const closeCall = G.gap < 10;
         G.closest = Math.min(G.closest, Math.max(0, G.gap));
         G.gap = Math.min(150, G.gap + push);
