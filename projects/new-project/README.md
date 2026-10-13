@@ -46,7 +46,7 @@ Every mode has Owen (Easy) 🧒, Medium (×1.25 points), Hard (×1.5) and Ultra 
 ## 🐉 Real Size: the dragon ride
 
 - **Everything is in centimeters.** Both cards are a length (a height, a length or a distance) measured in cm, so there are no units to convert: pick **▲ Bigger** or **▼ Smaller**. A mountain or a road trip in centimeters gets huge, so read every digit.
-- Real Size uses the 94 length facts. Weights, speeds, temperatures, times and volumes can't be shown in cm, so they only come up in the other modes.
+- Real Size uses the 226 length facts. Weights, speeds, temperatures, times and volumes can't be shown in cm, so they only come up in the other modes.
 
 | | Time per pick | Lives (🔥) | Sizes |
 | --- | --- | --- | --- |
@@ -127,7 +127,7 @@ Every mode has its own loop, made on the fly with Web Audio like Brain Rocket's 
 
 ## The facts
 
-There are 997 facts in 31 categories (plus the Years Ago category the year facts also come up in), making about 3,000 cards once every measurement is shown in its other units and every year as years ago and days ago.
+There are 1,157 facts in 34 categories (plus the Years Ago category the year facts also come up in), making about 3,800 cards once every measurement is shown in its other units and every year as years ago and days ago.
 
 | File | Facts |
 | --- | --- |
@@ -135,7 +135,7 @@ There are 997 facts in 31 categories (plus the Years Ago category the year facts
 | `js/facts-close.js` | 240 that sit close together (Pokédex and jersey numbers, famous numbers, game rules, sports clocks, years): Ultra's main supply |
 | `js/facts-more.js` | 113 more, mostly measurements (buildings, mountains, animals, speeds, temperatures, how long things last); its lengths are Real Size's main supply |
 | `js/facts-halloween.js` | 115 Halloween facts, only for the Halloween event |
-| `js/facts-500.js` | 340 new facts (of a planned 500) in old and eight new categories: Bugs & Insects, Science, Books & Comics, History, Plants & Trees, plus Countries & Flags, World Records and Art & Museums (still empty). Researched online; the few textbook or definitional values that weren't say so in `src` |
+| `js/facts-500.js` | 500 more facts across the old categories and eight new ones (Bugs & Insects, Science, Books & Comics, Countries & Flags, History, Plants & Trees, World Records, Art & Museums), plus many more lengths for Real Size. Researched online with each source in `src`; the few textbook or definitional values that weren't say so |
 
 **Same question, different units.** Every measurement comes up in every unit that reads sensibly: the Empire State Building is 1,454 feet, but also 443 meters, 44,318 centimeters, 485 yards or 0.28 miles. Converted numbers are rounded to what the card shows (approximate facts to three significant figures) and the game judges the numbers as shown.
 

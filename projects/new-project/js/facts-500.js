@@ -1,7 +1,7 @@
-/* Apples to Oranges — the new-facts batch: 340 of a planned 500, researched online (each one's
- * source is in src; a few textbook and definitional values say "not checked online"). Same format
- * as facts.js. Adds eight categories. They come up in every mode; the lengths also feed Real Size
- * (every card in centimeters), and the years also come up as "years ago" and "days ago". */
+/* Apples to Oranges — 500 more facts, researched online. Each one's source is in src; a few
+ * textbook and definitional values say they weren't checked online. Same format as facts.js. Adds
+ * eight categories. They come up in every mode; the lengths also feed Real Size (every card in
+ * centimeters), and the years also come up as "years ago" and "days ago". */
 'use strict';
 
 Object.assign(CATS, {
@@ -36,6 +36,11 @@ FACTS.push(
   { id: "p1-emperorpenguin", c: "animal", t: "the height of an emperor penguin", n: 4, m: "ft", note: "About; the tallest penguin", src: "Smithsonian Ocean; PBS Nature" },
   { id: "p1-spermwhalebrain", c: "animal", t: "the weight of a sperm whale's brain", n: 9, m: "kg", note: "Up to about; heaviest brain of any animal", src: "Guinness World Records" },
   { id: "p1-rabbitteeth", c: "animal", t: "teeth in an adult rabbit's mouth", n: 28, u: "teeth", x: 1, src: "PDSA; MSU rabbit dentition chart" },
+  { id: "p16-godwit", c: "animal", t: "the longest nonstop flight by a bird ever tracked", n: 13560, m: "km", note: "A young bar-tailed godwit, Alaska to Tasmania, 2022", src: "Max Planck Institute / BirdLife Tasmania" },
+  { id: "p16-etruscanshrew", c: "animal", t: "the weight of an Etruscan shrew, the lightest mammal", n: 1.8, m: "g", note: "About; typical adult", src: "Wikipedia" },
+  { id: "p16-penguindive", c: "animal", t: "the deepest dive ever recorded by an emperor penguin", n: 564, m: "m", note: "Antarctica, 2006", src: "Guinness World Records" },
+  { id: "p16-komodo", c: "animal", t: "the length of an adult male Komodo dragon", n: 2.59, m: "m", note: "Average; the largest lizard", src: "Guinness World Records" },
+  { id: "p16-bumblebeebat", c: "animal", t: "the body length of the bumblebee bat, the smallest bat", n: 30, m: "mm", note: "About; head and body", src: "Guinness World Records" },
 
   // ---- Bugs & Insects ----
   { id: "p1-insectparts", c: "bugs", t: "main body sections of an insect", n: 3, u: "sections", x: 1, note: "Head, thorax and abdomen", src: "Definitional" },
@@ -51,6 +56,17 @@ FACTS.push(
   { id: "p1-beecastes", c: "bugs", t: "kinds of bees in a honeybee hive", n: 3, u: "kinds", x: 1, note: "Queen, workers and drones", src: "Definitional" },
   { id: "p1-hivequeens", c: "bugs", t: "queens in a normal honeybee hive", n: 1, u: "queen", note: "Normally just one", src: "Definitional" },
   { id: "p1-cicada", c: "bugs", t: "how long Magicicada septendecim cicadas live underground", n: 17, m: "yr", note: "The 17-year periodical cicada", src: "Definitional" },
+  { id: "p16-beewingbeats", c: "bugs", t: "times a honeybee beats its wings each second", n: 230, u: "beats", note: "About", src: "Caltech" },
+  { id: "p16-millipedelegs", c: "bugs", t: "legs on the leggiest millipede ever found", n: 1306, u: "legs", note: "Eumillipes persephone, Australia, 2021", src: "Scientific Reports / NPR" },
+  { id: "p16-hivesize", c: "bugs", t: "bees in a honeybee colony in summer", n: 50000, u: "bees", note: "About; can range from 20,000 to 80,000", src: "Beekeeping references" },
+  { id: "p16-queeneggs", c: "bugs", t: "eggs a honeybee queen can lay in one day", n: 2000, u: "eggs", note: "Up to about, in peak season", src: "Beekeeping references" },
+  { id: "p16-weta", c: "bugs", t: "the weight of the heaviest insect ever weighed, a giant weta", n: 71, m: "g", note: "A female found in New Zealand in 2011", src: "Popular Science" },
+  { id: "p16-fairyfly", c: "bugs", t: "the length of the smallest insect ever measured", n: 139, m: "um", note: "A male Dicopomorpha echmepterygis wasp", src: "Wikipedia (Mockford 1997)" },
+  { id: "p16-stickinsect", c: "bugs", t: "the length of the longest insect, a stick insect from China", n: 64, m: "cm", note: "With legs stretched out; bred in 2017", src: "Guinness World Records" },
+  { id: "p16-dragonflylenses", c: "bugs", t: "tiny lenses in each eye of a dragonfly", n: 30000, u: "lenses", note: "Up to, in the biggest species", src: "RSPB / Brisbane Insects" },
+  { id: "p16-locustswarm", c: "bugs", t: "desert locusts in one square kilometer of swarm", n: 80000000, u: "locusts", note: "Up to", src: "UN FAO" },
+  { id: "p16-antsupercolony", c: "bugs", t: "the length of the Argentine ant supercolony in Europe", n: 6000, m: "km", note: "About; from Italy to Portugal", src: "Science News" },
+  { id: "p16-birdwing", c: "bugs", t: "the wingspan of Queen Alexandra's birdwing, the biggest butterfly", n: 28, m: "cm", note: "Up to, for a female", src: "Guinness World Records" },
 
   // ---- Human Body ----
   { id: "p2-neurons", c: "body", t: "neurons in the human brain", n: 86000000000, u: "neurons", note: "About, for an adult", src: "Azevedo et al. 2009, J Comp Neurol" },
@@ -82,6 +98,29 @@ FACTS.push(
   { id: "p2-butterstick", c: "food", t: "tablespoons in a stick of butter", n: 8, u: "tablespoons", note: "US packaging" },
   { id: "p2-fatcal", c: "food", t: "calories in one gram of fat", n: 9, u: "calories", x: 1, note: "The standard used on nutrition labels" },
   { id: "p2-proteincal", c: "food", t: "calories in one gram of protein", n: 4, u: "calories", x: 1, note: "The standard used on nutrition labels" },
+  { id: "p13-mcdmedfries", c: "food", t: "calories in a medium order of McDonald's fries", n: 320, u: "calories", note: "As of 2025, US menu", src: "McDonald's US nutrition" },
+  { id: "p13-qpcheese", c: "food", t: "calories in a McDonald's Quarter Pounder with Cheese", n: 520, u: "calories", note: "As of 2025, US menu", src: "McDonald's US nutrition" },
+  { id: "p13-eggmcmuffin", c: "food", t: "calories in an Egg McMuffin", n: 310, u: "calories", note: "As of 2025, US menu", src: "McDonald's US nutrition" },
+  { id: "p13-cfasandwich", c: "food", t: "calories in a Chick-fil-A Chicken Sandwich", n: 420, u: "calories", note: "As of 2025", src: "chick-fil-a.com" },
+  { id: "p13-crunchytaco", c: "food", t: "calories in a Taco Bell Crunchy Taco", n: 170, u: "calories", note: "As of 2025", src: "tacobell.com" },
+  { id: "p13-snickers", c: "food", t: "calories in a regular Snickers bar", n: 250, u: "calories", note: "As of 2025, the 1.86 oz bar", src: "snickers.com" },
+  { id: "p13-oreos", c: "food", t: "calories in three Oreo cookies", n: 160, u: "calories", note: "As of 2025, one 34 g serving", src: "Oreo nutrition label (via Fitbit/FatSecret)" },
+  { id: "p13-redbull", c: "food", t: "calories in a small can of Red Bull", n: 110, u: "calories", note: "As of 2025, the 8.4 fl oz can", src: "redbull.com" },
+  { id: "p13-largeegg", c: "food", t: "calories in one large egg", n: 72, u: "calories", note: "About", src: "USDA FoodData Central (via Livestrong)" },
+  { id: "p13-coke20sugar", c: "food", t: "the sugar in a 20-ounce bottle of Coke", n: 65, m: "g", note: "As of 2025", src: "Coca-Cola label (retailer listings)" },
+  { id: "p13-caramelfrap", c: "food", t: "the sugar in a grande Starbucks Caramel Frappuccino", n: 54, m: "g", note: "As of 2025, with whipped cream", src: "starbucks.com" },
+  { id: "p13-bigmacbun", c: "food", t: "pieces of bun in a Big Mac", n: 3, u: "pieces", note: "Top, middle (the club) and bottom", src: "Definitional" },
+  { id: "p13-watermelonrecord", c: "food", t: "the weight of the heaviest watermelon ever grown", n: 350.5, m: "lb", note: "Grown in Tennessee, 2013", src: "Guinness World Records" },
+  { id: "p13-carrotrecord", c: "food", t: "the length of the longest carrot ever grown", n: 6.245, m: "m", note: "Grown in the UK, 2016", src: "Guinness World Records" },
+  { id: "p13-strawberryrecord", c: "food", t: "the weight of the heaviest strawberry ever", n: 289, m: "g", note: "Grown in Israel, 2021", src: "Guinness World Records (Times of Israel)" },
+  { id: "p13-onionrecord", c: "food", t: "the weight of the heaviest onion ever grown", n: 8.97, m: "kg", note: "Grown in the UK, 2023", src: "Guinness World Records" },
+  { id: "p13-tomatorecord", c: "food", t: "the weight of the heaviest tomato ever grown", n: 7.661, m: "kg", note: "As of 2025; grown in Washington State", src: "Guinness World Records" },
+  { id: "p13-cornkernels", c: "food", t: "kernels on a typical ear of corn", n: 500, u: "kernels", note: "About; most ears have 400 to 600", src: "Purdue Univ.; Ohio State Univ." },
+  { id: "p13-maplesap", c: "food", t: "gallons of maple sap boiled down for 1 gallon of syrup", n: 40, u: "gallons", note: "About", src: "National Park Service" },
+  { id: "p13-peanutjar", c: "food", t: "peanuts in a 12-ounce jar of peanut butter", n: 540, u: "peanuts", note: "About", src: "National Peanut Board (via Purdue Extension)" },
+  { id: "p13-watermelonwater", c: "food", t: "how much of a watermelon is water", n: 92, u: "%", note: "About", src: "Geisinger; Food Republic" },
+  { id: "p13-turkeyoven", c: "food", t: "the lowest safe oven setting for roasting a turkey", n: 325, m: "F", note: "USDA guideline", src: "USDA FSIS" },
+  { id: "p13-poultrysafe", c: "food", t: "the safe inside temperature for cooked chicken or turkey", n: 165, m: "F", note: "USDA minimum", src: "USDA FSIS" },
 
   // ---- Space ----
   { id: "p3-neptunedist", c: "space", t: "the distance from the Sun to Neptune", n: 4500000000, m: "km", note: "On average; about 30 times Earth's distance", src: "NASA" },
@@ -95,10 +134,40 @@ FACTS.push(
   { id: "p3-proxima", c: "space", t: "the distance to the nearest star after the Sun", n: 40000, m: "Tm", note: "About 4.24 light-years, to Proxima Centauri", src: "Gaia via EarthSky" },
   { id: "p3-galacticyear", c: "space", t: "how long the Sun takes to circle the Milky Way", n: 230000000, m: "yr", note: "About", src: "NASA StarChild / Astronomy" },
   { id: "p3-suncore", c: "space", t: "the temperature at the center of the Sun", n: 27000000, m: "F", note: "About", src: "NASA JPL" },
+  { id: "p14-saturnmoons", c: "space", t: "known moons of Saturn", n: 274, u: "moons", note: "As of 2025, the most of any planet", src: "IAU / NASA" },
+  { id: "p14-neptunemoons", c: "space", t: "known moons of Neptune", n: 16, u: "moons", note: "As of 2025", src: "NASA / Sky & Telescope" },
+  { id: "p14-earthescape", c: "space", t: "the speed needed to escape Earth's gravity", n: 11.2, m: "kms", note: "About, from the surface", src: "NASA Planetary Fact Sheet" },
+  { id: "p14-jupiterescape", c: "space", t: "the speed needed to escape Jupiter's gravity", n: 59.5, m: "kms", note: "About", src: "NASA Planetary Fact Sheet" },
+  { id: "p14-jupiteryear", c: "space", t: "how long a year on Jupiter is", n: 11.86, m: "yr", note: "About 4,333 Earth days", src: "NASA" },
+  { id: "p14-mercuryyear", c: "space", t: "how long a year on Mercury is", n: 88, m: "d", note: "About", src: "NASA" },
+  { id: "p14-uranusday", c: "space", t: "how long a day on Uranus is", n: 17.2, m: "h", note: "About 17 hours 14 minutes", src: "NASA" },
+  { id: "p14-marswidth", c: "space", t: "the width of Mars", n: 4220, m: "mi", note: "About, roughly half of Earth's", src: "NASA" },
+  { id: "p14-shuttlemissions", c: "space", t: "Space Shuttle missions flown", n: 135, u: "missions", x: 1, note: "From 1981 to 2011", src: "NASA" },
+  { id: "p14-moonrocks", c: "space", t: "the weight of all the Moon rocks Apollo brought back", n: 842, m: "lb", note: "About, from six landings", src: "NASA" },
+  { id: "p14-apollo17stay", c: "space", t: "how long the Apollo 17 astronauts stayed on the Moon", n: 75, m: "h", note: "About; the longest Apollo stay", src: "NASA / UPI 1972" },
+  { id: "p14-moonday", c: "space", t: "the daytime temperature on the Moon", n: 250, m: "F", note: "About, near the equator", src: "NASA LRO" },
+  { id: "p14-isslength", c: "space", t: "the length of the International Space Station", n: 356, m: "ft", note: "About, end to end", src: "NASA" },
+  { id: "p14-issorbits", c: "space", t: "times the Space Station circles Earth each day", n: 16, u: "orbits", note: "About", src: "NASA" },
+  { id: "p14-issweight", c: "space", t: "the weight of the International Space Station", n: 925000, m: "lb", note: "About; changes with visiting ships", src: "NASA" },
 
   // ---- Earth & Weather ----
   { id: "p3-snowflake", c: "earth", t: "sides on a snowflake", n: 6, u: "sides", x: 1 },
   { id: "p9-karman", c: "earth", t: "the altitude where space officially begins", n: 100, m: "km", x: 1, note: "The Karman line, as defined by the FAI", src: "FAI definition" },
+  { id: "p15-yangtze", c: "earth", t: "the length of China's Yangtze River", n: 6300, m: "km", note: "About; longest river in Asia", src: "USGS / Wikipedia" },
+  { id: "p16-earthtilt", c: "earth", t: "how far Earth's axis is tilted", n: 23.44, u: "degrees", note: "About; it slowly wobbles over 41,000 years", src: "Britannica / NASA" },
+  { id: "p16-maunakea", c: "earth", t: "the height of Mauna Kea measured from its seafloor base", n: 10200, m: "m", note: "About; taller than Everest from base to peak", src: "EarthDate (UT Austin)" },
+  { id: "p16-superiorvol", c: "earth", t: "the amount of water in Lake Superior", n: 12100, m: "Tl", note: "About 2,900 cubic miles", src: "US EPA" },
+  { id: "p16-hailstone", c: "earth", t: "the width of the biggest hailstone ever found in the US", n: 8, m: "in", note: "Vivian, South Dakota, 2010; it weighed 1.94 lb", src: "NOAA / NWS" },
+  { id: "p16-mtbakersnow", c: "earth", t: "the most snow ever measured in one season, at Mount Baker", n: 1140, m: "in", note: "1998-99 season, Washington state", src: "NOAA" },
+  { id: "p16-cherrapunji", c: "earth", t: "the most rain ever to fall in one place in a single year", n: 1042, m: "in", note: "About; Cherrapunji, India, Aug 1860 to Jul 1861", src: "Guinness World Records / WMO" },
+  { id: "p16-activevolcanoes", c: "earth", t: "potentially active volcanoes on Earth's land", n: 1350, u: "volcanoes", note: "About; not counting seafloor ridges", src: "USGS" },
+  { id: "p16-sthelens", c: "earth", t: "how much height Mount St. Helens lost when it erupted in 1980", n: 1300, m: "ft", note: "About; from 9,677 ft down to 8,365 ft", src: "USGS" },
+  { id: "p16-krakatoa", c: "earth", t: "how far away the 1883 Krakatoa eruption was heard", n: 4653, m: "km", note: "About; heard on Rodrigues Island", src: "Guinness World Records" },
+  { id: "p16-elreno", c: "earth", t: "the width of the widest tornado ever recorded", n: 2.6, m: "mi", note: "El Reno, Oklahoma, 2013", src: "National Weather Service" },
+  { id: "p16-deadsea", c: "earth", t: "how far below sea level the Dead Sea's shore lies", n: 430, m: "m", note: "About, and still dropping; lowest land on Earth", src: "NOAA / Britannica" },
+  { id: "p16-lightningrate", c: "earth", t: "lightning flashes on Earth every second", n: 44, u: "flashes", note: "About, averaged over a year", src: "NASA" },
+  { id: "p16-megaflash", c: "earth", t: "the length of the longest lightning flash ever recorded", n: 829, m: "km", note: "Texas to near Kansas City, 2017; as of 2025", src: "World Meteorological Organization" },
+  { id: "p16-aconcagua", c: "earth", t: "the height of Aconcagua, the tallest mountain in the Americas", n: 6961, m: "m", note: "About", src: "CIA World Factbook" },
 
   // ---- Science ----
   { id: "p4-hydrogenatom", c: "science", t: "the radius of a hydrogen atom", n: 52.9, m: "pm", note: "The Bohr radius; about", src: "CODATA via Wikipedia" },
@@ -197,6 +266,11 @@ FACTS.push(
   { id: "p9-nflcrossbar", c: "sports", t: "the height of an NFL goal post's crossbar", n: 10, m: "ft", x: 1, src: "NFL Rulebook" },
   { id: "p9-nfluprights", c: "sports", t: "how far NFL uprights rise above the crossbar", n: 35, m: "ft", note: "Per the 2024 NFL rulebook; it was 30 ft in 2011", src: "NFL Rulebook; Pro Football Hall of Fame" },
   { id: "p9-diving", c: "sports", t: "the height of the highest Olympic diving platform", n: 10, m: "m", x: 1, note: "The Olympic event is named for it", src: "World Aquatics (10 m platform event)" },
+  { id: "p15-monacolap", c: "sports", t: "one lap of the Monaco Grand Prix circuit", n: 3.337, m: "km", note: "Shortest track on the F1 calendar", src: "Mercedes-AMG F1 / F1" },
+  { id: "p15-indylap", c: "sports", t: "one lap of the Indianapolis Motor Speedway oval", n: 2.5, m: "mi", src: "NASCAR / Racing Reference" },
+  { id: "p15-spalap", c: "sports", t: "one lap of Belgium's Spa-Francorchamps F1 circuit", n: 7.004, m: "km", note: "Longest track on the F1 calendar", src: "F1 circuit guides" },
+  { id: "p15-nurburgring", c: "sports", t: "one lap of Germany's Nürburgring Nordschleife", n: 20.832, m: "km", note: "The famous \"Green Hell\" track", src: "Nürburgring official site" },
+  { id: "p15-lemans", c: "sports", t: "one lap of the Le Mans 24 Hours circuit", n: 13.626, m: "km", note: "Partly on public roads", src: "Le Mans Ultimate / track guides" },
 
   // ---- Games & Toys ----
   { id: "p5-scrabblesquares", c: "games", t: "squares on a Scrabble board", n: 225, u: "squares", x: 1, src: "Wikipedia: Scrabble" },
@@ -299,6 +373,14 @@ FACTS.push(
   { id: "p7-machupicchu", c: "places", t: "the elevation of Machu Picchu", n: 2430, m: "m", note: "Above sea level", src: "UNESCO" },
   { id: "p7-moai", c: "places", t: "giant moai statues on Easter Island", n: 900, u: "statues", note: "About; estimates run from 887 to 1,000", src: "Britannica Kids / NOVA" },
   { id: "p7-pyramidblocks", c: "places", t: "stone blocks in the Great Pyramid of Giza", n: 2300000, u: "blocks", note: "About", src: "Britannica" },
+  { id: "p15-threegorges", c: "places", t: "the length of China's Three Gorges Dam", n: 2335, m: "m", note: "About; world's biggest power station", src: "Wikipedia / ESA" },
+  { id: "p15-merdeka118", c: "places", t: "the height of Merdeka 118 in Kuala Lumpur", n: 678.9, m: "m", note: "World's second-tallest building", src: "Wikipedia / Dezeen" },
+  { id: "p15-gotthard", c: "places", t: "the length of Switzerland's Gotthard Base Tunnel", n: 57.1, m: "km", note: "World's longest railway tunnel", src: "Swiss government (EDA)" },
+  { id: "p15-seikan", c: "places", t: "the length of Japan's undersea Seikan Tunnel", n: 53.85, m: "km", note: "About", src: "WorldAtlas / Interesting Engineering" },
+  { id: "p15-transsiberian", c: "places", t: "the length of the Trans-Siberian Railway", n: 9289, m: "km", note: "About; Moscow to Vladivostok", src: "Britannica / Wikipedia" },
+  { id: "p15-suez", c: "places", t: "the length of the Suez Canal", n: 193.3, m: "km", note: "About; after recent extensions", src: "Wikipedia / Guinness" },
+  { id: "p15-hzmb", c: "places", t: "the Hong Kong-Zhuhai-Macau sea bridge and tunnel", n: 55, m: "km", note: "About; includes approach roads", src: "Interesting Engineering / Xinhua" },
+  { id: "p15-laerdal", c: "places", t: "Norway's Lærdal Tunnel, the longest road tunnel", n: 24.5, m: "km", note: "About", src: "Visit Norway / National Geographic" },
 
   // ---- USA ----
   { id: "p7-constarticles", c: "usa", t: "articles in the US Constitution", n: 7, u: "articles", x: 1, src: "US Constitution" },
@@ -319,6 +401,12 @@ FACTS.push(
   { id: "p9-dollarbill", c: "usa", t: "the length of a US dollar bill", n: 6.14, m: "in", x: 1, note: "All current US bills are the same size", src: "Bureau of Engraving and Printing" },
   { id: "p9-oldbill", c: "usa", t: "the length of US paper money before 1929", n: 7.375, m: "in", x: 1, note: "The old large-size notes, shrunk with the 1928 series", src: "Bureau of Engraving and Printing" },
   { id: "p9-quarter", c: "usa", t: "the width of a US quarter", n: 0.955, m: "in", x: 1, src: "US Mint specs (via Wikipedia)" },
+  { id: "p15-verrazzano", c: "usa", t: "the main span of New York's Verrazzano-Narrows Bridge", n: 4260, m: "ft", note: "Longest suspension span in the US", src: "Structurae / Wikipedia" },
+  { id: "p15-craterlake", c: "usa", t: "the depth of Oregon's Crater Lake", n: 1949, m: "ft", note: "About; deepest lake in the US", src: "Wikipedia / Live Science" },
+  { id: "p15-tahoedepth", c: "usa", t: "the depth of Lake Tahoe", n: 1645, m: "ft", note: "About; at its deepest point", src: "WorldAtlas" },
+  { id: "p15-eriecanal", c: "usa", t: "the length of New York's Erie Canal", n: 363, m: "mi", note: "Lake Erie to the Hudson River", src: "HistoryNet" },
+  { id: "p15-mammothcave", c: "usa", t: "the mapped length of Kentucky's Mammoth Cave", n: 426, m: "mi", note: "As of 2025; world's longest known cave", src: "NPS / Discover Wildlife" },
+  { id: "p15-chesapeake", c: "usa", t: "the Chesapeake Bay Bridge-Tunnel, shore to shore", n: 17.6, m: "mi", src: "CBBT / Britannica" },
 
   // ---- Years ----
   { id: "p8-leonardo", c: "years", t: "the year Leonardo da Vinci was born", n: 1452, u: "", x: 1, year: 1, note: "Born April 15 near Vinci, Italy", src: "Smithsonian / World History Enc." },
@@ -376,6 +464,12 @@ FACTS.push(
   { id: "p9-a380len", c: "vehicles", t: "the length of an Airbus A380", n: 72.72, m: "m", src: "Aviation specs (FlyAway Simulation)" },
   { id: "p9-shuttle", c: "vehicles", t: "the length of the Space Shuttle orbiter", n: 37.24, m: "m", note: "About 122 ft", src: "NASA; Wikipedia" },
   { id: "p9-shuttlestack", c: "vehicles", t: "the height of the Space Shuttle on the launch pad", n: 184, m: "ft", note: "About; orbiter, fuel tank and boosters together", src: "NASA" },
+  { id: "p15-iconlength", c: "vehicles", t: "the length of Icon of the Seas, a giant cruise ship", n: 365, m: "m", note: "About; biggest cruise ship when it launched in 2024", src: "Wikipedia / Royal Caribbean" },
+  { id: "p15-hindenburg", c: "vehicles", t: "the length of the Hindenburg airship", n: 245, m: "m", note: "Largest airship ever built", src: "Britannica / Wikipedia" },
+  { id: "p15-iconpassengers", c: "vehicles", t: "passengers Icon of the Seas can carry", n: 7600, u: "passengers", note: "At most; plus about 2,350 crew", src: "Royal Caribbean / Seatrade" },
+  { id: "p15-a380pax", c: "vehicles", t: "passengers an Airbus A380 is certified to carry", n: 853, u: "passengers", note: "In an all-economy layout", src: "EASA / FAA certification" },
+  { id: "p15-modelt", c: "vehicles", t: "Ford Model T cars built", n: 15000000, u: "cars", note: "More than; from 1908 to 1927", src: "Wikipedia / SlashGear" },
+  { id: "p15-concordes", c: "vehicles", t: "Concorde jets ever built", n: 20, u: "jets", x: 1, note: "Including 6 prototypes and test planes", src: "HowStuffWorks / Plane & Pilot" },
 
   // ---- Plants & Trees ----
   { id: "p10-bamboogrowth", c: "plants", t: "how much some bamboo can grow in a single day", n: 91, m: "cm", note: "Up to; the fastest-growing plant", src: "Guinness World Records" },
@@ -392,5 +486,81 @@ FACTS.push(
   { id: "p10-saguaroage", c: "plants", t: "how long a saguaro cactus can live", n: 150, m: "yr", note: "Sometimes more", src: "NPS (Saguaro National Park)" },
   { id: "p10-ragweedpollen", c: "plants", t: "the width of a ragweed pollen grain", n: 20, m: "um", note: "About", src: "Allergy Asthma Clin Immunol (2016)" },
   { id: "p10-treespecies", c: "plants", t: "kinds of trees on Earth", n: 73000, u: "species", note: "About; 2022 estimate", src: "PNAS (Gatti et al. 2022)" },
-  { id: "p10-cloverleaflets", c: "plants", t: "leaflets on a normal clover leaf", n: 3, u: "leaflets", note: "Trifolium means \"three leaves\"", src: "Definitional (genus name)" }
+  { id: "p10-cloverleaflets", c: "plants", t: "leaflets on a normal clover leaf", n: 3, u: "leaflets", note: "Trifolium means \"three leaves\"", src: "Definitional (genus name)" },
+
+  // ---- Countries & Flags ----
+  { id: "p11-brazilstars", c: "world", t: "stars on Brazil's flag", n: 27, u: "stars", note: "One for each state plus the Federal District", src: "CIA World Factbook; Britannica" },
+  { id: "p11-indiaspokes", c: "world", t: "spokes on the wheel in the middle of India's flag", n: 24, u: "spokes", x: 1, note: "The wheel is the Ashoka Chakra", src: "Wikipedia (Ashoka Chakra)" },
+  { id: "p11-malaysiastripes", c: "world", t: "stripes on Malaysia's flag", n: 14, u: "stripes", x: 1, note: "13 states plus the federal government", src: "Wikipedia (Flag of Malaysia)" },
+  { id: "p11-venezuelastars", c: "world", t: "stars on Venezuela's flag", n: 8, u: "stars", note: "Since 2006; for the provinces that declared independence", src: "Wikipedia (Flag of Venezuela)" },
+  { id: "p11-uruguayrays", c: "world", t: "rays on the sun on Uruguay's flag", n: 16, u: "rays", x: 1, note: "The Sun of May; straight and wavy rays alternate", src: "Wikipedia (Flag of Uruguay); CIA World Factbook" },
+  { id: "p11-uruguaystripes", c: "world", t: "stripes on Uruguay's flag", n: 9, u: "stripes", x: 1, note: "The first version in 1828 had 19", src: "Wikipedia (Flag of Uruguay); CIA World Factbook" },
+  { id: "p11-mapleleaf", c: "world", t: "points on the maple leaf on Canada's flag", n: 11, u: "points", x: 1, note: "An early design had 13", src: "Government of Canada; Wikipedia" },
+  { id: "p11-australiastars", c: "world", t: "stars on Australia's flag", n: 6, u: "stars", x: 1, note: "The big Commonwealth Star plus the Southern Cross", src: "Wikipedia (Flag of Australia)" },
+  { id: "p11-japanprefs", c: "world", t: "prefectures in Japan", n: 47, u: "prefectures", src: "Nippon.com" },
+  { id: "p11-germanystates", c: "world", t: "states in Germany", n: 16, u: "states", src: "WYTV; Wikipedia" },
+  { id: "p11-swisscantons", c: "world", t: "cantons in Switzerland", n: 26, u: "cantons", note: "Counting the six former half-cantons separately", src: "Wikipedia (Subdivisions of Switzerland)" },
+  { id: "p11-italyregions", c: "world", t: "regions of Italy", n: 20, u: "regions", src: "sport-histoire.fr subdivisions list" },
+  { id: "p11-nigeriastates", c: "world", t: "states in Nigeria", n: 36, u: "states", note: "Plus the Federal Capital Territory, Abuja", src: "Wikipedia (States of Nigeria); BusinessDay" },
+  { id: "p11-russiatz", c: "world", t: "time zones in Russia", n: 11, u: "time zones", note: "The most consecutive zones of any country", src: "Guinness World Records; Sporcle" },
+  { id: "p11-francetz", c: "world", t: "time zones France uses, counting overseas lands", n: 12, u: "time zones", note: "The most of any country; 13 with its Antarctic claim", src: "Guinness World Records; The Local" },
+  { id: "p11-chinaborders", c: "world", t: "countries that border China", n: 14, u: "countries", note: "Tied with Russia for the most", src: "Guinness World Records" },
+  { id: "p11-brazilborders", c: "world", t: "countries that border Brazil", n: 10, u: "countries", note: "Counting France, via French Guiana", src: "WorldAtlas" },
+  { id: "p11-swedenislands", c: "world", t: "islands in Sweden", n: 267570, u: "islands", note: "About; the most of any country", src: "WorldAtlas; HowStuffWorks" },
+  { id: "p11-philippinesislands", c: "world", t: "islands in the Philippines", n: 7641, u: "islands", note: "About; roughly 2,000 are inhabited", src: "WorldAtlas" },
+  { id: "p11-japanislands", c: "world", t: "islands in Japan", n: 14125, u: "islands", note: "About, per Japan's 2023 recount", src: "Geospatial Information Authority of Japan (via WorldAtlas)" },
+  { id: "p11-russiaarea", c: "world", t: "the area of Russia", n: 17098242, u: "square kilometers", note: "About 6.6 million square miles", src: "CIA World Factbook" },
+  { id: "p11-vaticanarea", c: "world", t: "the area of Vatican City", n: 0.44, u: "square kilometers", note: "About; the world's smallest country", src: "CIA World Factbook; StatisticsTimes" },
+
+  // ---- World Records ----
+  { id: "p12-calment", c: "records", t: "the age of the oldest person ever", n: 122, m: "yr", note: "Jeanne Calment of France, 122 years 164 days", src: "Guinness World Records" },
+  { id: "p12-shortestman", c: "records", t: "the height of the shortest man ever", n: 54.6, m: "cm", note: "Chandra Bahadur Dangi of Nepal, measured 2012", src: "Guinness World Records" },
+  { id: "p12-nails", c: "records", t: "the combined length of the longest fingernails ever", n: 8.65, m: "m", note: "Lee Redmond's ten nails, at their peak in 2008", src: "Guinness World Records" },
+  { id: "p12-hiccups", c: "records", t: "how long the longest attack of hiccups lasted", n: 68, m: "yr", note: "Charles Osborne of Iowa, 1922 to 1990", src: "Guinness World Records" },
+  { id: "p12-oldcat", c: "records", t: "the age of the oldest cat ever", n: 38, m: "yr", note: "Creme Puff of Austin, Texas (38 years 3 days)", src: "Guinness World Records" },
+  { id: "p12-goldfish", c: "records", t: "the age of the oldest goldfish ever", n: 43, m: "yr", note: "Tish, won at a fair in England in 1956", src: "Guinness World Records" },
+  { id: "p12-dominoes", c: "records", t: "dominoes toppled in the biggest domino topple", n: 4491863, u: "dominoes", note: "Domino Day 2009, Netherlands", src: "Guinness World Records" },
+  { id: "p12-heaviest", c: "records", t: "the weight of the heaviest person ever", n: 1400, m: "lb", note: "About; Jon Brower Minnoch, estimated in 1978", src: "Guinness World Records" },
+  { id: "p12-beard", c: "records", t: "the length of the longest beard ever", n: 17.5, m: "ft", note: "Hans Langseth, measured in 1927", src: "Guinness World Records; Smithsonian" },
+  { id: "p12-snowwoman", c: "records", t: "the height of the tallest snowperson ever built", n: 122, m: "ft", note: "Olympia, Bethel, Maine, 2008; as of 2025", src: "Guinness World Records" },
+  { id: "p12-kosen", c: "records", t: "the height of the tallest man alive", n: 251, m: "cm", note: "Sultan Kösen of Türkiye; as of 2025", src: "Guinness World Records" },
+  { id: "p12-mostkids", c: "records", t: "children born to the most prolific mother ever", n: 69, u: "children", note: "Wife of Feodor Vassilyev, Russia, 1700s", src: "Guinness World Records" },
+  { id: "p12-landspeed", c: "records", t: "the land speed record", n: 763, m: "mph", note: "ThrustSSC, 1997; as of 2025", src: "Guinness World Records" },
+  { id: "p12-tallhorse", c: "records", t: "the height of the tallest horse ever", n: 219.7, m: "cm", note: "Sampson, a Shire horse, by 1850", src: "Guinness World Records" },
+  { id: "p12-longcat", c: "records", t: "the length of the longest house cat ever", n: 48.5, m: "in", note: "Stewie, a Maine Coon, nose to tail tip, 2010", src: "Guinness World Records" },
+  { id: "p12-skydive", c: "records", t: "the height of the highest skydive ever", n: 135890, m: "ft", note: "About; Alan Eustace, 2014; as of 2025", src: "FAI via NBC News" },
+  { id: "p15-qamdorunway", c: "records", t: "the old runway at Tibet's Qamdo Bamda Airport", n: 5.5, m: "km", note: "Longest civil runway ever built; now closed", src: "Guinness World Records" },
+
+  // ---- Art & Museums ----
+  { id: "p12-monalisa", c: "art", t: "the height of the Mona Lisa", n: 77, m: "cm", note: "Not counting the frame", src: "Louvre via Wikipedia" },
+  { id: "p12-pearlearring", c: "art", t: "the height of Vermeer's Girl with a Pearl Earring", n: 44.5, m: "cm", note: "About; at the Mauritshuis, The Hague", src: "Mauritshuis via Wikipedia" },
+  { id: "p12-lastsupper", c: "art", t: "the width of Leonardo's The Last Supper", n: 8.8, m: "m", note: "About; a wall painting in Milan", src: "Multiple art references" },
+  { id: "p12-guernica", c: "art", t: "the width of Picasso's Guernica", n: 7.77, m: "m", note: "About; Museo Reina Sofía, Madrid", src: "Museo Reina Sofía" },
+  { id: "p12-david", c: "art", t: "the height of Michelangelo's David", n: 5.17, m: "m", note: "The statue alone, without its pedestal", src: "Dimensions.com; Accademia" },
+  { id: "p12-venusdemilo", c: "art", t: "the height of the Venus de Milo", n: 2.02, m: "m", note: "About; at the Louvre", src: "arte.it; Dimensions.com" },
+  { id: "p12-vangogh", c: "art", t: "oil paintings Vincent van Gogh made", n: 860, u: "paintings", note: "About; estimates run up to 900", src: "Van Gogh catalogues; The Met" },
+  { id: "p12-picasso", c: "art", t: "paintings and designs Picasso made", n: 13500, u: "paintings", note: "About; Guinness's most prolific painter", src: "Guinness World Records" },
+  { id: "p12-waterlilies", c: "art", t: "Water Lilies paintings Monet made", n: 250, u: "paintings", note: "About", src: "Art Institute of Chicago" },
+  { id: "p12-salvatormundi", c: "art", t: "the auction price of Leonardo's Salvator Mundi", n: 450300000, u: "dollars", note: "Christie's, 2017; most ever paid at auction", src: "Britannica; CBS News" },
+  { id: "p12-sistine", c: "art", t: "years Michelangelo took to paint the Sistine Chapel ceiling", n: 4, m: "yr", note: "About; 1508 to 1512", src: "Multiple art references" },
+
+  // ---- Ocean ----
+  { id: "p14-avgdepth", c: "ocean", t: "the average depth of the ocean", n: 12080, m: "ft", note: "About", src: "NOAA" },
+  { id: "p14-saltlayer", c: "ocean", t: "how thick the ocean's salt would be spread over all land", n: 500, m: "ft", note: "More than; an estimate", src: "USGS (via salinity.oceansciences.org)" },
+  { id: "p14-salinity", c: "ocean", t: "how much of seawater's weight is salt", n: 3.5, u: "percent", note: "About, on average", src: "NOAA" },
+  { id: "p14-fundytide", c: "ocean", t: "the biggest tides in the Bay of Fundy, low to high", n: 53, m: "ft", note: "About; the highest tides on Earth", src: "Smithsonian Ocean" },
+  { id: "p14-lituya", c: "ocean", t: "how high the 1958 Lituya Bay tsunami splashed", n: 1720, m: "ft", note: "Up a mountainside in Alaska", src: "NWS / USGS" },
+  { id: "p14-prtrench", c: "ocean", t: "the depth of the deepest spot in the Atlantic", n: 8400, m: "m", note: "About, in the Puerto Rico Trench", src: "USGS" },
+  { id: "p14-oceanvolume", c: "ocean", t: "how much water is in the ocean", n: 1338000000, m: "Tl", note: "About 321 million cubic miles", src: "NOAA NGDC / USGS" },
+  { id: "p14-midoceanridge", c: "ocean", t: "the length of the mountain range under the ocean", n: 40389, m: "mi", note: "About; the mid-ocean ridge, Earth's longest", src: "NOAA" },
+  { id: "p14-tsunamispeed", c: "ocean", t: "how fast a tsunami can move in the deep ocean", n: 500, m: "mph", note: "Over; about as fast as a jet", src: "NOAA" },
+  { id: "p14-lionsmane", c: "ocean", t: "the longest lion's mane jellyfish ever measured", n: 120, m: "ft", note: "Including tentacles", src: "Smithsonian / Wikipedia" },
+  { id: "p14-gpoarmspan", c: "ocean", t: "the arm span of a giant Pacific octopus", n: 14, m: "ft", note: "About, for an average adult", src: "Georgia Aquarium" },
+  { id: "p15-seawisegiant", c: "ocean", t: "the length of the Seawise Giant oil tanker", n: 458.45, m: "m", note: "Longest self-propelled ship ever built", src: "Guinness World Records" },
+
+  // ---- Dinosaurs ----
+  { id: "p15-trexteeth", c: "dinos", t: "teeth in a T. rex's mouth", n: 60, u: "teeth", note: "About; 50 to 60", src: "IFLScience / Zenodo paper" },
+  { id: "p15-triketeeth", c: "dinos", t: "teeth a Triceratops could have", n: 800, u: "teeth", note: "Up to; most were spares waiting to grow in", src: "Discover Wildlife" },
+  { id: "p15-stegoage", c: "dinos", t: "how long ago Stegosaurus lived", n: 150000000, m: "yr", note: "About; 155 to 150 million years ago", src: "Natural History Museum / Live Science" },
+  { id: "p15-trextooth", c: "dinos", t: "the longest T. rex teeth, root included", n: 12, m: "in", note: "About", src: "IFLScience" }
 );
