@@ -53,6 +53,8 @@ const Pairs = (function () {
   // Facts from the same category are too related to meet, except years
   // (Toy Story against the first Pokémon games is fair and fun). A fact never meets itself.
   function unrelated(a, b) {
+    // "how many years ago" against a plain year would give the answer away (19 vs 1996)
+    if ((a.ago && b.year) || (a.year && b.ago)) return false;
     return a.base !== b.base && (a.c !== b.c || a.c === 'years');
   }
 

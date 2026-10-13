@@ -45,5 +45,27 @@ const CARDS = (function () {
       }));
     }
   }
+  // Every year also comes up as "how many years ago" and "how many days ago", worked out from today.
+  // They're the same fact (same base), not new ones. Years ago is exact (this year minus that year);
+  // days ago counts from the fact's date when it has one, otherwise from the middle of that year.
+  const now = new Date(), thisYear = now.getFullYear(), DAY = 86400000;
+  const today = Date.UTC(thisYear, now.getMonth(), now.getDate());
+  const fmtDate = d => new Date(d + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  for (const f of FACTS) {
+    if (!f.year || !(f.n < thisYear)) continue;
+    const what = /^the year /.test(f.t) ? f.t.replace(/^the year /, '') : 'it was ' + f.t;
+    out.push(Object.assign({}, f, {
+      base: f.id, id: f.id + '@yearsago', c: 'ago', t: 'how many years ago ' + what, n: thisYear - f.n, u: 'years ago',
+      year: 0, x: 0, xs: 1, converted: 1, ago: 1, note: 'In ' + f.n + (f.date ? ' (' + fmtDate(f.date) + ')' : '')
+    }));
+    const from = f.date ? Date.parse(f.date + 'T00:00:00Z') : Date.UTC(f.n, 6, 1);
+    const days = Math.round((today - from) / DAY);
+    if (days < 1) continue;
+    out.push(Object.assign({}, f, {
+      base: f.id, id: f.id + '@daysago', c: 'ago', t: 'how many days ago ' + what, n: f.date ? days : Units.sig3(days), u: 'days ago',
+      year: 0, x: 0, xs: 0, converted: 1, ago: 1, note: f.date ? 'Since ' + fmtDate(f.date) : 'About. In ' + f.n
+    }));
+  }
   return out;
 })();
+CATS.ago = { name: 'Years Ago', icon: '⏳' };

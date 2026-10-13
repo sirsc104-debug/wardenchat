@@ -41,19 +41,25 @@ const CATS = {
   earth:    { name: 'Earth & Weather', icon: '🌍' }
 };
 
-/* Units, grouped by what they measure. Each is [size in the group's base unit, name].
+/* Units, grouped by what they measure. Each is [size in the group's base unit, name]. Lengths,
+ * weights, times and amounts also come in the metric prefixes pico- (a trillionth), micro- (a
+ * millionth) and tera- (a trillion), so a hair can be 70 micrometers and the Sun 0.15 terameters away.
  * Temperature isn't a simple multiple, so it converts through kelvin below. */
 const UNITS = {
   len:   { mm: [0.001, 'millimeters'], cm: [0.01, 'centimeters'], m: [1, 'meters'], km: [1000, 'kilometers'],
-           in: [0.0254, 'inches'], ft: [0.3048, 'feet'], yd: [0.9144, 'yards'], mi: [1609.344, 'miles'] },
+           in: [0.0254, 'inches'], ft: [0.3048, 'feet'], yd: [0.9144, 'yards'], mi: [1609.344, 'miles'],
+           pm: [1e-12, 'picometers'], um: [1e-6, 'micrometers'], Tm: [1e12, 'terameters'] },
   mass:  { g: [0.001, 'grams'], kg: [1, 'kilograms'], oz: [0.028349523, 'ounces'], lb: [0.45359237, 'pounds'],
-           ton: [907.18474, 'tons'], tonne: [1000, 'metric tons'] },
+           ton: [907.18474, 'tons'], tonne: [1000, 'metric tons'],
+           pg: [1e-15, 'picograms'], ug: [1e-9, 'micrograms'], Tg: [1e9, 'teragrams'] },
   speed: { mph: [0.44704, 'mph'], kmh: [1 / 3.6, 'km/h'], ms: [1, 'meters per second'], fts: [0.3048, 'feet per second'],
            knots: [0.514444, 'knots'], kms: [1000, 'km per second'] },
   time:  { s: [1, 'seconds'], min: [60, 'minutes'], h: [3600, 'hours'], d: [86400, 'days'], wk: [604800, 'weeks'],
-           mo: [2629746, 'months'], yr: [31556952, 'years'] },
+           mo: [2629746, 'months'], yr: [31556952, 'years'],
+           ps: [1e-12, 'picoseconds'], us: [1e-6, 'microseconds'], Ts: [1e12, 'teraseconds'] },
   vol:   { ml: [0.001, 'milliliters'], l: [1, 'liters'], floz: [0.0295735296, 'fluid ounces'], cup: [0.2365882365, 'cups'],
-           gal: [3.785411784, 'gallons'] },
+           gal: [3.785411784, 'gallons'],
+           pl: [1e-12, 'picoliters'], ul: [1e-6, 'microliters'], Tl: [1e12, 'teraliters'] },
   temp:  { F: [null, '°F'], C: [null, '°C'], K: [null, 'kelvin'] }
 };
 

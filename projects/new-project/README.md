@@ -137,6 +137,10 @@ There are 657 facts in 26 categories, making 1,633 cards once every measurement 
 
 **Same question, different units.** Every measurement comes up in every unit that reads sensibly: the Empire State Building is 1,454 feet, but also 443 meters, 44,318 centimeters, 485 yards or 0.28 miles. Converted numbers are rounded to what the card shows (approximate facts to three significant figures) and the game judges the numbers as shown.
 
+**Metric prefixes.** Lengths, weights, times and amounts also come in pico- (a trillionth), micro- (a millionth) and tera- (a trillion): picometers, micrometers and terameters; picograms, micrograms and teragrams; picoseconds, microseconds and teraseconds; picoliters, microliters and teraliters. Like every unit, one only comes up when its number reads sensibly (0.1 up to a trillion), so a hair can be micrometers and the distance to the Sun 0.15 terameters, but a skyscraper is never picometers. They show up in Classic, Guess the Number and Halloween (Real Size is always centimeters).
+
+**Years ago and days ago.** Every fact whose answer is a year also comes up two more ways, worked out from the day you play: "how many years ago the first iPhone came out" (this year minus that year, exact) and "how many days ago" (counted from the exact date when the fact has one, otherwise from the middle of that year and marked About). They're the same facts, not new ones, and they never meet a plain year (19 against 1996 would give it away).
+
 **Accuracy matters more here than in a normal quiz.** The number is the whole question.
 
 - **Never put the number in the question.** "The number of Route 66" answers itself.
