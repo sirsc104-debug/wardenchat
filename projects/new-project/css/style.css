@@ -330,7 +330,8 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
   transition: transform var(--slide), width var(--slide);
 }
 .type-glider.instant { transition: none; }
-.rules.switching { filter: blur(5px); opacity: 0.55; }
+.rules.switching, .modes.switching { filter: blur(5px); opacity: 0.55; }
+.modes { transition: filter 0.25s, opacity 0.25s; }
 
 /* the Halloween tab's LIMITED TIME badge: a rainbow that keeps sliding along, under an orange layer that fades away and back */
 .ltd-badge {

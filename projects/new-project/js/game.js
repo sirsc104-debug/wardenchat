@@ -217,7 +217,7 @@
   }
   function rulesHTML() { return TYPES[type].rules.map(r => `<div>${r}</div>`).join(''); }
   // Switching tabs: the highlight glides over, the world slides across in the same direction,
-  // and the rules box blurs, changes its text while it's blurred, then sharpens.
+  // and the rules box and the difficulty cards blur, change while they're blurred, then sharpen.
   function setType(t, animate) {
     const from = TYPE_ORDER.indexOf(type), to = TYPE_ORDER.indexOf(t);
     type = t;
@@ -230,13 +230,16 @@
     Scene.setWorld(TYPES[t].world, animate && from !== to ? (to > from ? 1 : -1) : 0);
     if (t === 'haunt') Scene.chase({ gap: 26, dist: 0, score: 0, play: false, reset: true });
     $('tagline').innerHTML = `<span>${TYPES[t].tagline}</span>`;
-    showModeCards();
-    const rules = $('rules');
+    // the rules box and the difficulty cards blur together, change while blurred, then sharpen
+    const rules = $('rules'), modes = document.querySelector('.modes');
     if (animate && from !== to) {
-      rules.classList.add('switching');
+      rules.classList.add('switching'); modes.classList.add('switching');
       clearTimeout(setType.t1); clearTimeout(setType.t2);
-      setType.t1 = setTimeout(() => { rules.innerHTML = rulesHTML(); setType.t2 = setTimeout(() => rules.classList.remove('switching'), 40); }, 270);
-    } else rules.innerHTML = rulesHTML();
+      setType.t1 = setTimeout(() => {
+        rules.innerHTML = rulesHTML(); showModeCards();
+        setType.t2 = setTimeout(() => { rules.classList.remove('switching'); modes.classList.remove('switching'); }, 40);
+      }, 270);
+    } else { rules.innerHTML = rulesHTML(); showModeCards(); }
     if (musicStarted) Sound.music(trackNow());
   }
 
