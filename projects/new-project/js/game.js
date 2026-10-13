@@ -37,7 +37,7 @@
       rules: [
         '<b>🍎🍊 Apples to oranges.</b> A blue whale against Jersey Mike’s. Ignore the units: just say if the number on the right is higher or lower.',
         '<b>🎯 Close calls pay.</b> The closer the two numbers, the more it’s worth: Common 10 up to Legendary 200.',
-        '<b>📸 Photo finish!</b> Sometimes they’re a tie or only 1 apart. Get it right and celebrate. Get it wrong… sorry.',
+        '<b>📸 Photo finish!</b> Sometimes they’re only 1 apart, or exactly the same. <b>Tie!</b> is right when they’re within 5%, and on an exact tie it’s the only right answer.',
         '<b>🔥 Keep a streak.</b> Each right answer in a row adds ×0.25, up to ×5. Pick in the first quarter of the timer for ×2.'
       ],
       info: {
@@ -53,7 +53,7 @@
       rules: [
         '<b>📏 Real size.</b> 555 feet against 330 meters: the bigger number isn’t always the bigger thing. Pick what’s really bigger.',
         '<b>🪤 Watch for traps.</b> When the smaller thing has the bigger number, a right answer pays ×1.5.',
-        '<b>🎯 Close calls pay.</b> The closer the real sizes, the more it’s worth: within 10% is Legendary.',
+        '<b>🎯 Close calls pay.</b> The closer the real sizes, the more it’s worth: within 10% is Legendary. <b>Tie!</b> is right within 5% (and the only right answer if they’re exactly equal).',
         '<b>🔥 Keep a streak.</b> Each right answer in a row adds ×0.25, up to ×5. Pick in the first quarter of the timer for ×2.'
       ],
       info: {
@@ -84,7 +84,7 @@
       tagline: '🎃 Limited time! A ghost is chasing your balloon. Every right answer<br>blasts you ahead. How far can you get?',
       rules: [
         '<b>👻 Outrun the ghost.</b> It closes in while you think, and slowly speeds up. Closer calls push it further back.',
-        '<b>🎃 Halloween facts.</b> Every matchup has one: candy, spooky movies, monsters, pumpkins and more.',
+        '<b>🎃 Halloween facts.</b> Every matchup has one: candy, spooky movies, monsters, pumpkins and more. <b>Tie!</b> is right within 5%, and the only right answer on an exact tie.',
         '<b>💥 Wrong answers hurt.</b> The ghost lunges closer: 25 m on Owen, 30 on Medium, 35 on Hard, 40 on Ultra.',
         '<b>🔥 Keep a streak.</b> Each right answer in a row pushes harder. No timer and no lives: just get as far as you can.'
       ],
@@ -319,6 +319,8 @@
     $('result').className = 'result';
     $('resultQuip').textContent = ''; $('resultLine').textContent = ''; $('resultPts').textContent = '';
     $('photoBanner').classList.add('hidden');
+    $('photoBanner').classList.remove('tie'); $('photoBanner').textContent = '📸 PHOTO FINISH';
+    $('panel').classList.remove('tie-party');
     if (type === 'guess') focusField();
   }
 
@@ -334,6 +336,7 @@
       <div class="cnote">${hidden ? '' : esc(f.note || '')}</div>
       ${hidden && inline ? `<div class="choices">
         <button class="btn-hi" type="button" data-g="higher">${lbl[0]}</button>
+        <button class="btn-tie" type="button" data-g="tie" title="Within 5% of each other">Tie!</button>
         <button class="btn-lo" type="button" data-g="lower">${lbl[1]}</button>
       </div>` : ''}`;
   }
@@ -347,7 +350,7 @@
     R.style.setProperty('--shift', (L.offsetLeft - R.offsetLeft) + 'px');
     const sc = $('stripChoices');
     sc.className = 'strip-choices';
-    sc.innerHTML = strip ? '<button class="btn-hi" type="button" data-g="higher">▲ Higher</button><button class="btn-lo" type="button" data-g="lower">▼ Lower</button>' : '';
+    sc.innerHTML = strip ? '<button class="btn-hi" type="button" data-g="higher">▲ Higher</button><button class="btn-tie" type="button" data-g="tie">Tie!</button><button class="btn-lo" type="button" data-g="lower">▼ Lower</button>' : '';
     document.querySelectorAll('#cardR [data-g], #stripChoices [data-g]').forEach(b => b.addEventListener('click', () => pick(b.dataset.g)));
   }
 
@@ -557,6 +560,22 @@
     if (note) note.textContent = f.note || '';
   }
 
+  // 🤝 A correct tie call: the banner, a fanfare, confetti from the sky and from the vehicle, flashes
+  function celebrateTie(run) {
+    const b = $('photoBanner');
+    b.textContent = '🤝 TIE CALLED!';
+    b.classList.add('tie'); b.classList.remove('hidden');
+    const p = $('panel');
+    p.classList.remove('tie-party'); void p.offsetWidth; p.classList.add('tie-party');
+    Sound.tie();
+    setTimeout(() => { if (G === run) Sound.photoWin(); }, 420);
+    Scene.confetti(240);
+    Scene.confetti(120, Scene.balloonX());
+    Scene.burn(2.4);
+    flash();
+    setTimeout(() => { if (G === run) { flash(); Scene.confetti(160); } }, 600);
+  }
+
   function flash() {
     const el = $('flash');
     el.classList.remove('go'); void el.offsetWidth; el.classList.add('go');
@@ -586,7 +605,15 @@
     const size = type === 'size', haunt = type === 'haunt';
     const usedFrac = haunt ? 1 : 1 - G.timeLeft / G.d.time;
     const photo = !size && Pairs.isPhoto(L, R), tie = !size && L.n === R.n;
-    const ok = !!g && (size ? (g === 'higher') === (R.real > L.real) : (tie || (g === 'higher' ? R.n > L.n : R.n < L.n)));
+    // Tie! is right when the two are within 5% of each other (real sizes in Real Size). Years are always
+    // close in percent, so two years only tie when they're the same year.
+    const apart = size ? Pairs.realRatio(L, R) : Pairs.ratio(L, R);
+    // On an exact tie, Tie is the only right answer: Higher or Lower is wrong.
+    const exact = size ? Math.abs(L.real - R.real) <= 1e-9 * Math.max(L.real, R.real) : tie;
+    const near = exact || (L.year || R.year ? L.n === R.n : apart <= 1.05);
+    const ok = !!g && (g === 'tie' ? near : !exact && (size ? (g === 'higher') === (R.real > L.real) : (g === 'higher' ? R.n > L.n : R.n < L.n)));
+    const tieCall = ok && g === 'tie';
+    const pctApart = isFinite(apart) ? Math.round((apart - 1) * 100) : null;
     const gap = Math.abs(L.n - R.n);
     const trap = size && Pairs.isTrap(L, R);
     const dodge = haunt && G.warn > 0 && ok;
@@ -620,11 +647,18 @@
       if (speed > 1) parts.push(`×${speed} speed`);
       if (streakMult > 1) parts.push(`×${streakMult.toFixed(2)} streak`);
       if (trap) parts.push('🪤 ×1.5 trap');
-      if (photo) {
+      if (tieCall) {
+        // calling a tie is a big deal: a banner, two bursts of confetti, flashes and a fanfare
+        if (photo) G.photoWon++;
+        G.ties = (G.ties || 0) + 1;
+        quipText = exact ? 'IT’S A TIE!! YOU CALLED IT!' : pctApart < 1 ? 'TIE! Less than 1% apart!' : `TIE! Only ${pctApart}% apart!`;
+        quipCls = 'q-photo q-tie';
+        celebrateTie(run);
+      } else if (photo) {
         G.photoWon++;
-        quipText = tie ? 'IT’S A TIE?! Both answers count!' : gap === 1 ? 'PHOTO FINISH! By ONE!' : `PHOTO FINISH! By ${gap}!`;
+        quipText = gap === 1 ? 'PHOTO FINISH! By ONE!' : `PHOTO FINISH! By ${gap}!`;
         quipCls = 'q-photo';
-        tie ? Sound.tie() : Sound.photoWin();
+        Sound.photoWin();
         Scene.confetti(160);
         flash();
       } else {
@@ -660,13 +694,18 @@
     } else {
       G.streak = 0;
       G.killer = { L, R, g, photo, gap };
-      if (photo) {
+      if (exact && g && g !== 'tie') {
+        if (photo) G.photoLost++;
+        quipText = '🤝 It was a TIE! Only Tie was right.';
+        quipCls = 'q-bad';
+        Sound.photoLose();
+      } else if (photo && g !== 'tie') {
         G.photoLost++;
         quipText = gap === 1 ? 'Lost by ONE.' : `Lost by ${gap}.`;
         quipCls = 'q-bad';
         Sound.photoLose();
       } else {
-        quipText = !g ? 'Too slow!' : trap ? '🪤 It was a trap!' : (size ? Pairs.realRatio(L, R) : Pairs.ratio(L, R)) >= 10 ? 'Not even close!' : pickOne(['Nope!', 'Oof!', 'Wrong way!']);
+        quipText = !g ? 'Too slow!' : g === 'tie' ? (pctApart == null || pctApart >= 1000 ? 'Not a tie! Not even close!' : `Not a tie! They’re ${pctApart}% apart.`) : trap ? '🪤 It was a trap!' : (size ? Pairs.realRatio(L, R) : Pairs.ratio(L, R)) >= 10 ? 'Not even close!' : pickOne(['Nope!', 'Oof!', 'Wrong way!']);
         quipCls = 'q-bad';
         if (g) Sound.bad();
       }
@@ -695,7 +734,7 @@
 
     if (photo) setTimeout(() => { if (G === run && !G.paused) Sound.musicLevel(1); }, 1800);
     if (haunt && G.gap <= 0) { caught(); return; }
-    await wait(photo ? 2700 : ok ? 1500 : 2100);
+    await wait(photo || tieCall ? 2900 : ok ? 1500 : 2100);
     if (G !== run || G.phase === 'over') return;
     while (G.paused) { await wait(100); if (G !== run) return; }
     if (!haunt && G.lives <= 0) gameOver();
@@ -873,7 +912,8 @@
         : `💀 ${esc(cap(c.t))}: <b>${esc(withUnit(c))}</b>${k.v == null ? ' (ran out of time)' : `. You guessed <b>${esc(valText(k.v, c))}</b>`}`;
     }
     const L = k.L, R = k.R;
-    const lead = k.g ? (k.photo ? `Lost by ${k.gap === 1 ? 'ONE' : k.gap}` : 'Taken down by') : 'Ran out of time on';
+    const lead = !k.g ? 'Ran out of time on' : k.gap === 0 && k.g !== 'tie' ? 'Missed the tie on' : k.g === 'tie' ? 'Called a tie that wasn’t on'
+      : k.photo ? `Lost by ${k.gap === 1 ? 'ONE' : k.gap}` : 'Taken down by';
     return plain ? `💀 ${lead}: ${L.t} (${withUnit(L)}) vs ${R.t} (${withUnit(R)})`
       : `💀 ${lead}: ${esc(cap(L.t))} (<b>${esc(withUnit(L))}</b>) vs ${esc(R.t)} (<b>${esc(withUnit(R))}</b>)`;
   }
@@ -1004,6 +1044,7 @@
     }
     if (['ArrowUp', 'w', 'W', 'h', 'H'].includes(e.key)) { e.preventDefault(); pick('higher'); }
     else if (['ArrowDown', 's', 'S', 'l', 'L'].includes(e.key)) { e.preventDefault(); pick('lower'); }
+    else if (['=', 't', 'T'].includes(e.key)) { e.preventDefault(); pick('tie'); }
   });
   document.addEventListener('visibilitychange', () => { if (document.hidden && G && G.phase !== 'over' && !G.paused) setPaused(true, true); });
 

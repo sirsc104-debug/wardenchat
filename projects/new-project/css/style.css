@@ -199,6 +199,12 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 .choices button:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
 .btn-hi { background: linear-gradient(#5ee39a, #1f9e52); }
 .btn-lo { background: linear-gradient(#5aa8ff, #2a5fd0); }
+/* 🤝 Tie: right when the two are within 5% of each other */
+.btn-tie { background: linear-gradient(#c79bff, #7a3fd6); }
+.choices { gap: 9px; }
+.choices button { white-space: nowrap; font-size: 27px; padding: 0 6px; }
+.choices button.btn-tie { flex: 0 0 88px; font-size: 27px; }
+#panel.strip .strip-choices button.btn-tie { font-size: 23px; }
 .choices button.chosen { outline: 5px solid #fff; outline-offset: 2px; }
 .choices.locked button { pointer-events: none; }
 .choices.locked button:not(.chosen) { opacity: 0.35; }
@@ -409,9 +415,9 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 #panel.strip .vs { position: static; margin: auto 0; width: 64px; height: 64px; font-size: 24px; flex: none; }
 #panel.strip .card.right-ans, #panel.strip .card.wrong-ans { z-index: 1; }
 .strip-choices { display: none; }
-#panel.strip .strip-choices { display: flex; flex-direction: column; gap: 10px; width: 200px; flex: none; }
+#panel.strip .strip-choices { display: flex; flex-direction: column; gap: 7px; width: 200px; flex: none; }
 #panel.strip .strip-choices button {
-  flex: 1; border-radius: 18px; border: 3px solid rgba(255,255,255,0.85); font-size: 26px; font-weight: 700;
+  flex: 1; border-radius: 16px; border: 3px solid rgba(255,255,255,0.85); font-size: 23px; font-weight: 700;
   box-shadow: 0 5px 0 rgba(0,0,0,0.25);
 }
 #panel.strip .strip-choices.locked button { pointer-events: none; }
@@ -431,3 +437,12 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 .chase-sub { display: flex; justify-content: space-between; font-size: 17px; margin-top: 3px; font-weight: 600; }
 #chaseText.warn { color: #ff5d73; animation: bump 0.4s ease infinite; }
 #panel.strip .legend { font-size: 14px; }
+
+/* 🤝 A correct tie call gets a party */
+.photo-banner.tie { background: linear-gradient(90deg, #c79bff, #ff7ad9, #ffd23f, #7ae0ff, #c79bff); background-size: 300% 100%; color: #2a0a40; animation: tie-banner 0.9s ease-out, tie-shimmer 1.6s linear infinite; }
+@keyframes tie-banner { 0% { transform: translateX(-50%) scale(0.2) rotate(-12deg); } 55% { transform: translateX(-50%) scale(1.35) rotate(4deg); } 100% { transform: translateX(-50%) scale(1) rotate(0); } }
+@keyframes tie-shimmer { to { background-position: 300% 0; } }
+#panel.tie-party { animation: tie-party 0.7s ease-out 2; box-shadow: 0 0 60px rgba(199,155,255,0.8), 0 10px 40px rgba(0,0,0,0.3); }
+@keyframes tie-party { 0%, 100% { transform: none; } 20% { transform: scale(1.025) rotate(-0.6deg); } 45% { transform: scale(1.01) rotate(0.6deg); } 70% { transform: scale(1.02) rotate(-0.3deg); } }
+.q-tie { background: linear-gradient(90deg, #c79bff, #ff7ad9, #ffd23f, #7ae0ff, #c79bff); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; animation: tie-shimmer 1.6s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .photo-banner.tie, #panel.tie-party, .q-tie { animation: none; } }
