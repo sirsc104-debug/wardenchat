@@ -28,17 +28,18 @@ const Pairs = (function () {
   // Chance that the next matchup tries to be a photo finish.
   const PHOTO_CHANCE = { owen: 1 / 16, medium: 1 / 11, hard: 1 / 7 };
 
+  // A number trustworthy to the last digit: an exact fact, or a measurement converted from one.
+  const trusted = c => !!(c.x || c.xs);
+
   function ratio(a, b) {
     const hi = Math.max(a.n, b.n), lo = Math.min(a.n, b.n);
     return lo <= 0 ? Infinity : hi / lo;
   }
 
-  // A tie, or a gap of a few, between two exact facts.
+  // A photo finish: any matchup within 5 of each other, or within 3%, always. (Which pairs can come
+  // up at all is fair()'s job: approximate numbers never meet that close.)
   function isPhoto(a, b) {
-    if (!a.x || !b.x) return false;
-    if (a.n === b.n) return true;
-    const gap = Math.abs(a.n - b.n), r = ratio(a, b);
-    return (gap <= 4 && r <= 1.05) || r <= 1.002;
+    return Math.abs(a.n - b.n) <= 5 || ratio(a, b) <= 1.03;
   }
 
   function tierOf(a, b) {
@@ -58,13 +59,13 @@ const Pairs = (function () {
     return a.base !== b.base && (a.c !== b.c || a.c === 'years');
   }
 
-  // Could this pair come up at all? An approximate or converted number needs a clear gap,
-  // so "about 70 mph" never decides a matchup by a hair.
+  // Could this pair come up at all? An approximate number needs a clear gap, so "about 70 mph"
+  // never decides a matchup by a hair. A tie needs two exact facts (rounding a converted number
+  // can make two different sizes look equal).
   function fair(a, b) {
     if (!unrelated(a, b)) return false;
-    if (isPhoto(a, b)) return true;
-    if (a.n === b.n) return false;
-    if ((!a.x || !b.x) && ratio(a, b) < 1.1) return false;
+    if (a.n === b.n) return !!(a.x && b.x);
+    if ((!trusted(a) || !trusted(b)) && ratio(a, b) < 1.1) return false;
     return true;
   }
 
@@ -86,8 +87,9 @@ const Pairs = (function () {
     return pick(pick([...byBase.values()]));
   }
 
+  // A planned photo finish: a fair pair within 5 or 3%, between two trustworthy numbers.
   function photoPartners(f, pool) {
-    return pool.filter(o => unrelated(f, o) && isPhoto(f, o));
+    return pool.filter(o => trusted(f) && trusted(o) && fair(f, o) && isPhoto(f, o));
   }
 
   /* ---- Ultra: every matchup is within 10 -----------------------------------------------
@@ -96,7 +98,6 @@ const Pairs = (function () {
    * them look equal, so a converted number never meets an equal one). No ties: a tie would be a
    * free point. */
   const ULTRA_GAP = 10;
-  const trusted = c => !!(c.x || c.xs);
   function ultraPair(a, b) {
     if (!unrelated(a, b) || !trusted(a) || !trusted(b)) return false;
     const gap = Math.abs(a.n - b.n);
@@ -159,7 +160,7 @@ const Pairs = (function () {
 
     if (state.pendingPhoto) {
       const after = CARDS.filter(o => o.base !== left.base);
-      const setUp = cands.filter(f => f.x && photoPartners(f, after.filter(o => allowed(o, f, mode))).length);
+      const setUp = cands.filter(f => trusted(f) && photoPartners(f, after.filter(o => allowed(o, f, mode))).length);
       if (setUp.length) return pickByFact(setUp);
     }
     return pickByFact(cands);

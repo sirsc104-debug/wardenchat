@@ -37,7 +37,7 @@
       rules: [
         '<b>🍎🍊 Apples to oranges.</b> A blue whale against Jersey Mike’s. Ignore the units: just say if the number on the right is higher or lower.',
         '<b>🎯 Close calls pay.</b> The closer the two numbers, the more it’s worth: Common 10 up to Legendary 200.',
-        '<b>📸 Photo finish!</b> Sometimes they’re only 1 apart, or exactly the same. Within 5%? A <b>Tie!</b> button appears, but it’s only right on an exact tie.',
+        '<b>📸 Photo finish!</b> Within 5 or within 3% is always a photo finish. Close (within 5% or 10)? A <b>Tie!</b> button appears, but it’s only right on an exact tie.',
         '<b>🔥 Keep a streak.</b> Each right answer in a row adds ×0.25, up to ×5. Pick in the first quarter of the timer for ×2.'
       ],
       info: {
@@ -53,7 +53,7 @@
       rules: [
         '<b>📏 Everything in centimeters.</b> Heights, lengths and distances, every one measured in cm. Pick the one that’s bigger.',
         '<b>🔢 Big numbers.</b> A mountain or a road trip in centimeters gets huge, so read every digit.',
-        '<b>🎯 Close calls pay.</b> The closer the real sizes, the more it’s worth: within 10% is Legendary. Within 5%? A <b>Tie!</b> button appears, but it’s only right if they’re exactly equal.',
+        '<b>🎯 Close calls pay.</b> The closer the real sizes, the more it’s worth: within 10% is Legendary. Within 5% or 10? A <b>Tie!</b> button appears, but it’s only right if they’re exactly equal.',
         '<b>🔥 Keep a streak.</b> Each right answer in a row adds ×0.25, up to ×5. Pick in the first quarter of the timer for ×2.'
       ],
       info: {
@@ -84,7 +84,7 @@
       tagline: '🎃 Limited time! A ghost is chasing your balloon. Every right answer<br>blasts you ahead. How far can you get?',
       rules: [
         '<b>👻 Outrun the ghost.</b> It closes in while you think, and slowly speeds up. Closer calls push it further back.',
-        '<b>🎃 Halloween facts.</b> Every matchup has one: candy, spooky movies, monsters, pumpkins and more. Within 5%? A <b>Tie!</b> button appears, but it’s only right on an exact tie.',
+        '<b>🎃 Halloween facts.</b> Every matchup has one: candy, spooky movies, monsters, pumpkins and more. Within 5% or 10? A <b>Tie!</b> button appears, but it’s only right on an exact tie.',
         '<b>💥 Wrong answers hurt.</b> The ghost lunges closer: 25 m on Owen, 30 on Medium, 35 on Hard, 40 on Ultra.',
         '<b>🔥 Keep a streak.</b> Each right answer in a row pushes harder. No timer and no lives: just get as far as you can.'
       ],
@@ -341,9 +341,9 @@
     if (type === 'guess') focusField();
   }
 
-  // Tie! only shows up when the two are within 5% of each other (real sizes in Real Size), and it's only
-  // right on an exact tie.
-  const tieable = (L, R) => (type === 'size' ? Pairs.realRatio(L, R) : Pairs.ratio(L, R)) <= 1.05;
+  // Tie! only shows up when the two are within 5% of each other (real sizes in Real Size) or within
+  // 10, and it's only right on an exact tie.
+  const tieable = (L, R) => (type === 'size' ? Pairs.realRatio(L, R) : Pairs.ratio(L, R)) <= 1.05 || Math.abs(L.n - R.n) <= 10;
   const isExactTie = (L, R) => (type === 'size' ? Math.abs(L.real - R.real) <= 1e-9 * Math.max(L.real, R.real) : L.n === R.n);
 
   function cardHTML(f, hidden, inline) {
