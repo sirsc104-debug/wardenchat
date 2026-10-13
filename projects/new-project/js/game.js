@@ -37,7 +37,7 @@
       rules: [
         '<b>🍎🍊 Apples to oranges.</b> A blue whale against Jersey Mike’s. Ignore the units: just say if the number on the right is higher or lower.',
         '<b>🎯 Close calls pay.</b> The closer the two numbers, the more it’s worth: Common 10 up to Legendary 200.',
-        '<b>📸 Photo finish!</b> Sometimes they’re only 1 apart, or exactly the same. <b>Tie!</b> is right when they’re within 5%, and on an exact tie it’s the only right answer.',
+        '<b>📸 Photo finish!</b> Sometimes they’re only 1 apart, or exactly the same. Within 5%? A <b>Tie!</b> button appears, but it’s only right on an exact tie.',
         '<b>🔥 Keep a streak.</b> Each right answer in a row adds ×0.25, up to ×5. Pick in the first quarter of the timer for ×2.'
       ],
       info: {
@@ -53,7 +53,7 @@
       rules: [
         '<b>📏 Real size.</b> 555 feet against 330 meters: the bigger number isn’t always the bigger thing. Pick what’s really bigger.',
         '<b>🪤 Watch for traps.</b> When the smaller thing has the bigger number, a right answer pays ×1.5.',
-        '<b>🎯 Close calls pay.</b> The closer the real sizes, the more it’s worth: within 10% is Legendary. <b>Tie!</b> is right within 5% (and the only right answer if they’re exactly equal).',
+        '<b>🎯 Close calls pay.</b> The closer the real sizes, the more it’s worth: within 10% is Legendary. Within 5%? A <b>Tie!</b> button appears, but it’s only right if they’re exactly equal.',
         '<b>🔥 Keep a streak.</b> Each right answer in a row adds ×0.25, up to ×5. Pick in the first quarter of the timer for ×2.'
       ],
       info: {
@@ -84,7 +84,7 @@
       tagline: '🎃 Limited time! A ghost is chasing your balloon. Every right answer<br>blasts you ahead. How far can you get?',
       rules: [
         '<b>👻 Outrun the ghost.</b> It closes in while you think, and slowly speeds up. Closer calls push it further back.',
-        '<b>🎃 Halloween facts.</b> Every matchup has one: candy, spooky movies, monsters, pumpkins and more. <b>Tie!</b> is right within 5%, and the only right answer on an exact tie.',
+        '<b>🎃 Halloween facts.</b> Every matchup has one: candy, spooky movies, monsters, pumpkins and more. Within 5%? A <b>Tie!</b> button appears, but it’s only right on an exact tie.',
         '<b>💥 Wrong answers hurt.</b> The ghost lunges closer: 25 m on Owen, 30 on Medium, 35 on Hard, 40 on Ultra.',
         '<b>🔥 Keep a streak.</b> Each right answer in a row pushes harder. No timer and no lives: just get as far as you can.'
       ],
@@ -324,6 +324,11 @@
     if (type === 'guess') focusField();
   }
 
+  // Tie! only shows up when the two are within 5% of each other (real sizes in Real Size), and it's only
+  // right on an exact tie.
+  const tieable = (L, R) => (type === 'size' ? Pairs.realRatio(L, R) : Pairs.ratio(L, R)) <= 1.05;
+  const isExactTie = (L, R) => (type === 'size' ? Math.abs(L.real - R.real) <= 1e-9 * Math.max(L.real, R.real) : L.n === R.n);
+
   function cardHTML(f, hidden, inline) {
     const cat = CATS[f.c];
     const t = cap(f.t), num = numText(f);
@@ -336,7 +341,7 @@
       <div class="cnote">${hidden ? '' : esc(f.note || '')}</div>
       ${hidden && inline ? `<div class="choices">
         <button class="btn-hi" type="button" data-g="higher">${lbl[0]}</button>
-        <button class="btn-tie" type="button" data-g="tie" title="Within 5% of each other">Tie!</button>
+        ${G.tieShown ? '<button class="btn-tie" type="button" data-g="tie">Tie!</button>' : ''}
         <button class="btn-lo" type="button" data-g="lower">${lbl[1]}</button>
       </div>` : ''}`;
   }
@@ -344,13 +349,14 @@
   function renderCards(first) {
     const L = $('cardL'), R = $('cardR');
     const strip = type === 'haunt';
+    G.tieShown = tieable(G.left, G.right_);
     L.className = 'card card-l'; R.className = 'card card-r' + (first ? '' : ' in');
     L.innerHTML = cardHTML(G.left, false, !strip);
     R.innerHTML = cardHTML(G.right_, true, !strip);
     R.style.setProperty('--shift', (L.offsetLeft - R.offsetLeft) + 'px');
     const sc = $('stripChoices');
     sc.className = 'strip-choices';
-    sc.innerHTML = strip ? '<button class="btn-hi" type="button" data-g="higher">▲ Higher</button><button class="btn-tie" type="button" data-g="tie">Tie!</button><button class="btn-lo" type="button" data-g="lower">▼ Lower</button>' : '';
+    sc.innerHTML = strip ? '<button class="btn-hi" type="button" data-g="higher">▲ Higher</button>' + (G.tieShown ? '<button class="btn-tie" type="button" data-g="tie">Tie!</button>' : '') + '<button class="btn-lo" type="button" data-g="lower">▼ Lower</button>' : '';
     document.querySelectorAll('#cardR [data-g], #stripChoices [data-g]').forEach(b => b.addEventListener('click', () => pick(b.dataset.g)));
   }
 
@@ -506,6 +512,7 @@
   // ---- Higher or lower (Classic, Halloween) and bigger or smaller (Real Size) ------------------
   function pick(g) {
     if (!G || G.phase !== 'ask' || G.paused) return;
+    if (g === 'tie' && !G.tieShown) return;           // no Tie! button this time
     Sound.click();
     reveal(g);
   }
@@ -605,13 +612,10 @@
     const size = type === 'size', haunt = type === 'haunt';
     const usedFrac = haunt ? 1 : 1 - G.timeLeft / G.d.time;
     const photo = !size && Pairs.isPhoto(L, R), tie = !size && L.n === R.n;
-    // Tie! is right when the two are within 5% of each other (real sizes in Real Size). Years are always
-    // close in percent, so two years only tie when they're the same year.
+    // Tie! is only right on an exact tie, and then Higher or Lower is wrong.
     const apart = size ? Pairs.realRatio(L, R) : Pairs.ratio(L, R);
-    // On an exact tie, Tie is the only right answer: Higher or Lower is wrong.
-    const exact = size ? Math.abs(L.real - R.real) <= 1e-9 * Math.max(L.real, R.real) : tie;
-    const near = exact || (L.year || R.year ? L.n === R.n : apart <= 1.05);
-    const ok = !!g && (g === 'tie' ? near : !exact && (size ? (g === 'higher') === (R.real > L.real) : (g === 'higher' ? R.n > L.n : R.n < L.n)));
+    const exact = isExactTie(L, R);
+    const ok = !!g && (g === 'tie' ? exact : !exact && (size ? (g === 'higher') === (R.real > L.real) : (g === 'higher' ? R.n > L.n : R.n < L.n)));
     const tieCall = ok && g === 'tie';
     const pctApart = isFinite(apart) ? Math.round((apart - 1) * 100) : null;
     const gap = Math.abs(L.n - R.n);
@@ -651,7 +655,7 @@
         // calling a tie is a big deal: a banner, two bursts of confetti, flashes and a fanfare
         if (photo) G.photoWon++;
         G.ties = (G.ties || 0) + 1;
-        quipText = exact ? 'IT’S A TIE!! YOU CALLED IT!' : pctApart < 1 ? 'TIE! Less than 1% apart!' : `TIE! Only ${pctApart}% apart!`;
+        quipText = 'IT’S A TIE!! YOU CALLED IT!';
         quipCls = 'q-photo q-tie';
         celebrateTie(run);
       } else if (photo) {
@@ -705,7 +709,7 @@
         quipCls = 'q-bad';
         Sound.photoLose();
       } else {
-        quipText = !g ? 'Too slow!' : g === 'tie' ? (pctApart == null || pctApart >= 1000 ? 'Not a tie! Not even close!' : `Not a tie! They’re ${pctApart}% apart.`) : trap ? '🪤 It was a trap!' : (size ? Pairs.realRatio(L, R) : Pairs.ratio(L, R)) >= 10 ? 'Not even close!' : pickOne(['Nope!', 'Oof!', 'Wrong way!']);
+        quipText = !g ? 'Too slow!' : g === 'tie' ? (pctApart < 1 ? 'So close, but not a tie!' : `Not a tie! They’re ${pctApart}% apart.`) : trap ? '🪤 It was a trap!' : (size ? Pairs.realRatio(L, R) : Pairs.ratio(L, R)) >= 10 ? 'Not even close!' : pickOne(['Nope!', 'Oof!', 'Wrong way!']);
         quipCls = 'q-bad';
         if (g) Sound.bad();
       }
