@@ -2032,6 +2032,7 @@ const Scene = (function () {
       if (o.warn != null) hz.warn = o.warn;
       if (o.play != null) hz.playT = o.play ? 1 : 0;
       if (o.score != null) hSetZone(mapPlace('haunt', o.score).i);
+      if (o.rewind) { hz.caught = 0; hz.warn = 0; hCache.clear(); }   // play again: the night scrolls back to the start
       if (o.reset) { hz.cam = hz.camT; hz.gap = hz.gapT; hz.caught = 0; hCache.clear(); hz.skyFrom = null; hz.skyMix = 1; }
     },
     caught() { hz.caught = 0.01; },

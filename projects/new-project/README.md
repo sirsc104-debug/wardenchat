@@ -10,7 +10,7 @@ Every visit starts with the SirSC104 producer tag from `sirsc-intro-eyes.html`: 
 
 ## Picking a mode
 
-The home screen keeps the logo, tagline and tab bar in the same place in every mode. Switching tabs works like Brain Rocket's: the yellow highlight glides to the new tab while the world slides across in the same direction (the old picture is captured and pushed out one side as the new world comes in from the other), and the rules box blurs, changes its text while blurred, then sharpens. The tagline, the four difficulty cards and their best scores change to the new mode. The game remembers your last tab, and on the title screen ← and → switch tabs too.
+The home screen keeps the logo, tagline and tab bar in the same place in every mode. Switching tabs works like Brain Rocket's: the yellow highlight glides to the new tab while the world slides across in the same direction (the old picture is captured and pushed out one side as the new world comes in from the other), and the rules box blurs, changes its text while blurred, then sharpens. The tagline, the four difficulty cards and their best scores change to the new mode. The game remembers your last tab, and on the title screen ← and → switch tabs too. Going home or hitting **↻ Play again** both take you back to the start the same way: the world glides back down to the ground (on Halloween the night scrolls back and the ghost drops back), and with Play again the new run starts as it goes.
 
 | Tab | Vehicle | The question |
 | --- | --- | --- |

@@ -248,6 +248,7 @@
   let G = null;
 
   function start(diff) {
+    const replay = !!G;              // Play again, straight from the results
     Sound.unlock(); Sound.click();
     startMusic();
     Sound.musicLevel(1);
@@ -262,7 +263,9 @@
     };
     $('home').classList.add('hidden'); $('over').classList.add('hidden');
     $('game').classList.remove('hidden');
-    Scene.setAlt(0, true);
+    // Back to the start the same way going home does: the world glides back down (or, on Halloween,
+    // scrolls back) while the new run begins.
+    Scene.setAlt(0);
     setupPanel();
     buildRail();
     renderLives();
@@ -275,7 +278,7 @@
       G.left = Pairs.first(diff, type); G.used.add(G.left.id);
       G.right_ = Pairs.next(G.left, diff, G.used, G.pstate, type); G.used.add(G.right_.id);
     }
-    if (type === 'haunt') Scene.chase({ gap: 60, dist: 0, score: 0, play: true, warn: 0, reset: true });
+    if (type === 'haunt') Scene.chase({ gap: 60, dist: 0, score: 0, play: true, warn: 0, reset: !replay, rewind: replay });
     updateHud();
     if (type === 'guess') renderGuess(); else renderCards(true);
     newRound();
