@@ -871,60 +871,69 @@ const Scene = (function () {
   const FRUIT = FORCE ? (FORCE === 'orange' ? 'orange' : 'apple') : Math.random() < 0.5 ? 'apple' : 'orange';
   const WORM = FORCE ? FORCE === 'worm' : FRUIT === 'apple' && Math.random() < 0.05;
 
-  // The fruit envelope, around (cx, mouthY) like envelope(): the mouth at mouthY, the fruit above it.
+  // The fruit envelope: a real apple or orange shape (not a balloon's teardrop) sitting on the
+  // balloon's mouth at mouthY, the burner and ropes hanging below it as usual.
   function fruitEnvelope(cx, mouth) {
-    const R = 108, cy = mouth - 140;
+    const apple = FRUIT === 'apple';
+    const R = apple ? 128 : 118;                   // half the width
+    const bottom = mouth + 4, top = apple ? mouth - 226 : mouth - 232;
+    const cy = (top + bottom) / 2;
     ctx.save();
     ctx.beginPath();
-    if (FRUIT === 'apple') {
-      // two shoulders with a dip at the top where the stem goes
-      ctx.moveTo(cx - 22, mouth);
-      ctx.bezierCurveTo(cx - 74, mouth - 8, cx - R * 1.18, cy + 72, cx - R * 1.12, cy - 8);
-      ctx.bezierCurveTo(cx - R * 1.06, cy - R * 0.98, cx - 34, cy - R * 1.08, cx, cy - R * 0.8);
-      ctx.bezierCurveTo(cx + 34, cy - R * 1.08, cx + R * 1.06, cy - R * 0.98, cx + R * 1.12, cy - 8);
-      ctx.bezierCurveTo(cx + R * 1.18, cy + 72, cx + 74, mouth - 8, cx + 22, mouth);
+    if (apple) {
+      // dimple at the top, round shoulders, sides tucking in to a flatter bottom with its own dimple
+      ctx.moveTo(cx, top + 22);
+      ctx.bezierCurveTo(cx + 34, top - 10, cx + R * 0.92, top - 14, cx + R, top + 64);
+      ctx.bezierCurveTo(cx + R * 1.04, top + 140, cx + R * 0.6, bottom + 4, cx + 36, bottom - 2);
+      ctx.quadraticCurveTo(cx, bottom - 16, cx - 36, bottom - 2);
+      ctx.bezierCurveTo(cx - R * 0.6, bottom + 4, cx - R * 1.04, top + 140, cx - R, top + 64);
+      ctx.bezierCurveTo(cx - R * 0.92, top - 14, cx - 34, top - 10, cx, top + 22);
     } else {
-      ctx.moveTo(cx - 22, mouth);
-      ctx.bezierCurveTo(cx - 64, mouth - 18, cx - R * 1.1, cy + 66, cx - R * 1.08, cy);
-      ctx.arc(cx, cy, R * 1.08, Math.PI, 0);
-      ctx.bezierCurveTo(cx + R * 1.1, cy + 66, cx + 64, mouth - 18, cx + 22, mouth);
+      ctx.ellipse(cx, cy, R, (bottom - top) / 2, 0, 0, TAU);
     }
     ctx.closePath();
-    const g = ctx.createRadialGradient(cx - 40, cy - 40, 10, cx, cy + 10, R * 1.4);
-    if (FRUIT === 'apple') { g.addColorStop(0, '#ff7a7a'); g.addColorStop(0.45, '#ec2f3c'); g.addColorStop(1, '#a8162a'); }
-    else { g.addColorStop(0, '#ffc75a'); g.addColorStop(0.45, '#ff9a1f'); g.addColorStop(1, '#d9650a'); }
+    const g = ctx.createRadialGradient(cx - R * 0.4, cy - R * 0.4, 10, cx, cy, R * 1.25);
+    if (apple) { g.addColorStop(0, '#ff7a7a'); g.addColorStop(0.45, '#ec2f3c'); g.addColorStop(1, '#a8162a'); }
+    else { g.addColorStop(0, '#ffc75a'); g.addColorStop(0.5, '#ff9a1f'); g.addColorStop(1, '#d9650a'); }
     ctx.fillStyle = g; ctx.fill();
     ctx.clip();
-    if (FRUIT === 'orange') {
+    if (apple) {
+      // faint streaks running from the stem down round the apple
+      ctx.strokeStyle = 'rgba(255,210,120,0.2)'; ctx.lineWidth = 3;
+      ctx.beginPath();
+      for (const k of [-0.7, -0.4, 0.4, 0.7]) { ctx.moveTo(cx + k * 20, top + 26); ctx.quadraticCurveTo(cx + k * R * 1.25, cy, cx + k * 34, bottom - 8); }
+      ctx.stroke();
+      // the dimple's shadow at the top
+      ctx.fillStyle = 'rgba(110,10,25,0.35)'; ctx.beginPath(); ctx.ellipse(cx, top + 26, 30, 10, 0, 0, TAU); ctx.fill();
+    } else {
       // the dimpled peel
       ctx.fillStyle = 'rgba(190,80,0,0.22)';
-      for (let i = 0; i < 70; i++) {
-        const a = i * 2.39996, r = R * 1.05 * Math.sqrt((i + 0.5) / 70);
-        ctx.beginPath(); ctx.arc(cx + Math.cos(a) * r, cy + 10 + Math.sin(a) * r * 1.05, 2.4, 0, TAU); ctx.fill();
+      for (let i = 0; i < 90; i++) {
+        const a = i * 2.39996, r = R * 0.98 * Math.sqrt((i + 0.5) / 90);
+        ctx.beginPath(); ctx.arc(cx + Math.cos(a) * r, cy + Math.sin(a) * r, 2.4, 0, TAU); ctx.fill();
       }
-    } else {
-      // apple streaks
-      ctx.strokeStyle = 'rgba(255,210,120,0.18)'; ctx.lineWidth = 3;
-      ctx.beginPath(); for (const dx of [-60, -30, 30, 60]) { ctx.moveTo(cx + dx * 0.4, cy - R * 0.8); ctx.quadraticCurveTo(cx + dx * 1.3, cy, cx + dx * 0.5, mouth - 10); } ctx.stroke();
     }
     // shine
     ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.beginPath(); ctx.ellipse(cx - 52, cy - 38, 16, 30, -0.5, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx - R * 0.45, cy - R * 0.4, 15, 30, -0.6, 0, TAU); ctx.fill();
     ctx.restore();
     // stem and leaf
-    const top = FRUIT === 'apple' ? cy - R * 0.8 : cy - R * 1.08;
     const sway = Math.sin(st.t * 1.3) * 0.08;
-    if (FRUIT === 'apple') {
+    if (apple) {
       ctx.strokeStyle = '#6b4a2b'; ctx.lineWidth = 7; ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(cx, top + 8); ctx.quadraticCurveTo(cx + 2, top - 20, cx + 12, top - 34); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx, top + 26); ctx.quadraticCurveTo(cx + 2, top - 6, cx + 12, top - 22); ctx.stroke();
+      ctx.save(); ctx.translate(cx + 8, top - 6); ctx.rotate(-0.5 + sway);
     } else {
-      ctx.fillStyle = '#3f7a22'; ctx.beginPath(); ctx.arc(cx, top + 4, 7, 0, TAU); ctx.fill();
+      // the little green star where the stem was
+      ctx.fillStyle = '#3f7a22'; ctx.beginPath();
+      for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? 4 : 10; ctx.lineTo(cx + Math.cos(a) * r, top + 6 + Math.sin(a) * r * 0.6); }
+      ctx.closePath(); ctx.fill();
+      ctx.save(); ctx.translate(cx + 4, top + 2); ctx.rotate(-0.45 + sway);
     }
-    ctx.save(); ctx.translate(cx + 6, top - (FRUIT === 'apple' ? 18 : 2)); ctx.rotate(-0.5 + sway);
     ctx.fillStyle = '#4caf50'; ctx.beginPath(); ctx.ellipse(26, 0, 28, 12, 0, 0, TAU); ctx.fill();
     ctx.strokeStyle = '#2e7d32'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(2, 0); ctx.lineTo(50, 0); ctx.stroke();
     ctx.restore();
-    if (WORM) { ctx.save(); ctx.translate(cx + 70, cy + 6); ctx.scale(1.4, 1.4); drawWorm(0, 0); ctx.restore(); }
+    if (WORM) { ctx.save(); ctx.translate(cx + 76, cy - 4); ctx.scale(1.4, 1.4); drawWorm(0, 0); ctx.restore(); }
   }
   // The worm, poking out of a hole in the apple's side, wiggling and smiling
   function drawWorm(x, y) {
@@ -1292,7 +1301,7 @@ const Scene = (function () {
   }
   function drawBranch(b) {
     const y = sy(b.w); if (y < -240 || y > H + 240) return;
-    const x0 = TX() + b.side * TRUNK_W / 2, x1 = x0 + b.side * b.len;
+    const x0 = TX() + b.side * (TRUNK_W / 2 - 14), x1 = x0 + b.side * (b.len + 14);   // starts inside the wavy trunk edge
     ctx.fillStyle = '#6e4a2c';
     ctx.beginPath(); ctx.moveTo(x0, y - 16); ctx.quadraticCurveTo((x0 + x1) / 2, y - 30, x1, y - 44); ctx.lineTo(x1, y - 38); ctx.quadraticCurveTo((x0 + x1) / 2, y - 8, x0, y + 14); ctx.closePath(); ctx.fill();
     const [c1, c2] = leafColor(zoneOfW(b.w));
@@ -1391,21 +1400,68 @@ const Scene = (function () {
       ctx.beginPath(); ctx.moveTo(x - 10, y - 10); ctx.quadraticCurveTo(x + 30, y + 30, x + 50, y - 20); ctx.stroke();
     }
   }
+  // The trunk: gently wavy sides, bark that stays on the tree, a few knots, and at the bottom a base
+  // that flares out into roots gripping the ground.
   function drawTrunk() {
     const gy = BASE + 14 + st.cam;
-    const x = TX() - TRUNK_W / 2, bottom = Math.min(H + 10, gy);
-    const g = ctx.createLinearGradient(x, 0, x + TRUNK_W, 0);
-    g.addColorStop(0, '#5a3a22'); g.addColorStop(0.35, '#8a5c36'); g.addColorStop(0.7, '#7a5032'); g.addColorStop(1, '#4e321e');
-    ctx.fillStyle = g; ctx.fillRect(x, -10, TRUNK_W, bottom + 10);
-    // bark grooves that slide by as the squirrel climbs
-    ctx.strokeStyle = 'rgba(40,24,12,0.45)'; ctx.lineWidth = 3;
-    const step = 46, off = (st.cam % step + step) % step;
-    for (let y = -step + off; y < bottom; y += step) {
-      for (let i = 0; i < 5; i++) {
-        const bx = x + 20 + i * 36 + ((Math.floor((y - off + st.cam) / step) * 7 + i * 13) % 10);
-        ctx.beginPath(); ctx.moveTo(bx, y); ctx.quadraticCurveTo(bx + 6, y + step * 0.5, bx, y + step * 0.9); ctx.stroke();
+    const cx = TX(), half = TRUNK_W / 2;
+    const bottom = Math.min(H + 20, gy + 10);
+    const worldAt = y => BASE - y + st.cam;
+    const wob = (y, side) => { const w = worldAt(y); return 5 * Math.sin(w * 0.011 + side) + 3 * Math.sin(w * 0.029 + side * 2); };
+    const flare = y => { const d = y - (gy - 170); return d > 0 ? Math.pow(d / 170, 2.2) * 80 : 0; };
+    const edge = (y, side) => cx + side * (half + flare(y)) + wob(y, side);
+    const path = () => {
+      ctx.beginPath();
+      ctx.moveTo(edge(-20, -1), -20);
+      for (let y = -20; y <= bottom; y += 14) ctx.lineTo(edge(y, -1), y);
+      ctx.lineTo(edge(bottom, -1), bottom); ctx.lineTo(edge(bottom, 1), bottom);
+      for (let y = bottom; y >= -20; y -= 14) ctx.lineTo(edge(y, 1), y);
+      ctx.closePath();
+    };
+    // roots, spreading out over the grass on both sides
+    if (gy - 200 < H) {
+      for (const [d, len, lift, wdt] of [[-1, 210, 4, 34], [-1, 120, 12, 26], [1, 230, 2, 36], [1, 130, 14, 24]]) {
+        const x0 = cx + d * (half + 30);
+        const rg = ctx.createLinearGradient(x0, 0, x0 + d * len, 0);
+        rg.addColorStop(0, '#6e4a2c'); rg.addColorStop(1, '#4e321e');
+        ctx.fillStyle = rg;
+        ctx.beginPath();
+        ctx.moveTo(x0 - d * 40, gy - 70);
+        ctx.quadraticCurveTo(x0 + d * len * 0.35, gy - wdt * 0.6 - lift, x0 + d * len, gy + 6 - lift * 0.2);
+        ctx.quadraticCurveTo(x0 + d * len * 0.4, gy + 10, x0 - d * 10, gy + 10);
+        ctx.closePath(); ctx.fill();
       }
     }
+    // the trunk itself
+    const g = ctx.createLinearGradient(cx - half - 60, 0, cx + half + 60, 0);
+    g.addColorStop(0, '#4e321e'); g.addColorStop(0.3, '#7a5032'); g.addColorStop(0.45, '#8a5c36'); g.addColorStop(0.75, '#734b2e'); g.addColorStop(1, '#452c1a');
+    ctx.save();
+    path(); ctx.fillStyle = g; ctx.fill();
+    ctx.clip();
+    // bark grooves that slide by as the squirrel climbs; they bend outward where the base flares
+    ctx.strokeStyle = 'rgba(40,24,12,0.42)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    const step = 46, off = (st.cam % step + step) % step;
+    for (let y = -step + off; y < bottom; y += step) {
+      const row = Math.floor((y - off + st.cam) / step);
+      for (let i = 0; i < 6; i++) {
+        const u = (i + 0.5) / 6 * 2 - 1 + (((row * 7 + i * 13) % 10) - 5) * 0.012;   // -1..1 across the trunk
+        const at = yy => cx + u * (half + flare(yy)) + wob(yy, u);
+        ctx.beginPath(); ctx.moveTo(at(y), y); ctx.quadraticCurveTo(at(y + step * 0.5) + 5, y + step * 0.5, at(y + step * 0.85), y + step * 0.85); ctx.stroke();
+      }
+    }
+    // a knot now and then
+    const k0 = Math.floor((st.cam - 300) / 520), k1 = Math.floor((st.cam + H + 300) / 520);
+    for (let k = Math.max(0, k0); k <= k1; k++) {
+      if (k % 3 === 1) continue;
+      const ky = BASE - (k * 520 + 260) + st.cam, kx = cx + (((k * 37) % 70) - 35);
+      if (ky < -40 || ky > H + 40 || ky > gy - 120) continue;
+      ctx.fillStyle = '#3e2716'; ctx.beginPath(); ctx.ellipse(kx, ky, 11, 17, 0, 0, TAU); ctx.fill();
+      ctx.strokeStyle = 'rgba(40,24,12,0.5)'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.ellipse(kx, ky, 18, 27, 0, 0, TAU); ctx.stroke();
+      ctx.fillStyle = 'rgba(160,110,70,0.35)'; ctx.beginPath(); ctx.ellipse(kx - 3, ky - 4, 4, 7, 0, 0, TAU); ctx.fill();
+    }
+    // light down the left side, shade down the right
+    ctx.fillStyle = 'rgba(255,220,170,0.08)'; ctx.fillRect(cx - half * 0.55, -20, half * 0.35, bottom + 20);
+    ctx.restore();
     const top = st.cam + BASE + 260, bot = st.cam - (H - BASE) - 260;
     for (let ci = Math.max(0, Math.floor(bot / TREE_CH)); ci <= Math.floor(top / TREE_CH); ci++) {
       const c = treeChunk(ci);
@@ -1441,12 +1497,7 @@ const Scene = (function () {
     ctx.fillStyle = '#4caf50'; ctx.fillRect(-20, gy, W + 40, 30);
     ctx.fillStyle = '#3d8f42'; ctx.fillRect(-20, gy + 30, W + 40, 18);
     ctx.fillStyle = '#7a5537'; ctx.fillRect(-20, gy + 48, W + 40, 1600);
-    // roots spreading from the giant trunk
     const tx = TX();
-    ctx.fillStyle = '#6e4a2c';
-    for (const d of [-1, 1]) {
-      ctx.beginPath(); ctx.moveTo(tx + d * TRUNK_W * 0.4, gy - 60); ctx.quadraticCurveTo(tx + d * TRUNK_W * 0.6, gy - 6, tx + d * (TRUNK_W * 0.5 + 90), gy + 6); ctx.lineTo(tx + d * TRUNK_W * 0.3, gy + 6); ctx.closePath(); ctx.fill();
-    }
     // mushrooms and ferns on the forest floor
     for (let i = 0; i < 10; i++) {
       const mx = (i * 173 + 90) % W;
