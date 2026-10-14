@@ -51,6 +51,9 @@
 .mv-go:hover { transform: translateY(-2px); box-shadow: 0 8px 0 #c9781a, 0 18px 34px rgba(255,170,40,0.38); }
 .mv-go:active { transform: translateY(4px); box-shadow: 0 2px 0 #c9781a, 0 8px 18px rgba(255,170,40,0.25); }
 .mv-note { margin: -4px 0 0; font-size: 13px; line-height: 1.45; color: var(--mv-muted); }
+.mv-alt { margin: -6px 0 0; font-size: 15px; line-height: 1.45; color: var(--mv-muted); }
+.mv-alt a { color: var(--mv-cool); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.mv-alt a:hover { color: #fff; }
 .mv-stay {
   justify-self: center; font: 500 15px var(--mv-display); color: var(--mv-cool); background: none; border: 0;
   padding: 6px 10px; margin-top: -6px; border-radius: 10px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
@@ -70,6 +73,7 @@
       <span class="mv-url"><b id="mvUrl">brainrocket.sirsc104.com</b><button type="button" class="mv-copy" id="mvCopy">Copy link</button></span>
     </div>
     <a class="mv-go" id="mvGo" href="https://brainrocket.sirsc104.com/" target="_blank" rel="noopener">Launch the new site</a>
+    <p class="mv-alt">Link not working? Go here instead: <a href="https://brainrocket.xsirsc.chatgpt.site/" target="_blank" rel="noopener">brainrocket.xsirsc.chatgpt.site</a></p>
     <p class="mv-note">Best scores from this page don't carry over, so the new site starts you fresh.</p>
     <button type="button" class="mv-stay" id="mvStay">Keep playing here for a few more days</button>
   </div>

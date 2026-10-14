@@ -2,7 +2,7 @@
 
     python3 brain-rocket-artifact/build.py OUT_DIR [off|closeable|none] [--accounts-demo] [--google-sites]
 
-  off        (default) "This link has been switched off": can't be closed, links to the new site and Warden Chat
+  off        (default) "This link has been switched off": can't be closed, links to the new site, a backup site and Warden Chat
   closeable  "Brain Rocket has a new home!": can be closed to keep playing "for a few more days"
   none       no screen: the plain game
 
