@@ -17,6 +17,8 @@
   // The Halloween event ends once November 1, 2026 is over, in the player's own time zone.
   const HAUNT_ENDS = new Date(2026, 10, 2);
   const EVENT_ON = Date.now() < HAUNT_ENDS.getTime();
+  // Fruit Dash's NEW badge shows for its first 5 days, until October 18, 2026 is over (player's time zone).
+  const DASH_NEW_ENDS = new Date(2026, 9, 19);
 
   const BASE_DIFFS = {
     // mult: the points multiplier. push: how much harder a right answer shoves the Halloween ghost back.
@@ -1204,6 +1206,8 @@
   // ---- Wiring --------------------------------------------------------------
   document.querySelectorAll('.type-btn').forEach(b => {
     if (!TYPE_ORDER.includes(b.dataset.type)) b.hidden = true;
+    const badge = b.querySelector('.new-badge');
+    if (badge && Date.now() >= DASH_NEW_ENDS.getTime()) badge.remove();
     b.addEventListener('click', () => { startMusic(); if (b.dataset.type !== type) { Sound.click(); setType(b.dataset.type, true); } });
   });
   document.querySelectorAll('.mode').forEach(b => b.addEventListener('click', () => start(b.dataset.diff)));

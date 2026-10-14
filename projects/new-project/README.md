@@ -85,7 +85,7 @@ Follows Brain Rocket's Haunted Flight. The jack-o'-lantern balloon flies right a
 - **Ultra:** matchups within 10, the ghost never lets up, not even while an answer plays out, and every 8 to 13 seconds the ghost lunges 20 m after a 1.5-second red-eyed warning. A right answer during the warning dodges it (🛡️).
 - **Halloween facts.** Every matchup puts one of 115 Halloween facts (candy, spooky movies, monsters and myths, spooky shows and games, pumpkins and haunts, creepy critters) against a regular fact. They never come up in the other modes.
 - The tab has a **LIMITED TIME** badge that fades from orange into a sliding rainbow.
-- **The event ends on its own:** once November 1, 2026 is over (midnight in the player's time zone), the tab disappears and anyone who last played it lands on Classic. Change `HAUNT_ENDS` in `js/game.js` to move the date.
+- **The event ends on its own:** once November 1, 2026 is over (midnight in the player's time zone), the tab disappears and anyone who last played it lands on Classic. Change `HAUNT_ENDS` in `js/game.js` to move the date. Fruit Dash's **New** badge goes away the same way once October 18, 2026 is over (`DASH_NEW_ENDS`).
 
 ## 🐉 Real Size: the dragon ride (retired from the menu)
 
