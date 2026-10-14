@@ -109,7 +109,7 @@
       }
     }
   };
-  const TYPE_ORDER = ['classic', 'race', 'guess', 'haunt'].filter(t => t !== 'haunt' || EVENT_ON);
+  const TYPE_ORDER = ['classic', 'guess', 'race', 'haunt'].filter(t => t !== 'haunt' || EVENT_ON);
   // Fruit Dash: how long a dash lasts, and how quick an answer has to be for the speed bonus
   const DASH_LEN = 60;
   const dashSpeed = secs => (secs < 1.5 ? 2 : secs < 3 ? 1.5 : 1);
