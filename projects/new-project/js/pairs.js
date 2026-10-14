@@ -69,8 +69,29 @@ const Pairs = (function () {
     return true;
   }
 
-  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
-  const rand = (a, b) => a + Math.random() * (b - a);
+  // Random choices go through rnd, so a live race can swap in a seeded generator: everyone in the
+  // race then gets the same matchups in the same order (useSeed below).
+  let rnd = Math.random;
+  const pick = arr => arr[Math.floor(rnd() * arr.length)];
+  const rand = (a, b) => a + rnd() * (b - a);
+  // The cards higher-or-lower matchups come from. A seeded race leaves out the cards that depend on
+  // the player's own date ("years ago", "days ago"), so every racer sees exactly the same numbers.
+  let POOL = CARDS;
+  function seeded(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function useSeed(seed) {
+    if (seed == null && rnd === Math.random) return;      // already unseeded: keep Ultra's chains
+    if (seed == null) { rnd = Math.random; POOL = CARDS; }
+    else { rnd = seeded(seed); POOL = CARDS.filter(c => !c.ago); }
+    ultraMap = null;
+  }
 
   // Halloween facts only come up in the Halloween event, always against a regular fact.
   // allowed(c, from, mode): can card c be the next card after `from` in this mode?
@@ -111,7 +132,7 @@ const Pairs = (function () {
   function ultraAll(c) {
     if (!ultraMap) {
       ultraMap = new Map();
-      const ok = CARDS.filter(trusted).sort((a, b) => a.n - b.n);
+      const ok = POOL.filter(trusted).sort((a, b) => a.n - b.n);
       for (const c0 of ok) ultraMap.set(c0.id, []);
       for (let i = 0; i < ok.length; i++) {
         for (let j = i + 1; j < ok.length && ok[j].n - ok[i].n <= ULTRA_GAP; j++) {
@@ -139,14 +160,14 @@ const Pairs = (function () {
   function next(left, diff, used, state, mode = 'classic') {
     if (diff === 'ultra' && ultraPartners(left, left, mode).length) return nextUltra(left, used, mode);
     if (diff === 'ultra') diff = 'hard';     // (never expected: a card with no close partner falls back to Hard)
-    let pool = CARDS.filter(f => !used.has(f.id) && f.base !== left.base && allowed(f, left, mode));
+    let pool = POOL.filter(f => !used.has(f.id) && f.base !== left.base && allowed(f, left, mode));
     if (pool.length < 40) {            // nearly used everything: start over (but not the card on screen)
       used.clear(); used.add(left.id);
-      pool = CARDS.filter(f => f.base !== left.base && allowed(f, left, mode));
+      pool = POOL.filter(f => f.base !== left.base && allowed(f, left, mode));
     }
 
     // Photo finish: on a lucky roll (or one left over from last time), if this card has a near-twin.
-    if (state.pendingPhoto || Math.random() < PHOTO_CHANCE[diff]) {
+    if (state.pendingPhoto || rnd() < PHOTO_CHANCE[diff]) {
       const twins = photoPartners(left, pool);
       if (twins.length) { state.pendingPhoto = false; return pickByFact(twins); }
       state.pendingPhoto = true;       // this card has none: steer toward one that does
@@ -159,7 +180,7 @@ const Pairs = (function () {
     if (!cands.length) cands = pool;
 
     if (state.pendingPhoto) {
-      const after = CARDS.filter(o => o.base !== left.base);
+      const after = POOL.filter(o => o.base !== left.base);
       const setUp = cands.filter(f => trusted(f) && photoPartners(f, after.filter(o => allowed(o, f, mode))).length);
       if (setUp.length) return pickByFact(setUp);
     }
@@ -168,7 +189,7 @@ const Pairs = (function () {
 
   // A first card: a regular fact in its own unit, not a year (on Ultra: one with plenty of close partners).
   function first(diff, mode = 'classic') {
-    const start = CARDS.filter(f => !f.hw && !f.year && !f.converted);
+    const start = POOL.filter(f => !f.hw && !f.year && !f.converted);
     if (diff === 'ultra') return pickByFact(start.filter(f => trusted(f) && ultraPartners(f, f, mode).length >= 3));
     return pickByFact(start);
   }
@@ -277,7 +298,7 @@ const Pairs = (function () {
   }
 
   return {
-    TIERS, GUESS_TIERS, ratio, isPhoto, tierOf, next, first, ultraPartners,
+    TIERS, GUESS_TIERS, ratio, isPhoto, tierOf, next, first, ultraPartners, useSeed,
     realRatio, isTrap, sizeTier, nextSize, firstSize,
     nextGuess, scoreGuess, guessChoices, guessRange
   };

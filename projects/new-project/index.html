@@ -584,7 +584,7 @@
       <div class="type-toggle" id="typeToggle" role="group" aria-label="Pick a mode">
         <div class="type-glider" id="typeGlider"></div>
         <button class="type-btn" data-type="classic" type="button"><span class="type-icon">🎈</span><span class="type-txt"><span class="type-name">Classic</span><span class="type-sub">Higher or lower</span></span></button>
-        <button class="type-btn" data-type="size" type="button"><span class="type-icon">🐉</span><span class="type-txt"><span class="type-name">Real Size</span><span class="type-sub">Dragon ride</span></span></button>
+        <button class="type-btn type-race" data-type="race" type="button"><span class="new-badge">New</span><span class="type-icon">🏃</span><span class="type-txt"><span class="type-name">Fruit Dash</span><span class="type-sub">Race friends live</span></span></button>
         <button class="type-btn" data-type="guess" type="button"><span class="type-icon">🐿️</span><span class="type-txt"><span class="type-name">Guess the Number</span><span class="type-sub">Endless tree</span></span></button>
         <button class="type-btn type-haunt" data-type="haunt" type="button"><span class="ltd-badge">Limited time</span><span class="type-icon">🎃</span><span class="type-txt"><span class="type-name">Halloween</span><span class="type-sub">Outrun the ghost</span></span></button>
       </div>
@@ -620,9 +620,12 @@
         </button>
       </div>
 
+      <!-- Fruit Dash: join or host a live race, or practise solo (filled in by js/race.js) -->
+      <div class="race-panel hidden" id="racePanel"></div>
+
       <div class="rules" id="rules"></div>
     </div>
-    <div class="version">v0.3</div>
+    <div class="version">v0.4</div>
   </div>
 
   <!-- ===== Game ===== -->
@@ -635,7 +638,7 @@
       <div class="hud-spacer"></div>
       <div class="hud-pill streak-pill" id="streakPill"><span class="pill-label">Streak</span><span class="pill-value"><span id="hudStreak">0</span> <span class="flame">🔥</span></span><span class="pill-sub" id="hudMult">next ×1.00</span></div>
       <div class="hud-pill lives-pill" id="livesPill"><span class="pill-label" id="hudLivesLabel">Lives</span><div class="lives" id="hudLives"></div></div>
-      <div class="hud-pill time-pill hidden" id="timePill"><span class="pill-label">Survived</span><span class="pill-value" id="hudTime">0:00</span></div>
+      <div class="hud-pill time-pill hidden" id="timePill"><span class="pill-label" id="hudTimeLabel">Survived</span><span class="pill-value" id="hudTime">0:00</span></div>
       <button class="hud-pill pause-btn" id="btnPause" type="button" aria-label="Pause">⏸</button>
     </div>
 
@@ -677,6 +680,8 @@
       </div>
       <div class="legend" id="legend"></div>
     </div>
+    <!-- Fruit Dash: 3, 2, 1, GO! -->
+    <div id="countdown" class="hidden"><div class="cd-num" id="cdNum"></div><div class="cd-sub" id="cdSub"></div></div>
     <div id="flash"></div>
   </div>
 
@@ -723,6 +728,10 @@
 <script src="js/audio.js"></script>
 <script src="js/map.js"></script>
 <script src="js/scene.js"></script>
+<script src="js/kitchen.js"></script>
+<script src="js/account.js"></script>
+<script src="js/accountui.js"></script>
+<script src="js/race.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>

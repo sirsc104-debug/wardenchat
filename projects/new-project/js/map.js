@@ -13,6 +13,7 @@
  * decor   what's drawn in the sky there, and how much (for Halloween: the props along the ground)
  * mark    a one-off landmark drawn in the middle of the location
  * feature what grows on the tree there (Guess the Number)
+ * wall    the kitchen tiles' colours (Fruit Dash)
  */
 'use strict';
 
@@ -76,6 +77,31 @@ const MAPS = (function () {
       ['The Moon’s Doorstep',  '🌕', { meteor: 0.8, constellation: 0.6 }, { mark: 'bigmoon' }],
       ['The Dragon Star',        '🌟', { constellation: 1 }, { mark: 'bigstar' }]
     ], { name: 'The Endless Night', ic: '♾️', decor: { constellation: 1, meteor: 1, aurora: 0.6 } }),
+
+    // 🏃 Fruit Dash: a race of running fruits across a giant kitchen, out to the farmers' market.
+    // decor here is the things on the back counter; wall is the tile colours [light, dark].
+    race: build([
+      ['The Fruit Bowl',      '🍇', { bowl: 2, napkin: 1 },           { wall: ['#fff3d6', '#f3dfb2'] }],
+      ['The Cutting Board',   '🪵', { board: 2, rollingpin: 1 },      { wall: ['#e8f6ff', '#cfe8f7'] }],
+      ['The Toaster',         '🍞', { toaster: 2, butter: 1 },        { wall: ['#fff0f0', '#f6d6d6'] }],
+      ['The Kitchen Sink',    '🚰', { sink: 1, sponge: 1, bubbles: 2 }, { wall: ['#e6fbff', '#c6eef7'] }],
+      ['The Spice Rack',      '🧂', { spices: 2, shakers: 1 },        { wall: ['#fff6e0', '#f5e2b8'] }],
+      ['The Cookie Jar',      '🍪', { cookiejar: 2, milk: 1 },        { wall: ['#f1ecff', '#ddd2fb'] }],
+      ['The Stand Mixer',     '🥄', { mixer: 2, flour: 1 },           { wall: ['#eafbea', '#cdeccd'] }],
+      ['The Cereal Boxes',    '🥣', { cereal: 3 },                    { wall: ['#fffbe0', '#f7ecb0'] }],
+      ['The Stovetop',        '🍳', { stove: 1, pot: 2 },             { wall: ['#ffece0', '#f6d2bb'] }],
+      ['The Fridge',          '🧊', { fridge: 1, magnets: 1 },        { wall: ['#e6f1ff', '#c9dcf7'] }],
+      ['The Pantry Shelves',  '🥫', { cans: 3 },                      { wall: ['#f6efe6', '#e6d6c0'] }],
+      ['The Cake Stand',      '🎂', { cake: 2, cupcake: 2 },          { wall: ['#ffe8f3', '#f7cde2'] }],
+      ['The Blender',         '🌀', { blender: 2 },                   { wall: ['#e9e9f5', '#d0d0e6'] }],
+      ['The Bread Bin',       '🥖', { bread: 2, baguette: 1 },        { wall: ['#fff3df', '#f0dcb4'] }],
+      ['The Teapot',          '🫖', { teapot: 2, teacup: 2 },         { wall: ['#eef8f1', '#d2ebdb'] }],
+      ['The Herb Garden',     '🌿', { herbs: 3 },                     { wall: ['#effbe6', '#d6f0c4'] }],
+      ['The Dish Rack',       '🍽️', { dishes: 2, cups: 1 },           { wall: ['#eaf6fb', '#cfe6f0'] }],
+      ['The Pizza Oven',      '🍕', { oven: 1, pizza: 1 },            { wall: ['#fff0e3', '#f4d2b4'] }],
+      ['The Juice Bar',       '🧃', { juice: 3 },                     { wall: ['#fffbe3', '#f6efb6'] }],
+      ['The Farmers’ Market', '🧺', { stall: 1, crate: 2 },          { wall: ['#e8f7ff', '#bfe3fb'], outdoors: true }]
+    ], { name: 'The Endless Kitchen', ic: '♾️', decor: { bowl: 1, toaster: 1, cookiejar: 1, cake: 1, teapot: 1, juice: 1 }, wall: ['#f3eefc', '#ddd3f3'] }),
 
     // 🐿️ Guess the Number: the squirrel, from the roots up a tree that never ends
     guess: build([

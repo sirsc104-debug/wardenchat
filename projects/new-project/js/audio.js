@@ -116,6 +116,20 @@ const Sound = (function () {
         const m = this.tune[j];
         if (m && i >= 32) tone(hz(m), E * 1.6, { type: 'sine', vol: 0.05, t, out, vibrato: 5, attack: 0.03 });   // flute
       } },
+    // Fruit Dash, the kitchen race: a quick, bouncy loop. C – Am – F – G, a marimba, slap bass, a
+    // snappy snare on the backbeat and a whistled tune every other time round.
+    dash: { bpm: 152, vol: 0.5, echo: 2, fb: 0.18, steps: 64,
+      chords: [[48, 52, 55], [45, 48, 52], [41, 45, 48], [43, 47, 50]],
+      tune: [76, 0, 79, 0, 76, 74, 72, 0, 72, 0, 76, 0, 74, 0, 0, 0, 77, 0, 76, 74, 72, 0, 69, 0, 71, 0, 74, 0, 79, 0, 0, 0],
+      step(i, t, out, E) {
+        const j = i % 32, ch = this.chords[Math.floor(j / 8)], k = j % 8;
+        tone(hz(ch[[0, 2, 1, 2, 0, 2, 1, 2][k]] + 24), 0.1, { type: 'sine', vol: 0.07, t, out });   // marimba
+        if (k === 0 || k === 3 || k === 6) tone(hz(ch[0] - 12 + (k === 3 ? 7 : 0)), E * 0.9, { type: 'triangle', vol: 0.16, t, out });   // slap bass
+        if (k === 2 || k === 6) noise(0.09, { vol: 0.07, freq: 1800, q: 0.7, t, out });   // snare
+        if (k % 2 === 1) noise(0.03, { vol: 0.02, freq: 8000, type: 'highpass', t, out });   // hi-hat
+        const m = this.tune[j];
+        if (m && i >= 32) tone(hz(m + 12), E * 1.4, { type: 'sine', vol: 0.045, t, out, vibrato: 5, attack: 0.02 });   // whistle
+      } },
     // Halloween: a spooky waltz-ish loop in E minor. Music box, organ bass, bells and a wobbly theremin.
     spooky: { bpm: 100, vol: 0.85, echo: 3, fb: 0.35, steps: 64,
       chords: [[52, 55, 59], [48, 52, 55], [45, 48, 52], [47, 51, 54]],
@@ -187,6 +201,12 @@ const Sound = (function () {
       if (M.gain) M.gain.gain.setTargetAtTime(M.track.vol * M.level, ctx.currentTime, 0.25);
     },
     click() { tone(660, 0.06, { type: 'triangle', vol: 0.12 }); },
+    // the race countdown: three beeps, then a higher GO
+    countBeep(go) { tone(go ? 1046.5 : 523.25, go ? 0.45 : 0.18, { type: 'square', vol: go ? 0.12 : 0.09 }); },
+    // the race is over: a referee's whistle
+    whistle() { tone(2300, 0.5, { type: 'sine', vol: 0.12, vibrato: 60 }); tone(2350, 0.22, { type: 'sine', vol: 0.08, at: 0.55, vibrato: 60 }); },
+    // a fruit tripping over: a squelchy slip
+    slip() { tone(500, 0.25, { type: 'sine', vol: 0.12, to: 140 }); noise(0.15, { vol: 0.1, freq: 900, q: 1.5, at: 0.05 }); },
     tick() { tone(1400, 0.025, { type: 'square', vol: 0.03 }); },
     // the slow final ticks of a photo finish, each a little higher
     photoTick(i) { tone(330 + i * 40, 0.12, { type: 'triangle', vol: 0.22 }); noise(0.08, { vol: 0.25, freq: 180, type: 'lowpass' }); },

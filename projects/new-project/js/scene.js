@@ -7,6 +7,7 @@
  *            autumn, fog and frost, on up into space
  *   haunt    the Halloween chase: a jack-o'-lantern balloon flying sideways across a Halloween
  *            night with a ghost coming from behind
+ *   race     Fruit Dash's kitchen, drawn by js/kitchen.js and plugged in with Scene.addWorld
  * One canvas, redrawn every frame. Where you are is your score, on the mode's map of 20 locations
  * (js/map.js); each location has its own sky, its own decor and sometimes a landmark, so what you
  * see is where you are. Switching worlds slides the old picture out and the new one in, the way
@@ -29,6 +30,7 @@ const Scene = (function () {
   const fx = [];      // screen-space confetti and smoke
   let trees = [], city = [], stars = [];
   let world = 'classic';
+  const extra = {};   // worlds drawn by their own files (Scene.addWorld), like Fruit Dash's kitchen
   let pines = [], cottages = [], woods = [];
 
   // ---- Helpers -----------------------------------------------------------
@@ -1963,7 +1965,9 @@ const Scene = (function () {
     st.sway *= Math.pow(0.1, dt);
     st.gold = Math.max(0, (st.gold || 0) - dt * 0.6);
 
-    if (world === 'haunt') {
+    if (extra[world]) {
+      extra[world].draw(ctx, dt, { W, H, t: st.t });
+    } else if (world === 'haunt') {
       drawHaunt(dt);
     } else {
       drawSky();
@@ -1982,6 +1986,7 @@ const Scene = (function () {
 
   // where the vehicle is on screen, for effects
   function vehiclePos() {
+    if (extra[world]) return extra[world].vehiclePos();
     if (world === 'haunt') return { x: lerp(W * 0.25, W * 0.64, hz.play), y: H * 0.47 - 200 };
     if (world === 'size') return { x: BX + 150, y: BASE - 190 + st.dipY };
     if (world === 'guess') return { x: TX() + TRUNK_W / 2 - 20, y: BASE - 110 + st.dipY };
@@ -2012,7 +2017,7 @@ const Scene = (function () {
         fx.push({ kind: 'acorn', x: v.x - 10, y: v.y + 20, vx: rand(-40, 40), vy: -160, rot: 0, vr: rand(-8, 8), life: 1.6, max: 1.6 });
         return;
       }
-      if (world === 'haunt') return;
+      if (world === 'haunt' || extra[world]) return;
       // the balloon's burner coughs smoke; the dragon sneezes it
       for (let i = 0; i < 8; i++) fx.push({ kind: 'smoke', x: v.x + rand(-12, 12), y: v.y, vx: rand(-40, 40), vy: rand(-70, -30), life: 1.1, max: 1.1, r: rand(6, 12) });
     },
@@ -2024,7 +2029,10 @@ const Scene = (function () {
       st.cam = st.target = 0; st.burn = 0; st.dipY = st.dipV = 0; egg = null;
       hz.cam = hz.camT = 0; hz.gap = hz.gapT = 60; hz.caught = 0; hz.warn = 0;
       hz.zone = 0; hz.sky = hz.skyFrom = null; hz.skyMix = 1; hCache.clear();
+      if (extra[name]) extra[name].reset();
     },
+    // another world, drawn by its own file: impl = { draw(ctx, dt, {W, H, t}), vehiclePos(), reset() }
+    addWorld(name, impl) { extra[name] = impl; },
     // the Halloween chase: gap (metres the ghost is behind), dist (metres flown), warn (0..1 lunge warning), play
     chase(o) {
       if (o.gap != null) hz.gapT = o.gap;
@@ -2047,7 +2055,7 @@ const Scene = (function () {
         fx.push({ kind: 'confetti', x: x == null ? rand(0, W) : x + rand(-100, 100), y: x == null ? rand(-60, -10) : H * 0.4, vx: rand(-160, 160), vy: x == null ? rand(40, 180) : rand(-520, -200), rot: rand(0, TAU), vr: rand(-8, 8), life: 2.6, max: 2.6, c: cols[i % cols.length], r: rand(4, 7) });
       }
     },
-    rocket() { if (world !== 'haunt') launchEgg(); },
+    rocket() { if (world !== 'haunt' && !extra[world]) launchEgg(); },
     balloonX: () => vehiclePos().x
   };
 })();

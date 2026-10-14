@@ -1,9 +1,12 @@
 /* Apples to Oranges — the game: the mode picker, the four ways to play, the reveal, scoring and bests.
  *
  *   classic  🎈 Higher or lower. The hot-air balloon climbs with every right answer.
- *   size     🐉 Real Size. Two measurements in different units: which is really bigger? A dragon ride.
+ *   race     🏃 Fruit Dash. 60 seconds of Classic higher or lower, racing your friends live (js/race.js)
+ *            or practising solo. Every racer is a different fruit, dashing across a kitchen (js/kitchen.js).
  *   guess    🐿️ Guess the Number. One card at a time; the squirrel climbs a tree that never ends.
  *   haunt    🎃 Halloween (limited time). Higher or lower while a ghost chases the jack-o'-lantern balloon.
+ *   size     🐉 Real Size, retired from the menu when Fruit Dash took its place. Its code is still here
+ *            (and its bests are kept), so it can come back by adding it to TYPE_ORDER and index.html.
  */
 'use strict';
 
@@ -79,6 +82,16 @@
         ultra: 'type it, within 5%<br>15s · 1 acorn'
       }
     },
+    race: {
+      world: 'race', icons: { medium: '🍓', hard: '🍉' },
+      tagline: '🏃 Race your friends live! <b>60 seconds</b> of higher or lower.<br>Every right answer sends your fruit dashing across the kitchen.',
+      rules: [
+        '<b>⏱️ 60 seconds.</b> Classic higher or lower against the clock. No lives: a wrong answer trips your fruit and ends your streak.',
+        '<b>🍉 Everyone’s a fruit.</b> Up to 8 racers, each a different fruit, get the same matchups in the same order. Highest score wins.',
+        '<b>⚡ Be quick.</b> Answer within 1.5 seconds for ×2, within 3 for ×1.5. Each right answer in a row adds ×0.25, up to ×5.',
+        '<b>📸 Close calls pay.</b> Common 10 up to Legendary 200. Within 5% or 10? A <b>Tie!</b> button appears, but it’s only right on an exact tie.'
+      ]
+    },
     haunt: {
       world: 'haunt', icons: { medium: '🎃', hard: '👻' },
       tagline: '🎃 Limited time! A ghost is chasing your balloon. Every right answer<br>blasts you ahead. How far can you get?',
@@ -96,7 +109,10 @@
       }
     }
   };
-  const TYPE_ORDER = ['classic', 'size', 'guess', 'haunt'].filter(t => t !== 'haunt' || EVENT_ON);
+  const TYPE_ORDER = ['classic', 'race', 'guess', 'haunt'].filter(t => t !== 'haunt' || EVENT_ON);
+  // Fruit Dash: how long a dash lasts, and how quick an answer has to be for the speed bonus
+  const DASH_LEN = 60;
+  const dashSpeed = secs => (secs < 1.5 ? 2 : secs < 3 ? 1.5 : 1);
 
   // ---- The maps ------------------------------------------------------------------------
   // Each mode's 20 locations are in js/map.js. Your score is where you are on the map: the 20th
@@ -110,7 +126,7 @@
 
   // ---- Saving (best scores, and the last tab) ----------------------------------------------
   // best[type][difficulty]: the best score
-  const best = { classic: {}, size: {}, guess: {}, haunt: {} };
+  const best = { classic: {}, race: {}, size: {}, guess: {}, haunt: {} };
   try {
     Object.assign(best, JSON.parse(localStorage.getItem('a2o.best2') || '{}'));
     const old = JSON.parse(localStorage.getItem('a2o.best') || 'null');   // bests from before there were modes
@@ -118,7 +134,17 @@
     // Halloween bests used to be metres flown; now every mode keeps its best score
     if (!localStorage.getItem('a2o.hauntScore')) { best.haunt = {}; localStorage.setItem('a2o.hauntScore', '1'); localStorage.setItem('a2o.best2', JSON.stringify(best)); }
   } catch (e) { /* storage blocked */ }
-  function saveBest() { try { localStorage.setItem('a2o.best2', JSON.stringify(best)); } catch (e) { /* ignore */ } }
+  function saveBest() {
+    try { localStorage.setItem('a2o.best2', JSON.stringify(best)); } catch (e) { /* ignore */ }
+    if (typeof Account !== 'undefined') Account.changed();     // and to your Warden Chat account, if you're signed in
+  }
+  // Signing in brings the bests from your account; signing out can take them off this device.
+  window.addEventListener('a2o-progress', () => {
+    let b = {};
+    try { b = JSON.parse(localStorage.getItem('a2o.best2') || '{}') || {}; } catch (e) { /* storage blocked */ }
+    for (const k of Object.keys(best)) best[k] = b[k] && typeof b[k] === 'object' ? b[k] : {};
+    if (!G) { showModeCards(); if (type === 'race' && typeof Race !== 'undefined') Race.renderPanel(); }
+  });
   let type = 'classic';
   try { const t = localStorage.getItem('a2o.type'); if (TYPE_ORDER.includes(t)) type = t; } catch (e) { /* ignore */ }
 
@@ -173,6 +199,7 @@
   // Every mode has its own tune. Classic switches to the dreamy Sky tune once you reach the clouds.
   const trackNow = () => {
     if (type === 'size') return 'dragon';
+    if (type === 'race') return 'dash';
     if (type === 'guess') return 'forest';
     if (type === 'haunt') return 'spooky';
     return G && mapPlace('classic', G.score).i >= 6 ? 'sky' : 'breeze';
@@ -207,6 +234,7 @@
   }
   function showModeCards() {
     const T = TYPES[type];
+    if (!T.info) return;          // Fruit Dash has its own panel instead (js/race.js)
     document.querySelectorAll('.mode').forEach(c => {
       const d = c.dataset.diff;
       c.querySelector('.mode-desc').innerHTML = T.info[d];
@@ -227,25 +255,36 @@
       b.setAttribute('aria-pressed', b.dataset.type === t ? 'true' : 'false');
     });
     placeGlider(!animate);
+    $('home').dataset.type = t;
     Scene.setWorld(TYPES[t].world, animate && from !== to ? (to > from ? 1 : -1) : 0);
     if (t === 'haunt') Scene.chase({ gap: 26, dist: 0, score: 0, play: false, reset: true });
     $('tagline').innerHTML = `<span>${TYPES[t].tagline}</span>`;
     // the rules box and the difficulty cards blur together, change while blurred, then sharpen
-    const rules = $('rules'), modes = document.querySelector('.modes');
+    const rules = $('rules'), modes = document.querySelector('.modes'), rp = $('racePanel');
+    // Fruit Dash swaps the difficulty cards for its race panel, behind the same blur
+    const fill = () => {
+      rules.innerHTML = rulesHTML(); showModeCards();
+      modes.classList.toggle('hidden', t === 'race'); rp.classList.toggle('hidden', t !== 'race');
+      if (t === 'race') { Kitchen.title = true; if (typeof Race !== 'undefined') Race.renderPanel(); }
+    };
     if (animate && from !== to) {
-      rules.classList.add('switching'); modes.classList.add('switching');
+      [rules, modes, rp].forEach(el => el.classList.add('switching'));
       clearTimeout(setType.t1); clearTimeout(setType.t2);
       setType.t1 = setTimeout(() => {
-        rules.innerHTML = rulesHTML(); showModeCards();
-        setType.t2 = setTimeout(() => { rules.classList.remove('switching'); modes.classList.remove('switching'); }, 40);
+        fill();
+        setType.t2 = setTimeout(() => { [rules, modes, rp].forEach(el => el.classList.remove('switching')); }, 40);
       }, 270);
-    } else { rules.innerHTML = rulesHTML(); showModeCards(); }
+    } else fill();
     if (musicStarted) Sound.music(trackNow());
   }
 
   function goHome() {
     G = null;
+    Pairs.useSeed(null);          // a race's shared matchups end with it
     $('game').classList.add('hidden'); $('over').classList.add('hidden'); $('pause').classList.add('hidden');
+    $('countdown').classList.add('hidden');
+    if (type === 'race') { Kitchen.reset(); Kitchen.title = true; }
+    if (typeof Race !== 'undefined') Race.onTitle();
     $('home').classList.remove('hidden');
     Scene.setAlt(0);
     if (type === 'haunt') Scene.chase({ play: false, gap: 26, warn: 0, score: 0 });
@@ -258,20 +297,30 @@
   // ---- A run ----------------------------------------------------------------
   let G = null;
 
-  function start(diff) {
+  // dash (Fruit Dash only): { fruit, race } where race is from js/race.js: { raceId, code, seed, round, startLocal, endLocal }
+  function start(diff, dash) {
     const replay = !!G;              // Play again, straight from the results
     Sound.unlock(); Sound.click();
     startMusic();
     Sound.musicLevel(1);
     const base = BASE_DIFFS[diff];
     const d = Object.assign({}, base, type === 'guess' ? { time: GUESS_TIME[diff] } : {});
+    const race = type === 'race' && dash && dash.race;
+    // a race's matchups come from its shared seed, so every fruit gets the same ones in the same order
+    Pairs.useSeed(race ? race.seed : null);
     G = {
-      type, diff, d, score: 0, scoreSeen: 0, lives: d.lives, streak: 0, bestStreak: 0, right: 0, asked: 0,
+      type, diff, d, score: 0, scoreSeen: 0, lives: type === 'race' ? Infinity : d.lives, streak: 0, bestStreak: 0, right: 0, asked: 0,
       photoWon: 0, photoLost: 0, traps: 0, bullseyes: 0, used: new Set(), pstate: { pendingPhoto: false },
       left: null, right_: null, card: null, timeLeft: d.time, phase: 'ask', paused: false, killer: null,
       // Halloween chase
-      gap: 60, dist: 0, qtime: 0, survived: 0, closest: Infinity, pausesLeft: 1, lungeIn: 8 + Math.random() * 5, warn: 0, dodged: 0, beatIn: 0
+      gap: 60, dist: 0, qtime: 0, survived: 0, closest: Infinity, pausesLeft: 1, lungeIn: 8 + Math.random() * 5, warn: 0, dodged: 0, beatIn: 0,
+      // Fruit Dash: the clock (this computer's time in ms; a race's comes from the server's), your fruit, your rivals
+      dash: type !== 'race' ? null : {
+        fruit: (dash && dash.fruit) | 0, raceId: race ? race.raceId : null, code: race ? race.code : '', round: race ? race.round : 0,
+        goAt: race ? race.startLocal : Date.now() + 3400, endAt: race ? race.endLocal : Date.now() + 3400 + DASH_LEN * 1000, beat: null, rivals: []
+      }
     };
+    if (G.dash) G.phase = 'countdown';
     $('home').classList.add('hidden'); $('over').classList.add('hidden');
     $('game').classList.remove('hidden');
     // Back to the start the same way going home does: the world glides back down (or, on Halloween,
@@ -286,34 +335,46 @@
       G.left = Pairs.firstSize(diff); G.used.add(G.left.id);
       G.right_ = Pairs.nextSize(G.left, diff, G.used); G.used.add(G.right_.id);
     } else {
-      const sig = firstMatchup && type === 'classic' && [CARDS.find(c => c.id === 'jerseymikes'), CARDS.find(c => c.id === 'whale@ton')];
+      const sig = firstMatchup && type === 'classic' && !G.dash && [CARDS.find(c => c.id === 'jerseymikes'), CARDS.find(c => c.id === 'whale@ton')];
       if (sig && sig[0] && sig[1]) {
         firstMatchup = false;
         try { localStorage.setItem('a2o.firstMatch', '1'); } catch (e) { /* ignore */ }
         G.left = sig[0]; G.right_ = sig[1];
       } else {
-        G.left = Pairs.first(diff, type); G.right_ = Pairs.next(G.left, diff, G.used, G.pstate, type);
+        G.left = Pairs.first(diff, pairMode()); G.right_ = Pairs.next(G.left, diff, G.used, G.pstate, pairMode());
       }
       G.used.add(G.left.id); G.used.add(G.right_.id);
     }
     if (type === 'haunt') Scene.chase({ gap: 60, dist: 0, score: 0, play: true, warn: 0, reset: !replay, rewind: replay });
+    if (G.dash) { Kitchen.reset(); Kitchen.title = false; syncKitchen(); }
     updateHud();
     if (type === 'guess') renderGuess(); else renderCards(true);
-    newRound();
+    if (G.dash) { $('panel').classList.add('waiting'); $('countdown').classList.remove('hidden'); dashTick(); }
+    else newRound();
     Sound.music(trackNow());
   }
+  // Fruit Dash plays Classic's matchups
+  const pairMode = () => (type === 'race' ? 'classic' : type);
 
   // The panel changes shape with the mode: two cards, one card and an answer box, or the Halloween strip.
+  // Fruit Dash uses the Halloween strip too, so the kitchen gets the whole width, and its clock runs
+  // along the strip's bar.
   function setupPanel() {
-    const p = $('panel');
-    p.classList.toggle('strip', type === 'haunt');
+    const p = $('panel'), strip = type === 'haunt' || type === 'race';
+    p.classList.toggle('strip', strip);
+    p.classList.toggle('dash', type === 'race');
+    p.classList.remove('waiting');
     $('cardsRow').classList.toggle('hidden', type === 'guess');
     $('guessWrap').classList.toggle('hidden', type !== 'guess');
-    $('timerRow').classList.toggle('hidden', type === 'haunt');
-    $('chaseRow').classList.toggle('hidden', type !== 'haunt');
-    $('rail').classList.toggle('hidden', type === 'haunt');
-    $('livesPill').classList.toggle('hidden', type === 'haunt');
-    $('timePill').classList.toggle('hidden', type !== 'haunt');
+    $('timerRow').classList.toggle('hidden', strip);
+    $('chaseRow').classList.toggle('hidden', !strip);
+    $('rail').classList.toggle('hidden', strip);
+    $('livesPill').classList.toggle('hidden', strip);
+    $('timePill').classList.toggle('hidden', !strip);
+    $('timePill').classList.remove('hurry');
+    $('hudTimeLabel').textContent = type === 'race' ? 'Time left' : 'Survived';
+    // no pausing a live race: everyone's clock runs together
+    $('btnPause').classList.toggle('hidden', !!(G.dash && G.dash.raceId));
     $('hudScoreLabel').textContent = 'Score';
     $('hudAltLabel').textContent = type === 'haunt' ? 'Ghost behind' : 'Location';
     $('hudAlt').className = 'pill-value' + (type === 'haunt' ? '' : ' loc');
@@ -321,7 +382,9 @@
     $('prompt').innerHTML = type === 'size' ? 'Is the right one <b class="hi-word">bigger</b> or <b class="lo-word">smaller</b>?'
       : type === 'guess' ? 'What’s the <b class="hi-word">number</b>?'
       : 'Is the right one <b class="hi-word">higher</b> or <b class="lo-word">lower</b>?';
-    $('legend').innerHTML = type === 'guess'
+    $('legend').innerHTML = type === 'race'
+      ? '<span>Closer numbers score more:</span><span class="t1">● Common 10</span><span class="t2">● Uncommon 25</span><span class="t3">● Rare 50</span><span class="t4">● Epic 100</span><span class="t5">● Legendary 200</span><span>⚡ under 1.5 s ×2 · under 3 s ×1.5</span>'
+      : type === 'guess'
       ? '<span>How close you get:</span><span class="t1">● 50% · 10</span><span class="t2">● 25% · 25</span><span class="t3">● 10% · 50</span><span class="t4">● 5% · 100</span><span class="t5">● 1% · Bullseye 200</span>'
       : type === 'haunt'
         ? `<span>Pushes the ghost back:</span>${Pairs.TIERS.map((T, i) => `<span class="${T.cls}">● ${T.name} +${Math.round(PUSH[i] * G.d.push)} m</span>`).join('')}`
@@ -339,6 +402,7 @@
     $('photoBanner').classList.remove('tie'); $('photoBanner').textContent = '📸 PHOTO FINISH';
     $('panel').classList.remove('tie-party');
     if (type === 'guess') focusField();
+    if (G.dash) G.qStart = performance.now();
   }
 
   // Tie! only shows up when the two are within 5% of each other (real sizes in Real Size) or within
@@ -365,7 +429,7 @@
 
   function renderCards(first) {
     const L = $('cardL'), R = $('cardR');
-    const strip = type === 'haunt';
+    const strip = type === 'haunt' || type === 'race';
     G.tieShown = tieable(G.left, G.right_);
     L.className = 'card card-l'; R.className = 'card card-r' + (first ? '' : ' in');
     L.innerHTML = cardHTML(G.left, false, !strip);
@@ -385,7 +449,7 @@
       `<div class="rail-stop" data-i="${S.length - 1 - i}" title="${esc(s.name)} · ${commas(s.at)}">${s.ic}</div>`).join('');
   }
   function renderLives() {
-    if (type === 'haunt') return;
+    if (type === 'haunt' || type === 'race') return;
     $('hudLives').innerHTML = Array.from({ length: G.d.lives }, (_, i) => `<span class="${i < G.lives ? '' : 'gone'}">${TYPES[type].lifeIcon}</span>`).join('');
   }
   function updateHud() {
@@ -501,6 +565,90 @@
     setTimeout(() => { if (G) gameOver(); }, 1600);
   }
 
+  // ---- Fruit Dash: the countdown, the clock and the finish ------------------------------------
+  // The clock is the computer's own time, not frames, so a race ends on the same instant for
+  // everyone (js/race.js sets it from the server's clock). Pausing is only for practice.
+  function dashTick() {
+    const D = G.dash, now = Date.now();
+    if (G.phase === 'countdown') {
+      const left = (D.goAt - now) / 1000, num = Math.ceil(left);
+      const shown = left <= 0 ? 'GO!' : num <= 3 ? String(num) : '';
+      if (shown !== D.beat) {
+        D.beat = shown;
+        const el = $('cdNum');
+        el.textContent = shown || '🏁';
+        el.classList.toggle('go', shown === 'GO!');
+        el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+        if (shown) Sound.countBeep(shown === 'GO!');
+      }
+      $('cdSub').textContent = left > 3 ? `Get ready! Starting in ${num}…` : D.raceId ? `Race ${D.code}${D.round > 1 ? ' · round ' + D.round : ''}` : 'Practice dash';
+      if (left <= 0) {
+        G.phase = 'ask';
+        $('panel').classList.remove('waiting');
+        setTimeout(() => { if (G && G.dash === D) $('countdown').classList.add('hidden'); }, 600);
+        newRound();
+      }
+      updateDashHud(DASH_LEN);
+      return;
+    }
+    const left = Math.max(0, (D.endAt - now) / 1000);
+    // the last ten seconds tick
+    const whole = Math.ceil(left);
+    if (whole <= 10 && whole > 0 && whole !== D.tickAt) { D.tickAt = whole; Sound.tick(); Sound.tick(); }
+    updateDashHud(left);
+    if (left <= 0 && G.phase !== 'over') {
+      if (G.phase === 'reveal') G.timeUp = true;          // the answer on screen still counts
+      else finishDash();
+    }
+  }
+  function updateDashHud(left) {
+    $('hudTime').textContent = fmtTime(Math.ceil(left));
+    $('timePill').classList.toggle('hurry', left <= 10 && G.phase !== 'countdown');
+    const fill = $('chaseFill');
+    fill.style.width = clamp(left / DASH_LEN, 0, 1) * 100 + '%';
+    fill.className = 'chase-fill' + (left > 20 ? '' : left > 10 ? ' mid' : ' high');
+    $('chaseText').textContent = left > 0 ? `⏱️ ${Math.ceil(left)} seconds left` : '🏁 Time’s up!';
+    $('chaseText').classList.toggle('warn', left <= 10 && left > 0 && G.phase !== 'countdown');
+    $('chaseSpeed').textContent = G.dash.raceId ? `🏁 Race ${G.dash.code}` : '⚡ Answer in 1.5 s for ×2 points';
+  }
+  // You, plus everyone else in the race, running across the kitchen
+  function syncKitchen() {
+    if (!G || !G.dash) return;
+    Kitchen.set(G.dash.rivals.concat([{ id: 'me', name: 'You', fruit: G.dash.fruit, score: G.score, me: true, finished: G.phase === 'over' }]));
+  }
+  function finishDash() {
+    if (!G || G.phase === 'over') return;
+    G.phase = 'over';
+    Pairs.useSeed(null);
+    Sound.whistle();
+    Sound.musicLevel(0.4);
+    syncKitchen();
+    const box = $('stripChoices');
+    box.classList.add('locked');
+    const score = result();
+    const isBest = score > (best.race[G.diff] || 0);
+    if (isBest && score > 0) { best.race[G.diff] = score; saveBest(); }
+    const ov = $('over');
+    ov.dataset.mode = 'race'; ov.dataset.diff = G.diff; ov.dataset.race = G.dash.raceId ? '1' : '';
+    $('overScore').textContent = commas(score);
+    const ob = $('overBest');
+    ob.className = 'over-best' + (isBest && score > 0 ? ' new' : '');
+    ob.textContent = isBest && score > 0 ? '🏆 New best!' : best.race[G.diff] ? 'Best: ' + commas(best.race[G.diff]) : '';
+    $('overKiller').innerHTML = '';
+    $('btnShare').textContent = '📋 Share';
+    const res = { score, correct: G.right, bestStreak: G.bestStreak, photos: G.photoWon };
+    if (!(G.dash.raceId && typeof Race !== 'undefined' && Race.over(res))) {
+      // practice: the usual results
+      const here = mapPlace('race', score).stop;
+      $('overKicker').textContent = `🏃 Fruit Dash practice · ${G.d.name}`;
+      $('overTitle').textContent = G.right === 0 ? 'Still at the start line!' : '⏱️ Time’s up!';
+      const stat = (v, l) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`;
+      $('overStats').innerHTML = stat(here.ic, score > 0 ? esc(here.name) : 'The start line') + stat(G.right, 'Right answers')
+        + stat(G.bestStreak, 'Best streak') + stat(`${G.photoWon}/${G.photoWon + G.photoLost}`, 'Photo finishes won');
+    }
+    setTimeout(() => { if (G && G.phase === 'over') ov.classList.remove('hidden'); }, 1100);
+  }
+
   // ---- Timer loop ----------------------------------------------------------
   const portrait = window.matchMedia('(orientation: portrait) and (pointer: coarse)');
   let last = performance.now();
@@ -510,11 +658,13 @@
     last = now;
     const running = G && !G.paused && !portrait.matches;
     if (running && G.type === 'haunt' && G.phase !== 'over') chaseTick(dt);
-    if (running && G.type !== 'haunt' && G.phase === 'ask') {
+    // a race's clock keeps going even sideways or in the background: everyone else's does
+    if (G && G.dash && !G.paused && G.phase !== 'over') dashTick();
+    if (running && G.type !== 'haunt' && !G.dash && G.phase === 'ask') {
       G.timeLeft -= dt;
       if (G.timeLeft <= 0) { G.timeLeft = 0; if (G.type === 'guess') submitGuess(null); else reveal(null); }
     }
-    if (G && G.type !== 'haunt' && G.phase === 'ask') {
+    if (G && G.type !== 'haunt' && !G.dash && G.phase === 'ask') {
       const frac = G.timeLeft / G.d.time;
       $('timerFill').style.transform = `scaleX(${frac})`;
       $('timerSecs').textContent = Math.ceil(G.timeLeft) + 's';
@@ -539,7 +689,7 @@
 
   // Count the hidden number up. A photo finish races most of the way, then crawls the last few
   // numbers one at a time, slower and slower.
-  async function countUp(card, f, other, photo) {
+  async function countUp(card, f, other, photo, fast) {
     const el = card.querySelector('.cnum');
     el.classList.remove('hidden-num');
     card.classList.add('counting');
@@ -548,7 +698,7 @@
     const big = f.n > 1e12;
     const crawlFrom = photo ? Math.max(0, Math.max(Math.min(f.n, other.n) - 3, f.n - 8)) : f.n;
     const fastTo = photo ? crawlFrom : f.n;
-    const dur = photo ? 900 : 850;
+    const dur = fast ? 420 : photo ? 900 : 850;      // Fruit Dash is against the clock: quicker
     const t0 = performance.now();
     let lastTick = 0;
     for (;;) {
@@ -565,16 +715,16 @@
       $('photoBanner').classList.remove('hidden');
       flash();
       const steps = f.n - crawlFrom;
-      Sound.drumroll(0.3 + steps * 0.45);
+      Sound.drumroll(fast ? 0.2 + steps * 0.17 : 0.3 + steps * 0.45);
       for (let i = 1; i <= steps; i++) {
-        await wait(200 + i * 95);
+        await wait(fast ? 110 + i * 40 : 200 + i * 95);
         if (!G) return;
         show(crawlFrom + i);
         Sound.photoTick(i);
         el.style.transform = 'scale(1.12)';
         setTimeout(() => { el.style.transform = ''; }, 120);
       }
-      await wait(350);
+      await wait(fast ? 150 : 350);
     }
     el.textContent = numText(f);
     card.classList.remove('counting');
@@ -626,8 +776,9 @@
     const L = G.left, R = G.right_;
     const run = G;
     G.phase = 'reveal';
-    const size = type === 'size', haunt = type === 'haunt';
-    const usedFrac = haunt ? 1 : 1 - G.timeLeft / G.d.time;
+    const size = type === 'size', haunt = type === 'haunt', dash = !!G.dash;
+    const usedFrac = haunt ? 1 : dash ? 0 : 1 - G.timeLeft / G.d.time;
+    const answerSecs = dash ? (performance.now() - G.qStart) / 1000 : 0;
     const photo = !size && Pairs.isPhoto(L, R), tie = !size && L.n === R.n;
     // Tie! is only right on an exact tie, and then Higher or Lower is wrong.
     const apart = size ? Pairs.realRatio(L, R) : Pairs.ratio(L, R);
@@ -639,7 +790,7 @@
     const trap = size && Pairs.isTrap(L, R);
     const dodge = haunt && G.warn > 0 && ok;
 
-    const box = haunt ? $('stripChoices') : $('cardR').querySelector('.choices');
+    const box = haunt || dash ? $('stripChoices') : $('cardR').querySelector('.choices');
     if (box) {
       box.classList.add('locked');
       const btn = box.querySelector(`[data-g="${g}"]`);
@@ -647,7 +798,7 @@
     }
     if (!g) Sound.timeout();
 
-    await countUp($('cardR'), R, L, photo);
+    await countUp($('cardR'), R, L, photo, dash);
     if (G !== run) return;            // quit during the reveal
     if (size && R.mk !== L.mk) { $('cardR').querySelector('.cconv').textContent = '= ' + convText(R, L); $('cardR').classList.add('has-conv'); }
 
@@ -656,7 +807,7 @@
     if (ok) {
       const tier = size ? Pairs.sizeTier(L, R) : Pairs.tierOf(L, R);
       const T = Pairs.TIERS[tier];
-      const speed = usedFrac < 0.25 ? 2 : usedFrac < 0.5 ? 1.5 : 1;
+      const speed = dash ? dashSpeed(answerSecs) : usedFrac < 0.25 ? 2 : usedFrac < 0.5 ? 1.5 : 1;
       const streakMult = Math.min(5, 1 + 0.25 * G.streak);
       const trapMult = trap ? 1.5 : 1;
       pts = Math.round(T.pts * G.d.mult * speed * streakMult * trapMult);
@@ -707,6 +858,10 @@
         Scene.burn(1.3);
         Scene.chase({ gap: G.gap, dist: G.dist, warn: 0 });
         updateChaseHud();
+      } else if (dash) {
+        // a burst of speed across the kitchen
+        Kitchen.fx('me', 'boost');
+        addScore(pts);
       } else {
         if (size) { Sound.roar(); Scene.burn(1.6); } else { Scene.burn(photo ? 2.2 : 1.3); Sound.burner(); }
         addScore(pts);
@@ -715,7 +870,7 @@
       ptsText = parts.join(' &nbsp;·&nbsp; ');
     } else {
       G.streak = 0;
-      G.killer = { L, R, g, photo, gap };
+      if (!dash) G.killer = { L, R, g, photo, gap };
       if (exact && g && g !== 'tie') {
         if (photo) G.photoLost++;
         quipText = '🤝 It was a TIE! Only Tie was right.';
@@ -733,7 +888,13 @@
       }
       $('cardR').classList.add('wrong-ans');
       Scene.dip();
-      if (haunt) {
+      if (dash) {
+        // no lives in a dash: your fruit trips over, and the streak is gone
+        Kitchen.fx('me', 'stumble');
+        Sound.slip();
+        ptsText = '<span class="t0">💫 Your fruit tripped! Streak lost.</span>';
+        updateHud();
+      } else if (haunt) {
         const lunge = LUNGE[G.diff];
         G.gap -= lunge;
         ptsText = `<span class="t0">👻 The ghost lunges ${lunge} m closer!</span>`;
@@ -756,10 +917,11 @@
 
     if (photo) setTimeout(() => { if (G === run && !G.paused) Sound.musicLevel(1); }, 1800);
     if (haunt && G.gap <= 0) { caught(); return; }
-    await wait(photo || tieCall ? 2900 : ok ? 1500 : 2100);
+    await wait(dash ? (photo || tieCall ? 1300 : ok ? 650 : 1000) : photo || tieCall ? 2900 : ok ? 1500 : 2100);
     if (G !== run || G.phase === 'over') return;
     while (G.paused) { await wait(100); if (G !== run) return; }
-    if (!haunt && G.lives <= 0) gameOver();
+    if (dash && G.timeUp) finishDash();
+    else if (!haunt && G.lives <= 0) gameOver();
     else advance();
   }
 
@@ -768,6 +930,7 @@
     const before = G.score;
     G.score += pts;
     Scene.setAlt(G.score);
+    syncKitchen();
     if (musicStarted) Sound.music(trackNow());
     const pill = document.querySelector('.score-pill');
     pill.classList.remove('bump'); void pill.offsetWidth; pill.classList.add('bump');
@@ -786,7 +949,7 @@
       if (!next) { G.left = Pairs.firstSize(G.diff); next = Pairs.nextSize(G.left, G.diff, G.used); }
       G.right_ = next;
     } else {
-      G.right_ = Pairs.next(G.left, G.diff, G.used, G.pstate, type);
+      G.right_ = Pairs.next(G.left, G.diff, G.used, G.pstate, pairMode());
     }
     G.used.add(G.right_.id);
     renderCards(false);
@@ -923,7 +1086,7 @@
   }
 
   // ---- Game over and sharing -----------------------------------------------
-  const TITLE = { classic: 'Apples to Oranges', size: 'Apples to Oranges: Real Size', guess: 'Apples to Oranges: Guess the Number', haunt: 'Apples to Oranges: Halloween' };
+  const TITLE = { classic: 'Apples to Oranges', race: 'Apples to Oranges: Fruit Dash', size: 'Apples to Oranges: Real Size', guess: 'Apples to Oranges: Guess the Number', haunt: 'Apples to Oranges: Halloween' };
   function result() { return Math.round(G.score); }
   function killerText(plain) {
     const k = G.killer;
@@ -941,6 +1104,15 @@
   }
   function shareText() {
     const lines = [`🍎 ${TITLE[G.type]} 🍊 (${G.d.name})`];
+    if (G.dash) {
+      const f = Kitchen.FRUITS[G.dash.fruit];
+      lines.push(`${f.emoji} ${commas(G.score)} points in ${DASH_LEN} seconds · ${G.right} right · best streak ${G.bestStreak}`);
+      const place = G.dash.raceId && $('overStats').querySelector('.stat b');
+      if (place && /\d/.test(place.textContent)) lines.push(`🏁 Finished ${place.textContent} in a live race`);
+      lines.push(`📍 Dashed to ${placeName('race', G.score)}`);
+      if (G.photoWon || G.photoLost) lines.push(`📸 Photo finishes: ${G.photoWon} won, ${G.photoLost} lost`);
+      return lines.join('\n');
+    }
     if (G.type === 'haunt') {
       lines.push(`🎃 ${commas(G.score)} points before the ghost caught me · survived ${fmtTime(G.survived)}`);
       lines.push(`📍 Reached ${placeName('haunt', G.score)}` + (G.score >= MAP_TARGET ? ' · ♾️ infinite mode' : ''));
@@ -958,6 +1130,7 @@
 
   function gameOver() {
     G.phase = 'over';
+    Object.assign($('over').dataset, { mode: G.type, diff: G.diff, race: '' });
     if (G.type !== 'haunt') Sound.over();
     const score = result();
     const isBest = score > (best[G.type][G.diff] || 0);
@@ -1009,6 +1182,12 @@
   // Halloween gives you one pause per run (switching away from the tab always pauses).
   function setPaused(p, forced) {
     if (!G || G.phase === 'over') return;
+    if (G.dash && G.dash.raceId) return;            // a live race can't wait for you
+    if (G.dash) {
+      // practice: the clock stops while it's paused
+      if (p && !G.paused) G.dash.pausedAt = Date.now();
+      else if (!p && G.paused && G.dash.pausedAt) { const gone = Date.now() - G.dash.pausedAt; G.dash.goAt += gone; G.dash.endAt += gone; G.dash.pausedAt = 0; if (G.qStart) G.qStart += gone; }
+    }
     if (p && G.type === 'haunt' && !forced) {
       if (G.pausesLeft <= 0) return;
       G.pausesLeft--;
@@ -1043,8 +1222,14 @@
   $('btnPause').addEventListener('click', () => setPaused(true));
   $('btnResume').addEventListener('click', () => setPaused(false));
   $('btnQuit').addEventListener('click', goHome);
-  $('btnAgain').addEventListener('click', () => start(G ? G.diff : 'owen'));
-  $('btnHome').addEventListener('click', goHome);
+  // In a race, Play again is a vote and Home leaves the race (js/race.js); after practice it's another dash.
+  function playAgain() {
+    if (typeof Race !== 'undefined' && Race.phase === 'results') { Race.again(); return; }
+    if (G && G.dash) start(G.diff, { fruit: G.dash.fruit });
+    else start(G ? G.diff : 'owen');
+  }
+  $('btnAgain').addEventListener('click', playAgain);
+  $('btnHome').addEventListener('click', () => { if (typeof Race !== 'undefined' && Race.phase !== 'none') Race.leave(); else goHome(); });
   $('btnShare').addEventListener('click', share);
 
   document.addEventListener('keydown', e => {
@@ -1058,7 +1243,8 @@
     }
     if (e.key === 'Escape' || ((e.key === 'p' || e.key === 'P') && G.type !== 'guess')) { if (G.phase !== 'over') setPaused(!G.paused); return; }
     if (G.paused) return;
-    if (G.phase === 'over') { if (e.key === 'Enter' && !$('over').classList.contains('hidden')) start(G.diff); return; }
+    if (G.phase === 'over') { if (e.key === 'Enter' && !$('over').classList.contains('hidden') && !$('btnAgain').disabled) playAgain(); return; }
+    if (G.phase === 'countdown') return;
     if (G.type === 'guess') {
       if (G.diff === 'owen' && G.phase === 'ask' && /^[1-4]$/.test(e.key) && G.choices) submitGuess(G.choices[+e.key - 1]);
       else if (G.diff === 'medium' && G.phase === 'ask' && e.key === 'Enter') submitGuess(sliderValue());
@@ -1069,6 +1255,27 @@
     else if (['=', 't', 'T'].includes(e.key)) { e.preventDefault(); pick('tie'); }
   });
   document.addEventListener('visibilitychange', () => { if (document.hidden && G && G.phase !== 'over' && !G.paused) setPaused(true, true); });
+
+  // ---- Hooks for the live race (js/race.js) and the account screens -------------------------
+  window.A2OGame = {
+    get state() { return !G ? 'title' : G.paused ? 'paused' : G.phase === 'over' ? 'over' : G.phase === 'countdown' ? 'countdown' : 'playing'; },
+    get type() { return type; },
+    get racing() { return !!(G && G.dash && G.dash.raceId); },
+    get raceId() { return G && G.dash ? G.dash.raceId : null; },
+    score: () => (G ? Math.round(G.score) : 0),
+    correct: () => (G ? G.right : 0),
+    best: (mode, diff) => (best[mode] && best[mode][diff]) || 0,
+    // r: { raceId, code, diff, seed, round, fruit, startLocal, endLocal }
+    startRace(r) {
+      if (type !== 'race') setType('race', false);
+      $('pause').classList.add('hidden');
+      start(BASE_DIFFS[r.diff] ? r.diff : 'medium', { fruit: r.fruit, race: r });
+    },
+    practice(diff, fruit) { if (type !== 'race') setType('race', false); start(diff, { fruit }); },
+    // the other fruits in the race: [{ id, name, fruit, score, finished, left }]
+    rivals(list) { if (G && G.dash) { G.dash.rivals = list; syncKitchen(); } },
+    showTitle: goHome
+  };
 
   Scene.init($('scene'), $('sceneOld'));
   fit();
