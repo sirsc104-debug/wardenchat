@@ -12,7 +12,7 @@
 </head>
 <body>
 <div id="app">
-  <div class="ambient" aria-hidden="true"><div class="drift" id="drift"></div></div>
+  <div class="ambient" aria-hidden="true"><div class="drift" id="drift"></div><canvas class="embers" id="embers"></canvas></div>
 
   <!-- MAIN MENU -->
   <section class="screen" id="menu">
@@ -22,13 +22,19 @@
         <h1 class="logo"><span class="logo-a">Wildcard</span><span class="logo-b">Chess</span></h1>
         <p class="tagline">Both armies start with the usual sixteen pieces, plus a wildcard with rules of its own. You can see your opponent's. You can't see what it does.</p>
         <nav class="menu-btns" aria-label="Main menu">
-          <button class="btn primary" data-go="setup" id="playBtn"><span>Play</span><small>vs the computer</small></button>
+          <button class="btn primary" data-mode="ai" id="playBtn"><span>Play</span><small>vs the computer</small></button>
+          <button class="btn" data-mode="local" id="localBtn"><span>Pass &amp; Play</span><small>2 players, one device</small></button>
           <button class="btn" data-go="codex"><span>Codex</span><small id="codexCount">0 / 30 discovered</small></button>
           <button class="btn" data-go="how"><span>How it works</span><small>Rules in two minutes</small></button>
           <button class="btn ghost" id="soundBtn"><span>Sound</span><small id="soundState">On</small></button>
         </nav>
       </div>
       <div class="menu-right" aria-hidden="true">
+        <div class="float-cards">
+          <div class="fcard" style="--r:-14deg;--d:0s"><div class="fcard-in"></div></div>
+          <div class="fcard" style="--r:9deg;--d:-2.2s"><div class="fcard-in"></div></div>
+          <div class="fcard" style="--r:-4deg;--d:-4.1s"><div class="fcard-in"></div></div>
+        </div>
         <div class="stage">
           <div class="tilt"><div class="board" id="showBoard"></div></div>
           <div class="stage-shadow"></div>
@@ -40,8 +46,13 @@
 
   <!-- DIFFICULTY -->
   <section class="screen" id="setup">
-    <header class="topbar"><button class="back" data-go="menu">← Menu</button><h2>Pick your opponent</h2></header>
+    <header class="topbar"><button class="back" data-go="menu">← Menu</button><h2 id="setupTitle">Pick your opponent</h2></header>
     <div class="setup-body">
+      <div class="opts"><div class="seg seg-big" id="segMode"><button data-v="ai">vs Computer</button><button data-v="local">Pass &amp; Play · 2 players</button></div></div>
+      <div class="local-intro" id="localIntro">
+        <div class="duel"><div class="duel-p">{W}</div><span>vs</span><div class="duel-p">{B}</div></div>
+        <p>Two players share this device. Each of you sees your own wildcard rules and only the <i>name</i> of the other's. Between turns a screen hides the board so you can pass the device without giving anything away.</p>
+      </div>
       <div class="diff-grid" role="radiogroup" aria-label="Difficulty">
         <button class="diff" data-level="easy" role="radio">
           <div class="diff-ico" data-piece="P"></div>
@@ -69,10 +80,14 @@
         </button>
       </div>
       <div class="opts">
-        <div class="opt"><span class="opt-l">Play as</span>
+        <div class="opt ai-only"><span class="opt-l">Play as</span>
           <div class="seg" id="segColor"><button data-v="w">White</button><button data-v="r">Random</button><button data-v="b">Black</button></div></div>
         <div class="opt"><span class="opt-l">Wildcards each</span>
           <div class="seg" id="segCount"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button></div></div>
+        <div class="opt local-only"><span class="opt-l">Privacy screen</span>
+          <div class="seg" id="segPrivacy"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
+        <div class="opt local-only"><span class="opt-l">Flip board each turn</span>
+          <div class="seg" id="segFlip"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
       </div>
       <button class="btn primary big" id="dealBtn"><span>Deal the wildcards</span></button>
     </div>
@@ -83,18 +98,18 @@
     <header class="topbar"><button class="back" data-go="setup">← Opponent</button><h2>The deal</h2></header>
     <div class="draft-body">
       <div class="draft-side">
-        <h3>Yours</h3>
+        <h3 id="draftMineTitle">Yours</h3>
         <div class="cards" id="draftMine"></div>
         <button class="btn ghost small" id="rerollBtn">Reroll mine (1 left)</button>
       </div>
       <div class="vs" aria-hidden="true">vs</div>
       <div class="draft-side">
-        <h3>Theirs</h3>
+        <h3 id="draftTheirsTitle">Theirs</h3>
         <div class="cards" id="draftTheirs"></div>
         <p class="draft-note">You'll find out what it does the hard way.</p>
       </div>
     </div>
-    <div class="draft-foot"><button class="btn primary big" id="startBtn"><span>Start the game</span></button></div>
+    <div class="draft-foot"><button class="btn primary big" id="startBtn"><span id="startLabel">Start the game</span></button></div>
   </section>
 
   <!-- GAME -->
@@ -140,7 +155,7 @@
     <div class="how-body">
       <article>
         <h3>Normal chess, plus a stranger</h3>
-        <p>Both sides start with the full standard army. Each side also gets one or more <b>wildcards</b>, dealt at random from 30, standing on the third rank in front of the pawns.</p>
+        <p>Both sides start with the standard army, except that each <b>wildcard</b> (dealt at random from 30) takes the place of one of your regular pieces. It can replace any piece except the king: a pawn, a knight, even your queen. You'll see which one when the cards are dealt.</p>
         <h3>You know yours. You don't know theirs.</h3>
         <p>Before the game you see your own wildcard and what it does. You also see your opponent's piece and its name, but not its rules. Hover or tap any piece on the board to read about it; theirs only says <i>unknown</i>. Watch what it does and work it out. When the game ends, its rules are revealed and it joins your Codex.</p>
         <h3>How to win</h3>
@@ -149,12 +164,23 @@
         <p>Click or drag a piece. Dots mark quiet moves, rings mark captures, and coloured stars mark special abilities. A pulsing ring on the piece itself means it has an ability it uses in place (click it again to use it). If one square offers two different moves, you'll be asked which.</p>
         <h3>Promotion</h3>
         <p>Pawns that reach the last rank can promote into a queen, rook, bishop, knight, or one of your wildcards.</p>
+        <h3>Pass &amp; Play</h3>
+        <p>Two people can play on one device. Each player looks at their own cards in private, and between turns a screen covers the board until the next player taps <i>Ready</i>, so nobody sees the other's wildcard rules. The board can turn to face whoever is moving.</p>
         <h3>Difficulty</h3>
         <p><b>Easy</b> and <b>Medium</b> look one and two moves ahead. <b>Pro</b> calculates four moves deep. <b>Xtreme</b> searches as deep as it can in four seconds and brings one more wildcard than you do. Only Xtreme refuses take-backs.</p>
       </article>
     </div>
   </section>
 
+  <div class="curtain" id="curtain" hidden>
+    <div class="curtain-card">
+      <div class="curtain-ico" id="curtainIco"></div>
+      <p class="curtain-k" id="curtainK"></p>
+      <h2 id="curtainTitle"></h2>
+      <p class="curtain-text" id="curtainText"></p>
+      <button class="btn primary big" id="curtainBtn"><span id="curtainBtnLabel">Ready</span></button>
+    </div>
+  </div>
   <div class="modal" id="modal" hidden><div class="modal-card" id="modalCard" role="dialog" aria-modal="true"></div></div>
   <div class="tip" id="tip" hidden></div>
   <div class="chooser" id="chooser" hidden></div>

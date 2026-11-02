@@ -605,9 +605,22 @@ function ChessEngine() {
       b[SQ(f, 6)] = newPiece(s, 'P', 'b', SQ(f, 6));
       b[SQ(f, 7)] = newPiece(s, back[f], 'b', SQ(f, 7));
     }
-    o.wild.w.forEach((t, i) => { const q = SQ(o.files.w[i], 2); b[q] = newPiece(s, t, 'w', q); });
-    o.wild.b.forEach((t, i) => { const q = SQ(o.files.b[i], 5); b[q] = newPiece(s, t, 'b', q); });
+    // Each wildcard takes the place of one regular piece (never the king), given as o.slots.
+    for (const c of ['w', 'b']) (o.wild[c] || []).forEach((t, i) => {
+      const q = o.slots ? o.slots[c][i] : SQ(o.files[c][i], c === 'w' ? 2 : 5);
+      b[q] = newPiece(s, t, c, q);
+    });
     return s;
+  }
+
+  /* Random squares of regular pieces (not the king) for a side's wildcards to replace. */
+  function pickSlots(c, n) {
+    const base = c === 'w' ? 0 : 48, king = c === 'w' ? 4 : 60, sq = [];
+    for (let q = base; q < base + 16; q++) if (q !== king) sq.push(q);
+    for (let i = sq.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [sq[i], sq[j]] = [sq[j], sq[i]]; }
+    return sq.slice(0, n);
+  }
+  function startType(q) { const r = R(q); return r === 1 || r === 6 ? 'P' : 'RNBQKBNR'[F(q)];
   }
 
   /* ---------- evaluation ---------- */
@@ -776,7 +789,7 @@ function ChessEngine() {
     return { s, moves: out };
   }
 
-  return { newGame, legalMoves, makeMove, status, inCheck, findKing, think, quickPick, demo, value, evaluate,
+  return { newGame, pickSlots, startType, legalMoves, makeMove, status, inCheck, findKing, think, quickPick, demo, value, evaluate,
     WILD_IDS, LEVELS, sqName: q => 'abcdefgh'[F(q)] + (R(q) + 1), F, R, SQ, stats: () => nodes };
 }
 if (typeof module !== 'undefined') module.exports = ChessEngine;

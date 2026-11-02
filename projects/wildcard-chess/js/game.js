@@ -1,4 +1,4 @@
-/* Wildcard Chess: screens, the deal, the game against the computer, the Codex. */
+/* Wildcard Chess: screens, the deal, games against the computer or a friend (pass & play), the Codex. */
 'use strict';
 
 const E = ChessEngine();
@@ -20,7 +20,8 @@ const LEVELS = {
   xtreme: { name: 'Xtreme', who: 'The Unhinged', icon: 'void', color: 'var(--lv-xtreme)' },
 };
 
-const settings = { level: store.get('level', 'medium'), color: store.get('color', 'w'), count: store.get('count', 1) };
+const settings = { mode: 'ai', level: store.get('level', 'medium'), color: store.get('color', 'w'), count: store.get('count', 1),
+  privacy: store.get('privacy', true), autoflip: store.get('autoflip', true) };
 if (!LEVELS[settings.level]) settings.level = 'medium';
 Sound.on = store.get('sound', true);
 const discovered = new Set(store.get('codex', []));
@@ -32,8 +33,10 @@ function show(id) {
   current = id;
   for (const s of $$('.screen')) s.classList.toggle('on', s.id === id);
   if (id === 'menu') Showcase.start(); else Showcase.stop();
+  Embers.toggle(id !== 'game');
   if (id === 'codex') renderCodex();
   if (id === 'game') requestAnimationFrame(() => G.board && G.board.resize());
+  if (id !== 'game' && id !== 'draft') { $('#curtain').hidden = true; curtainCb = null; }
   hideTip(); hideChooser();
 }
 
@@ -66,11 +69,13 @@ const AI = {
 };
 
 /* ---------- tooltip, chooser, toast ---------- */
+const sideName = c => (c === 'w' ? 'White' : 'Black');
 function tipHTML(p, mine) {
   if (p.t === 'WALL') return `<h5>Stone wall</h5><p>${STD_DESC.WALL}</p>`;
-  const w = WILD[p.t], side = p.c === 'w' ? 'White' : 'Black';
+  const w = WILD[p.t], side = sideName(p.c);
   if (w) {
-    if (mine) return `<div class="tip-k" style="--acc:${w.accent}">Your wildcard · ${esc(w.moves)}</div><h5>${w.name}</h5><p>${w.desc}</p>`;
+    const owner = G.mode === 'local' || G.over ? `${side}'s wildcard` : 'Your wildcard';
+    if (mine) return `<div class="tip-k" style="--acc:${w.accent}">${owner} · ${esc(w.moves)}</div><h5>${w.name}</h5><p>${w.desc}</p>`;
     return `<div class="tip-k" style="--acc:${w.accent}">${side}'s wildcard</div><h5>${w.name}</h5><p class="unk">What does it do? Nobody's telling. Watch it closely.</p>`;
   }
   return `<div class="tip-k">${side}</div><h5>${STD_NAMES[p.t]}</h5><p>${STD_DESC[p.t]}</p>`;
@@ -118,14 +123,27 @@ function modal(html) { $('#modalCard').innerHTML = html; $('#modal').hidden = fa
 function closeModal() { $('#modal').hidden = true; }
 
 /* ---------- setup screen ---------- */
+let syncSetup = () => {};
 function initSetup() {
   for (const el of $$('.diff-ico')) el.innerHTML = pieceSVG(el.dataset.piece, el.dataset.piece === 'void' ? 'b' : 'w');
   const sync = () => {
     for (const d of $$('.diff')) { const on = d.dataset.level === settings.level; d.classList.toggle('sel', on); d.setAttribute('aria-checked', on); }
     for (const b of $$('#segColor button')) b.classList.toggle('on', b.dataset.v === settings.color);
     for (const b of $$('#segCount button')) b.classList.toggle('on', +b.dataset.v === settings.count);
+    for (const b of $$('#segMode button')) b.classList.toggle('on', b.dataset.v === settings.mode);
+    for (const b of $$('#segPrivacy button')) b.classList.toggle('on', !!+b.dataset.v === settings.privacy);
+    for (const b of $$('#segFlip button')) b.classList.toggle('on', !!+b.dataset.v === settings.autoflip);
+    $('#setup').classList.toggle('local', settings.mode === 'local');
+    $('#setupTitle').textContent = settings.mode === 'local' ? 'Pass & Play' : 'Pick your opponent';
     store.set('level', settings.level); store.set('color', settings.color); store.set('count', settings.count);
+    store.set('privacy', settings.privacy); store.set('autoflip', settings.autoflip);
   };
+  syncSetup = sync;
+  $('#localIntro .duel').innerHTML = `<div class="duel-p">${pieceSVG('K', 'w')}</div><span>vs</span><div class="duel-p">${pieceSVG('K', 'b')}</div>`;
+  for (const b of $$('#segMode button')) b.addEventListener('click', () => { settings.mode = b.dataset.v; sync(); });
+  for (const b of $$('#segPrivacy button')) b.addEventListener('click', () => { settings.privacy = !!+b.dataset.v; sync(); });
+  for (const b of $$('#segFlip button')) b.addEventListener('click', () => { settings.autoflip = !!+b.dataset.v; sync(); });
+  for (const b of $$('[data-mode]')) b.addEventListener('click', () => { Sound.init(); settings.mode = b.dataset.mode; sync(); show('setup'); });
   for (const d of $$('.diff')) d.addEventListener('click', () => { settings.level = d.dataset.level; Sound.init(); Sound.play('select'); sync(); });
   for (const b of $$('#segColor button')) b.addEventListener('click', () => { settings.color = b.dataset.v; sync(); });
   for (const b of $$('#segCount button')) b.addEventListener('click', () => { settings.count = +b.dataset.v; sync(); });
@@ -134,84 +152,190 @@ function initSetup() {
 }
 
 /* ---------- the deal ---------- */
-const Draft = { mine: [], theirs: [], pool: [], rerolls: 1, human: 'w' };
+const Draft = { wild: { w: [], b: [] }, slots: { w: [], b: [] }, pool: [], rerolls: { w: 1, b: 1 }, human: 'w', mode: 'ai', viewer: 'w' };
 function deal() {
   Sound.init();
-  const n = settings.count, nThem = n + (settings.level === 'xtreme' ? 1 : 0);
+  const local = settings.mode === 'local';
+  const n = settings.count;
+  Draft.mode = settings.mode;
+  Draft.human = local ? 'w' : settings.color === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : settings.color;
+  const nOf = c => n + (!local && settings.level === 'xtreme' && c !== Draft.human ? 1 : 0);
   const pool = shuffle(WILD_IDS.slice());
-  Draft.mine = pool.splice(0, n); Draft.theirs = pool.splice(0, nThem); Draft.pool = pool;
-  Draft.rerolls = 1;
-  Draft.human = settings.color === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : settings.color;
+  Draft.wild = { w: pool.splice(0, nOf('w')), b: pool.splice(0, nOf('b')) };
+  Draft.slots = { w: E.pickSlots('w', Draft.wild.w.length), b: E.pickSlots('b', Draft.wild.b.length) };
+  Draft.pool = pool;
+  Draft.rerolls = { w: 1, b: 1 };
   show('draft');
-  renderDraftSide('#draftMine', Draft.mine, false, Draft.human, 250);
-  renderDraftSide('#draftTheirs', Draft.theirs, true, opp(Draft.human), 650);
-  syncReroll();
+  if (local) {
+    $('#draftMine').innerHTML = ''; $('#draftTheirs').innerHTML = '';
+    passCurtain('w', 'Your deal, White', "Black, look away. White's wildcards and their rules are about to be shown.", "Show White's cards", () => renderDraft('w', true));
+  } else renderDraft(Draft.human, true);
 }
-function cardHTML(t, secret, color) {
+function slotText(c, q, own) {
+  const name = STD_NAMES[E.startType(q)].toLowerCase();
+  return `${own ? 'Replaces your' : 'Replaces their'} ${name} on ${E.sqName(q)}`;
+}
+function cardHTML(t, secret, color, q) {
   const w = WILD[t];
   return `<div class="card ${secret ? 'secret' : ''}" style="--acc:${w.accent}"><div class="card-in">
     <div class="card-face"><div class="card-art">${pieceSVG(t, color)}${secret ? '<span class="q-mark">?</span>' : ''}</div>
       <div class="card-name">${w.name}</div>
       <div class="card-moves">${secret ? 'Ability unknown' : esc(w.moves)}</div>
+      <div class="card-slot">${slotText(color, q, !secret)}</div>
       <div class="card-desc">${secret ? 'Its rules stay hidden until the game is over. Watch what it does.' : w.desc}</div></div>
     <div class="card-back"></div></div></div>`;
 }
-function renderDraftSide(sel, types, secret, color, delay) {
+function renderDraftSide(sel, c, secret, delay) {
   const box = $(sel);
-  box.innerHTML = types.map(t => cardHTML(t, secret, color)).join('');
-  [...box.children].forEach((c, i) => setTimeout(() => { c.classList.add('up'); Sound.play('deal'); }, delay + i * 260));
+  box.innerHTML = Draft.wild[c].map((t, i) => cardHTML(t, secret, c, Draft.slots[c][i])).join('');
+  [...box.children].forEach((el, i) => setTimeout(() => { el.classList.add('up'); Sound.play('deal'); }, delay + i * 260));
+}
+/* Show the deal from one side's point of view: its own cards face up, the other side's as secrets. */
+function renderDraft(viewer, fresh) {
+  Draft.viewer = viewer;
+  const local = Draft.mode === 'local', other = opp(viewer);
+  $('#draftMineTitle').textContent = local ? `${sideName(viewer)} · yours` : 'Yours';
+  $('#draftTheirsTitle').textContent = local ? `${sideName(other)} · theirs` : 'Theirs';
+  renderDraftSide('#draftMine', viewer, false, fresh ? 250 : 60);
+  if (fresh) renderDraftSide('#draftTheirs', other, true, 650);
+  $('#startLabel').textContent = local && viewer === 'w' ? 'Done. Pass to Black' : 'Start the game';
+  syncReroll();
 }
 function syncReroll() {
-  const b = $('#rerollBtn');
-  b.textContent = Draft.rerolls ? 'Reroll mine (1 left)' : 'No rerolls left';
-  b.disabled = !Draft.rerolls;
+  const b = $('#rerollBtn'), left = Draft.rerolls[Draft.viewer];
+  b.textContent = left ? 'Reroll mine (1 left)' : 'No rerolls left';
+  b.disabled = !left;
 }
 $('#rerollBtn').addEventListener('click', () => {
-  if (!Draft.rerolls) return;
-  Draft.rerolls--;
-  Draft.pool.push(...Draft.mine);
-  Draft.mine = Draft.pool.splice(0, Draft.mine.length);
-  renderDraftSide('#draftMine', Draft.mine, false, Draft.human, 60);
-  syncReroll();
+  const c = Draft.viewer;
+  if (!Draft.rerolls[c]) return;
+  Draft.rerolls[c]--;
+  Draft.pool.push(...Draft.wild[c]);
+  Draft.wild[c] = Draft.pool.splice(0, Draft.wild[c].length);
+  renderDraft(c, false);
 });
 $('#startBtn').addEventListener('click', () => {
-  const h = Draft.human, a = opp(h);
-  const wild = { [h]: Draft.mine.slice(), [a]: Draft.theirs.slice() };
-  Draft.mine.forEach(discover);
-  G.start({ wild, human: h, level: settings.level });
+  if (Draft.mode === 'local' && Draft.viewer === 'w') {
+    passCurtain('b', 'Your deal, Black', "White, look away. Black's wildcards and their rules are about to be shown.", "Show Black's cards", () => renderDraft('b', true));
+    return;
+  }
+  const cfg = { mode: Draft.mode, wild: { w: Draft.wild.w.slice(), b: Draft.wild.b.slice() }, slots: Draft.slots, human: Draft.human, level: settings.level,
+    privacy: settings.privacy, autoflip: settings.autoflip };
+  if (Draft.mode === 'ai') Draft.wild[Draft.human].forEach(discover);
   show('game');
+  G.start(cfg);
+});
+
+/* ---------- the pass-the-device curtain ---------- */
+let curtainCb = null;
+function passCurtain(c, title, text, btn, cb) {
+  $('#curtainIco').innerHTML = pieceSVG('K', c);
+  $('#curtainIco').classList.toggle('dark', c === 'b');
+  $('#curtainK').textContent = 'Pass the device';
+  $('#curtainTitle').textContent = title;
+  $('#curtainText').textContent = text;
+  $('#curtainBtnLabel').textContent = btn;
+  $('#curtain').hidden = false;
+  hideTip(); hideChooser();
+  curtainCb = cb;
+}
+$('#curtainBtn').addEventListener('click', () => {
+  Sound.init(); Sound.play('deal');
+  $('#curtain').hidden = true;
+  const f = curtainCb; curtainCb = null;
+  if (f) f();
 });
 
 /* ---------- the game ---------- */
 const G = {
-  board: null, s: null, hist: [], log: [], human: 'w', ai: 'b', level: 'medium', wild: null,
+  board: null, s: null, hist: [], log: [], mode: 'ai', human: 'w', ai: 'b', level: 'medium', wild: null,
+  privacy: true, autoflip: true, view: 'w', intro: false, passing: false,
   legal: [], sel: -1, selMoves: [], busy: false, over: null, token: 0, hover: -1,
   start(cfg) {
     this.token++;
-    this.human = cfg.human; this.ai = opp(cfg.human); this.level = cfg.level; this.wild = cfg.wild;
-    const pick = n => shuffle(n === 1 ? [2, 3, 4, 5] : [1, 2, 3, 4, 5, 6]).slice(0, n).sort((x, y) => x - y);
-    const files = { w: pick(cfg.wild.w.length), b: pick(cfg.wild.b.length) };
-    this.s = cfg.state || E.newGame({ wild: cfg.wild, files });
+    this.mode = cfg.mode || 'ai'; this.privacy = cfg.privacy !== false; this.autoflip = cfg.autoflip !== false;
+    this.human = cfg.human; this.ai = this.mode === 'ai' ? opp(cfg.human) : null; this.level = cfg.level; this.wild = cfg.wild;
+    const fresh = !cfg.state;
+    this.s = cfg.state || E.newGame({ wild: cfg.wild, slots: cfg.slots });
     this.hist = cfg.hist || [{ s: this.s }];
     this.log = cfg.log || [];
-    this.over = null; this.sel = -1; this.busy = false;
-    this.board.setFlip(this.human === 'b');
-    this.board.setPieces(this.s, { anim: false, frozen: frozenSquares(this.s) });
+    this.over = null; this.sel = -1; this.busy = false; this.intro = fresh; this.passing = false;
+    this.view = this.mode === 'local' ? this.s.turn : this.human;
+    this.board.setFlip(this.mode === 'local' ? (this.autoflip && this.s.turn === 'b') : this.human === 'b');
     this.legal = E.legalMoves(this.s);
     const lv = LEVELS[this.level];
-    $('#game').style.setProperty('--lv', lv.color);
-    $('#modeChip').textContent = `vs ${lv.name} · ${lv.who}`;
+    $('#game').style.setProperty('--lv', this.mode === 'local' ? 'var(--gold)' : lv.color);
+    $('#modeChip').textContent = this.mode === 'local' ? 'Pass & Play · 2 players' : `vs ${lv.name} · ${lv.who}`;
+    if (fresh) this.board.setPieces(startingArmy(this.s, cfg.slots), { anim: false });
+    else this.board.setPieces(this.s, { anim: false, frozen: frozenSquares(this.s) });
     renderWildInfo(); renderLog(); this.render();
-    if (this.s.turn === this.ai) aiTurn();
+    const go = () => (fresh ? runIntro(cfg.slots) : afterIntro());
+    if (this.mode === 'local' && this.privacy) handTo(this.s.turn, go, true);
+    else go();
   },
   render() {
     renderBars(); renderStatus(); renderMarks();
-    const canUndo = this.level !== 'xtreme' && !this.over && this.hist.some((h, i) => i > 0 && this.hist[i - 1].s.turn === this.human);
-    $('#undoBtn').disabled = !canUndo;
-    $('#undoBtn').title = this.level === 'xtreme' ? 'No take-backs in Xtreme' : '';
-    $('#resignBtn').disabled = !!this.over;
+    if (this.mode === 'local') renderWildInfo();
+    const canUndo = this.mode === 'local' ? !this.over && this.hist.length > 1
+      : this.level !== 'xtreme' && !this.over && this.hist.some((h, i) => i > 0 && this.hist[i - 1].s.turn === this.human);
+    $('#undoBtn').disabled = !canUndo || this.intro || this.passing;
+    $('#undoBtn').title = this.mode === 'ai' && this.level === 'xtreme' ? 'No take-backs in Xtreme' : '';
+    $('#resignBtn').disabled = !!this.over || this.intro || this.passing;
   },
 };
+/* Who is looking at the screen: whose wildcard rules may be shown. */
+function knows(c) { return !!G.over || (G.mode === 'local' ? G.view === c : G.human === c); }
+function canAct() {
+  return !G.busy && !G.over && !G.intro && !G.passing && $('#curtain').hidden &&
+    (G.mode === 'local' ? G.view === G.s.turn : G.s.turn === G.human);
+}
+
+/* The regular army the wildcards are about to replace, for the opening swap animation. */
+function startingArmy(s, slots) {
+  const b = s.b.slice();
+  let id = 100000;
+  for (const c of ['w', 'b']) for (const q of slots[c]) b[q] = { t: E.startType(q), c, id: id++, m: false, d: null };
+  return { ...s, b };
+}
+function runIntro(slots) {
+  G.intro = true; G.render();
+  const list = [];
+  for (const c of [G.s.turn, opp(G.s.turn)]) slots[c].forEach(q => list.push(q));
+  const shown = startingArmy(G.s, slots);
+  const token = G.token;
+  list.forEach((q, i) => setTimeout(() => {
+    if (token !== G.token) return;
+    shown.b = shown.b.slice(); shown.b[q] = G.s.b[q];
+    const w = WILD[G.s.b[q].t];
+    G.board.burstAt(q, { n: 34, color: [w.accent, '#fff3d0', '#ffffff'], kind: 'spark', speed: 1.5, gravity: -0.02, life: 44 });
+    G.board.ringAt(q, w.accent, 1.2, 8, 28);
+    G.board.setPieces(shown, { anim: true });
+    Sound.play('magic');
+  }, 650 + i * 420));
+  setTimeout(() => {
+    if (token !== G.token) return;
+    G.board.setPieces(G.s, { anim: true, frozen: frozenSquares(G.s) });
+    toast(`${pieceSVG('K', G.s.turn)}<span>Wildcards in. ${G.mode === 'local' ? sideName(G.s.turn) + ' to move' : 'Your move'}</span>`, 'var(--gold)');
+    afterIntro();
+  }, 650 + list.length * 420 + 250);
+}
+function afterIntro() {
+  G.intro = false;
+  G.render();
+  if (G.mode === 'ai' && G.s.turn === G.ai) aiTurn();
+}
+/* Local games: hand the device to side c behind the privacy curtain. */
+function handTo(c, cb, first) {
+  const other = sideName(opp(c));
+  passCurtain(c, `${sideName(c)}'s turn`, first
+    ? `${other}, look away. ${sideName(c)} moves first.`
+    : `Hand the device to ${sideName(c)}. ${other}, no peeking at the board.`, `I'm ${sideName(c)}. Show the board`, () => {
+    G.view = c;
+    if (G.autoflip) G.board.setFlip(c === 'b');
+    G.render();
+    if (cb) cb();
+  });
+}
 
 function frozenSquares(s) {
   const out = new Set();
@@ -233,14 +357,16 @@ function material(s, c) { let v = 0; for (const p of s.b) if (p && p.c === c && 
 function renderBars() {
   const top = G.board.flip ? 'w' : 'b';
   for (const [id, c] of [['#barTop', top], ['#barBot', opp(top)]]) {
-    const el = $(id), human = c === G.human, lv = LEVELS[G.level];
+    const el = $(id), local = G.mode === 'local', human = local || c === G.human, lv = LEVELS[G.level], known = knows(c);
     const lost = G.s.lost[opp(c)].filter(t => t !== 'K').slice().sort((a, b) => E.value({ t: b, d: { k: 0, ch: 1 } }) - E.value({ t: a, d: { k: 0, ch: 1 } }));
     const diff = Math.round((material(G.s, c) - material(G.s, opp(c))) / 100);
-    const chips = (G.wild[c] || []).map(t => `<button class="chip" data-wild="${t}" data-c="${c}" aria-label="${WILD[t].name}">${pieceSVG(t, c)}${human ? '' : '<span class="qm">?</span>'}</button>`).join('');
+    const chips = (G.wild[c] || []).map(t => `<button class="chip" data-wild="${t}" data-c="${c}" aria-label="${WILD[t].name}">${pieceSVG(t, c)}${known ? '' : '<span class="qm">?</span>'}</button>`).join('');
     el.classList.toggle('turn', !G.over && G.s.turn === c);
+    const name = local ? sideName(c) : human ? 'You' : lv.name + ' AI';
+    const sub = local ? (c === 'w' ? 'Player 1' : 'Player 2') + (!G.over && G.s.turn === c ? ' · to move' : '') : sideName(c) + (human ? '' : ` · <span class="lvl">${lv.who}</span>`);
     el.innerHTML = `<div class="avatar">${pieceSVG(human ? 'K' : lv.icon, c)}</div>
-      <div class="pname"><b>${human ? 'You' : lv.name + ' AI'}${!human && G.busy ? '<span class="thinking"><i></i><i></i><i></i></span>' : ''}</b>
-      <span>${c === 'w' ? 'White' : 'Black'}${human ? '' : ` · <span class="lvl">${lv.who}</span>`}</span></div>
+      <div class="pname"><b>${name}${!human && G.busy ? '<span class="thinking"><i></i><i></i><i></i></span>' : ''}</b>
+      <span>${sub}</span></div>
       <div class="chips">${chips}</div>
       <div class="capt">${lost.map(t => pieceSVG(t, opp(c))).join('')}${diff > 0 ? `<span class="adv">+${diff}</span>` : ''}</div>`;
   }
@@ -248,19 +374,32 @@ function renderBars() {
 
 function renderStatus() {
   let t;
+  if (G.mode === 'local') {
+    const c = G.s.turn, n = sideName(c);
+    if (G.over) t = G.over.winner ? `${sideName(G.over.winner)} wins` : 'Draw';
+    else if (G.intro) t = 'Dealing the wildcards…';
+    else if (G.passing) t = `Passing to ${sideName(c)}…`;
+    else t = E.inCheck(G.s, c) ? `Check! ${n} to move` : G.s.extra ? `Extra turn! ${n} again` : `${n} to move`;
+    $('#status').textContent = t;
+    return;
+  }
   if (G.over) t = G.over.winner === G.human ? 'You won' : G.over.winner ? 'You lost' : 'Draw';
+  else if (G.intro) t = 'Dealing the wildcards…';
   else if (G.s.turn === G.human) t = E.inCheck(G.s, G.human) ? 'Check! Your move' : (G.s.extra ? 'Extra turn!' : 'Your move');
   else t = G.busy ? 'Thinking…' : 'Their move';
   $('#status').textContent = t;
 }
 
 function renderWildInfo() {
-  const row = (t, c, mine) => {
-    const w = WILD[t];
-    return `<div class="wi ${mine ? '' : 'theirs'}" style="--acc:${w.accent}"><div class="wi-art">${pieceSVG(t, c)}</div>
-      <div><h4>${w.name}<small>${mine ? 'Yours' : 'Theirs'}</small></h4><p>${mine ? w.desc : 'Unknown. Watch what it does.'}</p></div></div>`;
+  const local = G.mode === 'local';
+  const row = (t, c) => {
+    const w = WILD[t], k = knows(c), tag = local || G.over ? sideName(c) : c === G.human ? 'Yours' : 'Theirs';
+    return `<div class="wi ${k ? '' : 'theirs'}" style="--acc:${w.accent}"><div class="wi-art">${pieceSVG(t, c)}</div>
+      <div><h4>${w.name}<small>${tag}</small></h4><p>${k ? w.desc : 'Unknown. Watch what it does.'}</p></div></div>`;
   };
-  $('#wildInfo').innerHTML = G.wild[G.human].map(t => row(t, G.human, true)).join('') + G.wild[G.ai].map(t => row(t, G.ai, false)).join('');
+  const first = local ? G.view : G.human;
+  const html = [first, opp(first)].map(c => G.wild[c].map(t => row(t, c)).join('')).join('');
+  if ($('#wildInfo').innerHTML !== html) $('#wildInfo').innerHTML = html;
 }
 
 function renderLog() {
@@ -320,13 +459,13 @@ function tryMove(ms, x, y) {
   const s = G.s, pc = s.b[ms[0].o];
   showChooser(ms.map(m => ({
     label: moveLabel(m, s),
-    icon: pieceSVG(m.promo || (m.k === 'raise' ? m.rt : m.k === 'spawn' ? 'P' : m.k === 'wall' ? 'WALL' : pc.t), G.human),
+    icon: pieceSVG(m.promo || (m.k === 'raise' ? m.rt : m.k === 'spawn' ? 'P' : m.k === 'wall' ? 'WALL' : pc.t), G.s.turn),
   })), x, y, i => humanMove(ms[i]));
   return true;
 }
 
 function humanMove(m) {
-  if (G.busy || G.over || G.s.turn !== G.human) return;
+  if (!canAct()) return;
   hideTip();
   G.sel = -1; G.selMoves = []; G.hover = -1;
   applyMove(m);
@@ -342,12 +481,12 @@ function initBoardInput() {
     const q = G.board.sqAt(e.clientX, e.clientY);
     if (q < 0) return;
     const p = G.s.b[q];
-    const myTurn = !G.busy && !G.over && G.s.turn === G.human;
+    const myTurn = canAct();
     if (myTurn && G.sel >= 0 && q !== G.sel) {
       const ms = G.selMoves.filter(m => m.t === q && m.t !== m.o);
       if (ms.length) { tryMove(ms, e.clientX, e.clientY); return; }
     }
-    if (myTurn && p && p.c === G.human) {
+    if (myTurn && p && p.c === G.s.turn) {
       const wasSel = q === G.sel;
       if (!wasSel) select(q);
       const el = G.board.elAt(q);
@@ -355,7 +494,7 @@ function initBoardInput() {
       root.setPointerCapture(e.pointerId);
       return;
     }
-    if (p) showTip(tipHTML(p, p.c === G.human), e.clientX, e.clientY, 2600);
+    if (p) showTip(tipHTML(p, knows(p.c)), e.clientX, e.clientY, 2600);
     if (G.sel >= 0) select(-1);
   });
   root.addEventListener('pointermove', e => {
@@ -371,7 +510,7 @@ function initBoardInput() {
     if (!drag && e.pointerType === 'mouse' && q !== hoverSq) {
       hoverSq = q; hideTip(); clearTimeout(hoverTimer);
       const p = q >= 0 ? G.s.b[q] : null;
-      if (p && G.sel < 0) { const x = e.clientX, y = e.clientY; hoverTimer = setTimeout(() => showTip(tipHTML(p, p.c === G.human), x, y), 420); }
+      if (p && G.sel < 0) { const x = e.clientX, y = e.clientY; hoverTimer = setTimeout(() => showTip(tipHTML(p, knows(p.c)), x, y), 420); }
     }
   });
   const end = e => {
@@ -515,9 +654,19 @@ function applyMove(m) {
   }
   if (!st.over && E.inCheck(ns, ns.turn)) setTimeout(() => Sound.play('check'), 120);
   renderLog();
-  if (st.over) { G.over = st; G.render(); setTimeout(() => endGame(st), 1100); return; }
+  if (st.over) { G.over = st; renderWildInfo(); G.render(); setTimeout(() => endGame(st), 1100); return; }
+  if (G.mode === 'local' && ns.turn !== s.turn) {
+    if (G.privacy) {
+      G.passing = true; G.render();
+      const token = G.token;
+      setTimeout(() => { if (token !== G.token) return; G.passing = false; handTo(ns.turn); }, 900);
+      return;
+    }
+    G.view = ns.turn;
+    if (G.autoflip) setTimeout(() => { if (G.s === ns) { G.board.setFlip(ns.turn === 'b'); G.render(); } }, 700);
+  }
   G.render();
-  if (ns.turn === G.ai) aiTurn();
+  if (G.mode === 'ai' && ns.turn === G.ai) aiTurn();
 }
 
 function aiTurn() {
@@ -537,7 +686,20 @@ function aiTurn() {
 }
 
 function undo() {
-  if (G.level === 'xtreme' || G.over) return;
+  if (G.over || G.intro || G.passing) return;
+  if (G.mode === 'local') {
+    if (G.hist.length < 2) return;
+    G.token++;
+    G.hist.pop(); G.log.pop();
+    G.s = G.hist[G.hist.length - 1].s;
+    G.legal = E.legalMoves(G.s); G.sel = -1; G.selMoves = [];
+    G.board.setPieces(G.s, { anim: true, frozen: frozenSquares(G.s) });
+    renderLog();
+    if (G.view !== G.s.turn) { if (G.privacy) { G.render(); handTo(G.s.turn); return; } G.view = G.s.turn; if (G.autoflip) G.board.setFlip(G.view === 'b'); }
+    G.render();
+    return;
+  }
+  if (G.level === 'xtreme') return;
   G.token++; G.busy = false;
   while (G.hist.length > 1) {
     const mover = G.hist[G.hist.length - 2].s.turn;
@@ -552,25 +714,30 @@ function undo() {
 }
 
 const REASONS = {
-  mate: w => (w ? 'Checkmate. Their king has nowhere to go.' : 'Checkmate. Your king has nowhere to go.'),
-  king: w => (w ? 'Their king was destroyed outright.' : 'Your king was destroyed outright.'),
-  resign: () => 'You resigned.',
+  mate: (w, l) => `Checkmate. ${l} has nowhere to go.`,
+  king: (w, l) => `${l} was destroyed outright.`,
+  resign: (w, l) => (G.mode === 'local' ? `${l.replace(/'s king$/, '')} resigned.` : 'You resigned.'),
   stalemate: () => 'Stalemate: no legal moves, but no check either.',
   fifty: () => '50 moves passed without a capture or pawn move.',
   repetition: () => 'The same position came up three times.',
   material: () => 'Only the kings are left standing.',
 };
 function endGame(st) {
-  const won = st.winner === G.human, draw = !st.winner;
-  Sound.play(won ? 'win' : draw ? 'move' : 'lose');
-  const theirs = G.wild[G.ai].map(t => {
+  const local = G.mode === 'local', draw = !st.winner, won = !local && st.winner === G.human;
+  Sound.play(local ? (draw ? 'move' : 'win') : won ? 'win' : draw ? 'move' : 'lose');
+  const loser = st.winner ? opp(st.winner) : null;
+  const loserName = !loser ? '' : local ? `${sideName(loser)}'s king` : loser === G.human ? 'Your king' : 'Their king';
+  const sides = local ? ['w', 'b'] : [G.ai];
+  const reveal = sides.map(c => G.wild[c].map(t => {
     const fresh = discover(t), w = WILD[t];
-    return `<div class="wi" style="--acc:${w.accent}"><div class="wi-art">${pieceSVG(t, G.ai)}</div><div>
-      <h4>${w.name}<small>Their wildcard</small></h4>${fresh ? '<div class="new">New in your Codex</div>' : ''}<p>${w.desc}</p></div></div>`;
-  }).join('');
-  modal(`<h2 class="${won ? 'win' : draw ? 'draw' : 'lose'}">${won ? 'Victory' : draw ? 'Draw' : 'Defeat'}</h2>
-    <p class="why">${REASONS[st.reason](won)}</p>
-    <div class="reveal">${theirs}</div>
+    return `<div class="wi" style="--acc:${w.accent}"><div class="wi-art">${pieceSVG(t, c)}</div><div>
+      <h4>${w.name}<small>${local ? sideName(c) + "'s wildcard" : 'Their wildcard'}</small></h4>${fresh ? '<div class="new">New in your Codex</div>' : ''}<p>${w.desc}</p></div></div>`;
+  }).join('')).join('');
+  const title = local ? (draw ? 'Draw' : `${sideName(st.winner)} wins`) : won ? 'Victory' : draw ? 'Draw' : 'Defeat';
+  const cls = local ? (draw ? 'draw' : 'win') : won ? 'win' : draw ? 'draw' : 'lose';
+  modal(`<h2 class="${cls}">${title}</h2>
+    <p class="why">${REASONS[st.reason](st.winner, loserName)}</p>
+    <div class="reveal">${reveal}</div>
     <div class="modal-btns"><button class="btn primary" data-act="rematch"><span>Play again</span></button>
     <button class="btn" data-act="look"><span>See the board</span></button><button class="btn ghost" data-act="menu"><span>Main menu</span></button></div>`);
 }
@@ -585,7 +752,7 @@ $('#modal').addEventListener('click', e => {
   if (!b) { if (e.target.id === 'modal') closeModal(); return; }
   const a = b.dataset.act;
   closeModal();
-  if (a === 'rematch') deal();
+  if (a === 'rematch') { settings.mode = G.mode; deal(); }
   else if (a === 'menu') show('menu');
   else if (a === 'yes' && confirmCb) { const f = confirmCb; confirmCb = null; f(); }
 });
@@ -594,20 +761,23 @@ $('#undoBtn').addEventListener('click', undo);
 $('#flipBtn').addEventListener('click', () => { G.board.setFlip(!G.board.flip); G.render(); });
 $('#resignBtn').addEventListener('click', () => {
   if (G.over) return;
-  confirmBox('Resign?', 'The game ends and their wildcard is revealed.', 'Resign', () => {
-    G.token++; G.busy = false; G.over = { over: true, winner: G.ai, reason: 'resign' }; G.render(); endGame(G.over);
+  if (G.intro || G.passing || !$('#curtain').hidden) return;
+  const local = G.mode === 'local', who = local ? G.s.turn : G.human;
+  confirmBox(local ? `Resign as ${sideName(who)}?` : 'Resign?', local ? 'The game ends and both sides\' wildcards are revealed.' : 'The game ends and their wildcard is revealed.', 'Resign', () => {
+    G.token++; G.busy = false; G.over = { over: true, winner: opp(who), reason: 'resign' }; renderWildInfo(); G.render(); endGame(G.over);
   });
 });
 $('#leaveBtn').addEventListener('click', () => {
+  if (!$('#curtain').hidden) return;
   if (G.over || G.hist.length < 2) { G.token++; show('menu'); return; }
-  confirmBox('Leave the game?', 'This game will be abandoned.', 'Leave', () => { G.token++; G.busy = false; show('menu'); });
+  confirmBox('Leave the game?', 'This game will be abandoned.', 'Leave', () => { G.token++; G.busy = false; G.intro = false; G.passing = false; show('menu'); });
 });
 document.addEventListener('click', e => {
   const c = e.target.closest('.chip[data-wild]');
   if (c) {
     const t = c.dataset.wild, p = { t, c: c.dataset.c };
     const r = c.getBoundingClientRect();
-    showTip(tipHTML(p, p.c === G.human), r.left, r.bottom, 3200);
+    showTip(tipHTML(p, knows(p.c)), r.left, r.bottom, 3200);
     return;
   }
   const g = e.target.closest('[data-go]');
@@ -618,6 +788,7 @@ document.addEventListener('pointerdown', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
+  if (!$('#curtain').hidden) return;
   if (!$('#chooser').hidden) hideChooser();
   else if (!$('#modal').hidden) closeModal();
   else if (current === 'game' && G.sel >= 0) select(-1);
@@ -634,8 +805,7 @@ const Showcase = {
   stop() { clearInterval(this.timer); this.timer = 0; },
   newGame() {
     const [a, b] = shuffle(WILD_IDS.slice());
-    const f = () => 2 + Math.floor(Math.random() * 4);
-    this.s = E.newGame({ wild: { w: [a], b: [b] }, files: { w: [f()], b: [f()] } });
+    this.s = E.newGame({ wild: { w: [a], b: [b] }, slots: { w: E.pickSlots('w', 1), b: E.pickSlots('b', 1) } });
     this.board.setPieces(this.s, { anim: false });
     this.board.setMarks({});
     $('#showCap').textContent = `Exhibition match · ${WILD[a].name} vs ${WILD[b].name}`;
@@ -683,7 +853,71 @@ function renderCodex() {
 $('#spoilers').addEventListener('change', renderCodex);
 
 /* ---------- boot ---------- */
+/* Rising embers behind the menus. */
+const Embers = {
+  cv: null, cx: null, parts: [], on: false, raf: 0,
+  init() {
+    this.cv = $('#embers'); this.cx = this.cv.getContext('2d');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    addEventListener('resize', () => this.size());
+    this.size();
+    for (let i = 0; i < 70; i++) this.parts.push(this.spawn(true));
+  },
+  size() { const d = Math.min(devicePixelRatio || 1, 2); this.w = innerWidth; this.h = innerHeight; this.cv.width = this.w * d; this.cv.height = this.h * d; this.cx.setTransform(d, 0, 0, d, 0, 0); },
+  spawn(any) {
+    return { x: Math.random() * this.w, y: any ? Math.random() * this.h : this.h + 10, r: 0.6 + Math.random() * 2.2,
+      vy: 0.2 + Math.random() * 0.7, ph: Math.random() * 6.28, sw: 0.3 + Math.random() * 0.8, hue: 30 + Math.random() * 18, a: 0.25 + Math.random() * 0.55 };
+  },
+  toggle(on) {
+    if (!this.parts.length) return;
+    if (on && !this.on) { this.on = true; this.tick(); }
+    if (!on) { this.on = false; cancelAnimationFrame(this.raf); this.cx.clearRect(0, 0, this.w, this.h); }
+  },
+  tick() {
+    if (!this.on) return;
+    const c = this.cx, t = performance.now() / 1000;
+    c.clearRect(0, 0, this.w, this.h);
+    c.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < this.parts.length; i++) {
+      const p = this.parts[i];
+      p.y -= p.vy; p.x += Math.sin(t * p.sw + p.ph) * 0.35;
+      if (p.y < -10) this.parts[i] = this.spawn(false);
+      const fl = p.a * (0.6 + 0.4 * Math.sin(t * 3 + p.ph * 2));
+      const g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
+      g.addColorStop(0, `hsla(${p.hue},100%,70%,${fl})`); g.addColorStop(1, `hsla(${p.hue},100%,50%,0)`);
+      c.fillStyle = g; c.beginPath(); c.arc(p.x, p.y, p.r * 4, 0, 6.29); c.fill();
+    }
+    c.globalCompositeOperation = 'source-over';
+    this.raf = requestAnimationFrame(() => this.tick());
+  },
+};
+
+function splitLetters(el, offset) {
+  el.innerHTML = [...el.textContent].map((ch, i) => `<span class="ch" style="--i:${i + offset}"><span>${esc(ch)}</span></span>`).join('');
+}
+function initFloatCards() {
+  const cards = $$('.fcard');
+  let pool = [];
+  const face = el => {
+    if (!pool.length) pool = shuffle(WILD_IDS.slice());
+    const t = pool.pop(), w = WILD[t];
+    el.style.setProperty('--acc', w.accent);
+    el.querySelector('.fcard-in').innerHTML = `<div class="fa">${pieceSVG(t, Math.random() < 0.5 ? 'w' : 'b')}<b>?</b></div><div class="fn">${w.name}</div>`;
+  };
+  cards.forEach(face);
+  let i = 0;
+  setInterval(() => {
+    if (current !== 'menu' || document.hidden) return;
+    const el = cards[i++ % cards.length];
+    el.classList.add('turn');
+    setTimeout(() => { face(el); el.classList.remove('turn'); }, 330);
+  }, 2600);
+}
+
 function initMenu() {
+  splitLetters($('.logo-a'), 0); splitLetters($('.logo-b'), 8);
+  initFloatCards();
+  Embers.init();
   const sync = () => { $('#soundState').textContent = Sound.on ? 'On' : 'Off'; store.set('sound', Sound.on); };
   $('#soundBtn').addEventListener('click', () => { Sound.on = !Sound.on; Sound.init(); Sound.play('select'); sync(); });
   sync(); updateCodexCount();
@@ -700,14 +934,14 @@ function boot(data) {
   initBoardInput();
   const g = data && data.game;
   if (g && g.hist && g.hist.length) {
-    G.start({ wild: g.wild, human: g.human, level: g.level, state: g.hist[g.hist.length - 1].s, hist: g.hist, log: g.log });
     show('game');
+    G.start({ mode: g.mode, privacy: g.privacy, autoflip: g.autoflip, wild: g.wild, human: g.human, level: g.level, state: g.hist[g.hist.length - 1].s, hist: g.hist, log: g.log });
   } else show(data && data.screen && data.screen !== 'game' && data.screen !== 'draft' ? data.screen : 'menu');
 }
 if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
   window.claude.hot.snapshot(() => ({
     screen: current,
-    game: current === 'game' && G.s && !G.over ? { wild: G.wild, human: G.human, level: G.level, hist: G.hist, log: G.log } : null,
+    game: current === 'game' && G.s && !G.over && !G.intro ? { mode: G.mode, privacy: G.privacy, autoflip: G.autoflip, wild: G.wild, human: G.human, level: G.level, hist: G.hist, log: G.log } : null,
   }));
 }
 const hot = window.claude && window.claude.hot;

@@ -1,6 +1,6 @@
 # Wildcard Chess
 
-Chess against the computer, with a twist: both armies start with the normal sixteen pieces **plus one or more wildcards**, dealt at random from 30 custom pieces. You know what your wildcard does. You can see your opponent's wildcard and its name, but not its rules; you find out by watching it, and it is revealed when the game ends.
+Chess against the computer or a friend on the same device, with a twist: each army gets one or more **wildcards**, dealt at random from 30 custom pieces, and each wildcard takes the place of one of its regular pieces (anything but the king). You know what your wildcard does. You can see your opponent's wildcard and its name, but not its rules; you find out by watching it, and it is revealed when the game ends.
 
 Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `index.html` in a browser, or serve the folder with `python3 -m http.server`.
 
@@ -8,9 +8,9 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 
 | Screen | What's on it |
 | --- | --- |
-| Main menu | The logo, a tilted 3D board playing a live exhibition match between two random wildcards, and Play, Codex, How it works and a sound toggle. |
-| Pick your opponent | Easy, Medium, Pro and Xtreme, plus play as White / Random / Black and 1–3 wildcards each. |
-| The deal | Your wildcard cards flip up with their rules; theirs flip up showing only the piece, its name and a question mark. One reroll of your own hand. |
+| Main menu | A letter-by-letter animated logo with a travelling glint, rising embers, floating wildcard cards that flip to new pieces, a tilted 3D board playing a live exhibition match, and Play, Pass & Play, Codex, How it works and a sound toggle that slide in. |
+| Pick your opponent | vs Computer (Easy, Medium, Pro, Xtreme; play as White / Random / Black) or Pass & Play (privacy screen and board flipping on or off), with 1–3 wildcards each. |
+| The deal | Your wildcard cards flip up with their rules and which of your pieces they replace; theirs show only the piece, its name, what it replaces and a question mark. One reroll of your own hand. In Pass & Play each player is dealt in private behind a pass-the-device screen. |
 | Game | The wooden board with player bars (wildcard chips, captured pieces, material), a sidebar with your wildcard rules, their wildcards marked unknown, the move log, and Undo / Flip / Resign / Menu. |
 | Codex | All 30 wildcards. One unlocks when you play with it or when a game against it ends; each shows a sample board of its moves from d4. A checkbox shows the undiscovered ones. |
 
@@ -27,7 +27,7 @@ The AI runs in a Web Worker built from `ChessEngine.toString()`, so the page sta
 
 ## The 30 wildcards
 
-Each side's wildcards start on its third rank (White's rank 3, Black's rank 6). Pawns can promote into your own wildcard types.
+Each wildcard replaces a random regular piece from its own army: any pawn, knight, bishop, rook or the queen, but never the king (replacing a rook also gives up castling on that side). At the start of the game the board shows the normal setup, then each replaced piece bursts and its wildcard appears. Pawns can promote into your own wildcard types.
 
 | Wildcard | Rules |
 | --- | --- |
@@ -61,6 +61,10 @@ Each side's wildcards start on its third rank (White's rank 3, Black's rank 6). 
 | Catapult | Steps 1, or flings an adjacent friendly piece 2 squares past it on the far side, capturing there. |
 | Assassin | Knight jump; captures without moving (strike and return). |
 | Void | Steps 1. Enemy pieces (not kings) that end their move next to it are destroyed. |
+
+## Pass & Play
+
+Two players on one device. The deal is done in private: White sees their own cards while Black looks away, then the device is passed and Black sees theirs. During the game the sidebar and tooltips only explain the wildcards of the player whose turn it is. After each move a **privacy screen** covers everything until the next player taps *Ready*, and the board can **flip** to face whoever is moving (both can be switched off in setup). Undo takes back one move. When the game ends, both sides' wildcards are revealed and added to the Codex.
 
 ## Rules notes
 
