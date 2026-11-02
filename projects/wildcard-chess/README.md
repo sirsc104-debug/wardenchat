@@ -82,6 +82,17 @@ Each wildcard replaces a random regular piece from its own army: any pawn, knigh
 | Grappler | Steps 1, or hooks the first enemy 2–4 squares away in a line and drags it adjacent. |
 | Echo | Up to 2 diagonally; its first three moves each leave a new pawn behind. |
 
+## The draft
+
+Choose **Deal: Draft** on the setup screen (it works against the computer and in Pass & Play) to build both armies from nothing:
+
+- There are 16 pairs of cards, drawn from the standard pieces and the 50 wildcards. One pair, at a random point, is always **King vs King**, so each side ends with exactly one king.
+- Each player chooses from 8 pairs. The card you take joins your army; the one you leave goes to your opponent. So each army is 16 pieces: your 8 picks plus the 8 your opponent passed over. Four bishops and a Cyclops where the pawns usually stand is entirely possible.
+- Against the computer you alternate picks (a coin flip decides who goes first) and never see the pairs it was offered. In Pass & Play, White makes 8 private picks, then the device goes to Black for theirs.
+- Every card offered to you can be read, so you know the rules of each wildcard you passed to your opponent (marked *seen in draft*), but not the ones they picked for themselves.
+- Armies are laid out automatically (king on e1, rooks in the corners, queen on d1, knights and bishops in their usual spots, pawns across the front, anything else where it fits). Before the game, each player taps two of their pieces to swap them, as often as they like, then taps **Ready**.
+- Xtreme's extra wildcard applies to the classic deal only.
+
 ## Pass & Play
 
 Two players on one device. The deal is done in private: White sees their own cards while Black looks away, then the device is passed and Black sees theirs. During the game the sidebar and tooltips only explain the wildcards of the player whose turn it is. After each move a **privacy screen** covers everything until the next player taps *Ready*, and the board can **flip** to face whoever is moving (both can be switched off in setup). Undo takes back one move. When the game ends, both sides' wildcards are revealed and added to the Codex.

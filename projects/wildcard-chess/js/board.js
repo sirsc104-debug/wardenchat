@@ -160,6 +160,7 @@ class BoardView {
       else el.remove();
     }
   }
+  clear() { for (const el of this.els.values()) el.remove(); this.els.clear(); }
   elAt(q) { for (const el of this.els.values()) if (el._q === q && !el.classList.contains('dying')) return el; return null; }
 
   cell(q, cls, style = '') { const d = this.disp(q); return `<div class="${cls}" style="left:${d.x * 12.5}%;top:${d.y * 12.5}%;${style}"></div>`; }

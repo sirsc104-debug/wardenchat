@@ -787,6 +787,11 @@ function ChessEngine() {
     const b = new Array(64).fill(null);
     const s = { b, turn: 'w', ep: -1, ply: 0, half: 0, lost: { w: [], b: [] }, nid: 1, dead: null, walls: 0,
       wild: o.wild, last: null, extra: false, events: null };
+    // A drafted army: o.army[c] maps squares to piece types, replacing the standard setup.
+    if (o.army) {
+      for (const c of ['w', 'b']) for (const k of Object.keys(o.army[c])) { const q = +k; b[q] = newPiece(s, o.army[c][k], c, q); }
+      return s;
+    }
     const back = 'RNBQKBNR';
     for (let f = 0; f < 8; f++) {
       b[SQ(f, 0)] = newPiece(s, back[f], 'w', SQ(f, 0));
@@ -978,7 +983,7 @@ function ChessEngine() {
     return { s, moves: out };
   }
 
-  return { newGame, pickSlots, startType, legalMoves, makeMove, status, inCheck, findKing, think, quickPick, demo, value, evaluate,
+  return { newGame, pickSlots, startType, cardValue: t => (t === 'K' ? 0 : value({ t, d: initData(t, 0) || { k: 0, ch: 1 } })), initData, legalMoves, makeMove, status, inCheck, findKing, think, quickPick, demo, value, evaluate,
     WILD_IDS, LEVELS, sqName: q => 'abcdefgh'[F(q)] + (R(q) + 1), F, R, SQ, stats: () => nodes };
 }
 if (typeof module !== 'undefined') module.exports = ChessEngine;
