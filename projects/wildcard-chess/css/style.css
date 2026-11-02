@@ -669,3 +669,14 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-hi); o
   background: radial-gradient(circle at var(--kx, 50%) var(--ky, 50%), transparent 0, transparent 7%, rgba(8, 5, 3, .62) 34%);
   animation: fade 1.2s both;
 }
+
+/* the reveal at the end of the draft */
+.pair .card.fast .card-in { transition-duration: .38s; }
+.pair .card.from-mine { animation: revFromMine .45s cubic-bezier(.2, 1.2, .4, 1) both; }
+.pair .card.from-theirs { animation: revFromTheirs .45s cubic-bezier(.2, 1.2, .4, 1) both; }
+@keyframes revFromMine { from { transform: translate(-120px, 160px) scale(.4) rotate(-12deg); opacity: 0; } }
+@keyframes revFromTheirs { from { transform: translate(120px, 160px) scale(.4) rotate(12deg); opacity: 0; } }
+.pair .card.wildrev .card-face { box-shadow: 0 0 0 2px var(--acc), 0 0 50px -4px var(--acc), 0 20px 40px -18px rgba(0,0,0,.8); }
+.army-row .tile.reveal { animation: tileFlip .5s cubic-bezier(.3, 1.4, .5, 1) both; box-shadow: 0 0 0 2px var(--gold-hi), 0 0 18px rgba(255, 217, 142, .6); }
+.army-row .tile.reveal.wildrev { box-shadow: 0 0 0 2px #fff, 0 0 22px rgba(255, 255, 255, .7); }
+#pickNote .btn { margin: 0 auto; }

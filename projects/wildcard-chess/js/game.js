@@ -260,7 +260,7 @@ $('#curtainBtn').addEventListener('click', () => {
 
 /* ---------- the draft: 16 pairs, take one, the other goes to your opponent ---------- */
 const DRAFT_STD = ['P', 'P', 'P', 'P', 'P', 'P', 'N', 'N', 'B', 'B', 'R', 'R', 'Q'];
-const PD = { pairs: [], order: [], i: 0, army: { w: [], b: [] }, gift: { w: [], b: [] }, revealed: false, known: { w: new Set(), b: new Set() }, mode: 'ai', human: 'w', viewer: 'w', busy: false, token: 0 };
+const PD = { pairs: [], order: [], i: 0, army: { w: [], b: [] }, gift: { w: [], b: [] }, shown: new Set(), revealTimer: 0, known: { w: new Set(), b: new Set() }, mode: 'ai', human: 'w', viewer: 'w', busy: false, token: 0 };
 function makePairs() {
   const wilds = shuffle(WILD_IDS.slice());
   let wi = 0;
@@ -280,7 +280,7 @@ function startDraft() {
   const local = settings.mode === 'local';
   PD.token++;
   PD.mode = settings.mode; PD.pairs = makePairs(); PD.i = 0; PD.busy = false;
-  PD.army = { w: [], b: [] }; PD.gift = { w: [], b: [] }; PD.revealed = false; PD.known = { w: new Set(), b: new Set() };
+  PD.army = { w: [], b: [] }; PD.gift = { w: [], b: [] }; PD.shown = new Set(); clearTimeout(PD.revealTimer); PD.known = { w: new Set(), b: new Set() };
   PD.human = local ? 'w' : settings.color === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : settings.color;
   if (local) PD.order = PD.pairs.map((_, i) => (i < 8 ? 'w' : 'b'));
   else { const first = Math.random() < 0.5 ? PD.human : opp(PD.human); PD.order = PD.pairs.map((_, i) => (i % 2 ? opp(first) : first)); }
@@ -304,7 +304,7 @@ function renderDots() {
     return `<i class="${i < PD.i ? (mine ? 'me' : 'them') : ''} ${i === PD.i ? 'now' : ''} ${pr[0] === 'K' && (i < PD.i || mine) ? 'king' : ''}"></i>`;
   }).join('');
 }
-function renderArmies(fresh) {
+function renderArmies(fresh, flip) {
   const v = PD.viewer, o = opp(v), local = PD.mode === 'local';
   $('#armyMineT').textContent = `${local ? sideName(v) + "'s" : 'Your'} army · ${PD.army[v].length} / 16`;
   $('#armyTheirsT').textContent = `${local ? sideName(o) + "'s" : 'Their'} army · ${PD.army[o].length} / 16`;
@@ -314,12 +314,12 @@ function renderArmies(fresh) {
       const t = PD.army[c][i];
       if (!t) { h += `<div class="tile ${c === 'b' ? 'dark' : ''}"></div>`; continue; }
       const isNew = fresh && fresh.has(c + i) ? 'new' : '';
-      if (mine && PD.gift[c][i] && !PD.revealed) {
-        h += `<div class="tile mystery ${isNew}" title="Passed to you face down. Revealed when the draft ends."></div>`; continue;
+      if (!PD.shown.has(c + i)) {
+        h += `<div class="tile mystery ${isNew}" title="Face down until the reveal at the end of the draft"></div>`; continue;
       }
       const unk = !mine && WILD[t] && !PD.known[v].has(t);
-      const rev = mine && PD.gift[c][i] && PD.revealed ? 'reveal' : '';
-      h += `<div class="tile full ${c === 'b' ? 'dark' : ''} ${isNew} ${rev}" style="animation-delay:${rev ? i * 90 : 0}ms" title="${pieceName(t)}">${pieceSVG(t, c)}${unk ? '<span class="qm">?</span>' : ''}</div>`;
+      const rev = flip && flip.has(c + i) ? 'reveal' : '';
+      h += `<div class="tile full ${c === 'b' ? 'dark' : ''} ${rev} ${rev && WILD[t] ? 'wildrev' : ''}" title="${pieceName(t)}">${pieceSVG(t, c)}${unk ? '<span class="qm">?</span>' : ''}</div>`;
     }
     return h;
   };
@@ -332,7 +332,7 @@ function nextPick() {
   const c = PD.order[PD.i], local = PD.mode === 'local';
   if (local && PD.i === 8 && PD.viewer !== 'b') {
     $('#pair').innerHTML = '';
-    passCurtain('b', 'Your picks, Black', "White, look away. Black is about to see Black's 8 pairs. The cards White passed over stay face down until the draft ends.", "Show Black's pairs", () => {
+    passCurtain('b', 'Your picks, Black', "White, look away. Black is about to see Black's 8 pairs. Both armies stay face down until the reveal at the end.", "Show Black's pairs", () => {
       PD.viewer = 'b'; renderArmies(); renderDots(); nextPick();
     });
     return;
@@ -342,7 +342,7 @@ function nextPick() {
   const n = PD.order.slice(0, PD.i + 1).filter(x => x === c).length;
   if (mine) {
     $('#pickWho').textContent = `${local ? sideName(c) + "'s" : 'Your'} pick · ${n} of 8${pair[0] === 'K' ? ' · the king pair' : ''}`;
-    $('#pickNote').textContent = pair[0] === 'K' ? 'Two kings. Take one; the other crowns your opponent.' : 'Take one. The other goes to your opponent.';
+    $('#pickNote').textContent = pair[0] === 'K' ? 'Two kings. Take one; the other crowns your opponent.' : 'Take one. The other goes to your opponent. Both armies stay face down until the reveal.';
     $('#pair').innerHTML = cardFace(pair[0], c) + '<span class="or">or</span>' + cardFace(pair[1], c);
     const cards = $$('#pair .card');
     cards.forEach((el, k) => {
@@ -418,29 +418,58 @@ function autoArrange(list, c) {
   [3, 4, 2, 5, 1, 6, 0, 7].forEach((f, i) => { map[sq(f, front)] = frontT[i]; });
   return map;
 }
+/* The draft is over: flip all 32 cards one at a time (about 20 seconds), alternating sides, then start. */
+const REVEAL_MS = 20000;
 function finishDraft() {
-  const v = PD.viewer, gifts = PD.gift[v].filter(Boolean).length;
-  $('#pickWho').textContent = PD.mode === 'local' ? `Draft complete · here's what White passed ${sideName(v)}` : "Draft complete · here's what they passed you";
-  $('#pickNote').textContent = 'The game starts in a moment.';
-  $('#pair').innerHTML = '';
-  PD.revealed = true;
-  renderArmies(); renderDots();
-  [...Array(gifts)].forEach((_, i) => setTimeout(() => Sound.play('deal'), i * 90));
+  const v = PD.viewer, o = opp(v), local = PD.mode === 'local', token = PD.token;
   const army = { w: autoArrange(PD.army.w, 'w'), b: autoArrange(PD.army.b, 'b') };
   const wild = { w: [...new Set(PD.army.w.filter(t => WILD[t]))], b: [...new Set(PD.army.b.filter(t => WILD[t]))] };
-  const local = PD.mode === 'local';
   if (!local) wild[PD.human].forEach(discover);
   const known = { w: [...PD.known.w], b: [...PD.known.b] };
   const state = E.newGame({ wild, army });
-  const token = PD.token;
-  setTimeout(() => {
-    if (token !== PD.token) return;
-    show('game');
-    G.start({ mode: PD.mode, human: PD.human, level: settings.level, wild, state, known, privacy: settings.privacy, autoflip: settings.autoflip,
-      arrange: local ? ['w', 'b'] : [PD.human] });
-  }, 1600 + 16 * 90);
+  const order = [];
+  for (let i = 0; i < 16; i++) order.push([v, i], [o, i]);
+  const step = REVEAL_MS / order.length;
+  let n = 0, finished = false;
+  const begin = () => {
+    if (finished || token !== PD.token) return;
+    finished = true;
+    clearTimeout(PD.revealTimer);
+    for (const [c, i] of order) PD.shown.add(c + i);
+    renderArmies();
+    $('#pickWho').textContent = 'The armies are set';
+    $('#pickNote').textContent = 'The game starts in a moment.';
+    setTimeout(() => {
+      if (token !== PD.token) return;
+      show('game');
+      G.start({ mode: PD.mode, human: PD.human, level: settings.level, wild, state, known, privacy: settings.privacy, autoflip: settings.autoflip,
+        arrange: local ? ['w', 'b'] : [PD.human] });
+    }, 1300);
+  };
+  const tick = () => {
+    if (finished || token !== PD.token) return;
+    if (n >= order.length) { begin(); return; }
+    const [c, i] = order[n++], t = PD.army[c][i], mine = c === v;
+    PD.shown.add(c + i);
+    renderArmies(null, new Set([c + i]));
+    const secret = !mine && WILD[t] && !PD.known[v].has(t);
+    $('#pickWho').textContent = `The reveal · ${n} of ${order.length} · ${mine ? (local ? sideName(v) + "'s" : 'yours') : (local ? sideName(o) + "'s" : 'theirs')}`;
+    $('#pair').innerHTML = cardFace(t, c, secret);
+    const card = $('#pair .card');
+    card.classList.add('fast', mine ? 'from-mine' : 'from-theirs');
+    if (WILD[t]) card.classList.add('wildrev');
+    requestAnimationFrame(() => card.classList.add('up'));
+    Sound.play(WILD[t] ? 'magic' : t === 'K' ? 'check' : 'deal');
+    PD.revealTimer = setTimeout(tick, step);
+  };
+  renderDots();
+  $('#pair').innerHTML = '';
+  $('#pickWho').textContent = 'Draft complete · the reveal';
+  $('#pickNote').innerHTML = '<button class="btn ghost small" id="skipReveal"><span>Skip the reveal</span></button>';
+  $('#skipReveal').addEventListener('click', begin);
+  PD.revealTimer = setTimeout(tick, 900);
 }
-$('#pickBack').addEventListener('click', () => { PD.token++; PD.busy = false; show('setup'); });
+$('#pickBack').addEventListener('click', () => { PD.token++; PD.busy = false; clearTimeout(PD.revealTimer); show('setup'); });
 
 /* ---------- setting up a drafted army: tap two of your pieces to swap them ---------- */
 function showArrangeBar(c) {
