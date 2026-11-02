@@ -680,3 +680,17 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-hi); o
 .army-row .tile.reveal { animation: tileFlip .5s cubic-bezier(.3, 1.4, .5, 1) both; box-shadow: 0 0 0 2px var(--gold-hi), 0 0 18px rgba(255, 217, 142, .6); }
 .army-row .tile.reveal.wildrev { box-shadow: 0 0 0 2px #fff, 0 0 22px rgba(255, 255, 255, .7); }
 #pickNote .btn { margin: 0 auto; }
+
+/* face-down pieces during the reveal on the board */
+.pc.facedown svg { visibility: hidden; }
+.pc.facedown::before { display: none; }
+.pc.facedown::after {
+  content: "?"; position: absolute; inset: 9%; border-radius: 12%; display: grid; place-items: center;
+  font: 400 calc(var(--sq, 80px) * .42) / 1 var(--f-display); color: var(--gold);
+  background: radial-gradient(circle, rgba(232, 180, 80, .25), transparent 62%), repeating-conic-gradient(#3a2a1c 0 25%, #2a1f15 0 50%) 0 0 / calc(var(--sq, 80px) * .2) calc(var(--sq, 80px) * .2);
+  border: 1px solid #7a5530; box-shadow: 0 4px 10px rgba(0, 0, 0, .45);
+  animation: born .5s cubic-bezier(.3, 1.6, .5, 1) both; animation-delay: var(--dd, 0ms);
+}
+.pc.flipup svg { animation: pcFlip .48s cubic-bezier(.3, 1.4, .5, 1); }
+@keyframes pcFlip { from { transform: rotateY(90deg) scale(.6); filter: brightness(2); } }
+.reveal-wait { margin: 0; color: var(--faint); font-style: italic; }

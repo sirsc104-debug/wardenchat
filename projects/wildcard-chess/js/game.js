@@ -418,61 +418,70 @@ function autoArrange(list, c) {
   [3, 4, 2, 5, 1, 6, 0, 7].forEach((f, i) => { map[sq(f, front)] = frontT[i]; });
   return map;
 }
-/* The draft is over: flip all 32 cards one at a time (about 20 seconds), alternating sides, then start. */
-const REVEAL_MS = 20000;
+/* The draft is over: go to the board, where all 32 pieces are revealed one by one (see boardReveal). */
+const REVEAL_MS = 10000;
 function finishDraft() {
-  const v = PD.viewer, o = opp(v), local = PD.mode === 'local', token = PD.token;
+  const v = PD.viewer, local = PD.mode === 'local', token = PD.token;
   const army = { w: autoArrange(PD.army.w, 'w'), b: autoArrange(PD.army.b, 'b') };
   const wild = { w: [...new Set(PD.army.w.filter(t => WILD[t]))], b: [...new Set(PD.army.b.filter(t => WILD[t]))] };
   if (!local) wild[PD.human].forEach(discover);
   const known = { w: [...PD.known.w], b: [...PD.known.b] };
   const state = E.newGame({ wild, army });
-  const order = [];
-  for (let i = 0; i < 16; i++) order.push([v, i], [o, i]);
-  const step = REVEAL_MS / order.length;
-  let n = 0, finished = false;
-  const begin = () => {
-    if (finished || token !== PD.token) return;
-    finished = true;
-    clearTimeout(PD.revealTimer);
-    for (const [c, i] of order) PD.shown.add(c + i);
-    renderArmies();
-    $('#pickWho').textContent = 'The armies are set';
-    $('#pickNote').textContent = 'The game starts in a moment.';
-    setTimeout(() => {
-      if (token !== PD.token) return;
-      show('game');
-      G.start({ mode: PD.mode, human: PD.human, level: settings.level, wild, state, known, privacy: settings.privacy, autoflip: settings.autoflip,
-        arrange: local ? ['w', 'b'] : [PD.human] });
-    }, 1300);
-  };
-  const tick = () => {
-    if (finished || token !== PD.token) return;
-    if (n >= order.length) { begin(); return; }
-    const [c, i] = order[n++], t = PD.army[c][i], mine = c === v;
-    PD.shown.add(c + i);
-    renderArmies(null, new Set([c + i]));
-    const secret = !mine && WILD[t] && !PD.known[v].has(t);
-    $('#pickWho').textContent = `The reveal · ${n} of ${order.length} · ${mine ? (local ? sideName(v) + "'s" : 'yours') : (local ? sideName(o) + "'s" : 'theirs')}`;
-    $('#pair').innerHTML = cardFace(t, c, secret);
-    const card = $('#pair .card');
-    card.classList.add('fast', mine ? 'from-mine' : 'from-theirs');
-    if (WILD[t]) card.classList.add('wildrev');
-    requestAnimationFrame(() => card.classList.add('up'));
-    Sound.play(WILD[t] ? 'magic' : t === 'K' ? 'check' : 'deal');
-    PD.revealTimer = setTimeout(tick, step);
-  };
   renderDots();
   $('#pair').innerHTML = '';
-  $('#pickWho').textContent = 'Draft complete · the reveal';
-  $('#pickNote').innerHTML = '<button class="btn ghost small" id="skipReveal"><span>Skip the reveal</span></button>';
-  $('#skipReveal').addEventListener('click', begin);
-  PD.revealTimer = setTimeout(tick, 900);
+  $('#pickWho').textContent = 'Draft complete';
+  $('#pickNote').textContent = 'To the board for the reveal…';
+  setTimeout(() => {
+    if (token !== PD.token) return;
+    show('game');
+    G.start({ mode: PD.mode, human: PD.human, level: settings.level, wild, state, known, privacy: settings.privacy, autoflip: settings.autoflip,
+      arrange: local ? ['w', 'b'] : [PD.human], reveal: true, viewer: v });
+  }, 900);
 }
 $('#pickBack').addEventListener('click', () => { PD.token++; PD.busy = false; clearTimeout(PD.revealTimer); show('setup'); });
 
+/* ---------- the reveal on the board: every piece starts face down and flips one by one ---------- */
+function boardReveal(colors) {
+  const b = G.board, s = G.s, token = G.token;
+  G.intro = true; G.revealing = true; G.render();
+  const squares = c => { const out = []; for (const r of (c === 'w' ? [0, 1] : [7, 6])) for (let f = 0; f < 8; f++) out.push(r * 8 + f); return out; };
+  const first = G.mode === 'ai' ? G.human : G.view, A = squares(first), B = squares(opp(first)), order = [];
+  for (let i = 0; i < 16; i++) order.push(A[i], B[i]);
+  const step = REVEAL_MS / order.length;
+  let n = 0, done = false, timer = 0;
+  const finish = () => {
+    if (done || token !== G.token) return;
+    done = true; clearTimeout(timer);
+    b.setFacedown(new Set());
+    hideArrangeBar();
+    G.revealing = false; G.intro = false;
+    renderWildInfo(); G.render();
+    setTimeout(() => { if (token === G.token) arrangeSeq(colors); }, 500);
+  };
+  const tick = () => {
+    if (done || token !== G.token) return;
+    if (n >= order.length) { finish(); return; }
+    const q = order[n++], p = s.b[q];
+    b.flipUp(q);
+    if (p && WILD[p.t]) {
+      const acc = WILD[p.t].accent;
+      b.burstAt(q, { n: 22, color: [acc, '#ffffff'], kind: 'spark', speed: 1.1, gravity: -0.02, life: 36 });
+      b.ringAt(q, acc, 0.8, 6, 22);
+      Sound.play('magic');
+    } else Sound.play(p && p.t === 'K' ? 'select' : 'deal');
+    timer = setTimeout(tick, step);
+  };
+  $('#arrangeText').textContent = 'Revealing the armies…';
+  $('#arrangeDone span').textContent = 'Skip';
+  $('#arrangeBar').hidden = false;
+  arrangeDone = finish;
+  timer = setTimeout(tick, 900);
+}
+function faceDownAt(q) { const el = G.board.elAt(q); return !!(el && el.classList.contains('facedown')); }
+
 /* ---------- setting up a drafted army: tap two of your pieces to swap them ---------- */
 function showArrangeBar(c) {
+  $('#arrangeDone span').textContent = 'Ready';
   $('#arrangeText').textContent = `${G.mode === 'local' ? sideName(c) + ', set' : 'Set'} up your army: tap two pieces to swap them. The king stays put.`;
   $('#arrangeBar').hidden = false;
 }
@@ -521,7 +530,7 @@ function arrangeTap(q) {
 /* ---------- the game ---------- */
 const G = {
   board: null, s: null, hist: [], log: [], mode: 'ai', human: 'w', ai: 'b', level: 'medium', wild: null,
-  privacy: true, autoflip: true, view: 'w', intro: false, passing: false, arranging: null, arrSel: -1, known: null, drafted: false,
+  privacy: true, autoflip: true, view: 'w', intro: false, passing: false, revealing: false, arranging: null, arrSel: -1, known: null, drafted: false,
   legal: [], sel: -1, selMoves: [], busy: false, over: null, token: 0, hover: -1,
   start(cfg) {
     this.token++;
@@ -533,18 +542,24 @@ const G = {
     this.log = cfg.log || [];
     this.over = null; this.sel = -1; this.busy = false; this.intro = fresh; this.passing = false; this.arranging = null; this.arrSel = -1;
     this.known = cfg.known || null; this.drafted = !!cfg.known;
-    this.view = this.mode === 'local' ? this.s.turn : this.human;
-    this.board.setFlip(this.mode === 'local' ? (this.autoflip && this.s.turn === 'b') : this.human === 'b');
+    this.view = this.mode === 'local' ? (cfg.viewer || this.s.turn) : this.human;
+    this.revealing = !!cfg.reveal;
+    this.board.setFlip(this.mode === 'local' ? (this.autoflip && this.view === 'b') : this.human === 'b');
     this.legal = E.legalMoves(this.s);
     const lv = LEVELS[this.level];
     $('#game').style.setProperty('--lv', this.mode === 'local' ? 'var(--gold)' : lv.color);
     $('#modeChip').textContent = this.mode === 'local' ? 'Pass & Play · 2 players' : `vs ${lv.name} · ${lv.who}`;
-    if (cfg.arrange) { this.board.clear(); this.board.setPieces(this.s, { anim: true }); Sound.play('deal'); }
+    if (cfg.arrange) {
+      this.board.clear();
+      this.board.setPieces(this.s, { anim: !cfg.reveal });
+      if (cfg.reveal) this.board.setFacedown(new Set(this.s.b.map((p, q) => (p ? q : -1)).filter(q => q >= 0)));
+      Sound.play('deal');
+    }
     else if (fresh) this.board.setPieces(startingArmy(this.s, cfg.slots), { anim: false });
     else this.board.setPieces(this.s, { anim: false, frozen: frozenSquares(this.s) });
     this.board.resetEnd();
     renderWildInfo(); renderLog(); this.render();
-    if (cfg.arrange) { arrangeSeq(cfg.arrange); return; }
+    if (cfg.arrange) { if (cfg.reveal) boardReveal(cfg.arrange); else arrangeSeq(cfg.arrange); return; }
     const go = () => (fresh ? runIntro(cfg.slots) : afterIntro());
     if (this.mode === 'local' && this.privacy) handTo(this.s.turn, go, true);
     else go();
@@ -642,7 +657,7 @@ function renderBars() {
     const el = $(id), local = G.mode === 'local', human = local || c === G.human, lv = LEVELS[G.level];
     const lost = G.s.lost[opp(c)].filter(t => t !== 'K').slice().sort((a, b) => E.value({ t: b, d: { k: 0, ch: 1 } }) - E.value({ t: a, d: { k: 0, ch: 1 } }));
     const diff = Math.round((material(G.s, c) - material(G.s, opp(c))) / 100);
-    const chips = (G.wild[c] || []).map(t => `<button class="chip" data-wild="${t}" data-c="${c}" aria-label="${WILD[t].name}">${pieceSVG(t, c)}${knowsType(c, t) ? '' : '<span class="qm">?</span>'}</button>`).join('');
+    const chips = G.revealing ? '' : (G.wild[c] || []).map(t => `<button class="chip" data-wild="${t}" data-c="${c}" aria-label="${WILD[t].name}">${pieceSVG(t, c)}${knowsType(c, t) ? '' : '<span class="qm">?</span>'}</button>`).join('');
     el.classList.toggle('turn', !G.over && G.s.turn === c);
     const name = local ? sideName(c) : human ? 'You' : lv.name + ' AI';
     const sub = local ? (c === 'w' ? 'Player 1' : 'Player 2') + (!G.over && G.s.turn === c ? ' · to move' : '') : sideName(c) + (human ? '' : ` · <span class="lvl">${lv.who}</span>`);
@@ -650,7 +665,7 @@ function renderBars() {
       <div class="pname"><b>${name}${!human && G.busy ? '<span class="thinking"><i></i><i></i><i></i></span>' : ''}</b>
       <span>${sub}</span></div>
       <div class="chips">${chips}</div>
-      <div class="capt">${lost.map(t => pieceSVG(t, opp(c))).join('')}${diff > 0 ? `<span class="adv">+${diff}</span>` : ''}</div>`;
+      <div class="capt">${lost.map(t => pieceSVG(t, opp(c))).join('')}${diff > 0 && !G.revealing ? `<span class="adv">+${diff}</span>` : ''}</div>`;
   }
 }
 
@@ -660,6 +675,7 @@ function renderStatus() {
     const c = G.s.turn, n = sideName(c);
     if (G.over) t = G.over.winner ? `${sideName(G.over.winner)} wins` : 'Draw';
     else if (G.arranging) t = `${sideName(G.arranging)} sets up`;
+    else if (G.revealing) t = 'The reveal';
     else if (G.intro) t = 'Dealing the wildcards…';
     else if (G.passing) t = `Passing to ${sideName(c)}…`;
     else t = E.inCheck(G.s, c) ? `Check by the ${checkText(G.s, c)}! ${n} to move` : G.s.extra ? `Extra turn! ${n} again` : `${n} to move`;
@@ -668,6 +684,7 @@ function renderStatus() {
   }
   if (G.over) t = G.over.winner === G.human ? 'You won' : G.over.winner ? 'You lost' : 'Draw';
   else if (G.arranging) t = 'Set up your army';
+  else if (G.revealing) t = 'The reveal';
   else if (G.intro) t = 'Dealing the wildcards…';
   else if (G.s.turn === G.human) t = E.inCheck(G.s, G.human) ? `Check by the ${checkText(G.s, G.human)}!` : (G.s.extra ? 'Extra turn!' : 'Your move');
   else t = G.busy ? 'Thinking…' : 'Their move';
@@ -675,6 +692,7 @@ function renderStatus() {
 }
 
 function renderWildInfo() {
+  if (G.revealing) { $('#wildInfo').innerHTML = '<p class="reveal-wait">The armies are being revealed…</p>'; return; }
   const local = G.mode === 'local';
   const row = (t, c) => {
     const w = WILD[t], k = knowsType(c, t), tag = (local || G.over ? sideName(c) : c === G.human ? 'Yours' : 'Theirs') +
@@ -788,7 +806,7 @@ function initBoardInput() {
       root.setPointerCapture(e.pointerId);
       return;
     }
-    if (p) showTip(tipHTML(p, knowsType(p.c, p.t)), e.clientX, e.clientY, 2600);
+    if (p && !faceDownAt(q)) showTip(tipHTML(p, knowsType(p.c, p.t)), e.clientX, e.clientY, 2600);
     if (G.sel >= 0) select(-1);
   });
   root.addEventListener('pointermove', e => {
@@ -804,7 +822,7 @@ function initBoardInput() {
     if (!drag && e.pointerType === 'mouse' && q !== hoverSq) {
       hoverSq = q; hideTip(); clearTimeout(hoverTimer);
       const p = q >= 0 ? G.s.b[q] : null;
-      if (p && G.sel < 0) { const x = e.clientX, y = e.clientY; hoverTimer = setTimeout(() => showTip(tipHTML(p, knowsType(p.c, p.t)), x, y), 420); }
+      if (p && G.sel < 0 && !faceDownAt(q)) { const x = e.clientX, y = e.clientY; hoverTimer = setTimeout(() => showTip(tipHTML(p, knowsType(p.c, p.t)), x, y), 420); }
     }
   });
   const end = e => {

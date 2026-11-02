@@ -165,6 +165,22 @@ class BoardView {
       else el.remove();
     }
   }
+  /* Show the pieces on these squares as face-down cards (everything else face up). */
+  setFacedown(set) {
+    let i = 0;
+    for (const el of this.els.values()) {
+      const down = set.has(el._q);
+      el.classList.toggle('facedown', down);
+      if (down) el.style.setProperty('--dd', (i++ * 18) + 'ms');
+    }
+  }
+  flipUp(q) {
+    const el = this.elAt(q);
+    if (!el) return;
+    el.classList.remove('facedown');
+    el.classList.add('flipup');
+    setTimeout(() => el.classList.remove('flipup'), 520);
+  }
   clear() { for (const el of this.els.values()) el.remove(); this.els.clear(); }
   elAt(q) { for (const el of this.els.values()) if (el._q === q && !el.classList.contains('dying')) return el; return null; }
 
