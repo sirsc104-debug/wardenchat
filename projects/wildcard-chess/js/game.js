@@ -26,7 +26,7 @@ if (!LEVELS[settings.level]) settings.level = 'medium';
 Sound.on = store.get('sound', true);
 const discovered = new Set(store.get('codex', []));
 function discover(t) { if (discovered.has(t)) return false; discovered.add(t); store.set('codex', [...discovered]); updateCodexCount(); return true; }
-function updateCodexCount() { $('#codexCount').textContent = `${discovered.size} / 30 discovered`; }
+function updateCodexCount() { $('#codexCount').textContent = `${discovered.size} / ${WILD_IDS.length} discovered`; }
 
 let current = 'menu';
 function show(id) {
@@ -74,7 +74,7 @@ function tipHTML(p, mine) {
   if (p.t === 'WALL') return `<h5>Stone wall</h5><p>${STD_DESC.WALL}</p>`;
   const w = WILD[p.t], side = sideName(p.c);
   if (w) {
-    const owner = G.mode === 'local' || G.over ? `${side}'s wildcard` : 'Your wildcard';
+    const owner = G.over || G.mode === 'local' ? `${side}'s wildcard` : p.c === G.human ? 'Your wildcard' : 'Their wildcard, read by your Oracle';
     if (mine) return `<div class="tip-k" style="--acc:${w.accent}">${owner} · ${esc(w.moves)}</div><h5>${w.name}</h5><p>${w.desc}</p>`;
     return `<div class="tip-k" style="--acc:${w.accent}">${side}'s wildcard</div><h5>${w.name}</h5><p class="unk">What does it do? Nobody's telling. Watch it closely.</p>`;
   }
@@ -275,7 +275,7 @@ const G = {
   },
   render() {
     renderBars(); renderStatus(); renderMarks();
-    if (this.mode === 'local') renderWildInfo();
+    renderWildInfo();
     const canUndo = this.mode === 'local' ? !this.over && this.hist.length > 1
       : this.level !== 'xtreme' && !this.over && this.hist.some((h, i) => i > 0 && this.hist[i - 1].s.turn === this.human);
     $('#undoBtn').disabled = !canUndo || this.intro || this.passing;
@@ -284,7 +284,9 @@ const G = {
   },
 };
 /* Who is looking at the screen: whose wildcard rules may be shown. */
-function knows(c) { return !!G.over || (G.mode === 'local' ? G.view === c : G.human === c); }
+function viewerSide() { return G.mode === 'local' ? G.view : G.human; }
+function hasOracle(c) { return !!(G.s && G.s.b.some(p => p && p.t === 'oracle' && p.c === c)); }
+function knows(c) { const v = viewerSide(); return !!G.over || v === c || hasOracle(v); }
 function canAct() {
   return !G.busy && !G.over && !G.intro && !G.passing && $('#curtain').hidden &&
     (G.mode === 'local' ? G.view === G.s.turn : G.s.turn === G.human);
@@ -339,6 +341,7 @@ function handTo(c, cb, first) {
 
 function frozenSquares(s) {
   const out = new Set();
+  for (let q = 0; q < 64; q++) { const p = s.b[q]; if (p && p.d && p.d.st > s.ply) out.add(q + 100); }
   for (let q = 0; q < 64; q++) {
     const p = s.b[q];
     if (!p || p.t !== 'frost') continue;
@@ -393,7 +396,7 @@ function renderStatus() {
 function renderWildInfo() {
   const local = G.mode === 'local';
   const row = (t, c) => {
-    const w = WILD[t], k = knows(c), tag = local || G.over ? sideName(c) : c === G.human ? 'Yours' : 'Theirs';
+    const w = WILD[t], k = knows(c), tag = (local || G.over ? sideName(c) : c === G.human ? 'Yours' : 'Theirs') + (k && !G.over && c !== viewerSide() ? ' · Oracle' : '');
     return `<div class="wi ${k ? '' : 'theirs'}" style="--acc:${w.accent}"><div class="wi-art">${pieceSVG(t, c)}</div>
       <div><h4>${w.name}<small>${tag}</small></h4><p>${k ? w.desc : 'Unknown. Watch what it does.'}</p></div></div>`;
   };
@@ -444,10 +447,14 @@ function select(q) {
 const LABEL = {
   boom: 'Detonate', shoot: 'Shoot', strike: 'Strike', swap: 'Swap places', gust: 'Blow a gust', crush: 'Charge',
   charm: 'Charm it', spawn: 'Lay a pawn', wall: 'Raise a wall', hex: 'Hex into a pawn', launch: 'Fling', jump: 'Jump', castle: 'Castle', ep: 'En passant',
+  zap: 'Discharge', march: 'Beat the march', split: 'Split in two', infect: 'Bite it', stone: 'Petrify it',
 };
 function moveLabel(m, s) {
   if (m.promo) return 'Promote to ' + pieceName(m.promo);
   if (m.k === 'raise') return 'Raise a ' + pieceName(m.rt);
+  if (m.k === 'transmute') return 'Transmute into a ' + pieceName(m.rt);
+  if (m.k === 'pull') return m.t === m.o ? 'Magnetize' : 'Hook it in';
+  if (m.k === 'crush' && s.b[m.o].t === 'rampage') return `Rampage (${m.x.length} captures)`;
   if (m.k === 'n') return m.tele ? 'Teleport' : m.x ? 'Capture' : 'Move here';
   if (m.k === 'launch') return 'Fling the ' + pieceName(s.b[m.f].t);
   return LABEL[m.k] || 'Move';
@@ -459,7 +466,7 @@ function tryMove(ms, x, y) {
   const s = G.s, pc = s.b[ms[0].o];
   showChooser(ms.map(m => ({
     label: moveLabel(m, s),
-    icon: pieceSVG(m.promo || (m.k === 'raise' ? m.rt : m.k === 'spawn' ? 'P' : m.k === 'wall' ? 'WALL' : pc.t), G.s.turn),
+    icon: pieceSVG(m.promo || (m.k === 'raise' || m.k === 'transmute' ? m.rt : m.k === 'spawn' || m.k === 'infect' ? 'P' : m.k === 'wall' ? 'WALL' : pc.t), G.s.turn),
   })), x, y, i => humanMove(ms[i]));
   return true;
 }
@@ -542,6 +549,7 @@ function initBoardInput() {
 const VERB = {
   boom: 'detonates!', shoot: 'fires!', strike: 'strikes and vanishes', swap: 'swaps places', raise: 'raises the dead', gust: 'blows a gale',
   crush: 'tramples through', charm: 'charms a piece', spawn: 'lays a pawn', wall: 'raises a wall', hex: 'casts a hex', launch: 'flings a piece', jump: 'jumps',
+  pull: 'drags them in', zap: 'discharges!', march: 'beats the march', split: 'splits in two', infect: 'bites!', stone: 'turns a piece to stone', transmute: 'transmutes a pawn', swapE: 'trades places with an enemy',
 };
 
 function moveText(s, m, ns) {
@@ -564,6 +572,13 @@ function moveText(s, m, ns) {
     case 'hex': t = `turns the ${pieceName(tgt.t)} on ${code(m.t)} into a pawn`; break;
     case 'launch': t = `flings the ${pieceName(p.t)} ${code(m.f)}–${code(m.t)}${m.x ? ', capturing' : ''}`; break;
     case 'jump': t = `${code(m.f)}–${code(m.t)}, jumping ${m.x.length}`; break;
+    case 'pull': t = m.t === m.o ? `magnetizes from ${code(m.o)}, pulling ${m.pushes.length / 2} in` : `hooks the ${pieceName(tgt.t)} on ${code(m.t)} and drags it to ${code(m.pushes[1])}`; break;
+    case 'zap': t = `discharges at ${code(m.o)}, frying ${m.x.length} pawn${m.x.length > 1 ? 's' : ''}`; break;
+    case 'march': t = `beats the march: ${m.pushes.length / 2} pawn${m.pushes.length > 2 ? 's' : ''} advance`; break;
+    case 'split': t = `splits, a new Amoeba on ${code(m.t)}`; break;
+    case 'infect': t = `bites the ${pieceName(tgt.t)} on ${code(m.t)}, turning it into a pawn`; break;
+    case 'stone': t = `turns the ${pieceName(tgt.t)} on ${code(m.t)} to stone`; break;
+    case 'transmute': t = `transmutes the pawn on ${code(m.t)} into a ${pieceName(m.rt)}`; break;
     default: t = `${code(m.f)}–${code(m.t)}`;
   }
   for (const e of ns.events || []) {
@@ -571,6 +586,8 @@ function moveText(s, m, ns) {
     if (e.k === 'void') t += '. Swallowed by the Void';
     if (e.k === 'reborn') t += '. A Phoenix is reborn';
     if (e.k === 'extra') t += '. Extra turn';
+    if (e.k === 'echo') t += '. An echo pawn stays behind';
+    if (e.k === 'morph') t += `. It becomes a ${pieceName(ns.b[e.q].t)}`;
   }
   if (!ns.dead && E.inCheck(ns, ns.turn)) t += ' +';
   return t;
@@ -598,7 +615,7 @@ function playEffects(board, s, m, ns, quiet) {
     }
     case 'shoot': board.beam(m.o, m.t, acc, 16); snd = 'zap'; msg = 'shoot'; break;
     case 'strike': board.beam(m.o, m.t, '#ff2d55', 12); board.burstAt(m.t, { n: 16, color: ['#ff2d55', '#fff'], kind: 'spark', speed: 1.4 }); snd = 'whoosh'; msg = 'strike'; break;
-    case 'swap': board.ringAt(m.o, acc, 0.8); board.ringAt(m.t, acc, 0.8); snd = 'magic'; msg = 'swap'; break;
+    case 'swap': board.ringAt(m.o, acc, 0.8); board.ringAt(m.t, acc, 0.8); snd = 'magic'; msg = s.b[m.t] && s.b[m.t].c !== actor.c ? 'swapE' : 'swap'; break;
     case 'raise': board.burstAt(m.t, { n: 30, color: ['#6dff8a', '#2f7d45', '#b8ffc6'], kind: 'smoke', speed: 0.6, size: 0.12, life: 60, gravity: -0.04 }); snd = 'magic'; msg = 'raise'; break;
     case 'gust':
       board.ringAt(m.o, '#cfeeff', 1.6, 10, 28); board.ringAt(m.o, '#8fd3ff', 1.1, 6, 20);
@@ -611,6 +628,17 @@ function playEffects(board, s, m, ns, quiet) {
     case 'hex': board.burstAt(m.t, { n: 34, color: ['#a96bff', '#e2ccff', '#6b2fd6'], kind: 'spark', speed: 1.2, gravity: -0.02 }); board.ringAt(m.t, '#a96bff', 0.9); snd = 'magic'; msg = 'hex'; break;
     case 'launch': fly.add(mover.id); snd = 'whoosh'; msg = 'launch'; break;
     case 'jump': fly.add(mover.id); msg = 'jump'; break;
+    case 'pull':
+      for (let i = 0; i < m.pushes.length; i += 2) board.beam(m.o, m.pushes[i], acc, 14);
+      board.ringAt(m.o, acc, 1, 6, 22); snd = 'zap'; msg = 'pull'; break;
+    case 'zap':
+      for (const q of m.x) { board.beam(m.o, q, '#7df9ff', 16); board.burstAt(q, { n: 18, color: ['#7df9ff', '#ffffff'], kind: 'spark', speed: 1.6, gravity: 0 }); }
+      board.ringAt(m.o, '#7df9ff', 1.3, 8, 22); snd = 'zap'; shake = 1; msg = 'zap'; break;
+    case 'march': for (let i = 1; i < m.pushes.length; i += 2) board.burstAt(m.pushes[i], { n: 6, color: ['#ff8c42', '#ffd0a8'], kind: 'spark', speed: 0.6 }); snd = 'stone'; msg = 'march'; break;
+    case 'split': board.burstAt(m.t, { n: 26, color: ['#9cff6e', '#d9ffc6'], kind: 'smoke', speed: 0.7, size: 0.1, life: 50 }); snd = 'magic'; msg = 'split'; break;
+    case 'infect': board.burstAt(m.t, { n: 26, color: ['#a3e635', '#3f6212'], kind: 'smoke', speed: 0.6, size: 0.1, life: 55 }); snd = 'capture'; msg = 'infect'; break;
+    case 'stone': board.beam(m.o, m.t, '#34d399', 18); board.burstAt(m.t, { n: 22, color: ['#9a958c', '#cfcac0'], kind: 'chip', speed: 0.7 }); snd = 'stone'; msg = 'stone'; break;
+    case 'transmute': board.burstAt(m.t, { n: 30, color: ['#6ee7b7', '#ffffff', '#ffd98e'], kind: 'spark', speed: 1.1, gravity: -0.03 }); board.ringAt(m.t, '#6ee7b7', 0.9); snd = 'magic'; msg = 'transmute'; break;
   }
   if (m.tele) {
     instant.add(mover.id);
@@ -628,6 +656,8 @@ function playEffects(board, s, m, ns, quiet) {
     if (e.k === 'reborn') { board.burstAt(e.q, { n: 40, color: ['#ffb347', '#ff7a1a', '#fff3b0'], kind: 'spark', speed: 1.3, gravity: -0.05, life: 50 }); evMsg = ['phoenix', 'Reborn from the ashes']; }
     if (e.k === 'extra') { board.ringAt(e.q, '#ffc94a', 1.6, 10, 34); evMsg = ['chrono', 'Time bends: extra turn']; }
     if (e.k === 'grow') { board.burstAt(e.q, { n: 18, color: ['#ff3048', '#8a0a1c'], kind: 'spark', speed: 1 }); evMsg = ['vampire', 'The Vampire grows stronger']; }
+    if (e.k === 'echo') { board.ringAt(e.q, '#a5b4fc', 0.8, 5, 22); }
+    if (e.k === 'morph') { board.burstAt(e.q, { n: 26, color: ['#e879f9', '#fff'], kind: 'spark', speed: 1.1 }); evMsg = ['changeling', `The Changeling becomes a ${pieceName(ns.b[e.q].t)}`]; }
     if (e.k === 'crumble') board.burstAt(e.q, { n: 16, color: ['#8d8476', '#b3aa9b'], kind: 'chip', speed: 0.8, size: 0.06 });
   }
   board.setPieces(ns, { anim: true, instant, fly, frozen: frozenSquares(ns) });
@@ -654,7 +684,7 @@ function applyMove(m) {
   }
   if (!st.over && E.inCheck(ns, ns.turn)) setTimeout(() => Sound.play('check'), 120);
   renderLog();
-  if (st.over) { G.over = st; renderWildInfo(); G.render(); setTimeout(() => endGame(st), 1100); return; }
+  if (st.over) { G.over = st; renderWildInfo(); G.render(); const tk = G.token; setTimeout(() => { if (tk === G.token) endGame(st); }, 1100); return; }
   if (G.mode === 'local' && ns.turn !== s.turn) {
     if (G.privacy) {
       G.passing = true; G.render();
@@ -841,7 +871,7 @@ function miniBoard(t) {
 }
 function renderCodex() {
   const spoil = $('#spoilers').checked;
-  $('#codexLede').textContent = `You've discovered ${discovered.size} of 30 wildcards. A wildcard joins your Codex when you play with it, or when a game against it ends. The small boards show sample moves from d4: dots are moves, red rings are captures, stars are special abilities.`;
+  $('#codexLede').textContent = `You've discovered ${discovered.size} of ${WILD_IDS.length} wildcards. A wildcard joins your Codex when you play with it, or when a game against it ends. The small boards show sample moves from d4: dots are moves, red rings are captures, stars are special abilities.`;
   $('#codexGrid').innerHTML = WILD_IDS.map(t => {
     const w = WILD[t], known = discovered.has(t) || spoil;
     return `<div class="cx ${known ? '' : 'locked'}" style="--acc:${w.accent}">

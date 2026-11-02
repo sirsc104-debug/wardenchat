@@ -146,6 +146,7 @@ class BoardView {
       }
       el._piece = p;
       el.classList.toggle('frozen', !!(opts.frozen && opts.frozen.has(q)));
+      el.classList.toggle('stoned', !!(opts.frozen && opts.frozen.has(q + 100)));
       if (el._q !== q || opts.force) {
         const inst = opts.instant && opts.instant.has(p.id);
         this.place(el, q, inst || !opts.anim);

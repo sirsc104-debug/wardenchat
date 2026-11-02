@@ -61,7 +61,7 @@ const STD_ART = {
   WALL: '',
 };
 
-/* The 30 wildcards. `desc` is what the owner sees; the opponent only ever sees the icon and name. */
+/* The 50 wildcards. `desc` is what the owner sees; the opponent only ever sees the icon and name. */
 const WILD = {
   bomber: { name: 'Bomber', accent: '#ff9a2e', moves: 'Steps 1 square',
     desc: 'Steps one square in any direction. When it captures, it explodes: every piece in the 3×3 blast around the target is destroyed, friend or foe, the Bomber included. Kings are not safe, but it will never blow up its own.',
@@ -211,6 +211,99 @@ const WILD = {
          '<circle {B} cx="50" cy="32" r="16"/><circle cx="50" cy="32" r="10" fill="#0c0a10"/>' +
          '<circle cx="50" cy="32" r="10" fill="none" stroke="{acc}" stroke-width="1.6" opacity=".9"/>' +
          '<path d="M22 33 A28 9 -14 0 0 78 31" {L}/><path d="M22 33 A28 9 -14 0 0 78 31" {S}/>' },
+
+  /* ----- the second wave ----- */
+  magnet: { name: 'Magnet', accent: '#ff4a4a', moves: 'Steps 1, or pulls enemies in',
+    desc: 'Steps one square. Or, instead of moving, it switches on: the nearest enemy along each rank and file (not a king) is dragged one square closer to it.',
+    art: '<path {B} d="M29 12 H44 V33 C44 40 56 40 56 33 V12 H71 V33 C71 62 29 62 29 33 Z"/>' +
+         '<rect {A} x="29" y="9" width="15" height="10" rx="1.5"/><rect x="56" y="9" width="15" height="10" rx="1.5" fill="#d8dde3" stroke="{ink}" stroke-width="2.4"/>' },
+  rampage: { name: 'Berserker', accent: '#ff5533', moves: 'Steps 1, chains captures',
+    desc: 'Steps one square. When it captures, it can keep going: up to three captures in a row in one turn, each on a square next to the last.',
+    art: '<rect {B} x="46.5" y="9" width="7" height="48" rx="2.5"/>' +
+         '<path {B} d="M46.5 15 C35 9 25 15 23 28 C25 39 35 43 46.5 37 Z"/><path {B} d="M53.5 15 C65 9 75 15 77 28 C75 39 65 43 53.5 37 Z"/>' +
+         '<path {S} d="M27 20 C24.5 25 24.5 31 27 36"/><path {S} d="M73 20 C75.5 25 75.5 31 73 36"/>' },
+  comet: { name: 'Comet', accent: '#8fd8ff', moves: 'Flies forward any distance',
+    desc: 'Flies any distance straight ahead or diagonally forward, soaring over every piece in between and capturing where it lands. It can also step one square sideways or back.',
+    art: '<path {B} d="M24 46 L50 25 L54 31 Z"/><path {B} d="M27 56 L52 31 L58 36 Z"/><path {B} d="M38 58 L56 36 L61 40 Z"/>' +
+         '<circle {A} cx="59" cy="25" r="13"/><path d="M54 19 C56 17 59 16 62 17" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".8"/>' },
+  kangaroo: { name: 'Kangaroo', accent: '#e8a25a', moves: 'Leaps exactly 2 squares',
+    desc: 'Leaps exactly two squares in any straight line, along ranks, files or diagonals, jumping clean over whatever is in between.',
+    art: '<path {B} d="M38 57 C33 45 35 34 42 28 L36 9 L46 21 L50 7 L54 23 C64 25 73 33 73 40 C73 45 68 47 62 45 C58 45 56 47 56 51 L58 57 Z"/>' +
+         '<path {A} d="M40 14 L44.5 23 L41.5 24 Z"/><circle {K} cx="57" cy="32" r="2.6"/><circle {K} cx="70.5" cy="40" r="2"/>' },
+  tesla: { name: 'Tesla Coil', accent: '#7df9ff', moves: 'Steps 1, zaps pawns',
+    desc: 'Steps one square. Or, instead of moving, it discharges and fries every enemy pawn standing next to it.',
+    art: '<path {B} d="M42 57 L44 30 H56 L58 57 Z"/><path {D} d="M43 51 H57 M43.5 45 H56.5 M44 39 H56"/>' +
+         '<ellipse {B} cx="50" cy="24" rx="16" ry="8"/>' +
+         '<path {A} d="M29 6 L38 14 L33 16 L41 23 L28 17 L32 15 Z"/><path {A} d="M71 6 L62 14 L67 16 L59 23 L72 17 L68 15 Z"/>' },
+  drummer: { name: 'Drummer', accent: '#ff8c42', moves: 'Steps 1, marches pawns',
+    desc: 'Steps one square. Or, instead of moving, it beats the march: every one of your pawns with an empty square ahead steps forward at once. Then it rests for three turns.',
+    art: '<path {L} d="M37 26 L24 8 M63 26 L76 8"/><circle {A} cx="24" cy="8" r="4.5"/><circle {A} cx="76" cy="8" r="4.5"/>' +
+         '<path {B} d="M29 30 V48 C29 55 71 55 71 48 V30"/><ellipse {B} cx="50" cy="30" rx="21" ry="7"/>' +
+         '<path {D} d="M30 35 L40 51 L50 37 L60 51 L70 35"/>' },
+  sniper: { name: 'Sniper', accent: '#ff3344', moves: 'Steps 1 straight, long diagonal shot',
+    desc: 'Steps one square along a rank or file. Every few turns it can take a long shot: it removes the first enemy along a diagonal, at least two squares away, without moving.',
+    art: '<circle {B} cx="50" cy="32" r="20"/><circle {D} cx="50" cy="32" r="12"/>' +
+         '<path {D} d="M50 12 V24 M50 40 V52 M30 32 H42 M58 32 H70"/><circle {A} cx="50" cy="32" r="3.8"/>' },
+  amoeba: { name: 'Amoeba', accent: '#9cff6e', moves: 'Steps 1, splits once',
+    desc: 'Steps one square. Once per game, instead of moving, it splits in two: a second Amoeba appears on an adjacent empty square.',
+    art: '<path {B} d="M30 46 C21 36 27 19 40 18 C46 9 61 11 65 20 C77 22 77 41 69 47 C66 57 36 59 30 46 Z"/>' +
+         '<circle {A} cx="46" cy="33" r="7.5"/><circle {A} cx="61" cy="40" r="3.6"/><circle {A} cx="38" cy="43" r="2.6"/>' },
+  changeling: { name: 'Changeling', accent: '#e879f9', moves: 'Steps 1 or knight jump',
+    desc: 'Steps one square or jumps like a knight. Whatever it captures, it becomes: take a rook and it turns into your rook. Pawns don’t count.',
+    art: '<path {B} d="M50 7 C62 19 70 30 68 42 C66 52 58 57 50 57 C42 57 34 52 32 42 C30 30 38 19 50 7 Z"/>' +
+         '<path {D} d="M50 14 C44 25 56 32 50 45"/><circle {A} cx="42" cy="37" r="3.8"/><circle {A} cx="58" cy="37" r="3.8"/>' },
+  monk: { name: 'Monk', accent: '#ffe08a', moves: 'Up to 3 in any direction',
+    desc: 'Moves up to three squares in any direction through empty squares. A pacifist: it never captures, and nothing can capture it. Perfect for blocking.',
+    art: '<path {B} d="M29 57 C29 44 37 38 50 38 C63 38 71 44 71 57 Z"/><circle {B} cx="50" cy="27" r="12"/>' +
+         '<ellipse cx="50" cy="11" rx="13" ry="4" {L}/><ellipse cx="50" cy="11" rx="13" ry="4" {S}/>' +
+         '<path {D} d="M43.5 27 C45 29.5 47 29.5 48 27 M52 27 C53 29.5 55 29.5 56.5 27"/>' },
+  alchemist: { name: 'Alchemist', accent: '#6ee7b7', moves: 'Steps 1, transmutes pawns',
+    desc: 'Steps one square. Twice per game, instead of moving, it transmutes one of your pawns standing next to it into a knight or a bishop.',
+    art: '<path {B} d="M44 12 H56 V25 L68 50 C70 55 66 57 62 57 H38 C34 57 30 55 32 50 L44 25 Z"/>' +
+         '<path {A} d="M37.5 41 H62.5 L66.5 50 C67.5 53 65 54.5 62 54.5 H38 C35 54.5 32.5 53 33.5 50 Z"/>' +
+         '<rect {B} x="41" y="7" width="18" height="7" rx="2"/><circle {D} cx="47" cy="34" r="2.4"/><circle {D} cx="54" cy="28" r="1.9"/>' },
+  displacer: { name: 'Displacer', accent: '#38bdf8', moves: 'Steps 1, swaps with enemies',
+    desc: 'Steps one square. Or it trades places with any enemy piece (not a king) a knight’s jump away, yanking it into its own spot.',
+    art: '<circle {B} cx="50" cy="33" r="20"/>' +
+         '<path {S} d="M39 27 C43 20 57 20 61 27"/><path {A} d="M59 20 L65 29 L55 29.5 Z"/>' +
+         '<path {S} d="M61 39 C57 46 43 46 39 39"/><path {A} d="M41 46 L35 37 L45 36.5 Z"/>' },
+  oracle: { name: 'Oracle', accent: '#facc15', moves: 'Steps 1 square',
+    desc: 'Steps one square in any direction. While your Oracle is on the board, you can read the rules of every enemy wildcard. Lose it and the secrets go dark again.',
+    art: '<path {D} d="M50 12 V5 M35 16 L31 10 M65 16 L69 10 M27 24 L21 21 M73 24 L79 21"/>' +
+         '<path {B} d="M23 35 C33 19 67 19 77 35 C67 51 33 51 23 35 Z"/><circle {A} cx="50" cy="35" r="10.5"/><circle {K} cx="50" cy="35" r="4.6"/>' },
+  zombie: { name: 'Zombie', accent: '#a3e635', moves: 'Steps 1, infects',
+    desc: 'Steps one square. Or, instead of moving, it bites an adjacent enemy pawn, knight or bishop and turns it into one of your pawns. It needs two turns between bites.',
+    art: '<path {B} d="M33 57 V26 C33 14 42 9 50 9 C58 9 67 14 67 26 V57 Z"/>' +
+         '<path {D} d="M40 17 L60 21 M44 14.5 V20 M50 15.5 V22 M56 16.5 V23"/>' +
+         '<circle {A} cx="43" cy="33" r="4.6"/><circle {K} cx="58" cy="33" r="3"/><path {D} d="M41 47 L45.5 43.5 L50 47 L54.5 43.5 L59 47"/>' },
+  chameleon: { name: 'Chameleon', accent: '#4ade80', moves: 'Rook on light, knight on dark',
+    desc: 'Its moves depend on the square it stands on: from a light square it slides like a rook, from a dark square it jumps like a knight.',
+    art: '<path {O} d="M40 53 C24 53 24 35 37 36 C45 37 44 46 38 45"/><path {C} d="M40 53 C24 53 24 35 37 36 C45 37 44 46 38 45"/>' +
+         '<path {B} d="M41 41 C41 27 53 18 66 22 C74 25 79 32 77 39 C71 43 58 45 41 41 Z"/>' +
+         '<circle {A} cx="63" cy="31" r="5.6"/><circle {K} cx="64" cy="31" r="2.1"/>' },
+  warlord: { name: 'Warlord', accent: '#ef4444', moves: 'Steps 1, rallies pawns',
+    desc: 'Steps one square. Your pawns standing next to the Warlord are rallied: on top of their normal moves, they can step or capture one square in any direction.',
+    art: '<rect {B} x="33" y="9" width="6" height="48" rx="2.5"/><path {A} d="M39 11 H73 L65 22 L73 33 H39 Z"/>' +
+         '<path {K} d="M52 16 L55.5 22 L52 28 L48.5 22 Z"/><circle {B} cx="36" cy="8" r="4.5"/>' },
+  cyclops: { name: 'Cyclops', accent: '#f97316', moves: 'Steps 1, forward laser',
+    desc: 'Steps one square. Every few turns it can fire its eye-beam straight ahead along its file, destroying the first piece it hits, even one of your own (but never your king).',
+    art: '<path {B} d="M45.5 14 L50 4 L54.5 14 Z"/><path {B} d="M31 57 C29 40 32 14 50 12 C68 14 71 40 69 57 Z"/>' +
+         '<ellipse {B} cx="50" cy="30" rx="12" ry="9.5"/><circle {A} cx="50" cy="30" r="5.4"/><circle {K} cx="50" cy="30" r="2.2"/><path {D} d="M42 46 H58"/>' },
+  gorgon: { name: 'Gorgon', accent: '#34d399', moves: 'Steps 1, petrifying gaze',
+    desc: 'Steps one square. Every few turns, instead of moving, it stares down the first piece in any straight line: an enemy (not a king) turns to stone and cannot move for three turns.',
+    art: '<path {L} d="M37 25 C29 21 31 13 24 10 M44 20 C42 12 46 7 42 3 M56 20 C58 12 54 7 58 3 M63 25 C71 21 69 13 76 10"/>' +
+         '<circle {A} cx="24" cy="10" r="3.4"/><circle {A} cx="42" cy="3.5" r="3.4"/><circle {A} cx="58" cy="3.5" r="3.4"/><circle {A} cx="76" cy="10" r="3.4"/>' +
+         '<path {B} d="M34 57 C32 44 34 22 50 20 C66 22 68 44 66 57 Z"/><path {A} d="M39 35 L47.5 37 L39 39.5 Z"/><path {A} d="M61 35 L52.5 37 L61 39.5 Z"/>' },
+  grappler: { name: 'Grappler', accent: '#94a3b8', moves: 'Steps 1, hooks enemies',
+    desc: 'Steps one square. Or it throws its hook at the first enemy in a straight line two to four squares away (not a king) and drags it right up next to itself.',
+    art: '<path {S} d="M50 6 C58 1 66 6 61 13"/><rect {B} x="46.5" y="9" width="7" height="34" rx="2.5"/>' +
+         '<path {O} d="M50 43 C34 43 30 31 32 24 M50 43 C66 43 70 31 68 24"/><path {C} d="M50 43 C34 43 30 31 32 24 M50 43 C66 43 70 31 68 24"/>' +
+         '<path {B} d="M27 27 L32 17 L38 27 Z"/><path {B} d="M73 27 L68 17 L62 27 Z"/>' },
+  echo: { name: 'Echo', accent: '#a5b4fc', moves: 'Up to 2 diagonally, leaves pawns',
+    desc: 'Moves up to two squares diagonally. The first three times it moves, it leaves an echo behind: a new pawn of yours on the square it just left.',
+    art: '<circle {B} cx="50" cy="33" r="10.5"/>' +
+         '<path {S} d="M36 22 C30 29 30 37 36 44"/><path {S} d="M64 22 C70 29 70 37 64 44"/>' +
+         '<path {S} d="M27 15 C17 27 17 39 27 51" opacity=".6"/><path {S} d="M73 15 C83 27 83 39 73 51" opacity=".6"/>' },
 };
 
 const WILD_IDS = Object.keys(WILD);
@@ -243,7 +336,7 @@ function pieceSVG(type, color) {
     const acc = w ? w.accent : '#fff';
     const tk = tokens(color, acc);
     const src = w ? PED + w.art : STD_ART[type];
-    body = src.replace(/\{([BDKASCOL])\}/g, (_, k) => tk[k]).replace(/\{acc\}/g, acc);
+    body = src.replace(/\{([BDKASCOL])\}/g, (_, k) => tk[k]).replace(/\{acc\}/g, acc).replace(/\{ink\}/g, INK[color]);
   }
   const svg = `<svg viewBox="0 0 100 100" aria-hidden="true">${body}</svg>`;
   SVG_CACHE.set(key, svg);

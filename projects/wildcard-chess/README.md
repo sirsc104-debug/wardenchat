@@ -1,6 +1,6 @@
 # Wildcard Chess
 
-Chess against the computer or a friend on the same device, with a twist: each army gets one or more **wildcards**, dealt at random from 30 custom pieces, and each wildcard takes the place of one of its regular pieces (anything but the king). You know what your wildcard does. You can see your opponent's wildcard and its name, but not its rules; you find out by watching it, and it is revealed when the game ends.
+Chess against the computer or a friend on the same device, with a twist: each army gets one or more **wildcards**, dealt at random from 50 custom pieces, and each wildcard takes the place of one of its regular pieces (anything but the king). You know what your wildcard does. You can see your opponent's wildcard and its name, but not its rules; you find out by watching it, and it is revealed when the game ends.
 
 Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `index.html` in a browser, or serve the folder with `python3 -m http.server`.
 
@@ -12,7 +12,7 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 | Pick your opponent | vs Computer (Easy, Medium, Pro, Xtreme; play as White / Random / Black) or Pass & Play (privacy screen and board flipping on or off), with 1–3 wildcards each. |
 | The deal | Your wildcard cards flip up with their rules and which of your pieces they replace; theirs show only the piece, its name, what it replaces and a question mark. One reroll of your own hand. In Pass & Play each player is dealt in private behind a pass-the-device screen. |
 | Game | The wooden board with player bars (wildcard chips, captured pieces, material), a sidebar with your wildcard rules, their wildcards marked unknown, the move log, and Undo / Flip / Resign / Menu. |
-| Codex | All 30 wildcards. One unlocks when you play with it or when a game against it ends; each shows a sample board of its moves from d4. A checkbox shows the undiscovered ones. |
+| Codex | All 50 wildcards. One unlocks when you play with it or when a game against it ends; each shows a sample board of its moves from d4. A checkbox shows the undiscovered ones. |
 
 ## Difficulty
 
@@ -25,7 +25,7 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 
 The AI runs in a Web Worker built from `ChessEngine.toString()`, so the page stays responsive while it thinks (it falls back to the main thread if workers are unavailable).
 
-## The 30 wildcards
+## The 50 wildcards
 
 Each wildcard replaces a random regular piece from its own army: any pawn, knight, bishop, rook or the queen, but never the king (replacing a rook also gives up castling on that side). At the start of the game the board shows the normal setup, then each replaced piece bursts and its wildcard appears. Pawns can promote into your own wildcard types.
 
@@ -61,6 +61,26 @@ Each wildcard replaces a random regular piece from its own army: any pawn, knigh
 | Catapult | Steps 1, or flings an adjacent friendly piece 2 squares past it on the far side, capturing there. |
 | Assassin | Knight jump; captures without moving (strike and return). |
 | Void | Steps 1. Enemy pieces (not kings) that end their move next to it are destroyed. |
+| Magnet | Steps 1, or pulls the nearest enemy (not a king) along each rank and file one square closer. |
+| Berserker | Steps 1, and can chain up to 3 captures in one turn, each next to the last. |
+| Comet | Flies any distance forward or diagonally forward over pieces; steps 1 sideways or back. |
+| Kangaroo | Leaps exactly 2 squares in any straight line, over anything. |
+| Tesla Coil | Steps 1, or destroys every adjacent enemy pawn. |
+| Drummer | Steps 1, or every one of your pawns with a free square ahead advances at once (3-turn rest). |
+| Sniper | Steps 1 orthogonally; every few turns shoots the first enemy along a diagonal, 2+ squares away. |
+| Amoeba | Steps 1. Once per game, splits into two Amoebas. |
+| Changeling | Steps 1 or knight jump; becomes whatever non-pawn piece it captures. |
+| Monk | Up to 3 in any direction; never captures and can't be captured (blasts spare it too). |
+| Alchemist | Steps 1. Twice per game, turns an adjacent friendly pawn into a knight or bishop. |
+| Displacer | Steps 1, or swaps with an enemy (not a king) a knight's jump away. |
+| Oracle | Steps 1. While it lives, you can read the rules of every enemy wildcard. |
+| Zombie | Steps 1, or turns an adjacent enemy pawn, knight or bishop into your pawn (2-turn rest). |
+| Chameleon | Rook moves from a light square, knight moves from a dark square. |
+| Warlord | Steps 1. Your pawns next to it can also step or capture one square in any direction. |
+| Cyclops | Steps 1; every few turns its forward eye-beam destroys the first piece on its file, either colour (never your king). |
+| Gorgon | Steps 1; every few turns petrifies the first enemy (not a king) in any line for 3 turns. |
+| Grappler | Steps 1, or hooks the first enemy 2–4 squares away in a line and drags it adjacent. |
+| Echo | Up to 2 diagonally; its first three moves each leave a new pawn behind. |
 
 ## Pass & Play
 

@@ -556,3 +556,5 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-hi); o
 .curtain-text { margin: 4px 0 18px; color: var(--mute); font-size: 16px; text-wrap: pretty; }
 .card-slot { font: 600 12px var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
 .card-slot::before { content: "⇄ "; color: var(--acc); }
+
+.pc.stoned svg { filter: grayscale(1) sepia(.25) brightness(.92) contrast(1.15) drop-shadow(0 0 4px rgba(52, 211, 153, .55)); }

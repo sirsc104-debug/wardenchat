@@ -567,6 +567,8 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-hi); o
 .card-slot { font: 600 12px var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
 .card-slot::before { content: "⇄ "; color: var(--acc); }
 
+.pc.stoned svg { filter: grayscale(1) sepia(.25) brightness(.92) contrast(1.15) drop-shadow(0 0 4px rgba(52, 211, 153, .55)); }
+
 </style>
 </head>
 <body>
@@ -577,13 +579,13 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-hi); o
   <section class="screen" id="menu">
     <div class="menu-wrap">
       <div class="menu-left">
-        <p class="eyebrow">Chess with 30 secret pieces</p>
+        <p class="eyebrow">Chess with 50 secret pieces</p>
         <h1 class="logo"><span class="logo-a">Wildcard</span><span class="logo-b">Chess</span></h1>
         <p class="tagline">Both armies start with the usual sixteen pieces, plus a wildcard with rules of its own. You can see your opponent's. You can't see what it does.</p>
         <nav class="menu-btns" aria-label="Main menu">
           <button class="btn primary" data-mode="ai" id="playBtn"><span>Play</span><small>vs the computer</small></button>
           <button class="btn" data-mode="local" id="localBtn"><span>Pass &amp; Play</span><small>2 players, one device</small></button>
-          <button class="btn" data-go="codex"><span>Codex</span><small id="codexCount">0 / 30 discovered</small></button>
+          <button class="btn" data-go="codex"><span>Codex</span><small id="codexCount">0 / 50 discovered</small></button>
           <button class="btn" data-go="how"><span>How it works</span><small>Rules in two minutes</small></button>
           <button class="btn ghost" id="soundBtn"><span>Sound</span><small id="soundState">On</small></button>
         </nav>
@@ -714,7 +716,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-hi); o
     <div class="how-body">
       <article>
         <h3>Normal chess, plus a stranger</h3>
-        <p>Both sides start with the standard army, except that each <b>wildcard</b> (dealt at random from 30) takes the place of one of your regular pieces. It can replace any piece except the king: a pawn, a knight, even your queen. You'll see which one when the cards are dealt.</p>
+        <p>Both sides start with the standard army, except that each <b>wildcard</b> (dealt at random from 50) takes the place of one of your regular pieces. It can replace any piece except the king: a pawn, a knight, even your queen. You'll see which one when the cards are dealt.</p>
         <h3>You know yours. You don't know theirs.</h3>
         <p>Before the game you see your own wildcard and what it does. You also see your opponent's piece and its name, but not its rules. Hover or tap any piece on the board to read about it; theirs only says <i>unknown</i>. Watch what it does and work it out. When the game ends, its rules are revealed and it joins your Codex.</p>
         <h3>How to win</h3>
@@ -808,7 +810,7 @@ const STD_ART = {
   WALL: '',
 };
 
-/* The 30 wildcards. `desc` is what the owner sees; the opponent only ever sees the icon and name. */
+/* The 50 wildcards. `desc` is what the owner sees; the opponent only ever sees the icon and name. */
 const WILD = {
   bomber: { name: 'Bomber', accent: '#ff9a2e', moves: 'Steps 1 square',
     desc: 'Steps one square in any direction. When it captures, it explodes: every piece in the 3×3 blast around the target is destroyed, friend or foe, the Bomber included. Kings are not safe, but it will never blow up its own.',
@@ -958,6 +960,99 @@ const WILD = {
          '<circle {B} cx="50" cy="32" r="16"/><circle cx="50" cy="32" r="10" fill="#0c0a10"/>' +
          '<circle cx="50" cy="32" r="10" fill="none" stroke="{acc}" stroke-width="1.6" opacity=".9"/>' +
          '<path d="M22 33 A28 9 -14 0 0 78 31" {L}/><path d="M22 33 A28 9 -14 0 0 78 31" {S}/>' },
+
+  /* ----- the second wave ----- */
+  magnet: { name: 'Magnet', accent: '#ff4a4a', moves: 'Steps 1, or pulls enemies in',
+    desc: 'Steps one square. Or, instead of moving, it switches on: the nearest enemy along each rank and file (not a king) is dragged one square closer to it.',
+    art: '<path {B} d="M29 12 H44 V33 C44 40 56 40 56 33 V12 H71 V33 C71 62 29 62 29 33 Z"/>' +
+         '<rect {A} x="29" y="9" width="15" height="10" rx="1.5"/><rect x="56" y="9" width="15" height="10" rx="1.5" fill="#d8dde3" stroke="{ink}" stroke-width="2.4"/>' },
+  rampage: { name: 'Berserker', accent: '#ff5533', moves: 'Steps 1, chains captures',
+    desc: 'Steps one square. When it captures, it can keep going: up to three captures in a row in one turn, each on a square next to the last.',
+    art: '<rect {B} x="46.5" y="9" width="7" height="48" rx="2.5"/>' +
+         '<path {B} d="M46.5 15 C35 9 25 15 23 28 C25 39 35 43 46.5 37 Z"/><path {B} d="M53.5 15 C65 9 75 15 77 28 C75 39 65 43 53.5 37 Z"/>' +
+         '<path {S} d="M27 20 C24.5 25 24.5 31 27 36"/><path {S} d="M73 20 C75.5 25 75.5 31 73 36"/>' },
+  comet: { name: 'Comet', accent: '#8fd8ff', moves: 'Flies forward any distance',
+    desc: 'Flies any distance straight ahead or diagonally forward, soaring over every piece in between and capturing where it lands. It can also step one square sideways or back.',
+    art: '<path {B} d="M24 46 L50 25 L54 31 Z"/><path {B} d="M27 56 L52 31 L58 36 Z"/><path {B} d="M38 58 L56 36 L61 40 Z"/>' +
+         '<circle {A} cx="59" cy="25" r="13"/><path d="M54 19 C56 17 59 16 62 17" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".8"/>' },
+  kangaroo: { name: 'Kangaroo', accent: '#e8a25a', moves: 'Leaps exactly 2 squares',
+    desc: 'Leaps exactly two squares in any straight line, along ranks, files or diagonals, jumping clean over whatever is in between.',
+    art: '<path {B} d="M38 57 C33 45 35 34 42 28 L36 9 L46 21 L50 7 L54 23 C64 25 73 33 73 40 C73 45 68 47 62 45 C58 45 56 47 56 51 L58 57 Z"/>' +
+         '<path {A} d="M40 14 L44.5 23 L41.5 24 Z"/><circle {K} cx="57" cy="32" r="2.6"/><circle {K} cx="70.5" cy="40" r="2"/>' },
+  tesla: { name: 'Tesla Coil', accent: '#7df9ff', moves: 'Steps 1, zaps pawns',
+    desc: 'Steps one square. Or, instead of moving, it discharges and fries every enemy pawn standing next to it.',
+    art: '<path {B} d="M42 57 L44 30 H56 L58 57 Z"/><path {D} d="M43 51 H57 M43.5 45 H56.5 M44 39 H56"/>' +
+         '<ellipse {B} cx="50" cy="24" rx="16" ry="8"/>' +
+         '<path {A} d="M29 6 L38 14 L33 16 L41 23 L28 17 L32 15 Z"/><path {A} d="M71 6 L62 14 L67 16 L59 23 L72 17 L68 15 Z"/>' },
+  drummer: { name: 'Drummer', accent: '#ff8c42', moves: 'Steps 1, marches pawns',
+    desc: 'Steps one square. Or, instead of moving, it beats the march: every one of your pawns with an empty square ahead steps forward at once. Then it rests for three turns.',
+    art: '<path {L} d="M37 26 L24 8 M63 26 L76 8"/><circle {A} cx="24" cy="8" r="4.5"/><circle {A} cx="76" cy="8" r="4.5"/>' +
+         '<path {B} d="M29 30 V48 C29 55 71 55 71 48 V30"/><ellipse {B} cx="50" cy="30" rx="21" ry="7"/>' +
+         '<path {D} d="M30 35 L40 51 L50 37 L60 51 L70 35"/>' },
+  sniper: { name: 'Sniper', accent: '#ff3344', moves: 'Steps 1 straight, long diagonal shot',
+    desc: 'Steps one square along a rank or file. Every few turns it can take a long shot: it removes the first enemy along a diagonal, at least two squares away, without moving.',
+    art: '<circle {B} cx="50" cy="32" r="20"/><circle {D} cx="50" cy="32" r="12"/>' +
+         '<path {D} d="M50 12 V24 M50 40 V52 M30 32 H42 M58 32 H70"/><circle {A} cx="50" cy="32" r="3.8"/>' },
+  amoeba: { name: 'Amoeba', accent: '#9cff6e', moves: 'Steps 1, splits once',
+    desc: 'Steps one square. Once per game, instead of moving, it splits in two: a second Amoeba appears on an adjacent empty square.',
+    art: '<path {B} d="M30 46 C21 36 27 19 40 18 C46 9 61 11 65 20 C77 22 77 41 69 47 C66 57 36 59 30 46 Z"/>' +
+         '<circle {A} cx="46" cy="33" r="7.5"/><circle {A} cx="61" cy="40" r="3.6"/><circle {A} cx="38" cy="43" r="2.6"/>' },
+  changeling: { name: 'Changeling', accent: '#e879f9', moves: 'Steps 1 or knight jump',
+    desc: 'Steps one square or jumps like a knight. Whatever it captures, it becomes: take a rook and it turns into your rook. Pawns don’t count.',
+    art: '<path {B} d="M50 7 C62 19 70 30 68 42 C66 52 58 57 50 57 C42 57 34 52 32 42 C30 30 38 19 50 7 Z"/>' +
+         '<path {D} d="M50 14 C44 25 56 32 50 45"/><circle {A} cx="42" cy="37" r="3.8"/><circle {A} cx="58" cy="37" r="3.8"/>' },
+  monk: { name: 'Monk', accent: '#ffe08a', moves: 'Up to 3 in any direction',
+    desc: 'Moves up to three squares in any direction through empty squares. A pacifist: it never captures, and nothing can capture it. Perfect for blocking.',
+    art: '<path {B} d="M29 57 C29 44 37 38 50 38 C63 38 71 44 71 57 Z"/><circle {B} cx="50" cy="27" r="12"/>' +
+         '<ellipse cx="50" cy="11" rx="13" ry="4" {L}/><ellipse cx="50" cy="11" rx="13" ry="4" {S}/>' +
+         '<path {D} d="M43.5 27 C45 29.5 47 29.5 48 27 M52 27 C53 29.5 55 29.5 56.5 27"/>' },
+  alchemist: { name: 'Alchemist', accent: '#6ee7b7', moves: 'Steps 1, transmutes pawns',
+    desc: 'Steps one square. Twice per game, instead of moving, it transmutes one of your pawns standing next to it into a knight or a bishop.',
+    art: '<path {B} d="M44 12 H56 V25 L68 50 C70 55 66 57 62 57 H38 C34 57 30 55 32 50 L44 25 Z"/>' +
+         '<path {A} d="M37.5 41 H62.5 L66.5 50 C67.5 53 65 54.5 62 54.5 H38 C35 54.5 32.5 53 33.5 50 Z"/>' +
+         '<rect {B} x="41" y="7" width="18" height="7" rx="2"/><circle {D} cx="47" cy="34" r="2.4"/><circle {D} cx="54" cy="28" r="1.9"/>' },
+  displacer: { name: 'Displacer', accent: '#38bdf8', moves: 'Steps 1, swaps with enemies',
+    desc: 'Steps one square. Or it trades places with any enemy piece (not a king) a knight’s jump away, yanking it into its own spot.',
+    art: '<circle {B} cx="50" cy="33" r="20"/>' +
+         '<path {S} d="M39 27 C43 20 57 20 61 27"/><path {A} d="M59 20 L65 29 L55 29.5 Z"/>' +
+         '<path {S} d="M61 39 C57 46 43 46 39 39"/><path {A} d="M41 46 L35 37 L45 36.5 Z"/>' },
+  oracle: { name: 'Oracle', accent: '#facc15', moves: 'Steps 1 square',
+    desc: 'Steps one square in any direction. While your Oracle is on the board, you can read the rules of every enemy wildcard. Lose it and the secrets go dark again.',
+    art: '<path {D} d="M50 12 V5 M35 16 L31 10 M65 16 L69 10 M27 24 L21 21 M73 24 L79 21"/>' +
+         '<path {B} d="M23 35 C33 19 67 19 77 35 C67 51 33 51 23 35 Z"/><circle {A} cx="50" cy="35" r="10.5"/><circle {K} cx="50" cy="35" r="4.6"/>' },
+  zombie: { name: 'Zombie', accent: '#a3e635', moves: 'Steps 1, infects',
+    desc: 'Steps one square. Or, instead of moving, it bites an adjacent enemy pawn, knight or bishop and turns it into one of your pawns. It needs two turns between bites.',
+    art: '<path {B} d="M33 57 V26 C33 14 42 9 50 9 C58 9 67 14 67 26 V57 Z"/>' +
+         '<path {D} d="M40 17 L60 21 M44 14.5 V20 M50 15.5 V22 M56 16.5 V23"/>' +
+         '<circle {A} cx="43" cy="33" r="4.6"/><circle {K} cx="58" cy="33" r="3"/><path {D} d="M41 47 L45.5 43.5 L50 47 L54.5 43.5 L59 47"/>' },
+  chameleon: { name: 'Chameleon', accent: '#4ade80', moves: 'Rook on light, knight on dark',
+    desc: 'Its moves depend on the square it stands on: from a light square it slides like a rook, from a dark square it jumps like a knight.',
+    art: '<path {O} d="M40 53 C24 53 24 35 37 36 C45 37 44 46 38 45"/><path {C} d="M40 53 C24 53 24 35 37 36 C45 37 44 46 38 45"/>' +
+         '<path {B} d="M41 41 C41 27 53 18 66 22 C74 25 79 32 77 39 C71 43 58 45 41 41 Z"/>' +
+         '<circle {A} cx="63" cy="31" r="5.6"/><circle {K} cx="64" cy="31" r="2.1"/>' },
+  warlord: { name: 'Warlord', accent: '#ef4444', moves: 'Steps 1, rallies pawns',
+    desc: 'Steps one square. Your pawns standing next to the Warlord are rallied: on top of their normal moves, they can step or capture one square in any direction.',
+    art: '<rect {B} x="33" y="9" width="6" height="48" rx="2.5"/><path {A} d="M39 11 H73 L65 22 L73 33 H39 Z"/>' +
+         '<path {K} d="M52 16 L55.5 22 L52 28 L48.5 22 Z"/><circle {B} cx="36" cy="8" r="4.5"/>' },
+  cyclops: { name: 'Cyclops', accent: '#f97316', moves: 'Steps 1, forward laser',
+    desc: 'Steps one square. Every few turns it can fire its eye-beam straight ahead along its file, destroying the first piece it hits, even one of your own (but never your king).',
+    art: '<path {B} d="M45.5 14 L50 4 L54.5 14 Z"/><path {B} d="M31 57 C29 40 32 14 50 12 C68 14 71 40 69 57 Z"/>' +
+         '<ellipse {B} cx="50" cy="30" rx="12" ry="9.5"/><circle {A} cx="50" cy="30" r="5.4"/><circle {K} cx="50" cy="30" r="2.2"/><path {D} d="M42 46 H58"/>' },
+  gorgon: { name: 'Gorgon', accent: '#34d399', moves: 'Steps 1, petrifying gaze',
+    desc: 'Steps one square. Every few turns, instead of moving, it stares down the first piece in any straight line: an enemy (not a king) turns to stone and cannot move for three turns.',
+    art: '<path {L} d="M37 25 C29 21 31 13 24 10 M44 20 C42 12 46 7 42 3 M56 20 C58 12 54 7 58 3 M63 25 C71 21 69 13 76 10"/>' +
+         '<circle {A} cx="24" cy="10" r="3.4"/><circle {A} cx="42" cy="3.5" r="3.4"/><circle {A} cx="58" cy="3.5" r="3.4"/><circle {A} cx="76" cy="10" r="3.4"/>' +
+         '<path {B} d="M34 57 C32 44 34 22 50 20 C66 22 68 44 66 57 Z"/><path {A} d="M39 35 L47.5 37 L39 39.5 Z"/><path {A} d="M61 35 L52.5 37 L61 39.5 Z"/>' },
+  grappler: { name: 'Grappler', accent: '#94a3b8', moves: 'Steps 1, hooks enemies',
+    desc: 'Steps one square. Or it throws its hook at the first enemy in a straight line two to four squares away (not a king) and drags it right up next to itself.',
+    art: '<path {S} d="M50 6 C58 1 66 6 61 13"/><rect {B} x="46.5" y="9" width="7" height="34" rx="2.5"/>' +
+         '<path {O} d="M50 43 C34 43 30 31 32 24 M50 43 C66 43 70 31 68 24"/><path {C} d="M50 43 C34 43 30 31 32 24 M50 43 C66 43 70 31 68 24"/>' +
+         '<path {B} d="M27 27 L32 17 L38 27 Z"/><path {B} d="M73 27 L68 17 L62 27 Z"/>' },
+  echo: { name: 'Echo', accent: '#a5b4fc', moves: 'Up to 2 diagonally, leaves pawns',
+    desc: 'Moves up to two squares diagonally. The first three times it moves, it leaves an echo behind: a new pawn of yours on the square it just left.',
+    art: '<circle {B} cx="50" cy="33" r="10.5"/>' +
+         '<path {S} d="M36 22 C30 29 30 37 36 44"/><path {S} d="M64 22 C70 29 70 37 64 44"/>' +
+         '<path {S} d="M27 15 C17 27 17 39 27 51" opacity=".6"/><path {S} d="M73 15 C83 27 83 39 73 51" opacity=".6"/>' },
 };
 
 const WILD_IDS = Object.keys(WILD);
@@ -990,7 +1085,7 @@ function pieceSVG(type, color) {
     const acc = w ? w.accent : '#fff';
     const tk = tokens(color, acc);
     const src = w ? PED + w.art : STD_ART[type];
-    body = src.replace(/\{([BDKASCOL])\}/g, (_, k) => tk[k]).replace(/\{acc\}/g, acc);
+    body = src.replace(/\{([BDKASCOL])\}/g, (_, k) => tk[k]).replace(/\{acc\}/g, acc).replace(/\{ink\}/g, INK[color]);
   }
   const svg = `<svg viewBox="0 0 100 100" aria-hidden="true">${body}</svg>`;
   SVG_CACHE.set(key, svg);
@@ -1040,15 +1135,17 @@ function ChessEngine() {
   // Passive auras (Frost Warden freezes, Guardian shields), rebuilt for each position we generate in.
   const FRZ = [new Uint8Array(64), new Uint8Array(64)];
   const GRD = [new Uint8Array(64), new Uint8Array(64)];
-  const HAS_FRZ = [false, false], HAS_GRD = [false, false];
+  const WLD = [new Uint8Array(64), new Uint8Array(64)];
+  const HAS_FRZ = [false, false], HAS_GRD = [false, false], HAS_WLD = [false, false];
   function setCtx(s) {
-    FRZ[0].fill(0); FRZ[1].fill(0); GRD[0].fill(0); GRD[1].fill(0);
-    HAS_FRZ[0] = HAS_FRZ[1] = HAS_GRD[0] = HAS_GRD[1] = false;
+    FRZ[0].fill(0); FRZ[1].fill(0); GRD[0].fill(0); GRD[1].fill(0); WLD[0].fill(0); WLD[1].fill(0);
+    HAS_FRZ[0] = HAS_FRZ[1] = HAS_GRD[0] = HAS_GRD[1] = HAS_WLD[0] = HAS_WLD[1] = false;
     for (let q = 0; q < 64; q++) {
       const p = s.b[q];
       if (!p) continue;
       if (p.t === 'frost') { const v = ci(opp(p.c)); HAS_FRZ[v] = true; for (const a of ADJ[q]) FRZ[v][a] = 1; }
       else if (p.t === 'guardian') { const v = ci(p.c); HAS_GRD[v] = true; for (const a of ADJ[q]) GRD[v][a] = 1; }
+      else if (p.t === 'warlord') { const v = ci(p.c); HAS_WLD[v] = true; for (const a of ADJ[q]) WLD[v][a] = 1; }
     }
   }
 
@@ -1056,6 +1153,7 @@ function ChessEngine() {
     const p = s.b[t];
     if (!p || p.c === a.c || p.c === 'n') return false;
     if (p.t === 'golem' && a.t !== 'P' && a.t !== 'K') return false;
+    if (p.t === 'monk') return false;
     if (p.t === 'viper' && a.t === 'K') return false;
     const v = ci(p.c);
     if (HAS_GRD[v] && GRD[v][t]) return false;
@@ -1117,6 +1215,18 @@ function ChessEngine() {
         if (v && v.t === 'P' && v.c !== p.c && capOK(s, p, vq)) out.push(mv(q, q, t, 'ep', [vq]));
       }
     }
+    const v = ci(p.c);
+    if (HAS_WLD[v] && WLD[v][q]) {
+      const have = new Set(out.filter(m => m.o === q).map(m => m.t));
+      for (const [dx, dy] of D8) {
+        const nf = f + dx, rr = r + dy;
+        if (!on(nf, rr) || rr === 0 || rr === 7) continue;
+        const t = SQ(nf, rr);
+        if (have.has(t)) continue;
+        if (!s.b[t]) out.push(mv(q, q, t, 'n', null));
+        else if (capOK(s, p, t)) out.push(mv(q, q, t, 'n', [t]));
+      }
+    }
   }
   function king(s, q, p, out, noCastle) {
     step(s, q, p, out, D8);
@@ -1154,7 +1264,7 @@ function ChessEngine() {
         const x = [t]; let bad = false;
         for (const a of ADJ[t]) {
           const ap = s.b[a];
-          if (!ap || ap.c === 'n') continue;
+          if (!ap || ap.c === 'n' || ap.t === 'monk') continue;
           if (ap.t === 'K' && ap.c === p.c) { bad = true; break; }
           x.push(a);
         }
@@ -1439,6 +1549,164 @@ function ChessEngine() {
       }
     } },
     void: { v: 420, gen: (s, q, p, out) => step(s, q, p, out, D8) },
+    /* ----- the second wave ----- */
+    magnet: { v: 380, gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      const f = F(q), r = R(q), pushes = [];
+      for (const [dx, dy] of D4) {
+        for (let k = 1; k < 8; k++) {
+          const nf = f + dx * k, nr = r + dy * k;
+          if (!on(nf, nr)) break;
+          const a = SQ(nf, nr), ap = s.b[a];
+          if (!ap) continue;
+          if (k > 1 && ap.c !== p.c && ap.c !== 'n' && ap.t !== 'K') pushes.push(a, SQ(nf - dx, nr - dy));
+          break;
+        }
+      }
+      if (pushes.length) out.push({ o: q, f: q, t: q, k: 'pull', x: null, pushes });
+    } },
+    rampage: { v: 450, gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      const path = [], seen = new Set();
+      const dfs = cur => {
+        if (path.length >= 3) return;
+        for (const a of ADJ[cur]) {
+          if (path.includes(a) || !capOK(s, p, a)) continue;
+          path.push(a);
+          const key = a + ':' + path.length;
+          if (path.length > 1 && !seen.has(key)) { seen.add(key); out.push(mv(q, q, a, 'crush', path.slice())); }
+          dfs(a);
+          path.pop();
+        }
+      };
+      dfs(q);
+    } },
+    comet: { v: 480, gen(s, q, p, out) {
+      const fw = p.c === 'w' ? 1 : -1, f = F(q), r = R(q);
+      for (const dx of [-1, 0, 1]) for (let k = 1; k < 8; k++) {
+        const nf = f + dx * k, nr = r + fw * k;
+        if (!on(nf, nr)) break;
+        const t = SQ(nf, nr);
+        if (!s.b[t]) out.push(mv(q, q, t, 'n', null));
+        else if (capOK(s, p, t)) out.push(mv(q, q, t, 'n', [t]));
+      }
+      step(s, q, p, out, [[1, 0], [-1, 0], [0, -fw], [1, -fw], [-1, -fw]]);
+    } },
+    kangaroo: { v: 330, gen: (s, q, p, out) => step(s, q, p, out, [[2, 0], [-2, 0], [0, 2], [0, -2], [2, 2], [2, -2], [-2, 2], [-2, -2]]) },
+    tesla: { v: 380, gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      const x = ADJ[q].filter(a => s.b[a] && s.b[a].t === 'P' && capOK(s, p, a));
+      if (x.length) out.push(mv(q, q, q, 'zap', x));
+    } },
+    drummer: { v: 360, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      const fw = p.c === 'w' ? 1 : -1, last = p.c === 'w' ? 7 : 0, pushes = [];
+      for (let a = 0; a < 64; a++) {
+        const ap = s.b[a];
+        if (!ap || ap.t !== 'P' || ap.c !== p.c) continue;
+        const nr = R(a) + fw;
+        if (nr === last || !on(F(a), nr) || s.b[SQ(F(a), nr)]) continue;
+        pushes.push(a, SQ(F(a), nr));
+      }
+      if (pushes.length) out.push({ o: q, f: q, t: q, k: 'march', x: null, pushes, cd: 6 });
+    } },
+    sniper: { v: 450, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D4);
+      if (s.ply < p.d.cd) return;
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of DG) for (let k = 2; k < 8; k++) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (!on(nf, nr)) break;
+        if (s.b[SQ(f + dx * (k - 1), r + dy * (k - 1))]) break;
+        const t = SQ(nf, nr);
+        if (!s.b[t]) continue;
+        if (capOK(s, p, t)) out.push({ o: q, f: q, t, k: 'shoot', x: [t], cd: 6 });
+        break;
+      }
+    } },
+    amoeba: { v: 380, init: () => ({ ch: 1 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (p.d.ch <= 0) return;
+      for (const a of ADJ[q]) if (!s.b[a]) out.push(mv(q, q, a, 'split', null));
+    } },
+    changeling: { v: 380, gen(s, q, p, out) { const tmp = []; step(s, q, p, tmp, D8); step(s, q, p, tmp, KN); uniq(tmp, out); } },
+    monk: { v: 300, gen(s, q, p, out) {
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) for (let k = 1; k <= 3; k++) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (!on(nf, nr) || s.b[SQ(nf, nr)]) break;
+        out.push(mv(q, q, SQ(nf, nr), 'n', null));
+      }
+    } },
+    alchemist: { v: 380, init: () => ({ ch: 2 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (p.d.ch <= 0) return;
+      for (const a of ADJ[q]) {
+        const ap = s.b[a];
+        if (ap && ap.t === 'P' && ap.c === p.c) for (const rt of ['N', 'B']) out.push({ o: q, f: q, t: a, k: 'transmute', x: null, rt });
+      }
+    } },
+    displacer: { v: 360, gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of KN) {
+        if (!on(f + dx, r + dy)) continue;
+        const t = SQ(f + dx, r + dy), tp = s.b[t];
+        if (tp && tp.c !== p.c && tp.c !== 'n' && tp.t !== 'K') out.push(mv(q, q, t, 'swap', null));
+      }
+    } },
+    oracle: { v: 300, gen: (s, q, p, out) => step(s, q, p, out, D8) },
+    zombie: { v: 450, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      for (const a of ADJ[q]) {
+        const ap = s.b[a];
+        if (!ap || ap.c === p.c || ap.c === 'n' || !'PNB'.includes(ap.t) || ap.t.length !== 1) continue;
+        if (R(a) === 0 || R(a) === 7) continue;
+        out.push({ o: q, f: q, t: a, k: 'infect', x: null, cd: 4 });
+      }
+    } },
+    chameleon: { v: 450, gen(s, q, p, out) { if ((F(q) + R(q)) % 2) slide(s, q, p, out, D4); else step(s, q, p, out, KN); } },
+    warlord: { v: 380, gen: (s, q, p, out) => step(s, q, p, out, D8) },
+    cyclops: { v: 420, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      const fw = p.c === 'w' ? 1 : -1, f = F(q);
+      for (let r = R(q) + fw; r >= 0 && r < 8; r += fw) {
+        const t = SQ(f, r), tp = s.b[t];
+        if (!tp) continue;
+        if (tp.c === p.c ? tp.t !== 'K' : capOK(s, p, t)) out.push({ o: q, f: q, t, k: 'shoot', x: [t], cd: 6 });
+        break;
+      }
+    } },
+    gorgon: { v: 400, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) for (let k = 1; k < 8; k++) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (!on(nf, nr)) break;
+        const t = SQ(nf, nr), tp = s.b[t];
+        if (!tp) continue;
+        if (tp.c !== p.c && tp.c !== 'n' && tp.t !== 'K' && !(tp.d && tp.d.st > s.ply)) out.push({ o: q, f: q, t, k: 'stone', x: null, cd: 8 });
+        break;
+      }
+    } },
+    grappler: { v: 400, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) for (let k = 1; k <= 4; k++) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (!on(nf, nr)) break;
+        const t = SQ(nf, nr), tp = s.b[t];
+        if (!tp) continue;
+        if (k >= 2 && tp.c !== p.c && tp.c !== 'n' && tp.t !== 'K') out.push({ o: q, f: q, t, k: 'pull', x: null, pushes: [t, SQ(f + dx, r + dy)], cd: 4 });
+        break;
+      }
+    } },
+    echo: { v: 380, init: () => ({ ch: 3 }), gen: (s, q, p, out) => slide(s, q, p, out, DG, 2) },
   };
   const WILD_IDS = Object.keys(W);
 
@@ -1447,7 +1715,7 @@ function ChessEngine() {
     if (p.t === 'vampire') return 330 + 220 * Math.min(p.d.k, 2);
     const w = W[p.t];
     let v = w.v;
-    if ((p.t === 'necro' || p.t === 'siren' || p.t === 'hexer' || p.t === 'chrono') && p.d.ch <= 0) v -= 60;
+    if ((p.t === 'necro' || p.t === 'siren' || p.t === 'hexer' || p.t === 'chrono' || p.t === 'amoeba' || p.t === 'alchemist') && p.d.ch <= 0) v -= 60;
     if (p.t === 'phoenix' && p.d.reborn) v -= 80;
     return v;
   }
@@ -1465,6 +1733,7 @@ function ChessEngine() {
       const p = s.b[q];
       if (!p || p.c !== c) continue;
       if (fz && fz[q] && p.t !== 'K') continue;
+      if (p.d && p.d.st > s.ply) continue;
       if (p.t === 'K') king(s, q, p, out, noCastle);
       else if (STD[p.t]) STD[p.t](s, q, p, out);
       else W[p.t].gen(s, q, p, out);
@@ -1514,7 +1783,7 @@ function ChessEngine() {
       case 'castle': moveTo(m.f, m.t); moveTo(m.rf, m.rt); break;
       case 'boom': for (const q of m.x) kill(q); ev({ k: 'boom', q: m.t }); break;
       case 'swap': { const a = b[m.f], t = b[m.t]; b[m.f] = { ...t, m: true }; b[m.t] = { ...a, m: true }; mover = m.t; break; }
-      case 'shoot': case 'strike':
+      case 'shoot': case 'strike': case 'zap':
         for (const q of m.x) { const k = kill(q); if (k) kills.push([q, k]); }
         actor = m.o; break;
       case 'raise': {
@@ -1525,16 +1794,27 @@ function ChessEngine() {
         b[m.t] = newPiece(ns, m.rt, c, m.t); b[m.t].m = true;
         break;
       }
-      case 'gust':
+      case 'gust': case 'pull': case 'march':
         if (m.x) for (const q of m.x) kill(q);
         for (let i = 0; i < m.pushes.length; i += 2) moveTo(m.pushes[i], m.pushes[i + 1]);
+        if (m.k === 'march') ns.half = 0;
         break;
+      case 'split': b[m.t] = newPiece(ns, 'amoeba', c, m.t); b[m.t].d = { ch: 0 }; b[m.t].m = true; setD(m.o, { ch: 0 }); break;
+      case 'infect': b[m.t] = { ...b[m.t], t: 'P', c, d: null, m: true }; break;
+      case 'stone': b[m.t] = { ...b[m.t], d: { ...(b[m.t].d || {}), st: s.ply + 6 } }; break;
+      case 'transmute': b[m.t] = { ...b[m.t], t: m.rt, d: null }; setD(m.o, { ch: b[m.o].d.ch - 1 }); break;
       case 'charm': b[m.t] = { ...b[m.t], c, m: true }; setD(m.o, { ch: 0 }); break;
       case 'spawn': b[m.t] = newPiece(ns, 'P', c, m.t); setD(m.o, { cd: s.ply + 6 }); break;
       case 'wall': b[m.t] = { t: 'WALL', c: 'n', id: ns.nid++, m: true, d: { exp: s.ply + 8, o: c } }; ns.walls++; break;
       case 'hex': b[m.t] = { ...b[m.t], t: 'P', d: null, m: true }; setD(m.o, { ch: 0 }); break;
     }
 
+    if (m.cd && b[m.o] && b[m.o].id === s.b[m.o].id) setD(m.o, { cd: s.ply + m.cd });
+    // The Echo leaves a pawn behind on the square it left.
+    if (m.k === 'n' && b[m.t] && b[m.t].t === 'echo' && b[m.t].d.ch > 0 && !b[m.f] && R(m.f) !== 0 && R(m.f) !== 7) {
+      b[m.f] = newPiece(ns, 'P', c, m.f); b[m.f].m = true;
+      setD(m.t, { ch: b[m.t].d.ch - 1 }); ev({ k: 'echo', q: m.f });
+    }
     // Venom: whatever lands on a Viper's square dies with it.
     if (mover >= 0 && b[mover] && kills.some(([q, k]) => q === mover && k.t === 'viper')) {
       kill(mover); ev({ k: 'venom', q: mover }); actor = -1; mover = -1;
@@ -1543,6 +1823,10 @@ function ChessEngine() {
       const a = b[actor];
       if (a.t === 'vampire') { setD(actor, { k: a.d.k + kills.length }); if (a.d.k < 2) ev({ k: 'grow', q: actor }); }
       else if (a.t === 'chrono' && a.d.ch > 0) { setD(actor, { ch: 0 }); ns.extra = true; ev({ k: 'extra', q: actor }); }
+      else if (a.t === 'changeling') {
+        const k = kills.find(([, kp]) => kp.t !== 'K' && kp.t !== 'P' && kp.t !== 'WALL');
+        if (k) { b[actor] = { ...a, t: k[1].t, d: initData(k[1].t, actor) }; ev({ k: 'morph', q: actor }); }
+      }
     }
     // The Void swallows enemy pieces that finish their move beside it.
     if (mover >= 0 && b[mover] && b[mover].t !== 'K' && b[mover].c === c) {
@@ -1791,7 +2075,7 @@ function ChessEngine() {
     const s = { b, turn: 'w', ep: -1, ply: 10, half: 0, lost: { w: ['N'], b: [] }, nid: 1, dead: null, walls: 0,
       wild: { w: [type], b: [] }, last: null, extra: false };
     const put = (f, r, t, c) => { b[SQ(f, r)] = newPiece(s, t, c, SQ(f, r)); };
-    put(3, 3, type, 'w'); put(2, 2, 'N', 'w');
+    put(3, 3, type, 'w'); put(2, 2, 'N', 'w'); put(4, 2, 'P', 'w');
     put(4, 4, 'P', 'b'); put(3, 5, 'P', 'b'); put(1, 5, 'B', 'b'); put(3, 7, 'R', 'b'); put(6, 6, 'N', 'b');
     setCtx(s);
     const out = [];
@@ -2091,6 +2375,7 @@ class BoardView {
       }
       el._piece = p;
       el.classList.toggle('frozen', !!(opts.frozen && opts.frozen.has(q)));
+      el.classList.toggle('stoned', !!(opts.frozen && opts.frozen.has(q + 100)));
       if (el._q !== q || opts.force) {
         const inst = opts.instant && opts.instant.has(p.id);
         this.place(el, q, inst || !opts.anim);
@@ -2160,7 +2445,7 @@ if (!LEVELS[settings.level]) settings.level = 'medium';
 Sound.on = store.get('sound', true);
 const discovered = new Set(store.get('codex', []));
 function discover(t) { if (discovered.has(t)) return false; discovered.add(t); store.set('codex', [...discovered]); updateCodexCount(); return true; }
-function updateCodexCount() { $('#codexCount').textContent = `${discovered.size} / 30 discovered`; }
+function updateCodexCount() { $('#codexCount').textContent = `${discovered.size} / ${WILD_IDS.length} discovered`; }
 
 let current = 'menu';
 function show(id) {
@@ -2208,7 +2493,7 @@ function tipHTML(p, mine) {
   if (p.t === 'WALL') return `<h5>Stone wall</h5><p>${STD_DESC.WALL}</p>`;
   const w = WILD[p.t], side = sideName(p.c);
   if (w) {
-    const owner = G.mode === 'local' || G.over ? `${side}'s wildcard` : 'Your wildcard';
+    const owner = G.over || G.mode === 'local' ? `${side}'s wildcard` : p.c === G.human ? 'Your wildcard' : 'Their wildcard, read by your Oracle';
     if (mine) return `<div class="tip-k" style="--acc:${w.accent}">${owner} · ${esc(w.moves)}</div><h5>${w.name}</h5><p>${w.desc}</p>`;
     return `<div class="tip-k" style="--acc:${w.accent}">${side}'s wildcard</div><h5>${w.name}</h5><p class="unk">What does it do? Nobody's telling. Watch it closely.</p>`;
   }
@@ -2409,7 +2694,7 @@ const G = {
   },
   render() {
     renderBars(); renderStatus(); renderMarks();
-    if (this.mode === 'local') renderWildInfo();
+    renderWildInfo();
     const canUndo = this.mode === 'local' ? !this.over && this.hist.length > 1
       : this.level !== 'xtreme' && !this.over && this.hist.some((h, i) => i > 0 && this.hist[i - 1].s.turn === this.human);
     $('#undoBtn').disabled = !canUndo || this.intro || this.passing;
@@ -2418,7 +2703,9 @@ const G = {
   },
 };
 /* Who is looking at the screen: whose wildcard rules may be shown. */
-function knows(c) { return !!G.over || (G.mode === 'local' ? G.view === c : G.human === c); }
+function viewerSide() { return G.mode === 'local' ? G.view : G.human; }
+function hasOracle(c) { return !!(G.s && G.s.b.some(p => p && p.t === 'oracle' && p.c === c)); }
+function knows(c) { const v = viewerSide(); return !!G.over || v === c || hasOracle(v); }
 function canAct() {
   return !G.busy && !G.over && !G.intro && !G.passing && $('#curtain').hidden &&
     (G.mode === 'local' ? G.view === G.s.turn : G.s.turn === G.human);
@@ -2473,6 +2760,7 @@ function handTo(c, cb, first) {
 
 function frozenSquares(s) {
   const out = new Set();
+  for (let q = 0; q < 64; q++) { const p = s.b[q]; if (p && p.d && p.d.st > s.ply) out.add(q + 100); }
   for (let q = 0; q < 64; q++) {
     const p = s.b[q];
     if (!p || p.t !== 'frost') continue;
@@ -2527,7 +2815,7 @@ function renderStatus() {
 function renderWildInfo() {
   const local = G.mode === 'local';
   const row = (t, c) => {
-    const w = WILD[t], k = knows(c), tag = local || G.over ? sideName(c) : c === G.human ? 'Yours' : 'Theirs';
+    const w = WILD[t], k = knows(c), tag = (local || G.over ? sideName(c) : c === G.human ? 'Yours' : 'Theirs') + (k && !G.over && c !== viewerSide() ? ' · Oracle' : '');
     return `<div class="wi ${k ? '' : 'theirs'}" style="--acc:${w.accent}"><div class="wi-art">${pieceSVG(t, c)}</div>
       <div><h4>${w.name}<small>${tag}</small></h4><p>${k ? w.desc : 'Unknown. Watch what it does.'}</p></div></div>`;
   };
@@ -2578,10 +2866,14 @@ function select(q) {
 const LABEL = {
   boom: 'Detonate', shoot: 'Shoot', strike: 'Strike', swap: 'Swap places', gust: 'Blow a gust', crush: 'Charge',
   charm: 'Charm it', spawn: 'Lay a pawn', wall: 'Raise a wall', hex: 'Hex into a pawn', launch: 'Fling', jump: 'Jump', castle: 'Castle', ep: 'En passant',
+  zap: 'Discharge', march: 'Beat the march', split: 'Split in two', infect: 'Bite it', stone: 'Petrify it',
 };
 function moveLabel(m, s) {
   if (m.promo) return 'Promote to ' + pieceName(m.promo);
   if (m.k === 'raise') return 'Raise a ' + pieceName(m.rt);
+  if (m.k === 'transmute') return 'Transmute into a ' + pieceName(m.rt);
+  if (m.k === 'pull') return m.t === m.o ? 'Magnetize' : 'Hook it in';
+  if (m.k === 'crush' && s.b[m.o].t === 'rampage') return `Rampage (${m.x.length} captures)`;
   if (m.k === 'n') return m.tele ? 'Teleport' : m.x ? 'Capture' : 'Move here';
   if (m.k === 'launch') return 'Fling the ' + pieceName(s.b[m.f].t);
   return LABEL[m.k] || 'Move';
@@ -2593,7 +2885,7 @@ function tryMove(ms, x, y) {
   const s = G.s, pc = s.b[ms[0].o];
   showChooser(ms.map(m => ({
     label: moveLabel(m, s),
-    icon: pieceSVG(m.promo || (m.k === 'raise' ? m.rt : m.k === 'spawn' ? 'P' : m.k === 'wall' ? 'WALL' : pc.t), G.s.turn),
+    icon: pieceSVG(m.promo || (m.k === 'raise' || m.k === 'transmute' ? m.rt : m.k === 'spawn' || m.k === 'infect' ? 'P' : m.k === 'wall' ? 'WALL' : pc.t), G.s.turn),
   })), x, y, i => humanMove(ms[i]));
   return true;
 }
@@ -2676,6 +2968,7 @@ function initBoardInput() {
 const VERB = {
   boom: 'detonates!', shoot: 'fires!', strike: 'strikes and vanishes', swap: 'swaps places', raise: 'raises the dead', gust: 'blows a gale',
   crush: 'tramples through', charm: 'charms a piece', spawn: 'lays a pawn', wall: 'raises a wall', hex: 'casts a hex', launch: 'flings a piece', jump: 'jumps',
+  pull: 'drags them in', zap: 'discharges!', march: 'beats the march', split: 'splits in two', infect: 'bites!', stone: 'turns a piece to stone', transmute: 'transmutes a pawn', swapE: 'trades places with an enemy',
 };
 
 function moveText(s, m, ns) {
@@ -2698,6 +2991,13 @@ function moveText(s, m, ns) {
     case 'hex': t = `turns the ${pieceName(tgt.t)} on ${code(m.t)} into a pawn`; break;
     case 'launch': t = `flings the ${pieceName(p.t)} ${code(m.f)}–${code(m.t)}${m.x ? ', capturing' : ''}`; break;
     case 'jump': t = `${code(m.f)}–${code(m.t)}, jumping ${m.x.length}`; break;
+    case 'pull': t = m.t === m.o ? `magnetizes from ${code(m.o)}, pulling ${m.pushes.length / 2} in` : `hooks the ${pieceName(tgt.t)} on ${code(m.t)} and drags it to ${code(m.pushes[1])}`; break;
+    case 'zap': t = `discharges at ${code(m.o)}, frying ${m.x.length} pawn${m.x.length > 1 ? 's' : ''}`; break;
+    case 'march': t = `beats the march: ${m.pushes.length / 2} pawn${m.pushes.length > 2 ? 's' : ''} advance`; break;
+    case 'split': t = `splits, a new Amoeba on ${code(m.t)}`; break;
+    case 'infect': t = `bites the ${pieceName(tgt.t)} on ${code(m.t)}, turning it into a pawn`; break;
+    case 'stone': t = `turns the ${pieceName(tgt.t)} on ${code(m.t)} to stone`; break;
+    case 'transmute': t = `transmutes the pawn on ${code(m.t)} into a ${pieceName(m.rt)}`; break;
     default: t = `${code(m.f)}–${code(m.t)}`;
   }
   for (const e of ns.events || []) {
@@ -2705,6 +3005,8 @@ function moveText(s, m, ns) {
     if (e.k === 'void') t += '. Swallowed by the Void';
     if (e.k === 'reborn') t += '. A Phoenix is reborn';
     if (e.k === 'extra') t += '. Extra turn';
+    if (e.k === 'echo') t += '. An echo pawn stays behind';
+    if (e.k === 'morph') t += `. It becomes a ${pieceName(ns.b[e.q].t)}`;
   }
   if (!ns.dead && E.inCheck(ns, ns.turn)) t += ' +';
   return t;
@@ -2732,7 +3034,7 @@ function playEffects(board, s, m, ns, quiet) {
     }
     case 'shoot': board.beam(m.o, m.t, acc, 16); snd = 'zap'; msg = 'shoot'; break;
     case 'strike': board.beam(m.o, m.t, '#ff2d55', 12); board.burstAt(m.t, { n: 16, color: ['#ff2d55', '#fff'], kind: 'spark', speed: 1.4 }); snd = 'whoosh'; msg = 'strike'; break;
-    case 'swap': board.ringAt(m.o, acc, 0.8); board.ringAt(m.t, acc, 0.8); snd = 'magic'; msg = 'swap'; break;
+    case 'swap': board.ringAt(m.o, acc, 0.8); board.ringAt(m.t, acc, 0.8); snd = 'magic'; msg = s.b[m.t] && s.b[m.t].c !== actor.c ? 'swapE' : 'swap'; break;
     case 'raise': board.burstAt(m.t, { n: 30, color: ['#6dff8a', '#2f7d45', '#b8ffc6'], kind: 'smoke', speed: 0.6, size: 0.12, life: 60, gravity: -0.04 }); snd = 'magic'; msg = 'raise'; break;
     case 'gust':
       board.ringAt(m.o, '#cfeeff', 1.6, 10, 28); board.ringAt(m.o, '#8fd3ff', 1.1, 6, 20);
@@ -2745,6 +3047,17 @@ function playEffects(board, s, m, ns, quiet) {
     case 'hex': board.burstAt(m.t, { n: 34, color: ['#a96bff', '#e2ccff', '#6b2fd6'], kind: 'spark', speed: 1.2, gravity: -0.02 }); board.ringAt(m.t, '#a96bff', 0.9); snd = 'magic'; msg = 'hex'; break;
     case 'launch': fly.add(mover.id); snd = 'whoosh'; msg = 'launch'; break;
     case 'jump': fly.add(mover.id); msg = 'jump'; break;
+    case 'pull':
+      for (let i = 0; i < m.pushes.length; i += 2) board.beam(m.o, m.pushes[i], acc, 14);
+      board.ringAt(m.o, acc, 1, 6, 22); snd = 'zap'; msg = 'pull'; break;
+    case 'zap':
+      for (const q of m.x) { board.beam(m.o, q, '#7df9ff', 16); board.burstAt(q, { n: 18, color: ['#7df9ff', '#ffffff'], kind: 'spark', speed: 1.6, gravity: 0 }); }
+      board.ringAt(m.o, '#7df9ff', 1.3, 8, 22); snd = 'zap'; shake = 1; msg = 'zap'; break;
+    case 'march': for (let i = 1; i < m.pushes.length; i += 2) board.burstAt(m.pushes[i], { n: 6, color: ['#ff8c42', '#ffd0a8'], kind: 'spark', speed: 0.6 }); snd = 'stone'; msg = 'march'; break;
+    case 'split': board.burstAt(m.t, { n: 26, color: ['#9cff6e', '#d9ffc6'], kind: 'smoke', speed: 0.7, size: 0.1, life: 50 }); snd = 'magic'; msg = 'split'; break;
+    case 'infect': board.burstAt(m.t, { n: 26, color: ['#a3e635', '#3f6212'], kind: 'smoke', speed: 0.6, size: 0.1, life: 55 }); snd = 'capture'; msg = 'infect'; break;
+    case 'stone': board.beam(m.o, m.t, '#34d399', 18); board.burstAt(m.t, { n: 22, color: ['#9a958c', '#cfcac0'], kind: 'chip', speed: 0.7 }); snd = 'stone'; msg = 'stone'; break;
+    case 'transmute': board.burstAt(m.t, { n: 30, color: ['#6ee7b7', '#ffffff', '#ffd98e'], kind: 'spark', speed: 1.1, gravity: -0.03 }); board.ringAt(m.t, '#6ee7b7', 0.9); snd = 'magic'; msg = 'transmute'; break;
   }
   if (m.tele) {
     instant.add(mover.id);
@@ -2762,6 +3075,8 @@ function playEffects(board, s, m, ns, quiet) {
     if (e.k === 'reborn') { board.burstAt(e.q, { n: 40, color: ['#ffb347', '#ff7a1a', '#fff3b0'], kind: 'spark', speed: 1.3, gravity: -0.05, life: 50 }); evMsg = ['phoenix', 'Reborn from the ashes']; }
     if (e.k === 'extra') { board.ringAt(e.q, '#ffc94a', 1.6, 10, 34); evMsg = ['chrono', 'Time bends: extra turn']; }
     if (e.k === 'grow') { board.burstAt(e.q, { n: 18, color: ['#ff3048', '#8a0a1c'], kind: 'spark', speed: 1 }); evMsg = ['vampire', 'The Vampire grows stronger']; }
+    if (e.k === 'echo') { board.ringAt(e.q, '#a5b4fc', 0.8, 5, 22); }
+    if (e.k === 'morph') { board.burstAt(e.q, { n: 26, color: ['#e879f9', '#fff'], kind: 'spark', speed: 1.1 }); evMsg = ['changeling', `The Changeling becomes a ${pieceName(ns.b[e.q].t)}`]; }
     if (e.k === 'crumble') board.burstAt(e.q, { n: 16, color: ['#8d8476', '#b3aa9b'], kind: 'chip', speed: 0.8, size: 0.06 });
   }
   board.setPieces(ns, { anim: true, instant, fly, frozen: frozenSquares(ns) });
@@ -2788,7 +3103,7 @@ function applyMove(m) {
   }
   if (!st.over && E.inCheck(ns, ns.turn)) setTimeout(() => Sound.play('check'), 120);
   renderLog();
-  if (st.over) { G.over = st; renderWildInfo(); G.render(); setTimeout(() => endGame(st), 1100); return; }
+  if (st.over) { G.over = st; renderWildInfo(); G.render(); const tk = G.token; setTimeout(() => { if (tk === G.token) endGame(st); }, 1100); return; }
   if (G.mode === 'local' && ns.turn !== s.turn) {
     if (G.privacy) {
       G.passing = true; G.render();
@@ -2975,7 +3290,7 @@ function miniBoard(t) {
 }
 function renderCodex() {
   const spoil = $('#spoilers').checked;
-  $('#codexLede').textContent = `You've discovered ${discovered.size} of 30 wildcards. A wildcard joins your Codex when you play with it, or when a game against it ends. The small boards show sample moves from d4: dots are moves, red rings are captures, stars are special abilities.`;
+  $('#codexLede').textContent = `You've discovered ${discovered.size} of ${WILD_IDS.length} wildcards. A wildcard joins your Codex when you play with it, or when a game against it ends. The small boards show sample moves from d4: dots are moves, red rings are captures, stars are special abilities.`;
   $('#codexGrid').innerHTML = WILD_IDS.map(t => {
     const w = WILD[t], known = discovered.has(t) || spoil;
     return `<div class="cx ${known ? '' : 'locked'}" style="--acc:${w.accent}">

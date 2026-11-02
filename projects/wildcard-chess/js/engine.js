@@ -30,15 +30,17 @@ function ChessEngine() {
   // Passive auras (Frost Warden freezes, Guardian shields), rebuilt for each position we generate in.
   const FRZ = [new Uint8Array(64), new Uint8Array(64)];
   const GRD = [new Uint8Array(64), new Uint8Array(64)];
-  const HAS_FRZ = [false, false], HAS_GRD = [false, false];
+  const WLD = [new Uint8Array(64), new Uint8Array(64)];
+  const HAS_FRZ = [false, false], HAS_GRD = [false, false], HAS_WLD = [false, false];
   function setCtx(s) {
-    FRZ[0].fill(0); FRZ[1].fill(0); GRD[0].fill(0); GRD[1].fill(0);
-    HAS_FRZ[0] = HAS_FRZ[1] = HAS_GRD[0] = HAS_GRD[1] = false;
+    FRZ[0].fill(0); FRZ[1].fill(0); GRD[0].fill(0); GRD[1].fill(0); WLD[0].fill(0); WLD[1].fill(0);
+    HAS_FRZ[0] = HAS_FRZ[1] = HAS_GRD[0] = HAS_GRD[1] = HAS_WLD[0] = HAS_WLD[1] = false;
     for (let q = 0; q < 64; q++) {
       const p = s.b[q];
       if (!p) continue;
       if (p.t === 'frost') { const v = ci(opp(p.c)); HAS_FRZ[v] = true; for (const a of ADJ[q]) FRZ[v][a] = 1; }
       else if (p.t === 'guardian') { const v = ci(p.c); HAS_GRD[v] = true; for (const a of ADJ[q]) GRD[v][a] = 1; }
+      else if (p.t === 'warlord') { const v = ci(p.c); HAS_WLD[v] = true; for (const a of ADJ[q]) WLD[v][a] = 1; }
     }
   }
 
@@ -46,6 +48,7 @@ function ChessEngine() {
     const p = s.b[t];
     if (!p || p.c === a.c || p.c === 'n') return false;
     if (p.t === 'golem' && a.t !== 'P' && a.t !== 'K') return false;
+    if (p.t === 'monk') return false;
     if (p.t === 'viper' && a.t === 'K') return false;
     const v = ci(p.c);
     if (HAS_GRD[v] && GRD[v][t]) return false;
@@ -107,6 +110,18 @@ function ChessEngine() {
         if (v && v.t === 'P' && v.c !== p.c && capOK(s, p, vq)) out.push(mv(q, q, t, 'ep', [vq]));
       }
     }
+    const v = ci(p.c);
+    if (HAS_WLD[v] && WLD[v][q]) {
+      const have = new Set(out.filter(m => m.o === q).map(m => m.t));
+      for (const [dx, dy] of D8) {
+        const nf = f + dx, rr = r + dy;
+        if (!on(nf, rr) || rr === 0 || rr === 7) continue;
+        const t = SQ(nf, rr);
+        if (have.has(t)) continue;
+        if (!s.b[t]) out.push(mv(q, q, t, 'n', null));
+        else if (capOK(s, p, t)) out.push(mv(q, q, t, 'n', [t]));
+      }
+    }
   }
   function king(s, q, p, out, noCastle) {
     step(s, q, p, out, D8);
@@ -144,7 +159,7 @@ function ChessEngine() {
         const x = [t]; let bad = false;
         for (const a of ADJ[t]) {
           const ap = s.b[a];
-          if (!ap || ap.c === 'n') continue;
+          if (!ap || ap.c === 'n' || ap.t === 'monk') continue;
           if (ap.t === 'K' && ap.c === p.c) { bad = true; break; }
           x.push(a);
         }
@@ -429,6 +444,164 @@ function ChessEngine() {
       }
     } },
     void: { v: 420, gen: (s, q, p, out) => step(s, q, p, out, D8) },
+    /* ----- the second wave ----- */
+    magnet: { v: 380, gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      const f = F(q), r = R(q), pushes = [];
+      for (const [dx, dy] of D4) {
+        for (let k = 1; k < 8; k++) {
+          const nf = f + dx * k, nr = r + dy * k;
+          if (!on(nf, nr)) break;
+          const a = SQ(nf, nr), ap = s.b[a];
+          if (!ap) continue;
+          if (k > 1 && ap.c !== p.c && ap.c !== 'n' && ap.t !== 'K') pushes.push(a, SQ(nf - dx, nr - dy));
+          break;
+        }
+      }
+      if (pushes.length) out.push({ o: q, f: q, t: q, k: 'pull', x: null, pushes });
+    } },
+    rampage: { v: 450, gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      const path = [], seen = new Set();
+      const dfs = cur => {
+        if (path.length >= 3) return;
+        for (const a of ADJ[cur]) {
+          if (path.includes(a) || !capOK(s, p, a)) continue;
+          path.push(a);
+          const key = a + ':' + path.length;
+          if (path.length > 1 && !seen.has(key)) { seen.add(key); out.push(mv(q, q, a, 'crush', path.slice())); }
+          dfs(a);
+          path.pop();
+        }
+      };
+      dfs(q);
+    } },
+    comet: { v: 480, gen(s, q, p, out) {
+      const fw = p.c === 'w' ? 1 : -1, f = F(q), r = R(q);
+      for (const dx of [-1, 0, 1]) for (let k = 1; k < 8; k++) {
+        const nf = f + dx * k, nr = r + fw * k;
+        if (!on(nf, nr)) break;
+        const t = SQ(nf, nr);
+        if (!s.b[t]) out.push(mv(q, q, t, 'n', null));
+        else if (capOK(s, p, t)) out.push(mv(q, q, t, 'n', [t]));
+      }
+      step(s, q, p, out, [[1, 0], [-1, 0], [0, -fw], [1, -fw], [-1, -fw]]);
+    } },
+    kangaroo: { v: 330, gen: (s, q, p, out) => step(s, q, p, out, [[2, 0], [-2, 0], [0, 2], [0, -2], [2, 2], [2, -2], [-2, 2], [-2, -2]]) },
+    tesla: { v: 380, gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      const x = ADJ[q].filter(a => s.b[a] && s.b[a].t === 'P' && capOK(s, p, a));
+      if (x.length) out.push(mv(q, q, q, 'zap', x));
+    } },
+    drummer: { v: 360, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      const fw = p.c === 'w' ? 1 : -1, last = p.c === 'w' ? 7 : 0, pushes = [];
+      for (let a = 0; a < 64; a++) {
+        const ap = s.b[a];
+        if (!ap || ap.t !== 'P' || ap.c !== p.c) continue;
+        const nr = R(a) + fw;
+        if (nr === last || !on(F(a), nr) || s.b[SQ(F(a), nr)]) continue;
+        pushes.push(a, SQ(F(a), nr));
+      }
+      if (pushes.length) out.push({ o: q, f: q, t: q, k: 'march', x: null, pushes, cd: 6 });
+    } },
+    sniper: { v: 450, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D4);
+      if (s.ply < p.d.cd) return;
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of DG) for (let k = 2; k < 8; k++) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (!on(nf, nr)) break;
+        if (s.b[SQ(f + dx * (k - 1), r + dy * (k - 1))]) break;
+        const t = SQ(nf, nr);
+        if (!s.b[t]) continue;
+        if (capOK(s, p, t)) out.push({ o: q, f: q, t, k: 'shoot', x: [t], cd: 6 });
+        break;
+      }
+    } },
+    amoeba: { v: 380, init: () => ({ ch: 1 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (p.d.ch <= 0) return;
+      for (const a of ADJ[q]) if (!s.b[a]) out.push(mv(q, q, a, 'split', null));
+    } },
+    changeling: { v: 380, gen(s, q, p, out) { const tmp = []; step(s, q, p, tmp, D8); step(s, q, p, tmp, KN); uniq(tmp, out); } },
+    monk: { v: 300, gen(s, q, p, out) {
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) for (let k = 1; k <= 3; k++) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (!on(nf, nr) || s.b[SQ(nf, nr)]) break;
+        out.push(mv(q, q, SQ(nf, nr), 'n', null));
+      }
+    } },
+    alchemist: { v: 380, init: () => ({ ch: 2 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (p.d.ch <= 0) return;
+      for (const a of ADJ[q]) {
+        const ap = s.b[a];
+        if (ap && ap.t === 'P' && ap.c === p.c) for (const rt of ['N', 'B']) out.push({ o: q, f: q, t: a, k: 'transmute', x: null, rt });
+      }
+    } },
+    displacer: { v: 360, gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of KN) {
+        if (!on(f + dx, r + dy)) continue;
+        const t = SQ(f + dx, r + dy), tp = s.b[t];
+        if (tp && tp.c !== p.c && tp.c !== 'n' && tp.t !== 'K') out.push(mv(q, q, t, 'swap', null));
+      }
+    } },
+    oracle: { v: 300, gen: (s, q, p, out) => step(s, q, p, out, D8) },
+    zombie: { v: 450, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      for (const a of ADJ[q]) {
+        const ap = s.b[a];
+        if (!ap || ap.c === p.c || ap.c === 'n' || !'PNB'.includes(ap.t) || ap.t.length !== 1) continue;
+        if (R(a) === 0 || R(a) === 7) continue;
+        out.push({ o: q, f: q, t: a, k: 'infect', x: null, cd: 4 });
+      }
+    } },
+    chameleon: { v: 450, gen(s, q, p, out) { if ((F(q) + R(q)) % 2) slide(s, q, p, out, D4); else step(s, q, p, out, KN); } },
+    warlord: { v: 380, gen: (s, q, p, out) => step(s, q, p, out, D8) },
+    cyclops: { v: 420, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      const fw = p.c === 'w' ? 1 : -1, f = F(q);
+      for (let r = R(q) + fw; r >= 0 && r < 8; r += fw) {
+        const t = SQ(f, r), tp = s.b[t];
+        if (!tp) continue;
+        if (tp.c === p.c ? tp.t !== 'K' : capOK(s, p, t)) out.push({ o: q, f: q, t, k: 'shoot', x: [t], cd: 6 });
+        break;
+      }
+    } },
+    gorgon: { v: 400, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) for (let k = 1; k < 8; k++) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (!on(nf, nr)) break;
+        const t = SQ(nf, nr), tp = s.b[t];
+        if (!tp) continue;
+        if (tp.c !== p.c && tp.c !== 'n' && tp.t !== 'K' && !(tp.d && tp.d.st > s.ply)) out.push({ o: q, f: q, t, k: 'stone', x: null, cd: 8 });
+        break;
+      }
+    } },
+    grappler: { v: 400, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) for (let k = 1; k <= 4; k++) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (!on(nf, nr)) break;
+        const t = SQ(nf, nr), tp = s.b[t];
+        if (!tp) continue;
+        if (k >= 2 && tp.c !== p.c && tp.c !== 'n' && tp.t !== 'K') out.push({ o: q, f: q, t, k: 'pull', x: null, pushes: [t, SQ(f + dx, r + dy)], cd: 4 });
+        break;
+      }
+    } },
+    echo: { v: 380, init: () => ({ ch: 3 }), gen: (s, q, p, out) => slide(s, q, p, out, DG, 2) },
   };
   const WILD_IDS = Object.keys(W);
 
@@ -437,7 +610,7 @@ function ChessEngine() {
     if (p.t === 'vampire') return 330 + 220 * Math.min(p.d.k, 2);
     const w = W[p.t];
     let v = w.v;
-    if ((p.t === 'necro' || p.t === 'siren' || p.t === 'hexer' || p.t === 'chrono') && p.d.ch <= 0) v -= 60;
+    if ((p.t === 'necro' || p.t === 'siren' || p.t === 'hexer' || p.t === 'chrono' || p.t === 'amoeba' || p.t === 'alchemist') && p.d.ch <= 0) v -= 60;
     if (p.t === 'phoenix' && p.d.reborn) v -= 80;
     return v;
   }
@@ -455,6 +628,7 @@ function ChessEngine() {
       const p = s.b[q];
       if (!p || p.c !== c) continue;
       if (fz && fz[q] && p.t !== 'K') continue;
+      if (p.d && p.d.st > s.ply) continue;
       if (p.t === 'K') king(s, q, p, out, noCastle);
       else if (STD[p.t]) STD[p.t](s, q, p, out);
       else W[p.t].gen(s, q, p, out);
@@ -504,7 +678,7 @@ function ChessEngine() {
       case 'castle': moveTo(m.f, m.t); moveTo(m.rf, m.rt); break;
       case 'boom': for (const q of m.x) kill(q); ev({ k: 'boom', q: m.t }); break;
       case 'swap': { const a = b[m.f], t = b[m.t]; b[m.f] = { ...t, m: true }; b[m.t] = { ...a, m: true }; mover = m.t; break; }
-      case 'shoot': case 'strike':
+      case 'shoot': case 'strike': case 'zap':
         for (const q of m.x) { const k = kill(q); if (k) kills.push([q, k]); }
         actor = m.o; break;
       case 'raise': {
@@ -515,16 +689,27 @@ function ChessEngine() {
         b[m.t] = newPiece(ns, m.rt, c, m.t); b[m.t].m = true;
         break;
       }
-      case 'gust':
+      case 'gust': case 'pull': case 'march':
         if (m.x) for (const q of m.x) kill(q);
         for (let i = 0; i < m.pushes.length; i += 2) moveTo(m.pushes[i], m.pushes[i + 1]);
+        if (m.k === 'march') ns.half = 0;
         break;
+      case 'split': b[m.t] = newPiece(ns, 'amoeba', c, m.t); b[m.t].d = { ch: 0 }; b[m.t].m = true; setD(m.o, { ch: 0 }); break;
+      case 'infect': b[m.t] = { ...b[m.t], t: 'P', c, d: null, m: true }; break;
+      case 'stone': b[m.t] = { ...b[m.t], d: { ...(b[m.t].d || {}), st: s.ply + 6 } }; break;
+      case 'transmute': b[m.t] = { ...b[m.t], t: m.rt, d: null }; setD(m.o, { ch: b[m.o].d.ch - 1 }); break;
       case 'charm': b[m.t] = { ...b[m.t], c, m: true }; setD(m.o, { ch: 0 }); break;
       case 'spawn': b[m.t] = newPiece(ns, 'P', c, m.t); setD(m.o, { cd: s.ply + 6 }); break;
       case 'wall': b[m.t] = { t: 'WALL', c: 'n', id: ns.nid++, m: true, d: { exp: s.ply + 8, o: c } }; ns.walls++; break;
       case 'hex': b[m.t] = { ...b[m.t], t: 'P', d: null, m: true }; setD(m.o, { ch: 0 }); break;
     }
 
+    if (m.cd && b[m.o] && b[m.o].id === s.b[m.o].id) setD(m.o, { cd: s.ply + m.cd });
+    // The Echo leaves a pawn behind on the square it left.
+    if (m.k === 'n' && b[m.t] && b[m.t].t === 'echo' && b[m.t].d.ch > 0 && !b[m.f] && R(m.f) !== 0 && R(m.f) !== 7) {
+      b[m.f] = newPiece(ns, 'P', c, m.f); b[m.f].m = true;
+      setD(m.t, { ch: b[m.t].d.ch - 1 }); ev({ k: 'echo', q: m.f });
+    }
     // Venom: whatever lands on a Viper's square dies with it.
     if (mover >= 0 && b[mover] && kills.some(([q, k]) => q === mover && k.t === 'viper')) {
       kill(mover); ev({ k: 'venom', q: mover }); actor = -1; mover = -1;
@@ -533,6 +718,10 @@ function ChessEngine() {
       const a = b[actor];
       if (a.t === 'vampire') { setD(actor, { k: a.d.k + kills.length }); if (a.d.k < 2) ev({ k: 'grow', q: actor }); }
       else if (a.t === 'chrono' && a.d.ch > 0) { setD(actor, { ch: 0 }); ns.extra = true; ev({ k: 'extra', q: actor }); }
+      else if (a.t === 'changeling') {
+        const k = kills.find(([, kp]) => kp.t !== 'K' && kp.t !== 'P' && kp.t !== 'WALL');
+        if (k) { b[actor] = { ...a, t: k[1].t, d: initData(k[1].t, actor) }; ev({ k: 'morph', q: actor }); }
+      }
     }
     // The Void swallows enemy pieces that finish their move beside it.
     if (mover >= 0 && b[mover] && b[mover].t !== 'K' && b[mover].c === c) {
@@ -781,7 +970,7 @@ function ChessEngine() {
     const s = { b, turn: 'w', ep: -1, ply: 10, half: 0, lost: { w: ['N'], b: [] }, nid: 1, dead: null, walls: 0,
       wild: { w: [type], b: [] }, last: null, extra: false };
     const put = (f, r, t, c) => { b[SQ(f, r)] = newPiece(s, t, c, SQ(f, r)); };
-    put(3, 3, type, 'w'); put(2, 2, 'N', 'w');
+    put(3, 3, type, 'w'); put(2, 2, 'N', 'w'); put(4, 2, 'P', 'w');
     put(4, 4, 'P', 'b'); put(3, 5, 'P', 'b'); put(1, 5, 'B', 'b'); put(3, 7, 'R', 'b'); put(6, 6, 'N', 'b');
     setCtx(s);
     const out = [];
