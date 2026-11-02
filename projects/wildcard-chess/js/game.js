@@ -152,7 +152,9 @@ function initSetup() {
   for (const b of $$('#segDeal button')) b.addEventListener('click', () => { settings.deal = b.dataset.v; sync(); });
   for (const b of $$('#segPrivacy button')) b.addEventListener('click', () => { settings.privacy = !!+b.dataset.v; sync(); });
   for (const b of $$('#segFlip button')) b.addEventListener('click', () => { settings.autoflip = !!+b.dataset.v; sync(); });
-  for (const b of $$('[data-mode]')) b.addEventListener('click', () => { Sound.init(); settings.mode = b.dataset.mode; sync(); show('setup'); });
+  for (const b of $$('[data-mode]')) b.addEventListener('click', () => {
+    Sound.init(); settings.mode = b.dataset.mode; if (b.dataset.deal) settings.deal = b.dataset.deal; sync(); show('setup');
+  });
   for (const d of $$('.diff')) d.addEventListener('click', () => { settings.level = d.dataset.level; Sound.init(); Sound.play('select'); sync(); });
   for (const b of $$('#segColor button')) b.addEventListener('click', () => { settings.color = b.dataset.v; sync(); });
   for (const b of $$('#segCount button')) b.addEventListener('click', () => { settings.count = +b.dataset.v; sync(); });
@@ -258,7 +260,7 @@ $('#curtainBtn').addEventListener('click', () => {
 
 /* ---------- the draft: 16 pairs, take one, the other goes to your opponent ---------- */
 const DRAFT_STD = ['P', 'P', 'P', 'P', 'P', 'P', 'N', 'N', 'B', 'B', 'R', 'R', 'Q'];
-const PD = { pairs: [], order: [], i: 0, army: { w: [], b: [] }, known: { w: new Set(), b: new Set() }, mode: 'ai', human: 'w', viewer: 'w', busy: false, token: 0 };
+const PD = { pairs: [], order: [], i: 0, army: { w: [], b: [] }, gift: { w: [], b: [] }, revealed: false, known: { w: new Set(), b: new Set() }, mode: 'ai', human: 'w', viewer: 'w', busy: false, token: 0 };
 function makePairs() {
   const wilds = shuffle(WILD_IDS.slice());
   let wi = 0;
@@ -278,7 +280,7 @@ function startDraft() {
   const local = settings.mode === 'local';
   PD.token++;
   PD.mode = settings.mode; PD.pairs = makePairs(); PD.i = 0; PD.busy = false;
-  PD.army = { w: [], b: [] }; PD.known = { w: new Set(), b: new Set() };
+  PD.army = { w: [], b: [] }; PD.gift = { w: [], b: [] }; PD.revealed = false; PD.known = { w: new Set(), b: new Set() };
   PD.human = local ? 'w' : settings.color === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : settings.color;
   if (local) PD.order = PD.pairs.map((_, i) => (i < 8 ? 'w' : 'b'));
   else { const first = Math.random() < 0.5 ? PD.human : opp(PD.human); PD.order = PD.pairs.map((_, i) => (i % 2 ? opp(first) : first)); }
@@ -311,8 +313,13 @@ function renderArmies(fresh) {
     for (let i = 0; i < 16; i++) {
       const t = PD.army[c][i];
       if (!t) { h += `<div class="tile ${c === 'b' ? 'dark' : ''}"></div>`; continue; }
+      const isNew = fresh && fresh.has(c + i) ? 'new' : '';
+      if (mine && PD.gift[c][i] && !PD.revealed) {
+        h += `<div class="tile mystery ${isNew}" title="Passed to you face down. Revealed when the draft ends."></div>`; continue;
+      }
       const unk = !mine && WILD[t] && !PD.known[v].has(t);
-      h += `<div class="tile full ${c === 'b' ? 'dark' : ''} ${fresh && fresh.has(c + i) ? 'new' : ''}" title="${pieceName(t)}">${pieceSVG(t, c)}${unk ? '<span class="qm">?</span>' : ''}</div>`;
+      const rev = mine && PD.gift[c][i] && PD.revealed ? 'reveal' : '';
+      h += `<div class="tile full ${c === 'b' ? 'dark' : ''} ${isNew} ${rev}" style="animation-delay:${rev ? i * 90 : 0}ms" title="${pieceName(t)}">${pieceSVG(t, c)}${unk ? '<span class="qm">?</span>' : ''}</div>`;
     }
     return h;
   };
@@ -325,7 +332,7 @@ function nextPick() {
   const c = PD.order[PD.i], local = PD.mode === 'local';
   if (local && PD.i === 8 && PD.viewer !== 'b') {
     $('#pair').innerHTML = '';
-    passCurtain('b', 'Your picks, Black', "White, look away. Black is about to see Black's 8 pairs, plus the cards White passed over.", "Show Black's pairs", () => {
+    passCurtain('b', 'Your picks, Black', "White, look away. Black is about to see Black's 8 pairs. The cards White passed over stay face down until the draft ends.", "Show Black's pairs", () => {
       PD.viewer = 'b'; renderArmies(); renderDots(); nextPick();
     });
     return;
@@ -349,7 +356,7 @@ function nextPick() {
     });
   } else {
     $('#pickWho').textContent = `${LEVELS[settings.level].name} AI is picking…`;
-    $('#pickNote').textContent = "You can't see what they were offered. One of the two comes to you.";
+    $('#pickNote').textContent = "You can't see what they were offered. One of the two comes to you, face down.";
     $('#pair').innerHTML = '<div class="card hidden-pick"><div class="card-in"><div class="card-face"></div><div class="card-back"></div></div></div><span class="or">or</span><div class="card hidden-pick"><div class="card-in"><div class="card-face"></div><div class="card-back"></div></div></div>';
     PD.busy = true;
     setTimeout(() => {
@@ -372,6 +379,7 @@ let lastAdded = null;
 function record(k) {
   const c = PD.order[PD.i], pair = PD.pairs[PD.i];
   PD.army[c].push(pair[k]); PD.army[opp(c)].push(pair[1 - k]);
+  PD.gift[c].push(false); PD.gift[opp(c)].push(true);
   for (const t of pair) if (WILD[t]) PD.known[c].add(t);
   lastAdded = new Set([c + (PD.army[c].length - 1), opp(c) + (PD.army[opp(c)].length - 1)]);
 }
@@ -411,8 +419,13 @@ function autoArrange(list, c) {
   return map;
 }
 function finishDraft() {
-  $('#pickWho').textContent = 'Draft complete';
+  const v = PD.viewer, gifts = PD.gift[v].filter(Boolean).length;
+  $('#pickWho').textContent = PD.mode === 'local' ? `Draft complete · here's what White passed ${sideName(v)}` : "Draft complete · here's what they passed you";
+  $('#pickNote').textContent = 'The game starts in a moment.';
   $('#pair').innerHTML = '';
+  PD.revealed = true;
+  renderArmies(); renderDots();
+  [...Array(gifts)].forEach((_, i) => setTimeout(() => Sound.play('deal'), i * 90));
   const army = { w: autoArrange(PD.army.w, 'w'), b: autoArrange(PD.army.b, 'b') };
   const wild = { w: [...new Set(PD.army.w.filter(t => WILD[t]))], b: [...new Set(PD.army.b.filter(t => WILD[t]))] };
   const local = PD.mode === 'local';
@@ -425,13 +438,13 @@ function finishDraft() {
     show('game');
     G.start({ mode: PD.mode, human: PD.human, level: settings.level, wild, state, known, privacy: settings.privacy, autoflip: settings.autoflip,
       arrange: local ? ['w', 'b'] : [PD.human] });
-  }, 700);
+  }, 1600 + 16 * 90);
 }
 $('#pickBack').addEventListener('click', () => { PD.token++; PD.busy = false; show('setup'); });
 
 /* ---------- setting up a drafted army: tap two of your pieces to swap them ---------- */
 function showArrangeBar(c) {
-  $('#arrangeText').textContent = `${G.mode === 'local' ? sideName(c) + ', set' : 'Set'} up your army: tap two of your pieces to swap them.`;
+  $('#arrangeText').textContent = `${G.mode === 'local' ? sideName(c) + ', set' : 'Set'} up your army: tap two pieces to swap them. The king stays put.`;
   $('#arrangeBar').hidden = false;
 }
 function hideArrangeBar() { $('#arrangeBar').hidden = true; }
@@ -464,6 +477,7 @@ $('#arrangeDone').addEventListener('click', () => { if (arrangeDone) { const f =
 function arrangeTap(q) {
   const p = G.s.b[q];
   if (!p || p.c !== G.arranging) { G.arrSel = -1; renderMarks(); return; }
+  if (p.t === 'K') { G.arrSel = -1; renderMarks(); toast(`${pieceSVG('K', p.c)}<span>The king stays on its own square</span>`, 'var(--gold)'); return; }
   if (G.arrSel < 0 || G.arrSel === q) { G.arrSel = G.arrSel === q ? -1 : q; Sound.play('select'); renderMarks(); return; }
   const a = G.arrSel, b = G.s.b.slice();
   [b[a], b[q]] = [b[q], b[a]];

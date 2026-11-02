@@ -8,7 +8,7 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 
 | Screen | What's on it |
 | --- | --- |
-| Main menu | A letter-by-letter animated logo with a travelling glint, rising embers, floating wildcard cards that flip to new pieces, a tilted 3D board playing a live exhibition match, and Play, Pass & Play, Codex, How it works and a sound toggle that slide in. |
+| Main menu | A letter-by-letter animated logo with a travelling glint, rising embers, floating wildcard cards that flip to new pieces, a tilted 3D board playing a live exhibition match, and three modes (Play, Draft, Pass & Play) plus Codex, Rules and a sound toggle that slide in. |
 | Pick your opponent | vs Computer (Easy, Medium, Pro, Xtreme; play as White / Random / Black) or Pass & Play (privacy screen and board flipping on or off), with 1–3 wildcards each. |
 | The deal | Your wildcard cards flip up with their rules and which of your pieces they replace; theirs show only the piece, its name, what it replaces and a question mark. One reroll of your own hand. In Pass & Play each player is dealt in private behind a pass-the-device screen. |
 | Game | The wooden board with player bars (wildcard chips, captured pieces, material), a sidebar with your wildcard rules, their wildcards marked unknown, the move log, and Undo / Flip / Resign / Menu. |
@@ -84,13 +84,14 @@ Each wildcard replaces a random regular piece from its own army: any pawn, knigh
 
 ## The draft
 
-Choose **Deal: Draft** on the setup screen (it works against the computer and in Pass & Play) to build both armies from nothing:
+Pick **Draft** on the main menu (or **Deal: Draft** on the setup screen; it works against the computer and in Pass & Play) to build both armies from nothing:
 
 - There are 16 pairs of cards, drawn from the standard pieces and the 50 wildcards. One pair, at a random point, is always **King vs King**, so each side ends with exactly one king.
 - Each player chooses from 8 pairs. The card you take joins your army; the one you leave goes to your opponent. So each army is 16 pieces: your 8 picks plus the 8 your opponent passed over. Four bishops and a Cyclops where the pawns usually stand is entirely possible.
+- The cards your opponent passes to you arrive **face down**: you can't see what you were given until the draft ends, when they flip over just before the game starts.
 - Against the computer you alternate picks (a coin flip decides who goes first) and never see the pairs it was offered. In Pass & Play, White makes 8 private picks, then the device goes to Black for theirs.
 - Every card offered to you can be read, so you know the rules of each wildcard you passed to your opponent (marked *seen in draft*), but not the ones they picked for themselves.
-- Armies are laid out automatically (king on e1, rooks in the corners, queen on d1, knights and bishops in their usual spots, pawns across the front, anything else where it fits). Before the game, each player taps two of their pieces to swap them, as often as they like, then taps **Ready**.
+- Armies are laid out automatically (king on e1, rooks in the corners, queen on d1, knights and bishops in their usual spots, pawns across the front, anything else where it fits). Before the game, each player taps two of their pieces to swap them, as often as they like, then taps **Ready**. The king always starts on its own square (e1 or e8) and can't be swapped.
 - Xtreme's extra wildcard applies to the classic deal only.
 
 ## Pass & Play

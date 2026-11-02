@@ -612,3 +612,16 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-hi); o
   .pair .or { font-size: 22px; }
   .arrange-bar { font-size: 13px; border-radius: 14px; }
 }
+
+/* menu: three modes, then a compact row */
+.menu-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; animation: btnIn .7s cubic-bezier(.2, .9, .3, 1.25) both; animation-delay: 1.4s; }
+.menu-row .btn { animation: none; padding: 9px 12px; }
+.menu-row .btn span { font-size: 16px; }
+.menu-row .btn small { font-size: 11.5px; }
+.menu-btns .btn.draft-btn { border-color: #8a5f1f; background: linear-gradient(180deg, #43362a, #2f2820); }
+.menu-btns .btn.draft-btn span::after { content: " ♛ ♞ ?"; font-size: 15px; color: var(--gold); letter-spacing: .1em; }
+/* face-down cards in the draft */
+.army-row .tile.mystery { border-style: solid; border-color: #5b4129; background: radial-gradient(circle, rgba(232,180,80,.22), transparent 60%), repeating-conic-gradient(#3a2a1c 0 25%, #2a1f15 0 50%) 0 0 / 12px 12px; }
+.army-row .tile.mystery::after { content: "?"; font: 400 clamp(14px, 2vw, 22px) var(--f-display); color: var(--gold); }
+.army-row .tile.reveal { animation: tileFlip .7s cubic-bezier(.3, 1.4, .5, 1) both; }
+@keyframes tileFlip { from { transform: rotateY(90deg) scale(.8); filter: brightness(1.8); } }
