@@ -1,0 +1,2714 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wildcard Chess</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a one-screen app. The menu pairs the logo with a tilted live board; the game puts the
+   wooden board centre stage with player bars above and below and a sidebar to the right
+   (stacked underneath on narrow screens). Single dark look, like a club room after hours. */
+:root {
+  --bg: #1b1916;
+  --bg-2: #23201c;
+  --panel: #2b2723;
+  --panel-2: #34302a;
+  --line: #433d35;
+  --ink: #f1e8d8;
+  --mute: #a99c88;
+  --faint: #6f6557;
+  --gold: #e8b450;
+  --gold-hi: #ffd98e;
+  --gold-lo: #8a5f1f;
+  --red: #ff5a3c;
+  --wood-l: #e1c495;
+  --wood-d: #9c6c41;
+  --lv-easy: #7bd66a;
+  --lv-medium: #56aefc;
+  --lv-pro: #b98bff;
+  --lv-xtreme: #ff5a3c;
+  --f-display: 'Rye', 'Rockwell Extra Bold', Georgia, serif;
+  --f-ui: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', sans-serif;
+  --f-body: 'Barlow', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 15px/1.5 var(--f-body);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 2px; }
+
+#app { position: relative; height: 100%; overflow: hidden; }
+
+.ambient {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+  background:
+    radial-gradient(1200px 700px at 72% 38%, rgba(232, 180, 80, .10), transparent 60%),
+    radial-gradient(900px 600px at 10% 90%, rgba(156, 108, 65, .14), transparent 60%),
+    radial-gradient(160% 120% at 50% 0%, #26221d 0%, var(--bg) 60%);
+}
+.ambient::after {
+  content: ""; position: absolute; inset: 0;
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.012) 0 1px, transparent 1px 4px);
+}
+.drift { position: absolute; inset: 0; }
+.drift i {
+  position: absolute; width: 64px; height: 64px; opacity: .07; filter: blur(.4px);
+  animation: drift linear infinite;
+}
+.drift i svg { width: 100%; height: 100%; }
+@keyframes drift {
+  from { transform: translate3d(0, 110vh, 0) rotate(0deg); }
+  to { transform: translate3d(40px, -20vh, 0) rotate(40deg); }
+}
+
+/* ---------- screens ---------- */
+.screen {
+  position: absolute; inset: 0; display: none; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+  padding-left: var(--gutter-l); padding-right: var(--gutter-r);
+  padding-block: 16px;
+}
+.screen.on { display: flex; animation: screenIn .5s cubic-bezier(.2, .8, .2, 1); }
+@keyframes screenIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.topbar {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  max-width: 1180px; width: 100%; margin: 0 auto; padding: 6px 0 18px;
+}
+.topbar h2 {
+  margin: 0; font: 400 clamp(26px, 4vw, 40px)/1 var(--f-display); color: var(--ink);
+  letter-spacing: .01em; text-wrap: balance;
+}
+.back {
+  background: transparent; border: 1px solid var(--line); border-radius: 999px;
+  padding: 6px 14px; font: 600 14px var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--mute);
+}
+.back:hover { color: var(--ink); border-color: var(--mute); }
+
+.btn {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0;
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px 18px; text-align: left;
+  transition: transform .15s, border-color .15s, background .15s;
+}
+.btn span { font: 700 22px/1.1 var(--f-ui); letter-spacing: .06em; text-transform: uppercase; }
+.btn small { font: 500 13px/1.3 var(--f-body); color: var(--mute); }
+.btn:hover { transform: translateX(4px); border-color: var(--gold-lo); }
+.btn.primary {
+  background: linear-gradient(180deg, #f2c362, #d39a33);
+  border-color: #f6d48a; color: #2a1b06;
+  box-shadow: 0 10px 30px -10px rgba(232, 180, 80, .6), inset 0 1px 0 rgba(255, 255, 255, .5);
+}
+.btn.primary small { color: rgba(42, 27, 6, .7); }
+.btn.primary:hover { border-color: #fff1c9; }
+.btn.ghost { background: transparent; }
+.btn.big { align-items: center; padding: 14px 34px; margin: 0 auto; }
+.btn.big:hover { transform: translateY(-2px); }
+.btn.small { padding: 8px 14px; align-items: center; }
+.btn.small span, .btn.small { font: 600 15px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; }
+.btn:disabled { opacity: .4; cursor: default; transform: none; }
+
+/* ---------- menu ---------- */
+#menu { justify-content: center; }
+.menu-wrap {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); align-items: center; gap: 40px;
+  max-width: 1240px; width: 100%; margin: auto;
+}
+.menu-left { min-width: 0; position: relative; z-index: 2; }
+.eyebrow { margin: 0 0 10px; font: 600 14px var(--f-ui); letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+.logo { margin: 0; display: flex; flex-direction: column; line-height: .92; }
+.logo-a {
+  font: 400 clamp(54px, 8.4vw, 112px) var(--f-display); color: var(--gold-hi);
+  text-shadow: 0 1px 0 #c58a2c, 0 2px 0 #b07a23, 0 3px 0 #9a681c, 0 4px 0 #7f5415, 0 10px 24px rgba(0, 0, 0, .55);
+  animation: logoIn .9s cubic-bezier(.2, .9, .2, 1.2) both;
+}
+.logo-b {
+  font: 400 clamp(46px, 7vw, 94px) var(--f-display); color: transparent;
+  -webkit-text-stroke: 2px var(--ink); letter-spacing: .08em; margin-left: .08em;
+  animation: logoIn .9s .12s cubic-bezier(.2, .9, .2, 1.2) both;
+}
+@keyframes logoIn { from { opacity: 0; transform: translateY(24px) scale(.96); } to { opacity: 1; transform: none; } }
+.tagline { max-width: 34em; margin: 22px 0 28px; font-size: 17px; color: var(--mute); text-wrap: pretty; }
+.menu-btns { display: grid; gap: 10px; max-width: 360px; }
+
+.menu-right { min-width: 0; display: flex; flex-direction: column; align-items: center; }
+.stage { position: relative; width: min(42vw, 560px); aspect-ratio: 1; perspective: 1500px; }
+.tilt {
+  position: absolute; inset: 0; transform-style: preserve-3d;
+  transform: rotateX(50deg) rotateZ(-34deg) scale(.86);
+  animation: sway 14s ease-in-out infinite alternate;
+}
+@keyframes sway { from { transform: rotateX(50deg) rotateZ(-38deg) scale(.86); } to { transform: rotateX(46deg) rotateZ(-26deg) scale(.86); } }
+.stage .board { width: 100%; height: 100%; overflow: visible; transform-style: preserve-3d;
+  box-shadow: 0 0 0 10px #2a1f15, 0 0 0 12px #5b4129, 0 40px 80px rgba(0, 0, 0, .65); }
+.stage .board .wood { border-radius: 2px; }
+.stage .pieces, .stage .pc { transform-style: preserve-3d; }
+.stage .pc svg { transform-origin: 50% 88%; transform: rotateZ(34deg) rotateX(-58deg); filter: drop-shadow(0 6px 4px rgba(0,0,0,.35)); }
+.stage-shadow { position: absolute; left: 10%; right: 10%; bottom: -6%; height: 16%; background: radial-gradient(closest-side, rgba(0, 0, 0, .55), transparent); filter: blur(8px); z-index: -1; }
+.stage-cap { margin: 8px 0 0; font: 600 13px var(--f-ui); letter-spacing: .2em; text-transform: uppercase; color: var(--faint); }
+
+/* ---------- setup ---------- */
+.setup-body { max-width: 1180px; width: 100%; margin: auto; display: flex; flex-direction: column; gap: 26px; padding-bottom: 20px; }
+.diff-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.diff {
+  --lv: var(--gold);
+  position: relative; display: flex; flex-direction: column; align-items: flex-start; text-align: left;
+  background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); border-radius: 14px;
+  padding: 18px 18px 20px; transition: transform .2s, border-color .2s, box-shadow .2s; min-width: 0;
+}
+.diff[data-level="easy"] { --lv: var(--lv-easy); }
+.diff[data-level="medium"] { --lv: var(--lv-medium); }
+.diff[data-level="pro"] { --lv: var(--lv-pro); }
+.diff[data-level="xtreme"] { --lv: var(--lv-xtreme); }
+.diff:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--lv) 55%, var(--line)); }
+.diff.sel { border-color: var(--lv); box-shadow: 0 0 0 1px var(--lv), 0 18px 40px -16px color-mix(in srgb, var(--lv) 70%, transparent); transform: translateY(-4px); }
+.diff-ico {
+  width: 84px; height: 84px; border-radius: 10px; margin-bottom: 14px;
+  background: linear-gradient(135deg, var(--wood-l), #cfae7c); box-shadow: inset 0 0 0 1px rgba(0,0,0,.25), 0 6px 14px rgba(0,0,0,.35);
+  display: grid; place-items: center;
+}
+.diff:nth-child(even) .diff-ico { background: linear-gradient(135deg, #a8774a, var(--wood-d)); }
+.diff-ico svg { width: 88%; height: 88%; }
+.diff-name { font: 700 30px/1 var(--f-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--lv); }
+.diff-sub { font: 400 17px var(--f-display); color: var(--ink); margin: 4px 0 10px; }
+.diff ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; color: var(--mute); font-size: 14px; }
+.diff li::before { content: "—"; color: var(--faint); margin-right: 6px; }
+.diff b { color: var(--ink); font-weight: 600; }
+.diff.xtreme::after {
+  content: ""; position: absolute; inset: -1px; border-radius: 15px; padding: 1px; pointer-events: none;
+  background: conic-gradient(from var(--spin, 0deg), transparent 0 60%, #ff8a3c, #ff3c2e, transparent 85%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: spin 3.2s linear infinite;
+}
+@property --spin { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes spin { to { --spin: 360deg; } }
+.diff.xtreme .diff-ico { box-shadow: inset 0 0 0 1px rgba(0,0,0,.25), 0 0 26px rgba(255, 90, 60, .35); }
+
+.opts { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px 36px; }
+.opt { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.opt-l { font: 600 14px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.seg { display: inline-flex; background: var(--bg-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.seg button { border: 0; background: transparent; padding: 6px 16px; border-radius: 999px; font: 600 15px var(--f-ui); letter-spacing: .06em; color: var(--mute); }
+.seg button.on { background: var(--ink); color: var(--bg); }
+
+/* ---------- draft ---------- */
+.draft-body { max-width: 1180px; width: 100%; margin: auto auto 0; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 24px; align-items: start; }
+.draft-side { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; }
+.draft-side h3 { margin: 0; font: 600 15px var(--f-ui); letter-spacing: .24em; text-transform: uppercase; color: var(--gold); }
+.cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+.vs { align-self: center; font: 400 44px var(--f-display); color: var(--faint); }
+.draft-note { margin: 0; color: var(--faint); font-style: italic; }
+.draft-foot { padding: 26px 0 10px; display: flex; margin-bottom: auto; }
+
+.card { width: 240px; max-width: 100%; aspect-ratio: 5 / 7.4; perspective: 1200px; }
+.card-in { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3, 1.3, .4, 1); transform: rotateY(180deg); }
+.card.up .card-in { transform: rotateY(0deg); }
+.card-face, .card-back { position: absolute; inset: 0; border-radius: 14px; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; }
+.card-back {
+  transform: rotateY(180deg); border: 1px solid #5b4129;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(232,180,80,.25), transparent 45%),
+    repeating-conic-gradient(#3a2a1c 0 25%, #2a1f15 0 50%) 0 0 / 28px 28px;
+  display: grid; place-items: center;
+}
+.card-back::after { content: "W"; font: 400 64px var(--f-display); color: var(--gold); text-shadow: 0 3px 0 #6b4512; }
+.card-face {
+  --acc: var(--gold);
+  background: linear-gradient(180deg, #3a342d, #2a2622); border: 1px solid #5a5045;
+  display: flex; flex-direction: column; padding: 14px; gap: 8px;
+  box-shadow: 0 20px 40px -18px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.card-art {
+  position: relative; border-radius: 9px; aspect-ratio: 1.25; display: grid; place-items: center; overflow: hidden;
+  background: linear-gradient(135deg, var(--wood-l), #caa877);
+}
+.card-art::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--acc) 45%, transparent), transparent 60%); }
+.card-art svg { position: relative; height: 92%; width: auto; filter: drop-shadow(0 6px 6px rgba(0,0,0,.3)); }
+.card-name { font: 400 22px/1.1 var(--f-display); color: var(--ink); }
+.card-moves { font: 600 12px var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--acc); }
+.card-desc { font-size: 13.5px; line-height: 1.45; color: #d5cbb9; overflow: auto; }
+.card.secret .card-desc { color: var(--faint); font-style: italic; }
+.card.secret .card-art { background: linear-gradient(135deg, #a8774a, var(--wood-d)); }
+.card .q-mark { position: absolute; right: 8px; top: 6px; font: 400 30px var(--f-display); color: rgba(255,255,255,.85); text-shadow: 0 2px 0 rgba(0,0,0,.4); }
+
+/* ---------- game ---------- */
+#game { padding-block: 12px; }
+.game-wrap {
+  --bs: min(calc(100dvh - 150px), calc(100vw - 440px), 860px);
+  margin: auto; display: grid; grid-template-columns: auto minmax(300px, 360px); gap: 22px; align-items: center;
+}
+.board-col { display: flex; flex-direction: column; gap: 8px; width: max(300px, var(--bs)); }
+.board-frame { position: relative; }
+#mainBoard { width: max(300px, var(--bs)); height: max(300px, var(--bs)); }
+
+.pbar { display: flex; align-items: center; gap: 10px; min-height: 46px; }
+.avatar { width: 42px; height: 42px; flex: none; border-radius: 8px; background: linear-gradient(135deg, var(--wood-l), #c7a676); display: grid; place-items: center; box-shadow: inset 0 0 0 1px rgba(0,0,0,.3); }
+.avatar svg { width: 92%; height: 92%; }
+.pname { display: flex; flex-direction: column; min-width: 0; }
+.pname b { font: 700 17px/1.1 var(--f-ui); letter-spacing: .05em; }
+.pname span { font: 500 12px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.pbar .lvl { color: var(--lv, var(--gold)); }
+.chips { display: flex; gap: 4px; }
+.chip { position: relative; width: 34px; height: 34px; border-radius: 7px; background: var(--panel-2); border: 1px solid var(--line); padding: 0; display: grid; place-items: center; }
+.chip svg { width: 92%; height: 92%; }
+.chip .qm { position: absolute; right: -5px; top: -6px; width: 16px; height: 16px; border-radius: 50%; background: var(--red); color: #fff; font: 700 11px/16px var(--f-ui); text-align: center; }
+.capt { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
+.capt svg { width: 22px; height: 22px; margin-left: -7px; }
+.capt .adv { margin-left: 6px; font: 600 13px var(--f-mono); color: var(--mute); }
+.thinking { display: inline-flex; gap: 3px; margin-left: 6px; }
+.thinking i { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); animation: blink 1s infinite; }
+.thinking i:nth-child(2) { animation-delay: .15s; } .thinking i:nth-child(3) { animation-delay: .3s; }
+@keyframes blink { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+.pbar.turn .avatar { box-shadow: 0 0 0 2px var(--gold), 0 0 18px rgba(232,180,80,.45); }
+
+.side {
+  align-self: stretch; max-height: calc(var(--bs) + 108px); min-width: 0;
+  display: flex; flex-direction: column; background: rgba(43, 39, 35, .85); border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+}
+.side-head { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px; }
+.mode-chip { font: 600 12px var(--f-ui); letter-spacing: .2em; text-transform: uppercase; color: var(--lv, var(--gold)); }
+.status { font: 400 20px/1.2 var(--f-display); text-wrap: balance; min-height: 1.2em; }
+.side-scroll { flex: 1; overflow: auto; min-height: 0; padding: 12px 16px; display: flex; flex-direction: column; gap: 14px; }
+.wild-info { display: grid; gap: 10px; }
+.wi { --acc: var(--gold); display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px; border-radius: 10px; background: var(--bg-2); border: 1px solid var(--line); }
+.wi .wi-art { width: 46px; height: 46px; border-radius: 8px; background: linear-gradient(135deg, var(--wood-l), #caa877); display: grid; place-items: center; }
+.wi.theirs .wi-art { background: linear-gradient(135deg, #a8774a, var(--wood-d)); }
+.wi .wi-art svg { width: 94%; height: 94%; }
+.wi h4 { margin: 0; font: 700 16px/1.15 var(--f-ui); letter-spacing: .04em; }
+.wi h4 small { font: 600 11px var(--f-ui); letter-spacing: .16em; text-transform: uppercase; color: var(--acc); margin-left: 6px; }
+.wi p { margin: 2px 0 0; font-size: 13px; line-height: 1.4; color: #cfc4b2; }
+.wi.theirs p { color: var(--faint); font-style: italic; }
+.log-wrap { display: flex; flex-direction: column; gap: 6px; }
+.log-title { font: 600 12px var(--f-ui); letter-spacing: .2em; text-transform: uppercase; color: var(--faint); }
+.log { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; font-size: 13.5px; }
+.log li { display: grid; grid-template-columns: 30px 22px minmax(0, 1fr); align-items: center; gap: 6px; padding: 3px 6px; border-radius: 6px; }
+.log li:nth-child(odd) { background: rgba(255,255,255,.025); }
+.log li .n { font: 500 11px var(--f-mono); color: var(--faint); text-align: right; }
+.log li svg { width: 22px; height: 22px; }
+.log li .t { min-width: 0; overflow-wrap: anywhere; }
+.log li .t code { font: 500 12.5px var(--f-mono); color: var(--ink); }
+.log li.special .t { color: var(--gold-hi); }
+.log li.last { background: rgba(232, 180, 80, .12); }
+.controls { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); }
+.controls button { background: transparent; border: 0; border-right: 1px solid var(--line); padding: 12px 4px; font: 600 14px var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--mute); }
+.controls button:last-child { border-right: 0; }
+.controls button:hover:not(:disabled) { background: var(--panel-2); color: var(--ink); }
+.controls button:disabled { opacity: .35; cursor: default; }
+
+/* ---------- board ---------- */
+.board { position: relative; border-radius: 5px; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.6), 0 30px 70px -20px rgba(0, 0, 0, .8); }
+.board > * { position: absolute; inset: 0; }
+.board canvas { width: 100%; height: 100%; display: block; }
+.board .fx { pointer-events: none; z-index: 6; }
+.coords { pointer-events: none; z-index: 1; font: 600 max(10px, calc(var(--sq, 80px) * .19)) / 1 var(--f-body); }
+.coords span { position: absolute; }
+.hl { z-index: 1; pointer-events: none; }
+.hl div, .marks div { position: absolute; width: 12.5%; height: 12.5%; }
+.hl .last { background: rgba(255, 221, 76, .42); }
+.hl .sel { background: rgba(255, 221, 76, .6); }
+.hl .check { background: radial-gradient(circle, rgba(255, 40, 20, .95) 0%, rgba(255, 40, 20, .55) 38%, rgba(255, 40, 20, 0) 72%); }
+.hl .xprev { background: rgba(255, 60, 30, .32); box-shadow: inset 0 0 0 2px rgba(255, 60, 30, .55); }
+.hl .aura { background: color-mix(in srgb, var(--acc) 22%, transparent); }
+.pieces { z-index: 3; pointer-events: none; }
+.marks { z-index: 4; pointer-events: none; }
+.marks .dot::after { content: ""; position: absolute; left: 35%; top: 35%; width: 30%; height: 30%; border-radius: 50%; background: rgba(20, 16, 10, .22); }
+.marks .ring::after { content: ""; position: absolute; inset: 4%; border-radius: 50%; border: calc(var(--sq, 80px) * .085) solid rgba(20, 16, 10, .24); }
+.marks .spec::after {
+  content: ""; position: absolute; left: 27%; top: 27%; width: 46%; height: 46%;
+  background: var(--acc); clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  filter: drop-shadow(0 0 4px var(--acc)); opacity: .9; animation: specPulse 1.4s ease-in-out infinite;
+}
+.marks .spec.cap::before { content: ""; position: absolute; inset: 5%; border-radius: 50%; border: calc(var(--sq, 80px) * .06) solid var(--acc); opacity: .75; }
+.marks .self::after { content: ""; position: absolute; inset: 3%; border-radius: 50%; border: 3px dashed var(--acc); animation: selfSpin 6s linear infinite; }
+.marks .hover { background: rgba(255,255,255,.14); }
+@keyframes specPulse { 50% { transform: scale(.82); opacity: .65; } }
+@keyframes selfSpin { to { transform: rotate(360deg); } }
+
+.pc { position: absolute; left: 0; top: 0; width: 12.5%; height: 12.5%; transition: transform .26s cubic-bezier(.3, .75, .3, 1); will-change: transform; }
+.pc svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.pc.wild::before {
+  content: ""; position: absolute; inset: 8%; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--acc) 55%, transparent) 0%, transparent 68%);
+  animation: aura 2.6s ease-in-out infinite;
+}
+@keyframes aura { 50% { transform: scale(1.15); opacity: .55; } }
+.pc.instant { transition: none; }
+.pc.drag { transition: none; z-index: 10; }
+.pc.drag svg { transform: scale(1.12); filter: drop-shadow(0 10px 8px rgba(0,0,0,.35)); }
+.pc.fly svg { animation: fly .34s ease-out; }
+@keyframes fly { 40% { transform: translateY(-38%) scale(1.25); filter: drop-shadow(0 18px 10px rgba(0,0,0,.35)); } }
+.pc.dying { transition: none; z-index: 5; }
+.pc.dying svg { animation: die .42s ease-in forwards; }
+@keyframes die { 30% { transform: scale(1.12) rotate(-6deg); } to { transform: scale(.2) rotate(20deg); opacity: 0; } }
+.pc.born svg { animation: born .5s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes born { from { transform: scale(0) translateY(30%); opacity: 0; } }
+.pc.recolor svg { animation: recolor .6s ease; }
+@keyframes recolor { 40% { transform: scale(1.2) rotate(8deg); filter: brightness(1.6) drop-shadow(0 0 10px #ff8fc8); } }
+.pc.frozen svg { filter: drop-shadow(0 0 5px #9fe6ff) saturate(.6) brightness(1.05); }
+.pc.frozen::after { content: ""; position: absolute; inset: 10% 12% 6%; border-radius: 8px; background: linear-gradient(160deg, rgba(190,240,255,.42), rgba(120,200,255,.12)); border: 1px solid rgba(200,245,255,.6); }
+
+.board.shake { animation: shake .45s; }
+@keyframes shake { 15% { transform: translate(-6px, 3px); } 30% { transform: translate(5px, -4px); } 45% { transform: translate(-4px, -2px); } 60% { transform: translate(3px, 4px); } 75% { transform: translate(-2px, 1px); } }
+.board.big-shake { animation: shake .6s; }
+
+.toast {
+  position: absolute; left: 50%; top: 10%; z-index: 8; pointer-events: none;
+  display: flex; align-items: center; gap: 10px; padding: 8px 16px 8px 8px; border-radius: 999px;
+  background: rgba(24, 21, 18, .92); border: 1px solid var(--acc, var(--gold)); box-shadow: 0 10px 30px rgba(0,0,0,.5), 0 0 24px color-mix(in srgb, var(--acc, var(--gold)) 40%, transparent);
+  font: 700 18px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+  opacity: 0; transform: translate(-50%, -12px) scale(.9); transition: opacity .25s, transform .25s;
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.toast svg { width: 34px; height: 34px; }
+
+/* ---------- codex ---------- */
+.codex-body { max-width: 1180px; width: 100%; margin: 0 auto; padding-bottom: 24px; }
+.codex-lede { margin: 0 0 18px; color: var(--mute); max-width: 60ch; }
+.spoil { margin-left: auto; display: flex; align-items: center; gap: 8px; font: 600 14px var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--mute); cursor: pointer; }
+.codex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 14px; }
+.cx { --acc: var(--gold); display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; padding: 14px; border-radius: 12px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); }
+.cx.locked { opacity: .72; }
+.cx-l { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.cx-art { width: 112px; height: 112px; border-radius: 9px; display: grid; place-items: center; background: linear-gradient(135deg, var(--wood-l), #caa877); position: relative; overflow: hidden; }
+.cx-art::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 50% 60%, color-mix(in srgb, var(--acc) 40%, transparent), transparent 62%); }
+.cx-art svg { position: relative; width: 90%; height: 90%; }
+.cx.locked .cx-art svg { filter: brightness(.25) contrast(.8); }
+.cx h4 { margin: 0; font: 400 20px/1.15 var(--f-display); }
+.cx .cx-moves { font: 600 11.5px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--acc); margin: 2px 0 6px; }
+.cx p { margin: 0; font-size: 13.5px; color: #d0c5b3; }
+.cx.locked p { color: var(--faint); font-style: italic; }
+.mini { width: 112px; height: 112px; display: grid; grid-template-columns: repeat(8, 1fr); border-radius: 6px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(0,0,0,.3); }
+.mini i { position: relative; display: block; }
+.mini i.l { background: var(--wood-l); } .mini i.d { background: var(--wood-d); }
+.mini i svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mini i.mq::after { content: ""; position: absolute; inset: 32%; border-radius: 50%; background: rgba(20,16,10,.38); }
+.mini i.mc::after { content: ""; position: absolute; inset: 6%; border-radius: 50%; border: 2px solid #d9322a; }
+.mini i.ms::after { content: ""; position: absolute; inset: 22%; background: var(--acc); clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+
+/* ---------- how ---------- */
+.how-body { max-width: 760px; width: 100%; margin: 0 auto; padding-bottom: 30px; }
+.how-body h3 { font: 700 20px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--gold); margin: 22px 0 6px; }
+.how-body h3:first-child { margin-top: 0; }
+.how-body p { margin: 0; color: #d6ccba; font-size: 16px; max-width: 65ch; }
+.how-body b { color: var(--ink); }
+
+/* ---------- overlays ---------- */
+.modal { position: absolute; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px var(--gutter-r) 16px var(--gutter-l); background: rgba(10, 8, 6, .62); backdrop-filter: blur(6px); animation: fade .3s; overflow: auto; }
+@keyframes fade { from { opacity: 0; } }
+.modal-card { width: min(640px, 100%); background: linear-gradient(180deg, #34302a, #26221e); border: 1px solid #5a5045; border-radius: 18px; padding: 26px; box-shadow: 0 40px 90px rgba(0,0,0,.7); animation: pop .5s cubic-bezier(.2, 1.4, .4, 1); text-align: center; }
+@keyframes pop { from { transform: scale(.85) translateY(20px); opacity: 0; } }
+.modal-card h2 { margin: 0; font: 400 clamp(40px, 8vw, 64px)/1 var(--f-display); }
+.modal-card h2.win { color: var(--gold-hi); text-shadow: 0 3px 0 #9a681c, 0 0 40px rgba(232,180,80,.4); }
+.modal-card h2.lose { color: #ff8f7a; text-shadow: 0 3px 0 #6b1f12; }
+.modal-card h2.draw { color: var(--ink); }
+.modal-card .why { margin: 8px 0 18px; color: var(--mute); font-size: 16px; }
+.reveal { display: grid; gap: 10px; text-align: left; margin-bottom: 20px; }
+.reveal .wi { background: rgba(0,0,0,.2); }
+.reveal .new { color: var(--gold); font: 600 11px var(--f-ui); letter-spacing: .16em; text-transform: uppercase; }
+.modal-btns { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.modal-btns .btn { align-items: center; }
+.modal-btns .btn span { font-size: 18px; }
+
+.tip { position: fixed; z-index: 60; max-width: 290px; pointer-events: none; padding: 12px 14px; border-radius: 12px; background: rgba(28, 25, 21, .97); border: 1px solid var(--line); box-shadow: 0 16px 40px rgba(0,0,0,.6); font-size: 13.5px; color: #d6ccba; }
+.tip h5 { margin: 0 0 2px; font: 700 16px var(--f-ui); letter-spacing: .04em; color: var(--ink); }
+.tip .tip-k { font: 600 11px var(--f-ui); letter-spacing: .16em; text-transform: uppercase; color: var(--acc, var(--gold)); margin-bottom: 4px; }
+.tip p { margin: 0; }
+.tip .unk { color: var(--faint); font-style: italic; }
+
+.chooser { position: fixed; z-index: 55; display: flex; flex-direction: column; gap: 4px; padding: 6px; border-radius: 12px; background: rgba(28, 25, 21, .98); border: 1px solid var(--gold-lo); box-shadow: 0 18px 40px rgba(0,0,0,.6); animation: pop .25s; }
+.chooser button { display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 4px 12px 4px 4px; font: 600 15px var(--f-ui); letter-spacing: .05em; text-align: left; }
+.chooser button:hover { border-color: var(--gold); background: var(--panel-2); }
+.chooser button svg { width: 36px; height: 36px; background: var(--wood-l); border-radius: 6px; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+  .diff-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 960px) {
+  .menu-wrap { grid-template-columns: minmax(0, 1fr); gap: 10px; text-align: left; }
+  .menu-right { order: -1; }
+  .stage { width: min(72vw, 400px); }
+  .game-wrap { --bs: min(calc(100vw - 32px), calc(100dvh - 210px), 640px); grid-template-columns: minmax(0, 1fr); justify-items: center; margin: 0 auto; }
+  .side { max-height: none; width: 100%; max-width: max(300px, var(--bs)); }
+  .side-scroll { overflow: visible; }
+  .draft-body { grid-template-columns: minmax(0, 1fr); }
+  .vs { font-size: 30px; }
+  body { overflow: hidden; }
+}
+@media (max-width: 560px) {
+  .game-wrap { --bs: calc(100vw - 32px); }
+  .diff-grid { grid-template-columns: minmax(0, 1fr); }
+  .diff { display: grid; grid-template-columns: 64px minmax(0, 1fr); column-gap: 14px; }
+  .diff-ico { width: 64px; height: 64px; grid-row: span 3; margin: 0; }
+  .diff ul { grid-column: 2; }
+  .card { width: 100%; max-width: 300px; aspect-ratio: auto; min-height: 400px; }
+  .pbar .capt svg { width: 18px; height: 18px; }
+  .stage { width: min(80vw, 340px); }
+  .tagline { font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="ambient" aria-hidden="true"><div class="drift" id="drift"></div></div>
+
+  <!-- MAIN MENU -->
+  <section class="screen" id="menu">
+    <div class="menu-wrap">
+      <div class="menu-left">
+        <p class="eyebrow">Chess with 30 secret pieces</p>
+        <h1 class="logo"><span class="logo-a">Wildcard</span><span class="logo-b">Chess</span></h1>
+        <p class="tagline">Both armies start with the usual sixteen pieces, plus a wildcard with rules of its own. You can see your opponent's. You can't see what it does.</p>
+        <nav class="menu-btns" aria-label="Main menu">
+          <button class="btn primary" data-go="setup" id="playBtn"><span>Play</span><small>vs the computer</small></button>
+          <button class="btn" data-go="codex"><span>Codex</span><small id="codexCount">0 / 30 discovered</small></button>
+          <button class="btn" data-go="how"><span>How it works</span><small>Rules in two minutes</small></button>
+          <button class="btn ghost" id="soundBtn"><span>Sound</span><small id="soundState">On</small></button>
+        </nav>
+      </div>
+      <div class="menu-right" aria-hidden="true">
+        <div class="stage">
+          <div class="tilt"><div class="board" id="showBoard"></div></div>
+          <div class="stage-shadow"></div>
+        </div>
+        <p class="stage-cap" id="showCap">Exhibition match</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIFFICULTY -->
+  <section class="screen" id="setup">
+    <header class="topbar"><button class="back" data-go="menu">← Menu</button><h2>Pick your opponent</h2></header>
+    <div class="setup-body">
+      <div class="diff-grid" role="radiogroup" aria-label="Difficulty">
+        <button class="diff" data-level="easy" role="radio">
+          <div class="diff-ico" data-piece="P"></div>
+          <div class="diff-name">Easy</div>
+          <div class="diff-sub">The Pawn Pusher</div>
+          <ul><li>Looks one move ahead</li><li>Gets distracted, blunders often</li><li>Take-backs allowed</li></ul>
+        </button>
+        <button class="diff" data-level="medium" role="radio">
+          <div class="diff-ico" data-piece="N"></div>
+          <div class="diff-name">Medium</div>
+          <div class="diff-sub">The Club Regular</div>
+          <ul><li>Sees two moves ahead</li><li>Grabs anything left hanging</li><li>Take-backs allowed</li></ul>
+        </button>
+        <button class="diff" data-level="pro" role="radio">
+          <div class="diff-ico" data-piece="Q"></div>
+          <div class="diff-name">Pro</div>
+          <div class="diff-sub">The Tactician</div>
+          <ul><li>Calculates four moves deep</li><li>Knows every wildcard trick</li><li>Take-backs allowed</li></ul>
+        </button>
+        <button class="diff xtreme" data-level="xtreme" role="radio">
+          <div class="diff-ico" data-piece="void"></div>
+          <div class="diff-name">Xtreme</div>
+          <div class="diff-sub">The Unhinged</div>
+          <ul><li>Thinks as deep as time allows</li><li><b>Brings one extra wildcard</b></li><li>No take-backs</li></ul>
+        </button>
+      </div>
+      <div class="opts">
+        <div class="opt"><span class="opt-l">Play as</span>
+          <div class="seg" id="segColor"><button data-v="w">White</button><button data-v="r">Random</button><button data-v="b">Black</button></div></div>
+        <div class="opt"><span class="opt-l">Wildcards each</span>
+          <div class="seg" id="segCount"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button></div></div>
+      </div>
+      <button class="btn primary big" id="dealBtn"><span>Deal the wildcards</span></button>
+    </div>
+  </section>
+
+  <!-- DRAFT -->
+  <section class="screen" id="draft">
+    <header class="topbar"><button class="back" data-go="setup">← Opponent</button><h2>The deal</h2></header>
+    <div class="draft-body">
+      <div class="draft-side">
+        <h3>Yours</h3>
+        <div class="cards" id="draftMine"></div>
+        <button class="btn ghost small" id="rerollBtn">Reroll mine (1 left)</button>
+      </div>
+      <div class="vs" aria-hidden="true">vs</div>
+      <div class="draft-side">
+        <h3>Theirs</h3>
+        <div class="cards" id="draftTheirs"></div>
+        <p class="draft-note">You'll find out what it does the hard way.</p>
+      </div>
+    </div>
+    <div class="draft-foot"><button class="btn primary big" id="startBtn"><span>Start the game</span></button></div>
+  </section>
+
+  <!-- GAME -->
+  <section class="screen" id="game">
+    <div class="game-wrap">
+      <div class="board-col">
+        <div class="pbar" id="barTop"></div>
+        <div class="board-frame">
+          <div class="board" id="mainBoard"></div>
+          <div class="toast" id="toast" aria-live="polite"></div>
+        </div>
+        <div class="pbar" id="barBot"></div>
+      </div>
+      <aside class="side">
+        <div class="side-head">
+          <div class="mode-chip" id="modeChip"></div>
+          <div class="status" id="status" aria-live="polite"></div>
+        </div>
+        <div class="side-scroll">
+          <div class="wild-info" id="wildInfo"></div>
+          <div class="log-wrap"><div class="log-title">Moves</div><ol class="log" id="log"></ol></div>
+        </div>
+        <div class="controls">
+          <button id="undoBtn">Undo</button><button id="flipBtn">Flip</button><button id="resignBtn">Resign</button><button id="leaveBtn">Menu</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- CODEX -->
+  <section class="screen" id="codex">
+    <header class="topbar"><button class="back" data-go="menu">← Menu</button><h2>Codex</h2>
+      <label class="spoil"><input type="checkbox" id="spoilers"> Show undiscovered</label></header>
+    <div class="codex-body">
+      <p class="codex-lede" id="codexLede"></p>
+      <div class="codex-grid" id="codexGrid"></div>
+    </div>
+  </section>
+
+  <!-- HOW -->
+  <section class="screen" id="how">
+    <header class="topbar"><button class="back" data-go="menu">← Menu</button><h2>How it works</h2></header>
+    <div class="how-body">
+      <article>
+        <h3>Normal chess, plus a stranger</h3>
+        <p>Both sides start with the full standard army. Each side also gets one or more <b>wildcards</b>, dealt at random from 30, standing on the third rank in front of the pawns.</p>
+        <h3>You know yours. You don't know theirs.</h3>
+        <p>Before the game you see your own wildcard and what it does. You also see your opponent's piece and its name, but not its rules. Hover or tap any piece on the board to read about it; theirs only says <i>unknown</i>. Watch what it does and work it out. When the game ends, its rules are revealed and it joins your Codex.</p>
+        <h3>How to win</h3>
+        <p>Checkmate still wins. So does destroying the king outright, which some wildcards can do: explosions, charges, arrows. Your own moves can never leave your king in check or get it killed. Stalemate, 50 moves without a capture or pawn move, threefold repetition, and bare kings are draws.</p>
+        <h3>Playing a move</h3>
+        <p>Click or drag a piece. Dots mark quiet moves, rings mark captures, and coloured stars mark special abilities. A pulsing ring on the piece itself means it has an ability it uses in place (click it again to use it). If one square offers two different moves, you'll be asked which.</p>
+        <h3>Promotion</h3>
+        <p>Pawns that reach the last rank can promote into a queen, rook, bishop, knight, or one of your wildcards.</p>
+        <h3>Difficulty</h3>
+        <p><b>Easy</b> and <b>Medium</b> look one and two moves ahead. <b>Pro</b> calculates four moves deep. <b>Xtreme</b> searches as deep as it can in four seconds and brings one more wildcard than you do. Only Xtreme refuses take-backs.</p>
+      </article>
+    </div>
+  </section>
+
+  <div class="modal" id="modal" hidden><div class="modal-card" id="modalCard" role="dialog" aria-modal="true"></div></div>
+  <div class="tip" id="tip" hidden></div>
+  <div class="chooser" id="chooser" hidden></div>
+</div>
+<script>
+/* Wildcard Chess: piece artwork and wildcard catalogue.
+   Every piece is drawn in a 100x100 box in the flat, thick-outlined style of a wooden club set:
+   a light body with a soft shade down its right side. Wildcards share one pedestal and carry a
+   coloured accent so they stand out from the standard army. */
+'use strict';
+
+const INK = { w: '#3b3a38', b: '#222120' };
+
+/* Tokens inside the art strings:
+   {B} body shape, {D} outline-only detail, {K} solid ink, {A} accent fill, {S} accent stroke,
+   {C} body-coloured stroke (for coils and tubes), {O} thick ink stroke under a {C}. */
+function tokens(color, accent) {
+  const ink = INK[color];
+  const grad = color === 'w' ? 'url(#gW)' : 'url(#gB)';
+  return {
+    B: `fill="${grad}" stroke="${ink}" stroke-width="3.2" stroke-linejoin="round"`,
+    D: `fill="none" stroke="${ink}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"`,
+    K: `fill="${ink}"`,
+    A: `fill="${accent}" stroke="${ink}" stroke-width="2.4" stroke-linejoin="round"`,
+    S: `fill="none" stroke="${accent}" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"`,
+    C: `fill="none" stroke="${grad}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"`,
+    O: `fill="none" stroke="${ink}" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"`,
+    L: `fill="none" stroke="${ink}" stroke-width="4.4" stroke-linecap="round" stroke-linejoin="round"`,
+  };
+}
+
+const PED = '<rect {B} x="22" y="81" width="56" height="11" rx="5.5"/>' +
+  '<path {B} d="M35 82 C37 72 41 66 42 61 H58 C59 66 63 72 65 82 Z"/>' +
+  '<rect {B} x="33" y="54" width="34" height="8" rx="4"/>';
+
+const STD_ART = {
+  P: '<rect {B} x="22" y="80" width="56" height="12" rx="6"/>' +
+     '<path {B} d="M34 81 C36 68 41 60 43 54 H57 C59 60 64 68 66 81 Z"/>' +
+     '<rect {B} x="35" y="47" width="30" height="9" rx="4.5"/>' +
+     '<circle {B} cx="50" cy="33" r="13"/>',
+  R: '<rect {B} x="18" y="81" width="64" height="11" rx="5.5"/>' +
+     '<rect {B} x="25" y="72" width="50" height="10" rx="3"/>' +
+     '<path {B} d="M31 72 L34 44 H66 L69 72 Z"/>' +
+     '<path {B} d="M27 40 V19 H37 V26 H45 V19 H55 V26 H63 V19 H73 V40 Z"/>' +
+     '<rect {B} x="26" y="37" width="48" height="8" rx="2"/>',
+  N: '<rect {B} x="20" y="81" width="62" height="11" rx="5.5"/>' +
+     '<rect {B} x="28" y="73" width="48" height="9" rx="3"/>' +
+     '<path {B} d="M71 74 C74 60 77 44 71 31 C67 24 61 20 57 19 L59 8 L50 15 C42 15 34 21 30 29 L20 47 C18 52 20 57 25 58 C30 59 34 56 38 54 C42 54 44 57 45 60 C40 65 34 69 33 74 Z"/>' +
+     '<path {D} d="M63 25 C70 36 71 52 67 68"/>' +
+     '<circle {K} cx="41" cy="31" r="3.4"/>' +
+     '<circle {K} cx="24.5" cy="51.5" r="2"/>',
+  B: '<rect {B} x="22" y="80" width="56" height="12" rx="6"/>' +
+     '<path {B} d="M36 81 C38 74 42 70 43 66 H57 C58 70 62 74 64 81 Z"/>' +
+     '<rect {B} x="34" y="59" width="32" height="8" rx="4"/>' +
+     '<path {B} d="M50 11 C36 22 30 37 34 49 C36 56 42 60 50 60 C58 60 64 56 66 49 C69 39 65 30 59 23 L51 37 L47 34 L55 19 C53 16 52 13 50 11 Z"/>',
+  Q: '<rect {B} x="18" y="81" width="64" height="11" rx="5.5"/>' +
+     '<rect {B} x="26" y="71" width="48" height="10" rx="4"/>' +
+     '<path {B} d="M28 72 L18 37 L32 55 L34 30 L43 52 L50 25 L57 52 L66 30 L68 55 L82 37 L72 72 Z"/>' +
+     '<circle {B} cx="18" cy="33" r="5.5"/><circle {B} cx="34" cy="26" r="5.5"/><circle {B} cx="50" cy="20" r="5.5"/>' +
+     '<circle {B} cx="66" cy="26" r="5.5"/><circle {B} cx="82" cy="33" r="5.5"/>',
+  K: '<rect {B} x="18" y="81" width="64" height="11" rx="5.5"/>' +
+     '<rect {B} x="26" y="71" width="48" height="10" rx="4"/>' +
+     '<path {B} d="M28 72 C15 60 16 43 30 40 C40 38 47 45 50 53 C53 45 60 38 70 40 C84 43 85 60 72 72 Z"/>' +
+     '<path {B} d="M50 54 C45 45 45 37 50 32 C55 37 55 45 50 54 Z"/>' +
+     '<path {B} d="M46 9 H54 V15 H60 V22 H54 V32 H46 V22 H40 V15 H46 Z"/>',
+  WALL: '',
+};
+
+/* The 30 wildcards. `desc` is what the owner sees; the opponent only ever sees the icon and name. */
+const WILD = {
+  bomber: { name: 'Bomber', accent: '#ff9a2e', moves: 'Steps 1 square',
+    desc: 'Steps one square in any direction. When it captures, it explodes: every piece in the 3×3 blast around the target is destroyed, friend or foe, the Bomber included. Kings are not safe, but it will never blow up its own.',
+    art: '<circle {B} cx="50" cy="37" r="17"/><rect {B} x="43" y="15" width="14" height="8" rx="2"/>' +
+         '<path {D} d="M50 15 C50 9 56 6 61 9"/><path {D} d="M40 32 C41 28 44 25 47 24" opacity=".5"/>' +
+         '<path {A} d="M65 2 L67 7 L72 7 L68 10.5 L70 15.5 L65 12.5 L60 15.5 L62 10.5 L58 7 L63 7 Z"/>' },
+  phantom: { name: 'Phantom', accent: '#5fe0ff', moves: 'Any distance along ranks and files',
+    desc: 'Glides any distance along ranks and files, passing straight through every piece in its way. Captures wherever it lands.',
+    art: '<path {B} d="M33 57 V31 C33 11 67 11 67 31 V57 L61 51 L55.5 57 L50 51 L44.5 57 L39 51 Z"/>' +
+         '<ellipse {A} cx="43" cy="31" rx="4.2" ry="6.2"/><ellipse {A} cx="57" cy="31" rx="4.2" ry="6.2"/>' +
+         '<path {D} d="M45 43 C48 45 52 45 55 43"/>' },
+  blink: { name: 'Blink', accent: '#b57bff', moves: 'Steps 1, or teleports',
+    desc: 'Steps one square, or teleports to any empty square on the board. After a teleport it needs two turns to recharge. It cannot capture by teleporting.',
+    art: '<circle {B} cx="50" cy="34" r="19"/>' +
+         '<path {S} d="M50 34 C50 30 55 30 55 34 C55 40 44 40 44 34 C44 26 60 26 60 34 C60 44 39 44 39 33 C39 23 48 18 56 19"/>' },
+  trickster: { name: 'Trickster', accent: '#ffcf3f', moves: 'Steps 1, or swaps',
+    desc: 'Steps one square, or swaps places with any friendly piece up to two squares away, the king included.',
+    art: '<path {B} d="M31 56 C31 46 34 40 38 36 C32 31 26 28 19 28 C27 21 36 23 42 29 C42 21 46 14 50 10 C54 14 58 21 58 29 C64 23 73 21 81 28 C74 28 68 31 62 36 C66 40 69 46 69 56 Z"/>' +
+         '<path {D} d="M35 47 H65"/>' +
+         '<circle {A} cx="18" cy="28" r="5"/><circle {A} cx="50" cy="9" r="5"/><circle {A} cx="82" cy="28" r="5"/>' },
+  archer: { name: 'Archer', accent: '#ff5a4a', moves: 'Steps 1, shoots 2–3 away',
+    desc: 'Steps one square but never captures by moving. Instead it shoots: it removes an enemy exactly 2 or 3 squares away in a straight line, firing over anything in between, without moving.',
+    art: '<path {B} d="M38 10 C66 16 66 52 38 58 L40 53 C58 47 58 21 40 15 Z"/>' +
+         '<path {D} d="M39 12.5 V55.5"/>' +
+         '<path {L} d="M24 34 H66"/><path {D} d="M25 34 L20 29 M25 34 L20 39 M29 34 L24 29 M29 34 L24 39"/>' +
+         '<path {A} d="M64 27 L76 34 L64 41 Z"/>' },
+  necro: { name: 'Necromancer', accent: '#6dff8a', moves: 'Up to 2 diagonally',
+    desc: 'Moves up to two squares diagonally. Twice per game, instead of moving, it raises your most recently lost piece back to life on an adjacent empty square.',
+    art: '<path {B} d="M32 33 C32 17 40 9 50 9 C60 9 68 17 68 33 C68 41 65 45 62 47 V56 H38 V47 C35 45 32 41 32 33 Z"/>' +
+         '<circle {A} cx="42" cy="32" r="5.6"/><circle {A} cx="58" cy="32" r="5.6"/>' +
+         '<path {K} d="M50 38 L46.5 45 H53.5 Z"/><path {D} d="M44 49 V56 M50 49 V56 M56 49 V56"/>' },
+  frost: { name: 'Frost Warden', accent: '#9fe6ff', moves: 'Steps 1 square',
+    desc: 'Steps one square in any direction. Enemy pieces standing next to it are frozen solid and cannot move or capture. Kings are immune.',
+    art: '<path {B} d="M41 32 L29 26 L27 47 L38 56 Z"/><path {B} d="M59 32 L71 26 L73 47 L62 56 Z"/>' +
+         '<path {A} d="M50 5 L62 21 L59 50 L50 57 L41 50 L38 21 Z"/><path {D} d="M50 5 V57 M38 21 L50 29 L62 21"/>' },
+  wyvern: { name: 'Wyvern', accent: '#ff4a3d', moves: 'Knight jump, twice',
+    desc: 'Jumps like a knight, and can jump a second time in the same turn if its first landing square is empty.',
+    art: '<path {B} d="M64 57 C69 45 71 34 67 26 L78 11 L62 19 C58 15 52 13 46 15 L39 8 L39 18 C33 21 27 27 21 31 L19 38 C25 40 31 39 36 38 L26 46 C32 48 40 47 46 43 C46 49 42 53 38 57 Z"/>' +
+         '<circle {A} cx="48" cy="26" r="3.8"/><circle {K} cx="24.5" cy="33" r="1.8"/>' +
+         '<path {D} d="M67 35 L74 37 M67 43 L74 46 M66 51 L72 54"/>' },
+  hopper: { name: 'Hopper', accent: '#8ee34a', moves: 'Hops over pieces',
+    desc: 'Moves along any straight line, but only by hopping over the first piece in its way and landing right behind it. Captures if it lands on an enemy.',
+    art: '<path {O} d="M37 53 L63 47 L37 40 L63 34 L37 27"/><path {C} d="M37 53 L63 47 L37 40 L63 34 L37 27"/>' +
+         '<ellipse {B} cx="50" cy="20" rx="19" ry="7.5"/><circle {A} cx="50" cy="13" r="6"/>' },
+  serpent: { name: 'Serpent', accent: '#ff4d6d', moves: 'Up to 3 steps, turning',
+    desc: 'Slithers up to three steps along ranks and files, turning corners as it goes, through empty squares. Captures at the end of its path.',
+    art: '<path {O} d="M30 54 C20 50 26 40 42 40 C60 40 66 31 58 24 C53 20 46 21 43 25"/><path {C} d="M30 54 C20 50 26 40 42 40 C60 40 66 31 58 24 C53 20 46 21 43 25"/>' +
+         '<ellipse {B} cx="38" cy="22" rx="11" ry="8"/><circle {K} cx="35" cy="20" r="2.2"/>' +
+         '<path d="M27 24 L20 25 M20 25 L16 22 M20 25 L16 28" fill="none" stroke="{acc}" stroke-width="2.6" stroke-linecap="round"/>' },
+  ricochet: { name: 'Ricochet', accent: '#ffd23f', moves: 'Diagonals that bounce',
+    desc: 'Slides diagonally like a bishop and bounces off the edge of the board once, carrying on at a new angle.',
+    art: '<path {B} d="M50 7 L73 32 L50 57 L27 32 Z"/>' +
+         '<path {S} d="M36 42 L45 25 L54 39 L61 26"/><path {A} d="M57 23 L66 19 L65 29 Z"/>' },
+  orbit: { name: 'Orbit', accent: '#5fa8ff', moves: 'Rook lines that wrap around',
+    desc: 'Slides like a rook, but the board wraps around: leave one edge and it comes back in on the opposite side.',
+    art: '<path d="M24 41.4 A27 8.5 -16 0 1 76 26.6" {L}/><path d="M24 41.4 A27 8.5 -16 0 1 76 26.6" {S}/>' +
+         '<circle {B} cx="50" cy="33" r="15"/>' +
+         '<path d="M24 41.4 A27 8.5 -16 0 0 76 26.6" {L}/><path d="M24 41.4 A27 8.5 -16 0 0 76 26.6" {S}/>' },
+  juggernaut: { name: 'Juggernaut', accent: '#e07b39', moves: 'Charges 1–3 straight',
+    desc: 'Charges one to three squares along a rank or file, flattening every enemy piece in its path. It stops in front of friendly pieces.',
+    art: '<path {B} d="M31 31 C20 29 14 19 16 8 C22 16 28 18 35 20 Z"/><path {B} d="M69 31 C80 29 86 19 84 8 C78 16 72 18 65 20 Z"/>' +
+         '<path {B} d="M30 56 V32 C30 18 40 12 50 12 C60 12 70 18 70 32 V56 Z"/>' +
+         '<rect {A} x="30" y="25" width="40" height="6" rx="1"/>' +
+         '<path {K} d="M36 35 H64 V41 H54 V53 H46 V41 H36 Z"/>' },
+  cannon: { name: 'Cannon', accent: '#ff6b3d', moves: 'Rook moves, fires over a screen',
+    desc: 'Moves like a rook without capturing. It captures by firing over exactly one piece of either colour to hit the first enemy beyond it, at any range.',
+    art: '<path {B} d="M33 49 L59 15 C62 11 69 15 66 20 L45 54 Z"/><path {D} d="M56 19 L64 25"/>' +
+         '<circle {B} cx="40" cy="47" r="11"/><path {D} d="M40 38 V56 M31 47 H49"/><circle {K} cx="40" cy="47" r="3"/>' +
+         '<path {A} d="M70 6 L72 11 L77 11 L73 14 L75 19 L70 16 L65 19 L67 14 L63 11 L68 11 Z"/>' },
+  tempest: { name: 'Tempest', accent: '#8fd3ff', moves: 'Steps 1, or blows a gust',
+    desc: 'Steps one square. Or, instead of moving, it unleashes a gust that blows every adjacent enemy one square away. Enemies blown off the board are destroyed; kings just hold on.',
+    art: '<path {B} d="M23 13 H77 C75 20 69 24 62 26 C66 30 62 36 56 38 C58 43 54 48 50 50 C48 54 46 56 44 57 C46 53 46 49 44 47 C40 45 40 41 42 38 C36 34 36 30 40 28 C30 24 25 20 23 13 Z"/>' +
+         '<path {S} d="M30 17 C44 22 60 22 70 17"/><path {S} d="M39 29 C46 32 55 32 61 29"/><path {S} d="M45 39 C48 41 51 41 54 39"/>' },
+  mimic: { name: 'Mimic', accent: '#c77dff', moves: 'Borrows its neighbours’ moves',
+    desc: 'Steps one square, and also borrows the moves of every piece standing next to it, friend or foe.',
+    art: '<path {B} d="M29 13 C40 8 60 8 71 13 C73 34 65 52 50 57 C35 52 27 34 29 13 Z"/>' +
+         '<path {K} d="M36 27 C39 23 45 23 47 27 C45 31 39 31 36 27 Z"/><path {K} d="M64 27 C61 23 55 23 53 27 C55 31 61 31 64 27 Z"/>' +
+         '<path {K} d="M39 41 C45 48 55 48 61 41 C56 45 44 45 39 41 Z"/>' +
+         '<path {A} d="M34 35 L37.5 31 L41 35 L37.5 39 Z"/><path {A} d="M59 35 L62.5 31 L66 35 L62.5 39 Z"/>' },
+  siren: { name: 'Siren', accent: '#ff8fc8', moves: 'Up to 2 diagonally',
+    desc: 'Moves up to two squares diagonally. Once per game, it sings to an adjacent enemy that isn’t a king or queen and turns it to your side.',
+    art: '<path {B} d="M50 56 L23 30 C25 18 37 9 50 9 C63 9 75 18 77 30 Z"/>' +
+         '<path {D} d="M50 54 L32 21 M50 54 L41 13 M50 54 V10 M50 54 L59 13 M50 54 L68 21"/>' +
+         '<circle {A} cx="50" cy="44" r="6"/>' },
+  guardian: { name: 'Guardian', accent: '#ffcc4d', moves: 'Steps 1 square',
+    desc: 'Steps one square in any direction. Friendly pieces next to it cannot be captured. The Guardian itself can.',
+    art: '<path {B} d="M29 11 H71 V30 C71 44 63 52 50 58 C37 52 29 44 29 30 Z"/>' +
+         '<path {A} d="M46 17 H54 V27 H63 V35 H54 V49 H46 V35 H37 V27 H46 Z"/>' },
+  golem: { name: 'Golem', accent: '#ffb020', moves: 'Steps 1 along ranks and files',
+    desc: 'Steps one square along a rank or file. It is made of stone: only pawns and kings can capture it.',
+    art: '<path {B} d="M29 56 V20 L36 11 H64 L71 20 V56 Z"/><path {D} d="M29 26 H71"/>' +
+         '<rect {A} x="36" y="30" width="10" height="6"/><rect {A} x="54" y="30" width="10" height="6"/>' +
+         '<path {D} d="M42 47 H58 M61 11 L56 19 L60 23 M35 44 L41 48 L39 56"/>' },
+  phoenix: { name: 'Phoenix', accent: '#ff7a1a', moves: 'Up to 2 in any direction',
+    desc: 'Moves up to two squares in any direction. The first time it is captured, it is reborn on its starting square, if that square is empty.',
+    art: '<path {B} d="M50 57 C33 55 23 42 25 25 C29 31 33 33 38 33 C34 23 36 13 44 7 C44 17 48 23 50 25 C52 23 56 17 56 7 C64 13 66 23 62 33 C67 33 71 31 75 25 C77 42 67 55 50 57 Z"/>' +
+         '<path {A} d="M50 52 C42 50 38 44 40 36 C44 40 46 40 48 38 C46 32 48 26 50 21 C52 26 54 32 52 38 C54 40 56 40 60 36 C62 44 58 50 50 52 Z"/>' },
+  viper: { name: 'Viper', accent: '#7dff6a', moves: 'Knight jump',
+    desc: 'Jumps like a knight. Its venom is lethal: any piece that captures it by moving onto its square dies too. Kings won’t touch it.',
+    art: '<path {B} d="M38 57 C40 48 30 42 28 30 C26 17 38 9 50 9 C62 9 74 17 72 30 C70 42 60 48 62 57 Z"/>' +
+         '<path {A} d="M50 29 C44 33 44 41 50 46 C56 41 56 33 50 29 Z"/>' +
+         '<path {K} d="M38 23 C41 20 45 21 46 24 C43 25 40 25 38 23 Z"/><path {K} d="M62 23 C59 20 55 21 54 24 C57 25 60 25 62 23 Z"/>' },
+  brood: { name: 'Broodmother', accent: '#ff3b3b', moves: 'Steps 1, lays pawns',
+    desc: 'Steps one square. Instead of moving, it can lay a new pawn on an adjacent empty square, then needs three turns to recover.',
+    art: '<path {L} d="M42 31 L28 20 L21 30 M42 37 L24 36 L17 46 M43 43 L29 49 L26 57 M58 31 L72 20 L79 30 M58 37 L76 36 L83 46 M57 43 L71 49 L74 57"/>' +
+         '<ellipse {B} cx="50" cy="41" rx="13" ry="15"/><circle {B} cx="50" cy="20" r="8.5"/>' +
+         '<path {A} d="M45.5 34 H54.5 L50 41 L54.5 48 H45.5 L50 41 Z"/>' },
+  chrono: { name: 'Chronomancer', accent: '#ffc94a', moves: 'Steps 1, or up to 3 diagonally',
+    desc: 'Steps one square, or slides up to three squares diagonally. The first time it captures, time bends and you immediately take another turn.',
+    art: '<path {B} d="M35 14 H65 C65 28 54 30 54 34 C54 38 65 40 65 53 H35 C35 40 46 38 46 34 C46 30 35 28 35 14 Z"/>' +
+         '<path {A} d="M40 19 H60 C58 25 52 28 50 31 C48 28 42 25 40 19 Z"/><path {A} d="M38 51 C40 44 46 42 50 40 C54 42 60 44 62 51 Z"/>' +
+         '<rect {B} x="29" y="8" width="42" height="7" rx="3"/><rect {B} x="29" y="51" width="42" height="7" rx="3"/>' },
+  mason: { name: 'Mason', accent: '#e2774a', moves: 'Steps 1, builds walls',
+    desc: 'Steps one square. Instead of moving, it raises a stone wall on an empty square up to two away in a straight line. Walls block everything, cannot be captured, and crumble after four turns. Two walls at most.',
+    art: '<rect {B} x="25" y="42" width="24" height="13" rx="1.5"/><rect {B} x="51" y="42" width="24" height="13" rx="1.5"/>' +
+         '<rect {B} x="37" y="28" width="26" height="13" rx="1.5"/><rect {A} x="41" y="14" width="18" height="13" rx="1.5"/>' },
+  vampire: { name: 'Vampire', accent: '#ff3048', moves: 'Steps 1, grows with kills',
+    desc: 'Steps one square. It grows stronger with every kill: after its first capture it can also jump like a knight, and after its second it can also slide like a queen.',
+    art: '<path {B} d="M50 25 C40 22 30 18 15 22 C19 26 22 31 22 37 C26 34 30 34 34 39 C36 35 40 35 44 39 C46 35 48 33 50 33 C52 33 54 35 56 39 C60 35 64 35 66 39 C70 34 74 34 78 37 C78 31 81 26 85 22 C70 18 60 22 50 25 Z"/>' +
+         '<ellipse {B} cx="50" cy="42" rx="7.5" ry="13"/>' +
+         '<path {B} d="M50 27 C45 27 43 23 43 19 L45 11 L48 16.5 H52 L55 11 L57 19 C57 23 55 27 50 27 Z"/>' +
+         '<circle fill="{acc}" cx="47.2" cy="20" r="1.9"/><circle fill="{acc}" cx="52.8" cy="20" r="1.9"/>' },
+  marauder: { name: 'Marauder', accent: '#ffd84a', moves: 'Diagonal steps, checker jumps',
+    desc: 'Steps one square diagonally but captures like a checker: it jumps over an adjacent enemy diagonally to the empty square beyond, and can chain several jumps in one turn.',
+    art: '<path {B} d="M30 46 V52 A20 7 0 0 0 70 52 V46"/><ellipse {B} cx="50" cy="46" rx="20" ry="7"/>' +
+         '<path {B} d="M30 34 V40 A20 7 0 0 0 70 40 V34"/><ellipse {B} cx="50" cy="34" rx="20" ry="7"/><ellipse {D} cx="50" cy="34" rx="12" ry="3.8"/>' +
+         '<path {A} d="M38 29 L35 12 L44 19 L50 8 L56 19 L65 12 L62 29 Z"/>' },
+  hexer: { name: 'Hexer', accent: '#a96bff', moves: 'Up to 2 along ranks and files',
+    desc: 'Moves up to two squares along ranks and files. Once per game, it curses an enemy piece within two squares (not a king or pawn) and turns it into a pawn.',
+    art: '<path {B} d="M36 57 C36 48 40 45 44 45 H56 C60 45 64 48 64 57 Z"/>' +
+         '<circle {A} cx="50" cy="28" r="17"/>' +
+         '<path d="M41 20 C43 16 47 14.5 51 14.5 C47 16.5 45 18.5 44 22 Z" fill="#fff" opacity=".7"/>' +
+         '<path {B} d="M37 48 C34 42 34 37 37 32 C39 38 42 42 46 45 Z"/><path {B} d="M63 48 C66 42 66 37 63 32 C61 38 58 42 54 45 Z"/>' },
+  catapult: { name: 'Catapult', accent: '#c9a27a', moves: 'Steps 1, flings friends',
+    desc: 'Steps one square. Or it flings an adjacent friendly piece over itself, landing two squares out on the far side and capturing any enemy that is there.',
+    art: '<path {B} d="M40 46 L50 22 L60 46 H54 L50 35 L46 46 Z"/>' +
+         '<path {B} d="M27 42 L68 15 L72 20 L31 47 Z"/><path {B} d="M62 13 C62 5 79 3 81 11 Z"/>' +
+         '<rect {B} x="22" y="45" width="56" height="10" rx="2"/><circle {A} cx="71" cy="5.5" r="5"/>' },
+  assassin: { name: 'Assassin', accent: '#ff2d55', moves: 'Knight jump, hit and run',
+    desc: 'Jumps like a knight. When it captures, it strikes and returns: the target is removed but the Assassin stays where it was.',
+    art: '<path {B} d="M50 6 C38 14 30 28 30 44 C30 50 32 54 34 57 H66 C68 54 70 50 70 44 C70 28 62 14 50 6 Z"/>' +
+         '<path {K} d="M38 44 C38 32 44 24 50 24 C56 24 62 32 62 44 C58 48 42 48 38 44 Z"/>' +
+         '<path fill="{acc}" d="M41 35 L48 37.5 L41 39 Z"/><path fill="{acc}" d="M59 35 L52 37.5 L59 39 Z"/>' },
+  void: { name: 'Void', accent: '#c084fc', moves: 'Steps 1 square',
+    desc: 'Steps one square in any direction. Enemy pieces that end their move next to it are pulled in and destroyed. Kings are immune.',
+    art: '<path d="M22 33 A28 9 -14 0 1 78 31" {L}/><path d="M22 33 A28 9 -14 0 1 78 31" {S}/>' +
+         '<circle {B} cx="50" cy="32" r="16"/><circle cx="50" cy="32" r="10" fill="#0c0a10"/>' +
+         '<circle cx="50" cy="32" r="10" fill="none" stroke="{acc}" stroke-width="1.6" opacity=".9"/>' +
+         '<path d="M22 33 A28 9 -14 0 0 78 31" {L}/><path d="M22 33 A28 9 -14 0 0 78 31" {S}/>' },
+};
+
+const WILD_IDS = Object.keys(WILD);
+
+const STD_NAMES = { P: 'Pawn', N: 'Knight', B: 'Bishop', R: 'Rook', Q: 'Queen', K: 'King', WALL: 'Stone wall' };
+const STD_DESC = {
+  P: 'Moves forward one square (two from its starting square) and captures diagonally. Promotes on the last rank, including into your wildcard.',
+  N: 'Jumps in an L: two squares one way, one square to the side.',
+  B: 'Slides any distance diagonally.',
+  R: 'Slides any distance along ranks and files.',
+  Q: 'Slides any distance in any direction.',
+  K: 'Steps one square in any direction. Lose it and you lose the game, whether it is checkmated, blown up or flattened.',
+  WALL: 'A stone wall raised by a Mason. It blocks every piece and crumbles after four turns.',
+};
+
+function pieceName(t) { return WILD[t] ? WILD[t].name : STD_NAMES[t]; }
+
+const WALL_ART = '<rect x="12" y="20" width="76" height="70" rx="5" fill="#8d8476" stroke="#2c2925" stroke-width="3.2"/>' +
+  '<path d="M12 43 H88 M12 66 H88 M38 20 V43 M64 20 V43 M26 43 V66 M52 43 V66 M76 43 V66 M38 66 V90 M64 66 V90" stroke="#2c2925" stroke-width="2.6" fill="none"/>' +
+  '<path d="M14 22 H86" stroke="#b3aa9b" stroke-width="2" opacity=".8"/><path d="M58 47 L54 55 L58 60" stroke="#2c2925" stroke-width="2" fill="none"/>';
+
+const SVG_CACHE = new Map();
+function pieceSVG(type, color) {
+  const key = type + color;
+  if (SVG_CACHE.has(key)) return SVG_CACHE.get(key);
+  let body;
+  if (type === 'WALL') body = WALL_ART;
+  else {
+    const w = WILD[type];
+    const acc = w ? w.accent : '#fff';
+    const tk = tokens(color, acc);
+    const src = w ? PED + w.art : STD_ART[type];
+    body = src.replace(/\{([BDKASCOL])\}/g, (_, k) => tk[k]).replace(/\{acc\}/g, acc);
+  }
+  const svg = `<svg viewBox="0 0 100 100" aria-hidden="true">${body}</svg>`;
+  SVG_CACHE.set(key, svg);
+  return svg;
+}
+
+/* Gradient definitions the pieces fill with. Injected once into the document. */
+function installPieceDefs() {
+  if (document.getElementById('piece-defs')) return;
+  const d = document.createElement('div');
+  d.innerHTML = '<svg id="piece-defs" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>' +
+    '<linearGradient id="gW" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#ffffff"/><stop offset=".58" stop-color="#f3f2f0"/><stop offset=".58" stop-color="#dcdad6"/><stop offset="1" stop-color="#cfccc7"/></linearGradient>' +
+    '<linearGradient id="gB" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#6d6b68"/><stop offset=".58" stop-color="#5d5b58"/><stop offset=".58" stop-color="#4b4946"/><stop offset="1" stop-color="#42403d"/></linearGradient>' +
+    '</defs></svg>';
+  document.body.appendChild(d.firstChild);
+}
+
+/* Wildcard Chess engine: the rules for the standard pieces and all 30 wildcards, plus the
+   computer opponent. Everything lives inside one function with no outside references so the
+   same source can be started inside a Web Worker (see game.js).
+
+   Squares are 0..63, rank * 8 + file, with rank 0 = White's back rank.
+   A piece is { t: type, c: 'w' | 'b' | 'n' (neutral wall), id, m: has moved, d: per-piece data }.
+   A move is { o: square the player clicks, f: piece that moves, t: target, k: kind, x: squares destroyed }. */
+function ChessEngine() {
+  'use strict';
+  const F = q => q & 7, R = q => q >> 3, SQ = (f, r) => r * 8 + f;
+  const on = (f, r) => f >= 0 && f < 8 && r >= 0 && r < 8;
+  const D8 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+  const D4 = D8.slice(0, 4), DG = D8.slice(4);
+  const KN = [[1, 2], [2, 1], [-1, 2], [-2, 1], [1, -2], [2, -1], [-1, -2], [-2, -1]];
+  const opp = c => (c === 'w' ? 'b' : 'w');
+  const ci = c => (c === 'w' ? 0 : 1);
+  const cheb = (a, b) => Math.max(Math.abs(F(a) - F(b)), Math.abs(R(a) - R(b)));
+
+  const ADJ = [], RING2 = [];
+  for (let q = 0; q < 64; q++) {
+    ADJ[q] = []; RING2[q] = [];
+    for (let t = 0; t < 64; t++) {
+      if (t === q) continue;
+      const d = cheb(q, t);
+      if (d === 1) ADJ[q].push(t);
+      if (d <= 2) RING2[q].push(t);
+    }
+  }
+
+  // Passive auras (Frost Warden freezes, Guardian shields), rebuilt for each position we generate in.
+  const FRZ = [new Uint8Array(64), new Uint8Array(64)];
+  const GRD = [new Uint8Array(64), new Uint8Array(64)];
+  const HAS_FRZ = [false, false], HAS_GRD = [false, false];
+  function setCtx(s) {
+    FRZ[0].fill(0); FRZ[1].fill(0); GRD[0].fill(0); GRD[1].fill(0);
+    HAS_FRZ[0] = HAS_FRZ[1] = HAS_GRD[0] = HAS_GRD[1] = false;
+    for (let q = 0; q < 64; q++) {
+      const p = s.b[q];
+      if (!p) continue;
+      if (p.t === 'frost') { const v = ci(opp(p.c)); HAS_FRZ[v] = true; for (const a of ADJ[q]) FRZ[v][a] = 1; }
+      else if (p.t === 'guardian') { const v = ci(p.c); HAS_GRD[v] = true; for (const a of ADJ[q]) GRD[v][a] = 1; }
+    }
+  }
+
+  function capOK(s, a, t) {
+    const p = s.b[t];
+    if (!p || p.c === a.c || p.c === 'n') return false;
+    if (p.t === 'golem' && a.t !== 'P' && a.t !== 'K') return false;
+    if (p.t === 'viper' && a.t === 'K') return false;
+    const v = ci(p.c);
+    if (HAS_GRD[v] && GRD[v][t]) return false;
+    return true;
+  }
+
+  const mv = (o, f, t, k, x) => ({ o, f, t, k, x });
+
+  function step(s, q, p, out, dirs, capture = true) {
+    const f = F(q), r = R(q);
+    for (const [dx, dy] of dirs) {
+      const nf = f + dx, nr = r + dy;
+      if (!on(nf, nr)) continue;
+      const t = SQ(nf, nr);
+      if (!s.b[t]) out.push(mv(q, q, t, 'n', null));
+      else if (capture && capOK(s, p, t)) out.push(mv(q, q, t, 'n', [t]));
+    }
+  }
+  function slide(s, q, p, out, dirs, max = 7) {
+    const f = F(q), r = R(q);
+    for (const [dx, dy] of dirs) {
+      for (let k = 1; k <= max; k++) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (!on(nf, nr)) break;
+        const t = SQ(nf, nr);
+        if (!s.b[t]) { out.push(mv(q, q, t, 'n', null)); continue; }
+        if (capOK(s, p, t)) out.push(mv(q, q, t, 'n', [t]));
+        break;
+      }
+    }
+  }
+  function uniq(list, out) {
+    const seen = new Set();
+    for (const m of list) { const key = m.t * 32 + (m.x ? 1 : 0); if (!seen.has(key)) { seen.add(key); out.push(m); } }
+  }
+
+  /* ---------- standard pieces ---------- */
+  function pawn(s, q, p, out) {
+    const dir = p.c === 'w' ? 1 : -1, f = F(q), r = R(q), start = p.c === 'w' ? 1 : 6, last = p.c === 'w' ? 7 : 0;
+    const nr = r + dir;
+    if (!on(f, nr)) return;
+    const add = (t, x, k) => {
+      if (R(t) === last) {
+        for (const pr of ['Q', 'R', 'B', 'N'].concat(s.wild[p.c] || [])) out.push({ o: q, f: q, t, k: k || 'n', x, promo: pr });
+      } else out.push(mv(q, q, t, k || 'n', x));
+    };
+    const t1 = SQ(f, nr);
+    if (!s.b[t1]) {
+      add(t1, null);
+      if (r === start) { const t2 = SQ(f, r + 2 * dir); if (!s.b[t2]) out.push({ o: q, f: q, t: t2, k: 'n', x: null, dbl: 1 }); }
+    }
+    for (const dx of [-1, 1]) {
+      const nf = f + dx;
+      if (!on(nf, nr)) continue;
+      const t = SQ(nf, nr);
+      if (s.b[t]) { if (capOK(s, p, t)) add(t, [t]); }
+      else if (t === s.ep) {
+        const vq = SQ(nf, r), v = s.b[vq];
+        if (v && v.t === 'P' && v.c !== p.c && capOK(s, p, vq)) out.push(mv(q, q, t, 'ep', [vq]));
+      }
+    }
+  }
+  function king(s, q, p, out, noCastle) {
+    step(s, q, p, out, D8);
+    if (noCastle || p.m) return;
+    const r = p.c === 'w' ? 0 : 7;
+    if (q !== SQ(4, r)) return;
+    const rk = s.b[SQ(7, r)];
+    if (rk && rk.t === 'R' && rk.c === p.c && !rk.m && !s.b[SQ(5, r)] && !s.b[SQ(6, r)])
+      out.push({ o: q, f: q, t: SQ(6, r), k: 'castle', x: null, rf: SQ(7, r), rt: SQ(5, r), pass: SQ(5, r) });
+    const rq = s.b[SQ(0, r)];
+    if (rq && rq.t === 'R' && rq.c === p.c && !rq.m && !s.b[SQ(1, r)] && !s.b[SQ(2, r)] && !s.b[SQ(3, r)])
+      out.push({ o: q, f: q, t: SQ(2, r), k: 'castle', x: null, rf: SQ(0, r), rt: SQ(3, r), pass: SQ(3, r) });
+  }
+
+  const STD = {
+    P: pawn,
+    N: (s, q, p, out) => step(s, q, p, out, KN),
+    B: (s, q, p, out) => slide(s, q, p, out, DG),
+    R: (s, q, p, out) => slide(s, q, p, out, D4),
+    Q: (s, q, p, out) => slide(s, q, p, out, D8),
+    K: king,
+  };
+  const STD_VAL = { P: 100, N: 320, B: 330, R: 500, Q: 900, K: 0, WALL: 0 };
+
+  /* ---------- the 30 wildcards ---------- */
+  const W = {
+    bomber: { v: 400, gen(s, q, p, out) {
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) {
+        const nf = f + dx, nr = r + dy;
+        if (!on(nf, nr)) continue;
+        const t = SQ(nf, nr);
+        if (!s.b[t]) { out.push(mv(q, q, t, 'n', null)); continue; }
+        if (!capOK(s, p, t)) continue;
+        const x = [t]; let bad = false;
+        for (const a of ADJ[t]) {
+          const ap = s.b[a];
+          if (!ap || ap.c === 'n') continue;
+          if (ap.t === 'K' && ap.c === p.c) { bad = true; break; }
+          x.push(a);
+        }
+        if (!bad) out.push(mv(q, q, t, 'boom', x));
+      }
+    } },
+    phantom: { v: 600, gen(s, q, p, out) {
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D4) {
+        for (let k = 1; k < 8; k++) {
+          const nf = f + dx * k, nr = r + dy * k;
+          if (!on(nf, nr)) break;
+          const t = SQ(nf, nr);
+          if (!s.b[t]) out.push(mv(q, q, t, 'n', null));
+          else if (capOK(s, p, t)) out.push(mv(q, q, t, 'n', [t]));
+        }
+      }
+    } },
+    blink: { v: 360, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      for (let t = 0; t < 64; t++) if (!s.b[t] && cheb(q, t) > 1) out.push({ o: q, f: q, t, k: 'n', x: null, tele: 1 });
+    } },
+    trickster: { v: 320, gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      for (const t of RING2[q]) { const tp = s.b[t]; if (tp && tp.c === p.c) out.push(mv(q, q, t, 'swap', null)); }
+    } },
+    archer: { v: 450, gen(s, q, p, out) {
+      step(s, q, p, out, D8, false);
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) for (const k of [2, 3]) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (!on(nf, nr)) continue;
+        const t = SQ(nf, nr);
+        if (capOK(s, p, t)) out.push(mv(q, q, t, 'shoot', [t]));
+      }
+    } },
+    necro: { v: 420, init: () => ({ ch: 2 }), gen(s, q, p, out) {
+      slide(s, q, p, out, DG, 2);
+      if (p.d.ch <= 0) return;
+      const rt = lastLost(s, p.c);
+      if (!rt) return;
+      for (const t of ADJ[q]) {
+        if (s.b[t]) continue;
+        if (rt === 'P' && (R(t) === 0 || R(t) === 7)) continue;
+        out.push({ o: q, f: q, t, k: 'raise', x: null, rt });
+      }
+    } },
+    frost: { v: 400, gen: (s, q, p, out) => step(s, q, p, out, D8) },
+    wyvern: { v: 560, gen(s, q, p, out) {
+      const seen = new Uint8Array(64); seen[q] = 1;
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of KN) {
+        const nf = f + dx, nr = r + dy;
+        if (!on(nf, nr)) continue;
+        const t1 = SQ(nf, nr);
+        if (s.b[t1]) { if (!seen[t1] && capOK(s, p, t1)) { seen[t1] = 1; out.push(mv(q, q, t1, 'n', [t1])); } continue; }
+        if (!seen[t1]) { seen[t1] = 1; out.push(mv(q, q, t1, 'n', null)); }
+        for (const [ex, ey] of KN) {
+          const f2 = nf + ex, r2 = nr + ey;
+          if (!on(f2, r2)) continue;
+          const t2 = SQ(f2, r2);
+          if (seen[t2]) continue;
+          if (!s.b[t2]) { seen[t2] = 1; out.push(mv(q, q, t2, 'n', null)); }
+          else if (capOK(s, p, t2)) { seen[t2] = 1; out.push(mv(q, q, t2, 'n', [t2])); }
+        }
+      }
+    } },
+    hopper: { v: 260, gen(s, q, p, out) {
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) {
+        let k = 1;
+        while (on(f + dx * k, r + dy * k) && !s.b[SQ(f + dx * k, r + dy * k)]) k++;
+        const lf = f + dx * (k + 1), lr = r + dy * (k + 1);
+        if (!on(f + dx * k, r + dy * k) || !on(lf, lr)) continue;
+        const t = SQ(lf, lr);
+        if (!s.b[t]) out.push(mv(q, q, t, 'n', null));
+        else if (capOK(s, p, t)) out.push(mv(q, q, t, 'n', [t]));
+      }
+    } },
+    serpent: { v: 420, gen(s, q, p, out) {
+      const seen = new Uint8Array(64); seen[q] = 1;
+      let front = [q];
+      for (let stepN = 1; stepN <= 3; stepN++) {
+        const next = [];
+        for (const c of front) for (const [dx, dy] of D4) {
+          const nf = F(c) + dx, nr = R(c) + dy;
+          if (!on(nf, nr)) continue;
+          const t = SQ(nf, nr);
+          if (seen[t]) continue;
+          seen[t] = 1;
+          if (!s.b[t]) { next.push(t); out.push(mv(q, q, t, 'n', null)); }
+          else if (capOK(s, p, t)) out.push(mv(q, q, t, 'n', [t]));
+        }
+        front = next;
+      }
+    } },
+    ricochet: { v: 400, gen(s, q, p, out) {
+      const seen = new Uint8Array(64);
+      for (const [dx0, dy0] of DG) {
+        let x = F(q), y = R(q), dx = dx0, dy = dy0, bounced = false;
+        for (let i = 0; i < 16; i++) {
+          let nx = x + dx, ny = y + dy;
+          if (!on(nx, ny)) {
+            if (bounced) break;
+            bounced = true;
+            if (nx < 0 || nx > 7) dx = -dx;
+            if (ny < 0 || ny > 7) dy = -dy;
+            nx = x + dx; ny = y + dy;
+            if (!on(nx, ny)) break;
+          }
+          const t = SQ(nx, ny);
+          if (t === q) break;
+          if (!s.b[t]) { if (!seen[t]) { seen[t] = 1; out.push(mv(q, q, t, 'n', null)); } }
+          else { if (!seen[t] && capOK(s, p, t)) { seen[t] = 1; out.push(mv(q, q, t, 'n', [t])); } break; }
+          x = nx; y = ny;
+        }
+      }
+    } },
+    orbit: { v: 560, gen(s, q, p, out) {
+      const seen = new Uint8Array(64);
+      for (const [dx, dy] of D4) {
+        let x = F(q), y = R(q);
+        for (let i = 0; i < 7; i++) {
+          x = (x + dx + 8) & 7; y = (y + dy + 8) & 7;
+          const t = SQ(x, y);
+          if (t === q) break;
+          if (!s.b[t]) { if (!seen[t]) { seen[t] = 1; out.push(mv(q, q, t, 'n', null)); } continue; }
+          if (!seen[t] && capOK(s, p, t)) { seen[t] = 1; out.push(mv(q, q, t, 'n', [t])); }
+          break;
+        }
+      }
+    } },
+    juggernaut: { v: 600, gen(s, q, p, out) {
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D4) {
+        let x = [];
+        for (let k = 1; k <= 3; k++) {
+          const nf = f + dx * k, nr = r + dy * k;
+          if (!on(nf, nr)) break;
+          const t = SQ(nf, nr);
+          if (s.b[t]) {
+            if (!capOK(s, p, t)) break;
+            x = x.concat(t);
+            out.push(mv(q, q, t, 'crush', x));
+          } else out.push(x.length ? mv(q, q, t, 'crush', x) : mv(q, q, t, 'n', null));
+        }
+      }
+    } },
+    cannon: { v: 450, gen(s, q, p, out) {
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D4) {
+        let screen = false;
+        for (let k = 1; k < 8; k++) {
+          const nf = f + dx * k, nr = r + dy * k;
+          if (!on(nf, nr)) break;
+          const t = SQ(nf, nr), tp = s.b[t];
+          if (!screen) { if (!tp) out.push(mv(q, q, t, 'n', null)); else screen = true; }
+          else if (tp) { if (capOK(s, p, t)) out.push(mv(q, q, t, 'n', [t])); break; }
+        }
+      }
+    } },
+    tempest: { v: 400, gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      const f = F(q), r = R(q), x = [], pushes = [];
+      for (const [dx, dy] of D8) {
+        const nf = f + dx, nr = r + dy;
+        if (!on(nf, nr)) continue;
+        const a = SQ(nf, nr), ap = s.b[a];
+        if (!ap || ap.c === p.c || ap.c === 'n') continue;
+        const f2 = nf + dx, r2 = nr + dy;
+        if (!on(f2, r2)) { if (ap.t !== 'K') x.push(a); }
+        else { const d = SQ(f2, r2); if (!s.b[d]) pushes.push(a, d); }
+      }
+      if (x.length || pushes.length) out.push({ o: q, f: q, t: q, k: 'gust', x: x.length ? x : null, pushes });
+    } },
+    mimic: { v: 400, gen(s, q, p, out) {
+      const tmp = [];
+      step(s, q, p, tmp, D8);
+      const ty = new Set();
+      for (const a of ADJ[q]) { const ap = s.b[a]; if (ap && ap.c !== 'n') ty.add(ap.t); }
+      if (ty.has('N')) step(s, q, p, tmp, KN);
+      if (ty.has('B') || ty.has('Q')) slide(s, q, p, tmp, DG);
+      if (ty.has('R') || ty.has('Q')) slide(s, q, p, tmp, D4);
+      if (ty.has('P')) {
+        const dir = p.c === 'w' ? 1 : -1, f = F(q), nr = R(q) + dir;
+        if (on(f, nr) && !s.b[SQ(f, nr)]) tmp.push(mv(q, q, SQ(f, nr), 'n', null));
+        for (const dx of [-1, 1]) if (on(f + dx, nr) && capOK(s, p, SQ(f + dx, nr))) tmp.push(mv(q, q, SQ(f + dx, nr), 'n', [SQ(f + dx, nr)]));
+      }
+      uniq(tmp, out);
+    } },
+    siren: { v: 400, init: () => ({ ch: 1 }), gen(s, q, p, out) {
+      slide(s, q, p, out, DG, 2);
+      if (p.d.ch <= 0) return;
+      for (const a of ADJ[q]) {
+        const ap = s.b[a];
+        if (!ap || ap.c === p.c || ap.c === 'n' || ap.t === 'K' || ap.t === 'Q') continue;
+        if (ap.t === 'P' && (R(a) === 0 || R(a) === 7)) continue;
+        out.push(mv(q, q, a, 'charm', null));
+      }
+    } },
+    guardian: { v: 420, gen: (s, q, p, out) => step(s, q, p, out, D8) },
+    golem: { v: 400, gen: (s, q, p, out) => step(s, q, p, out, D4) },
+    phoenix: { v: 520, init: q => ({ home: q, reborn: false }), gen: (s, q, p, out) => slide(s, q, p, out, D8, 2) },
+    viper: { v: 360, gen: (s, q, p, out) => step(s, q, p, out, KN) },
+    brood: { v: 400, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      for (const a of ADJ[q]) if (!s.b[a] && R(a) !== 0 && R(a) !== 7) out.push(mv(q, q, a, 'spawn', null));
+    } },
+    chrono: { v: 400, init: () => ({ ch: 1 }), gen(s, q, p, out) { step(s, q, p, out, D4); slide(s, q, p, out, DG, 3); } },
+    mason: { v: 340, gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.walls) { let n = 0; for (const w of s.b) if (w && w.t === 'WALL' && w.d.o === p.c) n++; if (n >= 2) return; }
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) for (let k = 1; k <= 2; k++) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (on(nf, nr) && !s.b[SQ(nf, nr)]) out.push(mv(q, q, SQ(nf, nr), 'wall', null));
+      }
+    } },
+    vampire: { v: 330, init: () => ({ k: 0 }), gen(s, q, p, out) {
+      const tmp = [];
+      step(s, q, p, tmp, D8);
+      if (p.d.k >= 1) step(s, q, p, tmp, KN);
+      if (p.d.k >= 2) slide(s, q, p, tmp, D8);
+      uniq(tmp, out);
+    } },
+    marauder: { v: 400, gen(s, q, p, out) {
+      step(s, q, p, out, DG, false);
+      const best = new Map(), jumped = [];
+      const dfs = (cur, depth) => {
+        if (depth >= 4) return;
+        for (const [dx, dy] of DG) {
+          const lf = F(cur) + 2 * dx, lr = R(cur) + 2 * dy;
+          if (!on(lf, lr)) continue;
+          const over = SQ(F(cur) + dx, R(cur) + dy), land = SQ(lf, lr);
+          if (jumped.includes(over) || !capOK(s, p, over)) continue;
+          if (s.b[land] && land !== q) continue;
+          jumped.push(over);
+          const prev = best.get(land);
+          if (land !== q && (!prev || prev.x.length < jumped.length)) best.set(land, mv(q, q, land, 'jump', jumped.slice()));
+          dfs(land, depth + 1);
+          jumped.pop();
+        }
+      };
+      dfs(q, 0);
+      for (const m of best.values()) out.push(m);
+    } },
+    hexer: { v: 400, init: () => ({ ch: 1 }), gen(s, q, p, out) {
+      slide(s, q, p, out, D4, 2);
+      if (p.d.ch <= 0) return;
+      for (const t of RING2[q]) {
+        const tp = s.b[t];
+        if (!tp || tp.c === p.c || tp.c === 'n' || tp.t === 'K' || tp.t === 'P') continue;
+        if ((tp.c === 'w' && R(t) === 7) || (tp.c === 'b' && R(t) === 0)) continue;
+        out.push(mv(q, q, t, 'hex', null));
+      }
+    } },
+    catapult: { v: 340, gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) {
+        if (!on(f + dx, r + dy)) continue;
+        const a = SQ(f + dx, r + dy), ap = s.b[a];
+        if (!ap || ap.c !== p.c) continue;
+        const lf = f - 2 * dx, lr = r - 2 * dy;
+        if (!on(lf, lr)) continue;
+        if (ap.t === 'P' && (lr === 0 || lr === 7)) continue;
+        const L = SQ(lf, lr);
+        if (!s.b[L]) out.push(mv(q, a, L, 'launch', null));
+        else if (capOK(s, ap, L)) out.push(mv(q, a, L, 'launch', [L]));
+      }
+    } },
+    assassin: { v: 360, gen(s, q, p, out) {
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of KN) {
+        const nf = f + dx, nr = r + dy;
+        if (!on(nf, nr)) continue;
+        const t = SQ(nf, nr);
+        if (!s.b[t]) out.push(mv(q, q, t, 'n', null));
+        else if (capOK(s, p, t)) out.push(mv(q, q, t, 'strike', [t]));
+      }
+    } },
+    void: { v: 420, gen: (s, q, p, out) => step(s, q, p, out, D8) },
+  };
+  const WILD_IDS = Object.keys(W);
+
+  function value(p) {
+    if (p.t in STD_VAL) return STD_VAL[p.t];
+    if (p.t === 'vampire') return 330 + 220 * Math.min(p.d.k, 2);
+    const w = W[p.t];
+    let v = w.v;
+    if ((p.t === 'necro' || p.t === 'siren' || p.t === 'hexer' || p.t === 'chrono') && p.d.ch <= 0) v -= 60;
+    if (p.t === 'phoenix' && p.d.reborn) v -= 80;
+    return v;
+  }
+  function initData(t, q) { const w = W[t]; return w && w.init ? w.init(q) : null; }
+  function lastLost(s, c) {
+    const L = s.lost[c];
+    for (let i = L.length - 1; i >= 0; i--) if (L[i] !== 'K' && L[i] !== 'WALL') return L[i];
+    return null;
+  }
+
+  function genAll(s, c, noCastle) {
+    setCtx(s);
+    const out = [], fz = HAS_FRZ[ci(c)] ? FRZ[ci(c)] : null;
+    for (let q = 0; q < 64; q++) {
+      const p = s.b[q];
+      if (!p || p.c !== c) continue;
+      if (fz && fz[q] && p.t !== 'K') continue;
+      if (p.t === 'K') king(s, q, p, out, noCastle);
+      else if (STD[p.t]) STD[p.t](s, q, p, out);
+      else W[p.t].gen(s, q, p, out);
+    }
+    return out;
+  }
+
+  /* ---------- making moves ---------- */
+  function newPiece(ns, t, c, q) { return { t, c, id: ns.nid++, m: false, d: initData(t, q) }; }
+
+  function makeMove(s, m) {
+    const b = s.b.slice();
+    const c = s.turn;
+    const ns = { b, turn: c, ep: -1, ply: s.ply + 1, half: s.half + 1, lost: s.lost, nid: s.nid, dead: s.dead,
+      walls: s.walls, wild: s.wild, last: m, extra: false, events: null };
+    const pend = [];
+    const ev = e => { (ns.events || (ns.events = [])).push(e); };
+    const kills = [];
+    const kill = q => {
+      const p = b[q];
+      if (!p || p.c === 'n') return null;
+      b[q] = null;
+      if (p.t === 'K' && !ns.dead) ns.dead = p.c;
+      ns.lost = { w: ns.lost.w, b: ns.lost.b, [p.c]: ns.lost[p.c].concat(p.t) };
+      if (p.t === 'phoenix' && p.d && !p.d.reborn) pend.push(p);
+      ns.half = 0;
+      return p;
+    };
+    const moveTo = (f, t) => { const p = b[f]; b[f] = null; b[t] = p.m ? p : { ...p, m: true }; return b[t]; };
+    const setD = (q, d) => { b[q] = { ...b[q], d: { ...b[q].d, ...d } }; };
+    let actor = -1, mover = -1;
+
+    switch (m.k) {
+      case 'n': case 'launch': case 'ep': case 'crush': case 'jump': {
+        const pc = b[m.f];
+        if (m.x) for (const q of m.x) { const k = kill(q); if (k) kills.push([q, k]); }
+        moveTo(m.f, m.t);
+        actor = mover = m.t;
+        if (pc.t === 'P') {
+          ns.half = 0;
+          if (m.dbl) ns.ep = (m.f + m.t) >> 1;
+          if (m.promo) b[m.t] = { ...b[m.t], t: m.promo, d: initData(m.promo, m.t) };
+        }
+        if (m.tele) setD(m.t, { cd: s.ply + 5 });
+        break;
+      }
+      case 'castle': moveTo(m.f, m.t); moveTo(m.rf, m.rt); break;
+      case 'boom': for (const q of m.x) kill(q); ev({ k: 'boom', q: m.t }); break;
+      case 'swap': { const a = b[m.f], t = b[m.t]; b[m.f] = { ...t, m: true }; b[m.t] = { ...a, m: true }; mover = m.t; break; }
+      case 'shoot': case 'strike':
+        for (const q of m.x) { const k = kill(q); if (k) kills.push([q, k]); }
+        actor = m.o; break;
+      case 'raise': {
+        setD(m.o, { ch: b[m.o].d.ch - 1 });
+        const L = ns.lost[c].slice(), i = L.lastIndexOf(m.rt);
+        if (i >= 0) L.splice(i, 1);
+        ns.lost = { ...ns.lost, [c]: L };
+        b[m.t] = newPiece(ns, m.rt, c, m.t); b[m.t].m = true;
+        break;
+      }
+      case 'gust':
+        if (m.x) for (const q of m.x) kill(q);
+        for (let i = 0; i < m.pushes.length; i += 2) moveTo(m.pushes[i], m.pushes[i + 1]);
+        break;
+      case 'charm': b[m.t] = { ...b[m.t], c, m: true }; setD(m.o, { ch: 0 }); break;
+      case 'spawn': b[m.t] = newPiece(ns, 'P', c, m.t); setD(m.o, { cd: s.ply + 6 }); break;
+      case 'wall': b[m.t] = { t: 'WALL', c: 'n', id: ns.nid++, m: true, d: { exp: s.ply + 8, o: c } }; ns.walls++; break;
+      case 'hex': b[m.t] = { ...b[m.t], t: 'P', d: null, m: true }; setD(m.o, { ch: 0 }); break;
+    }
+
+    // Venom: whatever lands on a Viper's square dies with it.
+    if (mover >= 0 && b[mover] && kills.some(([q, k]) => q === mover && k.t === 'viper')) {
+      kill(mover); ev({ k: 'venom', q: mover }); actor = -1; mover = -1;
+    }
+    if (actor >= 0 && kills.length && b[actor]) {
+      const a = b[actor];
+      if (a.t === 'vampire') { setD(actor, { k: a.d.k + kills.length }); if (a.d.k < 2) ev({ k: 'grow', q: actor }); }
+      else if (a.t === 'chrono' && a.d.ch > 0) { setD(actor, { ch: 0 }); ns.extra = true; ev({ k: 'extra', q: actor }); }
+    }
+    // The Void swallows enemy pieces that finish their move beside it.
+    if (mover >= 0 && b[mover] && b[mover].t !== 'K' && b[mover].c === c) {
+      for (const a of ADJ[mover]) { const ap = b[a]; if (ap && ap.t === 'void' && ap.c !== c) { kill(mover); ev({ k: 'void', q: mover, by: a }); break; } }
+    }
+    for (const p of pend) {
+      const h = p.d.home;
+      if (!b[h]) {
+        b[h] = { ...p, id: ns.nid++, m: true, d: { ...p.d, reborn: true } };
+        const L = ns.lost[p.c].slice(), i = L.lastIndexOf('phoenix');
+        if (i >= 0) L.splice(i, 1);
+        ns.lost = { ...ns.lost, [p.c]: L };
+        ev({ k: 'reborn', q: h });
+      }
+    }
+    if (ns.walls > 0) {
+      for (let q = 0; q < 64; q++) { const w = b[q]; if (w && w.t === 'WALL' && w.d.exp <= ns.ply) { b[q] = null; ns.walls--; ev({ k: 'crumble', q }); } }
+    }
+    ns.turn = ns.extra ? c : opp(c);
+    return ns;
+  }
+
+  /* ---------- legality and game status ---------- */
+  function findKing(s, c) { for (let q = 0; q < 64; q++) { const p = s.b[q]; if (p && p.t === 'K' && p.c === c) return q; } return -1; }
+  function attacked(s, q, by) {
+    for (const m of genAll(s, by, true)) if (m.x && m.x.includes(q)) return true;
+    return false;
+  }
+  function inCheck(s, c) { const k = findKing(s, c); return k < 0 || attacked(s, k, opp(c)); }
+
+  function legalMoves(s) {
+    if (s.dead) return [];
+    const c = s.turn, out = [];
+    for (const m of genAll(s, c, false)) {
+      const ns = makeMove(s, m);
+      if (ns.dead === c) continue;
+      if (ns.dead === opp(c)) { out.push(m); continue; }
+      if (inCheck(ns, c)) continue;
+      if (m.k === 'castle') {
+        if (inCheck(s, c)) continue;
+        if (inCheck(makeMove(s, mv(m.f, m.f, m.pass, 'n', null)), c)) continue;
+      }
+      out.push(m);
+    }
+    return out;
+  }
+
+  function status(s, legal) {
+    if (s.dead) return { over: true, winner: opp(s.dead), reason: 'king' };
+    legal = legal || legalMoves(s);
+    if (!legal.length) {
+      if (inCheck(s, s.turn)) return { over: true, winner: opp(s.turn), reason: 'mate' };
+      return { over: true, winner: null, reason: 'stalemate' };
+    }
+    if (s.half >= 100) return { over: true, winner: null, reason: 'fifty' };
+    let others = 0;
+    for (const p of s.b) if (p && p.t !== 'K' && p.c !== 'n') others++;
+    if (!others) return { over: true, winner: null, reason: 'material' };
+    return { over: false };
+  }
+
+  function newGame(o) {
+    const b = new Array(64).fill(null);
+    const s = { b, turn: 'w', ep: -1, ply: 0, half: 0, lost: { w: [], b: [] }, nid: 1, dead: null, walls: 0,
+      wild: o.wild, last: null, extra: false, events: null };
+    const back = 'RNBQKBNR';
+    for (let f = 0; f < 8; f++) {
+      b[SQ(f, 0)] = newPiece(s, back[f], 'w', SQ(f, 0));
+      b[SQ(f, 1)] = newPiece(s, 'P', 'w', SQ(f, 1));
+      b[SQ(f, 6)] = newPiece(s, 'P', 'b', SQ(f, 6));
+      b[SQ(f, 7)] = newPiece(s, back[f], 'b', SQ(f, 7));
+    }
+    o.wild.w.forEach((t, i) => { const q = SQ(o.files.w[i], 2); b[q] = newPiece(s, t, 'w', q); });
+    o.wild.b.forEach((t, i) => { const q = SQ(o.files.b[i], 5); b[q] = newPiece(s, t, 'b', q); });
+    return s;
+  }
+
+  /* ---------- evaluation ---------- */
+  const T = a => a; // tables are written rank 8 first, from White's side
+  const PST = {
+    P: T([0,0,0,0,0,0,0,0, 50,50,50,50,50,50,50,50, 10,10,20,30,30,20,10,10, 5,5,10,25,25,10,5,5, 0,0,0,20,20,0,0,0, 5,-5,-10,0,0,-10,-5,5, 5,10,10,-20,-20,10,10,5, 0,0,0,0,0,0,0,0]),
+    N: T([-50,-40,-30,-30,-30,-30,-40,-50, -40,-20,0,0,0,0,-20,-40, -30,0,10,15,15,10,0,-30, -30,5,15,20,20,15,5,-30, -30,0,15,20,20,15,0,-30, -30,5,10,15,15,10,5,-30, -40,-20,0,5,5,0,-20,-40, -50,-40,-30,-30,-30,-30,-40,-50]),
+    B: T([-20,-10,-10,-10,-10,-10,-10,-20, -10,0,0,0,0,0,0,-10, -10,0,5,10,10,5,0,-10, -10,5,5,10,10,5,5,-10, -10,0,10,10,10,10,0,-10, -10,10,10,10,10,10,10,-10, -10,5,0,0,0,0,5,-10, -20,-10,-10,-10,-10,-10,-10,-20]),
+    R: T([0,0,0,0,0,0,0,0, 5,10,10,10,10,10,10,5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, -5,0,0,0,0,0,0,-5, 0,0,0,5,5,0,0,0]),
+    Q: T([-20,-10,-10,-5,-5,-10,-10,-20, -10,0,0,0,0,0,0,-10, -10,0,5,5,5,5,0,-10, -5,0,5,5,5,5,0,-5, 0,0,5,5,5,5,0,-5, -10,5,5,5,5,5,0,-10, -10,0,5,0,0,0,0,-10, -20,-10,-10,-5,-5,-10,-10,-20]),
+    K: T([-30,-40,-40,-50,-50,-40,-40,-30, -30,-40,-40,-50,-50,-40,-40,-30, -30,-40,-40,-50,-50,-40,-40,-30, -30,-40,-40,-50,-50,-40,-40,-30, -20,-30,-30,-40,-40,-30,-30,-20, -10,-20,-20,-20,-20,-20,-20,-10, 20,20,0,0,0,0,20,20, 20,30,10,0,0,10,30,20]),
+    KE: T([-50,-40,-30,-20,-20,-30,-40,-50, -30,-20,-10,0,0,-10,-20,-30, -30,-10,20,30,30,20,-10,-30, -30,-10,30,40,40,30,-10,-30, -30,-10,30,40,40,30,-10,-30, -30,-10,20,30,30,20,-10,-30, -30,-30,0,0,0,0,-30,-30, -50,-30,-30,-30,-30,-30,-30,-50]),
+  };
+  const CENT = [];
+  for (let q = 0; q < 64; q++) CENT[q] = Math.round((3.5 - Math.max(Math.abs(F(q) - 3.5), Math.abs(R(q) - 3.5))) * 7);
+
+  function evaluate(s) {
+    let sc = 0, heavy = 0;
+    for (const p of s.b) if (p && p.c !== 'n' && p.t !== 'K' && p.t !== 'P') heavy += value(p);
+    const endgame = heavy < 2600;
+    for (let q = 0; q < 64; q++) {
+      const p = s.b[q];
+      if (!p || p.c === 'n') continue;
+      const idx = p.c === 'w' ? (7 - R(q)) * 8 + F(q) : R(q) * 8 + F(q);
+      let v = value(p);
+      if (p.t === 'K') v += (endgame ? PST.KE : PST.K)[idx];
+      else if (PST[p.t]) v += PST[p.t][idx];
+      else v += CENT[q] + (p.c === 'w' ? R(q) : 7 - R(q)) * 3;
+      sc += p.c === 'w' ? v : -v;
+    }
+    return (s.turn === 'w' ? sc : -sc) + 10;
+  }
+
+  /* ---------- search ---------- */
+  const MATE = 100000, INF = 1e9;
+  let nodes = 0, deadline = 0, aborted = false, QMAX = 4;
+
+  function orderScore(s, m, c) {
+    let sc = 0;
+    if (m.x) for (const q of m.x) {
+      const p = s.b[q];
+      if (!p) continue;
+      const v = p.t === 'K' ? 50000 : value(p);
+      sc += p.c === c ? -v : v;
+    }
+    if (m.x && sc > 0) sc += 1000;
+    if (m.promo) sc += m.promo === 'Q' ? 900 : 100;
+    if (m.k !== 'n' && m.k !== 'castle') sc += 30;
+    return sc;
+  }
+  function ordered(s, ms) {
+    const c = s.turn;
+    for (const m of ms) m._s = orderScore(s, m, c);
+    return ms.sort((a, b) => b._s - a._s);
+  }
+  function hitsKing(ms, k) { if (k < 0) return false; for (const m of ms) if (m.x && m.x.includes(k)) return true; return false; }
+
+  function qs(s, alpha, beta, ply, qd) {
+    if (s.dead) return s.dead === s.turn ? -(MATE - ply) : MATE - ply;
+    const stand = evaluate(s);
+    if (qd >= QMAX) return stand;
+    if (stand >= beta) return stand;
+    if (stand > alpha) alpha = stand;
+    if ((++nodes & 1023) === 0 && Date.now() > deadline) aborted = true;
+    if (aborted) return alpha;
+    const c = s.turn, ms = genAll(s, c, true);
+    if (hitsKing(ms, findKing(s, opp(c)))) return MATE - ply;
+    const caps = [];
+    for (const m of ms) if (m.x || m.promo === 'Q') { m._s = orderScore(s, m, c); if (m._s > 0) caps.push(m); }
+    caps.sort((a, b) => b._s - a._s);
+    for (const m of caps) {
+      const ns = makeMove(s, m);
+      if (ns.dead === c) continue;
+      const v = ns.turn === c ? qs(ns, alpha, beta, ply + 1, qd + 1) : -qs(ns, -beta, -alpha, ply + 1, qd + 1);
+      if (v >= beta) return v;
+      if (v > alpha) alpha = v;
+    }
+    return alpha;
+  }
+
+  function ab(s, depth, alpha, beta, ply) {
+    if (s.dead) return s.dead === s.turn ? -(MATE - ply) : MATE - ply;
+    if (depth <= 0) return qs(s, alpha, beta, ply, 0);
+    if ((++nodes & 1023) === 0 && Date.now() > deadline) aborted = true;
+    if (aborted) return 0;
+    const c = s.turn, ms = genAll(s, c, false);
+    if (hitsKing(ms, findKing(s, opp(c)))) return MATE - ply;
+    if (!ms.length) return 0;
+    ordered(s, ms);
+    let best = -INF;
+    for (const m of ms) {
+      const ns = makeMove(s, m);
+      if (ns.dead === c) continue;
+      const v = ns.turn === c ? ab(ns, depth - 1, alpha, beta, ply + 1) : -ab(ns, depth - 1, -beta, -alpha, ply + 1);
+      if (aborted) return 0;
+      if (v > best) best = v;
+      if (v > alpha) alpha = v;
+      if (alpha >= beta) break;
+    }
+    return best === -INF ? evaluate(s) : best;
+  }
+
+  const LEVELS = {
+    easy: { depth: 1, q: 0, noise: 170, blunder: 0.2, time: 600 },
+    medium: { depth: 2, q: 3, noise: 40, blunder: 0.04, time: 1500 },
+    pro: { depth: 4, q: 5, noise: 6, blunder: 0, time: 2400 },
+    xtreme: { depth: 8, q: 8, noise: 0, blunder: 0, time: 4000 },
+  };
+
+  /* Returns the index of the chosen move in legalMoves(s). */
+  function think(s, level) {
+    const L = LEVELS[level] || LEVELS.medium;
+    const legal = legalMoves(s);
+    if (!legal.length) return -1;
+    if (legal.length === 1) return 0;
+    const c = s.turn;
+    if (L.blunder && Math.random() < L.blunder) return Math.floor(Math.random() * legal.length);
+    deadline = Date.now() + L.time; aborted = false; nodes = 0; QMAX = L.q;
+    const root = legal.map((m, i) => ({ m, i, v: orderScore(s, m, c) })).sort((a, b) => b.v - a.v);
+    let bestIdx = root[0].i;
+    for (let d = 1; d <= L.depth; d++) {
+      let alpha = -INF, bestV = -INF, bi = -1;
+      for (const r of root) {
+        const ns = makeMove(s, r.m);
+        let v;
+        if (ns.dead === opp(c)) v = MATE;
+        else v = ns.turn === c ? ab(ns, d - 1, alpha, INF, 1) : -ab(ns, d - 1, -INF, -alpha, 1);
+        if (aborted) break;
+        if (L.noise) v += (Math.random() * 2 - 1) * L.noise;
+        r.v = v;
+        if (v > bestV) { bestV = v; bi = r.i; }
+        if (!L.noise && v > alpha) alpha = v;
+      }
+      if (aborted) break;
+      bestIdx = bi;
+      root.sort((a, b) => b.v - a.v);
+      if (bestV >= MATE - 100) break;
+    }
+    return bestIdx;
+  }
+
+  /* Cheap move picker for the menu's background exhibition game. */
+  function quickPick(s) {
+    const legal = legalMoves(s);
+    if (!legal.length) return -1;
+    let best = 0, bv = -INF;
+    legal.forEach((m, i) => {
+      const ns = makeMove(s, m);
+      const v = (ns.dead ? MATE : -evaluate(ns)) + Math.random() * 90 + (m.k !== 'n' ? 25 : 0);
+      if (v > bv) { bv = v; best = i; }
+    });
+    return best;
+  }
+
+  /* A small sample position for the Codex: the wildcard on d4 surrounded by a few pieces. */
+  function demo(type) {
+    const b = new Array(64).fill(null);
+    const s = { b, turn: 'w', ep: -1, ply: 10, half: 0, lost: { w: ['N'], b: [] }, nid: 1, dead: null, walls: 0,
+      wild: { w: [type], b: [] }, last: null, extra: false };
+    const put = (f, r, t, c) => { b[SQ(f, r)] = newPiece(s, t, c, SQ(f, r)); };
+    put(3, 3, type, 'w'); put(2, 2, 'N', 'w');
+    put(4, 4, 'P', 'b'); put(3, 5, 'P', 'b'); put(1, 5, 'B', 'b'); put(3, 7, 'R', 'b'); put(6, 6, 'N', 'b');
+    setCtx(s);
+    const out = [];
+    W[type].gen(s, 27, b[27], out);
+    return { s, moves: out };
+  }
+
+  return { newGame, legalMoves, makeMove, status, inCheck, findKing, think, quickPick, demo, value, evaluate,
+    WILD_IDS, LEVELS, sqName: q => 'abcdefgh'[F(q)] + (R(q) + 1), F, R, SQ, stats: () => nodes };
+}
+if (typeof module !== 'undefined') module.exports = ChessEngine;
+
+/* Wildcard Chess: particle effects drawn over the board, and synthesized sound. */
+'use strict';
+
+class FXLayer {
+  constructor(canvas) {
+    this.cv = canvas; this.cx = canvas.getContext('2d');
+    this.parts = []; this.rings = []; this.lines = []; this.running = false;
+    this.w = 0; this.h = 0;
+  }
+  resize(w, h, dpr) {
+    this.w = w; this.h = h;
+    this.cv.width = Math.round(w * dpr); this.cv.height = Math.round(h * dpr);
+    this.cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  burst(x, y, o = {}) {
+    const n = o.n || 18, sq = this.w / 8;
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, sp = (o.speed || 1) * sq * (0.02 + Math.random() * 0.06);
+      this.parts.push({
+        x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - (o.lift || 0) * sq * 0.03,
+        life: 0, max: (o.life || 40) * (0.6 + Math.random() * 0.6), size: (o.size || 0.06) * sq * (0.5 + Math.random()),
+        color: Array.isArray(o.color) ? o.color[i % o.color.length] : (o.color || '#fff'),
+        g: (o.gravity == null ? 0.12 : o.gravity) * sq * 0.01, kind: o.kind || 'chip', spin: Math.random() * 6, drag: o.drag || 0.96,
+      });
+    }
+    this.go();
+  }
+  ring(x, y, color, maxR = 1.2, width = 6, life = 26) {
+    this.rings.push({ x, y, color, r: 0, max: maxR * this.w / 8, life: 0, lifeMax: life, width });
+    this.go();
+  }
+  beam(x1, y1, x2, y2, color, life = 18) { this.lines.push({ x1, y1, x2, y2, color, life: 0, max: life }); this.go(); }
+  go() { if (!this.running) { this.running = true; requestAnimationFrame(() => this.tick()); } }
+  tick() {
+    const c = this.cx;
+    c.clearRect(0, 0, this.w, this.h);
+    for (const r of this.rings) {
+      r.life++;
+      const t = r.life / r.lifeMax;
+      r.r = r.max * (1 - Math.pow(1 - t, 3));
+      c.globalAlpha = Math.max(0, 1 - t);
+      c.strokeStyle = r.color; c.lineWidth = r.width * (1 - t) + 1;
+      c.beginPath(); c.arc(r.x, r.y, r.r, 0, Math.PI * 2); c.stroke();
+    }
+    for (const l of this.lines) {
+      l.life++;
+      const t = l.life / l.max;
+      c.globalAlpha = Math.max(0, 1 - t);
+      c.strokeStyle = l.color; c.lineWidth = 5 * (1 - t) + 1; c.lineCap = 'round';
+      c.shadowColor = l.color; c.shadowBlur = 14;
+      c.beginPath(); c.moveTo(l.x1, l.y1); c.lineTo(l.x2, l.y2); c.stroke();
+      c.shadowBlur = 0;
+    }
+    for (const p of this.parts) {
+      p.life++;
+      p.vx *= p.drag; p.vy = p.vy * p.drag + p.g;
+      p.x += p.vx; p.y += p.vy; p.spin += 0.2;
+      const t = p.life / p.max;
+      c.globalAlpha = Math.max(0, 1 - t);
+      c.fillStyle = p.color;
+      if (p.kind === 'spark') {
+        c.shadowColor = p.color; c.shadowBlur = 10;
+        c.beginPath(); c.arc(p.x, p.y, p.size * (1 - t * 0.6), 0, Math.PI * 2); c.fill();
+        c.shadowBlur = 0;
+      } else if (p.kind === 'smoke') {
+        c.globalAlpha = Math.max(0, 0.5 * (1 - t));
+        c.beginPath(); c.arc(p.x, p.y, p.size * (1 + t * 2.5), 0, Math.PI * 2); c.fill();
+      } else if (p.kind === 'heart') {
+        c.save(); c.translate(p.x, p.y); c.scale(p.size / 10, p.size / 10);
+        c.beginPath(); c.moveTo(0, 3); c.bezierCurveTo(-8, -4, -4, -10, 0, -5); c.bezierCurveTo(4, -10, 8, -4, 0, 3); c.fill(); c.restore();
+      } else {
+        c.save(); c.translate(p.x, p.y); c.rotate(p.spin);
+        c.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.7); c.restore();
+      }
+    }
+    c.globalAlpha = 1;
+    this.parts = this.parts.filter(p => p.life < p.max);
+    this.rings = this.rings.filter(r => r.life < r.lifeMax);
+    this.lines = this.lines.filter(l => l.life < l.max);
+    if (this.parts.length || this.rings.length || this.lines.length) requestAnimationFrame(() => this.tick());
+    else { this.running = false; c.clearRect(0, 0, this.w, this.h); }
+  }
+}
+
+const Sound = {
+  ctx: null, on: true, noise: null,
+  init() {
+    if (this.ctx) { if (this.ctx.state === 'suspended') this.ctx.resume(); return; }
+    try {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const len = this.ctx.sampleRate;
+      const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      this.noise = buf;
+    } catch (e) { this.ctx = null; }
+  },
+  _env(node, t, a, peak, dec) {
+    node.gain.setValueAtTime(0.0001, t);
+    node.gain.exponentialRampToValueAtTime(peak, t + a);
+    node.gain.exponentialRampToValueAtTime(0.0001, t + a + dec);
+  },
+  _noise(t, dur, freq, q, peak, type = 'bandpass') {
+    const c = this.ctx, src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    src.buffer = this.noise; f.type = type; f.frequency.setValueAtTime(freq, t); f.Q.value = q;
+    this._env(g, t, 0.003, peak, dur);
+    src.connect(f); f.connect(g); g.connect(c.destination);
+    src.start(t, Math.random() * 0.5); src.stop(t + dur + 0.05);
+    return f;
+  },
+  _tone(t, freq, dur, peak, type = 'sine', to) {
+    const c = this.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+    this._env(g, t, 0.005, peak, dur);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.05);
+  },
+  play(kind) {
+    if (!this.on || !this.ctx) return;
+    const t = this.ctx.currentTime + 0.005;
+    switch (kind) {
+      case 'move': this._noise(t, 0.07, 1500, 1.4, 0.5); this._tone(t, 190, 0.08, 0.25, 'triangle', 120); break;
+      case 'capture': this._noise(t, 0.1, 1100, 1.1, 0.7); this._tone(t, 150, 0.12, 0.35, 'triangle', 80); this._noise(t + 0.03, 0.06, 3000, 2, 0.25); break;
+      case 'boom': {
+        const f = this._noise(t, 0.9, 900, 0.7, 0.9, 'lowpass'); f.frequency.exponentialRampToValueAtTime(80, t + 0.8);
+        this._tone(t, 90, 0.7, 0.6, 'sine', 30); break;
+      }
+      case 'magic': [660, 880, 1320].forEach((fr, i) => this._tone(t + i * 0.06, fr, 0.3, 0.12, 'sine')); break;
+      case 'whoosh': { const f = this._noise(t, 0.4, 400, 0.8, 0.4); f.frequency.exponentialRampToValueAtTime(2400, t + 0.35); break; }
+      case 'zap': this._tone(t, 1400, 0.15, 0.15, 'sawtooth', 300); this._noise(t, 0.12, 4000, 3, 0.2); break;
+      case 'check': this._tone(t, 740, 0.12, 0.18, 'square'); this._tone(t + 0.12, 988, 0.18, 0.16, 'square'); break;
+      case 'select': this._tone(t, 520, 0.05, 0.06, 'sine'); break;
+      case 'win': [523, 659, 784, 1047].forEach((fr, i) => this._tone(t + i * 0.12, fr, 0.4, 0.16, 'triangle')); break;
+      case 'lose': [392, 330, 262, 196].forEach((fr, i) => this._tone(t + i * 0.16, fr, 0.45, 0.16, 'triangle')); break;
+      case 'deal': this._noise(t, 0.08, 2600, 1.6, 0.3); break;
+      case 'stone': this._noise(t, 0.3, 300, 0.9, 0.6, 'lowpass'); this._tone(t, 70, 0.25, 0.4, 'sine', 40); break;
+    }
+  },
+};
+
+/* Wildcard Chess: the board view. Paints procedural wood squares on a canvas, keeps one element
+   per piece (keyed by piece id, so pieces slide when they move), and draws highlights and effects. */
+'use strict';
+
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+class BoardView {
+  constructor(root, o = {}) {
+    this.root = root; this.flip = false; this.seed = o.seed || 11; this.showCoords = o.coords !== false;
+    this.els = new Map(); this.size = 0;
+    root.classList.add('board');
+    root.innerHTML = '<canvas class="wood"></canvas><div class="coords"></div><div class="hl"></div><div class="pieces"></div><div class="marks"></div><canvas class="fx"></canvas>';
+    this.wood = root.querySelector('.wood');
+    this.coordEl = root.querySelector('.coords');
+    this.hlEl = root.querySelector('.hl');
+    this.pcEl = root.querySelector('.pieces');
+    this.markEl = root.querySelector('.marks');
+    this.fx = new FXLayer(root.querySelector('.fx'));
+    if (window.ResizeObserver) { this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(root); }
+    else window.addEventListener('resize', () => this.resize());
+    this.resize();
+  }
+
+  setFlip(f) { if (this.flip === f) return; this.flip = f; this.drawCoords(); for (const el of this.els.values()) this.place(el, el._q, true); }
+  disp(q) { const f = q & 7, r = q >> 3; return this.flip ? { x: 7 - f, y: r } : { x: f, y: 7 - r }; }
+  center(q) { const d = this.disp(q), s = this.size / 8; return { x: (d.x + 0.5) * s, y: (d.y + 0.5) * s }; }
+  sqAt(cx, cy) {
+    const r = this.root.getBoundingClientRect();
+    const x = Math.floor(((cx - r.left) / r.width) * 8), y = Math.floor(((cy - r.top) / r.height) * 8);
+    if (x < 0 || x > 7 || y < 0 || y > 7) return -1;
+    return this.flip ? y * 8 + (7 - x) : (7 - y) * 8 + x;
+  }
+
+  resize() {
+    const size = this.root.offsetWidth;
+    if (!size || size === this.size) return;
+    this.size = size;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.root.style.setProperty('--sq', size / 8 + 'px');
+    this.wood.width = Math.round(size * dpr); this.wood.height = Math.round(size * dpr);
+    this.fx.resize(size, size, dpr);
+    this.drawWood(dpr);
+    this.drawCoords();
+  }
+
+  drawWood(dpr) {
+    const c = this.wood.getContext('2d'), S = this.size * dpr, s = S / 8, rnd = mulberry32(this.seed);
+    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+      const light = (x + y) % 2 === 0;
+      const base = light ? [225, 197, 150] : [157, 109, 66];
+      const v = (rnd() - 0.5) * 14;
+      const x0 = x * s, y0 = y * s;
+      c.save();
+      c.beginPath(); c.rect(x0, y0, s, s); c.clip();
+      c.fillStyle = `rgb(${base[0] + v},${base[1] + v * 0.9},${base[2] + v * 0.7})`;
+      c.fillRect(x0, y0, s, s);
+      const vertical = rnd() < 0.72;
+      c.translate(x0 + s / 2, y0 + s / 2);
+      if (!vertical) c.rotate(Math.PI / 2);
+      c.translate(-s / 2, -s / 2);
+      // broad soft bands
+      for (let i = 0; i < 5; i++) {
+        c.fillStyle = rnd() < 0.5 ? `rgba(110,60,20,${0.03 + rnd() * 0.05})` : `rgba(255,240,205,${0.03 + rnd() * 0.05})`;
+        const bx = rnd() * s, bw = s * (0.08 + rnd() * 0.22);
+        c.fillRect(bx, 0, bw, s);
+      }
+      // fine grain lines
+      const lines = 22 + Math.floor(rnd() * 14);
+      for (let i = 0; i < lines; i++) {
+        const px = rnd() * s, amp = s * (0.004 + rnd() * 0.02), k = 0.6 + rnd() * 1.8, ph = rnd() * 6.28;
+        const dark = rnd() < 0.7;
+        c.strokeStyle = dark ? `rgba(${light ? '120,72,30' : '70,38,14'},${0.05 + rnd() * 0.14})` : `rgba(255,236,200,${0.04 + rnd() * 0.08})`;
+        c.lineWidth = (0.4 + rnd() * 1.5) * dpr * (s / (90 * dpr));
+        c.beginPath();
+        for (let t = 0; t <= 12; t++) {
+          const yy = (t / 12) * s, xx = px + Math.sin((t / 12) * Math.PI * k + ph) * amp;
+          t ? c.lineTo(xx, yy) : c.moveTo(xx, yy);
+        }
+        c.stroke();
+      }
+      if (rnd() < 0.07) {
+        const kx = s * (0.2 + rnd() * 0.6), ky = s * (0.2 + rnd() * 0.6);
+        for (let r = 1; r <= 4; r++) {
+          c.strokeStyle = `rgba(90,50,20,${0.16 - r * 0.03})`; c.lineWidth = dpr;
+          c.beginPath(); c.ellipse(kx, ky, s * 0.02 * r, s * 0.06 * r, 0, 0, Math.PI * 2); c.stroke();
+        }
+      }
+      c.restore();
+    }
+  }
+
+  drawCoords() {
+    if (!this.showCoords) { this.coordEl.innerHTML = ''; return; }
+    let h = '';
+    for (let y = 0; y < 8; y++) {
+      const rank = this.flip ? y + 1 : 8 - y, light = y % 2 === 0;
+      h += `<span style="left:1.1%;top:${y * 12.5 + 0.6}%;color:${light ? '#9c6c41' : '#ead4ad'}">${rank}</span>`;
+    }
+    for (let x = 0; x < 8; x++) {
+      const file = 'abcdefgh'[this.flip ? 7 - x : x], light = (x + 7) % 2 === 0;
+      h += `<span style="left:${x * 12.5 + 10.2}%;top:${7 * 12.5 + 9.2}%;color:${light ? '#9c6c41' : '#ead4ad'}">${file}</span>`;
+    }
+    this.coordEl.innerHTML = h;
+  }
+
+  place(el, q, instant) {
+    const d = this.disp(q);
+    el._q = q;
+    if (instant) el.classList.add('instant');
+    el.style.transform = `translate(${d.x * 100}%, ${d.y * 100}%)`;
+    if (instant) { void el.offsetWidth; el.classList.remove('instant'); }
+  }
+
+  /* Bring the piece elements in line with a position. opts: anim, instant (Set of ids), fly (Set), frozen (Set of squares). */
+  setPieces(s, opts = {}) {
+    const seen = new Set();
+    for (let q = 0; q < 64; q++) {
+      const p = s.b[q];
+      if (!p) continue;
+      seen.add(p.id);
+      let el = this.els.get(p.id);
+      const key = p.t + p.c;
+      if (!el) {
+        el = document.createElement('div');
+        el.className = 'pc';
+        el._key = '';
+        this.place(el, q, true);
+        this.pcEl.appendChild(el);
+        this.els.set(p.id, el);
+        if (opts.anim) { el.classList.add('born'); setTimeout(() => el.classList.remove('born'), 600); }
+      }
+      if (el._key !== key) {
+        if (el._key && opts.anim) { el.classList.add('recolor'); setTimeout(() => el.classList.remove('recolor'), 700); }
+        el.innerHTML = pieceSVG(p.t, p.c);
+        el._key = key;
+        const w = WILD[p.t];
+        el.classList.toggle('wild', !!w);
+        if (w) el.style.setProperty('--acc', w.accent);
+      }
+      el._piece = p;
+      el.classList.toggle('frozen', !!(opts.frozen && opts.frozen.has(q)));
+      if (el._q !== q || opts.force) {
+        const inst = opts.instant && opts.instant.has(p.id);
+        this.place(el, q, inst || !opts.anim);
+        if (opts.fly && opts.fly.has(p.id)) { el.classList.add('fly'); setTimeout(() => el.classList.remove('fly'), 420); }
+      }
+    }
+    for (const [id, el] of this.els) {
+      if (seen.has(id)) continue;
+      this.els.delete(id);
+      if (opts.anim) { el.classList.add('dying'); setTimeout(() => el.remove(), 460); }
+      else el.remove();
+    }
+  }
+  elAt(q) { for (const el of this.els.values()) if (el._q === q && !el.classList.contains('dying')) return el; return null; }
+
+  cell(q, cls, style = '') { const d = this.disp(q); return `<div class="${cls}" style="left:${d.x * 12.5}%;top:${d.y * 12.5}%;${style}"></div>`; }
+
+  /* o: { last: [from, to], sel, check, marks: [{q, cls, acc}], xprev: [squares] } */
+  setMarks(o = {}) {
+    let h = '';
+    if (o.last) for (const q of o.last) if (q >= 0) h += this.cell(q, 'last');
+    if (o.sel >= 0) h += this.cell(o.sel, 'sel');
+    if (o.check >= 0) h += this.cell(o.check, 'check');
+    if (o.xprev) for (const q of o.xprev) h += this.cell(q, 'xprev');
+    this.hlEl.innerHTML = h;
+    let m = '';
+    if (o.marks) for (const k of o.marks) m += this.cell(k.q, k.cls, k.acc ? `--acc:${k.acc}` : '');
+    if (o.hover >= 0) m += this.cell(o.hover, 'hover');
+    this.markEl.innerHTML = m;
+  }
+
+  burstAt(q, o) { const c = this.center(q); this.fx.burst(c.x, c.y, o); }
+  ringAt(q, color, r, w, life) { const c = this.center(q); this.fx.ring(c.x, c.y, color, r, w, life); }
+  beam(a, b, color, life) { const p = this.center(a), q = this.center(b); this.fx.beam(p.x, p.y, q.x, q.y, color, life); }
+  shake(big) {
+    const cls = big ? 'big-shake' : 'shake';
+    this.root.classList.remove('shake', 'big-shake'); void this.root.offsetWidth; this.root.classList.add(cls);
+    setTimeout(() => this.root.classList.remove(cls), 650);
+  }
+}
+
+/* Wildcard Chess: screens, the deal, the game against the computer, the Codex. */
+'use strict';
+
+const E = ChessEngine();
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const opp = c => (c === 'w' ? 'b' : 'w');
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('wildcard-chess:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('wildcard-chess:' + k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } },
+};
+
+const LEVELS = {
+  easy: { name: 'Easy', who: 'The Pawn Pusher', icon: 'P', color: 'var(--lv-easy)' },
+  medium: { name: 'Medium', who: 'The Club Regular', icon: 'N', color: 'var(--lv-medium)' },
+  pro: { name: 'Pro', who: 'The Tactician', icon: 'Q', color: 'var(--lv-pro)' },
+  xtreme: { name: 'Xtreme', who: 'The Unhinged', icon: 'void', color: 'var(--lv-xtreme)' },
+};
+
+const settings = { level: store.get('level', 'medium'), color: store.get('color', 'w'), count: store.get('count', 1) };
+if (!LEVELS[settings.level]) settings.level = 'medium';
+Sound.on = store.get('sound', true);
+const discovered = new Set(store.get('codex', []));
+function discover(t) { if (discovered.has(t)) return false; discovered.add(t); store.set('codex', [...discovered]); updateCodexCount(); return true; }
+function updateCodexCount() { $('#codexCount').textContent = `${discovered.size} / 30 discovered`; }
+
+let current = 'menu';
+function show(id) {
+  current = id;
+  for (const s of $$('.screen')) s.classList.toggle('on', s.id === id);
+  if (id === 'menu') Showcase.start(); else Showcase.stop();
+  if (id === 'codex') renderCodex();
+  if (id === 'game') requestAnimationFrame(() => G.board && G.board.resize());
+  hideTip(); hideChooser();
+}
+
+/* ---------- AI in a Web Worker (falls back to the main thread) ---------- */
+const AI = {
+  worker: null, cb: new Map(), id: 0,
+  init() {
+    try {
+      const src = ChessEngine.toString() + '\nconst E = ChessEngine();\n' +
+        'onmessage = function (e) { var d = e.data, idx = -1; try { idx = E.think(d.s, d.level); } catch (err) { idx = -1; } postMessage({ id: d.id, idx: idx }); };';
+      const url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+      this.worker = new Worker(url);
+      this.worker.onmessage = e => { const f = this.cb.get(e.data.id); if (f) { this.cb.delete(e.data.id); f(e.data.idx); } };
+      this.worker.onerror = () => this.fail();
+    } catch (e) { this.worker = null; }
+  },
+  fail() {
+    this.worker = null;
+    for (const [id, f] of this.cb) { this.cb.delete(id); f(null); }
+  },
+  think(s, level) {
+    return new Promise(res => {
+      const local = () => setTimeout(() => res(E.think(s, level)), 20);
+      if (!this.worker) return local();
+      const id = ++this.id;
+      this.cb.set(id, idx => (idx == null ? local() : res(idx)));
+      try { this.worker.postMessage({ id, s, level }); } catch (e) { this.cb.delete(id); local(); }
+    });
+  },
+};
+
+/* ---------- tooltip, chooser, toast ---------- */
+function tipHTML(p, mine) {
+  if (p.t === 'WALL') return `<h5>Stone wall</h5><p>${STD_DESC.WALL}</p>`;
+  const w = WILD[p.t], side = p.c === 'w' ? 'White' : 'Black';
+  if (w) {
+    if (mine) return `<div class="tip-k" style="--acc:${w.accent}">Your wildcard · ${esc(w.moves)}</div><h5>${w.name}</h5><p>${w.desc}</p>`;
+    return `<div class="tip-k" style="--acc:${w.accent}">${side}'s wildcard</div><h5>${w.name}</h5><p class="unk">What does it do? Nobody's telling. Watch it closely.</p>`;
+  }
+  return `<div class="tip-k">${side}</div><h5>${STD_NAMES[p.t]}</h5><p>${STD_DESC[p.t]}</p>`;
+}
+let tipTimer = 0;
+function showTip(html, x, y, ms) {
+  const t = $('#tip');
+  t.innerHTML = html; t.hidden = false;
+  const r = t.getBoundingClientRect();
+  let left = x + 16, top = y + 16;
+  if (left + r.width > innerWidth - 8) left = x - r.width - 16;
+  if (top + r.height > innerHeight - 8) top = y - r.height - 16;
+  t.style.left = Math.max(8, left) + 'px'; t.style.top = Math.max(8, top) + 'px';
+  clearTimeout(tipTimer);
+  if (ms) tipTimer = setTimeout(hideTip, ms);
+}
+function hideTip() { $('#tip').hidden = true; }
+
+let chooserCb = null;
+function showChooser(items, x, y, cb) {
+  const ch = $('#chooser');
+  ch.innerHTML = items.map((it, i) => `<button data-i="${i}">${it.icon}<span>${esc(it.label)}</span></button>`).join('');
+  ch.hidden = false;
+  const r = ch.getBoundingClientRect();
+  ch.style.left = Math.max(8, Math.min(innerWidth - r.width - 8, x - r.width / 2)) + 'px';
+  ch.style.top = Math.max(8, Math.min(innerHeight - r.height - 8, y - r.height / 2)) + 'px';
+  chooserCb = cb;
+}
+function hideChooser() { $('#chooser').hidden = true; chooserCb = null; }
+$('#chooser').addEventListener('click', e => {
+  const b = e.target.closest('button[data-i]');
+  if (!b || !chooserCb) return;
+  const f = chooserCb; hideChooser(); f(+b.dataset.i);
+});
+
+let toastTimer = 0;
+function toast(html, acc) {
+  const t = $('#toast');
+  t.innerHTML = html; t.style.setProperty('--acc', acc || 'var(--gold)');
+  t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 1700);
+}
+
+function modal(html) { $('#modalCard').innerHTML = html; $('#modal').hidden = false; }
+function closeModal() { $('#modal').hidden = true; }
+
+/* ---------- setup screen ---------- */
+function initSetup() {
+  for (const el of $$('.diff-ico')) el.innerHTML = pieceSVG(el.dataset.piece, el.dataset.piece === 'void' ? 'b' : 'w');
+  const sync = () => {
+    for (const d of $$('.diff')) { const on = d.dataset.level === settings.level; d.classList.toggle('sel', on); d.setAttribute('aria-checked', on); }
+    for (const b of $$('#segColor button')) b.classList.toggle('on', b.dataset.v === settings.color);
+    for (const b of $$('#segCount button')) b.classList.toggle('on', +b.dataset.v === settings.count);
+    store.set('level', settings.level); store.set('color', settings.color); store.set('count', settings.count);
+  };
+  for (const d of $$('.diff')) d.addEventListener('click', () => { settings.level = d.dataset.level; Sound.init(); Sound.play('select'); sync(); });
+  for (const b of $$('#segColor button')) b.addEventListener('click', () => { settings.color = b.dataset.v; sync(); });
+  for (const b of $$('#segCount button')) b.addEventListener('click', () => { settings.count = +b.dataset.v; sync(); });
+  $('#dealBtn').addEventListener('click', deal);
+  sync();
+}
+
+/* ---------- the deal ---------- */
+const Draft = { mine: [], theirs: [], pool: [], rerolls: 1, human: 'w' };
+function deal() {
+  Sound.init();
+  const n = settings.count, nThem = n + (settings.level === 'xtreme' ? 1 : 0);
+  const pool = shuffle(WILD_IDS.slice());
+  Draft.mine = pool.splice(0, n); Draft.theirs = pool.splice(0, nThem); Draft.pool = pool;
+  Draft.rerolls = 1;
+  Draft.human = settings.color === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : settings.color;
+  show('draft');
+  renderDraftSide('#draftMine', Draft.mine, false, Draft.human, 250);
+  renderDraftSide('#draftTheirs', Draft.theirs, true, opp(Draft.human), 650);
+  syncReroll();
+}
+function cardHTML(t, secret, color) {
+  const w = WILD[t];
+  return `<div class="card ${secret ? 'secret' : ''}" style="--acc:${w.accent}"><div class="card-in">
+    <div class="card-face"><div class="card-art">${pieceSVG(t, color)}${secret ? '<span class="q-mark">?</span>' : ''}</div>
+      <div class="card-name">${w.name}</div>
+      <div class="card-moves">${secret ? 'Ability unknown' : esc(w.moves)}</div>
+      <div class="card-desc">${secret ? 'Its rules stay hidden until the game is over. Watch what it does.' : w.desc}</div></div>
+    <div class="card-back"></div></div></div>`;
+}
+function renderDraftSide(sel, types, secret, color, delay) {
+  const box = $(sel);
+  box.innerHTML = types.map(t => cardHTML(t, secret, color)).join('');
+  [...box.children].forEach((c, i) => setTimeout(() => { c.classList.add('up'); Sound.play('deal'); }, delay + i * 260));
+}
+function syncReroll() {
+  const b = $('#rerollBtn');
+  b.textContent = Draft.rerolls ? 'Reroll mine (1 left)' : 'No rerolls left';
+  b.disabled = !Draft.rerolls;
+}
+$('#rerollBtn').addEventListener('click', () => {
+  if (!Draft.rerolls) return;
+  Draft.rerolls--;
+  Draft.pool.push(...Draft.mine);
+  Draft.mine = Draft.pool.splice(0, Draft.mine.length);
+  renderDraftSide('#draftMine', Draft.mine, false, Draft.human, 60);
+  syncReroll();
+});
+$('#startBtn').addEventListener('click', () => {
+  const h = Draft.human, a = opp(h);
+  const wild = { [h]: Draft.mine.slice(), [a]: Draft.theirs.slice() };
+  Draft.mine.forEach(discover);
+  G.start({ wild, human: h, level: settings.level });
+  show('game');
+});
+
+/* ---------- the game ---------- */
+const G = {
+  board: null, s: null, hist: [], log: [], human: 'w', ai: 'b', level: 'medium', wild: null,
+  legal: [], sel: -1, selMoves: [], busy: false, over: null, token: 0, hover: -1,
+  start(cfg) {
+    this.token++;
+    this.human = cfg.human; this.ai = opp(cfg.human); this.level = cfg.level; this.wild = cfg.wild;
+    const pick = n => shuffle(n === 1 ? [2, 3, 4, 5] : [1, 2, 3, 4, 5, 6]).slice(0, n).sort((x, y) => x - y);
+    const files = { w: pick(cfg.wild.w.length), b: pick(cfg.wild.b.length) };
+    this.s = cfg.state || E.newGame({ wild: cfg.wild, files });
+    this.hist = cfg.hist || [{ s: this.s }];
+    this.log = cfg.log || [];
+    this.over = null; this.sel = -1; this.busy = false;
+    this.board.setFlip(this.human === 'b');
+    this.board.setPieces(this.s, { anim: false, frozen: frozenSquares(this.s) });
+    this.legal = E.legalMoves(this.s);
+    const lv = LEVELS[this.level];
+    $('#game').style.setProperty('--lv', lv.color);
+    $('#modeChip').textContent = `vs ${lv.name} · ${lv.who}`;
+    renderWildInfo(); renderLog(); this.render();
+    if (this.s.turn === this.ai) aiTurn();
+  },
+  render() {
+    renderBars(); renderStatus(); renderMarks();
+    const canUndo = this.level !== 'xtreme' && !this.over && this.hist.some((h, i) => i > 0 && this.hist[i - 1].s.turn === this.human);
+    $('#undoBtn').disabled = !canUndo;
+    $('#undoBtn').title = this.level === 'xtreme' ? 'No take-backs in Xtreme' : '';
+    $('#resignBtn').disabled = !!this.over;
+  },
+};
+
+function frozenSquares(s) {
+  const out = new Set();
+  for (let q = 0; q < 64; q++) {
+    const p = s.b[q];
+    if (!p || p.t !== 'frost') continue;
+    for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+      const f = (q & 7) + dx, r = (q >> 3) + dy;
+      if ((!dx && !dy) || f < 0 || f > 7 || r < 0 || r > 7) continue;
+      const a = s.b[r * 8 + f];
+      if (a && a.c !== p.c && a.c !== 'n' && a.t !== 'K') out.add(r * 8 + f);
+    }
+  }
+  return out;
+}
+
+function material(s, c) { let v = 0; for (const p of s.b) if (p && p.c === c && p.t !== 'K') v += E.value(p); return v; }
+
+function renderBars() {
+  const top = G.board.flip ? 'w' : 'b';
+  for (const [id, c] of [['#barTop', top], ['#barBot', opp(top)]]) {
+    const el = $(id), human = c === G.human, lv = LEVELS[G.level];
+    const lost = G.s.lost[opp(c)].filter(t => t !== 'K').slice().sort((a, b) => E.value({ t: b, d: { k: 0, ch: 1 } }) - E.value({ t: a, d: { k: 0, ch: 1 } }));
+    const diff = Math.round((material(G.s, c) - material(G.s, opp(c))) / 100);
+    const chips = (G.wild[c] || []).map(t => `<button class="chip" data-wild="${t}" data-c="${c}" aria-label="${WILD[t].name}">${pieceSVG(t, c)}${human ? '' : '<span class="qm">?</span>'}</button>`).join('');
+    el.classList.toggle('turn', !G.over && G.s.turn === c);
+    el.innerHTML = `<div class="avatar">${pieceSVG(human ? 'K' : lv.icon, c)}</div>
+      <div class="pname"><b>${human ? 'You' : lv.name + ' AI'}${!human && G.busy ? '<span class="thinking"><i></i><i></i><i></i></span>' : ''}</b>
+      <span>${c === 'w' ? 'White' : 'Black'}${human ? '' : ` · <span class="lvl">${lv.who}</span>`}</span></div>
+      <div class="chips">${chips}</div>
+      <div class="capt">${lost.map(t => pieceSVG(t, opp(c))).join('')}${diff > 0 ? `<span class="adv">+${diff}</span>` : ''}</div>`;
+  }
+}
+
+function renderStatus() {
+  let t;
+  if (G.over) t = G.over.winner === G.human ? 'You won' : G.over.winner ? 'You lost' : 'Draw';
+  else if (G.s.turn === G.human) t = E.inCheck(G.s, G.human) ? 'Check! Your move' : (G.s.extra ? 'Extra turn!' : 'Your move');
+  else t = G.busy ? 'Thinking…' : 'Their move';
+  $('#status').textContent = t;
+}
+
+function renderWildInfo() {
+  const row = (t, c, mine) => {
+    const w = WILD[t];
+    return `<div class="wi ${mine ? '' : 'theirs'}" style="--acc:${w.accent}"><div class="wi-art">${pieceSVG(t, c)}</div>
+      <div><h4>${w.name}<small>${mine ? 'Yours' : 'Theirs'}</small></h4><p>${mine ? w.desc : 'Unknown. Watch what it does.'}</p></div></div>`;
+  };
+  $('#wildInfo').innerHTML = G.wild[G.human].map(t => row(t, G.human, true)).join('') + G.wild[G.ai].map(t => row(t, G.ai, false)).join('');
+}
+
+function renderLog() {
+  const ol = $('#log');
+  ol.innerHTML = G.log.map((e, i) => `<li class="${e.special ? 'special' : ''} ${i === G.log.length - 1 ? 'last' : ''}"><span class="n">${e.n}${e.c === 'w' ? '.' : '…'}</span>${pieceSVG(e.t, e.c)}<span class="t">${e.text}</span></li>`).join('');
+  const sc = ol.closest('.side-scroll');
+  if (sc && getComputedStyle(sc).overflowY === 'auto') sc.scrollTop = sc.scrollHeight;
+}
+
+function kingSq(s, c) { return E.findKing(s, c); }
+
+function renderMarks() {
+  const s = G.s, last = s.last;
+  const o = { last: last ? [last.o, last.t] : null, sel: G.sel, check: -1, marks: [], xprev: null, hover: -1 };
+  if (!G.over && E.inCheck(s, s.turn)) o.check = kingSq(s, s.turn);
+  if (G.sel >= 0) {
+    const pc = s.b[G.sel], w = pc && WILD[pc.t], acc = w ? w.accent : '#ffd98e';
+    const byT = new Map();
+    for (const m of G.selMoves) { if (!byT.has(m.t)) byT.set(m.t, []); byT.get(m.t).push(m); }
+    for (const [t, ms] of byT) {
+      if (t === G.sel) { o.marks.push({ q: t, cls: 'self', acc }); continue; }
+      const cap = ms.some(m => m.x && m.x.length), spec = ms.some(m => (m.k !== 'n' && m.k !== 'castle' && m.k !== 'ep') || m.tele);
+      o.marks.push({ q: t, cls: spec ? 'spec' + (cap ? ' cap' : '') : cap ? 'ring' : 'dot', acc });
+    }
+    if (G.hover >= 0 && byT.has(G.hover)) {
+      const xs = new Set();
+      for (const m of byT.get(G.hover)) if (m.x) for (const q of m.x) if (q !== G.hover || m.x.length > 1) xs.add(q);
+      if (xs.size) o.xprev = [...xs];
+      o.hover = G.hover;
+    }
+  }
+  G.board.setMarks(o);
+}
+
+function select(q) {
+  G.sel = q;
+  G.selMoves = G.legal.filter(m => m.o === q);
+  if (q >= 0) Sound.play('select');
+  renderMarks();
+}
+
+const LABEL = {
+  boom: 'Detonate', shoot: 'Shoot', strike: 'Strike', swap: 'Swap places', gust: 'Blow a gust', crush: 'Charge',
+  charm: 'Charm it', spawn: 'Lay a pawn', wall: 'Raise a wall', hex: 'Hex into a pawn', launch: 'Fling', jump: 'Jump', castle: 'Castle', ep: 'En passant',
+};
+function moveLabel(m, s) {
+  if (m.promo) return 'Promote to ' + pieceName(m.promo);
+  if (m.k === 'raise') return 'Raise a ' + pieceName(m.rt);
+  if (m.k === 'n') return m.tele ? 'Teleport' : m.x ? 'Capture' : 'Move here';
+  if (m.k === 'launch') return 'Fling the ' + pieceName(s.b[m.f].t);
+  return LABEL[m.k] || 'Move';
+}
+
+function tryMove(ms, x, y) {
+  if (!ms.length) return false;
+  if (ms.length === 1) { humanMove(ms[0]); return true; }
+  const s = G.s, pc = s.b[ms[0].o];
+  showChooser(ms.map(m => ({
+    label: moveLabel(m, s),
+    icon: pieceSVG(m.promo || (m.k === 'raise' ? m.rt : m.k === 'spawn' ? 'P' : m.k === 'wall' ? 'WALL' : pc.t), G.human),
+  })), x, y, i => humanMove(ms[i]));
+  return true;
+}
+
+function humanMove(m) {
+  if (G.busy || G.over || G.s.turn !== G.human) return;
+  hideTip();
+  G.sel = -1; G.selMoves = []; G.hover = -1;
+  applyMove(m);
+}
+
+/* ---------- pointer input on the board ---------- */
+let drag = null, hoverSq = -1, hoverTimer = 0;
+function initBoardInput() {
+  const root = G.board.root;
+  root.addEventListener('pointerdown', e => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    Sound.init(); hideChooser(); hideTip(); clearTimeout(hoverTimer);
+    const q = G.board.sqAt(e.clientX, e.clientY);
+    if (q < 0) return;
+    const p = G.s.b[q];
+    const myTurn = !G.busy && !G.over && G.s.turn === G.human;
+    if (myTurn && G.sel >= 0 && q !== G.sel) {
+      const ms = G.selMoves.filter(m => m.t === q && m.t !== m.o);
+      if (ms.length) { tryMove(ms, e.clientX, e.clientY); return; }
+    }
+    if (myTurn && p && p.c === G.human) {
+      const wasSel = q === G.sel;
+      if (!wasSel) select(q);
+      const el = G.board.elAt(q);
+      drag = { q, el, x0: e.clientX, y0: e.clientY, moved: false, wasSel, id: e.pointerId };
+      root.setPointerCapture(e.pointerId);
+      return;
+    }
+    if (p) showTip(tipHTML(p, p.c === G.human), e.clientX, e.clientY, 2600);
+    if (G.sel >= 0) select(-1);
+  });
+  root.addEventListener('pointermove', e => {
+    if (drag && drag.id === e.pointerId) {
+      if (!drag.moved && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > 5) { drag.moved = true; if (drag.el) drag.el.classList.add('drag'); hideTip(); }
+      if (drag.moved && drag.el) {
+        const r = root.getBoundingClientRect(), sq = r.width / 8;
+        drag.el.style.transform = `translate(${e.clientX - r.left - sq / 2}px, ${e.clientY - r.top - sq / 2}px)`;
+      }
+    }
+    const q = G.board.sqAt(e.clientX, e.clientY);
+    if (G.sel >= 0 && q !== G.hover) { G.hover = q; renderMarks(); }
+    if (!drag && e.pointerType === 'mouse' && q !== hoverSq) {
+      hoverSq = q; hideTip(); clearTimeout(hoverTimer);
+      const p = q >= 0 ? G.s.b[q] : null;
+      if (p && G.sel < 0) { const x = e.clientX, y = e.clientY; hoverTimer = setTimeout(() => showTip(tipHTML(p, p.c === G.human), x, y), 420); }
+    }
+  });
+  const end = e => {
+    if (!drag || drag.id !== e.pointerId) return;
+    const d = drag; drag = null;
+    if (d.el) d.el.classList.remove('drag');
+    if (d.moved) {
+      const q = G.board.sqAt(e.clientX, e.clientY);
+      const ms = q >= 0 ? G.selMoves.filter(m => m.t === q && m.t !== m.o) : [];
+      if (!ms.length || !tryMove(ms, e.clientX, e.clientY)) { if (d.el) G.board.place(d.el, d.q, true); }
+      else if (ms.length > 1 && d.el) G.board.place(d.el, d.q, true);
+      return;
+    }
+    if (d.wasSel) {
+      const self = G.selMoves.filter(m => m.t === d.q);
+      if (self.length) tryMove(self, e.clientX, e.clientY);
+      else select(-1);
+    } else if (!G.selMoves.length) {
+      const p = G.s.b[d.q];
+      if (p) showTip(tipHTML(p, true) + '<p class="unk" style="margin-top:6px">It has no legal moves right now.</p>', e.clientX, e.clientY, 2400);
+    }
+  };
+  root.addEventListener('pointerup', end);
+  root.addEventListener('pointercancel', e => { if (drag && drag.el) G.board.place(drag.el, drag.q, true); drag = null; });
+  root.addEventListener('pointerleave', () => { if (G.hover !== -1) { G.hover = -1; renderMarks(); } hoverSq = -1; clearTimeout(hoverTimer); hideTip(); });
+}
+
+/* ---------- moves, effects and the log ---------- */
+const VERB = {
+  boom: 'detonates!', shoot: 'fires!', strike: 'strikes and vanishes', swap: 'swaps places', raise: 'raises the dead', gust: 'blows a gale',
+  crush: 'tramples through', charm: 'charms a piece', spawn: 'lays a pawn', wall: 'raises a wall', hex: 'casts a hex', launch: 'flings a piece', jump: 'jumps',
+};
+
+function moveText(s, m, ns) {
+  const sq = E.sqName, code = q => `<code>${sq(q)}</code>`, p = s.b[m.f], tgt = s.b[m.t];
+  let t;
+  switch (m.k) {
+    case 'castle': t = m.t > m.f ? 'castles short' : 'castles long'; break;
+    case 'n': t = `${code(m.f)}${m.x ? '×' : '–'}${code(m.t)}`; if (m.promo) t += ` promotes to ${pieceName(m.promo)}`; if (m.tele) t += ', teleporting'; break;
+    case 'ep': t = `${code(m.f)}×${code(m.t)} en passant`; break;
+    case 'boom': t = `detonates on ${code(m.t)}, ${m.x.length} destroyed`; break;
+    case 'shoot': t = `shoots ${code(m.t)} from ${code(m.o)}`; break;
+    case 'strike': t = `strikes ${code(m.t)} and returns to ${code(m.o)}`; break;
+    case 'swap': t = `swaps ${code(m.o)} with the ${pieceName(tgt.t)} on ${code(m.t)}`; break;
+    case 'raise': t = `raises a ${pieceName(m.rt)} on ${code(m.t)}`; break;
+    case 'gust': t = `blows a gust from ${code(m.o)}${m.x ? `, ${m.x.length} blown off the board` : ''}`; break;
+    case 'crush': t = `${code(m.f)}–${code(m.t)}, crushing ${m.x.length}`; break;
+    case 'charm': t = `charms the ${pieceName(tgt.t)} on ${code(m.t)}`; break;
+    case 'spawn': t = `lays a pawn on ${code(m.t)}`; break;
+    case 'wall': t = `raises a wall on ${code(m.t)}`; break;
+    case 'hex': t = `turns the ${pieceName(tgt.t)} on ${code(m.t)} into a pawn`; break;
+    case 'launch': t = `flings the ${pieceName(p.t)} ${code(m.f)}–${code(m.t)}${m.x ? ', capturing' : ''}`; break;
+    case 'jump': t = `${code(m.f)}–${code(m.t)}, jumping ${m.x.length}`; break;
+    default: t = `${code(m.f)}–${code(m.t)}`;
+  }
+  for (const e of ns.events || []) {
+    if (e.k === 'venom') t += '. The capturer is poisoned';
+    if (e.k === 'void') t += '. Swallowed by the Void';
+    if (e.k === 'reborn') t += '. A Phoenix is reborn';
+    if (e.k === 'extra') t += '. Extra turn';
+  }
+  if (!ns.dead && E.inCheck(ns, ns.turn)) t += ' +';
+  return t;
+}
+
+const CHIPS = { w: ['#ffffff', '#e8e6e2', '#cfccc7'], b: ['#6d6b68', '#4b4946', '#2a2826'] };
+
+function playEffects(board, s, m, ns, quiet) {
+  const actor = s.b[m.o], mover = s.b[m.f];
+  const aw = actor && WILD[actor.t], acc = aw ? aw.accent : '#ffd98e';
+  const before = new Map(), after = new Set();
+  for (let q = 0; q < 64; q++) { const p = s.b[q]; if (p) before.set(p.id, { p, q }); }
+  for (const p of ns.b) if (p) after.add(p.id);
+  const deaths = [...before.values()].filter(v => !after.has(v.p.id) && v.p.c !== 'n');
+  const instant = new Set(), fly = new Set();
+  let snd = deaths.length ? 'capture' : 'move', shake = 0, msg = null;
+
+  switch (m.k) {
+    case 'boom': {
+      const c = m.t;
+      board.burstAt(c, { n: 60, color: ['#fff3b0', '#ffb347', '#ff6a1a', '#ff3b1a'], kind: 'spark', speed: 2.4, size: 0.09, life: 46, gravity: 0.02 });
+      board.burstAt(c, { n: 26, color: ['#3a332c', '#5a5048'], kind: 'smoke', speed: 0.8, size: 0.16, life: 70, gravity: -0.03 });
+      board.ringAt(c, '#ffcf6b', 1.9, 12, 30); board.ringAt(c, '#ff6a1a', 1.3, 8, 22);
+      snd = 'boom'; shake = 2; msg = 'boom'; break;
+    }
+    case 'shoot': board.beam(m.o, m.t, acc, 16); snd = 'zap'; msg = 'shoot'; break;
+    case 'strike': board.beam(m.o, m.t, '#ff2d55', 12); board.burstAt(m.t, { n: 16, color: ['#ff2d55', '#fff'], kind: 'spark', speed: 1.4 }); snd = 'whoosh'; msg = 'strike'; break;
+    case 'swap': board.ringAt(m.o, acc, 0.8); board.ringAt(m.t, acc, 0.8); snd = 'magic'; msg = 'swap'; break;
+    case 'raise': board.burstAt(m.t, { n: 30, color: ['#6dff8a', '#2f7d45', '#b8ffc6'], kind: 'smoke', speed: 0.6, size: 0.12, life: 60, gravity: -0.04 }); snd = 'magic'; msg = 'raise'; break;
+    case 'gust':
+      board.ringAt(m.o, '#cfeeff', 1.6, 10, 28); board.ringAt(m.o, '#8fd3ff', 1.1, 6, 20);
+      board.burstAt(m.o, { n: 30, color: ['#e6f7ff', '#8fd3ff'], kind: 'spark', speed: 2, size: 0.04, gravity: 0 });
+      snd = 'whoosh'; shake = 1; msg = 'gust'; break;
+    case 'crush': for (const q of m.x) board.burstAt(q, { n: 14, color: ['#8a7a66', '#c9b79c'], kind: 'smoke', speed: 0.7, size: 0.1, life: 40 }); shake = 1; msg = 'crush'; break;
+    case 'charm': board.burstAt(m.t, { n: 16, color: ['#ff8fc8', '#ffc2e2'], kind: 'heart', speed: 0.7, size: 0.09, life: 60, gravity: -0.05 }); snd = 'magic'; msg = 'charm'; break;
+    case 'spawn': board.burstAt(m.t, { n: 18, color: ['#ff3b3b', '#ffd1d1'], kind: 'spark', speed: 1 }); snd = 'magic'; msg = 'spawn'; break;
+    case 'wall': board.burstAt(m.t, { n: 22, color: ['#8d8476', '#b3aa9b'], kind: 'smoke', speed: 0.6, size: 0.12, life: 45 }); snd = 'stone'; shake = 1; msg = 'wall'; break;
+    case 'hex': board.burstAt(m.t, { n: 34, color: ['#a96bff', '#e2ccff', '#6b2fd6'], kind: 'spark', speed: 1.2, gravity: -0.02 }); board.ringAt(m.t, '#a96bff', 0.9); snd = 'magic'; msg = 'hex'; break;
+    case 'launch': fly.add(mover.id); snd = 'whoosh'; msg = 'launch'; break;
+    case 'jump': fly.add(mover.id); msg = 'jump'; break;
+  }
+  if (m.tele) {
+    instant.add(mover.id);
+    for (const q of [m.f, m.t]) { board.burstAt(q, { n: 26, color: ['#b57bff', '#e5d2ff', '#7a3cff'], kind: 'spark', speed: 1.3, gravity: 0 }); board.ringAt(q, '#b57bff', 0.9); }
+    snd = 'magic'; msg = 'tele';
+  }
+  for (const d of deaths) {
+    if (m.k === 'boom') continue;
+    board.burstAt(d.q, { n: 22, color: CHIPS[d.p.c], kind: 'chip', speed: 1.2, size: 0.07, life: 38 });
+  }
+  let evMsg = null;
+  for (const e of ns.events || []) {
+    if (e.k === 'venom') { board.burstAt(e.q, { n: 28, color: ['#7dff6a', '#2c8a22'], kind: 'smoke', speed: 0.8, size: 0.1, life: 50 }); evMsg = ['viper', 'Poisoned!']; }
+    if (e.k === 'void') { board.ringAt(e.q, '#c084fc', 0.9, 8, 24); board.burstAt(e.q, { n: 26, color: ['#c084fc', '#2a1840'], kind: 'spark', speed: 0.9, gravity: 0, drag: 0.85 }); snd = 'zap'; evMsg = ['void', 'Swallowed by the Void']; }
+    if (e.k === 'reborn') { board.burstAt(e.q, { n: 40, color: ['#ffb347', '#ff7a1a', '#fff3b0'], kind: 'spark', speed: 1.3, gravity: -0.05, life: 50 }); evMsg = ['phoenix', 'Reborn from the ashes']; }
+    if (e.k === 'extra') { board.ringAt(e.q, '#ffc94a', 1.6, 10, 34); evMsg = ['chrono', 'Time bends: extra turn']; }
+    if (e.k === 'grow') { board.burstAt(e.q, { n: 18, color: ['#ff3048', '#8a0a1c'], kind: 'spark', speed: 1 }); evMsg = ['vampire', 'The Vampire grows stronger']; }
+    if (e.k === 'crumble') board.burstAt(e.q, { n: 16, color: ['#8d8476', '#b3aa9b'], kind: 'chip', speed: 0.8, size: 0.06 });
+  }
+  board.setPieces(ns, { anim: true, instant, fly, frozen: frozenSquares(ns) });
+  if (shake) board.shake(shake > 1);
+  if (quiet) return;
+  Sound.play(snd);
+  if (evMsg) toast(`${pieceSVG(evMsg[0], 'w')}<span>${evMsg[1]}</span>`, WILD[evMsg[0]].accent);
+  else if (msg && aw) toast(`${pieceSVG(actor.t, actor.c)}<span>${aw.name} ${msg === 'tele' ? 'teleports' : VERB[msg]}</span>`, acc);
+}
+
+function posKey(s) { return s.b.map(p => (p ? p.t + p.c : '.')).join(',') + s.turn; }
+
+function applyMove(m) {
+  const s = G.s, ns = E.makeMove(s, m), actor = s.b[m.o];
+  G.s = ns;
+  G.log.push({ n: Math.floor(s.ply / 2) + 1, c: s.turn, t: actor.t, text: moveText(s, m, ns), special: m.k !== 'n' && m.k !== 'castle' || !!m.tele || !!(ns.events && ns.events.length) });
+  G.hist.push({ s: ns });
+  playEffects(G.board, s, m, ns);
+  G.legal = E.legalMoves(ns);
+  let st = E.status(ns, G.legal);
+  if (!st.over) {
+    const k = posKey(ns);
+    if (G.hist.filter(h => posKey(h.s) === k).length >= 3) st = { over: true, winner: null, reason: 'repetition' };
+  }
+  if (!st.over && E.inCheck(ns, ns.turn)) setTimeout(() => Sound.play('check'), 120);
+  renderLog();
+  if (st.over) { G.over = st; G.render(); setTimeout(() => endGame(st), 1100); return; }
+  G.render();
+  if (ns.turn === G.ai) aiTurn();
+}
+
+function aiTurn() {
+  G.busy = true; G.render();
+  const token = ++G.token, s = G.s, t0 = performance.now();
+  AI.think(s, G.level).then(idx => {
+    if (token !== G.token) return;
+    const wait = Math.max(0, 650 - (performance.now() - t0));
+    setTimeout(() => {
+      if (token !== G.token) return;
+      G.busy = false;
+      const m = G.legal[idx] || G.legal[0];
+      if (m) applyMove(m);
+      else G.render();
+    }, wait);
+  });
+}
+
+function undo() {
+  if (G.level === 'xtreme' || G.over) return;
+  G.token++; G.busy = false;
+  while (G.hist.length > 1) {
+    const mover = G.hist[G.hist.length - 2].s.turn;
+    G.hist.pop(); G.log.pop();
+    if (mover === G.human && G.hist[G.hist.length - 1].s.turn === G.human) break;
+  }
+  G.s = G.hist[G.hist.length - 1].s;
+  G.legal = E.legalMoves(G.s); G.sel = -1; G.selMoves = [];
+  G.board.setPieces(G.s, { anim: true, frozen: frozenSquares(G.s) });
+  renderLog(); G.render();
+  if (G.s.turn === G.ai) aiTurn();
+}
+
+const REASONS = {
+  mate: w => (w ? 'Checkmate. Their king has nowhere to go.' : 'Checkmate. Your king has nowhere to go.'),
+  king: w => (w ? 'Their king was destroyed outright.' : 'Your king was destroyed outright.'),
+  resign: () => 'You resigned.',
+  stalemate: () => 'Stalemate: no legal moves, but no check either.',
+  fifty: () => '50 moves passed without a capture or pawn move.',
+  repetition: () => 'The same position came up three times.',
+  material: () => 'Only the kings are left standing.',
+};
+function endGame(st) {
+  const won = st.winner === G.human, draw = !st.winner;
+  Sound.play(won ? 'win' : draw ? 'move' : 'lose');
+  const theirs = G.wild[G.ai].map(t => {
+    const fresh = discover(t), w = WILD[t];
+    return `<div class="wi" style="--acc:${w.accent}"><div class="wi-art">${pieceSVG(t, G.ai)}</div><div>
+      <h4>${w.name}<small>Their wildcard</small></h4>${fresh ? '<div class="new">New in your Codex</div>' : ''}<p>${w.desc}</p></div></div>`;
+  }).join('');
+  modal(`<h2 class="${won ? 'win' : draw ? 'draw' : 'lose'}">${won ? 'Victory' : draw ? 'Draw' : 'Defeat'}</h2>
+    <p class="why">${REASONS[st.reason](won)}</p>
+    <div class="reveal">${theirs}</div>
+    <div class="modal-btns"><button class="btn primary" data-act="rematch"><span>Play again</span></button>
+    <button class="btn" data-act="look"><span>See the board</span></button><button class="btn ghost" data-act="menu"><span>Main menu</span></button></div>`);
+}
+function confirmBox(title, text, yes, cb) {
+  modal(`<h2 class="draw" style="font-size:40px">${title}</h2><p class="why">${text}</p>
+    <div class="modal-btns"><button class="btn primary" data-act="yes"><span>${yes}</span></button><button class="btn" data-act="look"><span>Keep playing</span></button></div>`);
+  confirmCb = cb;
+}
+let confirmCb = null;
+$('#modal').addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b) { if (e.target.id === 'modal') closeModal(); return; }
+  const a = b.dataset.act;
+  closeModal();
+  if (a === 'rematch') deal();
+  else if (a === 'menu') show('menu');
+  else if (a === 'yes' && confirmCb) { const f = confirmCb; confirmCb = null; f(); }
+});
+
+$('#undoBtn').addEventListener('click', undo);
+$('#flipBtn').addEventListener('click', () => { G.board.setFlip(!G.board.flip); G.render(); });
+$('#resignBtn').addEventListener('click', () => {
+  if (G.over) return;
+  confirmBox('Resign?', 'The game ends and their wildcard is revealed.', 'Resign', () => {
+    G.token++; G.busy = false; G.over = { over: true, winner: G.ai, reason: 'resign' }; G.render(); endGame(G.over);
+  });
+});
+$('#leaveBtn').addEventListener('click', () => {
+  if (G.over || G.hist.length < 2) { G.token++; show('menu'); return; }
+  confirmBox('Leave the game?', 'This game will be abandoned.', 'Leave', () => { G.token++; G.busy = false; show('menu'); });
+});
+document.addEventListener('click', e => {
+  const c = e.target.closest('.chip[data-wild]');
+  if (c) {
+    const t = c.dataset.wild, p = { t, c: c.dataset.c };
+    const r = c.getBoundingClientRect();
+    showTip(tipHTML(p, p.c === G.human), r.left, r.bottom, 3200);
+    return;
+  }
+  const g = e.target.closest('[data-go]');
+  if (g) { Sound.init(); show(g.dataset.go); }
+});
+document.addEventListener('pointerdown', e => {
+  if (!$('#chooser').hidden && !e.target.closest('#chooser') && !e.target.closest('.board')) hideChooser();
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (!$('#chooser').hidden) hideChooser();
+  else if (!$('#modal').hidden) closeModal();
+  else if (current === 'game' && G.sel >= 0) select(-1);
+});
+
+/* ---------- the menu's exhibition match ---------- */
+const Showcase = {
+  board: null, s: null, timer: 0,
+  start() {
+    if (!this.board) this.board = new BoardView($('#showBoard'), { coords: false, seed: 5 });
+    if (!this.s) this.newGame();
+    if (!this.timer) this.timer = setInterval(() => this.step(), 1450);
+  },
+  stop() { clearInterval(this.timer); this.timer = 0; },
+  newGame() {
+    const [a, b] = shuffle(WILD_IDS.slice());
+    const f = () => 2 + Math.floor(Math.random() * 4);
+    this.s = E.newGame({ wild: { w: [a], b: [b] }, files: { w: [f()], b: [f()] } });
+    this.board.setPieces(this.s, { anim: false });
+    this.board.setMarks({});
+    $('#showCap').textContent = `Exhibition match · ${WILD[a].name} vs ${WILD[b].name}`;
+  },
+  step() {
+    if (document.hidden || !this.board) return;
+    const st = E.status(this.s);
+    if (st.over || this.s.ply > 140) { this.newGame(); return; }
+    const L = E.legalMoves(this.s), m = L[E.quickPick(this.s)];
+    if (!m) { this.newGame(); return; }
+    const before = this.s;
+    this.s = E.makeMove(before, m);
+    playEffects(this.board, before, m, this.s, true);
+    this.board.setMarks({ last: [m.o, m.t] });
+  },
+};
+
+/* ---------- codex ---------- */
+function miniBoard(t) {
+  const { s, moves } = E.demo(t);
+  const mark = new Map();
+  for (const m of moves) {
+    const cap = m.x && m.x.length, spec = (m.k !== 'n' && m.k !== 'castle') || m.tele;
+    const cls = spec ? 'ms' : cap ? 'mc' : 'mq', prev = mark.get(m.t);
+    if (!prev || cls === 'ms' || (cls === 'mc' && prev === 'mq')) mark.set(m.t, cls);
+  }
+  let h = '';
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    const q = (7 - y) * 8 + x, p = s.b[q];
+    h += `<i class="${(x + y) % 2 ? 'd' : 'l'} ${mark.get(q) || ''}">${p ? pieceSVG(p.t, p.c) : ''}</i>`;
+  }
+  return `<div class="mini" title="Sample moves from d4">${h}</div>`;
+}
+function renderCodex() {
+  const spoil = $('#spoilers').checked;
+  $('#codexLede').textContent = `You've discovered ${discovered.size} of 30 wildcards. A wildcard joins your Codex when you play with it, or when a game against it ends. The small boards show sample moves from d4: dots are moves, red rings are captures, stars are special abilities.`;
+  $('#codexGrid').innerHTML = WILD_IDS.map(t => {
+    const w = WILD[t], known = discovered.has(t) || spoil;
+    return `<div class="cx ${known ? '' : 'locked'}" style="--acc:${w.accent}">
+      <div class="cx-l"><div class="cx-art">${pieceSVG(t, 'w')}</div>${known ? miniBoard(t) : ''}</div>
+      <div><h4>${w.name}</h4><div class="cx-moves">${known ? esc(w.moves) : 'Undiscovered'}</div>
+      <p>${known ? w.desc : 'Not discovered yet. Play with it or face it to learn what it does.'}</p></div></div>`;
+  }).join('');
+}
+$('#spoilers').addEventListener('change', renderCodex);
+
+/* ---------- boot ---------- */
+function initMenu() {
+  const sync = () => { $('#soundState').textContent = Sound.on ? 'On' : 'Off'; store.set('sound', Sound.on); };
+  $('#soundBtn').addEventListener('click', () => { Sound.on = !Sound.on; Sound.init(); Sound.play('select'); sync(); });
+  sync(); updateCodexCount();
+  const drift = $('#drift');
+  const ids = shuffle(WILD_IDS.slice()).slice(0, 14);
+  drift.innerHTML = ids.map((t, i) => `<i style="left:${(i * 7.3 + Math.random() * 4) % 100}%;animation-duration:${38 + Math.random() * 30}s;animation-delay:-${Math.random() * 60}s;width:${50 + Math.random() * 50}px;height:${50 + Math.random() * 50}px">${pieceSVG(t, i % 2 ? 'b' : 'w')}</i>`).join('');
+}
+
+function boot(data) {
+  installPieceDefs();
+  AI.init();
+  initMenu(); initSetup();
+  G.board = new BoardView($('#mainBoard'), { seed: 11 });
+  initBoardInput();
+  const g = data && data.game;
+  if (g && g.hist && g.hist.length) {
+    G.start({ wild: g.wild, human: g.human, level: g.level, state: g.hist[g.hist.length - 1].s, hist: g.hist, log: g.log });
+    show('game');
+  } else show(data && data.screen && data.screen !== 'game' && data.screen !== 'draft' ? data.screen : 'menu');
+}
+if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
+  window.claude.hot.snapshot(() => ({
+    screen: current,
+    game: current === 'game' && G.s && !G.over ? { wild: G.wild, human: G.human, level: G.level, hist: G.hist, log: G.log } : null,
+  }));
+}
+const hot = window.claude && window.claude.hot;
+if (hot && hot.ready) hot.ready(boot); else boot((hot && hot.data) || {});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wildcard Chess</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rye&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <div class="ambient" aria-hidden="true"><div class="drift" id="drift"></div></div>
+
+  <!-- MAIN MENU -->
+  <section class="screen" id="menu">
+    <div class="menu-wrap">
+      <div class="menu-left">
+        <p class="eyebrow">Chess with 30 secret pieces</p>
+        <h1 class="logo"><span class="logo-a">Wildcard</span><span class="logo-b">Chess</span></h1>
+        <p class="tagline">Both armies start with the usual sixteen pieces, plus a wildcard with rules of its own. You can see your opponent's. You can't see what it does.</p>
+        <nav class="menu-btns" aria-label="Main menu">
+          <button class="btn primary" data-go="setup" id="playBtn"><span>Play</span><small>vs the computer</small></button>
+          <button class="btn" data-go="codex"><span>Codex</span><small id="codexCount">0 / 30 discovered</small></button>
+          <button class="btn" data-go="how"><span>How it works</span><small>Rules in two minutes</small></button>
+          <button class="btn ghost" id="soundBtn"><span>Sound</span><small id="soundState">On</small></button>
+        </nav>
+      </div>
+      <div class="menu-right" aria-hidden="true">
+        <div class="stage">
+          <div class="tilt"><div class="board" id="showBoard"></div></div>
+          <div class="stage-shadow"></div>
+        </div>
+        <p class="stage-cap" id="showCap">Exhibition match</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIFFICULTY -->
+  <section class="screen" id="setup">
+    <header class="topbar"><button class="back" data-go="menu">← Menu</button><h2>Pick your opponent</h2></header>
+    <div class="setup-body">
+      <div class="diff-grid" role="radiogroup" aria-label="Difficulty">
+        <button class="diff" data-level="easy" role="radio">
+          <div class="diff-ico" data-piece="P"></div>
+          <div class="diff-name">Easy</div>
+          <div class="diff-sub">The Pawn Pusher</div>
+          <ul><li>Looks one move ahead</li><li>Gets distracted, blunders often</li><li>Take-backs allowed</li></ul>
+        </button>
+        <button class="diff" data-level="medium" role="radio">
+          <div class="diff-ico" data-piece="N"></div>
+          <div class="diff-name">Medium</div>
+          <div class="diff-sub">The Club Regular</div>
+          <ul><li>Sees two moves ahead</li><li>Grabs anything left hanging</li><li>Take-backs allowed</li></ul>
+        </button>
+        <button class="diff" data-level="pro" role="radio">
+          <div class="diff-ico" data-piece="Q"></div>
+          <div class="diff-name">Pro</div>
+          <div class="diff-sub">The Tactician</div>
+          <ul><li>Calculates four moves deep</li><li>Knows every wildcard trick</li><li>Take-backs allowed</li></ul>
+        </button>
+        <button class="diff xtreme" data-level="xtreme" role="radio">
+          <div class="diff-ico" data-piece="void"></div>
+          <div class="diff-name">Xtreme</div>
+          <div class="diff-sub">The Unhinged</div>
+          <ul><li>Thinks as deep as time allows</li><li><b>Brings one extra wildcard</b></li><li>No take-backs</li></ul>
+        </button>
+      </div>
+      <div class="opts">
+        <div class="opt"><span class="opt-l">Play as</span>
+          <div class="seg" id="segColor"><button data-v="w">White</button><button data-v="r">Random</button><button data-v="b">Black</button></div></div>
+        <div class="opt"><span class="opt-l">Wildcards each</span>
+          <div class="seg" id="segCount"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button></div></div>
+      </div>
+      <button class="btn primary big" id="dealBtn"><span>Deal the wildcards</span></button>
+    </div>
+  </section>
+
+  <!-- DRAFT -->
+  <section class="screen" id="draft">
+    <header class="topbar"><button class="back" data-go="setup">← Opponent</button><h2>The deal</h2></header>
+    <div class="draft-body">
+      <div class="draft-side">
+        <h3>Yours</h3>
+        <div class="cards" id="draftMine"></div>
+        <button class="btn ghost small" id="rerollBtn">Reroll mine (1 left)</button>
+      </div>
+      <div class="vs" aria-hidden="true">vs</div>
+      <div class="draft-side">
+        <h3>Theirs</h3>
+        <div class="cards" id="draftTheirs"></div>
+        <p class="draft-note">You'll find out what it does the hard way.</p>
+      </div>
+    </div>
+    <div class="draft-foot"><button class="btn primary big" id="startBtn"><span>Start the game</span></button></div>
+  </section>
+
+  <!-- GAME -->
+  <section class="screen" id="game">
+    <div class="game-wrap">
+      <div class="board-col">
+        <div class="pbar" id="barTop"></div>
+        <div class="board-frame">
+          <div class="board" id="mainBoard"></div>
+          <div class="toast" id="toast" aria-live="polite"></div>
+        </div>
+        <div class="pbar" id="barBot"></div>
+      </div>
+      <aside class="side">
+        <div class="side-head">
+          <div class="mode-chip" id="modeChip"></div>
+          <div class="status" id="status" aria-live="polite"></div>
+        </div>
+        <div class="side-scroll">
+          <div class="wild-info" id="wildInfo"></div>
+          <div class="log-wrap"><div class="log-title">Moves</div><ol class="log" id="log"></ol></div>
+        </div>
+        <div class="controls">
+          <button id="undoBtn">Undo</button><button id="flipBtn">Flip</button><button id="resignBtn">Resign</button><button id="leaveBtn">Menu</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- CODEX -->
+  <section class="screen" id="codex">
+    <header class="topbar"><button class="back" data-go="menu">← Menu</button><h2>Codex</h2>
+      <label class="spoil"><input type="checkbox" id="spoilers"> Show undiscovered</label></header>
+    <div class="codex-body">
+      <p class="codex-lede" id="codexLede"></p>
+      <div class="codex-grid" id="codexGrid"></div>
+    </div>
+  </section>
+
+  <!-- HOW -->
+  <section class="screen" id="how">
+    <header class="topbar"><button class="back" data-go="menu">← Menu</button><h2>How it works</h2></header>
+    <div class="how-body">
+      <article>
+        <h3>Normal chess, plus a stranger</h3>
+        <p>Both sides start with the full standard army. Each side also gets one or more <b>wildcards</b>, dealt at random from 30, standing on the third rank in front of the pawns.</p>
+        <h3>You know yours. You don't know theirs.</h3>
+        <p>Before the game you see your own wildcard and what it does. You also see your opponent's piece and its name, but not its rules. Hover or tap any piece on the board to read about it; theirs only says <i>unknown</i>. Watch what it does and work it out. When the game ends, its rules are revealed and it joins your Codex.</p>
+        <h3>How to win</h3>
+        <p>Checkmate still wins. So does destroying the king outright, which some wildcards can do: explosions, charges, arrows. Your own moves can never leave your king in check or get it killed. Stalemate, 50 moves without a capture or pawn move, threefold repetition, and bare kings are draws.</p>
+        <h3>Playing a move</h3>
+        <p>Click or drag a piece. Dots mark quiet moves, rings mark captures, and coloured stars mark special abilities. A pulsing ring on the piece itself means it has an ability it uses in place (click it again to use it). If one square offers two different moves, you'll be asked which.</p>
+        <h3>Promotion</h3>
+        <p>Pawns that reach the last rank can promote into a queen, rook, bishop, knight, or one of your wildcards.</p>
+        <h3>Difficulty</h3>
+        <p><b>Easy</b> and <b>Medium</b> look one and two moves ahead. <b>Pro</b> calculates four moves deep. <b>Xtreme</b> searches as deep as it can in four seconds and brings one more wildcard than you do. Only Xtreme refuses take-backs.</p>
+      </article>
+    </div>
+  </section>
+
+  <div class="modal" id="modal" hidden><div class="modal-card" id="modalCard" role="dialog" aria-modal="true"></div></div>
+  <div class="tip" id="tip" hidden></div>
+  <div class="chooser" id="chooser" hidden></div>
+</div>
+<script src="js/art.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/fx.js"></script>
+<script src="js/board.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
