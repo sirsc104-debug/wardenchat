@@ -98,6 +98,12 @@ Pick **Draft** on the main menu (or **Deal: Draft** on the setup screen; it work
 
 Two players on one device. The deal is done in private: White sees their own cards while Black looks away, then the device is passed and Black sees theirs. During the game the sidebar and tooltips only explain the wildcards of the player whose turn it is. After each move a **privacy screen** covers everything until the next player taps *Ready*, and the board can **flip** to face whoever is moving (both can be switched off in setup). Undo takes back one move. When the game ends, both sides' wildcards are revealed and added to the Codex.
 
+## Check and checkmate
+
+When a king is in check, every piece threatening it glows red, its square pulses, and a red arrow runs from it to the king; the status line names it ("Check by the Bomber on d5"). Indirect threats count too: a Bomber that could blow up a piece next to the king, or the piece a Catapult could fling onto it. A "Check!" stamp slams onto the board as the king shakes and the board's edges flash red.
+
+Checkmate gets a finale before the result card: a deep gong, the board darkens around the losing king, the king topples over in a shockwave of sparks, and a "Checkmate" banner lands. A king destroyed outright gets "King down!", and draws get a quieter stamp. The log marks mate with #.
+
 ## Rules notes
 
 - A game is won by checkmate or by destroying the enemy king outright (explosions, charges, arrows and so on). Your own move can never leave your king attackable or get it killed.

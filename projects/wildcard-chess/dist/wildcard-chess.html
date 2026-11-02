@@ -636,6 +636,50 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-hi); o
 .army-row .tile.reveal { animation: tileFlip .7s cubic-bezier(.3, 1.4, .5, 1) both; }
 @keyframes tileFlip { from { transform: rotateY(90deg) scale(.8); filter: brightness(1.8); } }
 
+/* ---------- check and checkmate ---------- */
+.board .arrows { z-index: 4; pointer-events: none; width: 100%; height: 100%; overflow: visible; }
+.board .arrows line { animation: arrowIn .35s ease-out both; }
+@keyframes arrowIn { from { stroke-opacity: 0; stroke-dasharray: 0 2000; } to { stroke-dasharray: 2000 0; } }
+.hl .check { animation: chkPulse 1.1s ease-in-out infinite; }
+.hl .checker { background: rgba(255, 60, 30, .2); box-shadow: inset 0 0 0 calc(var(--sq, 80px) * .05) rgba(255, 60, 30, .85); animation: chkPulse 1.1s ease-in-out infinite; }
+@keyframes chkPulse { 50% { opacity: .55; } }
+.pc.checking svg { filter: drop-shadow(0 0 4px #ff3b20) drop-shadow(0 0 12px rgba(255, 59, 32, .7)); }
+.pc.checked svg { animation: kingShake .75s ease-in-out; }
+@keyframes kingShake {
+  15% { transform: rotate(-12deg) translateX(-4%); } 30% { transform: rotate(10deg) translateX(4%); }
+  45% { transform: rotate(-8deg) translateX(-3%); } 60% { transform: rotate(6deg) translateX(2%); } 80% { transform: rotate(-3deg); }
+}
+.pc.toppled svg { transform-origin: 32% 92%; transform: rotate(-84deg) translate(-6%, 6%); filter: grayscale(.85) brightness(.75); transition: transform 1.1s cubic-bezier(.55, 0, .55, 1.35), filter 1.1s; }
+.board .stamp {
+  position: absolute; left: 50%; top: 50%; right: auto; bottom: auto; z-index: 9; pointer-events: none; white-space: nowrap;
+  transform: translate(-50%, -50%) rotate(-7deg);
+  animation: stampIn .5s cubic-bezier(.2, 1.6, .4, 1) both, stampOut .45s ease-in 1.05s forwards;
+}
+.board .stamp span {
+  display: block; padding: .12em .45em .2em; border-radius: .18em;
+  font: 400 calc(var(--sq, 80px) * 1.05) / 1 var(--f-display); letter-spacing: .02em;
+  color: #fff3e8; background: rgba(150, 22, 10, .88); border: calc(var(--sq, 80px) * .05) solid #ffb199;
+  box-shadow: 0 0 0 calc(var(--sq, 80px) * .03) rgba(150, 22, 10, .9), 0 18px 40px rgba(0, 0, 0, .55), 0 0 60px rgba(255, 60, 30, .55);
+  text-shadow: 0 3px 0 rgba(60, 6, 2, .8);
+}
+.board .stamp.mate { animation: stampIn .65s cubic-bezier(.2, 1.5, .4, 1) both; }
+.board .stamp.mate span { font-size: calc(var(--sq, 80px) * .92); background: rgba(24, 18, 12, .92); color: var(--gold-hi); border-color: var(--gold); box-shadow: 0 0 0 calc(var(--sq, 80px) * .03) #6b4512, 0 24px 60px rgba(0, 0, 0, .7), 0 0 90px rgba(255, 190, 90, .55); text-shadow: 0 4px 0 #7f5415; }
+.board .stamp.mate.lose span { color: #ffb4a3; border-color: #ff6a4a; box-shadow: 0 0 0 calc(var(--sq, 80px) * .03) #6b1f12, 0 24px 60px rgba(0, 0, 0, .7), 0 0 90px rgba(255, 70, 40, .55); text-shadow: 0 4px 0 #6b1f12; }
+.board .stamp.draw { animation: stampIn .6s cubic-bezier(.2, 1.3, .4, 1) both; }
+.board .stamp.draw span { background: rgba(24, 22, 20, .9); color: var(--ink); border-color: var(--mute); box-shadow: 0 20px 50px rgba(0, 0, 0, .6); text-shadow: none; }
+.board .stamp small { display: block; margin-top: .5em; font: 600 calc(var(--sq, 80px) * .2) var(--f-ui); letter-spacing: .2em; text-transform: uppercase; text-align: center; color: var(--ink); text-shadow: 0 2px 6px rgba(0,0,0,.8); }
+@keyframes stampIn { from { transform: translate(-50%, -50%) rotate(-7deg) scale(3.2); opacity: 0; filter: blur(8px); } 70% { filter: none; } }
+@keyframes stampOut { to { transform: translate(-50%, -50%) rotate(-7deg) scale(.85); opacity: 0; } }
+.board .flash { position: absolute; inset: 0; z-index: 7; pointer-events: none; animation: flashOut .95s ease-out forwards; }
+.board .flash.red { box-shadow: inset 0 0 calc(var(--sq, 80px) * 1.3) rgba(255, 40, 20, .9); }
+.board .flash.gold { box-shadow: inset 0 0 calc(var(--sq, 80px) * 1.6) rgba(255, 200, 100, .9); background: rgba(255, 230, 180, .25); }
+@keyframes flashOut { from { opacity: 1; } to { opacity: 0; } }
+.board.ended::after {
+  content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none;
+  background: radial-gradient(circle at var(--kx, 50%) var(--ky, 50%), transparent 0, transparent 7%, rgba(8, 5, 3, .62) 34%);
+  animation: fade 1.2s both;
+}
+
 </style>
 </head>
 <body>
@@ -1947,6 +1991,17 @@ function ChessEngine() {
     return false;
   }
   function inCheck(s, c) { const k = findKing(s, c); return k < 0 || attacked(s, k, opp(c)); }
+  /* The squares of every enemy piece that threatens side c's king (for a Catapult, the piece it would fling). */
+  function checkers(s, c) {
+    const k = findKing(s, c), out = [];
+    if (k < 0) return out;
+    for (const m of genAll(s, opp(c), true)) {
+      if (!m.x || !m.x.includes(k)) continue;
+      const q = m.k === 'launch' ? m.f : m.o;
+      if (!out.includes(q)) out.push(q);
+    }
+    return out;
+  }
 
   function legalMoves(s) {
     if (s.dead) return [];
@@ -2179,7 +2234,7 @@ function ChessEngine() {
     return { s, moves: out };
   }
 
-  return { newGame, pickSlots, startType, cardValue: t => (t === 'K' ? 0 : value({ t, d: initData(t, 0) || { k: 0, ch: 1 } })), initData, legalMoves, makeMove, status, inCheck, findKing, think, quickPick, demo, value, evaluate,
+  return { newGame, pickSlots, startType, cardValue: t => (t === 'K' ? 0 : value({ t, d: initData(t, 0) || { k: 0, ch: 1 } })), initData, legalMoves, makeMove, status, inCheck, checkers, findKing, think, quickPick, demo, value, evaluate,
     WILD_IDS, LEVELS, sqName: q => 'abcdefgh'[F(q)] + (R(q) + 1), F, R, SQ, stats: () => nodes };
 }
 if (typeof module !== 'undefined') module.exports = ChessEngine;
@@ -2319,6 +2374,11 @@ const Sound = {
       case 'lose': [392, 330, 262, 196].forEach((fr, i) => this._tone(t + i * 0.16, fr, 0.45, 0.16, 'triangle')); break;
       case 'deal': this._noise(t, 0.08, 2600, 1.6, 0.3); break;
       case 'stone': this._noise(t, 0.3, 300, 0.9, 0.6, 'lowpass'); this._tone(t, 70, 0.25, 0.4, 'sine', 40); break;
+      case 'mate': {
+        [98, 147, 196, 294].forEach((fr, i) => this._tone(t + i * 0.02, fr, 2.2 - i * 0.3, 0.26 - i * 0.04, i % 2 ? 'triangle' : 'sine'));
+        const f = this._noise(t, 1.2, 600, 0.6, 0.5, 'lowpass'); f.frequency.exponentialRampToValueAtTime(60, t + 1.1);
+        break;
+      }
     }
   },
 };
@@ -2341,12 +2401,17 @@ class BoardView {
     this.root = root; this.flip = false; this.seed = o.seed || 11; this.showCoords = o.coords !== false;
     this.els = new Map(); this.size = 0;
     root.classList.add('board');
-    root.innerHTML = '<canvas class="wood"></canvas><div class="coords"></div><div class="hl"></div><div class="pieces"></div><div class="marks"></div><canvas class="fx"></canvas>';
+    this.uid = 'b' + (BoardView.n = (BoardView.n || 0) + 1);
+    root.innerHTML = '<canvas class="wood"></canvas><div class="coords"></div><div class="hl"></div><div class="pieces"></div>' +
+      `<svg class="arrows" viewBox="0 0 800 800" aria-hidden="true"><defs><marker id="${this.uid}-ah" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto-start-reverse">` +
+      '<path d="M0 0 L10 5 L0 10 Z" fill="#ff3b20"/></marker></defs><g></g></svg>' +
+      '<div class="marks"></div><canvas class="fx"></canvas>';
     this.wood = root.querySelector('.wood');
     this.coordEl = root.querySelector('.coords');
     this.hlEl = root.querySelector('.hl');
     this.pcEl = root.querySelector('.pieces');
     this.markEl = root.querySelector('.marks');
+    this.arrowEl = root.querySelector('.arrows g');
     this.fx = new FXLayer(root.querySelector('.fx'));
     if (window.ResizeObserver) { this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(root); }
     else window.addEventListener('resize', () => this.resize());
@@ -2496,8 +2561,18 @@ class BoardView {
     if (o.last) for (const q of o.last) if (q >= 0) h += this.cell(q, 'last');
     if (o.sel >= 0) h += this.cell(o.sel, 'sel');
     if (o.check >= 0) h += this.cell(o.check, 'check');
+    if (o.checkers) for (const q of o.checkers) h += this.cell(q, 'checker');
     if (o.xprev) for (const q of o.xprev) h += this.cell(q, 'xprev');
     this.hlEl.innerHTML = h;
+    let a = '';
+    if (o.arrows) for (const [from, to] of o.arrows) {
+      const p = this.disp(from), q = this.disp(to);
+      const x1 = p.x * 100 + 50, y1 = p.y * 100 + 50, x2 = q.x * 100 + 50, y2 = q.y * 100 + 50;
+      const len = Math.hypot(x2 - x1, y2 - y1) || 1, ux = (x2 - x1) / len, uy = (y2 - y1) / len;
+      a += `<line x1="${x1 + ux * 22}" y1="${y1 + uy * 22}" x2="${x2 - ux * 40}" y2="${y2 - uy * 40}" stroke="#ff3b20" stroke-opacity=".78" stroke-width="15" stroke-linecap="round" marker-end="url(#${this.uid}-ah)"/>`;
+    }
+    this.arrowEl.innerHTML = a;
+    for (const el of this.els.values()) el.classList.toggle('checking', !!(o.checkers && o.checkers.includes(el._q)));
     let m = '';
     if (o.marks) for (const k of o.marks) m += this.cell(k.q, k.cls, k.acc ? `--acc:${k.acc}` : '');
     if (o.hover >= 0) m += this.cell(o.hover, 'hover');
@@ -2507,6 +2582,33 @@ class BoardView {
   burstAt(q, o) { const c = this.center(q); this.fx.burst(c.x, c.y, o); }
   ringAt(q, color, r, w, life) { const c = this.center(q); this.fx.ring(c.x, c.y, color, r, w, life); }
   beam(a, b, color, life) { const p = this.center(a), q = this.center(b); this.fx.beam(p.x, p.y, q.x, q.y, color, life); }
+  /* A big word slammed onto the board: 'Check!', 'Checkmate' and friends. */
+  stamp(text, cls, ms = 1500) {
+    const el = document.createElement('div');
+    el.className = 'stamp ' + (cls || '');
+    el.innerHTML = `<span>${text}</span>`;
+    this.root.appendChild(el);
+    if (ms) setTimeout(() => el.remove(), ms);
+    return el;
+  }
+  flash(cls = 'red') {
+    const el = document.createElement('div');
+    el.className = 'flash ' + cls;
+    this.root.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+  }
+  /* Darken the board around one square (the fallen king) at the end of a game. */
+  spotlight(q) {
+    const d = this.disp(q);
+    this.root.style.setProperty('--kx', (d.x + 0.5) * 12.5 + '%');
+    this.root.style.setProperty('--ky', (d.y + 0.5) * 12.5 + '%');
+    this.root.classList.add('ended');
+  }
+  resetEnd() {
+    this.root.classList.remove('ended');
+    for (const el of this.root.querySelectorAll('.stamp, .flash')) el.remove();
+    for (const el of this.els.values()) el.classList.remove('toppled', 'checked');
+  }
   shake(big) {
     const cls = big ? 'big-shake' : 'shake';
     this.root.classList.remove('shake', 'big-shake'); void this.root.offsetWidth; this.root.classList.add(cls);
@@ -3029,6 +3131,7 @@ const G = {
     if (cfg.arrange) { this.board.clear(); this.board.setPieces(this.s, { anim: true }); Sound.play('deal'); }
     else if (fresh) this.board.setPieces(startingArmy(this.s, cfg.slots), { anim: false });
     else this.board.setPieces(this.s, { anim: false, frozen: frozenSquares(this.s) });
+    this.board.resetEnd();
     renderWildInfo(); renderLog(); this.render();
     if (cfg.arrange) { arrangeSeq(cfg.arrange); return; }
     const go = () => (fresh ? runIntro(cfg.slots) : afterIntro());
@@ -3148,14 +3251,14 @@ function renderStatus() {
     else if (G.arranging) t = `${sideName(G.arranging)} sets up`;
     else if (G.intro) t = 'Dealing the wildcards…';
     else if (G.passing) t = `Passing to ${sideName(c)}…`;
-    else t = E.inCheck(G.s, c) ? `Check! ${n} to move` : G.s.extra ? `Extra turn! ${n} again` : `${n} to move`;
+    else t = E.inCheck(G.s, c) ? `Check by the ${checkText(G.s, c)}! ${n} to move` : G.s.extra ? `Extra turn! ${n} again` : `${n} to move`;
     $('#status').textContent = t;
     return;
   }
   if (G.over) t = G.over.winner === G.human ? 'You won' : G.over.winner ? 'You lost' : 'Draw';
   else if (G.arranging) t = 'Set up your army';
   else if (G.intro) t = 'Dealing the wildcards…';
-  else if (G.s.turn === G.human) t = E.inCheck(G.s, G.human) ? 'Check! Your move' : (G.s.extra ? 'Extra turn!' : 'Your move');
+  else if (G.s.turn === G.human) t = E.inCheck(G.s, G.human) ? `Check by the ${checkText(G.s, G.human)}!` : (G.s.extra ? 'Extra turn!' : 'Your move');
   else t = G.busy ? 'Thinking…' : 'Their move';
   $('#status').textContent = t;
 }
@@ -3186,7 +3289,10 @@ function renderMarks() {
   const s = G.s, last = s.last;
   const o = { last: last ? [last.o, last.t] : null, sel: G.sel, check: -1, marks: [], xprev: null, hover: -1 };
   if (G.arranging) { G.board.setMarks({ sel: G.arrSel }); return; }
-  if (!G.over && E.inCheck(s, s.turn)) o.check = kingSq(s, s.turn);
+  const k = kingSq(s, s.turn);
+  if (k >= 0 && (!G.over || G.over.reason === 'mate') && E.inCheck(s, s.turn)) {
+    o.check = k; o.checkers = E.checkers(s, s.turn); o.arrows = o.checkers.map(q => [q, k]);
+  }
   if (G.sel >= 0) {
     const pc = s.b[G.sel], w = pc && WILD[pc.t], acc = w ? w.accent : '#ffd98e';
     const byT = new Map();
@@ -3438,6 +3544,51 @@ function playEffects(board, s, m, ns, quiet) {
   else if (msg && aw) toast(`${pieceSVG(actor.t, actor.c)}<span>${aw.name} ${msg === 'tele' ? 'teleports' : VERB[msg]}</span>`, acc);
 }
 
+/* Who is giving check, as words: 'Rook on e8' or 'Bomber on d5 and Knight on f3'. */
+function checkText(s, c) { return E.checkers(s, c).map(q => `${pieceName(s.b[q].t)} on ${E.sqName(q)}`).join(' and the '); }
+
+function checkFX() {
+  const s = G.s, c = s.turn, k = E.findKing(s, c), b = G.board;
+  if (k < 0 || G.over) return;
+  Sound.play('check');
+  b.stamp('Check!', 'check');
+  b.flash('red');
+  b.ringAt(k, '#ff3b20', 1.2, 9, 28);
+  for (const q of E.checkers(s, c)) { b.ringAt(q, '#ff6a4a', 0.8, 5, 22); b.burstAt(q, { n: 12, color: ['#ff3b20', '#ffb199'], kind: 'spark', speed: 0.8, gravity: 0 }); }
+  const el = b.elAt(k);
+  if (el) { el.classList.remove('checked'); void el.offsetWidth; el.classList.add('checked'); setTimeout(() => el.classList.remove('checked'), 800); }
+}
+
+/* The finale before the result card. Returns how long to wait before showing it. */
+function endFX(st, prev) {
+  const b = G.board;
+  if (st.reason === 'mate' || st.reason === 'king') {
+    const loser = opp(st.winner), lose = G.mode === 'ai' && loser === G.human;
+    const k = st.reason === 'mate' ? E.findKing(G.s, loser) : E.findKing(prev, loser);
+    const tk = G.token;
+    if (st.reason === 'mate') setTimeout(() => { if (tk === G.token) Sound.play('check'); }, 150);
+    setTimeout(() => {
+      if (tk !== G.token) return;
+      if (k >= 0) {
+        b.spotlight(k);
+        b.ringAt(k, '#ffcf6b', 2.6, 14, 44); b.ringAt(k, lose ? '#ff5a3c' : '#ffd98e', 1.7, 10, 32);
+        b.burstAt(k, { n: 70, color: lose ? ['#ff8a6a', '#ff3b20', '#fff'] : ['#ffd98e', '#ff9a3c', '#ffffff'], kind: 'spark', speed: 2.4, life: 64, gravity: 0.03 });
+        b.burstAt(k, { n: 20, color: ['#3a332c', '#5a5048'], kind: 'smoke', speed: 0.6, size: 0.16, life: 70, gravity: -0.03 });
+        const el = st.reason === 'mate' ? b.elAt(k) : null;
+        if (el) el.classList.add('toppled');
+      }
+      b.shake(true); b.flash(lose ? 'red' : 'gold');
+      Sound.play('mate');
+      const sub = G.mode === 'local' ? `${sideName(st.winner)} wins` : lose ? 'You lose' : 'You win';
+      b.stamp(`${st.reason === 'mate' ? 'Checkmate' : 'King down!'}<small>${sub}</small>`, 'mate' + (lose ? ' lose' : ''), 0);
+    }, 550);
+    return 3100;
+  }
+  if (st.reason === 'resign') return 0;
+  setTimeout(() => b.stamp(st.reason === 'stalemate' ? 'Stalemate' : 'Draw', 'draw', 0), 400);
+  return 2100;
+}
+
 function posKey(s) { return s.b.map(p => (p ? p.t + p.c : '.')).join(',') + s.turn; }
 
 function applyMove(m) {
@@ -3452,20 +3603,27 @@ function applyMove(m) {
     const k = posKey(ns);
     if (G.hist.filter(h => posKey(h.s) === k).length >= 3) st = { over: true, winner: null, reason: 'repetition' };
   }
-  if (!st.over && E.inCheck(ns, ns.turn)) setTimeout(() => Sound.play('check'), 120);
+  const check = !st.over && E.inCheck(ns, ns.turn);
+  if (st.over && st.reason === 'mate') { const l = G.log[G.log.length - 1]; l.text = l.text.replace(/ \+$/, '') + ' #'; }
   renderLog();
-  if (st.over) { G.over = st; renderWildInfo(); G.render(); const tk = G.token; setTimeout(() => { if (tk === G.token) endGame(st); }, 1100); return; }
+  if (st.over) {
+    G.over = st; renderWildInfo(); G.render();
+    const tk = G.token, wait = endFX(st, s);
+    setTimeout(() => { if (tk === G.token) endGame(st); }, wait);
+    return;
+  }
   if (G.mode === 'local' && ns.turn !== s.turn) {
     if (G.privacy) {
       G.passing = true; G.render();
       const token = G.token;
-      setTimeout(() => { if (token !== G.token) return; G.passing = false; handTo(ns.turn); }, 900);
+      setTimeout(() => { if (token !== G.token) return; G.passing = false; handTo(ns.turn, check ? () => setTimeout(checkFX, 150) : null); }, 900);
       return;
     }
     G.view = ns.turn;
     if (G.autoflip) setTimeout(() => { if (G.s === ns) { G.board.setFlip(ns.turn === 'b'); G.render(); } }, 700);
   }
   G.render();
+  if (check) setTimeout(() => { if (G.s === ns) checkFX(); }, 260);
   if (G.mode === 'ai' && ns.turn === G.ai) aiTurn();
 }
 
@@ -3523,6 +3681,7 @@ const REASONS = {
   material: () => 'Only the kings are left standing.',
 };
 function endGame(st) {
+  for (const el of G.board.root.querySelectorAll('.stamp')) el.remove();
   const local = G.mode === 'local', draw = !st.winner, won = !local && st.winner === G.human;
   Sound.play(local ? (draw ? 'move' : 'win') : won ? 'win' : draw ? 'move' : 'lose');
   const loser = st.winner ? opp(st.winner) : null;

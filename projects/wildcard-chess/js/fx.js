@@ -133,6 +133,11 @@ const Sound = {
       case 'lose': [392, 330, 262, 196].forEach((fr, i) => this._tone(t + i * 0.16, fr, 0.45, 0.16, 'triangle')); break;
       case 'deal': this._noise(t, 0.08, 2600, 1.6, 0.3); break;
       case 'stone': this._noise(t, 0.3, 300, 0.9, 0.6, 'lowpass'); this._tone(t, 70, 0.25, 0.4, 'sine', 40); break;
+      case 'mate': {
+        [98, 147, 196, 294].forEach((fr, i) => this._tone(t + i * 0.02, fr, 2.2 - i * 0.3, 0.26 - i * 0.04, i % 2 ? 'triangle' : 'sine'));
+        const f = this._noise(t, 1.2, 600, 0.6, 0.5, 'lowpass'); f.frequency.exponentialRampToValueAtTime(60, t + 1.1);
+        break;
+      }
     }
   },
 };

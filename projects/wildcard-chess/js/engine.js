@@ -751,6 +751,17 @@ function ChessEngine() {
     return false;
   }
   function inCheck(s, c) { const k = findKing(s, c); return k < 0 || attacked(s, k, opp(c)); }
+  /* The squares of every enemy piece that threatens side c's king (for a Catapult, the piece it would fling). */
+  function checkers(s, c) {
+    const k = findKing(s, c), out = [];
+    if (k < 0) return out;
+    for (const m of genAll(s, opp(c), true)) {
+      if (!m.x || !m.x.includes(k)) continue;
+      const q = m.k === 'launch' ? m.f : m.o;
+      if (!out.includes(q)) out.push(q);
+    }
+    return out;
+  }
 
   function legalMoves(s) {
     if (s.dead) return [];
@@ -983,7 +994,7 @@ function ChessEngine() {
     return { s, moves: out };
   }
 
-  return { newGame, pickSlots, startType, cardValue: t => (t === 'K' ? 0 : value({ t, d: initData(t, 0) || { k: 0, ch: 1 } })), initData, legalMoves, makeMove, status, inCheck, findKing, think, quickPick, demo, value, evaluate,
+  return { newGame, pickSlots, startType, cardValue: t => (t === 'K' ? 0 : value({ t, d: initData(t, 0) || { k: 0, ch: 1 } })), initData, legalMoves, makeMove, status, inCheck, checkers, findKing, think, quickPick, demo, value, evaluate,
     WILD_IDS, LEVELS, sqName: q => 'abcdefgh'[F(q)] + (R(q) + 1), F, R, SQ, stats: () => nodes };
 }
 if (typeof module !== 'undefined') module.exports = ChessEngine;

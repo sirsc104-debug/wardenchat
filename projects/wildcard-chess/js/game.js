@@ -513,6 +513,7 @@ const G = {
     if (cfg.arrange) { this.board.clear(); this.board.setPieces(this.s, { anim: true }); Sound.play('deal'); }
     else if (fresh) this.board.setPieces(startingArmy(this.s, cfg.slots), { anim: false });
     else this.board.setPieces(this.s, { anim: false, frozen: frozenSquares(this.s) });
+    this.board.resetEnd();
     renderWildInfo(); renderLog(); this.render();
     if (cfg.arrange) { arrangeSeq(cfg.arrange); return; }
     const go = () => (fresh ? runIntro(cfg.slots) : afterIntro());
@@ -632,14 +633,14 @@ function renderStatus() {
     else if (G.arranging) t = `${sideName(G.arranging)} sets up`;
     else if (G.intro) t = 'Dealing the wildcards…';
     else if (G.passing) t = `Passing to ${sideName(c)}…`;
-    else t = E.inCheck(G.s, c) ? `Check! ${n} to move` : G.s.extra ? `Extra turn! ${n} again` : `${n} to move`;
+    else t = E.inCheck(G.s, c) ? `Check by the ${checkText(G.s, c)}! ${n} to move` : G.s.extra ? `Extra turn! ${n} again` : `${n} to move`;
     $('#status').textContent = t;
     return;
   }
   if (G.over) t = G.over.winner === G.human ? 'You won' : G.over.winner ? 'You lost' : 'Draw';
   else if (G.arranging) t = 'Set up your army';
   else if (G.intro) t = 'Dealing the wildcards…';
-  else if (G.s.turn === G.human) t = E.inCheck(G.s, G.human) ? 'Check! Your move' : (G.s.extra ? 'Extra turn!' : 'Your move');
+  else if (G.s.turn === G.human) t = E.inCheck(G.s, G.human) ? `Check by the ${checkText(G.s, G.human)}!` : (G.s.extra ? 'Extra turn!' : 'Your move');
   else t = G.busy ? 'Thinking…' : 'Their move';
   $('#status').textContent = t;
 }
@@ -670,7 +671,10 @@ function renderMarks() {
   const s = G.s, last = s.last;
   const o = { last: last ? [last.o, last.t] : null, sel: G.sel, check: -1, marks: [], xprev: null, hover: -1 };
   if (G.arranging) { G.board.setMarks({ sel: G.arrSel }); return; }
-  if (!G.over && E.inCheck(s, s.turn)) o.check = kingSq(s, s.turn);
+  const k = kingSq(s, s.turn);
+  if (k >= 0 && (!G.over || G.over.reason === 'mate') && E.inCheck(s, s.turn)) {
+    o.check = k; o.checkers = E.checkers(s, s.turn); o.arrows = o.checkers.map(q => [q, k]);
+  }
   if (G.sel >= 0) {
     const pc = s.b[G.sel], w = pc && WILD[pc.t], acc = w ? w.accent : '#ffd98e';
     const byT = new Map();
@@ -922,6 +926,51 @@ function playEffects(board, s, m, ns, quiet) {
   else if (msg && aw) toast(`${pieceSVG(actor.t, actor.c)}<span>${aw.name} ${msg === 'tele' ? 'teleports' : VERB[msg]}</span>`, acc);
 }
 
+/* Who is giving check, as words: 'Rook on e8' or 'Bomber on d5 and Knight on f3'. */
+function checkText(s, c) { return E.checkers(s, c).map(q => `${pieceName(s.b[q].t)} on ${E.sqName(q)}`).join(' and the '); }
+
+function checkFX() {
+  const s = G.s, c = s.turn, k = E.findKing(s, c), b = G.board;
+  if (k < 0 || G.over) return;
+  Sound.play('check');
+  b.stamp('Check!', 'check');
+  b.flash('red');
+  b.ringAt(k, '#ff3b20', 1.2, 9, 28);
+  for (const q of E.checkers(s, c)) { b.ringAt(q, '#ff6a4a', 0.8, 5, 22); b.burstAt(q, { n: 12, color: ['#ff3b20', '#ffb199'], kind: 'spark', speed: 0.8, gravity: 0 }); }
+  const el = b.elAt(k);
+  if (el) { el.classList.remove('checked'); void el.offsetWidth; el.classList.add('checked'); setTimeout(() => el.classList.remove('checked'), 800); }
+}
+
+/* The finale before the result card. Returns how long to wait before showing it. */
+function endFX(st, prev) {
+  const b = G.board;
+  if (st.reason === 'mate' || st.reason === 'king') {
+    const loser = opp(st.winner), lose = G.mode === 'ai' && loser === G.human;
+    const k = st.reason === 'mate' ? E.findKing(G.s, loser) : E.findKing(prev, loser);
+    const tk = G.token;
+    if (st.reason === 'mate') setTimeout(() => { if (tk === G.token) Sound.play('check'); }, 150);
+    setTimeout(() => {
+      if (tk !== G.token) return;
+      if (k >= 0) {
+        b.spotlight(k);
+        b.ringAt(k, '#ffcf6b', 2.6, 14, 44); b.ringAt(k, lose ? '#ff5a3c' : '#ffd98e', 1.7, 10, 32);
+        b.burstAt(k, { n: 70, color: lose ? ['#ff8a6a', '#ff3b20', '#fff'] : ['#ffd98e', '#ff9a3c', '#ffffff'], kind: 'spark', speed: 2.4, life: 64, gravity: 0.03 });
+        b.burstAt(k, { n: 20, color: ['#3a332c', '#5a5048'], kind: 'smoke', speed: 0.6, size: 0.16, life: 70, gravity: -0.03 });
+        const el = st.reason === 'mate' ? b.elAt(k) : null;
+        if (el) el.classList.add('toppled');
+      }
+      b.shake(true); b.flash(lose ? 'red' : 'gold');
+      Sound.play('mate');
+      const sub = G.mode === 'local' ? `${sideName(st.winner)} wins` : lose ? 'You lose' : 'You win';
+      b.stamp(`${st.reason === 'mate' ? 'Checkmate' : 'King down!'}<small>${sub}</small>`, 'mate' + (lose ? ' lose' : ''), 0);
+    }, 550);
+    return 3100;
+  }
+  if (st.reason === 'resign') return 0;
+  setTimeout(() => b.stamp(st.reason === 'stalemate' ? 'Stalemate' : 'Draw', 'draw', 0), 400);
+  return 2100;
+}
+
 function posKey(s) { return s.b.map(p => (p ? p.t + p.c : '.')).join(',') + s.turn; }
 
 function applyMove(m) {
@@ -936,20 +985,27 @@ function applyMove(m) {
     const k = posKey(ns);
     if (G.hist.filter(h => posKey(h.s) === k).length >= 3) st = { over: true, winner: null, reason: 'repetition' };
   }
-  if (!st.over && E.inCheck(ns, ns.turn)) setTimeout(() => Sound.play('check'), 120);
+  const check = !st.over && E.inCheck(ns, ns.turn);
+  if (st.over && st.reason === 'mate') { const l = G.log[G.log.length - 1]; l.text = l.text.replace(/ \+$/, '') + ' #'; }
   renderLog();
-  if (st.over) { G.over = st; renderWildInfo(); G.render(); const tk = G.token; setTimeout(() => { if (tk === G.token) endGame(st); }, 1100); return; }
+  if (st.over) {
+    G.over = st; renderWildInfo(); G.render();
+    const tk = G.token, wait = endFX(st, s);
+    setTimeout(() => { if (tk === G.token) endGame(st); }, wait);
+    return;
+  }
   if (G.mode === 'local' && ns.turn !== s.turn) {
     if (G.privacy) {
       G.passing = true; G.render();
       const token = G.token;
-      setTimeout(() => { if (token !== G.token) return; G.passing = false; handTo(ns.turn); }, 900);
+      setTimeout(() => { if (token !== G.token) return; G.passing = false; handTo(ns.turn, check ? () => setTimeout(checkFX, 150) : null); }, 900);
       return;
     }
     G.view = ns.turn;
     if (G.autoflip) setTimeout(() => { if (G.s === ns) { G.board.setFlip(ns.turn === 'b'); G.render(); } }, 700);
   }
   G.render();
+  if (check) setTimeout(() => { if (G.s === ns) checkFX(); }, 260);
   if (G.mode === 'ai' && ns.turn === G.ai) aiTurn();
 }
 
@@ -1007,6 +1063,7 @@ const REASONS = {
   material: () => 'Only the kings are left standing.',
 };
 function endGame(st) {
+  for (const el of G.board.root.querySelectorAll('.stamp')) el.remove();
   const local = G.mode === 'local', draw = !st.winner, won = !local && st.winner === G.human;
   Sound.play(local ? (draw ? 'move' : 'win') : won ? 'win' : draw ? 'move' : 'lose');
   const loser = st.winner ? opp(st.winner) : null;

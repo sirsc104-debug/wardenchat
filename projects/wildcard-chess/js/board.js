@@ -16,12 +16,17 @@ class BoardView {
     this.root = root; this.flip = false; this.seed = o.seed || 11; this.showCoords = o.coords !== false;
     this.els = new Map(); this.size = 0;
     root.classList.add('board');
-    root.innerHTML = '<canvas class="wood"></canvas><div class="coords"></div><div class="hl"></div><div class="pieces"></div><div class="marks"></div><canvas class="fx"></canvas>';
+    this.uid = 'b' + (BoardView.n = (BoardView.n || 0) + 1);
+    root.innerHTML = '<canvas class="wood"></canvas><div class="coords"></div><div class="hl"></div><div class="pieces"></div>' +
+      `<svg class="arrows" viewBox="0 0 800 800" aria-hidden="true"><defs><marker id="${this.uid}-ah" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="3.2" markerHeight="3.2" orient="auto-start-reverse">` +
+      '<path d="M0 0 L10 5 L0 10 Z" fill="#ff3b20"/></marker></defs><g></g></svg>' +
+      '<div class="marks"></div><canvas class="fx"></canvas>';
     this.wood = root.querySelector('.wood');
     this.coordEl = root.querySelector('.coords');
     this.hlEl = root.querySelector('.hl');
     this.pcEl = root.querySelector('.pieces');
     this.markEl = root.querySelector('.marks');
+    this.arrowEl = root.querySelector('.arrows g');
     this.fx = new FXLayer(root.querySelector('.fx'));
     if (window.ResizeObserver) { this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(root); }
     else window.addEventListener('resize', () => this.resize());
@@ -171,8 +176,18 @@ class BoardView {
     if (o.last) for (const q of o.last) if (q >= 0) h += this.cell(q, 'last');
     if (o.sel >= 0) h += this.cell(o.sel, 'sel');
     if (o.check >= 0) h += this.cell(o.check, 'check');
+    if (o.checkers) for (const q of o.checkers) h += this.cell(q, 'checker');
     if (o.xprev) for (const q of o.xprev) h += this.cell(q, 'xprev');
     this.hlEl.innerHTML = h;
+    let a = '';
+    if (o.arrows) for (const [from, to] of o.arrows) {
+      const p = this.disp(from), q = this.disp(to);
+      const x1 = p.x * 100 + 50, y1 = p.y * 100 + 50, x2 = q.x * 100 + 50, y2 = q.y * 100 + 50;
+      const len = Math.hypot(x2 - x1, y2 - y1) || 1, ux = (x2 - x1) / len, uy = (y2 - y1) / len;
+      a += `<line x1="${x1 + ux * 22}" y1="${y1 + uy * 22}" x2="${x2 - ux * 40}" y2="${y2 - uy * 40}" stroke="#ff3b20" stroke-opacity=".78" stroke-width="15" stroke-linecap="round" marker-end="url(#${this.uid}-ah)"/>`;
+    }
+    this.arrowEl.innerHTML = a;
+    for (const el of this.els.values()) el.classList.toggle('checking', !!(o.checkers && o.checkers.includes(el._q)));
     let m = '';
     if (o.marks) for (const k of o.marks) m += this.cell(k.q, k.cls, k.acc ? `--acc:${k.acc}` : '');
     if (o.hover >= 0) m += this.cell(o.hover, 'hover');
@@ -182,6 +197,33 @@ class BoardView {
   burstAt(q, o) { const c = this.center(q); this.fx.burst(c.x, c.y, o); }
   ringAt(q, color, r, w, life) { const c = this.center(q); this.fx.ring(c.x, c.y, color, r, w, life); }
   beam(a, b, color, life) { const p = this.center(a), q = this.center(b); this.fx.beam(p.x, p.y, q.x, q.y, color, life); }
+  /* A big word slammed onto the board: 'Check!', 'Checkmate' and friends. */
+  stamp(text, cls, ms = 1500) {
+    const el = document.createElement('div');
+    el.className = 'stamp ' + (cls || '');
+    el.innerHTML = `<span>${text}</span>`;
+    this.root.appendChild(el);
+    if (ms) setTimeout(() => el.remove(), ms);
+    return el;
+  }
+  flash(cls = 'red') {
+    const el = document.createElement('div');
+    el.className = 'flash ' + cls;
+    this.root.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+  }
+  /* Darken the board around one square (the fallen king) at the end of a game. */
+  spotlight(q) {
+    const d = this.disp(q);
+    this.root.style.setProperty('--kx', (d.x + 0.5) * 12.5 + '%');
+    this.root.style.setProperty('--ky', (d.y + 0.5) * 12.5 + '%');
+    this.root.classList.add('ended');
+  }
+  resetEnd() {
+    this.root.classList.remove('ended');
+    for (const el of this.root.querySelectorAll('.stamp, .flash')) el.remove();
+    for (const el of this.els.values()) el.classList.remove('toppled', 'checked');
+  }
   shake(big) {
     const cls = big ? 'big-shake' : 'shake';
     this.root.classList.remove('shake', 'big-shake'); void this.root.offsetWidth; this.root.classList.add(cls);
