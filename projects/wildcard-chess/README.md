@@ -86,7 +86,7 @@ Each wildcard replaces a random regular piece from its own army: any pawn, knigh
 
 Pick **Draft** on the main menu (or **Deal: Draft** on the setup screen; it works against the computer and in Pass & Play) to build both armies from nothing:
 
-- There are 16 pairs of cards, drawn from the standard pieces and the 50 wildcards. One pair, at a random point, is always **King vs King**, so each side ends with exactly one king.
+- There are 16 pairs of cards, mostly standard pieces: about one card in five is a wildcard (roughly 3 or 4 per army), the rest are pawns, knights, bishops, rooks and the odd queen. One pair, at a random point, is always **King vs King**, so each side ends with exactly one king.
 - Each player chooses from 8 pairs. The card you take joins your army; the one you leave goes to your opponent. So each army is 16 pieces: your 8 picks plus the 8 your opponent passed over. Four bishops and a Cyclops where the pawns usually stand is entirely possible.
 - **Both armies stay face down** while you draft, your own picks included: every card lands as a **?** tile. When the last pair is decided, you go straight to the board, where all 32 pieces are dealt face down on their squares and flip one at a time, alternating sides, over about 10 seconds (wildcards sparkle as they turn). Hover tips, the sidebar's wildcard list, the wildcard chips and the material count stay hidden until the reveal is done. *Skip* on the board jumps to the end.
 - Against the computer you alternate picks (a coin flip decides who goes first) and never see the pairs it was offered. In Pass & Play, White makes 8 private picks, then the device goes to Black for theirs.

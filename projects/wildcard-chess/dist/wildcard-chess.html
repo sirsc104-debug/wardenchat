@@ -2923,7 +2923,8 @@ const PD = { pairs: [], order: [], i: 0, army: { w: [], b: [] }, gift: { w: [], 
 function makePairs() {
   const wilds = shuffle(WILD_IDS.slice());
   let wi = 0;
-  const card = () => (Math.random() < 0.4 ? wilds[wi++ % wilds.length] : DRAFT_STD[Math.floor(Math.random() * DRAFT_STD.length)]);
+  const WILD_RATE = 0.2; // share of draft cards that are wildcards; the rest are regular pieces
+  const card = () => (Math.random() < WILD_RATE ? wilds[wi++ % wilds.length] : DRAFT_STD[Math.floor(Math.random() * DRAFT_STD.length)]);
   const pairs = [];
   for (let i = 0; i < 15; i++) {
     const a = card();
