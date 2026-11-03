@@ -788,3 +788,83 @@ button.acct-in:hover { border-color: var(--gold-lo); }
 }
 .pill.demo { background: #4a3a14; border-color: #8a6a1f; color: var(--gold-hi); font: 600 12px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; }
 .acct-demo { font: 600 10.5px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+
+/* ---------- legendary pieces: animated parts and a prismatic aura ---------- */
+.lg-flame { transform-box: fill-box; transform-origin: 100% 50%; animation: lgFlame .5s ease-in-out infinite alternate; }
+@keyframes lgFlame { from { transform: scale(.75, .9); opacity: .75; } to { transform: scale(1.15, 1.05); opacity: 1; } }
+.lg-wings { transform-box: fill-box; transform-origin: 50% 60%; animation: lgWings 1.6s ease-in-out infinite; }
+@keyframes lgWings { 50% { transform: scaleY(.86) translateY(4%); } }
+.lg-halo { transform-box: fill-box; transform-origin: center; animation: lgHalo 2.2s ease-in-out infinite; }
+@keyframes lgHalo { 50% { transform: translateY(-8%) scale(1.06); filter: drop-shadow(0 0 4px #ffe27a); } }
+.lg-hand-slow, .lg-hand-fast, .lg-spin { transform-origin: 50px 31px; }
+.lg-hand-slow { animation: lgTurn 12s linear infinite; }
+.lg-hand-fast { animation: lgTurn 2s linear infinite; }
+.lg-spin { animation: lgTurn 5s linear infinite; }
+@keyframes lgTurn { to { transform: rotate(360deg); } }
+.lg-pulse { transform-box: fill-box; transform-origin: center; animation: lgPulse 1.4s ease-in-out infinite; }
+@keyframes lgPulse { 50% { transform: scale(.6); opacity: .3; } }
+.lg-bolt { animation: lgBolt 2.4s steps(1) infinite; }
+@keyframes lgBolt { 0%, 46%, 54%, 58%, 100% { opacity: 1; filter: drop-shadow(0 0 3px #ffe14d); } 50%, 56% { opacity: .15; filter: none; } }
+.pc.legend::before {
+  inset: 2%; background: conic-gradient(from var(--spin, 0deg), #ff5a5a, #ffd23f, #5fe0ff, #b26bff, #ff5a5a);
+  -webkit-mask: radial-gradient(circle, transparent 54%, #000 57%, #000 66%, transparent 70%); mask: radial-gradient(circle, transparent 54%, #000 57%, #000 66%, transparent 70%);
+  opacity: .85; animation: spin 2.6s linear infinite;
+}
+.legend-tag { display: inline-block; font: 700 11px var(--f-ui); letter-spacing: .2em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; color: #1b1916;
+  background: linear-gradient(90deg, #ff5a5a, #ffd23f, #5fe0ff, #b26bff, #ff5a5a); background-size: 200% 100%; animation: legendSlide 3s linear infinite; }
+@keyframes legendSlide { to { background-position: 200% 0; } }
+.card.legendary .card-face, .cx.legendary { box-shadow: 0 0 0 2px #ffd23f, 0 0 30px -4px rgba(255, 210, 63, .7), 0 20px 40px -18px rgba(0,0,0,.8); }
+@media (prefers-reduced-motion: reduce) { .lg-flame, .lg-wings, .lg-halo, .lg-hand-slow, .lg-hand-fast, .lg-spin, .lg-pulse, .lg-bolt { animation: none; } }
+
+/* ---------- Fog Mode ---------- */
+.board .fog { z-index: 2; pointer-events: none; filter: blur(calc(var(--sq, 80px) * .1)); transition: opacity .6s; }
+.board .fog .fogsq {
+  position: absolute; width: 12.5%; height: 12.5%; transform: scale(1.18);
+  background:
+    radial-gradient(ellipse 70% 55% at 30% 40%, rgba(196, 202, 214, .55), transparent 70%),
+    radial-gradient(ellipse 60% 70% at 75% 70%, rgba(150, 158, 174, .5), transparent 70%),
+    linear-gradient(135deg, #3d424e, #2a2e37);
+  background-size: 180% 180%, 160% 160%, 100% 100%;
+  animation: fogDrift 9s ease-in-out infinite alternate;
+}
+@keyframes fogDrift { from { background-position: 0% 0%, 100% 100%, 0 0; } to { background-position: 100% 60%, 0% 30%, 0 0; } }
+.board.fog-roll .fog { animation: fogRoll 1.3s ease-out both; }
+@keyframes fogRoll { from { opacity: 0; transform: scale(1.06); } }
+.board.fog-lift .fog { animation: fogLift 1.1s ease-in both; }
+@keyframes fogLift { to { opacity: 0; } }
+.pc.fogin svg { animation: fogIn .45s ease-out; }
+@keyframes fogIn { from { opacity: 0; filter: blur(4px) brightness(1.6); transform: scale(.9); } }
+.pc.fogout { transition: none; z-index: 2; }
+.pc.fogout svg { animation: fogOut .4s ease-in forwards; }
+@keyframes fogOut { to { opacity: 0; filter: blur(5px); transform: scale(.92); } }
+.log li.fogged .t { color: var(--faint); font-style: italic; }
+.fog-ico { width: 22px; height: 22px; border-radius: 50%; background: #3d424e; color: #c4cad6; display: grid; place-items: center; font: 700 12px var(--f-ui); }
+@media (prefers-reduced-motion: reduce) { .board .fog .fogsq { animation: none; } }
+.menu-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.menu-modes .btn { animation: btnIn .7s cubic-bezier(.2, .9, .3, 1.25) both; animation-delay: 1.2s; padding: 11px 14px; }
+.menu-modes .btn span { font-size: 19px; }
+.menu-modes .btn small { font-size: 12px; }
+.menu-btns .btn.fog-btn { border-color: #4a5466; background: linear-gradient(180deg, #353b47, #272b33); }
+.menu-btns .btn.online-btn { border-color: #2f5a4a; background: linear-gradient(180deg, #2c3a33, #232b27); }
+
+/* ---------- online ---------- */
+.online-body { max-width: 880px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; padding-bottom: 24px; }
+.ol-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ol-card { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 18px; border-radius: 14px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); }
+.ol-card h3 { margin: 0; font: 400 24px var(--f-display); }
+.ol-note { margin: 0; color: var(--mute); }
+.ol-note.small { font-size: 13.5px; color: var(--faint); }
+.ol-err { margin: 0; color: #ffb4a3; }
+.ol-join { display: flex; gap: 10px; width: 100%; }
+.ol-join input { flex: 1; min-width: 0; font: 600 26px var(--f-mono); letter-spacing: .3em; text-transform: uppercase; text-align: center; color: var(--ink); background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.ol-join input:focus { outline: 2px solid var(--gold-hi); outline-offset: 1px; }
+.ol-wait { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 26px 18px; border-radius: 16px; background: linear-gradient(180deg, #2c3a33, #232b27); border: 1px solid #2f5a4a; text-align: center; }
+.ol-k { margin: 0; font: 600 14px var(--f-ui); letter-spacing: .24em; text-transform: uppercase; color: var(--lv-easy); }
+.ol-code { font: 600 clamp(44px, 10vw, 72px)/1 var(--f-mono); letter-spacing: .25em; padding-left: .25em; color: var(--ink); user-select: all; animation: codePulse 2.4s ease-in-out infinite; }
+@keyframes codePulse { 50% { text-shadow: 0 0 24px rgba(123, 214, 106, .55); } }
+.ol-presence { font-size: 13px; color: var(--gold); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+@media (max-width: 700px) { .ol-cols { grid-template-columns: minmax(0, 1fr); } }
+.lg-swirl { animation: lgSwirl 1.6s linear infinite; }
+@keyframes lgSwirl { to { stroke-dashoffset: -40; } }
+.pc.legend svg { position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) { .lg-swirl { animation: none; } }

@@ -1,6 +1,6 @@
 # Wildcard Chess
 
-Chess against the computer or a friend on the same device, with a twist: each army gets one or more **wildcards**, dealt at random from 50 custom pieces, and each wildcard takes the place of one of its regular pieces (anything but the king). You know what your wildcard does. You can see your opponent's wildcard and its name, but not its rules; you find out by watching it, and it is revealed when the game ends.
+Chess against the computer or a friend on the same device, with a twist: each army gets one or more **wildcards**, dealt at random from 55 custom pieces (5 of them rare legendaries), and each wildcard takes the place of one of its regular pieces (anything but the king). You know what your wildcard does. You can see your opponent's wildcard and its name, but not its rules; you find out by watching it, and it is revealed when the game ends.
 
 Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `index.html` in a browser, or serve the folder with `python3 -m http.server`.
 
@@ -12,7 +12,7 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 | Pick your opponent | vs Computer (Easy, Medium, Pro, Xtreme; play as White / Random / Black) or Pass & Play (privacy screen and board flipping on or off), with 1–3 wildcards each. |
 | The deal | Your wildcard cards flip up with their rules and which of your pieces they replace; theirs show only the piece, its name, what it replaces and a question mark. One reroll of your own hand. In Pass & Play each player is dealt in private behind a pass-the-device screen. |
 | Game | The wooden board with player bars (wildcard chips, captured pieces, material), a sidebar with your wildcard rules, their wildcards marked unknown, the move log, and Undo / Flip / Resign / Menu. |
-| Codex | All 50 wildcards. One unlocks when you play with it or when a game against it ends; each shows a sample board of its moves from d4. A checkbox shows the undiscovered ones. |
+| Codex | All 55 wildcards. One unlocks when you play with it or when a game against it ends; each shows a sample board of its moves from d4. A checkbox shows the undiscovered ones. |
 
 ## Difficulty
 
@@ -25,7 +25,7 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 
 The AI runs in a Web Worker built from `ChessEngine.toString()`, so the page stays responsive while it thinks (it falls back to the main thread if workers are unavailable).
 
-## The 50 wildcards
+## The 55 wildcards
 
 Each wildcard replaces a random regular piece from its own army: any pawn, knight, bishop, rook or the queen, but never the king (replacing a rook also gives up castling on that side). At the start of the game the board shows the normal setup, then each replaced piece bursts and its wildcard appears. Pawns can promote into your own wildcard types.
 
@@ -81,6 +81,13 @@ Each wildcard replaces a random regular piece from its own army: any pawn, knigh
 | Gorgon | Steps 1; every few turns petrifies the first enemy (not a king) in any line for 3 turns. |
 | Grappler | Steps 1, or hooks the first enemy 2–4 squares away in a line and drags it adjacent. |
 | Echo | Up to 2 diagonally; its first three moves each leave a new pawn behind. |
+| **Elder Dragon** (legendary) | Queen and knight moves; every capture also burns the enemy pawns next to the target. |
+| **Archangel** (legendary) | Queen moves; only a king can capture it. |
+| **Time Lord** (legendary) | Queen moves; every capture gives an extra turn (not chaining inside an extra turn). |
+| **Black Hole** (legendary) | Up to 2 in any direction; devours every enemy (not a king) next to where it lands. |
+| **Storm King** (legendary) | Steps 1; every other turn, lightning destroys the first enemy (not a king) in any line, at any range. |
+
+Legendary wildcards are animated (flame, wings and halo, turning clock hands, a swirling disk, flickering lightning), wear a prismatic ring on the board and a Legendary tag on cards and in the Codex, and are rare: each wildcard dealt (classic deal, draft cards and online setups) is legendary with probability 0.05.
 
 ## The draft
 
@@ -97,6 +104,22 @@ Pick **Draft** on the main menu (or **Deal: Draft** on the setup screen; it work
 ## Pass & Play
 
 Two players on one device. The deal is done in private: White sees their own cards while Black looks away, then the device is passed and Black sees theirs. During the game the sidebar and tooltips only explain the wildcards of the player whose turn it is. After each move a **privacy screen** covers everything until the next player taps *Ready*, and the board can **flip** to face whoever is moving (both can be switched off in setup). Undo takes back one move. When the game ends, both sides' wildcards are revealed and added to the Codex.
+
+## Fog Mode
+
+Pick **Fog Mode** on the menu, or switch **Fog of war** on in setup (it works against the computer, in Pass & Play, with the draft and online). Each side sees only the squares its pieces stand on and the squares next to them; everything else is drifting fog, and enemy pieces fade out of sight as they enter it and back in as they leave it.
+
+- **No check.** Nobody tells you your king is attacked; you win by capturing the enemy king (*King down!*). A move that would destroy your own king is the only illegal one (`fogMoves` in the engine).
+- **Move hints only use what you can see**, so they never reveal a hidden piece. If something hidden blocks your move you're told and pick again; land on a hidden enemy and you capture it by surprise.
+- **Nothing leaks:** the opponent's moves you couldn't see show in the log as *moved somewhere in the fog* or *captured your Knight from the fog*; effects, toasts and hover tips only appear for squares you can see; the material count is hidden. When the game ends the fog lifts.
+- **The computer plays fair:** it searches the position as its own pieces see it, and its move is matched to the real board.
+- In Pass & Play the privacy screen is always on in the fog, and each player sees their own fog.
+
+## Online
+
+**Online** on the menu: create a game and get a 5-letter code to send a friend, who joins with it (Warden Chat sign-in required). The server deals both sides' wildcards (no one picks their own, 5% legendary each) and keeps the moves in order; each device's engine checks every move it receives and stops the game if one doesn't fit. Moves travel by polling every 1.5 s. Wildcard rules stay private as against the computer, Fog Mode works online, a player gone for over two minutes can be claimed against, there are no take-backs, and online games don't earn coins yet.
+
+The back end is specified in [`docs/ONLINE-WCC.md`](docs/ONLINE-WCC.md), with a self-contained Codex prompt in [`docs/CODEX-PROMPT-ONLINE-WCC.md`](docs/CODEX-PROMPT-ONLINE-WCC.md). Until it exists the Online screen says it isn't switched on yet. The `--wallet-demo` build includes a pretend server with a friend called Rook_Rival who joins your game a few seconds after you create it (or hosts one when you type any code) and plays back.
 
 ## Coins, diamonds, membership and the Shop
 
@@ -143,7 +166,9 @@ js/cosmetics.js     board themes, card backs, finales, the wcc catalog, and what
 js/wallet.js        Warden Chat sign-in and the SirSC wallet (sirsc_* and wcc_* functions)
 js/wallet-mock.js   a pretend wallet back end, only in --wallet-demo builds
 js/shop.js          the account chip, sign-in, the Shop and the coins shown after a game
+js/online.js        online play: creating and joining games by code, sending and receiving moves
 docs/ECONOMY-WCC.md the back-end contract for Wildcard Chess on the SirSC wallet
+docs/ONLINE-WCC.md  the back-end contract for online play
 build-artifact.py   bundles everything into one HTML file
 dist/               the single-file build
 ```

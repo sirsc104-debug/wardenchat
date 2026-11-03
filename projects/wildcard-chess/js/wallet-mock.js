@@ -84,6 +84,7 @@
       r.status = 'cancelled'; save(); return R(200, meOf(id));
     }
     // demo only: pretend an admin gave this account a month of membership
+    if (fn.startsWith('wcc_online_')) return online(fn, b, u);
     if (fn === 'demo_membership') { w.member_until = new Date(Date.now() + 30 * 864e5).toISOString(); save(); return R(200, meOf(id)); }
     if (fn === 'wcc_reward') {
       const base = { easy: 500, medium: 1000, pro: 2000, xtreme: 4000 }[b.level], rm = { win: 1, draw: 0.3, loss: 0.1 }[b.result];
@@ -109,6 +110,99 @@
     return R(404, { code: 'PGRST202', message: 'Could not find the function public.' + fn });
   }
 
+
+  /* ---------- online (docs/ONLINE-WCC.md), with a pretend friend who joins and plays ---------- */
+  const ENG = ChessEngine();
+  const games = {};   // in memory only: a demo game lasts as long as the page
+  const BOT = { username: 'Rook_Rival', member: true };
+  const LEG = ['dragon', 'archangel', 'timelord', 'blackhole', 'zeus'];
+  function dealSetup(n, fog) {
+    const commons = WILD_IDS.filter(t => !LEG.includes(t)).sort(() => Math.random() - 0.5), legs = LEG.slice().sort(() => Math.random() - 0.5);
+    const pick = () => (Math.random() < 0.05 && legs.length ? legs.pop() : commons.pop());
+    const wild = { w: [], b: [] };
+    for (let i = 0; i < n; i++) { wild.w.push(pick()); wild.b.push(pick()); }
+    return { wild, slots: { w: ENG.pickSlots('w', n), b: ENG.pickSlots('b', n) }, fog: !!fog };
+  }
+  const code = () => Array.from({ length: 5 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random() * 24)]).join('');
+  function stateOf(g, uid, since) {
+    const color = g.white === uid ? 'w' : 'b', bot = { ...BOT }, me = { username: (mem.users[uid] || {}).name || 'you', member: isMember(wallet(uid)) };
+    return { game_id: g.id, code: g.code, color, status: g.status, turn: g.turn, ply: g.moves.length, setup: g.setup,
+      white: g.status === 'waiting' ? null : (g.white === uid ? me : bot), black: g.status === 'waiting' ? null : (g.black === uid ? me : bot),
+      moves: g.moves.filter(m => m.ply >= (since || 0)), result: g.result, opponent_seen: g.status === 'waiting' ? null : 1 };
+  }
+  function replay(g) {
+    let st = ENG.newGame({ wild: g.setup.wild, slots: g.setup.slots });
+    for (const m of g.moves) {
+      const L = g.setup.fog ? ENG.fogMoves(st) : ENG.legalMoves(st);
+      const r = L.find(x => x.o === m.move.o && x.f === m.move.f && x.t === m.move.t && x.k === m.move.k && (x.promo || '') === (m.move.promo || '') && (x.rt || '') === (m.move.rt || ''));
+      if (!r) return null;
+      st = ENG.makeMove(st, r);
+    }
+    return st;
+  }
+  // the pretend friend: joins a few seconds after you create a game, and answers each of your moves
+  function botStep(g) {
+    const now = Date.now();
+    if (g.status === 'waiting' && now - g.created > 3500) { g.status = 'playing'; g.botReadyAt = now + 2600; }
+    if (g.status !== 'playing' || g.turn !== g.botColor || now < (g.botReadyAt || 0)) return;
+    const st = replay(g);
+    if (!st) return;
+    const L = g.setup.fog ? ENG.fogMoves(st) : ENG.legalMoves(st);
+    if (!L.length || st.dead) return;
+    const m = L[g.setup.fog ? Math.floor(Math.random() * L.length) : ENG.quickPick(st)] || L[0];
+    const ns = ENG.makeMove(st, m);
+    const move = { o: m.o, f: m.f, t: m.t, k: m.k };
+    if (m.promo) move.promo = m.promo; if (m.rt) move.rt = m.rt; if (m.tele) move.tele = 1;
+    g.moves.push({ ply: g.moves.length, by: g.botColor, move });
+    g.turn = ns.turn;
+    g.botReadyAt = now + 1200;
+  }
+  function online(fn, b, u) {
+    if (!u) return fail('wcc_not_signed_in');
+    const id = u.id;
+    if (fn === 'wcc_online_create') {
+      const n = b.wildcards | 0;
+      if (n < 1 || n > 3) return fail('wcc_bad_setup');
+      const hostWhite = Math.random() < 0.5;
+      const g = { id: 'g-' + Date.now(), code: code(), setup: dealSetup(n, b.fog), status: 'waiting', turn: 'w', moves: [], result: null, created: Date.now(),
+        white: hostWhite ? id : 'bot', black: hostWhite ? 'bot' : id, botColor: hostWhite ? 'b' : 'w' };
+      games[g.id] = g;
+      return R(200, stateOf(g, id, 0));
+    }
+    if (fn === 'wcc_online_join') {
+      // any code joins a game your pretend friend has just made
+      const hostWhite = Math.random() < 0.5;
+      const g = { id: 'g-' + Date.now(), code: String(b.code || '').toUpperCase() || code(), setup: dealSetup(1 + Math.floor(Math.random() * 2), false), status: 'playing', turn: 'w', moves: [], result: null,
+        created: Date.now(), white: hostWhite ? 'bot' : id, black: hostWhite ? id : 'bot', botColor: hostWhite ? 'w' : 'b', botReadyAt: Date.now() + 4000 };
+      games[g.id] = g;
+      return R(200, stateOf(g, id, 0));
+    }
+    const g = games[b.game_id];
+    if (!g || (g.white !== id && g.black !== id)) return fail('wcc_no_such_game');
+    const color = g.white === id ? 'w' : 'b';
+    if (fn === 'wcc_online_state') { botStep(g); return R(200, stateOf(g, id, b.since)); }
+    if (fn === 'wcc_online_move') {
+      if (g.status !== 'playing') return fail('wcc_game_over');
+      if (g.turn !== color) return fail('wcc_not_your_turn');
+      if (b.ply !== g.moves.length) return fail('wcc_out_of_sync');
+      if (!b.move || typeof b.move !== 'object' || !['w', 'b'].includes(b.next_turn)) return fail('wcc_bad_move');
+      g.moves.push({ ply: g.moves.length, by: color, move: b.move });
+      g.turn = b.next_turn;
+      g.botReadyAt = Date.now() + 1400;
+      return R(200, stateOf(g, id, b.ply));
+    }
+    if (fn === 'wcc_online_finish') {
+      if (g.status === 'playing') { g.status = 'finished'; g.result = { winner: b.winner === 'draw' ? null : b.winner, reason: b.reason }; }
+      return R(200, stateOf(g, id, 0));
+    }
+    if (fn === 'wcc_online_resign') {
+      if (g.status === 'playing') { g.status = 'finished'; g.result = { winner: color === 'w' ? 'b' : 'w', reason: 'resign' }; }
+      return R(200, stateOf(g, id, 0));
+    }
+    if (fn === 'wcc_online_cancel') { if (g.status !== 'waiting') return fail('wcc_game_over'); g.status = 'cancelled'; return R(200, stateOf(g, id, 0)); }
+    if (fn === 'wcc_online_claim') return fail('wcc_opponent_here');
+    return R(404, { code: 'PGRST202', message: 'Could not find the function public.' + fn });
+  }
   function handle(method, url, headers, body) {
     const path = url.replace(WCC_CONFIG.supabaseUrl, '');
     if (path.startsWith('/auth/v1/token?grant_type=password') || path === '/auth/v1/signup') {

@@ -49,6 +49,7 @@ function ChessEngine() {
     if (!p || p.c === a.c || p.c === 'n') return false;
     if (p.t === 'golem' && a.t !== 'P' && a.t !== 'K') return false;
     if (p.t === 'monk') return false;
+    if (p.t === 'archangel' && a.t !== 'K') return false;
     if (p.t === 'viper' && a.t === 'K') return false;
     const v = ci(p.c);
     if (HAS_GRD[v] && GRD[v][t]) return false;
@@ -602,6 +603,48 @@ function ChessEngine() {
       }
     } },
     echo: { v: 380, init: () => ({ ch: 3 }), gen: (s, q, p, out) => slide(s, q, p, out, DG, 2) },
+
+    /* ----- legendary: rare and wildly overpowered ----- */
+    // Elder Dragon: queen and knight moves at once; its captures also incinerate enemy pawns around the target.
+    dragon: { v: 1250, gen(s, q, p, out) {
+      const tmp = [];
+      slide(s, q, p, tmp, D8); step(s, q, p, tmp, KN);
+      const seen = new Set();
+      for (const m of tmp) {
+        if (seen.has(m.t)) continue;
+        seen.add(m.t);
+        if (!m.x) { out.push(m); continue; }
+        const burn = ADJ[m.t].filter(a => s.b[a] && s.b[a].t === 'P' && s.b[a].c !== p.c && a !== q);
+        out.push(burn.length ? mv(q, q, m.t, 'burn', [m.t].concat(burn)) : m);
+      }
+    } },
+    // Archangel: a queen that only a king can capture.
+    archangel: { v: 1100, gen: (s, q, p, out) => slide(s, q, p, out, D8) },
+    // Time Lord: a queen; every capture it makes (outside an extra turn) gives you another turn.
+    timelord: { v: 1150, gen: (s, q, p, out) => slide(s, q, p, out, D8) },
+    // Black Hole: up to 2 squares in any direction, and it devours every enemy (not a king) next to where it lands.
+    blackhole: { v: 1000, gen(s, q, p, out) {
+      const tmp = [];
+      slide(s, q, p, tmp, D8, 2);
+      for (const m of tmp) {
+        const eat = ADJ[m.t].filter(a => a !== q && s.b[a] && s.b[a].c !== p.c && s.b[a].c !== 'n' && s.b[a].t !== 'K' && s.b[a].t !== 'monk');
+        out.push(eat.length ? mv(q, q, m.t, 'devour', (m.x || []).concat(eat)) : m);
+      }
+    } },
+    // Storm King: steps 1; every other turn it hurls lightning at the first piece in any line, any range.
+    zeus: { v: 1100, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) for (let k = 1; k < 8; k++) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (!on(nf, nr)) break;
+        const t = SQ(nf, nr), tp = s.b[t];
+        if (!tp) continue;
+        if (tp.c !== p.c && tp.c !== 'n' && tp.t !== 'K' && tp.t !== 'monk') out.push({ o: q, f: q, t, k: 'bolt', x: [t], cd: 4 });
+        break;
+      }
+    } },
   };
   const WILD_IDS = Object.keys(W);
 
@@ -662,7 +705,7 @@ function ChessEngine() {
     let actor = -1, mover = -1;
 
     switch (m.k) {
-      case 'n': case 'launch': case 'ep': case 'crush': case 'jump': {
+      case 'n': case 'launch': case 'ep': case 'crush': case 'jump': case 'burn': case 'devour': {
         const pc = b[m.f];
         if (m.x) for (const q of m.x) { const k = kill(q); if (k) kills.push([q, k]); }
         moveTo(m.f, m.t);
@@ -678,7 +721,7 @@ function ChessEngine() {
       case 'castle': moveTo(m.f, m.t); moveTo(m.rf, m.rt); break;
       case 'boom': for (const q of m.x) kill(q); ev({ k: 'boom', q: m.t }); break;
       case 'swap': { const a = b[m.f], t = b[m.t]; b[m.f] = { ...t, m: true }; b[m.t] = { ...a, m: true }; mover = m.t; break; }
-      case 'shoot': case 'strike': case 'zap':
+      case 'shoot': case 'strike': case 'zap': case 'bolt':
         for (const q of m.x) { const k = kill(q); if (k) kills.push([q, k]); }
         actor = m.o; break;
       case 'raise': {
@@ -718,6 +761,7 @@ function ChessEngine() {
       const a = b[actor];
       if (a.t === 'vampire') { setD(actor, { k: a.d.k + kills.length }); if (a.d.k < 2) ev({ k: 'grow', q: actor }); }
       else if (a.t === 'chrono' && a.d.ch > 0) { setD(actor, { ch: 0 }); ns.extra = true; ev({ k: 'extra', q: actor }); }
+      else if (a.t === 'timelord' && !s.extra) { ns.extra = true; ev({ k: 'extra', q: actor }); }
       else if (a.t === 'changeling') {
         const k = kills.find(([, kp]) => kp.t !== 'K' && kp.t !== 'P' && kp.t !== 'WALL');
         if (k) { b[actor] = { ...a, t: k[1].t, d: initData(k[1].t, actor) }; ev({ k: 'morph', q: actor }); }
@@ -761,6 +805,18 @@ function ChessEngine() {
       if (!out.includes(q)) out.push(q);
     }
     return out;
+  }
+
+  /* Fog Mode: what side c can see, which is every square its pieces stand on or touch. */
+  function visibleSquares(s, c) {
+    const v = new Set();
+    for (let q = 0; q < 64; q++) { const p = s.b[q]; if (p && p.c === c) { v.add(q); for (const a of ADJ[q]) v.add(a); } }
+    return v;
+  }
+  /* Fog Mode's rules: no check. Any move goes, except one that destroys your own king; lose your king and you lose. */
+  function fogMoves(s) {
+    if (s.dead) return [];
+    return genAll(s, s.turn, false).filter(m => makeMove(s, m).dead !== s.turn);
   }
 
   function legalMoves(s) {
@@ -994,7 +1050,7 @@ function ChessEngine() {
     return { s, moves: out };
   }
 
-  return { newGame, pickSlots, startType, cardValue: t => (t === 'K' ? 0 : value({ t, d: initData(t, 0) || { k: 0, ch: 1 } })), initData, legalMoves, makeMove, status, inCheck, checkers, findKing, think, quickPick, demo, value, evaluate,
+  return { newGame, pickSlots, startType, cardValue: t => (t === 'K' ? 0 : value({ t, d: initData(t, 0) || { k: 0, ch: 1 } })), initData, legalMoves, fogMoves, visibleSquares, makeMove, status, inCheck, checkers, findKing, think, quickPick, demo, value, evaluate,
     WILD_IDS, LEVELS, sqName: q => 'abcdefgh'[F(q)] + (R(q) + 1), F, R, SQ, stats: () => nodes };
 }
 if (typeof module !== 'undefined') module.exports = ChessEngine;

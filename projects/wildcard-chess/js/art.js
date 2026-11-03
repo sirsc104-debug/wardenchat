@@ -61,7 +61,7 @@ const STD_ART = {
   WALL: '',
 };
 
-/* The 50 wildcards. `desc` is what the owner sees; the opponent only ever sees the icon and name. */
+/* The 55 wildcards (the last 5 are legendary). `desc` is what the owner sees; the opponent only ever sees the icon and name. */
 const WILD = {
   bomber: { name: 'Bomber', accent: '#ff9a2e', moves: 'Steps 1 square',
     desc: 'Steps one square in any direction. When it captures, it explodes: every piece in the 3×3 blast around the target is destroyed, friend or foe, the Bomber included. Kings are not safe, but it will never blow up its own.',
@@ -304,6 +304,39 @@ const WILD = {
     art: '<circle {B} cx="50" cy="33" r="10.5"/>' +
          '<path {S} d="M36 22 C30 29 30 37 36 44"/><path {S} d="M64 22 C70 29 70 37 64 44"/>' +
          '<path {S} d="M27 15 C17 27 17 39 27 51" opacity=".6"/><path {S} d="M73 15 C83 27 83 39 73 51" opacity=".6"/>' },
+
+  /* ----- legendary: rare, animated, and far stronger than anything else ----- */
+  dragon: { name: 'Elder Dragon', legendary: true, accent: '#ff5a1f', moves: 'Queen and knight moves, burning captures',
+    desc: 'Moves like a queen and a knight combined. Every capture breathes fire: enemy pawns next to the target burn up too.',
+    art: '<path {B} d="M66 57 C71 45 73 33 68 24 L82 6 L64 17 C60 13 54 11 47 13 L36 3 L38 15 C31 18 24 25 18 29 L15 37 C22 40 29 39 34 38 L23 46 C30 49 39 48 46 44 C46 50 42 54 38 57 Z"/>' +
+         '<path {B} d="M58 14 L70 2 L66 16 Z"/><circle {A} cx="48" cy="24" r="4"/><circle {K} cx="21" cy="32" r="1.8"/>' +
+         '<path {D} d="M68 33 L76 35 M68 41 L77 44 M67 49 L75 53"/>' +
+         '<g class="lg-flame"><g transform="translate(17 39) scale(1.7) translate(-17 -39)"><path fill="#ffd23f" stroke="{ink}" stroke-width="1.2" d="M14 37 C6 35 2 40 4 45 C7 41 10 42 12 40 C9 45 11 49 15 49 C14 45 16 42 18 40 Z"/>' +
+         '<path fill="#ff5a1f" d="M13 39 C9 40 8 43 9 45 C11 43 12 42 15 41 Z"/></g></g>' },
+  archangel: { name: 'Archangel', legendary: true, accent: '#ffe27a', moves: 'Queen moves, only a king can capture it',
+    desc: 'Moves like a queen. Its armour is holy: nothing but a king can capture it.',
+    art: '<g class="lg-wings"><path {B} d="M40 34 C28 26 18 26 8 32 C16 34 20 38 22 44 C28 40 34 40 40 42 Z"/><path {B} d="M60 34 C72 26 82 26 92 32 C84 34 80 38 78 44 C72 40 66 40 60 42 Z"/>' +
+         '<path {D} d="M14 33 C22 33 30 36 36 40 M86 33 C78 33 70 36 64 40"/></g>' +
+         '<path {B} d="M38 57 C38 46 42 40 50 40 C58 40 62 46 62 57 Z"/><circle {B} cx="50" cy="29" r="10"/>' +
+         '<g class="lg-halo"><ellipse cx="50" cy="13" rx="14" ry="4.5" fill="none" stroke="{ink}" stroke-width="5"/><ellipse cx="50" cy="13" rx="14" ry="4.5" fill="none" stroke="{acc}" stroke-width="3"/></g>' },
+  timelord: { name: 'Time Lord', legendary: true, accent: '#7ef0ff', moves: 'Queen moves, every capture is another turn',
+    desc: 'Moves like a queen. Every time it captures, you immediately take another turn (though a capture during that extra turn doesn’t earn a third).',
+    art: '<circle {B} cx="50" cy="31" r="21"/><circle cx="50" cy="31" r="16" fill="#12283a" stroke="{ink}" stroke-width="2"/>' +
+         '<path d="M50 17 V20 M50 42 V45 M36 31 H39 M61 31 H64" stroke="{acc}" stroke-width="2.4" stroke-linecap="round"/>' +
+         '<g class="lg-hand-slow"><path d="M50 31 L50 21" stroke="{acc}" stroke-width="3" stroke-linecap="round"/></g>' +
+         '<g class="lg-hand-fast"><path d="M50 31 L58 31" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/></g>' +
+         '<circle cx="50" cy="31" r="2.4" fill="{acc}"/><rect {B} x="45" y="6" width="10" height="5" rx="1.5"/>' },
+  blackhole: { name: 'Black Hole', legendary: true, accent: '#b26bff', moves: 'Up to 2 in any direction, devours its neighbours',
+    desc: 'Moves up to two squares in any direction. Wherever it lands, it devours every enemy piece next to it (except a king).',
+    art: '<ellipse cx="50" cy="31" rx="30" ry="11" fill="none" stroke="{ink}" stroke-width="9"/><ellipse class="lg-swirl" cx="50" cy="31" rx="30" ry="11" fill="none" stroke="{acc}" stroke-width="5" stroke-dasharray="14 6"/>' +
+         '<circle {B} cx="50" cy="31" r="15"/><circle cx="50" cy="31" r="10.5" fill="#05030a"/>' +
+         '<g class="lg-pulse"><circle cx="50" cy="31" r="10.5" fill="none" stroke="#ffb347" stroke-width="1.8"/></g>' },
+  zeus: { name: 'Storm King', legendary: true, accent: '#ffe14d', moves: 'Steps 1, lightning at any range',
+    desc: 'Steps one square. Every other turn, instead of moving, it hurls lightning at the first enemy in any straight line, at any range (not a king), destroying it.',
+    art: '<path {B} d="M31 57 C29 42 32 20 50 18 C68 20 71 42 69 57 Z"/>' +
+         '<path {A} d="M32 21 L30 6 L40 14 L50 3 L60 14 L70 6 L68 21 Z"/>' +
+         '<path {K} d="M39 33 L46 35 L39 37 Z"/><path {K} d="M61 33 L54 35 L61 37 Z"/><path {D} d="M40 47 C46 51 54 51 60 47"/>' +
+         '<g class="lg-bolt"><path fill="{acc}" stroke="{ink}" stroke-width="1.8" stroke-linejoin="round" d="M80 12 L70 30 L78 30 L68 50 L86 26 L78 26 L86 12 Z"/></g>' },
 };
 
 const WILD_IDS = Object.keys(WILD);

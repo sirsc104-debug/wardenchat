@@ -103,7 +103,11 @@ class BoardView {
         this.place(el, q, true);
         this.pcEl.appendChild(el);
         this.els.set(p.id, el);
-        if (opts.anim) { el.classList.add('born'); setTimeout(() => el.classList.remove('born'), 600); }
+        if (opts.anim) {
+          // a piece that was already in the game is stepping out of the fog; a new one is being born
+          const cls = opts.existed && opts.existed.has(p.id) ? 'fogin' : 'born';
+          el.classList.add(cls); setTimeout(() => el.classList.remove(cls), 600);
+        }
       }
       if (el._key !== key) {
         if (el._key && opts.anim) { el.classList.add('recolor'); setTimeout(() => el.classList.remove('recolor'), 700); }
@@ -111,6 +115,7 @@ class BoardView {
         el._key = key;
         const w = WILD[p.t];
         el.classList.toggle('wild', !!w);
+        el.classList.toggle('legend', !!(w && w.legendary));
         if (w) el.style.setProperty('--acc', w.accent);
       }
       el._piece = p;
@@ -125,7 +130,9 @@ class BoardView {
     for (const [id, el] of this.els) {
       if (seen.has(id)) continue;
       this.els.delete(id);
-      if (opts.anim) { el.classList.add('dying'); setTimeout(() => el.remove(), 460); }
+      // still alive but out of sight: it fades into the fog instead of dying
+      if (opts.anim && opts.alive && opts.alive.has(id)) { el.classList.add('fogout'); setTimeout(() => el.remove(), 420); }
+      else if (opts.anim) { el.classList.add('dying'); setTimeout(() => el.remove(), 460); }
       else el.remove();
     }
   }
@@ -144,6 +151,17 @@ class BoardView {
     el.classList.remove('facedown');
     el.classList.add('flipup');
     setTimeout(() => el.classList.remove('flipup'), 520);
+  }
+  /* Fog Mode: cover every square not in vis (a Set), or clear the fog (null). */
+  setFog(vis) {
+    if (!this.fogEl) { this.fogEl = document.createElement('div'); this.fogEl.className = 'fog'; this.root.insertBefore(this.fogEl, this.pcEl); }
+    const key = vis ? [...vis].sort((a, b) => a - b).join(',') : '';
+    if (key === this.fogKey) return;
+    this.fogKey = key;
+    if (!vis) { this.fogEl.innerHTML = ''; return; }
+    let h = '';
+    for (let q = 0; q < 64; q++) if (!vis.has(q)) h += this.cell(q, 'fogsq', `animation-delay:-${(q * 0.37) % 9}s`);
+    this.fogEl.innerHTML = h;
   }
   clear() { for (const el of this.els.values()) el.remove(); this.els.clear(); }
   elAt(q) { for (const el of this.els.values()) if (el._q === q && !el.classList.contains('dying')) return el; return null; }

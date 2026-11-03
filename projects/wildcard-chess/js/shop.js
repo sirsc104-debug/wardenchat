@@ -197,7 +197,7 @@ const Shop = (() => {
   function reward(st, game) {
     const box = q('#rewardBox');
     if (!box || !available()) return;
-    if (game.mode !== 'ai') { box.innerHTML = '<p class="rw-note">Pass &amp; Play games don’t earn coins.</p>'; return; }
+    if (game.mode !== 'ai') { box.innerHTML = `<p class="rw-note">${game.mode === 'online' ? 'Online games don\u2019t earn coins yet.' : 'Pass &amp; Play games don\u2019t earn coins.'}</p>`; return; }
     const result = !st.winner ? 'draw' : st.winner === game.human ? 'win' : 'loss';
     if (Account.status !== 'signedIn') {
       const est = Math.floor(REWARD_BASE[game.level] * { win: 1, draw: 0.3, loss: 0.1 }[result] * (game.drafted ? 1.25 : 1));

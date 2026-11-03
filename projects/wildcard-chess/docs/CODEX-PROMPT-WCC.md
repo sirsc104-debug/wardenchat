@@ -71,7 +71,7 @@ then **+ codex_bonus** (outside the cap).
   game (both sides). For each valid id (the list below) the player has never been paid for, add 500
   coins and record it in `warden_private.wcc_codex_paid (user_id, wildcard, created_at, primary key
   (user_id, wildcard))`. `codex_new` lists them; `codex_bonus` = 500 × their count. Unknown ids are
-  ignored (no error). At most 50 × 500 = 25,000 coins per player ever. Pay it even when `capped`.
+  ignored (no error). At most 55 × 500 = 27,500 coins per player ever. Pay it even when `capped`.
 - Writes one ledger row (`reward`, game `wcc`, coins = the total paid, note like
   `pro win draft` / `+codex 2`).
 
@@ -82,7 +82,8 @@ Valid wildcard ids: bomber, phantom, blink, trickster, archer, necro, frost, wyv
 ricochet, orbit, juggernaut, cannon, tempest, mimic, siren, guardian, golem, phoenix, viper, brood,
 chrono, mason, vampire, marauder, hexer, catapult, assassin, void, magnet, rampage, comet, kangaroo,
 tesla, drummer, sniper, amoeba, changeling, monk, alchemist, displacer, oracle, zombie, chameleon,
-warlord, cyclops, gorgon, grappler, echo.
+warlord, cyclops, gorgon, grappler, echo, and the five legendary ones: dragon, archangel, timelord,
+blackhole, zeus.
 
 ## The catalog to seed (game `wcc`)
 

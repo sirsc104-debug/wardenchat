@@ -799,6 +799,86 @@ button.acct-in:hover { border-color: var(--gold-lo); }
 .pill.demo { background: #4a3a14; border-color: #8a6a1f; color: var(--gold-hi); font: 600 12px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; }
 .acct-demo { font: 600 10.5px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
 
+/* ---------- legendary pieces: animated parts and a prismatic aura ---------- */
+.lg-flame { transform-box: fill-box; transform-origin: 100% 50%; animation: lgFlame .5s ease-in-out infinite alternate; }
+@keyframes lgFlame { from { transform: scale(.75, .9); opacity: .75; } to { transform: scale(1.15, 1.05); opacity: 1; } }
+.lg-wings { transform-box: fill-box; transform-origin: 50% 60%; animation: lgWings 1.6s ease-in-out infinite; }
+@keyframes lgWings { 50% { transform: scaleY(.86) translateY(4%); } }
+.lg-halo { transform-box: fill-box; transform-origin: center; animation: lgHalo 2.2s ease-in-out infinite; }
+@keyframes lgHalo { 50% { transform: translateY(-8%) scale(1.06); filter: drop-shadow(0 0 4px #ffe27a); } }
+.lg-hand-slow, .lg-hand-fast, .lg-spin { transform-origin: 50px 31px; }
+.lg-hand-slow { animation: lgTurn 12s linear infinite; }
+.lg-hand-fast { animation: lgTurn 2s linear infinite; }
+.lg-spin { animation: lgTurn 5s linear infinite; }
+@keyframes lgTurn { to { transform: rotate(360deg); } }
+.lg-pulse { transform-box: fill-box; transform-origin: center; animation: lgPulse 1.4s ease-in-out infinite; }
+@keyframes lgPulse { 50% { transform: scale(.6); opacity: .3; } }
+.lg-bolt { animation: lgBolt 2.4s steps(1) infinite; }
+@keyframes lgBolt { 0%, 46%, 54%, 58%, 100% { opacity: 1; filter: drop-shadow(0 0 3px #ffe14d); } 50%, 56% { opacity: .15; filter: none; } }
+.pc.legend::before {
+  inset: 2%; background: conic-gradient(from var(--spin, 0deg), #ff5a5a, #ffd23f, #5fe0ff, #b26bff, #ff5a5a);
+  -webkit-mask: radial-gradient(circle, transparent 54%, #000 57%, #000 66%, transparent 70%); mask: radial-gradient(circle, transparent 54%, #000 57%, #000 66%, transparent 70%);
+  opacity: .85; animation: spin 2.6s linear infinite;
+}
+.legend-tag { display: inline-block; font: 700 11px var(--f-ui); letter-spacing: .2em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; color: #1b1916;
+  background: linear-gradient(90deg, #ff5a5a, #ffd23f, #5fe0ff, #b26bff, #ff5a5a); background-size: 200% 100%; animation: legendSlide 3s linear infinite; }
+@keyframes legendSlide { to { background-position: 200% 0; } }
+.card.legendary .card-face, .cx.legendary { box-shadow: 0 0 0 2px #ffd23f, 0 0 30px -4px rgba(255, 210, 63, .7), 0 20px 40px -18px rgba(0,0,0,.8); }
+@media (prefers-reduced-motion: reduce) { .lg-flame, .lg-wings, .lg-halo, .lg-hand-slow, .lg-hand-fast, .lg-spin, .lg-pulse, .lg-bolt { animation: none; } }
+
+/* ---------- Fog Mode ---------- */
+.board .fog { z-index: 2; pointer-events: none; filter: blur(calc(var(--sq, 80px) * .1)); transition: opacity .6s; }
+.board .fog .fogsq {
+  position: absolute; width: 12.5%; height: 12.5%; transform: scale(1.18);
+  background:
+    radial-gradient(ellipse 70% 55% at 30% 40%, rgba(196, 202, 214, .55), transparent 70%),
+    radial-gradient(ellipse 60% 70% at 75% 70%, rgba(150, 158, 174, .5), transparent 70%),
+    linear-gradient(135deg, #3d424e, #2a2e37);
+  background-size: 180% 180%, 160% 160%, 100% 100%;
+  animation: fogDrift 9s ease-in-out infinite alternate;
+}
+@keyframes fogDrift { from { background-position: 0% 0%, 100% 100%, 0 0; } to { background-position: 100% 60%, 0% 30%, 0 0; } }
+.board.fog-roll .fog { animation: fogRoll 1.3s ease-out both; }
+@keyframes fogRoll { from { opacity: 0; transform: scale(1.06); } }
+.board.fog-lift .fog { animation: fogLift 1.1s ease-in both; }
+@keyframes fogLift { to { opacity: 0; } }
+.pc.fogin svg { animation: fogIn .45s ease-out; }
+@keyframes fogIn { from { opacity: 0; filter: blur(4px) brightness(1.6); transform: scale(.9); } }
+.pc.fogout { transition: none; z-index: 2; }
+.pc.fogout svg { animation: fogOut .4s ease-in forwards; }
+@keyframes fogOut { to { opacity: 0; filter: blur(5px); transform: scale(.92); } }
+.log li.fogged .t { color: var(--faint); font-style: italic; }
+.fog-ico { width: 22px; height: 22px; border-radius: 50%; background: #3d424e; color: #c4cad6; display: grid; place-items: center; font: 700 12px var(--f-ui); }
+@media (prefers-reduced-motion: reduce) { .board .fog .fogsq { animation: none; } }
+.menu-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.menu-modes .btn { animation: btnIn .7s cubic-bezier(.2, .9, .3, 1.25) both; animation-delay: 1.2s; padding: 11px 14px; }
+.menu-modes .btn span { font-size: 19px; }
+.menu-modes .btn small { font-size: 12px; }
+.menu-btns .btn.fog-btn { border-color: #4a5466; background: linear-gradient(180deg, #353b47, #272b33); }
+.menu-btns .btn.online-btn { border-color: #2f5a4a; background: linear-gradient(180deg, #2c3a33, #232b27); }
+
+/* ---------- online ---------- */
+.online-body { max-width: 880px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; padding-bottom: 24px; }
+.ol-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ol-card { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 18px; border-radius: 14px; background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--line); }
+.ol-card h3 { margin: 0; font: 400 24px var(--f-display); }
+.ol-note { margin: 0; color: var(--mute); }
+.ol-note.small { font-size: 13.5px; color: var(--faint); }
+.ol-err { margin: 0; color: #ffb4a3; }
+.ol-join { display: flex; gap: 10px; width: 100%; }
+.ol-join input { flex: 1; min-width: 0; font: 600 26px var(--f-mono); letter-spacing: .3em; text-transform: uppercase; text-align: center; color: var(--ink); background: var(--bg-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.ol-join input:focus { outline: 2px solid var(--gold-hi); outline-offset: 1px; }
+.ol-wait { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 26px 18px; border-radius: 16px; background: linear-gradient(180deg, #2c3a33, #232b27); border: 1px solid #2f5a4a; text-align: center; }
+.ol-k { margin: 0; font: 600 14px var(--f-ui); letter-spacing: .24em; text-transform: uppercase; color: var(--lv-easy); }
+.ol-code { font: 600 clamp(44px, 10vw, 72px)/1 var(--f-mono); letter-spacing: .25em; padding-left: .25em; color: var(--ink); user-select: all; animation: codePulse 2.4s ease-in-out infinite; }
+@keyframes codePulse { 50% { text-shadow: 0 0 24px rgba(123, 214, 106, .55); } }
+.ol-presence { font-size: 13px; color: var(--gold); display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+@media (max-width: 700px) { .ol-cols { grid-template-columns: minmax(0, 1fr); } }
+.lg-swirl { animation: lgSwirl 1.6s linear infinite; }
+@keyframes lgSwirl { to { stroke-dashoffset: -40; } }
+.pc.legend svg { position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) { .lg-swirl { animation: none; } }
+
 </style>
 </head>
 <body>
@@ -810,15 +890,19 @@ button.acct-in:hover { border-color: var(--gold-lo); }
     <div class="acct-chip" id="acctChip" hidden></div>
     <div class="menu-wrap">
       <div class="menu-left">
-        <p class="eyebrow">Chess with 50 secret pieces</p>
+        <p class="eyebrow">Chess with 55 secret pieces</p>
         <h1 class="logo"><span class="logo-a">Wildcard</span><span class="logo-b">Chess</span></h1>
         <p class="tagline">Both armies start with the usual sixteen pieces, plus a wildcard with rules of its own. You can see your opponent's. You can't see what it does.</p>
         <nav class="menu-btns" aria-label="Main menu">
-          <button class="btn primary" data-mode="ai" data-deal="classic" id="playBtn"><span>Play</span><small>vs the computer, random wildcards</small></button>
-          <button class="btn draft-btn" data-mode="ai" data-deal="draft" id="draftBtn"><span>Draft</span><small>Build your army card by card</small></button>
-          <button class="btn" data-mode="local" id="localBtn"><span>Pass &amp; Play</span><small>2 players, one device</small></button>
+          <button class="btn primary" data-mode="ai" data-deal="classic" data-fog="0" id="playBtn"><span>Play</span><small>vs the computer, random wildcards</small></button>
+          <div class="menu-modes">
+            <button class="btn draft-btn" data-mode="ai" data-deal="draft" data-fog="0" id="draftBtn"><span>Draft</span><small>Build your army card by card</small></button>
+            <button class="btn fog-btn" data-mode="ai" data-deal="classic" data-fog="1" id="fogBtn"><span>Fog Mode</span><small>See only what your pieces touch</small></button>
+            <button class="btn online-btn" data-go="online" id="onlineBtn"><span>Online</span><small>Play a friend anywhere</small></button>
+            <button class="btn" data-mode="local" data-fog="0" id="localBtn"><span>Pass &amp; Play</span><small>2 players, one device</small></button>
+          </div>
           <div class="menu-row">
-            <button class="btn btn-sm" data-go="codex"><span>Codex</span><small id="codexCount">0 / 50 discovered</small></button>
+            <button class="btn btn-sm" data-go="codex"><span>Codex</span><small id="codexCount">0 / 55 discovered</small></button>
             <button class="btn btn-sm" data-go="shop"><span>Shop</span><small id="shopCount">Boards &amp; more</small></button>
             <button class="btn btn-sm" data-go="how"><span>Rules</span><small>How it works</small></button>
             <button class="btn btn-sm ghost" id="soundBtn"><span>Sound</span><small id="soundState">On</small></button>
@@ -882,6 +966,8 @@ button.acct-in:hover { border-color: var(--gold-lo); }
           <div class="seg" id="segDeal"><button data-v="classic">Classic</button><button data-v="draft">Draft</button></div></div>
         <div class="opt classic-only"><span class="opt-l">Wildcards each</span>
           <div class="seg" id="segCount"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button></div></div>
+        <div class="opt"><span class="opt-l">Fog of war</span>
+          <div class="seg" id="segFog"><button data-v="0">Off</button><button data-v="1">On</button></div></div>
         <div class="opt local-only"><span class="opt-l">Privacy screen</span>
           <div class="seg" id="segPrivacy"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
         <div class="opt local-only"><span class="opt-l">Flip board each turn</span>
@@ -942,6 +1028,7 @@ button.acct-in:hover { border-color: var(--gold-lo); }
         <div class="side-head">
           <div class="mode-chip" id="modeChip"></div>
           <div class="status" id="status" aria-live="polite"></div>
+          <div class="ol-presence" id="onlinePresence" hidden></div>
         </div>
         <div class="side-scroll">
           <div class="wild-info" id="wildInfo"></div>
@@ -962,6 +1049,12 @@ button.acct-in:hover { border-color: var(--gold-lo); }
       <p class="codex-lede" id="codexLede"></p>
       <div class="codex-grid" id="codexGrid"></div>
     </div>
+  </section>
+
+  <!-- ONLINE -->
+  <section class="screen" id="online">
+    <header class="topbar"><button class="back" data-go="menu">← Menu</button><h2>Online</h2></header>
+    <div class="online-body" id="onlineBody"></div>
   </section>
 
   <!-- SHOP -->
@@ -989,7 +1082,7 @@ button.acct-in:hover { border-color: var(--gold-lo); }
     <div class="how-body">
       <article>
         <h3>Normal chess, plus a stranger</h3>
-        <p>Both sides start with the standard army, except that each <b>wildcard</b> (dealt at random from 50) takes the place of one of your regular pieces. It can replace any piece except the king: a pawn, a knight, even your queen. You'll see which one when the cards are dealt.</p>
+        <p>Both sides start with the standard army, except that each <b>wildcard</b> (dealt at random from 55) takes the place of one of your regular pieces. It can replace any piece except the king: a pawn, a knight, even your queen. You'll see which one when the cards are dealt.</p>
         <h3>You know yours. You don't know theirs.</h3>
         <p>Before the game you see your own wildcard and what it does. You also see your opponent's piece and its name, but not its rules. Hover or tap any piece on the board to read about it; theirs only says <i>unknown</i>. Watch what it does and work it out. When the game ends, its rules are revealed and it joins your Codex.</p>
         <h3>How to win</h3>
@@ -1002,6 +1095,12 @@ button.acct-in:hover { border-color: var(--gold-lo); }
         <p>Sign in with your Warden Chat account to earn <b>🪙 coins</b> for games against the computer: 500 for beating Easy, 1,000 Medium, 2,000 Pro, 4,000 Xtreme. Draws pay 30% and losses 10%. A drafted army pays ×1.25, SirSC Members get ×1.5, your first win each day adds 1,500, and every wildcard new to your Codex pays 500. You can earn up to 25,000 coins a day. Pass &amp; Play games don't earn coins. Spend coins or <b>💎 diamonds</b> in the Shop on board themes, card backs and checkmate finales. It's the same wallet as Downhill Death Run.</p>
         <h3>The draft</h3>
         <p>Pick <b>Draft</b> on the setup screen to build both armies from scratch. You're shown 16 pairs of cards, 8 of them for you to choose from; take one, and the one you leave goes to your opponent. Your army is your 8 picks plus the 8 your opponent passed over, so it might have four bishops and a Cyclops where the pawns usually stand. One pair is always King vs King, so everybody gets exactly one king. You can read the rules of every card offered to you, which means you'll know the wildcards you passed to your opponent, but not the ones they picked. Both armies stay face down while you draft, your own picks included; when it's over, all 32 pieces flip face up on the board one by one over about 10 seconds. Armies are laid out automatically and can't be rearranged: the king on its own square, rooks in the corners, the queen beside the king, knights and bishops where they usually stand, pawns across the front, and everything else wherever it fits.</p>
+        <h3>Fog Mode</h3>
+        <p>Turn on <b>Fog of war</b> (or pick Fog Mode on the main menu) and you can only see the squares your pieces stand on and the squares right next to them. Enemy pieces vanish into the fog when you lose sight of them. There is no check in the fog: nobody tells you your king is under attack, and you win by <b>capturing the enemy king</b>. If something you can't see blocks a move, you're told and can pick another; if you land on a hidden enemy, you capture it. The computer plays by the same rules and only sees what its own pieces see. In Pass &amp; Play the privacy screen is always on in the fog.</p>
+        <h3>Legendary wildcards</h3>
+        <p>Five wildcards are <b>legendary</b>: the Elder Dragon, Archangel, Time Lord, Black Hole and Storm King. They are animated, far stronger than anything else, and rare: about one wildcard in twenty is legendary, in the classic deal and in the draft.</p>
+        <h3>Online</h3>
+        <p>Sign in with your Warden Chat account, open <b>Online</b> and create a game: you get a 5-letter code to send a friend, who joins with it. Warden Chat deals both sides' wildcards, so nobody picks their own. Your wildcard's rules are shown to you and theirs stay hidden, just like against the computer, and Fog Mode works online too. If your friend disappears for more than two minutes you can claim the win. Online games don't earn coins yet.</p>
         <h3>Pass &amp; Play</h3>
         <p>Two people can play on one device. Each player looks at their own cards in private, and between turns a screen covers the board until the next player taps <i>Ready</i>, so nobody sees the other's wildcard rules. The board can turn to face whoever is moving.</p>
         <h3>Difficulty</h3>
@@ -1102,7 +1201,7 @@ const STD_ART = {
   WALL: '',
 };
 
-/* The 50 wildcards. `desc` is what the owner sees; the opponent only ever sees the icon and name. */
+/* The 55 wildcards (the last 5 are legendary). `desc` is what the owner sees; the opponent only ever sees the icon and name. */
 const WILD = {
   bomber: { name: 'Bomber', accent: '#ff9a2e', moves: 'Steps 1 square',
     desc: 'Steps one square in any direction. When it captures, it explodes: every piece in the 3×3 blast around the target is destroyed, friend or foe, the Bomber included. Kings are not safe, but it will never blow up its own.',
@@ -1345,6 +1444,39 @@ const WILD = {
     art: '<circle {B} cx="50" cy="33" r="10.5"/>' +
          '<path {S} d="M36 22 C30 29 30 37 36 44"/><path {S} d="M64 22 C70 29 70 37 64 44"/>' +
          '<path {S} d="M27 15 C17 27 17 39 27 51" opacity=".6"/><path {S} d="M73 15 C83 27 83 39 73 51" opacity=".6"/>' },
+
+  /* ----- legendary: rare, animated, and far stronger than anything else ----- */
+  dragon: { name: 'Elder Dragon', legendary: true, accent: '#ff5a1f', moves: 'Queen and knight moves, burning captures',
+    desc: 'Moves like a queen and a knight combined. Every capture breathes fire: enemy pawns next to the target burn up too.',
+    art: '<path {B} d="M66 57 C71 45 73 33 68 24 L82 6 L64 17 C60 13 54 11 47 13 L36 3 L38 15 C31 18 24 25 18 29 L15 37 C22 40 29 39 34 38 L23 46 C30 49 39 48 46 44 C46 50 42 54 38 57 Z"/>' +
+         '<path {B} d="M58 14 L70 2 L66 16 Z"/><circle {A} cx="48" cy="24" r="4"/><circle {K} cx="21" cy="32" r="1.8"/>' +
+         '<path {D} d="M68 33 L76 35 M68 41 L77 44 M67 49 L75 53"/>' +
+         '<g class="lg-flame"><g transform="translate(17 39) scale(1.7) translate(-17 -39)"><path fill="#ffd23f" stroke="{ink}" stroke-width="1.2" d="M14 37 C6 35 2 40 4 45 C7 41 10 42 12 40 C9 45 11 49 15 49 C14 45 16 42 18 40 Z"/>' +
+         '<path fill="#ff5a1f" d="M13 39 C9 40 8 43 9 45 C11 43 12 42 15 41 Z"/></g></g>' },
+  archangel: { name: 'Archangel', legendary: true, accent: '#ffe27a', moves: 'Queen moves, only a king can capture it',
+    desc: 'Moves like a queen. Its armour is holy: nothing but a king can capture it.',
+    art: '<g class="lg-wings"><path {B} d="M40 34 C28 26 18 26 8 32 C16 34 20 38 22 44 C28 40 34 40 40 42 Z"/><path {B} d="M60 34 C72 26 82 26 92 32 C84 34 80 38 78 44 C72 40 66 40 60 42 Z"/>' +
+         '<path {D} d="M14 33 C22 33 30 36 36 40 M86 33 C78 33 70 36 64 40"/></g>' +
+         '<path {B} d="M38 57 C38 46 42 40 50 40 C58 40 62 46 62 57 Z"/><circle {B} cx="50" cy="29" r="10"/>' +
+         '<g class="lg-halo"><ellipse cx="50" cy="13" rx="14" ry="4.5" fill="none" stroke="{ink}" stroke-width="5"/><ellipse cx="50" cy="13" rx="14" ry="4.5" fill="none" stroke="{acc}" stroke-width="3"/></g>' },
+  timelord: { name: 'Time Lord', legendary: true, accent: '#7ef0ff', moves: 'Queen moves, every capture is another turn',
+    desc: 'Moves like a queen. Every time it captures, you immediately take another turn (though a capture during that extra turn doesn’t earn a third).',
+    art: '<circle {B} cx="50" cy="31" r="21"/><circle cx="50" cy="31" r="16" fill="#12283a" stroke="{ink}" stroke-width="2"/>' +
+         '<path d="M50 17 V20 M50 42 V45 M36 31 H39 M61 31 H64" stroke="{acc}" stroke-width="2.4" stroke-linecap="round"/>' +
+         '<g class="lg-hand-slow"><path d="M50 31 L50 21" stroke="{acc}" stroke-width="3" stroke-linecap="round"/></g>' +
+         '<g class="lg-hand-fast"><path d="M50 31 L58 31" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/></g>' +
+         '<circle cx="50" cy="31" r="2.4" fill="{acc}"/><rect {B} x="45" y="6" width="10" height="5" rx="1.5"/>' },
+  blackhole: { name: 'Black Hole', legendary: true, accent: '#b26bff', moves: 'Up to 2 in any direction, devours its neighbours',
+    desc: 'Moves up to two squares in any direction. Wherever it lands, it devours every enemy piece next to it (except a king).',
+    art: '<ellipse cx="50" cy="31" rx="30" ry="11" fill="none" stroke="{ink}" stroke-width="9"/><ellipse class="lg-swirl" cx="50" cy="31" rx="30" ry="11" fill="none" stroke="{acc}" stroke-width="5" stroke-dasharray="14 6"/>' +
+         '<circle {B} cx="50" cy="31" r="15"/><circle cx="50" cy="31" r="10.5" fill="#05030a"/>' +
+         '<g class="lg-pulse"><circle cx="50" cy="31" r="10.5" fill="none" stroke="#ffb347" stroke-width="1.8"/></g>' },
+  zeus: { name: 'Storm King', legendary: true, accent: '#ffe14d', moves: 'Steps 1, lightning at any range',
+    desc: 'Steps one square. Every other turn, instead of moving, it hurls lightning at the first enemy in any straight line, at any range (not a king), destroying it.',
+    art: '<path {B} d="M31 57 C29 42 32 20 50 18 C68 20 71 42 69 57 Z"/>' +
+         '<path {A} d="M32 21 L30 6 L40 14 L50 3 L60 14 L70 6 L68 21 Z"/>' +
+         '<path {K} d="M39 33 L46 35 L39 37 Z"/><path {K} d="M61 33 L54 35 L61 37 Z"/><path {D} d="M40 47 C46 51 54 51 60 47"/>' +
+         '<g class="lg-bolt"><path fill="{acc}" stroke="{ink}" stroke-width="1.8" stroke-linejoin="round" d="M80 12 L70 30 L78 30 L68 50 L86 26 L78 26 L86 12 Z"/></g>' },
 };
 
 const WILD_IDS = Object.keys(WILD);
@@ -1446,6 +1578,7 @@ function ChessEngine() {
     if (!p || p.c === a.c || p.c === 'n') return false;
     if (p.t === 'golem' && a.t !== 'P' && a.t !== 'K') return false;
     if (p.t === 'monk') return false;
+    if (p.t === 'archangel' && a.t !== 'K') return false;
     if (p.t === 'viper' && a.t === 'K') return false;
     const v = ci(p.c);
     if (HAS_GRD[v] && GRD[v][t]) return false;
@@ -1999,6 +2132,48 @@ function ChessEngine() {
       }
     } },
     echo: { v: 380, init: () => ({ ch: 3 }), gen: (s, q, p, out) => slide(s, q, p, out, DG, 2) },
+
+    /* ----- legendary: rare and wildly overpowered ----- */
+    // Elder Dragon: queen and knight moves at once; its captures also incinerate enemy pawns around the target.
+    dragon: { v: 1250, gen(s, q, p, out) {
+      const tmp = [];
+      slide(s, q, p, tmp, D8); step(s, q, p, tmp, KN);
+      const seen = new Set();
+      for (const m of tmp) {
+        if (seen.has(m.t)) continue;
+        seen.add(m.t);
+        if (!m.x) { out.push(m); continue; }
+        const burn = ADJ[m.t].filter(a => s.b[a] && s.b[a].t === 'P' && s.b[a].c !== p.c && a !== q);
+        out.push(burn.length ? mv(q, q, m.t, 'burn', [m.t].concat(burn)) : m);
+      }
+    } },
+    // Archangel: a queen that only a king can capture.
+    archangel: { v: 1100, gen: (s, q, p, out) => slide(s, q, p, out, D8) },
+    // Time Lord: a queen; every capture it makes (outside an extra turn) gives you another turn.
+    timelord: { v: 1150, gen: (s, q, p, out) => slide(s, q, p, out, D8) },
+    // Black Hole: up to 2 squares in any direction, and it devours every enemy (not a king) next to where it lands.
+    blackhole: { v: 1000, gen(s, q, p, out) {
+      const tmp = [];
+      slide(s, q, p, tmp, D8, 2);
+      for (const m of tmp) {
+        const eat = ADJ[m.t].filter(a => a !== q && s.b[a] && s.b[a].c !== p.c && s.b[a].c !== 'n' && s.b[a].t !== 'K' && s.b[a].t !== 'monk');
+        out.push(eat.length ? mv(q, q, m.t, 'devour', (m.x || []).concat(eat)) : m);
+      }
+    } },
+    // Storm King: steps 1; every other turn it hurls lightning at the first piece in any line, any range.
+    zeus: { v: 1100, init: () => ({ cd: 0 }), gen(s, q, p, out) {
+      step(s, q, p, out, D8);
+      if (s.ply < p.d.cd) return;
+      const f = F(q), r = R(q);
+      for (const [dx, dy] of D8) for (let k = 1; k < 8; k++) {
+        const nf = f + dx * k, nr = r + dy * k;
+        if (!on(nf, nr)) break;
+        const t = SQ(nf, nr), tp = s.b[t];
+        if (!tp) continue;
+        if (tp.c !== p.c && tp.c !== 'n' && tp.t !== 'K' && tp.t !== 'monk') out.push({ o: q, f: q, t, k: 'bolt', x: [t], cd: 4 });
+        break;
+      }
+    } },
   };
   const WILD_IDS = Object.keys(W);
 
@@ -2059,7 +2234,7 @@ function ChessEngine() {
     let actor = -1, mover = -1;
 
     switch (m.k) {
-      case 'n': case 'launch': case 'ep': case 'crush': case 'jump': {
+      case 'n': case 'launch': case 'ep': case 'crush': case 'jump': case 'burn': case 'devour': {
         const pc = b[m.f];
         if (m.x) for (const q of m.x) { const k = kill(q); if (k) kills.push([q, k]); }
         moveTo(m.f, m.t);
@@ -2075,7 +2250,7 @@ function ChessEngine() {
       case 'castle': moveTo(m.f, m.t); moveTo(m.rf, m.rt); break;
       case 'boom': for (const q of m.x) kill(q); ev({ k: 'boom', q: m.t }); break;
       case 'swap': { const a = b[m.f], t = b[m.t]; b[m.f] = { ...t, m: true }; b[m.t] = { ...a, m: true }; mover = m.t; break; }
-      case 'shoot': case 'strike': case 'zap':
+      case 'shoot': case 'strike': case 'zap': case 'bolt':
         for (const q of m.x) { const k = kill(q); if (k) kills.push([q, k]); }
         actor = m.o; break;
       case 'raise': {
@@ -2115,6 +2290,7 @@ function ChessEngine() {
       const a = b[actor];
       if (a.t === 'vampire') { setD(actor, { k: a.d.k + kills.length }); if (a.d.k < 2) ev({ k: 'grow', q: actor }); }
       else if (a.t === 'chrono' && a.d.ch > 0) { setD(actor, { ch: 0 }); ns.extra = true; ev({ k: 'extra', q: actor }); }
+      else if (a.t === 'timelord' && !s.extra) { ns.extra = true; ev({ k: 'extra', q: actor }); }
       else if (a.t === 'changeling') {
         const k = kills.find(([, kp]) => kp.t !== 'K' && kp.t !== 'P' && kp.t !== 'WALL');
         if (k) { b[actor] = { ...a, t: k[1].t, d: initData(k[1].t, actor) }; ev({ k: 'morph', q: actor }); }
@@ -2158,6 +2334,18 @@ function ChessEngine() {
       if (!out.includes(q)) out.push(q);
     }
     return out;
+  }
+
+  /* Fog Mode: what side c can see, which is every square its pieces stand on or touch. */
+  function visibleSquares(s, c) {
+    const v = new Set();
+    for (let q = 0; q < 64; q++) { const p = s.b[q]; if (p && p.c === c) { v.add(q); for (const a of ADJ[q]) v.add(a); } }
+    return v;
+  }
+  /* Fog Mode's rules: no check. Any move goes, except one that destroys your own king; lose your king and you lose. */
+  function fogMoves(s) {
+    if (s.dead) return [];
+    return genAll(s, s.turn, false).filter(m => makeMove(s, m).dead !== s.turn);
   }
 
   function legalMoves(s) {
@@ -2391,7 +2579,7 @@ function ChessEngine() {
     return { s, moves: out };
   }
 
-  return { newGame, pickSlots, startType, cardValue: t => (t === 'K' ? 0 : value({ t, d: initData(t, 0) || { k: 0, ch: 1 } })), initData, legalMoves, makeMove, status, inCheck, checkers, findKing, think, quickPick, demo, value, evaluate,
+  return { newGame, pickSlots, startType, cardValue: t => (t === 'K' ? 0 : value({ t, d: initData(t, 0) || { k: 0, ch: 1 } })), initData, legalMoves, fogMoves, visibleSquares, makeMove, status, inCheck, checkers, findKing, think, quickPick, demo, value, evaluate,
     WILD_IDS, LEVELS, sqName: q => 'abcdefgh'[F(q)] + (R(q) + 1), F, R, SQ, stats: () => nodes };
 }
 if (typeof module !== 'undefined') module.exports = ChessEngine;
@@ -2645,7 +2833,11 @@ class BoardView {
         this.place(el, q, true);
         this.pcEl.appendChild(el);
         this.els.set(p.id, el);
-        if (opts.anim) { el.classList.add('born'); setTimeout(() => el.classList.remove('born'), 600); }
+        if (opts.anim) {
+          // a piece that was already in the game is stepping out of the fog; a new one is being born
+          const cls = opts.existed && opts.existed.has(p.id) ? 'fogin' : 'born';
+          el.classList.add(cls); setTimeout(() => el.classList.remove(cls), 600);
+        }
       }
       if (el._key !== key) {
         if (el._key && opts.anim) { el.classList.add('recolor'); setTimeout(() => el.classList.remove('recolor'), 700); }
@@ -2653,6 +2845,7 @@ class BoardView {
         el._key = key;
         const w = WILD[p.t];
         el.classList.toggle('wild', !!w);
+        el.classList.toggle('legend', !!(w && w.legendary));
         if (w) el.style.setProperty('--acc', w.accent);
       }
       el._piece = p;
@@ -2667,7 +2860,9 @@ class BoardView {
     for (const [id, el] of this.els) {
       if (seen.has(id)) continue;
       this.els.delete(id);
-      if (opts.anim) { el.classList.add('dying'); setTimeout(() => el.remove(), 460); }
+      // still alive but out of sight: it fades into the fog instead of dying
+      if (opts.anim && opts.alive && opts.alive.has(id)) { el.classList.add('fogout'); setTimeout(() => el.remove(), 420); }
+      else if (opts.anim) { el.classList.add('dying'); setTimeout(() => el.remove(), 460); }
       else el.remove();
     }
   }
@@ -2686,6 +2881,17 @@ class BoardView {
     el.classList.remove('facedown');
     el.classList.add('flipup');
     setTimeout(() => el.classList.remove('flipup'), 520);
+  }
+  /* Fog Mode: cover every square not in vis (a Set), or clear the fog (null). */
+  setFog(vis) {
+    if (!this.fogEl) { this.fogEl = document.createElement('div'); this.fogEl.className = 'fog'; this.root.insertBefore(this.fogEl, this.pcEl); }
+    const key = vis ? [...vis].sort((a, b) => a - b).join(',') : '';
+    if (key === this.fogKey) return;
+    this.fogKey = key;
+    if (!vis) { this.fogEl.innerHTML = ''; return; }
+    let h = '';
+    for (let q = 0; q < 64; q++) if (!vis.has(q)) h += this.cell(q, 'fogsq', `animation-delay:-${(q * 0.37) % 9}s`);
+    this.fogEl.innerHTML = h;
   }
   clear() { for (const el of this.els.values()) el.remove(); this.els.clear(); }
   elAt(q) { for (const el of this.els.values()) if (el._q === q && !el.classList.contains('dying')) return el; return null; }
@@ -3376,7 +3582,7 @@ const Shop = (() => {
   function reward(st, game) {
     const box = q('#rewardBox');
     if (!box || !available()) return;
-    if (game.mode !== 'ai') { box.innerHTML = '<p class="rw-note">Pass &amp; Play games don’t earn coins.</p>'; return; }
+    if (game.mode !== 'ai') { box.innerHTML = `<p class="rw-note">${game.mode === 'online' ? 'Online games don\u2019t earn coins yet.' : 'Pass &amp; Play games don\u2019t earn coins.'}</p>`; return; }
     const result = !st.winner ? 'draw' : st.winner === game.human ? 'win' : 'loss';
     if (Account.status !== 'signedIn') {
       const est = Math.floor(REWARD_BASE[game.level] * { win: 1, draw: 0.3, loss: 0.1 }[result] * (game.drafted ? 1.25 : 1));
@@ -3454,6 +3660,185 @@ const Shop = (() => {
   return { init, render, reward, openSignIn, renderChip };
 })();
 
+/* Wildcard Chess: playing a friend online. One player creates a game and shares a 5-letter code,
+   the other joins with it. The server (docs/ONLINE-WCC.md) deals the wildcards and keeps the moves in
+   order; each side's engine checks every move it receives. Moves travel by polling wcc_online_state.
+   Loaded before game.js; uses its helpers ($, G, show, toast…) only at run time. */
+'use strict';
+
+const Online = (() => {
+  const q = s => document.querySelector(s);
+  const POLL_MS = 1500;
+  let game = null;          // the latest state for the game in progress (or waiting)
+  let timer = 0, polling = false, token = 0, count = 1, fog = false;
+  const ERR = {
+    wcc_no_such_game: 'No game has that code. Check it with your friend.',
+    wcc_game_full: 'That game already has two players.',
+    wcc_own_game: 'That’s your own game. Send the code to a friend.',
+    wcc_too_many_games: 'You already have 3 online games going. Finish or cancel one first.',
+    not_deployed: 'Online play isn’t switched on yet on Warden Chat.',
+    offline: 'Can’t reach Warden Chat. Check your connection.',
+  };
+  const err = e => ERR[e && e.code] || 'Something went wrong. Try again in a moment.';
+  const me = () => (game ? game.color : 'w');
+  const them = () => (game ? game[me() === 'w' ? 'black' : 'white'] : null);
+
+  /* ---------- the Online screen ---------- */
+  function render(msg) {
+    const box = q('#onlineBody');
+    const available = Account.status !== 'unavailable' && Account.status !== 'checking';
+    if (!available) { box.innerHTML = '<p class="ol-note">Online play opens when Warden Chat accounts are switched on for Wildcard Chess.</p>'; return; }
+    if (Account.status !== 'signedIn') {
+      box.innerHTML = '<p class="ol-note">Sign in with your Warden Chat account to play friends online.</p><button type="button" class="btn primary small" data-shop="signin"><span>Sign in</span></button>';
+      return;
+    }
+    if (game && game.status === 'waiting') {
+      box.innerHTML = `<div class="ol-wait"><p class="ol-k">Your game code</p><div class="ol-code" id="olCode">${game.code}</div>
+        <button type="button" class="btn small" data-ol="copy"><span>Copy code</span></button>
+        <p class="ol-note">Waiting for your friend. They open <b>Online</b>, choose <b>Join</b> and type this code.<span class="thinking"><i></i><i></i><i></i></span></p>
+        <p class="ol-note small">You'll play ${game.color === 'w' ? 'White' : 'Black'}, ${game.setup.wild.w.length} wildcard${game.setup.wild.w.length > 1 ? 's' : ''} each${game.setup.fog ? ', in the fog' : ''}.</p>
+        <button type="button" class="btn ghost small" data-ol="cancel"><span>Cancel</span></button></div>`;
+      return;
+    }
+    const seg = (id, vals, cur) => `<div class="seg" id="${id}">${vals.map(([v, l]) => `<button type="button" data-v="${v}" class="${String(v) === String(cur) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+    box.innerHTML = `<div class="ol-cols">
+      <div class="ol-card"><h3>Create a game</h3><p class="ol-note">You'll get a code to send a friend. The server deals both sides' wildcards.</p>
+        <div class="opt"><span class="opt-l">Wildcards each</span>${seg('olCount', [[1, '1'], [2, '2'], [3, '3']], count)}</div>
+        <div class="opt"><span class="opt-l">Fog of war</span>${seg('olFog', [[0, 'Off'], [1, 'On']], fog ? 1 : 0)}</div>
+        <button type="button" class="btn primary" data-ol="create"><span>Create game</span></button></div>
+      <div class="ol-card"><h3>Join a game</h3><p class="ol-note">Type the code your friend sent you.</p>
+        <form id="olJoin" class="ol-join"><input id="olCodeIn" maxlength="5" autocomplete="off" spellcheck="false" placeholder="ABCDE" aria-label="Game code">
+        <button class="btn primary" type="submit"><span>Join</span></button></form></div>
+    </div>${msg ? `<p class="ol-err" role="alert">${esc(msg)}</p>` : ''}
+    <p class="ol-note small">Online games don't earn coins yet. Your wildcard's rules are shown to you; your friend's stay hidden, just like against the computer.</p>`;
+  }
+
+  /* ---------- talking to the server ---------- */
+  function call(fn, p) { return Account.rpc(fn, p); }
+  function create() {
+    call('wcc_online_create', { wildcards: count, fog }).then(st => { game = st; render(); startPolling(); }, e => render(err(e)));
+  }
+  function join(code) {
+    call('wcc_online_join', { code: code.trim().toUpperCase() }).then(st => { game = st; begin(); }, e => render(err(e)));
+  }
+  function cancel() {
+    const g = game;
+    stop(); game = null; render();
+    if (g) call('wcc_online_cancel', { game_id: g.game_id }).catch(() => {});
+  }
+  function startPolling() { stop(); polling = true; const t = ++token; const tick = () => { if (t !== token) return; poll().finally(() => { if (t === token) timer = setTimeout(tick, POLL_MS); }); }; timer = setTimeout(tick, POLL_MS); }
+  function stop() { polling = false; token++; clearTimeout(timer); }
+  const applied = () => (G.mode === 'online' && G.hist ? G.hist.length - 1 : 0);
+
+  function poll() {
+    if (!game) return Promise.resolve();
+    const since = game.status === 'playing' ? applied() : 0;
+    return call('wcc_online_state', { game_id: game.game_id, since }).then(st => {
+      const was = game.status;
+      game = Object.assign({}, game, st);
+      if (was === 'waiting' && st.status === 'playing') { begin(); return; }
+      if (st.status === 'cancelled') { stop(); game = null; if (current === 'online') render('That game was cancelled.'); return; }
+      if (G.mode !== 'online') return;
+      // the opponent's moves, in order
+      for (const mv of (st.moves || []).slice().sort((a, b) => a.ply - b.ply)) {
+        if (mv.ply !== applied() || mv.by === me()) continue;
+        const real = matchMove(mv.move);
+        if (!real) { dispute(); return; }
+        applyMove(real);
+      }
+      if (st.status === 'finished' && !G.over && st.result) {
+        const r = st.result;
+        G.over = { over: true, winner: r.winner, reason: r.reason };
+        if (G.fog) refreshBoard(true);
+        renderWildInfo(); G.render(); endGame(G.over);
+        stop();
+      }
+      renderBars(); renderStatus(); renderPresence();
+    }, () => { renderPresence(true); });
+  }
+  function matchMove(m) {
+    if (!m || typeof m !== 'object') return null;
+    return G.legal.find(r => r.o === m.o && r.f === m.f && r.t === m.t && r.k === m.k && (r.promo || '') === (m.promo || '') && (r.rt || '') === (m.rt || '') && !!r.tele === !!m.tele) || null;
+  }
+  function dispute() {
+    stop();
+    toast('<span>Your opponent sent a move that doesn’t fit this board</span>', 'var(--red)');
+    call('wcc_online_finish', { game_id: game.game_id, winner: 'draw', reason: 'disputed' }).catch(() => {});
+    G.over = { over: true, winner: null, reason: 'disputed' };
+    G.render(); endGame(G.over);
+  }
+
+  /* ---------- the game itself ---------- */
+  function begin() {
+    show('game');
+    G.start({ mode: 'online', human: game.color, level: 'pro', wild: game.setup.wild, slots: game.setup.slots, fog: !!game.setup.fog });
+    startPolling();
+  }
+  /* game.js calls this after every move it applies; only the player's own moves go to the server. */
+  function moved(s, m, ns, st) {
+    if (G.mode !== 'online' || !game) return;
+    if (s.turn !== me()) {   // the opponent's move, already on the server: just report a finish our engine sees
+      if (st.over) { call('wcc_online_finish', { game_id: game.game_id, winner: st.winner || 'draw', reason: st.reason }).catch(() => {}); stop(); }
+      return;
+    }
+    const move = { o: m.o, f: m.f, t: m.t, k: m.k };
+    if (m.promo) move.promo = m.promo;
+    if (m.rt) move.rt = m.rt;
+    if (m.tele) move.tele = 1;
+    call('wcc_online_move', { game_id: game.game_id, ply: G.hist.length - 2, move, next_turn: ns.turn }).then(() => {
+      if (st.over) {
+        const winner = st.winner || 'draw';
+        call('wcc_online_finish', { game_id: game.game_id, winner, reason: st.reason }).catch(() => {});
+        stop();
+      }
+    }, e => toast(`<span>${e.code === 'wcc_out_of_sync' ? 'Out of sync with the server. Reload the game from the Online screen.' : 'That move didn’t reach Warden Chat. Check your connection.'}</span>`, 'var(--red)'));
+  }
+  function resign() {
+    if (!game) return Promise.resolve();
+    stop();
+    return call('wcc_online_resign', { game_id: game.game_id }).catch(() => {});
+  }
+  function claim() {
+    call('wcc_online_claim', { game_id: game.game_id }).then(st => { game = Object.assign({}, game, st); poll(); },
+      e => toast(`<span>${e.code === 'wcc_opponent_here' ? 'Your opponent is still here.' : esc(err(e))}</span>`, 'var(--gold)'));
+  }
+  function renderPresence(lost) {
+    const el = q('#onlinePresence');
+    if (!el) return;
+    if (G.mode !== 'online' || G.over || !game) { el.hidden = true; return; }
+    const away = game.opponent_seen;
+    el.hidden = !(lost || away > 20);
+    el.innerHTML = lost ? 'Can’t reach Warden Chat. Retrying…'
+      : away > 120 ? `${esc(oppName())} has been gone for ${Math.round(away / 60)} min. <button type="button" class="btn small" data-ol="claim"><span>Claim the win</span></button>`
+        : `${esc(oppName())} seems to have lost connection…`;
+  }
+  const oppName = () => (them() ? them().username : 'Your opponent');
+
+  function init() {
+    document.addEventListener('click', e => {
+      const t = e.target.closest('[data-ol], #olCount button, #olFog button');
+      if (!t) return;
+      if (t.closest('#olCount')) { count = +t.dataset.v; render(); return; }
+      if (t.closest('#olFog')) { fog = t.dataset.v === '1'; render(); return; }
+      const a = t.dataset.ol;
+      if (a === 'create') create();
+      else if (a === 'cancel') cancel();
+      else if (a === 'claim') claim();
+      else if (a === 'copy') {
+        const code = game && game.code;
+        if (navigator.clipboard) navigator.clipboard.writeText(code).then(() => toast('<span>Code copied</span>', 'var(--gold)'), () => selectCode());
+        else selectCode();
+      }
+    });
+    document.addEventListener('submit', e => { if (e.target.id === 'olJoin') { e.preventDefault(); join(q('#olCodeIn').value); } });
+    Account.on(() => { if (current === 'online') render(); });
+  }
+  function selectCode() { const el = q('#olCode'); if (!el) return; const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+  /* Leaving the game screen for good. */
+  function leave() { stop(); game = null; }
+  return { init, render, moved, resign, leave, oppName, oppMember: () => !!(them() && them().member), renderPresence, get active() { return !!game; } };
+})();
+
 /* Wildcard Chess: screens, the deal, games against the computer or a friend (pass & play), the Codex. */
 'use strict';
 
@@ -3477,7 +3862,7 @@ const LEVELS = {
 };
 
 const settings = { mode: 'ai', level: store.get('level', 'medium'), color: store.get('color', 'w'), count: store.get('count', 1),
-  privacy: store.get('privacy', true), autoflip: store.get('autoflip', true), deal: store.get('deal', 'classic') };
+  privacy: store.get('privacy', true), autoflip: store.get('autoflip', true), deal: store.get('deal', 'classic'), fog: store.get('fog', false) };
 if (!LEVELS[settings.level]) settings.level = 'medium';
 Sound.on = store.get('sound', true);
 const discovered = new Set(store.get('codex', []));
@@ -3492,6 +3877,7 @@ function show(id) {
   Embers.toggle(id !== 'game');
   if (id === 'codex') renderCodex();
   if (id === 'shop') Shop.render();
+  if (id === 'online') Online.render();
   if (id === 'game') requestAnimationFrame(() => G.board && G.board.resize());
   if (id !== 'game' && id !== 'draft' && id !== 'pick') { $('#curtain').hidden = true; curtainCb = null; }
   if (id !== 'pick') PD.token++;
@@ -3580,6 +3966,16 @@ function toast(html, acc) {
 function modal(html) { $('#modalCard').innerHTML = html; $('#modal').hidden = false; }
 function closeModal() { $('#modal').hidden = true; }
 
+/* ---------- rarity: legendary wildcards turn up about once in every 20 wildcards dealt ---------- */
+const LEGEND_RATE = 0.05;
+const LEGENDS = WILD_IDS.filter(t => WILD[t].legendary), COMMONS = WILD_IDS.filter(t => !WILD[t].legendary);
+/* n distinct wildcards, each one legendary with probability LEGEND_RATE. */
+function rollWilds(n) {
+  const commons = shuffle(COMMONS.slice()), legends = shuffle(LEGENDS.slice()), out = [];
+  while (out.length < n) out.push(Math.random() < LEGEND_RATE && legends.length ? legends.pop() : commons.pop());
+  return out;
+}
+
 /* ---------- setup screen ---------- */
 let syncSetup = () => {};
 function initSetup() {
@@ -3599,6 +3995,8 @@ function initSetup() {
       ? 'Draft: pick one card from each of 8 pairs; the cards you skip go to your opponent. Armies are built entirely from the draft, kings included.'
       : 'Classic: the normal army, with random wildcards taking the place of some of your pieces.';
     store.set('deal', settings.deal);
+    for (const b of $$('#segFog button')) b.classList.toggle('on', !!+b.dataset.v === settings.fog);
+    store.set('fog', settings.fog);
     $('#setupTitle').textContent = settings.mode === 'local' ? 'Pass & Play' : 'Pick your opponent';
     store.set('level', settings.level); store.set('color', settings.color); store.set('count', settings.count);
     store.set('privacy', settings.privacy); store.set('autoflip', settings.autoflip);
@@ -3607,10 +4005,13 @@ function initSetup() {
   $('#localIntro .duel').innerHTML = `<div class="duel-p">${pieceSVG('K', 'w')}</div><span>vs</span><div class="duel-p">${pieceSVG('K', 'b')}</div>`;
   for (const b of $$('#segMode button')) b.addEventListener('click', () => { settings.mode = b.dataset.v; sync(); });
   for (const b of $$('#segDeal button')) b.addEventListener('click', () => { settings.deal = b.dataset.v; sync(); });
+  for (const b of $$('#segFog button')) b.addEventListener('click', () => { settings.fog = !!+b.dataset.v; sync(); });
   for (const b of $$('#segPrivacy button')) b.addEventListener('click', () => { settings.privacy = !!+b.dataset.v; sync(); });
   for (const b of $$('#segFlip button')) b.addEventListener('click', () => { settings.autoflip = !!+b.dataset.v; sync(); });
   for (const b of $$('[data-mode]')) b.addEventListener('click', () => {
-    Sound.init(); settings.mode = b.dataset.mode; if (b.dataset.deal) settings.deal = b.dataset.deal; sync(); show('setup');
+    Sound.init(); settings.mode = b.dataset.mode; if (b.dataset.deal) settings.deal = b.dataset.deal;
+    if (b.dataset.fog) settings.fog = b.dataset.fog === '1';
+    sync(); show('setup');
   });
   for (const d of $$('.diff')) d.addEventListener('click', () => { settings.level = d.dataset.level; Sound.init(); Sound.play('select'); sync(); });
   for (const b of $$('#segColor button')) b.addEventListener('click', () => { settings.color = b.dataset.v; sync(); });
@@ -3629,7 +4030,7 @@ function deal() {
   Draft.mode = settings.mode;
   Draft.human = local ? 'w' : settings.color === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : settings.color;
   const nOf = c => n + (!local && settings.level === 'xtreme' && c !== Draft.human ? 1 : 0);
-  const pool = shuffle(WILD_IDS.slice());
+  const pool = rollWilds(24);
   Draft.wild = { w: pool.splice(0, nOf('w')), b: pool.splice(0, nOf('b')) };
   Draft.slots = { w: E.pickSlots('w', Draft.wild.w.length), b: E.pickSlots('b', Draft.wild.b.length) };
   Draft.pool = pool;
@@ -3646,9 +4047,9 @@ function slotText(c, q, own) {
 }
 function cardHTML(t, secret, color, q) {
   const w = WILD[t];
-  return `<div class="card ${secret ? 'secret' : ''}" style="--acc:${w.accent}"><div class="card-in">
+  return `<div class="card ${secret ? 'secret' : ''} ${w.legendary ? 'legendary' : ''}" style="--acc:${w.accent}"><div class="card-in">
     <div class="card-face"><div class="card-art">${pieceSVG(t, color)}${secret ? '<span class="q-mark">?</span>' : ''}</div>
-      <div class="card-name">${w.name}</div>
+      <div class="card-name">${w.name}${w.legendary ? ' <span class="legend-tag">Legendary</span>' : ''}</div>
       <div class="card-moves">${secret ? 'Ability unknown' : esc(w.moves)}</div>
       ${q == null ? '' : `<div class="card-slot">${slotText(color, q, !secret)}</div>`}
       <div class="card-desc">${secret ? 'Its rules stay hidden until the game is over. Watch what it does.' : w.desc}</div></div>
@@ -3689,7 +4090,7 @@ $('#startBtn').addEventListener('click', () => {
     return;
   }
   const cfg = { mode: Draft.mode, wild: { w: Draft.wild.w.slice(), b: Draft.wild.b.slice() }, slots: Draft.slots, human: Draft.human, level: settings.level,
-    privacy: settings.privacy, autoflip: settings.autoflip };
+    privacy: settings.privacy, autoflip: settings.autoflip, fog: settings.fog };
   if (Draft.mode === 'ai') Draft.wild[Draft.human].forEach(discover);
   show('game');
   G.start(cfg);
@@ -3719,7 +4120,7 @@ $('#curtainBtn').addEventListener('click', () => {
 const DRAFT_STD = ['P', 'P', 'P', 'P', 'P', 'P', 'N', 'N', 'B', 'B', 'R', 'R', 'Q'];
 const PD = { pairs: [], order: [], i: 0, army: { w: [], b: [] }, gift: { w: [], b: [] }, shown: new Set(), revealTimer: 0, known: { w: new Set(), b: new Set() }, mode: 'ai', human: 'w', viewer: 'w', busy: false, token: 0 };
 function makePairs() {
-  const wilds = shuffle(WILD_IDS.slice());
+  const wilds = rollWilds(32);
   let wi = 0;
   const WILD_RATE = 0.2; // share of draft cards that are wildcards; the rest are regular pieces
   const card = () => (Math.random() < WILD_RATE ? wilds[wi++ % wilds.length] : DRAFT_STD[Math.floor(Math.random() * DRAFT_STD.length)]);
@@ -3892,7 +4293,7 @@ function finishDraft() {
   setTimeout(() => {
     if (token !== PD.token) return;
     show('game');
-    G.start({ mode: PD.mode, human: PD.human, level: settings.level, wild, state, known, privacy: settings.privacy, autoflip: settings.autoflip,
+    G.start({ mode: PD.mode, human: PD.human, level: settings.level, wild, state, known, privacy: settings.privacy, autoflip: settings.autoflip, fog: settings.fog,
       reveal: true, viewer: v });
   }, 900);
 }
@@ -3941,7 +4342,7 @@ function faceDownAt(q) { const el = G.board.elAt(q); return !!(el && el.classLis
 function hideArrangeBar() { $('#arrangeBar').hidden = true; }
 function startDrafted() {
   hideArrangeBar();
-  G.hist = [{ s: G.s }]; G.legal = E.legalMoves(G.s);
+  G.hist = [{ s: G.s }]; G.legal = rulesMoves(G.s);
   if (G.mode === 'local') {
     if (G.privacy) { handTo(G.s.turn, afterIntro, true); return; }
     G.view = G.s.turn; if (G.autoflip) G.board.setFlip(G.s.turn === 'b');
@@ -3959,8 +4360,11 @@ const G = {
   legal: [], sel: -1, selMoves: [], busy: false, over: null, token: 0, hover: -1,
   start(cfg) {
     this.token++;
-    this.mode = cfg.mode || 'ai'; this.privacy = cfg.privacy !== false; this.autoflip = cfg.autoflip !== false;
-    this.human = cfg.human; this.ai = this.mode === 'ai' ? opp(cfg.human) : null; this.level = cfg.level; this.wild = cfg.wild;
+    this.mode = cfg.mode || 'ai'; this.autoflip = cfg.autoflip !== false;
+    this.fog = !!cfg.fog; this.shown = null;
+    this.privacy = cfg.privacy !== false || (this.fog && this.mode === 'local');   // fog needs the privacy screen
+    this.board.setFog(null);
+    this.human = cfg.human; this.ai = this.mode === 'local' ? null : opp(cfg.human); this.level = cfg.level; this.wild = cfg.wild;
     const fresh = !cfg.state;
     this.s = cfg.state || E.newGame({ wild: cfg.wild, slots: cfg.slots });
     this.hist = cfg.hist || [{ s: this.s }];
@@ -3970,10 +4374,10 @@ const G = {
     this.view = this.mode === 'local' ? (cfg.viewer || this.s.turn) : this.human;
     this.revealing = !!cfg.reveal;
     this.board.setFlip(this.mode === 'local' ? (this.autoflip && this.view === 'b') : this.human === 'b');
-    this.legal = E.legalMoves(this.s);
+    this.legal = rulesMoves(this.s);
     const lv = LEVELS[this.level];
-    $('#game').style.setProperty('--lv', this.mode === 'local' ? 'var(--gold)' : lv.color);
-    $('#modeChip').textContent = this.mode === 'local' ? 'Pass & Play · 2 players' : `vs ${lv.name} · ${lv.who}`;
+    $('#game').style.setProperty('--lv', this.mode === 'local' ? 'var(--gold)' : this.mode === 'online' ? 'var(--lv-easy)' : lv.color);
+    $('#modeChip').textContent = (this.mode === 'local' ? 'Pass & Play · 2 players' : this.mode === 'online' ? 'Online · vs a friend' : `vs ${lv.name} · ${lv.who}`) + (this.fog ? ' · Fog Mode' : '');
     if (cfg.reveal) {
       this.board.clear();
       this.board.setPieces(this.s, { anim: false });
@@ -3992,7 +4396,7 @@ const G = {
   render() {
     renderBars(); renderStatus(); renderMarks();
     renderWildInfo();
-    const canUndo = this.mode === 'local' ? !this.over && this.hist.length > 1
+    const canUndo = this.mode === 'online' ? false : this.mode === 'local' ? !this.over && this.hist.length > 1
       : this.level !== 'xtreme' && !this.over && this.hist.some((h, i) => i > 0 && this.hist[i - 1].s.turn === this.human);
     $('#undoBtn').disabled = !canUndo || this.intro || this.passing;
     $('#undoBtn').title = this.mode === 'ai' && this.level === 'xtreme' ? 'No take-backs in Xtreme' : '';
@@ -4035,13 +4439,14 @@ function runIntro(slots) {
   }, 650 + i * 420));
   setTimeout(() => {
     if (token !== G.token) return;
-    G.board.setPieces(G.s, { anim: true, frozen: frozenSquares(G.s) });
+    refreshBoard(true);
     toast(`${pieceSVG('K', G.s.turn)}<span>Wildcards in. ${G.mode === 'local' ? sideName(G.s.turn) + ' to move' : 'Your move'}</span>`, 'var(--gold)');
     afterIntro();
   }, 650 + list.length * 420 + 250);
 }
 function afterIntro() {
   G.intro = false;
+  if (G.fog) { refreshBoard(true); G.board.root.classList.add('fog-roll'); setTimeout(() => G.board.root.classList.remove('fog-roll'), 1400); renderLog(); }
   G.startedAt = Date.now();
   G.render();
   if (G.mode === 'ai' && G.s.turn === G.ai) aiTurn();
@@ -4054,6 +4459,7 @@ function handTo(c, cb, first) {
     : `Hand the device to ${sideName(c)}. ${other}, no peeking at the board.`, `I'm ${sideName(c)}. Show the board`, () => {
     G.view = c;
     if (G.autoflip) G.board.setFlip(c === 'b');
+    if (G.fog) { refreshBoard(false); renderLog(); }
     G.render();
     if (cb) cb();
   });
@@ -4085,13 +4491,14 @@ function renderBars() {
     const diff = Math.round((material(G.s, c) - material(G.s, opp(c))) / 100);
     const chips = G.revealing ? '' : (G.wild[c] || []).map(t => `<button class="chip" data-wild="${t}" data-c="${c}" aria-label="${WILD[t].name}">${pieceSVG(t, c)}${knowsType(c, t) ? '' : '<span class="qm">?</span>'}</button>`).join('');
     el.classList.toggle('turn', !G.over && G.s.turn === c);
-    const name = local ? sideName(c) : human ? 'You' : lv.name + ' AI';
-    const sub = local ? (c === 'w' ? 'Player 1' : 'Player 2') + (!G.over && G.s.turn === c ? ' · to move' : '') : sideName(c) + (human ? '' : ` · <span class="lvl">${lv.who}</span>`);
-    el.innerHTML = `<div class="avatar">${pieceSVG(human ? 'K' : lv.icon, c)}</div>
-      <div class="pname"><b>${name}${!human && G.busy ? '<span class="thinking"><i></i><i></i><i></i></span>' : ''}</b>
+    const online = G.mode === 'online';
+    const name = local ? sideName(c) : human ? 'You' : online ? esc(Online.oppName()) + (Online.oppMember() ? SIRSC_BADGE_SVG : '') : lv.name + ' AI';
+    const sub = local ? (c === 'w' ? 'Player 1' : 'Player 2') + (!G.over && G.s.turn === c ? ' · to move' : '') : sideName(c) + (human ? '' : online ? ' · <span class="lvl">Online</span>' : ` · <span class="lvl">${lv.who}</span>`);
+    el.innerHTML = `<div class="avatar">${pieceSVG(human || online ? 'K' : lv.icon, c)}</div>
+      <div class="pname"><b>${name}${!human && (G.busy || (online && !G.over && G.s.turn === c && !G.intro)) ? '<span class="thinking"><i></i><i></i><i></i></span>' : ''}</b>
       <span>${sub}</span></div>
       <div class="chips">${chips}</div>
-      <div class="capt">${lost.map(t => pieceSVG(t, opp(c))).join('')}${diff > 0 && !G.revealing ? `<span class="adv">+${diff}</span>` : ''}</div>`;
+      <div class="capt">${lost.map(t => pieceSVG(t, opp(c))).join('')}${diff > 0 && !G.revealing && !fogOn() ? `<span class="adv">+${diff}</span>` : ''}</div>`;
   }
 }
 
@@ -4103,14 +4510,14 @@ function renderStatus() {
     else if (G.revealing) t = 'The reveal';
     else if (G.intro) t = 'Dealing the wildcards…';
     else if (G.passing) t = `Passing to ${sideName(c)}…`;
-    else t = E.inCheck(G.s, c) ? `Check by the ${checkText(G.s, c)}! ${n} to move` : G.s.extra ? `Extra turn! ${n} again` : `${n} to move`;
+    else t = !G.fog && E.inCheck(G.s, c) ? `Check by the ${checkText(G.s, c)}! ${n} to move` : G.s.extra ? `Extra turn! ${n} again` : `${n} to move`;
     $('#status').textContent = t;
     return;
   }
   if (G.over) t = G.over.winner === G.human ? 'You won' : G.over.winner ? 'You lost' : 'Draw';
   else if (G.revealing) t = 'The reveal';
   else if (G.intro) t = 'Dealing the wildcards…';
-  else if (G.s.turn === G.human) t = E.inCheck(G.s, G.human) ? `Check by the ${checkText(G.s, G.human)}!` : (G.s.extra ? 'Extra turn!' : 'Your move');
+  else if (G.s.turn === G.human) t = !G.fog && E.inCheck(G.s, G.human) ? `Check by the ${checkText(G.s, G.human)}!` : (G.s.extra ? 'Extra turn!' : 'Your move');
   else t = G.busy ? 'Thinking…' : 'Their move';
   $('#status').textContent = t;
 }
@@ -4131,7 +4538,11 @@ function renderWildInfo() {
 
 function renderLog() {
   const ol = $('#log');
-  ol.innerHTML = G.log.map((e, i) => `<li class="${e.special ? 'special' : ''} ${i === G.log.length - 1 ? 'last' : ''}"><span class="n">${e.n}${e.c === 'w' ? '.' : '…'}</span>${pieceSVG(e.t, e.c)}<span class="t">${e.text}</span></li>`).join('');
+  const v = viewerSide();
+  ol.innerHTML = G.log.map((e, i) => {
+    const hid = fogOn() && e.fogFor && e.fogFor[v];
+    return `<li class="${e.special && !hid ? 'special' : ''} ${hid ? 'fogged' : ''} ${i === G.log.length - 1 ? 'last' : ''}"><span class="n">${e.n}${e.c === 'w' ? '.' : '…'}</span>${hid ? '<span class="fog-ico" aria-hidden="true">?</span>' : pieceSVG(e.t, e.c)}<span class="t">${hid || e.text}</span></li>`;
+  }).join('');
   const sc = ol.closest('.side-scroll');
   if (sc && getComputedStyle(sc).overflowY === 'auto') sc.scrollTop = sc.scrollHeight;
 }
@@ -4140,9 +4551,10 @@ function kingSq(s, c) { return E.findKing(s, c); }
 
 function renderMarks() {
   const s = G.s, last = s.last;
-  const o = { last: last ? [last.o, last.t] : null, sel: G.sel, check: -1, marks: [], xprev: null, hover: -1 };
+  const lv = fogOn() && G.shown && G.shown.vis;
+  const o = { last: last ? [last.o, last.t].filter(q => !lv || lv.has(q)) : null, sel: G.sel, check: -1, marks: [], xprev: null, hover: -1 };
   const k = kingSq(s, s.turn);
-  if (k >= 0 && (!G.over || G.over.reason === 'mate') && E.inCheck(s, s.turn)) {
+  if (k >= 0 && !G.fog && (!G.over || G.over.reason === 'mate') && E.inCheck(s, s.turn)) {
     o.check = k; o.checkers = E.checkers(s, s.turn); o.arrows = o.checkers.map(q => [q, k]);
   }
   if (G.sel >= 0) {
@@ -4166,7 +4578,7 @@ function renderMarks() {
 
 function select(q) {
   G.sel = q;
-  G.selMoves = G.legal.filter(m => m.o === q);
+  G.selMoves = (fogOn() ? E.fogMoves(G.shown || G.s) : G.legal).filter(m => m.o === q);
   if (q >= 0) Sound.play('select');
   renderMarks();
 }
@@ -4174,6 +4586,7 @@ function select(q) {
 const LABEL = {
   boom: 'Detonate', shoot: 'Shoot', strike: 'Strike', swap: 'Swap places', gust: 'Blow a gust', crush: 'Charge',
   charm: 'Charm it', spawn: 'Lay a pawn', wall: 'Raise a wall', hex: 'Hex into a pawn', launch: 'Fling', jump: 'Jump', castle: 'Castle', ep: 'En passant',
+  burn: 'Breathe fire', devour: 'Land and devour', bolt: 'Hurl lightning',
   zap: 'Discharge', march: 'Beat the march', split: 'Split in two', infect: 'Bite it', stone: 'Petrify it',
 };
 function moveLabel(m, s) {
@@ -4201,6 +4614,16 @@ function tryMove(ms, x, y) {
 function humanMove(m) {
   if (!canAct()) return;
   hideTip();
+  if (fogOn()) {
+    const r = realMove(m);
+    if (!r) {
+      G.board.burstAt(m.t, { n: 18, color: ['#8a93a6', '#c9cfdb'], kind: 'smoke', speed: 0.6, size: 0.12, life: 40 });
+      G.board.shake(false); Sound.play('stone');
+      toast('<span>Something in the fog blocks that move</span>', '#8a93a6');
+      return;
+    }
+    m = r;
+  }
   G.sel = -1; G.selMoves = []; G.hover = -1;
   applyMove(m);
 }
@@ -4214,7 +4637,7 @@ function initBoardInput() {
     Sound.init(); hideChooser(); hideTip(); clearTimeout(hoverTimer);
     const q = G.board.sqAt(e.clientX, e.clientY);
     if (q < 0) return;
-    const p = G.s.b[q];
+    const p = shownAt(q);
     const myTurn = canAct();
     if (myTurn && G.sel >= 0 && q !== G.sel) {
       const ms = G.selMoves.filter(m => m.t === q && m.t !== m.o);
@@ -4243,7 +4666,7 @@ function initBoardInput() {
     if (G.sel >= 0 && q !== G.hover) { G.hover = q; renderMarks(); }
     if (!drag && e.pointerType === 'mouse' && q !== hoverSq) {
       hoverSq = q; hideTip(); clearTimeout(hoverTimer);
-      const p = q >= 0 ? G.s.b[q] : null;
+      const p = q >= 0 ? shownAt(q) : null;
       if (p && G.sel < 0 && !faceDownAt(q)) { const x = e.clientX, y = e.clientY; hoverTimer = setTimeout(() => showTip(tipHTML(p, knowsType(p.c, p.t)), x, y), 420); }
     }
   });
@@ -4276,6 +4699,7 @@ function initBoardInput() {
 const VERB = {
   boom: 'detonates!', shoot: 'fires!', strike: 'strikes and vanishes', swap: 'swaps places', raise: 'raises the dead', gust: 'blows a gale',
   crush: 'tramples through', charm: 'charms a piece', spawn: 'lays a pawn', wall: 'raises a wall', hex: 'casts a hex', launch: 'flings a piece', jump: 'jumps',
+  burn: 'breathes fire!', devour: 'devours everything nearby', bolt: 'hurls lightning!',
   pull: 'drags them in', zap: 'discharges!', march: 'beats the march', split: 'splits in two', infect: 'bites!', stone: 'turns a piece to stone', transmute: 'transmutes a pawn', swapE: 'trades places with an enemy',
 };
 
@@ -4306,6 +4730,9 @@ function moveText(s, m, ns) {
     case 'infect': t = `bites the ${pieceName(tgt.t)} on ${code(m.t)}, turning it into a pawn`; break;
     case 'stone': t = `turns the ${pieceName(tgt.t)} on ${code(m.t)} to stone`; break;
     case 'transmute': t = `transmutes the pawn on ${code(m.t)} into a ${pieceName(m.rt)}`; break;
+    case 'burn': t = `${code(m.f)}×${code(m.t)}, burning ${m.x.length - 1} more`; break;
+    case 'devour': t = `${code(m.f)}–${code(m.t)}, devouring ${m.x.length - (s.b[m.t] ? 1 : 0)}`; break;
+    case 'bolt': t = `hurls lightning at ${code(m.t)}`; break;
     default: t = `${code(m.f)}–${code(m.t)}`;
   }
   for (const e of ns.events || []) {
@@ -4316,13 +4743,37 @@ function moveText(s, m, ns) {
     if (e.k === 'echo') t += '. An echo pawn stays behind';
     if (e.k === 'morph') t += `. It becomes a ${pieceName(ns.b[e.q].t)}`;
   }
-  if (!ns.dead && E.inCheck(ns, ns.turn)) t += ' +';
+  if (!ns.dead && !G.fog && E.inCheck(ns, ns.turn)) t += ' +';
   return t;
 }
 
 const CHIPS = { w: ['#ffffff', '#e8e6e2', '#cfccc7'], b: ['#6d6b68', '#4b4946', '#2a2826'] };
 
+function fogProxy(b, V, seen, existedBefore) {
+  return {
+    root: b.root,
+    burstAt: (q, o) => V(q) && b.burstAt(q, o),
+    ringAt: (q, ...a) => V(q) && b.ringAt(q, ...a),
+    beam: (q1, q2, ...a) => (V(q1) || V(q2)) && b.beam(q1, q2, ...a),
+    shake: big => seen && b.shake(big),
+    flash: c => seen && b.flash(c),
+    setPieces(st, o) {
+      G.shown = viewState(st);
+      b.setPieces(G.shown, { ...o, frozen: frozenSquares(G.shown), existed: existedBefore, alive: new Set(st.b.filter(Boolean).map(p => p.id)) });
+      b.setFog(G.shown.vis);
+    },
+  };
+}
 function playEffects(board, s, m, ns, quiet) {
+  // In Fog Mode the viewer only sees effects on squares they can see, before or after the move.
+  const fogged = board === G.board && fogOn();
+  let V = () => true, seenAct = true;
+  if (fogged) {
+    const v = viewerSide(), b1 = E.visibleSquares(s, v), b2 = E.visibleSquares(ns, v);
+    V = q => b1.has(q) || b2.has(q);
+    seenAct = V(m.o) || V(m.t);
+    board = fogProxy(board, V, seenAct, new Set(s.b.filter(Boolean).map(p => p.id)));
+  }
   const actor = s.b[m.o], mover = s.b[m.f];
   const aw = actor && WILD[actor.t], acc = aw ? aw.accent : '#ffd98e';
   const before = new Map(), after = new Set();
@@ -4342,6 +4793,18 @@ function playEffects(board, s, m, ns, quiet) {
     }
     case 'shoot': board.beam(m.o, m.t, acc, 16); snd = 'zap'; msg = 'shoot'; break;
     case 'strike': board.beam(m.o, m.t, '#ff2d55', 12); board.burstAt(m.t, { n: 16, color: ['#ff2d55', '#fff'], kind: 'spark', speed: 1.4 }); snd = 'whoosh'; msg = 'strike'; break;
+    case 'burn':
+      board.beam(m.f, m.t, '#ff6a1a', 16);
+      for (const q of m.x) board.burstAt(q, { n: 30, color: ['#fff3b0', '#ffb347', '#ff6a1a', '#ff3b1a'], kind: 'spark', speed: 1.4, gravity: -0.06, life: 50 });
+      snd = 'boom'; shake = 1; msg = 'burn'; break;
+    case 'devour':
+      board.ringAt(m.t, '#b26bff', 1.6, 12, 34); board.ringAt(m.t, '#ffb347', 1, 6, 24);
+      for (const q of m.x) board.burstAt(q, { n: 26, color: ['#b26bff', '#2a1840', '#ffb347'], kind: 'spark', speed: 0.9, gravity: 0, drag: 0.82 });
+      snd = 'zap'; shake = 2; msg = 'devour'; break;
+    case 'bolt':
+      board.beam(m.o, m.t, '#ffe14d', 22); board.beam(m.o, m.t, '#ffffff', 10);
+      board.burstAt(m.t, { n: 40, color: ['#ffe14d', '#ffffff', '#7df9ff'], kind: 'spark', speed: 2, gravity: 0.02, life: 40 });
+      board.flash('gold'); snd = 'zap'; shake = 1; msg = 'bolt'; break;
     case 'swap': board.ringAt(m.o, acc, 0.8); board.ringAt(m.t, acc, 0.8); snd = 'magic'; msg = s.b[m.t] && s.b[m.t].c !== actor.c ? 'swapE' : 'swap'; break;
     case 'raise': board.burstAt(m.t, { n: 30, color: ['#6dff8a', '#2f7d45', '#b8ffc6'], kind: 'smoke', speed: 0.6, size: 0.12, life: 60, gravity: -0.04 }); snd = 'magic'; msg = 'raise'; break;
     case 'gust':
@@ -4388,11 +4851,11 @@ function playEffects(board, s, m, ns, quiet) {
     if (e.k === 'crumble') board.burstAt(e.q, { n: 16, color: ['#8d8476', '#b3aa9b'], kind: 'chip', speed: 0.8, size: 0.06 });
   }
   board.setPieces(ns, { anim: true, instant, fly, frozen: frozenSquares(ns) });
-  if (shake) board.shake(shake > 1);
+  if (shake && seenAct) board.shake(shake > 1);
   if (quiet) return;
   Sound.play(snd);
-  if (evMsg) toast(`${pieceSVG(evMsg[0], 'w')}<span>${evMsg[1]}</span>`, WILD[evMsg[0]].accent);
-  else if (msg && aw) toast(`${pieceSVG(actor.t, actor.c)}<span>${aw.name} ${msg === 'tele' ? 'teleports' : VERB[msg]}</span>`, acc);
+  if (evMsg && seenAct) toast(`${pieceSVG(evMsg[0], 'w')}<span>${evMsg[1]}</span>`, WILD[evMsg[0]].accent);
+  else if (msg && aw && seenAct) toast(`${pieceSVG(actor.t, actor.c)}<span>${aw.name} ${msg === 'tele' ? 'teleports' : VERB[msg]}</span>`, acc);
 }
 
 /* Who is giving check, as words: 'Rook on e8' or 'Bomber on d5 and Knight on f3'. */
@@ -4479,23 +4942,66 @@ const FINALE_EXTRAS = {
 
 function posKey(s) { return s.b.map(p => (p ? p.t + p.c : '.')).join(',') + s.turn; }
 
+/* ---------- Fog Mode ---------- */
+// The rules: normal chess (check, checkmate) or Fog Mode's (no check; capture the king to win).
+function rulesMoves(s) { return G.fog ? E.fogMoves(s) : E.legalMoves(s); }
+function rulesStatus(s, legal) {
+  if (!G.fog) return E.status(s, legal);
+  if (s.dead) return { over: true, winner: opp(s.dead), reason: 'king' };
+  if (!legal.length) return { over: true, winner: null, reason: 'stalemate' };
+  if (s.half >= 100) return { over: true, winner: null, reason: 'fifty' };
+  return { over: false };
+}
+const fogOn = () => !!G.fog && !G.over;
+/* The position as the viewer sees it: enemy pieces (and walls) outside their sight are gone. */
+function viewState(s, who) {
+  if (!fogOn()) return s;
+  const v = who || viewerSide(), vis = E.visibleSquares(s, v);
+  return { ...s, b: s.b.map((p, q) => (p && p.c !== v && !vis.has(q) ? null : p)), vis };
+}
+const shownAt = q => (G.shown || G.s).b[q];
+/* Draw the board for whoever is looking: their fog, their pieces. */
+function refreshBoard(anim) {
+  const ids = new Set(G.s.b.filter(Boolean).map(p => p.id));
+  G.shown = viewState(G.s);
+  G.board.setPieces(G.shown, { anim, frozen: frozenSquares(G.shown), existed: ids, alive: ids });
+  G.board.setFog(fogOn() ? G.shown.vis : null);
+}
+/* A move picked from what the viewer can see, matched to what is really on the board. */
+function realMove(m) {
+  const same = r => r.o === m.o && r.f === m.f && r.t === m.t && (r.promo || '') === (m.promo || '') && (r.rt || '') === (m.rt || '') && !!r.tele === !!m.tele;
+  return G.legal.find(r => same(r) && r.k === m.k) || G.legal.find(same) || null;
+}
+
 function applyMove(m) {
   const s = G.s, ns = E.makeMove(s, m), actor = s.b[m.o];
   G.s = ns;
   G.log.push({ n: Math.floor(s.ply / 2) + 1, c: s.turn, t: actor.t, text: moveText(s, m, ns), special: m.k !== 'n' && m.k !== 'castle' || !!m.tele || !!(ns.events && ns.events.length) });
   G.hist.push({ s: ns });
+  if (G.fog) {
+    const e = G.log[G.log.length - 1];
+    e.fogFor = {};
+    for (const c of ['w', 'b']) {
+      if (c === s.turn || E.visibleSquares(s, c).has(m.o) || E.visibleSquares(ns, c).has(m.t)) continue;
+      const lost = s.b.filter(p => p && p.c === c && !ns.b.some(x => x && x.id === p.id)).map(p => pieceName(p.t));
+      e.fogFor[c] = lost.length ? `captured your ${lost.join(' and ')} from the fog` : 'moved somewhere in the fog';
+    }
+  }
   playEffects(G.board, s, m, ns);
-  G.legal = E.legalMoves(ns);
-  let st = E.status(ns, G.legal);
+  G.legal = rulesMoves(ns);
+  let st = rulesStatus(ns, G.legal);
   if (!st.over) {
     const k = posKey(ns);
     if (G.hist.filter(h => posKey(h.s) === k).length >= 3) st = { over: true, winner: null, reason: 'repetition' };
   }
-  const check = !st.over && E.inCheck(ns, ns.turn);
+  if (G.mode === 'online') Online.moved(s, m, ns, st);
+  const check = !st.over && !G.fog && E.inCheck(ns, ns.turn);
   if (st.over && st.reason === 'mate') { const l = G.log[G.log.length - 1]; l.text = l.text.replace(/ \+$/, '') + ' #'; }
   renderLog();
   if (st.over) {
-    G.over = st; renderWildInfo(); G.render();
+    G.over = st;
+    if (G.fog) { refreshBoard(true); renderLog(); G.board.root.classList.add('fog-lift'); setTimeout(() => G.board.root.classList.remove('fog-lift'), 1200); }
+    renderWildInfo(); G.render();
     const tk = G.token, wait = endFX(st, s);
     setTimeout(() => { if (tk === G.token) endGame(st); }, wait);
     return;
@@ -4508,6 +5014,7 @@ function applyMove(m) {
       return;
     }
     G.view = ns.turn;
+    if (G.fog) { refreshBoard(false); renderLog(); }
     if (G.autoflip) setTimeout(() => { if (G.s === ns) { G.board.setFlip(ns.turn === 'b'); G.render(); } }, 700);
   }
   G.render();
@@ -4517,14 +5024,18 @@ function applyMove(m) {
 
 function aiTurn() {
   G.busy = true; G.render();
-  const token = ++G.token, s = G.s, t0 = performance.now();
+  const token = ++G.token, s = G.fog ? viewState(G.s, G.ai) : G.s, t0 = performance.now();
   AI.think(s, G.level).then(idx => {
     if (token !== G.token) return;
     const wait = Math.max(0, 650 - (performance.now() - t0));
     setTimeout(() => {
       if (token !== G.token) return;
       G.busy = false;
-      const m = G.legal[idx] || G.legal[0];
+      let m = G.legal[idx] || G.legal[0];
+      if (G.fog) {
+        const seen = E.legalMoves(s)[idx];
+        m = (seen && realMove(seen)) || (seen && G.legal.find(r => r.o === seen.o)) || G.legal[Math.floor(Math.random() * G.legal.length)];
+      }
       if (m) applyMove(m);
       else G.render();
     }, wait);
@@ -4538,8 +5049,8 @@ function undo() {
     G.token++;
     G.hist.pop(); G.log.pop();
     G.s = G.hist[G.hist.length - 1].s;
-    G.legal = E.legalMoves(G.s); G.sel = -1; G.selMoves = [];
-    G.board.setPieces(G.s, { anim: true, frozen: frozenSquares(G.s) });
+    G.legal = rulesMoves(G.s); G.sel = -1; G.selMoves = [];
+    refreshBoard(true);
     renderLog();
     if (G.view !== G.s.turn) { if (G.privacy) { G.render(); handTo(G.s.turn); return; } G.view = G.s.turn; if (G.autoflip) G.board.setFlip(G.view === 'b'); }
     G.render();
@@ -4553,8 +5064,8 @@ function undo() {
     if (mover === G.human && G.hist[G.hist.length - 1].s.turn === G.human) break;
   }
   G.s = G.hist[G.hist.length - 1].s;
-  G.legal = E.legalMoves(G.s); G.sel = -1; G.selMoves = [];
-  G.board.setPieces(G.s, { anim: true, frozen: frozenSquares(G.s) });
+  G.legal = rulesMoves(G.s); G.sel = -1; G.selMoves = [];
+  refreshBoard(true);
   renderLog(); G.render();
   if (G.s.turn === G.ai) aiTurn();
 }
@@ -4562,7 +5073,9 @@ function undo() {
 const REASONS = {
   mate: (w, l) => `Checkmate. ${l} has nowhere to go.`,
   king: (w, l) => `${l} was destroyed outright.`,
-  resign: (w, l) => (G.mode === 'local' ? `${l.replace(/'s king$/, '')} resigned.` : 'You resigned.'),
+  resign: (w, l) => (G.mode === 'local' ? `${l.replace(/'s king$/, '')} resigned.` : G.mode === 'online' && w === G.human ? `${esc(Online.oppName())} resigned.` : 'You resigned.'),
+  timeout: w => (w === G.human ? `${esc(Online.oppName())} left the game.` : 'You were away too long and lost the game.'),
+  disputed: () => 'A move didn\u2019t match between the two boards, so the game was stopped.',
   stalemate: () => 'Stalemate: no legal moves, but no check either.',
   fifty: () => '50 moves passed without a capture or pawn move.',
   repetition: () => 'The same position came up three times.',
@@ -4602,7 +5115,8 @@ $('#modal').addEventListener('click', e => {
   if (!b) { if (e.target.id === 'modal') closeModal(); return; }
   const a = b.dataset.act;
   closeModal();
-  if (a === 'rematch') { settings.mode = G.mode; deal(); }
+  if (a === 'rematch') { if (G.mode === 'online') { Online.leave(); show('online'); } else { settings.mode = G.mode; deal(); } }
+  else if (a === 'menu' && G.mode === 'online') { Online.leave(); show('menu'); }
   else if (a === 'menu') show('menu');
   else if (a === 'yes' && confirmCb) { const f = confirmCb; confirmCb = null; f(); }
 });
@@ -4614,12 +5128,19 @@ $('#resignBtn').addEventListener('click', () => {
   if (G.intro || G.passing || !$('#curtain').hidden) return;
   const local = G.mode === 'local', who = local ? G.s.turn : G.human;
   confirmBox(local ? `Resign as ${sideName(who)}?` : 'Resign?', local ? 'The game ends and both sides\' wildcards are revealed.' : 'The game ends and their wildcard is revealed.', 'Resign', () => {
-    G.token++; G.busy = false; G.over = { over: true, winner: opp(who), reason: 'resign' }; renderWildInfo(); G.render(); endGame(G.over);
+    G.token++; G.busy = false; G.over = { over: true, winner: opp(who), reason: 'resign' };
+    if (G.mode === 'online') Online.resign();
+    if (G.fog) refreshBoard(true);
+    renderWildInfo(); G.render(); endGame(G.over);
   });
 });
 $('#leaveBtn').addEventListener('click', () => {
   if (!$('#curtain').hidden) return;
   if (G.over || (G.hist.length < 2 && !G.intro)) { G.token++; hideArrangeBar(); show('menu'); return; }
+  if (G.mode === 'online') {
+    confirmBox('Leave the game?', 'Leaving an online game counts as resigning.', 'Resign and leave', () => { G.token++; Online.resign(); Online.leave(); show('menu'); });
+    return;
+  }
   confirmBox('Leave the game?', 'This game will be abandoned.', 'Leave', () => { G.token++; G.busy = false; G.intro = false; G.passing = false; hideArrangeBar(); show('menu'); });
 });
 document.addEventListener('click', e => {
@@ -4654,7 +5175,7 @@ const Showcase = {
   },
   stop() { clearInterval(this.timer); this.timer = 0; },
   newGame() {
-    const [a, b] = shuffle(WILD_IDS.slice());
+    const [a, b] = rollWilds(2);
     this.s = E.newGame({ wild: { w: [a], b: [b] }, slots: { w: E.pickSlots('w', 1), b: E.pickSlots('b', 1) } });
     this.board.setPieces(this.s, { anim: false });
     this.board.setMarks({});
@@ -4694,9 +5215,9 @@ function renderCodex() {
   $('#codexLede').textContent = `You've discovered ${discovered.size} of ${WILD_IDS.length} wildcards. A wildcard joins your Codex when you play with it, or when a game against it ends. The small boards show sample moves from d4: dots are moves, red rings are captures, stars are special abilities.`;
   $('#codexGrid').innerHTML = WILD_IDS.map(t => {
     const w = WILD[t], known = discovered.has(t) || spoil;
-    return `<div class="cx ${known ? '' : 'locked'}" style="--acc:${w.accent}">
+    return `<div class="cx ${known ? '' : 'locked'} ${w.legendary ? 'legendary' : ''}" style="--acc:${w.accent}">
       <div class="cx-l"><div class="cx-art">${pieceSVG(t, 'w')}</div>${known ? miniBoard(t) : ''}</div>
-      <div><h4>${w.name}</h4><div class="cx-moves">${known ? esc(w.moves) : 'Undiscovered'}</div>
+      <div><h4>${w.name}${w.legendary ? ' <span class="legend-tag">Legendary</span>' : ''}</h4><div class="cx-moves">${known ? esc(w.moves) : 'Undiscovered'}</div>
       <p>${known ? w.desc : 'Not discovered yet. Play with it or face it to learn what it does.'}</p></div></div>`;
   }).join('');
 }
@@ -4782,18 +5303,19 @@ function boot(data) {
   AI.init();
   initMenu(); initSetup();
   Shop.init();
+  Online.init();
   G.board = new BoardView($('#mainBoard'), { seed: 11 });
   initBoardInput();
   const g = data && data.game;
   if (g && g.hist && g.hist.length) {
     show('game');
-    G.start({ mode: g.mode, privacy: g.privacy, autoflip: g.autoflip, wild: g.wild, human: g.human, level: g.level, state: g.hist[g.hist.length - 1].s, hist: g.hist, log: g.log, known: g.known });
+    G.start({ mode: g.mode, privacy: g.privacy, autoflip: g.autoflip, wild: g.wild, human: g.human, level: g.level, state: g.hist[g.hist.length - 1].s, hist: g.hist, log: g.log, known: g.known, fog: g.fog });
   } else show(data && data.screen && data.screen !== 'game' && data.screen !== 'draft' ? data.screen : 'menu');
 }
 if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
   window.claude.hot.snapshot(() => ({
     screen: current,
-    game: current === 'game' && G.s && !G.over && !G.intro ? { mode: G.mode, privacy: G.privacy, autoflip: G.autoflip, wild: G.wild, human: G.human, level: G.level, hist: G.hist, log: G.log, known: G.known } : null,
+    game: current === 'game' && G.s && !G.over && !G.intro && G.mode !== 'online' ? { mode: G.mode, privacy: G.privacy, autoflip: G.autoflip, wild: G.wild, human: G.human, level: G.level, hist: G.hist, log: G.log, known: G.known, fog: G.fog } : null,
   }));
 }
 const hot = window.claude && window.claude.hot;

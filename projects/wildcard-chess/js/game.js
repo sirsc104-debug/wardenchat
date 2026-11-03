@@ -21,7 +21,7 @@ const LEVELS = {
 };
 
 const settings = { mode: 'ai', level: store.get('level', 'medium'), color: store.get('color', 'w'), count: store.get('count', 1),
-  privacy: store.get('privacy', true), autoflip: store.get('autoflip', true), deal: store.get('deal', 'classic') };
+  privacy: store.get('privacy', true), autoflip: store.get('autoflip', true), deal: store.get('deal', 'classic'), fog: store.get('fog', false) };
 if (!LEVELS[settings.level]) settings.level = 'medium';
 Sound.on = store.get('sound', true);
 const discovered = new Set(store.get('codex', []));
@@ -36,6 +36,7 @@ function show(id) {
   Embers.toggle(id !== 'game');
   if (id === 'codex') renderCodex();
   if (id === 'shop') Shop.render();
+  if (id === 'online') Online.render();
   if (id === 'game') requestAnimationFrame(() => G.board && G.board.resize());
   if (id !== 'game' && id !== 'draft' && id !== 'pick') { $('#curtain').hidden = true; curtainCb = null; }
   if (id !== 'pick') PD.token++;
@@ -124,6 +125,16 @@ function toast(html, acc) {
 function modal(html) { $('#modalCard').innerHTML = html; $('#modal').hidden = false; }
 function closeModal() { $('#modal').hidden = true; }
 
+/* ---------- rarity: legendary wildcards turn up about once in every 20 wildcards dealt ---------- */
+const LEGEND_RATE = 0.05;
+const LEGENDS = WILD_IDS.filter(t => WILD[t].legendary), COMMONS = WILD_IDS.filter(t => !WILD[t].legendary);
+/* n distinct wildcards, each one legendary with probability LEGEND_RATE. */
+function rollWilds(n) {
+  const commons = shuffle(COMMONS.slice()), legends = shuffle(LEGENDS.slice()), out = [];
+  while (out.length < n) out.push(Math.random() < LEGEND_RATE && legends.length ? legends.pop() : commons.pop());
+  return out;
+}
+
 /* ---------- setup screen ---------- */
 let syncSetup = () => {};
 function initSetup() {
@@ -143,6 +154,8 @@ function initSetup() {
       ? 'Draft: pick one card from each of 8 pairs; the cards you skip go to your opponent. Armies are built entirely from the draft, kings included.'
       : 'Classic: the normal army, with random wildcards taking the place of some of your pieces.';
     store.set('deal', settings.deal);
+    for (const b of $$('#segFog button')) b.classList.toggle('on', !!+b.dataset.v === settings.fog);
+    store.set('fog', settings.fog);
     $('#setupTitle').textContent = settings.mode === 'local' ? 'Pass & Play' : 'Pick your opponent';
     store.set('level', settings.level); store.set('color', settings.color); store.set('count', settings.count);
     store.set('privacy', settings.privacy); store.set('autoflip', settings.autoflip);
@@ -151,10 +164,13 @@ function initSetup() {
   $('#localIntro .duel').innerHTML = `<div class="duel-p">${pieceSVG('K', 'w')}</div><span>vs</span><div class="duel-p">${pieceSVG('K', 'b')}</div>`;
   for (const b of $$('#segMode button')) b.addEventListener('click', () => { settings.mode = b.dataset.v; sync(); });
   for (const b of $$('#segDeal button')) b.addEventListener('click', () => { settings.deal = b.dataset.v; sync(); });
+  for (const b of $$('#segFog button')) b.addEventListener('click', () => { settings.fog = !!+b.dataset.v; sync(); });
   for (const b of $$('#segPrivacy button')) b.addEventListener('click', () => { settings.privacy = !!+b.dataset.v; sync(); });
   for (const b of $$('#segFlip button')) b.addEventListener('click', () => { settings.autoflip = !!+b.dataset.v; sync(); });
   for (const b of $$('[data-mode]')) b.addEventListener('click', () => {
-    Sound.init(); settings.mode = b.dataset.mode; if (b.dataset.deal) settings.deal = b.dataset.deal; sync(); show('setup');
+    Sound.init(); settings.mode = b.dataset.mode; if (b.dataset.deal) settings.deal = b.dataset.deal;
+    if (b.dataset.fog) settings.fog = b.dataset.fog === '1';
+    sync(); show('setup');
   });
   for (const d of $$('.diff')) d.addEventListener('click', () => { settings.level = d.dataset.level; Sound.init(); Sound.play('select'); sync(); });
   for (const b of $$('#segColor button')) b.addEventListener('click', () => { settings.color = b.dataset.v; sync(); });
@@ -173,7 +189,7 @@ function deal() {
   Draft.mode = settings.mode;
   Draft.human = local ? 'w' : settings.color === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : settings.color;
   const nOf = c => n + (!local && settings.level === 'xtreme' && c !== Draft.human ? 1 : 0);
-  const pool = shuffle(WILD_IDS.slice());
+  const pool = rollWilds(24);
   Draft.wild = { w: pool.splice(0, nOf('w')), b: pool.splice(0, nOf('b')) };
   Draft.slots = { w: E.pickSlots('w', Draft.wild.w.length), b: E.pickSlots('b', Draft.wild.b.length) };
   Draft.pool = pool;
@@ -190,9 +206,9 @@ function slotText(c, q, own) {
 }
 function cardHTML(t, secret, color, q) {
   const w = WILD[t];
-  return `<div class="card ${secret ? 'secret' : ''}" style="--acc:${w.accent}"><div class="card-in">
+  return `<div class="card ${secret ? 'secret' : ''} ${w.legendary ? 'legendary' : ''}" style="--acc:${w.accent}"><div class="card-in">
     <div class="card-face"><div class="card-art">${pieceSVG(t, color)}${secret ? '<span class="q-mark">?</span>' : ''}</div>
-      <div class="card-name">${w.name}</div>
+      <div class="card-name">${w.name}${w.legendary ? ' <span class="legend-tag">Legendary</span>' : ''}</div>
       <div class="card-moves">${secret ? 'Ability unknown' : esc(w.moves)}</div>
       ${q == null ? '' : `<div class="card-slot">${slotText(color, q, !secret)}</div>`}
       <div class="card-desc">${secret ? 'Its rules stay hidden until the game is over. Watch what it does.' : w.desc}</div></div>
@@ -233,7 +249,7 @@ $('#startBtn').addEventListener('click', () => {
     return;
   }
   const cfg = { mode: Draft.mode, wild: { w: Draft.wild.w.slice(), b: Draft.wild.b.slice() }, slots: Draft.slots, human: Draft.human, level: settings.level,
-    privacy: settings.privacy, autoflip: settings.autoflip };
+    privacy: settings.privacy, autoflip: settings.autoflip, fog: settings.fog };
   if (Draft.mode === 'ai') Draft.wild[Draft.human].forEach(discover);
   show('game');
   G.start(cfg);
@@ -263,7 +279,7 @@ $('#curtainBtn').addEventListener('click', () => {
 const DRAFT_STD = ['P', 'P', 'P', 'P', 'P', 'P', 'N', 'N', 'B', 'B', 'R', 'R', 'Q'];
 const PD = { pairs: [], order: [], i: 0, army: { w: [], b: [] }, gift: { w: [], b: [] }, shown: new Set(), revealTimer: 0, known: { w: new Set(), b: new Set() }, mode: 'ai', human: 'w', viewer: 'w', busy: false, token: 0 };
 function makePairs() {
-  const wilds = shuffle(WILD_IDS.slice());
+  const wilds = rollWilds(32);
   let wi = 0;
   const WILD_RATE = 0.2; // share of draft cards that are wildcards; the rest are regular pieces
   const card = () => (Math.random() < WILD_RATE ? wilds[wi++ % wilds.length] : DRAFT_STD[Math.floor(Math.random() * DRAFT_STD.length)]);
@@ -436,7 +452,7 @@ function finishDraft() {
   setTimeout(() => {
     if (token !== PD.token) return;
     show('game');
-    G.start({ mode: PD.mode, human: PD.human, level: settings.level, wild, state, known, privacy: settings.privacy, autoflip: settings.autoflip,
+    G.start({ mode: PD.mode, human: PD.human, level: settings.level, wild, state, known, privacy: settings.privacy, autoflip: settings.autoflip, fog: settings.fog,
       reveal: true, viewer: v });
   }, 900);
 }
@@ -485,7 +501,7 @@ function faceDownAt(q) { const el = G.board.elAt(q); return !!(el && el.classLis
 function hideArrangeBar() { $('#arrangeBar').hidden = true; }
 function startDrafted() {
   hideArrangeBar();
-  G.hist = [{ s: G.s }]; G.legal = E.legalMoves(G.s);
+  G.hist = [{ s: G.s }]; G.legal = rulesMoves(G.s);
   if (G.mode === 'local') {
     if (G.privacy) { handTo(G.s.turn, afterIntro, true); return; }
     G.view = G.s.turn; if (G.autoflip) G.board.setFlip(G.s.turn === 'b');
@@ -503,8 +519,11 @@ const G = {
   legal: [], sel: -1, selMoves: [], busy: false, over: null, token: 0, hover: -1,
   start(cfg) {
     this.token++;
-    this.mode = cfg.mode || 'ai'; this.privacy = cfg.privacy !== false; this.autoflip = cfg.autoflip !== false;
-    this.human = cfg.human; this.ai = this.mode === 'ai' ? opp(cfg.human) : null; this.level = cfg.level; this.wild = cfg.wild;
+    this.mode = cfg.mode || 'ai'; this.autoflip = cfg.autoflip !== false;
+    this.fog = !!cfg.fog; this.shown = null;
+    this.privacy = cfg.privacy !== false || (this.fog && this.mode === 'local');   // fog needs the privacy screen
+    this.board.setFog(null);
+    this.human = cfg.human; this.ai = this.mode === 'local' ? null : opp(cfg.human); this.level = cfg.level; this.wild = cfg.wild;
     const fresh = !cfg.state;
     this.s = cfg.state || E.newGame({ wild: cfg.wild, slots: cfg.slots });
     this.hist = cfg.hist || [{ s: this.s }];
@@ -514,10 +533,10 @@ const G = {
     this.view = this.mode === 'local' ? (cfg.viewer || this.s.turn) : this.human;
     this.revealing = !!cfg.reveal;
     this.board.setFlip(this.mode === 'local' ? (this.autoflip && this.view === 'b') : this.human === 'b');
-    this.legal = E.legalMoves(this.s);
+    this.legal = rulesMoves(this.s);
     const lv = LEVELS[this.level];
-    $('#game').style.setProperty('--lv', this.mode === 'local' ? 'var(--gold)' : lv.color);
-    $('#modeChip').textContent = this.mode === 'local' ? 'Pass & Play · 2 players' : `vs ${lv.name} · ${lv.who}`;
+    $('#game').style.setProperty('--lv', this.mode === 'local' ? 'var(--gold)' : this.mode === 'online' ? 'var(--lv-easy)' : lv.color);
+    $('#modeChip').textContent = (this.mode === 'local' ? 'Pass & Play · 2 players' : this.mode === 'online' ? 'Online · vs a friend' : `vs ${lv.name} · ${lv.who}`) + (this.fog ? ' · Fog Mode' : '');
     if (cfg.reveal) {
       this.board.clear();
       this.board.setPieces(this.s, { anim: false });
@@ -536,7 +555,7 @@ const G = {
   render() {
     renderBars(); renderStatus(); renderMarks();
     renderWildInfo();
-    const canUndo = this.mode === 'local' ? !this.over && this.hist.length > 1
+    const canUndo = this.mode === 'online' ? false : this.mode === 'local' ? !this.over && this.hist.length > 1
       : this.level !== 'xtreme' && !this.over && this.hist.some((h, i) => i > 0 && this.hist[i - 1].s.turn === this.human);
     $('#undoBtn').disabled = !canUndo || this.intro || this.passing;
     $('#undoBtn').title = this.mode === 'ai' && this.level === 'xtreme' ? 'No take-backs in Xtreme' : '';
@@ -579,13 +598,14 @@ function runIntro(slots) {
   }, 650 + i * 420));
   setTimeout(() => {
     if (token !== G.token) return;
-    G.board.setPieces(G.s, { anim: true, frozen: frozenSquares(G.s) });
+    refreshBoard(true);
     toast(`${pieceSVG('K', G.s.turn)}<span>Wildcards in. ${G.mode === 'local' ? sideName(G.s.turn) + ' to move' : 'Your move'}</span>`, 'var(--gold)');
     afterIntro();
   }, 650 + list.length * 420 + 250);
 }
 function afterIntro() {
   G.intro = false;
+  if (G.fog) { refreshBoard(true); G.board.root.classList.add('fog-roll'); setTimeout(() => G.board.root.classList.remove('fog-roll'), 1400); renderLog(); }
   G.startedAt = Date.now();
   G.render();
   if (G.mode === 'ai' && G.s.turn === G.ai) aiTurn();
@@ -598,6 +618,7 @@ function handTo(c, cb, first) {
     : `Hand the device to ${sideName(c)}. ${other}, no peeking at the board.`, `I'm ${sideName(c)}. Show the board`, () => {
     G.view = c;
     if (G.autoflip) G.board.setFlip(c === 'b');
+    if (G.fog) { refreshBoard(false); renderLog(); }
     G.render();
     if (cb) cb();
   });
@@ -629,13 +650,14 @@ function renderBars() {
     const diff = Math.round((material(G.s, c) - material(G.s, opp(c))) / 100);
     const chips = G.revealing ? '' : (G.wild[c] || []).map(t => `<button class="chip" data-wild="${t}" data-c="${c}" aria-label="${WILD[t].name}">${pieceSVG(t, c)}${knowsType(c, t) ? '' : '<span class="qm">?</span>'}</button>`).join('');
     el.classList.toggle('turn', !G.over && G.s.turn === c);
-    const name = local ? sideName(c) : human ? 'You' : lv.name + ' AI';
-    const sub = local ? (c === 'w' ? 'Player 1' : 'Player 2') + (!G.over && G.s.turn === c ? ' · to move' : '') : sideName(c) + (human ? '' : ` · <span class="lvl">${lv.who}</span>`);
-    el.innerHTML = `<div class="avatar">${pieceSVG(human ? 'K' : lv.icon, c)}</div>
-      <div class="pname"><b>${name}${!human && G.busy ? '<span class="thinking"><i></i><i></i><i></i></span>' : ''}</b>
+    const online = G.mode === 'online';
+    const name = local ? sideName(c) : human ? 'You' : online ? esc(Online.oppName()) + (Online.oppMember() ? SIRSC_BADGE_SVG : '') : lv.name + ' AI';
+    const sub = local ? (c === 'w' ? 'Player 1' : 'Player 2') + (!G.over && G.s.turn === c ? ' · to move' : '') : sideName(c) + (human ? '' : online ? ' · <span class="lvl">Online</span>' : ` · <span class="lvl">${lv.who}</span>`);
+    el.innerHTML = `<div class="avatar">${pieceSVG(human || online ? 'K' : lv.icon, c)}</div>
+      <div class="pname"><b>${name}${!human && (G.busy || (online && !G.over && G.s.turn === c && !G.intro)) ? '<span class="thinking"><i></i><i></i><i></i></span>' : ''}</b>
       <span>${sub}</span></div>
       <div class="chips">${chips}</div>
-      <div class="capt">${lost.map(t => pieceSVG(t, opp(c))).join('')}${diff > 0 && !G.revealing ? `<span class="adv">+${diff}</span>` : ''}</div>`;
+      <div class="capt">${lost.map(t => pieceSVG(t, opp(c))).join('')}${diff > 0 && !G.revealing && !fogOn() ? `<span class="adv">+${diff}</span>` : ''}</div>`;
   }
 }
 
@@ -647,14 +669,14 @@ function renderStatus() {
     else if (G.revealing) t = 'The reveal';
     else if (G.intro) t = 'Dealing the wildcards…';
     else if (G.passing) t = `Passing to ${sideName(c)}…`;
-    else t = E.inCheck(G.s, c) ? `Check by the ${checkText(G.s, c)}! ${n} to move` : G.s.extra ? `Extra turn! ${n} again` : `${n} to move`;
+    else t = !G.fog && E.inCheck(G.s, c) ? `Check by the ${checkText(G.s, c)}! ${n} to move` : G.s.extra ? `Extra turn! ${n} again` : `${n} to move`;
     $('#status').textContent = t;
     return;
   }
   if (G.over) t = G.over.winner === G.human ? 'You won' : G.over.winner ? 'You lost' : 'Draw';
   else if (G.revealing) t = 'The reveal';
   else if (G.intro) t = 'Dealing the wildcards…';
-  else if (G.s.turn === G.human) t = E.inCheck(G.s, G.human) ? `Check by the ${checkText(G.s, G.human)}!` : (G.s.extra ? 'Extra turn!' : 'Your move');
+  else if (G.s.turn === G.human) t = !G.fog && E.inCheck(G.s, G.human) ? `Check by the ${checkText(G.s, G.human)}!` : (G.s.extra ? 'Extra turn!' : 'Your move');
   else t = G.busy ? 'Thinking…' : 'Their move';
   $('#status').textContent = t;
 }
@@ -675,7 +697,11 @@ function renderWildInfo() {
 
 function renderLog() {
   const ol = $('#log');
-  ol.innerHTML = G.log.map((e, i) => `<li class="${e.special ? 'special' : ''} ${i === G.log.length - 1 ? 'last' : ''}"><span class="n">${e.n}${e.c === 'w' ? '.' : '…'}</span>${pieceSVG(e.t, e.c)}<span class="t">${e.text}</span></li>`).join('');
+  const v = viewerSide();
+  ol.innerHTML = G.log.map((e, i) => {
+    const hid = fogOn() && e.fogFor && e.fogFor[v];
+    return `<li class="${e.special && !hid ? 'special' : ''} ${hid ? 'fogged' : ''} ${i === G.log.length - 1 ? 'last' : ''}"><span class="n">${e.n}${e.c === 'w' ? '.' : '…'}</span>${hid ? '<span class="fog-ico" aria-hidden="true">?</span>' : pieceSVG(e.t, e.c)}<span class="t">${hid || e.text}</span></li>`;
+  }).join('');
   const sc = ol.closest('.side-scroll');
   if (sc && getComputedStyle(sc).overflowY === 'auto') sc.scrollTop = sc.scrollHeight;
 }
@@ -684,9 +710,10 @@ function kingSq(s, c) { return E.findKing(s, c); }
 
 function renderMarks() {
   const s = G.s, last = s.last;
-  const o = { last: last ? [last.o, last.t] : null, sel: G.sel, check: -1, marks: [], xprev: null, hover: -1 };
+  const lv = fogOn() && G.shown && G.shown.vis;
+  const o = { last: last ? [last.o, last.t].filter(q => !lv || lv.has(q)) : null, sel: G.sel, check: -1, marks: [], xprev: null, hover: -1 };
   const k = kingSq(s, s.turn);
-  if (k >= 0 && (!G.over || G.over.reason === 'mate') && E.inCheck(s, s.turn)) {
+  if (k >= 0 && !G.fog && (!G.over || G.over.reason === 'mate') && E.inCheck(s, s.turn)) {
     o.check = k; o.checkers = E.checkers(s, s.turn); o.arrows = o.checkers.map(q => [q, k]);
   }
   if (G.sel >= 0) {
@@ -710,7 +737,7 @@ function renderMarks() {
 
 function select(q) {
   G.sel = q;
-  G.selMoves = G.legal.filter(m => m.o === q);
+  G.selMoves = (fogOn() ? E.fogMoves(G.shown || G.s) : G.legal).filter(m => m.o === q);
   if (q >= 0) Sound.play('select');
   renderMarks();
 }
@@ -718,6 +745,7 @@ function select(q) {
 const LABEL = {
   boom: 'Detonate', shoot: 'Shoot', strike: 'Strike', swap: 'Swap places', gust: 'Blow a gust', crush: 'Charge',
   charm: 'Charm it', spawn: 'Lay a pawn', wall: 'Raise a wall', hex: 'Hex into a pawn', launch: 'Fling', jump: 'Jump', castle: 'Castle', ep: 'En passant',
+  burn: 'Breathe fire', devour: 'Land and devour', bolt: 'Hurl lightning',
   zap: 'Discharge', march: 'Beat the march', split: 'Split in two', infect: 'Bite it', stone: 'Petrify it',
 };
 function moveLabel(m, s) {
@@ -745,6 +773,16 @@ function tryMove(ms, x, y) {
 function humanMove(m) {
   if (!canAct()) return;
   hideTip();
+  if (fogOn()) {
+    const r = realMove(m);
+    if (!r) {
+      G.board.burstAt(m.t, { n: 18, color: ['#8a93a6', '#c9cfdb'], kind: 'smoke', speed: 0.6, size: 0.12, life: 40 });
+      G.board.shake(false); Sound.play('stone');
+      toast('<span>Something in the fog blocks that move</span>', '#8a93a6');
+      return;
+    }
+    m = r;
+  }
   G.sel = -1; G.selMoves = []; G.hover = -1;
   applyMove(m);
 }
@@ -758,7 +796,7 @@ function initBoardInput() {
     Sound.init(); hideChooser(); hideTip(); clearTimeout(hoverTimer);
     const q = G.board.sqAt(e.clientX, e.clientY);
     if (q < 0) return;
-    const p = G.s.b[q];
+    const p = shownAt(q);
     const myTurn = canAct();
     if (myTurn && G.sel >= 0 && q !== G.sel) {
       const ms = G.selMoves.filter(m => m.t === q && m.t !== m.o);
@@ -787,7 +825,7 @@ function initBoardInput() {
     if (G.sel >= 0 && q !== G.hover) { G.hover = q; renderMarks(); }
     if (!drag && e.pointerType === 'mouse' && q !== hoverSq) {
       hoverSq = q; hideTip(); clearTimeout(hoverTimer);
-      const p = q >= 0 ? G.s.b[q] : null;
+      const p = q >= 0 ? shownAt(q) : null;
       if (p && G.sel < 0 && !faceDownAt(q)) { const x = e.clientX, y = e.clientY; hoverTimer = setTimeout(() => showTip(tipHTML(p, knowsType(p.c, p.t)), x, y), 420); }
     }
   });
@@ -820,6 +858,7 @@ function initBoardInput() {
 const VERB = {
   boom: 'detonates!', shoot: 'fires!', strike: 'strikes and vanishes', swap: 'swaps places', raise: 'raises the dead', gust: 'blows a gale',
   crush: 'tramples through', charm: 'charms a piece', spawn: 'lays a pawn', wall: 'raises a wall', hex: 'casts a hex', launch: 'flings a piece', jump: 'jumps',
+  burn: 'breathes fire!', devour: 'devours everything nearby', bolt: 'hurls lightning!',
   pull: 'drags them in', zap: 'discharges!', march: 'beats the march', split: 'splits in two', infect: 'bites!', stone: 'turns a piece to stone', transmute: 'transmutes a pawn', swapE: 'trades places with an enemy',
 };
 
@@ -850,6 +889,9 @@ function moveText(s, m, ns) {
     case 'infect': t = `bites the ${pieceName(tgt.t)} on ${code(m.t)}, turning it into a pawn`; break;
     case 'stone': t = `turns the ${pieceName(tgt.t)} on ${code(m.t)} to stone`; break;
     case 'transmute': t = `transmutes the pawn on ${code(m.t)} into a ${pieceName(m.rt)}`; break;
+    case 'burn': t = `${code(m.f)}×${code(m.t)}, burning ${m.x.length - 1} more`; break;
+    case 'devour': t = `${code(m.f)}–${code(m.t)}, devouring ${m.x.length - (s.b[m.t] ? 1 : 0)}`; break;
+    case 'bolt': t = `hurls lightning at ${code(m.t)}`; break;
     default: t = `${code(m.f)}–${code(m.t)}`;
   }
   for (const e of ns.events || []) {
@@ -860,13 +902,37 @@ function moveText(s, m, ns) {
     if (e.k === 'echo') t += '. An echo pawn stays behind';
     if (e.k === 'morph') t += `. It becomes a ${pieceName(ns.b[e.q].t)}`;
   }
-  if (!ns.dead && E.inCheck(ns, ns.turn)) t += ' +';
+  if (!ns.dead && !G.fog && E.inCheck(ns, ns.turn)) t += ' +';
   return t;
 }
 
 const CHIPS = { w: ['#ffffff', '#e8e6e2', '#cfccc7'], b: ['#6d6b68', '#4b4946', '#2a2826'] };
 
+function fogProxy(b, V, seen, existedBefore) {
+  return {
+    root: b.root,
+    burstAt: (q, o) => V(q) && b.burstAt(q, o),
+    ringAt: (q, ...a) => V(q) && b.ringAt(q, ...a),
+    beam: (q1, q2, ...a) => (V(q1) || V(q2)) && b.beam(q1, q2, ...a),
+    shake: big => seen && b.shake(big),
+    flash: c => seen && b.flash(c),
+    setPieces(st, o) {
+      G.shown = viewState(st);
+      b.setPieces(G.shown, { ...o, frozen: frozenSquares(G.shown), existed: existedBefore, alive: new Set(st.b.filter(Boolean).map(p => p.id)) });
+      b.setFog(G.shown.vis);
+    },
+  };
+}
 function playEffects(board, s, m, ns, quiet) {
+  // In Fog Mode the viewer only sees effects on squares they can see, before or after the move.
+  const fogged = board === G.board && fogOn();
+  let V = () => true, seenAct = true;
+  if (fogged) {
+    const v = viewerSide(), b1 = E.visibleSquares(s, v), b2 = E.visibleSquares(ns, v);
+    V = q => b1.has(q) || b2.has(q);
+    seenAct = V(m.o) || V(m.t);
+    board = fogProxy(board, V, seenAct, new Set(s.b.filter(Boolean).map(p => p.id)));
+  }
   const actor = s.b[m.o], mover = s.b[m.f];
   const aw = actor && WILD[actor.t], acc = aw ? aw.accent : '#ffd98e';
   const before = new Map(), after = new Set();
@@ -886,6 +952,18 @@ function playEffects(board, s, m, ns, quiet) {
     }
     case 'shoot': board.beam(m.o, m.t, acc, 16); snd = 'zap'; msg = 'shoot'; break;
     case 'strike': board.beam(m.o, m.t, '#ff2d55', 12); board.burstAt(m.t, { n: 16, color: ['#ff2d55', '#fff'], kind: 'spark', speed: 1.4 }); snd = 'whoosh'; msg = 'strike'; break;
+    case 'burn':
+      board.beam(m.f, m.t, '#ff6a1a', 16);
+      for (const q of m.x) board.burstAt(q, { n: 30, color: ['#fff3b0', '#ffb347', '#ff6a1a', '#ff3b1a'], kind: 'spark', speed: 1.4, gravity: -0.06, life: 50 });
+      snd = 'boom'; shake = 1; msg = 'burn'; break;
+    case 'devour':
+      board.ringAt(m.t, '#b26bff', 1.6, 12, 34); board.ringAt(m.t, '#ffb347', 1, 6, 24);
+      for (const q of m.x) board.burstAt(q, { n: 26, color: ['#b26bff', '#2a1840', '#ffb347'], kind: 'spark', speed: 0.9, gravity: 0, drag: 0.82 });
+      snd = 'zap'; shake = 2; msg = 'devour'; break;
+    case 'bolt':
+      board.beam(m.o, m.t, '#ffe14d', 22); board.beam(m.o, m.t, '#ffffff', 10);
+      board.burstAt(m.t, { n: 40, color: ['#ffe14d', '#ffffff', '#7df9ff'], kind: 'spark', speed: 2, gravity: 0.02, life: 40 });
+      board.flash('gold'); snd = 'zap'; shake = 1; msg = 'bolt'; break;
     case 'swap': board.ringAt(m.o, acc, 0.8); board.ringAt(m.t, acc, 0.8); snd = 'magic'; msg = s.b[m.t] && s.b[m.t].c !== actor.c ? 'swapE' : 'swap'; break;
     case 'raise': board.burstAt(m.t, { n: 30, color: ['#6dff8a', '#2f7d45', '#b8ffc6'], kind: 'smoke', speed: 0.6, size: 0.12, life: 60, gravity: -0.04 }); snd = 'magic'; msg = 'raise'; break;
     case 'gust':
@@ -932,11 +1010,11 @@ function playEffects(board, s, m, ns, quiet) {
     if (e.k === 'crumble') board.burstAt(e.q, { n: 16, color: ['#8d8476', '#b3aa9b'], kind: 'chip', speed: 0.8, size: 0.06 });
   }
   board.setPieces(ns, { anim: true, instant, fly, frozen: frozenSquares(ns) });
-  if (shake) board.shake(shake > 1);
+  if (shake && seenAct) board.shake(shake > 1);
   if (quiet) return;
   Sound.play(snd);
-  if (evMsg) toast(`${pieceSVG(evMsg[0], 'w')}<span>${evMsg[1]}</span>`, WILD[evMsg[0]].accent);
-  else if (msg && aw) toast(`${pieceSVG(actor.t, actor.c)}<span>${aw.name} ${msg === 'tele' ? 'teleports' : VERB[msg]}</span>`, acc);
+  if (evMsg && seenAct) toast(`${pieceSVG(evMsg[0], 'w')}<span>${evMsg[1]}</span>`, WILD[evMsg[0]].accent);
+  else if (msg && aw && seenAct) toast(`${pieceSVG(actor.t, actor.c)}<span>${aw.name} ${msg === 'tele' ? 'teleports' : VERB[msg]}</span>`, acc);
 }
 
 /* Who is giving check, as words: 'Rook on e8' or 'Bomber on d5 and Knight on f3'. */
@@ -1023,23 +1101,66 @@ const FINALE_EXTRAS = {
 
 function posKey(s) { return s.b.map(p => (p ? p.t + p.c : '.')).join(',') + s.turn; }
 
+/* ---------- Fog Mode ---------- */
+// The rules: normal chess (check, checkmate) or Fog Mode's (no check; capture the king to win).
+function rulesMoves(s) { return G.fog ? E.fogMoves(s) : E.legalMoves(s); }
+function rulesStatus(s, legal) {
+  if (!G.fog) return E.status(s, legal);
+  if (s.dead) return { over: true, winner: opp(s.dead), reason: 'king' };
+  if (!legal.length) return { over: true, winner: null, reason: 'stalemate' };
+  if (s.half >= 100) return { over: true, winner: null, reason: 'fifty' };
+  return { over: false };
+}
+const fogOn = () => !!G.fog && !G.over;
+/* The position as the viewer sees it: enemy pieces (and walls) outside their sight are gone. */
+function viewState(s, who) {
+  if (!fogOn()) return s;
+  const v = who || viewerSide(), vis = E.visibleSquares(s, v);
+  return { ...s, b: s.b.map((p, q) => (p && p.c !== v && !vis.has(q) ? null : p)), vis };
+}
+const shownAt = q => (G.shown || G.s).b[q];
+/* Draw the board for whoever is looking: their fog, their pieces. */
+function refreshBoard(anim) {
+  const ids = new Set(G.s.b.filter(Boolean).map(p => p.id));
+  G.shown = viewState(G.s);
+  G.board.setPieces(G.shown, { anim, frozen: frozenSquares(G.shown), existed: ids, alive: ids });
+  G.board.setFog(fogOn() ? G.shown.vis : null);
+}
+/* A move picked from what the viewer can see, matched to what is really on the board. */
+function realMove(m) {
+  const same = r => r.o === m.o && r.f === m.f && r.t === m.t && (r.promo || '') === (m.promo || '') && (r.rt || '') === (m.rt || '') && !!r.tele === !!m.tele;
+  return G.legal.find(r => same(r) && r.k === m.k) || G.legal.find(same) || null;
+}
+
 function applyMove(m) {
   const s = G.s, ns = E.makeMove(s, m), actor = s.b[m.o];
   G.s = ns;
   G.log.push({ n: Math.floor(s.ply / 2) + 1, c: s.turn, t: actor.t, text: moveText(s, m, ns), special: m.k !== 'n' && m.k !== 'castle' || !!m.tele || !!(ns.events && ns.events.length) });
   G.hist.push({ s: ns });
+  if (G.fog) {
+    const e = G.log[G.log.length - 1];
+    e.fogFor = {};
+    for (const c of ['w', 'b']) {
+      if (c === s.turn || E.visibleSquares(s, c).has(m.o) || E.visibleSquares(ns, c).has(m.t)) continue;
+      const lost = s.b.filter(p => p && p.c === c && !ns.b.some(x => x && x.id === p.id)).map(p => pieceName(p.t));
+      e.fogFor[c] = lost.length ? `captured your ${lost.join(' and ')} from the fog` : 'moved somewhere in the fog';
+    }
+  }
   playEffects(G.board, s, m, ns);
-  G.legal = E.legalMoves(ns);
-  let st = E.status(ns, G.legal);
+  G.legal = rulesMoves(ns);
+  let st = rulesStatus(ns, G.legal);
   if (!st.over) {
     const k = posKey(ns);
     if (G.hist.filter(h => posKey(h.s) === k).length >= 3) st = { over: true, winner: null, reason: 'repetition' };
   }
-  const check = !st.over && E.inCheck(ns, ns.turn);
+  if (G.mode === 'online') Online.moved(s, m, ns, st);
+  const check = !st.over && !G.fog && E.inCheck(ns, ns.turn);
   if (st.over && st.reason === 'mate') { const l = G.log[G.log.length - 1]; l.text = l.text.replace(/ \+$/, '') + ' #'; }
   renderLog();
   if (st.over) {
-    G.over = st; renderWildInfo(); G.render();
+    G.over = st;
+    if (G.fog) { refreshBoard(true); renderLog(); G.board.root.classList.add('fog-lift'); setTimeout(() => G.board.root.classList.remove('fog-lift'), 1200); }
+    renderWildInfo(); G.render();
     const tk = G.token, wait = endFX(st, s);
     setTimeout(() => { if (tk === G.token) endGame(st); }, wait);
     return;
@@ -1052,6 +1173,7 @@ function applyMove(m) {
       return;
     }
     G.view = ns.turn;
+    if (G.fog) { refreshBoard(false); renderLog(); }
     if (G.autoflip) setTimeout(() => { if (G.s === ns) { G.board.setFlip(ns.turn === 'b'); G.render(); } }, 700);
   }
   G.render();
@@ -1061,14 +1183,18 @@ function applyMove(m) {
 
 function aiTurn() {
   G.busy = true; G.render();
-  const token = ++G.token, s = G.s, t0 = performance.now();
+  const token = ++G.token, s = G.fog ? viewState(G.s, G.ai) : G.s, t0 = performance.now();
   AI.think(s, G.level).then(idx => {
     if (token !== G.token) return;
     const wait = Math.max(0, 650 - (performance.now() - t0));
     setTimeout(() => {
       if (token !== G.token) return;
       G.busy = false;
-      const m = G.legal[idx] || G.legal[0];
+      let m = G.legal[idx] || G.legal[0];
+      if (G.fog) {
+        const seen = E.legalMoves(s)[idx];
+        m = (seen && realMove(seen)) || (seen && G.legal.find(r => r.o === seen.o)) || G.legal[Math.floor(Math.random() * G.legal.length)];
+      }
       if (m) applyMove(m);
       else G.render();
     }, wait);
@@ -1082,8 +1208,8 @@ function undo() {
     G.token++;
     G.hist.pop(); G.log.pop();
     G.s = G.hist[G.hist.length - 1].s;
-    G.legal = E.legalMoves(G.s); G.sel = -1; G.selMoves = [];
-    G.board.setPieces(G.s, { anim: true, frozen: frozenSquares(G.s) });
+    G.legal = rulesMoves(G.s); G.sel = -1; G.selMoves = [];
+    refreshBoard(true);
     renderLog();
     if (G.view !== G.s.turn) { if (G.privacy) { G.render(); handTo(G.s.turn); return; } G.view = G.s.turn; if (G.autoflip) G.board.setFlip(G.view === 'b'); }
     G.render();
@@ -1097,8 +1223,8 @@ function undo() {
     if (mover === G.human && G.hist[G.hist.length - 1].s.turn === G.human) break;
   }
   G.s = G.hist[G.hist.length - 1].s;
-  G.legal = E.legalMoves(G.s); G.sel = -1; G.selMoves = [];
-  G.board.setPieces(G.s, { anim: true, frozen: frozenSquares(G.s) });
+  G.legal = rulesMoves(G.s); G.sel = -1; G.selMoves = [];
+  refreshBoard(true);
   renderLog(); G.render();
   if (G.s.turn === G.ai) aiTurn();
 }
@@ -1106,7 +1232,9 @@ function undo() {
 const REASONS = {
   mate: (w, l) => `Checkmate. ${l} has nowhere to go.`,
   king: (w, l) => `${l} was destroyed outright.`,
-  resign: (w, l) => (G.mode === 'local' ? `${l.replace(/'s king$/, '')} resigned.` : 'You resigned.'),
+  resign: (w, l) => (G.mode === 'local' ? `${l.replace(/'s king$/, '')} resigned.` : G.mode === 'online' && w === G.human ? `${esc(Online.oppName())} resigned.` : 'You resigned.'),
+  timeout: w => (w === G.human ? `${esc(Online.oppName())} left the game.` : 'You were away too long and lost the game.'),
+  disputed: () => 'A move didn\u2019t match between the two boards, so the game was stopped.',
   stalemate: () => 'Stalemate: no legal moves, but no check either.',
   fifty: () => '50 moves passed without a capture or pawn move.',
   repetition: () => 'The same position came up three times.',
@@ -1146,7 +1274,8 @@ $('#modal').addEventListener('click', e => {
   if (!b) { if (e.target.id === 'modal') closeModal(); return; }
   const a = b.dataset.act;
   closeModal();
-  if (a === 'rematch') { settings.mode = G.mode; deal(); }
+  if (a === 'rematch') { if (G.mode === 'online') { Online.leave(); show('online'); } else { settings.mode = G.mode; deal(); } }
+  else if (a === 'menu' && G.mode === 'online') { Online.leave(); show('menu'); }
   else if (a === 'menu') show('menu');
   else if (a === 'yes' && confirmCb) { const f = confirmCb; confirmCb = null; f(); }
 });
@@ -1158,12 +1287,19 @@ $('#resignBtn').addEventListener('click', () => {
   if (G.intro || G.passing || !$('#curtain').hidden) return;
   const local = G.mode === 'local', who = local ? G.s.turn : G.human;
   confirmBox(local ? `Resign as ${sideName(who)}?` : 'Resign?', local ? 'The game ends and both sides\' wildcards are revealed.' : 'The game ends and their wildcard is revealed.', 'Resign', () => {
-    G.token++; G.busy = false; G.over = { over: true, winner: opp(who), reason: 'resign' }; renderWildInfo(); G.render(); endGame(G.over);
+    G.token++; G.busy = false; G.over = { over: true, winner: opp(who), reason: 'resign' };
+    if (G.mode === 'online') Online.resign();
+    if (G.fog) refreshBoard(true);
+    renderWildInfo(); G.render(); endGame(G.over);
   });
 });
 $('#leaveBtn').addEventListener('click', () => {
   if (!$('#curtain').hidden) return;
   if (G.over || (G.hist.length < 2 && !G.intro)) { G.token++; hideArrangeBar(); show('menu'); return; }
+  if (G.mode === 'online') {
+    confirmBox('Leave the game?', 'Leaving an online game counts as resigning.', 'Resign and leave', () => { G.token++; Online.resign(); Online.leave(); show('menu'); });
+    return;
+  }
   confirmBox('Leave the game?', 'This game will be abandoned.', 'Leave', () => { G.token++; G.busy = false; G.intro = false; G.passing = false; hideArrangeBar(); show('menu'); });
 });
 document.addEventListener('click', e => {
@@ -1198,7 +1334,7 @@ const Showcase = {
   },
   stop() { clearInterval(this.timer); this.timer = 0; },
   newGame() {
-    const [a, b] = shuffle(WILD_IDS.slice());
+    const [a, b] = rollWilds(2);
     this.s = E.newGame({ wild: { w: [a], b: [b] }, slots: { w: E.pickSlots('w', 1), b: E.pickSlots('b', 1) } });
     this.board.setPieces(this.s, { anim: false });
     this.board.setMarks({});
@@ -1238,9 +1374,9 @@ function renderCodex() {
   $('#codexLede').textContent = `You've discovered ${discovered.size} of ${WILD_IDS.length} wildcards. A wildcard joins your Codex when you play with it, or when a game against it ends. The small boards show sample moves from d4: dots are moves, red rings are captures, stars are special abilities.`;
   $('#codexGrid').innerHTML = WILD_IDS.map(t => {
     const w = WILD[t], known = discovered.has(t) || spoil;
-    return `<div class="cx ${known ? '' : 'locked'}" style="--acc:${w.accent}">
+    return `<div class="cx ${known ? '' : 'locked'} ${w.legendary ? 'legendary' : ''}" style="--acc:${w.accent}">
       <div class="cx-l"><div class="cx-art">${pieceSVG(t, 'w')}</div>${known ? miniBoard(t) : ''}</div>
-      <div><h4>${w.name}</h4><div class="cx-moves">${known ? esc(w.moves) : 'Undiscovered'}</div>
+      <div><h4>${w.name}${w.legendary ? ' <span class="legend-tag">Legendary</span>' : ''}</h4><div class="cx-moves">${known ? esc(w.moves) : 'Undiscovered'}</div>
       <p>${known ? w.desc : 'Not discovered yet. Play with it or face it to learn what it does.'}</p></div></div>`;
   }).join('');
 }
@@ -1326,18 +1462,19 @@ function boot(data) {
   AI.init();
   initMenu(); initSetup();
   Shop.init();
+  Online.init();
   G.board = new BoardView($('#mainBoard'), { seed: 11 });
   initBoardInput();
   const g = data && data.game;
   if (g && g.hist && g.hist.length) {
     show('game');
-    G.start({ mode: g.mode, privacy: g.privacy, autoflip: g.autoflip, wild: g.wild, human: g.human, level: g.level, state: g.hist[g.hist.length - 1].s, hist: g.hist, log: g.log, known: g.known });
+    G.start({ mode: g.mode, privacy: g.privacy, autoflip: g.autoflip, wild: g.wild, human: g.human, level: g.level, state: g.hist[g.hist.length - 1].s, hist: g.hist, log: g.log, known: g.known, fog: g.fog });
   } else show(data && data.screen && data.screen !== 'game' && data.screen !== 'draft' ? data.screen : 'menu');
 }
 if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
   window.claude.hot.snapshot(() => ({
     screen: current,
-    game: current === 'game' && G.s && !G.over && !G.intro ? { mode: G.mode, privacy: G.privacy, autoflip: G.autoflip, wild: G.wild, human: G.human, level: G.level, hist: G.hist, log: G.log, known: G.known } : null,
+    game: current === 'game' && G.s && !G.over && !G.intro && G.mode !== 'online' ? { mode: G.mode, privacy: G.privacy, autoflip: G.autoflip, wild: G.wild, human: G.human, level: G.level, hist: G.hist, log: G.log, known: G.known, fog: G.fog } : null,
   }));
 }
 const hot = window.claude && window.claude.hot;

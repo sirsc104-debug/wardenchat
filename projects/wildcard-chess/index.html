@@ -19,15 +19,19 @@
     <div class="acct-chip" id="acctChip" hidden></div>
     <div class="menu-wrap">
       <div class="menu-left">
-        <p class="eyebrow">Chess with 50 secret pieces</p>
+        <p class="eyebrow">Chess with 55 secret pieces</p>
         <h1 class="logo"><span class="logo-a">Wildcard</span><span class="logo-b">Chess</span></h1>
         <p class="tagline">Both armies start with the usual sixteen pieces, plus a wildcard with rules of its own. You can see your opponent's. You can't see what it does.</p>
         <nav class="menu-btns" aria-label="Main menu">
-          <button class="btn primary" data-mode="ai" data-deal="classic" id="playBtn"><span>Play</span><small>vs the computer, random wildcards</small></button>
-          <button class="btn draft-btn" data-mode="ai" data-deal="draft" id="draftBtn"><span>Draft</span><small>Build your army card by card</small></button>
-          <button class="btn" data-mode="local" id="localBtn"><span>Pass &amp; Play</span><small>2 players, one device</small></button>
+          <button class="btn primary" data-mode="ai" data-deal="classic" data-fog="0" id="playBtn"><span>Play</span><small>vs the computer, random wildcards</small></button>
+          <div class="menu-modes">
+            <button class="btn draft-btn" data-mode="ai" data-deal="draft" data-fog="0" id="draftBtn"><span>Draft</span><small>Build your army card by card</small></button>
+            <button class="btn fog-btn" data-mode="ai" data-deal="classic" data-fog="1" id="fogBtn"><span>Fog Mode</span><small>See only what your pieces touch</small></button>
+            <button class="btn online-btn" data-go="online" id="onlineBtn"><span>Online</span><small>Play a friend anywhere</small></button>
+            <button class="btn" data-mode="local" data-fog="0" id="localBtn"><span>Pass &amp; Play</span><small>2 players, one device</small></button>
+          </div>
           <div class="menu-row">
-            <button class="btn btn-sm" data-go="codex"><span>Codex</span><small id="codexCount">0 / 50 discovered</small></button>
+            <button class="btn btn-sm" data-go="codex"><span>Codex</span><small id="codexCount">0 / 55 discovered</small></button>
             <button class="btn btn-sm" data-go="shop"><span>Shop</span><small id="shopCount">Boards &amp; more</small></button>
             <button class="btn btn-sm" data-go="how"><span>Rules</span><small>How it works</small></button>
             <button class="btn btn-sm ghost" id="soundBtn"><span>Sound</span><small id="soundState">On</small></button>
@@ -91,6 +95,8 @@
           <div class="seg" id="segDeal"><button data-v="classic">Classic</button><button data-v="draft">Draft</button></div></div>
         <div class="opt classic-only"><span class="opt-l">Wildcards each</span>
           <div class="seg" id="segCount"><button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button></div></div>
+        <div class="opt"><span class="opt-l">Fog of war</span>
+          <div class="seg" id="segFog"><button data-v="0">Off</button><button data-v="1">On</button></div></div>
         <div class="opt local-only"><span class="opt-l">Privacy screen</span>
           <div class="seg" id="segPrivacy"><button data-v="1">On</button><button data-v="0">Off</button></div></div>
         <div class="opt local-only"><span class="opt-l">Flip board each turn</span>
@@ -151,6 +157,7 @@
         <div class="side-head">
           <div class="mode-chip" id="modeChip"></div>
           <div class="status" id="status" aria-live="polite"></div>
+          <div class="ol-presence" id="onlinePresence" hidden></div>
         </div>
         <div class="side-scroll">
           <div class="wild-info" id="wildInfo"></div>
@@ -171,6 +178,12 @@
       <p class="codex-lede" id="codexLede"></p>
       <div class="codex-grid" id="codexGrid"></div>
     </div>
+  </section>
+
+  <!-- ONLINE -->
+  <section class="screen" id="online">
+    <header class="topbar"><button class="back" data-go="menu">← Menu</button><h2>Online</h2></header>
+    <div class="online-body" id="onlineBody"></div>
   </section>
 
   <!-- SHOP -->
@@ -198,7 +211,7 @@
     <div class="how-body">
       <article>
         <h3>Normal chess, plus a stranger</h3>
-        <p>Both sides start with the standard army, except that each <b>wildcard</b> (dealt at random from 50) takes the place of one of your regular pieces. It can replace any piece except the king: a pawn, a knight, even your queen. You'll see which one when the cards are dealt.</p>
+        <p>Both sides start with the standard army, except that each <b>wildcard</b> (dealt at random from 55) takes the place of one of your regular pieces. It can replace any piece except the king: a pawn, a knight, even your queen. You'll see which one when the cards are dealt.</p>
         <h3>You know yours. You don't know theirs.</h3>
         <p>Before the game you see your own wildcard and what it does. You also see your opponent's piece and its name, but not its rules. Hover or tap any piece on the board to read about it; theirs only says <i>unknown</i>. Watch what it does and work it out. When the game ends, its rules are revealed and it joins your Codex.</p>
         <h3>How to win</h3>
@@ -211,6 +224,12 @@
         <p>Sign in with your Warden Chat account to earn <b>🪙 coins</b> for games against the computer: 500 for beating Easy, 1,000 Medium, 2,000 Pro, 4,000 Xtreme. Draws pay 30% and losses 10%. A drafted army pays ×1.25, SirSC Members get ×1.5, your first win each day adds 1,500, and every wildcard new to your Codex pays 500. You can earn up to 25,000 coins a day. Pass &amp; Play games don't earn coins. Spend coins or <b>💎 diamonds</b> in the Shop on board themes, card backs and checkmate finales. It's the same wallet as Downhill Death Run.</p>
         <h3>The draft</h3>
         <p>Pick <b>Draft</b> on the setup screen to build both armies from scratch. You're shown 16 pairs of cards, 8 of them for you to choose from; take one, and the one you leave goes to your opponent. Your army is your 8 picks plus the 8 your opponent passed over, so it might have four bishops and a Cyclops where the pawns usually stand. One pair is always King vs King, so everybody gets exactly one king. You can read the rules of every card offered to you, which means you'll know the wildcards you passed to your opponent, but not the ones they picked. Both armies stay face down while you draft, your own picks included; when it's over, all 32 pieces flip face up on the board one by one over about 10 seconds. Armies are laid out automatically and can't be rearranged: the king on its own square, rooks in the corners, the queen beside the king, knights and bishops where they usually stand, pawns across the front, and everything else wherever it fits.</p>
+        <h3>Fog Mode</h3>
+        <p>Turn on <b>Fog of war</b> (or pick Fog Mode on the main menu) and you can only see the squares your pieces stand on and the squares right next to them. Enemy pieces vanish into the fog when you lose sight of them. There is no check in the fog: nobody tells you your king is under attack, and you win by <b>capturing the enemy king</b>. If something you can't see blocks a move, you're told and can pick another; if you land on a hidden enemy, you capture it. The computer plays by the same rules and only sees what its own pieces see. In Pass &amp; Play the privacy screen is always on in the fog.</p>
+        <h3>Legendary wildcards</h3>
+        <p>Five wildcards are <b>legendary</b>: the Elder Dragon, Archangel, Time Lord, Black Hole and Storm King. They are animated, far stronger than anything else, and rare: about one wildcard in twenty is legendary, in the classic deal and in the draft.</p>
+        <h3>Online</h3>
+        <p>Sign in with your Warden Chat account, open <b>Online</b> and create a game: you get a 5-letter code to send a friend, who joins with it. Warden Chat deals both sides' wildcards, so nobody picks their own. Your wildcard's rules are shown to you and theirs stay hidden, just like against the computer, and Fog Mode works online too. If your friend disappears for more than two minutes you can claim the win. Online games don't earn coins yet.</p>
         <h3>Pass &amp; Play</h3>
         <p>Two people can play on one device. Each player looks at their own cards in private, and between turns a screen covers the board until the next player taps <i>Ready</i>, so nobody sees the other's wildcard rules. The board can turn to face whoever is moving.</p>
         <h3>Difficulty</h3>
@@ -254,6 +273,7 @@
 <script src="js/cosmetics.js"></script>
 <script src="js/wallet.js"></script>
 <script src="js/shop.js"></script>
+<script src="js/online.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>
