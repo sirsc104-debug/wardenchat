@@ -1118,7 +1118,7 @@ function viewState(s, who) {
   const v = who || viewerSide(), vis = E.visibleSquares(s, v);
   return { ...s, b: s.b.map((p, q) => (p && p.c !== v && !vis.has(q) ? null : p)), vis };
 }
-const shownAt = q => (G.shown || G.s).b[q];
+const shownAt = q => (fogOn() && G.shown ? G.shown : G.s).b[q];   // fog: what the viewer sees; otherwise the real board
 /* Draw the board for whoever is looking: their fog, their pieces. */
 function refreshBoard(anim) {
   const ids = new Set(G.s.b.filter(Boolean).map(p => p.id));
