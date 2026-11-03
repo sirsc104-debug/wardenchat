@@ -838,7 +838,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-hi); o
         <div class="board-frame">
           <div class="board" id="mainBoard"></div>
           <div class="toast" id="toast" aria-live="polite"></div>
-          <div class="arrange-bar" id="arrangeBar" hidden><span id="arrangeText">Set up your army: tap two of your pieces to swap them.</span><button class="btn primary small" id="arrangeDone"><span>Ready</span></button></div>
+          <div class="arrange-bar" id="arrangeBar" hidden><span id="arrangeText">Revealing the armies…</span><button class="btn primary small" id="arrangeDone"><span>Skip</span></button></div>
         </div>
         <div class="pbar" id="barBot"></div>
       </div>
@@ -884,7 +884,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--gold-hi); o
         <h3>Promotion</h3>
         <p>Pawns that reach the last rank can promote into a queen, rook, bishop, knight, or one of your wildcards.</p>
         <h3>The draft</h3>
-        <p>Pick <b>Draft</b> on the setup screen to build both armies from scratch. You're shown 16 pairs of cards, 8 of them for you to choose from; take one, and the one you leave goes to your opponent. Your army is your 8 picks plus the 8 your opponent passed over, so it might have four bishops and a Cyclops where the pawns usually stand. One pair is always King vs King, so everybody gets exactly one king. You can read the rules of every card offered to you, which means you'll know the wildcards you passed to your opponent, but not the ones they picked. Both armies stay face down while you draft, your own picks included; when it's over, all 32 pieces flip face up on the board one by one over about 10 seconds. Afterwards, tap two of your pieces to swap them until the army is set up the way you like. The king always starts on its own square and can't be moved.</p>
+        <p>Pick <b>Draft</b> on the setup screen to build both armies from scratch. You're shown 16 pairs of cards, 8 of them for you to choose from; take one, and the one you leave goes to your opponent. Your army is your 8 picks plus the 8 your opponent passed over, so it might have four bishops and a Cyclops where the pawns usually stand. One pair is always King vs King, so everybody gets exactly one king. You can read the rules of every card offered to you, which means you'll know the wildcards you passed to your opponent, but not the ones they picked. Both armies stay face down while you draft, your own picks included; when it's over, all 32 pieces flip face up on the board one by one over about 10 seconds. Armies are laid out automatically and can't be rearranged: the king on its own square, rooks in the corners, the queen beside the king, knights and bishops where they usually stand, pawns across the front, and everything else wherever it fits.</p>
         <h3>Pass &amp; Play</h3>
         <p>Two people can play on one device. Each player looks at their own cards in private, and between turns a screen covers the board until the next player taps <i>Ready</i>, so nobody sees the other's wildcard rules. The board can turn to face whoever is moving.</p>
         <h3>Difficulty</h3>
@@ -3095,13 +3095,13 @@ function finishDraft() {
     if (token !== PD.token) return;
     show('game');
     G.start({ mode: PD.mode, human: PD.human, level: settings.level, wild, state, known, privacy: settings.privacy, autoflip: settings.autoflip,
-      arrange: local ? ['w', 'b'] : [PD.human], reveal: true, viewer: v });
+      reveal: true, viewer: v });
   }, 900);
 }
 $('#pickBack').addEventListener('click', () => { PD.token++; PD.busy = false; clearTimeout(PD.revealTimer); show('setup'); });
 
 /* ---------- the reveal on the board: every piece starts face down and flips one by one ---------- */
-function boardReveal(colors) {
+function boardReveal() {
   const b = G.board, s = G.s, token = G.token;
   G.intro = true; G.revealing = true; G.render();
   const squares = c => { const out = []; for (const r of (c === 'w' ? [0, 1] : [7, 6])) for (let f = 0; f < 8; f++) out.push(r * 8 + f); return out; };
@@ -3116,7 +3116,7 @@ function boardReveal(colors) {
     hideArrangeBar();
     G.revealing = false; G.intro = false;
     renderWildInfo(); G.render();
-    setTimeout(() => { if (token === G.token) arrangeSeq(colors); }, 500);
+    setTimeout(() => { if (token === G.token) startDrafted(); }, 500);
   };
   const tick = () => {
     if (done || token !== G.token) return;
@@ -3139,58 +3139,25 @@ function boardReveal(colors) {
 }
 function faceDownAt(q) { const el = G.board.elAt(q); return !!(el && el.classList.contains('facedown')); }
 
-/* ---------- setting up a drafted army: tap two of your pieces to swap them ---------- */
-function showArrangeBar(c) {
-  $('#arrangeDone span').textContent = 'Ready';
-  $('#arrangeText').textContent = `${G.mode === 'local' ? sideName(c) + ', set' : 'Set'} up your army: tap two pieces to swap them. The king stays put.`;
-  $('#arrangeBar').hidden = false;
-}
+/* ---------- after the reveal: drafted armies keep their automatic layout and the game begins ---------- */
 function hideArrangeBar() { $('#arrangeBar').hidden = true; }
-function arrangeSeq(colors) {
-  if (!colors.length) {
-    G.arranging = null; hideArrangeBar();
-    G.hist = [{ s: G.s }]; G.legal = E.legalMoves(G.s);
-    if (G.mode === 'local') {
-      if (G.privacy) { handTo(G.s.turn, afterIntro, true); return; }
-      G.view = G.s.turn; if (G.autoflip) G.board.setFlip(G.s.turn === 'b');
-    }
-    toast(`${pieceSVG('K', G.s.turn)}<span>Armies ready. ${G.mode === 'local' ? sideName(G.s.turn) + ' to move' : G.s.turn === G.human ? 'Your move' : 'Their move'}</span>`, 'var(--gold)');
-    afterIntro();
-    return;
+function startDrafted() {
+  hideArrangeBar();
+  G.hist = [{ s: G.s }]; G.legal = E.legalMoves(G.s);
+  if (G.mode === 'local') {
+    if (G.privacy) { handTo(G.s.turn, afterIntro, true); return; }
+    G.view = G.s.turn; if (G.autoflip) G.board.setFlip(G.s.turn === 'b');
   }
-  const c = colors[0];
-  const go = () => {
-    G.arranging = c; G.arrSel = -1;
-    if (G.mode === 'local') { G.view = c; if (G.autoflip) G.board.setFlip(c === 'b'); }
-    showArrangeBar(c); G.render();
-    arrangeDone = () => { G.arranging = null; hideArrangeBar(); arrangeSeq(colors.slice(1)); };
-  };
-  if (G.mode === 'local' && G.privacy) {
-    G.arranging = c; hideArrangeBar(); G.render();
-    passCurtain(c, `${sideName(c)}, set up your army`, `${sideName(opp(c))}, look away while ${sideName(c)} arranges their pieces.`, `I'm ${sideName(c)}. Show my army`, go);
-  } else go();
+  toast(`${pieceSVG('K', G.s.turn)}<span>Armies ready. ${G.mode === 'local' ? sideName(G.s.turn) + ' to move' : G.s.turn === G.human ? 'Your move' : 'Their move'}</span>`, 'var(--gold)');
+  afterIntro();
 }
 let arrangeDone = null;
 $('#arrangeDone').addEventListener('click', () => { if (arrangeDone) { const f = arrangeDone; arrangeDone = null; Sound.play('select'); f(); } });
-function arrangeTap(q) {
-  const p = G.s.b[q];
-  if (!p || p.c !== G.arranging) { G.arrSel = -1; renderMarks(); return; }
-  if (p.t === 'K') { G.arrSel = -1; renderMarks(); toast(`${pieceSVG('K', p.c)}<span>The king stays on its own square</span>`, 'var(--gold)'); return; }
-  if (G.arrSel < 0 || G.arrSel === q) { G.arrSel = G.arrSel === q ? -1 : q; Sound.play('select'); renderMarks(); return; }
-  const a = G.arrSel, b = G.s.b.slice();
-  [b[a], b[q]] = [b[q], b[a]];
-  for (const k of [a, q]) if (b[k].t === 'phoenix') b[k] = { ...b[k], d: { ...b[k].d, home: k } };
-  G.s = { ...G.s, b };
-  G.arrSel = -1;
-  G.board.setPieces(G.s, { anim: true });
-  Sound.play('move');
-  renderMarks();
-}
 
 /* ---------- the game ---------- */
 const G = {
   board: null, s: null, hist: [], log: [], mode: 'ai', human: 'w', ai: 'b', level: 'medium', wild: null,
-  privacy: true, autoflip: true, view: 'w', intro: false, passing: false, revealing: false, arranging: null, arrSel: -1, known: null, drafted: false,
+  privacy: true, autoflip: true, view: 'w', intro: false, passing: false, revealing: false, known: null, drafted: false,
   legal: [], sel: -1, selMoves: [], busy: false, over: null, token: 0, hover: -1,
   start(cfg) {
     this.token++;
@@ -3200,7 +3167,7 @@ const G = {
     this.s = cfg.state || E.newGame({ wild: cfg.wild, slots: cfg.slots });
     this.hist = cfg.hist || [{ s: this.s }];
     this.log = cfg.log || [];
-    this.over = null; this.sel = -1; this.busy = false; this.intro = fresh; this.passing = false; this.arranging = null; this.arrSel = -1;
+    this.over = null; this.sel = -1; this.busy = false; this.intro = fresh; this.passing = false;
     this.known = cfg.known || null; this.drafted = !!cfg.known;
     this.view = this.mode === 'local' ? (cfg.viewer || this.s.turn) : this.human;
     this.revealing = !!cfg.reveal;
@@ -3209,17 +3176,17 @@ const G = {
     const lv = LEVELS[this.level];
     $('#game').style.setProperty('--lv', this.mode === 'local' ? 'var(--gold)' : lv.color);
     $('#modeChip').textContent = this.mode === 'local' ? 'Pass & Play · 2 players' : `vs ${lv.name} · ${lv.who}`;
-    if (cfg.arrange) {
+    if (cfg.reveal) {
       this.board.clear();
-      this.board.setPieces(this.s, { anim: !cfg.reveal });
-      if (cfg.reveal) this.board.setFacedown(new Set(this.s.b.map((p, q) => (p ? q : -1)).filter(q => q >= 0)));
+      this.board.setPieces(this.s, { anim: false });
+      this.board.setFacedown(new Set(this.s.b.map((p, q) => (p ? q : -1)).filter(q => q >= 0)));
       Sound.play('deal');
     }
     else if (fresh) this.board.setPieces(startingArmy(this.s, cfg.slots), { anim: false });
     else this.board.setPieces(this.s, { anim: false, frozen: frozenSquares(this.s) });
     this.board.resetEnd();
     renderWildInfo(); renderLog(); this.render();
-    if (cfg.arrange) { if (cfg.reveal) boardReveal(cfg.arrange); else arrangeSeq(cfg.arrange); return; }
+    if (cfg.reveal) { boardReveal(); return; }
     const go = () => (fresh ? runIntro(cfg.slots) : afterIntro());
     if (this.mode === 'local' && this.privacy) handTo(this.s.turn, go, true);
     else go();
@@ -3229,9 +3196,9 @@ const G = {
     renderWildInfo();
     const canUndo = this.mode === 'local' ? !this.over && this.hist.length > 1
       : this.level !== 'xtreme' && !this.over && this.hist.some((h, i) => i > 0 && this.hist[i - 1].s.turn === this.human);
-    $('#undoBtn').disabled = !canUndo || this.intro || this.passing || !!this.arranging;
+    $('#undoBtn').disabled = !canUndo || this.intro || this.passing;
     $('#undoBtn').title = this.mode === 'ai' && this.level === 'xtreme' ? 'No take-backs in Xtreme' : '';
-    $('#resignBtn').disabled = !!this.over || this.intro || this.passing || !!this.arranging;
+    $('#resignBtn').disabled = !!this.over || this.intro || this.passing;
   },
 };
 /* Who is looking at the screen: whose wildcard rules may be shown. */
@@ -3242,7 +3209,7 @@ function hasOracle(c) { return !!(G.s && G.s.b.some(p => p && p.t === 'oracle' &
 function seenInDraft(c, t) { const v = viewerSide(); return !!(G.known && G.known[v] && G.known[v].includes(t)) && v !== c; }
 function knowsType(c, t) { const v = viewerSide(); return !!G.over || v === c || hasOracle(v) || seenInDraft(c, t); }
 function canAct() {
-  return !G.busy && !G.over && !G.intro && !G.passing && !G.arranging && $('#curtain').hidden &&
+  return !G.busy && !G.over && !G.intro && !G.passing && $('#curtain').hidden &&
     (G.mode === 'local' ? G.view === G.s.turn : G.s.turn === G.human);
 }
 
@@ -3334,7 +3301,6 @@ function renderStatus() {
   if (G.mode === 'local') {
     const c = G.s.turn, n = sideName(c);
     if (G.over) t = G.over.winner ? `${sideName(G.over.winner)} wins` : 'Draw';
-    else if (G.arranging) t = `${sideName(G.arranging)} sets up`;
     else if (G.revealing) t = 'The reveal';
     else if (G.intro) t = 'Dealing the wildcards…';
     else if (G.passing) t = `Passing to ${sideName(c)}…`;
@@ -3343,7 +3309,6 @@ function renderStatus() {
     return;
   }
   if (G.over) t = G.over.winner === G.human ? 'You won' : G.over.winner ? 'You lost' : 'Draw';
-  else if (G.arranging) t = 'Set up your army';
   else if (G.revealing) t = 'The reveal';
   else if (G.intro) t = 'Dealing the wildcards…';
   else if (G.s.turn === G.human) t = E.inCheck(G.s, G.human) ? `Check by the ${checkText(G.s, G.human)}!` : (G.s.extra ? 'Extra turn!' : 'Your move');
@@ -3377,7 +3342,6 @@ function kingSq(s, c) { return E.findKing(s, c); }
 function renderMarks() {
   const s = G.s, last = s.last;
   const o = { last: last ? [last.o, last.t] : null, sel: G.sel, check: -1, marks: [], xprev: null, hover: -1 };
-  if (G.arranging) { G.board.setMarks({ sel: G.arrSel }); return; }
   const k = kingSq(s, s.turn);
   if (k >= 0 && (!G.over || G.over.reason === 'mate') && E.inCheck(s, s.turn)) {
     o.check = k; o.checkers = E.checkers(s, s.turn); o.arrows = o.checkers.map(q => [q, k]);
@@ -3452,7 +3416,6 @@ function initBoardInput() {
     const q = G.board.sqAt(e.clientX, e.clientY);
     if (q < 0) return;
     const p = G.s.b[q];
-    if (G.arranging) { if ($('#curtain').hidden) arrangeTap(q); return; }
     const myTurn = canAct();
     if (myTurn && G.sel >= 0 && q !== G.sel) {
       const ms = G.selMoves.filter(m => m.t === q && m.t !== m.o);
@@ -3817,8 +3780,8 @@ $('#resignBtn').addEventListener('click', () => {
 });
 $('#leaveBtn').addEventListener('click', () => {
   if (!$('#curtain').hidden) return;
-  if (G.over || (G.hist.length < 2 && !G.arranging)) { G.token++; hideArrangeBar(); show('menu'); return; }
-  confirmBox('Leave the game?', 'This game will be abandoned.', 'Leave', () => { G.token++; G.busy = false; G.intro = false; G.passing = false; G.arranging = null; hideArrangeBar(); show('menu'); });
+  if (G.over || (G.hist.length < 2 && !G.intro)) { G.token++; hideArrangeBar(); show('menu'); return; }
+  confirmBox('Leave the game?', 'This game will be abandoned.', 'Leave', () => { G.token++; G.busy = false; G.intro = false; G.passing = false; hideArrangeBar(); show('menu'); });
 });
 document.addEventListener('click', e => {
   const c = e.target.closest('.chip[data-wild]');
@@ -3989,7 +3952,7 @@ function boot(data) {
 if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
   window.claude.hot.snapshot(() => ({
     screen: current,
-    game: current === 'game' && G.s && !G.over && !G.intro && !G.arranging ? { mode: G.mode, privacy: G.privacy, autoflip: G.autoflip, wild: G.wild, human: G.human, level: G.level, hist: G.hist, log: G.log, known: G.known } : null,
+    game: current === 'game' && G.s && !G.over && !G.intro ? { mode: G.mode, privacy: G.privacy, autoflip: G.autoflip, wild: G.wild, human: G.human, level: G.level, hist: G.hist, log: G.log, known: G.known } : null,
   }));
 }
 const hot = window.claude && window.claude.hot;
