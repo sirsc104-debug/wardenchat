@@ -891,3 +891,10 @@ svg.ps-gilded.pc-b { filter: drop-shadow(0 0 3px rgba(255, 210, 90, .55)); }
 .item-kind { font: 600 11px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
 .new-tag, .shop-tabs button.new::after { display: inline-block; font: 700 10px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: #1b1916; background: var(--lv-easy); border-radius: 999px; padding: 1px 6px; }
 .shop-tabs button.new::after { content: "New"; margin-left: 6px; vertical-align: 1px; }
+
+/* ---------- Google Sites landing (only when the Sites loader sets WCC_LANDING) ---------- */
+body.landing .menu-btns > :not(.landing-only), body.landing #acctChip { display: none !important; }
+body.landing #openTabBtn { padding: 20px 24px; }
+body.landing #openTabBtn span { font-size: 26px; }
+.landing-note { margin: 4px 2px 0; font-size: 14px; color: var(--mute); }
+.landing-note a { color: var(--gold-hi); cursor: pointer; text-decoration: underline; }

@@ -23,6 +23,8 @@
         <h1 class="logo"><span class="logo-a">Wildcard</span><span class="logo-b">Chess</span></h1>
         <p class="tagline">Both armies start with the usual sixteen pieces, plus a wildcard with rules of its own. You can see your opponent's. You can't see what it does.</p>
         <nav class="menu-btns" aria-label="Main menu">
+          <button class="btn primary landing-only" id="openTabBtn" hidden><span>Open in a new tab</span><small>Plays full size in its own window</small></button>
+          <p class="landing-only landing-note" id="landingNote" hidden></p>
           <button class="btn primary" data-mode="ai" data-deal="classic" data-fog="0" id="playBtn"><span>Play</span><small>vs the computer, random wildcards</small></button>
           <div class="menu-modes">
             <button class="btn draft-btn" data-mode="ai" data-deal="draft" data-fog="0" id="draftBtn"><span>Draft</span><small>Build your army card by card</small></button>
@@ -278,5 +280,6 @@
 <script src="js/shop.js"></script>
 <script src="js/online.js"></script>
 <script src="js/game.js"></script>
+<script src="js/landing.js"></script>
 </body>
 </html>

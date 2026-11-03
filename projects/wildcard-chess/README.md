@@ -184,13 +184,15 @@ dist/               the single-file build
 
 ## Single-file build (Google Sites)
 
-`dist/wildcard-chess-google-sites.html` is the whole game in one self-contained file, with the real Warden Chat connection (no demo wallet). To put it on a Google Site, open the file in a text editor, copy everything, then in Google Sites choose **Insert → Embed → Embed code**, paste it, and click **Next → Insert**. Drag the embed's corners to make it big (about 1280 × 860 works well; it also fits smaller, down to phone width). Settings, the Codex and equipped cosmetics save in each visitor's own browser; coins, diamonds, membership and online games come from Warden Chat once its back end is deployed (until then the game hides accounts and works offline).
+`dist/wildcard-chess-google-sites.html` is for a Google Site. Google Sites shows embeds in a small frame and blocks fullscreen, so this file shows the title screen (title, animated exhibition board and cards) with one button, **Open in a new tab**, which opens an `about:blank` tab and writes the full game into it, with the real Warden Chat connection (no demo wallet). If the browser blocks the new tab, the page says so and offers to play inside the frame instead. Closing or reloading that tab ends the game; the Google Site opens it again.
 
-`dist/wildcard-chess.html` is the same file. Rebuild both after changing the game with:
+To put it on a Google Site, open the file in a text editor, copy everything, then in Google Sites choose **Insert → Embed → Embed code**, paste it, and click **Next → Insert**. Drag the embed's corners to the full width of the page and about 700 px tall. Settings, the Codex and equipped cosmetics save in each visitor's own browser; coins, diamonds, membership and online games come from Warden Chat once its back end is deployed (until then the game hides accounts and works offline).
+
+`dist/wildcard-chess.html` is the plain single-file game (open it anywhere). Rebuild both after changing the game with:
 
 ```sh
 python3 build-artifact.py dist/wildcard-chess.html --standalone
-cp dist/wildcard-chess.html dist/wildcard-chess-google-sites.html
+python3 build-sites.py
 ```
 
 Progress (Codex discoveries and your last settings) is kept in the browser's `localStorage`.
