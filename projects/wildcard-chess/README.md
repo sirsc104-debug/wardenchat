@@ -98,6 +98,26 @@ Pick **Draft** on the main menu (or **Deal: Draft** on the setup screen; it work
 
 Two players on one device. The deal is done in private: White sees their own cards while Black looks away, then the device is passed and Black sees theirs. During the game the sidebar and tooltips only explain the wildcards of the player whose turn it is. After each move a **privacy screen** covers everything until the next player taps *Ready*, and the board can **flip** to face whoever is moving (both can be switched off in setup). Undo takes back one move. When the game ends, both sides' wildcards are revealed and added to the Codex.
 
+## Coins, diamonds, membership and the Shop
+
+Wildcard Chess uses the **SirSC wallet** that Downhill Death Run already uses (`docs/ECONOMY-API.md` in `sirsc104-debug/claude`): the same Warden Chat accounts, 🪙 coins, 💎 diamonds (1 💎 = 5,000 coins) and 👑 SirSC Membership, through the same `sirsc_*` functions with `game = 'wcc'`. What this game adds on the server is in [`docs/ECONOMY-WCC.md`](docs/ECONOMY-WCC.md), with a ready-to-paste Codex prompt in [`docs/CODEX-PROMPT-WCC.md`](docs/CODEX-PROMPT-WCC.md): `wcc_ping`, `wcc_reward` and the `wcc` catalog rows.
+
+**Earning coins** (games against the computer only; the server works every number out):
+
+| | Easy | Medium | Pro | Xtreme |
+|---|---|---|---|---|
+| Win | 500 | 1,000 | 2,000 | 4,000 |
+| Draw (30%) | 150 | 300 | 600 | 1,200 |
+| Loss (10%) | 50 | 100 | 200 | 400 |
+
+×1.25 for a drafted army, ×1.5 for members, +1,500 for the first win of each day, and +500 for every wildcard the account has never been paid for (lifetime, at most 25,000, outside the daily cap). **Daily limit: 25,000 coins** from Wildcard Chess (inside the wallet-wide 300,000). A game needs at least 12 plies and 30 seconds to pay; at most 20 paid games an hour. Pass & Play pays nothing, since one account would be playing both sides.
+
+**The Shop** (menu → Shop, or the account chip) sells cosmetics only, never an advantage: 8 board themes (Club Walnut free; Marble Hall and Ebony & Ivory 15,000 🪙 / 4 💎; Emerald Felt and Frozen Lake 22,500 / 6; Neon Arcade 12 💎 and Haunted Manor 15 💎 only), 6 card backs (used by the deal, the draft tiles and the face-down reveal), and 5 checkmate finales (Fireworks, Inferno and Deep Freeze 30,000 / 8; Supernova 20 💎). Clicking an item previews it on the Shop's board; buying equips it. Equipping is remembered per device and only counts for things the account owns.
+
+**Members** get 1.5× coins, 5 💎 a month, the SirSC Diamond badge by their name, that month's members' board to keep (November 2026: Royal Velvet) and the SirSC Diamond card back. The Diamonds tab sends SirSC a "please add my diamonds" request after paying in person, as in Downhill Death Run.
+
+**Until the server has `wcc_ping`**, accounts stay hidden and the game works exactly as before. `python3 build-artifact.py OUT.html --wallet-demo` adds a pretend back end (`js/wallet-mock.js`, labelled "Demo wallet" in the game) so the whole thing can be tried now: any username and password, 40,000 coins and 10 diamonds to start, and a button to try membership.
+
 ## Check and checkmate
 
 When a king is in check, every piece threatening it glows red, its square pulses, and a red arrow runs from it to the king; the status line names it ("Check by the Bomber on d5"). Indirect threats count too: a Bomber that could blow up a piece next to the king, or the piece a Catapult could fling onto it. A "Check!" stamp slams onto the board as the king shakes and the board's edges flash red.
@@ -119,6 +139,11 @@ js/engine.js        rules for every piece, legality, evaluation and the alpha-be
 js/fx.js            board particle effects and synthesized sound
 js/board.js         the board view: procedural wood, piece sprites, highlights
 js/game.js          screens, the deal, input, game flow, log, Codex, exhibition match
+js/cosmetics.js     board themes, card backs, finales, the wcc catalog, and what this device has equipped
+js/wallet.js        Warden Chat sign-in and the SirSC wallet (sirsc_* and wcc_* functions)
+js/wallet-mock.js   a pretend wallet back end, only in --wallet-demo builds
+js/shop.js          the account chip, sign-in, the Shop and the coins shown after a game
+docs/ECONOMY-WCC.md the back-end contract for Wildcard Chess on the SirSC wallet
 build-artifact.py   bundles everything into one HTML file
 dist/               the single-file build
 ```

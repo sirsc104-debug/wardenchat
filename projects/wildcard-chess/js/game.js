@@ -35,6 +35,7 @@ function show(id) {
   if (id === 'menu') Showcase.start(); else Showcase.stop();
   Embers.toggle(id !== 'game');
   if (id === 'codex') renderCodex();
+  if (id === 'shop') Shop.render();
   if (id === 'game') requestAnimationFrame(() => G.board && G.board.resize());
   if (id !== 'game' && id !== 'draft' && id !== 'pick') { $('#curtain').hidden = true; curtainCb = null; }
   if (id !== 'pick') PD.token++;
@@ -585,6 +586,7 @@ function runIntro(slots) {
 }
 function afterIntro() {
   G.intro = false;
+  G.startedAt = Date.now();
   G.render();
   if (G.mode === 'ai' && G.s.turn === G.ai) aiTurn();
 }
@@ -962,18 +964,8 @@ function endFX(st, prev) {
     if (st.reason === 'mate') setTimeout(() => { if (tk === G.token) Sound.play('check'); }, 150);
     setTimeout(() => {
       if (tk !== G.token) return;
-      if (k >= 0) {
-        b.spotlight(k);
-        b.ringAt(k, '#ffcf6b', 2.6, 14, 44); b.ringAt(k, lose ? '#ff5a3c' : '#ffd98e', 1.7, 10, 32);
-        b.burstAt(k, { n: 70, color: lose ? ['#ff8a6a', '#ff3b20', '#fff'] : ['#ffd98e', '#ff9a3c', '#ffffff'], kind: 'spark', speed: 2.4, life: 64, gravity: 0.03 });
-        b.burstAt(k, { n: 20, color: ['#3a332c', '#5a5048'], kind: 'smoke', speed: 0.6, size: 0.16, life: 70, gravity: -0.03 });
-        const el = st.reason === 'mate' ? b.elAt(k) : null;
-        if (el) el.classList.add('toppled');
-      }
-      b.shake(true); b.flash(lose ? 'red' : 'gold');
-      Sound.play('mate');
       const sub = G.mode === 'local' ? `${sideName(st.winner)} wins` : lose ? 'You lose' : 'You win';
-      b.stamp(`${st.reason === 'mate' ? 'Checkmate' : 'King down!'}<small>${sub}</small>`, 'mate' + (lose ? ' lose' : ''), 0);
+      playFinale(b, k, lose ? 'classic' : Look.current().finale, { lose, word: st.reason === 'mate' ? 'Checkmate' : 'King down!', sub, topple: st.reason === 'mate', keep: true });
     }, 550);
     return 3100;
   }
@@ -981,6 +973,53 @@ function endFX(st, prev) {
   setTimeout(() => b.stamp(st.reason === 'stalemate' ? 'Stalemate' : 'Draw', 'draw', 0), 400);
   return 2100;
 }
+
+/* A checkmate finale on board b around the king on square k. The winner's equipped finale (Shop);
+   a loss always gets the plain red one. Also used by the Shop's preview. */
+function playFinale(b, k, id, o = {}) {
+  const f = FINALES[id] || FINALES.classic, lose = !!o.lose, colors = lose ? ['#ff8a6a', '#ff3b20', '#ffffff'] : f.colors;
+  if (k >= 0) {
+    b.spotlight(k);
+    b.ringAt(k, lose ? '#ff5a3c' : f.ring, 2.6, 14, 44); b.ringAt(k, colors[1], 1.7, 10, 32);
+    b.burstAt(k, { n: 70, color: colors, kind: 'spark', speed: 2.4, life: 64, gravity: 0.03 });
+    b.burstAt(k, { n: 20, color: ['#3a332c', '#5a5048'], kind: 'smoke', speed: 0.6, size: 0.16, life: 70, gravity: -0.03 });
+    const el = o.topple === false ? null : b.elAt(k);
+    if (el) el.classList.add('toppled');
+  }
+  b.shake(true); b.flash(lose ? 'red' : f.flash);
+  Sound.play('mate');
+  if (!lose && FINALE_EXTRAS[id]) FINALE_EXTRAS[id](b, k);
+  b.stamp(`${o.word || 'Checkmate'}<small>${o.sub || ''}</small>`, 'mate' + (lose ? ' lose' : ' f-' + id), o.keep ? 0 : 2800);
+}
+const rndSq = () => Math.floor(Math.random() * 64);
+const FINALE_EXTRAS = {
+  fireworks(b) {
+    const c = FINALES.fireworks.colors;
+    for (let i = 0; i < 9; i++) setTimeout(() => {
+      const q = rndSq(), col = c[i % c.length];
+      b.ringAt(q, col, 1.1, 6, 26);
+      b.burstAt(q, { n: 34, color: [col, '#ffffff'], kind: 'spark', speed: 1.9, life: 50, gravity: 0.05 });
+      Sound.play('zap');
+    }, 200 + i * 180);
+  },
+  inferno(b) {
+    for (let w = 0; w < 3; w++) setTimeout(() => {
+      for (let f = 0; f < 8; f++) for (const r of [0, 7]) b.burstAt(r * 8 + f, { n: 10, color: FINALES.inferno.colors, kind: 'spark', speed: 0.9, life: 60, gravity: -0.12, size: 0.08 });
+      b.flash('red');
+    }, 150 + w * 380);
+  },
+  frost(b, k) {
+    b.root.classList.add('frozen-over');
+    setTimeout(() => b.root.classList.remove('frozen-over'), 2600);
+    for (let i = 0; i < 4; i++) setTimeout(() => b.burstAt(k >= 0 ? k : rndSq(), { n: 30, color: FINALES.frost.colors, kind: 'chip', speed: 2.2, life: 56, size: 0.06 }), 120 + i * 160);
+    for (let i = 0; i < 24; i++) setTimeout(() => b.burstAt(rndSq(), { n: 4, color: ['#ffffff', '#cfeeff'], kind: 'spark', speed: 0.3, life: 70, gravity: 0.04, size: 0.05 }), i * 60);
+  },
+  supernova(b, k) {
+    const at = k >= 0 ? k : 27;
+    for (let i = 0; i < 6; i++) setTimeout(() => b.ringAt(at, FINALES.supernova.colors[i % 5], 1 + i * 0.9, 16 - i * 2, 40), i * 110);
+    setTimeout(() => { b.flash('nova'); b.burstAt(at, { n: 120, color: FINALES.supernova.colors, kind: 'spark', speed: 3.4, life: 70, gravity: 0 }); b.shake(true); Sound.play('boom'); }, 420);
+  },
+};
 
 function posKey(s) { return s.b.map(p => (p ? p.t + p.c : '.')).join(',') + s.turn; }
 
@@ -1090,8 +1129,11 @@ function endGame(st) {
   modal(`<h2 class="${cls}">${title}</h2>
     <p class="why">${REASONS[st.reason](st.winner, loserName)}</p>
     <div class="reveal">${reveal}</div>
+    <div class="reward" id="rewardBox"></div>
     <div class="modal-btns"><button class="btn primary" data-act="rematch"><span>Play again</span></button>
     <button class="btn" data-act="look"><span>See the board</span></button><button class="btn ghost" data-act="menu"><span>Main menu</span></button></div>`);
+  Shop.reward(st, { mode: G.mode, human: G.human, level: G.level, drafted: G.drafted, plies: G.s.ply,
+    durationMs: Date.now() - (G.startedAt || Date.now()), codex: [...new Set(G.wild.w.concat(G.wild.b))] });
 }
 function confirmBox(title, text, yes, cb) {
   modal(`<h2 class="draw" style="font-size:40px">${title}</h2><p class="why">${text}</p>
@@ -1280,8 +1322,10 @@ function initMenu() {
 
 function boot(data) {
   installPieceDefs();
+  Look.apply();
   AI.init();
   initMenu(); initSetup();
+  Shop.init();
   G.board = new BoardView($('#mainBoard'), { seed: 11 });
   initBoardInput();
   const g = data && data.game;

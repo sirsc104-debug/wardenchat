@@ -16,6 +16,7 @@
 
   <!-- MAIN MENU -->
   <section class="screen" id="menu">
+    <div class="acct-chip" id="acctChip" hidden></div>
     <div class="menu-wrap">
       <div class="menu-left">
         <p class="eyebrow">Chess with 50 secret pieces</p>
@@ -27,6 +28,7 @@
           <button class="btn" data-mode="local" id="localBtn"><span>Pass &amp; Play</span><small>2 players, one device</small></button>
           <div class="menu-row">
             <button class="btn btn-sm" data-go="codex"><span>Codex</span><small id="codexCount">0 / 50 discovered</small></button>
+            <button class="btn btn-sm" data-go="shop"><span>Shop</span><small id="shopCount">Boards &amp; more</small></button>
             <button class="btn btn-sm" data-go="how"><span>Rules</span><small>How it works</small></button>
             <button class="btn btn-sm ghost" id="soundBtn"><span>Sound</span><small id="soundState">On</small></button>
           </div>
@@ -171,6 +173,25 @@
     </div>
   </section>
 
+  <!-- SHOP -->
+  <section class="screen" id="shop">
+    <header class="topbar"><button class="back" data-go="menu">← Menu</button><h2>Shop</h2><div class="shop-wallet" id="shopWallet"></div></header>
+    <div class="shop-body">
+      <div class="shop-preview">
+        <div class="board" id="shopBoard"></div>
+        <p class="shop-pv-cap" id="shopPvCap"></p>
+      </div>
+      <div class="shop-main">
+        <div class="shop-tabs" role="tablist">
+          <button data-tab="board" role="tab">Boards</button><button data-tab="back" role="tab">Card backs</button><button data-tab="finale" role="tab">Finales</button>
+          <button data-tab="member" role="tab">👑 Membership</button><button data-tab="diamonds" role="tab">💎 Diamonds</button>
+        </div>
+        <div class="shop-grid" id="shopGrid"></div>
+        <p class="shop-foot">Coins, diamonds and membership are your SirSC wallet, shared with Downhill Death Run and SirSC's other games. Earn coins by beating the computer: 500 on Easy up to 4,000 on Xtreme, ×1.25 for a drafted army, ×1.5 for members, +1,500 for your first win each day, and 500 for every wildcard new to your Codex. Up to 25,000 coins a day.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- HOW -->
   <section class="screen" id="how">
     <header class="topbar"><button class="back" data-go="menu">← Menu</button><h2>How it works</h2></header>
@@ -186,6 +207,8 @@
         <p>Click or drag a piece. Dots mark quiet moves, rings mark captures, and coloured stars mark special abilities. A pulsing ring on the piece itself means it has an ability it uses in place (click it again to use it). If one square offers two different moves, you'll be asked which.</p>
         <h3>Promotion</h3>
         <p>Pawns that reach the last rank can promote into a queen, rook, bishop, knight, or one of your wildcards.</p>
+        <h3>Coins, diamonds and the Shop</h3>
+        <p>Sign in with your Warden Chat account to earn <b>🪙 coins</b> for games against the computer: 500 for beating Easy, 1,000 Medium, 2,000 Pro, 4,000 Xtreme. Draws pay 30% and losses 10%. A drafted army pays ×1.25, SirSC Members get ×1.5, your first win each day adds 1,500, and every wildcard new to your Codex pays 500. You can earn up to 25,000 coins a day. Pass &amp; Play games don't earn coins. Spend coins or <b>💎 diamonds</b> in the Shop on board themes, card backs and checkmate finales. It's the same wallet as Downhill Death Run.</p>
         <h3>The draft</h3>
         <p>Pick <b>Draft</b> on the setup screen to build both armies from scratch. You're shown 16 pairs of cards, 8 of them for you to choose from; take one, and the one you leave goes to your opponent. Your army is your 8 picks plus the 8 your opponent passed over, so it might have four bishops and a Cyclops where the pawns usually stand. One pair is always King vs King, so everybody gets exactly one king. You can read the rules of every card offered to you, which means you'll know the wildcards you passed to your opponent, but not the ones they picked. Both armies stay face down while you draft, your own picks included; when it's over, all 32 pieces flip face up on the board one by one over about 10 seconds. Armies are laid out automatically and can't be rearranged: the king on its own square, rooks in the corners, the queen beside the king, knights and bishops where they usually stand, pawns across the front, and everything else wherever it fits.</p>
         <h3>Pass &amp; Play</h3>
@@ -205,6 +228,21 @@
       <button class="btn primary big" id="curtainBtn"><span id="curtainBtnLabel">Ready</span></button>
     </div>
   </div>
+  <div class="modal" id="signin" hidden>
+    <form class="modal-card signin-card" id="signinForm" role="dialog" aria-modal="true" aria-labelledby="siTitle">
+      <h2 class="draw" id="siTitle">Sign in</h2>
+      <p class="why">Use your Warden Chat account. Your coins, diamonds and membership are shared with Downhill Death Run and SirSC's other games.</p>
+      <label class="si-field">Username <input id="siUser" autocomplete="username" maxlength="24" required></label>
+      <label class="si-field">Password <input id="siPass" type="password" autocomplete="current-password" required></label>
+      <p class="si-err" id="siErr" role="alert"></p>
+      <div class="modal-btns">
+        <button class="btn primary" type="submit"><span>Sign in</span></button>
+        <button class="btn" type="button" id="siCreate"><span>Create account</span></button>
+        <button class="btn ghost" type="button" id="siClose"><span>Cancel</span></button>
+      </div>
+      <p class="si-foot">Changing your password or deleting your account happens on <a id="siChat" href="https://chat.sirsc104.com/" target="_blank" rel="noopener">Warden Chat</a>.</p>
+    </form>
+  </div>
   <div class="modal" id="modal" hidden><div class="modal-card" id="modalCard" role="dialog" aria-modal="true"></div></div>
   <div class="tip" id="tip" hidden></div>
   <div class="chooser" id="chooser" hidden></div>
@@ -213,6 +251,9 @@
 <script src="js/engine.js"></script>
 <script src="js/fx.js"></script>
 <script src="js/board.js"></script>
+<script src="js/cosmetics.js"></script>
+<script src="js/wallet.js"></script>
+<script src="js/shop.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>

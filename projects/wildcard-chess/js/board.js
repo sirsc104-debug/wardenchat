@@ -14,7 +14,8 @@ function mulberry32(a) {
 class BoardView {
   constructor(root, o = {}) {
     this.root = root; this.flip = false; this.seed = o.seed || 11; this.showCoords = o.coords !== false;
-    this.els = new Map(); this.size = 0;
+    this.els = new Map(); this.size = 0; this.theme = o.theme || 'walnut';
+    (BoardView.all || (BoardView.all = [])).push(this);
     root.classList.add('board');
     this.uid = 'b' + (BoardView.n = (BoardView.n || 0) + 1);
     root.innerHTML = '<canvas class="wood"></canvas><div class="coords"></div><div class="hl"></div><div class="pieces"></div>' +
@@ -56,61 +57,24 @@ class BoardView {
   }
 
   drawWood(dpr) {
-    const c = this.wood.getContext('2d'), S = this.size * dpr, s = S / 8, rnd = mulberry32(this.seed);
-    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
-      const light = (x + y) % 2 === 0;
-      const base = light ? [225, 197, 150] : [157, 109, 66];
-      const v = (rnd() - 0.5) * 14;
-      const x0 = x * s, y0 = y * s;
-      c.save();
-      c.beginPath(); c.rect(x0, y0, s, s); c.clip();
-      c.fillStyle = `rgb(${base[0] + v},${base[1] + v * 0.9},${base[2] + v * 0.7})`;
-      c.fillRect(x0, y0, s, s);
-      const vertical = rnd() < 0.72;
-      c.translate(x0 + s / 2, y0 + s / 2);
-      if (!vertical) c.rotate(Math.PI / 2);
-      c.translate(-s / 2, -s / 2);
-      // broad soft bands
-      for (let i = 0; i < 5; i++) {
-        c.fillStyle = rnd() < 0.5 ? `rgba(110,60,20,${0.03 + rnd() * 0.05})` : `rgba(255,240,205,${0.03 + rnd() * 0.05})`;
-        const bx = rnd() * s, bw = s * (0.08 + rnd() * 0.22);
-        c.fillRect(bx, 0, bw, s);
-      }
-      // fine grain lines
-      const lines = 22 + Math.floor(rnd() * 14);
-      for (let i = 0; i < lines; i++) {
-        const px = rnd() * s, amp = s * (0.004 + rnd() * 0.02), k = 0.6 + rnd() * 1.8, ph = rnd() * 6.28;
-        const dark = rnd() < 0.7;
-        c.strokeStyle = dark ? `rgba(${light ? '120,72,30' : '70,38,14'},${0.05 + rnd() * 0.14})` : `rgba(255,236,200,${0.04 + rnd() * 0.08})`;
-        c.lineWidth = (0.4 + rnd() * 1.5) * dpr * (s / (90 * dpr));
-        c.beginPath();
-        for (let t = 0; t <= 12; t++) {
-          const yy = (t / 12) * s, xx = px + Math.sin((t / 12) * Math.PI * k + ph) * amp;
-          t ? c.lineTo(xx, yy) : c.moveTo(xx, yy);
-        }
-        c.stroke();
-      }
-      if (rnd() < 0.07) {
-        const kx = s * (0.2 + rnd() * 0.6), ky = s * (0.2 + rnd() * 0.6);
-        for (let r = 1; r <= 4; r++) {
-          c.strokeStyle = `rgba(90,50,20,${0.16 - r * 0.03})`; c.lineWidth = dpr;
-          c.beginPath(); c.ellipse(kx, ky, s * 0.02 * r, s * 0.06 * r, 0, 0, Math.PI * 2); c.stroke();
-        }
-      }
-      c.restore();
-    }
+    paintBoard(this.wood.getContext('2d'), this.size * dpr, this.theme, this.seed, dpr);
+  }
+  setTheme(id) {
+    if (!BOARD_THEMES[id] || id === this.theme) return;
+    this.theme = id;
+    if (this.size) { this.drawWood(Math.min(window.devicePixelRatio || 1, 2)); this.drawCoords(); }
   }
 
   drawCoords() {
     if (!this.showCoords) { this.coordEl.innerHTML = ''; return; }
     let h = '';
     for (let y = 0; y < 8; y++) {
-      const rank = this.flip ? y + 1 : 8 - y, light = y % 2 === 0;
-      h += `<span style="left:1.1%;top:${y * 12.5 + 0.6}%;color:${light ? '#9c6c41' : '#ead4ad'}">${rank}</span>`;
+      const rank = this.flip ? y + 1 : 8 - y, light = y % 2 === 0, ink = (BOARD_THEMES[this.theme] || BOARD_THEMES.walnut).ink;
+      h += `<span style="left:1.1%;top:${y * 12.5 + 0.6}%;color:${light ? ink[0] : ink[1]}">${rank}</span>`;
     }
     for (let x = 0; x < 8; x++) {
-      const file = 'abcdefgh'[this.flip ? 7 - x : x], light = (x + 7) % 2 === 0;
-      h += `<span style="left:${x * 12.5 + 10.2}%;top:${7 * 12.5 + 9.2}%;color:${light ? '#9c6c41' : '#ead4ad'}">${file}</span>`;
+      const file = 'abcdefgh'[this.flip ? 7 - x : x], light = (x + 7) % 2 === 0, ink = (BOARD_THEMES[this.theme] || BOARD_THEMES.walnut).ink;
+      h += `<span style="left:${x * 12.5 + 10.2}%;top:${7 * 12.5 + 9.2}%;color:${light ? ink[0] : ink[1]}">${file}</span>`;
     }
     this.coordEl.innerHTML = h;
   }
