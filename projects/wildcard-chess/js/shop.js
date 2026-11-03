@@ -64,13 +64,16 @@ const Shop = (() => {
 
   /* ---------- the shop screen ---------- */
   function items(kind) {
-    const free = { board: 'walnut', back: 'classic', finale: 'classic' }[kind];
+    const free = DEFAULT_LOOK[kind];
     return [kind + ':' + free].concat(WCC_CATALOG.filter(c => c.item_id.startsWith(kind + ':')).map(c => c.item_id));
   }
   function swatch(item) {
     const c = cosmeticOf(item);
     if (c.kind === 'board') return `<canvas class="sw-board" data-theme="${c.id}" width="128" height="128"></canvas>`;
     if (c.kind === 'back') return `<div class="sw-back" style="--a:${c.a};--b:${c.b};--ink:${c.ink};--bd:${c.border}"><span>W</span></div>`;
+    if (c.kind === 'pieces') return `<div class="sw-pieces"><span>${pieceSVG('Q', 'w', c.id)}</span><span>${pieceSVG('K', 'b', c.id)}</span></div>`;
+    if (c.kind === 'capture') return `<div class="sw-capture" style="--c1:${c.colors[0]};--c2:${c.colors[1]};--c3:${c.colors[2] || c.colors[0]}"><i></i><i></i><i></i><i></i><i></i><i></i>${pieceSVG('P', 'b')}</div>`;
+    if (c.kind === 'avatar') return `<div class="sw-avatar">${avatarHTML(c.id, 'w')}</div>`;
     return `<div class="sw-finale" style="--c1:${c.colors[0]};--c2:${c.colors[1]};--c3:${c.colors[2] || c.colors[0]}">${pieceSVG('K', 'w')}</div>`;
   }
   function stateOf(item) {
@@ -101,7 +104,36 @@ const Shop = (() => {
     w.innerHTML = (window.WCC_DEMO ? '<span class="pill demo" title="This build uses a pretend wallet stored in your browser. Nothing touches a real Warden Chat account.">Demo wallet</span>' : '') + `<span class="pill">🪙 <b>${fmt(Wallet.coins)}</b></span><span class="pill">💎 <b>${fmt(Wallet.diamonds)}</b></span>
       <span class="pill who">${esc(Account.user.username)}${badge()}</span><button type="button" class="btn small ghost" data-shop="signout"><span>Sign out</span></button>`;
   }
+  function featured() {
+    const week = Math.floor((Date.now() / 864e5 + 3) / 7);
+    const pool = WCC_CATALOG.filter(c => !c.member_only).map(c => c.item_id);
+    const rnd = mulberry32(week * 9301 + 49297), out = [];
+    const kinds = new Set();
+    while (out.length < 4 && pool.length) {
+      const i = Math.floor(rnd() * pool.length), id = pool.splice(i, 1)[0], k = id.split(':')[0];
+      if (kinds.has(k) && pool.some(x => !kinds.has(x.split(':')[0]))) continue;   // one of each kind where possible
+      kinds.add(k); out.push(id);
+    }
+    return out;
+  }
+  function renderFeatured() {
+    const box = q('#shopFeatured');
+    if (!box) return;
+    const until = new Date((Math.floor((Date.now() / 864e5 + 3) / 7) * 7 + 4) * 864e5);
+    box.innerHTML = `<div class="feat-head"><h3>Featured this week</h3><span>New picks ${until.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' })}</span></div>
+      <div class="feat-row">${featured().map(item => {
+        const c = cosmeticOf(item);
+        return `<div class="item feat ${preview === item ? 'pv' : ''}" data-preview="${item}" tabindex="0" role="button" aria-label="Preview ${esc(c.name)}">
+          <div class="item-art">${swatch(item)}</div>
+          <div class="item-txt"><div class="item-kind">${KIND_NAMES[c.kind]}${NEW_KINDS.includes(c.kind) ? ' <span class="new-tag">New</span>' : ''}</div><div class="item-name">${esc(c.name)}</div></div>
+          <div class="item-buy">${buyHTML(item)}</div></div>`;
+      }).join('')}</div>`;
+    for (const cv of box.querySelectorAll('canvas.sw-board')) paintBoard(cv.getContext('2d'), cv.width, cv.dataset.theme, 3, 2);
+  }
+  const KIND_NAMES = { board: 'Board', pieces: 'Piece set', back: 'Card back', capture: 'Capture effect', finale: 'Finale', avatar: 'Avatar' };
   function renderGrid() {
+    renderFeatured();
+    for (const b of document.querySelectorAll('.shop-tabs button')) b.classList.toggle('new', NEW_KINDS.includes(b.dataset.tab));
     for (const b of document.querySelectorAll('.shop-tabs button')) b.classList.toggle('on', b.dataset.tab === tab);
     const g = q('#shopGrid');
     if (tab === 'member') { g.innerHTML = memberHTML(); return; }
@@ -117,7 +149,7 @@ const Shop = (() => {
   }
   function memberHTML() {
     const until = Wallet.memberUntil ? new Date(Wallet.memberUntil).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
-    const month = WCC_CATALOG.filter(c => c.member_only && c.claim_from && Date.parse(c.claim_from) <= Date.now() && Date.now() < Date.parse(c.claim_until));
+    const month = WCC_CATALOG.filter(c => c.member_only && c.item_id.startsWith('board:') && c.claim_from && Date.parse(c.claim_from) <= Date.now() && Date.now() < Date.parse(c.claim_until));
     return `<div class="member-card">
       <div class="mc-head">${SIRSC_BADGE_SVG}<div><h3>SirSC Membership</h3><p>${Wallet.member ? `You're a member until ${until}.` : '$3 a month, paid to SirSC. It works across all of SirSC’s games.'}</p></div></div>
       <ul class="mc-perks">
@@ -125,7 +157,8 @@ const Shop = (() => {
         <li><b>5 💎 every month</b>, added the first time you play that month</li>
         <li><b>The SirSC Diamond</b> by your name</li>
         <li><b>This month's members' board</b>, yours forever: ${month.map(c => esc(cosmeticOf(c.item_id).name)).join(', ') || 'coming soon'}</li>
-        <li><b>The SirSC Diamond card back</b> while you're a member</li>
+        <li><b>This month's members' piece set</b>, yours forever: ${WCC_CATALOG.filter(c => c.member_only && c.item_id.startsWith('pieces:') && c.claim_from && Date.parse(c.claim_from) <= Date.now() && Date.now() < Date.parse(c.claim_until)).map(c => esc(cosmeticOf(c.item_id).name)).join(', ') || 'coming soon'}</li>
+        <li><b>The SirSC Diamond card back</b>, <b>Diamond Shards</b> capture effect and <b>SirSC Royalty</b> avatar while you're a member</li>
       </ul>
       ${Wallet.member ? '' : `<p class="mc-how">To join, pay SirSC $3 for each month and ask them to add it to your Warden Chat account.</p>`}
       ${window.WCC_DEMO && Account.status === 'signedIn' && !Wallet.member ? '<button type="button" class="btn small primary" data-shop="demo-member"><span>Demo: try a month of membership</span></button>' : ''}
@@ -149,6 +182,9 @@ const Shop = (() => {
     if (!b) return;
     b.resetEnd();
     b.setTheme(c.kind === 'board' ? c.id : Look.current().board);
+    b.repaint(c.kind === 'pieces' ? c.id : null);
+    const bar = q('#shopPvBar'), av = c.kind === 'avatar' ? c.id : Look.current().avatar;
+    if (bar) bar.innerHTML = `${avatarHTML(av, 'w')}<div class="pname"><b>${esc(Account.user ? Account.user.username : 'You')}${badge()}</b><span>White${av !== 'king' ? ' · <span class="av-title">' + esc(AVATARS[av].name) + '</span>' : ''}</span></div>`;
     if (c.kind === 'back') {
       const root = b.root.style;
       root.setProperty('--back-a', c.a); root.setProperty('--back-b', c.b); root.setProperty('--back-ink', c.ink); root.setProperty('--back-border', c.border);
@@ -158,6 +194,11 @@ const Shop = (() => {
       for (const k of ['--back-a', '--back-b', '--back-ink', '--back-border']) b.root.style.removeProperty(k);
     }
     q('#shopPvCap').textContent = c.kind === 'finale' ? `Previewing: ${c.name}` : `Previewing: ${c.name}`;
+    if (c.kind === 'capture') {
+      const at = preview;
+      const show = () => { if (preview !== at || current !== 'shop') return; for (const sq of [44, 35, 42]) playCapture(c.id, b, sq, { c: 'b' }); };
+      show(); setTimeout(show, 1400);
+    }
     if (c.kind === 'finale') {
       playFinale(b, 60, c.id, { win: true, word: 'Checkmate', sub: 'Preview' });
       const at = preview;

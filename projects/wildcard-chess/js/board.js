@@ -54,6 +54,7 @@ class BoardView {
     this.fx.resize(size, size, dpr);
     this.drawWood(dpr);
     this.drawCoords();
+    this.sizeFog();
   }
 
   drawWood(dpr) {
@@ -95,7 +96,7 @@ class BoardView {
       if (!p) continue;
       seen.add(p.id);
       let el = this.els.get(p.id);
-      const key = p.t + p.c;
+      const key = p.t + p.c + (this.pieceSet || PIECE_SET);
       if (!el) {
         el = document.createElement('div');
         el.className = 'pc';
@@ -111,7 +112,7 @@ class BoardView {
       }
       if (el._key !== key) {
         if (el._key && opts.anim) { el.classList.add('recolor'); setTimeout(() => el.classList.remove('recolor'), 700); }
-        el.innerHTML = pieceSVG(p.t, p.c);
+        el.innerHTML = pieceSVG(p.t, p.c, this.pieceSet || PIECE_SET);
         el._key = key;
         const w = WILD[p.t];
         el.classList.toggle('wild', !!w);
@@ -152,16 +153,82 @@ class BoardView {
     el.classList.add('flipup');
     setTimeout(() => el.classList.remove('flipup'), 520);
   }
-  /* Fog Mode: cover every square not in vis (a Set), or clear the fog (null). */
+  /* Fog Mode: cover every square not in vis (a Set), or clear the fog (null). The fog is a canvas of
+     soft drifting cloud puffs: each square's density eases toward its target, so fog billows in from
+     the edges when a square is lost from sight and thins out and drifts apart when it is seen again. */
   setFog(vis) {
-    if (!this.fogEl) { this.fogEl = document.createElement('div'); this.fogEl.className = 'fog'; this.root.insertBefore(this.fogEl, this.pcEl); }
-    const key = vis ? [...vis].sort((a, b) => a - b).join(',') : '';
-    if (key === this.fogKey) return;
-    this.fogKey = key;
-    if (!vis) { this.fogEl.innerHTML = ''; return; }
-    let h = '';
-    for (let q = 0; q < 64; q++) if (!vis.has(q)) h += this.cell(q, 'fogsq', `animation-delay:-${(q * 0.37) % 9}s`);
-    this.fogEl.innerHTML = h;
+    if (!this.fogCv) {
+      this.fogCv = document.createElement('canvas');
+      this.fogCv.className = 'fog';
+      this.root.insertBefore(this.fogCv, this.pcEl);
+      this.fogDen = new Float32Array(64); this.fogTgt = new Float32Array(64);
+      const rnd = mulberry32(this.seed * 7 + 3);
+      this.fogPuffs = [];
+      for (let q = 0; q < 64; q++) for (let i = 0; i < 4; i++)
+        this.fogPuffs.push({ q, ox: (rnd() - 0.5) * 0.7, oy: (rnd() - 0.5) * 0.7, r: 0.5 + rnd() * 0.35, ph: rnd() * 6.28, sp: 0.25 + rnd() * 0.35, light: rnd() < 0.35 });
+      this.sizeFog();
+    }
+    for (let q = 0; q < 64; q++) this.fogTgt[q] = vis && !vis.has(q) ? 1 : 0;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) this.fogDen.set(this.fogTgt);
+    if (!this.fogRun) { this.fogRun = true; requestAnimationFrame(() => this.fogTick()); }
+  }
+  sizeFog() {
+    if (!this.fogCv || !this.size) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.fogCv.width = Math.round(this.size * dpr); this.fogCv.height = Math.round(this.size * dpr);
+    this.fogDpr = dpr;
+    // one soft puff, drawn once and stamped many times
+    const P = 128, sp = document.createElement('canvas'); sp.width = sp.height = P;
+    const c = sp.getContext('2d'), gr = c.createRadialGradient(P / 2, P / 2, 0, P / 2, P / 2, P / 2);
+    gr.addColorStop(0, 'rgba(64,70,84,1)'); gr.addColorStop(0.5, 'rgba(58,63,76,.85)'); gr.addColorStop(1, 'rgba(50,55,66,0)');
+    c.fillStyle = gr; c.fillRect(0, 0, P, P);
+    this.fogSprite = sp;
+    const lp = document.createElement('canvas'); lp.width = lp.height = P;
+    const l = lp.getContext('2d'), lg = l.createRadialGradient(P / 2, P / 2, 0, P / 2, P / 2, P / 2);
+    lg.addColorStop(0, 'rgba(176,184,200,.55)'); lg.addColorStop(1, 'rgba(176,184,200,0)');
+    l.fillStyle = lg; l.fillRect(0, 0, P, P);
+    this.fogLight = lp;
+  }
+  fogTick() {
+    const c = this.fogCv.getContext('2d'), S = this.fogCv.width, s = S / 8, t = performance.now() / 1000;
+    let live = false;
+    for (let q = 0; q < 64; q++) {
+      const d = this.fogTgt[q] - this.fogDen[q];
+      if (Math.abs(d) > 0.002) { this.fogDen[q] += d * 0.07; live = true; } else this.fogDen[q] = this.fogTgt[q];
+      if (this.fogTgt[q] > 0) live = true;
+    }
+    c.clearRect(0, 0, S, S);
+    // a solid core under each fully hidden square, so the fog never shows gaps
+    for (let q = 0; q < 64; q++) {
+      const den = this.fogDen[q];
+      if (den < 0.01) continue;
+      const p = this.disp(q), cx = (p.x + 0.5) * s, cy = (p.y + 0.5) * s, r = s * 0.95 * (0.55 + 0.45 * den);
+      c.globalAlpha = Math.min(1, den * 1.05);
+      c.drawImage(this.fogSprite, cx - r, cy - r, r * 2, r * 2);
+    }
+    // drifting puffs: they spread out and thin as a square clears, and roll in as it fogs over
+    for (const f of this.fogPuffs) {
+      const den = this.fogDen[f.q];
+      if (den < 0.01) continue;
+      const p = this.disp(f.q), spread = 1 + (1 - den) * 1.4;
+      const x = (p.x + 0.5 + f.ox * spread + Math.sin(t * f.sp + f.ph) * 0.18) * s;
+      const y = (p.y + 0.5 + f.oy * spread + Math.cos(t * f.sp * 0.8 + f.ph) * 0.14) * s;
+      const r = f.r * s * (0.6 + 0.4 * den);
+      c.globalAlpha = den * (f.light ? 0.7 : 0.8);
+      c.drawImage(f.light ? this.fogLight : this.fogSprite, x - r, y - r, r * 2, r * 2);
+    }
+    c.globalAlpha = 1;
+    if (live) requestAnimationFrame(() => this.fogTick());
+    else { this.fogRun = false; c.clearRect(0, 0, S, S); }
+  }
+  /* Redraw every piece in a piece set (the equipped one, or a preview's). */
+  repaint(set) {
+    this.pieceSet = set || null;
+    for (const el of this.els.values()) {
+      if (!el._piece) continue;
+      el.innerHTML = pieceSVG(el._piece.t, el._piece.c, set || PIECE_SET);
+      el._key = el._piece.t + el._piece.c + (set || PIECE_SET);
+    }
   }
   clear() { for (const el of this.els.values()) el.remove(); this.els.clear(); }
   elAt(q) { for (const el of this.els.values()) if (el._q === q && !el.classList.contains('dying')) return el; return null; }

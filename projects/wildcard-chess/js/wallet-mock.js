@@ -114,7 +114,7 @@
   /* ---------- online (docs/ONLINE-WCC.md), with a pretend friend who joins and plays ---------- */
   const ENG = ChessEngine();
   const games = {};   // in memory only: a demo game lasts as long as the page
-  const BOT = { username: 'Rook_Rival', member: true };
+  const BOT = { username: 'Rook_Rival', member: true, avatar: 'dragon' };
   const LEG = ['dragon', 'archangel', 'timelord', 'blackhole', 'zeus'];
   function dealSetup(n, fog) {
     const commons = WILD_IDS.filter(t => !LEG.includes(t)).sort(() => Math.random() - 0.5), legs = LEG.slice().sort(() => Math.random() - 0.5);
@@ -125,7 +125,7 @@
   }
   const code = () => Array.from({ length: 5 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.floor(Math.random() * 24)]).join('');
   function stateOf(g, uid, since) {
-    const color = g.white === uid ? 'w' : 'b', bot = { ...BOT }, me = { username: (mem.users[uid] || {}).name || 'you', member: isMember(wallet(uid)) };
+    const color = g.white === uid ? 'w' : 'b', bot = { ...BOT }, me = { username: (mem.users[uid] || {}).name || 'you', member: isMember(wallet(uid)), avatar: g.avatars && g.avatars[uid] || 'king' };
     return { game_id: g.id, code: g.code, color, status: g.status, turn: g.turn, ply: g.moves.length, setup: g.setup,
       white: g.status === 'waiting' ? null : (g.white === uid ? me : bot), black: g.status === 'waiting' ? null : (g.black === uid ? me : bot),
       moves: g.moves.filter(m => m.ply >= (since || 0)), result: g.result, opponent_seen: g.status === 'waiting' ? null : 1 };
@@ -157,6 +157,8 @@
     g.turn = ns.turn;
     g.botReadyAt = now + 1200;
   }
+  // only an avatar the account owns is shown to the other player; anything else becomes the default
+  const ownsAvatar = (id, a) => (a && a !== 'king' && owns(id, 'avatar:' + a) ? a : 'king');
   function online(fn, b, u) {
     if (!u) return fail('wcc_not_signed_in');
     const id = u.id;
@@ -166,6 +168,7 @@
       const hostWhite = Math.random() < 0.5;
       const g = { id: 'g-' + Date.now(), code: code(), setup: dealSetup(n, b.fog), status: 'waiting', turn: 'w', moves: [], result: null, created: Date.now(),
         white: hostWhite ? id : 'bot', black: hostWhite ? 'bot' : id, botColor: hostWhite ? 'b' : 'w' };
+      g.avatars = { [id]: ownsAvatar(id, b.avatar) };
       games[g.id] = g;
       return R(200, stateOf(g, id, 0));
     }
@@ -173,7 +176,7 @@
       // any code joins a game your pretend friend has just made
       const hostWhite = Math.random() < 0.5;
       const g = { id: 'g-' + Date.now(), code: String(b.code || '').toUpperCase() || code(), setup: dealSetup(1 + Math.floor(Math.random() * 2), false), status: 'playing', turn: 'w', moves: [], result: null,
-        created: Date.now(), white: hostWhite ? 'bot' : id, black: hostWhite ? id : 'bot', botColor: hostWhite ? 'w' : 'b', botReadyAt: Date.now() + 4000 };
+        created: Date.now(), white: hostWhite ? 'bot' : id, black: hostWhite ? id : 'bot', botColor: hostWhite ? 'w' : 'b', botReadyAt: Date.now() + 4000, avatars: { [id]: ownsAvatar(id, b.avatar) } };
       games[g.id] = g;
       return R(200, stateOf(g, id, 0));
     }

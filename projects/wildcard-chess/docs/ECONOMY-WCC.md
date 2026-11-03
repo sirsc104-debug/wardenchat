@@ -91,10 +91,34 @@ Priced like Downhill Death Run: 1 💎 = 5,000 coins, and coin prices are 75% of
 | finale:inferno | 30,000 | 8 | |
 | finale:frost | 30,000 | 8 | |
 | finale:supernova | – | 20 | diamonds only |
+| pieces:marble | 22,500 | 6 | piece sets restyle every piece |
+| pieces:carved | 22,500 | 6 | |
+| pieces:gilded | 30,000 | 8 | |
+| pieces:glass | – | 12 | diamonds only |
+| pieces:neon | – | 15 | diamonds only |
+| pieces:royal | – | – | member_only, claim 2026-11-01T00:00Z to 2026-12-01T00:00Z (November 2026's members' piece set) |
+| capture:confetti | 15,000 | 4 | capture effects play when your pieces capture |
+| capture:petals | 15,000 | 4 | |
+| capture:pixel | 22,500 | 6 | |
+| capture:shadow | 22,500 | 6 | |
+| capture:lightning | – | 10 | diamonds only |
+| capture:goldrush | – | 15 | diamonds only |
+| capture:diamond | – | – | member_only, no claim window: every member can claim it while a member |
+| avatar:knight | 7,500 | 2 | avatars show in the player bar, and to the opponent online |
+| avatar:bomber | 7,500 | 2 | |
+| avatar:phantom | 15,000 | 4 | |
+| avatar:vampire | 15,000 | 4 | |
+| avatar:archangel | 30,000 | 8 | |
+| avatar:dragon | – | 10 | diamonds only |
+| avatar:zeus | – | 12 | diamonds only |
+| avatar:crown | – | – | member_only, no claim window: every member can claim it while a member |
 
 `sirsc_member_claim('wcc')` gives the member-only rows exactly as it does for `ddr` (window items
 inside their window, no-window items while a member), with `target = ''`. Each month's new members'
-board is one more `board:<id>` row with that month's window.
+content is one more `board:<id>` row and one more `pieces:<id>` row with that month's window.
+
+The free defaults (`board:walnut`, `pieces:classic`, `back:classic`, `capture:splinters`,
+`finale:classic`, `avatar:king`) are not catalog rows: everyone has them.
 
 ## Checklist
 

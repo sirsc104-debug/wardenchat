@@ -54,10 +54,10 @@ const Online = (() => {
   /* ---------- talking to the server ---------- */
   function call(fn, p) { return Account.rpc(fn, p); }
   function create() {
-    call('wcc_online_create', { wildcards: count, fog }).then(st => { game = st; render(); startPolling(); }, e => render(err(e)));
+    call('wcc_online_create', { wildcards: count, fog, avatar: Look.current().avatar }).then(st => { game = st; render(); startPolling(); }, e => render(err(e)));
   }
   function join(code) {
-    call('wcc_online_join', { code: code.trim().toUpperCase() }).then(st => { game = st; begin(); }, e => render(err(e)));
+    call('wcc_online_join', { code: code.trim().toUpperCase(), avatar: Look.current().avatar }).then(st => { game = st; begin(); }, e => render(err(e)));
   }
   function cancel() {
     const g = game;
@@ -174,5 +174,6 @@ const Online = (() => {
   function selectCode() { const el = q('#olCode'); if (!el) return; const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
   /* Leaving the game screen for good. */
   function leave() { stop(); game = null; }
-  return { init, render, moved, resign, leave, oppName, oppMember: () => !!(them() && them().member), renderPresence, get active() { return !!game; } };
+  return { init, render, moved, resign, leave, oppName, oppMember: () => !!(them() && them().member),
+    oppAvatar: () => (them() && AVATARS[them().avatar] ? them().avatar : 'king'), renderPresence, get active() { return !!game; } };
 })();

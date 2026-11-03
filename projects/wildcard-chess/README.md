@@ -107,7 +107,7 @@ Two players on one device. The deal is done in private: White sees their own car
 
 ## Fog Mode
 
-Pick **Fog Mode** on the menu, or switch **Fog of war** on in setup (it works against the computer, in Pass & Play, with the draft and online). Each side sees only the squares its pieces stand on and the squares next to them; everything else is drifting fog, and enemy pieces fade out of sight as they enter it and back in as they leave it.
+Pick **Fog Mode** on the menu, or switch **Fog of war** on in setup (it works against the computer, in Pass & Play, with the draft and online). Each side sees only the squares its pieces stand on and the squares next to them. Everything else is covered by drifting clouds (soft puffs on a canvas, not squares): when a square comes into sight its cloud thins out and drifts apart, and when it's lost the fog billows back in from the edges. Enemy pieces fade out of sight as they enter the fog and back in as they leave it.
 
 - **No check.** Nobody tells you your king is attacked; you win by capturing the enemy king (*King down!*). A move that would destroy your own king is the only illegal one (`fogMoves` in the engine).
 - **Move hints only use what you can see**, so they never reveal a hidden piece. If something hidden blocks your move you're told and pick again; land on a hidden enemy and you capture it by surprise.
@@ -135,9 +135,18 @@ Wildcard Chess uses the **SirSC wallet** that Downhill Death Run already uses (`
 
 ×1.25 for a drafted army, ×1.5 for members, +1,500 for the first win of each day, and +500 for every wildcard the account has never been paid for (lifetime, at most 25,000, outside the daily cap). **Daily limit: 25,000 coins** from Wildcard Chess (inside the wallet-wide 300,000). A game needs at least 12 plies and 30 seconds to pay; at most 20 paid games an hour. Pass & Play pays nothing, since one account would be playing both sides.
 
-**The Shop** (menu → Shop, or the account chip) sells cosmetics only, never an advantage: 8 board themes (Club Walnut free; Marble Hall and Ebony & Ivory 15,000 🪙 / 4 💎; Emerald Felt and Frozen Lake 22,500 / 6; Neon Arcade 12 💎 and Haunted Manor 15 💎 only), 6 card backs (used by the deal, the draft tiles and the face-down reveal), and 5 checkmate finales (Fireworks, Inferno and Deep Freeze 30,000 / 8; Supernova 20 💎). Clicking an item previews it on the Shop's board; buying equips it. Equipping is remembered per device and only counts for things the account owns.
+**The Shop** (menu → Shop, or the account chip) sells cosmetics only, never an advantage. A **Featured this week** row at the top shows four items (one of each kind where possible), picked the same for everyone and changing every Monday (UTC); the three newest kinds wear a **New** tag. Clicking any item previews it on the Shop's board (and the player bar under it); buying equips it. Equipping is remembered per device and only counts for things the account owns.
 
-**Members** get 1.5× coins, 5 💎 a month, the SirSC Diamond badge by their name, that month's members' board to keep (November 2026: Royal Velvet) and the SirSC Diamond card back. The Diamonds tab sends SirSC a "please add my diamonds" request after paying in person, as in Downhill Death Run.
+| Kind | What it changes | Items (free default first) |
+|---|---|---|
+| Boards | The board's squares | Club Walnut; Marble Hall, Ebony & Ivory (15,000 🪙 / 4 💎); Emerald Felt, Frozen Lake (22,500 / 6); Neon Arcade (12 💎); Haunted Manor (15 💎) |
+| Piece sets | Every piece and wildcard | Club Set; Marble & Obsidian, Carved Wood (22,500 / 6); Gilded (30,000 / 8); Crystal Glass (12 💎); Neon (15 💎) |
+| Card backs | The deal, the draft tiles, the face-down reveal | Club Back; Crimson, Midnight, Jade (7,500 / 2); Gilded (15,000 / 4) |
+| Capture effects | What happens when *your* pieces capture | Splinters; Confetti, Petals (15,000 / 4); Pixel Pop, Shadow (22,500 / 6); Lightning (10 💎); Gold Rush, a fountain of coins with a ka-ching (15 💎) |
+| Finales | Your checkmate | Golden Fall; Fireworks, Inferno, Deep Freeze (30,000 / 8); Supernova (20 💎) |
+| Avatars | Your framed portrait and title in the player bar, shown to your opponent online | The Challenger; Knight Errant, The Mad Bomber (silver, 7,500 / 2); Phantom of the Board, Count of the Night (gold, 15,000 / 4); Holy Terror (gold, 30,000 / 8); Dragonlord (10 💎), Storm Caller (12 💎) in animated prismatic frames |
+
+**Members** get 1.5× coins, 5 💎 a month, the SirSC Diamond badge by their name, that month's members' board and piece set to keep (November 2026: Royal Velvet and Royal Court), and, while they're members, the SirSC Diamond card back, the Diamond Shards capture effect and the SirSC Royalty avatar (a diamond frame with a crown). The Diamonds tab sends SirSC a "please add my diamonds" request after paying in person, as in Downhill Death Run.
 
 **Until the server has `wcc_ping`**, accounts stay hidden and the game works exactly as before. `python3 build-artifact.py OUT.html --wallet-demo` adds a pretend back end (`js/wallet-mock.js`, labelled "Demo wallet" in the game) so the whole thing can be tried now: any username and password, 40,000 coins and 10 diamonds to start, and a button to try membership.
 
@@ -173,6 +182,15 @@ build-artifact.py   bundles everything into one HTML file
 dist/               the single-file build
 ```
 
-Rebuild the single file with `python3 build-artifact.py dist/wildcard-chess.html --standalone`.
+## Single-file build (Google Sites)
+
+`dist/wildcard-chess-google-sites.html` is the whole game in one self-contained file, with the real Warden Chat connection (no demo wallet). To put it on a Google Site, open the file in a text editor, copy everything, then in Google Sites choose **Insert → Embed → Embed code**, paste it, and click **Next → Insert**. Drag the embed's corners to make it big (about 1280 × 860 works well; it also fits smaller, down to phone width). Settings, the Codex and equipped cosmetics save in each visitor's own browser; coins, diamonds, membership and online games come from Warden Chat once its back end is deployed (until then the game hides accounts and works offline).
+
+`dist/wildcard-chess.html` is the same file. Rebuild both after changing the game with:
+
+```sh
+python3 build-artifact.py dist/wildcard-chess.html --standalone
+cp dist/wildcard-chess.html dist/wildcard-chess-google-sites.html
+```
 
 Progress (Codex discoveries and your last settings) is kept in the browser's `localStorage`.

@@ -23,7 +23,30 @@ const WCC_CATALOG = [
   { item_id: 'finale:inferno', coins: 30000, diamonds: 8 },
   { item_id: 'finale:frost', coins: 30000, diamonds: 8 },
   { item_id: 'finale:supernova', coins: null, diamonds: 20 },
+  { item_id: 'pieces:marble', coins: 22500, diamonds: 6 },
+  { item_id: 'pieces:carved', coins: 22500, diamonds: 6 },
+  { item_id: 'pieces:gilded', coins: 30000, diamonds: 8 },
+  { item_id: 'pieces:glass', coins: null, diamonds: 12 },
+  { item_id: 'pieces:neon', coins: null, diamonds: 15 },
+  { item_id: 'pieces:royal', coins: null, diamonds: null, member_only: true, claim_from: '2026-11-01T00:00:00Z', claim_until: '2026-12-01T00:00:00Z' },
+  { item_id: 'capture:confetti', coins: 15000, diamonds: 4 },
+  { item_id: 'capture:petals', coins: 15000, diamonds: 4 },
+  { item_id: 'capture:pixel', coins: 22500, diamonds: 6 },
+  { item_id: 'capture:shadow', coins: 22500, diamonds: 6 },
+  { item_id: 'capture:lightning', coins: null, diamonds: 10 },
+  { item_id: 'capture:goldrush', coins: null, diamonds: 15 },
+  { item_id: 'capture:diamond', coins: null, diamonds: null, member_only: true, claim_from: null, claim_until: null },
+  { item_id: 'avatar:knight', coins: 7500, diamonds: 2 },
+  { item_id: 'avatar:bomber', coins: 7500, diamonds: 2 },
+  { item_id: 'avatar:phantom', coins: 15000, diamonds: 4 },
+  { item_id: 'avatar:vampire', coins: 15000, diamonds: 4 },
+  { item_id: 'avatar:archangel', coins: 30000, diamonds: 8 },
+  { item_id: 'avatar:dragon', coins: null, diamonds: 10 },
+  { item_id: 'avatar:zeus', coins: null, diamonds: 12 },
+  { item_id: 'avatar:crown', coins: null, diamonds: null, member_only: true, claim_from: null, claim_until: null },
 ];
+/* Kinds added in the latest update, marked New in the Shop. */
+const NEW_KINDS = ['pieces', 'capture', 'avatar'];
 
 const BOARD_THEMES = {
   walnut: { name: 'Club Walnut', desc: 'Warm walnut and maple, the set every club owns.', light: [225, 197, 150], dark: [157, 109, 66], style: 'wood', ink: ['#9c6c41', '#ead4ad'] },
@@ -53,8 +76,49 @@ const FINALES = {
   supernova: { name: 'Supernova', desc: 'The board collapses into a blinding star, then explodes.', colors: ['#ffffff', '#e5d2ff', '#a5b4fc', '#5fe0ff', '#ffd98e'], ring: '#ffffff', flash: 'nova' },
 };
 
-const COSMETIC_KINDS = { board: BOARD_THEMES, back: CARD_BACKS, finale: FINALES };
-const DEFAULT_LOOK = { board: 'walnut', back: 'classic', finale: 'classic' };
+/* What happens on the captured piece's square when one of your pieces takes it. */
+const CAPTURE_FX = {
+  splinters: { name: 'Splinters', desc: 'The captured piece shatters into chips. The house style.', colors: ['#ffffff', '#cfccc7', '#6d6b68'],
+    play: (b, q, p) => b.burstAt(q, { n: 22, color: p && p.c === 'b' ? ['#6d6b68', '#4b4946', '#2a2826'] : ['#ffffff', '#e8e6e2', '#cfccc7'], kind: 'chip', speed: 1.2, size: 0.07, life: 38 }) },
+  confetti: { name: 'Confetti', desc: 'A party popper of paper streamers on every capture.', colors: ['#ff4d6d', '#ffd23f', '#5fe0ff', '#9cff6e', '#c77dff'],
+  },
+  petals: { name: 'Petals', desc: 'The piece dissolves into drifting cherry blossom.', colors: ['#ffc2e2', '#ff8fc8', '#ffe6f2'] },
+  pixel: { name: 'Pixel Pop', desc: 'An 8-bit explosion of chunky pixels.', colors: ['#2ef2ff', '#ff4df0', '#ffd23f', '#9cff6e'] },
+  shadow: { name: 'Shadow', desc: 'The piece is dragged down into a swirl of shadow.', colors: ['#c084fc', '#2a1840', '#000000'] },
+  lightning: { name: 'Lightning', desc: 'A bolt from the sky strikes the captured piece.', colors: ['#ffffff', '#7df9ff', '#ffe14d'] },
+  goldrush: { name: 'Gold Rush', desc: 'The piece bursts into a fountain of gold coins, with a ka-ching.', colors: ['#ffe08a', '#f3c955', '#c9952c'] },
+  diamond: { name: 'Diamond Shards', desc: 'It shatters into glittering diamonds. Every member gets it.', colors: ['#e9fbff', '#7fd8ff', '#3b82f6'] },
+};
+const CAPTURE_PLAY = {
+  confetti: (b, q) => { b.burstAt(q, { n: 46, color: CAPTURE_FX.confetti.colors, kind: 'chip', speed: 1.8, size: 0.08, life: 70, gravity: 0.08, drag: 0.95, lift: 1.5 }); Sound.play('select'); },
+  petals: (b, q) => b.burstAt(q, { n: 30, color: CAPTURE_FX.petals.colors, kind: 'heart', speed: 0.9, size: 0.1, life: 90, gravity: 0.015, drag: 0.97 }),
+  pixel: (b, q) => { b.burstAt(q, { n: 36, color: CAPTURE_FX.pixel.colors, kind: 'pixel', speed: 1.5, size: 0.09, life: 46, gravity: 0.1 }); Sound.play('zap'); },
+  shadow: (b, q) => { b.ringAt(q, '#c084fc', 0.9, 8, 22); b.burstAt(q, { n: 30, color: CAPTURE_FX.shadow.colors, kind: 'smoke', speed: 0.7, size: 0.13, life: 50, gravity: 0, drag: 0.86 }); },
+  lightning: (b, q) => { b.beam(q < 32 ? q + 32 : q - 32, q, '#ffffff', 14); b.burstAt(q, { n: 30, color: CAPTURE_FX.lightning.colors, kind: 'spark', speed: 1.8, life: 34 }); b.flash('gold'); Sound.play('zap'); },
+  goldrush: (b, q) => { b.burstAt(q, { n: 34, color: CAPTURE_FX.goldrush.colors, kind: 'coin', speed: 1.6, size: 0.11, life: 70, gravity: 0.12, lift: 2.2 }); Sound.play('coin'); },
+  diamond: (b, q) => { b.burstAt(q, { n: 30, color: CAPTURE_FX.diamond.colors, kind: 'gem', speed: 1.6, size: 0.1, life: 56, gravity: 0.08, lift: 1 }); b.burstAt(q, { n: 16, color: ['#ffffff'], kind: 'spark', speed: 1, gravity: 0 }); },
+};
+function playCapture(id, b, q, p) { (CAPTURE_PLAY[id] || CAPTURE_FX.splinters.play)(b, q, p); }
+
+/* Avatars: a framed portrait and a title shown in your player bar (and to your opponent online). */
+const AVATARS = {
+  king: { name: 'The Challenger', emblem: 'K', frame: 'wood', desc: 'Every player’s first portrait.' },
+  knight: { name: 'Knight Errant', emblem: 'N', frame: 'silver', desc: 'A silver-framed knight, always on the move.' },
+  bomber: { name: 'The Mad Bomber', emblem: 'bomber', frame: 'silver', desc: 'For players who like things loud.' },
+  phantom: { name: 'Phantom of the Board', emblem: 'phantom', frame: 'gold', desc: 'A gold frame and a ghost that walks through walls.' },
+  vampire: { name: 'Count of the Night', emblem: 'vampire', frame: 'gold', desc: 'Gold frame, red eyes, no mercy.' },
+  archangel: { name: 'Holy Terror', emblem: 'archangel', frame: 'gold', desc: 'The Archangel in a gilded frame.' },
+  dragon: { name: 'Dragonlord', emblem: 'dragon', frame: 'prism', desc: 'An animated prismatic frame around the Elder Dragon.' },
+  zeus: { name: 'Storm Caller', emblem: 'zeus', frame: 'prism', desc: 'The Storm King in a crackling prismatic frame.' },
+  crown: { name: 'SirSC Royalty', emblem: 'K', frame: 'diamond', desc: 'The diamond frame and crown of a SirSC Member.' },
+};
+function avatarHTML(id, color) {
+  const a = AVATARS[id] || AVATARS.king;
+  return `<div class="avatar av-${a.frame}">${pieceSVG(a.emblem, color || 'w')}${a.frame === 'diamond' ? '<span class="av-crown" aria-hidden="true">♛</span>' : ''}</div>`;
+}
+
+const COSMETIC_KINDS = { board: BOARD_THEMES, pieces: PIECE_SETS, back: CARD_BACKS, capture: CAPTURE_FX, finale: FINALES, avatar: AVATARS };
+const DEFAULT_LOOK = { board: 'walnut', pieces: 'classic', back: 'classic', capture: 'splinters', finale: 'classic', avatar: 'king' };
 const cosmeticOf = item => { const [k, id] = String(item).split(':'); return COSMETIC_KINDS[k] && COSMETIC_KINDS[k][id] ? { kind: k, id, ...COSMETIC_KINDS[k][id] } : null; };
 
 /* ---------- painting a board theme ---------- */
@@ -199,5 +263,10 @@ const Look = {
     root.setProperty('--back-ink', back.ink); root.setProperty('--back-border', back.border);
     document.documentElement.dataset.back = cur.back;
     for (const b of BoardView.all || []) b.setTheme(cur.board);
+    if (PIECE_SET !== cur.pieces) {
+      PIECE_SET = cur.pieces;
+      for (const b of BoardView.all || []) b.repaint();
+      if (typeof G !== 'undefined' && G.s && typeof renderLog === 'function') { renderLog(); G.render(); }
+    }
   },
 };

@@ -6,7 +6,7 @@ Where it goes: one new migration in `sirsc104-debug/warden-chat`, with the same 
 
 What to build (the checklist at the end of the contract is the definition of done):
 1. `wcc_online_games` and `wcc_online_moves`, readable only by the two players through the functions.
-2. The nine functions: `wcc_online_create`, `wcc_online_join`, `wcc_online_state`, `wcc_online_move`, `wcc_online_finish`, `wcc_online_resign`, `wcc_online_cancel`, `wcc_online_claim` (and the state shape every one of them returns), with the 30-minute expiry of waiting games and the 3-game limit.
+2. The nine functions (create and join take the player's equipped `avatar`, stored only if they own it): `wcc_online_create`, `wcc_online_join`, `wcc_online_state`, `wcc_online_move`, `wcc_online_finish`, `wcc_online_resign`, `wcc_online_cancel`, `wcc_online_claim` (and the state shape every one of them returns), with the 30-minute expiry of waiting games and the 3-game limit.
 3. Server-side dealing exactly as in "The setup": distinct wildcard ids, each legendary with probability 0.05, slots never on the king's square, the host's colour random.
 4. `wcc_online_move` locks the game row; turn order follows `next_turn` (two moves in a row by one colour are normal for extra turns).
 5. Tests like the DDR ones (native PostgreSQL, no Docker), with the existing tests still passing.
@@ -92,6 +92,15 @@ A `waiting` game more than 30 minutes old counts as `cancelled`. A player has at
   except 60. Squares are numbered rank × 8 + file, a1 = 0, h8 = 63.
 - The host's colour is random.
 
+## Avatars
+
+`wcc_online_create` and `wcc_online_join` take the avatar the player has equipped (`avatar`, an id
+like `dragon`). The server stores it for that player in this game only if the player owns it
+(`sirsc_owned` has `game = 'wcc'`, `item_id = 'avatar:' || avatar`); otherwise, and for `king` or
+null, it stores `king`. Each player object in the state carries `"avatar"`, so both players see each
+other's. Add the column `white_avatar text not null default 'king'` and `black_avatar` to
+`wcc_online_games`. Never an error.
+
 ## Functions
 
 Every function returning a game returns the **state** below for that game, from the caller's side.
@@ -100,17 +109,17 @@ Every function returning a game returns the **state** below for that game, from 
 { "game_id": "uuid", "code": "KQBRT", "color": "w",            // the caller's colour
   "status": "playing", "turn": "b", "ply": 7,                    // ply: moves made so far
   "setup": { ... },
-  "white": { "username": "sirsc", "member": true }, "black": { "username": "pal", "member": false },   // null while waiting
+  "white": { "username": "sirsc", "member": true, "avatar": "dragon" }, "black": { "username": "pal", "member": false, "avatar": "king" },   // null while waiting
   "moves": [ { "ply": 6, "by": "w", "move": { ... } } ],        // moves with ply >= since (all for create/join)
   "result": null,                                                // or { "winner": "b", "reason": "resign" }
   "opponent_seen": 2 }                                           // seconds since the opponent's last state call; null while waiting
 ```
 
-### `wcc_online_create(wildcards integer, fog boolean) returns json`
+### `wcc_online_create(wildcards integer, fog boolean, avatar text default null) returns json`
 Makes a `waiting` game with a fresh code and setup; the caller is the host, at a random colour. Errors:
 `wcc_bad_setup` (wildcards not 1–3), `wcc_too_many_games`.
 
-### `wcc_online_join(code text) returns json`
+### `wcc_online_join(code text, avatar text default null) returns json`
 Joins a `waiting` game by code (case-insensitive) as the other colour; status becomes `playing`.
 Errors: `wcc_no_such_game` (unknown, cancelled or expired), `wcc_game_full`, `wcc_own_game` (the host).
 
@@ -143,7 +152,7 @@ wins, reason `timeout`. Otherwise `wcc_opponent_here`.
 ## Checklist
 
 1. The two tables (RLS on, no grants), the nine functions above with exact names, parameters, JSON keys
-   and error codes; only the two players can read a game.
+   and error codes; only the two players can read a game; avatars stored only when owned.
 2. Setups follow "The setup" exactly (distinct ids, 5% legendary, slots never the king's square).
 3. Tests: create/join/expire/cancel, the 3-game limit, turn order with `next_turn` (including two moves
    in a row by the same colour), out-of-sync and game-over errors, finish agreement and disputes,

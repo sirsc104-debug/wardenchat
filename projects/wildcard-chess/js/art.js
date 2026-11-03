@@ -6,12 +6,34 @@
 
 const INK = { w: '#3b3a38', b: '#222120' };
 
+/* Piece sets (sold in the Shop): the four gradient stops of each side's body (light, light, shade,
+   shade), the outline ink, and how see-through the body is. Every piece and wildcard is drawn in the
+   equipped set; accents keep their own colours. */
+const PIECE_SETS = {
+  classic: { name: 'Club Set', desc: 'The standard white and charcoal club pieces.',
+    w: { stops: ['#ffffff', '#f3f2f0', '#dcdad6', '#cfccc7'], ink: '#3b3a38' }, b: { stops: ['#6d6b68', '#5d5b58', '#4b4946', '#42403d'], ink: '#222120' } },
+  marble: { name: 'Marble & Obsidian', desc: 'Polished white marble against glassy black obsidian.',
+    w: { stops: ['#fdfcf9', '#f1eee8', '#d9d4cb', '#cbc5ba'], ink: '#4a463f' }, b: { stops: ['#3b3d44', '#2e3036', '#202227', '#17181c'], ink: '#0b0c0e' } },
+  carved: { name: 'Carved Wood', desc: 'Hand-carved maple against dark walnut.',
+    w: { stops: ['#f3dcae', '#e6c58e', '#cfa56b', '#c09359'], ink: '#5c3b17' }, b: { stops: ['#8a5a35', '#764a2a', '#5c381f', '#4d2e19'], ink: '#24140a' } },
+  gilded: { name: 'Gilded', desc: 'Polished silver against solid gold.',
+    w: { stops: ['#ffffff', '#e9edf2', '#bcc5cf', '#a9b3be'], ink: '#4f5966' }, b: { stops: ['#ffe9a6', '#f3c955', '#c9952c', '#b07e1d'], ink: '#4a3205' } },
+  glass: { name: 'Crystal Glass', desc: 'See-through crystal that glows from inside.',
+    w: { stops: ['#f2faff', '#d9efff', '#a9d4f7', '#93c6ef'], ink: '#3f74a3', alpha: 0.78 }, b: { stops: ['#8f7fe0', '#6d5cc9', '#4a3d99', '#3b307e'], ink: '#1a1240', alpha: 0.82 } },
+  neon: { name: 'Neon', desc: 'Dark pieces outlined in glowing cyan and magenta.',
+    w: { stops: ['#14232b', '#10202a', '#0c1a22', '#0a161d'], ink: '#2ef2ff' }, b: { stops: ['#24112a', '#1d0e22', '#160a1a', '#120815'], ink: '#ff4df0' } },
+  royal: { name: 'Royal Court', desc: 'Ivory and crimson trimmed in gold. November 2026\u2019s members-only set.',
+    w: { stops: ['#fffaf0', '#f6ecd6', '#e3cfa2', '#d6bd85'], ink: '#7a5a14' }, b: { stops: ['#8a1c34', '#741528', '#5a0f1f', '#4a0c19'], ink: '#2a0710' } },
+};
+let PIECE_SET = 'classic';
+const gradId = (set, color) => (set === 'classic' ? (color === 'w' ? 'gW' : 'gB') : `g${color.toUpperCase()}-${set}`);
+
 /* Tokens inside the art strings:
    {B} body shape, {D} outline-only detail, {K} solid ink, {A} accent fill, {S} accent stroke,
    {C} body-coloured stroke (for coils and tubes), {O} thick ink stroke under a {C}. */
-function tokens(color, accent) {
-  const ink = INK[color];
-  const grad = color === 'w' ? 'url(#gW)' : 'url(#gB)';
+function tokens(color, accent, set) {
+  const ink = (PIECE_SETS[set] || PIECE_SETS.classic)[color].ink;
+  const grad = `url(#${gradId(PIECE_SETS[set] ? set : 'classic', color)})`;
   return {
     B: `fill="${grad}" stroke="${ink}" stroke-width="3.2" stroke-linejoin="round"`,
     D: `fill="none" stroke="${ink}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"`,
@@ -359,19 +381,20 @@ const WALL_ART = '<rect x="12" y="20" width="76" height="70" rx="5" fill="#8d847
   '<path d="M14 22 H86" stroke="#b3aa9b" stroke-width="2" opacity=".8"/><path d="M58 47 L54 55 L58 60" stroke="#2c2925" stroke-width="2" fill="none"/>';
 
 const SVG_CACHE = new Map();
-function pieceSVG(type, color) {
-  const key = type + color;
+function pieceSVG(type, color, set) {
+  set = PIECE_SETS[set] ? set : PIECE_SET;
+  const key = type + color + set;
   if (SVG_CACHE.has(key)) return SVG_CACHE.get(key);
   let body;
   if (type === 'WALL') body = WALL_ART;
   else {
     const w = WILD[type];
     const acc = w ? w.accent : '#fff';
-    const tk = tokens(color, acc);
+    const tk = tokens(color, acc, set);
     const src = w ? PED + w.art : STD_ART[type];
-    body = src.replace(/\{([BDKASCOL])\}/g, (_, k) => tk[k]).replace(/\{acc\}/g, acc).replace(/\{ink\}/g, INK[color]);
+    body = src.replace(/\{([BDKASCOL])\}/g, (_, k) => tk[k]).replace(/\{acc\}/g, acc).replace(/\{ink\}/g, PIECE_SETS[set][color].ink);
   }
-  const svg = `<svg viewBox="0 0 100 100" aria-hidden="true">${body}</svg>`;
+  const svg = `<svg class="ps-${set} pc-${color}" viewBox="0 0 100 100" aria-hidden="true">${body}</svg>`;
   SVG_CACHE.set(key, svg);
   return svg;
 }
@@ -381,8 +404,11 @@ function installPieceDefs() {
   if (document.getElementById('piece-defs')) return;
   const d = document.createElement('div');
   d.innerHTML = '<svg id="piece-defs" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>' +
-    '<linearGradient id="gW" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#ffffff"/><stop offset=".58" stop-color="#f3f2f0"/><stop offset=".58" stop-color="#dcdad6"/><stop offset="1" stop-color="#cfccc7"/></linearGradient>' +
-    '<linearGradient id="gB" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#6d6b68"/><stop offset=".58" stop-color="#5d5b58"/><stop offset=".58" stop-color="#4b4946"/><stop offset="1" stop-color="#42403d"/></linearGradient>' +
+    Object.keys(PIECE_SETS).map(set => ['w', 'b'].map(c => {
+      const d2 = PIECE_SETS[set][c], o = d2.alpha == null ? '' : ` stop-opacity="${d2.alpha}"`;
+      return `<linearGradient id="${gradId(set, c)}" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="${d2.stops[0]}"${o}/><stop offset=".58" stop-color="${d2.stops[1]}"${o}/>` +
+        `<stop offset=".58" stop-color="${d2.stops[2]}"${o}/><stop offset="1" stop-color="${d2.stops[3]}"${o}/></linearGradient>`;
+    }).join('')).join('') +
     '</defs></svg>';
   document.body.appendChild(d.firstChild);
 }

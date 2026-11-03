@@ -65,6 +65,19 @@ class FXLayer {
       } else if (p.kind === 'smoke') {
         c.globalAlpha = Math.max(0, 0.5 * (1 - t));
         c.beginPath(); c.arc(p.x, p.y, p.size * (1 + t * 2.5), 0, Math.PI * 2); c.fill();
+      } else if (p.kind === 'pixel') {
+        const z = Math.max(2, Math.round(p.size));
+        c.fillRect(Math.round(p.x / z) * z, Math.round(p.y / z) * z, z, z);
+      } else if (p.kind === 'coin') {
+        const w = Math.abs(Math.cos(p.spin)) * p.size * 0.55 + 1;
+        c.beginPath(); c.ellipse(p.x, p.y, w, p.size * 0.55, 0, 0, Math.PI * 2); c.fill();
+        c.strokeStyle = '#8a5a0a'; c.lineWidth = 1; c.stroke();
+        c.fillStyle = 'rgba(255,255,240,.8)'; c.fillRect(p.x - w * 0.3, p.y - p.size * 0.3, Math.max(1, w * 0.25), p.size * 0.25);
+      } else if (p.kind === 'gem') {
+        c.save(); c.translate(p.x, p.y); c.rotate(p.spin * 0.4);
+        const z = p.size * 0.6;
+        c.beginPath(); c.moveTo(0, -z); c.lineTo(z * 0.7, -z * 0.2); c.lineTo(0, z); c.lineTo(-z * 0.7, -z * 0.2); c.closePath(); c.fill();
+        c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 1; c.stroke(); c.restore();
       } else if (p.kind === 'heart') {
         c.save(); c.translate(p.x, p.y); c.scale(p.size / 10, p.size / 10);
         c.beginPath(); c.moveTo(0, 3); c.bezierCurveTo(-8, -4, -4, -10, 0, -5); c.bezierCurveTo(4, -10, 8, -4, 0, 3); c.fill(); c.restore();
@@ -132,6 +145,7 @@ const Sound = {
       case 'win': [523, 659, 784, 1047].forEach((fr, i) => this._tone(t + i * 0.12, fr, 0.4, 0.16, 'triangle')); break;
       case 'lose': [392, 330, 262, 196].forEach((fr, i) => this._tone(t + i * 0.16, fr, 0.45, 0.16, 'triangle')); break;
       case 'deal': this._noise(t, 0.08, 2600, 1.6, 0.3); break;
+      case 'coin': [1568, 2093, 2637].forEach((fr, i) => this._tone(t + i * 0.07, fr, 0.25, 0.12, 'square')); this._noise(t, 0.05, 5000, 2, 0.2); break;
       case 'stone': this._noise(t, 0.3, 300, 0.9, 0.6, 'lowpass'); this._tone(t, 70, 0.25, 0.4, 'sine', 40); break;
       case 'mate': {
         [98, 147, 196, 294].forEach((fr, i) => this._tone(t + i * 0.02, fr, 2.2 - i * 0.3, 0.26 - i * 0.04, i % 2 ? 'triangle' : 'sine'));

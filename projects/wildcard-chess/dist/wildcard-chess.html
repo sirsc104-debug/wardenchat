@@ -827,21 +827,7 @@ button.acct-in:hover { border-color: var(--gold-lo); }
 @media (prefers-reduced-motion: reduce) { .lg-flame, .lg-wings, .lg-halo, .lg-hand-slow, .lg-hand-fast, .lg-spin, .lg-pulse, .lg-bolt { animation: none; } }
 
 /* ---------- Fog Mode ---------- */
-.board .fog { z-index: 2; pointer-events: none; filter: blur(calc(var(--sq, 80px) * .1)); transition: opacity .6s; }
-.board .fog .fogsq {
-  position: absolute; width: 12.5%; height: 12.5%; transform: scale(1.18);
-  background:
-    radial-gradient(ellipse 70% 55% at 30% 40%, rgba(196, 202, 214, .55), transparent 70%),
-    radial-gradient(ellipse 60% 70% at 75% 70%, rgba(150, 158, 174, .5), transparent 70%),
-    linear-gradient(135deg, #3d424e, #2a2e37);
-  background-size: 180% 180%, 160% 160%, 100% 100%;
-  animation: fogDrift 9s ease-in-out infinite alternate;
-}
-@keyframes fogDrift { from { background-position: 0% 0%, 100% 100%, 0 0; } to { background-position: 100% 60%, 0% 30%, 0 0; } }
-.board.fog-roll .fog { animation: fogRoll 1.3s ease-out both; }
-@keyframes fogRoll { from { opacity: 0; transform: scale(1.06); } }
-.board.fog-lift .fog { animation: fogLift 1.1s ease-in both; }
-@keyframes fogLift { to { opacity: 0; } }
+.board canvas.fog { z-index: 2; pointer-events: none; }
 .pc.fogin svg { animation: fogIn .45s ease-out; }
 @keyframes fogIn { from { opacity: 0; filter: blur(4px) brightness(1.6); transform: scale(.9); } }
 .pc.fogout { transition: none; z-index: 2; }
@@ -849,7 +835,6 @@ button.acct-in:hover { border-color: var(--gold-lo); }
 @keyframes fogOut { to { opacity: 0; filter: blur(5px); transform: scale(.92); } }
 .log li.fogged .t { color: var(--faint); font-style: italic; }
 .fog-ico { width: 22px; height: 22px; border-radius: 50%; background: #3d424e; color: #c4cad6; display: grid; place-items: center; font: 700 12px var(--f-ui); }
-@media (prefers-reduced-motion: reduce) { .board .fog .fogsq { animation: none; } }
 .menu-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .menu-modes .btn { animation: btnIn .7s cubic-bezier(.2, .9, .3, 1.25) both; animation-delay: 1.2s; padding: 11px 14px; }
 .menu-modes .btn span { font-size: 19px; }
@@ -878,6 +863,44 @@ button.acct-in:hover { border-color: var(--gold-lo); }
 @keyframes lgSwirl { to { stroke-dashoffset: -40; } }
 .pc.legend svg { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: reduce) { .lg-swirl { animation: none; } }
+
+/* ---------- piece sets, capture effects, avatars, featured row ---------- */
+svg.ps-neon.pc-w { filter: drop-shadow(0 0 2px #2ef2ff) drop-shadow(0 0 6px rgba(46, 242, 255, .55)); }
+svg.ps-neon.pc-b { filter: drop-shadow(0 0 2px #ff4df0) drop-shadow(0 0 6px rgba(255, 77, 240, .55)); }
+svg.ps-glass { filter: drop-shadow(0 0 4px rgba(170, 215, 255, .65)); }
+svg.ps-gilded.pc-b { filter: drop-shadow(0 0 3px rgba(255, 210, 90, .55)); }
+.sw-pieces { width: 72px; height: 72px; display: grid; grid-template-columns: 1fr 1fr; align-items: end; border-radius: 8px; background: linear-gradient(135deg, var(--wood-l), #b98a55); }
+.sw-pieces svg { width: 100%; height: auto; display: block; }
+.sw-capture { position: relative; width: 72px; height: 72px; border-radius: 8px; background: radial-gradient(circle, #3a332c, #1f1c18); overflow: hidden; }
+.sw-capture svg { position: absolute; inset: 22% 22%; width: 56%; height: 56%; opacity: .55; }
+.sw-capture i { position: absolute; width: 9px; height: 9px; border-radius: 2px; left: 50%; top: 50%; background: var(--c1); animation: swBurst 1.8s ease-out infinite; }
+.sw-capture i:nth-child(2) { background: var(--c2); --dx: -26px; --dy: -20px; animation-delay: .1s; } .sw-capture i:nth-child(3) { background: var(--c3); --dx: 24px; --dy: -24px; animation-delay: .2s; }
+.sw-capture i:nth-child(4) { background: var(--c1); --dx: -22px; --dy: 18px; animation-delay: .05s; } .sw-capture i:nth-child(5) { background: var(--c2); --dx: 26px; --dy: 16px; animation-delay: .15s; }
+.sw-capture i:nth-child(6) { background: var(--c3); --dx: 0px; --dy: -30px; animation-delay: .25s; } .sw-capture i:nth-child(1) { --dx: 4px; --dy: 28px; }
+@keyframes swBurst { from { transform: translate(-50%, -50%) scale(.2); opacity: 1; } 70% { opacity: 1; } to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(160deg); opacity: 0; } }
+.sw-avatar { width: 72px; height: 72px; display: grid; place-items: center; border-radius: 8px; background: radial-gradient(circle, #3a342d, #221f1b); }
+.sw-avatar .avatar { width: 56px; height: 56px; }
+.avatar { position: relative; }
+.avatar.av-wood { background: linear-gradient(135deg, var(--wood-l), #c7a676); }
+.avatar.av-silver { background: linear-gradient(135deg, #f4f6f9, #aab3be); box-shadow: 0 0 0 2px #dfe4ea, 0 0 0 3px #6b7480, inset 0 0 0 1px rgba(0,0,0,.25); }
+.avatar.av-gold { background: linear-gradient(135deg, #fff1b8, #d9a640); box-shadow: 0 0 0 2px #ffd76a, 0 0 0 3px #8a5f1f, 0 0 14px rgba(255, 200, 80, .45); }
+.avatar.av-prism { border: 3px solid transparent; background: linear-gradient(135deg, #2a2438, #16131f) padding-box, conic-gradient(from var(--spin, 0deg), #ff5a5a, #ffd23f, #5fe0ff, #b26bff, #ff5a5a) border-box; animation: spin 2.4s linear infinite; box-shadow: 0 0 14px rgba(178, 107, 255, .45); }
+.avatar.av-diamond { background: linear-gradient(135deg, #e9fbff, #7fd8ff 55%, #3b82f6); box-shadow: 0 0 0 2px #e9fbff, 0 0 0 3px #1e3a8a, 0 0 16px rgba(127, 216, 255, .6); }
+.av-crown { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); font-size: 15px; line-height: 1; color: #ffd23f; text-shadow: 0 1px 0 #6b4512, 0 0 6px rgba(255, 210, 63, .7); }
+.av-title { color: var(--gold); }
+.shop-pv-bar { padding: 8px 10px; border-radius: 10px; background: rgba(43,39,35,.8); border: 1px solid var(--line); }
+.shop-featured { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; background: linear-gradient(135deg, #3d2f1a, #2a231c 60%); border: 1px solid #8a5f1f; box-shadow: 0 0 0 1px rgba(232,180,80,.15), 0 18px 40px -24px rgba(232,180,80,.5); }
+.feat-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px; }
+.feat-head h3 { margin: 0; font: 400 22px var(--f-display); color: var(--gold-hi); }
+.feat-head span { font: 600 12px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.feat-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 560px) { .feat-row { grid-template-columns: minmax(0, 1fr); } }
+.item.feat { grid-template-columns: 56px minmax(0, 1fr); background: rgba(24, 20, 16, .55); }
+.item.feat .item-art, .item.feat .sw-board, .item.feat .sw-back, .item.feat .sw-pieces, .item.feat .sw-capture, .item.feat .sw-avatar, .item.feat .sw-finale { width: 56px; height: 56px; }
+.item.feat .sw-avatar .avatar { width: 44px; height: 44px; }
+.item-kind { font: 600 11px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.new-tag, .shop-tabs button.new::after { display: inline-block; font: 700 10px var(--f-ui); letter-spacing: .14em; text-transform: uppercase; color: #1b1916; background: var(--lv-easy); border-radius: 999px; padding: 1px 6px; }
+.shop-tabs button.new::after { content: "New"; margin-left: 6px; vertical-align: 1px; }
 
 </style>
 </head>
@@ -1063,11 +1086,14 @@ button.acct-in:hover { border-color: var(--gold-lo); }
     <div class="shop-body">
       <div class="shop-preview">
         <div class="board" id="shopBoard"></div>
+        <div class="pbar shop-pv-bar" id="shopPvBar"></div>
         <p class="shop-pv-cap" id="shopPvCap"></p>
       </div>
       <div class="shop-main">
+        <div class="shop-featured" id="shopFeatured"></div>
         <div class="shop-tabs" role="tablist">
-          <button data-tab="board" role="tab">Boards</button><button data-tab="back" role="tab">Card backs</button><button data-tab="finale" role="tab">Finales</button>
+          <button data-tab="board" role="tab">Boards</button><button data-tab="pieces" role="tab">Piece sets</button><button data-tab="back" role="tab">Card backs</button>
+          <button data-tab="capture" role="tab">Captures</button><button data-tab="finale" role="tab">Finales</button><button data-tab="avatar" role="tab">Avatars</button>
           <button data-tab="member" role="tab">👑 Membership</button><button data-tab="diamonds" role="tab">💎 Diamonds</button>
         </div>
         <div class="shop-grid" id="shopGrid"></div>
@@ -1146,12 +1172,34 @@ button.acct-in:hover { border-color: var(--gold-lo); }
 
 const INK = { w: '#3b3a38', b: '#222120' };
 
+/* Piece sets (sold in the Shop): the four gradient stops of each side's body (light, light, shade,
+   shade), the outline ink, and how see-through the body is. Every piece and wildcard is drawn in the
+   equipped set; accents keep their own colours. */
+const PIECE_SETS = {
+  classic: { name: 'Club Set', desc: 'The standard white and charcoal club pieces.',
+    w: { stops: ['#ffffff', '#f3f2f0', '#dcdad6', '#cfccc7'], ink: '#3b3a38' }, b: { stops: ['#6d6b68', '#5d5b58', '#4b4946', '#42403d'], ink: '#222120' } },
+  marble: { name: 'Marble & Obsidian', desc: 'Polished white marble against glassy black obsidian.',
+    w: { stops: ['#fdfcf9', '#f1eee8', '#d9d4cb', '#cbc5ba'], ink: '#4a463f' }, b: { stops: ['#3b3d44', '#2e3036', '#202227', '#17181c'], ink: '#0b0c0e' } },
+  carved: { name: 'Carved Wood', desc: 'Hand-carved maple against dark walnut.',
+    w: { stops: ['#f3dcae', '#e6c58e', '#cfa56b', '#c09359'], ink: '#5c3b17' }, b: { stops: ['#8a5a35', '#764a2a', '#5c381f', '#4d2e19'], ink: '#24140a' } },
+  gilded: { name: 'Gilded', desc: 'Polished silver against solid gold.',
+    w: { stops: ['#ffffff', '#e9edf2', '#bcc5cf', '#a9b3be'], ink: '#4f5966' }, b: { stops: ['#ffe9a6', '#f3c955', '#c9952c', '#b07e1d'], ink: '#4a3205' } },
+  glass: { name: 'Crystal Glass', desc: 'See-through crystal that glows from inside.',
+    w: { stops: ['#f2faff', '#d9efff', '#a9d4f7', '#93c6ef'], ink: '#3f74a3', alpha: 0.78 }, b: { stops: ['#8f7fe0', '#6d5cc9', '#4a3d99', '#3b307e'], ink: '#1a1240', alpha: 0.82 } },
+  neon: { name: 'Neon', desc: 'Dark pieces outlined in glowing cyan and magenta.',
+    w: { stops: ['#14232b', '#10202a', '#0c1a22', '#0a161d'], ink: '#2ef2ff' }, b: { stops: ['#24112a', '#1d0e22', '#160a1a', '#120815'], ink: '#ff4df0' } },
+  royal: { name: 'Royal Court', desc: 'Ivory and crimson trimmed in gold. November 2026\u2019s members-only set.',
+    w: { stops: ['#fffaf0', '#f6ecd6', '#e3cfa2', '#d6bd85'], ink: '#7a5a14' }, b: { stops: ['#8a1c34', '#741528', '#5a0f1f', '#4a0c19'], ink: '#2a0710' } },
+};
+let PIECE_SET = 'classic';
+const gradId = (set, color) => (set === 'classic' ? (color === 'w' ? 'gW' : 'gB') : `g${color.toUpperCase()}-${set}`);
+
 /* Tokens inside the art strings:
    {B} body shape, {D} outline-only detail, {K} solid ink, {A} accent fill, {S} accent stroke,
    {C} body-coloured stroke (for coils and tubes), {O} thick ink stroke under a {C}. */
-function tokens(color, accent) {
-  const ink = INK[color];
-  const grad = color === 'w' ? 'url(#gW)' : 'url(#gB)';
+function tokens(color, accent, set) {
+  const ink = (PIECE_SETS[set] || PIECE_SETS.classic)[color].ink;
+  const grad = `url(#${gradId(PIECE_SETS[set] ? set : 'classic', color)})`;
   return {
     B: `fill="${grad}" stroke="${ink}" stroke-width="3.2" stroke-linejoin="round"`,
     D: `fill="none" stroke="${ink}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"`,
@@ -1499,19 +1547,20 @@ const WALL_ART = '<rect x="12" y="20" width="76" height="70" rx="5" fill="#8d847
   '<path d="M14 22 H86" stroke="#b3aa9b" stroke-width="2" opacity=".8"/><path d="M58 47 L54 55 L58 60" stroke="#2c2925" stroke-width="2" fill="none"/>';
 
 const SVG_CACHE = new Map();
-function pieceSVG(type, color) {
-  const key = type + color;
+function pieceSVG(type, color, set) {
+  set = PIECE_SETS[set] ? set : PIECE_SET;
+  const key = type + color + set;
   if (SVG_CACHE.has(key)) return SVG_CACHE.get(key);
   let body;
   if (type === 'WALL') body = WALL_ART;
   else {
     const w = WILD[type];
     const acc = w ? w.accent : '#fff';
-    const tk = tokens(color, acc);
+    const tk = tokens(color, acc, set);
     const src = w ? PED + w.art : STD_ART[type];
-    body = src.replace(/\{([BDKASCOL])\}/g, (_, k) => tk[k]).replace(/\{acc\}/g, acc).replace(/\{ink\}/g, INK[color]);
+    body = src.replace(/\{([BDKASCOL])\}/g, (_, k) => tk[k]).replace(/\{acc\}/g, acc).replace(/\{ink\}/g, PIECE_SETS[set][color].ink);
   }
-  const svg = `<svg viewBox="0 0 100 100" aria-hidden="true">${body}</svg>`;
+  const svg = `<svg class="ps-${set} pc-${color}" viewBox="0 0 100 100" aria-hidden="true">${body}</svg>`;
   SVG_CACHE.set(key, svg);
   return svg;
 }
@@ -1521,8 +1570,11 @@ function installPieceDefs() {
   if (document.getElementById('piece-defs')) return;
   const d = document.createElement('div');
   d.innerHTML = '<svg id="piece-defs" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>' +
-    '<linearGradient id="gW" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#ffffff"/><stop offset=".58" stop-color="#f3f2f0"/><stop offset=".58" stop-color="#dcdad6"/><stop offset="1" stop-color="#cfccc7"/></linearGradient>' +
-    '<linearGradient id="gB" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#6d6b68"/><stop offset=".58" stop-color="#5d5b58"/><stop offset=".58" stop-color="#4b4946"/><stop offset="1" stop-color="#42403d"/></linearGradient>' +
+    Object.keys(PIECE_SETS).map(set => ['w', 'b'].map(c => {
+      const d2 = PIECE_SETS[set][c], o = d2.alpha == null ? '' : ` stop-opacity="${d2.alpha}"`;
+      return `<linearGradient id="${gradId(set, c)}" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="${d2.stops[0]}"${o}/><stop offset=".58" stop-color="${d2.stops[1]}"${o}/>` +
+        `<stop offset=".58" stop-color="${d2.stops[2]}"${o}/><stop offset="1" stop-color="${d2.stops[3]}"${o}/></linearGradient>`;
+    }).join('')).join('') +
     '</defs></svg>';
   document.body.appendChild(d.firstChild);
 }
@@ -2651,6 +2703,19 @@ class FXLayer {
       } else if (p.kind === 'smoke') {
         c.globalAlpha = Math.max(0, 0.5 * (1 - t));
         c.beginPath(); c.arc(p.x, p.y, p.size * (1 + t * 2.5), 0, Math.PI * 2); c.fill();
+      } else if (p.kind === 'pixel') {
+        const z = Math.max(2, Math.round(p.size));
+        c.fillRect(Math.round(p.x / z) * z, Math.round(p.y / z) * z, z, z);
+      } else if (p.kind === 'coin') {
+        const w = Math.abs(Math.cos(p.spin)) * p.size * 0.55 + 1;
+        c.beginPath(); c.ellipse(p.x, p.y, w, p.size * 0.55, 0, 0, Math.PI * 2); c.fill();
+        c.strokeStyle = '#8a5a0a'; c.lineWidth = 1; c.stroke();
+        c.fillStyle = 'rgba(255,255,240,.8)'; c.fillRect(p.x - w * 0.3, p.y - p.size * 0.3, Math.max(1, w * 0.25), p.size * 0.25);
+      } else if (p.kind === 'gem') {
+        c.save(); c.translate(p.x, p.y); c.rotate(p.spin * 0.4);
+        const z = p.size * 0.6;
+        c.beginPath(); c.moveTo(0, -z); c.lineTo(z * 0.7, -z * 0.2); c.lineTo(0, z); c.lineTo(-z * 0.7, -z * 0.2); c.closePath(); c.fill();
+        c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 1; c.stroke(); c.restore();
       } else if (p.kind === 'heart') {
         c.save(); c.translate(p.x, p.y); c.scale(p.size / 10, p.size / 10);
         c.beginPath(); c.moveTo(0, 3); c.bezierCurveTo(-8, -4, -4, -10, 0, -5); c.bezierCurveTo(4, -10, 8, -4, 0, 3); c.fill(); c.restore();
@@ -2718,6 +2783,7 @@ const Sound = {
       case 'win': [523, 659, 784, 1047].forEach((fr, i) => this._tone(t + i * 0.12, fr, 0.4, 0.16, 'triangle')); break;
       case 'lose': [392, 330, 262, 196].forEach((fr, i) => this._tone(t + i * 0.16, fr, 0.45, 0.16, 'triangle')); break;
       case 'deal': this._noise(t, 0.08, 2600, 1.6, 0.3); break;
+      case 'coin': [1568, 2093, 2637].forEach((fr, i) => this._tone(t + i * 0.07, fr, 0.25, 0.12, 'square')); this._noise(t, 0.05, 5000, 2, 0.2); break;
       case 'stone': this._noise(t, 0.3, 300, 0.9, 0.6, 'lowpass'); this._tone(t, 70, 0.25, 0.4, 'sine', 40); break;
       case 'mate': {
         [98, 147, 196, 294].forEach((fr, i) => this._tone(t + i * 0.02, fr, 2.2 - i * 0.3, 0.26 - i * 0.04, i % 2 ? 'triangle' : 'sine'));
@@ -2784,6 +2850,7 @@ class BoardView {
     this.fx.resize(size, size, dpr);
     this.drawWood(dpr);
     this.drawCoords();
+    this.sizeFog();
   }
 
   drawWood(dpr) {
@@ -2825,7 +2892,7 @@ class BoardView {
       if (!p) continue;
       seen.add(p.id);
       let el = this.els.get(p.id);
-      const key = p.t + p.c;
+      const key = p.t + p.c + (this.pieceSet || PIECE_SET);
       if (!el) {
         el = document.createElement('div');
         el.className = 'pc';
@@ -2841,7 +2908,7 @@ class BoardView {
       }
       if (el._key !== key) {
         if (el._key && opts.anim) { el.classList.add('recolor'); setTimeout(() => el.classList.remove('recolor'), 700); }
-        el.innerHTML = pieceSVG(p.t, p.c);
+        el.innerHTML = pieceSVG(p.t, p.c, this.pieceSet || PIECE_SET);
         el._key = key;
         const w = WILD[p.t];
         el.classList.toggle('wild', !!w);
@@ -2882,16 +2949,82 @@ class BoardView {
     el.classList.add('flipup');
     setTimeout(() => el.classList.remove('flipup'), 520);
   }
-  /* Fog Mode: cover every square not in vis (a Set), or clear the fog (null). */
+  /* Fog Mode: cover every square not in vis (a Set), or clear the fog (null). The fog is a canvas of
+     soft drifting cloud puffs: each square's density eases toward its target, so fog billows in from
+     the edges when a square is lost from sight and thins out and drifts apart when it is seen again. */
   setFog(vis) {
-    if (!this.fogEl) { this.fogEl = document.createElement('div'); this.fogEl.className = 'fog'; this.root.insertBefore(this.fogEl, this.pcEl); }
-    const key = vis ? [...vis].sort((a, b) => a - b).join(',') : '';
-    if (key === this.fogKey) return;
-    this.fogKey = key;
-    if (!vis) { this.fogEl.innerHTML = ''; return; }
-    let h = '';
-    for (let q = 0; q < 64; q++) if (!vis.has(q)) h += this.cell(q, 'fogsq', `animation-delay:-${(q * 0.37) % 9}s`);
-    this.fogEl.innerHTML = h;
+    if (!this.fogCv) {
+      this.fogCv = document.createElement('canvas');
+      this.fogCv.className = 'fog';
+      this.root.insertBefore(this.fogCv, this.pcEl);
+      this.fogDen = new Float32Array(64); this.fogTgt = new Float32Array(64);
+      const rnd = mulberry32(this.seed * 7 + 3);
+      this.fogPuffs = [];
+      for (let q = 0; q < 64; q++) for (let i = 0; i < 4; i++)
+        this.fogPuffs.push({ q, ox: (rnd() - 0.5) * 0.7, oy: (rnd() - 0.5) * 0.7, r: 0.5 + rnd() * 0.35, ph: rnd() * 6.28, sp: 0.25 + rnd() * 0.35, light: rnd() < 0.35 });
+      this.sizeFog();
+    }
+    for (let q = 0; q < 64; q++) this.fogTgt[q] = vis && !vis.has(q) ? 1 : 0;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) this.fogDen.set(this.fogTgt);
+    if (!this.fogRun) { this.fogRun = true; requestAnimationFrame(() => this.fogTick()); }
+  }
+  sizeFog() {
+    if (!this.fogCv || !this.size) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    this.fogCv.width = Math.round(this.size * dpr); this.fogCv.height = Math.round(this.size * dpr);
+    this.fogDpr = dpr;
+    // one soft puff, drawn once and stamped many times
+    const P = 128, sp = document.createElement('canvas'); sp.width = sp.height = P;
+    const c = sp.getContext('2d'), gr = c.createRadialGradient(P / 2, P / 2, 0, P / 2, P / 2, P / 2);
+    gr.addColorStop(0, 'rgba(64,70,84,1)'); gr.addColorStop(0.5, 'rgba(58,63,76,.85)'); gr.addColorStop(1, 'rgba(50,55,66,0)');
+    c.fillStyle = gr; c.fillRect(0, 0, P, P);
+    this.fogSprite = sp;
+    const lp = document.createElement('canvas'); lp.width = lp.height = P;
+    const l = lp.getContext('2d'), lg = l.createRadialGradient(P / 2, P / 2, 0, P / 2, P / 2, P / 2);
+    lg.addColorStop(0, 'rgba(176,184,200,.55)'); lg.addColorStop(1, 'rgba(176,184,200,0)');
+    l.fillStyle = lg; l.fillRect(0, 0, P, P);
+    this.fogLight = lp;
+  }
+  fogTick() {
+    const c = this.fogCv.getContext('2d'), S = this.fogCv.width, s = S / 8, t = performance.now() / 1000;
+    let live = false;
+    for (let q = 0; q < 64; q++) {
+      const d = this.fogTgt[q] - this.fogDen[q];
+      if (Math.abs(d) > 0.002) { this.fogDen[q] += d * 0.07; live = true; } else this.fogDen[q] = this.fogTgt[q];
+      if (this.fogTgt[q] > 0) live = true;
+    }
+    c.clearRect(0, 0, S, S);
+    // a solid core under each fully hidden square, so the fog never shows gaps
+    for (let q = 0; q < 64; q++) {
+      const den = this.fogDen[q];
+      if (den < 0.01) continue;
+      const p = this.disp(q), cx = (p.x + 0.5) * s, cy = (p.y + 0.5) * s, r = s * 0.95 * (0.55 + 0.45 * den);
+      c.globalAlpha = Math.min(1, den * 1.05);
+      c.drawImage(this.fogSprite, cx - r, cy - r, r * 2, r * 2);
+    }
+    // drifting puffs: they spread out and thin as a square clears, and roll in as it fogs over
+    for (const f of this.fogPuffs) {
+      const den = this.fogDen[f.q];
+      if (den < 0.01) continue;
+      const p = this.disp(f.q), spread = 1 + (1 - den) * 1.4;
+      const x = (p.x + 0.5 + f.ox * spread + Math.sin(t * f.sp + f.ph) * 0.18) * s;
+      const y = (p.y + 0.5 + f.oy * spread + Math.cos(t * f.sp * 0.8 + f.ph) * 0.14) * s;
+      const r = f.r * s * (0.6 + 0.4 * den);
+      c.globalAlpha = den * (f.light ? 0.7 : 0.8);
+      c.drawImage(f.light ? this.fogLight : this.fogSprite, x - r, y - r, r * 2, r * 2);
+    }
+    c.globalAlpha = 1;
+    if (live) requestAnimationFrame(() => this.fogTick());
+    else { this.fogRun = false; c.clearRect(0, 0, S, S); }
+  }
+  /* Redraw every piece in a piece set (the equipped one, or a preview's). */
+  repaint(set) {
+    this.pieceSet = set || null;
+    for (const el of this.els.values()) {
+      if (!el._piece) continue;
+      el.innerHTML = pieceSVG(el._piece.t, el._piece.c, set || PIECE_SET);
+      el._key = el._piece.t + el._piece.c + (set || PIECE_SET);
+    }
   }
   clear() { for (const el of this.els.values()) el.remove(); this.els.clear(); }
   elAt(q) { for (const el of this.els.values()) if (el._q === q && !el.classList.contains('dying')) return el; return null; }
@@ -2984,7 +3117,30 @@ const WCC_CATALOG = [
   { item_id: 'finale:inferno', coins: 30000, diamonds: 8 },
   { item_id: 'finale:frost', coins: 30000, diamonds: 8 },
   { item_id: 'finale:supernova', coins: null, diamonds: 20 },
+  { item_id: 'pieces:marble', coins: 22500, diamonds: 6 },
+  { item_id: 'pieces:carved', coins: 22500, diamonds: 6 },
+  { item_id: 'pieces:gilded', coins: 30000, diamonds: 8 },
+  { item_id: 'pieces:glass', coins: null, diamonds: 12 },
+  { item_id: 'pieces:neon', coins: null, diamonds: 15 },
+  { item_id: 'pieces:royal', coins: null, diamonds: null, member_only: true, claim_from: '2026-11-01T00:00:00Z', claim_until: '2026-12-01T00:00:00Z' },
+  { item_id: 'capture:confetti', coins: 15000, diamonds: 4 },
+  { item_id: 'capture:petals', coins: 15000, diamonds: 4 },
+  { item_id: 'capture:pixel', coins: 22500, diamonds: 6 },
+  { item_id: 'capture:shadow', coins: 22500, diamonds: 6 },
+  { item_id: 'capture:lightning', coins: null, diamonds: 10 },
+  { item_id: 'capture:goldrush', coins: null, diamonds: 15 },
+  { item_id: 'capture:diamond', coins: null, diamonds: null, member_only: true, claim_from: null, claim_until: null },
+  { item_id: 'avatar:knight', coins: 7500, diamonds: 2 },
+  { item_id: 'avatar:bomber', coins: 7500, diamonds: 2 },
+  { item_id: 'avatar:phantom', coins: 15000, diamonds: 4 },
+  { item_id: 'avatar:vampire', coins: 15000, diamonds: 4 },
+  { item_id: 'avatar:archangel', coins: 30000, diamonds: 8 },
+  { item_id: 'avatar:dragon', coins: null, diamonds: 10 },
+  { item_id: 'avatar:zeus', coins: null, diamonds: 12 },
+  { item_id: 'avatar:crown', coins: null, diamonds: null, member_only: true, claim_from: null, claim_until: null },
 ];
+/* Kinds added in the latest update, marked New in the Shop. */
+const NEW_KINDS = ['pieces', 'capture', 'avatar'];
 
 const BOARD_THEMES = {
   walnut: { name: 'Club Walnut', desc: 'Warm walnut and maple, the set every club owns.', light: [225, 197, 150], dark: [157, 109, 66], style: 'wood', ink: ['#9c6c41', '#ead4ad'] },
@@ -3014,8 +3170,49 @@ const FINALES = {
   supernova: { name: 'Supernova', desc: 'The board collapses into a blinding star, then explodes.', colors: ['#ffffff', '#e5d2ff', '#a5b4fc', '#5fe0ff', '#ffd98e'], ring: '#ffffff', flash: 'nova' },
 };
 
-const COSMETIC_KINDS = { board: BOARD_THEMES, back: CARD_BACKS, finale: FINALES };
-const DEFAULT_LOOK = { board: 'walnut', back: 'classic', finale: 'classic' };
+/* What happens on the captured piece's square when one of your pieces takes it. */
+const CAPTURE_FX = {
+  splinters: { name: 'Splinters', desc: 'The captured piece shatters into chips. The house style.', colors: ['#ffffff', '#cfccc7', '#6d6b68'],
+    play: (b, q, p) => b.burstAt(q, { n: 22, color: p && p.c === 'b' ? ['#6d6b68', '#4b4946', '#2a2826'] : ['#ffffff', '#e8e6e2', '#cfccc7'], kind: 'chip', speed: 1.2, size: 0.07, life: 38 }) },
+  confetti: { name: 'Confetti', desc: 'A party popper of paper streamers on every capture.', colors: ['#ff4d6d', '#ffd23f', '#5fe0ff', '#9cff6e', '#c77dff'],
+  },
+  petals: { name: 'Petals', desc: 'The piece dissolves into drifting cherry blossom.', colors: ['#ffc2e2', '#ff8fc8', '#ffe6f2'] },
+  pixel: { name: 'Pixel Pop', desc: 'An 8-bit explosion of chunky pixels.', colors: ['#2ef2ff', '#ff4df0', '#ffd23f', '#9cff6e'] },
+  shadow: { name: 'Shadow', desc: 'The piece is dragged down into a swirl of shadow.', colors: ['#c084fc', '#2a1840', '#000000'] },
+  lightning: { name: 'Lightning', desc: 'A bolt from the sky strikes the captured piece.', colors: ['#ffffff', '#7df9ff', '#ffe14d'] },
+  goldrush: { name: 'Gold Rush', desc: 'The piece bursts into a fountain of gold coins, with a ka-ching.', colors: ['#ffe08a', '#f3c955', '#c9952c'] },
+  diamond: { name: 'Diamond Shards', desc: 'It shatters into glittering diamonds. Every member gets it.', colors: ['#e9fbff', '#7fd8ff', '#3b82f6'] },
+};
+const CAPTURE_PLAY = {
+  confetti: (b, q) => { b.burstAt(q, { n: 46, color: CAPTURE_FX.confetti.colors, kind: 'chip', speed: 1.8, size: 0.08, life: 70, gravity: 0.08, drag: 0.95, lift: 1.5 }); Sound.play('select'); },
+  petals: (b, q) => b.burstAt(q, { n: 30, color: CAPTURE_FX.petals.colors, kind: 'heart', speed: 0.9, size: 0.1, life: 90, gravity: 0.015, drag: 0.97 }),
+  pixel: (b, q) => { b.burstAt(q, { n: 36, color: CAPTURE_FX.pixel.colors, kind: 'pixel', speed: 1.5, size: 0.09, life: 46, gravity: 0.1 }); Sound.play('zap'); },
+  shadow: (b, q) => { b.ringAt(q, '#c084fc', 0.9, 8, 22); b.burstAt(q, { n: 30, color: CAPTURE_FX.shadow.colors, kind: 'smoke', speed: 0.7, size: 0.13, life: 50, gravity: 0, drag: 0.86 }); },
+  lightning: (b, q) => { b.beam(q < 32 ? q + 32 : q - 32, q, '#ffffff', 14); b.burstAt(q, { n: 30, color: CAPTURE_FX.lightning.colors, kind: 'spark', speed: 1.8, life: 34 }); b.flash('gold'); Sound.play('zap'); },
+  goldrush: (b, q) => { b.burstAt(q, { n: 34, color: CAPTURE_FX.goldrush.colors, kind: 'coin', speed: 1.6, size: 0.11, life: 70, gravity: 0.12, lift: 2.2 }); Sound.play('coin'); },
+  diamond: (b, q) => { b.burstAt(q, { n: 30, color: CAPTURE_FX.diamond.colors, kind: 'gem', speed: 1.6, size: 0.1, life: 56, gravity: 0.08, lift: 1 }); b.burstAt(q, { n: 16, color: ['#ffffff'], kind: 'spark', speed: 1, gravity: 0 }); },
+};
+function playCapture(id, b, q, p) { (CAPTURE_PLAY[id] || CAPTURE_FX.splinters.play)(b, q, p); }
+
+/* Avatars: a framed portrait and a title shown in your player bar (and to your opponent online). */
+const AVATARS = {
+  king: { name: 'The Challenger', emblem: 'K', frame: 'wood', desc: 'Every player’s first portrait.' },
+  knight: { name: 'Knight Errant', emblem: 'N', frame: 'silver', desc: 'A silver-framed knight, always on the move.' },
+  bomber: { name: 'The Mad Bomber', emblem: 'bomber', frame: 'silver', desc: 'For players who like things loud.' },
+  phantom: { name: 'Phantom of the Board', emblem: 'phantom', frame: 'gold', desc: 'A gold frame and a ghost that walks through walls.' },
+  vampire: { name: 'Count of the Night', emblem: 'vampire', frame: 'gold', desc: 'Gold frame, red eyes, no mercy.' },
+  archangel: { name: 'Holy Terror', emblem: 'archangel', frame: 'gold', desc: 'The Archangel in a gilded frame.' },
+  dragon: { name: 'Dragonlord', emblem: 'dragon', frame: 'prism', desc: 'An animated prismatic frame around the Elder Dragon.' },
+  zeus: { name: 'Storm Caller', emblem: 'zeus', frame: 'prism', desc: 'The Storm King in a crackling prismatic frame.' },
+  crown: { name: 'SirSC Royalty', emblem: 'K', frame: 'diamond', desc: 'The diamond frame and crown of a SirSC Member.' },
+};
+function avatarHTML(id, color) {
+  const a = AVATARS[id] || AVATARS.king;
+  return `<div class="avatar av-${a.frame}">${pieceSVG(a.emblem, color || 'w')}${a.frame === 'diamond' ? '<span class="av-crown" aria-hidden="true">♛</span>' : ''}</div>`;
+}
+
+const COSMETIC_KINDS = { board: BOARD_THEMES, pieces: PIECE_SETS, back: CARD_BACKS, capture: CAPTURE_FX, finale: FINALES, avatar: AVATARS };
+const DEFAULT_LOOK = { board: 'walnut', pieces: 'classic', back: 'classic', capture: 'splinters', finale: 'classic', avatar: 'king' };
 const cosmeticOf = item => { const [k, id] = String(item).split(':'); return COSMETIC_KINDS[k] && COSMETIC_KINDS[k][id] ? { kind: k, id, ...COSMETIC_KINDS[k][id] } : null; };
 
 /* ---------- painting a board theme ---------- */
@@ -3160,6 +3357,11 @@ const Look = {
     root.setProperty('--back-ink', back.ink); root.setProperty('--back-border', back.border);
     document.documentElement.dataset.back = cur.back;
     for (const b of BoardView.all || []) b.setTheme(cur.board);
+    if (PIECE_SET !== cur.pieces) {
+      PIECE_SET = cur.pieces;
+      for (const b of BoardView.all || []) b.repaint();
+      if (typeof G !== 'undefined' && G.s && typeof renderLog === 'function') { renderLog(); G.render(); }
+    }
   },
 };
 
@@ -3449,13 +3651,16 @@ const Shop = (() => {
 
   /* ---------- the shop screen ---------- */
   function items(kind) {
-    const free = { board: 'walnut', back: 'classic', finale: 'classic' }[kind];
+    const free = DEFAULT_LOOK[kind];
     return [kind + ':' + free].concat(WCC_CATALOG.filter(c => c.item_id.startsWith(kind + ':')).map(c => c.item_id));
   }
   function swatch(item) {
     const c = cosmeticOf(item);
     if (c.kind === 'board') return `<canvas class="sw-board" data-theme="${c.id}" width="128" height="128"></canvas>`;
     if (c.kind === 'back') return `<div class="sw-back" style="--a:${c.a};--b:${c.b};--ink:${c.ink};--bd:${c.border}"><span>W</span></div>`;
+    if (c.kind === 'pieces') return `<div class="sw-pieces"><span>${pieceSVG('Q', 'w', c.id)}</span><span>${pieceSVG('K', 'b', c.id)}</span></div>`;
+    if (c.kind === 'capture') return `<div class="sw-capture" style="--c1:${c.colors[0]};--c2:${c.colors[1]};--c3:${c.colors[2] || c.colors[0]}"><i></i><i></i><i></i><i></i><i></i><i></i>${pieceSVG('P', 'b')}</div>`;
+    if (c.kind === 'avatar') return `<div class="sw-avatar">${avatarHTML(c.id, 'w')}</div>`;
     return `<div class="sw-finale" style="--c1:${c.colors[0]};--c2:${c.colors[1]};--c3:${c.colors[2] || c.colors[0]}">${pieceSVG('K', 'w')}</div>`;
   }
   function stateOf(item) {
@@ -3486,7 +3691,36 @@ const Shop = (() => {
     w.innerHTML = (window.WCC_DEMO ? '<span class="pill demo" title="This build uses a pretend wallet stored in your browser. Nothing touches a real Warden Chat account.">Demo wallet</span>' : '') + `<span class="pill">🪙 <b>${fmt(Wallet.coins)}</b></span><span class="pill">💎 <b>${fmt(Wallet.diamonds)}</b></span>
       <span class="pill who">${esc(Account.user.username)}${badge()}</span><button type="button" class="btn small ghost" data-shop="signout"><span>Sign out</span></button>`;
   }
+  function featured() {
+    const week = Math.floor((Date.now() / 864e5 + 3) / 7);
+    const pool = WCC_CATALOG.filter(c => !c.member_only).map(c => c.item_id);
+    const rnd = mulberry32(week * 9301 + 49297), out = [];
+    const kinds = new Set();
+    while (out.length < 4 && pool.length) {
+      const i = Math.floor(rnd() * pool.length), id = pool.splice(i, 1)[0], k = id.split(':')[0];
+      if (kinds.has(k) && pool.some(x => !kinds.has(x.split(':')[0]))) continue;   // one of each kind where possible
+      kinds.add(k); out.push(id);
+    }
+    return out;
+  }
+  function renderFeatured() {
+    const box = q('#shopFeatured');
+    if (!box) return;
+    const until = new Date((Math.floor((Date.now() / 864e5 + 3) / 7) * 7 + 4) * 864e5);
+    box.innerHTML = `<div class="feat-head"><h3>Featured this week</h3><span>New picks ${until.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' })}</span></div>
+      <div class="feat-row">${featured().map(item => {
+        const c = cosmeticOf(item);
+        return `<div class="item feat ${preview === item ? 'pv' : ''}" data-preview="${item}" tabindex="0" role="button" aria-label="Preview ${esc(c.name)}">
+          <div class="item-art">${swatch(item)}</div>
+          <div class="item-txt"><div class="item-kind">${KIND_NAMES[c.kind]}${NEW_KINDS.includes(c.kind) ? ' <span class="new-tag">New</span>' : ''}</div><div class="item-name">${esc(c.name)}</div></div>
+          <div class="item-buy">${buyHTML(item)}</div></div>`;
+      }).join('')}</div>`;
+    for (const cv of box.querySelectorAll('canvas.sw-board')) paintBoard(cv.getContext('2d'), cv.width, cv.dataset.theme, 3, 2);
+  }
+  const KIND_NAMES = { board: 'Board', pieces: 'Piece set', back: 'Card back', capture: 'Capture effect', finale: 'Finale', avatar: 'Avatar' };
   function renderGrid() {
+    renderFeatured();
+    for (const b of document.querySelectorAll('.shop-tabs button')) b.classList.toggle('new', NEW_KINDS.includes(b.dataset.tab));
     for (const b of document.querySelectorAll('.shop-tabs button')) b.classList.toggle('on', b.dataset.tab === tab);
     const g = q('#shopGrid');
     if (tab === 'member') { g.innerHTML = memberHTML(); return; }
@@ -3502,7 +3736,7 @@ const Shop = (() => {
   }
   function memberHTML() {
     const until = Wallet.memberUntil ? new Date(Wallet.memberUntil).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
-    const month = WCC_CATALOG.filter(c => c.member_only && c.claim_from && Date.parse(c.claim_from) <= Date.now() && Date.now() < Date.parse(c.claim_until));
+    const month = WCC_CATALOG.filter(c => c.member_only && c.item_id.startsWith('board:') && c.claim_from && Date.parse(c.claim_from) <= Date.now() && Date.now() < Date.parse(c.claim_until));
     return `<div class="member-card">
       <div class="mc-head">${SIRSC_BADGE_SVG}<div><h3>SirSC Membership</h3><p>${Wallet.member ? `You're a member until ${until}.` : '$3 a month, paid to SirSC. It works across all of SirSC’s games.'}</p></div></div>
       <ul class="mc-perks">
@@ -3510,7 +3744,8 @@ const Shop = (() => {
         <li><b>5 💎 every month</b>, added the first time you play that month</li>
         <li><b>The SirSC Diamond</b> by your name</li>
         <li><b>This month's members' board</b>, yours forever: ${month.map(c => esc(cosmeticOf(c.item_id).name)).join(', ') || 'coming soon'}</li>
-        <li><b>The SirSC Diamond card back</b> while you're a member</li>
+        <li><b>This month's members' piece set</b>, yours forever: ${WCC_CATALOG.filter(c => c.member_only && c.item_id.startsWith('pieces:') && c.claim_from && Date.parse(c.claim_from) <= Date.now() && Date.now() < Date.parse(c.claim_until)).map(c => esc(cosmeticOf(c.item_id).name)).join(', ') || 'coming soon'}</li>
+        <li><b>The SirSC Diamond card back</b>, <b>Diamond Shards</b> capture effect and <b>SirSC Royalty</b> avatar while you're a member</li>
       </ul>
       ${Wallet.member ? '' : `<p class="mc-how">To join, pay SirSC $3 for each month and ask them to add it to your Warden Chat account.</p>`}
       ${window.WCC_DEMO && Account.status === 'signedIn' && !Wallet.member ? '<button type="button" class="btn small primary" data-shop="demo-member"><span>Demo: try a month of membership</span></button>' : ''}
@@ -3534,6 +3769,9 @@ const Shop = (() => {
     if (!b) return;
     b.resetEnd();
     b.setTheme(c.kind === 'board' ? c.id : Look.current().board);
+    b.repaint(c.kind === 'pieces' ? c.id : null);
+    const bar = q('#shopPvBar'), av = c.kind === 'avatar' ? c.id : Look.current().avatar;
+    if (bar) bar.innerHTML = `${avatarHTML(av, 'w')}<div class="pname"><b>${esc(Account.user ? Account.user.username : 'You')}${badge()}</b><span>White${av !== 'king' ? ' · <span class="av-title">' + esc(AVATARS[av].name) + '</span>' : ''}</span></div>`;
     if (c.kind === 'back') {
       const root = b.root.style;
       root.setProperty('--back-a', c.a); root.setProperty('--back-b', c.b); root.setProperty('--back-ink', c.ink); root.setProperty('--back-border', c.border);
@@ -3543,6 +3781,11 @@ const Shop = (() => {
       for (const k of ['--back-a', '--back-b', '--back-ink', '--back-border']) b.root.style.removeProperty(k);
     }
     q('#shopPvCap').textContent = c.kind === 'finale' ? `Previewing: ${c.name}` : `Previewing: ${c.name}`;
+    if (c.kind === 'capture') {
+      const at = preview;
+      const show = () => { if (preview !== at || current !== 'shop') return; for (const sq of [44, 35, 42]) playCapture(c.id, b, sq, { c: 'b' }); };
+      show(); setTimeout(show, 1400);
+    }
     if (c.kind === 'finale') {
       playFinale(b, 60, c.id, { win: true, word: 'Checkmate', sub: 'Preview' });
       const at = preview;
@@ -3716,10 +3959,10 @@ const Online = (() => {
   /* ---------- talking to the server ---------- */
   function call(fn, p) { return Account.rpc(fn, p); }
   function create() {
-    call('wcc_online_create', { wildcards: count, fog }).then(st => { game = st; render(); startPolling(); }, e => render(err(e)));
+    call('wcc_online_create', { wildcards: count, fog, avatar: Look.current().avatar }).then(st => { game = st; render(); startPolling(); }, e => render(err(e)));
   }
   function join(code) {
-    call('wcc_online_join', { code: code.trim().toUpperCase() }).then(st => { game = st; begin(); }, e => render(err(e)));
+    call('wcc_online_join', { code: code.trim().toUpperCase(), avatar: Look.current().avatar }).then(st => { game = st; begin(); }, e => render(err(e)));
   }
   function cancel() {
     const g = game;
@@ -3836,7 +4079,8 @@ const Online = (() => {
   function selectCode() { const el = q('#olCode'); if (!el) return; const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
   /* Leaving the game screen for good. */
   function leave() { stop(); game = null; }
-  return { init, render, moved, resign, leave, oppName, oppMember: () => !!(them() && them().member), renderPresence, get active() { return !!game; } };
+  return { init, render, moved, resign, leave, oppName, oppMember: () => !!(them() && them().member),
+    oppAvatar: () => (them() && AVATARS[them().avatar] ? them().avatar : 'king'), renderPresence, get active() { return !!game; } };
 })();
 
 /* Wildcard Chess: screens, the deal, games against the computer or a friend (pass & play), the Codex. */
@@ -4446,7 +4690,7 @@ function runIntro(slots) {
 }
 function afterIntro() {
   G.intro = false;
-  if (G.fog) { refreshBoard(true); G.board.root.classList.add('fog-roll'); setTimeout(() => G.board.root.classList.remove('fog-roll'), 1400); renderLog(); }
+  if (G.fog) { refreshBoard(true); renderLog(); }   // the fog rolls in from the edges
   G.startedAt = Date.now();
   G.render();
   if (G.mode === 'ai' && G.s.turn === G.ai) aiTurn();
@@ -4493,8 +4737,10 @@ function renderBars() {
     el.classList.toggle('turn', !G.over && G.s.turn === c);
     const online = G.mode === 'online';
     const name = local ? sideName(c) : human ? 'You' : online ? esc(Online.oppName()) + (Online.oppMember() ? SIRSC_BADGE_SVG : '') : lv.name + ' AI';
-    const sub = local ? (c === 'w' ? 'Player 1' : 'Player 2') + (!G.over && G.s.turn === c ? ' · to move' : '') : sideName(c) + (human ? '' : online ? ' · <span class="lvl">Online</span>' : ` · <span class="lvl">${lv.who}</span>`);
-    el.innerHTML = `<div class="avatar">${pieceSVG(human || online ? 'K' : lv.icon, c)}</div>
+    const avId = local ? 'king' : c === G.human ? Look.current().avatar : online ? Online.oppAvatar() : null;
+    const title = avId && avId !== 'king' ? ` · <span class="av-title">${esc(AVATARS[avId].name)}</span>` : '';
+    const sub = local ? (c === 'w' ? 'Player 1' : 'Player 2') + (!G.over && G.s.turn === c ? ' · to move' : '') : sideName(c) + (human ? title : online ? (title || ' · <span class="lvl">Online</span>') : ` · <span class="lvl">${lv.who}</span>`);
+    el.innerHTML = `${avId ? avatarHTML(avId, c) : `<div class="avatar">${pieceSVG(lv.icon, c)}</div>`}
       <div class="pname"><b>${name}${!human && (G.busy || (online && !G.over && G.s.turn === c && !G.intro)) ? '<span class="thinking"><i></i><i></i><i></i></span>' : ''}</b>
       <span>${sub}</span></div>
       <div class="chips">${chips}</div>
@@ -4835,9 +5081,12 @@ function playEffects(board, s, m, ns, quiet) {
     for (const q of [m.f, m.t]) { board.burstAt(q, { n: 26, color: ['#b57bff', '#e5d2ff', '#7a3cff'], kind: 'spark', speed: 1.3, gravity: 0 }); board.ringAt(q, '#b57bff', 0.9); }
     snd = 'magic'; msg = 'tele';
   }
+  // your own captures get your capture effect (Shop); everything else shatters the house way
+  const mine = !quiet && (G.mode === 'local' || s.turn === G.human), fxId = mine ? Look.current().capture : 'splinters';
   for (const d of deaths) {
     if (m.k === 'boom') continue;
-    board.burstAt(d.q, { n: 22, color: CHIPS[d.p.c], kind: 'chip', speed: 1.2, size: 0.07, life: 38 });
+    if (mine && d.p.c !== s.turn) playCapture(fxId, board, d.q, d.p);
+    else board.burstAt(d.q, { n: 22, color: CHIPS[d.p.c], kind: 'chip', speed: 1.2, size: 0.07, life: 38 });
   }
   let evMsg = null;
   for (const e of ns.events || []) {
@@ -5000,7 +5249,7 @@ function applyMove(m) {
   renderLog();
   if (st.over) {
     G.over = st;
-    if (G.fog) { refreshBoard(true); renderLog(); G.board.root.classList.add('fog-lift'); setTimeout(() => G.board.root.classList.remove('fog-lift'), 1200); }
+    if (G.fog) { refreshBoard(true); renderLog(); }   // and rolls away to reveal the whole board
     renderWildInfo(); G.render();
     const tk = G.token, wait = endFX(st, s);
     setTimeout(() => { if (tk === G.token) endGame(st); }, wait);

@@ -605,7 +605,7 @@ function runIntro(slots) {
 }
 function afterIntro() {
   G.intro = false;
-  if (G.fog) { refreshBoard(true); G.board.root.classList.add('fog-roll'); setTimeout(() => G.board.root.classList.remove('fog-roll'), 1400); renderLog(); }
+  if (G.fog) { refreshBoard(true); renderLog(); }   // the fog rolls in from the edges
   G.startedAt = Date.now();
   G.render();
   if (G.mode === 'ai' && G.s.turn === G.ai) aiTurn();
@@ -652,8 +652,10 @@ function renderBars() {
     el.classList.toggle('turn', !G.over && G.s.turn === c);
     const online = G.mode === 'online';
     const name = local ? sideName(c) : human ? 'You' : online ? esc(Online.oppName()) + (Online.oppMember() ? SIRSC_BADGE_SVG : '') : lv.name + ' AI';
-    const sub = local ? (c === 'w' ? 'Player 1' : 'Player 2') + (!G.over && G.s.turn === c ? ' · to move' : '') : sideName(c) + (human ? '' : online ? ' · <span class="lvl">Online</span>' : ` · <span class="lvl">${lv.who}</span>`);
-    el.innerHTML = `<div class="avatar">${pieceSVG(human || online ? 'K' : lv.icon, c)}</div>
+    const avId = local ? 'king' : c === G.human ? Look.current().avatar : online ? Online.oppAvatar() : null;
+    const title = avId && avId !== 'king' ? ` · <span class="av-title">${esc(AVATARS[avId].name)}</span>` : '';
+    const sub = local ? (c === 'w' ? 'Player 1' : 'Player 2') + (!G.over && G.s.turn === c ? ' · to move' : '') : sideName(c) + (human ? title : online ? (title || ' · <span class="lvl">Online</span>') : ` · <span class="lvl">${lv.who}</span>`);
+    el.innerHTML = `${avId ? avatarHTML(avId, c) : `<div class="avatar">${pieceSVG(lv.icon, c)}</div>`}
       <div class="pname"><b>${name}${!human && (G.busy || (online && !G.over && G.s.turn === c && !G.intro)) ? '<span class="thinking"><i></i><i></i><i></i></span>' : ''}</b>
       <span>${sub}</span></div>
       <div class="chips">${chips}</div>
@@ -994,9 +996,12 @@ function playEffects(board, s, m, ns, quiet) {
     for (const q of [m.f, m.t]) { board.burstAt(q, { n: 26, color: ['#b57bff', '#e5d2ff', '#7a3cff'], kind: 'spark', speed: 1.3, gravity: 0 }); board.ringAt(q, '#b57bff', 0.9); }
     snd = 'magic'; msg = 'tele';
   }
+  // your own captures get your capture effect (Shop); everything else shatters the house way
+  const mine = !quiet && (G.mode === 'local' || s.turn === G.human), fxId = mine ? Look.current().capture : 'splinters';
   for (const d of deaths) {
     if (m.k === 'boom') continue;
-    board.burstAt(d.q, { n: 22, color: CHIPS[d.p.c], kind: 'chip', speed: 1.2, size: 0.07, life: 38 });
+    if (mine && d.p.c !== s.turn) playCapture(fxId, board, d.q, d.p);
+    else board.burstAt(d.q, { n: 22, color: CHIPS[d.p.c], kind: 'chip', speed: 1.2, size: 0.07, life: 38 });
   }
   let evMsg = null;
   for (const e of ns.events || []) {
@@ -1159,7 +1164,7 @@ function applyMove(m) {
   renderLog();
   if (st.over) {
     G.over = st;
-    if (G.fog) { refreshBoard(true); renderLog(); G.board.root.classList.add('fog-lift'); setTimeout(() => G.board.root.classList.remove('fog-lift'), 1200); }
+    if (G.fog) { refreshBoard(true); renderLog(); }   // and rolls away to reveal the whole board
     renderWildInfo(); G.render();
     const tk = G.token, wait = endFX(st, s);
     setTimeout(() => { if (tk === G.token) endGame(st); }, wait);
