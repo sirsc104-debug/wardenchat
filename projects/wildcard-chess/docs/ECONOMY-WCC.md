@@ -133,3 +133,11 @@ The free defaults (`board:walnut`, `pieces:classic`, `back:classic`, `capture:sp
    ignored, plausibility errors, the hourly limit, and `sirsc_buy` / `sirsc_member_claim` working
    with `game = 'wcc'`.
 4. Deploy to the Warden Chat project once SirSC says so.
+
+## Shared wallet loadouts
+
+`game = 'wcc'` uses six slots: `board`, `pieces`, `back`, `capture`, `finale`, `avatar`. Each catalog row's `slot` is its item ID prefix before `:`. `sirsc_me('wcc').equipped` maps a slot to the full item ID, for example `{ "board": "board:marble" }`.
+
+The client calls `sirsc_equip(game, slot, item_id, target)` with target `''`; a free default sends `item_id: null`. The response is `sirsc_me(game)`. Buying does not equip on the server; the Shop follows a successful purchase with a separate equip call. Errors are `sirsc_unknown_item`, `sirsc_not_owned`, `sirsc_wrong_slot`, `rate_limited`, and the shared `sirsc_not_signed_in` authentication refusal.
+
+The server loadout wins over device preferences at sign-in and reload. Pending offline choices override only their own slots and remain isolated by user ID. Calls are serialized; a newer choice replaces an older queued choice in that slot. Offline failures wait for a successful wallet response or reconnect. Other failures discard that attempted choice and reload the wallet. Blocked storage leaves the current page functional, but cannot preserve unsent changes across a page close. Successfully saved server choices still restore after signing in again.

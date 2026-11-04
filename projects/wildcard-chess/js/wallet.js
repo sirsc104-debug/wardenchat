@@ -43,7 +43,7 @@ const Account = (() => {
   }
   function errorCode(r, kind) {
     const d = r.data || {}, msg = String(d.msg || d.message || d.error_description || d.error || ''), code = String(d.error_code || d.code || d.error || '');
-    if (r.status === 429 || /rate limit/i.test(msg)) return 'rate_limited';
+    if (r.status === 429 || msg === 'rate_limited' || /rate limit/i.test(msg)) return 'rate_limited';
     if (kind === 'rpc') {
       const own = /^(wcc|sirsc)_[a-z_]+$/.test(msg) ? msg : '';
       if (own === 'wcc_not_signed_in' || own === 'sirsc_not_signed_in') return 'unauthorized';
@@ -95,7 +95,11 @@ const Account = (() => {
   }
   function rpc(fn, params, anon) {
     const at = epoch;
-    const go = force => (anon ? Promise.resolve(null) : token(force)).then(t => call('POST', '/rest/v1/rpc/' + fn, params || {}, t)).then(r => {
+    const go = force => (anon ? Promise.resolve(null) : token(force)).then(t => {
+      if (!anon && at !== epoch) throw new ApiError('session_changed');
+      return call('POST', '/rest/v1/rpc/' + fn, params || {}, t);
+    }).then(r => {
+      if (!anon && at !== epoch) throw new ApiError('session_changed');
       if (r.status >= 200 && r.status < 300) return r.data;
       const code = errorCode(r, 'rpc');
       if (code === 'unauthorized' && !anon && !force) return go(true);
@@ -109,7 +113,9 @@ const Account = (() => {
   // A refused call: banned or suspended on Warden Chat, or just signed out somewhere else?
   function refused() {
     if (!sess) return Promise.resolve();
+    const at = epoch;
     return call('POST', '/rest/v1/rpc/my_account_state', {}, sess.access_token).then(r => {
+      if (at !== epoch) return;
       if (r.status === 200 && r.data && r.data.active === false) {
         st.status = 'restricted';
         st.restriction = { status: r.data.status || 'suspended', reason: r.data.reason || '', until: r.data.restrictedUntil || null };
@@ -150,8 +156,8 @@ const Account = (() => {
     },
     signOut() {
       const t = sess && sess.access_token;
-      const done = () => signedOut();
-      return (t ? call('POST', '/auth/v1/logout?scope=local', {}, t) : Promise.resolve()).then(done, done);
+      signedOut();
+      return (t ? call('POST', '/auth/v1/logout?scope=local', {}, t) : Promise.resolve()).catch(() => {});
     },
   };
 })();
@@ -160,49 +166,87 @@ const Account = (() => {
 const Wallet = (() => {
   const GAME = 'wcc';
   const listeners = new Set();
-  let me = null, loading = null, onClaim = null;
-  const emit = () => listeners.forEach(fn => { try { fn(me); } catch (e) { console.error(e); } });
-  // What's equipped, per slot (the kind: board, pieces, back, capture, finale, avatar), sent with
-  // sirsc_equip. Anything changed here and not saved there yet waits in unsent, wins over the
-  // wallet's copy, and is sent again when the wallet next answers (e.g. after being offline).
-  const unsent = new Map();
-  const keep = m => {
-    if (m && typeof m === 'object' && 'coins' in m) {
-      me = m;
-      if (m.equipped && typeof m.equipped === 'object' && typeof Look !== 'undefined') {
-        const merged = { ...m.equipped };
-        for (const [slot, item] of unsent) { if (item) merged[slot] = item; else delete merged[slot]; }
-        Look.adopt(merged);
+  let me = null, loading = null, onClaim = null, user = null, epoch = 0, version = 0, draining = null, offline = false;
+  const queues = new Map();
+  const queueKey = id => 'wcc.equip.pending:' + id;
+  function pending(id = user) {
+    if (!id) return {};
+    if (!queues.has(id)) {
+      let saved;
+      try { saved = JSON.parse(localStorage.getItem(queueKey(id)) || '{}'); } catch (e) { /* storage blocked */ }
+      const clean = {};
+      for (const [slot, item] of Object.entries(saved && typeof saved === 'object' ? saved : {})) {
+        if (['board', 'pieces', 'back', 'capture', 'finale', 'avatar'].includes(slot) && (item === null || (typeof item === 'string' && item.startsWith(slot + ':')))) clean[slot] = item;
       }
-      emit();
+      queues.set(id, clean);
     }
-    return me;
-  };
-  function equip(slot, item) {
-    if (Account.status !== 'signedIn') return;
-    unsent.set(slot, item);
-    Account.rpc('sirsc_equip', { game: GAME, slot, item_id: item, target: '' })
-      .then(() => { if (unsent.get(slot) === item) unsent.delete(slot); }, e => { if (!e || !e.offline) unsent.delete(slot); });
+    return queues.get(id);
   }
-  const resend = () => { for (const [slot, item] of [...unsent]) equip(slot, item); };
+  function savePending(id) { try { localStorage.setItem(queueKey(id), JSON.stringify(pending(id))); } catch (e) { /* memory queue still works */ } }
+  const emit = () => listeners.forEach(fn => { try { fn(me); } catch (e) { console.error(e); } });
+  const keep = m => { if (m && typeof m === 'object' && 'coins' in m) { me = m; offline = false; emit(); flush(); } return me; };
   const call = (fn, p) => Account.rpc(fn, p);
+  // Full-wallet responses must never cross accounts or overwrite a newer request.
+  function update(fn, p, select = x => x) {
+    const at = epoch, rev = ++version;
+    return call(fn, p).then(x => {
+      if (at === epoch) {
+        if (rev === version) keep(select(x));
+        else if (fn !== 'sirsc_me') { loading = null; load(); }
+      }
+      return x;
+    });
+  }
+  function flush() {
+    if (!user || Account.status !== 'signedIn' || draining || offline) return;
+    const id = user, at = epoch, q = pending(id), slot = Object.keys(q)[0];
+    if (!slot) return;
+    const item = q[slot], rev = ++version, marker = {};
+    draining = marker;
+    call('sirsc_equip', { game: GAME, slot, item_id: item, target: '' }).then(m => {
+      if (at !== epoch) return;
+      if (q[slot] === item) { delete q[slot]; savePending(id); }
+      if (rev === version) keep(m);
+      else { loading = null; load(); }
+    }).catch(e => {
+      if (at !== epoch) return;
+      if (e.offline) { offline = true; return; }
+      if (q[slot] === item) { delete q[slot]; savePending(id); }
+      emit();
+      // Discard a failed choice and obtain the authoritative loadout anew.
+      loading = null;
+      load();
+    }).finally(() => {
+      if (at !== epoch || draining !== marker) return;
+      draining = null;
+      flush();
+    });
+  }
+  // Diamond request RPCs return the DDR wallet view. Only their shared request list belongs here.
+  const withRequests = m => me && m && { ...me, requests: m.requests };
   function load() {
     if (Account.status !== 'signedIn') { me = null; emit(); return Promise.resolve(null); }
     if (loading) return loading;
-    loading = call('sirsc_me', { game: GAME }).then(m => {
-      keep(m); resend();
+    const at = epoch;
+    const job = update('sirsc_me', { game: GAME }).then(m => {
+      if (at !== epoch) return null;
       return m && m.member ? call('sirsc_member_claim', { game: GAME }).then(c => {
-        keep(c && c.me);
+        if (at !== epoch) return null;
+        // Claim grants can change ownership; refresh instead of applying an older snapshot.
+        update('sirsc_me', { game: GAME }).catch(() => {});
         if (c && onClaim && (c.diamonds_added > 0 || (c.claimed && c.claimed.length))) onClaim(c);
         return me;
       }, () => me) : me;
-    }).catch(() => me).finally(() => { loading = null; });
+    }).catch(() => me).finally(() => { if (loading === job) loading = null; });
+    loading = job;
     return loading;
   }
   Account.on(() => {
-    if (Account.status === 'signedIn' && !me && !loading) load();
-    if (Account.status !== 'signedIn' && me) { me = null; unsent.clear(); emit(); }
+    const next = Account.status === 'signedIn' && Account.user ? Account.user.id : null;
+    if (next !== user) { user = next; epoch++; version++; me = null; loading = null; draining = null; offline = false; emit(); }
+    if (user && !me && !loading) load();
   });
+  window.addEventListener('online', () => { if (user) load(); });
   return {
     GAME,
     get me() { return me; },
@@ -213,16 +257,19 @@ const Wallet = (() => {
     on(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     onClaim(fn) { onClaim = fn; },
     load,
+    get equipped() { return user ? { ...(me && me.equipped || {}), ...pending() } : {}; },
+    equip(slot, item) {
+      if (!user) return;
+      pending()[slot] = item; savePending(user); emit(); flush();
+    },
     owns: item => !!me && (me.owned || []).some(o => o.item_id === item),
-    equip,
     price: item => (me && (me.catalog || []).find(c => c.item_id === item)) || WCC_CATALOG.find(c => c.item_id === item) || null,
-    buy: (item, currency) => call('sirsc_buy', { game: GAME, item_id: item, target: '', currency }).then(keep),
-    requestDiamonds: (diamonds, note) => call('sirsc_request_diamonds', { diamonds, note: note || '' }).then(keep),
-    cancelRequest: id => call('sirsc_cancel_request', { request_id: id }).then(keep),
+    buy: (item, currency) => update('sirsc_buy', { game: GAME, item_id: item, target: '', currency }),
+    requestDiamonds: (diamonds, note) => update('sirsc_request_diamonds', { diamonds, note: note || '' }, withRequests),
+    cancelRequest: id => update('sirsc_cancel_request', { request_id: id }, withRequests),
     /* A finished game against the computer: the server works out the coins and returns the breakdown. */
     reward(r) {
-      return call('wcc_reward', { level: r.level, result: r.result, plies: r.plies | 0, duration_ms: Math.round(r.durationMs), draft: !!r.draft, codex: r.codex || [] })
-        .then(x => { keep(x && x.me); return x; });
+      return update('wcc_reward', { level: r.level, result: r.result, plies: r.plies | 0, duration_ms: Math.round(r.durationMs), draft: !!r.draft, codex: r.codex || [] }, x => x && x.me);
     },
   };
 })();

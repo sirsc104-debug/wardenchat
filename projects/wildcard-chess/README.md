@@ -135,7 +135,7 @@ Wildcard Chess uses the **SirSC wallet** that Downhill Death Run already uses (`
 
 ×1.25 for a drafted army, ×1.5 for members, +1,500 for the first win of each day, and +500 for every wildcard the account has never been paid for (lifetime, at most 25,000, outside the daily cap). **Daily limit: 25,000 coins** from Wildcard Chess (inside the wallet-wide 300,000). A game needs at least 12 plies and 30 seconds to pay; at most 20 paid games an hour. Pass & Play pays nothing, since one account would be playing both sides.
 
-**The Shop** (menu → Shop, or the account chip) sells cosmetics only, never an advantage. A **Featured this week** row at the top shows four items (one of each kind where possible), picked the same for everyone and changing every Monday (UTC); the three newest kinds wear a **New** tag. Clicking any item previews it on the Shop's board (and the player bar under it); buying equips it. Equipping is remembered per device and only counts for things the account owns.
+**The Shop** (menu → Shop, or the account chip) sells cosmetics only, never an advantage. A **Featured this week** row at the top shows four items (one of each kind where possible), picked the same for everyone and changing every Monday (UTC); the three newest kinds wear a **New** tag. Clicking any item previews it on the Shop's board (and the player bar under it); buying equips it. Signed-in equipment is saved to the SirSC wallet and restored on every device. Offline changes are queued per account and slot, then retried when the wallet answers or the connection returns; other errors discard the change and refresh the server loadout. Signed-out preferences stay on the device, with an in-memory fallback when storage is blocked.
 
 | Kind | What it changes | Items (free default first) |
 |---|---|---|
@@ -171,7 +171,7 @@ js/engine.js        rules for every piece, legality, evaluation and the alpha-be
 js/fx.js            board particle effects and synthesized sound
 js/board.js         the board view: procedural wood, piece sprites, highlights
 js/game.js          screens, the deal, input, game flow, log, Codex, exhibition match
-js/cosmetics.js     board themes, card backs, finales, the wcc catalog, and what this device has equipped
+js/cosmetics.js     board themes, card backs, finales, the wcc catalog, and the account loadout (device preferences when signed out)
 js/wallet.js        Warden Chat sign-in and the SirSC wallet (sirsc_* and wcc_* functions)
 js/wallet-mock.js   a pretend wallet back end, only in --wallet-demo builds
 js/shop.js          the account chip, sign-in, the Shop and the coins shown after a game
@@ -186,7 +186,7 @@ dist/               the single-file build
 
 `dist/wildcard-chess-google-sites.html` is for a Google Site. Google Sites shows embeds in a small frame and blocks fullscreen, so this file shows the title screen (title, animated exhibition board and cards) with one button, **Open in a new tab**, which opens an `about:blank` tab and writes the full game into it, with the real Warden Chat connection (no demo wallet). If the browser blocks the new tab, the page says so and offers to play inside the frame instead. Closing or reloading that tab ends the game; the Google Site opens it again.
 
-To put it on a Google Site, open the file in a text editor, copy everything, then in Google Sites choose **Insert → Embed → Embed code**, paste it, and click **Next → Insert**. Drag the embed's corners to the full width of the page and about 700 px tall. Settings and the Codex save in each visitor's own browser. Equipped cosmetics do too, and, signed in, they're also saved in the SirSC wallet (`sirsc_equip`, one slot per kind: `board`, `pieces`, `back`, `capture`, `finale`, `avatar`), because the Google Sites tab's storage doesn't reliably last between visits: signing in brings your loadout back on any device. Coins, diamonds, membership and online games come from Warden Chat (until its back end answers, the game hides accounts and works offline).
+To put it on a Google Site, open the file in a text editor, copy everything, then in Google Sites choose **Insert → Embed → Embed code**, paste it, and click **Next → Insert**. Drag the embed's corners to the full width of the page and about 700 px tall. Settings and the Codex save in each visitor's own browser; signed-in equipped cosmetics, coins, diamonds, membership and online games come from Warden Chat once its back end is deployed (until then the game hides accounts and works offline).
 
 `dist/wildcard-chess.html` is the plain single-file game (open it anywhere). Rebuild both after changing the game with:
 
@@ -196,3 +196,7 @@ python3 build-sites.py
 ```
 
 Progress (Codex discoveries and your last settings) is kept in the browser's `localStorage`.
+
+## Loadout regression tests
+
+Run `node --test projects/wildcard-chess/tests/*.test.cjs` from the repository root. The suite runs the actual wallet and cosmetics code in independent clients against a shared simulated server, plus the demo wallet contract. It covers purchase/equip/reload, another device, defaults, separate slots, offline retry, rejected changes, account changes, response ordering, blocked storage, catalog slots, and rate limits. Browser and deployed-server checks are separate.
