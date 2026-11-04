@@ -1,6 +1,8 @@
 /* Wildcard Chess: the cosmetics you can own (board themes, card backs, checkmate finales), how each is
-   drawn, and which ones this device has equipped. Owning things is the SirSC wallet's job
-   (wallet.js, docs/ECONOMY-WCC.md); equipping is a per-device choice among what you own. */
+   drawn, and which ones are equipped. Owning things is the SirSC wallet's job (wallet.js,
+   docs/ECONOMY-WCC.md). What's equipped is saved on this device, and, signed in, in the wallet too
+   (sirsc_equip, one slot per kind), so it stays equipped after a reload, in the Google Sites tab and
+   on any other device. */
 'use strict';
 
 /* Prices follow the SirSC wallet: 1 💎 is 5,000 coins, and things bought with coins cost 75% of that.
@@ -250,7 +252,22 @@ const SQUARE_PAINTERS = {
 const Look = {
   key: 'wildcard-chess:look',
   chosen() { try { return Object.assign({}, DEFAULT_LOOK, JSON.parse(localStorage.getItem(this.key) || '{}')); } catch (e) { return { ...DEFAULT_LOOK }; } },
-  choose(kind, id) { const c = this.chosen(); c[kind] = id; try { localStorage.setItem(this.key, JSON.stringify(c)); } catch (e) { /* storage blocked */ } this.apply(); },
+  save(c) { try { localStorage.setItem(this.key, JSON.stringify(c)); } catch (e) { /* storage blocked */ } },
+  choose(kind, id) {
+    const c = this.chosen(); c[kind] = id; this.save(c); this.apply();
+    // signed in, the wallet keeps it too (the default for a kind means "nothing in that slot")
+    if (typeof Wallet !== 'undefined' && Wallet.equip) Wallet.equip(kind, id === DEFAULT_LOOK[kind] ? null : kind + ':' + id);
+  },
+  /* The wallet's loadout ({ board: 'board:marble', … }) replaces this device's, at sign-in and
+     whenever the wallet answers. Kinds with nothing in the wallet go back to the default. */
+  adopt(equipped) {
+    const c = { ...DEFAULT_LOOK };
+    for (const k of Object.keys(DEFAULT_LOOK)) {
+      const item = equipped[k], co = item && cosmeticOf(item);
+      if (co && co.kind === k) c[k] = co.id;
+    }
+    this.save(c); this.apply();
+  },
   /* An equipped item only counts while the wallet says you own it (or it's a free default). */
   current() {
     const c = this.chosen(), out = {};

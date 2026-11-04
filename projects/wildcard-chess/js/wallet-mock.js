@@ -31,7 +31,8 @@
   function meOf(id) {
     const w = wallet(id);
     return { coins: w.coins, diamonds: w.diamonds, member: isMember(w), member_until: w.member_until, admin: false,
-      owned: (mem.owned[id] || []).map(item_id => ({ item_id, target: '' })), catalog: WCC_CATALOG,
+      owned: (mem.owned[id] || []).map(item_id => ({ item_id, target: '' })), equipped: (mem.equipped || {})[id] || {},
+      catalog: WCC_CATALOG.map(c => ({ ...c, slot: String(c.item_id).split(':')[0] })),
       requests: mem.requests.filter(r => r.user_id === id).slice(-10).reverse(), server_now: new Date().toISOString() };
   }
   const owns = (id, item) => (mem.owned[id] || []).includes(item);
@@ -69,6 +70,18 @@
       if ((b.currency === 'coins' ? w.coins : w.diamonds) < cost) return fail('sirsc_not_enough');
       if (b.currency === 'coins') w.coins -= cost; else w.diamonds -= cost;
       give(id, c.item_id); save();
+      return R(200, meOf(id));
+    }
+    // what's equipped, one item per slot (the slot is the kind before the colon); null takes it off
+    if (fn === 'sirsc_equip') {
+      if (b.game !== 'wcc') return fail('sirsc_unknown_item');
+      const mine = ((mem.equipped = mem.equipped || {})[id] = mem.equipped[id] || {});
+      if (b.item_id == null) { delete mine[b.slot]; save(); return R(200, meOf(id)); }
+      const c = WCC_CATALOG.find(x => x.item_id === b.item_id);
+      if (!c) return fail('sirsc_unknown_item');
+      if (!owns(id, c.item_id)) return fail('sirsc_not_owned');
+      if (String(c.item_id).split(':')[0] !== b.slot) return fail('sirsc_wrong_slot');
+      mine[b.slot] = c.item_id; save();
       return R(200, meOf(id));
     }
     if (fn === 'sirsc_request_diamonds') {

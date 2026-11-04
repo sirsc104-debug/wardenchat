@@ -3102,8 +3102,10 @@ class BoardView {
 }
 
 /* Wildcard Chess: the cosmetics you can own (board themes, card backs, checkmate finales), how each is
-   drawn, and which ones this device has equipped. Owning things is the SirSC wallet's job
-   (wallet.js, docs/ECONOMY-WCC.md); equipping is a per-device choice among what you own. */
+   drawn, and which ones are equipped. Owning things is the SirSC wallet's job (wallet.js,
+   docs/ECONOMY-WCC.md). What's equipped is saved on this device, and, signed in, in the wallet too
+   (sirsc_equip, one slot per kind), so it stays equipped after a reload, in the Google Sites tab and
+   on any other device. */
 'use strict';
 
 /* Prices follow the SirSC wallet: 1 💎 is 5,000 coins, and things bought with coins cost 75% of that.
@@ -3353,7 +3355,22 @@ const SQUARE_PAINTERS = {
 const Look = {
   key: 'wildcard-chess:look',
   chosen() { try { return Object.assign({}, DEFAULT_LOOK, JSON.parse(localStorage.getItem(this.key) || '{}')); } catch (e) { return { ...DEFAULT_LOOK }; } },
-  choose(kind, id) { const c = this.chosen(); c[kind] = id; try { localStorage.setItem(this.key, JSON.stringify(c)); } catch (e) { /* storage blocked */ } this.apply(); },
+  save(c) { try { localStorage.setItem(this.key, JSON.stringify(c)); } catch (e) { /* storage blocked */ } },
+  choose(kind, id) {
+    const c = this.chosen(); c[kind] = id; this.save(c); this.apply();
+    // signed in, the wallet keeps it too (the default for a kind means "nothing in that slot")
+    if (typeof Wallet !== 'undefined' && Wallet.equip) Wallet.equip(kind, id === DEFAULT_LOOK[kind] ? null : kind + ':' + id);
+  },
+  /* The wallet's loadout ({ board: 'board:marble', … }) replaces this device's, at sign-in and
+     whenever the wallet answers. Kinds with nothing in the wallet go back to the default. */
+  adopt(equipped) {
+    const c = { ...DEFAULT_LOOK };
+    for (const k of Object.keys(DEFAULT_LOOK)) {
+      const item = equipped[k], co = item && cosmeticOf(item);
+      if (co && co.kind === k) c[k] = co.id;
+    }
+    this.save(c); this.apply();
+  },
   /* An equipped item only counts while the wallet says you own it (or it's a free default). */
   current() {
     const c = this.chosen(), out = {};
@@ -3538,13 +3555,35 @@ const Wallet = (() => {
   const listeners = new Set();
   let me = null, loading = null, onClaim = null;
   const emit = () => listeners.forEach(fn => { try { fn(me); } catch (e) { console.error(e); } });
-  const keep = m => { if (m && typeof m === 'object' && 'coins' in m) { me = m; emit(); } return me; };
+  // What's equipped, per slot (the kind: board, pieces, back, capture, finale, avatar), sent with
+  // sirsc_equip. Anything changed here and not saved there yet waits in unsent, wins over the
+  // wallet's copy, and is sent again when the wallet next answers (e.g. after being offline).
+  const unsent = new Map();
+  const keep = m => {
+    if (m && typeof m === 'object' && 'coins' in m) {
+      me = m;
+      if (m.equipped && typeof m.equipped === 'object' && typeof Look !== 'undefined') {
+        const merged = { ...m.equipped };
+        for (const [slot, item] of unsent) { if (item) merged[slot] = item; else delete merged[slot]; }
+        Look.adopt(merged);
+      }
+      emit();
+    }
+    return me;
+  };
+  function equip(slot, item) {
+    if (Account.status !== 'signedIn') return;
+    unsent.set(slot, item);
+    Account.rpc('sirsc_equip', { game: GAME, slot, item_id: item, target: '' })
+      .then(() => { if (unsent.get(slot) === item) unsent.delete(slot); }, e => { if (!e || !e.offline) unsent.delete(slot); });
+  }
+  const resend = () => { for (const [slot, item] of [...unsent]) equip(slot, item); };
   const call = (fn, p) => Account.rpc(fn, p);
   function load() {
     if (Account.status !== 'signedIn') { me = null; emit(); return Promise.resolve(null); }
     if (loading) return loading;
     loading = call('sirsc_me', { game: GAME }).then(m => {
-      keep(m);
+      keep(m); resend();
       return m && m.member ? call('sirsc_member_claim', { game: GAME }).then(c => {
         keep(c && c.me);
         if (c && onClaim && (c.diamonds_added > 0 || (c.claimed && c.claimed.length))) onClaim(c);
@@ -3555,7 +3594,7 @@ const Wallet = (() => {
   }
   Account.on(() => {
     if (Account.status === 'signedIn' && !me && !loading) load();
-    if (Account.status !== 'signedIn' && me) { me = null; emit(); }
+    if (Account.status !== 'signedIn' && me) { me = null; unsent.clear(); emit(); }
   });
   return {
     GAME,
@@ -3568,6 +3607,7 @@ const Wallet = (() => {
     onClaim(fn) { onClaim = fn; },
     load,
     owns: item => !!me && (me.owned || []).some(o => o.item_id === item),
+    equip,
     price: item => (me && (me.catalog || []).find(c => c.item_id === item)) || WCC_CATALOG.find(c => c.item_id === item) || null,
     buy: (item, currency) => call('sirsc_buy', { game: GAME, item_id: item, target: '', currency }).then(keep),
     requestDiamonds: (diamonds, note) => call('sirsc_request_diamonds', { diamonds, note: note || '' }).then(keep),

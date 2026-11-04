@@ -162,13 +162,35 @@ const Wallet = (() => {
   const listeners = new Set();
   let me = null, loading = null, onClaim = null;
   const emit = () => listeners.forEach(fn => { try { fn(me); } catch (e) { console.error(e); } });
-  const keep = m => { if (m && typeof m === 'object' && 'coins' in m) { me = m; emit(); } return me; };
+  // What's equipped, per slot (the kind: board, pieces, back, capture, finale, avatar), sent with
+  // sirsc_equip. Anything changed here and not saved there yet waits in unsent, wins over the
+  // wallet's copy, and is sent again when the wallet next answers (e.g. after being offline).
+  const unsent = new Map();
+  const keep = m => {
+    if (m && typeof m === 'object' && 'coins' in m) {
+      me = m;
+      if (m.equipped && typeof m.equipped === 'object' && typeof Look !== 'undefined') {
+        const merged = { ...m.equipped };
+        for (const [slot, item] of unsent) { if (item) merged[slot] = item; else delete merged[slot]; }
+        Look.adopt(merged);
+      }
+      emit();
+    }
+    return me;
+  };
+  function equip(slot, item) {
+    if (Account.status !== 'signedIn') return;
+    unsent.set(slot, item);
+    Account.rpc('sirsc_equip', { game: GAME, slot, item_id: item, target: '' })
+      .then(() => { if (unsent.get(slot) === item) unsent.delete(slot); }, e => { if (!e || !e.offline) unsent.delete(slot); });
+  }
+  const resend = () => { for (const [slot, item] of [...unsent]) equip(slot, item); };
   const call = (fn, p) => Account.rpc(fn, p);
   function load() {
     if (Account.status !== 'signedIn') { me = null; emit(); return Promise.resolve(null); }
     if (loading) return loading;
     loading = call('sirsc_me', { game: GAME }).then(m => {
-      keep(m);
+      keep(m); resend();
       return m && m.member ? call('sirsc_member_claim', { game: GAME }).then(c => {
         keep(c && c.me);
         if (c && onClaim && (c.diamonds_added > 0 || (c.claimed && c.claimed.length))) onClaim(c);
@@ -179,7 +201,7 @@ const Wallet = (() => {
   }
   Account.on(() => {
     if (Account.status === 'signedIn' && !me && !loading) load();
-    if (Account.status !== 'signedIn' && me) { me = null; emit(); }
+    if (Account.status !== 'signedIn' && me) { me = null; unsent.clear(); emit(); }
   });
   return {
     GAME,
@@ -192,6 +214,7 @@ const Wallet = (() => {
     onClaim(fn) { onClaim = fn; },
     load,
     owns: item => !!me && (me.owned || []).some(o => o.item_id === item),
+    equip,
     price: item => (me && (me.catalog || []).find(c => c.item_id === item)) || WCC_CATALOG.find(c => c.item_id === item) || null,
     buy: (item, currency) => call('sirsc_buy', { game: GAME, item_id: item, target: '', currency }).then(keep),
     requestDiamonds: (diamonds, note) => call('sirsc_request_diamonds', { diamonds, note: note || '' }).then(keep),
