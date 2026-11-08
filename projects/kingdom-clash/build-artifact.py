@@ -8,6 +8,7 @@ The Artifact host wraps the page in its own <html>/<head>/<body>, so the default
 out: the <title>, the Google Fonts link, the CSS inlined into <style>, the body's markup, then every
 script inlined in the order index.html loads them. With --standalone it is a complete page instead.
 """
+import base64
 import pathlib
 import re
 import sys
@@ -26,6 +27,12 @@ def main(out, standalone=False):
     scripts = re.findall(r'<script src="([^"]+)"></script>', body)
     body = re.sub(r'\s*<script src="[^"]+"></script>', '', body).strip()
     js = '\n'.join((HERE / src).read_text(encoding='utf-8') for src in scripts)
+    # Images the scripts load (the scenery backgrounds) are baked in as data URIs.
+    def inline(m):
+        path = HERE / m.group(1)
+        mime = {'.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg'}[path.suffix]
+        return f"'data:{mime};base64,{base64.b64encode(path.read_bytes()).decode()}'"
+    js = re.sub(r"'(img/[A-Za-z0-9_-]+\.(?:webp|png|jpg))'", inline, js)
     if '</script' in js or '</style' in css:
         sys.exit('A closing tag inside the CSS or JS would end the inline block early.')
     page = f'{title}\n{metas}{fonts}<style>\n{css}\n</style>\n{body}\n<script>\n{js}\n</script>\n'

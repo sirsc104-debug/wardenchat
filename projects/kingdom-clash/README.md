@@ -11,7 +11,7 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 | Screen | What's on it |
 | --- | --- |
 | Home | The Kingdom Clash logo, Trainer Owen with a **Battle** button and your record against him, your 8-card deck (click a card for its stats), how to play, and a sound toggle. |
-| Battle | Five columns, following the desktop layout concept: arena scenery (statue, crowd, banners, torches) · your 4 cards and the next one · the arena · the Energy bar · the timer, crown score and more scenery (waterfall). Below 1000 px wide the scenery is dropped and the clock moves onto the arena. |
+| Battle | Five columns, following the desktop layout concept: the Royal Grandstands (King statue, stands, banners, torches) · your 4 cards and the next one · the arena · the Energy bar · the Royal Waterfall with the timer and crown score over its sky. The spectators in both stands are animated and react to the match. Below 1000 px wide the scenery is dropped and the clock moves onto the arena. |
 | Result | Victory / Defeat / Draw, both sides' crowns, why it ended, and **Play Again** or **Home**. |
 
 ## How a match works
@@ -53,13 +53,14 @@ The other skills (`trainer`, `normal`) are kept for later bots and for the bot-v
 | `js/sim.js` | The battle: fixed 30 steps a second, no DOM, seeded, so it runs the same in the page, in Node and later on both ends of an online match |
 | `js/bot.js` | Trainer Owen |
 | `js/art.js` | Every troop, tower, card portrait and the arena, drawn in code. Each troop and tower has two views: your side is seen from behind (facing up the arena, toward the enemy) and the enemy faces you; cards use the front view |
-| `js/scenery.js` | The animated scenery panels; the crowd cheers when a tower falls |
+| `js/scenery.js` | The Training Grounds side panels. Each draws its illustrated background (`img/grounds-left.webp`, `img/grounds-right.webp`) once into a cache cropped to cover the panel, then each frame the animated spectators seated on the illustrated benches (team-coloured outfits, flags; they jump for the side that takes a tower, celebrate the winner and slump if their side lost), torch glow, embers, twinkling stars and waterfall mist. Bench positions are in `LAYOUT`, in image coordinates |
 | `js/audio.js` | Sound effects made with Web Audio (no sound files) |
 | `js/game.js` | Screens, the game loop, drawing the battle, input |
 | `tools/path-test.js` | `node tools/path-test.js` places every ground troop behind and beside each tower, for both teams, and checks it walks around instead of getting stuck |
 | `tools/owen-test.js` | `node tools/owen-test.js 100` plays Trainer Owen against a good player, a sloppy player, a random clicker and a player who does nothing, and prints how often he wins |
 | `tools/sim-test.js` | `node tools/sim-test.js 40` plays 40 bot-vs-bot matches headless and checks they end cleanly (no NaNs, no troops in the river) |
-| `build-artifact.py` | Bundles everything into one page: `python3 build-artifact.py OUT.html` (claude.ai Artifact) or `--standalone` (a complete page) |
+| `img/` | The two Training Grounds backgrounds (793 × 1983 WebP) |
+| `build-artifact.py` | Bundles everything into one page, with the images baked in as data URIs: `python3 build-artifact.py OUT.html` (claude.ai Artifact) or `--standalone` (a complete page) |
 
 Built copies are in `dist/`: `kingdom-clash.html` (Artifact bundle) and `kingdom-clash-standalone.html` (open anywhere, works offline apart from the Google font, which falls back to a system font).
 

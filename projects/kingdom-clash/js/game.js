@@ -79,6 +79,7 @@
     G.bot = KCBot.create(1, { skill: 'tutorial', seed: Math.floor(Math.random() * 1e9) });
     Object.assign(G, { fx: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0 });
     $('#result').hidden = true; $('#leaveAsk').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
+    KCScenery.reset();
     show('battle');
     layout();
     G.phase = 'intro'; G.intro = 1.7;
@@ -273,7 +274,7 @@
   function towerFx(e) {
     KCSound.play('tower');
     G.shake = Math.max(G.shake, 0.55);
-    KCScenery.cheer();
+    KCScenery.cheer(1 - e.team);
     for (let i = 0; i < 26; i++) {
       const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 5;
       G.fx.push({ kind: 'rock', x: e.x, y: e.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.6, z: 0, vz: 4 + Math.random() * 6, r: 0.12 + Math.random() * 0.2, life: 1.2, max: 1.2, col: Math.random() < 0.3 ? A.TEAM[e.team].cloth : '#b8b2a8' });
@@ -312,6 +313,7 @@
   function endBattle(e) {
     G.phase = 'end';
     G.ended = 1.8;
+    if (e.winner >= 0) KCScenery.celebrate(e.winner);
     select(-1);
     const r = G.record;
     if (e.winner === 0) r.w++; else if (e.winner === 1) r.l++; else r.d++;

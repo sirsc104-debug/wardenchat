@@ -1,176 +1,258 @@
-/* Kingdom Clash: the arena scenery beside the battlefield. The left side has a statue, the right side
-   a waterfall, and both have a crowd in the stands, banners and torches. The crowd cheers when a
-   tower falls. Drawn at 30 frames a second at most. */
+/* Kingdom Clash: the Training Grounds scenery beside the battlefield.
+
+   Each side panel shows one illustrated background (the Royal Grandstands with the King statue on the
+   left, the Royal Waterfall on the right), cropped to fill the panel like CSS "cover". The image is
+   drawn once into a cached canvas whenever the panel changes size; every frame then draws that cache,
+   the animated spectators sitting on the illustrated benches, and a few light effects (torch glow,
+   twinkling stars, waterfall mist). The spectators are not in the artwork: they bob, cheer when a
+   tower falls and celebrate the winner. Drawn at 30 frames a second at most. */
 'use strict';
 
 const KCScenery = (() => {
-  const A = KCArt, scenes = [];
-  let last = 0;
-  const SHIRTS = ['#2f7cf6', '#e5414b', '#ffcf3f', '#3fbf6f', '#b06bff', '#ff8a3d', '#f5f5f5', '#59c9e8'];
-  const SKIN = ['#f0c29e', '#d9a27a', '#a8714c', '#7a4e33', '#f6d3b5'];
+  const SRC = { left: 'img/grounds-left.webp', right: 'img/grounds-right.webp' };
+  const IMG_W = 793, IMG_H = 1983;
+  const OUT = '#231c33';
+  const BLUE = ['#2f6fe4', '#3d82f2', '#2458c4'], RED = ['#dc3640', '#e8505a', '#b8262f'];
+  const PLAIN = ['#f2c14e', '#4fb477', '#9b6bd6', '#f08a4b', '#e9e4dc', '#5fc4d9', '#6d6a7c'];
+  const SKIN = ['#f6c9a6', '#e0a982', '#b87a52', '#8a5636', '#f8d8bd'];
+  const HAIR = ['#3a2a20', '#6b4426', '#c58a3c', '#2a2a33', '#9a3b2a', '#e2d3a8'];
+
+  /* Where people can sit, in image coordinates (0 to 1 of the artwork's width and height).
+     Each row is the line a seated spectator's hips rest on, with the stretches between stairs,
+     the statue and the waterfall. Rows further back are drawn smaller. */
+  const LAYOUT = {
+    left: {
+      anchor: [0.55, 0.72],
+      rows: [
+        { y: 0.586, slope: 0.012, size: 0.82, spans: [[0.365, 0.575], [0.69, 0.985]] },
+        { y: 0.615, slope: 0.012, size: 0.87, spans: [[0.47, 0.63], [0.745, 0.985]] },
+        { y: 0.645, slope: 0.012, size: 0.92, spans: [[0.51, 0.71], [0.815, 0.985]] },
+        { y: 0.676, slope: 0.012, size: 0.97, spans: [[0.5, 0.79], [0.9, 0.985]] },
+        { y: 0.707, slope: 0.012, size: 1.02, spans: [[0.505, 0.86]] },
+        { y: 0.737, slope: 0.012, size: 1.07, spans: [[0.6, 0.92]] },
+        { y: 0.766, slope: 0.01, size: 1.12, spans: [[0.62, 0.72], [0.78, 0.93]] },
+      ],
+      glows: [[0.07, 0.725, 1.3], [0.548, 0.735, 1.2], [0.523, 0.528, 0.7], [0.958, 0.551, 0.7], [0.093, 0.462, 0.6], [0.405, 0.512, 0.6]],
+    },
+    right: {
+      anchor: [0.35, 0.72],
+      rows: [
+        { y: 0.590, slope: 0, size: 0.78, spans: [[0.005, 0.105], [0.22, 0.44]] },
+        { y: 0.606, slope: 0, size: 0.8, spans: [[0.005, 0.12], [0.24, 0.455]] },
+        { y: 0.622, slope: 0, size: 0.82, spans: [[0.005, 0.135], [0.26, 0.47]] },
+        { y: 0.672, slope: 0, size: 0.9, spans: [[0.005, 0.15], [0.29, 0.43]] },
+        { y: 0.689, slope: 0, size: 0.93, spans: [[0.005, 0.17], [0.31, 0.445]] },
+        { y: 0.706, slope: 0, size: 0.96, spans: [[0.005, 0.19], [0.33, 0.46]] },
+      ],
+      glows: [[0.067, 0.528, 0.7], [0.305, 0.551, 0.7], [0.178, 0.646, 0.45], [0.455, 0.646, 0.45], [0.052, 0.835, 1.3], [0.935, 0.845, 1.3]],
+      mist: [0.44, 0.9, 0.855],
+    },
+  };
+
+  const scenes = [], images = {};
+  let last = 0, cheerT = 0, cheerTeam = -1, partyT = 0, partyTeam = -1;
+
+  function load(side) {
+    if (images[side]) return images[side];
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => { for (const s of scenes) if (s.side === side) s.cacheKey = ''; };
+    img.src = SRC[side];
+    images[side] = img;
+    return img;
+  }
 
   function make(cv, side) {
-    const s = { cv, side, w: 0, h: 0, crowd: [], stars: [], cheer: 0, dpr: 1 };
+    const s = { cv, side, img: load(side), w: 0, h: 0, dpr: 1, cache: null, cacheKey: '', crowd: [], fx: [], cover: null };
     scenes.push(s);
     resize(s);
     return s;
   }
+
+  // Scale the artwork to cover the panel, keeping the anchor point (a fraction of the image) in view.
+  function cover(s) {
+    const L = LAYOUT[s.side], k = Math.max(s.w / IMG_W, s.h / IMG_H);
+    const dw = IMG_W * k, dh = IMG_H * k;
+    const ox = Math.min(0, Math.max(s.w - dw, s.w / 2 - L.anchor[0] * dw));
+    const oy = Math.min(0, Math.max(s.h - dh, s.h * 0.62 - L.anchor[1] * dh));
+    return { k, ox, oy, dw, dh, x: u => ox + u * dw, y: v => oy + v * dh };
+  }
+
   function resize(s) {
     const r = s.cv.getBoundingClientRect();
     s.dpr = Math.min(2, window.devicePixelRatio || 1);
-    s.w = Math.max(1, r.width); s.h = Math.max(1, r.height);
+    s.w = Math.max(1, Math.round(r.width)); s.h = Math.max(1, Math.round(r.height));
     s.cv.width = Math.round(s.w * s.dpr); s.cv.height = Math.round(s.h * s.dpr);
-    const rand = KCSim.mulberry(s.side === 'left' ? 11 : 23);
+    s.cover = cover(s);
+    s.cacheKey = '';
+    seat(s);
+  }
+
+  // Fill the benches with people. The seating is seeded, so the same crowd comes back every match.
+  function seat(s) {
+    const L = LAYOUT[s.side], cv = s.cover, rand = KCSim.mulberry(s.side === 'left' ? 11 : 23);
+    const unit = IMG_W * cv.k; // pixels per image width
     s.crowd = [];
-    const rows = 4, top = s.h * 0.6, rowH = (s.h * 0.24) / rows;
-    for (let r2 = 0; r2 < rows; r2++) {
-      const size = 7 + r2 * 1.6, n = Math.floor(s.w / (size * 2.3));
-      for (let i = 0; i < n; i++) {
-        s.crowd.push({ x: (i + 0.5 + (rand() - 0.5) * 0.5) * (s.w / n), y: top + r2 * rowH + rowH * 0.8, size,
-          shirt: SHIRTS[Math.floor(rand() * SHIRTS.length)], skin: SKIN[Math.floor(rand() * SKIN.length)],
-          ph: rand() * 6.28, sp: 2 + rand() * 2.5, flag: rand() < 0.12, row: r2 });
+    for (const row of L.rows) {
+      const size = row.size * unit * 0.034;
+      for (const [a, b] of row.spans) {
+        const step = row.size * 0.036;
+        for (let u = a + step * 0.5; u < b; u += step * (0.85 + rand() * 0.3)) {
+          if (rand() < 0.1) continue; // an empty seat now and then
+          const fan = rand();
+          const team = fan < 0.42 ? 0 : fan < 0.72 ? 1 : -1;
+          const shirt = team === 0 ? BLUE[Math.floor(rand() * 3)] : team === 1 ? RED[Math.floor(rand() * 3)] : PLAIN[Math.floor(rand() * PLAIN.length)];
+          s.crowd.push({
+            x: cv.x(u), y: cv.y(row.y + row.slope * (u - 0.5)), z: size * (0.92 + rand() * 0.16), team, shirt,
+            skin: SKIN[Math.floor(rand() * SKIN.length)], hair: HAIR[Math.floor(rand() * HAIR.length)], hairStyle: Math.floor(rand() * 4),
+            hat: rand() < 0.14, flag: team >= 0 && rand() < 0.16, ph: rand() * 6.28, sp: 1.6 + rand() * 2.2, jump: 0.7 + rand() * 0.6,
+          });
+        }
       }
     }
-    s.stars = Array.from({ length: 34 }, () => ({ x: rand() * s.w, y: rand() * s.h * 0.4, r: 0.6 + rand() * 1.3, ph: rand() * 6 }));
+    s.crowd.sort((p, q) => p.y - q.y);
+    s.stars = Array.from({ length: 26 }, () => ({ x: rand() * s.w, y: rand() * Math.max(10, cv.y(0.33)), r: 0.6 + rand() * 1.1, ph: rand() * 6.28 }));
   }
-  function cheer() { for (const s of scenes) s.cheer = 2.2; }
+
+  // Draw the artwork into the cache, once per size (and once more when the image finishes loading).
+  function paintCache(s) {
+    const key = `${s.w}x${s.h}@${s.dpr}:${s.img.complete && s.img.naturalWidth > 0}`;
+    if (key === s.cacheKey && s.cache) return;
+    s.cacheKey = key;
+    if (!s.cache) s.cache = document.createElement('canvas');
+    s.cache.width = s.cv.width; s.cache.height = s.cv.height;
+    const c = s.cache.getContext('2d'), cv = s.cover;
+    c.setTransform(s.dpr, 0, 0, s.dpr, 0, 0);
+    if (s.img.complete && s.img.naturalWidth > 0) {
+      c.imageSmoothingQuality = 'high';
+      c.drawImage(s.img, cv.ox, cv.oy, cv.dw, cv.dh);
+    } else {
+      const g = c.createLinearGradient(0, 0, 0, s.h);
+      g.addColorStop(0, '#2a1758'); g.addColorStop(1, '#4b3a7a');
+      c.fillStyle = g; c.fillRect(0, 0, s.w, s.h);
+    }
+  }
+
+  /* ---------- the crowd ---------- */
+  function person(c, p, t, mood) {
+    const z = p.z, team = p.team;
+    // mood: 0 idle, 1 cheering, 2 celebrating (their side won), -1 disappointed
+    const excited = mood > 0 && (mood === 2 || team < 0 || team === cheerTeam || cheerTeam < 0);
+    const bob = Math.sin(t * p.sp + p.ph) * z * 0.06;
+    const hop = excited ? Math.abs(Math.sin(t * (mood === 2 ? 8 : 9.5) + p.ph)) * z * 0.55 * p.jump : 0;
+    const slump = mood === -1 && team >= 0 && team !== partyTeam ? z * 0.12 : 0;
+    const y = p.y + bob - hop + slump, x = p.x;
+    c.lineWidth = Math.max(1, z * 0.09); c.strokeStyle = OUT; c.lineJoin = 'round';
+    // body
+    rr(c, x - z * 0.42, y - z * 0.78, z * 0.84, z * 0.86, z * 0.3);
+    c.fillStyle = p.shirt; c.fill(); c.stroke();
+    c.fillStyle = 'rgba(0,0,0,0.18)'; rr(c, x - z * 0.42, y - z * 0.2, z * 0.84, z * 0.28, z * 0.14); c.fill();
+    // arms: up when excited, a flag for some fans
+    const wave = Math.sin(t * 7 + p.ph);
+    if (excited || p.flag) {
+      c.lineCap = 'round';
+      const arm = (sx, up) => {
+        const ex = x + sx * z * (0.55 + up * 0.15 + wave * 0.12 * sx), ey = y - z * (0.55 + up * 0.75);
+        c.beginPath(); c.moveTo(x + sx * z * 0.3, y - z * 0.6); c.lineTo(ex, ey);
+        c.lineWidth = z * 0.28; c.strokeStyle = OUT; c.stroke();
+        c.lineWidth = z * 0.17; c.strokeStyle = p.skin; c.stroke();
+        return [ex, ey];
+      };
+      const [fx, fy] = arm(1, excited ? 1 : 0.7);
+      if (excited) arm(-1, 1);
+      if (p.flag) {
+        const col = team === 0 ? '#2f6fe4' : '#dc3640';
+        c.beginPath(); c.moveTo(fx, fy); c.lineTo(fx, fy - z * 1.0); c.lineWidth = Math.max(1, z * 0.08); c.strokeStyle = '#4a3523'; c.stroke();
+        c.beginPath(); c.moveTo(fx, fy - z * 1.0);
+        c.quadraticCurveTo(fx + z * 0.45, fy - z * (1.0 - wave * 0.12), fx + z * 0.85, fy - z * (0.95 + wave * 0.1));
+        c.lineTo(fx + z * 0.85, fy - z * (0.55 + wave * 0.1));
+        c.quadraticCurveTo(fx + z * 0.45, fy - z * (0.6 - wave * 0.12), fx, fy - z * 0.6);
+        c.closePath(); c.fillStyle = col; c.fill(); c.lineWidth = Math.max(1, z * 0.07); c.strokeStyle = OUT; c.stroke();
+      }
+      c.lineWidth = Math.max(1, z * 0.09); c.strokeStyle = OUT;
+    }
+    // head and hair
+    const hy = y - z * 1.08;
+    c.beginPath(); c.arc(x, hy, z * 0.38, 0, Math.PI * 2); c.fillStyle = p.skin; c.fill(); c.stroke();
+    c.fillStyle = p.hair;
+    if (p.hat) { rr(c, x - z * 0.42, hy - z * 0.46, z * 0.84, z * 0.24, z * 0.1); c.fillStyle = team === 1 ? '#dc3640' : team === 0 ? '#2f6fe4' : '#f2c14e'; c.fill(); c.stroke(); }
+    else if (p.hairStyle === 0) { c.beginPath(); c.arc(x, hy - z * 0.06, z * 0.38, Math.PI * 1.05, Math.PI * 1.95); c.closePath(); c.fill(); }
+    else if (p.hairStyle === 1) { c.beginPath(); c.arc(x, hy - z * 0.04, z * 0.4, Math.PI * 0.95, Math.PI * 2.05); c.closePath(); c.fill(); c.fillRect(x - z * 0.4, hy - z * 0.08, z * 0.14, z * 0.4); c.fillRect(x + z * 0.26, hy - z * 0.08, z * 0.14, z * 0.4); }
+    else if (p.hairStyle === 2) { c.beginPath(); c.arc(x, hy - z * 0.34, z * 0.16, 0, Math.PI * 2); c.fill(); c.beginPath(); c.arc(x, hy - z * 0.08, z * 0.37, Math.PI * 1.1, Math.PI * 1.9); c.closePath(); c.fill(); }
+  }
+  function rr(c, x, y, w, h, r) {
+    c.beginPath(); r = Math.min(r, w / 2, h / 2);
+    c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+  }
+
+  /* ---------- light effects ---------- */
+  function effects(s, c, t, dt) {
+    const L = LAYOUT[s.side], cv = s.cover;
+    for (const st of s.stars) {
+      c.globalAlpha = 0.25 + 0.5 * Math.max(0, Math.sin(t * 1.4 + st.ph));
+      c.beginPath(); c.arc(st.x, st.y, st.r, 0, Math.PI * 2); c.fillStyle = '#fff'; c.fill();
+    }
+    c.globalAlpha = 1;
+    c.globalCompositeOperation = 'lighter';
+    for (const [u, v, size] of L.glows) {
+      const x = cv.x(u), y = cv.y(v), r = size * cv.dw * 0.09 * (1 + Math.sin(t * 11 + u * 40) * 0.06 + Math.sin(t * 6.3 + v * 30) * 0.05);
+      const g = c.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, 'rgba(255,170,70,0.32)'); g.addColorStop(1, 'rgba(255,120,40,0)');
+      c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2);
+      if (size > 1 && Math.random() < dt * 5) s.fx.push({ kind: 'ember', x: x + (Math.random() - 0.5) * r * 0.3, y: y - r * 0.2, vx: (Math.random() - 0.5) * 8, vy: -20 - Math.random() * 25, life: 1.2, max: 1.2 });
+    }
+    c.globalCompositeOperation = 'source-over';
+    if (L.mist && Math.random() < dt * 4) {
+      const [a, b, v] = L.mist;
+      s.fx.push({ kind: 'mist', x: cv.x(a + Math.random() * (b - a)), y: cv.y(v), vx: (Math.random() - 0.5) * 10, vy: -6 - Math.random() * 6, r: cv.dw * (0.03 + Math.random() * 0.04), life: 2.6, max: 2.6 });
+    }
+    if (partyT > 0 && Math.random() < dt * 30) {
+      const cols = partyTeam === 1 ? ['#dc3640', '#ffcd33', '#ff9299'] : ['#2f6fe4', '#ffcd33', '#86b6ff', '#ffffff'];
+      s.fx.push({ kind: 'confetti', x: Math.random() * s.w, y: -6, vx: (Math.random() - 0.5) * 30, vy: 50 + Math.random() * 50, rot: Math.random() * 6, life: 4, max: 4, col: cols[Math.floor(Math.random() * cols.length)] });
+    }
+    for (const f of s.fx) {
+      f.life -= dt; f.x += f.vx * dt; f.y += f.vy * dt;
+      const a = Math.max(0, f.life / f.max);
+      if (f.kind === 'ember') { c.globalAlpha = a; c.fillStyle = '#ffc261'; c.fillRect(f.x, f.y, 2, 2); }
+      else if (f.kind === 'mist') { c.globalAlpha = Math.sin(a * Math.PI) * 0.35; c.beginPath(); c.arc(f.x, f.y, f.r * (1.6 - a * 0.6), 0, Math.PI * 2); c.fillStyle = '#eef6ff'; c.fill(); }
+      else if (f.kind === 'confetti') {
+        f.rot += dt * 6; c.globalAlpha = Math.min(1, a * 2);
+        c.save(); c.translate(f.x, f.y); c.rotate(f.rot); c.fillStyle = f.col; c.fillRect(-3, -1.5, 6, 3); c.restore();
+      }
+    }
+    c.globalAlpha = 1;
+    s.fx = s.fx.filter(f => f.life > 0 && f.y < s.h + 10);
+    if (s.fx.length > 220) s.fx.splice(0, s.fx.length - 220);
+  }
 
   function draw(s, t, dt) {
-    const c = s.cv.getContext('2d'), w = s.w, h = s.h;
+    paintCache(s);
+    const c = s.cv.getContext('2d');
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.drawImage(s.cache, 0, 0);
     c.setTransform(s.dpr, 0, 0, s.dpr, 0, 0);
-    s.cheer = Math.max(0, s.cheer - dt);
-    const sky = c.createLinearGradient(0, 0, 0, h * 0.62);
-    sky.addColorStop(0, '#1a0f33'); sky.addColorStop(0.55, '#47215f'); sky.addColorStop(1, '#a84a72');
-    c.fillStyle = sky; c.fillRect(0, 0, w, h);
-    for (const st of s.stars) {
-      c.globalAlpha = 0.45 + 0.45 * Math.sin(t * 1.7 + st.ph);
-      A.circ(c, st.x, st.y, st.r); c.fillStyle = '#fff'; c.fill();
-    }
-    c.globalAlpha = 1;
-    c.fillStyle = '#2d1a4b';
-    c.beginPath(); c.moveTo(0, h * 0.52);
-    for (let i = 0; i <= 8; i++) c.lineTo((w * i) / 8, h * (0.4 + ((i * 37) % 11) / 90));
-    c.lineTo(w, h * 0.6); c.lineTo(0, h * 0.6); c.closePath(); c.fill();
-
-    // back wall with banners
-    c.fillStyle = '#5a4a72'; c.fillRect(0, h * 0.53, w, h * 0.08);
-    for (let x = 0; x < w; x += 22) { c.fillRect(x, h * 0.515, 13, h * 0.02); }
-    c.fillStyle = 'rgba(20,10,35,0.35)'; c.fillRect(0, h * 0.6, w, h * 0.012);
-    const poles = s.side === 'left' ? [0.14, 0.52, 0.88] : [0.12, 0.48, 0.84];
-    poles.forEach((px, i) => flag(c, w * px, h * 0.53, h * 0.15, i % 2 ? 1 : 0, t + i));
-
-    // stands and crowd
-    for (let r2 = 0; r2 < 4; r2++) {
-      const y = h * 0.6 + (h * 0.24 * r2) / 4;
-      c.fillStyle = r2 % 2 ? '#6d5c86' : '#776690'; c.fillRect(0, y, w, (h * 0.24) / 4);
-      c.fillStyle = 'rgba(0,0,0,0.2)'; c.fillRect(0, y + (h * 0.24) / 4 - 3, w, 3);
-    }
-    const ch = s.cheer > 0;
-    for (const p of s.crowd) {
-      const bob = Math.sin(t * p.sp + p.ph) * 1.5, jump = ch ? Math.abs(Math.sin(t * 9 + p.ph)) * p.size * 0.9 : 0;
-      const y = p.y + bob - jump, z = p.size;
-      A.rr(c, p.x - z * 0.75, y - z * 0.4, z * 1.5, z * 1.6, z * 0.5); c.fillStyle = p.shirt; c.fill();
-      A.circ(c, p.x, y - z * 0.85, z * 0.62); c.fillStyle = p.skin; c.fill();
-      if (ch || p.flag) {
-        const wave = Math.sin(t * 8 + p.ph) * 0.4;
-        c.strokeStyle = p.skin; c.lineWidth = z * 0.35; c.lineCap = 'round';
-        c.beginPath(); c.moveTo(p.x + z * 0.55, y - z * 0.2); c.lineTo(p.x + z * (0.9 + wave * 0.4), y - z * 1.6); c.stroke();
-        if (ch) { c.beginPath(); c.moveTo(p.x - z * 0.55, y - z * 0.2); c.lineTo(p.x - z * (0.9 - wave * 0.4), y - z * 1.6); c.stroke(); }
-        if (p.flag) { c.fillStyle = p.row % 2 ? '#e5414b' : '#2f7cf6'; c.fillRect(p.x + z * (0.9 + wave * 0.4), y - z * 2.4, z * 1.3, z * 0.8); }
-      }
-    }
-
-    // front wall
-    const fy = h * 0.84;
-    c.fillStyle = '#857c95'; c.fillRect(0, fy, w, h - fy);
-    c.strokeStyle = 'rgba(30,20,45,0.45)'; c.lineWidth = 1.5;
-    for (let row = 0; row < 6; row++) {
-      const y = fy + row * 18;
-      c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke();
-      for (let x = (row % 2) * 17; x < w; x += 34) { c.beginPath(); c.moveTo(x, y); c.lineTo(x, y + 18); c.stroke(); }
-    }
-    c.fillStyle = '#9a91a9'; c.fillRect(0, fy - 8, w, 10);
-    for (let x = 4; x < w; x += 30) { c.fillStyle = '#9a91a9'; c.fillRect(x, fy - 20, 18, 14); }
-
-    if (s.side === 'left') statue(c, w * 0.36, h * 0.985, h * 0.34, t);
-    else waterfall(c, w, h, t);
-    const torchX = s.side === 'left' ? [0.08, 0.8] : [0.1, 0.5];
-    for (const tx of torchX) torch(c, w * tx, fy + 4, t + tx * 10);
+    const mood = partyT > 0 ? 2 : cheerT > 0 ? 1 : partyTeam >= 0 ? -1 : 0;
+    for (const p of s.crowd) person(c, p, t, mood === 2 && p.team >= 0 && p.team !== partyTeam ? -1 : mood);
+    effects(s, c, t, dt);
   }
 
-  function flag(c, x, y, len, team, t) {
-    c.fillStyle = '#3a2d1f'; c.fillRect(x - 2, y - len, 4, len);
-    A.circ(c, x, y - len - 3, 4); c.fillStyle = '#ffcf3f'; c.fill();
-    const col = KCArt.TEAM[team].cloth, fw = len * 0.55, fh = len * 0.62;
-    c.beginPath(); c.moveTo(x + 2, y - len);
-    for (let i = 0; i <= 10; i++) { const u = i / 10; c.lineTo(x + 2 + u * fw, y - len + Math.sin(t * 4 + u * 4) * 3 * u); }
-    for (let i = 10; i >= 0; i--) { const u = i / 10; c.lineTo(x + 2 + u * fw, y - len + fh + Math.sin(t * 4 + u * 4) * 3 * u - (u > 0.8 ? 0 : 0)); }
-    c.closePath(); c.fillStyle = col; c.fill(); c.strokeStyle = KCArt.OUT; c.lineWidth = 1.5; c.stroke();
-    KCArt.crownIcon(c, x + 2 + fw * 0.45, y - len + fh * 0.5 + Math.sin(t * 4 + 2) * 1.2, fh * 0.16, '#ffcf3f');
-  }
-  function torch(c, x, y, t) {
-    c.fillStyle = '#4a3423'; c.fillRect(x - 3, y - 26, 6, 26);
-    A.rr(c, x - 7, y - 32, 14, 8, 3); c.fillStyle = '#6b6f7a'; c.fill();
-    const fl = 1 + Math.sin(t * 13) * 0.12 + Math.sin(t * 7.3) * 0.08;
-    const g = c.createRadialGradient(x, y - 40, 2, x, y - 40, 34);
-    g.addColorStop(0, 'rgba(255,190,90,0.55)'); g.addColorStop(1, 'rgba(255,120,40,0)');
-    c.fillStyle = g; c.fillRect(x - 40, y - 80, 80, 80);
-    c.beginPath(); c.moveTo(x - 7, y - 32);
-    c.quadraticCurveTo(x - 9, y - 44 * fl, x, y - 56 * fl); c.quadraticCurveTo(x + 9, y - 44 * fl, x + 7, y - 32); c.closePath();
-    c.fillStyle = '#ff8a2a'; c.fill();
-    c.beginPath(); c.moveTo(x - 3.5, y - 32);
-    c.quadraticCurveTo(x - 4, y - 40 * fl, x, y - 47 * fl); c.quadraticCurveTo(x + 4, y - 40 * fl, x + 3.5, y - 32); c.closePath();
-    c.fillStyle = '#ffe08a'; c.fill();
-  }
-  function statue(c, x, y, hgt, t) {
-    const k = hgt / 2.6, O = A.OUT;
-    A.rr(c, x - k * 0.9, y - k * 0.55, k * 1.8, k * 0.55, k * 0.08); A.paint(c, '#77708a', 2);
-    A.rr(c, x - k * 0.75, y - k * 0.75, k * 1.5, k * 0.22, k * 0.06); A.paint(c, '#8b84a0', 2);
-    c.save(); c.translate(x, y - k * 0.75);
-    A.poly(c, [-k * 0.5, 0, k * 0.5, 0, k * 0.34, -k * 1.1, -k * 0.34, -k * 1.1]); A.paint(c, '#a29cb2', 2);
-    A.rr(c, -k * 0.3, -k * 1.5, k * 0.6, k * 0.5, k * 0.18); A.paint(c, '#aaa4ba', 2);
-    A.circ(c, 0, -k * 1.72, k * 0.26); A.paint(c, '#b4aec4', 2);
-    c.beginPath(); c.arc(0, -k * 1.62, k * 0.24, 0.2, Math.PI - 0.2); c.closePath(); A.paint(c, '#9993aa', 1.5);
-    A.crownIcon(c, 0, -k * 2.02, k * 0.2, '#c9c2d8');
-    A.rr(c, k * 0.3, -k * 2.35, k * 0.1, k * 1.5, k * 0.04); A.paint(c, '#c2bcd0', 2);
-    A.rr(c, k * 0.18, -k * 0.95, k * 0.34, k * 0.08, k * 0.03); A.paint(c, '#b4aec4', 1.5);
-    c.fillStyle = 'rgba(80,60,110,0.25)'; c.fillRect(-k * 0.5, -k * 0.5, k * 1.0, k * 0.5);
-    c.restore();
-    c.strokeStyle = O; c.globalAlpha = 0.15 + 0.1 * Math.sin(t);
-    c.globalAlpha = 1;
-  }
-  function waterfall(c, w, h, t) {
-    const x0 = w * 0.58, x1 = w * 0.9, top = h * 0.36, bot = h * 0.93;
-    c.fillStyle = '#4b3d63';
-    c.beginPath(); c.moveTo(w * 0.48, h); c.lineTo(w * 0.5, top + h * 0.06); c.lineTo(w * 0.6, top - h * 0.02);
-    c.lineTo(w * 0.92, top - h * 0.04); c.lineTo(w, top + h * 0.03); c.lineTo(w, h); c.closePath(); c.fill();
-    c.fillStyle = '#5d4e78';
-    for (const [rx, ry, rw, rh] of [[0.5, 0.5, 0.1, 0.07], [0.9, 0.45, 0.1, 0.09], [0.52, 0.7, 0.07, 0.06], [0.92, 0.66, 0.08, 0.08]]) {
-      A.ell(c, w * rx, h * ry, w * rw, h * rh); c.fill();
-    }
-    const g = c.createLinearGradient(0, top, 0, bot);
-    g.addColorStop(0, '#7fd1ff'); g.addColorStop(1, '#4a8fe6');
-    c.fillStyle = g; c.fillRect(x0, top, x1 - x0, bot - top);
-    c.save(); c.beginPath(); c.rect(x0, top, x1 - x0, bot - top); c.clip();
-    c.strokeStyle = 'rgba(255,255,255,0.55)'; c.lineWidth = 2;
-    for (let i = 0; i < 9; i++) {
-      const lx = x0 + ((i + 0.5) / 9) * (x1 - x0), off = ((t * 220 + i * 53) % (bot - top + 60)) - 60;
-      c.beginPath(); c.moveTo(lx, top + off); c.lineTo(lx, top + off + 40); c.stroke();
-    }
-    c.restore();
-    c.fillStyle = '#3d7fd6'; A.ell(c, (x0 + x1) / 2, bot + 4, (x1 - x0) * 0.75, h * 0.03); c.fill();
-    for (let i = 0; i < 8; i++) {
-      const mx = x0 + (i / 7) * (x1 - x0), r = 9 + 4 * Math.sin(t * 3 + i * 1.7);
-      A.circ(c, mx, bot - 2 + Math.sin(t * 2 + i) * 2, r); c.fillStyle = 'rgba(235,245,255,0.75)'; c.fill();
-    }
-  }
+  /* ---------- reactions the game calls ---------- */
+  // A tower fell: the scoring side's fans and the neutral fans jump and wave.
+  function cheer(team) { cheerT = 2.4; cheerTeam = team === undefined ? -1 : team; }
+  // The match is over: the winner's fans and the neutral fans celebrate under confetti; the other side's fans slump.
+  function celebrate(team) { partyT = 7; partyTeam = team; cheerTeam = team; }
+  // A new match: everyone settles down.
+  function reset() { cheerT = 0; partyT = 0; partyTeam = -1; cheerTeam = -1; for (const s of scenes) s.fx = []; }
 
   function frame(now) {
     const t = now / 1000;
     if (t - last < 1 / 30) return;
     const dt = Math.min(0.1, t - last);
     last = t;
+    cheerT = Math.max(0, cheerT - dt);
+    partyT = Math.max(0, partyT - dt);
     for (const s of scenes) if (s.cv.offsetParent !== null) draw(s, t, dt);
   }
-  return { make, resize: () => scenes.forEach(resize), frame, cheer };
+  return { make, resize: () => scenes.forEach(resize), frame, cheer, celebrate, reset, LAYOUT };
 })();
