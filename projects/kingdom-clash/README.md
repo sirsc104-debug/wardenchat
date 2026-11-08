@@ -39,7 +39,7 @@ Every level adds 8% to HP and damage. Stats live in `js/cards.js`; tower stats, 
 
 ## Trainer Owen
 
-`js/bot.js` plays with the same rules and information a player has: its own hand and energy and the troops on the field. It fireballs clumps, defends the lane under the most pressure with a fitting counter (Gorilla or Wolves for a Rhino, Archers or Snowman for air, Snowman for swarms), backs up its own Rhino pushes and starts a push when its energy is nearly full. The `trainer` skill reacts slowly (1.6 to 3 seconds), misplaces about half its cards slightly, under-defends and sometimes sits on full energy; in headless tests a `normal` bot beats it about 3 to 1. The bot can play either side, which is what the tests use.
+`js/bot.js` plays with the same rules and information a player has: its own hand and energy and the troops on the field. It fireballs clumps, defends the lane under the most pressure with a fitting counter (Gorilla or Wolves for a Rhino, Archers or Snowman for air, Snowman for swarms), backs up its own Rhino pushes and starts a push when its energy is nearly full. The `trainer` skill reacts slowly (1.8 to 3.2 seconds), misplaces about half its cards slightly, under-defends and sometimes sits on full energy; in headless tests a `normal` bot beats it about 3 to 1. The bot can play either side, which is what the tests use.
 
 ## Files
 
@@ -52,6 +52,7 @@ Every level adds 8% to HP and damage. Stats live in `js/cards.js`; tower stats, 
 | `js/scenery.js` | The animated scenery panels; the crowd cheers when a tower falls |
 | `js/audio.js` | Sound effects made with Web Audio (no sound files) |
 | `js/game.js` | Screens, the game loop, drawing the battle, input |
+| `tools/path-test.js` | `node tools/path-test.js` places every ground troop behind and beside each tower, for both teams, and checks it walks around instead of getting stuck |
 | `tools/sim-test.js` | `node tools/sim-test.js 40` plays 40 bot-vs-bot matches headless and checks they end cleanly (no NaNs, no troops in the river) |
 | `build-artifact.py` | Bundles everything into one page: `python3 build-artifact.py OUT.html` (claude.ai Artifact) or `--standalone` (a complete page) |
 

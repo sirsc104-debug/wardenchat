@@ -874,6 +874,37 @@ const KCSim = (() => {
     if (Math.abs(u.x - bx) < 0.55 && Math.abs(u.y - entryY) < 0.7) return [bx, exitY];
     return [bx, entryY];
   }
+  // Walk around any standing tower between a ground troop and where it is heading: aim for the near
+  // corner of the tower first, then the far corner, on the side closer to the troop (or its goal).
+  function avoid(s, u, nx, ny, target) {
+    if (u.air) return [nx, ny];
+    let best = null, bt = Infinity;
+    for (const t of s.ents) {
+      if (t.kind !== 'tower' || t.dead || t === target) continue;
+      const h = t.half + u.radius * 0.8 + 0.12;
+      const hit = segBox(u.x, u.y, nx, ny, t.x - h, t.y - h, t.x + h, t.y + h);
+      if (hit !== null && hit < bt) { bt = hit; best = { t, h }; }
+    }
+    if (!best) return [nx, ny];
+    const { t, h } = best, dx = u.x - t.x;
+    const sx = Math.abs(dx) > 0.3 ? Math.sign(dx) : Math.sign(nx - t.x) || (t.x < W / 2 ? 1 : -1);
+    const sy = Math.sign(ny - u.y) || 1;
+    const cx = t.x + sx * (h + 0.15);
+    if (Math.abs(dx) < h) return [cx, Math.abs(u.y - t.y) < h ? u.y + sy * 0.2 : t.y - sy * h];
+    return [cx, t.y + sy * (h + 0.15)];
+  }
+  // Where along the segment (0 to 1) it enters the box, or null if it misses.
+  function segBox(x1, y1, x2, y2, minX, minY, maxX, maxY) {
+    let t0 = 0, t1 = 1;
+    const dx = x2 - x1, dy = y2 - y1;
+    for (const [p, q] of [[-dx, x1 - minX], [dx, maxX - x1], [-dy, y1 - minY], [dy, maxY - y1]]) {
+      if (Math.abs(p) < 1e-9) { if (q < 0) return null; continue; }
+      const r = q / p;
+      if (p < 0) { if (r > t1) return null; if (r > t0) t0 = r; }
+      else { if (r < t0) return null; if (r < t1) t1 = r; }
+    }
+    return t0;
+  }
   function clampArena(u) {
     u.x = Math.max(u.radius * 0.6, Math.min(W - u.radius * 0.6, u.x));
     u.y = Math.max(u.radius * 0.6, Math.min(H - u.radius * 0.6, u.y));
@@ -940,7 +971,7 @@ const KCSim = (() => {
     }
     if (u.locked && d > u.range + 0.6) u.locked = false;
     if (u.cd < u.hit * 0.5) u.cd = u.hit * 0.5;
-    const [nx, ny] = nav(u, t.x, t.y);
+    const [nx, ny] = avoid(s, u, ...nav(u, t.x, t.y), t);
     const dx = nx - u.x, dy = ny - u.y, len = Math.hypot(dx, dy);
     if (len > 0.001) {
       const step = Math.min(len, u.speed * DT);
@@ -1105,7 +1136,7 @@ const KCSim = (() => {
 const KCBot = (() => {
   const S = KCSim;
   const SKILLS = {
-    trainer: { react: [1.6, 3.0], sloppy: 0.45, attackAt: 9.8, idle: 0.35, fireballValue: 7, defend: 0.55 },
+    trainer: { react: [1.8, 3.2], sloppy: 0.45, attackAt: 9.8, idle: 0.35, fireballValue: 7, defend: 0.45 },
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
   const ROLE = {

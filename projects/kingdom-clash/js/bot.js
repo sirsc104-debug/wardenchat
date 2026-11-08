@@ -9,7 +9,7 @@
 const KCBot = (() => {
   const S = KCSim;
   const SKILLS = {
-    trainer: { react: [1.6, 3.0], sloppy: 0.45, attackAt: 9.8, idle: 0.35, fireballValue: 7, defend: 0.55 },
+    trainer: { react: [1.8, 3.2], sloppy: 0.45, attackAt: 9.8, idle: 0.35, fireballValue: 7, defend: 0.45 },
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
   const ROLE = {
