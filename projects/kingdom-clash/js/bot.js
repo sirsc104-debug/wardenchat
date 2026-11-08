@@ -10,6 +10,8 @@ const KCBot = (() => {
   const S = KCSim;
   const SKILLS = {
     trainer: { react: [1.8, 3.2], sloppy: 0.45, attackAt: 9.8, idle: 0.35, fireballValue: 7, defend: 0.45 },
+    // The first tutorial opponent: slow, waits between cards, barely defends, never uses Fireball.
+    tutorial: { react: [2.6, 4.2], sloppy: 0.6, attackAt: 10, idle: 0.6, fireballValue: 99, defend: 0.3, gap: [4, 7] },
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
   const ROLE = {
@@ -50,7 +52,8 @@ const KCBot = (() => {
         if (p) S.play(s, b.team, slot, p.x, p.y);
         if (b.plan.attack) b.lastAttack = s.time;
         b.plan = null;
-        b.wait = 0.5 + b.rand() * 0.7;
+        const gap = b.skill.gap || [0.5, 1.2];
+        b.wait = gap[0] + b.rand() * (gap[1] - gap[0]);
       } else if (s.time > b.plan.at + 4) b.plan = null;
       return;
     }

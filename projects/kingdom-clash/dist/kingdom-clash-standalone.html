@@ -520,7 +520,7 @@ kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--out
           <div class="trainer-info">
             <p class="eyebrow">Your opponent</p>
             <h2>Trainer Owen</h2>
-            <p>A friendly coach who goes easy on new players. Beat him to learn how the arena works.</p>
+            <p>Your first tutorial match. Owen goes easy on you while you learn how to place cards and take towers.</p>
             <p class="record" id="record"></p>
           </div>
           <button class="big-btn" id="battleBtn" type="button"><span>Battle</span></button>
@@ -716,6 +716,8 @@ const KCSim = (() => {
       ents: [], projs: [], events: [], nextId: 1,
       energy: [START_ENERGY, START_ENERGY], crowns: [0, 0], result: null,
       hands: [], queues: [], levels: opts.levels || [1, 1], played: [0, 0],
+      // How hard each team's troops and spells hit towers (Trainer Owen hits them at a quarter).
+      towerDamage: opts.towerDamage || [1, 1],
       rand: mulberry(opts.seed || 1),
     };
     for (const team of [0, 1]) {
@@ -822,8 +824,9 @@ const KCSim = (() => {
   }
 
   /* ---------- damage ---------- */
-  function damage(s, e, amount) {
+  function damage(s, e, amount, by) {
     if (!e || e.dead) return;
+    if (e.kind === 'tower' && by !== undefined) amount = Math.max(1, Math.round(amount * s.towerDamage[by]));
     e.hp -= amount;
     e.flash = 0.12;
     if (e.kind === 'tower' && e.sub === 'king' && !e.active) {
@@ -950,7 +953,7 @@ const KCSim = (() => {
         air: u.air });
       s.events.push({ type: 'shoot', kind: u.proj, team: u.team, x: u.x, y: u.y });
     } else {
-      damage(s, t, u.dmg);
+      damage(s, t, u.dmg, u.team);
       s.events.push({ type: 'hit', card: u.card, team: u.team, x: t.x, y: t.y, by: u.id });
     }
   }
@@ -1024,11 +1027,11 @@ const KCSim = (() => {
         for (const e of s.ents) {
           if (e.dead || e.team === p.team) continue;
           if (p.targets === 'ground' && e.air) continue;
-          if (Math.hypot(e.x - p.x, e.y - p.y) - e.radius <= p.splash) damage(s, e, p.dmg);
+          if (Math.hypot(e.x - p.x, e.y - p.y) - e.radius <= p.splash) damage(s, e, p.dmg, p.team);
         }
         s.events.push({ type: 'splash', kind: p.kind, x: p.x, y: p.y, r: p.splash });
       } else if (t && !t.dead) {
-        damage(s, t, p.dmg);
+        damage(s, t, p.dmg, p.team);
         s.events.push({ type: 'hit', kind: p.kind, team: p.team, x: p.x, y: p.y });
       }
     }
@@ -1040,7 +1043,7 @@ const KCSim = (() => {
       if (e.dead || e.team === p.team) continue;
       const d = Math.hypot(e.x - p.x, e.y - p.y);
       if (d - e.radius > c.area) continue;
-      damage(s, e, e.kind === 'tower' ? Math.round(p.dmg * c.towerPct) : p.dmg);
+      damage(s, e, e.kind === 'tower' ? Math.round(p.dmg * c.towerPct) : p.dmg, p.team);
       if (e.kind === 'troop' && !e.dead && !e.heavy) {
         const k = c.knockback / Math.max(1, e.mass / 2);
         const nx = d > 0.01 ? (e.x - p.x) / d : 0, ny = d > 0.01 ? (e.y - p.y) / d : (e.team === 0 ? 1 : -1);
@@ -1143,6 +1146,8 @@ const KCBot = (() => {
   const S = KCSim;
   const SKILLS = {
     trainer: { react: [1.8, 3.2], sloppy: 0.45, attackAt: 9.8, idle: 0.35, fireballValue: 7, defend: 0.45 },
+    // The first tutorial opponent: slow, waits between cards, barely defends, never uses Fireball.
+    tutorial: { react: [2.6, 4.2], sloppy: 0.6, attackAt: 10, idle: 0.6, fireballValue: 99, defend: 0.3, gap: [4, 7] },
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
   const ROLE = {
@@ -1183,7 +1188,8 @@ const KCBot = (() => {
         if (p) S.play(s, b.team, slot, p.x, p.y);
         if (b.plan.attack) b.lastAttack = s.time;
         b.plan = null;
-        b.wait = 0.5 + b.rand() * 0.7;
+        const gap = b.skill.gap || [0.5, 1.2];
+        b.wait = gap[0] + b.rand() * (gap[1] - gap[0]);
       } else if (s.time > b.plan.at + 4) b.plan = null;
       return;
     }
@@ -2132,8 +2138,10 @@ const KCSound = (() => {
   /* ---------- starting a battle ---------- */
   function startBattle() {
     KCSound.unlock();
-    G.s = S.create({ seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0 });
-    G.bot = KCBot.create(1, { skill: 'trainer', seed: Math.floor(Math.random() * 1e9) });
+    // Trainer Owen is the first tutorial match: he plays like a beginner and his troops only do a
+    // quarter of their damage to your towers, so new players nearly always win.
+    G.s = S.create({ seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, 0.25] });
+    G.bot = KCBot.create(1, { skill: 'tutorial', seed: Math.floor(Math.random() * 1e9) });
     Object.assign(G, { fx: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0 });
     $('#result').hidden = true; $('#leaveAsk').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     show('battle');

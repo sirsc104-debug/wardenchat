@@ -2,7 +2,7 @@
 
 A real-time card battler for desktop browsers (built for school Chromebooks). Two players each defend two Archer Towers and a King Tower; you play troops and spells from a hand of four, paying with Energy that refills over time, and knock down towers for crowns.
 
-This first version has one opponent, **Trainer Owen**, a gentle computer player. Wallet, trophies, chests, upgrades, evolutions and online 1v1 come later.
+This first version has one opponent, **Trainer Owen**, the first tutorial match, who is built to lose. Wallet, trophies, chests, upgrades, evolutions and online 1v1 come later.
 
 Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `index.html` in a browser, or serve the folder with `python3 -m http.server`.
 
@@ -39,7 +39,11 @@ Every level adds 8% to HP and damage. Stats live in `js/cards.js`; tower stats, 
 
 ## Trainer Owen
 
-`js/bot.js` plays with the same rules and information a player has: its own hand and energy and the troops on the field. It fireballs clumps, defends the lane under the most pressure with a fitting counter (Gorilla or Wolves for a Rhino, Archers or Snowman for air, Snowman for swarms), backs up its own Rhino pushes and starts a push when its energy is nearly full. The `trainer` skill reacts slowly (1.8 to 3.2 seconds), misplaces about half its cards slightly, under-defends and sometimes sits on full energy; in headless tests a `normal` bot beats it about 3 to 1. The bot can play either side, which is what the tests use.
+Owen is the first level of the tutorial, so he is built to lose. `js/bot.js` plays with the same rules and information a player has (its own hand and energy and the troops on the field), and the `tutorial` skill makes it play like a beginner: it reacts 2.6 to 4.2 seconds late, waits 4 to 7 seconds between cards, misplaces most of them, barely defends, sits on full energy and never uses Fireball. On top of that the match is created with `towerDamage: [1, 0.25]`, so Owen's troops do a quarter of their damage to your towers.
+
+`node tools/owen-test.js 100` measures it. Over 100 matches each, Owen beat a good player 0 times, a sloppy player 0 times and a player who drops random cards in random spots 2 times. He only beats a player who never plays a card.
+
+The other skills (`trainer`, `normal`) are kept for later bots and for the bot-vs-bot tests.
 
 ## Files
 
@@ -53,6 +57,7 @@ Every level adds 8% to HP and damage. Stats live in `js/cards.js`; tower stats, 
 | `js/audio.js` | Sound effects made with Web Audio (no sound files) |
 | `js/game.js` | Screens, the game loop, drawing the battle, input |
 | `tools/path-test.js` | `node tools/path-test.js` places every ground troop behind and beside each tower, for both teams, and checks it walks around instead of getting stuck |
+| `tools/owen-test.js` | `node tools/owen-test.js 100` plays Trainer Owen against a good player, a sloppy player, a random clicker and a player who does nothing, and prints how often he wins |
 | `tools/sim-test.js` | `node tools/sim-test.js 40` plays 40 bot-vs-bot matches headless and checks they end cleanly (no NaNs, no troops in the river) |
 | `build-artifact.py` | Bundles everything into one page: `python3 build-artifact.py OUT.html` (claude.ai Artifact) or `--standalone` (a complete page) |
 

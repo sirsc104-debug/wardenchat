@@ -43,6 +43,8 @@ const KCSim = (() => {
       ents: [], projs: [], events: [], nextId: 1,
       energy: [START_ENERGY, START_ENERGY], crowns: [0, 0], result: null,
       hands: [], queues: [], levels: opts.levels || [1, 1], played: [0, 0],
+      // How hard each team's troops and spells hit towers (Trainer Owen hits them at a quarter).
+      towerDamage: opts.towerDamage || [1, 1],
       rand: mulberry(opts.seed || 1),
     };
     for (const team of [0, 1]) {
@@ -149,8 +151,9 @@ const KCSim = (() => {
   }
 
   /* ---------- damage ---------- */
-  function damage(s, e, amount) {
+  function damage(s, e, amount, by) {
     if (!e || e.dead) return;
+    if (e.kind === 'tower' && by !== undefined) amount = Math.max(1, Math.round(amount * s.towerDamage[by]));
     e.hp -= amount;
     e.flash = 0.12;
     if (e.kind === 'tower' && e.sub === 'king' && !e.active) {
@@ -277,7 +280,7 @@ const KCSim = (() => {
         air: u.air });
       s.events.push({ type: 'shoot', kind: u.proj, team: u.team, x: u.x, y: u.y });
     } else {
-      damage(s, t, u.dmg);
+      damage(s, t, u.dmg, u.team);
       s.events.push({ type: 'hit', card: u.card, team: u.team, x: t.x, y: t.y, by: u.id });
     }
   }
@@ -351,11 +354,11 @@ const KCSim = (() => {
         for (const e of s.ents) {
           if (e.dead || e.team === p.team) continue;
           if (p.targets === 'ground' && e.air) continue;
-          if (Math.hypot(e.x - p.x, e.y - p.y) - e.radius <= p.splash) damage(s, e, p.dmg);
+          if (Math.hypot(e.x - p.x, e.y - p.y) - e.radius <= p.splash) damage(s, e, p.dmg, p.team);
         }
         s.events.push({ type: 'splash', kind: p.kind, x: p.x, y: p.y, r: p.splash });
       } else if (t && !t.dead) {
-        damage(s, t, p.dmg);
+        damage(s, t, p.dmg, p.team);
         s.events.push({ type: 'hit', kind: p.kind, team: p.team, x: p.x, y: p.y });
       }
     }
@@ -367,7 +370,7 @@ const KCSim = (() => {
       if (e.dead || e.team === p.team) continue;
       const d = Math.hypot(e.x - p.x, e.y - p.y);
       if (d - e.radius > c.area) continue;
-      damage(s, e, e.kind === 'tower' ? Math.round(p.dmg * c.towerPct) : p.dmg);
+      damage(s, e, e.kind === 'tower' ? Math.round(p.dmg * c.towerPct) : p.dmg, p.team);
       if (e.kind === 'troop' && !e.dead && !e.heavy) {
         const k = c.knockback / Math.max(1, e.mass / 2);
         const nx = d > 0.01 ? (e.x - p.x) / d : 0, ny = d > 0.01 ? (e.y - p.y) / d : (e.team === 0 ? 1 : -1);

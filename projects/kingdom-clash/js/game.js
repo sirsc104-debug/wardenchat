@@ -73,8 +73,10 @@
   /* ---------- starting a battle ---------- */
   function startBattle() {
     KCSound.unlock();
-    G.s = S.create({ seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0 });
-    G.bot = KCBot.create(1, { skill: 'trainer', seed: Math.floor(Math.random() * 1e9) });
+    // Trainer Owen is the first tutorial match: he plays like a beginner and his troops only do a
+    // quarter of their damage to your towers, so new players nearly always win.
+    G.s = S.create({ seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, 0.25] });
+    G.bot = KCBot.create(1, { skill: 'tutorial', seed: Math.floor(Math.random() * 1e9) });
     Object.assign(G, { fx: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0 });
     $('#result').hidden = true; $('#leaveAsk').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     show('battle');
