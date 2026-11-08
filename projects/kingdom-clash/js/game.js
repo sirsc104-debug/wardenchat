@@ -407,7 +407,7 @@
       if (e.dead) A.rubble(c, k, { team: e.team, sub: e.sub });
       else {
         if (e.flash > 0) c.filter = 'brightness(1.5)';
-        (e.sub === 'king' ? A.kingTower : A.archerTower)(c, k, { team: e.team, face, active: e.active, t });
+        (e.sub === 'king' ? A.kingTower : A.archerTower)(c, k, { team: e.team, face, active: e.active, t, view: e.team === 0 ? 'back' : 'front', atk: Math.max(0, e.cd / e.hit - 0.6) * 2.5 });
       }
       c.restore();
       return;
@@ -422,7 +422,7 @@
     if (e.deploy > 0) { sc = 1 - Math.max(0, e.deploy - 0.75) * 2; c.globalAlpha = 0.65; }
     if (sc < 1) c.scale(Math.max(0.2, sc), Math.max(0.2, sc));
     if (e.flash > 0) c.filter = 'brightness(1.8)';
-    const o = { team: e.team, t: t + e.id * 0.37, walk: e.moving, atk: Math.max(0, e.atk / 0.28), face: e.face, id: e.id };
+    const o = { team: e.team, t: t + e.id * 0.37, walk: e.moving, atk: Math.max(0, e.atk / 0.28), face: e.face, id: e.id, view: e.team === 0 ? 'back' : 'front' };
     A.troop(c, e.card, k, o);
     c.restore();
     if (e.deploy > 0) {
@@ -438,8 +438,9 @@
     const x = SX(d.x), y = SY(d.y), blue = e.team === 0, T = A.TEAM[e.team];
     if (e.kind === 'tower') {
       const king = e.sub === 'king', w = (king ? 3.0 : 2.4) * k, h = Math.max(10, k * 0.5);
-      const by = blue ? y + (king ? 2.0 : 1.5) * k : y - (king ? 3.35 : 2.75) * k;
-      const bx = x - w / 2 + h * 0.6;
+      // Your bars sit under your towers; the enemy's sit above theirs, the King's beside its crown.
+      const by = blue ? y + (king ? 1.62 : 1.26) * k : y - (king ? 3.05 : 3.12) * k;
+      const bx = (!blue && king ? x + 2.65 * k : x) - w / 2 + h * 0.6;
       A.rr(c, bx, by, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
       A.rr(c, bx + 2, by + 2, Math.max(0, (w - 4) * e.hp / e.maxHp), h - 4, (h - 4) / 2); c.fillStyle = T.main; c.fill();
       c.fillStyle = 'rgba(255,255,255,0.3)'; c.fillRect(bx + h / 2, by + 3, Math.max(0, (w - h) * e.hp / e.maxHp), Math.max(1, h * 0.15));
@@ -451,7 +452,7 @@
       return;
     }
     if (e.hp >= e.maxHp || e.deploy > 0) return;
-    const lift = e.air ? k * 1.1 : 0, top = { rhino: 1.35, gorilla: 1.6, gladiator: 1.75, snowman: 1.95, archers: 1.45, wolves: 0.95, hawks: 0.9 }[e.card] || 1.4;
+    const lift = e.air ? k * 1.1 : 0, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75 }[e.card] || 1.4;
     const w = Math.max(0.8, e.radius * 1.9) * k, h = Math.max(5, k * 0.2), by = y - lift - top * k, bx = x - w / 2;
     A.rr(c, bx, by, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
     A.rr(c, bx + 1, by + 1, Math.max(0, (w - 2) * e.hp / e.maxHp), h - 2, (h - 2) / 2); c.fillStyle = blue ? '#5aa9ff' : '#ff5f69'; c.fill();
@@ -537,7 +538,7 @@
     const offs = card.count === 4 ? [[-0.45, -0.45], [0.45, -0.45], [-0.45, 0.45], [0.45, 0.45]] : card.count === 2 ? [[-0.5, 0], [0.5, 0]] : [[0, 0]];
     for (const [ox, oy] of offs) {
       c.save(); c.translate(x + ox * k, y + oy * k - (card.air ? k * 1.1 : 0));
-      A.troop(c, id, k, { team: 0, t, walk: false, atk: 0, face: 1, id: 1 });
+      A.troop(c, id, k, { team: 0, t, walk: false, atk: 0, face: 1, id: 1, view: 'back' });
       c.restore();
     }
     c.globalAlpha = 1;

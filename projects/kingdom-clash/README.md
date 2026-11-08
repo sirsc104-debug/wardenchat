@@ -48,7 +48,7 @@ Every level adds 8% to HP and damage. Stats live in `js/cards.js`; tower stats, 
 | `js/cards.js` | The 8 cards and the starter deck |
 | `js/sim.js` | The battle: fixed 30 steps a second, no DOM, seeded, so it runs the same in the page, in Node and later on both ends of an online match |
 | `js/bot.js` | Trainer Owen |
-| `js/art.js` | Every troop, tower, card portrait and the arena, drawn in code |
+| `js/art.js` | Every troop, tower, card portrait and the arena, drawn in code. Each troop and tower has two views: your side is seen from behind (facing up the arena, toward the enemy) and the enemy faces you; cards use the front view |
 | `js/scenery.js` | The animated scenery panels; the crowd cheers when a tower falls |
 | `js/audio.js` | Sound effects made with Web Audio (no sound files) |
 | `js/game.js` | Screens, the game loop, drawing the battle, input |
