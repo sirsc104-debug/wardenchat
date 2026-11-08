@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kingdom Clash</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <section class="screen" id="home">
+    <div class="home-wrap">
+      <header class="home-head">
+        <svg class="logo-crown" viewBox="0 0 100 70" aria-hidden="true"><path d="M8 62 L8 22 L30 40 L50 6 L70 40 L92 22 L92 62 Z" fill="#ffcf3f" stroke="#1c1530" stroke-width="6" stroke-linejoin="round"/><circle cx="50" cy="46" r="7" fill="#e5414b" stroke="#1c1530" stroke-width="4"/></svg>
+        <h1 class="logo"><span class="logo-a">Kingdom</span> <span class="logo-b">Clash</span></h1>
+        <p class="tag">Training Camp</p>
+      </header>
+
+      <div class="home-main">
+        <div class="trainer">
+          <canvas id="owenPic" width="220" height="220" aria-label="Trainer Owen"></canvas>
+          <div class="trainer-info">
+            <p class="eyebrow">Your opponent</p>
+            <h2>Trainer Owen</h2>
+            <p>A friendly coach who goes easy on new players. Beat him to learn how the arena works.</p>
+            <p class="record" id="record"></p>
+          </div>
+          <button class="big-btn" id="battleBtn" type="button"><span>Battle</span></button>
+        </div>
+
+        <div class="deck">
+          <div class="deck-head"><h3>Your Deck</h3><small>8 cards &middot; average 3.5 energy</small></div>
+          <div class="deck-grid" id="deckGrid"></div>
+          <div class="card-info" id="cardInfo"></div>
+        </div>
+      </div>
+
+      <ol class="how">
+        <li><b>Drag a card</b> onto your side of the arena, or press <kbd>1</kbd>&ndash;<kbd>4</kbd> and click.</li>
+        <li><b>Energy</b> refills over time. Each card costs what&rsquo;s on its badge.</li>
+        <li><b>Knock down towers</b> for crowns. Take the King Tower for all three.</li>
+      </ol>
+      <div class="home-foot"><button class="pill" id="soundBtn" type="button">Sound: On</button></div>
+    </div>
+  </section>
+
+  <!-- BATTLE -->
+  <section class="screen" id="battle" hidden>
+    <div class="bf">
+      <aside class="side side-l" aria-hidden="true"><canvas class="scene" id="sceneL"></canvas></aside>
+
+      <div class="col col-cards">
+        <div class="col-head">Cards</div>
+        <div class="hand" id="hand"></div>
+        <div class="next"><span>Next</span><img id="nextImg" alt=""></div>
+      </div>
+
+      <main class="arena-box" id="arenaBox">
+        <canvas id="arena" aria-label="Battle arena"></canvas>
+        <div class="nameplate"><b>Trainer Owen</b><small>Training Camp</small></div>
+        <div class="bubble" id="bubble" hidden></div>
+        <div class="banner" id="banner" hidden></div>
+        <div class="countdown" id="countdown" hidden></div>
+        <div class="toast" id="toast" hidden></div>
+        <div class="mini-timer" id="miniTimer"></div>
+        <button class="leave" id="leaveBtn" type="button" title="Leave the battle">&#x2715;</button>
+        <div class="leave-ask" id="leaveAsk" hidden>
+          <p>Leave this battle?</p>
+          <div><button class="pill" id="leaveYes" type="button">Leave</button><button class="pill gold" id="leaveNo" type="button">Keep playing</button></div>
+        </div>
+      </main>
+
+      <div class="col col-energy">
+        <div class="col-head">Energy</div>
+        <div class="ebar" id="ebar"><div class="efill" id="efill"></div><div class="eticks"></div></div>
+        <div class="enum" id="enum">5</div>
+        <div class="x2" id="x2" hidden>&times;2</div>
+      </div>
+
+      <aside class="side side-r">
+        <div class="timer" id="timer"><small id="timerLabel">Time left</small><b id="timerVal">3:00</b></div>
+        <div class="score">
+          <div class="score-row foe"><span>Trainer Owen</span><b><i class="crown-i"></i><em id="crownFoe">0</em></b></div>
+          <div class="score-row you"><span>You</span><b><i class="crown-i"></i><em id="crownYou">0</em></b></div>
+        </div>
+        <canvas class="scene" id="sceneR" aria-hidden="true"></canvas>
+      </aside>
+    </div>
+
+    <div class="intro" id="intro" hidden>
+      <div class="vs-side you"><b>You</b><small>Training Camp</small></div>
+      <div class="vs">VS</div>
+      <div class="vs-side foe"><canvas id="introOwen" width="120" height="120"></canvas><b>Trainer Owen</b></div>
+    </div>
+
+    <div class="result" id="result" hidden>
+      <div class="result-card">
+        <h2 id="resTitle">Victory!</h2>
+        <div class="res-row foe"><span>Trainer Owen</span><div class="res-crowns" id="resFoe"></div></div>
+        <div class="res-row you"><span>You</span><div class="res-crowns" id="resYou"></div></div>
+        <p class="res-line" id="resLine"></p>
+        <p class="res-small" id="resSmall"></p>
+        <div class="res-btns">
+          <button class="big-btn" id="againBtn" type="button"><span>Play Again</span></button>
+          <button class="pill" id="homeBtn" type="button">Home</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="js/cards.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/bot.js"></script>
+<script src="js/art.js"></script>
+<script src="js/scenery.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
