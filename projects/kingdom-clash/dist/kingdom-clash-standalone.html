@@ -515,39 +515,74 @@ button.slot:hover { transform: translateY(-3px); }
 .res-trophy.down b { color: #ff8d94; }
 .res-trophy small { color: var(--muted); font-weight: 900; }
 
-/* bottom navigation */
+/* bottom navigation: separate 3D tiles on a stone bar with a gold rail; a glowing, gold-trimmed
+   highlight glides behind the selected tab and lifts it above the bar. */
 .bottomnav {
-  position: relative; z-index: 5; display: flex; justify-content: center; align-items: flex-end; gap: 0;
+  position: relative; z-index: 5; display: flex; justify-content: center; align-items: flex-end; gap: 8px;
+  padding-top: 10px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: linear-gradient(#2d3a7c, #1b2352);
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 40%),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 46px),
+    linear-gradient(#2a2457, #171236);
   border-top: 3px solid var(--outline);
-  box-shadow: inset 0 3px 0 #d9a032, 0 -8px 22px rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 3px 0 #e2ab3a, inset 0 5px 0 #8a5a12, inset 0 9px 14px rgba(0, 0, 0, 0.35), 0 -10px 26px rgba(0, 0, 0, 0.4);
 }
+.bottomnav::before {
+  /* gold studs along the rail */
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 5px; pointer-events: none;
+  background: radial-gradient(circle, #fff0a8 0 1.6px, transparent 2.2px) 12px 0 / 48px 5px repeat-x;
+}
+.nb-glow {
+  position: absolute; z-index: 0; left: 0; bottom: 8px; height: 82px; width: 0; box-sizing: border-box; pointer-events: none;
+  border-radius: 18px 18px 14px 14px; border: 3px solid var(--outline);
+  background: radial-gradient(ellipse at 50% 18%, rgba(255, 255, 255, 0.5), transparent 55%), linear-gradient(#7db0ff, #3f72dc 55%, #2c55b8);
+  box-shadow: inset 0 0 0 2px #f6c443, inset 0 -5px 0 rgba(10, 20, 80, 0.35), 0 6px 0 #101a4e, 0 0 26px rgba(120, 170, 255, 0.55);
+}
+.nb-glow::before {
+  content: ''; position: absolute; left: 50%; top: -9px; width: 14px; height: 14px; transform: translateX(-50%) rotate(45deg);
+  background: linear-gradient(135deg, #fff2a8, #f2b01e); border: 3px solid var(--outline); border-radius: 3px;
+}
+.nb-glow.ready { transition: transform 0.38s cubic-bezier(.3, 1.35, .45, 1), width 0.38s cubic-bezier(.3, 1.35, .45, 1); }
 .nb {
-  position: relative; flex: 0 1 150px; height: 74px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  border: 0; border-left: 2px solid rgba(10, 8, 30, 0.6); background: linear-gradient(#34428a, #232d63); color: #c9d2ff;
-  transition: background 0.15s, transform 0.15s, flex-basis 0.2s;
+  position: relative; z-index: 1; flex: 0 1 140px; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  border: 3px solid var(--outline); border-radius: 14px; color: #aeb7ee;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 45%), linear-gradient(#3d4892, #262f6a);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.18), inset 0 -4px 0 rgba(0, 0, 0, 0.22), 0 4px 0 #0f1235;
+  transition: transform 0.15s, background 0.15s, height 0.25s, color 0.15s;
 }
-.nb:last-child { border-right: 2px solid rgba(10, 8, 30, 0.6); }
-.nb-ico { width: 40px; height: 40px; transition: transform 0.18s; }
+.nb-ico { width: 38px; height: 38px; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.35)) saturate(0.75) brightness(0.92); transition: transform 0.25s cubic-bezier(.3, 1.5, .5, 1), filter 0.2s; }
 .nb-ico svg { width: 100%; height: 100%; }
-.nb-label { font-size: 15px; }
-.nb:hover { background: linear-gradient(#3d4c9a, #29346f); }
-.nb:hover .nb-ico { transform: translateY(-2px); }
-.nb.on {
-  background: linear-gradient(#6f9bf7, #3a66cf); color: #fff;
-  box-shadow: inset 0 0 0 3px var(--outline), inset 0 0 0 5px #f0c040; border-radius: 14px 14px 0 0; transform: translateY(-8px); height: 82px; margin-bottom: -8px;
-}
-.nb.on .nb-ico { transform: scale(1.18) translateY(-3px); }
-.nb-battle { flex-basis: 190px; }
-.nb-battle .nb-ico { width: 48px; height: 48px; }
-.nb-battle .nb-label { font-size: 18px; }
-.nb-tag { position: absolute; top: 6px; right: 8px; font-style: normal; font-size: 10px; font-weight: 900; padding: 1px 6px; border-radius: 999px; background: rgba(0, 0, 0, 0.45); color: #cbbfec; }
-.nb-tag.lock::before { content: ''; display: inline-block; width: 9px; height: 9px; margin-right: 3px; vertical-align: -1px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='10.5' width='14' height='10' rx='2.5' fill='%23cbbfec'/%3E%3Cpath d='M8 10.5V8a4 4 0 0 1 8 0v2.5' stroke='%23cbbfec' stroke-width='3' fill='none'/%3E%3C/svg%3E") center / contain no-repeat; }
+.nb-label { font-size: 14px; transition: font-size 0.2s; }
+.nb:hover:not(.on) { background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 45%), linear-gradient(#4957a8, #2d3878); color: #e2e6ff; }
+.nb:hover:not(.on) .nb-ico { transform: translateY(-3px); filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35)); }
+.nb:active:not(.on) { transform: translateY(3px); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.18), 0 1px 0 #0f1235; }
+.nb.on { background: transparent; border-color: transparent; box-shadow: none; color: #fff; height: 82px; }
+.nb.on .nb-ico { transform: scale(1.3) translateY(-6px); filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.4)); }
+.nb.on .nb-label { font-size: 16px; }
+.nb-battle { flex-basis: 180px; }
+.nb-battle .nb-ico { width: 46px; height: 46px; }
+.nb-battle .nb-label { font-size: 17px; }
+.nb-battle.on .nb-label { font-size: 19px; }
+.nb-tag { position: absolute; z-index: 2; top: -9px; right: -6px; font-style: normal; font-size: 10px; font-weight: 900; padding: 2px 7px; border-radius: 999px;
+  border: 2px solid var(--outline); background: #4a4170; color: #e0daf7; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35); white-space: nowrap; }
+.nb-tag.lock::before { content: ''; display: inline-block; width: 9px; height: 9px; margin-right: 3px; vertical-align: -1px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='5' y='10.5' width='14' height='10' rx='2.5' fill='%23e0daf7'/%3E%3Cpath d='M8 10.5V8a4 4 0 0 1 8 0v2.5' stroke='%23e0daf7' stroke-width='3' fill='none'/%3E%3C/svg%3E") center / contain no-repeat; }
 .nb-tag.new { background: var(--red); color: #fff; animation: bob 1.4s ease-in-out infinite; }
 .nb-tag.open { background: #2fa84f; color: #fff; }
+
+/* sliding between tabs */
+.lobby-main { position: relative; overflow-x: hidden; }
+.tab-out { position: absolute; margin: 0; pointer-events: none; }
+.in-right { animation: tabInRight 0.34s cubic-bezier(.2, .8, .2, 1) both; }
+.in-left { animation: tabInLeft 0.34s cubic-bezier(.2, .8, .2, 1) both; }
+.out-left { animation: tabOutLeft 0.3s cubic-bezier(.4, 0, .8, .4) forwards; }
+.out-right { animation: tabOutRight 0.3s cubic-bezier(.4, 0, .8, .4) forwards; }
+@keyframes tabInRight { from { transform: translateX(14%); opacity: 0; } }
+@keyframes tabInLeft { from { transform: translateX(-14%); opacity: 0; } }
+@keyframes tabOutLeft { to { transform: translateX(-14%); opacity: 0; } }
+@keyframes tabOutRight { to { transform: translateX(14%); opacity: 0; } }
 
 /* ---------- battle ---------- */
 #battle { background: radial-gradient(ellipse at 50% 0%, #2a1650, var(--ink) 70%); }
@@ -874,11 +909,13 @@ button.slot:hover { transform: translateY(-3px); }
   .cp-row { display: block; }
   .cp { width: min(100%, 640px); }
   .bottomnav { position: fixed; left: 0; right: 0; bottom: 0; padding-left: 4px; padding-right: 4px; }
-  .nb { flex: 1 1 0; height: 64px; }
-  .nb.on { height: 70px; }
-  .nb-ico { width: 30px; height: 30px; }
-  .nb-battle .nb-ico { width: 36px; height: 36px; }
-  .nb-label, .nb-battle .nb-label { font-size: 11px; }
+  .bottomnav { gap: 4px; padding-top: 8px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); }
+  .nb { flex: 1 1 0; height: 54px; border-radius: 12px; }
+  .nb.on { height: 66px; }
+  .nb-glow { height: 66px; bottom: 6px; }
+  .nb-ico { width: 28px; height: 28px; }
+  .nb-battle .nb-ico { width: 32px; height: 32px; }
+  .nb-label, .nb-battle .nb-label, .nb.on .nb-label, .nb-battle.on .nb-label { font-size: 11px; }
   .nb-tag { display: none; }
   .deck-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .modal-card { grid-template-columns: minmax(0, 1fr); }
@@ -1017,6 +1054,7 @@ button.slot:hover { transform: translateY(-3px); }
       </main>
 
       <nav class="bottomnav" aria-label="Menu">
+        <span class="nb-glow" id="nbGlow" aria-hidden="true"></span>
         <button class="nb" type="button" data-tab="shop"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 20h32l-3 22H11z" fill="#c9792f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M6 14h36v8H6z" fill="#e8a33c" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M18 14a6 6 0 0 1 12 0" fill="none" stroke="#1c1530" stroke-width="3"/><rect x="20" y="24" width="8" height="8" rx="2" fill="#ffcf3f" stroke="#1c1530" stroke-width="2.5"/></svg></span><span class="nb-label">Shop</span><i class="nb-tag">Soon</i></button>
         <button class="nb" type="button" data-tab="cards"><i class="nb-tag up" id="cardsTag" hidden>0</i><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="10" width="22" height="30" rx="4" transform="rotate(-10 17 25)" fill="#7a5be0" stroke="#1c1530" stroke-width="3"/><rect x="20" y="8" width="22" height="30" rx="4" transform="rotate(8 31 23)" fill="#4f8ff0" stroke="#1c1530" stroke-width="3"/><circle cx="31" cy="22" r="5" fill="#ffcf3f" stroke="#1c1530" stroke-width="2.5"/></svg></span><span class="nb-label">Cards</span></button>
         <button class="nb nb-battle on" type="button" data-tab="battle"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 6l24 24-4 4L5 10V6z" fill="#dfe6ee" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M39 6v4L15 34l-4-4L35 6z" fill="#dfe6ee" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M8 32l8 8-4 3-7-7zM40 32l-8 8 4 3 7-7z" fill="#ffcf3f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/></svg></span><span class="nb-label">Battle</span></button>
@@ -3455,11 +3493,48 @@ const KCMenu = (() => {
     closePops();
     if (name !== 'cards') endSwap();
     for (const b of $$('.nb')) { const on = b.dataset.tab === name; b.classList.toggle('on', on); b.setAttribute('aria-current', on ? 'page' : 'false'); }
-    for (const s of $$('.lobby-main .tab')) s.hidden = s.id !== 'tab-' + name;
+    placeGlow();
+    const prev = [...$$('.lobby-main .tab')].find(el => !el.hidden && !el.classList.contains('tab-out')), next = $('#tab-' + name);
+    if (prev && prev !== next && !$('#home').hidden) slideTabs(prev, next, TABS.indexOf(name) > TABS.indexOf(prev.id.slice(4)) ? 1 : -1);
+    else { finishSlide(); for (const el of $$('.lobby-main .tab')) el.hidden = el !== next; }
     if (name === 'road' && G.roadOpen() && !P().roadSeen) { P().roadSeen = true; G.save(); }
     refresh();
     if (name === 'road') requestAnimationFrame(scrollRoad);
   }
+  // Tabs slide in from the side their button is on; the old tab slides out the other way.
+  let sliding = null;
+  function slideTabs(prev, next, dir) {
+    finishSlide();
+    const main = $('.lobby-main'), scroll = main.scrollTop;
+    const box = { top: prev.offsetTop - scroll, left: prev.offsetLeft, width: prev.offsetWidth, height: prev.offsetHeight };
+    main.scrollTop = 0;
+    for (const k in box) prev.style[k] = box[k] + 'px';
+    prev.classList.add('tab-out', dir > 0 ? 'out-left' : 'out-right');
+    for (const el of $$('.lobby-main .tab')) if (el !== prev) el.hidden = el !== next;
+    next.classList.add(dir > 0 ? 'in-right' : 'in-left');
+    const done = e => { if (e.target === next) finishSlide(); };
+    next.addEventListener('animationend', done);
+    sliding = { prev, next, done, timer: setTimeout(finishSlide, 450) };
+  }
+  function finishSlide() {
+    if (!sliding) return;
+    const { prev, next, done, timer } = sliding;
+    sliding = null;
+    clearTimeout(timer);
+    next.removeEventListener('animationend', done);
+    prev.hidden = true;
+    prev.removeAttribute('style');
+    prev.classList.remove('tab-out', 'out-left', 'out-right');
+    next.classList.remove('in-left', 'in-right');
+  }
+  // The gold highlight behind the selected button glides to it.
+  function placeGlow() {
+    const on = $('.nb.on'), g = $('#nbGlow');
+    if (!on || !g) return;
+    g.style.width = on.offsetWidth + 'px';
+    g.style.transform = `translateX(${on.offsetLeft}px)`;
+  }
+
   function closePops() {
     $('#oppPanel').hidden = true; $('#oppChange').setAttribute('aria-expanded', 'false');
     $('#settings').hidden = true; $('#settingsBtn').setAttribute('aria-expanded', 'false');
@@ -3906,6 +3981,10 @@ const KCMenu = (() => {
       else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(nextFoe()); e.preventDefault(); }
     });
     // chest timers tick while the lobby is showing
+    placeGlow();
+    requestAnimationFrame(() => { placeGlow(); $('#nbGlow').classList.add('ready'); });
+    window.addEventListener('resize', placeGlow);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeGlow);
     clearInterval(ticker);
     ticker = setInterval(() => { if (!$('#home').hidden && G.roadOpen() && P().chests.some(Boolean)) { renderChests(); } }, 1000);
     refresh();
@@ -3914,7 +3993,7 @@ const KCMenu = (() => {
   return {
     init, refresh, recordResult, nextFoe, cardImg, tab,
     get name() { return P() ? P().name : 'Player'; },
-    show() { refresh(); },
+    show() { refresh(); requestAnimationFrame(placeGlow); },
   };
 })();
 

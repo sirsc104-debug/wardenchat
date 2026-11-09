@@ -53,11 +53,48 @@ const KCMenu = (() => {
     closePops();
     if (name !== 'cards') endSwap();
     for (const b of $$('.nb')) { const on = b.dataset.tab === name; b.classList.toggle('on', on); b.setAttribute('aria-current', on ? 'page' : 'false'); }
-    for (const s of $$('.lobby-main .tab')) s.hidden = s.id !== 'tab-' + name;
+    placeGlow();
+    const prev = [...$$('.lobby-main .tab')].find(el => !el.hidden && !el.classList.contains('tab-out')), next = $('#tab-' + name);
+    if (prev && prev !== next && !$('#home').hidden) slideTabs(prev, next, TABS.indexOf(name) > TABS.indexOf(prev.id.slice(4)) ? 1 : -1);
+    else { finishSlide(); for (const el of $$('.lobby-main .tab')) el.hidden = el !== next; }
     if (name === 'road' && G.roadOpen() && !P().roadSeen) { P().roadSeen = true; G.save(); }
     refresh();
     if (name === 'road') requestAnimationFrame(scrollRoad);
   }
+  // Tabs slide in from the side their button is on; the old tab slides out the other way.
+  let sliding = null;
+  function slideTabs(prev, next, dir) {
+    finishSlide();
+    const main = $('.lobby-main'), scroll = main.scrollTop;
+    const box = { top: prev.offsetTop - scroll, left: prev.offsetLeft, width: prev.offsetWidth, height: prev.offsetHeight };
+    main.scrollTop = 0;
+    for (const k in box) prev.style[k] = box[k] + 'px';
+    prev.classList.add('tab-out', dir > 0 ? 'out-left' : 'out-right');
+    for (const el of $$('.lobby-main .tab')) if (el !== prev) el.hidden = el !== next;
+    next.classList.add(dir > 0 ? 'in-right' : 'in-left');
+    const done = e => { if (e.target === next) finishSlide(); };
+    next.addEventListener('animationend', done);
+    sliding = { prev, next, done, timer: setTimeout(finishSlide, 450) };
+  }
+  function finishSlide() {
+    if (!sliding) return;
+    const { prev, next, done, timer } = sliding;
+    sliding = null;
+    clearTimeout(timer);
+    next.removeEventListener('animationend', done);
+    prev.hidden = true;
+    prev.removeAttribute('style');
+    prev.classList.remove('tab-out', 'out-left', 'out-right');
+    next.classList.remove('in-left', 'in-right');
+  }
+  // The gold highlight behind the selected button glides to it.
+  function placeGlow() {
+    const on = $('.nb.on'), g = $('#nbGlow');
+    if (!on || !g) return;
+    g.style.width = on.offsetWidth + 'px';
+    g.style.transform = `translateX(${on.offsetLeft}px)`;
+  }
+
   function closePops() {
     $('#oppPanel').hidden = true; $('#oppChange').setAttribute('aria-expanded', 'false');
     $('#settings').hidden = true; $('#settingsBtn').setAttribute('aria-expanded', 'false');
@@ -504,6 +541,10 @@ const KCMenu = (() => {
       else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(nextFoe()); e.preventDefault(); }
     });
     // chest timers tick while the lobby is showing
+    placeGlow();
+    requestAnimationFrame(() => { placeGlow(); $('#nbGlow').classList.add('ready'); });
+    window.addEventListener('resize', placeGlow);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeGlow);
     clearInterval(ticker);
     ticker = setInterval(() => { if (!$('#home').hidden && G.roadOpen() && P().chests.some(Boolean)) { renderChests(); } }, 1000);
     refresh();
@@ -512,6 +553,6 @@ const KCMenu = (() => {
   return {
     init, refresh, recordResult, nextFoe, cardImg, tab,
     get name() { return P() ? P().name : 'Player'; },
-    show() { refresh(); },
+    show() { refresh(); requestAnimationFrame(placeGlow); },
   };
 })();
