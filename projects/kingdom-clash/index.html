@@ -13,113 +13,136 @@
 <body>
 <div id="app">
 
-  <!-- HOME: top bar, sidebar, stage, side panels -->
+  <!-- HOME: the lobby. Top bar, the tabs, and a bottom navigation bar. -->
   <section class="screen" id="home">
-    <div class="menu">
+    <div class="lobby">
       <header class="topbar">
-        <div class="brand">
-          <svg viewBox="0 0 100 70" aria-hidden="true"><path d="M8 62 L8 22 L30 40 L50 6 L70 40 L92 22 L92 62 Z" fill="#ffcf3f" stroke="#1c1530" stroke-width="7" stroke-linejoin="round"/><circle cx="50" cy="46" r="7" fill="#e5414b" stroke="#1c1530" stroke-width="4"/></svg>
-          <span>Kingdom <b>Clash</b></span>
-        </div>
+        <button class="who" id="whoBtn" type="button" title="Change your name in Settings">
+          <span class="who-crest" aria-hidden="true"><svg viewBox="0 0 100 70"><path d="M8 62 L8 22 L30 40 L50 6 L70 40 L92 22 L92 62 Z" fill="#ffcf3f" stroke="#1c1530" stroke-width="8" stroke-linejoin="round"/><circle cx="50" cy="46" r="8" fill="#e5414b" stroke="#1c1530" stroke-width="5"/></svg></span>
+          <span class="who-text"><b id="playerName">Player</b><small>Training Grounds</small></span>
+        </button>
         <div class="lvl" title="Account level: wins and matches add experience">
           <span class="lvl-badge" id="lvlNum">1</span>
           <div class="lvl-bar"><i id="xpFill"></i><span id="xpText">0 / 100</span></div>
         </div>
-        <div class="wallet">
-          <button class="chip" type="button" data-tab="shop" title="Coins arrive with the SirSC wallet"><span class="coin-i" aria-hidden="true"></span><b id="coinVal">&ndash;</b><span class="plus" aria-hidden="true">+</span><span class="sr">Coins</span></button>
-          <button class="chip" type="button" data-tab="shop" title="Diamonds arrive with the SirSC wallet"><span class="gem-i" aria-hidden="true"></span><b id="gemVal">&ndash;</b><span class="plus" aria-hidden="true">+</span><span class="sr">Diamonds</span></button>
+        <div class="res">
+          <button class="res-chip" type="button" data-tab="shop" title="Coins arrive with the SirSC wallet"><span class="coin-i" aria-hidden="true"></span><b id="coinVal">&ndash;</b><span class="plus" aria-hidden="true">+</span><span class="sr">Coins</span></button>
+          <button class="res-chip" type="button" data-tab="shop" title="Diamonds arrive with the SirSC wallet"><span class="gem-i" aria-hidden="true"></span><b id="gemVal">&ndash;</b><span class="plus" aria-hidden="true">+</span><span class="sr">Diamonds</span></button>
         </div>
         <button class="icon-btn" id="soundBtn" type="button" aria-label="Sound on" title="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="soundWaves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+        <button class="icon-btn" id="settingsBtn" type="button" aria-label="Settings" aria-expanded="false" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm8.4 5.1l1.6 1.2-2 3.4-1.9-.7a7.6 7.6 0 0 1-2 1.2L15.8 21h-4l-.3-2.3a7.6 7.6 0 0 1-2-1.2l-1.9.7-2-3.4 1.6-1.2a7.4 7.4 0 0 1 0-2.4L5.6 9.6l2-3.4 1.9.7a7.6 7.6 0 0 1 2-1.2L11.8 3h4l.3 2.7a7.6 7.6 0 0 1 2 1.2l1.9-.7 2 3.4-1.6 1.2a7.4 7.4 0 0 1 0 2.4z" fill="currentColor"/></svg></button>
+        <div class="settings" id="settings" hidden>
+          <h3>Settings</h3>
+          <form class="name-form" id="nameForm"><label for="nameInput">Your name</label><div><input id="nameInput" maxlength="16" autocomplete="off"><button class="mini-btn" type="submit">Save</button></div></form>
+          <label class="switch"><input type="checkbox" id="soundToggle"><span>Sound effects</span></label>
+          <p class="keys"><kbd>1</kbd>&ndash;<kbd>5</kbd> switch tabs &middot; <kbd>Enter</kbd> battle &middot; <kbd>Esc</kbd> close</p>
+        </div>
       </header>
 
-      <nav class="sidenav" aria-label="Menu">
-        <button class="nav-btn on" type="button" data-tab="battle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3l9 9-2 2-9-9V3zM20 3v2l-6.5 6.5-2-2L18 3zM5 16l3 3-2 2-3-3zM19 16l2 2-2 2-2-2-5-5 2-2z" fill="currentColor"/></svg><span>Battle</span><kbd>1</kbd></button>
-        <button class="nav-btn" type="button" data-tab="cards"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="11" height="15" rx="2" fill="currentColor" opacity=".55"/><rect x="9" y="3" width="11" height="15" rx="2" fill="currentColor"/></svg><span>Cards</span><kbd>2</kbd></button>
-        <button class="nav-btn" type="button" data-tab="road"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v3h3v3a4 4 0 0 1-4 4h-.5A5 5 0 0 1 13 16v2h3v3H8v-3h3v-2a5 5 0 0 1-3.5-3H7a4 4 0 0 1-4-4V6h3zm-1 5v1a2 2 0 0 0 1.5 1.9V8zm13 0v2.9A2 2 0 0 0 19.5 9V8z" fill="currentColor"/></svg><span>Trophy Road</span><i class="nav-tag" id="roadTag">Locked</i><kbd>3</kbd></button>
-        <button class="nav-btn" type="button" data-tab="shop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8a3 3 0 0 1 6 0" stroke="currentColor" stroke-width="2" fill="none"/><rect x="5" y="8" width="14" height="12" rx="2" fill="currentColor" opacity=".35"/></svg><span>Shop</span><i class="nav-tag soon">Soon</i><kbd>4</kbd></button>
-        <button class="nav-btn" type="button" data-tab="clan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z" fill="currentColor"/></svg><span>Clan</span><i class="nav-tag soon">Soon</i><kbd>5</kbd></button>
-        <button class="nav-btn" type="button" data-tab="events"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="currentColor" opacity=".4"/><rect x="3" y="5" width="18" height="5" rx="2" fill="currentColor"/><path d="M8 3v4M16 3v4" stroke="currentColor" stroke-width="2"/></svg><span>Events</span><i class="nav-tag soon">Soon</i><kbd>6</kbd></button>
-      </nav>
-
-      <main class="stage">
+      <main class="lobby-main">
         <!-- Battle tab -->
-        <section class="tab" id="tab-battle">
-          <div class="player-row">
-            <div class="player-banner">
-              <div class="pb-name"><b id="playerName">Player</b><button class="mini-btn" id="editName" type="button">Edit name</button></div>
-              <form class="name-form" id="nameForm" hidden><label class="sr" for="nameInput">Your name</label><input id="nameInput" maxlength="16" autocomplete="off"><button class="mini-btn" type="submit">Save</button></form>
-              <small>Training Grounds</small>
+        <section class="tab battle-tab" id="tab-battle">
+          <aside class="lobby-side" aria-label="Kingdom Pass and upcoming unlocks">
+            <div class="plaque">
+              <div class="ribbon"><span>Kingdom Pass</span></div>
+              <div class="pass-row"><span class="pass-tier">1</span><div class="pass-track"><i></i></div><small>0/10</small></div>
+              <p class="dim"><span class="tag-lock">Locked</span> Opens with the Trophy Road. Members get the premium track.</p>
             </div>
-            <div class="arena-progress"><span id="trainersBeaten">0 of 3 trainers beaten</span><div class="ap-bar"><i id="apFill"></i></div></div>
-          </div>
-
-          <div class="hero" id="hero">
-            <div class="hero-bg left" id="heroL"></div><div class="hero-bg right" id="heroR"></div>
-            <div class="hero-arena"><canvas id="heroArena" aria-label="The Training Grounds arena"></canvas></div>
-            <div class="hero-title"><small>Arena</small><b>Training Grounds</b></div>
-            <div class="next-bubble" id="nextBubble"><small>Next goal</small><b id="nextGoal">Beat Trainer Owen</b></div>
-          </div>
-
-          <ol class="path" id="trainerPath" aria-label="Trainer path"></ol>
-
-          <div class="battle-row">
-            <button class="deck-btn" id="deckBtn" type="button" title="See your deck"><span class="deck-thumbs" id="deckThumbs"></span><span>Deck</span></button>
-            <button class="big-btn battle-main" id="battleBtn" type="button"><span>Battle</span><small id="battleSub">vs Trainer Owen</small></button>
-            <div class="opp">
-              <label for="oppSel">Opponent</label>
-              <select id="oppSel"></select>
+            <div class="plaque">
+              <div class="ribbon"><span>Coming Up</span></div>
+              <ul class="unlocks" id="unlocks"></ul>
             </div>
+          </aside>
+
+          <div class="center">
+            <div class="cp-row">
+              <div class="cp" id="cp">
+                <img id="cpImg" alt="Training Grounds arena" draggable="false">
+                <div class="cp-bar" role="progressbar" aria-label="Trainers defeated" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0" id="cpBar">
+                  <i id="cpFill"></i><span id="cpText">0 / 3 Trainers Defeated</span>
+                </div>
+              </div>
+            </div>
+            <div class="opp" id="opp">
+              <canvas id="oppPic" width="96" height="96" aria-hidden="true"></canvas>
+              <div class="opp-text"><small id="oppLabel">Next Opponent</small><b id="oppName">Trainer Owen</b><span id="oppMeta">Tutorial</span></div>
+              <button class="opp-change" id="oppChange" type="button" aria-expanded="false" aria-controls="oppPanel">Trainers <span aria-hidden="true">&#9662;</span></button>
+              <div class="opp-panel" id="oppPanel" hidden><ul id="oppList"></ul></div>
+            </div>
+            <button class="battle-btn" id="battleBtn" type="button"><span>Battle</span><small id="battleSub">vs Trainer Owen</small></button>
+            <div class="chests" id="chests" aria-label="Chest slots"></div>
           </div>
+
+          <aside class="lobby-side" aria-label="Training rewards">
+            <div class="plaque">
+              <div class="ribbon"><span>Training Rewards</span></div>
+              <ul class="rewards" id="rewards"></ul>
+              <p class="dim">First win against each trainer gives a 30 XP bonus.</p>
+            </div>
+          </aside>
         </section>
 
         <!-- Cards tab -->
-        <section class="tab panel" id="tab-cards" hidden>
-          <div class="deck-head"><h3>Your Deck</h3><small>8 cards &middot; average 3.5 energy &middot; click a card for its stats</small></div>
-          <div class="deck-grid" id="deckGrid"></div>
-          <div class="card-info" id="cardInfo"></div>
+        <section class="tab cards-tab" id="tab-cards" hidden>
+          <div class="plaque deck-plaque">
+            <div class="ribbon"><span>Battle Deck</span></div>
+            <div class="avg" title="Average energy cost"><span class="drop" aria-hidden="true"></span><b id="avgCost">3.5</b><small>average energy</small></div>
+            <div class="deck-row" id="deckRow"></div>
+          </div>
+          <div class="plaque coll-plaque">
+            <div class="ribbon"><span>Card Collection</span></div>
+            <small class="found" id="foundCount">8 / 8 found</small>
+            <div class="coll-grid" id="collGrid"></div>
+            <p class="dim">Card levels and upgrades arrive with the Trophy Road.</p>
+          </div>
         </section>
 
         <!-- Trophy Road tab -->
-        <section class="tab panel locked-panel" id="tab-road" hidden>
-          <div class="lock-big" aria-hidden="true"></div>
-          <h3 id="roadTitle">Trophy Road is locked</h3>
-          <p id="roadText">Beat all three Training Grounds trainers to open it.</p>
-          <ol class="road-list" id="roadList"></ol>
+        <section class="tab info-tab" id="tab-road" hidden>
+          <div class="plaque info-plaque">
+            <div class="big-lock" id="roadLock" aria-hidden="true"></div>
+            <h3 id="roadTitle">Trophy Road is locked</h3>
+            <p id="roadText">Beat all three Training Grounds trainers to open it.</p>
+            <ol class="road-list" id="roadList"></ol>
+          </div>
         </section>
-
-        <section class="tab panel locked-panel" id="tab-shop" hidden>
-          <div class="soon-big" aria-hidden="true"></div>
-          <h3>The Shop is coming</h3>
-          <p>It opens with the SirSC wallet: coins you earn by playing, diamonds, and SirSC Membership. Everything sold here will be listed with exactly what you get.</p>
+        <section class="tab info-tab" id="tab-shop" hidden>
+          <div class="plaque info-plaque">
+            <div class="big-soon" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 20h32l-3 22H11z" fill="#c9792f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M6 14h36v8H6z" fill="#e8a33c" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M18 14a6 6 0 0 1 12 0" fill="none" stroke="#1c1530" stroke-width="3"/><rect x="20" y="24" width="8" height="8" rx="2" fill="#ffcf3f" stroke="#1c1530" stroke-width="2.5"/></svg></div>
+            <h3>The Shop is coming</h3>
+            <p>It opens with the SirSC wallet: coins you earn by playing, diamonds and SirSC Membership. Everything sold here will show exactly what you get.</p>
+          </div>
         </section>
-        <section class="tab panel locked-panel" id="tab-clan" hidden>
-          <div class="soon-big" aria-hidden="true"></div>
-          <h3>Clans are coming</h3>
-          <p>Team up with friends, chat and trade cards. Friend battles by room code come first.</p>
-        </section>
-        <section class="tab panel locked-panel" id="tab-events" hidden>
-          <div class="soon-big" aria-hidden="true"></div>
-          <h3>Events are coming</h3>
-          <p>Weekly challenges with special rules and fixed rewards, once the Trophy Road is open.</p>
+        <section class="tab info-tab" id="tab-clan" hidden>
+          <div class="plaque info-plaque">
+            <div class="big-soon" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4l16 6v12c0 10-7 18-16 22C15 40 8 32 8 22V10z" fill="#3d7de6" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M24 10l10 4v8c0 7-4 12-10 15z" fill="#2a5fc0"/><path d="M17 26l5 5 9-11" fill="none" stroke="#ffcf3f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <h3>Clans are coming</h3>
+            <p>Team up with friends, chat and trade cards. Friend battles by room code come first.</p>
+          </div>
         </section>
       </main>
 
-      <aside class="widgets" aria-label="Side panels">
-        <div class="widget">
-          <div class="w-head"><b>Kingdom Pass</b><span class="w-lock">Locked</span></div>
-          <div class="pass-bar"><span class="pass-tier">1</span><div><i></i></div><small>0/10</small></div>
-          <p>Opens with the Trophy Road. Members get the premium track.</p>
+      <nav class="bottomnav" aria-label="Menu">
+        <button class="nb" type="button" data-tab="shop"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 20h32l-3 22H11z" fill="#c9792f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M6 14h36v8H6z" fill="#e8a33c" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M18 14a6 6 0 0 1 12 0" fill="none" stroke="#1c1530" stroke-width="3"/><rect x="20" y="24" width="8" height="8" rx="2" fill="#ffcf3f" stroke="#1c1530" stroke-width="2.5"/></svg></span><span class="nb-label">Shop</span><i class="nb-tag">Soon</i></button>
+        <button class="nb" type="button" data-tab="cards"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="10" width="22" height="30" rx="4" transform="rotate(-10 17 25)" fill="#7a5be0" stroke="#1c1530" stroke-width="3"/><rect x="20" y="8" width="22" height="30" rx="4" transform="rotate(8 31 23)" fill="#4f8ff0" stroke="#1c1530" stroke-width="3"/><circle cx="31" cy="22" r="5" fill="#ffcf3f" stroke="#1c1530" stroke-width="2.5"/></svg></span><span class="nb-label">Cards</span></button>
+        <button class="nb nb-battle on" type="button" data-tab="battle"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 6l24 24-4 4L5 10V6z" fill="#dfe6ee" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M39 6v4L15 34l-4-4L35 6z" fill="#dfe6ee" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M8 32l8 8-4 3-7-7zM40 32l-8 8 4 3 7-7z" fill="#ffcf3f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/></svg></span><span class="nb-label">Battle</span></button>
+        <button class="nb" type="button" data-tab="clan"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4l16 6v12c0 10-7 18-16 22C15 40 8 32 8 22V10z" fill="#3d7de6" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M24 10l10 4v8c0 7-4 12-10 15z" fill="#2a5fc0"/><path d="M17 26l5 5 9-11" fill="none" stroke="#ffcf3f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nb-label">Clan</span><i class="nb-tag">Soon</i></button>
+        <button class="nb" type="button" data-tab="road"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 6h20v6h7v5a8 8 0 0 1-8 8h-1a10 10 0 0 1-6 6v5h6v6H16v-6h6v-5a10 10 0 0 1-6-6h-1a8 8 0 0 1-8-8v-5h7z" fill="#ffcf3f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M11 12v5a4 4 0 0 0 3 4M37 12v5a4 4 0 0 1-3 4" fill="none" stroke="#1c1530" stroke-width="2.5"/></svg></span><span class="nb-label">Trophy Road</span><i class="nb-tag lock" id="roadTag">Locked</i></button>
+      </nav>
+    </div>
+
+    <div class="modal" id="cardModal" hidden>
+      <div class="modal-card plaque" role="dialog" aria-modal="true" aria-labelledby="mName">
+        <button class="modal-x" id="modalX" type="button" aria-label="Close">&#x2715;</button>
+        <div class="m-art"><img id="mImg" alt=""><span class="cost" id="mCost">3</span></div>
+        <div class="m-body">
+          <h3 id="mName">Card</h3>
+          <div class="m-tags" id="mTags"></div>
+          <p id="mBlurb"></p>
+          <div class="m-stats" id="mStats"></div>
+          <div class="m-evo"><b>Evolution</b> <small>(unlocks later)</small><p id="mEvo"></p></div>
         </div>
-        <div class="widget">
-          <div class="w-head"><b>Chests</b><span class="w-lock">Locked</span></div>
-          <div class="slots"><i></i><i></i><i></i><i></i></div>
-          <p>Win Trophy Road battles to earn chests.</p>
-        </div>
-        <div class="widget">
-          <div class="w-head"><b>Trainer records</b></div>
-          <ul class="records" id="records"></ul>
-        </div>
-      </aside>
+      </div>
     </div>
   </section>
 

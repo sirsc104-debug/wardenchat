@@ -2,7 +2,7 @@
 
 A real-time card battler for desktop browsers (built for school Chromebooks). Two players each defend two Archer Towers and a King Tower; you play troops and spells from a hand of four, paying with Energy that refills over time, and knock down towers for crowns.
 
-The Training Grounds have three trainers, played in order: **Trainer Owen** (the tutorial, built to lose), **Trainer Romeo** (mid tier) and **Trainer Luc** (hard). Beating all three unlocks the Trophy Road. The main menu is built as the full game's menu, with the parts that don't exist yet (wallet, Kingdom Pass, chests, Shop, clans, events) shown in their locked or coming states. Wallet, trophies, chests, upgrades, evolutions and online 1v1 come later.
+The Training Grounds have three trainers, played in order: **Trainer Owen** (the tutorial, built to lose), **Trainer Romeo** (mid tier) and **Trainer Luc** (hard). Beating all three unlocks the Trophy Road. The lobby is built as the full game's lobby, with the parts that don't exist yet (wallet, Kingdom Pass, chests, Shop, clans, events) shown in their locked or coming states. Wallet, trophies, chests, upgrades, evolutions and online 1v1 come later.
 
 Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `index.html` in a browser, or serve the folder with `python3 -m http.server`.
 
@@ -10,7 +10,8 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 
 | Screen | What's on it |
 | --- | --- |
-| Menu | A top bar (account level and experience, coins and diamonds with + buttons, sound), a sidebar of tabs (Battle, Cards, Trophy Road, Shop, Clan, Events; keys `1`–`6`), and the Battle tab: your name (editable), the Training Grounds arena shown in 3D between the two scenery images, a *Next goal* card, the trainer path (Owen → Romeo → Luc → Trophy Road, with check marks and locks), and the Battle row (deck, **Battle** against the chosen trainer, opponent picker; `Enter` starts). Side panels show the Kingdom Pass and chest slots (locked until the Trophy Road) and your record against each trainer. Under 1180 px the side panels hide; under 820 px everything stacks and the sidebar becomes a bottom tab bar. |
+| Lobby | A top bar (your name, level and experience, coins and diamonds with + buttons, sound, settings with name and sound), the tab, and a bottom navigation bar (Shop · Cards · **Battle** · Clan · Trophy Road; keys `1`–`5`). The Battle tab is built around the Training Grounds centerpiece (`img/training-grounds.webp`, transparent): its empty bar is filled live from your progress ("1 / 3 Trainers Defeated", turning green at 3/3). Under it: the opponent ("Next Opponent: Trainer Romeo", or "Trophy Road Unlocked!"; **Trainers** opens a panel of all three with portraits, status and records, to pick a rematch), the **Battle** button (`Enter`) and four chest slots (locked until the Trophy Road; the slots also support empty, chest, unlocking and ready states). On wide screens, stone plaques at the sides show the Kingdom Pass, what's coming up and the Training Grounds rewards. Everything fits a 1280×720 or larger screen without scrolling; under 1080 px wide the side plaques go; under 760 px the lobby scrolls with the navigation fixed at the bottom. |
+| Cards | Your 8-card Battle Deck in one row with the average energy cost, and the Card Collection grid (name, rarity, level, energy, *In deck*). Click any card for its details: stats, description and its evolution. |
 | Battle | Five columns, following the desktop layout concept: the Royal Grandstands (King statue, stands, banners, torches) · your 4 cards and the next one · the arena · the Energy bar · the Royal Waterfall with the timer and crown score over its sky. The spectators in both stands are animated and react to the match. Below 1000 px wide the scenery is dropped and the clock moves onto the arena. |
 | Result | Victory / Defeat / Draw, both sides' crowns, the trainer's comment, anything you unlocked (next trainer, Trophy Road, a new level), why it ended and the experience earned, then **Battle *next trainer*** (after a first win), **Play Again** or **Home**. |
 
@@ -57,7 +58,7 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | --- | --- |
 | `js/cards.js` | The 8 cards and the starter deck |
 | `js/trainers.js` | Owen, Romeo and Luc |
-| `js/menu.js` | The main menu, the trainer path and unlocking, saved progress |
+| `js/menu.js` | The lobby, the Cards screen, trainer progress and unlocking, saved progress |
 | `js/sim.js` | The battle: fixed 30 steps a second, no DOM, seeded, so it runs the same in the page, in Node and later on both ends of an online match |
 | `js/bot.js` | The trainers' AI (one bot with a skill setting per trainer) |
 | `js/art.js` | Every troop, tower, card portrait and the arena, drawn in code. Each troop and tower has two views: your side is seen from behind (facing up the arena, toward the enemy) and the enemy faces you; cards use the front view |
@@ -67,7 +68,7 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `tools/path-test.js` | `node tools/path-test.js` places every ground troop behind and beside each tower, for both teams, and checks it walks around instead of getting stuck |
 | `tools/trainers-test.js` | `node tools/trainers-test.js 100 [trainer]` plays each trainer against a good player, a sloppy player, a random clicker and a player who does nothing, and prints how often the trainer wins |
 | `tools/sim-test.js` | `node tools/sim-test.js 40` plays 40 bot-vs-bot matches headless and checks they end cleanly (no NaNs, no troops in the river) |
-| `img/` | The two Training Grounds backgrounds (793 × 1983 WebP) |
+| `img/` | The two Training Grounds battle backgrounds (793 × 1983 WebP) and the lobby centerpiece (`training-grounds.webp`, 1448 × 1086 with transparency) |
 | `build-artifact.py` | Bundles everything into one page, with the images baked in as data URIs: `python3 build-artifact.py OUT.html` (claude.ai Artifact) or `--standalone` (a complete page) |
 
 Built copies are in `dist/`: `kingdom-clash.html` (Artifact bundle) and `kingdom-clash-standalone.html` (open anywhere, works offline apart from the Google font, which falls back to a system font).

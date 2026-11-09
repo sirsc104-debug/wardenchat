@@ -1,17 +1,24 @@
-/* Kingdom Clash: the main menu. A top bar (account level, wallet, sound), a sidebar of tabs, the Battle
-   stage (the Training Grounds, the trainer path, the Battle button) and side panels.
+/* Kingdom Clash: the lobby. A top bar (name, level and experience, coins and diamonds, sound,
+   settings), the tabs (Battle, Cards, Trophy Road, Shop, Clan) and a bottom navigation bar.
 
-   The Training Grounds have no trophies: you beat Trainer Owen, then Romeo, then Luc, and beating all
-   three opens the Trophy Road. Progress, your name, account experience and your record against each
-   trainer are kept in this browser's local storage. The wallet (coins and diamonds), the Kingdom Pass,
-   chests, the Shop, clans and events are shown in their locked or "coming" states until they exist. */
+   The Battle tab is built around the Training Grounds centerpiece image (img/training-grounds.webp,
+   transparent). Its empty bar is filled here, over the image, from the player's progress: the Training
+   Grounds have no trophies, you beat Trainer Owen, then Romeo, then Luc, and beating all three opens
+   the Trophy Road. Under it are the opponent (with a panel of all three trainers and your records),
+   the Battle button and four chest slots.
+
+   Progress, your name, account experience and your record against each trainer are kept in this
+   browser's local storage under kc.progress. The wallet, Kingdom Pass, chests, Shop and clans are shown
+   locked or "coming" until they exist. */
 'use strict';
 
 const KCMenu = (() => {
   const $ = q => document.querySelector(q), $$ = q => document.querySelectorAll(q);
   const KEY = 'kc.progress';
+  const CENTERPIECE = 'img/training-grounds.webp';
   const XP_PER_LEVEL = 100;
   const XP = { win: 20, draw: 10, loss: 6, firstWin: 30 };
+  const TABS = ['shop', 'cards', 'battle', 'clan', 'road'];
   const imgs = {};
   let P = null, opts = {}, tabNow = 'battle';
 
@@ -35,15 +42,17 @@ const KCMenu = (() => {
   const unlocked = id => { const i = KC_TRAINERS.findIndex(t => t.id === id); return i === 0 || !!P.beaten[KC_TRAINERS[i - 1].id]; };
   const nextTrainer = () => KC_TRAINERS.find(t => !P.beaten[t.id]) || null;
   const roadOpen = () => KC_TRAINERS.every(t => P.beaten[t.id]);
+  const beatenCount = () => KC_TRAINERS.filter(t => P.beaten[t.id]).length;
   function opponent() {
     if (P.opp && KC_TRAINER[P.opp] && unlocked(P.opp)) return KC_TRAINER[P.opp];
     return nextTrainer() || KC_TRAINERS[KC_TRAINERS.length - 1];
   }
   const level = () => 1 + Math.floor(P.xp / XP_PER_LEVEL);
+  const recText = r => (r.w + r.l + r.d ? `${r.w}W · ${r.l}L${r.d ? ` · ${r.d}D` : ''}` : 'No matches yet');
 
   // Called by the game when a match ends. Returns what changed, for the result screen.
   function recordResult(id, winner) {
-    const r = P.records[id], before = { level: level() };
+    const r = P.records[id], before = level();
     let xp = winner === 0 ? XP.win : winner === 1 ? XP.loss : XP.draw;
     if (winner === 0) r.w++; else if (winner === 1) r.l++; else r.d++;
     let unlockedNext = null, opened = false, firstWin = false;
@@ -58,190 +67,198 @@ const KCMenu = (() => {
     }
     P.xp += xp;
     save();
-    return { xp, firstWin, unlockedNext, roadOpened: opened, levelUp: level() > before.level ? level() : 0 };
+    return { xp, firstWin, unlockedNext, roadOpened: opened, levelUp: level() > before ? level() : 0 };
   }
 
-  /* ---------- tabs ---------- */
+  /* ---------- tabs and popovers ---------- */
   function tab(name) {
+    if (!TABS.includes(name)) return;
     tabNow = name;
-    for (const b of $$('.nav-btn')) b.classList.toggle('on', b.dataset.tab === name);
-    for (const s of $$('.stage .tab')) s.hidden = s.id !== 'tab-' + name;
+    closePops();
+    for (const b of $$('.nb')) { const on = b.dataset.tab === name; b.classList.toggle('on', on); b.setAttribute('aria-current', on ? 'page' : 'false'); }
+    for (const s of $$('.lobby-main .tab')) s.hidden = s.id !== 'tab-' + name;
     if (name === 'road' && roadOpen() && !P.roadSeen) { P.roadSeen = true; save(); }
-    if (name === 'battle') requestAnimationFrame(drawHero);
     refresh();
+  }
+  function closePops() {
+    $('#oppPanel').hidden = true; $('#oppChange').setAttribute('aria-expanded', 'false');
+    $('#settings').hidden = true; $('#settingsBtn').setAttribute('aria-expanded', 'false');
+  }
+  function toggle(panel, btn) {
+    const open = $(panel).hidden;
+    closePops();
+    $(panel).hidden = !open;
+    $(btn).setAttribute('aria-expanded', String(open));
+    return open;
   }
 
   /* ---------- the Battle tab ---------- */
-  function buildPath() {
-    const ol = $('#trainerPath');
-    ol.innerHTML = '';
-    KC_TRAINERS.forEach((t, i) => {
-      const li = document.createElement('li');
-      li.className = 'node';
-      li.dataset.id = t.id;
-      li.innerHTML = `<button type="button" class="node-btn"><canvas width="132" height="132"></canvas><span class="node-mark" aria-hidden="true"></span></button>
-        <b>${esc(t.short)}</b><small>Level ${t.level} &middot; ${esc(t.tier)}</small>`;
-      li.querySelector('button').addEventListener('click', () => {
-        if (!unlocked(t.id)) { pulse(li); return; }
-        P.opp = t.id; save(); refresh();
-      });
-      ol.appendChild(li);
-      if (i < KC_TRAINERS.length) {
-        const link = document.createElement('li');
-        link.className = 'link'; link.setAttribute('aria-hidden', 'true');
-        ol.appendChild(link);
-      }
-    });
-    const road = document.createElement('li');
-    road.className = 'node road-node';
-    road.innerHTML = `<button type="button" class="node-btn"><span class="road-icon" aria-hidden="true"></span><span class="node-mark" aria-hidden="true"></span></button><b>Trophy Road</b><small id="roadSmall">Beat all 3</small>`;
-    road.querySelector('button').addEventListener('click', () => tab('road'));
-    ol.appendChild(road);
+  function choose(id) {
+    if (!unlocked(id)) return;
+    P.opp = id; save(); closePops(); refresh();
   }
-  function pulse(el) { el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope'); }
-
-  function buildOpp() {
-    const sel = $('#oppSel');
-    sel.innerHTML = KC_TRAINERS.map(t => `<option value="${t.id}">${esc(t.short)} · ${esc(t.tier)}</option>`).join('');
-    sel.addEventListener('change', () => { P.opp = sel.value; save(); refresh(); });
-  }
-
-  // The arena under the title: the battlefield with its six towers, tilted back in 3D by CSS.
-  function drawHero() {
-    const cv = $('#heroArena'), box = $('#hero');
-    if (!cv || !box || box.offsetParent === null) return;
-    const H = box.clientHeight, B = 0.6, k = Math.max(6, (H * 1.42) / (KCSim.H + 2 * B));
-    const w = Math.round((KCSim.W + 2 * B) * k), h = Math.round((KCSim.H + 2 * B) * k), dpr = Math.min(2, window.devicePixelRatio || 1);
-    if (cv.dataset.size === `${w}x${h}@${dpr}`) return;
-    cv.dataset.size = `${w}x${h}@${dpr}`;
-    cv.width = w * dpr; cv.height = h * dpr; cv.style.width = w + 'px'; cv.style.height = h + 'px';
-    const c = cv.getContext('2d');
-    c.setTransform(dpr, 0, 0, dpr, 0, 0);
-    KCArt.arena(c, k, B);
-    const towers = [[3.5, 6.5, 1, 'archer'], [14.5, 6.5, 1, 'archer'], [9, 3, 1, 'king'], [3.5, 25.5, 0, 'archer'], [14.5, 25.5, 0, 'archer'], [9, 29, 0, 'king']];
-    for (const [x, y, team, sub] of towers) {
-      c.save(); c.translate((x + B) * k, (y + B) * k);
-      (sub === 'king' ? KCArt.kingTower : KCArt.archerTower)(c, k, { team, view: team ? 'front' : 'back', active: true, face: 1, t: 0 });
-      c.restore();
-    }
+  // Four chest slots. Each slot is { state: 'locked' | 'empty' | 'chest' | 'unlocking' | 'ready', name, time }.
+  // Chests don't exist yet, so every slot stays locked until the Trophy Road brings them.
+  function chestSlots() { return [0, 1, 2, 3].map(() => ({ state: 'locked' })); }
+  const CHEST_SVG = '<svg viewBox="0 0 64 52" aria-hidden="true"><path d="M6 22h52v24a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4z" fill="#a8632c" stroke="#1c1530" stroke-width="3"/><path d="M6 22c0-11 8-18 26-18s26 7 26 18z" fill="#c97a36" stroke="#1c1530" stroke-width="3"/><path d="M6 22h52v6H6z" fill="#ffcf3f" stroke="#1c1530" stroke-width="3"/><rect x="27" y="22" width="10" height="13" rx="2" fill="#ffcf3f" stroke="#1c1530" stroke-width="3"/></svg>';
+  function renderChests() {
+    const slots = chestSlots();
+    $('#chests').innerHTML = slots.map((sl, i) => {
+      const label = { locked: 'Locked', empty: 'Empty slot', chest: 'Tap to unlock', unlocking: sl.time || 'Unlocking', ready: 'Open!' }[sl.state];
+      const inner = sl.state === 'locked' ? '<span class="slot-lock" aria-hidden="true"></span>' : sl.state === 'empty' ? '' : CHEST_SVG;
+      return `<div class="slot ${sl.state}" aria-label="Chest slot ${i + 1}: ${label}">${inner}<small>${label}</small></div>`;
+    }).join('') + '<p class="chest-note">Chests unlock with the Trophy Road</p>';
   }
 
   /* ---------- the Cards tab ---------- */
-  function buildDeck() {
-    const grid = $('#deckGrid');
-    grid.innerHTML = '';
-    for (const id of KC_STARTER_DECK) {
-      const c = KC_CARDS[id], b = document.createElement('button');
-      b.type = 'button'; b.className = 'deck-card'; b.dataset.id = id;
-      b.innerHTML = `<img src="${cardImg(id)}" alt=""><span class="cost">${c.cost}</span><span class="nm">${esc(c.name)}</span>`;
-      b.addEventListener('click', () => showInfo(id));
-      grid.appendChild(b);
-    }
-    showInfo('rhino');
-    $('#deckThumbs').innerHTML = KC_STARTER_DECK.slice(0, 3).map(id => `<img src="${cardImg(id)}" alt="">`).join('');
+  function buildCards() {
+    const deck = KC_STARTER_DECK;
+    const avg = deck.reduce((a, id) => a + KC_CARDS[id].cost, 0) / deck.length;
+    $('#avgCost').textContent = avg.toFixed(1);
+    $('#deckRow').innerHTML = deck.map(id => {
+      const c = KC_CARDS[id];
+      return `<button type="button" class="mini-card ${c.rarity}" data-id="${id}" title="${esc(c.name)}"><img src="${cardImg(id)}" alt="${esc(c.name)}"><span class="cost">${c.cost}</span><span class="lvl-strip">Level 1</span></button>`;
+    }).join('');
+    const all = Object.keys(KC_CARDS);
+    $('#foundCount').textContent = `${all.length} / ${all.length} found`;
+    $('#collGrid').innerHTML = all.map(id => {
+      const c = KC_CARDS[id];
+      return `<button type="button" class="coll-card ${c.rarity}" data-id="${id}"><span class="cc-art"><img src="${cardImg(id)}" alt=""><span class="cost">${c.cost}</span>${deck.includes(id) ? '<span class="in-deck" title="In your deck">In deck</span>' : ''}</span>
+        <b>${esc(c.name)}</b><span class="rar">${c.rarity}</span><span class="lvl-strip">Level 1</span></button>`;
+    }).join('');
+    for (const b of $$('.mini-card, .coll-card')) b.addEventListener('click', () => openCard(b.dataset.id));
   }
-  function showInfo(id) {
+  let lastFocus = null;
+  function openCard(id) {
     const c = KC_CARDS[id];
-    for (const b of $$('.deck-card')) b.classList.toggle('on', b.dataset.id === id);
+    lastFocus = document.activeElement;
+    $('#mImg').src = cardImg(id);
+    $('#mCost').textContent = c.cost;
+    $('#mName').textContent = c.name;
+    $('#mTags').innerHTML = [`<span class="rar ${c.rarity}">${c.rarity}</span>`, `<span>${esc(c.role)}</span>`, `<span>${c.kind === 'spell' ? 'Spell' : c.air ? 'Flying troop' : 'Troop'}</span>`, '<span>Level 1</span>'].join('');
+    $('#mBlurb').textContent = c.blurb;
     const tgt = { buildings: 'Towers only', ground: 'Ground', both: 'Air & ground' }[c.targets];
     const sp = s => (s >= 1.8 ? 'Very fast' : s >= 1.4 ? 'Fast' : s >= 1 ? 'Medium' : 'Slow');
     const stats = c.kind === 'spell'
-      ? [['Damage', c.dmg], ['Tower damage', Math.round(c.dmg * c.towerPct)], ['Radius', c.area + ' tiles']]
+      ? [['Damage', c.dmg], ['Tower damage', Math.round(c.dmg * c.towerPct)], ['Radius', c.area + ' tiles'], ['Energy', c.cost]]
       : [['Health', c.hp], ['Damage', c.dmg], ['Hit speed', c.hit + ' s'], ['Range', c.range < 1 ? 'Melee' : c.range + ' tiles'],
-        ['Speed', sp(c.speed)], ['Targets', tgt]].concat(c.count > 1 ? [['Count', '×' + c.count]] : []);
-    $('#cardInfo').innerHTML = `<h4>${esc(c.name)}</h4>
-      <div class="meta">${c.rarity} &middot; ${esc(c.role)} &middot; ${c.cost} energy${c.air ? ' &middot; flying' : ''}</div>
-      <p>${esc(c.blurb)}</p>
-      <div class="stats">${stats.map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('')}</div>
-      <div class="evo">Evolution (unlocks later): ${esc(c.evo)}</div>`;
+        ['Speed', sp(c.speed)], ['Targets', tgt], ['Energy', c.cost]].concat(c.count > 1 ? [['Count', '×' + c.count]] : []);
+    $('#mStats').innerHTML = stats.map(([k, v]) => `<div><small>${k}</small><b>${v}</b></div>`).join('');
+    $('#mEvo').textContent = c.evo;
+    $('#cardModal').hidden = false;
+    $('#modalX').focus();
+  }
+  function closeCard() {
+    if ($('#cardModal').hidden) return;
+    $('#cardModal').hidden = true;
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
   /* ---------- keeping everything current ---------- */
   function refresh() {
     if (!P) return;
-    const beaten = KC_TRAINERS.filter(t => P.beaten[t.id]).length, opp = opponent(), next = nextTrainer(), open = roadOpen();
+    const n = beatenCount(), total = KC_TRAINERS.length, opp = opponent(), next = nextTrainer(), open = roadOpen();
+    // top bar
     $('#playerName').textContent = P.name;
-    const lv = level(), into = P.xp % XP_PER_LEVEL;
-    $('#lvlNum').textContent = lv;
+    const into = P.xp % XP_PER_LEVEL;
+    $('#lvlNum').textContent = level();
     $('#xpFill').style.width = (into / XP_PER_LEVEL * 100).toFixed(1) + '%';
     $('#xpText').textContent = `${into} / ${XP_PER_LEVEL}`;
-    $('#trainersBeaten').textContent = open ? 'All 3 trainers beaten' : `${beaten} of ${KC_TRAINERS.length} trainers beaten`;
-    $('#apFill').style.width = (beaten / KC_TRAINERS.length * 100) + '%';
-    $('#nextGoal').textContent = next ? `Beat ${next.name}` : 'Trophy Road unlocked';
+    $('#soundBtn').setAttribute('aria-label', KCSound.on ? 'Sound on' : 'Sound off');
+    $('#soundBtn').classList.toggle('off', !KCSound.on);
+    $('#soundToggle').checked = KCSound.on;
+    // the centerpiece's bar
+    $('#cpFill').style.width = (n / total * 100).toFixed(1) + '%';
+    $('#cpText').textContent = `${n} / ${total} Trainers Defeated`;
+    $('#cpBar').setAttribute('aria-valuenow', String(n));
+    $('#cpBar').classList.toggle('full', open);
+    // opponent
+    const rec = P.records[opp.id];
+    $('#oppLabel').textContent = open ? 'Trophy Road Unlocked!' : next && opp.id === next.id ? 'Next Opponent' : 'Rematch';
+    $('#opp').classList.toggle('done', open);
+    $('#oppName').textContent = opp.name;
+    $('#oppMeta').textContent = `Level ${opp.level} · ${opp.tier} · ${recText(rec)}`;
+    const pic = $('#oppPic');
+    if (pic.dataset.id !== opp.id) { pic.dataset.id = opp.id; KCArt.trainer(pic, opp.look); }
     $('#battleSub').textContent = `vs ${opp.name}`;
-    const sel = $('#oppSel');
-    for (const o of sel.options) { o.disabled = !unlocked(o.value); o.textContent = `${KC_TRAINER[o.value].short} · ${o.disabled ? 'Locked' : P.beaten[o.value] ? 'Beaten' : KC_TRAINER[o.value].tier}`; }
-    sel.value = opp.id;
-    for (const li of $$('#trainerPath .node[data-id]')) {
-      const t = KC_TRAINER[li.dataset.id], lock = !unlocked(t.id);
-      li.classList.toggle('beaten', !!P.beaten[t.id]);
-      li.classList.toggle('locked', lock);
-      li.classList.toggle('current', t.id === opp.id);
-      const cvs = li.querySelector('canvas');
-      if (cvs.dataset.state !== String(lock)) { cvs.dataset.state = String(lock); KCArt.trainer(cvs, t.look, lock); }
-      li.querySelector('button').setAttribute('aria-label', `${t.name}, ${lock ? 'locked' : P.beaten[t.id] ? 'beaten' : 'not beaten yet'}`);
-    }
-    const links = $$('#trainerPath .link');
-    links.forEach((l, i) => l.classList.toggle('done', !!P.beaten[KC_TRAINERS[i].id]));
-    const rn = $('#trainerPath .road-node');
-    if (rn) { rn.classList.toggle('locked', !open); rn.classList.toggle('beaten', open); $('#roadSmall').textContent = open ? 'Unlocked' : `Beat all ${KC_TRAINERS.length}`; }
-    // Trophy Road tab and its sidebar tag
+    $('#oppList').innerHTML = KC_TRAINERS.map(t => {
+      const lock = !unlocked(t.id), st = lock ? 'Locked' : P.beaten[t.id] ? 'Beaten' : 'Not beaten yet';
+      return `<li><button type="button" class="opp-item${t.id === opp.id ? ' on' : ''}${lock ? ' locked' : ''}" data-id="${t.id}" ${lock ? 'aria-disabled="true"' : ''}>
+        <canvas width="88" height="88" data-look="${t.id}" aria-hidden="true"></canvas>
+        <span class="oi-text"><b>${esc(t.name)}</b><small>Level ${t.level} · ${esc(t.tier)} · ${st}</small><small>${lock ? esc(`Beat ${KC_TRAINERS[KC_TRAINERS.indexOf(t) - 1].name} to unlock`) : esc(recText(P.records[t.id]))}</small></span>
+        ${P.beaten[t.id] ? '<span class="oi-check" aria-hidden="true"></span>' : lock ? '<span class="oi-lock" aria-hidden="true"></span>' : ''}</button></li>`;
+    }).join('');
+    for (const cvs of $$('#oppList canvas')) KCArt.trainer(cvs, KC_TRAINER[cvs.dataset.look].look, !unlocked(cvs.dataset.look));
+    for (const b of $$('#oppList .opp-item')) b.addEventListener('click', () => choose(b.dataset.id));
+    // side plaques
+    $('#rewards').innerHTML = KC_TRAINERS.map((t, i) => {
+      const prize = KC_TRAINERS[i + 1] ? `Unlocks ${KC_TRAINERS[i + 1].short}` : 'Opens the Trophy Road';
+      return `<li class="${P.beaten[t.id] ? 'done' : unlocked(t.id) ? 'now' : 'later'}"><span class="rw-mark" aria-hidden="true"></span><span><b>Beat ${esc(t.short)}</b><small>${prize} · +30 XP</small></span></li>`;
+    }).join('');
+    const ups = [
+      next ? [`Trainer ${next.short}`, KC_TRAINERS.indexOf(next) === 0 ? 'Ready now' : 'Ready now'] : null,
+      ...KC_TRAINERS.filter(t => !unlocked(t.id)).map(t => [t.name, `Beat ${KC_TRAINERS[KC_TRAINERS.indexOf(t) - 1].short}`]),
+      ['Trophy Road', open ? 'Unlocked' : 'Beat all 3 trainers'],
+      ['Chests & Kingdom Pass', 'On the Trophy Road'],
+      ['Shop & Clans', 'Coming soon'],
+    ].filter(Boolean);
+    $('#unlocks').innerHTML = ups.map(([a, b]) => `<li><b>${esc(a)}</b><small>${esc(b)}</small></li>`).join('');
+    // Trophy Road tab and its nav tag
     const tag = $('#roadTag');
     tag.textContent = open ? (P.roadSeen ? 'Open' : 'New!') : 'Locked';
-    tag.className = 'nav-tag' + (open ? (P.roadSeen ? ' open' : ' new') : '');
+    tag.className = 'nb-tag' + (open ? (P.roadSeen ? ' open' : ' new') : ' lock');
     $('#tab-road').classList.toggle('open', open);
     $('#roadTitle').textContent = open ? 'Trophy Road unlocked!' : 'Trophy Road is locked';
     $('#roadText').textContent = open
       ? 'You beat every trainer in the Training Grounds. Trophy battles, new arenas and chests arrive in the next update.'
-      : `Beat all three Training Grounds trainers to open it. ${next ? `Next up: ${next.name}.` : ''}`;
+      : `Beat all three Training Grounds trainers to open it.${next ? ` Next up: ${next.name}.` : ''}`;
     $('#roadList').innerHTML = KC_TRAINERS.map(t => `<li class="${P.beaten[t.id] ? 'done' : ''}"><span>${esc(t.name)}</span><b>${P.beaten[t.id] ? 'Beaten' : unlocked(t.id) ? 'Not yet' : 'Locked'}</b></li>`).join('');
-    // records
-    $('#records').innerHTML = KC_TRAINERS.map(t => {
-      const r = P.records[t.id], n = r.w + r.l + r.d;
-      return `<li class="${unlocked(t.id) ? '' : 'dim'}"><span>${esc(t.short)}</span><b>${n ? `${r.w}W &middot; ${r.l}L${r.d ? ` &middot; ${r.d}D` : ''}` : unlocked(t.id) ? 'No matches yet' : 'Locked'}</b></li>`;
-    }).join('');
-    $('#soundBtn').setAttribute('aria-label', KCSound.on ? 'Sound on' : 'Sound off');
-    $('#soundBtn').classList.toggle('off', !KCSound.on);
   }
 
   function init(o) {
     opts = o || {};
     load();
-    buildPath(); buildOpp(); buildDeck();
-    const L = KCScenery.SRC;
-    $('#heroL').style.backgroundImage = `url("${L.left}")`;
-    $('#heroR').style.backgroundImage = `url("${L.right}")`;
+    $('#cpImg').src = CENTERPIECE;
+    buildCards();
+    renderChests();
     for (const b of $$('[data-tab]')) b.addEventListener('click', () => tab(b.dataset.tab));
     $('#battleBtn').addEventListener('click', () => opts.onBattle && opts.onBattle(opponent().id));
-    $('#deckBtn').addEventListener('click', () => tab('cards'));
-    $('#soundBtn').addEventListener('click', () => { KCSound.on = !KCSound.on; refresh(); });
-    $('#editName').addEventListener('click', () => {
-      $('#nameForm').hidden = false; $('#editName').hidden = true;
+    $('#oppChange').addEventListener('click', e => { e.stopPropagation(); toggle('#oppPanel', '#oppChange'); });
+    $('#settingsBtn').addEventListener('click', e => {
+      e.stopPropagation();
+      if (toggle('#settings', '#settingsBtn')) { const i = $('#nameInput'); i.value = P.name; }
+    });
+    $('#whoBtn').addEventListener('click', e => {
+      e.stopPropagation();
+      if ($('#settings').hidden) toggle('#settings', '#settingsBtn');
       const i = $('#nameInput'); i.value = P.name; i.focus(); i.select();
     });
+    for (const el of ['#settings', '#oppPanel']) $(el).addEventListener('click', e => e.stopPropagation());
+    document.addEventListener('click', () => closePops());
+    $('#soundBtn').addEventListener('click', () => { KCSound.on = !KCSound.on; refresh(); });
+    $('#soundToggle').addEventListener('change', e => { KCSound.on = e.target.checked; refresh(); });
     $('#nameForm').addEventListener('submit', e => {
       e.preventDefault();
       const v = $('#nameInput').value.replace(/\s+/g, ' ').trim().slice(0, 16);
       if (v) P.name = v;
-      save();
-      $('#nameForm').hidden = true; $('#editName').hidden = false;
-      refresh();
+      save(); closePops(); refresh();
     });
+    $('#modalX').addEventListener('click', closeCard);
+    $('#cardModal').addEventListener('click', e => { if (e.target.id === 'cardModal') closeCard(); });
     window.addEventListener('keydown', e => {
-      if ($('#home').hidden || e.repeat || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
-      const n = '123456'.indexOf(e.key);
-      if (n >= 0) { tab(['battle', 'cards', 'road', 'shop', 'clan', 'events'][n]); e.preventDefault(); }
-      else if (e.key === 'Enter' && tabNow === 'battle' && document.activeElement === document.body) { opts.onBattle && opts.onBattle(opponent().id); e.preventDefault(); }
+      if ($('#home').hidden || e.repeat) return;
+      if (e.key === 'Escape') { closeCard(); closePops(); return; }
+      if (!$('#cardModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      const n = '12345'.indexOf(e.key);
+      if (n >= 0) { tab(TABS[n]); e.preventDefault(); }
+      else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(opponent().id); e.preventDefault(); }
     });
-    let rt = 0;
-    window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawHero, 150); });
     refresh();
-    requestAnimationFrame(drawHero);
   }
 
   return {
     init, refresh, recordResult, opponent, cardImg, tab,
     get name() { return P ? P.name : 'Player'; },
-    show() { refresh(); requestAnimationFrame(drawHero); },
+    show() { refresh(); },
   };
 })();
