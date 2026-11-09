@@ -238,6 +238,34 @@ const KCArt = (() => {
       c.restore();
     },
 
+    skeletons(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], st = o.walk ? Math.sin(o.t * 14) * q(0.05) : 0, front = o.view === 'front';
+      const bone = '#f3efe4', boneSh = '#cfc8b8', swing = o.atk;
+      for (const [x, ph] of [[-0.1, 1], [0.1, -1]]) rope(c, () => { c.beginPath(); c.moveTo(q(x * 0.7), q(-0.3)); c.lineTo(q(x) , -st * ph); }, bone, q(0.06));
+      sh(c, () => ell(c, 0, q(-0.3), q(0.12), q(0.06)), bone, boneSh, q(0.02));
+      rope(c, () => { c.beginPath(); c.moveTo(0, q(-0.3)); c.lineTo(0, q(-0.5)); }, bone, q(0.05));
+      sh(c, () => rr(c, q(-0.15), q(-0.62), q(0.3), q(0.2), q(0.07)), bone, boneSh, q(0.03));
+      for (const y of [-0.56, -0.5]) line(c, q(-0.11), q(y), q(0.11), q(y), boneSh, LW * 0.8);
+      const arm = (sx, up) => rope(c, () => { c.beginPath(); c.moveTo(sx * q(0.14), q(-0.58)); c.lineTo(sx * q(0.27), q(-0.42 - up * 0.3)); }, bone, q(0.05));
+      arm(-1, 0); arm(1, swing);
+      // a little bone club in the right hand
+      c.save(); c.translate(q(0.27), q(-0.42 - swing * 0.3)); c.rotate(-0.6 + swing * 1.4);
+      sh(c, () => rr(c, q(-0.03), q(-0.26), q(0.06), q(0.26), q(0.03)), bone, boneSh, q(0.02));
+      sh(c, () => circ(c, 0, q(-0.27), q(0.055)), bone, null, 0);
+      c.restore();
+      sh(c, () => circ(c, 0, q(-0.84), q(0.22)), bone, boneSh, q(0.05));
+      if (front) {
+        sh(c, () => rr(c, q(-0.12), q(-0.72), q(0.24), q(0.1), q(0.04)), bone, boneSh, q(0.02));
+        for (const x of [-0.06, 0, 0.06]) line(c, q(x), q(-0.72), q(x), q(-0.63), boneSh, LW * 0.6);
+        for (const s2 of [-1, 1]) { ell(c, s2 * q(0.085), q(-0.86), q(0.06), q(0.065)); c.fillStyle = '#2a2236'; c.fill(); dot(c, s2 * q(0.085), q(-0.86), q(0.018), '#ffd43b'); }
+        poly(c, [q(-0.02), q(-0.77), q(0.02), q(-0.77), 0, q(-0.8)]); c.fillStyle = '#2a2236'; c.fill();
+      } else {
+        line(c, 0, q(-0.98), 0, q(-0.72), boneSh, LW);
+      }
+      sh(c, () => rr(c, q(-0.23), q(-1.01), q(0.46), q(0.09), q(0.04)), T.main, T.sh, q(0.02));
+      if (!front) for (const sx of [-1, 1]) sh(c, () => poly(c, [0, q(-0.97), sx * q(0.1), q(-0.82), sx * q(0.03), q(-0.8)]), T.main, T.sh, q(0.02));
+    },
+
     gorilla(c, k, o) {
       const q = v => v * k, T = TEAM[o.team], st = o.walk ? Math.sin(o.t * 8) * q(0.05) : 0, front = o.view === 'front';
       const fur = '#454955', furSh = '#30333c', sm = o.atk;
@@ -301,6 +329,28 @@ const KCArt = (() => {
       rope(c, () => { c.beginPath(); c.arc(0, q(-0.88), q(0.31), Math.PI * 0.22, Math.PI * 0.78); }, C.gold, q(0.06));
     }
     c.restore();
+  }
+
+  // The Cannon: a wooden platform with an iron barrel that turns to aim (o.angle, in screen space).
+  function cannon(c, k, o) {
+    LW = Math.max(1, k * 0.07);
+    const q = v => v * k, T = TEAM[o.team], recoil = (o.atk || 0) * q(0.18);
+    ell(c, 0, q(0.5), q(1.05), q(0.38)); c.fillStyle = 'rgba(0,0,0,0.28)'; c.fill();
+    sh(c, () => rr(c, q(-0.92), q(-0.5), q(1.84), q(1.1), q(0.18)), '#9a6a3c', '#734a26', q(0.16));
+    c.save(); rr(c, q(-0.92), q(-0.5), q(1.84), q(1.1), q(0.18)); c.clip();
+    for (const y of [-0.22, 0.06, 0.34]) line(c, q(-0.9), q(y), q(0.9), q(y), 'rgba(60,35,15,0.45)', LW * 0.8);
+    c.restore();
+    rr(c, q(-0.92), q(-0.5), q(1.84), q(1.1), q(0.18)); c.lineWidth = LW; c.strokeStyle = OUT; c.stroke();
+    for (const x of [-0.78, 0.78]) for (const y of [-0.36, 0.44]) dot(c, q(x), q(y), q(0.05), '#d9c27a');
+    sh(c, () => rr(c, q(-0.92), q(0.3), q(1.84), q(0.14), q(0.05)), T.main, T.sh, q(0.04));
+    for (const x of [-0.62, 0.62]) { sh(c, () => circ(c, q(x), q(0.12), q(0.24)), '#6b4a2c', '#4e351e', q(0.05)); dot(c, q(x), q(0.12), q(0.07), '#cfc6b6'); }
+    c.save(); c.translate(0, q(-0.18)); c.rotate(o.angle || -Math.PI / 2);
+    sh(c, () => rr(c, q(-0.32) - recoil, q(-0.24), q(1.15), q(0.48), q(0.2)), '#3e414c', '#2a2c34', q(0.08));
+    sh(c, () => rr(c, q(0.66) - recoil, q(-0.28), q(0.2), q(0.56), q(0.08)), '#555a66', '#3a3e48', q(0.05));
+    circ(c, q(0.86) - recoil, 0, q(0.13)); c.fillStyle = '#15161b'; c.fill();
+    sh(c, () => circ(c, q(-0.2) - recoil, 0, q(0.2)), '#555a66', null, 0);
+    c.restore();
+    sh(c, () => circ(c, 0, q(-0.18), q(0.16)), '#ffcd33', '#e09f12', q(0.04));
   }
 
   function troop(c, card, k, o) {
@@ -434,10 +484,15 @@ const KCArt = (() => {
     else if (cardId === 'hawks') { at(0.3, 0.34, 1.1, { t: 0.9 }); at(0.58, 0.62, 1.45, {}); }
     else if (cardId === 'archers') { at(0.3, 0.86, 1.2, {}); at(0.64, 0.92, 1.35, { face: 1 }); }
     else {
+      if (cardId === 'skeletons') { at(0.26, 0.78, 1.55, { t: 0.4 }); at(0.74, 0.78, 1.55, { t: 1.2 }); at(0.5, 0.94, 1.85, {}); c.restore(); return finish(c, w, h, R, cv); }
+      if (cardId === 'cannon') { c.save(); c.translate(w * 0.5, h * 0.62); cannon(c, k * 0.95, { team: 0, angle: Math.PI * 0.62 }); c.restore(); c.restore(); return finish(c, w, h, R, cv); }
       const sc = { rhino: 1.6, gladiator: 1.5, snowman: 1.32, gorilla: 1.45 }[cardId] || 1;
       at(0.5, cardId === 'rhino' ? 0.86 : 0.92, sc, {});
     }
     c.restore();
+    return finish(c, w, h, R, cv);
+  }
+  function finish(c, w, h, R, cv) {
     rr(c, w * 0.025, w * 0.025, w * 0.95, h - w * 0.05, w * 0.085);
     c.lineWidth = w * 0.04; c.strokeStyle = R[2]; c.stroke();
     return cv;
@@ -456,27 +511,33 @@ const KCArt = (() => {
   const eye = (c, x, y, r) => { circ(c, x, y, r); paint(c, '#fff', r * 0.5); circ(c, x + r * 0.25, y, r * 0.5); paint(c, OUT); };
 
   /* ---------- the arena (drawn once per size) ---------- */
-  function arena(c, k, B) {
+  // Battlefield palettes: the Training Grounds, and Arena 1 (Cinder Keep: dry grass, ash and embers).
+  const THEMES = {
+    training: { bg: '#5c5470', grass: ['#7cc653', '#73bd4b'], path: '#d6bf8a', pad: '#9d978d', river: ['#3d8fe0', '#2f75c4'], bank: '#5aa63e', wall: '#857c95', specks: ['#ffffff', '#ffd54a', '#ff8fb3', '#b68cff'] },
+    cinder: { bg: '#4d3f45', grass: ['#a6ad5a', '#9ba251'], path: '#c9a47c', pad: '#8d857e', river: ['#3a86c4', '#2c6aa3'], bank: '#7f8a42', wall: '#6f6168', specks: ['#ff8a3d', '#ffc261', '#5a4a44', '#e6dccd'] },
+  };
+  function arena(c, k, B, theme) {
+    const PAL = THEMES[theme] || THEMES.training;
     const S = KCSim, W = S.W, H = S.H, X = x => (x + B) * k, Y = y => (y + B) * k;
     const r = S.mulberry(42);
-    c.fillStyle = '#5c5470'; c.fillRect(0, 0, (W + 2 * B) * k, (H + 2 * B) * k);
+    c.fillStyle = PAL.bg; c.fillRect(0, 0, (W + 2 * B) * k, (H + 2 * B) * k);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      c.fillStyle = (x + y) % 2 ? '#7cc653' : '#73bd4b';
+      c.fillStyle = (x + y) % 2 ? PAL.grass[0] : PAL.grass[1];
       c.fillRect(X(x), Y(y), k + 0.5, k + 0.5);
     }
     c.fillStyle = 'rgba(255,255,255,0.05)';
     for (let i = 0; i < 160; i++) { const x = r() * W, y = r() * H; c.fillRect(X(x), Y(y), k * 0.08, k * 0.22); }
-    const path = (x1, y1, x2, y2) => { rr(c, X(x1), Y(y1), (x2 - x1) * k, (y2 - y1) * k, k * 0.5); c.fillStyle = '#d6bf8a'; c.fill(); };
+    const path = (x1, y1, x2, y2) => { rr(c, X(x1), Y(y1), (x2 - x1) * k, (y2 - y1) * k, k * 0.5); c.fillStyle = PAL.path; c.fill(); };
     for (const lx of [3.5, 14.5]) { path(lx - 0.7, 6.5, lx + 0.7, 25.5); }
     path(3.5, 2.3, 14.5, 3.7); path(3.5, 28.3, 14.5, 29.7);
     c.fillStyle = 'rgba(120,90,50,0.18)';
     for (let i = 0; i < 70; i++) { const lx = r() < 0.5 ? 3.5 : 14.5; ell(c, X(lx + (r() - 0.5) * 1.2), Y(7 + r() * 18), k * 0.09, k * 0.06); c.fill(); }
-    const pad = (x, y, h) => { rr(c, X(x - h - 0.15), Y(y - h - 0.15), (h * 2 + 0.3) * k, (h * 2 + 0.3) * k, k * 0.35); c.fillStyle = '#9d978d'; c.fill(); c.lineWidth = k * 0.06; c.strokeStyle = 'rgba(0,0,0,0.25)'; c.stroke(); };
+    const pad = (x, y, h) => { rr(c, X(x - h - 0.15), Y(y - h - 0.15), (h * 2 + 0.3) * k, (h * 2 + 0.3) * k, k * 0.35); c.fillStyle = PAL.pad; c.fill(); c.lineWidth = k * 0.06; c.strokeStyle = 'rgba(0,0,0,0.25)'; c.stroke(); };
     for (const y of [25.5, 6.5]) { pad(3.5, y, 1.5); pad(14.5, y, 1.5); }
     pad(9, 29, 2); pad(9, 3, 2);
-    c.fillStyle = '#3d8fe0'; c.fillRect(X(0), Y(S.RIVER_TOP), W * k, 2 * k);
-    c.fillStyle = '#2f75c4'; c.fillRect(X(0), Y(S.RIVER_TOP), W * k, k * 0.22); c.fillRect(X(0), Y(S.RIVER_BOT) - k * 0.22, W * k, k * 0.22);
-    c.fillStyle = '#5aa63e'; c.fillRect(X(0), Y(S.RIVER_TOP) - k * 0.14, W * k, k * 0.14); c.fillRect(X(0), Y(S.RIVER_BOT), W * k, k * 0.14);
+    c.fillStyle = PAL.river[0]; c.fillRect(X(0), Y(S.RIVER_TOP), W * k, 2 * k);
+    c.fillStyle = PAL.river[1]; c.fillRect(X(0), Y(S.RIVER_TOP), W * k, k * 0.22); c.fillRect(X(0), Y(S.RIVER_BOT) - k * 0.22, W * k, k * 0.22);
+    c.fillStyle = PAL.bank; c.fillRect(X(0), Y(S.RIVER_TOP) - k * 0.14, W * k, k * 0.14); c.fillRect(X(0), Y(S.RIVER_BOT), W * k, k * 0.14);
     for (const b of S.BRIDGES) {
       const x0 = X(b - 1.1), w = 2.2 * k, y0 = Y(S.RIVER_TOP - 0.35), h = (2.7) * k;
       c.fillStyle = 'rgba(0,0,0,0.25)'; c.fillRect(x0 + k * 0.12, y0 + k * 0.15, w, h);
@@ -484,14 +545,14 @@ const KCArt = (() => {
       for (let i = 1; i < 7; i++) line(c, x0 + k * 0.1, y0 + (h * i) / 7, x0 + w - k * 0.1, y0 + (h * i) / 7, 'rgba(70,40,20,0.45)', k * 0.04);
       for (const side of [x0, x0 + w - k * 0.2]) { rr(c, side, y0 - k * 0.1, k * 0.2, h + k * 0.2, k * 0.08); paint(c, '#8a5a2e', k * 0.05); }
     }
-    const flowers = ['#ffffff', '#ffd54a', '#ff8fb3', '#b68cff'];
+    const flowers = PAL.specks;
     for (let i = 0; i < 44; i++) {
       const x = 0.4 + r() * (W - 0.8), y = 0.4 + r() * (H - 0.8);
       if (Math.abs(x - 3.5) < 2 || Math.abs(x - 14.5) < 2 || (y > 13.8 && y < 18.2) || (Math.abs(x - 9) < 3 && (y < 6 || y > 26))) continue;
       circ(c, X(x), Y(y), k * 0.08); c.fillStyle = flowers[i % 4]; c.fill();
     }
     const wall = (x, y, w, h) => {
-      c.fillStyle = '#857c95'; c.fillRect(x, y, w, h);
+      c.fillStyle = PAL.wall; c.fillRect(x, y, w, h);
       c.strokeStyle = 'rgba(30,20,45,0.45)'; c.lineWidth = k * 0.05;
       const n = Math.max(1, Math.round(Math.max(w, h) / k));
       for (let i = 0; i <= n; i++) {
@@ -530,6 +591,20 @@ const KCArt = (() => {
       rr(c, q(0.44), q(0.74), q(0.12), q(0.28), q(0.03)); paint(c, '#ffffff');
       line(c, q(0.36), q(0.74), q(0.5), q(0.9), OUT, q(0.018)); line(c, q(0.64), q(0.74), q(0.5), q(0.9), OUT, q(0.018));
       sh(c, () => rr(c, q(0.45), q(0.88), q(0.1), q(0.06), q(0.02)), '#c9ced6', null, 0);
+    }
+    if (look.hair === 'robot') {
+      line(c, q(0.5), q(0.2), q(0.5), q(0.1), OUT, q(0.03));
+      sh(c, () => circ(c, q(0.5), q(0.09), q(0.05)), '#ff5f69', '#c8343e', q(0.015));
+      for (const x of [0.19, 0.81]) sh(c, () => rr(c, q(x - 0.05), q(0.38), q(0.1), q(0.18), q(0.04)), '#9aa1ae', null, 0);
+      sh(c, () => rr(c, q(0.23), q(0.2), q(0.54), q(0.52), q(0.12)), look.skin, '#9aa1ae', q(0.05));
+      for (const [x, y] of [[0.29, 0.26], [0.71, 0.26], [0.29, 0.66], [0.71, 0.66]]) dot(c, q(x), q(y), q(0.016), '#7a8190');
+      sh(c, () => rr(c, q(0.29), q(0.34), q(0.42), q(0.16), q(0.07)), '#1f2a3a', null, 0);
+      for (const x of [0.4, 0.6]) { circ(c, q(x), q(0.42), q(0.045)); c.fillStyle = '#5ff0ff'; c.fill(); }
+      sh(c, () => rr(c, q(0.38), q(0.56), q(0.24), q(0.08), q(0.03)), '#3b4250', null, 0);
+      for (const x of [0.44, 0.5, 0.56]) line(c, q(x), q(0.565), q(x), q(0.635), '#9aa1ae', q(0.01));
+      c.restore();
+      if (locked) { rr(c, 0, 0, w, h, q(0.14)); c.fillStyle = 'rgba(20,14,40,0.62)'; c.fill(); }
+      return;
     }
     // head
     for (const x of [0.24, 0.76]) sh(c, () => circ(c, q(x), q(0.5), q(0.06)), look.skin, null, 0);
@@ -570,5 +645,5 @@ const KCArt = (() => {
   }
   const owen = cv => trainer(cv, KC_TRAINERS[0].look);
 
-  return { OUT, TEAM, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer, rr, circ, ell, line, paint, poly };
+  return { OUT, TEAM, THEMES, cannon, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer, rr, circ, ell, line, paint, poly };
 })();

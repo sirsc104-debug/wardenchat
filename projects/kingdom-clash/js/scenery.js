@@ -49,6 +49,10 @@ const KCScenery = (() => {
     },
   };
 
+  // Colour grading per arena. Arena 1 reuses the Training Grounds art, warmed toward ember and ash,
+  // until it has illustrations of its own.
+  const GRADES = { training: 'none', cinder: 'sepia(0.6) saturate(1.45) hue-rotate(-28deg) brightness(0.85)' };
+  let grade = 'training';
   const scenes = [], images = {};
   let last = 0, cheerT = 0, cheerTeam = -1, partyT = 0, partyTeam = -1;
 
@@ -116,7 +120,7 @@ const KCScenery = (() => {
 
   // Draw the artwork into the cache, once per size (and once more when the image finishes loading).
   function paintCache(s) {
-    const key = `${s.w}x${s.h}@${s.dpr}:${s.img.complete && s.img.naturalWidth > 0}`;
+    const key = `${s.w}x${s.h}@${s.dpr}:${s.img.complete && s.img.naturalWidth > 0}:${grade}`;
     if (key === s.cacheKey && s.cache) return;
     s.cacheKey = key;
     if (!s.cache) s.cache = document.createElement('canvas');
@@ -125,7 +129,9 @@ const KCScenery = (() => {
     c.setTransform(s.dpr, 0, 0, s.dpr, 0, 0);
     if (s.img.complete && s.img.naturalWidth > 0) {
       c.imageSmoothingQuality = 'high';
+      c.filter = GRADES[grade] || 'none';
       c.drawImage(s.img, cv.ox, cv.oy, cv.dw, cv.dh);
+      c.filter = 'none';
     } else {
       const g = c.createLinearGradient(0, 0, 0, s.h);
       g.addColorStop(0, '#2a1758'); g.addColorStop(1, '#4b3a7a');
@@ -254,5 +260,6 @@ const KCScenery = (() => {
     partyT = Math.max(0, partyT - dt);
     for (const s of scenes) if (s.cv.offsetParent !== null) draw(s, t, dt);
   }
-  return { make, resize: () => scenes.forEach(resize), frame, cheer, celebrate, reset, LAYOUT, SRC };
+  function setGrade(g) { grade = GRADES[g] ? g : 'training'; }
+  return { make, resize: () => scenes.forEach(resize), frame, cheer, celebrate, reset, setGrade, LAYOUT, SRC };
 })();

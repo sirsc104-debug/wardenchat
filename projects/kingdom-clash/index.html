@@ -46,10 +46,10 @@
             <div class="plaque">
               <div class="ribbon"><span>Kingdom Pass</span></div>
               <div class="pass-row"><span class="pass-tier">1</span><div class="pass-track"><i></i></div><small>0/10</small></div>
-              <p class="dim"><span class="tag-lock">Locked</span> Opens with the Trophy Road. Members get the premium track.</p>
+              <p class="dim" id="passText"><span class="tag-lock">Locked</span> Opens with the Trophy Road. Members get the premium track.</p>
             </div>
             <div class="plaque">
-              <div class="ribbon"><span>Coming Up</span></div>
+              <div class="ribbon"><span id="leftTitle">Coming Up</span></div>
               <ul class="unlocks" id="unlocks"></ul>
             </div>
           </aside>
@@ -58,6 +58,7 @@
             <div class="cp-row">
               <div class="cp" id="cp">
                 <img id="cpImg" alt="Training Grounds arena" draggable="false">
+                <div class="cp-name" id="cpName" hidden><span id="cpNameText">Cinder Keep</span></div>
                 <div class="cp-bar" role="progressbar" aria-label="Trainers defeated" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0" id="cpBar">
                   <i id="cpFill"></i><span id="cpText">0 / 3 Trainers Defeated</span>
                 </div>
@@ -75,9 +76,9 @@
 
           <aside class="lobby-side" aria-label="Training rewards">
             <div class="plaque">
-              <div class="ribbon"><span>Training Rewards</span></div>
+              <div class="ribbon"><span id="rightTitle">Training Rewards</span></div>
               <ul class="rewards" id="rewards"></ul>
-              <p class="dim">First win against each trainer gives a 30 XP bonus.</p>
+              <p class="dim" id="rightNote">First win against each trainer gives a 30 XP bonus.</p>
             </div>
           </aside>
         </section>
@@ -87,19 +88,29 @@
           <div class="plaque deck-plaque">
             <div class="ribbon"><span>Battle Deck</span></div>
             <div class="avg" title="Average energy cost"><span class="drop" aria-hidden="true"></span><b id="avgCost">3.5</b><small>average energy</small></div>
+            <div class="swap-bar" id="swapBar" hidden><span id="swapText">Pick a card in your deck to swap out</span><button class="mini-btn" id="swapCancel" type="button">Cancel</button></div>
             <div class="deck-row" id="deckRow"></div>
           </div>
           <div class="plaque coll-plaque">
             <div class="ribbon"><span>Card Collection</span></div>
             <small class="found" id="foundCount">8 / 8 found</small>
             <div class="coll-grid" id="collGrid"></div>
-            <p class="dim">Card levels and upgrades arrive with the Trophy Road.</p>
+            <p class="dim" id="collNote">Collect copies from chests, then spend coins to level a card up (up to level 15).</p>
           </div>
         </section>
 
         <!-- Trophy Road tab -->
         <section class="tab info-tab" id="tab-road" hidden>
-          <div class="plaque info-plaque">
+          <div class="road-view" id="roadView" hidden>
+            <div class="road-head">
+              <div class="rh-count"><i class="trophy-i big" aria-hidden="true"></i><b id="rhTrophies">0</b><small>trophies</small></div>
+              <div class="rh-arena"><small id="rhArenaNo">Arena 1</small><b id="rhArena">Cinder Keep</b><span id="rhBest">Best 0</span></div>
+              <div class="rh-record" id="rhRecord"></div>
+            </div>
+            <div class="road-scroll" id="roadScroll"><ol class="road-track" id="roadTrack"></ol></div>
+            <p class="dim road-note">Win trophy battles to climb. A win is +30 trophies, a loss is &minus;20, and you never drop below your arena&rsquo;s floor. Claim each reward as you pass it.</p>
+          </div>
+          <div class="plaque info-plaque" id="roadLocked">
             <div class="big-lock" id="roadLock" aria-hidden="true"></div>
             <h3 id="roadTitle">Trophy Road is locked</h3>
             <p id="roadText">Beat all three Training Grounds trainers to open it.</p>
@@ -124,11 +135,24 @@
 
       <nav class="bottomnav" aria-label="Menu">
         <button class="nb" type="button" data-tab="shop"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 20h32l-3 22H11z" fill="#c9792f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M6 14h36v8H6z" fill="#e8a33c" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M18 14a6 6 0 0 1 12 0" fill="none" stroke="#1c1530" stroke-width="3"/><rect x="20" y="24" width="8" height="8" rx="2" fill="#ffcf3f" stroke="#1c1530" stroke-width="2.5"/></svg></span><span class="nb-label">Shop</span><i class="nb-tag">Soon</i></button>
-        <button class="nb" type="button" data-tab="cards"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="10" width="22" height="30" rx="4" transform="rotate(-10 17 25)" fill="#7a5be0" stroke="#1c1530" stroke-width="3"/><rect x="20" y="8" width="22" height="30" rx="4" transform="rotate(8 31 23)" fill="#4f8ff0" stroke="#1c1530" stroke-width="3"/><circle cx="31" cy="22" r="5" fill="#ffcf3f" stroke="#1c1530" stroke-width="2.5"/></svg></span><span class="nb-label">Cards</span></button>
+        <button class="nb" type="button" data-tab="cards"><i class="nb-tag up" id="cardsTag" hidden>0</i><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="10" width="22" height="30" rx="4" transform="rotate(-10 17 25)" fill="#7a5be0" stroke="#1c1530" stroke-width="3"/><rect x="20" y="8" width="22" height="30" rx="4" transform="rotate(8 31 23)" fill="#4f8ff0" stroke="#1c1530" stroke-width="3"/><circle cx="31" cy="22" r="5" fill="#ffcf3f" stroke="#1c1530" stroke-width="2.5"/></svg></span><span class="nb-label">Cards</span></button>
         <button class="nb nb-battle on" type="button" data-tab="battle"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 6l24 24-4 4L5 10V6z" fill="#dfe6ee" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M39 6v4L15 34l-4-4L35 6z" fill="#dfe6ee" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M8 32l8 8-4 3-7-7zM40 32l-8 8 4 3 7-7z" fill="#ffcf3f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/></svg></span><span class="nb-label">Battle</span></button>
         <button class="nb" type="button" data-tab="clan"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4l16 6v12c0 10-7 18-16 22C15 40 8 32 8 22V10z" fill="#3d7de6" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M24 10l10 4v8c0 7-4 12-10 15z" fill="#2a5fc0"/><path d="M17 26l5 5 9-11" fill="none" stroke="#ffcf3f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nb-label">Clan</span><i class="nb-tag">Soon</i></button>
         <button class="nb" type="button" data-tab="road"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 6h20v6h7v5a8 8 0 0 1-8 8h-1a10 10 0 0 1-6 6v5h6v6H16v-6h6v-5a10 10 0 0 1-6-6h-1a8 8 0 0 1-8-8v-5h7z" fill="#ffcf3f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M11 12v5a4 4 0 0 0 3 4M37 12v5a4 4 0 0 1-3 4" fill="none" stroke="#1c1530" stroke-width="2.5"/></svg></span><span class="nb-label">Trophy Road</span><i class="nb-tag lock" id="roadTag">Locked</i></button>
       </nav>
+    </div>
+
+    <div class="lobby-toast" id="lobbyToast" role="status" hidden></div>
+
+    <div class="chest-open" id="chestOpen" hidden>
+      <div class="co-stage" id="coStage">
+        <p class="co-title" id="coTitle">Wooden Chest</p>
+        <div class="co-chest" id="coChest"></div>
+        <div class="co-reward" id="coReward" hidden></div>
+        <div class="co-summary" id="coSummary" hidden></div>
+        <p class="co-hint" id="coHint">Click to open</p>
+        <button class="big-btn" id="coDone" type="button" hidden><span>Done</span></button>
+      </div>
     </div>
 
     <div class="modal" id="cardModal" hidden>
@@ -140,6 +164,12 @@
           <div class="m-tags" id="mTags"></div>
           <p id="mBlurb"></p>
           <div class="m-stats" id="mStats"></div>
+          <div class="m-level"><span class="m-lvl" id="mLevel">Level 1</span><div class="m-prog"><i id="mProgFill"></i><span id="mProgText">0 / 2</span></div></div>
+          <div class="m-actions">
+            <button class="up-btn" id="mUpgrade" type="button"><span>Upgrade</span><small id="mUpCost"><i class="coin-i" aria-hidden="true"></i>5</small></button>
+            <button class="use-btn" id="mUse" type="button">Use</button>
+            <span class="m-note" id="mNote"></span>
+          </div>
           <div class="m-evo"><b>Evolution</b> <small>(unlocks later)</small><p id="mEvo"></p></div>
         </div>
       </div>
@@ -201,6 +231,7 @@
         <div class="res-row foe"><span id="resFoeName">Trainer Owen</span><div class="res-crowns" id="resFoe"></div></div>
         <div class="res-row you"><span>You</span><div class="res-crowns" id="resYou"></div></div>
         <p class="res-line" id="resLine"></p>
+        <div class="res-trophy" id="resTrophy" hidden></div>
         <p class="res-unlock" id="resUnlock" hidden></p>
         <p class="res-small" id="resSmall"></p>
         <div class="res-btns">
@@ -216,6 +247,7 @@
 <script src="js/cards.js"></script>
 <script src="js/trainers.js"></script>
 <script src="js/sim.js"></script>
+<script src="js/progress.js"></script>
 <script src="js/bot.js"></script>
 <script src="js/art.js"></script>
 <script src="js/scenery.js"></script>

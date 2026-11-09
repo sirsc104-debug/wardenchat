@@ -19,17 +19,19 @@ const KCBot = (() => {
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
   const ROLE = {
-    tank: ['gorilla', 'wolves', 'gladiator', 'archers', 'hawks'],
+    tank: ['cannon', 'gorilla', 'skeletons', 'wolves', 'gladiator', 'archers', 'hawks'],
     air: ['archers', 'snowman', 'hawks', 'fireball'],
     swarm: ['snowman', 'archers', 'gladiator', 'fireball', 'hawks'],
-    ranged: ['gladiator', 'wolves', 'hawks', 'gorilla', 'rhino'],
-    melee: ['wolves', 'gladiator', 'hawks', 'gorilla', 'archers'],
+    ranged: ['gladiator', 'skeletons', 'wolves', 'hawks', 'gorilla', 'rhino'],
+    melee: ['skeletons', 'wolves', 'gladiator', 'cannon', 'hawks', 'gorilla', 'archers'],
   };
-  const MELEE = { wolves: 1, gladiator: 1, gorilla: 1, rhino: 1 };
+  const MELEE = { wolves: 1, gladiator: 1, gorilla: 1, rhino: 1, skeletons: 1 };
 
   function create(team, opts) {
     opts = opts || {};
-    return { team, skill: SKILLS[opts.skill || 'trainer'], rand: S.mulberry(opts.seed || 99), plan: null, wait: 2.5, lastAttack: 0 };
+    // A skill is a name from SKILLS or a settings object of the same shape (the trophy bots build one).
+    const skill = typeof opts.skill === 'object' ? opts.skill : SKILLS[opts.skill || 'trainer'];
+    return { team, skill, rand: S.mulberry(opts.seed || 99), plan: null, wait: 2.5, lastAttack: 0 };
   }
 
   const my = (b, y) => S.own(b.team, y);
@@ -113,7 +115,11 @@ const KCBot = (() => {
           : cards.filter(c => c === 'wolves').length >= 3 ? 'swarm'
           : cards.some(c => c === 'archers' || c === 'snowman') ? 'ranged' : 'melee';
         const pick = ROLE[role].find(id => has(id) && afford(id) && id !== 'fireball' && id !== 'rhino')
-          || hand.find(id => afford(id) && KC_CARDS[id].kind === 'troop' && id !== 'rhino');
+          || hand.find(id => afford(id) && KC_CARDS[id].kind !== 'spell' && id !== 'rhino');
+        if (pick && KC_CARDS[pick].kind === 'building') {
+          // a building goes in the middle of our side, a little toward the threatened lane, to pull it in
+          return { card: pick, x: lead.x < 9 ? 7.5 : 10.5, y: 22.5, quick: lead.y > 21 };
+        }
         if (pick) {
           const ahead = Math.max(17.5, lead.y + (MELEE[pick] ? 2.2 : pick === 'hawks' ? 1.5 : 5));
           const tx = MELEE[pick] ? lead.x : (lead.x + (lead.x < 9 ? 3.5 : 14.5)) / 2;

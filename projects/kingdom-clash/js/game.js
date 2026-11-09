@@ -30,13 +30,23 @@
   /* ---------- starting a battle ---------- */
   // Each trainer brings a bot skill and how hard their troops hit your towers (Owen, the tutorial,
   // hits at a quarter so new players nearly always win).
-  function startBattle(id) {
+  // A foe is a trainer (KC_TRAINERS) or a trophy bot (KCProgress.trophyFoe). You play your saved deck at
+  // your card levels; trophy bots bring their own deck and levels, trainers play the starter deck.
+  function startBattle(foe) {
     KCSound.unlock();
-    const T = G.trainer = KC_TRAINER[id] || KCMenu.opponent();
-    G.s = S.create({ seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, T.towerDamage] });
+    if (typeof foe === 'string') foe = KC_TRAINER[foe];
+    const T = G.trainer = foe || KCMenu.nextFoe();
+    const trophy = T.kind === 'trophy', arenaNow = KCProgress.arena();
+    G.theme = trophy ? arenaNow.theme : 'training';
+    KCScenery.setGrade(G.theme);
+    G.s = S.create({
+      seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, T.towerDamage],
+      decks: [trophy ? KCProgress.state.deck : KCProgress.trainingDeck(), T.deck || KC_STARTER_DECK], cardLevels: [KCProgress.cardLevels(), T.cardLevels || {}],
+    });
     G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9) });
-    for (const [sel, text] of [['#foeName', T.name], ['#foeTier', `Training Grounds · ${T.tier}`], ['#scoreFoe', T.name], ['#introFoeName', T.name],
-      ['#introFoeTier', `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
+    const where = trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
+    for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
+      ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0 });
     $('#result').hidden = true; $('#leaveAsk').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
@@ -85,7 +95,7 @@
     G.bg.width = cv.width; G.bg.height = cv.height;
     const b = G.bg.getContext('2d');
     b.scale(G.dpr, G.dpr);
-    A.arena(b, G.k, B);
+    A.arena(b, G.k, B, G.theme);
     G.zoneKey = '';
     requestAnimationFrame(() => KCScenery.resize());
   }
@@ -276,7 +286,7 @@
     G.ended = 1.8;
     if (e.winner >= 0) KCScenery.celebrate(e.winner);
     select(-1);
-    G.res = KCMenu.recordResult(G.trainer.id, e.winner);
+    G.res = KCMenu.recordResult(G.trainer, e.winner);
     $('#countdown').hidden = true;
     if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); }
     else if (e.winner === 1) { banner('Defeat'); setTimeout(() => KCSound.play('lose'), 300); }
@@ -292,9 +302,17 @@
     $('#resYou').innerHTML = crowns(r.crowns[0]);
     const L = G.trainer.lines, res = G.res || {};
     $('#resLine').textContent = (w === 0 && r.crowns[0] === 3 ? 'Three crowns! ' : '') + (w === 0 ? pick(L.youWin) : w === 1 ? pick(L.youLose) : L.draw);
-    const un = $('#resUnlock');
-    un.hidden = !(res.unlockedNext || res.roadOpened || res.levelUp);
-    un.textContent = [res.unlockedNext ? `${res.unlockedNext.name} unlocked!` : '', res.roadOpened ? 'Trophy Road unlocked!' : '', res.levelUp ? `Level ${res.levelUp}!` : ''].filter(Boolean).join('  ·  ');
+    const un = $('#resUnlock'), tr = $('#resTrophy');
+    const notes = [res.unlockedNext ? `${res.unlockedNext.name} unlocked!` : '', res.roadOpened ? 'Trophy Road unlocked!' : '',
+      res.chest ? `${res.chest.name} earned!` : '', res.slotsFull ? 'Chest slots full: open one to make room' : '',
+      res.newArena ? `${res.newArena.name} reached!` : '', res.newRewards ? 'Trophy Road reward ready!' : '', res.levelUp ? `Level ${res.levelUp}!` : ''].filter(Boolean);
+    un.hidden = !notes.length;
+    un.textContent = notes.join('  ·  ');
+    tr.hidden = res.kind !== 'trophy';
+    if (res.kind === 'trophy') {
+      tr.className = 'res-trophy' + (res.delta > 0 ? ' up' : res.delta < 0 ? ' down' : '');
+      tr.innerHTML = `<i class="trophy-i" aria-hidden="true"></i><b>${res.delta > 0 ? '+' : ''}${res.delta}</b><small>${res.trophies} trophies</small>`;
+    }
     $('#nextBtn').hidden = !res.unlockedNext;
     $('#againBtn').className = res.unlockedNext ? 'pill' : 'big-btn';
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
@@ -380,6 +398,14 @@
       c.restore();
       return;
     }
+    if (e.kind === 'building') {
+      c.save(); c.translate(x, y);
+      if (e.deploy > 0) { const sc = Math.max(0.3, 1 - Math.max(0, e.deploy - 0.6) * 2); c.globalAlpha = 0.7; c.scale(sc, sc); }
+      if (e.flash > 0) c.filter = 'brightness(1.6)';
+      A.cannon(c, k, { team: e.team, angle: e.angle, atk: Math.max(0, e.atk / 0.25) });
+      c.restore();
+      return;
+    }
     const lift = e.air ? k * 1.1 : 0;
     if (!e.air) shadow(c, x, y, e.radius * k * 1.05);
     A.ell(c, x, y, e.radius * k * 1.0, e.radius * k * 0.42);
@@ -412,26 +438,34 @@
       A.rr(c, bx, by, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
       A.rr(c, bx + 2, by + 2, Math.max(0, (w - 4) * e.hp / e.maxHp), h - 4, (h - 4) / 2); c.fillStyle = T.main; c.fill();
       c.fillStyle = 'rgba(255,255,255,0.3)'; c.fillRect(bx + h / 2, by + 3, Math.max(0, (w - h) * e.hp / e.maxHp), Math.max(1, h * 0.15));
-      levelBadge(c, bx - h * 0.25, by + h / 2, h * 0.75, e.team);
+      levelBadge(c, bx - h * 0.25, by + h / 2, h * 0.75, e.team, G.s.levels[e.team]);
       c.font = `${Math.round(h * 0.82)}px "Lilita One", "Arial Black", sans-serif`;
       c.textAlign = 'center'; c.textBaseline = 'middle';
       c.lineWidth = Math.max(2, h * 0.2); c.strokeStyle = A.OUT; c.strokeText(String(Math.ceil(e.hp)), bx + w / 2, by + h / 2 + 1);
       c.fillStyle = '#fff'; c.fillText(String(Math.ceil(e.hp)), bx + w / 2, by + h / 2 + 1);
       return;
     }
+    if (e.kind === 'building') {
+      if (e.deploy > 0) return;
+      const w = 1.7 * k, h = Math.max(6, k * 0.24), by = y - 1.05 * k, bx = x - w / 2;
+      A.rr(c, bx, by, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
+      A.rr(c, bx + 1, by + 1, Math.max(0, (w - 2) * e.hp / e.maxHp), h - 2, (h - 2) / 2); c.fillStyle = blue ? '#5aa9ff' : '#ff5f69'; c.fill();
+      levelBadge(c, bx - h * 0.6, by + h / 2, h * 0.95, e.team, e.level);
+      return;
+    }
     if (e.hp >= e.maxHp || e.deploy > 0) return;
-    const lift = e.air ? k * 1.1 : 0, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75 }[e.card] || 1.4;
+    const lift = e.air ? k * 1.1 : 0, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75, skeletons: 1.2 }[e.card] || 1.4;
     const w = Math.max(0.8, e.radius * 1.9) * k, h = Math.max(5, k * 0.2), by = y - lift - top * k, bx = x - w / 2;
     A.rr(c, bx, by, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
     A.rr(c, bx + 1, by + 1, Math.max(0, (w - 2) * e.hp / e.maxHp), h - 2, (h - 2) / 2); c.fillStyle = blue ? '#5aa9ff' : '#ff5f69'; c.fill();
-    levelBadge(c, bx - h * 0.6, by + h / 2, h * 0.95, e.team);
+    levelBadge(c, bx - h * 0.6, by + h / 2, h * 0.95, e.team, e.level);
   }
-  function levelBadge(c, x, y, r, team) {
+  function levelBadge(c, x, y, r, team, level) {
     A.rr(c, x - r, y - r, r * 2, r * 2, r * 0.45); c.fillStyle = team === 0 ? '#1a4ba8' : '#9e1f29'; c.fill();
     c.lineWidth = Math.max(1.5, r * 0.22); c.strokeStyle = A.OUT; c.stroke();
     c.font = `${Math.round(r * 1.5)}px "Lilita One", "Arial Black", sans-serif`;
     c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#fff';
-    c.fillText('1', x, y + 1);
+    c.fillText(String(level || 1), x, y + 1);
   }
   function drawProj(c, p, alpha, t) {
     const k = G.k, px = p.px === undefined ? p.x : p.px + (p.x - p.px) * alpha, py = p.py === undefined ? p.y : p.py + (p.y - p.py) * alpha;
@@ -500,10 +534,21 @@
       c.fillStyle = 'rgba(255,140,40,0.22)'; c.fill(); c.strokeStyle = 'rgba(255,220,150,0.95)'; c.lineWidth = 2.5; c.setLineDash([8, 6]); c.stroke(); c.setLineDash([]);
       return;
     }
+    if (card.kind === 'building') {
+      const hf = card.half;
+      A.rr(c, SX(p.x - hf), SY(p.y - hf), hf * 2 * k, hf * 2 * k, k * 0.2);
+      c.fillStyle = ok ? 'rgba(255,255,255,0.3)' : 'rgba(229,65,75,0.5)'; c.fill();
+      c.globalAlpha = ok ? 0.65 : 0.35;
+      c.save(); c.translate(x, y); A.cannon(c, k, { team: 0, angle: -Math.PI / 2 }); c.restore();
+      c.globalAlpha = 1;
+      A.ell(c, x, y, (card.range + card.radius) * k, (card.range + card.radius) * k);
+      c.strokeStyle = 'rgba(255,255,255,0.45)'; c.lineWidth = 1.5; c.setLineDash([5, 6]); c.stroke(); c.setLineDash([]);
+      return;
+    }
     A.rr(c, SX(p.x - 0.5), SY(p.y - 0.5), k, k, k * 0.15);
     c.fillStyle = ok ? 'rgba(255,255,255,0.35)' : 'rgba(229,65,75,0.5)'; c.fill();
     c.globalAlpha = ok ? 0.6 : 0.35;
-    const offs = card.count === 4 ? [[-0.45, -0.45], [0.45, -0.45], [-0.45, 0.45], [0.45, 0.45]] : card.count === 2 ? [[-0.5, 0], [0.5, 0]] : [[0, 0]];
+    const offs = card.count === 4 ? [[-0.45, -0.45], [0.45, -0.45], [-0.45, 0.45], [0.45, 0.45]] : card.count === 3 ? [[-0.55, 0.3], [0.55, 0.3], [0, -0.45]] : card.count === 2 ? [[-0.5, 0], [0.5, 0]] : [[0, 0]];
     for (const [ox, oy] of offs) {
       c.save(); c.translate(x + ox * k, y + oy * k - (card.air ? k * 1.1 : 0));
       A.troop(c, id, k, { team: 0, t, walk: false, atk: 0, face: 1, id: 1, view: 'back' });
@@ -593,8 +638,8 @@
     KCScenery.make($('#sceneL'), 'left');
     KCScenery.make($('#sceneR'), 'right');
     bindInput();
-    $('#againBtn').addEventListener('click', () => startBattle(G.trainer.id));
-    $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext.id));
+    $('#againBtn').addEventListener('click', () => startBattle(G.trainer.kind === 'trophy' ? KCMenu.nextFoe('trophy') : G.trainer));
+    $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext));
     $('#homeBtn').addEventListener('click', goHome);
     $('#leaveBtn').addEventListener('click', () => { if (G.phase === 'play') { $('#leaveAsk').hidden = false; G.phase = 'paused'; } });
     $('#leaveNo').addEventListener('click', () => { $('#leaveAsk').hidden = true; G.phase = 'play'; G.last = performance.now(); });

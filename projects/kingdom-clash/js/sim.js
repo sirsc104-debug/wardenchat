@@ -43,6 +43,8 @@ const KCSim = (() => {
       ents: [], projs: [], events: [], nextId: 1,
       energy: [START_ENERGY, START_ENERGY], crowns: [0, 0], result: null,
       hands: [], queues: [], levels: opts.levels || [1, 1], played: [0, 0],
+      // Each team's card levels ({ cardId: level }); a card not listed uses the team's level.
+      cardLevels: opts.cardLevels || [{}, {}],
       // How hard each team's troops and spells hit towers (Trainer Owen hits them at a quarter).
       towerDamage: opts.towerDamage || [1, 1],
       rand: mulberry(opts.seed || 1),
@@ -69,6 +71,8 @@ const KCSim = (() => {
     });
   }
 
+  const cardLevel = (s, team, id) => (s.cardLevels[team] && s.cardLevels[team][id]) || s.levels[team] || 1;
+  const blocks = e => (e.kind === 'tower' || e.kind === 'building') && !e.dead;
   const byId = (s, id) => {
     if (!id) return null;
     for (const e of s.ents) if (e.id === id) return e;
@@ -80,15 +84,17 @@ const KCSim = (() => {
   const edge = (a, b) => dist(a, b) - a.radius - b.radius;
   function canHit(a, t) {
     if (!t || t.dead || t.team === a.team) return false;
-    if (a.targets === 'buildings') return t.kind === 'tower';
+    if (a.kind === 'building' && t.kind !== 'troop') return false;
+    if (a.targets === 'buildings') return t.kind === 'tower' || t.kind === 'building';
     if (a.targets === 'ground') return !t.air;
     return true;
   }
 
   /* ---------- deploying ---------- */
+  // Is (x, y) on a tower or building (or within pad of one)?
   function inTower(s, x, y, pad) {
     for (const e of s.ents) {
-      if (e.kind !== 'tower' || e.dead) continue;
+      if (!blocks(e)) continue;
       if (Math.abs(x - e.x) < e.half + pad && Math.abs(y - e.y) < e.half + pad) return true;
     }
     return false;
@@ -97,13 +103,14 @@ const KCSim = (() => {
     const c = KC_CARDS[cardId];
     if (!c || x < 0.5 || x > W - 0.5 || y < 0.5 || y > H - 0.5) return false;
     if (c.kind === 'spell') return true;
-    const my = own(team, y);
-    let ok = my >= RIVER_BOT + 0.1;
-    if (!ok && my >= POCKET) {
+    const my = own(team, y), half = c.kind === 'building' ? c.half : 0;
+    let ok = my - half >= RIVER_BOT + 0.1;
+    if (!ok && my - half >= POCKET) {
       const t = tower(s, 1 - team, laneOf(x));
-      ok = !!(t && t.dead) && (my < RIVER_TOP || my > RIVER_BOT);
+      ok = !!(t && t.dead) && (my + half < RIVER_TOP || my - half > RIVER_BOT);
     }
-    return ok && !inTower(s, x, y, 0.2);
+    if (half && (x - half < 0 || x + half > W || y - half < 0 || y + half > H)) return false;
+    return ok && !inTower(s, x, y, half ? half + 0.05 : 0.2);
   }
 
   function play(s, team, slot, x, y) {
@@ -119,8 +126,13 @@ const KCSim = (() => {
     if (c.kind === 'spell') {
       const k = tower(s, team, 'K');
       s.projs.push({ kind: 'fireball', team, x: k.x, y: k.y, sx: k.x, sy: k.y, tx: x, ty: y, target: 0,
-        speed: c.projSpeed, dmg: Math.round(c.dmg * levelMult(s.levels[team])), card: id });
+        speed: c.projSpeed, dmg: Math.round(c.dmg * levelMult(cardLevel(s, team, id))), card: id });
       s.events.push({ type: 'cast', team, card: id, x, y });
+      return 'ok';
+    }
+    if (c.kind === 'building') {
+      spawnBuilding(s, team, id, x, y);
+      s.events.push({ type: 'deploy', team, card: id, x, y });
       return 'ok';
     }
     const offs = formation(c.count);
@@ -134,10 +146,21 @@ const KCSim = (() => {
     if (n === 4) return [[-0.45, -0.45], [0.45, -0.45], [-0.45, 0.45], [0.45, 0.45]];
     return [[0, 0]];
   }
+  function spawnBuilding(s, team, id, x, y) {
+    const c = KC_CARDS[id], level = cardLevel(s, team, id), m = levelMult(level), hp = Math.round(c.hp * m);
+    const b = {
+      id: s.nextId++, kind: 'building', team, card: id, x, y, px: x, py: y, level,
+      hp, maxHp: hp, dmg: Math.round(c.dmg * m), hit: c.hit, range: c.range, targets: c.targets, air: false,
+      radius: c.radius, half: c.half, decay: hp / c.lifetime, proj: c.proj, projSpeed: c.projSpeed,
+      deploy: 1.0, cd: 0, target: 0, angle: team === 0 ? -Math.PI / 2 : Math.PI / 2, atk: 0, flash: 0, dead: false,
+    };
+    s.ents.push(b);
+    return b;
+  }
   function spawn(s, team, id, x, y) {
-    const c = KC_CARDS[id], m = levelMult(s.levels[team]);
+    const c = KC_CARDS[id], level = cardLevel(s, team, id), m = levelMult(level);
     const u = {
-      id: s.nextId++, kind: 'troop', team, card: id, x, y, px: x, py: y,
+      id: s.nextId++, kind: 'troop', team, card: id, x, y, px: x, py: y, level,
       hp: Math.round(c.hp * m), maxHp: Math.round(c.hp * m), dmg: Math.round(c.dmg * m),
       hit: c.hit, range: c.range, speed: c.speed, targets: c.targets, air: !!c.air,
       radius: c.radius, mass: c.mass, heavy: !!c.heavy, proj: c.proj || null, projSpeed: c.projSpeed || 0,
@@ -164,7 +187,7 @@ const KCSim = (() => {
       e.hp = 0;
       e.dead = true;
       if (e.kind === 'tower') towerDown(s, e);
-      else s.events.push({ type: 'death', team: e.team, card: e.card, x: e.x, y: e.y, air: e.air });
+      else s.events.push({ type: 'death', team: e.team, card: e.card, x: e.x, y: e.y, air: e.air, building: e.kind === 'building' });
     }
   }
   function towerDown(s, t) {
@@ -216,7 +239,7 @@ const KCSim = (() => {
     if (u.air) return [nx, ny];
     let best = null, bt = Infinity;
     for (const t of s.ents) {
-      if (t.kind !== 'tower' || t.dead || t === target) continue;
+      if (!blocks(t) || t === target) continue;
       const h = t.half + u.radius * 0.8 + 0.12;
       const hit = segBox(u.x, u.y, nx, ny, t.x - h, t.y - h, t.x + h, t.y + h);
       if (hit !== null && hit < bt) { bt = hit; best = { t, h }; }
@@ -263,7 +286,8 @@ const KCSim = (() => {
       if (!canHit(u, e)) continue;
       const d = edge(u, e);
       if (u.targets !== 'buildings' && d > u.sight) continue;
-      if (u.targets === 'buildings' && e.kind === 'tower' && d > 3) continue;
+      // Tower-chasers go for a nearby building first (that is what a Cannon is for).
+      if (u.targets === 'buildings' && d > (e.kind === 'building' ? 7 : 3)) continue;
       if (d < bd) { bd = d; best = e; }
     }
     if (best) return best;
@@ -322,11 +346,11 @@ const KCSim = (() => {
     if (!e.active) return;
     e.cd -= DT;
     let t = byId(s, e.target);
-    if (!t || t.dead || t.kind !== 'troop' || edge(e, t) > e.range) {
+    if (!t || t.dead || t.kind === 'tower' || edge(e, t) > e.range) {
       t = null; e.target = 0;
       let bd = Infinity;
       for (const u of s.ents) {
-        if (u.kind !== 'troop' || u.team === e.team || u.dead) continue;
+        if ((u.kind !== 'troop' && u.kind !== 'building') || u.team === e.team || u.dead) continue;
         const d = edge(e, u);
         if (d <= e.range && d < bd) { bd = d; t = u; }
       }
@@ -338,6 +362,40 @@ const KCSim = (() => {
       s.projs.push({ kind: e.proj, team: e.team, x: e.x, y: e.y - top, sx: e.x, sy: e.y - top, tx: t.x, ty: t.y,
         target: t.id, speed: e.projSpeed, dmg: e.dmg, splash: 0, targets: 'both', tower: true });
       s.events.push({ type: 'shoot', kind: e.proj, team: e.team, x: e.x, y: e.y, tower: true });
+    }
+  }
+
+  /* ---------- buildings ---------- */
+  function buildingStep(s, b) {
+    if (b.flash > 0) b.flash -= DT;
+    if (b.deploy > 0) { b.deploy -= DT; return; }
+    b.hp -= b.decay * DT;
+    if (b.hp <= 0) {
+      b.hp = 0; b.dead = true;
+      s.events.push({ type: 'death', team: b.team, card: b.card, x: b.x, y: b.y, building: true });
+      return;
+    }
+    if (b.atk > 0) b.atk -= DT;
+    b.cd -= DT;
+    let t = byId(s, b.target);
+    if (!t || !canHit(b, t) || edge(b, t) > b.range) {
+      t = null; b.target = 0;
+      let bd = Infinity;
+      for (const u of s.ents) {
+        if (!canHit(b, u)) continue;
+        const d = edge(b, u);
+        if (d <= b.range && d < bd) { bd = d; t = u; }
+      }
+      if (t) b.target = t.id;
+    }
+    if (!t) return;
+    b.angle = Math.atan2(t.y - b.y, t.x - b.x);
+    if (b.cd <= 0) {
+      b.cd = b.hit; b.atk = 0.25;
+      const mx = b.x + Math.cos(b.angle) * 0.7, my = b.y + Math.sin(b.angle) * 0.7 - 0.3;
+      s.projs.push({ kind: b.proj, team: b.team, x: mx, y: my, sx: mx, sy: my, tx: t.x, ty: t.y, target: t.id,
+        speed: b.projSpeed, dmg: b.dmg, splash: 0, targets: b.targets, card: b.card });
+      s.events.push({ type: 'shoot', kind: b.proj, team: b.team, x: b.x, y: b.y });
     }
   }
 
@@ -401,7 +459,7 @@ const KCSim = (() => {
     }
     for (const u of troops) {
       if (!u.air) for (const t of s.ents) {
-        if (t.kind !== 'tower' || t.dead) continue;
+        if (!blocks(t)) continue;
         const h = t.half + u.radius * 0.8, dx = u.x - t.x, dy = u.y - t.y;
         if (Math.abs(dx) >= h || Math.abs(dy) >= h) continue;
         if (h - Math.abs(dx) < h - Math.abs(dy)) u.x = t.x + Math.sign(dx || 1) * h;
@@ -446,7 +504,7 @@ const KCSim = (() => {
     for (const p of s.projs) { p.px = p.x; p.py = p.y; }
     for (const e of s.ents) {
       if (e.dead) continue;
-      if (e.kind === 'tower') towerStep(s, e); else troopStep(s, e);
+      if (e.kind === 'tower') towerStep(s, e); else if (e.kind === 'building') buildingStep(s, e); else troopStep(s, e);
       if (s.result) break;
     }
     if (!s.result) projStep(s);

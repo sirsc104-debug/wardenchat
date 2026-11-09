@@ -1,5 +1,6 @@
 /* Kingdom Clash: the cards. Stats are level 1; every level adds 8% to HP and damage (level 15 is
-   about 2.9x level 1). Distances are in arena tiles, speeds in tiles per second, times in seconds. */
+   about 2.9x level 1). Kinds: troop, spell and building (a building stays where it is placed, attacks
+   what comes in range and loses health over its lifetime). Distances are in arena tiles, speeds in tiles per second, times in seconds. */
 'use strict';
 
 const KC_CARDS = {
@@ -58,6 +59,24 @@ const KC_CARDS = {
     blurb: 'Launches a fireball from your King Tower. Damages and knocks back everything in the area.',
     evo: 'Leaves burning ground for 2 seconds.',
   },
+  // Arena 1 (Cinder Keep) cards, found on the Trophy Road.
+  skeletons: {
+    id: 'skeletons', name: 'Skeleton Pack', cost: 1, rarity: 'common', kind: 'troop', role: 'Swarm', count: 3,
+    hp: 40, dmg: 40, hit: 1.0, range: 0.4, speed: 1.5, targets: 'ground', air: false,
+    radius: 0.3, mass: 0.8,
+    blurb: 'Three rattling skeletons for just 1 energy. Great for distracting a big troop or finishing one off.',
+    evo: 'Reassemble: one skeleton rises again a second after the last one falls.',
+  },
+  cannon: {
+    id: 'cannon', name: 'Cannon', cost: 3, rarity: 'common', kind: 'building', role: 'Defense', count: 1,
+    hp: 700, dmg: 70, hit: 0.9, range: 5.5, targets: 'ground', air: false,
+    radius: 0.9, half: 0.95, lifetime: 30, proj: 'cannon', projSpeed: 12,
+    blurb: 'A sturdy cannon that guards your side. Rhinos go for it before your towers. It crumbles after 30 seconds.',
+    evo: 'Overcharge: its first shot at each new target does double damage.',
+  },
 };
+
+// Every card in collection order: the starter deck, then cards found on the Trophy Road.
+const KC_ALL_CARDS = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball', 'skeletons', 'cannon'];
 
 const KC_STARTER_DECK = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'];
