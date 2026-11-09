@@ -1,5 +1,6 @@
 /* Kingdom Clash: the screens, the game loop, drawing the battle and reading the player's input.
-   The battle itself is KCSim (sim.js); Trainer Owen is KCBot (bot.js). */
+   The battle itself is KCSim (sim.js), the trainers are KCBot (bot.js) set up from KC_TRAINERS
+   (trainers.js), and the main menu is KCMenu (menu.js). */
 'use strict';
 
 (() => {
@@ -9,16 +10,11 @@
     phase: 'home', s: null, bot: null, acc: 0, last: 0, k: 20, dpr: 1,
     sel: -1, hover: null, drag: false, dragMoved: false, toggle: false,
     fx: [], bg: null, zone: null, zoneKey: '', handKey: '', ui: {},
-    intro: 0, ended: 0, shake: 0, lastSec: -1, idleHint: false, record: { w: 0, l: 0, d: 0 },
+    intro: 0, ended: 0, shake: 0, lastSec: -1, idleHint: false, trainer: null, res: null,
   };
   let cv, ctx;
-  const imgs = {};
-  const cardImg = id => imgs[id] || (imgs[id] = A.portrait(id, 200, 240).toDataURL());
+  const cardImg = id => KCMenu.cardImg(id);
   const pick = a => a[Math.floor(Math.random() * a.length)];
-  const store = {
-    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage blocked */ } },
-  };
 
   /* ---------- screens ---------- */
   function show(id) {
@@ -27,56 +23,21 @@
   function goHome() {
     G.phase = 'home'; G.s = null;
     $('#result').hidden = true; $('#leaveAsk').hidden = true;
-    renderRecord();
     show('home');
+    KCMenu.show();
   }
-
-  /* ---------- home ---------- */
-  function buildHome() {
-    A.owen($('#owenPic'));
-    A.owen($('#introOwen'));
-    const grid = $('#deckGrid');
-    grid.innerHTML = '';
-    for (const id of KC_STARTER_DECK) {
-      const c = KC_CARDS[id], b = document.createElement('button');
-      b.type = 'button'; b.className = 'deck-card'; b.dataset.id = id;
-      b.innerHTML = `<img src="${cardImg(id)}" alt=""><span class="cost">${c.cost}</span><span class="nm">${c.name}</span>`;
-      b.addEventListener('click', () => showInfo(id));
-      grid.appendChild(b);
-    }
-    showInfo('rhino');
-    G.record = store.get('kc.record', { w: 0, l: 0, d: 0 });
-    renderRecord();
-    renderSound();
-  }
-  function showInfo(id) {
-    const c = KC_CARDS[id];
-    for (const b of document.querySelectorAll('.deck-card')) b.classList.toggle('on', b.dataset.id === id);
-    const tgt = { buildings: 'Towers only', ground: 'Ground', both: 'Air & ground' }[c.targets];
-    const sp = s => (s >= 1.8 ? 'Very fast' : s >= 1.4 ? 'Fast' : s >= 1 ? 'Medium' : 'Slow');
-    const stats = c.kind === 'spell'
-      ? [['Damage', c.dmg], ['Tower damage', Math.round(c.dmg * c.towerPct)], ['Radius', c.area + ' tiles']]
-      : [['Health', c.hp], ['Damage', c.dmg], ['Hit speed', c.hit + ' s'], ['Range', c.range < 1 ? 'Melee' : c.range + ' tiles'],
-        ['Speed', sp(c.speed)], ['Targets', tgt]].concat(c.count > 1 ? [['Count', '×' + c.count]] : []);
-    $('#cardInfo').innerHTML = `<h4>${c.name}</h4>
-      <div class="meta">${c.rarity} &middot; ${c.role} &middot; ${c.cost} energy${c.air ? ' &middot; flying' : ''}</div>
-      <p>${c.blurb}</p>
-      <div class="stats">${stats.map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('')}</div>
-      <div class="evo">Evolution (unlocks later): ${c.evo}</div>`;
-  }
-  function renderRecord() {
-    const r = G.record, n = r.w + r.l + r.d;
-    $('#record').textContent = n ? `Your record vs Owen: ${r.w} won, ${r.l} lost${r.d ? `, ${r.d} drawn` : ''}` : 'First match? Owen will show you around.';
-  }
-  function renderSound() { $('#soundBtn').textContent = 'Sound: ' + (KCSound.on ? 'On' : 'Off'); }
 
   /* ---------- starting a battle ---------- */
-  function startBattle() {
+  // Each trainer brings a bot skill and how hard their troops hit your towers (Owen, the tutorial,
+  // hits at a quarter so new players nearly always win).
+  function startBattle(id) {
     KCSound.unlock();
-    // Trainer Owen is the first tutorial match: he plays like a beginner and his troops only do a
-    // quarter of their damage to your towers, so new players nearly always win.
-    G.s = S.create({ seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, 0.25] });
-    G.bot = KCBot.create(1, { skill: 'tutorial', seed: Math.floor(Math.random() * 1e9) });
+    const T = G.trainer = KC_TRAINER[id] || KCMenu.opponent();
+    G.s = S.create({ seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, T.towerDamage] });
+    G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9) });
+    for (const [sel, text] of [['#foeName', T.name], ['#foeTier', `Training Grounds · ${T.tier}`], ['#scoreFoe', T.name], ['#introFoeName', T.name],
+      ['#introFoeTier', `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
+    A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0 });
     $('#result').hidden = true; $('#leaveAsk').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
@@ -90,7 +51,7 @@
     G.phase = 'play';
     banner('FIGHT!');
     KCSound.play('fight');
-    setTimeout(() => say(pick(["Let's see what you've got!", "Don't worry, I'll go easy on you.", 'Ready? Put a card on your side!'])), 900);
+    setTimeout(() => say(pick(G.trainer.lines.start)), 900);
   }
 
   /* ---------- layout ---------- */
@@ -264,8 +225,8 @@
           sparks(e.x, e.y, 18, '#ffb030', 4);
           break;
         case 'tower': towerFx(e); break;
-        case 'double': banner('×2 Energy!', 'Last minute'); KCSound.play('double'); say('Double energy! Things speed up now.'); break;
-        case 'overtime': banner('Overtime!', 'Next tower wins'); KCSound.play('double'); say('Overtime! Whoever takes the next tower wins.'); break;
+        case 'double': banner('×2 Energy!', 'Last minute'); KCSound.play('double'); say(G.trainer.lines.double); break;
+        case 'overtime': banner('Overtime!', 'Next tower wins'); KCSound.play('double'); say(G.trainer.lines.overtime); break;
         case 'end': endBattle(e); break;
       }
     }
@@ -283,10 +244,10 @@
     if (e.team === 1) {
       G.fx.push({ kind: 'crown', x: e.x, y: e.y, life: 1.6, max: 1.6, team: 0 });
       setTimeout(() => KCSound.play('crown'), 250);
-      if (e.sub !== 'king') say(pick(['Whoa, nice hit!', 'Hey! I liked that tower.', 'Not bad at all!']));
+      if (e.sub !== 'king') say(pick(G.trainer.lines.youTower));
     } else {
       G.fx.push({ kind: 'crown', x: e.x, y: e.y, life: 1.6, max: 1.6, team: 1 });
-      if (e.sub !== 'king') say(pick(['Gotcha!', 'Watch your towers!', "That one's mine!"]));
+      if (e.sub !== 'king') say(pick(G.trainer.lines.myTower));
     }
   }
   function ring(x, y, team, r) { G.fx.push({ kind: 'ring', x, y, r, team, life: 0.45, max: 0.45 }); }
@@ -315,9 +276,7 @@
     G.ended = 1.8;
     if (e.winner >= 0) KCScenery.celebrate(e.winner);
     select(-1);
-    const r = G.record;
-    if (e.winner === 0) r.w++; else if (e.winner === 1) r.l++; else r.d++;
-    store.set('kc.record', r);
+    G.res = KCMenu.recordResult(G.trainer.id, e.winner);
     $('#countdown').hidden = true;
     if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); }
     else if (e.winner === 1) { banner('Defeat'); setTimeout(() => KCSound.play('lose'), 300); }
@@ -331,14 +290,19 @@
     const crowns = n => [0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}" style="animation-delay:${0.25 + i * 0.25}s"></i>`).join('');
     $('#resFoe').innerHTML = crowns(r.crowns[1]);
     $('#resYou').innerHTML = crowns(r.crowns[0]);
-    $('#resLine').textContent = w === 0
-      ? (r.crowns[0] === 3 ? 'Three crowns! Owen wants a rematch right now.' : 'You beat Trainer Owen! He wants a rematch.')
-      : w === 1 ? 'Owen got you this time. One more?' : 'Dead even. Break the tie?';
+    const L = G.trainer.lines, res = G.res || {};
+    $('#resLine').textContent = (w === 0 && r.crowns[0] === 3 ? 'Three crowns! ' : '') + (w === 0 ? pick(L.youWin) : w === 1 ? pick(L.youLose) : L.draw);
+    const un = $('#resUnlock');
+    un.hidden = !(res.unlockedNext || res.roadOpened || res.levelUp);
+    un.textContent = [res.unlockedNext ? `${res.unlockedNext.name} unlocked!` : '', res.roadOpened ? 'Trophy Road unlocked!' : '', res.levelUp ? `Level ${res.levelUp}!` : ''].filter(Boolean).join('  ·  ');
+    $('#nextBtn').hidden = !res.unlockedNext;
+    $('#againBtn').className = res.unlockedNext ? 'pill' : 'big-btn';
+    if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
     const why = { king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', draw: 'Every tower ended with the same health.' }[r.reason];
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
-    $('#resSmall').textContent = `${why} ${m}:${sec} played, ${s.played[0]} cards from you.`;
+    $('#resSmall').textContent = `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
     $('#result').hidden = false;
-    setTimeout(() => $('#againBtn').focus(), 50);
+    setTimeout(() => (res.unlockedNext ? $('#nextBtn') : $('#againBtn')).focus(), 50);
   }
 
   /* ---------- drawing ---------- */
@@ -625,14 +589,13 @@
 
   function boot() {
     cv = $('#arena'); ctx = cv.getContext('2d');
-    buildHome();
+    KCMenu.init({ onBattle: startBattle });
     KCScenery.make($('#sceneL'), 'left');
     KCScenery.make($('#sceneR'), 'right');
     bindInput();
-    $('#battleBtn').addEventListener('click', startBattle);
-    $('#againBtn').addEventListener('click', startBattle);
+    $('#againBtn').addEventListener('click', () => startBattle(G.trainer.id));
+    $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext.id));
     $('#homeBtn').addEventListener('click', goHome);
-    $('#soundBtn').addEventListener('click', () => { KCSound.on = !KCSound.on; renderSound(); });
     $('#leaveBtn').addEventListener('click', () => { if (G.phase === 'play') { $('#leaveAsk').hidden = false; G.phase = 'paused'; } });
     $('#leaveNo').addEventListener('click', () => { $('#leaveAsk').hidden = true; G.phase = 'play'; G.last = performance.now(); });
     $('#leaveYes').addEventListener('click', goHome);

@@ -1,4 +1,4 @@
-/* Kingdom Clash: everything drawn in code (troops, towers, the arena, card portraits, Trainer Owen).
+/* Kingdom Clash: everything drawn in code (troops, towers, the arena, card portraits, the trainers).
 
    The style: chunky shapes, thick dark outlines, flat colours with one darker shade along the
    bottom of each shape. Every troop and tower has two views. Your side is seen from behind (it faces
@@ -506,31 +506,69 @@ const KCArt = (() => {
   }
 
 
-  /* ---------- Trainer Owen ---------- */
-  function owen(cv) {
-    const c = cv.getContext('2d'), w = cv.width, h = cv.height, k = w;
+  /* ---------- trainer portraits ---------- */
+  // Head and shoulders of a trainer on a rounded square, from a look in js/trainers.js.
+  function trainer(cv, look, locked) {
+    const c = cv.getContext('2d'), w = cv.width, h = cv.height, q = v => v * w;
+    LW = Math.max(1.5, w * 0.022);
     c.clearRect(0, 0, w, h);
     const g = c.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#ffcf6b'); g.addColorStop(1, '#e98a2b');
-    rr(c, 0, 0, w, h, w * 0.14); c.fillStyle = g; c.fill();
-    c.save(); rr(c, 0, 0, w, h, w * 0.14); c.clip();
-    rr(c, w * 0.12, h * 0.72, w * 0.76, h * 0.5, w * 0.2); paint(c, '#e5414b', k * 0.025);
-    rr(c, w * 0.44, h * 0.72, w * 0.12, h * 0.3, w * 0.03); paint(c, '#ffffff');
-    line(c, w * 0.36, h * 0.72, w * 0.5, h * 0.9, '#2b2b36', k * 0.018);
-    line(c, w * 0.64, h * 0.72, w * 0.5, h * 0.9, '#2b2b36', k * 0.018);
-    rr(c, w * 0.45, h * 0.88, w * 0.1, w * 0.06, w * 0.02); paint(c, '#c9ced6', k * 0.015);
-    circ(c, w * 0.5, h * 0.47, w * 0.27); paint(c, '#f0c29e', k * 0.025);
-    circ(c, w * 0.24, h * 0.5, w * 0.06); paint(c, '#e8b08a', k * 0.02);
-    circ(c, w * 0.76, h * 0.5, w * 0.06); paint(c, '#e8b08a', k * 0.02);
-    c.beginPath(); c.arc(w * 0.5, h * 0.42, w * 0.29, Math.PI, 0); c.closePath(); paint(c, '#2f7cf6', k * 0.025);
-    rr(c, w * 0.42, h * 0.36, w * 0.48, h * 0.07, w * 0.03); paint(c, '#1a4ba8', k * 0.02);
-    crownIcon(c, w * 0.5, h * 0.26, w * 0.06, '#ffcf3f');
-    eye(c, w * 0.41, h * 0.5, w * 0.04); eye(c, w * 0.59, h * 0.5, w * 0.04);
-    c.beginPath(); c.arc(w * 0.5, h * 0.58, w * 0.1, 0.2, Math.PI - 0.2); c.lineWidth = k * 0.022; c.strokeStyle = OUT; c.stroke();
-    c.fillStyle = 'rgba(230,110,90,0.35)'; circ(c, w * 0.34, h * 0.58, w * 0.04); c.fill(); circ(c, w * 0.66, h * 0.58, w * 0.04); c.fill();
+    g.addColorStop(0, look.bg[0]); g.addColorStop(1, look.bg[1]);
+    rr(c, 0, 0, w, h, q(0.14)); c.fillStyle = g; c.fill();
+    c.save(); rr(c, 0, 0, w, h, q(0.14)); c.clip();
+    const glow = c.createRadialGradient(q(0.5), q(0.4), q(0.05), q(0.5), q(0.4), q(0.6));
+    glow.addColorStop(0, 'rgba(255,255,255,0.35)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = glow; c.fillRect(0, 0, w, h);
+    // shoulders
+    sh(c, () => rr(c, q(0.1), q(0.74), q(0.8), q(0.5), q(0.2)), look.shirt, shade(look.shirt), q(0.05));
+    if (look.extra === 'armor') {
+      for (const x of [0.06, 0.6]) sh(c, () => rr(c, q(x), q(0.76), q(0.34), q(0.18), q(0.09)), '#c4cad6', '#949cab', q(0.04));
+      sh(c, () => rr(c, q(0.4), q(0.74), q(0.2), q(0.3), q(0.04)), '#dc3640', '#ae232d', q(0.03));
+    }
+    if (look.extra === 'scarf') sh(c, () => rr(c, q(0.3), q(0.7), q(0.4), q(0.12), q(0.06)), '#ffcd33', '#e09f12', q(0.03));
+    if (look.extra === 'whistle') {
+      rr(c, q(0.44), q(0.74), q(0.12), q(0.28), q(0.03)); paint(c, '#ffffff');
+      line(c, q(0.36), q(0.74), q(0.5), q(0.9), OUT, q(0.018)); line(c, q(0.64), q(0.74), q(0.5), q(0.9), OUT, q(0.018));
+      sh(c, () => rr(c, q(0.45), q(0.88), q(0.1), q(0.06), q(0.02)), '#c9ced6', null, 0);
+    }
+    // head
+    for (const x of [0.24, 0.76]) sh(c, () => circ(c, q(x), q(0.5), q(0.06)), look.skin, null, 0);
+    if (look.hair === 'curly') for (const [x, y, r] of [[0.28, 0.32, 0.11], [0.72, 0.32, 0.11], [0.26, 0.45, 0.08], [0.74, 0.45, 0.08]]) sh(c, () => circ(c, q(x), q(y), q(r)), look.hairCol, null, 0);
+    sh(c, () => circ(c, q(0.5), q(0.47), q(0.27)), look.skin, shade(look.skin), q(0.04));
+    if (look.hair === 'cap') {
+      sh(c, () => { c.beginPath(); c.arc(q(0.5), q(0.42), q(0.29), Math.PI, 0); c.closePath(); }, look.hat, look.hatSh, q(0.04));
+      sh(c, () => rr(c, q(0.42), q(0.36), q(0.48), q(0.07), q(0.03)), look.hatSh, null, 0);
+      crownIcon(c, q(0.5), q(0.26), q(0.06), C.gold);
+    } else if (look.hair === 'curly') {
+      for (const [x, y, r] of [[0.32, 0.25, 0.11], [0.47, 0.19, 0.12], [0.62, 0.22, 0.11], [0.72, 0.3, 0.09], [0.26, 0.33, 0.08]]) sh(c, () => circ(c, q(x), q(y), q(r)), look.hairCol, null, 0);
+      sh(c, () => rr(c, q(0.25), q(0.3), q(0.5), q(0.06), q(0.03)), look.band, null, 0);
+    } else if (look.hair === 'beard') {
+      sh(c, () => { c.beginPath(); c.arc(q(0.5), q(0.42), q(0.28), Math.PI * 1.02, Math.PI * 1.98); c.closePath(); }, look.hairCol, '#a4a8b5', q(0.03));
+      sh(c, () => { c.beginPath(); c.moveTo(q(0.25), q(0.5)); c.quadraticCurveTo(q(0.24), q(0.84), q(0.5), q(0.9)); c.quadraticCurveTo(q(0.76), q(0.84), q(0.75), q(0.5)); c.quadraticCurveTo(q(0.5), q(0.66), q(0.25), q(0.5)); c.closePath(); }, look.hairCol, '#a4a8b5', q(0.04));
+      line(c, q(0.33), q(0.4), q(0.45), q(0.43), OUT, q(0.028)); line(c, q(0.67), q(0.4), q(0.55), q(0.43), OUT, q(0.028));
+      line(c, q(0.62), q(0.36), q(0.68), q(0.5), '#c98466', q(0.014));
+    }
+    const ey = look.hair === 'beard' ? 0.48 : 0.5;
+    eye(c, q(0.41), q(ey), q(0.04)); eye(c, q(0.59), q(ey), q(0.04));
+    c.beginPath();
+    if (look.mouth === 'smile') c.arc(q(0.5), q(0.58), q(0.1), 0.2, Math.PI - 0.2);
+    else if (look.mouth === 'smirk') { c.moveTo(q(0.42), q(0.63)); c.quadraticCurveTo(q(0.54), q(0.67), q(0.61), q(0.6)); }
+    else { c.moveTo(q(0.43), q(0.6)); c.lineTo(q(0.57), q(0.6)); }
+    c.lineWidth = q(0.022); c.strokeStyle = OUT; c.lineCap = 'round'; c.stroke();
+    if (look.mouth !== 'flat') { c.fillStyle = 'rgba(230,110,90,0.32)'; circ(c, q(0.34), q(0.58), q(0.04)); c.fill(); circ(c, q(0.66), q(0.58), q(0.04)); c.fill(); }
     c.restore();
+    if (locked) {
+      rr(c, 0, 0, w, h, q(0.14)); c.fillStyle = 'rgba(20,14,40,0.62)'; c.fill();
+      sh(c, () => rr(c, q(0.36), q(0.48), q(0.28), q(0.22), q(0.04)), '#c9ccd6', '#9a9eab', q(0.04));
+      c.beginPath(); c.arc(q(0.5), q(0.48), q(0.09), Math.PI, 0); c.lineWidth = q(0.04); c.strokeStyle = '#c9ccd6'; c.stroke();
+    }
   }
+  // A darker version of a #rrggbb colour, for the shaded side of a shape.
+  function shade(hex) {
+    const n = parseInt(hex.slice(1), 16), f = v => Math.round(v * 0.78);
+    return '#' + ((f(n >> 16) << 16) | (f((n >> 8) & 255) << 8) | f(n & 255)).toString(16).padStart(6, '0');
+  }
+  const owen = cv => trainer(cv, KC_TRAINERS[0].look);
 
-
-  return { OUT, TEAM, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, rr, circ, ell, line, paint, poly };
+  return { OUT, TEAM, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer, rr, circ, ell, line, paint, poly };
 })();

@@ -44,7 +44,8 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
 /* chunky outlined text, the game's voice */
 .logo, .big-btn span, .col-head, .timer b, .timer small, .enum, .x2, .banner, .countdown, .nameplate b,
-.result-card h2, .vs, .vs-side b, .trainer h2, .deck-head h3, .score-row, .bubble, .mini-timer, .res-row span {
+.result-card h2, .vs, .vs-side b, .deck-head h3, .score-row, .bubble, .mini-timer, .res-row span,
+.brand, .lvl-badge, .nav-btn span, .pb-name b, .hero-title b, .node b, .w-head b, .panel h3, .deck-btn, .res-unlock {
   font-family: var(--display);
   font-weight: 400;
   letter-spacing: 0.01em;
@@ -76,60 +77,192 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 }
 .pill.gold { background: linear-gradient(#ffe27a, var(--gold-dark)); color: var(--outline); box-shadow: 0 3px 0 #8a5a05; }
 
-/* ---------- home ---------- */
+/* ---------- the main menu ----------
+   Layout: a top bar across, then three columns (sidebar | stage | side panels). On narrow screens the
+   sidebar becomes a bottom tab bar and everything stacks. */
 #home {
-  overflow-y: auto;
+  overflow: hidden;
   background:
-    radial-gradient(ellipse at 50% -10%, rgba(255, 61, 139, 0.35), transparent 55%),
-    radial-gradient(ellipse at 10% 110%, rgba(47, 124, 246, 0.3), transparent 50%),
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.025) 0 22px, transparent 22px 44px),
+    radial-gradient(ellipse at 50% -20%, rgba(255, 61, 139, 0.32), transparent 55%),
+    radial-gradient(ellipse at 0% 110%, rgba(47, 124, 246, 0.28), transparent 50%),
+    radial-gradient(ellipse at 100% 110%, rgba(229, 65, 75, 0.22), transparent 50%),
     linear-gradient(#2a1650, var(--ink));
 }
-.home-wrap {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding-block: 28px 32px;
+.menu {
+  height: 100%;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr) 260px;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 14px;
+  padding-block: 12px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
 }
-.home-head { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.logo-crown { width: 84px; height: 60px; filter: drop-shadow(0 4px 0 rgba(0, 0, 0, 0.35)); animation: bob 3s ease-in-out infinite; }
-.logo { margin: 0; font-size: clamp(44px, 7vw, 84px); line-height: 0.95; text-wrap: balance; }
-.logo-a { color: #fff; }
-.logo-b { color: var(--gold); }
-.tag {
-  margin: 6px 0 0;
-  padding: 4px 16px;
-  border-radius: 999px;
-  background: rgba(255, 61, 139, 0.18);
-  border: 2px solid rgba(255, 61, 139, 0.5);
-  color: #ffd1e4;
-  font-size: 14px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-@keyframes bob { 50% { transform: translateY(-6px) rotate(-3deg); } }
-
-.home-main { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 20px; align-items: start; }
-.trainer, .deck {
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.panel, .widget, .topbar, .opp, .deck-btn {
   background: linear-gradient(var(--panel-2), var(--panel));
   border: 3px solid var(--line);
-  border-radius: 22px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.06);
 }
-.trainer { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
-#owenPic { width: 168px; height: 168px; border-radius: 22px; border: 3px solid var(--outline); box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3); }
-.trainer h2 { margin: 2px 0 6px; font-size: 32px; color: #ffd1d4; }
-.trainer p { margin: 0; color: var(--muted); line-height: 1.45; }
-.eyebrow { font-size: 12px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--glow) !important; font-weight: 900; }
-.record { margin-top: 8px !important; color: #fff !important; font-weight: 800; }
-.trainer .big-btn { width: 100%; }
 
-.deck { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+/* top bar */
+.topbar { grid-column: 1 / -1; display: flex; align-items: center; gap: 18px; padding: 8px 12px 8px 16px; }
+.brand { display: flex; align-items: center; gap: 10px; font-size: 26px; white-space: nowrap; }
+.brand svg { width: 42px; height: 30px; }
+.brand b { color: var(--gold); font-weight: 400; }
+.lvl { display: flex; align-items: center; gap: 0; }
+.lvl-badge {
+  position: relative; z-index: 1; isolation: isolate; width: 42px; height: 42px; display: grid; place-items: center;
+  font-size: 20px; color: #fff;
+}
+.lvl-badge::before {
+  content: ''; position: absolute; inset: 5px; z-index: -1; transform: rotate(45deg); border-radius: 9px;
+  background: radial-gradient(circle at 35% 30%, #8cc4ff, var(--blue) 60%, #1a4ba8);
+  border: 3px solid var(--outline); box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+}
+.lvl-bar { position: relative; width: 150px; height: 26px; margin-left: -10px; border-radius: 0 13px 13px 0; background: #120c22; border: 3px solid var(--outline); overflow: hidden; }
+.lvl-bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: linear-gradient(#8cdcff, #2fa6e8); }
+.lvl-bar span { position: relative; display: block; text-align: center; font-size: 13px; line-height: 20px; font-weight: 900; text-shadow: 0 1px 2px #000; }
+.wallet { margin-left: auto; display: flex; gap: 10px; }
+.chip {
+  display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 4px 0 6px; min-width: 150px;
+  background: #120c22; border: 3px solid var(--outline); border-radius: 12px; font-size: 18px;
+}
+.chip b { flex: 1; text-align: right; font-family: var(--display); font-weight: 400; color: #cbbfec; }
+.chip .plus { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: linear-gradient(#7ee07e, #2fa84f); border: 2px solid var(--outline); font-weight: 900; color: #fff; }
+.coin-i, .gem-i { width: 24px; height: 24px; flex: none; }
+.coin-i { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff1a6, var(--gold) 55%, #c7840c); border: 2px solid var(--outline); }
+.gem-i { background: linear-gradient(135deg, #b8f2ff, #39b8f0 55%, #1f6fd0); clip-path: polygon(50% 0, 100% 35%, 50% 100%, 0 35%); }
+.icon-btn { width: 42px; height: 42px; border-radius: 12px; border: 3px solid var(--outline); background: linear-gradient(#5a6fd8, #3846a8); display: grid; place-items: center; box-shadow: 0 3px 0 #1f2766; }
+.icon-btn svg { width: 22px; height: 22px; }
+.icon-btn.off #soundWaves { opacity: 0.15; }
+
+/* sidebar */
+.sidenav { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.nav-btn {
+  display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; gap: 10px;
+  padding: 11px 12px; border-radius: 14px; border: 3px solid var(--outline); text-align: left;
+  background: linear-gradient(#3b416f, #262a4f); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); color: #e8e4ff;
+  transition: transform 0.08s;
+}
+.nav-btn svg { width: 24px; height: 24px; }
+.nav-btn span { font-size: 18px; }
+.nav-btn kbd { display: none; }
+.nav-btn:hover { transform: translateX(3px); }
+.nav-btn.on { background: linear-gradient(#ffe27a, var(--gold) 50%, var(--gold-dark)); color: var(--outline); box-shadow: 0 4px 0 #8a5a05; }
+.nav-btn.on span { color: #fff; }
+.nav-tag { grid-column: 3; font-style: normal; font-size: 11px; font-weight: 900; padding: 2px 7px; border-radius: 999px; background: rgba(0, 0, 0, 0.35); color: #cbbfec; }
+.nav-tag.new { background: var(--red); color: #fff; animation: bob 1.4s ease-in-out infinite; }
+.nav-tag.open { background: #2fa84f; color: #fff; }
+.nav-btn.on .nav-tag { background: rgba(28, 21, 48, 0.25); color: var(--outline); }
+.nav-btn:has(.nav-tag) kbd { display: none; }
+
+/* stage */
+.stage { min-height: 0; min-width: 0; overflow-y: auto; }
+#tab-battle { height: 100%; display: flex; flex-direction: column; gap: 12px; min-height: 520px; }
+.player-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.player-banner small { color: var(--muted); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; font-size: 12px; }
+.pb-name { display: flex; align-items: center; gap: 10px; }
+.pb-name b { font-size: 30px; line-height: 1; }
+.mini-btn { font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 999px; border: 2px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.08); color: #e8e4ff; }
+.name-form { display: flex; gap: 8px; align-items: center; }
+.name-form input { font: 800 18px var(--body); padding: 6px 10px; width: 200px; border-radius: 10px; border: 3px solid var(--outline); background: #fff; color: var(--outline); }
+.arena-progress { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; font-weight: 900; }
+.ap-bar { width: 220px; height: 14px; border-radius: 999px; background: #120c22; border: 3px solid var(--outline); overflow: hidden; }
+.ap-bar i { display: block; height: 100%; width: 0; background: linear-gradient(#ffe27a, var(--gold-dark)); transition: width 0.4s; }
+
+.hero {
+  position: relative; flex: 1 1 260px; min-height: 230px; overflow: hidden;
+  border-radius: 22px; border: 3px solid var(--outline);
+  background: #1a0f36; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(255, 61, 139, 0.35);
+}
+.hero-bg { position: absolute; top: 0; bottom: 0; width: 52%; background-size: cover; }
+.hero-bg.left { left: 0; background-position: 40% 68%; -webkit-mask-image: linear-gradient(90deg, #000 55%, transparent); mask-image: linear-gradient(90deg, #000 55%, transparent); }
+.hero-bg.right { right: 0; background-position: 30% 68%; -webkit-mask-image: linear-gradient(270deg, #000 55%, transparent); mask-image: linear-gradient(270deg, #000 55%, transparent); }
+.hero::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 60%, transparent 35%, rgba(18, 10, 36, 0.55)); pointer-events: none; }
+.hero-arena { position: absolute; left: 50%; top: 56%; transform: translate(-50%, -50%) perspective(900px) rotateX(50deg); filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.55)); }
+.hero-arena canvas { display: block; border-radius: 10px; }
+.hero-title { position: absolute; z-index: 1; top: 12px; left: 50%; transform: translateX(-50%); text-align: center; line-height: 1; }
+.hero-title small { display: block; font-size: 12px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: #ffd1e4; text-shadow: 0 1px 3px #000; }
+.hero-title b { font-size: clamp(28px, 3.2vw, 42px); color: var(--gold); }
+.next-bubble {
+  position: absolute; z-index: 1; right: 16px; bottom: 16px; min-width: 150px;
+  background: #fff; color: var(--outline); border: 3px solid var(--outline); border-radius: 14px; overflow: hidden;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3); text-align: center;
+}
+.next-bubble small { display: block; background: linear-gradient(#ffe27a, var(--gold-dark)); font-family: var(--display); font-size: 14px; padding: 3px 10px; color: #fff; text-shadow: 0 1px 0 var(--outline), 1px 0 0 var(--outline), -1px 0 0 var(--outline), 0 -1px 0 var(--outline); }
+.next-bubble b { display: block; padding: 6px 12px 8px; font-weight: 900; font-size: 15px; }
+
+/* the trainer path */
+.path { list-style: none; margin: 0; padding: 0; display: flex; align-items: flex-start; justify-content: center; }
+.path .node { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 104px; text-align: center; }
+.path .link { flex: 0 1 70px; height: 8px; margin-top: 30px; border-radius: 999px; background: #120c22; border: 2px solid var(--outline); }
+.path .link.done { background: linear-gradient(#ffe27a, var(--gold-dark)); }
+.node-btn { position: relative; padding: 0; border: 0; background: none; border-radius: 16px; }
+.node-btn canvas, .road-icon { display: block; width: 66px; height: 66px; border-radius: 16px; border: 3px solid var(--outline); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); }
+.node b { font-size: 17px; font-family: var(--display); font-weight: 400; }
+.node small { font-size: 11px; color: var(--muted); font-weight: 800; }
+.node.current .node-btn canvas { border-color: var(--gold); box-shadow: 0 0 0 3px var(--outline), 0 0 18px rgba(255, 207, 63, 0.9); animation: bob 2s ease-in-out infinite; }
+.node.locked b { color: #8d84ad; }
+.node-mark { position: absolute; right: -6px; bottom: -6px; width: 24px; height: 24px; border-radius: 50%; border: 3px solid var(--outline); display: none; }
+.node.beaten .node-mark { display: block; background: #2fa84f url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' stroke='white' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat; }
+.node.nope { animation: shake 0.3s; }
+.road-icon { background: linear-gradient(#ffd27a, #e98a2b) ; display: grid; }
+.road-icon::before { content: ''; margin: auto; width: 38px; height: 38px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 3h12v3h3v3a4 4 0 0 1-4 4h-.5A5 5 0 0 1 13 16v2h3v3H8v-3h3v-2a5 5 0 0 1-3.5-3H7a4 4 0 0 1-4-4V6h3z' fill='%23ffcf3f' stroke='%231c1530' stroke-width='1.6'/%3E%3C/svg%3E") center / contain no-repeat; background-color: transparent; }
+.road-node.locked .road-icon { filter: grayscale(1) brightness(0.55); }
+
+/* the Battle row */
+.battle-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 220px; gap: 12px; align-items: stretch; }
+.deck-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 8px; font-family: var(--display); font-size: 18px; transition: transform 0.08s; }
+.deck-btn:hover { transform: translateY(-2px); }
+.deck-thumbs { display: flex; }
+.deck-thumbs img { width: 38px; border-radius: 6px; border: 2px solid var(--outline); margin: 0 -6px; }
+.deck-thumbs img:nth-child(1) { transform: rotate(-10deg) translateY(4px); }
+.deck-thumbs img:nth-child(3) { transform: rotate(10deg) translateY(4px); }
+.battle-main { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 20px; }
+.battle-main span { font-size: 46px; line-height: 1; }
+.battle-main small { font-weight: 900; font-size: 15px; color: #5a3a00; margin-top: 4px; }
+.opp { display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 10px 12px; }
+.opp label { font-size: 12px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.opp select { font: 800 15px var(--body); padding: 8px; border-radius: 10px; border: 3px solid var(--outline); background: #fff; color: var(--outline); width: 100%; }
+
+/* side panels */
+.widgets { display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow-y: auto; }
+.widget { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.widget p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.w-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.w-head b { font-size: 19px; }
+.w-lock { font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 999px; background: rgba(0, 0, 0, 0.35); color: #cbbfec; }
+.pass-bar { display: flex; align-items: center; gap: 8px; opacity: 0.6; }
+.pass-bar div { flex: 1; height: 16px; border-radius: 999px; background: #120c22; border: 3px solid var(--outline); }
+.pass-tier { width: 30px; height: 30px; display: grid; place-items: center; transform: rotate(45deg); background: linear-gradient(#ffe27a, var(--gold-dark)); border: 3px solid var(--outline); border-radius: 6px; font-family: var(--display); }
+.pass-bar small { font-weight: 900; }
+.slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.slots i { aspect-ratio: 1; border-radius: 10px; border: 2px dashed rgba(203, 191, 236, 0.35); background: rgba(0, 0, 0, 0.2); }
+.records { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.records li { display: flex; justify-content: space-between; gap: 8px; padding: 6px 10px; border-radius: 10px; background: rgba(0, 0, 0, 0.22); font-size: 14px; font-variant-numeric: tabular-nums; }
+.records li b { color: #fff; }
+.records li.dim { opacity: 0.5; }
+
+/* other tabs */
+.panel { padding: 20px; }
+.tab.panel { display: flex; flex-direction: column; gap: 14px; }
+.locked-panel { align-items: center; text-align: center; justify-content: center; min-height: 360px; }
+.locked-panel h3 { margin: 0; font-size: 32px; }
+.locked-panel p { margin: 0; max-width: 52ch; color: var(--muted); line-height: 1.5; }
+.lock-big, .soon-big { width: 84px; height: 84px; border-radius: 24px; border: 3px solid var(--outline); background: linear-gradient(#6b6f86, #3c3f55); position: relative; }
+.lock-big::before { content: ''; position: absolute; left: 22px; top: 36px; width: 40px; height: 30px; border-radius: 6px; background: #d9dbe5; border: 3px solid var(--outline); box-sizing: border-box; }
+.lock-big::after { content: ''; position: absolute; left: 28px; top: 16px; width: 28px; height: 26px; border: 5px solid #d9dbe5; border-bottom: 0; border-radius: 16px 16px 0 0; box-sizing: border-box; }
+#tab-road.open .lock-big { background: linear-gradient(#ffd27a, #e98a2b); }
+#tab-road.open .lock-big::after { transform: translateX(10px) rotate(20deg); transform-origin: 100% 100%; }
+.soon-big { background: linear-gradient(#5a6fd8, #3846a8); }
+.soon-big::before { content: '…'; position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--display); font-size: 48px; color: #fff; }
+.road-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; width: min(360px, 100%); }
+.road-list li { display: flex; justify-content: space-between; padding: 10px 14px; border-radius: 12px; background: rgba(0, 0, 0, 0.25); font-weight: 900; }
+.road-list li.done b { color: #7ee07e; }
+.deck-head h3 { margin: 0; }
 .deck-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .deck-head h3 { margin: 0; font-size: 26px; }
 .deck-head small { color: var(--muted); }
@@ -179,11 +312,7 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 .stats span b { color: var(--gold); }
 .evo { color: #e6c8ff; font-size: 14px; }
 
-.how { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.how li { background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 12px 14px; color: var(--muted); line-height: 1.45; }
-.how b { color: #fff; }
 kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--outline); border-bottom-width: 4px; border-radius: 6px; padding: 0 6px; color: #fff; }
-.home-foot { display: flex; justify-content: center; }
 
 /* ---------- battle ---------- */
 #battle { background: radial-gradient(ellipse at 50% 0%, #2a1650, var(--ink) 70%); }
@@ -459,6 +588,7 @@ kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--out
 .res-crowns i { width: 34px; height: 24px; background: rgba(0, 0, 0, 0.35); clip-path: polygon(0 100%, 0 25%, 25% 55%, 50% 0, 75% 55%, 100% 25%, 100% 100%); display: block; }
 .res-crowns i.on { background: var(--gold); animation: pop 0.35s ease-out backwards; }
 .res-line { margin: 0; font-size: 18px; line-height: 1.4; }
+.res-unlock { margin: 0; font-size: 24px; color: var(--gold); animation: pop 0.4s ease-out 0.3s backwards; }
 .res-small { margin: 0; color: var(--muted); font-size: 14px; }
 .res-btns { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 4px; }
 .res-btns .big-btn { width: 100%; }
@@ -483,9 +613,33 @@ kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--out
 #battle.narrow .card .cost { width: 24px; height: 24px; font-size: 13px; }
 #battle.narrow .card .key { display: none; }
 
+/* Narrower windows: drop the side panels' column, then stack everything with a bottom tab bar. */
+@media (max-width: 1180px) {
+  .menu { grid-template-columns: 180px minmax(0, 1fr); }
+  .widgets { display: none; }
+}
 @media (max-width: 820px) {
-  .home-main { grid-template-columns: minmax(0, 1fr); }
-  .how { grid-template-columns: minmax(0, 1fr); }
+  #home { overflow-y: auto; }
+  .menu { height: auto; min-height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; padding-bottom: 96px; }
+  .topbar { flex-wrap: wrap; gap: 10px; }
+  .wallet { margin-left: 0; }
+  .chip { min-width: 0; }
+  .sidenav {
+    position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; flex-direction: row; gap: 4px;
+    padding: 8px max(8px, env(safe-area-inset-left, 0px)) calc(8px + env(safe-area-inset-bottom, 0px));
+    background: #1d1440; border-top: 3px solid var(--line);
+  }
+  .nav-btn { flex: 1; grid-template-columns: 1fr; justify-items: center; padding: 6px 2px; gap: 2px; min-width: 0; }
+  .nav-btn span { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .nav-tag { display: none; }
+  .widgets { display: flex; }
+  #tab-battle { min-height: 0; height: auto; }
+  .hero { flex: none; height: 280px; }
+  .battle-row { grid-template-columns: minmax(0, 1fr); }
+  .deck-btn { flex-direction: row; }
+  .path .node { width: 72px; }
+  .path .link { flex-basis: 24px; }
+  .next-bubble { right: 8px; bottom: 8px; min-width: 0; }
 }
 @media (max-width: 480px) {
   .deck-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -500,40 +654,113 @@ kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--out
 </style>
 <div id="app">
 
-  <!-- HOME -->
+  <!-- HOME: top bar, sidebar, stage, side panels -->
   <section class="screen" id="home">
-    <div class="home-wrap">
-      <header class="home-head">
-        <svg class="logo-crown" viewBox="0 0 100 70" aria-hidden="true"><path d="M8 62 L8 22 L30 40 L50 6 L70 40 L92 22 L92 62 Z" fill="#ffcf3f" stroke="#1c1530" stroke-width="6" stroke-linejoin="round"/><circle cx="50" cy="46" r="7" fill="#e5414b" stroke="#1c1530" stroke-width="4"/></svg>
-        <h1 class="logo"><span class="logo-a">Kingdom</span> <span class="logo-b">Clash</span></h1>
-        <p class="tag">Training Camp</p>
+    <div class="menu">
+      <header class="topbar">
+        <div class="brand">
+          <svg viewBox="0 0 100 70" aria-hidden="true"><path d="M8 62 L8 22 L30 40 L50 6 L70 40 L92 22 L92 62 Z" fill="#ffcf3f" stroke="#1c1530" stroke-width="7" stroke-linejoin="round"/><circle cx="50" cy="46" r="7" fill="#e5414b" stroke="#1c1530" stroke-width="4"/></svg>
+          <span>Kingdom <b>Clash</b></span>
+        </div>
+        <div class="lvl" title="Account level: wins and matches add experience">
+          <span class="lvl-badge" id="lvlNum">1</span>
+          <div class="lvl-bar"><i id="xpFill"></i><span id="xpText">0 / 100</span></div>
+        </div>
+        <div class="wallet">
+          <button class="chip" type="button" data-tab="shop" title="Coins arrive with the SirSC wallet"><span class="coin-i" aria-hidden="true"></span><b id="coinVal">&ndash;</b><span class="plus" aria-hidden="true">+</span><span class="sr">Coins</span></button>
+          <button class="chip" type="button" data-tab="shop" title="Diamonds arrive with the SirSC wallet"><span class="gem-i" aria-hidden="true"></span><b id="gemVal">&ndash;</b><span class="plus" aria-hidden="true">+</span><span class="sr">Diamonds</span></button>
+        </div>
+        <button class="icon-btn" id="soundBtn" type="button" aria-label="Sound on" title="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="soundWaves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
       </header>
 
-      <div class="home-main">
-        <div class="trainer">
-          <canvas id="owenPic" width="220" height="220" aria-label="Trainer Owen"></canvas>
-          <div class="trainer-info">
-            <p class="eyebrow">Your opponent</p>
-            <h2>Trainer Owen</h2>
-            <p>Your first tutorial match. Owen goes easy on you while you learn how to place cards and take towers.</p>
-            <p class="record" id="record"></p>
-          </div>
-          <button class="big-btn" id="battleBtn" type="button"><span>Battle</span></button>
-        </div>
+      <nav class="sidenav" aria-label="Menu">
+        <button class="nav-btn on" type="button" data-tab="battle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3l9 9-2 2-9-9V3zM20 3v2l-6.5 6.5-2-2L18 3zM5 16l3 3-2 2-3-3zM19 16l2 2-2 2-2-2-5-5 2-2z" fill="currentColor"/></svg><span>Battle</span><kbd>1</kbd></button>
+        <button class="nav-btn" type="button" data-tab="cards"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="11" height="15" rx="2" fill="currentColor" opacity=".55"/><rect x="9" y="3" width="11" height="15" rx="2" fill="currentColor"/></svg><span>Cards</span><kbd>2</kbd></button>
+        <button class="nav-btn" type="button" data-tab="road"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v3h3v3a4 4 0 0 1-4 4h-.5A5 5 0 0 1 13 16v2h3v3H8v-3h3v-2a5 5 0 0 1-3.5-3H7a4 4 0 0 1-4-4V6h3zm-1 5v1a2 2 0 0 0 1.5 1.9V8zm13 0v2.9A2 2 0 0 0 19.5 9V8z" fill="currentColor"/></svg><span>Trophy Road</span><i class="nav-tag" id="roadTag">Locked</i><kbd>3</kbd></button>
+        <button class="nav-btn" type="button" data-tab="shop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8a3 3 0 0 1 6 0" stroke="currentColor" stroke-width="2" fill="none"/><rect x="5" y="8" width="14" height="12" rx="2" fill="currentColor" opacity=".35"/></svg><span>Shop</span><i class="nav-tag soon">Soon</i><kbd>4</kbd></button>
+        <button class="nav-btn" type="button" data-tab="clan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z" fill="currentColor"/></svg><span>Clan</span><i class="nav-tag soon">Soon</i><kbd>5</kbd></button>
+        <button class="nav-btn" type="button" data-tab="events"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="currentColor" opacity=".4"/><rect x="3" y="5" width="18" height="5" rx="2" fill="currentColor"/><path d="M8 3v4M16 3v4" stroke="currentColor" stroke-width="2"/></svg><span>Events</span><i class="nav-tag soon">Soon</i><kbd>6</kbd></button>
+      </nav>
 
-        <div class="deck">
-          <div class="deck-head"><h3>Your Deck</h3><small>8 cards &middot; average 3.5 energy</small></div>
+      <main class="stage">
+        <!-- Battle tab -->
+        <section class="tab" id="tab-battle">
+          <div class="player-row">
+            <div class="player-banner">
+              <div class="pb-name"><b id="playerName">Player</b><button class="mini-btn" id="editName" type="button">Edit name</button></div>
+              <form class="name-form" id="nameForm" hidden><label class="sr" for="nameInput">Your name</label><input id="nameInput" maxlength="16" autocomplete="off"><button class="mini-btn" type="submit">Save</button></form>
+              <small>Training Grounds</small>
+            </div>
+            <div class="arena-progress"><span id="trainersBeaten">0 of 3 trainers beaten</span><div class="ap-bar"><i id="apFill"></i></div></div>
+          </div>
+
+          <div class="hero" id="hero">
+            <div class="hero-bg left" id="heroL"></div><div class="hero-bg right" id="heroR"></div>
+            <div class="hero-arena"><canvas id="heroArena" aria-label="The Training Grounds arena"></canvas></div>
+            <div class="hero-title"><small>Arena</small><b>Training Grounds</b></div>
+            <div class="next-bubble" id="nextBubble"><small>Next goal</small><b id="nextGoal">Beat Trainer Owen</b></div>
+          </div>
+
+          <ol class="path" id="trainerPath" aria-label="Trainer path"></ol>
+
+          <div class="battle-row">
+            <button class="deck-btn" id="deckBtn" type="button" title="See your deck"><span class="deck-thumbs" id="deckThumbs"></span><span>Deck</span></button>
+            <button class="big-btn battle-main" id="battleBtn" type="button"><span>Battle</span><small id="battleSub">vs Trainer Owen</small></button>
+            <div class="opp">
+              <label for="oppSel">Opponent</label>
+              <select id="oppSel"></select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Cards tab -->
+        <section class="tab panel" id="tab-cards" hidden>
+          <div class="deck-head"><h3>Your Deck</h3><small>8 cards &middot; average 3.5 energy &middot; click a card for its stats</small></div>
           <div class="deck-grid" id="deckGrid"></div>
           <div class="card-info" id="cardInfo"></div>
-        </div>
-      </div>
+        </section>
 
-      <ol class="how">
-        <li><b>Drag a card</b> onto your side of the arena, or press <kbd>1</kbd>&ndash;<kbd>4</kbd> and click.</li>
-        <li><b>Energy</b> refills over time. Each card costs what&rsquo;s on its badge.</li>
-        <li><b>Knock down towers</b> for crowns. Take the King Tower for all three.</li>
-      </ol>
-      <div class="home-foot"><button class="pill" id="soundBtn" type="button">Sound: On</button></div>
+        <!-- Trophy Road tab -->
+        <section class="tab panel locked-panel" id="tab-road" hidden>
+          <div class="lock-big" aria-hidden="true"></div>
+          <h3 id="roadTitle">Trophy Road is locked</h3>
+          <p id="roadText">Beat all three Training Grounds trainers to open it.</p>
+          <ol class="road-list" id="roadList"></ol>
+        </section>
+
+        <section class="tab panel locked-panel" id="tab-shop" hidden>
+          <div class="soon-big" aria-hidden="true"></div>
+          <h3>The Shop is coming</h3>
+          <p>It opens with the SirSC wallet: coins you earn by playing, diamonds, and SirSC Membership. Everything sold here will be listed with exactly what you get.</p>
+        </section>
+        <section class="tab panel locked-panel" id="tab-clan" hidden>
+          <div class="soon-big" aria-hidden="true"></div>
+          <h3>Clans are coming</h3>
+          <p>Team up with friends, chat and trade cards. Friend battles by room code come first.</p>
+        </section>
+        <section class="tab panel locked-panel" id="tab-events" hidden>
+          <div class="soon-big" aria-hidden="true"></div>
+          <h3>Events are coming</h3>
+          <p>Weekly challenges with special rules and fixed rewards, once the Trophy Road is open.</p>
+        </section>
+      </main>
+
+      <aside class="widgets" aria-label="Side panels">
+        <div class="widget">
+          <div class="w-head"><b>Kingdom Pass</b><span class="w-lock">Locked</span></div>
+          <div class="pass-bar"><span class="pass-tier">1</span><div><i></i></div><small>0/10</small></div>
+          <p>Opens with the Trophy Road. Members get the premium track.</p>
+        </div>
+        <div class="widget">
+          <div class="w-head"><b>Chests</b><span class="w-lock">Locked</span></div>
+          <div class="slots"><i></i><i></i><i></i><i></i></div>
+          <p>Win Trophy Road battles to earn chests.</p>
+        </div>
+        <div class="widget">
+          <div class="w-head"><b>Trainer records</b></div>
+          <ul class="records" id="records"></ul>
+        </div>
+      </aside>
     </div>
   </section>
 
@@ -550,7 +777,7 @@ kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--out
 
       <main class="arena-box" id="arenaBox">
         <canvas id="arena" aria-label="Battle arena"></canvas>
-        <div class="nameplate"><b>Trainer Owen</b><small>Training Camp</small></div>
+        <div class="nameplate"><b id="foeName">Trainer Owen</b><small id="foeTier">Training Grounds</small></div>
         <div class="bubble" id="bubble" hidden></div>
         <div class="banner" id="banner" hidden></div>
         <div class="countdown" id="countdown" hidden></div>
@@ -573,7 +800,7 @@ kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--out
       <aside class="side side-r">
         <div class="timer" id="timer"><small id="timerLabel">Time left</small><b id="timerVal">3:00</b></div>
         <div class="score">
-          <div class="score-row foe"><span>Trainer Owen</span><b><i class="crown-i"></i><em id="crownFoe">0</em></b></div>
+          <div class="score-row foe"><span id="scoreFoe">Trainer Owen</span><b><i class="crown-i"></i><em id="crownFoe">0</em></b></div>
           <div class="score-row you"><span>You</span><b><i class="crown-i"></i><em id="crownYou">0</em></b></div>
         </div>
         <canvas class="scene" id="sceneR" aria-hidden="true"></canvas>
@@ -581,19 +808,21 @@ kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--out
     </div>
 
     <div class="intro" id="intro" hidden>
-      <div class="vs-side you"><b>You</b><small>Training Camp</small></div>
+      <div class="vs-side you"><b id="introYou">You</b><small>Training Grounds</small></div>
       <div class="vs">VS</div>
-      <div class="vs-side foe"><canvas id="introOwen" width="120" height="120"></canvas><b>Trainer Owen</b></div>
+      <div class="vs-side foe"><canvas id="introFoe" width="160" height="160"></canvas><b id="introFoeName">Trainer Owen</b><small id="introFoeTier">Tutorial</small></div>
     </div>
 
     <div class="result" id="result" hidden>
       <div class="result-card">
         <h2 id="resTitle">Victory!</h2>
-        <div class="res-row foe"><span>Trainer Owen</span><div class="res-crowns" id="resFoe"></div></div>
+        <div class="res-row foe"><span id="resFoeName">Trainer Owen</span><div class="res-crowns" id="resFoe"></div></div>
         <div class="res-row you"><span>You</span><div class="res-crowns" id="resYou"></div></div>
         <p class="res-line" id="resLine"></p>
+        <p class="res-unlock" id="resUnlock" hidden></p>
         <p class="res-small" id="resSmall"></p>
         <div class="res-btns">
+          <button class="big-btn" id="nextBtn" type="button" hidden><span id="nextBtnText">Battle Trainer Romeo</span></button>
           <button class="big-btn" id="againBtn" type="button"><span>Play Again</span></button>
           <button class="pill" id="homeBtn" type="button">Home</button>
         </div>
@@ -665,6 +894,63 @@ const KC_CARDS = {
 };
 
 const KC_STARTER_DECK = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'];
+
+/* Kingdom Clash: the three Training Grounds trainers. They are played in order, and beating all three
+   opens the Trophy Road. Each has a bot skill (js/bot.js), how hard their troops hit your towers
+   (1 = full strength), a look for their portrait (js/art.js) and what they say during a match. */
+'use strict';
+
+const KC_TRAINERS = [
+  {
+    id: 'owen', name: 'Trainer Owen', short: 'Owen', level: 1, tier: 'Tutorial',
+    skill: 'tutorial', towerDamage: 0.25,
+    blurb: 'Your first match. Owen goes easy on you while you learn to place cards and take towers.',
+    look: { bg: ['#ffd27a', '#ea8b2b'], hair: 'cap', hat: '#2f6fe4', hatSh: '#1d4fb8', hairCol: '#7a4a2a', shirt: '#dc3640', skin: '#f2c4a0', extra: 'whistle', mouth: 'smile' },
+    lines: {
+      start: ["Let's see what you've got!", "Don't worry, I'll go easy on you.", 'Ready? Put a card on your side!'],
+      youTower: ['Whoa, nice hit!', 'Hey! I liked that tower.', 'Not bad at all!'],
+      myTower: ['Gotcha!', 'Watch your towers!', "That one's mine!"],
+      double: 'Double energy! Things speed up now.',
+      overtime: 'Overtime! Whoever takes the next tower wins.',
+      youWin: ['You beat Trainer Owen! Romeo is next, and he hits harder.', 'Nice work! Owen says you are ready for Romeo.'],
+      youLose: ['Owen got you this time. One more?'],
+      draw: 'Dead even. Break the tie?',
+    },
+  },
+  {
+    id: 'romeo', name: 'Trainer Romeo', short: 'Romeo', level: 2, tier: 'Mid tier',
+    skill: 'romeo', towerDamage: 0.45,
+    blurb: 'Quick and cocky. Romeo defends his lanes, backs up his pushes and makes slow players pay.',
+    look: { bg: ['#c99bff', '#7440cf'], hair: 'curly', hairCol: '#2a1d18', band: '#ffcd33', shirt: '#2fb36b', skin: '#d9a27a', extra: 'scarf', mouth: 'smirk' },
+    lines: {
+      start: ['Owen went easy on you. I won’t.', 'Hope you brought your best cards!', 'Let’s make this quick.'],
+      youTower: ['Lucky shot!', 'Okay, okay, I saw that.', 'Hey! That was my favorite tower.'],
+      myTower: ['Ha! Did you see that?', 'Too slow!', 'One down!'],
+      double: 'Double energy, double trouble!',
+      overtime: 'Overtime! Don’t blink.',
+      youWin: ['Fine, you win. Luc won’t be this nice.', 'You beat Romeo! Luc is the last trainer.'],
+      youLose: ['Romeo wins this one. Want a rematch?', 'Too slow! Try backing up your pushes.'],
+      draw: 'A tie? Rematch, right now.',
+    },
+  },
+  {
+    id: 'luc', name: 'Trainer Luc', short: 'Luc', level: 3, tier: 'Hard',
+    skill: 'luc', towerDamage: 0.6,
+    blurb: 'The last test before the Trophy Road. Luc hits hard, defends well and uses every card.',
+    look: { bg: ['#9fc0e0', '#3c5d8c'], hair: 'beard', hairCol: '#c9ccd6', shirt: '#3d4459', skin: '#efc19c', extra: 'armor', mouth: 'flat' },
+    lines: {
+      start: ['Show me what you learned.', 'No more practice. This is the real thing.', 'Every card counts. Play carefully.'],
+      youTower: ['Hmph. Well played.', 'Good. Again.', 'You found the gap.'],
+      myTower: ['I saw that push a mile away.', 'Defend your lanes.', 'Too greedy.'],
+      double: 'Double energy. Spend it wisely.',
+      overtime: 'Overtime. One tower decides it.',
+      youWin: ['You beat Luc! The Trophy Road is open.', 'Well fought. The Trophy Road is yours.'],
+      youLose: ['Not yet. Watch how I defend, then try again.', 'Luc wins. Your next try will be better.'],
+      draw: 'Even. Again.',
+    },
+  },
+];
+const KC_TRAINER = Object.fromEntries(KC_TRAINERS.map(t => [t.id, t]));
 
 /* Kingdom Clash: the battle simulation. Plain state advanced in fixed steps (30 a second) with no DOM,
    so the same code runs in the page, in Node for tests, and later on both ends of an online match
@@ -1143,6 +1429,10 @@ const KCBot = (() => {
     trainer: { react: [1.8, 3.2], sloppy: 0.45, attackAt: 9.8, idle: 0.35, fireballValue: 7, defend: 0.45 },
     // The first tutorial opponent: slow, waits between cards, barely defends, never uses Fireball.
     tutorial: { react: [2.6, 4.2], sloppy: 0.6, attackAt: 10, idle: 0.6, fireballValue: 99, defend: 0.3, gap: [4, 7] },
+    // Trainer Romeo, the second trainer: reacts in good time, defends most pushes, backs up his own.
+    romeo: { react: [1.7, 2.9], sloppy: 0.35, attackAt: 9.6, idle: 0.3, fireballValue: 7.5, defend: 0.55, gap: [2.0, 3.4] },
+    // Trainer Luc, the last trainer before the Trophy Road: quick, accurate, fireballs clumps.
+    luc: { react: [1.4, 2.5], sloppy: 0.28, attackAt: 9.3, idle: 0.2, fireballValue: 6.5, defend: 0.62, gap: [1.7, 2.9] },
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
   const ROLE = {
@@ -1272,7 +1562,7 @@ const KCBot = (() => {
   return { create, update };
 })();
 
-/* Kingdom Clash: everything drawn in code (troops, towers, the arena, card portraits, Trainer Owen).
+/* Kingdom Clash: everything drawn in code (troops, towers, the arena, card portraits, the trainers).
 
    The style: chunky shapes, thick dark outlines, flat colours with one darker shade along the
    bottom of each shape. Every troop and tower has two views. Your side is seen from behind (it faces
@@ -1780,33 +2070,71 @@ const KCArt = (() => {
   }
 
 
-  /* ---------- Trainer Owen ---------- */
-  function owen(cv) {
-    const c = cv.getContext('2d'), w = cv.width, h = cv.height, k = w;
+  /* ---------- trainer portraits ---------- */
+  // Head and shoulders of a trainer on a rounded square, from a look in js/trainers.js.
+  function trainer(cv, look, locked) {
+    const c = cv.getContext('2d'), w = cv.width, h = cv.height, q = v => v * w;
+    LW = Math.max(1.5, w * 0.022);
     c.clearRect(0, 0, w, h);
     const g = c.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#ffcf6b'); g.addColorStop(1, '#e98a2b');
-    rr(c, 0, 0, w, h, w * 0.14); c.fillStyle = g; c.fill();
-    c.save(); rr(c, 0, 0, w, h, w * 0.14); c.clip();
-    rr(c, w * 0.12, h * 0.72, w * 0.76, h * 0.5, w * 0.2); paint(c, '#e5414b', k * 0.025);
-    rr(c, w * 0.44, h * 0.72, w * 0.12, h * 0.3, w * 0.03); paint(c, '#ffffff');
-    line(c, w * 0.36, h * 0.72, w * 0.5, h * 0.9, '#2b2b36', k * 0.018);
-    line(c, w * 0.64, h * 0.72, w * 0.5, h * 0.9, '#2b2b36', k * 0.018);
-    rr(c, w * 0.45, h * 0.88, w * 0.1, w * 0.06, w * 0.02); paint(c, '#c9ced6', k * 0.015);
-    circ(c, w * 0.5, h * 0.47, w * 0.27); paint(c, '#f0c29e', k * 0.025);
-    circ(c, w * 0.24, h * 0.5, w * 0.06); paint(c, '#e8b08a', k * 0.02);
-    circ(c, w * 0.76, h * 0.5, w * 0.06); paint(c, '#e8b08a', k * 0.02);
-    c.beginPath(); c.arc(w * 0.5, h * 0.42, w * 0.29, Math.PI, 0); c.closePath(); paint(c, '#2f7cf6', k * 0.025);
-    rr(c, w * 0.42, h * 0.36, w * 0.48, h * 0.07, w * 0.03); paint(c, '#1a4ba8', k * 0.02);
-    crownIcon(c, w * 0.5, h * 0.26, w * 0.06, '#ffcf3f');
-    eye(c, w * 0.41, h * 0.5, w * 0.04); eye(c, w * 0.59, h * 0.5, w * 0.04);
-    c.beginPath(); c.arc(w * 0.5, h * 0.58, w * 0.1, 0.2, Math.PI - 0.2); c.lineWidth = k * 0.022; c.strokeStyle = OUT; c.stroke();
-    c.fillStyle = 'rgba(230,110,90,0.35)'; circ(c, w * 0.34, h * 0.58, w * 0.04); c.fill(); circ(c, w * 0.66, h * 0.58, w * 0.04); c.fill();
+    g.addColorStop(0, look.bg[0]); g.addColorStop(1, look.bg[1]);
+    rr(c, 0, 0, w, h, q(0.14)); c.fillStyle = g; c.fill();
+    c.save(); rr(c, 0, 0, w, h, q(0.14)); c.clip();
+    const glow = c.createRadialGradient(q(0.5), q(0.4), q(0.05), q(0.5), q(0.4), q(0.6));
+    glow.addColorStop(0, 'rgba(255,255,255,0.35)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = glow; c.fillRect(0, 0, w, h);
+    // shoulders
+    sh(c, () => rr(c, q(0.1), q(0.74), q(0.8), q(0.5), q(0.2)), look.shirt, shade(look.shirt), q(0.05));
+    if (look.extra === 'armor') {
+      for (const x of [0.06, 0.6]) sh(c, () => rr(c, q(x), q(0.76), q(0.34), q(0.18), q(0.09)), '#c4cad6', '#949cab', q(0.04));
+      sh(c, () => rr(c, q(0.4), q(0.74), q(0.2), q(0.3), q(0.04)), '#dc3640', '#ae232d', q(0.03));
+    }
+    if (look.extra === 'scarf') sh(c, () => rr(c, q(0.3), q(0.7), q(0.4), q(0.12), q(0.06)), '#ffcd33', '#e09f12', q(0.03));
+    if (look.extra === 'whistle') {
+      rr(c, q(0.44), q(0.74), q(0.12), q(0.28), q(0.03)); paint(c, '#ffffff');
+      line(c, q(0.36), q(0.74), q(0.5), q(0.9), OUT, q(0.018)); line(c, q(0.64), q(0.74), q(0.5), q(0.9), OUT, q(0.018));
+      sh(c, () => rr(c, q(0.45), q(0.88), q(0.1), q(0.06), q(0.02)), '#c9ced6', null, 0);
+    }
+    // head
+    for (const x of [0.24, 0.76]) sh(c, () => circ(c, q(x), q(0.5), q(0.06)), look.skin, null, 0);
+    if (look.hair === 'curly') for (const [x, y, r] of [[0.28, 0.32, 0.11], [0.72, 0.32, 0.11], [0.26, 0.45, 0.08], [0.74, 0.45, 0.08]]) sh(c, () => circ(c, q(x), q(y), q(r)), look.hairCol, null, 0);
+    sh(c, () => circ(c, q(0.5), q(0.47), q(0.27)), look.skin, shade(look.skin), q(0.04));
+    if (look.hair === 'cap') {
+      sh(c, () => { c.beginPath(); c.arc(q(0.5), q(0.42), q(0.29), Math.PI, 0); c.closePath(); }, look.hat, look.hatSh, q(0.04));
+      sh(c, () => rr(c, q(0.42), q(0.36), q(0.48), q(0.07), q(0.03)), look.hatSh, null, 0);
+      crownIcon(c, q(0.5), q(0.26), q(0.06), C.gold);
+    } else if (look.hair === 'curly') {
+      for (const [x, y, r] of [[0.32, 0.25, 0.11], [0.47, 0.19, 0.12], [0.62, 0.22, 0.11], [0.72, 0.3, 0.09], [0.26, 0.33, 0.08]]) sh(c, () => circ(c, q(x), q(y), q(r)), look.hairCol, null, 0);
+      sh(c, () => rr(c, q(0.25), q(0.3), q(0.5), q(0.06), q(0.03)), look.band, null, 0);
+    } else if (look.hair === 'beard') {
+      sh(c, () => { c.beginPath(); c.arc(q(0.5), q(0.42), q(0.28), Math.PI * 1.02, Math.PI * 1.98); c.closePath(); }, look.hairCol, '#a4a8b5', q(0.03));
+      sh(c, () => { c.beginPath(); c.moveTo(q(0.25), q(0.5)); c.quadraticCurveTo(q(0.24), q(0.84), q(0.5), q(0.9)); c.quadraticCurveTo(q(0.76), q(0.84), q(0.75), q(0.5)); c.quadraticCurveTo(q(0.5), q(0.66), q(0.25), q(0.5)); c.closePath(); }, look.hairCol, '#a4a8b5', q(0.04));
+      line(c, q(0.33), q(0.4), q(0.45), q(0.43), OUT, q(0.028)); line(c, q(0.67), q(0.4), q(0.55), q(0.43), OUT, q(0.028));
+      line(c, q(0.62), q(0.36), q(0.68), q(0.5), '#c98466', q(0.014));
+    }
+    const ey = look.hair === 'beard' ? 0.48 : 0.5;
+    eye(c, q(0.41), q(ey), q(0.04)); eye(c, q(0.59), q(ey), q(0.04));
+    c.beginPath();
+    if (look.mouth === 'smile') c.arc(q(0.5), q(0.58), q(0.1), 0.2, Math.PI - 0.2);
+    else if (look.mouth === 'smirk') { c.moveTo(q(0.42), q(0.63)); c.quadraticCurveTo(q(0.54), q(0.67), q(0.61), q(0.6)); }
+    else { c.moveTo(q(0.43), q(0.6)); c.lineTo(q(0.57), q(0.6)); }
+    c.lineWidth = q(0.022); c.strokeStyle = OUT; c.lineCap = 'round'; c.stroke();
+    if (look.mouth !== 'flat') { c.fillStyle = 'rgba(230,110,90,0.32)'; circ(c, q(0.34), q(0.58), q(0.04)); c.fill(); circ(c, q(0.66), q(0.58), q(0.04)); c.fill(); }
     c.restore();
+    if (locked) {
+      rr(c, 0, 0, w, h, q(0.14)); c.fillStyle = 'rgba(20,14,40,0.62)'; c.fill();
+      sh(c, () => rr(c, q(0.36), q(0.48), q(0.28), q(0.22), q(0.04)), '#c9ccd6', '#9a9eab', q(0.04));
+      c.beginPath(); c.arc(q(0.5), q(0.48), q(0.09), Math.PI, 0); c.lineWidth = q(0.04); c.strokeStyle = '#c9ccd6'; c.stroke();
+    }
   }
+  // A darker version of a #rrggbb colour, for the shaded side of a shape.
+  function shade(hex) {
+    const n = parseInt(hex.slice(1), 16), f = v => Math.round(v * 0.78);
+    return '#' + ((f(n >> 16) << 16) | (f((n >> 8) & 255) << 8) | f(n & 255)).toString(16).padStart(6, '0');
+  }
+  const owen = cv => trainer(cv, KC_TRAINERS[0].look);
 
-
-  return { OUT, TEAM, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, rr, circ, ell, line, paint, poly };
+  return { OUT, TEAM, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer, rr, circ, ell, line, paint, poly };
 })();
 
 /* Kingdom Clash: the Training Grounds scenery beside the battlefield.
@@ -2065,7 +2393,7 @@ const KCScenery = (() => {
     partyT = Math.max(0, partyT - dt);
     for (const s of scenes) if (s.cv.offsetParent !== null) draw(s, t, dt);
   }
-  return { make, resize: () => scenes.forEach(resize), frame, cheer, celebrate, reset, LAYOUT };
+  return { make, resize: () => scenes.forEach(resize), frame, cheer, celebrate, reset, LAYOUT, SRC };
 })();
 
 /* Kingdom Clash: sound effects made on the fly with Web Audio (no sound files). Starts on the first
@@ -2140,8 +2468,257 @@ const KCSound = (() => {
   };
 })();
 
+/* Kingdom Clash: the main menu. A top bar (account level, wallet, sound), a sidebar of tabs, the Battle
+   stage (the Training Grounds, the trainer path, the Battle button) and side panels.
+
+   The Training Grounds have no trophies: you beat Trainer Owen, then Romeo, then Luc, and beating all
+   three opens the Trophy Road. Progress, your name, account experience and your record against each
+   trainer are kept in this browser's local storage. The wallet (coins and diamonds), the Kingdom Pass,
+   chests, the Shop, clans and events are shown in their locked or "coming" states until they exist. */
+'use strict';
+
+const KCMenu = (() => {
+  const $ = q => document.querySelector(q), $$ = q => document.querySelectorAll(q);
+  const KEY = 'kc.progress';
+  const XP_PER_LEVEL = 100;
+  const XP = { win: 20, draw: 10, loss: 6, firstWin: 30 };
+  const imgs = {};
+  let P = null, opts = {}, tabNow = 'battle';
+
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage blocked: progress lasts this visit */ } },
+  };
+  const blank = () => ({ name: 'Player', xp: 0, beaten: {}, records: {}, roadSeen: false, opp: null });
+  function load() {
+    P = Object.assign(blank(), store.get(KEY, {}));
+    const old = store.get('kc.record', null); // the record kept before there were three trainers
+    if (old && !P.records.owen) { P.records.owen = old; if (old.w > 0) P.beaten.owen = true; }
+    for (const t of KC_TRAINERS) P.records[t.id] = Object.assign({ w: 0, l: 0, d: 0 }, P.records[t.id]);
+  }
+  const save = () => store.set(KEY, P);
+
+  const cardImg = id => imgs[id] || (imgs[id] = KCArt.portrait(id, 200, 240).toDataURL());
+  const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+
+  /* ---------- progress ---------- */
+  const unlocked = id => { const i = KC_TRAINERS.findIndex(t => t.id === id); return i === 0 || !!P.beaten[KC_TRAINERS[i - 1].id]; };
+  const nextTrainer = () => KC_TRAINERS.find(t => !P.beaten[t.id]) || null;
+  const roadOpen = () => KC_TRAINERS.every(t => P.beaten[t.id]);
+  function opponent() {
+    if (P.opp && KC_TRAINER[P.opp] && unlocked(P.opp)) return KC_TRAINER[P.opp];
+    return nextTrainer() || KC_TRAINERS[KC_TRAINERS.length - 1];
+  }
+  const level = () => 1 + Math.floor(P.xp / XP_PER_LEVEL);
+
+  // Called by the game when a match ends. Returns what changed, for the result screen.
+  function recordResult(id, winner) {
+    const r = P.records[id], before = { level: level() };
+    let xp = winner === 0 ? XP.win : winner === 1 ? XP.loss : XP.draw;
+    if (winner === 0) r.w++; else if (winner === 1) r.l++; else r.d++;
+    let unlockedNext = null, opened = false, firstWin = false;
+    if (winner === 0 && !P.beaten[id]) {
+      firstWin = true;
+      xp += XP.firstWin;
+      P.beaten[id] = true;
+      const i = KC_TRAINERS.findIndex(t => t.id === id);
+      unlockedNext = KC_TRAINERS[i + 1] || null;
+      opened = !unlockedNext && roadOpen();
+      if (unlockedNext) P.opp = unlockedNext.id;
+    }
+    P.xp += xp;
+    save();
+    return { xp, firstWin, unlockedNext, roadOpened: opened, levelUp: level() > before.level ? level() : 0 };
+  }
+
+  /* ---------- tabs ---------- */
+  function tab(name) {
+    tabNow = name;
+    for (const b of $$('.nav-btn')) b.classList.toggle('on', b.dataset.tab === name);
+    for (const s of $$('.stage .tab')) s.hidden = s.id !== 'tab-' + name;
+    if (name === 'road' && roadOpen() && !P.roadSeen) { P.roadSeen = true; save(); }
+    if (name === 'battle') requestAnimationFrame(drawHero);
+    refresh();
+  }
+
+  /* ---------- the Battle tab ---------- */
+  function buildPath() {
+    const ol = $('#trainerPath');
+    ol.innerHTML = '';
+    KC_TRAINERS.forEach((t, i) => {
+      const li = document.createElement('li');
+      li.className = 'node';
+      li.dataset.id = t.id;
+      li.innerHTML = `<button type="button" class="node-btn"><canvas width="132" height="132"></canvas><span class="node-mark" aria-hidden="true"></span></button>
+        <b>${esc(t.short)}</b><small>Level ${t.level} &middot; ${esc(t.tier)}</small>`;
+      li.querySelector('button').addEventListener('click', () => {
+        if (!unlocked(t.id)) { pulse(li); return; }
+        P.opp = t.id; save(); refresh();
+      });
+      ol.appendChild(li);
+      if (i < KC_TRAINERS.length) {
+        const link = document.createElement('li');
+        link.className = 'link'; link.setAttribute('aria-hidden', 'true');
+        ol.appendChild(link);
+      }
+    });
+    const road = document.createElement('li');
+    road.className = 'node road-node';
+    road.innerHTML = `<button type="button" class="node-btn"><span class="road-icon" aria-hidden="true"></span><span class="node-mark" aria-hidden="true"></span></button><b>Trophy Road</b><small id="roadSmall">Beat all 3</small>`;
+    road.querySelector('button').addEventListener('click', () => tab('road'));
+    ol.appendChild(road);
+  }
+  function pulse(el) { el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope'); }
+
+  function buildOpp() {
+    const sel = $('#oppSel');
+    sel.innerHTML = KC_TRAINERS.map(t => `<option value="${t.id}">${esc(t.short)} · ${esc(t.tier)}</option>`).join('');
+    sel.addEventListener('change', () => { P.opp = sel.value; save(); refresh(); });
+  }
+
+  // The arena under the title: the battlefield with its six towers, tilted back in 3D by CSS.
+  function drawHero() {
+    const cv = $('#heroArena'), box = $('#hero');
+    if (!cv || !box || box.offsetParent === null) return;
+    const H = box.clientHeight, B = 0.6, k = Math.max(6, (H * 1.42) / (KCSim.H + 2 * B));
+    const w = Math.round((KCSim.W + 2 * B) * k), h = Math.round((KCSim.H + 2 * B) * k), dpr = Math.min(2, window.devicePixelRatio || 1);
+    if (cv.dataset.size === `${w}x${h}@${dpr}`) return;
+    cv.dataset.size = `${w}x${h}@${dpr}`;
+    cv.width = w * dpr; cv.height = h * dpr; cv.style.width = w + 'px'; cv.style.height = h + 'px';
+    const c = cv.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    KCArt.arena(c, k, B);
+    const towers = [[3.5, 6.5, 1, 'archer'], [14.5, 6.5, 1, 'archer'], [9, 3, 1, 'king'], [3.5, 25.5, 0, 'archer'], [14.5, 25.5, 0, 'archer'], [9, 29, 0, 'king']];
+    for (const [x, y, team, sub] of towers) {
+      c.save(); c.translate((x + B) * k, (y + B) * k);
+      (sub === 'king' ? KCArt.kingTower : KCArt.archerTower)(c, k, { team, view: team ? 'front' : 'back', active: true, face: 1, t: 0 });
+      c.restore();
+    }
+  }
+
+  /* ---------- the Cards tab ---------- */
+  function buildDeck() {
+    const grid = $('#deckGrid');
+    grid.innerHTML = '';
+    for (const id of KC_STARTER_DECK) {
+      const c = KC_CARDS[id], b = document.createElement('button');
+      b.type = 'button'; b.className = 'deck-card'; b.dataset.id = id;
+      b.innerHTML = `<img src="${cardImg(id)}" alt=""><span class="cost">${c.cost}</span><span class="nm">${esc(c.name)}</span>`;
+      b.addEventListener('click', () => showInfo(id));
+      grid.appendChild(b);
+    }
+    showInfo('rhino');
+    $('#deckThumbs').innerHTML = KC_STARTER_DECK.slice(0, 3).map(id => `<img src="${cardImg(id)}" alt="">`).join('');
+  }
+  function showInfo(id) {
+    const c = KC_CARDS[id];
+    for (const b of $$('.deck-card')) b.classList.toggle('on', b.dataset.id === id);
+    const tgt = { buildings: 'Towers only', ground: 'Ground', both: 'Air & ground' }[c.targets];
+    const sp = s => (s >= 1.8 ? 'Very fast' : s >= 1.4 ? 'Fast' : s >= 1 ? 'Medium' : 'Slow');
+    const stats = c.kind === 'spell'
+      ? [['Damage', c.dmg], ['Tower damage', Math.round(c.dmg * c.towerPct)], ['Radius', c.area + ' tiles']]
+      : [['Health', c.hp], ['Damage', c.dmg], ['Hit speed', c.hit + ' s'], ['Range', c.range < 1 ? 'Melee' : c.range + ' tiles'],
+        ['Speed', sp(c.speed)], ['Targets', tgt]].concat(c.count > 1 ? [['Count', '×' + c.count]] : []);
+    $('#cardInfo').innerHTML = `<h4>${esc(c.name)}</h4>
+      <div class="meta">${c.rarity} &middot; ${esc(c.role)} &middot; ${c.cost} energy${c.air ? ' &middot; flying' : ''}</div>
+      <p>${esc(c.blurb)}</p>
+      <div class="stats">${stats.map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('')}</div>
+      <div class="evo">Evolution (unlocks later): ${esc(c.evo)}</div>`;
+  }
+
+  /* ---------- keeping everything current ---------- */
+  function refresh() {
+    if (!P) return;
+    const beaten = KC_TRAINERS.filter(t => P.beaten[t.id]).length, opp = opponent(), next = nextTrainer(), open = roadOpen();
+    $('#playerName').textContent = P.name;
+    const lv = level(), into = P.xp % XP_PER_LEVEL;
+    $('#lvlNum').textContent = lv;
+    $('#xpFill').style.width = (into / XP_PER_LEVEL * 100).toFixed(1) + '%';
+    $('#xpText').textContent = `${into} / ${XP_PER_LEVEL}`;
+    $('#trainersBeaten').textContent = open ? 'All 3 trainers beaten' : `${beaten} of ${KC_TRAINERS.length} trainers beaten`;
+    $('#apFill').style.width = (beaten / KC_TRAINERS.length * 100) + '%';
+    $('#nextGoal').textContent = next ? `Beat ${next.name}` : 'Trophy Road unlocked';
+    $('#battleSub').textContent = `vs ${opp.name}`;
+    const sel = $('#oppSel');
+    for (const o of sel.options) { o.disabled = !unlocked(o.value); o.textContent = `${KC_TRAINER[o.value].short} · ${o.disabled ? 'Locked' : P.beaten[o.value] ? 'Beaten' : KC_TRAINER[o.value].tier}`; }
+    sel.value = opp.id;
+    for (const li of $$('#trainerPath .node[data-id]')) {
+      const t = KC_TRAINER[li.dataset.id], lock = !unlocked(t.id);
+      li.classList.toggle('beaten', !!P.beaten[t.id]);
+      li.classList.toggle('locked', lock);
+      li.classList.toggle('current', t.id === opp.id);
+      const cvs = li.querySelector('canvas');
+      if (cvs.dataset.state !== String(lock)) { cvs.dataset.state = String(lock); KCArt.trainer(cvs, t.look, lock); }
+      li.querySelector('button').setAttribute('aria-label', `${t.name}, ${lock ? 'locked' : P.beaten[t.id] ? 'beaten' : 'not beaten yet'}`);
+    }
+    const links = $$('#trainerPath .link');
+    links.forEach((l, i) => l.classList.toggle('done', !!P.beaten[KC_TRAINERS[i].id]));
+    const rn = $('#trainerPath .road-node');
+    if (rn) { rn.classList.toggle('locked', !open); rn.classList.toggle('beaten', open); $('#roadSmall').textContent = open ? 'Unlocked' : `Beat all ${KC_TRAINERS.length}`; }
+    // Trophy Road tab and its sidebar tag
+    const tag = $('#roadTag');
+    tag.textContent = open ? (P.roadSeen ? 'Open' : 'New!') : 'Locked';
+    tag.className = 'nav-tag' + (open ? (P.roadSeen ? ' open' : ' new') : '');
+    $('#tab-road').classList.toggle('open', open);
+    $('#roadTitle').textContent = open ? 'Trophy Road unlocked!' : 'Trophy Road is locked';
+    $('#roadText').textContent = open
+      ? 'You beat every trainer in the Training Grounds. Trophy battles, new arenas and chests arrive in the next update.'
+      : `Beat all three Training Grounds trainers to open it. ${next ? `Next up: ${next.name}.` : ''}`;
+    $('#roadList').innerHTML = KC_TRAINERS.map(t => `<li class="${P.beaten[t.id] ? 'done' : ''}"><span>${esc(t.name)}</span><b>${P.beaten[t.id] ? 'Beaten' : unlocked(t.id) ? 'Not yet' : 'Locked'}</b></li>`).join('');
+    // records
+    $('#records').innerHTML = KC_TRAINERS.map(t => {
+      const r = P.records[t.id], n = r.w + r.l + r.d;
+      return `<li class="${unlocked(t.id) ? '' : 'dim'}"><span>${esc(t.short)}</span><b>${n ? `${r.w}W &middot; ${r.l}L${r.d ? ` &middot; ${r.d}D` : ''}` : unlocked(t.id) ? 'No matches yet' : 'Locked'}</b></li>`;
+    }).join('');
+    $('#soundBtn').setAttribute('aria-label', KCSound.on ? 'Sound on' : 'Sound off');
+    $('#soundBtn').classList.toggle('off', !KCSound.on);
+  }
+
+  function init(o) {
+    opts = o || {};
+    load();
+    buildPath(); buildOpp(); buildDeck();
+    const L = KCScenery.SRC;
+    $('#heroL').style.backgroundImage = `url("${L.left}")`;
+    $('#heroR').style.backgroundImage = `url("${L.right}")`;
+    for (const b of $$('[data-tab]')) b.addEventListener('click', () => tab(b.dataset.tab));
+    $('#battleBtn').addEventListener('click', () => opts.onBattle && opts.onBattle(opponent().id));
+    $('#deckBtn').addEventListener('click', () => tab('cards'));
+    $('#soundBtn').addEventListener('click', () => { KCSound.on = !KCSound.on; refresh(); });
+    $('#editName').addEventListener('click', () => {
+      $('#nameForm').hidden = false; $('#editName').hidden = true;
+      const i = $('#nameInput'); i.value = P.name; i.focus(); i.select();
+    });
+    $('#nameForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const v = $('#nameInput').value.replace(/\s+/g, ' ').trim().slice(0, 16);
+      if (v) P.name = v;
+      save();
+      $('#nameForm').hidden = true; $('#editName').hidden = false;
+      refresh();
+    });
+    window.addEventListener('keydown', e => {
+      if ($('#home').hidden || e.repeat || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      const n = '123456'.indexOf(e.key);
+      if (n >= 0) { tab(['battle', 'cards', 'road', 'shop', 'clan', 'events'][n]); e.preventDefault(); }
+      else if (e.key === 'Enter' && tabNow === 'battle' && document.activeElement === document.body) { opts.onBattle && opts.onBattle(opponent().id); e.preventDefault(); }
+    });
+    let rt = 0;
+    window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawHero, 150); });
+    refresh();
+    requestAnimationFrame(drawHero);
+  }
+
+  return {
+    init, refresh, recordResult, opponent, cardImg, tab,
+    get name() { return P ? P.name : 'Player'; },
+    show() { refresh(); requestAnimationFrame(drawHero); },
+  };
+})();
+
 /* Kingdom Clash: the screens, the game loop, drawing the battle and reading the player's input.
-   The battle itself is KCSim (sim.js); Trainer Owen is KCBot (bot.js). */
+   The battle itself is KCSim (sim.js), the trainers are KCBot (bot.js) set up from KC_TRAINERS
+   (trainers.js), and the main menu is KCMenu (menu.js). */
 'use strict';
 
 (() => {
@@ -2151,16 +2728,11 @@ const KCSound = (() => {
     phase: 'home', s: null, bot: null, acc: 0, last: 0, k: 20, dpr: 1,
     sel: -1, hover: null, drag: false, dragMoved: false, toggle: false,
     fx: [], bg: null, zone: null, zoneKey: '', handKey: '', ui: {},
-    intro: 0, ended: 0, shake: 0, lastSec: -1, idleHint: false, record: { w: 0, l: 0, d: 0 },
+    intro: 0, ended: 0, shake: 0, lastSec: -1, idleHint: false, trainer: null, res: null,
   };
   let cv, ctx;
-  const imgs = {};
-  const cardImg = id => imgs[id] || (imgs[id] = A.portrait(id, 200, 240).toDataURL());
+  const cardImg = id => KCMenu.cardImg(id);
   const pick = a => a[Math.floor(Math.random() * a.length)];
-  const store = {
-    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage blocked */ } },
-  };
 
   /* ---------- screens ---------- */
   function show(id) {
@@ -2169,56 +2741,21 @@ const KCSound = (() => {
   function goHome() {
     G.phase = 'home'; G.s = null;
     $('#result').hidden = true; $('#leaveAsk').hidden = true;
-    renderRecord();
     show('home');
+    KCMenu.show();
   }
-
-  /* ---------- home ---------- */
-  function buildHome() {
-    A.owen($('#owenPic'));
-    A.owen($('#introOwen'));
-    const grid = $('#deckGrid');
-    grid.innerHTML = '';
-    for (const id of KC_STARTER_DECK) {
-      const c = KC_CARDS[id], b = document.createElement('button');
-      b.type = 'button'; b.className = 'deck-card'; b.dataset.id = id;
-      b.innerHTML = `<img src="${cardImg(id)}" alt=""><span class="cost">${c.cost}</span><span class="nm">${c.name}</span>`;
-      b.addEventListener('click', () => showInfo(id));
-      grid.appendChild(b);
-    }
-    showInfo('rhino');
-    G.record = store.get('kc.record', { w: 0, l: 0, d: 0 });
-    renderRecord();
-    renderSound();
-  }
-  function showInfo(id) {
-    const c = KC_CARDS[id];
-    for (const b of document.querySelectorAll('.deck-card')) b.classList.toggle('on', b.dataset.id === id);
-    const tgt = { buildings: 'Towers only', ground: 'Ground', both: 'Air & ground' }[c.targets];
-    const sp = s => (s >= 1.8 ? 'Very fast' : s >= 1.4 ? 'Fast' : s >= 1 ? 'Medium' : 'Slow');
-    const stats = c.kind === 'spell'
-      ? [['Damage', c.dmg], ['Tower damage', Math.round(c.dmg * c.towerPct)], ['Radius', c.area + ' tiles']]
-      : [['Health', c.hp], ['Damage', c.dmg], ['Hit speed', c.hit + ' s'], ['Range', c.range < 1 ? 'Melee' : c.range + ' tiles'],
-        ['Speed', sp(c.speed)], ['Targets', tgt]].concat(c.count > 1 ? [['Count', '×' + c.count]] : []);
-    $('#cardInfo').innerHTML = `<h4>${c.name}</h4>
-      <div class="meta">${c.rarity} &middot; ${c.role} &middot; ${c.cost} energy${c.air ? ' &middot; flying' : ''}</div>
-      <p>${c.blurb}</p>
-      <div class="stats">${stats.map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('')}</div>
-      <div class="evo">Evolution (unlocks later): ${c.evo}</div>`;
-  }
-  function renderRecord() {
-    const r = G.record, n = r.w + r.l + r.d;
-    $('#record').textContent = n ? `Your record vs Owen: ${r.w} won, ${r.l} lost${r.d ? `, ${r.d} drawn` : ''}` : 'First match? Owen will show you around.';
-  }
-  function renderSound() { $('#soundBtn').textContent = 'Sound: ' + (KCSound.on ? 'On' : 'Off'); }
 
   /* ---------- starting a battle ---------- */
-  function startBattle() {
+  // Each trainer brings a bot skill and how hard their troops hit your towers (Owen, the tutorial,
+  // hits at a quarter so new players nearly always win).
+  function startBattle(id) {
     KCSound.unlock();
-    // Trainer Owen is the first tutorial match: he plays like a beginner and his troops only do a
-    // quarter of their damage to your towers, so new players nearly always win.
-    G.s = S.create({ seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, 0.25] });
-    G.bot = KCBot.create(1, { skill: 'tutorial', seed: Math.floor(Math.random() * 1e9) });
+    const T = G.trainer = KC_TRAINER[id] || KCMenu.opponent();
+    G.s = S.create({ seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, T.towerDamage] });
+    G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9) });
+    for (const [sel, text] of [['#foeName', T.name], ['#foeTier', `Training Grounds · ${T.tier}`], ['#scoreFoe', T.name], ['#introFoeName', T.name],
+      ['#introFoeTier', `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
+    A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0 });
     $('#result').hidden = true; $('#leaveAsk').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
@@ -2232,7 +2769,7 @@ const KCSound = (() => {
     G.phase = 'play';
     banner('FIGHT!');
     KCSound.play('fight');
-    setTimeout(() => say(pick(["Let's see what you've got!", "Don't worry, I'll go easy on you.", 'Ready? Put a card on your side!'])), 900);
+    setTimeout(() => say(pick(G.trainer.lines.start)), 900);
   }
 
   /* ---------- layout ---------- */
@@ -2406,8 +2943,8 @@ const KCSound = (() => {
           sparks(e.x, e.y, 18, '#ffb030', 4);
           break;
         case 'tower': towerFx(e); break;
-        case 'double': banner('×2 Energy!', 'Last minute'); KCSound.play('double'); say('Double energy! Things speed up now.'); break;
-        case 'overtime': banner('Overtime!', 'Next tower wins'); KCSound.play('double'); say('Overtime! Whoever takes the next tower wins.'); break;
+        case 'double': banner('×2 Energy!', 'Last minute'); KCSound.play('double'); say(G.trainer.lines.double); break;
+        case 'overtime': banner('Overtime!', 'Next tower wins'); KCSound.play('double'); say(G.trainer.lines.overtime); break;
         case 'end': endBattle(e); break;
       }
     }
@@ -2425,10 +2962,10 @@ const KCSound = (() => {
     if (e.team === 1) {
       G.fx.push({ kind: 'crown', x: e.x, y: e.y, life: 1.6, max: 1.6, team: 0 });
       setTimeout(() => KCSound.play('crown'), 250);
-      if (e.sub !== 'king') say(pick(['Whoa, nice hit!', 'Hey! I liked that tower.', 'Not bad at all!']));
+      if (e.sub !== 'king') say(pick(G.trainer.lines.youTower));
     } else {
       G.fx.push({ kind: 'crown', x: e.x, y: e.y, life: 1.6, max: 1.6, team: 1 });
-      if (e.sub !== 'king') say(pick(['Gotcha!', 'Watch your towers!', "That one's mine!"]));
+      if (e.sub !== 'king') say(pick(G.trainer.lines.myTower));
     }
   }
   function ring(x, y, team, r) { G.fx.push({ kind: 'ring', x, y, r, team, life: 0.45, max: 0.45 }); }
@@ -2457,9 +2994,7 @@ const KCSound = (() => {
     G.ended = 1.8;
     if (e.winner >= 0) KCScenery.celebrate(e.winner);
     select(-1);
-    const r = G.record;
-    if (e.winner === 0) r.w++; else if (e.winner === 1) r.l++; else r.d++;
-    store.set('kc.record', r);
+    G.res = KCMenu.recordResult(G.trainer.id, e.winner);
     $('#countdown').hidden = true;
     if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); }
     else if (e.winner === 1) { banner('Defeat'); setTimeout(() => KCSound.play('lose'), 300); }
@@ -2473,14 +3008,19 @@ const KCSound = (() => {
     const crowns = n => [0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}" style="animation-delay:${0.25 + i * 0.25}s"></i>`).join('');
     $('#resFoe').innerHTML = crowns(r.crowns[1]);
     $('#resYou').innerHTML = crowns(r.crowns[0]);
-    $('#resLine').textContent = w === 0
-      ? (r.crowns[0] === 3 ? 'Three crowns! Owen wants a rematch right now.' : 'You beat Trainer Owen! He wants a rematch.')
-      : w === 1 ? 'Owen got you this time. One more?' : 'Dead even. Break the tie?';
+    const L = G.trainer.lines, res = G.res || {};
+    $('#resLine').textContent = (w === 0 && r.crowns[0] === 3 ? 'Three crowns! ' : '') + (w === 0 ? pick(L.youWin) : w === 1 ? pick(L.youLose) : L.draw);
+    const un = $('#resUnlock');
+    un.hidden = !(res.unlockedNext || res.roadOpened || res.levelUp);
+    un.textContent = [res.unlockedNext ? `${res.unlockedNext.name} unlocked!` : '', res.roadOpened ? 'Trophy Road unlocked!' : '', res.levelUp ? `Level ${res.levelUp}!` : ''].filter(Boolean).join('  ·  ');
+    $('#nextBtn').hidden = !res.unlockedNext;
+    $('#againBtn').className = res.unlockedNext ? 'pill' : 'big-btn';
+    if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
     const why = { king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', draw: 'Every tower ended with the same health.' }[r.reason];
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
-    $('#resSmall').textContent = `${why} ${m}:${sec} played, ${s.played[0]} cards from you.`;
+    $('#resSmall').textContent = `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
     $('#result').hidden = false;
-    setTimeout(() => $('#againBtn').focus(), 50);
+    setTimeout(() => (res.unlockedNext ? $('#nextBtn') : $('#againBtn')).focus(), 50);
   }
 
   /* ---------- drawing ---------- */
@@ -2767,14 +3307,13 @@ const KCSound = (() => {
 
   function boot() {
     cv = $('#arena'); ctx = cv.getContext('2d');
-    buildHome();
+    KCMenu.init({ onBattle: startBattle });
     KCScenery.make($('#sceneL'), 'left');
     KCScenery.make($('#sceneR'), 'right');
     bindInput();
-    $('#battleBtn').addEventListener('click', startBattle);
-    $('#againBtn').addEventListener('click', startBattle);
+    $('#againBtn').addEventListener('click', () => startBattle(G.trainer.id));
+    $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext.id));
     $('#homeBtn').addEventListener('click', goHome);
-    $('#soundBtn').addEventListener('click', () => { KCSound.on = !KCSound.on; renderSound(); });
     $('#leaveBtn').addEventListener('click', () => { if (G.phase === 'play') { $('#leaveAsk').hidden = false; G.phase = 'paused'; } });
     $('#leaveNo').addEventListener('click', () => { $('#leaveAsk').hidden = true; G.phase = 'play'; G.last = performance.now(); });
     $('#leaveYes').addEventListener('click', goHome);

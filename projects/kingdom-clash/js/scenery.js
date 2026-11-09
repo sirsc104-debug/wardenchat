@@ -254,5 +254,5 @@ const KCScenery = (() => {
     partyT = Math.max(0, partyT - dt);
     for (const s of scenes) if (s.cv.offsetParent !== null) draw(s, t, dt);
   }
-  return { make, resize: () => scenes.forEach(resize), frame, cheer, celebrate, reset, LAYOUT };
+  return { make, resize: () => scenes.forEach(resize), frame, cheer, celebrate, reset, LAYOUT, SRC };
 })();

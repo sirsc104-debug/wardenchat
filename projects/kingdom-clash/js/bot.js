@@ -12,6 +12,10 @@ const KCBot = (() => {
     trainer: { react: [1.8, 3.2], sloppy: 0.45, attackAt: 9.8, idle: 0.35, fireballValue: 7, defend: 0.45 },
     // The first tutorial opponent: slow, waits between cards, barely defends, never uses Fireball.
     tutorial: { react: [2.6, 4.2], sloppy: 0.6, attackAt: 10, idle: 0.6, fireballValue: 99, defend: 0.3, gap: [4, 7] },
+    // Trainer Romeo, the second trainer: reacts in good time, defends most pushes, backs up his own.
+    romeo: { react: [1.7, 2.9], sloppy: 0.35, attackAt: 9.6, idle: 0.3, fireballValue: 7.5, defend: 0.55, gap: [2.0, 3.4] },
+    // Trainer Luc, the last trainer before the Trophy Road: quick, accurate, fireballs clumps.
+    luc: { react: [1.4, 2.5], sloppy: 0.28, attackAt: 9.3, idle: 0.2, fireballValue: 6.5, defend: 0.62, gap: [1.7, 2.9] },
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
   const ROLE = {

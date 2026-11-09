@@ -2,7 +2,7 @@
 
 A real-time card battler for desktop browsers (built for school Chromebooks). Two players each defend two Archer Towers and a King Tower; you play troops and spells from a hand of four, paying with Energy that refills over time, and knock down towers for crowns.
 
-This first version has one opponent, **Trainer Owen**, the first tutorial match, who is built to lose. Wallet, trophies, chests, upgrades, evolutions and online 1v1 come later.
+The Training Grounds have three trainers, played in order: **Trainer Owen** (the tutorial, built to lose), **Trainer Romeo** (mid tier) and **Trainer Luc** (hard). Beating all three unlocks the Trophy Road. The main menu is built as the full game's menu, with the parts that don't exist yet (wallet, Kingdom Pass, chests, Shop, clans, events) shown in their locked or coming states. Wallet, trophies, chests, upgrades, evolutions and online 1v1 come later.
 
 Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `index.html` in a browser, or serve the folder with `python3 -m http.server`.
 
@@ -10,9 +10,9 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 
 | Screen | What's on it |
 | --- | --- |
-| Home | The Kingdom Clash logo, Trainer Owen with a **Battle** button and your record against him, your 8-card deck (click a card for its stats), how to play, and a sound toggle. |
+| Menu | A top bar (account level and experience, coins and diamonds with + buttons, sound), a sidebar of tabs (Battle, Cards, Trophy Road, Shop, Clan, Events; keys `1`–`6`), and the Battle tab: your name (editable), the Training Grounds arena shown in 3D between the two scenery images, a *Next goal* card, the trainer path (Owen → Romeo → Luc → Trophy Road, with check marks and locks), and the Battle row (deck, **Battle** against the chosen trainer, opponent picker; `Enter` starts). Side panels show the Kingdom Pass and chest slots (locked until the Trophy Road) and your record against each trainer. Under 1180 px the side panels hide; under 820 px everything stacks and the sidebar becomes a bottom tab bar. |
 | Battle | Five columns, following the desktop layout concept: the Royal Grandstands (King statue, stands, banners, torches) · your 4 cards and the next one · the arena · the Energy bar · the Royal Waterfall with the timer and crown score over its sky. The spectators in both stands are animated and react to the match. Below 1000 px wide the scenery is dropped and the clock moves onto the arena. |
-| Result | Victory / Defeat / Draw, both sides' crowns, why it ended, and **Play Again** or **Home**. |
+| Result | Victory / Defeat / Draw, both sides' crowns, the trainer's comment, anything you unlocked (next trainer, Trophy Road, a new level), why it ended and the experience earned, then **Battle *next trainer*** (after a first win), **Play Again** or **Home**. |
 
 ## How a match works
 
@@ -37,31 +37,39 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 
 Every level adds 8% to HP and damage. Stats live in `js/cards.js`; tower stats, timings and energy are at the top of `js/sim.js`.
 
-## Trainer Owen
+## The trainers
 
-Owen is the first level of the tutorial, so he is built to lose. `js/bot.js` plays with the same rules and information a player has (its own hand and energy and the troops on the field), and the `tutorial` skill makes it play like a beginner: it reacts 2.6 to 4.2 seconds late, waits 4 to 7 seconds between cards, misplaces most of them, barely defends, sits on full energy and never uses Fireball. On top of that the match is created with `towerDamage: [1, 0.25]`, so Owen's troops do a quarter of their damage to your towers.
+Defined in `js/trainers.js` (name, tier, bot skill, how hard their troops hit your towers, portrait, what they say). Every trainer plays the starter deck with the same rules and information a player has (`js/bot.js`); they differ in how fast they react, how long they wait between cards, how well they defend and place cards, and how hard their troops hit your towers.
 
-`node tools/owen-test.js 100` measures it. Over 100 matches each, Owen beat a good player 0 times, a sloppy player 0 times and a player who drops random cards in random spots 2 times. He only beats a player who never plays a card.
+| Trainer | Tier | Bot | Tower damage | Over 60–80 test matches, the trainer won against… |
+| --- | --- | --- | --- | --- |
+| Owen | Tutorial | reacts 2.6–4.2 s late, 4–7 s between cards, barely defends, no Fireball | 25% | a good player 0%, a sloppy player 0%, a random clicker 2% |
+| Romeo | Mid tier | reacts 1.7–2.9 s, 2–3.4 s between cards, defends about half of pushes | 45% | a good player 22%, a sloppy player 18%, a random clicker 63% |
+| Luc | Hard | reacts 1.4–2.5 s, 1.7–2.9 s between cards, defends most pushes, fireballs clumps | 60% | a good player 48%, a sloppy player 40%, a random clicker 88% |
 
-The other skills (`trainer`, `normal`) are kept for later bots and for the bot-vs-bot tests.
+`node tools/trainers-test.js 100` reruns those numbers (add `romeo` or `luc` to test one trainer). Any trainer beats a player who never plays a card.
+
+Progress is saved in this browser: which trainers you have beaten, your record against each, your name and your account experience (a win is 20 XP, a draw 10, a loss 6, plus 30 for the first win against each trainer; 100 XP per level). Losing to a trainer costs nothing; you can replay any trainer you have unlocked from the opponent picker or the path.
 
 ## Files
 
 | File | What it does |
 | --- | --- |
 | `js/cards.js` | The 8 cards and the starter deck |
+| `js/trainers.js` | Owen, Romeo and Luc |
+| `js/menu.js` | The main menu, the trainer path and unlocking, saved progress |
 | `js/sim.js` | The battle: fixed 30 steps a second, no DOM, seeded, so it runs the same in the page, in Node and later on both ends of an online match |
-| `js/bot.js` | Trainer Owen |
+| `js/bot.js` | The trainers' AI (one bot with a skill setting per trainer) |
 | `js/art.js` | Every troop, tower, card portrait and the arena, drawn in code. Each troop and tower has two views: your side is seen from behind (facing up the arena, toward the enemy) and the enemy faces you; cards use the front view |
 | `js/scenery.js` | The Training Grounds side panels. Each draws its illustrated background (`img/grounds-left.webp`, `img/grounds-right.webp`) once into a cache cropped to cover the panel, then each frame the animated spectators seated on the illustrated benches (team-coloured outfits, flags; they jump for the side that takes a tower, celebrate the winner and slump if their side lost), torch glow, embers, twinkling stars and waterfall mist. Bench positions are in `LAYOUT`, in image coordinates |
 | `js/audio.js` | Sound effects made with Web Audio (no sound files) |
 | `js/game.js` | Screens, the game loop, drawing the battle, input |
 | `tools/path-test.js` | `node tools/path-test.js` places every ground troop behind and beside each tower, for both teams, and checks it walks around instead of getting stuck |
-| `tools/owen-test.js` | `node tools/owen-test.js 100` plays Trainer Owen against a good player, a sloppy player, a random clicker and a player who does nothing, and prints how often he wins |
+| `tools/trainers-test.js` | `node tools/trainers-test.js 100 [trainer]` plays each trainer against a good player, a sloppy player, a random clicker and a player who does nothing, and prints how often the trainer wins |
 | `tools/sim-test.js` | `node tools/sim-test.js 40` plays 40 bot-vs-bot matches headless and checks they end cleanly (no NaNs, no troops in the river) |
 | `img/` | The two Training Grounds backgrounds (793 × 1983 WebP) |
 | `build-artifact.py` | Bundles everything into one page, with the images baked in as data URIs: `python3 build-artifact.py OUT.html` (claude.ai Artifact) or `--standalone` (a complete page) |
 
 Built copies are in `dist/`: `kingdom-clash.html` (Artifact bundle) and `kingdom-clash-standalone.html` (open anywhere, works offline apart from the Google font, which falls back to a system font).
 
-The only thing the game saves is your win/loss record against Owen and the sound setting, in the browser's local storage.
+The game saves your progress (trainers beaten, records, name, experience) and the sound setting in the browser's local storage only.
