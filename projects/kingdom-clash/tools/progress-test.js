@@ -75,14 +75,25 @@ const P2 = G.load(st);
 assert.strictEqual(P2.trophies, 130); assert.strictEqual(P2.cards.wolves.level, 2); assert.strictEqual(P2.deck[0], 'skeletons');
 console.log('save and reload: ok');
 
-// 8. Matchmaking settles near the target win rate against a steady player.
-st = mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true } }) });
-G.load(st);
+// 8. Opponent card levels follow their trophies, and they have no lines.
+for (const [t, want] of [[0, 1], [99, 1], [100, 2], [250, 3], [300, 4], [5000, 15]]) assert.strictEqual(G.foeLevel(t), want);
+G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 250 }) }));
+for (let i = 0; i < 40; i++) {
+  const foe = G.trophyFoe(KCSim.mulberry(i + 1));
+  assert.strictEqual(foe.lines, null);
+  assert(Object.values(foe.cardLevels).every(l => l === G.foeLevel(foe.trophies)), 'every card at the level for their trophies');
+  assert(foe.trophies >= 235 && foe.trophies <= 265);
+}
+console.log('opponent card levels follow their trophies; no lines: ok');
+
+// 9. Matchmaking: the win rate of a steady player who keeps their cards level with their trophies, and
+//    of one who never upgrades.
 const N = +process.argv[2] || 120;
-for (const [label, skill] of [['good player', 'normal'], ['sloppy player', 'trainer']]) {
+for (const [label, skill, upgrades] of [['good player, upgrades as they climb', 'normal', true], ['sloppy player, upgrades as they climb', 'trainer', true], ['good player, never upgrades', 'normal', false]]) {
   G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true } }) }));
   let wins = 0, late = 0, lateWins = 0;
   for (let i = 0; i < N; i++) {
+    if (upgrades) for (const id of KC_ALL_CARDS) G.state.cards[id].level = G.foeLevel(G.state.best);
     const foe = G.trophyFoe(KCSim.mulberry(700 + i));
     const s = KCSim.create({ seed: 3000 + i, towerDamage: [1, foe.towerDamage], decks: [G.state.deck, foe.deck], cardLevels: [G.cardLevels(), foe.cardLevels] });
     const me = KCBot.create(0, { skill, seed: i }), bot = KCBot.create(1, { skill: foe.skill, seed: 50 + i });
@@ -92,5 +103,5 @@ for (const [label, skill] of [['good player', 'normal'], ['sloppy player', 'trai
     if (w === 0) wins++;
     if (i >= N / 3) { late++; if (w === 0) lateWins++; }
   }
-  console.log(`${label}: won ${wins}/${N} overall, ${(lateWins / late * 100).toFixed(0)}% after settling; difficulty ${G.state.diff.toFixed(2)}, ${G.state.trophies} trophies`);
+  console.log(`${label}: won ${wins}/${N} overall, ${(lateWins / late * 100).toFixed(0)}% after settling; difficulty ${G.state.diff.toFixed(2)}, ${G.state.trophies} trophies (best ${G.state.best})`);
 }

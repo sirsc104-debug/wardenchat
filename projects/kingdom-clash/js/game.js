@@ -66,7 +66,7 @@
     G.phase = 'play';
     banner('FIGHT!');
     KCSound.play('fight');
-    setTimeout(() => say(pick(G.trainer.lines.start)), 900);
+    setTimeout(() => speak('start'), 900);
   }
 
   /* ---------- layout ---------- */
@@ -198,6 +198,11 @@
 
   /* ---------- messages ---------- */
   let bubbleT = 0, toastT = 0;
+  // The opponent says one of their lines, if they have any (trainers do, trophy opponents don't).
+  function speak(key) {
+    const L = G.trainer && G.trainer.lines, line = L && L[key];
+    if (line) say(Array.isArray(line) ? pick(line) : line);
+  }
   function say(text, ms) {
     const b = $('#bubble');
     b.textContent = text; b.hidden = false;
@@ -247,8 +252,8 @@
           sparks(e.x, e.y, 18, '#ffb030', 4);
           break;
         case 'tower': towerFx(e); break;
-        case 'double': banner('×2 Energy!', 'Last minute'); KCSound.play('double'); say(G.trainer.lines.double); break;
-        case 'overtime': banner('Overtime!', 'Next tower wins'); KCSound.play('double'); say(G.trainer.lines.overtime); break;
+        case 'double': banner('×2 Energy!', 'Last minute'); KCSound.play('double'); speak('double'); break;
+        case 'overtime': banner('Overtime!', 'Next tower wins'); KCSound.play('double'); speak('overtime'); break;
         case 'end': endBattle(e); break;
       }
     }
@@ -271,10 +276,10 @@
     if (e.team === 1) {
       G.fx.push({ kind: 'crown', x: e.x, y: e.y, life: 1.6, max: 1.6, team: 0 });
       setTimeout(() => KCSound.play('crown'), 250);
-      if (e.sub !== 'king') say(pick(G.trainer.lines.youTower));
+      if (e.sub !== 'king') speak('youTower');
     } else {
       G.fx.push({ kind: 'crown', x: e.x, y: e.y, life: 1.6, max: 1.6, team: 1 });
-      if (e.sub !== 'king') say(pick(G.trainer.lines.myTower));
+      if (e.sub !== 'king') speak('myTower');
     }
   }
   function ring(x, y, team, r) { G.fx.push({ kind: 'ring', x, y, r, team, life: 0.45, max: 0.45 }); }
@@ -318,7 +323,9 @@
     $('#resFoe').innerHTML = crowns(r.crowns[1]);
     $('#resYou').innerHTML = crowns(r.crowns[0]);
     const L = G.trainer.lines, res = G.res || {};
-    $('#resLine').textContent = (w === 0 && r.crowns[0] === 3 ? 'Three crowns! ' : '') + (w === 0 ? pick(L.youWin) : w === 1 ? pick(L.youLose) : L.draw);
+    const quote = L ? (w === 0 ? pick(L.youWin) : w === 1 ? pick(L.youLose) : L.draw) : '';
+    $('#resLine').textContent = ((w === 0 && r.crowns[0] === 3 ? 'Three crowns! ' : '') + quote).trim();
+    $('#resLine').hidden = !$('#resLine').textContent;
     const un = $('#resUnlock'), tr = $('#resTrophy');
     const notes = [res.unlockedNext ? `${res.unlockedNext.name} unlocked!` : '', res.roadOpened ? 'Trophy Road unlocked!' : '',
       res.chest ? `${res.chest.name} earned!` : '', res.slotsFull ? 'Chest slots full: open one to make room' : '',
@@ -682,7 +689,8 @@
     } else if (left > 10 && !$('#countdown').hidden) $('#countdown').hidden = true;
     if (G.phase === 'play' && !G.idleHint && s.time > 7 && s.played[0] === 0) {
       G.idleHint = true;
-      say('Tip: drag a card from the left onto your side of the arena.', 4000);
+      if (G.trainer.lines) say('Tip: drag a card from the left onto your side of the arena.', 4000);
+      else toast('Tip: drag a card from the left onto your side of the arena.');
     }
   }
 

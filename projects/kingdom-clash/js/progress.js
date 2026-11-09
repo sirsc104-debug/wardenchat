@@ -5,7 +5,8 @@
    - The Trophy Road: trophy battles against bots matched to your trophies. A win is +30 trophies
      and earns a chest if a slot is free; a loss is -20 (never below the arena's floor). Milestones on
      the road give fixed rewards you claim: coins, chests, new cards and arenas.
-   - Bots: their card levels follow your arena; their skill follows your recent results (up a step
+   - Opponents: their card levels follow their trophies (level 1 below 100 trophies, then one more per
+     100); their skill follows your recent results (up a step
      after a win, down a step after a loss), settling at about 52% wins for everyone.
    - Chests: four slots. A chest is rolled the moment you win it; one chest unlocks at a time, on a
      real-time timer. Opening gives coins and copies of cards you have found.
@@ -57,19 +58,9 @@ const KCProgress = (() => {
     },
     coins: [5, 20, 50, 150, 400, 1000, 2000, 4000, 6000, 9000, 14000, 20000, 30000, 50000],
   };
-  // Trophy opponents look and talk like any other player.
+  // Trophy opponents look like any other player. They don't talk (no speech bubbles or result lines).
   const FOE_NAMES = ['EmberFox', 'Kestrel', 'MossKnight', 'Juno77', 'BrickTop', 'Lumen', 'NovaRae', 'Quillon', 'RowanK', 'Tidebreaker',
     'Sable', 'PixelPike', 'Hollis', 'Marigold', 'Vexa', 'Orrin22', 'CrimsonOwl', 'Tamsin', 'Bramble', 'Ashgrove', 'Kaito', 'Wren', 'Delphine', 'Grit'];
-  const FOE_LINES = {
-    start: ['Good luck, have fun!', "Let's go!", 'Ready when you are.', 'Good luck!'],
-    youTower: ['Nice one.', 'Okay, okay.', "Didn't see that coming.", 'Well played.'],
-    myTower: ['Got one!', 'Gotcha!', 'Lane open!', "That's one!"],
-    double: 'Double energy!',
-    overtime: 'Overtime. Next tower wins!',
-    youWin: ['GG, well played.', 'Good game!', 'GG! You got me.'],
-    youLose: ['GG! Rematch?', 'Close one. Again?', 'Good game! Try again?'],
-    draw: 'A draw! Rematch?',
-  };
   const FOE_BG = [['#ffcf6b', '#ea8b2b'], ['#c99bff', '#7440cf'], ['#9fc0e0', '#3c5d8c'], ['#9fe6b8', '#2c8a5a'], ['#ffa3b5', '#c03a5a'], ['#a8e4ff', '#2f7cb8']];
   const FOE_SKIN = ['#f2c4a0', '#d9a27a', '#b87a52', '#8a5636', '#efc19c'];
   const FOE_HAIR = ['#2a1d18', '#6b4426', '#c58a3c', '#1e1e26', '#9a3b2a', '#c9ccd6'];
@@ -180,15 +171,15 @@ const KCProgress = (() => {
 
   /* ---------- trophy battles ---------- */
   const lerp = (a, b, t) => a + (b - a) * t;
-  // The bot for the next trophy battle: card levels follow your trophies, skill follows P.diff.
+  // Card level of an opponent with this many trophies: level 1 below 100, then one more per 100.
+  const foeLevel = t => Math.max(1, Math.min(MAX_LEVEL, 1 + Math.floor(t / 100)));
+  // The opponent for the next trophy battle: card levels follow their trophies, skill follows P.diff.
   function trophyFoe(rand = Math.random) {
     const d = Math.max(0, Math.min(1, P.diff)), t = P.trophies;
     const skill = {
       react: [lerp(2.2, 0.6, d), lerp(3.6, 1.2, d)], sloppy: lerp(0.5, 0.12, d), attackAt: lerp(9.8, 8, d), idle: lerp(0.45, 0.08, d),
       fireballValue: lerp(8, 5, d), defend: lerp(0.4, 1, d), gap: [lerp(2.6, 0.5, d), lerp(4.2, 1.1, d)],
     };
-    // Bot card levels follow the arena (level 1 in Arena 1, 2 in Arena 2...), so upgrades give an edge.
-    const lvl = Math.min(MAX_LEVEL, arena(t).number || 1);
     const deck = KC_STARTER_DECK.slice();
     const swap = (id, p) => {
       if (rand() > p) return;
@@ -197,12 +188,13 @@ const KCProgress = (() => {
     };
     if (t >= 40) swap('skeletons', 0.6);
     if (t >= 120) swap('cannon', 0.6);
-    const cardLevels = Object.fromEntries(deck.map(id => [id, lvl]));
     const name = FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
     const foeTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
+    const lvl = foeLevel(foeTrophies);
+    const cardLevels = Object.fromEntries(deck.map(id => [id, lvl]));
     return {
       id: 'trophy', kind: 'trophy', name, short: name, level: lvl, tier: `${foeTrophies} trophies`,
-      look: foeLook(rand), lines: FOE_LINES, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: foeTrophies,
+      look: foeLook(rand), lines: null, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: foeTrophies,
     };
   }
   function recordTrophy(winner) {
@@ -321,7 +313,7 @@ const KCProgress = (() => {
     load, save, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,
-    trophyFoe, recordTrophy,
+    trophyFoe, foeLevel, recordTrophy,
     roll, chestState, unlockingSlot, startUnlock, openChest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
   };
