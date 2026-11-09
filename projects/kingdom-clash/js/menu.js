@@ -36,6 +36,19 @@ const KCMenu = (() => {
     return r;
   }
 
+  // TEMPORARY test button: counts a win against the current opponent without playing the match,
+  // with the same rewards as a real win.
+  function simulateWin() {
+    const foe = nextFoe(), r = recordResult(foe, 0);
+    const bits = [r.unlockedNext ? `${r.unlockedNext.name} unlocked` : '', r.roadOpened ? 'Trophy Road unlocked' : '',
+      r.kind === 'trophy' ? `+${r.delta} trophies` : '', r.chest ? `${r.chest.name} earned` : '', r.slotsFull ? 'chest slots are full' : '',
+      r.levelUp ? `level ${r.levelUp}` : ''].filter(Boolean);
+    if (G.roadOpen()) KCArenas.preload(G.arena().theme);
+    KCSound.play('crown');
+    refresh();
+    toast(`Simulated win vs ${foe.name}${bits.length ? ': ' + bits.join(', ') : ''}`);
+  }
+
   /* ---------- small messages ---------- */
   let toastT = 0;
   function toast(text) {
@@ -500,6 +513,7 @@ const KCMenu = (() => {
     if (G.roadOpen()) KCArenas.preload(G.arena().theme);
     for (const b of $$('[data-tab]')) b.addEventListener('click', () => tab(b.dataset.tab));
     $('#battleBtn').addEventListener('click', () => opts.onBattle && opts.onBattle(nextFoe()));
+    $('#simWinLobby').addEventListener('click', simulateWin); // TEMPORARY
     $('#oppChange').addEventListener('click', e => { e.stopPropagation(); toggle('#oppPanel', '#oppChange'); });
     $('#settingsBtn').addEventListener('click', e => {
       e.stopPropagation();

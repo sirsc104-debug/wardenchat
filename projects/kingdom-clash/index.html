@@ -70,7 +70,11 @@
               <button class="opp-change" id="oppChange" type="button" aria-expanded="false" aria-controls="oppPanel">Trainers <span aria-hidden="true">&#9662;</span></button>
               <div class="opp-panel" id="oppPanel" hidden><ul id="oppList"></ul></div>
             </div>
-            <button class="battle-btn" id="battleBtn" type="button"><span>Battle</span><small id="battleSub">vs Trainer Owen</small></button>
+            <div class="battle-wrap">
+              <button class="battle-btn" id="battleBtn" type="button"><span>Battle</span><small id="battleSub">vs Trainer Owen</small></button>
+              <!-- TEMPORARY test button (lobby): remove with the other "TEMPORARY" blocks -->
+              <button class="sim-win sim-lobby" id="simWinLobby" type="button" title="Test button: counts a win against the current opponent without playing"><small>Test</small>Simulate Win</button>
+            </div>
             <div class="chests" id="chests" aria-label="Chest slots"></div>
           </div>
 
