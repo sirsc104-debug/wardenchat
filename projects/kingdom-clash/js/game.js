@@ -333,7 +333,7 @@
     $('#nextBtn').hidden = !res.unlockedNext;
     $('#againBtn').className = res.unlockedNext ? 'pill' : 'big-btn';
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
-    const why = { king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', draw: 'Every tower ended with the same health.' }[r.reason];
+    const why = { king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).' }[r.reason];
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
     $('#resSmall').textContent = `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
     $('#result').hidden = false;
@@ -725,6 +725,12 @@
     $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext));
     $('#homeBtn').addEventListener('click', goHome);
     $('#leaveBtn').addEventListener('click', () => { if (G.phase === 'play') { $('#leaveAsk').hidden = false; G.phase = 'paused'; } });
+    // TEMPORARY test button: ends the match as a win, with the same rewards as a real one.
+    $('#simWinBtn').addEventListener('click', () => {
+      if (G.phase !== 'play' || !G.s || G.s.result) return;
+      S.forceEnd(G.s, 0);
+      handleEvents();
+    });
     $('#leaveNo').addEventListener('click', () => { $('#leaveAsk').hidden = true; G.phase = 'play'; G.last = performance.now(); });
     $('#leaveYes').addEventListener('click', goHome);
     let rt = 0;

@@ -516,5 +516,7 @@ const KCSim = (() => {
   return {
     W, H, MID, RIVER_TOP, RIVER_BOT, BRIDGES, BRIDGE_HALF, DT, REGULAR, OVERTIME, MAX_ENERGY, TOWERS,
     create, step, play, canDeploy, tower, laneOf, own, mulberry, levelMult,
+    // TEMPORARY: ends a match on the spot for the Simulate Win test button.
+    forceEnd: (s, winner) => finish(s, winner, 'test'),
   };
 })();

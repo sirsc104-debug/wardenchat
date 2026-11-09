@@ -711,6 +711,13 @@ button.slot:hover { transform: translateY(-3px); }
   z-index: 3;
 }
 .mini-timer { display: none; }
+/* TEMPORARY test button */
+.sim-win {
+  position: absolute; z-index: 3; right: 2.4%; bottom: 1.4%; display: flex; flex-direction: column; align-items: center; line-height: 1.1;
+  padding: 4px 10px 5px; border-radius: 10px; border: 2px dashed #ffe27a; background: rgba(30, 20, 60, 0.85); color: #fff; font-weight: 900; font-size: 12px;
+}
+.sim-win small { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #ffe27a; }
+.sim-win:hover { background: rgba(60, 40, 110, 0.95); }
 .leave {
   position: absolute;
   bottom: 1.4%;
