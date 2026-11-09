@@ -75,16 +75,30 @@ const P2 = G.load(st);
 assert.strictEqual(P2.trophies, 130); assert.strictEqual(P2.cards.wolves.level, 2); assert.strictEqual(P2.deck[0], 'skeletons');
 console.log('save and reload: ok');
 
-// 8. Opponent card levels follow their trophies, and they have no lines.
-for (const [t, want] of [[0, 1], [99, 1], [100, 2], [250, 3], [300, 4], [5000, 15]]) assert.strictEqual(G.foeLevel(t), want);
-G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 250 }) }));
-for (let i = 0; i < 40; i++) {
-  const foe = G.trophyFoe(KCSim.mulberry(i + 1));
-  assert.strictEqual(foe.lines, null);
-  assert(Object.values(foe.cardLevels).every(l => l === G.foeLevel(foe.trophies)), 'every card at the level for their trophies');
-  assert(foe.trophies >= 235 && foe.trophies <= 265);
+// 8. Opponents level their cards one at a time as their trophies rise, and they have no lines.
+for (const [t, want] of [[0, 0], [49, 0], [50, 1], [62, 1], [63, 2], [137, 7], [138, 8], [149, 8], [150, 9], [250, 17], [1437, 111], [1438, 112], [9999, 112]]) assert.strictEqual(G.foeUpgrades(t), want, `upgrades at ${t}`);
+const tally = l => Object.values(l).sort().join('');
+const ids8 = KC_STARTER_DECK;
+assert.strictEqual(tally(G.spreadLevels(0, ids8)), '11111111');
+assert.strictEqual(tally(G.spreadLevels(1, ids8)), '11111112');
+assert.strictEqual(tally(G.spreadLevels(8, ids8)), '22222222');
+assert.strictEqual(tally(G.spreadLevels(9, ids8)), '22222223');
+assert.strictEqual(tally(G.spreadLevels(13, ids8)), '22233333');
+assert.strictEqual(Object.values(G.spreadLevels(112, ids8)).join(), Array(8).fill(15).join());
+const seenAhead = new Set();
+for (const t of [0, 50, 100, 130, 150, 200, 265]) {
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: t }) }));
+  for (let i = 0; i < 30; i++) {
+    const foe = G.trophyFoe(KCSim.mulberry(i + 1 + t)), lv = Object.values(foe.cardLevels), n = G.foeUpgrades(foe.trophies);
+    assert.strictEqual(foe.lines, null);
+    assert.deepStrictEqual(Object.keys(foe.cardLevels).sort(), foe.deck.slice().sort(), 'a level for every card in their deck');
+    assert.strictEqual(lv.reduce((a, l) => a + l - 1, 0), n, 'total upgrades match their trophies');
+    assert(Math.max(...lv) - Math.min(...lv) <= 1, 'levels are at most one apart');
+    if (t === 50 && n === 1) seenAhead.add(Object.keys(foe.cardLevels).find(id => foe.cardLevels[id] === 2));
+  }
 }
-console.log('opponent card levels follow their trophies; no lines: ok');
+assert(seenAhead.size >= 3, 'different opponents upgrade different cards first');
+console.log('opponent cards level up one at a time with trophies; no lines: ok');
 
 // 9. Matchmaking: the win rate of a steady player who keeps their cards level with their trophies, and
 //    of one who never upgrades.
@@ -93,7 +107,10 @@ for (const [label, skill, upgrades] of [['good player, upgrades as they climb', 
   G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true } }) }));
   let wins = 0, late = 0, lateWins = 0;
   for (let i = 0; i < N; i++) {
-    if (upgrades) for (const id of KC_ALL_CARDS) G.state.cards[id].level = G.foeLevel(G.state.best);
+    if (upgrades) {
+      const lv = G.spreadLevels(G.foeUpgrades(G.state.best), G.state.deck, KCSim.mulberry(11));
+      for (const id of G.state.deck) G.state.cards[id].level = lv[id];
+    }
     const foe = G.trophyFoe(KCSim.mulberry(700 + i));
     const s = KCSim.create({ seed: 3000 + i, towerDamage: [1, foe.towerDamage], decks: [G.state.deck, foe.deck], cardLevels: [G.cardLevels(), foe.cardLevels] });
     const me = KCBot.create(0, { skill, seed: i }), bot = KCBot.create(1, { skill: foe.skill, seed: 50 + i });

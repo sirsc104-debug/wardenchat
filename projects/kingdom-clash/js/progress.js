@@ -5,8 +5,8 @@
    - The Trophy Road: trophy battles against bots matched to your trophies. A win is +30 trophies
      and earns a chest if a slot is free; a loss is -20 (never below the arena's floor). Milestones on
      the road give fixed rewards you claim: coins, chests, new cards and arenas.
-   - Opponents: their card levels follow their trophies (level 1 below 100 trophies, then one more per
-     100); their skill follows your recent results (up a step
+   - Opponents: their cards level up one at a time with their trophies (all level 1 below 50, then one
+     card up a level every 12.5 trophies); their skill follows your recent results (up a step
      after a win, down a step after a loss), settling at about 52% wins for everyone.
    - Chests: four slots. A chest is rolled the moment you win it; one chest unlocks at a time, on a
      real-time timer. Opening gives coins and copies of cards you have found.
@@ -171,8 +171,20 @@ const KCProgress = (() => {
 
   /* ---------- trophy battles ---------- */
   const lerp = (a, b, t) => a + (b - a) * t;
-  // Card level of an opponent with this many trophies: level 1 below 100, then one more per 100.
-  const foeLevel = t => Math.max(1, Math.min(MAX_LEVEL, 1 + Math.floor(t / 100)));
+  // Opponents level their cards one at a time as their trophies rise. Below 50 trophies every card is
+  // level 1. From 50, one card goes up a level every 12.5 trophies: one level-2 card at 50, two at
+  // 62.5 ... all eight at 137.5; then the first level 3 at 150, and so on (a full level per 100
+  // trophies) until every card is level 15 at 1,437.5.
+  const FOE_FIRST = 50, FOE_STEP = 12.5, DECK = 8;
+  const foeUpgrades = t => (t < FOE_FIRST ? 0 : Math.min((MAX_LEVEL - 1) * DECK, 1 + Math.floor((t - FOE_FIRST) / FOE_STEP)));
+  // Spread n single-card upgrades over a deck: everyone gets floor(n / 8) levels, and n % 8 cards
+  // (picked with rand, so each opponent differs) are one level ahead.
+  function spreadLevels(n, ids, rand = Math.random) {
+    const base = 1 + Math.floor(n / ids.length), order = ids.slice();
+    let extra = n % ids.length;
+    for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    return Object.fromEntries(order.map(id => [id, Math.min(MAX_LEVEL, base + (extra-- > 0 ? 1 : 0))]));
+  }
   // The opponent for the next trophy battle: card levels follow their trophies, skill follows P.diff.
   function trophyFoe(rand = Math.random) {
     const d = Math.max(0, Math.min(1, P.diff)), t = P.trophies;
@@ -190,8 +202,8 @@ const KCProgress = (() => {
     if (t >= 120) swap('cannon', 0.6);
     const name = FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
     const foeTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
-    const lvl = foeLevel(foeTrophies);
-    const cardLevels = Object.fromEntries(deck.map(id => [id, lvl]));
+    const cardLevels = spreadLevels(foeUpgrades(foeTrophies), deck, rand);
+    const lvl = Math.min(...Object.values(cardLevels));
     return {
       id: 'trophy', kind: 'trophy', name, short: name, level: lvl, tier: `${foeTrophies} trophies`,
       look: foeLook(rand), lines: null, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: foeTrophies,
@@ -313,7 +325,7 @@ const KCProgress = (() => {
     load, save, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,
-    trophyFoe, foeLevel, recordTrophy,
+    trophyFoe, foeUpgrades, spreadLevels, recordTrophy,
     roll, chestState, unlockingSlot, startUnlock, openChest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
   };
