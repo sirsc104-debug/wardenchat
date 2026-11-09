@@ -57,18 +57,30 @@ const KCProgress = (() => {
     },
     coins: [5, 20, 50, 150, 400, 1000, 2000, 4000, 6000, 9000, 14000, 20000, 30000, 50000],
   };
-  const BOT_NAMES = ['Clank', 'Pebble', 'Rusty', 'Bolt', 'Sprocket', 'Mossy', 'Fizz', 'Tumble', 'Gizmo', 'Cog', 'Widget', 'Rivet'];
-  const BOT_LOOK = { bg: ['#9fe6d0', '#2c8a82'], hair: 'robot', shirt: '#5d6578', skin: '#c4cad6', mouth: 'flat' };
-  const BOT_LINES = {
-    start: ['Beep boop. Battle mode on.', 'Calculating your weak spot...', 'Good luck, human!'],
-    youTower: ['Error! Tower lost.', 'Recalculating...', 'That was not in my plans.'],
-    myTower: ['Tower acquired. Beep!', 'Target down.', 'Boop! Got one.'],
-    double: 'Energy doubled. Processing faster.',
-    overtime: 'Overtime protocol engaged.',
-    youWin: ['Bot defeated. Good game!', 'Shutting down... well played.'],
-    youLose: ['Bot wins this round. Try again?', 'Victory computed. Rematch?'],
-    draw: 'Tie detected. Again?',
+  // Trophy opponents look and talk like any other player.
+  const FOE_NAMES = ['EmberFox', 'Kestrel', 'MossKnight', 'Juno77', 'BrickTop', 'Lumen', 'NovaRae', 'Quillon', 'RowanK', 'Tidebreaker',
+    'Sable', 'PixelPike', 'Hollis', 'Marigold', 'Vexa', 'Orrin22', 'CrimsonOwl', 'Tamsin', 'Bramble', 'Ashgrove', 'Kaito', 'Wren', 'Delphine', 'Grit'];
+  const FOE_LINES = {
+    start: ['Good luck, have fun!', "Let's go!", 'Ready when you are.', 'Good luck!'],
+    youTower: ['Nice one.', 'Okay, okay.', "Didn't see that coming.", 'Well played.'],
+    myTower: ['Got one!', 'Gotcha!', 'Lane open!', "That's one!"],
+    double: 'Double energy!',
+    overtime: 'Overtime. Next tower wins!',
+    youWin: ['GG, well played.', 'Good game!', 'GG! You got me.'],
+    youLose: ['GG! Rematch?', 'Close one. Again?', 'Good game! Try again?'],
+    draw: 'A draw! Rematch?',
   };
+  const FOE_BG = [['#ffcf6b', '#ea8b2b'], ['#c99bff', '#7440cf'], ['#9fc0e0', '#3c5d8c'], ['#9fe6b8', '#2c8a5a'], ['#ffa3b5', '#c03a5a'], ['#a8e4ff', '#2f7cb8']];
+  const FOE_SKIN = ['#f2c4a0', '#d9a27a', '#b87a52', '#8a5636', '#efc19c'];
+  const FOE_HAIR = ['#2a1d18', '#6b4426', '#c58a3c', '#1e1e26', '#9a3b2a', '#c9ccd6'];
+  const FOE_SHIRT = ['#dc3640', '#2fb36b', '#3d4459', '#2f6fe4', '#9b6bd6', '#f08a4b'];
+  function foeLook(rand) {
+    const pick = a => a[Math.floor(rand() * a.length)];
+    const hair = pick(['cap', 'curly', 'beard', 'curly', 'cap']);
+    const hat = pick(['#2f6fe4', '#dc3640', '#2fb36b', '#3d4459']);
+    return { bg: pick(FOE_BG), hair, hat, hairCol: pick(FOE_HAIR), band: pick(['#ffcd33', '#ffffff', '#5fc4d9']),
+      shirt: pick(FOE_SHIRT), skin: pick(FOE_SKIN), extra: pick(['', 'scarf', 'armor', '']), mouth: pick(['smile', 'smirk', 'flat']) };
+  }
 
   let P = null, storage = null;
   const store = {
@@ -186,11 +198,11 @@ const KCProgress = (() => {
     if (t >= 40) swap('skeletons', 0.6);
     if (t >= 120) swap('cannon', 0.6);
     const cardLevels = Object.fromEntries(deck.map(id => [id, lvl]));
-    const name = BOT_NAMES[Math.floor(rand() * BOT_NAMES.length)];
-    const botTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
+    const name = FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
+    const foeTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
     return {
-      id: 'bot', kind: 'trophy', name: `${name} (Bot)`, short: name, level: lvl, tier: `Bot · ${botTrophies} trophies`,
-      look: BOT_LOOK, lines: BOT_LINES, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: botTrophies,
+      id: 'trophy', kind: 'trophy', name, short: name, level: lvl, tier: `${foeTrophies} trophies`,
+      look: foeLook(rand), lines: FOE_LINES, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: foeTrophies,
     };
   }
   function recordTrophy(winner) {

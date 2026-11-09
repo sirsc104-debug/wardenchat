@@ -516,7 +516,10 @@ const KCArt = (() => {
     training: { bg: '#5c5470', grass: ['#7cc653', '#73bd4b'], path: '#d6bf8a', pad: '#9d978d', river: ['#3d8fe0', '#2f75c4'], bank: '#5aa63e', wall: '#857c95', specks: ['#ffffff', '#ffd54a', '#ff8fb3', '#b68cff'] },
     cinder: { bg: '#4d3f45', grass: ['#a6ad5a', '#9ba251'], path: '#c9a47c', pad: '#8d857e', river: ['#3a86c4', '#2c6aa3'], bank: '#7f8a42', wall: '#6f6168', specks: ['#ff8a3d', '#ffc261', '#5a4a44', '#e6dccd'] },
   };
+  // The battlefield under the live game: the arena's illustration if it has one (js/arenas.js),
+  // otherwise drawn here from its palette.
   function arena(c, k, B, theme) {
+    if (typeof KCArenas !== 'undefined' && KCArenas.drawField(c, theme, k, B, KCSim.W, KCSim.H)) return;
     const PAL = THEMES[theme] || THEMES.training;
     const S = KCSim, W = S.W, H = S.H, X = x => (x + B) * k, Y = y => (y + B) * k;
     const r = S.mulberry(42);
@@ -592,27 +595,13 @@ const KCArt = (() => {
       line(c, q(0.36), q(0.74), q(0.5), q(0.9), OUT, q(0.018)); line(c, q(0.64), q(0.74), q(0.5), q(0.9), OUT, q(0.018));
       sh(c, () => rr(c, q(0.45), q(0.88), q(0.1), q(0.06), q(0.02)), '#c9ced6', null, 0);
     }
-    if (look.hair === 'robot') {
-      line(c, q(0.5), q(0.2), q(0.5), q(0.1), OUT, q(0.03));
-      sh(c, () => circ(c, q(0.5), q(0.09), q(0.05)), '#ff5f69', '#c8343e', q(0.015));
-      for (const x of [0.19, 0.81]) sh(c, () => rr(c, q(x - 0.05), q(0.38), q(0.1), q(0.18), q(0.04)), '#9aa1ae', null, 0);
-      sh(c, () => rr(c, q(0.23), q(0.2), q(0.54), q(0.52), q(0.12)), look.skin, '#9aa1ae', q(0.05));
-      for (const [x, y] of [[0.29, 0.26], [0.71, 0.26], [0.29, 0.66], [0.71, 0.66]]) dot(c, q(x), q(y), q(0.016), '#7a8190');
-      sh(c, () => rr(c, q(0.29), q(0.34), q(0.42), q(0.16), q(0.07)), '#1f2a3a', null, 0);
-      for (const x of [0.4, 0.6]) { circ(c, q(x), q(0.42), q(0.045)); c.fillStyle = '#5ff0ff'; c.fill(); }
-      sh(c, () => rr(c, q(0.38), q(0.56), q(0.24), q(0.08), q(0.03)), '#3b4250', null, 0);
-      for (const x of [0.44, 0.5, 0.56]) line(c, q(x), q(0.565), q(x), q(0.635), '#9aa1ae', q(0.01));
-      c.restore();
-      if (locked) { rr(c, 0, 0, w, h, q(0.14)); c.fillStyle = 'rgba(20,14,40,0.62)'; c.fill(); }
-      return;
-    }
     // head
     for (const x of [0.24, 0.76]) sh(c, () => circ(c, q(x), q(0.5), q(0.06)), look.skin, null, 0);
     if (look.hair === 'curly') for (const [x, y, r] of [[0.28, 0.32, 0.11], [0.72, 0.32, 0.11], [0.26, 0.45, 0.08], [0.74, 0.45, 0.08]]) sh(c, () => circ(c, q(x), q(y), q(r)), look.hairCol, null, 0);
     sh(c, () => circ(c, q(0.5), q(0.47), q(0.27)), look.skin, shade(look.skin), q(0.04));
     if (look.hair === 'cap') {
-      sh(c, () => { c.beginPath(); c.arc(q(0.5), q(0.42), q(0.29), Math.PI, 0); c.closePath(); }, look.hat, look.hatSh, q(0.04));
-      sh(c, () => rr(c, q(0.42), q(0.36), q(0.48), q(0.07), q(0.03)), look.hatSh, null, 0);
+      sh(c, () => { c.beginPath(); c.arc(q(0.5), q(0.42), q(0.29), Math.PI, 0); c.closePath(); }, look.hat, look.hatSh || shade(look.hat), q(0.04));
+      sh(c, () => rr(c, q(0.42), q(0.36), q(0.48), q(0.07), q(0.03)), look.hatSh || shade(look.hat), null, 0);
       crownIcon(c, q(0.5), q(0.26), q(0.06), C.gold);
     } else if (look.hair === 'curly') {
       for (const [x, y, r] of [[0.32, 0.25, 0.11], [0.47, 0.19, 0.12], [0.62, 0.22, 0.11], [0.72, 0.3, 0.09], [0.26, 0.33, 0.08]]) sh(c, () => circ(c, q(x), q(y), q(r)), look.hairCol, null, 0);

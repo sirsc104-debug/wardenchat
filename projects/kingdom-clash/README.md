@@ -23,19 +23,30 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 - **Towers**: Archer Towers (1,400 HP) shoot from the start; the King Tower (2,400 HP) sleeps until it is hit or one of its Archer Towers falls.
 - **Winning**: an Archer Tower is 1 crown, the King Tower is all 3 and ends the match. After 3:00 the side with more crowns wins; if tied, 1:00 of overtime where the next tower wins; if still tied, the side whose weakest tower has more health wins.
 
+## Arena art (js/arenas.js)
+
+Every arena's images are listed in one place, `js/arenas.js`: the lobby **centerpiece** (with where its empty progress bar sits), the two battle **scenery** panels (with the rows the animated spectators sit on and where the lights are), and the playable **battlefield**. Nothing else names an arena image.
+
+| Arena | Centerpiece | Left scenery | Right scenery | Battlefield |
+| --- | --- | --- | --- | --- |
+| Training Grounds | `training-grounds.webp` | `grounds-left.webp` | `grounds-right.webp` | drawn in code (grass, water, wooden bridges) |
+| Cinder Keep | `cinder_keep_volcanic_arena_badge.webp` | `cinder_keep_volcanic_grandstand.webp` | `cinder_keep_lavafall_arena.webp` | `cinder_keep_molten_battle_arena.webp` |
+
+A battlefield image is only art under the live game; the 18 × 32 tile simulation never changes. It is laid under the grid by anchor pairs (image pixel → tile), stretched piecewise so the tower pads sit under the Archer Towers (tiles 6.5 and 25.5), the lava edges on the river (tiles 15 and 17) and the bridges on the lanes (3.5 and 14.5). Cinder Keep's border is 1.4 tiles instead of 0.6 so its battlements and corner braziers show. If an image fails to load, the battlefield falls back to the drawn palette, the scenery to a plain gradient (the crowd still plays) and the lobby to the arena's name on a plaque. The bundler bakes every image into the single-page build.
+
 ## The Trophy Road and Arena 1
 
 Rules live in `js/progress.js` (no screen code; tested by `tools/progress-test.js`).
 
 - **Opening it**: beat Owen, Romeo and Luc. The Battle button then plays trophy battles in **Arena 1: Cinder Keep** (trainers can still be replayed from the Trainers panel, for no trophies).
 - **Trophies**: a win is +30, a loss is −20, never below the arena's floor (0 in Arena 1). Arena 2 is at 300 trophies and is marked *coming soon*.
-- **Bots**: named, marked "(Bot)", with a robot portrait. Their card levels follow the arena (level 1 in Arena 1). Their skill follows your results: a step harder after a win, a step easier after a loss, settling at about 52% wins for every player. In the headless test a good player settled at 53% and a sloppy one at 50%.
+- **Opponents**: computer players with ordinary player names, portraits and lines (nothing in the game labels them). Their card levels follow the arena (level 1 in Arena 1). Their skill follows your results: a step harder after a win, a step easier after a loss, settling at about 52% wins for every player. In the headless test a good player settled at 53% and a sloppy one at 50%.
 - **Road rewards** (claimed on the Trophy Road tab): 20 trophies 50 coins · 40 **Skeleton Pack** ×6 · 60 Silver Chest · 90 100 coins · 120 **Cannon** ×4 · 160 Silver Chest · 200 200 coins · 250 Gold Chest · 300 Arena 2 (coming soon).
 - **Chests**: a trophy win puts a chest in the first free slot (four slots), in a fixed repeating order (wooden, wooden, silver, wooden, silver, wooden, wooden, gold, wooden, silver). Its contents are decided when it is won. One chest unlocks at a time on a real-time timer (wooden 1 minute, silver 15 minutes, gold 1 hour), then opens with coins and copies of cards you have found. Skipping a timer with diamonds will come with the SirSC wallet.
 - **Card levels**: copies plus coins level a card up, to 15 at most. Commons need 2, 4, 10, 20, 40… copies; rares 1, 2, 4, 8, 15…; coins 5, 20, 50, 150, 400… Each level adds 8% health and damage. Units in battle show their level on their health bar.
 - **Arena cards stay in Arena 1**: Skeleton Pack and Cannon are only found on the Trophy Road. Trainers never use them, and in a Training Grounds match your deck goes back to the eight starter cards (each Arena 1 card swaps for a starter card you left out).
 - **Coins** are kept on this device for now and move to the SirSC wallet when it is connected. Diamonds show "–" until then.
-- **Arena 1 art**: the battlefield has its own palette (dry grass, ash and embers). The lobby centerpiece and the battle scenery reuse the Training Grounds illustrations, warmed and relabelled "Cinder Keep", until Arena 1 has illustrations of its own (drop them in `img/` and point `CENTERPIECE` in `js/menu.js` and `SRC` in `js/scenery.js` at them).
+- **Arena 1 art**: Cinder Keep has its own four illustrations: the lobby badge, the volcanic grandstand (left) and the lavafall (right) battle scenery, and the molten battlefield itself (dark stone, lava river, reinforced bridges, corner braziers), with ember, lava-glow, heat-shimmer and fiery-explosion effects on top.
 
 | New card | Energy | Rarity | What it does |
 | --- | --- | --- | --- |
@@ -77,6 +88,7 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | --- | --- |
 | `js/cards.js` | The 8 cards and the starter deck |
 | `js/trainers.js` | Owen, Romeo and Luc |
+| `js/arenas.js` | Arena art: each arena's centerpiece, scenery panels (with crowd rows and lights) and battlefield image with its tile mapping; loads each image once |
 | `js/progress.js` | Progress and its rules: trainers, trophies, bots, chests, road rewards, card levels, the deck |
 | `js/menu.js` | The lobby, the Cards screen (deck, collection, upgrades), chest opening, the Trophy Road tab |
 | `js/sim.js` | The battle: fixed 30 steps a second, no DOM, seeded, so it runs the same in the page, in Node and later on both ends of an online match |
@@ -90,7 +102,7 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `tools/cards-test.js` | `node tools/cards-test.js` checks the Cannon (pulls a Rhino, lasts 30 s, placement rules), the Skeleton Pack and card levels |
 | `tools/progress-test.js` | `node tools/progress-test.js [matches]` checks old saves, trophies, chests and timers, road rewards, upgrades, the deck and the Training Grounds deck rule, then plays trophy matches to check the 52% target |
 | `tools/sim-test.js` | `node tools/sim-test.js 40` plays 40 bot-vs-bot matches headless and checks they end cleanly (no NaNs, no troops in the river) |
-| `img/` | The two Training Grounds battle backgrounds (793 × 1983 WebP) and the lobby centerpiece (`training-grounds.webp`, 1448 × 1086 with transparency) |
+| `img/` | Arena art (see *Arena art*): the Training Grounds and Cinder Keep centerpieces (transparent), scenery panels (793 × 1983) and the Cinder Keep battlefield (1024 × 1536) |
 | `build-artifact.py` | Bundles everything into one page, with the images baked in as data URIs: `python3 build-artifact.py OUT.html` (claude.ai Artifact) or `--standalone` (a complete page) |
 
 Built copies are in `dist/`: `kingdom-clash.html` (Artifact bundle) and `kingdom-clash-standalone.html` (open anywhere, works offline apart from the Google font, which falls back to a system font).

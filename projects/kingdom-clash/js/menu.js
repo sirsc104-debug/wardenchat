@@ -13,7 +13,6 @@
 const KCMenu = (() => {
   const $ = q => document.querySelector(q), $$ = q => document.querySelectorAll(q);
   const G = KCProgress;
-  const CENTERPIECE = 'img/training-grounds.webp';
   const TABS = ['shop', 'cards', 'battle', 'clan', 'road'];
   const imgs = {};
   let opts = {}, tabNow = 'battle', swapId = null, ticker = 0;
@@ -296,7 +295,20 @@ const KCMenu = (() => {
   }
 
   /* ---------- the opponent ---------- */
-  const BOT_LOOK_ID = 'bot';
+  const TROPHY_ID = 'trophy';
+  // The Trophy Battle's picture: a gold trophy on the arena's colours.
+  function trophyPic(cv) {
+    const c = cv.getContext('2d'), w = cv.width, q = v => v * w;
+    c.clearRect(0, 0, w, w);
+    const g = c.createLinearGradient(0, 0, 0, w);
+    g.addColorStop(0, '#ff9a4a'); g.addColorStop(1, '#a3262d');
+    KCArt.rr(c, 0, 0, w, w, q(0.14)); c.fillStyle = g; c.fill();
+    c.save(); c.translate(q(0.5), q(0.52)); c.scale(w / 24 * 0.62, w / 24 * 0.62); c.translate(-12, -12);
+    c.fill(new Path2D('M7 3h10v3h3v3a4 4 0 0 1-4 4h-.5A5 5 0 0 1 13 16v2h3v3H8v-3h3v-2a5 5 0 0 1-3.5-3H8a4 4 0 0 1-4-4V6h3z'));
+    const p = new Path2D('M7 3h10v3h3v3a4 4 0 0 1-4 4h-.5A5 5 0 0 1 13 16v2h3v3H8v-3h3v-2a5 5 0 0 1-3.5-3H8a4 4 0 0 1-4-4V6h3z');
+    c.fillStyle = '#ffcf3f'; c.fill(p); c.lineWidth = 1.4; c.strokeStyle = '#1c1530'; c.lineJoin = 'round'; c.stroke(p);
+    c.restore();
+  }
   function renderOpp() {
     const p = P(), open = G.roadOpen(), mode = G.mode(), T = G.trainer(), next = G.nextTrainer();
     const pic = $('#oppPic');
@@ -305,7 +317,7 @@ const KCMenu = (() => {
       $('#oppLabel').textContent = 'Trophy Battle';
       $('#oppName').textContent = `${a.name}`;
       $('#oppMeta').textContent = `${fmt(p.trophies)} trophies · win +${G.TROPHIES.win} / loss −${G.TROPHIES.loss}`;
-      if (pic.dataset.id !== BOT_LOOK_ID) { pic.dataset.id = BOT_LOOK_ID; KCArt.trainer(pic, G.trophyFoe(() => 0).look); }
+      if (pic.dataset.id !== TROPHY_ID) { pic.dataset.id = TROPHY_ID; trophyPic(pic); }
       $('#battleSub').textContent = `Trophy battle · ${a.name}`;
     } else {
       $('#oppLabel').textContent = open ? 'Trainer rematch · starter deck · no trophies' : next && T.id === next.id ? 'Next Opponent' : 'Rematch';
@@ -315,7 +327,7 @@ const KCMenu = (() => {
       $('#battleSub').textContent = `vs ${T.name}`;
     }
     const items = [];
-    if (open) items.push(`<li><button type="button" class="opp-item${mode === 'trophy' ? ' on' : ''}" data-mode="trophy"><canvas width="88" height="88" data-look="${BOT_LOOK_ID}" aria-hidden="true"></canvas>
+    if (open) items.push(`<li><button type="button" class="opp-item${mode === 'trophy' ? ' on' : ''}" data-mode="trophy"><canvas width="88" height="88" data-look="${TROPHY_ID}" aria-hidden="true"></canvas>
       <span class="oi-text"><b>Trophy Battle</b><small>${esc(G.arena().name)} · ${fmt(p.trophies)} trophies</small><small>${esc(recText(p.trophyRecord))}</small></span></button></li>`);
     items.push(...KC_TRAINERS.map(t => {
       const lock = !G.unlocked(t.id), st = lock ? 'Locked' : p.beaten[t.id] ? 'Beaten' : 'Not beaten yet';
@@ -327,7 +339,8 @@ const KCMenu = (() => {
     $('#oppList').innerHTML = items.join('');
     for (const cvs of $$('#oppList canvas')) {
       const id = cvs.dataset.look;
-      KCArt.trainer(cvs, id === BOT_LOOK_ID ? G.trophyFoe(() => 0).look : KC_TRAINER[id].look, id !== BOT_LOOK_ID && !G.unlocked(id));
+      if (id === TROPHY_ID) trophyPic(cvs);
+      else KCArt.trainer(cvs, KC_TRAINER[id].look, !G.unlocked(id));
     }
     for (const b of $$('#oppList .opp-item')) b.addEventListener('click', () => {
       if (b.dataset.mode === 'trophy') G.setMode('trophy');
@@ -391,11 +404,21 @@ const KCMenu = (() => {
     $('.who-text small').textContent = open ? `Arena ${G.arena().number} · ${G.arena().name}` : 'Training Grounds';
     // centerpiece: trainers beaten, then trophies toward the next arena
     const cp = $('#cp'), bar = $('#cpBar');
-    cp.classList.toggle('arena-cinder', open);
-    $('#cpName').hidden = !open;
+    // the arena's own centerpiece (js/arenas.js), its progress bar placed over the art's empty bar
+    const art = KCArenas.get(open ? G.arena().theme : 'training'), C = art.centerpiece, img = $('#cpImg');
+    if (img.dataset.src !== C.src) {
+      img.dataset.src = C.src;
+      img.hidden = false;
+      img.onerror = () => { img.hidden = true; cp.classList.add('no-art'); };
+      img.onload = () => cp.classList.remove('no-art');
+      img.src = C.src;
+      cp.style.setProperty('--cpw', C.w); cp.style.setProperty('--cph', C.h);
+      for (const [k, v] of Object.entries(C.bar)) bar.style.setProperty(k, v + '%');
+    }
+    cp.dataset.arena = open ? G.arena().theme : 'training';
+    $('#cpFallback').textContent = art.name;
     if (open) {
       const a = G.arena(), na = G.nextArena(), lo = a.min, hi = na ? na.min : a.min + 300;
-      $('#cpNameText').textContent = a.name;
       $('#cpImg').alt = `${a.name} arena`;
       $('#cpFill').style.width = (Math.max(0, Math.min(1, (p.trophies - lo) / (hi - lo))) * 100).toFixed(1) + '%';
       $('#cpText').textContent = `${fmt(p.trophies)} / ${fmt(hi)} Trophies`;
@@ -436,7 +459,8 @@ const KCMenu = (() => {
   function init(o) {
     opts = o || {};
     G.load();
-    $('#cpImg').src = CENTERPIECE;
+    KCArenas.preload('training');
+    if (G.roadOpen()) KCArenas.preload(G.arena().theme);
     for (const b of $$('[data-tab]')) b.addEventListener('click', () => tab(b.dataset.tab));
     $('#battleBtn').addEventListener('click', () => opts.onBattle && opts.onBattle(nextFoe()));
     $('#oppChange').addEventListener('click', e => { e.stopPropagation(); toggle('#oppPanel', '#oppChange'); });

@@ -5,9 +5,11 @@
 
 (() => {
   const S = KCSim, A = KCArt, $ = q => document.querySelector(q);
-  const B = 0.6; // the wall drawn around the field, in tiles
+  // The border drawn around the 18 x 32 field, in tiles; each arena sets its own (js/arenas.js), so
+  // Cinder Keep shows its battlements and corner braziers.
+  let B = 0.6;
   const G = {
-    phase: 'home', s: null, bot: null, acc: 0, last: 0, k: 20, dpr: 1,
+    phase: 'home', s: null, bot: null, theme: 'training', art: KCArenas.get('training'), embers: [], acc: 0, last: 0, k: 20, dpr: 1,
     sel: -1, hover: null, drag: false, dragMoved: false, toggle: false,
     fx: [], bg: null, zone: null, zoneKey: '', handKey: '', ui: {},
     intro: 0, ended: 0, shake: 0, lastSec: -1, idleHint: false, trainer: null, res: null,
@@ -38,7 +40,10 @@
     const T = G.trainer = foe || KCMenu.nextFoe();
     const trophy = T.kind === 'trophy', arenaNow = KCProgress.arena();
     G.theme = trophy ? arenaNow.theme : 'training';
-    KCScenery.setGrade(G.theme);
+    G.art = KCArenas.get(G.theme);
+    B = G.art.margin;
+    KCScenery.setArena(G.theme);
+    G.embers = [];
     G.s = S.create({
       seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, T.towerDamage],
       decks: [trophy ? KCProgress.state.deck : KCProgress.trainingDeck(), T.deck || KC_STARTER_DECK], cardLevels: [KCProgress.cardLevels(), T.cardLevels || {}],
@@ -48,7 +53,7 @@
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
     A.trainer($('#introFoe'), T.look);
-    Object.assign(G, { fx: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0 });
+    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0 });
     $('#result').hidden = true; $('#leaveAsk').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
     show('battle');
@@ -96,6 +101,12 @@
     const b = G.bg.getContext('2d');
     b.scale(G.dpr, G.dpr);
     A.arena(b, G.k, B, G.theme);
+    // If the battlefield image is still loading, it is drawn from its palette now and swapped in once
+    // it arrives.
+    if (G.art.field && !KCArenas.ready(KCArenas.image(G.art.field.src))) {
+      const theme = G.theme;
+      KCArenas.whenReady(G.art.field.src, () => { if (!$('#battle').hidden && G.theme === theme) layout(); });
+    }
     G.zoneKey = '';
     requestAnimationFrame(() => KCScenery.resize());
   }
@@ -232,6 +243,7 @@
         case 'boom':
           KCSound.play('boom'); G.shake = Math.max(G.shake, 0.3);
           G.fx.push({ kind: 'blast', x: e.x, y: e.y, r: e.r, life: 0.5, max: 0.5 });
+          if (G.art.fx === 'lava') G.fx.push({ kind: 'flash', x: e.x, y: e.y, r: e.r * 2.2, life: 0.45, max: 0.45 });
           sparks(e.x, e.y, 18, '#ffb030', 4);
           break;
         case 'tower': towerFx(e); break;
@@ -248,7 +260,12 @@
     KCScenery.cheer(1 - e.team);
     for (let i = 0; i < 26; i++) {
       const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 5;
-      G.fx.push({ kind: 'rock', x: e.x, y: e.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.6, z: 0, vz: 4 + Math.random() * 6, r: 0.12 + Math.random() * 0.2, life: 1.2, max: 1.2, col: Math.random() < 0.3 ? A.TEAM[e.team].cloth : '#b8b2a8' });
+      G.fx.push({ kind: 'rock', x: e.x, y: e.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.6, z: 0, vz: 4 + Math.random() * 6, r: 0.12 + Math.random() * 0.2, life: 1.2, max: 1.2, col: Math.random() < 0.3 ? A.TEAM[e.team].cloth : G.art.fx === 'lava' && Math.random() < 0.4 ? '#ff8a2a' : '#b8b2a8' });
+    }
+    if (G.art.fx === 'lava') {
+      // a fiery collapse: a bright flash and a spray of embers
+      G.fx.push({ kind: 'flash', x: e.x, y: e.y, r: 4, life: 0.7, max: 0.7 });
+      sparks(e.x, e.y, 22, '#ffb030', 5);
     }
     puff(e.x, e.y, 16, '#cfc8dc', 1.6);
     if (e.team === 1) {
@@ -332,7 +349,7 @@
     const sh = G.shake > 0 ? G.shake * k * 0.35 : 0;
     c.translate((Math.random() - 0.5) * sh, (Math.random() - 0.5) * sh);
     c.drawImage(G.bg, 0, 0, G.bg.width / G.dpr, G.bg.height / G.dpr);
-    water(c, k, t);
+    if (G.art.fx === 'lava') lava(c, k, t); else water(c, k, t);
     const selId = G.sel >= 0 ? s.hands[0][G.sel] : null;
     if (selId && KC_CARDS[selId].kind === 'troop') drawZone(c);
 
@@ -351,6 +368,65 @@
     drawFx(c, t);
     for (const d of ground.concat(air)) bars(c, d);
     if (selId && G.hover) ghost(c, selId, t);
+  }
+  // Cinder Keep: the lava breathes, heat shimmers above it, embers rise off it and the corner braziers
+  // flicker. All light, and cheap: one pass of a few shapes per frame.
+  function lava(c, k, t) {
+    const f = G.art.field, y0 = SY(S.RIVER_TOP), y1 = SY(S.RIVER_BOT);
+    c.save();
+    c.globalCompositeOperation = 'lighter';
+    const pulse = 0.5 + 0.5 * Math.sin(t * 1.6);
+    const g = c.createLinearGradient(0, y0 - k * 0.8, 0, y1 + k * 0.8);
+    g.addColorStop(0, 'rgba(255,120,30,0)'); g.addColorStop(0.5, `rgba(255,140,40,${0.1 + pulse * 0.1})`); g.addColorStop(1, 'rgba(255,120,30,0)');
+    c.fillStyle = g; c.fillRect(SX(-B), y0 - k * 0.8, (S.W + 2 * B) * k, y1 - y0 + k * 1.6);
+    // slow bright blobs drifting along the river
+    for (let i = 0; i < 7; i++) {
+      const x = SX(((t * 0.35 + i * 2.9) % (S.W + 4)) - 2), y = SY(15.5 + ((i * 37) % 10) / 10), r = k * (0.6 + 0.3 * Math.sin(t * 2 + i));
+      const bg = c.createRadialGradient(x, y, 0, x, y, r);
+      bg.addColorStop(0, 'rgba(255,230,120,0.35)'); bg.addColorStop(1, 'rgba(255,160,40,0)');
+      c.fillStyle = bg; c.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    // corner braziers
+    for (const [bx, by] of f.braziers) {
+      const x = SX(bx), y = SY(by) - k * 0.4, r = k * (1.9 + Math.sin(t * 13 + bx) * 0.12 + Math.sin(t * 7.1 + by) * 0.1);
+      const bg = c.createRadialGradient(x, y, 0, x, y, r);
+      bg.addColorStop(0, 'rgba(255,190,90,0.4)'); bg.addColorStop(1, 'rgba(255,120,40,0)');
+      c.fillStyle = bg; c.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    c.globalCompositeOperation = 'source-over';
+    // heat shimmer: faint wavering lines just above the lava
+    c.strokeStyle = 'rgba(255,220,170,0.13)'; c.lineWidth = Math.max(1, k * 0.05);
+    for (let i = 0; i < 4; i++) {
+      const y = y0 - k * (0.3 + i * 0.35) - ((t * 6 + i * 9) % 10) * 0.02 * k;
+      c.beginPath();
+      for (let x = 0; x <= S.W + 2 * B; x += 0.5) {
+        const yy = y + Math.sin(x * 1.3 + t * 3 + i) * k * 0.06;
+        if (x === 0) c.moveTo(x * k, yy); else c.lineTo(x * k, yy);
+      }
+      c.stroke();
+    }
+    c.restore();
+    // the bridges go back on top, so the glow and shimmer stay on the lava
+    for (const [bx0, by0, bx1, by1] of f.bridges) {
+      const x0 = SX(bx0), y = SY(by0), w = (bx1 - bx0) * k, h = (by1 - by0) * k;
+      c.drawImage(G.bg, x0 * G.dpr, y * G.dpr, w * G.dpr, h * G.dpr, x0, y, w, h);
+    }
+    // embers rising off the lava (and a few off the braziers)
+    const E = G.embers;
+    if (E.length < 34 && Math.random() < 0.5) {
+      const fromBrazier = Math.random() < 0.25, br = f.braziers[Math.floor(Math.random() * 4)];
+      E.push(fromBrazier
+        ? { x: br[0] + (Math.random() - 0.5) * 0.5, y: br[1] - 0.6, vy: -1.4 - Math.random(), life: 1.6, max: 1.6, ph: Math.random() * 6 }
+        : { x: Math.random() * S.W, y: 15.2 + Math.random() * 1.6, vy: -0.6 - Math.random() * 0.8, life: 2.5 + Math.random() * 2, max: 4.5, ph: Math.random() * 6 });
+    }
+    for (const e of E) {
+      e.life -= 1 / 60; e.y += e.vy / 60; e.x += Math.sin(t * 2 + e.ph) * 0.006;
+      c.globalAlpha = Math.max(0, Math.min(1, e.life / e.max * 2)) * (0.55 + 0.45 * Math.sin(t * 10 + e.ph));
+      c.fillStyle = '#ffb347';
+      c.fillRect(SX(e.x), SY(e.y), Math.max(1.5, k * 0.08), Math.max(1.5, k * 0.08));
+    }
+    c.globalAlpha = 1;
+    G.embers = E.filter(e => e.life > 0);
   }
   function water(c, k, t) {
     c.save();
@@ -509,6 +585,13 @@
       else if (f.kind === 'ring') {
         c.globalAlpha = a; A.ell(c, SX(f.x), SY(f.y), f.r * k * (1.2 - a * 0.6), f.r * k * 0.5 * (1.2 - a * 0.6));
         c.strokeStyle = f.team === 0 ? '#8cc4ff' : '#ff9ea4'; c.lineWidth = k * 0.12; c.stroke();
+      } else if (f.kind === 'flash') {
+        const r = f.r * k * (0.6 + (1 - a) * 0.6), x = SX(f.x), y = SY(f.y);
+        c.globalCompositeOperation = 'lighter'; c.globalAlpha = a;
+        const g = c.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, 'rgba(255,220,140,0.75)'); g.addColorStop(0.5, 'rgba(255,130,40,0.35)'); g.addColorStop(1, 'rgba(255,80,20,0)');
+        c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2);
+        c.globalCompositeOperation = 'source-over';
       } else if (f.kind === 'blast') {
         const p = 1 - a;
         c.globalAlpha = a; A.ell(c, SX(f.x), SY(f.y), f.r * k * (0.4 + p), f.r * k * 0.6 * (0.4 + p));
