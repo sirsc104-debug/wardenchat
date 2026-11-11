@@ -1546,9 +1546,7 @@ button.slot:hover { transform: translateY(-3px); }
 
 /* card emotes: each card's character starring in its own little scene */
 .em-card { position: relative; display: block; width: 100%; height: 100%; overflow: visible; }
-.em-card img { position: absolute; left: 4%; top: -4%; width: 92%; height: 100%; object-fit: contain; display: block; }
-.em-card.k-spell img { left: -14%; width: 128%; top: -10%; height: 112%; }
-.em-card.k-building img { left: -6%; width: 112%; }
+.em-card img { position: absolute; left: 4%; top: 4%; width: 92%; height: 92%; object-fit: contain; display: block; }
 .em-card .em-fx { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .em-fx * { transform-box: fill-box; transform-origin: center; }
 /* each card's own move */

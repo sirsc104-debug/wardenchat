@@ -52,9 +52,21 @@ const KCEmotes = (() => {
     camel: `<g class="ef-lasso"><ellipse cx="80" cy="16" rx="12" ry="5" fill="none" stroke="${O}" stroke-width="4.4"/><ellipse cx="80" cy="16" rx="12" ry="5" fill="none" stroke="#c8a070" stroke-width="2.4"/></g><g class="ef-smoke"><circle cx="16" cy="86" r="6" fill="#e2c48a" stroke="${O}" stroke-width="1.6"/><circle cx="28" cy="90" r="4" fill="#e2c48a" stroke="${O}" stroke-width="1.6"/></g>`,
   });
   let FX = null;
+  // Crop a drawing to what is drawn on it (plus a little room), into a square so every card fills its
+  // bubble the same way.
+  function trim(cv) {
+    const c = cv.getContext('2d'), { width: W, height: H } = cv, d = c.getImageData(0, 0, W, H).data;
+    let x0 = W, y0 = H, x1 = -1, y1 = -1;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 8) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return cv;
+    const side = Math.max(x1 - x0, y1 - y0) * 1.06 + 4, out = document.createElement('canvas');
+    out.width = out.height = Math.ceil(side);
+    out.getContext('2d').drawImage(cv, x0 - (side - (x1 - x0)) / 2, y0 - (side - (y1 - y0)) / 2, side, side, 0, 0, side, side);
+    return out;
+  }
   function cardFace(id, team) {
     const key = id + ':' + team;
-    if (!cardPics[key]) cardPics[key] = KCArt.portrait(id, 200, 240, { bare: true, team }).toDataURL();
+    if (!cardPics[key]) cardPics[key] = trim(KCArt.portrait(id, 200, 240, { bare: true, team })).toDataURL();
     FX = FX || fx(O);
     const c = KC_CARDS[id], kind = c.kind === 'spell' ? 'spell' : c.kind === 'building' ? 'building' : 'troop';
     return `<span class="em-face em-card c-${id} k-${kind}" aria-hidden="true"><img src="${cardPics[key]}" alt=""><svg class="em-fx" viewBox="0 0 100 100">${FX[id] || ''}</svg></span>`;

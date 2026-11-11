@@ -814,17 +814,18 @@ const KCArt = (() => {
   // opts.evo: the evolved version's card (a violet card with the evolved troop).
   function portrait(cardId, w, h, opts) {
     const cv = document.createElement('canvas');
-    cv.width = w; cv.height = h;
-    // opts.bare: just the character, on a transparent background with no card (for the card emotes);
-    // opts.team: whose colours it wears
+    // opts.bare: just the character, on a transparent background with no card and nothing clipped (for
+    // the card emotes): drawn with a wide margin all round so wings and weapons fit (trim it after)
     const evo = !!(opts && opts.evo), bare = !!(opts && opts.bare), team = (opts && opts.team) || 0;
+    cv.width = bare ? w * 2 : w; cv.height = bare ? h * 2 : h;
     const c = cv.getContext('2d'), card = KC_CARDS[cardId], R = evo ? RARITY.evo : RARITY[card.rarity] || RARITY.common;
+    if (bare) c.translate(w / 2, h / 2);
     if (!bare) {
       const g = c.createLinearGradient(0, 0, w * 0.3, h);
       g.addColorStop(0, R[0]); if (R[3]) g.addColorStop(0.55, R[3]); g.addColorStop(1, R[1]);
       rr(c, 0, 0, w, h, w * 0.1); c.fillStyle = g; c.fill();
     }
-    c.save(); rr(c, 0, 0, w, h, w * 0.1); c.clip();
+    c.save(); if (!bare) { rr(c, 0, 0, w, h, w * 0.1); c.clip(); }
     if (!bare) {
       const glow = c.createRadialGradient(w * 0.5, h * 0.42, w * 0.05, w * 0.5, h * 0.42, w * 0.6);
       glow.addColorStop(0, 'rgba(255,255,255,0.45)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
