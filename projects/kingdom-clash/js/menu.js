@@ -582,11 +582,83 @@ const KCMenu = (() => {
     for (const b of $$('#shopChests .buy-btn[data-chest]')) b.addEventListener('click', e => { e.stopPropagation(); buyChestClick(b.dataset.chest); });
     const fb = $('#shopChests .free-btn');
     if (fb) fb.addEventListener('click', e => { e.stopPropagation(); freeChestClick(); });
+    // emotes: today's three, each animated on its tile
+    $('#shopEmotes').innerHTML = G.emoteOffers().map(o => {
+      const poor = P().coins < o.price;
+      const btn = o.owned ? '<button class="buy-btn" type="button" disabled>Owned</button>'
+        : `<button class="buy-btn${poor ? ' poor' : ''}" type="button" data-emote="${o.id}" aria-label="Buy the ${esc(o.name)} emote for ${o.price} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(o.price)}</button>`;
+      return `<div class="emote-offer${o.owned ? ' owned' : ''}"><span class="eo-art em-live">${KCEmotes.face(o.id, 0)}</span>
+        <span class="eo-body"><b>${esc(o.name)}</b><small>${o.owned ? 'In your emote panel' : 'Yours for good: use it in every battle'}</small>${btn}</span></div>`;
+    }).join('');
+    for (const b of $$('#shopEmotes .buy-btn[data-emote]')) b.addEventListener('click', e => { e.stopPropagation(); buyEmoteClick(b.dataset.emote); });
     shopTimer();
+  }
+  function buyEmoteClick(id) {
+    const r = G.buyEmote(id);
+    if (r.error === 'coins') { KCSound.play('error'); toast('Not enough coins. Win battles and open chests to earn more.'); return; }
+    if (!r.ok) return;
+    KCSound.play('buy'); setTimeout(() => KCSound.play('em_' + id), 250);
+    toast(`${KCEmotes.LABEL[id]} is in your emote panel!`);
+    refresh();
   }
   function shopTimer() {
     const left = clock(G.shopEnds() - Date.now());
-    for (const el of [$('#shopTimer'), $('#freeClock')]) if (el) el.textContent = left;
+    for (const el of [$('#shopTimer'), $('#freeClock'), $('#emoteTimer')]) if (el) el.textContent = left;
+  }
+
+  /* ---------- the King Tower ---------- */
+  // Drawn once per level onto a canvas (and as a picture for the upgrade scene).
+  function kingArt(cv, level) {
+    const c = cv.getContext('2d'), w = cv.width;
+    c.clearRect(0, 0, w, w);
+    const g = c.createRadialGradient(w / 2, w * 0.45, w * 0.05, w / 2, w * 0.45, w * 0.55);
+    g.addColorStop(0, 'rgba(140,180,255,0.55)'); g.addColorStop(1, 'rgba(140,180,255,0)');
+    c.fillStyle = g; c.fillRect(0, 0, w, w);
+    c.save(); c.translate(w / 2, w * 0.62); KCArt.kingTower(c, w * 0.16, { team: 0, face: 1, active: true, t: 0, view: 'front' }); c.restore();
+    // its level on a badge
+    const r = w * 0.09, x = w * 0.8, y = w * 0.18;
+    KCArt.rr(c, x - r, y - r, r * 2, r * 2, r * 0.45); c.fillStyle = '#1a4ba8'; c.fill(); c.lineWidth = w * 0.015; c.strokeStyle = KCArt.OUT; c.stroke();
+    c.font = `${Math.round(r * 1.4)}px "Lilita One", "Arial Black", sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#fff';
+    c.fillText(String(level), x, y + 1);
+  }
+  function kingImg(level) {
+    const cv = document.createElement('canvas'); cv.width = 200; cv.height = 240;
+    const c = cv.getContext('2d'), g = c.createLinearGradient(0, 0, 0, 240);
+    g.addColorStop(0, '#8cc0f0'); g.addColorStop(1, '#2a4fa0');
+    KCArt.rr(c, 0, 0, 200, 240, 20); c.fillStyle = g; c.fill();
+    const t = document.createElement('canvas'); t.width = 200; t.height = 200; kingArt(t, level);
+    c.drawImage(t, 0, 24);
+    return cv.toDataURL();
+  }
+  function openKing() { renderKing(); $('#kingModal').hidden = false; ($('#kingUp').disabled ? $('#kingX') : $('#kingUp')).focus(); }
+  function closeKing() { $('#kingModal').hidden = true; }
+  function renderKing() {
+    const k = G.kingInfo(), T = KCSim.TOWERS, m = KCSim.levelMult(k.level), mn = KCSim.levelMult(Math.min(15, k.level + 1));
+    $('#kingTitle').textContent = `King Tower · Level ${k.level}${k.max ? ' · Max' : ''}`;
+    kingArt($('#kingArt'), k.level);
+    const stat = (label, v) => { const a = Math.round(v * m), b = Math.round(v * mn); return `<div><small>${label}</small><b>${fmt(a)}${k.max ? '' : `<em>+${fmt(b - a)}</em>`}</b></div>`; };
+    $('#kingStats').innerHTML = stat('King Tower health', T.king.hp) + stat('King Tower damage', T.king.dmg) + stat('Archer Tower health', T.archer.hp) + stat('Archer Tower damage', T.archer.dmg);
+    if (k.max) {
+      $('#kingNeed').innerHTML = '<b>Your King Tower is at the top level.</b>';
+    } else {
+      const ok = P().found.filter(id => P().cards[id].level >= k.next), rest = P().found.filter(id => P().cards[id].level < k.next);
+      $('#kingNeed').innerHTML = `<b>Level ${k.next} needs ${k.next} cards at level ${k.next} or higher</b>
+        <div class="m-prog${k.can ? ' full' : ''}"><i style="width:${Math.min(100, k.have / k.need * 100).toFixed(0)}%"></i><span>${Math.min(k.have, k.need)} / ${k.need} cards</span></div>
+        <div class="kg-cards">${ok.map(id => `<img src="${cardImg(id)}" alt="${esc(KC_CARDS[id].name)}" title="${esc(KC_CARDS[id].name)}: level ${P().cards[id].level}">`).join('')}${rest.map(id => `<img class="off" src="${cardImg(id)}" alt="" title="${esc(KC_CARDS[id].name)}: level ${P().cards[id].level}">`).join('')}</div>`;
+    }
+    $('#kingUp').hidden = k.max;
+    $('#kingUp').disabled = !k.can;
+    $('#kingNote').textContent = k.max ? '' : k.can ? 'Ready to upgrade!' : `${k.need - k.have} more card${k.need - k.have === 1 ? '' : 's'} at level ${k.next} needed.`;
+  }
+  function upgradeKingClick() {
+    const before = G.kingInfo(), r = G.upgradeKing();
+    if (!r) return;
+    const T = KCSim.TOWERS, v = (x, l) => Math.round(x * KCSim.levelMult(l));
+    refresh(); renderKing();
+    KCUpgradeFX.play({ mode: 'king', id: 'king', name: 'King Tower', img: kingImg(r.level), imgBefore: kingImg(before.level), rarity: 'common', title: 'King Tower',
+      before: { level: before.level, count: 0, need: 0, max: true }, after: { level: r.level, count: 0, need: 0, max: true },
+      stats: [['Tower health', v(T.king.hp, before.level), v(T.king.hp, r.level)], ['Tower damage', v(T.king.dmg, before.level), v(T.king.dmg, r.level)]],
+      xp: r.xp, levelUp: r.levelUp, cost: 0, gives: 0, onClose: () => { if (!$('#kingModal').hidden) $('#kingX').focus(); } });
   }
   function buyChestClick(type) {
     const r = G.buyChest(type);
@@ -963,12 +1035,16 @@ const KCMenu = (() => {
     if (lastFocus && lastFocus.focus) lastFocus.focus();
     lastFocus = null;
   }
+  let kingReady = false;
   function upgradeCard() {
+    kingReady = G.kingInfo().can;
     const id = modalId, before = G.upgradeInfo(id), r = G.upgrade(id);
     if (!r) return;
     refresh();
     modalId = null; openCard(id);
-    growScene('upgrade', id, before, G.upgradeInfo(id), { title: `Upgrade ${KC_CARDS[id].name}`, cost: before.cost, xp: r.xp, levelUp: r.levelUp });
+    const kingWas = kingReady;
+    growScene('upgrade', id, before, G.upgradeInfo(id), { title: `Upgrade ${KC_CARDS[id].name}`, cost: before.cost, xp: r.xp, levelUp: r.levelUp,
+      onClose: () => { if (!kingWas && G.kingInfo().can) toast(`Your King Tower can go to level ${G.kingInfo().next}! Tap it in the top bar.`); } });
   }
 
   /* ---------- the opponent ---------- */
@@ -1086,6 +1162,11 @@ const KCMenu = (() => {
     $('#playerName').textContent = p.name;
     const lv = G.level(), into = p.xp % G.XP_PER_LEVEL;
     $('#lvlNum').textContent = lv;
+    const ki = G.kingInfo();
+    $('#kingNum').textContent = ki.level;
+    $('#kingBtn').classList.toggle('can', ki.can);
+    $('#kingBtn').title = ki.can ? 'Your King Tower can be upgraded!' : `King Tower level ${ki.level}: its level sets the strength of your towers`;
+    if (!$('#kingModal').hidden) renderKing();
     $('#xpFill').style.width = (into / G.XP_PER_LEVEL * 100).toFixed(1) + '%';
     $('#xpText').textContent = `${into} / ${G.XP_PER_LEVEL}`;
     $('#coinVal').textContent = fmt(p.coins);
@@ -1189,6 +1270,11 @@ const KCMenu = (() => {
     $('#mUpgrade').addEventListener('click', upgradeCard);
     $('#passPlaque').addEventListener('click', () => { if (G.passOpen()) openPass(); else { KCSound.play('error'); toast('The Diamond Pass opens in Sunstone Arena (600 trophies).'); } });
     $('#passX').addEventListener('click', closePass);
+    $('#kingBtn').addEventListener('click', openKing);
+    $('#kingX').addEventListener('click', closeKing);
+    $('#kingUp').addEventListener('click', upgradeKingClick);
+    $('#kingModal').addEventListener('click', e => { if (e.target.id === 'kingModal') closeKing(); });
+    for (const b of $$('.shop-jump button')) b.addEventListener('click', () => $('#' + b.dataset.jump).scrollIntoView({ behavior: 'smooth', block: 'start' }));
     $('#passMini').addEventListener('click', openPass);
     $('#passModal').addEventListener('click', e => { if (e.target.id === 'passModal') closePass(); });
     $('#mUse').addEventListener('click', () => startSwap(modalId));
@@ -1202,8 +1288,8 @@ const KCMenu = (() => {
         else if (e.key === ' ' || e.key === 'Enter') { chestTap(); e.preventDefault(); }
         return;
       }
-      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); return; }
-      if (!$('#cardModal').hidden || !$('#passModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); return; }
+      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
       const n = '12345'.indexOf(e.key);
       if (n >= 0) { tab(TABS[n]); e.preventDefault(); }
       else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(nextFoe()); e.preventDefault(); }

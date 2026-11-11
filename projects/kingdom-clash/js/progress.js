@@ -119,7 +119,7 @@ const KCProgress = (() => {
   };
   const blank = () => ({
     name: 'Player', xp: 0, beaten: {}, records: {}, roadSeen: false, opp: null,
-    mode: null, trophies: 0, best: 0, coins: 0, diamonds: 0, shop: null, freeChestDay: null, magic: {}, cards: {}, evos: [], pass: null, member: false, found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
+    mode: null, trophies: 0, best: 0, coins: 0, diamonds: 0, shop: null, freeChestDay: null, magic: {}, cards: {}, evos: [], pass: null, member: false, king: 1, emotes: [], found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
     chests: [null, null, null, null], cycle: 0, claimed: {}, diff: 0.35, trophyRecord: { w: 0, l: 0, d: 0 },
   });
 
@@ -133,6 +133,8 @@ const KCProgress = (() => {
     for (const id of KC_ALL_CARDS) P.cards[id] = Object.assign({ level: 1, count: 0 }, P.cards[id]);
     P.magic = Object.assign({}, P.magic);
     P.evos = Array.isArray(P.evos) ? P.evos.filter(id => KC_EVOS[id]) : [];
+    P.king = Math.max(1, Math.min(MAX_LEVEL, P.king | 0 || 1));
+    P.emotes = Array.isArray(P.emotes) ? P.emotes.filter(id => EMOTES.some(e => e.id === id)) : [];
     P.pass = Object.assign({ season: 1, points: 0, premium: false, free: {}, paid: {} }, P.pass);
     P.found = KC_ALL_CARDS.filter(id => P.found.includes(id));
     if (!Array.isArray(P.deck) || P.deck.length !== 8 || new Set(P.deck).size !== 8 || P.deck.some(id => !P.found.includes(id))) P.deck = KC_STARTER_DECK.slice();
@@ -256,9 +258,11 @@ const KCProgress = (() => {
     const foeTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
     const cardLevels = spreadLevels(foeUpgrades(foeTrophies), deck, rand);
     const lvl = Math.min(...Object.values(cardLevels));
+    // their King Tower level: the average level of their cards
+    const kingLevel = Math.max(1, Math.min(MAX_LEVEL, Math.round(Object.values(cardLevels).reduce((a, v) => a + v, 0) / deck.length)));
     return {
       id: 'trophy', kind: 'trophy', name, short: name, level: lvl, tier: `${foeTrophies} trophies`,
-      look: foeLook(rand), lines: null, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: foeTrophies,
+      look: foeLook(rand), lines: null, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: foeTrophies, kingLevel,
       // past 700 trophies about half the opponents with a Snowman have its evolution
       evos: foeTrophies >= 700 && deck.includes('snowman') && rand() < 0.5 ? ['snowman'] : [],
     };
@@ -289,6 +293,12 @@ const KCProgress = (() => {
   }
 
   /* ---------- chests ---------- */
+  // The cards a chest can give: every card you have found, and every card of the arenas you have
+  // reached (even before its Trophy Road reward), so a chest can be the first place you find one.
+  function chestPool() {
+    const open = roadOpen() ? ARENAS.filter(a => !a.soon && a.min <= P.trophies).flatMap(a => a.cards || []) : [];
+    return KC_ALL_CARDS.filter(id => KC_CARDS[id] && (P.found.includes(id) || open.includes(id)));
+  }
   const LEGENDARY_IN = { wooden: 0.03, silver: 0.06, gold: 0.15, platinum: 0.3, legendary: 1, mythic: 1 };
   // Chest contents grow with the account level (not trophies): 15% more coins and cards per level.
   const chestMult = (lv = level()) => 1 + 0.15 * (Math.max(1, lv) - 1);
@@ -305,7 +315,7 @@ const KCProgress = (() => {
   }
   function roll(type, rand = Math.random) {
     // a legendary card only turns up now and then, more often in the bigger chests
-    const C = chestOdds(type), pool = P.found.filter(id => KC_CARDS[id] && (KC_CARDS[id].rarity !== 'legendary' || rand() < (LEGENDARY_IN[type] || 0)));
+    const C = chestOdds(type), pool = chestPool().filter(id => KC_CARDS[id].rarity !== 'legendary' || rand() < (LEGENDARY_IN[type] || 0));
     const coins = Math.round(lerp(C.coins[0], C.coins[1], rand()));
     const kinds = Math.min(C.kinds, pool.length), picks = [];
     const bag = pool.slice();
@@ -323,6 +333,8 @@ const KCProgress = (() => {
   }
   function apply(c) {
     P.coins += c.coins;
+    // a card that came out before you reached it on the Trophy Road is found now
+    if (c.cards.some(x => !P.found.includes(x.id))) P.found = KC_ALL_CARDS.filter(id => P.found.includes(id) || c.cards.some(x => x.id === id));
     for (const { id, n } of c.cards) P.cards[id].count += n;
     for (const { id, n } of c.items || []) P.magic[id] = magicCount(id) + n;
   }
@@ -421,20 +433,20 @@ const KCProgress = (() => {
     const price = chestPrice(type);
     if (P.coins < price) return { error: 'coins' };
     P.coins -= price;
-    const c = roll(type, rand);
+    const c = roll(type, rand), before = P.found.slice();
     apply(c);
     save();
-    return { ok: true, chest: type, price, coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: false }, x)), items: c.items };
+    return { ok: true, chest: type, price, coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
   }
   // One free Wooden Chest a day (local days, like the offers).
   const freeChestReady = (now = Date.now()) => P.freeChestDay !== dayKey(now);
   function claimFreeChest(now = Date.now(), rand) {
     if (!freeChestReady(now)) return { error: 'claimed' };
     P.freeChestDay = dayKey(now);
-    const c = roll('wooden', rand);
+    const c = roll('wooden', rand), before = P.found.slice();
     apply(c);
     save();
-    return { ok: true, chest: 'wooden', coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: false }, x)), items: c.items };
+    return { ok: true, chest: 'wooden', coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
   }
   function refreshShop(rand, now = Date.now()) { P.shop = null; return shop(now, rand); }
   // Buy offer i. Returns { ok, coins, cards } or { error: 'sold' | 'coins' | 'diamonds' | 'none' }.
@@ -452,6 +464,41 @@ const KCProgress = (() => {
     save();
     return Object.assign({ ok: true, offer: o }, out);
   }
+  /* ---------- emotes in the Shop ----------
+     Fifteen emotes to buy, three of them on sale each day (the same three all day, a new set at
+     midnight; ones you own are skipped). Each costs coins and is yours for good: bought emotes join
+     the eight everyone has in the battle emote panel. The art is in js/emotes.js. */
+  const EMOTES = [
+    { id: 'love', name: 'Love Struck' }, { id: 'cool', name: 'Too Cool' }, { id: 'party', name: 'Party Time' },
+    { id: 'dizzy', name: 'Dizzy' }, { id: 'nervous', name: 'Nervous' }, { id: 'facepalm', name: 'Facepalm' },
+    { id: 'kiss', name: 'Blow a Kiss' }, { id: 'wave', name: 'Hello!' }, { id: 'clap', name: 'Applause' },
+    { id: 'shush', name: 'Shh!' }, { id: 'popcorn', name: 'Popcorn' }, { id: 'trophy', name: 'Champion' },
+    { id: 'mindblown', name: 'Mind Blown' }, { id: 'smug', name: 'Smug' }, { id: 'salute', name: 'Salute' },
+  ];
+  const EMOTE_SHOP = { perDay: 3, price: 3000 };
+  // Today's three: a shuffle seeded by the date, skipping emotes you own.
+  function emoteOffers(now = Date.now()) {
+    const day = dayKey(now), seed = [...day].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
+    const r = KCSim.mulberry(seed), order = EMOTES.map(e => e.id);
+    for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    // the day's three are kept, so one you buy stays on show (as owned) until the next set
+    if (!P.emoteShop || P.emoteShop.day !== day) {
+      const open = order.filter(id => !P.emotes.includes(id));
+      P.emoteShop = { day, ids: (open.length >= EMOTE_SHOP.perDay ? open : order).slice(0, EMOTE_SHOP.perDay) };
+    }
+    return P.emoteShop.ids.map(id => ({ id, name: EMOTES.find(e => e.id === id).name, price: EMOTE_SHOP.price, owned: P.emotes.includes(id) }));
+  }
+  function buyEmote(id, now = Date.now()) {
+    const o = emoteOffers(now).find(x => x.id === id);
+    if (!o) return { error: 'none' };
+    if (o.owned) return { error: 'owned' };
+    if (P.coins < o.price) return { error: 'coins' };
+    P.coins -= o.price;
+    P.emotes.push(id);
+    save();
+    return { ok: true, id, price: o.price };
+  }
+
   // TEMPORARY: the test button's 1,000,000 coins and diamonds.
   function grantTest() { P.coins = 1000000; P.diamonds = 1000000; save(); }
 
@@ -561,6 +608,25 @@ const KCProgress = (() => {
     const add = { wild_common: 300, wild_rare: 60, wild_epic: 10, wild_legendary: 2, book_common: 3, book_rare: 3, book_epic: 1, book_legendary: 1, book_books: 2, hammer_books: 3 };
     for (const [k, v] of Object.entries(add)) P.magic[k] = magicCount(k) + v;
     save();
+  }
+
+  /* ---------- the King Tower ----------
+     Its level (1 to 15) sets the health and damage of all three of your towers in battle (8% a level,
+     like card levels). To take it to level L you need L cards at level L or higher: 2 cards at level
+     2 for level 2, 3 at level 3 for level 3, and so on up to 15 cards at level 15. Upgrading is free
+     once you meet that. */
+  function kingInfo() {
+    const level = P.king, max = level >= MAX_LEVEL, next = level + 1;
+    const have = max ? 0 : P.found.filter(id => P.cards[id].level >= next).length;
+    return { level, max, next, need: max ? 0 : next, have, can: !max && have >= next };
+  }
+  function upgradeKing() {
+    const k = kingInfo();
+    if (!k.can) return null;
+    P.king++;
+    const levelUp = addXp(10 * P.king);
+    save();
+    return { level: P.king, xp: 10 * P.king, levelUp };
   }
 
   /* ---------- evolutions ----------
@@ -704,6 +770,7 @@ const KCProgress = (() => {
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
     MAGIC, MAGIC_ORDER, MAGIC_RULES, wildActive, magicCount, magicFor, useMagic, grantMagic,
     EVO_ARENA, evoOpen, hasEvo, evoList, evoInfo,
+    kingInfo, upgradeKing, EMOTES, EMOTE_SHOP, emoteOffers, buyEmote, chestPool,
     PASS, passOpen, passPremium, passTier, passInto, passMax, passState, passClaimable, claimPass, buyPass,
   };
 })();

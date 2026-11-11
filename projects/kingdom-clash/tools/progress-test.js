@@ -42,7 +42,7 @@ const got = G.openChest(0, t0 + 60_000);
 assert(got && got.coins >= 18 && got.cards.reduce((a, c) => a + c.n, 0) >= 6, 'at least a level-1 wooden chest');
 assert.strictEqual(P.coins, coinsBefore + got.coins);
 assert.strictEqual(KC_ALL_CARDS.reduce((a, id) => a + P.cards[id].count, 0), countsBefore + got.cards.reduce((a, c) => a + c.n, 0));
-assert(got.cards.every(c => KC_STARTER_DECK.includes(c.id)), 'only found cards drop');
+assert(got.cards.every(c => KC_STARTER_DECK.includes(c.id) || G.ARENAS[0].cards.includes(c.id)), 'only found cards and cards of your arena drop');
 assert.strictEqual(P.chests[0], null);
 console.log('chest unlock and open: ok', JSON.stringify(got));
 
@@ -286,9 +286,53 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
     // legendaries are rare in small chests
     const leg = type => { let k = 0; const r = KCSim.mulberry(5); for (let i = 0; i < 4000; i++) if (G.roll(type, r).cards.some(c => c.id === 'camel')) k++; return k / 4000; };
     const lw = leg('wooden'), lm = leg('mythic');
-    assert(lw < 0.05 && lm > 0.5, `camel in wooden ${lw}, mythic ${lm}`);
+    assert(lw < 0.05 && lm > 0.3, `camel in wooden ${lw}, mythic ${lm}`);
     console.log(`Arena 3 Sunstone Arena, its cards, evolutions and the Diamond Pass: ok (camel in wooden ${(lw * 100).toFixed(1)}%, mythic ${(lm * 100).toFixed(0)}%)`);
   }
+
+// King Tower levels, emotes in the Shop, and chests giving cards of your arena before the road does
+{
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 320, best: 320, claimed: { 0: true }, coins: 10000 }) }));
+  const P7 = G.state;
+  assert.strictEqual(G.kingInfo().level, 1);
+  assert(!G.kingInfo().can, 'level 2 needs two level-2 cards');
+  P7.cards.rhino.level = 2; assert(!G.kingInfo().can);
+  P7.cards.wolves.level = 3; assert(G.kingInfo().can && G.kingInfo().have === 2);
+  assert.strictEqual(G.upgradeKing().level, 2);
+  assert(!G.kingInfo().can && G.kingInfo().need === 3, 'level 3 needs three level-3 cards');
+  P7.cards.rhino.level = 3; P7.cards.gladiator.level = 3;
+  assert.strictEqual(G.upgradeKing().level, 3);
+  P7.king = 14; for (const id of KC_ALL_CARDS) P7.cards[id].level = 15; P7.found = KC_ALL_CARDS.slice(0, 14);
+  assert(!G.kingInfo().can, 'level 15 needs fifteen level-15 cards');
+  P7.found = KC_ALL_CARDS.slice(0, 15);
+  assert.strictEqual(G.upgradeKing().level, 15); assert(G.kingInfo().max && G.upgradeKing() === null);
+  const foe = G.trophyFoe(KCSim.mulberry(3));
+  assert(foe.kingLevel >= 1 && foe.kingLevel <= 15, 'opponents have a King Tower level');
+  // emotes: 15 in all, the same 3 all day, a new set tomorrow, bought for coins
+  assert.strictEqual(G.EMOTES.length, 15);
+  const day = new Date(2026, 10, 11, 9).getTime(), later = new Date(2026, 10, 11, 21).getTime(), next = new Date(2026, 10, 12, 9).getTime();
+  const today = G.emoteOffers(day);
+  assert.strictEqual(today.length, 3);
+  assert.deepStrictEqual(today.map(o => o.id), G.emoteOffers(later).map(o => o.id), 'the same three all day');
+  let changed = 0; for (let d = 0; d < 10; d++) if (G.emoteOffers(next + d * 864e5).map(o => o.id).join() !== today.map(o => o.id).join()) changed++;
+  assert(changed >= 8, 'a new set on other days');
+  P7.coins = 10000;
+  assert(G.buyEmote(today[0].id, day).ok && P7.emotes.includes(today[0].id) && P7.coins === 10000 - G.EMOTE_SHOP.price);
+  assert.strictEqual(G.buyEmote(today[0].id, day).error, 'owned');
+  assert.strictEqual(G.buyEmote(G.EMOTES.find(e => !today.some(o => o.id === e.id)).id, day).error, 'none', 'only today\'s three are for sale');
+  // chests: Briar Hollow cards can come out in Briar Hollow before the road gives them
+  P7.found = KC_STARTER_DECK.slice(); P7.trophies = 320;
+  assert(['spears', 'pots', 'footmen', 'flail', 'skeletons', 'cannon'].every(id => G.chestPool().includes(id)));
+  assert(!G.chestPool().includes('mole'), 'not cards of an arena you have not reached');
+  let early = null; const r = KCSim.mulberry(8);
+  for (let i = 0; i < 60 && !early; i++) { const c = G.roll('gold', r); if (c.cards.some(x => !P7.found.includes(x.id))) early = c; }
+  assert(early, 'a chest gave a card not found yet');
+  P7.chests[0] = { type: 'gold', state: 'unlocking', ends: 0, contents: early };
+  const opened = G.openChest(0, 1);
+  const fresh = opened.cards.filter(x => x.isNew).map(x => x.id);
+  assert(fresh.length && fresh.every(id => P7.found.includes(id)), 'and it is found now');
+  console.log(`King Tower levels (L cards at level L), ${G.EMOTES.length} emotes with 3 a day, chests give arena cards early (${fresh.join(', ')}): ok`);
+}
 
 // 9. Matchmaking: the win rate of a steady player who keeps their cards level with their trophies, and
 //    of one who never upgrades.

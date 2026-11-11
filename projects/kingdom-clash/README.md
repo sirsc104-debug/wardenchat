@@ -77,6 +77,18 @@ A season pass in the lobby (the Diamond Pass plaque; a small button under the ch
 
 The Diamond Pass is bought in the **Shop** (first tile in Daily Offers) for **10 diamonds** (`PASS.price` in `js/progress.js`), with a second click to confirm. Members get it as part of their membership (`member` in the save; the membership itself comes with the wallet). An evolution you already own comes as its 6 shards instead. The result screen shows the crowns you earned and any new tier.
 
+## The King Tower
+
+A **King Tower** button in the top bar shows its level (1 to 15). The level sets the health and damage of all three of your towers in battle (8% a level, like card levels; level 1 is a 2,400 HP King Tower and 1,400 HP Archer Towers). To reach level L you need **L cards at level L or higher**: 2 cards at level 2 for level 2, 3 at level 3 for level 3, and so on up to 15 cards at level 15. Upgrading is then free and plays its own scene. Its window shows the towers' stats now and after, how many cards qualify (each card shown, greyed out until it is high enough), and the Upgrade button; the button in the top bar gets a green dot when an upgrade is ready, and upgrading a card that makes it ready says so. Trophy opponents' towers follow the average level of their cards; trainers stay at level 1. Rules in `kingInfo` and `upgradeKing` in `js/progress.js`.
+
+## Emotes in the Shop
+
+The Shop has an **Emotes** section (and buttons at the top to jump to Daily Offers, Chests or Emotes). There are **15 emotes** to buy: Love Struck, Too Cool, Party Time, Dizzy, Nervous, Facepalm, Blow a Kiss, Hello!, Applause, Shh!, Popcorn, Champion, Mind Blown, Smug and Salute, all the game's own King, each animated with its own sound. **Three are on sale each day** (the same three all day, a new set at midnight, skipping ones you own), for 3,000 coins each (`EMOTE_SHOP` in `js/progress.js`). A bought emote is yours for good and joins the eight everyone has in the battle emote panel, which turns pages (an arrow button) once you have more than eight. Each opponent has four of the Shop's emotes of its own to use.
+
+## Cards from chests before the Trophy Road
+
+A chest can give **any card of the arenas you have reached**, found or not, not just the cards you have found. So in Briar Hollow a chest can hold Spears or a Flail Knight before the Trophy Road gets there, and it is found the moment it comes out (shown as *New card!*). Cards of arenas you haven't reached never drop. The Trophy Road still gives its card if you already have it (as copies).
+
 ## Emotes
 
 In battle, the speech-bubble button at the bottom left of the arena (or **E**) opens the emote panel over the bottom of the arena: a mute button for the opponent's emotes, eight picture emotes of the game's own King (laughing, crying, angry, thumbs up, amazed, yawning, cheeky, thinking), and six phrases (*Good luck!*, *Nice play!*, *Whoa!*, *Thanks!*, *Good game!*, *Oops!*). An emote pops up beside its player's King Tower, animated, with its own sound, for under three seconds. Three emotes in a row and the panel rests for 3.5 seconds.

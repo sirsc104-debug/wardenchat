@@ -48,6 +48,8 @@
       seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, T.towerDamage],
       decks: [trophy ? KCProgress.state.deck : KCProgress.trainingDeck(), T.deck || KC_STARTER_DECK], cardLevels: [KCProgress.cardLevels(), T.cardLevels || {}],
       evos: [KCProgress.evoList(), T.evos || []],
+      // tower levels: your King Tower's level; a trophy opponent's from its cards; trainers stay at 1
+      levels: [KCProgress.kingInfo().level, trophy ? T.kingLevel || 1 : 1],
     });
     G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9) });
     const where = trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;

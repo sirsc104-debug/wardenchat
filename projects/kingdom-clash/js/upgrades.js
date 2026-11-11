@@ -192,7 +192,7 @@ const KCUpgradeFX = (() => {
     build();
     if (S) end(true);
     S = { d, timers: [], counters: [], finished: false };
-    const lvlMode = d.mode === 'upgrade' || d.mode === 'hammer';
+    const lvlMode = d.mode === 'upgrade' || d.mode === 'hammer' || d.mode === 'king';
     el.className = `up-scene m-${d.mode} r-${d.rarity}${d.item === 'book_books' ? ' rainbow' : ''}`;
     $('usTitle').textContent = d.title;
     $('usImg').src = d.img; $('usImg').alt = d.name;
@@ -210,7 +210,7 @@ const KCUpgradeFX = (() => {
     sizeFx(); FX.parts = []; FX.last = 0;
     if (!FX.raf) FX.raf = requestAnimationFrame(frame);
     if (calm) { finish(false); return; }
-    ({ upgrade: coinsRun, hammer: hammerRun, wild: wildRun, book: bookRun, evo: evoRun })[d.mode]();
+    ({ upgrade: coinsRun, hammer: hammerRun, wild: wildRun, book: bookRun, evo: evoRun, king: kingRun })[d.mode]();
   }
   function tap() { if (!S) return; if (!S.finished) finish(true); else close(); }
   function end(quiet) {
@@ -236,7 +236,7 @@ const KCUpgradeFX = (() => {
     end(false);
     FX.parts = FX.parts.filter(p => p.x0 == null);
     S.finished = true;
-    const card = $('usCard'), lvl = d.mode === 'upgrade' || d.mode === 'hammer';
+    const card = $('usCard'), lvl = d.mode === 'upgrade' || d.mode === 'hammer' || d.mode === 'king';
     $('usTool').className = 'us-tool gone';
     if (d.mode === 'evo') {
       $('usImg').src = d.imgEvo;
@@ -349,6 +349,22 @@ const KCUpgradeFX = (() => {
       snd('evo'); snd('levelUp');
     }, 2600);
     later(() => finish(false), 3400);
+  }
+
+  /* ---------- the King Tower ---------- */
+  // Light gathers from all round into the tower, it charges and shakes, then bursts to its new level.
+  function kingRun() {
+    const d = S.d, card = $('usCard');
+    if (d.imgBefore) $('usImg').src = d.imgBefore;
+    later(() => {
+      const [cx, cy, w] = center(card), n = 14;
+      for (let i = 0; i < n; i++) later(() => {
+        const a = i / n * 6.283, R = Math.max(innerWidth, innerHeight) * 0.42;
+        fly('orb', cx + Math.cos(a) * R, cy + Math.sin(a) * R, cx, cy, 0.6, ['#8cc4ff', '#ffe27a', '#ffffff'][i % 3], () => { snd('partSnap'); sparks(cx, cy, 3, ['#8cc4ff', '#ffe27a', '#fff'], 150); });
+      }, i * 70);
+    }, 400);
+    later(() => { card.className = 'us-card charging'; snd('charge'); }, 1300);
+    later(() => { $('usImg').src = d.img; levelBurst(false); }, 2450);
   }
 
   /* ---------- the Hammer of Books ---------- */

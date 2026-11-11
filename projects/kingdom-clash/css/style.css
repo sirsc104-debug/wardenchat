@@ -1319,25 +1319,25 @@ button.slot:hover { transform: translateY(-3px); }
 @keyframes emPop { from { transform: translateY(-50%) scale(0.2) rotate(-12deg); opacity: 0; } 60% { transform: translateY(-50%) scale(1.12) rotate(3deg); } }
 /* each face moves its own way */
 .em-face .em-body { transform-box: view-box; transform-origin: 50% 90%; }
-.emote-bub .em-laugh .em-body { animation: emRock 0.32s ease-in-out infinite alternate; }
-.emote-bub .em-cry .em-body { animation: emShiver 0.12s linear infinite; }
-.emote-bub .em-angry .em-body { animation: emShake 0.09s linear infinite; }
-.emote-bub .em-thumbs .em-hand { animation: emPump 0.4s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
-.emote-bub .em-wow .em-body { animation: emBoing 0.6s cubic-bezier(.3, 1.6, .5, 1) infinite; }
-.emote-bub .em-yawn .em-body { animation: emSway 1.4s ease-in-out infinite alternate; }
-.emote-bub .em-cheeky .em-body { animation: emWiggle 0.28s ease-in-out infinite alternate; }
-.emote-bub .em-cheeky .em-tongue { animation: emTongue 0.18s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 0; }
-.emote-bub .em-think .em-body { animation: emTilt 1s ease-in-out infinite alternate; }
-.emote-bub .em-tear, .emote-bub .em-drop { animation: emDrop 0.7s ease-in infinite; }
-.emote-bub .em-tear.t2, .emote-bub .em-drop.t2 { animation-delay: 0.35s; }
-.emote-bub .em-stream { animation: emStream 0.4s linear infinite; }
-.emote-bub .em-steam { animation: emSteam 0.8s ease-out infinite; transform-box: fill-box; transform-origin: center; }
-.emote-bub .em-steam.t2 { animation-delay: 0.4s; }
-.emote-bub .em-spark { animation: emTwinkle 0.5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
-.emote-bub .em-spark.t2 { animation-delay: 0.25s; }
-.emote-bub .em-z { animation: emZ 1.4s ease-out infinite; }
-.emote-bub .em-z.t2 { animation-delay: 0.7s; }
-.emote-bub .em-q { animation: emBob 0.6s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-laugh .em-body { animation: emRock 0.32s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-cry .em-body { animation: emShiver 0.12s linear infinite; }
+:is(.emote-bub, .em-live) .em-angry .em-body { animation: emShake 0.09s linear infinite; }
+:is(.emote-bub, .em-live) .em-thumbs .em-hand { animation: emPump 0.4s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+:is(.emote-bub, .em-live) .em-wow .em-body { animation: emBoing 0.6s cubic-bezier(.3, 1.6, .5, 1) infinite; }
+:is(.emote-bub, .em-live) .em-yawn .em-body { animation: emSway 1.4s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-cheeky .em-body { animation: emWiggle 0.28s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-cheeky .em-tongue { animation: emTongue 0.18s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 0; }
+:is(.emote-bub, .em-live) .em-think .em-body { animation: emTilt 1s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-tear, .emote-bub .em-drop { animation: emDrop 0.7s ease-in infinite; }
+:is(.emote-bub, .em-live) .em-tear.t2, .emote-bub .em-drop.t2 { animation-delay: 0.35s; }
+:is(.emote-bub, .em-live) .em-stream { animation: emStream 0.4s linear infinite; }
+:is(.emote-bub, .em-live) .em-steam { animation: emSteam 0.8s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+:is(.emote-bub, .em-live) .em-steam.t2 { animation-delay: 0.4s; }
+:is(.emote-bub, .em-live) .em-spark { animation: emTwinkle 0.5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+:is(.emote-bub, .em-live) .em-spark.t2 { animation-delay: 0.25s; }
+:is(.emote-bub, .em-live) .em-z { animation: emZ 1.4s ease-out infinite; }
+:is(.emote-bub, .em-live) .em-z.t2 { animation-delay: 0.7s; }
+:is(.emote-bub, .em-live) .em-q { animation: emBob 0.6s ease-in-out infinite alternate; }
 @keyframes emRock { from { transform: rotate(-7deg) translateY(0); } to { transform: rotate(7deg) translateY(-3px); } }
 @keyframes emShiver { 50% { transform: translateX(1.2px); } }
 @keyframes emShake { 25% { transform: translate(-2px, 1px); } 75% { transform: translate(2px, -1px); } }
@@ -1456,3 +1456,87 @@ button.slot:hover { transform: translateY(-3px); }
   .pm-claim { padding: 3px 10px; font-size: 12px; }
   .pm-head .dim { display: none; }
 }
+/* the Shop's emotes: how each one moves (in a battle bubble and on its Shop tile) */
+.ep-next { aspect-ratio: 1.12; border: 3px solid var(--outline); border-radius: 14px; background: linear-gradient(#ffe27a, #e8a33c); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--outline); font-weight: 900; }
+.ep-next span { font-size: 22px; line-height: 1; }
+.ep-next small { font-size: 11px; }
+:is(.emote-bub, .em-live) .em-love .em-body, :is(.emote-bub, .em-live) .em-kiss .em-body { animation: emSway 0.9s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-heart { animation: emBeat 0.5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+:is(.emote-bub, .em-live) .em-heart.t2 { animation-delay: 0.25s; }
+:is(.emote-bub, .em-live) .em-float { animation: emZ 1.4s ease-out infinite; }
+:is(.emote-bub, .em-live) .em-float.t2 { animation-delay: 0.7s; }
+:is(.emote-bub, .em-live) .em-cool .em-shades { animation: emShades 1.6s ease-in-out infinite; }
+:is(.emote-bub, .em-live) .em-party .em-body { animation: emBoing 0.5s cubic-bezier(.3, 1.6, .5, 1) infinite; }
+:is(.emote-bub, .em-live) .em-party .em-crown { transform-box: view-box; transform-origin: 50% 30%; transform: rotate(-12deg); }
+:is(.emote-bub, .em-live) .em-confetti { animation: emConfetti 1.2s linear infinite; }
+:is(.emote-bub, .em-live) .em-horn { animation: emHorn 0.5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 0 50%; }
+:is(.emote-bub, .em-live) .em-dizzy .em-body { animation: emDizzy 1.2s ease-in-out infinite; }
+:is(.emote-bub, .em-live) .em-spiral { animation: emSpin 0.8s linear infinite; transform-box: fill-box; transform-origin: center; }
+:is(.emote-bub, .em-live) .em-stars { animation: emSpin 1.6s linear infinite; transform-box: view-box; transform-origin: 50% 12%; }
+:is(.emote-bub, .em-live) .em-nervous .em-body { animation: emShiver 0.1s linear infinite; }
+:is(.emote-bub, .em-live) .em-sweat { animation: emDrop 1s ease-in infinite; }
+:is(.emote-bub, .em-live) .em-facepalm .em-body { animation: emSway 1.1s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-wave { animation: emWave 0.45s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 30% 100%; }
+:is(.emote-bub, .em-live) .em-clapl { animation: emClapL 0.3s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-clapr { animation: emClapR 0.3s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-shush .em-body { animation: emTilt 1.2s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-chew { animation: emChew 0.25s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+:is(.emote-bub, .em-live) .em-kernel { animation: emKernel 0.8s ease-in-out infinite; }
+:is(.emote-bub, .em-live) .em-cup { animation: emPump 0.45s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+:is(.emote-bub, .em-live) .em-mindblown .em-crown { animation: emCrownPop 0.9s cubic-bezier(.3, 1.4, .5, 1) infinite; }
+:is(.emote-bub, .em-live) .em-boom { animation: emTwinkle 0.45s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+:is(.emote-bub, .em-live) .em-smug .em-body { animation: emTilt 1.6s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-salute { animation: emSalute 0.9s ease-in-out infinite; transform-box: fill-box; transform-origin: 100% 100%; }
+@keyframes emBeat { to { transform: scale(1.25); } }
+@keyframes emShades { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes emConfetti { from { transform: translateY(-6px); opacity: 1; } to { transform: translateY(14px); opacity: 0.2; } }
+@keyframes emHorn { to { transform: scaleX(1.2); } }
+@keyframes emDizzy { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+@keyframes emSpin { to { transform: rotate(360deg); } }
+@keyframes emWave { from { transform: rotate(-18deg); } to { transform: rotate(18deg); } }
+@keyframes emClapL { to { transform: translateX(6px); } }
+@keyframes emClapR { to { transform: translateX(-6px); } }
+@keyframes emChew { to { transform: scaleY(0.55); } }
+@keyframes emKernel { 0% { transform: translateY(0); opacity: 1; } 50% { transform: translateY(-10px); } 100% { transform: translateY(0); opacity: 0; } }
+@keyframes emCrownPop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-12px) rotate(-8deg); } }
+@keyframes emSalute { 0%, 60%, 100% { transform: rotate(0deg); } 30% { transform: rotate(-12deg); } }
+
+/* the Emotes section of the Shop */
+.shop-jump { display: flex; gap: 8px; justify-content: center; margin-bottom: -10px; }
+.shop-jump button { padding: 4px 14px; border-radius: 999px; border: 2px solid var(--outline); background: rgba(255, 255, 255, 0.12); color: #fff; font-weight: 900; font-size: 13px; }
+.shop-jump button:hover { background: rgba(255, 255, 255, 0.22); }
+.shop-emotes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.emote-offer { display: flex; align-items: center; gap: 14px; padding: 10px 14px; border-radius: 14px; border: 3px solid var(--outline); background: linear-gradient(#6a4bd8, #3c2a8f); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); }
+.emote-offer.owned { background: linear-gradient(#4a4560, #2e2a40); }
+.eo-art { flex: none; width: 92px; aspect-ratio: 1.1; padding: 4px; background: #fff; border: 3px solid var(--outline); border-radius: 16px; }
+.eo-art svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.eo-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.eo-body b { font-family: var(--display); font-weight: 400; font-size: 18px; }
+.eo-body small { color: #d8ccff; font-weight: 800; font-size: 12px; }
+.eo-body .buy-btn { width: auto; padding: 6px 16px; }
+@media (max-width: 1000px) { .shop-emotes { grid-template-columns: minmax(0, 1fr); } }
+
+/* the King Tower: the chip in the top bar and its window */
+.king-chip { display: flex; align-items: center; gap: 6px; padding: 4px 12px 4px 6px; border-radius: 999px; border: 3px solid var(--outline); background: linear-gradient(#4a6ae0, #2a3c9c); box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35); color: #fff; font-weight: 900; position: relative; }
+.king-chip svg { width: 28px; height: 28px; }
+.king-chip small { display: block; font-size: 10px; color: #cfe0ff; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1; }
+.king-chip b { display: block; font-family: var(--display); font-weight: 400; font-size: 18px; line-height: 1.05; }
+.king-chip.can::after { content: ''; position: absolute; top: -5px; right: -5px; width: 14px; height: 14px; border-radius: 50%; background: #2fb36b; border: 2px solid var(--outline); box-shadow: 0 0 8px #6cff8a; }
+.king-card { width: min(640px, 100%); box-sizing: border-box; display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 20px; padding: 26px 22px 20px; animation: pop 0.2s ease-out; }
+.king-card canvas { width: 200px; height: 200px; display: block; }
+.king-card h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; }
+.king-card p { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.kg-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.kg-stats div { padding: 6px 10px; border-radius: 10px; background: rgba(0, 0, 0, 0.3); }
+.kg-stats small { display: block; font-size: 11px; color: #b9acdf; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; }
+.kg-stats b { font-size: 17px; }
+.kg-stats em { font-style: normal; color: #a8f39a; font-size: 13px; margin-left: 4px; }
+.kg-need { margin-top: 12px; }
+.kg-need .m-prog { margin-top: 4px; }
+.kg-cards { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.kg-cards img { width: 34px; border-radius: 5px; border: 2px solid var(--outline); }
+.kg-cards img.off { filter: grayscale(1) brightness(0.55); }
+.kg-actions { margin-top: 12px; display: flex; align-items: center; gap: 12px; }
+@media (max-width: 600px) { .king-card { grid-template-columns: minmax(0, 1fr); justify-items: center; } .king-chip small { display: none; } }
+.m-king .us-bar { display: none; }
