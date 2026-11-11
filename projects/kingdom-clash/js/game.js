@@ -24,7 +24,7 @@
   }
   function goHome() {
     G.phase = 'home'; G.s = null;
-    $('#result').hidden = true; $('#leaveAsk').hidden = true;
+    $('#result').hidden = true;
     show('home');
     KCMenu.show();
   }
@@ -55,7 +55,7 @@
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0 });
-    $('#result').hidden = true; $('#leaveAsk').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
+    $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
     KCEmotes.reset();
     show('battle');
@@ -977,15 +977,12 @@
     $('#againBtn').addEventListener('click', () => startBattle(G.trainer.kind === 'trophy' ? KCMenu.nextFoe('trophy') : G.trainer));
     $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext));
     $('#homeBtn').addEventListener('click', goHome);
-    $('#leaveBtn').addEventListener('click', () => { if (G.phase === 'play') { $('#leaveAsk').hidden = false; G.phase = 'paused'; } });
     // TEMPORARY test button: ends the match as a win, with the same rewards as a real one.
     $('#simWinBtn').addEventListener('click', () => {
       if (G.phase !== 'play' || !G.s || G.s.result) return;
       S.forceEnd(G.s, 0);
       handleEvents();
     });
-    $('#leaveNo').addEventListener('click', () => { $('#leaveAsk').hidden = true; G.phase = 'play'; G.last = performance.now(); });
-    $('#leaveYes').addEventListener('click', goHome);
     let rt = 0;
     window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (!$('#battle').hidden) layout(); }, 120); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!$('#battle').hidden) layout(); });

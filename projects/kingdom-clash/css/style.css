@@ -987,31 +987,6 @@ button.slot:hover { transform: translateY(-3px); }
 }
 .sim-win small { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #ffe27a; }
 .sim-win:hover { background: rgba(60, 40, 110, 0.95); }
-.leave {
-  position: absolute;
-  bottom: 1.4%;
-  left: 2.4%;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 2px solid var(--outline);
-  background: rgba(30, 20, 60, 0.75);
-  font-size: 14px;
-  z-index: 3;
-}
-.leave-ask {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  gap: 14px;
-  text-align: center;
-  background: rgba(10, 5, 25, 0.72);
-  border-radius: 14px;
-  z-index: 5;
-}
-.leave-ask p { margin: 0; font-family: var(--display); font-size: 26px; }
-.leave-ask div { display: flex; gap: 10px; justify-content: center; }
 
 .ebar {
   position: relative;
@@ -1307,7 +1282,7 @@ button.slot:hover { transform: translateY(-3px); }
 @media (max-width: 560px) { .us-tool.wild, .us-tool.book { left: -40px; width: 96px; height: 96px; margin-top: -48px; } .us-tool.book .us-open { width: 140px; height: 90px; left: -20px; } .us-stats div { min-width: 88px; } }
 
 /* ---------- emotes (js/emotes.js) ---------- */
-.emote-btn { position: absolute; z-index: 5; left: 2.4%; bottom: calc(1.4% + 40px); width: 48px; height: 40px; padding: 0; border: 3px solid var(--outline); border-radius: 14px 14px 14px 4px;
+.emote-btn { position: absolute; z-index: 5; left: 2.4%; bottom: 1.4%; width: 48px; height: 40px; padding: 0; border: 3px solid var(--outline); border-radius: 14px 14px 14px 4px;
   background: #fff; color: var(--outline); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4); display: grid; place-items: center; transition: transform 0.1s; }
 .emote-btn:hover { transform: translateY(-2px); }
 .emote-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4); }
@@ -1316,7 +1291,7 @@ button.slot:hover { transform: translateY(-3px); }
 .eb-x { display: none; font-size: 18px; font-weight: 900; }
 .emote-btn.open .eb-dots { display: none; }
 .emote-btn.open .eb-x { display: block; }
-.emote-panel { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; padding: 10px 10px calc(1.4% + 88px); display: flex; flex-direction: column; gap: 10px;
+.emote-panel { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; padding: 10px 10px calc(1.4% + 50px); display: flex; flex-direction: column; gap: 10px;
   background: linear-gradient(rgba(28, 74, 160, 0.0), rgba(28, 74, 160, 0.92) 18%, #1e3f8f); border-radius: 0 0 17px 17px; animation: epUp 0.18s ease-out; }
 @keyframes epUp { from { transform: translateY(30px); opacity: 0; } }
 .ep-row { display: grid; gap: 8px; }
@@ -1332,7 +1307,7 @@ button.slot:hover { transform: translateY(-3px); }
 .ep-phrase { padding: 9px 6px; border: 3px solid var(--outline); border-radius: 999px; background: #fff; color: var(--outline); font-weight: 900; font-size: 14px; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); white-space: nowrap; transition: transform 0.1s; }
 .emote-panel.resting .ep-face, .emote-panel.resting .ep-phrase { filter: grayscale(0.9) brightness(0.7); pointer-events: none; }
 #battle.narrow .ep-phrase { font-size: 11px; padding: 7px 2px; }
-#battle.narrow .emote-btn { width: 40px; height: 34px; bottom: calc(1.4% + 36px); }
+#battle.narrow .emote-btn { width: 40px; height: 34px; bottom: 1.4%; }
 
 /* an emote, shown beside its player's King Tower */
 .emote-bub { position: absolute; z-index: 3; transform: translateY(-50%); transform-origin: 0 50%; pointer-events: none; animation: emPop 0.35s cubic-bezier(.2, .9, .3, 1.5); }
