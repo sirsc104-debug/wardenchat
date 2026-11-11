@@ -412,6 +412,147 @@ const KCArt = (() => {
       rr(c, q(-0.3), q(-0.36), q(0.6), q(0.08), q(0.03)); paint(c, T.main, LW * 0.7);
     },
 
+    // Bees: a small angry bee, wings a blur, with a band in the team's colour.
+    bees(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], f = Math.sin(o.t * 48 + (o.id || 0) * 1.7), front = o.view === 'front';
+      const dart = (front ? 1 : -1) * o.atk * q(0.18);
+      c.save(); c.translate(Math.sin(o.t * 6 + (o.id || 0)) * q(0.04), dart);
+      // wings: two pale ovals that flicker
+      c.save(); c.globalAlpha = 0.55 + f * 0.25;
+      for (const d of [-1, 1]) { ell(c, d * q(0.17), q(-0.2) - f * q(0.03), q(0.17), q(0.1), d * (0.5 + f * 0.25)); c.fillStyle = '#e8f6ff'; c.fill(); c.lineWidth = LW * 0.7; c.strokeStyle = OUT; c.stroke(); }
+      c.restore();
+      if (!front) sh(c, () => poly(c, [q(-0.04), q(0.16), q(0.04), q(0.16), 0, q(0.3)]), '#3a2c1c', null, 0);
+      sh(c, () => ell(c, 0, 0, q(0.17), q(0.2)), '#ffd23a', '#e8a816', q(0.04));
+      c.save(); ell(c, 0, 0, q(0.17), q(0.2)); c.clip();
+      for (const y of [-0.04, 0.08]) { rr(c, q(-0.2), q(y), q(0.4), q(0.06), 0); c.fillStyle = '#2a2230'; c.fill(); }
+      c.restore();
+      ell(c, 0, 0, q(0.17), q(0.2)); c.lineWidth = LW; c.strokeStyle = OUT; c.stroke();
+      sh(c, () => circ(c, 0, q(-0.2), q(0.1)), '#2a2230', null, 0);
+      rr(c, q(-0.1), q(-0.25), q(0.2), q(0.04), q(0.02)); c.fillStyle = T.main; c.fill();
+      if (front) {
+        for (const d of [-1, 1]) { dot(c, d * q(0.045), q(-0.19), q(0.025), '#fff'); line(c, d * q(0.1), q(-0.27), d * q(0.02), q(-0.23), '#fff', LW * 0.6); }
+        poly(c, [q(-0.03), q(0.18), q(0.03), q(0.18), 0, q(0.28)]); paint(c, '#2a2230', LW * 0.5);
+      }
+      for (const d of [-1, 1]) line(c, d * q(0.04), q(-0.28), d * q(0.09), q(-0.38), OUT, LW * 0.7);
+      c.restore();
+    },
+
+    // Owl: a big battle owl in a steel helm and chest plate, firing quills from its wings.
+    owl(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], flap = Math.sin(o.t * 5 + (o.id || 0)), front = o.view === 'front', shot = o.atk;
+      const brown = '#b08050', brownSh = '#8a5e36', steel = '#c7cfda', steelSh = '#8f99a8';
+      for (const d of [-1, 1]) {
+        c.save(); c.scale(d, 1); c.translate(q(0.22), q(-0.05)); c.rotate(-0.2 - flap * 0.35 - shot * 0.5);
+        // a broad rounded wing ending in soft feather tips
+        const wing = () => { c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(q(0.4), q(-0.5), q(0.86), q(-0.36));
+          c.quadraticCurveTo(q(1.0), q(-0.24), q(0.9), q(-0.14)); c.quadraticCurveTo(q(0.98), q(-0.02), q(0.82), q(0.04));
+          c.quadraticCurveTo(q(0.86), q(0.16), q(0.66), q(0.16)); c.quadraticCurveTo(q(0.62), q(0.28), q(0.42), q(0.22)); c.quadraticCurveTo(q(0.2), q(0.26), 0, q(0.2)); c.closePath(); };
+        sh(c, wing, brown, brownSh, q(0.07));
+        c.save(); wing(); c.clip(); rr(c, q(0.15), q(-0.32), q(0.5), q(0.12), q(0.05)); c.fillStyle = T.main; c.fill();
+        for (const [x, y] of [[0.86, -0.22], [0.86, -0.02], [0.7, 0.14], [0.5, 0.2]]) { ell(c, q(x), q(y), q(0.12), q(0.08), 0.6); c.fillStyle = '#f0e2c4'; c.fill(); }
+        c.restore();
+        wing(); c.lineWidth = LW; c.strokeStyle = OUT; c.stroke();
+        for (const x of [0.4, 0.58, 0.74]) line(c, q(x), q(-0.12), q(x + 0.1), q(0.08), brownSh, LW * 0.8);
+        c.restore();
+      }
+      sh(c, () => ell(c, 0, q(0.05), q(0.32), q(0.4)), brown, brownSh, q(0.08));
+      if (front) {
+        sh(c, () => poly(c, [q(-0.22), q(-0.1), q(0.22), q(-0.1), q(0.18), q(0.28), 0, q(0.38), q(-0.18), q(0.28)]), steel, steelSh, q(0.05));
+        sh(c, () => poly(c, [0, q(-0.02), q(0.07), q(0.1), 0, q(0.22), q(-0.07), q(0.1)]), C.gold, C.goldSh, q(0.02));
+        for (const d of [-1, 1]) line(c, d * q(0.06), q(0.38), d * q(0.1), q(0.5), '#f2b824', q(0.06));
+      } else sh(c, () => poly(c, [q(-0.12), q(0.38), q(0.12), q(0.38), q(0.18), q(0.6), 0, q(0.52), q(-0.18), q(0.6)]), brown, brownSh, q(0.04));
+      // the head and its helm
+      sh(c, () => circ(c, 0, q(-0.38), q(0.3)), brown, brownSh, q(0.06));
+      for (const d of [-1, 1]) sh(c, () => poly(c, [d * q(0.16), q(-0.6), d * q(0.28), q(-0.72), d * q(0.27), q(-0.55)]), brown, brownSh, q(0.03));
+      sh(c, () => { c.beginPath(); c.arc(0, q(-0.42), q(0.31), Math.PI * 1.15, Math.PI * 1.85); c.closePath(); }, steel, steelSh, q(0.04));
+      rr(c, q(-0.04), q(-0.74), q(0.08), q(0.12), q(0.02)); paint(c, T.main, LW * 0.6);
+      if (front) {
+        // the round face disc
+        for (const d of [-1, 1]) { circ(c, d * q(0.115), q(-0.35), q(0.16)); paint(c, '#f3e6cc', LW * 0.45); }
+        for (const d of [-1, 1]) { circ(c, d * q(0.11), q(-0.36), q(0.085)); paint(c, '#ffcf3f', LW * 0.45); dot(c, d * q(0.11), q(-0.36), q(0.045)); dot(c, d * q(0.09), q(-0.38), q(0.016), '#fff'); }
+        sh(c, () => poly(c, [q(-0.05), q(-0.3), q(0.05), q(-0.3), 0, q(-0.18)]), '#ffb02e', '#e08a10', q(0.02));
+        line(c, q(-0.22), q(-0.52), q(-0.05), q(-0.46), OUT, LW * 0.8); line(c, q(0.22), q(-0.52), q(0.05), q(-0.46), OUT, LW * 0.8);
+      }
+    },
+
+    // Thunder Cloud: a dark storm cloud with glowing eyes, crackling with electricity.
+    thundercloud(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', t = o.t, charge = o.atk;
+      const puffs = [[-0.55, 0.05, 0.36], [0.55, 0.05, 0.36], [-0.28, -0.22, 0.42], [0.3, -0.2, 0.44], [0, -0.38, 0.4], [0, 0.08, 0.46]];
+      const drift = Math.sin(t * 2) * q(0.03);
+      // rain under it
+      c.save(); c.globalAlpha = 0.7;
+      for (let i = 0; i < 6; i++) { const x = q(-0.5 + i * 0.2), y = q(0.4) + ((t * 3 + i * 0.37) % 1) * q(0.6); line(c, x, y, x - q(0.04), y + q(0.12), '#9fc8ff', Math.max(1, q(0.04))); }
+      c.restore();
+      c.save(); c.translate(drift, 0);
+      for (const [x, y, r] of puffs) { circ(c, q(x), q(y), q(r)); c.lineWidth = LW * 2.2; c.strokeStyle = OUT; c.stroke(); }
+      for (const [x, y, r] of puffs) { circ(c, q(x), q(y), q(r)); c.fillStyle = '#5a6278'; c.fill(); }
+      for (const [x, y, r] of puffs) { circ(c, q(x) - q(r * 0.2), q(y) - q(r * 0.25), q(r * 0.62)); c.fillStyle = '#737c94'; c.fill(); }
+      rr(c, q(-0.7), q(0.18), q(1.4), q(0.18), q(0.08)); c.fillStyle = '#454b5e'; c.fill();
+      rr(c, q(-0.4), q(0.26), q(0.8), q(0.07), q(0.03)); c.fillStyle = T.main; c.fill();
+      if (front) {
+        const glow = charge > 0.05 ? '#fff6a0' : '#ffe27a';
+        for (const d of [-1, 1]) {
+          poly(c, [d * q(0.08), q(-0.12), d * q(0.3), q(-0.2), d * q(0.28), q(-0.04)]); c.fillStyle = glow; c.fill();
+          c.save(); c.globalCompositeOperation = 'lighter'; circ(c, d * q(0.2), q(-0.1), q(0.14)); c.fillStyle = 'rgba(255,230,120,0.3)'; c.fill(); c.restore();
+        }
+        line(c, q(-0.12), q(0.06), q(0.12), q(0.04), OUT, LW * 1.2);
+      }
+      // electricity flickering over it
+      const spark = Math.floor(t * 9) % 4;
+      c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+      const zig = (x0, y0, len, a) => { c.beginPath(); c.moveTo(q(x0), q(y0)); let x = x0, y = y0; for (let i = 1; i <= 3; i++) { x += Math.cos(a) * len / 3 + (i % 2 ? 0.05 : -0.05); y += Math.sin(a) * len / 3; c.lineTo(q(x), q(y)); } };
+      for (let i = 0; i < 2; i++) {
+        const j = (spark + i * 2) % 4, a = [-2.4, -0.7, 2.6, 0.5][j];
+        zig([-0.5, 0.4, -0.2, 0.25][j], [-0.1, -0.15, 0.1, -0.3][j], 0.35, a);
+        c.strokeStyle = 'rgba(255,240,140,0.95)'; c.lineWidth = Math.max(1.2, q(0.05)); c.stroke();
+      }
+      if (charge > 0.05) { c.globalCompositeOperation = 'lighter'; circ(c, 0, q(-0.1), q(0.9)); c.fillStyle = `rgba(255,240,170,${0.25 * charge})`; c.fill(); }
+      c.restore();
+      c.restore();
+    },
+
+    // Griffin: an eagle's head and wings on a lion's body, crackling with storm light.
+    griffin(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], flap = Math.sin(o.t * 6 + (o.id || 0)), front = o.view === 'front', beam = o.beam || 0;
+      const fur = '#d9a85a', furSh = '#b5853f', white = '#f7f5f0', whiteSh = '#d9d6e0', wingC = '#a87a3c', wingSh = '#84592a';
+      for (const d of [-1, 1]) {
+        c.save(); c.scale(d, 1); c.translate(q(0.25), q(-0.2)); c.rotate(-0.35 - flap * 0.4);
+        const wing = () => { c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(q(0.5), q(-0.75), q(1.15), q(-0.55)); c.lineTo(q(1.0), q(-0.32)); c.lineTo(q(1.1), q(-0.16)); c.lineTo(q(0.84), q(-0.08)); c.lineTo(q(0.9), q(0.06)); c.lineTo(q(0.56), q(0.06)); c.quadraticCurveTo(q(0.26), q(0.2), 0, q(0.18)); c.closePath(); };
+        sh(c, wing, wingC, wingSh, q(0.08));
+        c.save(); wing(); c.clip(); poly(c, [q(0.82), q(-0.8), q(1.3), q(-0.8), q(1.3), q(0.3), q(0.82), q(0.3)]); c.fillStyle = T.main; c.fill(); c.restore();
+        wing(); c.lineWidth = LW; c.strokeStyle = OUT; c.stroke();
+        for (const x of [0.45, 0.65, 0.85]) line(c, q(x), q(-0.3), q(x + 0.1), q(-0.05), wingSh, LW * 0.8);
+        c.restore();
+      }
+      // the lion body, legs tucked as it flies
+      sh(c, () => ell(c, 0, q(0.12), q(0.42), q(0.36)), fur, furSh, q(0.08));
+      for (const d of [-1, 1]) sh(c, () => ell(c, d * q(0.24), q(0.44), q(0.1), q(0.12)), fur, furSh, q(0.03));
+      if (!front) {
+        rope(c, () => { c.beginPath(); c.moveTo(0, q(0.4)); c.quadraticCurveTo(q(0.18), q(0.7), q(0.05), q(0.85)); }, fur, q(0.07));
+        sh(c, () => circ(c, q(0.05), q(0.88), q(0.08)), '#8a5a2e', null, 0);
+      }
+      rr(c, q(-0.34), q(-0.02), q(0.68), q(0.1), q(0.04)); paint(c, T.main, LW * 0.7);
+      // the eagle head
+      sh(c, () => circ(c, 0, q(-0.36), q(0.3)), white, whiteSh, q(0.06));
+      for (const d of [-1, 1]) sh(c, () => poly(c, [d * q(0.14), q(-0.6), d * q(0.34), q(-0.84), d * q(0.3), q(-0.5)]), white, whiteSh, q(0.03));
+      if (front) {
+        sh(c, () => poly(c, [q(-0.1), q(-0.34), q(0.1), q(-0.34), q(0.04), q(-0.1), 0, q(-0.04), q(-0.04), q(-0.1)]), '#ffc52e', '#e09f12', q(0.03));
+        for (const d of [-1, 1]) {
+          circ(c, d * q(0.12), q(-0.42), q(0.06)); paint(c, beam ? '#9ff0ff' : '#ffcf3f', LW * 0.7); dot(c, d * q(0.12), q(-0.42), q(0.03));
+          line(c, d * q(0.22), q(-0.52), d * q(0.05), q(-0.47), OUT, LW * 1.1);
+        }
+      }
+      // storm light when the beam is on
+      if (beam) {
+        c.save(); c.globalCompositeOperation = 'lighter';
+        const g = c.createRadialGradient(0, q(-0.2), 0, 0, q(-0.2), q(0.9));
+        g.addColorStop(0, `rgba(160,230,255,${0.25 + beam * 0.12})`); g.addColorStop(1, 'rgba(120,200,255,0)');
+        c.fillStyle = g; circ(c, 0, q(-0.2), q(0.9)); c.fill();
+        c.restore();
+      }
+    },
+
     // A Ram Cart soldier: a desert fighter in a tunic and leather cap, with a wooden mallet.
     ramsoldier(c, k, o) {
       const q = v => v * k * 0.88, T = TEAM[o.team], st = o.walk ? Math.sin(o.t * 11) * q(0.05) : 0, front = o.view === 'front', sw = o.atk;
@@ -846,6 +987,10 @@ const KCArt = (() => {
     if (cardId === 'fireball') { c.save(); c.translate(w * 0.54, h * 0.46); LW = Math.max(1, k * 0.07); fireballArt(c, k * 1.0, 0.4); c.restore(); }
     else if (cardId === 'sandstorm') { c.save(); c.translate(w * 0.56, h * 0.76); LW = Math.max(1, k * 0.06); sandstormArt(c, k * 1.35, 0.6); c.restore(); }
     else if (cardId === 'ramcart') at(0.5, 0.9, 1.05, { power: 0.4 });
+    else if (cardId === 'bees') { for (const [x, y, sc, tt] of [[0.3, 0.32, 1.25, 0.1], [0.7, 0.3, 1.15, 0.6], [0.5, 0.52, 1.5, 0], [0.26, 0.72, 1.2, 1.1], [0.74, 0.72, 1.3, 0.4]]) at(x, y, sc, { t: tt, id: Math.round(tt * 10) }); }
+    else if (cardId === 'owl') at(0.5, 0.58, 1.0, { t: 0.4 });
+    else if (cardId === 'thundercloud') at(0.5, 0.52, 0.9, { t: 0.3, atk: 0.4 });
+    else if (cardId === 'griffin') at(0.5, 0.62, 0.82, { t: 0.2, beam: 1 });
     else if (cardId === 'camel') at(0.5, 0.97, 0.86, { ratk: 0.6, t: 0.2 });
     else if (cardId === 'spears') { c.save(); c.translate(w * 0.5, h * 0.5); LW = Math.max(1, k * 0.06); spearsArt(c, k * 1.05, 0); c.restore(); }
     else if (cardId === 'footmen') { at(0.27, 0.72, 1.15, { t: 0.4 }); at(0.73, 0.72, 1.15, { t: 1.1 }); at(0.5, 0.92, 1.4, {}); }
@@ -902,6 +1047,7 @@ const KCArt = (() => {
   const THEMES = {
     training: { bg: '#5c5470', grass: ['#7cc653', '#73bd4b'], path: '#d6bf8a', pad: '#9d978d', river: ['#3d8fe0', '#2f75c4'], bank: '#5aa63e', wall: '#857c95', specks: ['#ffffff', '#ffd54a', '#ff8fb3', '#b68cff'] },
     briar: { bg: '#3b4636', grass: ['#5d8a45', '#557f3f'], path: '#8a6a44', pad: '#7e8579', river: ['#2e7a84', '#22636c'], bank: '#3f6a34', wall: '#5e6b56', specks: ['#d8ff8a', '#ffe48a', '#9fe0a0', '#c84a5a'] },
+    stormspire: { bg: '#2e3348', grass: ['#9aa6bd', '#919db5'], path: '#c9d2e2', pad: '#6f7891', river: ['#6fc4ff', '#4a9ee0'], bank: '#5a647e', wall: '#505a74', specks: ['#ffe27a', '#bfe6ff', '#ffffff', '#8f9bb5'] },
     sunstone: { bg: '#6e4a2c', grass: ['#e8c47c', '#e0ba70'], path: '#c99a5a', pad: '#b3906a', river: ['#35b8c6', '#2794a6'], bank: '#9fb05a', wall: '#b07a4a', specks: ['#5fa84a', '#ffe08a', '#c96a3a', '#fff4d6'] },
     cinder: { bg: '#4d3f45', grass: ['#a6ad5a', '#9ba251'], path: '#c9a47c', pad: '#8d857e', river: ['#3a86c4', '#2c6aa3'], bank: '#7f8a42', wall: '#6f6168', specks: ['#ff8a3d', '#ffc261', '#5a4a44', '#e6dccd'] },
   };

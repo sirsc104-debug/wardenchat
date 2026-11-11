@@ -257,7 +257,7 @@ const KCEmotes = (() => {
       S.sent = S.sent.filter(t => now - t < 6000).concat(now);
       if (S.sent.length >= 3) { S.restUntil = now + 3500; S.sent = []; }
       show(0, id);
-      maybeReply(id);
+      if (opts.online && opts.online()) { if (opts.onSend) opts.onSend(id); } else maybeReply(id);
       return true;
     }
     if (!S.muted) show(1, id);

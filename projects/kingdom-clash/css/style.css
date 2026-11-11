@@ -1604,3 +1604,34 @@ button.slot:hover { transform: translateY(-3px); }
 @keyframes emHop { from { transform: translateY(0) scale(1, 1); } 70% { transform: translateY(-7%) scale(0.97, 1.03); } to { transform: translateY(-9%) rotate(3deg); } }
 @keyframes emPulse { from { transform: scale(0.92) rotate(-5deg); } to { transform: scale(1.08) rotate(5deg); } }
 @keyframes emRecoil { 0%, 70%, 100% { transform: none; } 78% { transform: translateY(5%) scale(1.04, 0.96); } }
+
+/* ---------- online battles ---------- */
+.online-btn { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 14px; padding: 8px 12px; border-radius: 10px; border: 3px solid var(--outline);
+  background: linear-gradient(#4cd47a, #239150); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), 0 3px 0 #145a30; white-space: nowrap; }
+.online-btn .ob-dot { width: 9px; height: 9px; border-radius: 50%; background: #c8ffd8; box-shadow: 0 0 6px #9dffb9; }
+.online-btn.locked { background: linear-gradient(#6a6a86, #45455e); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.15), 0 3px 0 #2a2a3a; }
+.online-btn.locked .ob-dot { background: #9a9ab0; box-shadow: none; }
+.online-card { width: min(620px, 100%); box-sizing: border-box; padding: 28px 22px 20px; display: flex; flex-direction: column; gap: 12px; animation: pop 0.2s ease-out; }
+.ol-where { margin: 0; text-align: center; color: var(--muted); font-size: 13px; font-weight: 800; }
+.ol-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.ol-opt { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; padding: 14px; border-radius: 14px; background: rgba(0, 0, 0, 0.28); border: 2px solid rgba(255, 255, 255, 0.1); }
+.ol-opt > b { font-family: var(--display); font-weight: 400; font-size: 20px; }
+.ol-opt p { margin: 0; font-size: 13px; color: var(--muted); }
+.ol-go { min-width: 0; width: 100%; }
+.ol-go span { font-size: 20px; }
+.ol-join { display: flex; gap: 6px; }
+.ol-join input { width: 92px; padding: 6px 10px; border-radius: 10px; border: 3px solid var(--outline); background: #120c22; color: #fff; font: inherit; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; text-align: center; }
+.ol-wait { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 18px; border-radius: 14px; background: rgba(0, 0, 0, 0.28); }
+.ol-wait p { margin: 0; color: var(--muted); font-size: 13px; }
+.ol-code { font-family: var(--display); font-weight: 400; font-size: 44px; letter-spacing: 0.18em; color: var(--gold); text-shadow: 0 3px 0 var(--outline); }
+.ol-lock { text-align: center; padding: 18px; }
+.ol-lock b { font-family: var(--display); font-weight: 400; font-size: 22px; }
+.ol-lock p { color: var(--muted); }
+.ol-note { margin: 0; text-align: center; font-size: 12px; }
+.online-card .pill { align-self: center; }
+.nw-spin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, 0.25); border-top-color: #fff; animation: usSpin 0.8s linear infinite; display: inline-block; }
+.net-wait { position: absolute; z-index: 4; left: 50%; top: 46%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 999px;
+  background: rgba(20, 12, 40, 0.85); border: 2px solid rgba(255, 255, 255, 0.2); font-weight: 900; font-size: 14px; pointer-events: none; }
+.card.pending img { filter: brightness(0.6) saturate(0.6); }
+.card.pending::after { content: ''; position: absolute; inset: 30% 30%; border-radius: 50%; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; animation: usSpin 0.7s linear infinite; }
+@media (max-width: 560px) { .ol-opts { grid-template-columns: minmax(0, 1fr); } }

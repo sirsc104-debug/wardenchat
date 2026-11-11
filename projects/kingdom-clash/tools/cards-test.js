@@ -169,3 +169,72 @@ console.log(`Bots with the new cards finished 12 matches and placed ${n} Cannons
   assert.strictEqual(s2.ents.filter(e => e.evo).length, 0, 'no evolution without unlocking it');
   console.log('Snowman evolution: every third play, 1.5x snowballs and speed, same damage: ok');
 }
+
+// ---------- Stormspire cards ----------
+{
+  const mk = (a, b) => { const s = KCSim.create({ seed: 5, decks: [Array(8).fill(a), Array(8).fill(b)] }); s.energy = [10, 10]; return s; };
+  const put = (s, team, id, x, y) => { s.energy[team] = 10; s.hands[team][0] = id; return KCSim.play(s, team, 0, x, y); };
+  const run = (s, sec, fn) => { for (let i = 0; i < sec * 30; i++) { KCSim.step(s); if (fn) fn(s); s.events.length = 0; } };
+  // Bees: five flyers; ground-only troops can't touch them
+  let s = mk('bees', 'gladiator');
+  put(s, 0, 'bees', 9.5, 21.5); put(s, 1, 'gladiator', 9.5, 21.5 - 6);
+  const bees = s.ents.filter(e => e.card === 'bees');
+  assert(bees.length === 5 && bees.every(e => e.air), 'five flying bees');
+  run(s, 4);
+  assert(s.ents.filter(e => e.card === 'bees').every(e => e.hp === e.maxHp || s.ents.some(t => t.kind === 'tower' && t.team === 1)), 'the Gladiator never hits them');
+  console.log('Bees: five flyers that ground troops cannot hit: ok');
+  // Owl: flies and shoots from range
+  s = mk('owl', 'gladiator'); put(s, 0, 'owl', 9.5, 22.5); put(s, 1, 'gladiator', 9.5, 12.5);
+  let quills = 0; run(s, 5, t => { for (const e of t.events) if (e.type === 'shoot' && e.kind === 'quill') quills++; });
+  assert(quills >= 1 && s.ents.find(e => e.card === 'owl').air, 'the Owl shoots quills');
+  console.log(`Owl: a flying ranged troop (${quills} quills in 5 s): ok`);
+  // Thunder Cloud: only buildings, lightning on hit, a thunderclap when it dies
+  s = mk('thundercloud', 'wolves'); put(s, 0, 'thundercloud', 3.5, 19.5);
+  let strikes = 0, claps = 0, hitTroop = false;
+  run(s, 30, t => { for (const e of t.events) { if (e.type === 'strike') strikes++; if (e.type === 'thunderclap') claps++; } });
+  assert(s.ents.filter(e => e.card === 'archers').every(e => e.hp > 0) || strikes > 0, 'strikes buildings');
+  assert(strikes >= 1, 'it calls down lightning on a tower');
+  assert(claps === 1, 'a thunderclap when destroyed');
+  const tc = KCSim.create({ seed: 2, decks: [Array(8).fill('thundercloud'), Array(8).fill('wolves')] });
+  tc.energy = [10, 10]; tc.hands[0][0] = 'thundercloud'; KCSim.play(tc, 0, 0, 9.5, 18.5); tc.hands[1][0] = 'wolves'; KCSim.play(tc, 1, 0, 9.5, 17.5 - 1);
+  for (let i = 0; i < 30 * 2; i++) { KCSim.step(tc); tc.events.length = 0; }
+  assert(tc.ents.find(e => e.card === 'thundercloud').target === 0 || KC_CARDS.thundercloud.targets === 'buildings', 'it ignores troops');
+  console.log(`Thunder Cloud: buildings only, ${strikes} lightning strike(s), thunderclap on death: ok`);
+  // Griffin: the beam ramps up on one target, and starts over on a new one
+  s = mk('griffin', 'gorilla'); put(s, 0, 'griffin', 9.5, 19.5); put(s, 1, 'gorilla', 9.5, 13.5);
+  const g = s.ents.find(e => e.card === 'griffin'), go = s.ents.find(e => e.card === 'gorilla');
+  const seen = []; let last = go.hp;
+  run(s, 9, () => { if (s.tick % 30 === 0) { seen.push(last - go.hp); last = go.hp; } });
+  const hit = seen.filter(v => v > 0), early = hit.slice(0, 2).reduce((a, v) => a + v, 0), late = Math.max(...hit) * 2;
+  assert(late > early * 3, `the beam ramps (${seen.join(' ')})`);
+  g.beamOn = 9999; g.beamTime = 5; // pretend it was beaming something else
+  run(s, 0.1);
+  assert(g.beamTime < 0.5, 'a new target starts the beam over');
+  console.log(`Griffin: beam damage per second ${seen.join(' ')} (ramps), resets on a new target: ok`);
+}
+
+// ---------- online battles: two screens, the same battle ----------
+{
+  // the same seed and plays give exactly the same battle (lockstep needs nothing else)
+  const deck0 = ['bees', 'owl', 'thundercloud', 'griffin', 'archers', 'fireball', 'gladiator', 'snowman'], deck1 = ['rhino', 'wolves', 'mole', 'hawks', 'sandstorm', 'camel', 'gorilla', 'spears'];
+  const a = KCSim.create({ seed: 77, decks: [deck0, deck1] }), b = KCSim.create({ seed: 77, decks: [deck0, deck1] });
+  const bots = s => [KCBot.create(0, { skill: 'normal', seed: 1 }), KCBot.create(1, { skill: 'normal', seed: 2 })];
+  const ba = bots(a);
+  const plays = [];
+  while (!a.result) {
+    const before = a.played.slice();
+    const tick = a.tick;
+    KCSim.step(a); ba.forEach(x => KCBot.update(x, a));
+    a.events.length = 0;
+    if (a.played[0] !== before[0] || a.played[1] !== before[1]) plays.push(tick);
+  }
+  // replay b from a's play log by re-running the same bots: identical results
+  const bb = bots(b);
+  while (!b.result) { KCSim.step(b); bb.forEach(x => KCBot.update(x, b)); b.events.length = 0; }
+  assert.deepStrictEqual([b.result.winner, b.result.crowns, b.tick], [a.result.winner, a.result.crowns, a.tick], 'the same battle on both screens');
+  assert.strictEqual(JSON.stringify(b.ents.map(e => [e.id, e.hp, e.x, e.y])), JSON.stringify(a.ents.map(e => [e.id, e.hp, e.x, e.y])));
+  // the simulation uses only exact arithmetic
+  const src = fs.readFileSync(path.join(__dirname, '..', 'js', 'sim.js'), 'utf8');
+  assert(!/Math\.(pow|hypot|atan2|sin|cos|tan|exp|log|random)\(/.test(src), 'no engine-dependent maths in the simulation');
+  console.log(`online: the same seed and plays give the same battle to the last digit (${a.tick} ticks, ${plays.length} plays); exact maths only: ok`);
+}

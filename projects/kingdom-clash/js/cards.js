@@ -138,6 +138,35 @@ const KC_CARDS = {
     blurb: 'A camel gallops for buildings and hits hard, double on the first hit after a run. Its rider lassos troops along the way, slowing them for a moment (once every 4 seconds).',
     evo: 'Mirage: the first lasso of the match pulls its target in.',
   },
+  // Arena 4 (Stormspire) cards, found on the Trophy Road.
+  bees: {
+    id: 'bees', name: 'Bees', cost: 2, rarity: 'common', kind: 'troop', role: 'Air swarm', count: 5,
+    hp: 50, dmg: 40, hit: 0.75, range: 0.4, speed: 2.0, targets: 'both', air: true,
+    radius: 0.28, mass: 0.5,
+    blurb: 'A buzzing swarm of five angry bees. Fast, cheap and fragile: they sting anything, in the air or on the ground.',
+    evo: 'Hive: one bee comes back once the swarm is gone.',
+  },
+  owl: {
+    id: 'owl', name: 'Owl', cost: 4, rarity: 'rare', kind: 'troop', role: 'Air ranged', count: 1,
+    hp: 640, dmg: 135, hit: 1.1, range: 6, speed: 0.9, targets: 'both', air: true,
+    radius: 0.55, mass: 3, proj: 'quill', projSpeed: 14,
+    blurb: 'An armored battle owl that fires steel-tipped quills from high up, at troops and towers alike. Slow, but it hits from far away.',
+    evo: 'Night Vision: its first quill at each target does double damage.',
+  },
+  thundercloud: {
+    id: 'thundercloud', name: 'Thunder Cloud', cost: 5, rarity: 'epic', kind: 'troop', role: 'Win condition', count: 1,
+    hp: 1050, dmg: 480, hit: 2.6, range: 0.3, speed: 0.85, targets: 'buildings', air: true,
+    radius: 0.8, mass: 6, strike: 1.2, deathBlast: { r: 2.2, dmg: 150 },
+    blurb: 'A slow storm cloud that drifts straight for buildings and calls down lightning on them. When it is destroyed it bursts in a final thunderclap.',
+    evo: 'Downpour: rain slows ground troops under it.',
+  },
+  griffin: {
+    id: 'griffin', name: 'Griffin', cost: 4, rarity: 'legendary', kind: 'troop', role: 'Tank killer', count: 1,
+    hp: 950, dmg: 40, hit: 0.2, range: 3.5, speed: 1.0, targets: 'both', air: true,
+    radius: 0.65, mass: 4, beam: { dps: [40, 120, 360], stage: 2 },
+    blurb: 'A storm griffin that locks a lightning beam on one target. The longer the beam holds, the harder it hits; it starts over when it changes target or is knocked away.',
+    evo: 'Static: the beam jumps to a second target at full power.',
+  },
 };
 
 // Evolutions: each has its own unlock (shards) and how often it comes round in a battle (every
@@ -149,6 +178,6 @@ const KC_EVOS = {
 
 // Every card in collection order: the starter deck, then cards found on the Trophy Road.
 const KC_ALL_CARDS = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball', 'skeletons', 'cannon', 'spears', 'footmen', 'flail', 'pots',
-  'sandstorm', 'ramcart', 'mole', 'camel'];
+  'sandstorm', 'ramcart', 'mole', 'camel', 'bees', 'owl', 'thundercloud', 'griffin'];
 
 const KC_STARTER_DECK = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'];

@@ -38,7 +38,9 @@ const KCProgress = (() => {
       blurb: 'An overgrown forest of ancient stone ruins, giant tree roots, thorny vines and glowing lanterns.' },
     { id: 'sunstone', number: 3, name: 'Sunstone Arena', min: 600, theme: 'sunstone', cards: ['sandstorm', 'ramcart', 'mole', 'camel'],
       blurb: 'A sun-baked desert fortress of sandstone walls and an oasis channel. Evolutions and the Diamond Pass open here.' },
-    { id: 'arena4', number: 4, name: 'Arena 4', min: 900, soon: true, blurb: 'Coming in a later update.' },
+    { id: 'stormspire', number: 4, name: 'Stormspire', min: 900, theme: 'stormspire', cards: ['bees', 'owl', 'thundercloud', 'griffin'],
+      blurb: 'A fortress on a mountain peak above the clouds, crackling with storms. Online battles open here.' },
+    { id: 'arena5', number: 5, name: 'Arena 5', min: 1200, soon: true, blurb: 'Coming in a later update.' },
   ];
   // Fixed rewards along the road, claimed by the player.
   const ROAD = [
@@ -67,7 +69,15 @@ const KCProgress = (() => {
     { at: 790, kind: 'card', card: 'mole', copies: 3 },
     { at: 830, kind: 'coins', amount: 600 },
     { at: 870, kind: 'card', card: 'camel', copies: 1 },
-    { at: 900, kind: 'arena', arena: 'arena4' },
+    { at: 900, kind: 'arena', arena: 'stormspire' },
+    { at: 930, kind: 'card', card: 'bees', copies: 6 },
+    { at: 970, kind: 'coins', amount: 700 },
+    { at: 1010, kind: 'card', card: 'owl', copies: 3 },
+    { at: 1050, kind: 'chest', chest: 'platinum' },
+    { at: 1090, kind: 'card', card: 'thundercloud', copies: 1 },
+    { at: 1130, kind: 'coins', amount: 800 },
+    { at: 1170, kind: 'card', card: 'griffin', copies: 1 },
+    { at: 1200, kind: 'arena', arena: 'arena5' },
   ];
   const CHESTS = {
     wooden: { name: 'Wooden Chest', seconds: 60, coins: [18, 26], cards: 6, kinds: 2 },
@@ -254,6 +264,11 @@ const KCProgress = (() => {
     if (t >= 710) swap('ramcart', 0.5);
     if (t >= 790) swap('mole', 0.5);
     if (t >= 870) swap('camel', 0.45);
+    // Stormspire cards
+    if (t >= 930) swap('bees', 0.5);
+    if (t >= 1010) swap('owl', 0.5);
+    if (t >= 1090) swap('thundercloud', 0.45);
+    if (t >= 1170) swap('griffin', 0.4);
     const name = FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
     const foeTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
     const cardLevels = spreadLevels(foeUpgrades(foeTrophies), deck, rand);
@@ -675,6 +690,9 @@ const KCProgress = (() => {
     ],
   };
   const passOpen = () => P.best >= EVO_ARENA;
+  // Online battles open when you first reach Stormspire (Arena 4).
+  const ONLINE_AT = 900;
+  const onlineOpen = () => P.best >= ONLINE_AT;
   const passPremium = () => !!(P.pass.premium || P.member);
   const passMax = () => PASS.tiers.length * PASS.crownsPerTier;
   // tiers reached (0 to the number of tiers), and the points toward the next one
@@ -775,7 +793,7 @@ const KCProgress = (() => {
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
     MAGIC, MAGIC_ORDER, MAGIC_RULES, wildActive, magicCount, magicFor, useMagic, grantMagic,
     EVO_ARENA, evoOpen, hasEvo, evoList, evoInfo,
-    kingInfo, upgradeKing, EMOTES, EMOTE_SHOP, emoteOffers, buyEmote, chestPool,
+    kingInfo, upgradeKing, ONLINE_AT, onlineOpen, EMOTES, EMOTE_SHOP, emoteOffers, buyEmote, chestPool,
     PASS, passOpen, passPremium, passTier, passInto, passMax, passState, passClaimable, claimPass, buyPass,
   };
 })();

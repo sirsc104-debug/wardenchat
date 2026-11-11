@@ -19,6 +19,11 @@ const DECKS = {
   'Mole for Gladiator': ['rhino', 'wolves', 'mole', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'],
   'Camel Jockey for Rhino': ['camel', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'],
   'Evolved Snowman': { deck: STARTER, evos: ['snowman'] },
+  // Stormspire
+  'Bees for Wolves': ['rhino', 'bees', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'],
+  'Owl for Archers': ['rhino', 'wolves', 'gladiator', 'hawks', 'owl', 'snowman', 'gorilla', 'fireball'],
+  'Thunder Cloud for Rhino': ['thundercloud', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'],
+  'Griffin for Gorilla': ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'griffin', 'fireball'],
 };
 const only = process.argv[3];
 for (const [name, spec] of Object.entries(DECKS)) {

@@ -17,7 +17,10 @@ const KCSim = (() => {
     archer: { hp: 1400, dmg: 50, hit: 0.8, range: 7.5, half: 1.5, proj: 'arrow', projSpeed: 14 },
     king: { hp: 2400, dmg: 55, hit: 1.0, range: 7.0, half: 2.0, proj: 'cannon', projSpeed: 11 },
   };
-  const levelMult = lvl => Math.pow(1.08, (lvl || 1) - 1);
+  // Only exact arithmetic (+ - * / and square roots) in the simulation, so two browsers playing the
+  // same online battle compute exactly the same thing: no powers, hypot or trigonometry here.
+  const hyp = (x, y) => Math.sqrt(x * x + y * y);
+  const levelMult = lvl => { let m = 1; for (let i = 1; i < (lvl || 1); i++) m *= 1.08; return m; };
 
   function mulberry(seed) {
     let a = seed >>> 0;
@@ -82,7 +85,7 @@ const KCSim = (() => {
   };
   const tower = (s, team, lane) => s.ents.find(e => e.kind === 'tower' && e.team === team && e.lane === lane);
   const laneOf = x => (x < W / 2 ? 'L' : 'R');
-  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const dist = (a, b) => hyp(a.x - b.x, a.y - b.y);
   const edge = (a, b) => dist(a, b) - a.radius - b.radius;
   function canHit(a, t) {
     if (!t || t.dead || t.team === a.team || t.tunnel) return false;
@@ -173,6 +176,7 @@ const KCSim = (() => {
     if (n === 2) return [[-0.5, 0], [0.5, 0]];
     if (n === 3) return [[-0.55, 0.3], [0.55, 0.3], [0, -0.45]];
     if (n === 4) return [[-0.45, -0.45], [0.45, -0.45], [-0.45, 0.45], [0.45, 0.45]];
+    if (n === 5) return [[0, -0.5], [-0.5, -0.1], [0.5, -0.1], [-0.3, 0.45], [0.3, 0.45]];
     return [[0, 0]];
   }
   function spawnBuilding(s, team, id, x, y) {
@@ -181,7 +185,7 @@ const KCSim = (() => {
       id: s.nextId++, kind: 'building', team, card: id, x, y, px: x, py: y, level,
       hp, maxHp: hp, dmg: Math.round(c.dmg * m), hit: c.hit, range: c.range, targets: c.targets, air: false,
       radius: c.radius, half: c.half, decay: hp / c.lifetime, proj: c.proj, projSpeed: c.projSpeed,
-      deploy: 1.0, cd: 0, target: 0, angle: team === 0 ? -Math.PI / 2 : Math.PI / 2, atk: 0, flash: 0, dead: false,
+      deploy: 1.0, cd: 0, target: 0, aimX: 0, aimY: team === 0 ? -1 : 1, atk: 0, flash: 0, dead: false,
     };
     s.ents.push(b);
     return b;
@@ -209,6 +213,9 @@ const KCSim = (() => {
     };
     if (c.ram) Object.assign(u, { ram: true, baseSpeed: c.speed, maxSpeed: c.ram.max, accel: c.ram.accel });
     if (c.chargeHit) u.chargeHit = c.chargeHit;
+    if (c.strike) u.strike = c.strike;
+    if (c.beam) Object.assign(u, { beam: c.beam.dps.map(d => d * m), beamStage: c.beam.stage, beamTime: 0, beamOn: 0, beamTick: 0 });
+    if (c.deathBlast) u.deathBlast = { r: c.deathBlast.r, dmg: Math.round(c.deathBlast.dmg * m) };
     if (c.rider) u.rider = { dmg: Math.round(c.rider.dmg * m), hit: c.rider.hit, range: c.rider.range, slow: c.rider.slow, slowDur: c.rider.slowDur,
       slowCd: c.rider.slowCd, cd: 0.6, snareCd: 0, atk: 0, aim: 0 };
     if (evo && KC_EVOS[id]) {
@@ -238,6 +245,14 @@ const KCSim = (() => {
       else {
         s.events.push({ type: 'death', team: e.team, card: e.card, x: e.x, y: e.y, air: e.air, building: e.kind === 'building' });
         breakUp(s, e);
+        if (e.deathBlast) {
+          // a final thunderclap: damage to everything on the ground under it
+          for (const o of s.ents) {
+            if (o.dead || o.team === e.team || o.air || o.tunnel) continue;
+            if (hyp(o.x - e.x, o.y - e.y) - o.radius <= e.deathBlast.r) damage(s, o, e.deathBlast.dmg, e.team);
+          }
+          s.events.push({ type: 'thunderclap', team: e.team, x: e.x, y: e.y, r: e.deathBlast.r });
+        }
       }
     }
   }
@@ -378,6 +393,16 @@ const KCSim = (() => {
       s.events.push({ type: 'spin', card: u.card, team: u.team, x: u.x, y: u.y, r: u.spin + u.radius });
       return;
     }
+    if (u.strike) {
+      // lightning called down onto the building, splashing the ground around it
+      damage(s, t, u.dmg, u.team);
+      for (const o of s.ents) {
+        if (o === t || o.dead || o.team === u.team || o.air || o.tunnel || o.kind === 'tower') continue;
+        if (hyp(o.x - t.x, o.y - t.y) - o.radius <= u.strike) damage(s, o, u.dmg, u.team);
+      }
+      s.events.push({ type: 'strike', card: u.card, team: u.team, x: t.x, y: t.y, fx: u.x, fy: u.y, r: u.strike });
+      return;
+    }
     if (u.proj) {
       s.projs.push({ kind: u.proj, team: u.team, x: u.x, y: u.y, sx: u.x, sy: u.y, tx: t.x, ty: t.y,
         target: t.id, speed: u.projSpeed, dmg: u.dmg, splash: u.splash, targets: u.targets, card: u.card,
@@ -405,7 +430,7 @@ const KCSim = (() => {
       if (d <= R.range && d < bd) { bd = d; best = e; }
     }
     if (!best) { R.cd = 0.15; return; }
-    R.cd = R.hit; R.atk = 0.4; R.aim = Math.atan2(best.y - u.y, best.x - u.x);
+    R.cd = R.hit; R.atk = 0.4;
     const snare = R.snareCd <= 0;
     if (snare) R.snareCd = R.slowCd;
     s.projs.push({ kind: 'lasso', team: u.team, x: u.x, y: u.y - 0.4, sx: u.x, sy: u.y - 0.4, tx: best.x, ty: best.y, target: best.id,
@@ -416,7 +441,7 @@ const KCSim = (() => {
     if (u.flash > 0) u.flash -= DT;
     if (u.tunnel) {
       // underground: straight to the spot, under the river and the towers, and nothing can hit it
-      const dx = u.tunnel.tx - u.x, dy = u.tunnel.ty - u.y, d = Math.hypot(dx, dy), step = KC_CARDS[u.card].burrow.speed * DT;
+      const dx = u.tunnel.tx - u.x, dy = u.tunnel.ty - u.y, d = hyp(dx, dy), step = KC_CARDS[u.card].burrow.speed * DT;
       u.moving = true;
       if (d > step) { u.x += (dx / d) * step; u.y += (dy / d) * step; if (Math.abs(dx) > 0.02) u.face = Math.sign(dx); return; }
       u.x = u.tunnel.tx; u.y = u.tunnel.ty; u.tunnel = null; u.moving = false;
@@ -439,6 +464,24 @@ const KCSim = (() => {
     u.moving = false;
     if (!t) return;
     const d = edge(u, t);
+    if (u.beam) {
+      // once locked it holds a little past its range, and follows the target while beaming
+      if (d <= u.range || (u.beamOn === t.id && d <= u.range + 0.8)) {
+        // the beam holds on one target; it grows stronger every few seconds and starts over on a new one
+        if (u.beamOn !== t.id) { u.beamOn = t.id; u.beamTime = 0; u.beamTick = 0; }
+        if (Math.abs(t.x - u.x) > 0.05) u.face = Math.sign(t.x - u.x);
+        u.locked = true; u.moving = false;
+        u.beamTime += DT; u.beamTick += DT;
+        if (u.beamTick >= u.hit - 1e-9) {
+          u.beamTick -= u.hit;
+          const stage = Math.min(u.beam.length - 1, Math.floor(u.beamTime / u.beamStage));
+          damage(s, t, Math.max(1, Math.round(u.beam[stage] * u.hit)), u.team);
+        }
+        if (d > u.range * 0.8) moveStep(s, u, t);
+        return;
+      }
+      u.beamOn = 0; u.beamTime = 0; u.beamTick = 0;
+    }
     if (d <= u.range) {
       if (Math.abs(t.x - u.x) > 0.05) u.face = Math.sign(t.x - u.x);
       if (u.ram) {
@@ -458,8 +501,12 @@ const KCSim = (() => {
     }
     if (u.locked && d > u.range + 0.6) u.locked = false;
     if (u.cd < u.hit * 0.5) u.cd = u.hit * 0.5;
+    moveStep(s, u, t);
+  }
+  // Move a troop one tick toward its target (round towers, over the bridges), slowed if it is slowed.
+  function moveStep(s, u, t) {
     const [nx, ny] = avoid(s, u, ...nav(u, t.x, t.y), t);
-    const dx = nx - u.x, dy = ny - u.y, len = Math.hypot(dx, dy);
+    const dx = nx - u.x, dy = ny - u.y, len = hyp(dx, dy);
     if (len > 0.001) {
       if (u.ram) u.speed = Math.min(u.maxSpeed, u.speed + u.accel * DT);
       const slow = u.slowEnd > s.time ? 1 - u.slowF : 1;
@@ -519,10 +566,12 @@ const KCSim = (() => {
       if (t) b.target = t.id;
     }
     if (!t) return;
-    b.angle = Math.atan2(t.y - b.y, t.x - b.x);
+    // where it aims (a direction, for drawing the barrel); the muzzle is 0.7 tiles along it
+    const ax = t.x - b.x, ay = t.y - b.y, al = hyp(ax, ay) || 1;
+    b.aimX = ax / al; b.aimY = ay / al;
     if (b.cd <= 0) {
       b.cd = b.hit; b.atk = 0.25;
-      const mx = b.x + Math.cos(b.angle) * 0.7, my = b.y + Math.sin(b.angle) * 0.7 - 0.3;
+      const mx = b.x + b.aimX * 0.7, my = b.y + b.aimY * 0.7 - 0.3;
       s.projs.push({ kind: b.proj, team: b.team, x: mx, y: my, sx: mx, sy: my, tx: t.x, ty: t.y, target: t.id,
         speed: b.projSpeed, dmg: b.dmg, splash: 0, targets: b.targets, card: b.card });
       s.events.push({ type: 'shoot', kind: b.proj, team: b.team, x: b.x, y: b.y });
@@ -534,7 +583,7 @@ const KCSim = (() => {
     for (const p of s.projs) {
       const t = byId(s, p.target);
       if (t && !t.dead) { p.tx = t.x; p.ty = t.y; }
-      const dx = p.tx - p.x, dy = p.ty - p.y, d = Math.hypot(dx, dy), step = p.speed * DT;
+      const dx = p.tx - p.x, dy = p.ty - p.y, d = hyp(dx, dy), step = p.speed * DT;
       if (d > step) { p.x += (dx / d) * step; p.y += (dy / d) * step; continue; }
       p.x = p.tx; p.y = p.ty; p.done = true;
       if (p.spell) spellHit(s, p);
@@ -542,7 +591,7 @@ const KCSim = (() => {
         for (const e of s.ents) {
           if (e.dead || e.team === p.team) continue;
           if (p.targets === 'ground' && e.air) continue;
-          if (Math.hypot(e.x - p.x, e.y - p.y) - e.radius <= p.splash) damage(s, e, p.dmg, p.team);
+          if (hyp(e.x - p.x, e.y - p.y) - e.radius <= p.splash) damage(s, e, p.dmg, p.team);
         }
         // broken pottery (and the like) keeps hurting the spot for a moment
         if (p.zone) s.zones.push({ x: p.x, y: p.y, r: p.zone.r, team: p.team, dps: p.zone.dps, left: p.zone.dur, dur: p.zone.dur, pulse: 0, kind: p.kind, targets: p.targets });
@@ -560,10 +609,11 @@ const KCSim = (() => {
     const c = KC_CARDS[p.spell] || KC_CARDS.fireball;
     for (const e of s.ents) {
       if (e.dead || e.team === p.team) continue;
-      const d = Math.hypot(e.x - p.x, e.y - p.y);
+      const d = hyp(e.x - p.x, e.y - p.y);
       if (d - e.radius > c.area) continue;
       damage(s, e, e.kind === 'tower' ? Math.round(p.dmg * c.towerPct) : p.dmg, p.team);
       if (c.knockback && e.kind === 'troop' && !e.dead && !e.heavy) {
+        if (e.beam) { e.beamOn = 0; e.beamTime = 0; }
         const k = c.knockback / Math.max(1, e.mass / 2);
         const nx = d > 0.01 ? (e.x - p.x) / d : 0, ny = d > 0.01 ? (e.y - p.y) / d : (e.team === 0 ? 1 : -1);
         e.x += nx * k; e.y += ny * k;
@@ -581,7 +631,7 @@ const KCSim = (() => {
       const amount = Math.max(1, Math.round(z.dps * 0.1));
       for (const e of s.ents) {
         if (e.dead || e.team === z.team || (z.targets === 'ground' && e.air)) continue;
-        if (Math.hypot(e.x - z.x, e.y - z.y) - e.radius > z.r) continue;
+        if (hyp(e.x - z.x, e.y - z.y) - e.radius > z.r) continue;
         damage(s, e, e.kind === 'tower' && z.towerPct ? Math.max(1, Math.round(amount * z.towerPct)) : amount, z.team, true);
         if (z.slow) slowDown(s, e, z.slow, 0.25, 'sand');
       }
@@ -597,10 +647,10 @@ const KCSim = (() => {
       for (let j = i + 1; j < troops.length; j++) {
         const b = troops[j];
         if (a.air !== b.air) continue;
-        let dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+        let dx = b.x - a.x, dy = b.y - a.y, d = hyp(dx, dy);
         const min = (a.radius + b.radius) * 0.9;
         if (d >= min) continue;
-        if (d < 0.001) { dx = ((a.id * 7919) % 13) / 13 - 0.5 || 0.1; dy = 0.3; d = Math.hypot(dx, dy); }
+        if (d < 0.001) { dx = ((a.id * 7919) % 13) / 13 - 0.5 || 0.1; dy = 0.3; d = hyp(dx, dy); }
         const push = min - d, ma = a.deploy > 0 ? a.mass * 3 : a.mass, mb = b.deploy > 0 ? b.mass * 3 : b.mass;
         const fa = mb / (ma + mb), fb = ma / (ma + mb);
         a.x -= (dx / d) * push * fa; a.y -= (dy / d) * push * fa;
@@ -667,7 +717,8 @@ const KCSim = (() => {
   return {
     W, H, MID, RIVER_TOP, RIVER_BOT, BRIDGES, BRIDGE_HALF, DT, REGULAR, OVERTIME, MAX_ENERGY, TOWERS,
     create, step, play, canDeploy, tower, laneOf, own, mulberry, levelMult, evoCharge,
-    // TEMPORARY: ends a match on the spot for the Simulate Win test button.
-    forceEnd: (s, winner) => finish(s, winner, 'test'),
+    // Ends a match on the spot: the Simulate Win test button (TEMPORARY), and an online battle whose
+    // opponent left ('left') or fell out of step ('desync').
+    forceEnd: (s, winner, reason) => finish(s, winner, reason || 'test'),
   };
 })();

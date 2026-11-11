@@ -69,6 +69,7 @@
               <canvas id="oppPic" width="96" height="96" aria-hidden="true"></canvas>
               <div class="opp-text"><small id="oppLabel">Next Opponent</small><b id="oppName">Trainer Owen</b><span id="oppMeta">Tutorial</span></div>
               <button class="opp-change" id="oppChange" type="button" aria-expanded="false" aria-controls="oppPanel">Trainers <span aria-hidden="true">&#9662;</span></button>
+              <button class="online-btn" id="onlineBtn" type="button" title="Battle other players online"><span class="ob-dot" aria-hidden="true"></span>Online</button>
               <div class="opp-panel" id="oppPanel" hidden><ul id="oppList"></ul></div>
             </div>
             <div class="battle-wrap">
@@ -197,6 +198,15 @@
       </div>
     </div>
 
+    <!-- online battles: quick match, or a friendly battle by room code -->
+    <div class="modal" id="onlineModal" hidden>
+      <div class="online-card plaque" role="dialog" aria-modal="true" aria-labelledby="onlineTitle">
+        <button class="modal-x" id="onlineX" type="button" aria-label="Close">&#x2715;</button>
+        <div class="ribbon"><span id="onlineTitle">Online Battle</span></div>
+        <div id="onlineBody"></div>
+      </div>
+    </div>
+
     <!-- the King Tower: its level, what the next one needs, and the upgrade -->
     <div class="modal" id="kingModal" hidden>
       <div class="king-card plaque" role="dialog" aria-modal="true" aria-labelledby="kingTitle">
@@ -264,6 +274,7 @@
         <div class="countdown" id="countdown" hidden></div>
         <div class="toast" id="toast" hidden></div>
         <div class="mini-timer" id="miniTimer"></div>
+        <div class="net-wait" id="netWait" hidden><span class="nw-spin" aria-hidden="true"></span>Waiting for your opponent…</div>
         <!-- TEMPORARY test button: remove this line and the "TEMPORARY" blocks in js/game.js, js/sim.js and css/style.css -->
         <button class="sim-win" id="simWinBtn" type="button" title="Test button: ends this match as a win"><small>Test</small>Simulate Win</button>
       </main>
@@ -321,6 +332,7 @@
 <script src="js/audio.js"></script>
 <script src="js/items.js"></script>
 <script src="js/upgrades.js"></script>
+<script src="js/net.js"></script>
 <script src="js/menu.js"></script>
 <script src="js/emotes.js"></script>
 <script src="js/game.js"></script>

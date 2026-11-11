@@ -92,6 +92,12 @@ const KCSound = (() => {
     em_mindblown: () => { noise(0.4, 0.2, 600); tone(120, 60, 0.3, 'sine', 0.25); tone(600, 1600, 0.3, 'triangle', 0.06, 0.1); },
     em_smug: () => { tone(330, 392, 0.2, 'triangle', 0.1); tone(523, 0, 0.18, 'triangle', 0.08, 0.2); },
     em_salute: () => { tone(392, 0, 0.12, 'square', 0.06); tone(523, 0, 0.12, 'square', 0.06, 0.12); tone(659, 0, 0.3, 'square', 0.06, 0.24); },
+    // Stormspire cards
+    buzz: () => { for (let i = 0; i < 3; i++) tone(210 + i * 9, 230, 0.4, 'sawtooth', 0.025, i * 0.03); },
+    quill: () => { noise(0.08, 0.06, 3600, 'highpass'); tone(900, 1400, 0.06, 'triangle', 0.04); },
+    thunder: () => { noise(0.08, 0.35, 5000, 'highpass'); noise(0.8, 0.3, 260); tone(80, 35, 0.7, 'sine', 0.3, 0.03); },
+    thunderclap: () => { noise(0.1, 0.4, 5000, 'highpass'); noise(1.2, 0.4, 200); tone(70, 30, 1.0, 'sine', 0.4, 0.05); noise(0.5, 0.15, 1200, 'bandpass', 0.2); },
+    beamUp: () => { tone(400, 1200, 0.25, 'sawtooth', 0.05); noise(0.2, 0.06, 4200, 'highpass'); },
     emCard: () => { tone(392, 784, 0.12, 'triangle', 0.1); [659, 988].forEach((f, i) => tone(f, 0, 0.18, 'triangle', 0.1, 0.12 + i * 0.09)); noise(0.1, 0.05, 3000, 'highpass', 0.1); },
     emPhrase: () => { tone(700, 1050, 0.08, 'triangle', 0.12); noise(0.05, 0.05, 3000, 'highpass'); },
     // Sunstone Arena cards and evolutions

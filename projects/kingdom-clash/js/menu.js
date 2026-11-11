@@ -715,6 +715,63 @@ const KCMenu = (() => {
   }
 
 
+  /* ---------- online battles (js/net.js) ---------- */
+  let onlineJoinCode = '';
+  function openOnline() {
+    $('#onlineModal').hidden = false;
+    KCNet.init().then(() => renderOnline(KCNet.info()));
+    renderOnline(KCNet.info());
+  }
+  function closeOnline() {
+    $('#onlineModal').hidden = true;
+    if (KCNet.info().status !== 'playing') KCNet.cancel();
+  }
+  const matched = m => { $('#onlineModal').hidden = true; if (opts.onOnline) opts.onOnline(m); };
+  function renderOnline(info) {
+    if ($('#onlineModal').hidden) return;
+    const box = $('#onlineBody');
+    if (!G.onlineOpen()) {
+      box.innerHTML = `<div class="ol-lock"><b>Opens at Stormspire</b><p>Reach Stormspire (${fmt(G.ONLINE_AT)} trophies) to battle other players online.</p></div>`;
+      return;
+    }
+    if (info.kind === 'none') { box.innerHTML = '<div class="ol-lock"><b>Not available here</b><p>This browser can\'t connect to other players.</p></div>'; return; }
+    const where = info.kind === 'room'
+      ? `<p class="ol-where"><b>${fmt(info.online)}</b> other player${info.online === 1 ? '' : 's'} here now${info.seeking ? ` · ${fmt(info.seeking)} looking for a battle` : ''}.</p>`
+      : '<p class="ol-where">Not on claude.ai, so only other tabs of this browser can be reached here.</p>';
+    if (info.status === 'seeking') {
+      box.innerHTML = `${where}<div class="ol-wait"><span class="nw-spin" aria-hidden="true"></span><b>Looking for an opponent…</b><p>You'll be matched with the next player who looks for a battle.</p></div>
+        <button type="button" class="pill" id="olCancel">Stop looking</button>`;
+    } else if (info.status === 'hosting') {
+      box.innerHTML = `${where}<div class="ol-wait"><small>Your room code</small><b class="ol-code">${esc(info.code.toUpperCase())}</b><p>Tell your friend this code. The battle starts as soon as they join.</p></div>
+        <button type="button" class="pill" id="olCancel">Cancel</button>`;
+    } else if (info.status === 'joining') {
+      box.innerHTML = `${where}<div class="ol-wait"><span class="nw-spin" aria-hidden="true"></span><b>Joining room ${esc(info.code.toUpperCase())}…</b><p>Waiting for its host. Check the code if this takes long.</p></div>
+        <button type="button" class="pill" id="olCancel">Cancel</button>`;
+    } else if (info.status === 'playing') {
+      box.innerHTML = '<div class="ol-wait"><b>Starting…</b></div>';
+    } else {
+      box.innerHTML = `${where}
+        <div class="ol-opts">
+          <div class="ol-opt"><b>Quick match</b><p>Battle the next player who's looking.</p><button type="button" class="big-btn ol-go" id="olQuick"><span>Find a battle</span></button></div>
+          <div class="ol-opt"><b>Friendly battle</b><p>Make a room and share its code, or type a friend's code.</p>
+            <button type="button" class="pill gold" id="olCreate">Make a room</button>
+            <form class="ol-join" id="olJoin"><input id="olCode" maxlength="5" placeholder="Code" autocomplete="off" spellcheck="false" aria-label="Room code" value="${esc(onlineJoinCode)}"><button type="submit" class="pill">Join</button></form>
+          </div>
+        </div>
+        <p class="dim ol-note">Online battles use your deck, card levels, King Tower and evolutions. No trophies are won or lost.</p>`;
+      $('#olQuick').addEventListener('click', () => KCNet.quickMatch(matched));
+      $('#olCreate').addEventListener('click', () => KCNet.createRoom(matched));
+      $('#olCode').addEventListener('input', e => { onlineJoinCode = e.target.value; });
+      $('#olJoin').addEventListener('submit', async e => {
+        e.preventDefault();
+        const r = await KCNet.joinRoom($('#olCode').value, matched);
+        if (r.error === 'code') { KCSound.play('error'); toast('Room codes are five letters and numbers.'); }
+      });
+    }
+    const c = $('#olCancel');
+    if (c) c.addEventListener('click', () => KCNet.cancel());
+  }
+
   /* ---------- the Diamond Pass ---------- */
   // A pass reward as a small picture and a label.
   function rewardArt(R) {
@@ -1184,6 +1241,8 @@ const KCMenu = (() => {
     $('#gemVal').textContent = fmt(p.diamonds);
     $('#shopTag').hidden = !G.freeChestReady();
     passPlaque();
+    $('#onlineBtn').classList.toggle('locked', !G.onlineOpen());
+    $('#onlineBtn').hidden = !G.roadOpen();
     if (subNow === 'magic') renderMagic(); else $('#magicTag').textContent = String(G.MAGIC_ORDER.reduce((a, id) => a + (id.startsWith('wild_') ? 0 : G.magicCount(id)), 0) || '');
     $('#soundBtn').setAttribute('aria-label', KCSound.on ? 'Sound on' : 'Sound off');
     $('#soundBtn').classList.toggle('off', !KCSound.on);
@@ -1281,6 +1340,10 @@ const KCMenu = (() => {
     $('#mUpgrade').addEventListener('click', upgradeCard);
     $('#passPlaque').addEventListener('click', () => { if (G.passOpen()) openPass(); else { KCSound.play('error'); toast('The Diamond Pass opens in Sunstone Arena (600 trophies).'); } });
     $('#passX').addEventListener('click', closePass);
+    $('#onlineBtn').addEventListener('click', openOnline);
+    $('#onlineX').addEventListener('click', closeOnline);
+    $('#onlineModal').addEventListener('click', e => { if (e.target.id === 'onlineModal') closeOnline(); });
+    KCNet.onChange(renderOnline);
     $('#kingBtn').addEventListener('click', openKing);
     $('#kingX').addEventListener('click', closeKing);
     $('#kingUp').addEventListener('click', upgradeKingClick);
@@ -1299,8 +1362,8 @@ const KCMenu = (() => {
         else if (e.key === ' ' || e.key === 'Enter') { chestTap(); e.preventDefault(); }
         return;
       }
-      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); return; }
-      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); if (!$('#onlineModal').hidden) closeOnline(); return; }
+      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#onlineModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
       const n = '12345'.indexOf(e.key);
       if (n >= 0) { tab(TABS[n]); e.preventDefault(); }
       else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(nextFoe()); e.preventDefault(); }

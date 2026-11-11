@@ -249,7 +249,14 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
     P6.trophies = 900; P6.best = 900;
     for (const at of [630, 710, 790, 870]) { const r = G.claim(at); assert(r && r.cards[0].isNew, `card at ${at}`); }
     for (const id of ['sandstorm', 'ramcart', 'mole', 'camel']) assert(P6.found.includes(id), id);
-    assert.strictEqual(G.roadState(G.ROAD.find(m => m.at === 900)), 'soon', 'Arena 4 is coming soon');
+    assert.strictEqual(G.roadState(G.ROAD.find(m => m.at === 900)), 'ready', 'Arena 4, Stormspire, opens at 900');
+    assert(G.onlineOpen(), 'online battles open at Stormspire');
+    P6.trophies = 1200; P6.best = 1200;
+    for (const at of [930, 1010, 1090, 1170]) { const r = G.claim(at); assert(r && r.cards[0].isNew, `card at ${at}`); }
+    for (const id of ['bees', 'owl', 'thundercloud', 'griffin']) assert(P6.found.includes(id), id);
+    assert.strictEqual(G.roadState(G.ROAD.find(m => m.at === 1200)), 'soon', 'Arena 5 is coming soon');
+    let sawStorm = 0; for (let i = 0; i < 40; i++) if (G.trophyFoe(KCSim.mulberry(i + 77)).deck.some(id => ['bees', 'owl', 'thundercloud', 'griffin'].includes(id))) sawStorm++;
+    assert(sawStorm > 20, 'opponents at 1,200 trophies play Stormspire cards');
     assert(!KC_ALL_CARDS.includes('ramsoldier'), 'the cart soldiers are not a card');
     let sawSun = 0; for (let i = 0; i < 40; i++) if (G.trophyFoe(KCSim.mulberry(i + 31)).deck.some(id => ['sandstorm', 'ramcart', 'mole', 'camel'].includes(id))) sawSun++;
     assert(sawSun > 20, 'opponents at 900 trophies play Sunstone cards');

@@ -19,16 +19,18 @@ const KCBot = (() => {
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
   const ROLE = {
-    tank: ['cannon', 'footmen', 'gorilla', 'skeletons', 'wolves', 'gladiator', 'flail', 'archers', 'hawks'],
-    air: ['archers', 'snowman', 'hawks', 'spears', 'fireball'],
-    swarm: ['flail', 'snowman', 'pots', 'archers', 'gladiator', 'spears', 'fireball', 'hawks'],
-    ranged: ['gladiator', 'skeletons', 'wolves', 'hawks', 'flail', 'footmen', 'gorilla', 'rhino'],
-    melee: ['skeletons', 'pots', 'wolves', 'gladiator', 'flail', 'cannon', 'hawks', 'footmen', 'gorilla', 'archers'],
+    tank: ['griffin', 'cannon', 'footmen', 'gorilla', 'bees', 'skeletons', 'wolves', 'gladiator', 'flail', 'archers', 'hawks'],
+    air: ['archers', 'owl', 'bees', 'snowman', 'hawks', 'griffin', 'spears', 'fireball'],
+    // a building-chaser in the air (the Thunder Cloud): only air-hitters stop it
+    airwin: ['griffin', 'archers', 'owl', 'bees', 'hawks', 'snowman'],
+    swarm: ['flail', 'snowman', 'pots', 'archers', 'gladiator', 'spears', 'fireball', 'hawks', 'owl'],
+    ranged: ['gladiator', 'bees', 'skeletons', 'wolves', 'hawks', 'flail', 'footmen', 'gorilla', 'rhino'],
+    melee: ['skeletons', 'pots', 'bees', 'wolves', 'gladiator', 'flail', 'cannon', 'hawks', 'footmen', 'gorilla', 'owl', 'archers'],
   };
-  const MELEE = { wolves: 1, gladiator: 1, gorilla: 1, rhino: 1, skeletons: 1, footmen: 1, flail: 1 };
+  const MELEE = { wolves: 1, gladiator: 1, gorilla: 1, rhino: 1, skeletons: 1, footmen: 1, flail: 1, bees: 1, griffin: 1 };
   // cards that go for towers: they start pushes, they don't defend
-  const WIN = ['rhino', 'ramcart', 'camel'];
-  const NO_DEFEND = { rhino: 1, ramcart: 1, camel: 1, mole: 1 };
+  const WIN = ['rhino', 'ramcart', 'camel', 'thundercloud'];
+  const NO_DEFEND = { rhino: 1, ramcart: 1, camel: 1, mole: 1, thundercloud: 1 };
 
   function create(team, opts) {
     opts = opts || {};
@@ -117,7 +119,7 @@ const KCBot = (() => {
       const guard = mine.filter(m => Math.hypot(m.x - cx, m.y - lead.y) < 5.5).reduce((a, m) => a + m.v, 0);
       if (guard < value * K.defend) {
         const cards = group.map(t => t.e.card);
-        const role = cards.some(c => WIN.includes(c)) ? 'tank'
+        const role = cards.includes('thundercloud') ? 'airwin' : cards.some(c => WIN.includes(c)) ? 'tank'
           : group.some(t => t.e.air) ? 'air'
           : cards.filter(c => c === 'wolves').length >= 3 ? 'swarm'
           : cards.some(c => c === 'archers' || c === 'snowman') ? 'ranged' : 'melee';
@@ -128,7 +130,7 @@ const KCBot = (() => {
           return { card: pick, x: lead.x < 9 ? 7.5 : 10.5, y: 22.5, quick: lead.y > 21 };
         }
         if (pick) {
-          const ahead = Math.max(17.5, lead.y + (MELEE[pick] ? 2.2 : pick === 'hawks' ? 1.5 : 5));
+          const ahead = Math.max(17.5, lead.y + (MELEE[pick] ? 2.2 : pick === 'hawks' || pick === 'owl' ? 2.5 : 5));
           const tx = MELEE[pick] ? lead.x : (lead.x + (lead.x < 9 ? 3.5 : 14.5)) / 2;
           return { card: pick, x: tx, y: Math.min(30.5, ahead), quick: lead.y > 22 };
         }
@@ -139,7 +141,7 @@ const KCBot = (() => {
     // 3. Back up a push that is already crossing.
     const push = mine.find(m => WIN.includes(m.e.card) && m.y < 19.5 && m.y > 11);
     if (push && E >= 4 && s.time - b.lastAttack > 2) {
-      const pick = ['snowman', 'pots', 'archers', 'hawks', 'flail', 'gladiator', 'wolves'].find(id => has(id) && afford(id));
+      const pick = ['snowman', 'owl', 'pots', 'archers', 'hawks', 'griffin', 'bees', 'flail', 'gladiator', 'wolves'].find(id => has(id) && afford(id));
       if (pick) return { card: pick, x: push.x, y: Math.max(17.5, push.y + 2.5), attack: true };
     }
 
@@ -154,9 +156,11 @@ const KCBot = (() => {
       if (has('rhino') && afford('rhino')) return { card: 'rhino', x: lx < 9 ? 5.5 : 12.5, y: 30.5, attack: true };
       // a Camel Jockey from the back, a Ram Cart right at the bridge for a fast hit
       if (has('camel') && afford('camel')) return { card: 'camel', x: lx < 9 ? 4.5 : 13.5, y: 29.5, attack: true };
+      // the Thunder Cloud drifts in from behind the King Tower's side, on the weak lane
+      if (has('thundercloud') && afford('thundercloud')) return { card: 'thundercloud', x: lx < 9 ? 3.5 : 14.5, y: 27.5, attack: true };
       if (has('ramcart') && afford('ramcart')) return { card: 'ramcart', x: lx, y: 18.5, attack: true };
       if (moleAt && has('mole') && afford('mole')) return moleAt;
-      const pick = ['gladiator', 'flail', 'hawks', 'archers', 'footmen', 'wolves', 'gorilla'].find(id => has(id) && afford(id));
+      const pick = ['gladiator', 'flail', 'hawks', 'owl', 'archers', 'footmen', 'wolves', 'gorilla'].find(id => has(id) && afford(id));
       if (pick) return { card: pick, x: lx, y: 18.5, attack: true };
     }
     return null;

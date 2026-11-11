@@ -11,7 +11,7 @@
   const G = {
     phase: 'home', s: null, bot: null, theme: 'training', art: KCArenas.get('training'), embers: [], acc: 0, last: 0, k: 20, dpr: 1,
     sel: -1, hover: null, drag: false, dragMoved: false, toggle: false,
-    fx: [], bg: null, zone: null, zoneKey: '', handKey: '', ui: {},
+    fx: [], bg: null, zone: null, zoneKey: '', handKey: '', ui: {}, beamStage: {}, online: null, sim: null,
     intro: 0, ended: 0, shake: 0, lastSec: -1, idleHint: false, trainer: null, res: null,
   };
   let cv, ctx;
@@ -38,6 +38,7 @@
     KCSound.unlock();
     if (typeof foe === 'string') foe = KC_TRAINER[foe];
     const T = G.trainer = foe || KCMenu.nextFoe();
+    G.online = null;
     const trophy = T.kind === 'trophy', arenaNow = KCProgress.arena();
     G.theme = trophy ? arenaNow.theme : 'training';
     G.art = KCArenas.get(G.theme);
@@ -51,12 +52,14 @@
       // tower levels: your King Tower's level; a trophy opponent's from its cards; trainers stay at 1
       levels: [KCProgress.kingInfo().level, trophy ? T.kingLevel || 1 : 1],
     });
+    G.sim = G.s;
     G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9) });
     const where = trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
     A.trainer($('#introFoe'), T.look);
-    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0 });
+    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {} });
+    $('#simWinBtn').hidden = false; $('#netWait').hidden = true;
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
     KCEmotes.reset();
@@ -118,7 +121,8 @@
   /* ---------- the hand ---------- */
   function renderHand() {
     const s = G.s, hand = s.hands[0], evoKey = hand.concat(s.queues[0][0]).map(id => { const e = S.evoCharge(s, 0, id); return e ? e.n : ''; }).join();
-    const key = hand.join() + '|' + s.queues[0][0] + '|' + evoKey;
+    const pend = G.online ? G.online.mine.filter(q => !q.applied).map(q => q.card) : [];
+    const key = hand.join() + '|' + s.queues[0][0] + '|' + evoKey + '|' + pend.join();
     if (key === G.handKey) return;
     const prev = G.handKey ? G.handKey.split('|')[0].split(',') : [];
     G.handKey = key;
@@ -133,6 +137,7 @@
       // an evolution's charge: a pip for each play counted, and the evolved card when the next is it
       const ev = S.evoCharge(s, 0, id);
       if (ev && ev.ready) b.classList.add('evo-ready');
+      if (pend.includes(id)) b.classList.add('pending');
       const pips = ev ? `<span class="evo-pips">${Array.from({ length: ev.cycle - 1 }, (_, j) => `<i class="${j < ev.n ? 'on' : ''}"></i>`).join('')}</span>` : '';
       b.innerHTML = `<img src="${ev && ev.ready ? KCMenu.cardImg(id, true) : cardImg(id)}" alt="${c.name}${ev && ev.ready ? ' (evolved)' : ''}"><span class="ready"></span><span class="key">${i + 1}</span><span class="cost">${c.cost}</span>${pips}`;
       if (ev && ev.ready) b.title = `${c.name}: evolved (${c.cost} energy)`;
@@ -184,6 +189,7 @@
     const s = G.s;
     if (!s || G.sel < 0 || G.phase !== 'play') return;
     const slot = G.sel, id = s.hands[0][slot], p = placeAt(id, w);
+    if (G.online) { onlinePlay(slot, id, p); return; }
     const r = S.play(s, 0, slot, p.x, p.y);
     if (r === 'ok') { select(-1); G.idleHint = true; return; }
     KCSound.play('error');
@@ -254,13 +260,17 @@
   }
 
   /* ---------- sim events become sound and effects ---------- */
-  const SHOOT = { arrow: 'arrow', cannon: 'cannon', snowball: 'snow', bigsnow: 'snow', pot: 'potThrow' };
+  const SHOOT = { arrow: 'arrow', cannon: 'cannon', snowball: 'snow', bigsnow: 'snow', pot: 'potThrow', quill: 'quill' };
+  // how high each flyer floats (in tiles)
+  const LIFT = { thundercloud: 1.7, griffin: 1.3, owl: 1.25 };
+  const liftOf = e => (e.air ? LIFT[e.card] || 1.1 : 0);
   function handleEvents() {
     const s = G.s;
     for (const e of s.events) {
       switch (e.type) {
         case 'deploy':
           KCSound.play('deploy');
+          if (e.card === 'bees') KCSound.play('buzz');
           ring(e.x, e.y, e.team, 1.4);
           dust(e.x, e.y, 8);
           if (e.evo) {
@@ -286,6 +296,20 @@
         case 'breakup': puff(e.x, e.y, 8, '#c9a070', 0.7); break;
         case 'lasso': KCSound.play('lasso'); break;
         case 'snare': KCSound.play('snare'); G.fx.push({ kind: 'ring', x: e.x, y: e.y, r: 0.7, team: 1 - e.team, life: 0.35, max: 0.35 }); break;
+        case 'strike': {
+          // a lightning bolt from the cloud down onto the building
+          KCSound.play('thunder'); G.shake = Math.max(G.shake, 0.25);
+          G.fx.push({ kind: 'bolt', x: e.x, y: e.y, fx: e.fx, fy: e.fy - LIFT.thundercloud + 0.3, seed: Math.random() * 1000, life: 0.35, max: 0.35 });
+          G.fx.push({ kind: 'zap', x: e.x, y: e.y, r: 1.6, life: 0.4, max: 0.4 });
+          sparks(e.x, e.y, 16, '#fff6a0', 4);
+          break;
+        }
+        case 'thunderclap':
+          KCSound.play('thunderclap'); G.shake = Math.max(G.shake, 0.4);
+          G.fx.push({ kind: 'zap', x: e.x, y: e.y, r: e.r * 1.6, life: 0.6, max: 0.6 });
+          for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; G.fx.push({ kind: 'bolt', x: e.x + Math.cos(a) * e.r, y: e.y + Math.sin(a) * e.r * 0.6, fx: e.x, fy: e.y - 1.4, seed: Math.random() * 1000, life: 0.4, max: 0.4 }); }
+          puff(e.x, e.y - 1.2, 14, '#7a8296', 1.6);
+          break;
         case 'charge':
           KCSound.play('smash'); G.shake = Math.max(G.shake, 0.22);
           sparks(e.x, e.y, 10, '#fff3c4', 4); puff(e.x, e.y, 8, '#e0c08a', 0.8);
@@ -345,7 +369,7 @@
       if (e.sub !== 'king') speak('youTower');
     } else {
       G.fx.push({ kind: 'crown', x: e.x, y: e.y, life: 1.6, max: 1.6, team: 1 });
-      if (e.sub !== 'king') { speak('myTower'); KCEmotes.foeTookTower(); }
+      if (e.sub !== 'king') { speak('myTower'); if (!G.online) KCEmotes.foeTookTower(); }
     }
   }
   function ring(x, y, team, r) { G.fx.push({ kind: 'ring', x, y, r, team, life: 0.45, max: 0.45 }); }
@@ -368,16 +392,193 @@
     G.shake = Math.max(0, G.shake - dt);
   }
 
+
+  /* ---------- online battles ----------
+     Both players run the same simulation from the same seed and swap only their card plays (lockstep).
+     The host is team 0 and sees the battle as it is; the guest is team 1 and sees a mirror image of it
+     (top and bottom swapped, teams swapped), so each player's side is at the bottom. A play made at
+     tick t happens at tick t + DELAY on both screens; a player can only run tick t once it knows the
+     other has sent every play up to t, so the faster screen waits for the slower one. Every message
+     carries all plays the other side hasn't confirmed, so a dropped message loses nothing. Every two
+     seconds both compare a checksum of the battle; if they ever differ the battle stops as out of
+     sync. Nothing here is recorded: online battles give no trophies, chests or experience. */
+  const DELAY = 9;
+  const FLIPY = ['y', 'py', 'ty', 'sy', 'cy', 'fy'];
+  function flipObj(o) {
+    const c = Object.assign({}, o);
+    for (const key of FLIPY) if (typeof c[key] === 'number') c[key] = S.H - c[key];
+    if (typeof c.team === 'number') c.team = 1 - c.team;
+    if (typeof c.aimY === 'number') c.aimY = -c.aimY;
+    if (c.tunnel) c.tunnel = { tx: c.tunnel.tx, ty: S.H - c.tunnel.ty };
+    if (c.type === 'end' && c.winner >= 0) c.winner = 1 - c.winner;
+    return c;
+  }
+  // The battle as the guest sees it.
+  function mirrorState(s) {
+    const sw = a => [a[1], a[0]];
+    return Object.assign({}, s, {
+      ents: s.ents.map(flipObj), projs: s.projs.map(flipObj), zones: s.zones.map(flipObj), events: s.events.map(flipObj),
+      energy: sw(s.energy), crowns: sw(s.crowns), hands: sw(s.hands), queues: sw(s.queues), levels: sw(s.levels), cardLevels: sw(s.cardLevels),
+      towerDamage: sw(s.towerDamage), evos: sw(s.evos), evoPlays: sw(s.evoPlays), played: sw(s.played),
+      result: s.result && Object.assign({}, s.result, { winner: s.result.winner >= 0 ? 1 - s.result.winner : s.result.winner, crowns: sw(s.result.crowns) }),
+    });
+  }
+  const viewOf = s => (G.online && G.online.team === 1 ? mirrorState(s) : s);
+  function hashState(s) {
+    let h = s.tick | 0;
+    for (const e of s.ents) h = (Math.imul(h, 31) + e.id * 7 + Math.round(e.hp * 8) * 13 + Math.round(e.x * 512) * 17 + Math.round(e.y * 512) * 19 + (e.dead ? 1 : 0)) | 0;
+    return (Math.imul(h, 31) + Math.round(s.energy[0] * 64) * 3 + Math.round(s.energy[1] * 64) * 5) | 0;
+  }
+  function startOnline(m) {
+    KCSound.unlock();
+    const st = m.start, team = m.role === 'host' ? 0 : 1, foe = team === 0 ? st.guest : st.host;
+    const lv = x => Object.fromEntries(x.deck.map((id, i) => [id, x.levels[i]]));
+    let hseed = 7; for (const ch of foe.name) hseed = (Math.imul(hseed, 31) + ch.charCodeAt(0)) >>> 0;
+    const T = G.trainer = { id: 'online', kind: 'online', name: foe.name, short: foe.name, level: foe.king, tier: `${foe.trophies} trophies`,
+      look: KCProgress.trophyFoe(KCSim.mulberry(hseed)).look, lines: null, deck: foe.deck };
+    G.theme = st.theme;
+    G.art = KCArenas.get(G.theme);
+    B = G.art.margin;
+    KCScenery.setArena(G.theme);
+    G.sim = S.create({ seed: st.seed, towerDamage: [1, 1], decks: [st.host.deck, st.guest.deck], cardLevels: [lv(st.host), lv(st.guest)],
+      levels: [st.host.king, st.guest.king], evos: [st.host.evos, st.guest.evos] });
+    G.bot = null;
+    const O = G.online = { room: m.room, team, peer: m.peer, foeDeck: foe.deck, mine: [], theirs: new Map(), mySeq: 0, myAck: 0, theirAck: 0,
+      theirUpTo: -1, lastHeard: performance.now(), sentAt: 0, hashes: {}, theirHashes: {}, lastHash: null, stalledAt: 0, stalled: false, bye: false, leftAt: 0,
+      emotesIn: [], stopStart: m.stopStart, unsub: [], done: false };
+    G.s = viewOf(G.sim);
+    O.unsub.push(m.room.on('mp.step', msg => { if (msg.peer === O.peer && G.online === O) onStep(O, msg.data); }));
+    O.unsub.push(m.room.on('mp.emote', msg => {
+      if (msg.peer !== O.peer || G.online !== O) return;
+      const now = performance.now(), id = msg.data && msg.data.id;
+      O.emotesIn = O.emotesIn.filter(t => now - t < 3000);
+      if (O.emotesIn.length >= 3 || typeof id !== 'string') return;
+      O.emotesIn.push(now);
+      KCEmotes.send(1, id);
+    }));
+    O.unsub.push(m.room.on('mp.bye', msg => { if (msg.peer === O.peer) O.bye = true; }));
+    O.unsub.push(m.room.onPeers(ch => { if ((ch.left || []).some(p => p.peer === O.peer)) O.leftAt = O.leftAt || performance.now(); if ((ch.joined || []).some(p => p.peer === O.peer)) O.leftAt = 0; }));
+    for (const [sel, text] of [['#foeName', T.name], ['#foeTier', `Online · ${T.tier}`], ['#scoreFoe', T.name], ['#introFoeName', T.name],
+      ['#introFoeTier', `Online battle · King Tower ${foe.king}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
+    A.trainer($('#introFoe'), T.look);
+    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {} });
+    $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true; $('#simWinBtn').hidden = true; $('#netWait').hidden = true;
+    KCScenery.reset();
+    KCEmotes.reset();
+    show('battle');
+    layout();
+    G.phase = 'intro'; G.intro = 1.7;
+    $('#intro').hidden = false;
+    sendStep(O, true);
+  }
+  function onStep(O, d) {
+    if (!d || typeof d !== 'object') return;
+    O.lastHeard = performance.now(); O.leftAt = 0;
+    if (O.stopStart) { O.stopStart(); O.stopStart = null; }
+    if (Array.isArray(d.p)) for (const q of d.p) {
+      if (!Array.isArray(q) || q.length !== 5) continue;
+      const [seq, at, card, x, y] = q;
+      if (!Number.isInteger(seq) || seq < 1 || !Number.isInteger(at) || at < 0 || !O.foeDeck.includes(card)) continue;
+      if (typeof x !== 'number' || typeof y !== 'number' || !(x >= 0 && x <= S.W && y >= 0 && y <= S.H)) continue;
+      if (O.theirs.has(seq)) continue;
+      if (at < G.sim.tick) { desync(O); return; }
+      O.theirs.set(seq, { seq, at, card, x, y, team: 1 - O.team, applied: false });
+    }
+    while (O.theirs.has(O.myAck + 1)) O.myAck++;
+    if (Number.isInteger(d.u)) O.theirUpTo = Math.max(O.theirUpTo, d.u);
+    if (Number.isInteger(d.a)) O.theirAck = Math.max(O.theirAck, d.a);
+    if (Array.isArray(d.h) && Number.isInteger(d.h[0]) && Number.isInteger(d.h[1])) { O.theirHashes[d.h[0]] = d.h[1]; checkHash(O, d.h[0]); }
+  }
+  function sendStep(O, now) {
+    if (!O || O.done) return;
+    const plays = O.mine.filter(p => p.seq > O.theirAck).map(p => [p.seq, p.at, p.card, p.x, p.y]);
+    O.sentAt = performance.now();
+    O.room.emit('mp.step', { u: G.sim.tick + DELAY - 1, p: plays, a: O.myAck, h: O.lastHash }).catch(() => {});
+  }
+  function checkHash(O, tick) {
+    const a = O.hashes[tick], b = O.theirHashes[tick];
+    if (a !== undefined && b !== undefined && a !== b) desync(O);
+  }
+  function desync(O) {
+    if (G.sim.result) return;
+    S.forceEnd(G.sim, -1, 'desync');
+    G.s = viewOf(G.sim); handleEvents(); G.sim.events.length = 0;
+  }
+  // The plays due at tick t, both players' (the host's first), in the order they were made.
+  function applyPlays(O, t) {
+    const due = O.mine.filter(p => !p.applied && p.at === t).concat([...O.theirs.values()].filter(p => !p.applied && p.at === t))
+      .sort((a, b) => a.team - b.team || a.seq - b.seq);
+    for (const p of due) {
+      p.applied = true;
+      const slot = G.sim.hands[p.team].indexOf(p.card);
+      const r = slot >= 0 ? S.play(G.sim, p.team, slot, p.x, p.y) : 'card';
+      if (p.team === O.team && r !== 'ok') { KCSound.play('error'); toast(r === 'energy' ? `Not enough energy for ${KC_CARDS[p.card].name}` : `${KC_CARDS[p.card].name} couldn't be played there`); }
+    }
+  }
+  function onlineTick(dt, now) {
+    const O = G.online;
+    G.acc = Math.min(G.acc + dt, S.DT * 8);
+    let n = 0;
+    while (G.acc >= S.DT && n < 8 && G.phase === 'play') {
+      const t = G.sim.tick;
+      if (O.theirUpTo < t) { if (!O.stalled) { O.stalled = true; O.stalledAt = now; } break; }
+      O.stalled = false;
+      applyPlays(O, t);
+      S.step(G.sim);
+      if (G.sim.tick % 60 === 0) { const h = hashState(G.sim); O.hashes[G.sim.tick] = h; O.lastHash = [G.sim.tick, h]; checkHash(O, G.sim.tick); }
+      G.s = viewOf(G.sim);
+      handleEvents(); G.sim.events.length = 0;
+      G.acc -= S.DT; n++;
+    }
+    if (now - O.sentAt > (O.stalled ? 120 : 66)) sendStep(O);
+    $('#netWait').hidden = !(O.stalled && now - O.stalledAt > 600);
+    // the opponent left: once their last plays are used up, the battle ends as a win
+    const gone = O.bye || (O.leftAt && now - O.leftAt > 3000) || now - O.lastHeard > 12000;
+    if (gone && O.stalled && !G.sim.result) {
+      S.forceEnd(G.sim, O.team, 'left');
+      G.s = viewOf(G.sim); handleEvents(); G.sim.events.length = 0;
+    }
+  }
+  function onlinePlay(slot, id, p) {
+    const O = G.online, c = KC_CARDS[id];
+    if (O.mine.some(q => !q.applied && q.card === id)) { toast(`${c.name} is on its way`); return; }
+    const pending = O.mine.filter(q => !q.applied).reduce((a, q) => a + KC_CARDS[q.card].cost, 0);
+    if (G.s.energy[0] - pending < c.cost) { KCSound.play('error'); toast(`Not enough energy for ${c.name}`); return; }
+    if (!S.canDeploy(G.s, 0, id, p.x, p.y)) { KCSound.play('error'); toast('Place troops on your side of the river'); return; }
+    O.mine.push({ seq: ++O.mySeq, at: G.sim.tick + DELAY, card: id, x: p.x, y: O.team === 0 ? p.y : S.H - p.y, team: O.team, vx: p.x, vy: p.y, applied: false });
+    select(-1); G.idleHint = true; G.handKey = '';
+    KCSound.play('select');
+    sendStep(O);
+  }
+  // Where my plays are about to land: a ring that fills as the moment comes.
+  function drawPending(c, t) {
+    const O = G.online;
+    if (!O) return;
+    for (const q of O.mine) {
+      if (q.applied) continue;
+      const left = Math.max(0, (q.at - G.sim.tick) / DELAY), x = SX(q.vx), y = SY(q.vy), r = G.k * 0.8;
+      A.ell(c, x, y, r, r * 0.5); c.fillStyle = 'rgba(120,180,255,0.25)'; c.fill();
+      c.beginPath(); c.ellipse(x, y, r, r * 0.5, 0, -Math.PI / 2, -Math.PI / 2 + (1 - left) * Math.PI * 2); c.strokeStyle = '#8cc4ff'; c.lineWidth = G.k * 0.12; c.stroke();
+    }
+  }
+  function endOnline() {
+    const O = G.online;
+    if (!O || O.done) return;
+    // keep telling the other side where we are for a moment, so they finish too, then leave
+    setTimeout(() => { O.done = true; for (const u of O.unsub) try { u(); } catch (e) { /* gone */ } KCNet.cancel(); }, 4000);
+  }
+
   /* ---------- the end ---------- */
   function endBattle(e) {
     G.phase = 'end';
     G.ended = 1.8;
     if (e.winner >= 0) KCScenery.celebrate(e.winner);
     select(-1);
-    G.res = KCMenu.recordResult(G.trainer, e.winner, G.s.crowns[0]);
+    G.res = G.online ? { kind: 'online' } : KCMenu.recordResult(G.trainer, e.winner, G.s.crowns[0]);
+    if (G.online) endOnline();
     $('#countdown').hidden = true;
     if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); }
-    else if (e.winner === 1) { banner('Defeat'); setTimeout(() => KCSound.play('lose'), 300); KCEmotes.foeWon(); }
+    else if (e.winner === 1) { banner('Defeat'); setTimeout(() => KCSound.play('lose'), 300); if (!G.online) KCEmotes.foeWon(); }
     else banner('Draw');
   }
   function showResult() {
@@ -407,9 +608,11 @@
     $('#nextBtn').hidden = !res.unlockedNext;
     $('#againBtn').className = res.unlockedNext ? 'pill' : 'big-btn';
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
-    const why = { king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).' }[r.reason];
+    if (res.kind === 'online') { un.hidden = false; un.textContent = 'Online battle · no trophies won or lost'; }
+    $('#againBtn').hidden = res.kind === 'online';
+    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).' }[r.reason];
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
-    $('#resSmall').textContent = `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
+    $('#resSmall').textContent = res.kind === 'online' ? `${why} ${m}:${sec} played, ${s.played[0]} cards from you.` : `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
     $('#result').hidden = false;
     setTimeout(() => (res.unlockedNext ? $('#nextBtn') : $('#againBtn')).focus(), 50);
   }
@@ -442,6 +645,7 @@
     for (const d of air) drawEnt(c, d, t);
     drawFx(c, t);
     for (const d of ground.concat(air)) bars(c, d);
+    drawPending(c, t);
     if (selId && G.hover) ghost(c, selId, t);
   }
   // Cinder Keep: the lava breathes, heat shimmers above it, embers rise off it and the corner braziers
@@ -593,14 +797,23 @@
       c.save(); c.translate(x, y);
       if (e.deploy > 0) { const sc = Math.max(0.3, 1 - Math.max(0, e.deploy - 0.6) * 2); c.globalAlpha = 0.7; c.scale(sc, sc); }
       if (e.flash > 0) c.filter = 'brightness(1.6)';
-      A.cannon(c, k, { team: e.team, angle: e.angle, atk: Math.max(0, e.atk / 0.25) });
+      A.cannon(c, k, { team: e.team, angle: Math.atan2(e.aimY, e.aimX), atk: Math.max(0, e.atk / 0.25) });
       c.restore();
       return;
     }
     if (e.tunnel) { tunnel(c, e, x, y, t); return; }
     if (e.card === 'mole' && e.deploy > 0) { surfacing(c, e, x, y, t); return; }
-    const lift = e.air ? k * 1.1 : 0;
+    const lift = liftOf(e) * k;
     if (!e.air) shadow(c, x, y, e.radius * k * 1.05);
+    // the Griffin's beam: a crackling line of storm light to its target, thicker as it powers up
+    if (e.beam && e.beamOn) {
+      const tg = G.s.ents.find(u => u.id === e.beamOn);
+      if (tg && !tg.dead) {
+        const stage = Math.min(e.beam.length - 1, Math.floor(e.beamTime / e.beamStage));
+        if (stage !== G.beamStage[e.id]) { G.beamStage[e.id] = stage; if (stage) KCSound.play('beamUp'); }
+        beamTo(c, x, y - lift + k * 0.2, SX(tg.x), SY(tg.y) - liftOf(tg) * k - k * 0.4, stage, t, e.team);
+      }
+    } else if (e.beam) G.beamStage[e.id] = -1;
     A.ell(c, x, y, e.radius * k * 1.0, e.radius * k * 0.42);
     c.strokeStyle = e.team === 0 ? 'rgba(80,160,255,0.85)' : 'rgba(255,90,100,0.85)'; c.lineWidth = k * 0.07; c.stroke();
     c.save();
@@ -613,6 +826,7 @@
     if (e.ram) o.power = Math.max(0, Math.min(1, (e.speed - e.baseSpeed) / (e.maxSpeed - e.baseSpeed)));
     if (e.rider) o.ratk = Math.max(0, e.rider.atk / 0.4);
     if (e.chargeHit) o.charged = e.run >= e.chargeHit;
+    if (e.beam) o.beam = e.beamOn ? 1 + Math.min(2, Math.floor(e.beamTime / e.beamStage)) : 0;
     A.troop(c, e.card, k, o);
     c.restore();
     // dust behind a rolling cart and a galloping camel
@@ -638,6 +852,21 @@
       c.beginPath(); c.moveTo(x, cy); c.arc(x, cy, r * 0.8, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); c.closePath();
       c.fillStyle = e.team === 0 ? '#8cc4ff' : '#ff9ea4'; c.fill();
     }
+  }
+  // A storm beam from (x0, y0) to (x1, y1): jagged, flickering, brighter and thicker each stage.
+  function beamTo(c, x0, y0, x1, y1, stage, t, team) {
+    const k = G.k, n = 8, dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1, nx = -dy / len, ny = dx / len;
+    const pts = [[x0, y0]];
+    for (let i = 1; i < n; i++) { const j = Math.sin(t * 40 + i * 2.3) * k * (0.1 + stage * 0.04); pts.push([x0 + dx * i / n + nx * j, y0 + dy * i / n + ny * j]); }
+    pts.push([x1, y1]);
+    const path = () => { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (const [px, py] of pts.slice(1)) c.lineTo(px, py); };
+    c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+    c.globalCompositeOperation = 'lighter';
+    path(); c.strokeStyle = team === 0 ? 'rgba(90,170,255,0.45)' : 'rgba(255,110,140,0.45)'; c.lineWidth = k * (0.32 + stage * 0.18); c.stroke();
+    path(); c.strokeStyle = 'rgba(170,240,255,0.95)'; c.lineWidth = k * (0.1 + stage * 0.06); c.stroke();
+    path(); c.strokeStyle = '#ffffff'; c.lineWidth = Math.max(1, k * 0.04); c.stroke();
+    A.circ(c, x1, y1, k * (0.25 + stage * 0.12)); c.fillStyle = 'rgba(200,245,255,0.7)'; c.fill();
+    c.restore();
   }
   // The Mole underground: a mound of earth moving along, leaving a trail of dirt.
   function tunnel(c, e, x, y, t) {
@@ -685,7 +914,7 @@
       return;
     }
     if (e.hp >= e.maxHp || e.deploy > 0) return;
-    const lift = e.air ? k * 1.1 : 0, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: e.evo ? 2.35 : 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75, skeletons: 1.2, footmen: 1.6, flail: 1.95, pots: 1.6, ramcart: 1.95, ramsoldier: 1.45, mole: 1.45, camel: 2.45 }[e.card] || 1.4;
+    const lift = liftOf(e) * k, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: e.evo ? 2.35 : 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75, skeletons: 1.2, footmen: 1.6, flail: 1.95, pots: 1.6, ramcart: 1.95, ramsoldier: 1.45, mole: 1.45, camel: 2.45, bees: 0.55, owl: 1.15, thundercloud: 0.85, griffin: 1.2 }[e.card] || 1.4;
     const w = Math.max(0.8, e.radius * 1.9) * k, h = Math.max(5, k * 0.2), by = y - lift - top * k, bx = x - w / 2;
     A.rr(c, bx, by, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
     A.rr(c, bx + 1, by + 1, Math.max(0, (w - 2) * e.hp / e.maxHp), h - 2, (h - 2) / 2); c.fillStyle = blue ? '#5aa9ff' : '#ff5f69'; c.fill();
@@ -794,6 +1023,13 @@
       c.restore();
     } else if (p.kind === 'cannon') {
       A.circ(c, x, y, k * 0.2); A.paint(c, '#2a2c35', k * 0.05);
+    } else if (p.kind === 'quill') {
+      // a steel-tipped quill from the Owl
+      const ang = Math.atan2((p.ty - p.sy) * k, (p.tx - p.sx) * k);
+      c.save(); c.translate(x, y); c.rotate(ang);
+      A.poly(c, [-k * 0.4, 0, -k * 0.15, -k * 0.1, k * 0.2, -k * 0.03, k * 0.2, k * 0.03, -k * 0.15, k * 0.1]); A.paint(c, '#a87a4a', Math.max(1, k * 0.04));
+      A.poly(c, [k * 0.38, 0, k * 0.18, -k * 0.06, k * 0.18, k * 0.06]); c.fillStyle = '#dfe6ee'; c.fill();
+      c.restore();
     } else if (p.kind === 'lasso') {
       // the rope runs back to the rider; a loop flies at the end
       const from = G.s.ents.find(u => u.id === p.from);
@@ -839,6 +1075,24 @@
         A.circ(c, SX(f.x), SY(f.y) - k * 0.4, f.r * k * 0.5 * a); c.fillStyle = 'rgba(255,240,180,0.8)'; c.fill();
       } else if (f.kind === 'rock') {
         c.globalAlpha = Math.min(1, a * 2); A.circ(c, SX(f.x), SY(f.y) - f.z * k * 0.3, f.r * k); A.paint(c, f.col, k * 0.04);
+      } else if (f.kind === 'bolt') {
+        // a jagged lightning bolt, fading
+        const x0 = SX(f.fx), y0 = SY(f.fy), x1 = SX(f.x), y1 = SY(f.y), n = 7;
+        const pts = [[x0, y0]];
+        for (let i = 1; i < n; i++) { const r = Math.sin(f.seed + i * 12.9898) * 43758.5453; const j = (r - Math.floor(r) - 0.5) * k * 0.9; pts.push([x0 + (x1 - x0) * i / n + j, y0 + (y1 - y0) * i / n]); }
+        pts.push([x1, y1]);
+        c.save(); c.globalAlpha = a; c.lineCap = 'round'; c.lineJoin = 'round'; c.globalCompositeOperation = 'lighter';
+        for (const [w, col] of [[k * 0.4, 'rgba(255,240,150,0.5)'], [k * 0.15, '#fff6c0'], [k * 0.05, '#ffffff']]) {
+          c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (const [px, py] of pts.slice(1)) c.lineTo(px, py); c.strokeStyle = col; c.lineWidth = w; c.stroke();
+        }
+        c.restore();
+      } else if (f.kind === 'zap') {
+        const p = 1 - a, x = SX(f.x), y = SY(f.y), r = f.r * k * (0.5 + p);
+        c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = a;
+        const g = c.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, 'rgba(255,255,220,0.9)'); g.addColorStop(0.5, 'rgba(255,230,120,0.4)'); g.addColorStop(1, 'rgba(200,220,255,0)');
+        c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2);
+        c.restore();
       } else if (f.kind === 'evo') {
         const p = 1 - a, x = SX(f.x), y = SY(f.y);
         c.globalAlpha = a; c.globalCompositeOperation = 'lighter';
@@ -890,9 +1144,9 @@
     A.rr(c, SX(p.x - 0.5), SY(p.y - 0.5), k, k, k * 0.15);
     c.fillStyle = ok ? 'rgba(255,255,255,0.35)' : 'rgba(229,65,75,0.5)'; c.fill();
     c.globalAlpha = ok ? 0.6 : 0.35;
-    const offs = card.count === 4 ? [[-0.45, -0.45], [0.45, -0.45], [-0.45, 0.45], [0.45, 0.45]] : card.count === 3 ? [[-0.55, 0.3], [0.55, 0.3], [0, -0.45]] : card.count === 2 ? [[-0.5, 0], [0.5, 0]] : [[0, 0]];
+    const offs = card.count === 5 ? [[0, -0.5], [-0.5, -0.1], [0.5, -0.1], [-0.3, 0.45], [0.3, 0.45]] : card.count === 4 ? [[-0.45, -0.45], [0.45, -0.45], [-0.45, 0.45], [0.45, 0.45]] : card.count === 3 ? [[-0.55, 0.3], [0.55, 0.3], [0, -0.45]] : card.count === 2 ? [[-0.5, 0], [0.5, 0]] : [[0, 0]];
     for (const [ox, oy] of offs) {
-      c.save(); c.translate(x + ox * k, y + oy * k - (card.air ? k * 1.1 : 0));
+      c.save(); c.translate(x + ox * k, y + oy * k - (card.air ? (LIFT[id] || 1.1) * k : 0));
       A.troop(c, id, k, { team: 0, t, walk: false, atk: 0, face: 1, id: 1, view: 'back' });
       c.restore();
     }
@@ -956,6 +1210,8 @@
     if (G.phase === 'intro') {
       G.intro -= dt;
       if (G.intro <= 0) begin();
+    } else if (G.phase === 'play' && G.online) {
+      onlineTick(dt, now);
     } else if (G.phase === 'play') {
       G.acc += dt;
       let n = 0;
@@ -967,17 +1223,18 @@
       }
       if (n === 6) G.acc = 0;
     } else if (G.phase === 'end') {
+      if (G.online && !G.online.done && now - G.online.sentAt > 150) sendStep(G.online);
       G.ended -= dt;
       if (G.ended <= 0 && $('#result').hidden) showResult();
     }
     updateFx(dt);
-    draw(G.phase === 'play' ? G.acc / S.DT : 1, now / 1000);
+    draw(G.phase === 'play' ? Math.min(1, G.acc / S.DT) : 1, now / 1000);
     ui();
   }
 
   function boot() {
     cv = $('#arena'); ctx = cv.getContext('2d');
-    KCMenu.init({ onBattle: startBattle });
+    KCMenu.init({ onBattle: startBattle, onOnline: startOnline });
     KCScenery.make($('#sceneL'), 'left');
     KCScenery.make($('#sceneR'), 'right');
     bindInput();
@@ -988,6 +1245,9 @@
       foeCanEmote: () => !$('#battle').hidden && $('#result').hidden && !!G.s,
       ended: () => G.phase === 'end',
       toast,
+      // online: emotes go to the other player, and nobody replies automatically
+      online: () => !!G.online,
+      onSend: id => { if (G.online && !G.online.done) G.online.room.emit('mp.emote', { id }).catch(() => {}); },
     });
     $('#againBtn').addEventListener('click', () => startBattle(G.trainer.kind === 'trophy' ? KCMenu.nextFoe('trophy') : G.trainer));
     $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext));
@@ -995,13 +1255,14 @@
     // TEMPORARY test button: ends the match as a win, with the same rewards as a real one.
     $('#simWinBtn').addEventListener('click', () => {
       if (G.phase !== 'play' || !G.s || G.s.result) return;
+      if (G.online) return;
       S.forceEnd(G.s, 0);
       handleEvents();
     });
     let rt = 0;
     window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (!$('#battle').hidden) layout(); }, 120); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!$('#battle').hidden) layout(); });
-    window.KingdomClash = { get state() { return G.s; }, G, startBattle };
+    window.KingdomClash = { get state() { return G.s; }, get sim() { return G.sim; }, G, startBattle, startOnline, mirrorState, hashState };
     requestAnimationFrame(frame);
   }
   if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(boot);

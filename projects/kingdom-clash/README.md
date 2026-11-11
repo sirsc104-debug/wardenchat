@@ -64,6 +64,34 @@ Its four cards come from the Trophy Road: **Sandstorm** at 630, **Ram Cart** at 
 
 Balance (`node tools/balance-test.js 120 <name>`; each new card takes a like-for-like slot in the starter deck, the same bot on both sides, sides swapped every match): Sandstorm 47%, Ram Cart 55%, Mole 57%, Camel Jockey 49% of decided matches. The bot plays all four: it casts Sandstorm on clumps, starts pushes with the Camel Jockey from the back and the Ram Cart at the bridge, and tunnels the Mole to just behind the weakest tower.
 
+## Arena 4: Stormspire
+
+Reached at **900 trophies**: a fortress on a mountain peak above the clouds. **Its art is placeholder for now** (`img/stormspire_badge.webp`, `img/stormspire_left.webp`, `img/stormspire_right.webp`, labelled "placeholder art", made in code); the battlefield is drawn in code from the `stormspire` palette. Swap in real art the same way as the other arenas (the `stormspire` entry in `js/arenas.js`, plus a `field` entry for a battlefield illustration). Arena 5 at 1,200 is marked *coming soon*. **Online battles open here.**
+
+Its four cards are all flyers, on the Trophy Road: **Bees** at 930, **Owl** at 1,010, **Thunder Cloud** at 1,090 and **Griffin** at 1,170 (700 coins at 970, a Platinum Chest at 1,050, 800 coins at 1,130). Opponents add them as their trophies pass those marks.
+
+| Card | Cost | Rarity | Role | What it does (level 1) |
+|---|---|---|---|---|
+| Bees | 2 | Common | like Bats | Five tiny flyers (50 HP, 40 damage every 0.75 s) that sting ground and air. Fast, cheap, fragile. Wings a blur. |
+| Owl | 4 | Rare | like the Flying Machine | One armored battle owl (640 HP) that flies slowly and fires steel-tipped quills (135 damage) from 6 tiles at ground and air. |
+| Thunder Cloud | 5 | Epic | like the Balloon | A slow storm cloud (1,050 HP) that only goes for buildings and calls down a lightning bolt on them (480 damage, splashing ground troops round it). When destroyed it bursts in a final thunderclap (150 damage to ground troops within 2.2 tiles). Glowing eyes, rain, flickering electricity. |
+| Griffin | 4 | Legendary | like the Inferno Dragon | A flying griffin (950 HP) that locks a lightning beam on one target, ground or air: 40 damage a second, then 120, then 360, stepping up every 2 seconds on the same target. The beam starts over on a new target, or when the Griffin is knocked back. |
+
+Balance (`node tools/balance-test.js 120 <name>`): Bees 56%, Owl 46%, Thunder Cloud 53%, Griffin 53%. The bot plays all four: Bees and the Griffin defend, the Owl backs up pushes, and the Thunder Cloud starts pushes from behind the King Tower; it answers a Thunder Cloud with air-hitters.
+
+## Online battles
+
+From Stormspire on, the **Online** button beside *Trainers* in the lobby opens online play:
+
+- **Quick match**: battle the next player who looks for one. The two who have been looking longest are paired.
+- **Friendly battle**: *Make a room* shows a five-letter code; a friend types it under *Join*.
+
+Online battles use each player's own deck, card levels, King Tower level and evolutions, in the host's arena. **No trophies, chests or experience are won or lost.** Emotes go to the other player (and there are no automatic replies). If the other player leaves, you win once their last plays are used up; if nothing is heard for 12 seconds, the same.
+
+**How it works** (`js/net.js`, and the online part of `js/game.js`): on claude.ai the page uses the artifact **room** capability, which reaches the other people who have the game open right now; nothing is stored. Both players run the same simulation from the same seed and send each other only their card plays (lockstep): a play made at tick *t* happens at tick *t* + 9 (0.3 s) on both screens, and a screen only runs a tick once it knows every play the other made for it, so the faster screen waits briefly (a *Waiting for your opponent…* note shows if it is longer than a moment). Each message repeats every play the other side hasn't confirmed, so a dropped message loses nothing. The host is the blue side of the simulation; the guest sees it mirrored, so both players have their own side at the bottom. The simulation uses only exact arithmetic (`+ − × ÷` and square roots, no `Math.pow`, `hypot` or trigonometry) so two different browsers compute exactly the same battle; every two seconds both screens compare a checksum, and if they ever differ the battle stops as *out of sync*. Everything a player sends (their setup and plays) is checked before use.
+
+**Who can play**: people the artifact is shared with who can **Contribute or Edit** (the room only lets those levels send moves; view-only people can't). Outside claude.ai (the standalone file) the same code falls back to a BroadcastChannel, which connects other tabs of the same browser only; that is how `tools` tests it.
+
 ## Evolutions
 
 Evolutions open in Sunstone Arena. An evolution is unlocked once, with **6 Evolution Shards** (Magic Items, or the Evolution part of the card's window) or from the Diamond Pass, and then works in every battle: **every third play of that card is the evolved one**. A card in your hand shows a violet pip for each play counted; when the next play will be evolved, the card turns into its violet evolved card and glows. Only the **Snowman's** is built (`KC_EVOS` in `js/cards.js`): its snowballs are **1.5x the size (splash radius) and 1.5x as fast, for the same damage**, and the evolved Snowman stands a little taller with an ice crown, frost shards and a violet glow. Past 700 trophies about half the opponents with a Snowman have its evolution too. Unlocking one plays its own scene: shards swirl into the card, it shakes and glows, then bursts into its evolved card. The evolution as specified is a small upgrade: in a direct test (the same Snowman against swarms) it killed exactly as many as the normal one, since it changes size and speed, not damage.
@@ -171,6 +199,7 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `js/trainers.js` | Owen, Romeo and Luc |
 | `js/arenas.js` | Arena art: each arena's centerpiece, scenery panels (with crowd rows and lights) and battlefield image with its tile mapping; loads each image once |
 | `js/progress.js` | Progress and its rules: trainers, trophies, bots, chests, road rewards, card levels, the deck |
+| `js/net.js` | Online battles: the connection (the room capability, or other tabs), quick match, room codes, checking what the other player sends |
 | `js/emotes.js` | Battle emotes: the panel, the King's faces, the bubbles, and when the opponent emotes |
 | `js/upgrades.js` | The full-screen scenes for upgrading a card and using a magic item on it |
 | `js/items.js` | Magic item art (SVG built from parts that fly together in a chest reveal) |
