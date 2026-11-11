@@ -61,6 +61,12 @@ const KCSound = (() => {
     },
     hammerForm: () => { tone(1320, 1240, 0.5, 'square', 0.05); tone(1980, 1900, 0.7, 'triangle', 0.09); tone(95, 45, 0.3, 'sine', 0.35); noise(0.14, 0.2, 2400, 'bandpass');
       [523, 784, 1047, 1568].forEach((f, i) => tone(f, 0, 0.5, 'triangle', 0.12, 0.12 + i * 0.07)); },
+    // a card growing (js/upgrades.js)
+    charge: () => { tone(160, 980, 1.1, 'sawtooth', 0.04); tone(240, 1470, 1.1, 'triangle', 0.05); noise(1.1, 0.05, 900, 'bandpass'); },
+    levelUp: () => { tone(70, 35, 0.5, 'sine', 0.4); noise(0.5, 0.2, 700); [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => tone(f, 0, i === 6 ? 0.8 : 0.25, 'triangle', 0.15, 0.05 + i * 0.065)); noise(0.9, 0.05, 6000, 'highpass', 0.3); },
+    anvil: () => { tone(1480, 1400, 0.45, 'square', 0.045); tone(2210, 2150, 0.6, 'triangle', 0.08); tone(110, 50, 0.22, 'sine', 0.35); noise(0.1, 0.22, 2600, 'bandpass'); },
+    bookOpen: () => { noise(0.25, 0.12, 1400, 'bandpass'); tone(330, 990, 0.4, 'sine', 0.06); [784, 988, 1319].forEach((f, i) => tone(f, 0, 0.3, 'triangle', 0.1, 0.12 + i * 0.06)); },
+    pageFlip: () => { noise(0.09, 0.08, 3400, 'highpass'); noise(0.06, 0.05, 1600, 'bandpass', 0.03); },
     buy: () => { tone(880, 1320, 0.1, 'triangle', 0.15); tone(1760, 0, 0.18, 'sine', 0.1, 0.09); },
     deploy: () => { tone(220, 90, 0.16, 'sine', 0.3); noise(0.12, 0.12, 600); },
     // Briar Hollow cards

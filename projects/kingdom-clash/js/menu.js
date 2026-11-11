@@ -662,12 +662,24 @@ const KCMenu = (() => {
     for (const b of $$('#magicPick .mp-card:not(.off)')) b.addEventListener('click', () => applyMagic(magicSel, b.dataset.card));
   }
   function applyMagic(item, id) {
-    const r = G.useMagic(item, id);
+    const before = G.upgradeInfo(id), r = G.useMagic(item, id);
     if (!r.ok) { toast('That item can\'t be used on that card right now.'); return; }
-    KCSound.play(G.MAGIC[item].kind === 'hammer' ? 'double' : 'revealRare');
-    toast(G.MAGIC[item].kind === 'hammer' ? `${KC_CARDS[id].name} upgraded to level ${r.level} with no coins!` : `${KC_CARDS[id].name}: +${fmt(r.gives)} ${r.gives === 1 ? 'copy' : 'copies'}`);
+    const M = G.MAGIC[item], after = G.upgradeInfo(id);
     refresh();
     if (!$('#cardModal').hidden && modalId === id) { modalId = null; openCard(id); }
+    growScene(M.kind === 'hammer' ? 'hammer' : M.kind === 'wild' ? 'wild' : 'book', id, before, after,
+      { item, itemSvg: itemSvg(item), title: M.name, gives: r.gives || 0, xp: M.kind === 'hammer' ? 4 * r.level : 0, levelUp: r.levelUp });
+  }
+  // The full-screen scene for a card growing (js/upgrades.js): a level-up, or copies from an item.
+  function growScene(mode, id, before, after, extra) {
+    const c = KC_CARDS[id], m = KCSim.levelMult, v = (x, l) => Math.round(x * m(l));
+    const stats = [];
+    if (c.hp) stats.push(['Health', v(c.hp, before.level), v(c.hp, after.level)]);
+    if (c.dmg) stats.push(['Damage', v(c.dmg, before.level), v(c.dmg, after.level)]);
+    const st = u => ({ level: u.level, count: u.count, need: u.need || 0, max: !!u.max });
+    KCUpgradeFX.play(Object.assign({ mode, id, name: c.name, img: cardImg(id), rarity: c.rarity, title: c.name,
+      before: st(before), after: st(after), stats, cost: 0, xp: 0, gives: 0,
+      onClose: () => { const f = !$('#cardModal').hidden ? $('#modalX') : null; if (f) f.focus(); } }, extra));
   }
   // Buttons in a card's details window for the items that can be used on it.
   function modalMagic(id) {
@@ -821,14 +833,11 @@ const KCMenu = (() => {
     lastFocus = null;
   }
   function upgradeCard() {
-    const id = modalId, r = G.upgrade(id);
+    const id = modalId, before = G.upgradeInfo(id), r = G.upgrade(id);
     if (!r) return;
-    KCSound.play('double');
-    toast(`${KC_CARDS[id].name} reached level ${r.level}!${r.levelUp ? ` You are now level ${r.levelUp}.` : ''}`);
-    const card = $('.modal-card');
-    card.classList.remove('leveled'); void card.offsetWidth; card.classList.add('leveled');
     refresh();
     modalId = null; openCard(id);
+    growScene('upgrade', id, before, G.upgradeInfo(id), { title: `Upgrade ${KC_CARDS[id].name}`, cost: before.cost, xp: r.xp, levelUp: r.levelUp });
   }
 
   /* ---------- the opponent ---------- */

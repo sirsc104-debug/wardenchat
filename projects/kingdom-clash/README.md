@@ -59,6 +59,12 @@ A **Magic Items** tab sits beside the card collection (Cards → Magic Items). P
 - **Evolution shards** have a slot in the tab; nothing gives them yet.
 - Item art is drawn in SVG (`js/items.js`), each item built from separate parts. In a chest reveal the parts fly in from every side, each trailing a comet, over a turning magic circle, and snap together; then the item flashes, a shockwave rolls out and its name appears. Books, the hammer and epic or legendary wild cards form more slowly and get a *Rare find!* tag.
 - The **Hammer of Books** has a living texture: its head shifts colour, runes scroll across it, a sheen sweeps over it and the book in its face glows, everywhere it is shown. Every item has a passing sheen. With reduced motion, none of it moves.
+- **Growing a card has its own scene** (`js/upgrades.js`), over everything, for every way a card grows:
+  - *Upgrade with coins*: copies stream out of the card's bar and coins pour in from below, the card charges up and shakes, then bursts; the level number slams to the new one, Health and Damage count up, and the XP (and any account level-up) shows.
+  - *Hammer of Books*: the hammer swings in and strikes the card three times (sparks, cracks of light, the screen shakes); the third strike bursts it into a rainbow level-up, *No coins spent!*
+  - *Wild cards*: the wild cards fly in one after another and melt into the card, each counting into its bar.
+  - *Books and the Book of Books*: the book drops in, shakes and falls open, its pages turn and fly into the card as light, filling its bar; *Upgrade ready!* if it can now level.
+  A click (or Space or Enter) skips to the end, another click closes it, Escape closes it. With reduced motion it opens on the end.
 - Rules and drop tables are `MAGIC` and `MAGIC_RULES` in `js/progress.js`.
 
 ## The Trophy Road and Arena 1
@@ -119,6 +125,7 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `js/trainers.js` | Owen, Romeo and Luc |
 | `js/arenas.js` | Arena art: each arena's centerpiece, scenery panels (with crowd rows and lights) and battlefield image with its tile mapping; loads each image once |
 | `js/progress.js` | Progress and its rules: trainers, trophies, bots, chests, road rewards, card levels, the deck |
+| `js/upgrades.js` | The full-screen scenes for upgrading a card and using a magic item on it |
 | `js/items.js` | Magic item art (SVG built from parts that fly together in a chest reveal) |
 | `js/menu.js` | The lobby, the Cards screen (deck, collection, upgrades), chest opening, the Trophy Road tab |
 | `js/sim.js` | The battle: fixed 30 steps a second, no DOM, seeded, so it runs the same in the page, in Node and later on both ends of an online match |
