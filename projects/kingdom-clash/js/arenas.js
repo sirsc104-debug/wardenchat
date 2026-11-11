@@ -197,43 +197,49 @@ const KCArenas = (() => {
     },
   };
 
-  // Arena 4: Stormspire. PLACEHOLDER art (img/stormspire_*.webp, labelled "placeholder art"): replace
-  // the three images and, if the new art differs, the bar, bench rows and lights below. The battlefield
-  // is drawn in code from the 'stormspire' palette until it has an illustration.
+  // Arena 4: Stormspire: a storm-wrapped stone fortress with gold trim, blue gems and waterfalls.
   ART.stormspire = {
     name: 'Stormspire',
-    centerpiece: { src: 'img/stormspire_badge.webp', w: 1254, h: 1254, bar: { left: 24.2, top: 86.2, width: 51.7, height: 3.9 } },
-    field: null, palette: 'stormspire', margin: 0.6, fx: 'water',
+    centerpiece: { src: 'img/stormspire_badge.webp', w: 1122, h: 1402, bar: { left: 24.1, top: 82.9, width: 53.5, height: 4.4 } },
+    palette: 'stormspire', margin: 1.4, fx: 'water',
+    field: {
+      src: 'img/stormspire_battlefield.webp', w: 1024, h: 1536,
+      // tower pads at x 262 / 762 px over lanes 3.5 / 14.5
+      x: [[262, 3.5], [762, 14.5]],
+      // king pad, princess pads, the stream's edges, princess pads, king pad
+      y: [[395, 3], [497, 6.5], [745, 15], [830, 17], [1068, 25.5], [1180, 29]],
+      // the plank bridges, in tiles, redrawn over the moving water
+      bridges: [[1.9, 13.1, 5.1, 18.0], [12.9, 13.1, 16.1, 18.0]],
+      // the four corner fire bowls, in tiles, which flicker
+      lanterns: [[0.27, -3.3], [17.65, -3.3], [0.6, 32.4], [17.1, 32.4]],
+    },
     scenery: {
+      // the left stands: lanterns in the arches, a fire bowl, waterfalls through the arches below
       left: {
-        src: 'img/stormspire_left.webp', w: 793, h: 1983, anchor: [0.55, 0.6], stars: 0,
+        src: 'img/stormspire_left.webp', w: 793, h: 1983, anchor: [0.55, 0.5], stars: 0,
         rows: [
-          { y: 0.438, slope: 0, size: 0.72, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.484, slope: 0, size: 0.77, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.53, slope: 0, size: 0.82, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.577, slope: 0, size: 0.87, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.623, slope: 0, size: 0.92, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.67, slope: 0, size: 0.97, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.716, slope: 0, size: 1.02, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.762, slope: 0, size: 1.07, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.809, slope: 0, size: 1.12, spans: [[0.2, 0.48], [0.58, 0.86]] },
+          { y: 0.372, slope: 0.11, size: 0.66, spans: [[0.26, 0.64]] },
+          { y: 0.392, slope: 0.11, size: 0.69, spans: [[0.28, 0.66]] },
+          { y: 0.528, slope: 0.04, size: 0.82, spans: [[0.33, 0.85]] },
+          { y: 0.552, slope: 0.04, size: 0.86, spans: [[0.35, 0.88]] },
+          { y: 0.578, slope: 0.04, size: 0.9, spans: [[0.36, 0.9]] },
         ],
-        glows: [[0.151, 0.338, 0.8], [0.53, 0.338, 0.8], [0.908, 0.338, 0.8]],
+        glows: [[0.29, 0.27, 0.7], [0.51, 0.33, 0.6], [0.7, 0.32, 0.6], [0.88, 0.35, 0.6], [0.18, 0.53, 1.3], [0.9, 0.43, 1.0]],
+        mist: [0.3, 0.45, 0.82],
       },
+      // the right stands, beside the waterfall
       right: {
-        src: 'img/stormspire_right.webp', w: 793, h: 1983, anchor: [0.45, 0.6], stars: 0,
+        src: 'img/stormspire_right.webp', w: 793, h: 1983, anchor: [0.45, 0.5], stars: 0,
         rows: [
-          { y: 0.438, slope: 0, size: 0.72, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.484, slope: 0, size: 0.77, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.53, slope: 0, size: 0.82, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.577, slope: 0, size: 0.87, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.623, slope: 0, size: 0.92, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.67, slope: 0, size: 0.97, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.716, slope: 0, size: 1.02, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.762, slope: 0, size: 1.07, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.809, slope: 0, size: 1.12, spans: [[0.14, 0.42], [0.52, 0.8]] },
+          { y: 0.378, slope: -0.065, size: 0.66, spans: [[0.22, 0.78]] },
+          { y: 0.405, slope: -0.065, size: 0.69, spans: [[0.2, 0.78]] },
+          { y: 0.432, slope: -0.065, size: 0.72, spans: [[0.2, 0.75]] },
+          { y: 0.522, slope: 0, size: 0.82, spans: [[0.16, 0.62]] },
+          { y: 0.552, slope: 0, size: 0.86, spans: [[0.14, 0.62]] },
+          { y: 0.582, slope: 0, size: 0.9, spans: [[0.14, 0.6]] },
         ],
-        glows: [[0.088, 0.338, 0.8], [0.467, 0.338, 0.8], [0.845, 0.338, 0.8]],
+        glows: [[0.39, 0.31, 0.7], [0.73, 0.26, 0.7]],
+        mist: [0.75, 0.95, 0.68],
       },
     },
   };
