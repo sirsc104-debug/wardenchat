@@ -28,13 +28,36 @@ const KCEmotes = (() => {
 
   /* ---------- the King's faces, in SVG ---------- */
   const TEAMC = ['#2f6fe4', '#dc3640'];
-  // A card emote: the card's character (in the sender's colours) with its name on a banner.
+  // A card emote: the card's character (in the sender's colours) starring in its own little scene,
+  // with an effect about that card drawn over it and a move of its own (css/style.css, .c-<card>).
   const cardPics = {};
+  const fx = O => ({
+    rhino: `<g class="ef-steam"><circle cx="30" cy="66" r="6" fill="#fff" stroke="${O}" stroke-width="2"/><circle cx="22" cy="60" r="4" fill="#fff" stroke="${O}" stroke-width="2"/></g><g class="ef-steam t2"><circle cx="70" cy="66" r="6" fill="#fff" stroke="${O}" stroke-width="2"/><circle cx="78" cy="60" r="4" fill="#fff" stroke="${O}" stroke-width="2"/></g><path class="ef-pop" d="M78 18l4 4m0-8v6m6 2h-6" stroke="#ff3a48" stroke-width="3" stroke-linecap="round"/>`,
+    wolves: `<g class="ef-note"><path d="M18 30v-14l8-2v14" fill="none" stroke="${O}" stroke-width="2.6"/><circle cx="16" cy="30" r="3.6" fill="${O}"/><circle cx="24" cy="28" r="3.6" fill="${O}"/></g><g class="ef-note t2"><path d="M80 24v-12" stroke="${O}" stroke-width="2.6"/><circle cx="78" cy="24" r="3.6" fill="${O}"/><path d="M80 12q5 2 4 7" fill="none" stroke="${O}" stroke-width="2.4"/></g>`,
+    gladiator: `<path class="ef-twinkle" d="M80 26l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#fff6c8" stroke="${O}" stroke-width="1.6"/><path class="ef-twinkle t2" d="M18 40l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#fff6c8" stroke="${O}" stroke-width="1.4"/>`,
+    hawks: `<path class="ef-feather" d="M14 22q8-6 12 2q-6 6-12-2z" fill="#c9a070" stroke="${O}" stroke-width="1.8"/><path class="ef-feather t2" d="M80 70q8-6 12 2q-6 6-12-2z" fill="#e8dcc8" stroke="${O}" stroke-width="1.8"/>`,
+    archers: `<g class="ef-arrow"><path d="M-6 30h24" stroke="#8a5a2e" stroke-width="3" stroke-linecap="round"/><path d="M24 30l-7-4v8z" fill="#dfe6ee" stroke="${O}" stroke-width="1.6"/><path d="M-6 30l-4-4M-6 30l-4 4" stroke="#dc3640" stroke-width="2.4" stroke-linecap="round"/></g><g transform="translate(84 30)"><circle r="9" fill="#fff" stroke="${O}" stroke-width="2"/><circle r="5.5" fill="#ff4d5d"/><circle r="2.4" fill="#fff"/></g>`,
+    snowman: `<g class="ef-snow"><path d="M18 12v12M12 18h12M14 14l8 8M22 14l-8 8" stroke="#bfe6ff" stroke-width="2.4" stroke-linecap="round"/></g><g class="ef-snow t2"><path d="M82 24v10M77 29h10M78.5 25.5l7 7M85.5 25.5l-7 7" stroke="#bfe6ff" stroke-width="2.2" stroke-linecap="round"/></g><g class="ef-snow t3"><path d="M70 6v8M66 10h8" stroke="#bfe6ff" stroke-width="2" stroke-linecap="round"/></g>`,
+    gorilla: `<g class="ef-pop"><path d="M14 44l-8-4M14 52H4M14 60l-8 4" stroke="${O}" stroke-width="3" stroke-linecap="round"/><path d="M86 44l8-4M86 52h10M86 60l8 4" stroke="${O}" stroke-width="3" stroke-linecap="round"/></g>`,
+    fireball: `<path class="ef-flame" d="M18 80q-6-10 2-18q0 8 6 8q-2-10 6-14q-2 10 4 16q4 6-2 10q-8 4-16-2z" fill="#ff9a2e" stroke="${O}" stroke-width="2" stroke-linejoin="round"/><path class="ef-flame t2" d="M78 30q-4-8 2-13q0 6 4 6q-1-7 4-10q-1 7 3 11q3 5-2 8q-6 3-11-2z" fill="#ffcf3f" stroke="${O}" stroke-width="2" stroke-linejoin="round"/>`,
+    skeletons: `<g class="ef-bone"><path d="M14 20h14" stroke="#f3ead6" stroke-width="4" stroke-linecap="round"/><circle cx="12" cy="18" r="3" fill="#f3ead6" stroke="${O}" stroke-width="1.4"/><circle cx="12" cy="22" r="3" fill="#f3ead6" stroke="${O}" stroke-width="1.4"/><circle cx="30" cy="18" r="3" fill="#f3ead6" stroke="${O}" stroke-width="1.4"/><circle cx="30" cy="22" r="3" fill="#f3ead6" stroke="${O}" stroke-width="1.4"/></g><g class="ef-bone t2"><path d="M70 16h14" stroke="#f3ead6" stroke-width="4" stroke-linecap="round"/><circle cx="68" cy="14" r="3" fill="#f3ead6" stroke="${O}" stroke-width="1.4"/><circle cx="68" cy="18" r="3" fill="#f3ead6" stroke="${O}" stroke-width="1.4"/><circle cx="86" cy="14" r="3" fill="#f3ead6" stroke="${O}" stroke-width="1.4"/><circle cx="86" cy="18" r="3" fill="#f3ead6" stroke="${O}" stroke-width="1.4"/></g>`,
+    cannon: `<g class="ef-ball"><circle cx="78" cy="24" r="7" fill="#2a2c35" stroke="${O}" stroke-width="2"/><circle cx="76" cy="22" r="2" fill="#8a8d98"/></g><g class="ef-smoke"><circle cx="60" cy="38" r="7" fill="#e8e2d8" stroke="${O}" stroke-width="1.8"/><circle cx="68" cy="34" r="5" fill="#e8e2d8" stroke="${O}" stroke-width="1.8"/></g>`,
+    spears: `<path class="ef-whoosh" d="M10 30q20-8 40 0M14 44q18-6 34 0M18 58q14-4 26 0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".9"/>`,
+    footmen: `<path class="ef-twinkle" d="M50 6l3 6 6 2-6 2-3 6-3-6-6-2 6-2z" fill="#fff6c8" stroke="${O}" stroke-width="1.5"/><path class="ef-twinkle t2" d="M86 46l2 4 4 2-4 2-2 4-2-4-4-2 4-2z" fill="#fff6c8" stroke="${O}" stroke-width="1.4"/>`,
+    flail: `<path class="ef-swirl" d="M50 50m-38 0a38 16 0 1 0 76 0" stroke="#fff" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-dasharray="10 8"/>`,
+    pots: `<g class="ef-shard"><path d="M14 70l8-4 2 7-7 3z" fill="#d07a45" stroke="${O}" stroke-width="1.6"/><path d="M84 66l-8-3-1 7 7 2z" fill="#a8582c" stroke="${O}" stroke-width="1.6"/><path d="M26 84l6-5 3 6-6 3z" fill="#d07a45" stroke="${O}" stroke-width="1.6"/></g>`,
+    sandstorm: `<g class="ef-dust"><circle cx="16" cy="30" r="3" fill="#c9a070"/><circle cx="84" cy="44" r="3.4" fill="#9a7048"/><circle cx="22" cy="70" r="2.6" fill="#9a7048"/><circle cx="80" cy="78" r="2.8" fill="#c9a070"/><circle cx="50" cy="8" r="2.4" fill="#c9a070"/></g>`,
+    ramcart: `<g class="ef-smoke"><circle cx="20" cy="82" r="7" fill="#e2c48a" stroke="${O}" stroke-width="1.8"/><circle cx="10" cy="78" r="5" fill="#e2c48a" stroke="${O}" stroke-width="1.8"/><circle cx="80" cy="82" r="7" fill="#e2c48a" stroke="${O}" stroke-width="1.8"/></g><path class="ef-pop" d="M50 4l4 8 8-2-5 7 7 5-9 1 1 9-6-6-6 6 1-9-9-1 7-5-5-7 8 2z" fill="#ffe27a" stroke="${O}" stroke-width="1.8" stroke-linejoin="round"/>`,
+    mole: `<g class="ef-dirt"><circle cx="16" cy="78" r="4" fill="#8a6440" stroke="${O}" stroke-width="1.4"/><circle cx="84" cy="76" r="4.4" fill="#a07850" stroke="${O}" stroke-width="1.4"/><circle cx="24" cy="66" r="3" fill="#a07850" stroke="${O}" stroke-width="1.2"/><circle cx="78" cy="64" r="3" fill="#8a6440" stroke="${O}" stroke-width="1.2"/></g><path d="M10 92q40-12 80 0" fill="#6e4e32" stroke="${O}" stroke-width="2"/>`,
+    camel: `<g class="ef-lasso"><ellipse cx="80" cy="16" rx="12" ry="5" fill="none" stroke="${O}" stroke-width="4.4"/><ellipse cx="80" cy="16" rx="12" ry="5" fill="none" stroke="#c8a070" stroke-width="2.4"/></g><g class="ef-smoke"><circle cx="16" cy="86" r="6" fill="#e2c48a" stroke="${O}" stroke-width="1.6"/><circle cx="28" cy="90" r="4" fill="#e2c48a" stroke="${O}" stroke-width="1.6"/></g>`,
+  });
+  let FX = null;
   function cardFace(id, team) {
     const key = id + ':' + team;
     if (!cardPics[key]) cardPics[key] = KCArt.portrait(id, 200, 240, { bare: true, team }).toDataURL();
+    FX = FX || fx(O);
     const c = KC_CARDS[id], kind = c.kind === 'spell' ? 'spell' : c.kind === 'building' ? 'building' : 'troop';
-    return `<span class="em-face em-card k-${kind} r-${c.rarity}" aria-hidden="true"><img src="${cardPics[key]}" alt=""><b class="${c.name.length > 11 ? 'long' : c.name.length > 7 ? 'mid' : ''}" style="--tc:${TEAMC[team] || TEAMC[0]}">${c.name}</b></span>`;
+    return `<span class="em-face em-card c-${id} k-${kind}" aria-hidden="true"><img src="${cardPics[key]}" alt=""><svg class="em-fx" viewBox="0 0 100 100">${FX[id] || ''}</svg></span>`;
   }
   function face(expr, team) {
     if (expr.startsWith('card_')) return cardFace(expr.slice(5), team);
