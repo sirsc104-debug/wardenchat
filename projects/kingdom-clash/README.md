@@ -51,7 +51,7 @@ Reached at **300 trophies** (Arena 1's floor stays 0; Briar Hollow's is 300). An
 
 ## Arena 3: Sunstone Arena
 
-Reached at **600 trophies**: a sun-baked desert fortress of sandstone walls with an oasis channel for the river. **Art:** `img/sunstone_arena_badge.webp` (lobby centerpiece), `img/sunstone_arena_left.webp` (the sundial, lion statues and great stairs) and `img/sunstone_arena_right.webp` (the stands by the waterfall, with market stalls); their bar, bench rows, lights and waterfall mist are in the `sunstone` entry of `js/arenas.js`. The battlefield is still drawn in code from the `sunstone` palette; a battlefield illustration goes in as a `field` entry like Briar Hollow's. Arena 4 at 900 is marked *coming soon*.
+Reached at **600 trophies**: a sun-baked desert fortress of sandstone walls with an oasis channel for the river. **Art:** `img/sunstone_arena_badge.webp` (lobby centerpiece), `img/sunstone_arena_left.webp` (the sundial, lion statues and great stairs) and `img/sunstone_arena_right.webp` (the stands by the waterfall, with market stalls); their bar, bench rows, lights and waterfall mist are in the `sunstone` entry of `js/arenas.js`. The battlefield is `img/sunstone_arena_battlefield.webp`, laid onto the tile grid by its pads, the oasis channel's edges and the bridges, with its four corner fire bowls flickering. Arena 4 at 900 is marked *coming soon*.
 
 Its four cards come from the Trophy Road: **Sandstorm** at 630, **Ram Cart** at 710, **Mole** at 790 and **Camel Jockey** at 870 (500 coins at 670, a Gold Chest at 750, 600 coins at 830 between them). Opponents add them as their trophies pass those marks, and they stay out of Training Grounds matches.
 

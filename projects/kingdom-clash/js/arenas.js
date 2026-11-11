@@ -144,12 +144,22 @@ const KCArenas = (() => {
     },
   };
 
-  // Arena 3: Sunstone Arena: a sandstone desert fortress with an oasis. The battlefield is drawn in code
-  // from the 'sunstone' palette until it has an illustration (add a field entry like Briar Hollow's).
+  // Arena 3: Sunstone Arena: a sandstone desert fortress with an oasis channel for the river.
   ART.sunstone = {
     name: 'Sunstone Arena',
     centerpiece: { src: 'img/sunstone_arena_badge.webp', w: 1122, h: 1402, bar: { left: 23.6, top: 84.1, width: 52.8, height: 4.4 } },
-    field: null, palette: 'sunstone', margin: 0.6, fx: 'water',
+    palette: 'sunstone', margin: 1.4, fx: 'water',
+    field: {
+      src: 'img/sunstone_arena_battlefield.webp', w: 1024, h: 1536,
+      // tower pads at x 262 / 762 px over lanes 3.5 / 14.5
+      x: [[262, 3.5], [762, 14.5]],
+      // king pad, princess pads, the oasis channel's edges, princess pads, king pad
+      y: [[275, 3], [390, 6.5], [722, 15], [805, 17], [1067, 25.5], [1205, 29]],
+      // the plank bridges, in tiles, redrawn over the moving water
+      bridges: [[1.8, 13.1, 5.25, 17.8], [12.75, 13.1, 16.2, 17.8]],
+      // the four corner fire bowls, in tiles, which flicker
+      lanterns: [[0.4, -1.8], [17.6, -1.9], [0.85, 31.5], [17.2, 31.4]],
+    },
     scenery: {
       // the sundial, the lion statues and the great stairs
       left: {
