@@ -79,8 +79,12 @@
   /* ---------- layout ---------- */
   function layout() {
     if (!cv) return;
-    const narrow = innerWidth < 1000;
+    // a phone held upright: the arena on top, the cards and the energy bar along the bottom
+    const phone = innerWidth < 700 && innerHeight > innerWidth * 1.2;
+    $('#battle').classList.toggle('phone', phone);
+    const narrow = !phone && innerWidth < 1000;
     $('#battle').classList.toggle('narrow', narrow);
+    if (phone) { layoutPhone(); return; }
     const gap = narrow ? 8 : 12, enw = narrow ? 50 : 92;
     const avH = innerHeight - 24;
     let cardH = Math.min(150, (avH - 44 - 128 - 36) / 4);
@@ -116,6 +120,41 @@
     }
     G.zoneKey = '';
     requestAnimationFrame(() => KCScenery.resize());
+  }
+  function layoutPhone() {
+    const pad = 8, gap = 6, W = innerWidth - 2 * pad;
+    // the next card is a little smaller than the four in hand
+    // the hand row (padding 8 and a 3 px border each side) and the energy row span the screen
+    const cardW = Math.min(92, (W - 22 - 4 * gap) / 4.6), cardH = cardW * 1.2, nextW = cardW * 0.6;
+    const bottom = (cardH + 22) + 48 + 2 * gap;
+    const aspect = (S.W + 2 * B) / (S.H + 2 * B);
+    const aw = Math.max(160, Math.min(W, (innerHeight - 2 * pad - bottom) * aspect));
+    $('#battle').style.setProperty('--barw', Math.round(W) + 'px');
+    sizeArena(aw, { cardW, cardH, nextW, gap });
+  }
+  // Size the arena canvas to aw pixels wide and draw its battlefield (and set the card sizes).
+  function sizeArena(aw, o) {
+    G.k = aw / (S.W + 2 * B);
+    const ah = G.k * (S.H + 2 * B), root = $('#battle').style;
+    root.setProperty('--gap', o.gap + 'px');
+    root.setProperty('--cardw', Math.round(o.cardW) + 'px');
+    root.setProperty('--cardh', Math.round(o.cardH) + 'px');
+    root.setProperty('--nextw', Math.round(o.nextW) + 'px');
+    root.setProperty('--arenaw', Math.round(aw) + 'px');
+    root.setProperty('--arenah', Math.round(ah) + 'px');
+    G.dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.style.width = Math.round(aw) + 'px'; cv.style.height = Math.round(ah) + 'px';
+    cv.width = Math.round(aw * G.dpr); cv.height = Math.round(ah * G.dpr);
+    G.bg = document.createElement('canvas');
+    G.bg.width = cv.width; G.bg.height = cv.height;
+    const b = G.bg.getContext('2d');
+    b.scale(G.dpr, G.dpr);
+    A.arena(b, G.k, B, G.theme);
+    if (G.art.field && !KCArenas.ready(KCArenas.image(G.art.field.src))) {
+      const theme = G.theme;
+      KCArenas.whenReady(G.art.field.src, () => { if (!$('#battle').hidden && G.theme === theme) layout(); });
+    }
+    G.zoneKey = '';
   }
 
   /* ---------- the hand ---------- */
@@ -1164,7 +1203,9 @@
     renderHand();
     const en = s.energy[0];
     const fill = (en / S.MAX_ENERGY * 100).toFixed(1) + '%';
-    if (u.fill !== fill) { u.fill = fill; $('#efill').style.height = fill; }
+    // the bar fills upward beside the arena, and left to right along the bottom on a phone
+    const across = $('#battle').classList.contains('phone');
+    if (u.fill !== fill || u.across !== across) { u.fill = fill; u.across = across; $('#efill').style.height = across ? '' : fill; $('#efill').style.width = across ? fill : ''; }
     const n = Math.floor(en);
     if (u.n !== n) { u.n = n; $('#enum').textContent = n; }
     const dbl = s.double || s.phase === 'overtime';

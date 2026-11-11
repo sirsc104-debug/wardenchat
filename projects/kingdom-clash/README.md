@@ -15,6 +15,10 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 | Battle | Five columns, following the desktop layout concept: the Royal Grandstands (King statue, stands, banners, torches) · your 4 cards and the next one · the arena · the Energy bar · the Royal Waterfall with the timer and crown score over its sky. The spectators in both stands are animated and react to the match. Below 1000 px wide the scenery is dropped and the clock moves onto the arena. |
 | Result | Victory / Defeat / Draw, both sides' crowns, the trainer's comment, anything you unlocked (next trainer, Trophy Road, a new level), why it ended and the experience earned, then **Battle *next trainer*** (after a first win), **Play Again** or **Home**. |
 
+## Phones
+
+On a phone held upright the battle switches layout: the arena fills the top of the screen, and the hand (the next card, then the four you can play) and a horizontal energy bar run along the bottom, full width. The lobby keeps its centre column inside the screen (the opponent row wraps its Trainers and Online buttons onto their own line), and the Shop's offers are two to a row.
+
 ## How a match works
 
 - **Energy**: start with 5, max 10, +1 every 2.8 seconds; double speed in the last minute and in overtime.

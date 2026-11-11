@@ -1426,7 +1426,7 @@ button.slot:hover { transform: translateY(-3px); }
 .pm-lock::before { content: ''; position: absolute; left: 2px; right: 2px; top: -9px; height: 10px; border: 3px solid #8fe3ff; border-bottom: 0; border-radius: 8px 8px 0 0; }
 
 /* the Diamond Pass in the Shop */
-.offers { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+@media (min-width: 1001px) { .offers { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
 .pass-offer { background: linear-gradient(#4aa8e8, #1f5fae) !important; }
 .pass-art img { width: 64px; border-radius: 8px; border: 3px solid var(--outline); box-shadow: 0 0 14px rgba(190, 140, 255, 0.8); }
 .of-see { padding: 2px 10px; border-radius: 999px; border: 2px solid var(--outline); background: rgba(255, 255, 255, 0.85); color: var(--outline); font-weight: 900; font-size: 11px; }
@@ -1649,6 +1649,41 @@ button.slot:hover { transform: translateY(-3px); }
 .ol-soon b { font-family: var(--display); font-weight: 400; font-size: 22px; }
 .ol-soon p { margin: 0; color: var(--muted); font-size: 13px; }
 .ol-opts.is-soon { opacity: 0.5; filter: grayscale(0.6); pointer-events: none; }
+
+/* ---------- phones ---------- */
+/* the lobby's centre column never grows past the screen; the opponent row wraps its buttons */
+.center { grid-template-columns: minmax(0, 1fr); width: 100%; }
+@media (max-width: 560px) {
+  .opp { flex-wrap: wrap; row-gap: 8px; }
+  .opp-text { flex: 1 1 calc(100% - 60px); }
+  .opp-change, .online-btn { flex: 1 1 0; justify-content: center; }
+  .offers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* the battle on a phone held upright: arena on top, then the hand, then the energy bar */
+#battle.phone .bf { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: var(--gap, 6px);
+  padding: 8px 8px max(8px, env(safe-area-inset-bottom, 0px)); height: 100%; }
+#battle.phone .side { display: none; }
+#battle.phone .arena-box { order: 1; flex: none; }
+#battle.phone .col { height: auto; width: var(--barw, 100%); box-sizing: border-box; flex: none; }
+#battle.phone .hand .card { flex: none; }
+#battle.phone .col-head { display: none; }
+#battle.phone .col-cards { order: 2; flex-direction: row; align-items: center; padding: 8px; gap: var(--gap, 6px); }
+#battle.phone .hand { flex-direction: row; flex: 1; justify-content: space-between; gap: var(--gap, 6px); }
+#battle.phone .card .key { display: none; }
+#battle.phone .card .cost { width: 24px; height: 24px; font-size: 13px; }
+#battle.phone .card.sel { transform: translateY(-8px) scale(1.06); }
+#battle.phone .next { order: -1; font-size: 11px; gap: 2px; }
+#battle.phone .next img { width: var(--nextw, 50px); }
+#battle.phone .col-energy { order: 3; flex-direction: row; align-items: center; padding: 4px 8px; gap: 8px; }
+#battle.phone .ebar { width: auto; height: 22px; flex: 1; border-radius: 12px; }
+#battle.phone .efill { top: 0; right: auto; height: 100% !important; }
+#battle.phone .eticks { background: repeating-linear-gradient(to right, transparent 0 calc(10% - 2px), rgba(18, 12, 34, 0.9) calc(10% - 2px) 10%); }
+#battle.phone .enum { width: 34px; height: 34px; font-size: 19px; flex: none; order: -1; }
+#battle.phone .x2 { font-size: 16px; }
+#battle.phone .mini-timer { display: block; position: absolute; top: 2.4%; right: 4%; font-size: 16px; text-align: right; line-height: 1; pointer-events: none; }
+#battle.phone .sim-win { padding: 2px 8px 3px; font-size: 11px; }
+#battle.phone .emote-btn { width: 40px; height: 34px; }
+#battle.phone .ep-phrase { font-size: 11px; padding: 7px 2px; }
 
 </style>
 </head>
@@ -8519,8 +8554,12 @@ const KCEmotes = (() => {
   /* ---------- layout ---------- */
   function layout() {
     if (!cv) return;
-    const narrow = innerWidth < 1000;
+    // a phone held upright: the arena on top, the cards and the energy bar along the bottom
+    const phone = innerWidth < 700 && innerHeight > innerWidth * 1.2;
+    $('#battle').classList.toggle('phone', phone);
+    const narrow = !phone && innerWidth < 1000;
     $('#battle').classList.toggle('narrow', narrow);
+    if (phone) { layoutPhone(); return; }
     const gap = narrow ? 8 : 12, enw = narrow ? 50 : 92;
     const avH = innerHeight - 24;
     let cardH = Math.min(150, (avH - 44 - 128 - 36) / 4);
@@ -8556,6 +8595,41 @@ const KCEmotes = (() => {
     }
     G.zoneKey = '';
     requestAnimationFrame(() => KCScenery.resize());
+  }
+  function layoutPhone() {
+    const pad = 8, gap = 6, W = innerWidth - 2 * pad;
+    // the next card is a little smaller than the four in hand
+    // the hand row (padding 8 and a 3 px border each side) and the energy row span the screen
+    const cardW = Math.min(92, (W - 22 - 4 * gap) / 4.6), cardH = cardW * 1.2, nextW = cardW * 0.6;
+    const bottom = (cardH + 22) + 48 + 2 * gap;
+    const aspect = (S.W + 2 * B) / (S.H + 2 * B);
+    const aw = Math.max(160, Math.min(W, (innerHeight - 2 * pad - bottom) * aspect));
+    $('#battle').style.setProperty('--barw', Math.round(W) + 'px');
+    sizeArena(aw, { cardW, cardH, nextW, gap });
+  }
+  // Size the arena canvas to aw pixels wide and draw its battlefield (and set the card sizes).
+  function sizeArena(aw, o) {
+    G.k = aw / (S.W + 2 * B);
+    const ah = G.k * (S.H + 2 * B), root = $('#battle').style;
+    root.setProperty('--gap', o.gap + 'px');
+    root.setProperty('--cardw', Math.round(o.cardW) + 'px');
+    root.setProperty('--cardh', Math.round(o.cardH) + 'px');
+    root.setProperty('--nextw', Math.round(o.nextW) + 'px');
+    root.setProperty('--arenaw', Math.round(aw) + 'px');
+    root.setProperty('--arenah', Math.round(ah) + 'px');
+    G.dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.style.width = Math.round(aw) + 'px'; cv.style.height = Math.round(ah) + 'px';
+    cv.width = Math.round(aw * G.dpr); cv.height = Math.round(ah * G.dpr);
+    G.bg = document.createElement('canvas');
+    G.bg.width = cv.width; G.bg.height = cv.height;
+    const b = G.bg.getContext('2d');
+    b.scale(G.dpr, G.dpr);
+    A.arena(b, G.k, B, G.theme);
+    if (G.art.field && !KCArenas.ready(KCArenas.image(G.art.field.src))) {
+      const theme = G.theme;
+      KCArenas.whenReady(G.art.field.src, () => { if (!$('#battle').hidden && G.theme === theme) layout(); });
+    }
+    G.zoneKey = '';
   }
 
   /* ---------- the hand ---------- */
@@ -9604,7 +9678,9 @@ const KCEmotes = (() => {
     renderHand();
     const en = s.energy[0];
     const fill = (en / S.MAX_ENERGY * 100).toFixed(1) + '%';
-    if (u.fill !== fill) { u.fill = fill; $('#efill').style.height = fill; }
+    // the bar fills upward beside the arena, and left to right along the bottom on a phone
+    const across = $('#battle').classList.contains('phone');
+    if (u.fill !== fill || u.across !== across) { u.fill = fill; u.across = across; $('#efill').style.height = across ? '' : fill; $('#efill').style.width = across ? fill : ''; }
     const n = Math.floor(en);
     if (u.n !== n) { u.n = n; $('#enum').textContent = n; }
     const dbl = s.double || s.phase === 'overtime';
