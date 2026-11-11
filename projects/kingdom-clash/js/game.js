@@ -755,10 +755,23 @@
       const r = KC_CARDS.spears.area;
       A.ell(c, SX(p.tx), SY(p.ty), r * k, r * k * 0.6);
       c.fillStyle = 'rgba(255,255,255,0.1)'; c.fill(); c.strokeStyle = 'rgba(255,255,255,0.55)'; c.lineWidth = 2; c.stroke();
-      // the volley drops onto the area as it arrives
-      c.save(); c.translate(SX(p.tx), SY(p.ty) - (1 - done) * k * 5);
-      c.globalAlpha = Math.min(1, done * 3);
-      A.spearsArt(c, k * 1.6, done);
+      // the volley is thrown from the King Tower: it climbs in an arc, pointing the way it flies, and
+      // fans out as it comes down over the area
+      const at = d => [SX(p.sx + (p.tx - p.sx) * d), SY(p.sy + (p.ty - p.sy) * d) - (Math.sin(d * Math.PI) * arcH * Math.min(1, total / 6) + 0.6 * (1 - d)) * k];
+      const [hx, hy] = at(Math.min(1, done + 0.03)), ang = Math.atan2(hy - y, hx - x);
+      shadow(c, SX(px), SY(py), k * (0.4 + done * r * 0.5));
+      const fan = 0.25 + done * done * r * 0.75;
+      const volley = [[0, 0], [-0.55, -0.35], [0.55, -0.35], [-1, -0.75], [1, -0.75], [-0.3, -1.05], [0.3, -1.05]];
+      c.save(); c.translate(x, y); c.rotate(ang); c.scale(1.3, 1.3);
+      for (const [side, back] of volley) {
+        c.save(); c.translate(back * k * 0.55, side * fan * k / 1.3);
+        // one spear, pointing along +x: shaft, steel head, red fletching
+        A.line(c, -k * 0.75, 0, k * 0.45, 0, A.OUT, k * 0.13);
+        A.line(c, -k * 0.75, 0, k * 0.45, 0, '#9a6a3a', k * 0.07);
+        A.poly(c, [k * 0.72, 0, k * 0.42, -k * 0.11, k * 0.42, k * 0.11]); A.paint(c, '#e4e9f0', Math.max(1, k * 0.05));
+        A.poly(c, [-k * 0.72, 0, -k * 0.88, -k * 0.12, -k * 0.8, 0, -k * 0.88, k * 0.12]); A.paint(c, '#dc3640', Math.max(1, k * 0.04));
+        c.restore();
+      }
       c.restore();
       return;
     }
