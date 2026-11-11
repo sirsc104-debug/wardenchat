@@ -19,7 +19,8 @@ const KCMenu = (() => {
   let opts = {}, tabNow = 'battle', swapId = null, ticker = 0;
   const P = () => G.state;
 
-  const cardImg = id => imgs[id] || (imgs[id] = KCArt.portrait(id, 200, 240).toDataURL());
+  // A card's picture (evo: its evolved version's card), drawn once and kept.
+  const cardImg = (id, evo) => { const key = evo ? id + ':evo' : id; return imgs[key] || (imgs[key] = KCArt.portrait(id, 200, 240, { evo: !!evo }).toDataURL()); };
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   const fmt = n => Number(n || 0).toLocaleString('en-US');
   const recText = r => (r.w + r.l + r.d ? `${r.w}W · ${r.l}L${r.d ? ` · ${r.d}D` : ''}` : 'No matches yet');
@@ -32,15 +33,16 @@ const KCMenu = (() => {
     return G.trainer();
   }
   // Called by the game when a match ends; returns what changed, for the result screen.
-  function recordResult(foe, winner) {
-    const r = foe.kind === 'trophy' ? G.recordTrophy(winner) : G.recordTrainer(foe.id, winner);
+  // crowns: the crowns you took, which count toward the Diamond Pass in trophy battles.
+  function recordResult(foe, winner, crowns) {
+    const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns) : G.recordTrainer(foe.id, winner);
     return r;
   }
 
   // TEMPORARY test button: counts a win against the current opponent without playing the match,
   // with the same rewards as a real win.
   function simulateWin() {
-    const foe = nextFoe(), r = recordResult(foe, 0);
+    const foe = nextFoe(), r = recordResult(foe, 0, 3);
     const bits = [r.unlockedNext ? `${r.unlockedNext.name} unlocked` : '', r.roadOpened ? 'Trophy Road unlocked' : '',
       r.kind === 'trophy' ? `+${r.delta} trophies` : '', r.chest ? `${r.chest.name} earned` : '', r.slotsFull ? 'chest slots are full' : '',
       r.levelUp ? `level ${r.levelUp}` : ''].filter(Boolean);
@@ -533,7 +535,7 @@ const KCMenu = (() => {
   let confirmOffer = -1, confirmT = 0;
   function renderShop() {
     const shop = G.shop(), p = P();
-    $('#shopOffers').innerHTML = shop.offers.map((o, i) => {
+    $('#shopOffers').innerHTML = passTile() + shop.offers.map((o, i) => {
       const sold = !!shop.bought[o.id] && !o.repeat, gem = o.currency === 'diamonds';
       const poor = !sold && (gem ? p.diamonds : p.coins) < o.price;
       let body;
@@ -554,6 +556,10 @@ const KCMenu = (() => {
       return `<div class="offer ${o.currency}${sold ? ' sold' : ''}"><span class="of-tag">${esc(o.tag)}</span>${body}${btn}</div>`;
     }).join('');
     for (const b of $$('#shopOffers .buy-btn[data-offer]')) b.addEventListener('click', e => { e.stopPropagation(); buyClick(+b.dataset.offer); });
+    const pb = $('#shopOffers .buy-btn[data-pass]');
+    if (pb) pb.addEventListener('click', e => { e.stopPropagation(); buyPassClick(); });
+    const pv = $('#shopOffers .of-see');
+    if (pv) pv.addEventListener('click', e => { e.stopPropagation(); openPass(); });
     // the chest row: a free Wooden Chest each day, then every tier for coins (contents stay hidden)
     const oddsText = t => { const o = G.chestOdds(t), w = G.wildActive() && Object.keys(G.MAGIC_RULES.wild[t] || {}).length; return `${fmt(o.cards)} cards<br>${fmt(o.coins[0])}–${fmt(o.coins[1])} coins${w ? '<br>+ wild cards' : ''}`; };
     const free = G.freeChestReady();
@@ -625,6 +631,129 @@ const KCMenu = (() => {
     showChest(null, r, 'Purchased');
   }
 
+
+  /* ---------- the Diamond Pass ---------- */
+  // A pass reward as a small picture and a label.
+  function rewardArt(R) {
+    if (R.kind === 'coins') return { art: '<span class="pr-coins" aria-hidden="true"><i class="coin-i"></i><i class="coin-i"></i></span>', label: `${fmt(R.n)} coins` };
+    if (R.kind === 'chest') return { art: `<span class="pr-chest">${chestSvg(R.chest)}</span>`, label: G.CHESTS[R.chest].name };
+    if (R.kind === 'item') return { art: `<span class="pr-item">${itemSvg(R.item)}</span>`, label: `${G.MAGIC[R.item].name} ×${fmt(R.n)}` };
+    if (R.kind === 'evo') return { art: `<img class="pr-evo" src="${cardImg(R.card, true)}" alt="">`, label: KC_EVOS[R.card].name };
+    return { art: '', label: '' };
+  }
+  function passPlaque() {
+    const open = G.passOpen(), tier = G.passTier(), max = G.PASS.tiers.length, per = G.PASS.crownsPerTier, ready = G.passClaimable();
+    $('#passTier').textContent = tier;
+    $('#passFill').style.width = (open ? (tier >= max ? 100 : G.passInto() / per * 100) : 0).toFixed(1) + '%';
+    $('#passCount').textContent = open ? (tier >= max ? 'Done' : `${G.passInto()}/${per}`) : `0/${per}`;
+    $('#passPlaque').classList.toggle('locked', !open);
+    $('#passPlaque').classList.toggle('has-ready', ready > 0);
+    // on narrow screens the side plaques are hidden: a small Diamond Pass button sits under the chests
+    $('#passMini').hidden = !open;
+    $('#passMiniText').textContent = ready ? `${ready} reward${ready === 1 ? '' : 's'} ready` : `Tier ${tier} / ${max}`;
+    $('#passMini').classList.toggle('has-ready', ready > 0);
+    $('#passText').innerHTML = !open ? '<span class="tag-lock">Locked</span> Opens in Sunstone Arena (600 trophies). Members get the Diamond Pass track.'
+      : ready ? `<span class="tag-new">${ready} ready</span> Rewards to claim! Crowns from trophy battles move you up.`
+        : `Tier ${tier} of ${max}. ${G.passPremium() ? 'Diamond Pass active.' : 'Free track · the Diamond Pass is in the Shop.'} Win crowns to move up.`;
+  }
+  let passConfirm = false, passConfirmT = 0;
+  function passTile() {
+    if (!G.passOpen()) return '';
+    const owned = G.passPremium(), poor = P().diamonds < G.PASS.price;
+    const btn = owned ? '<button class="buy-btn" type="button" disabled>Active</button>'
+      : `<button class="buy-btn gem${poor ? ' poor' : ''}${passConfirm ? ' confirm' : ''}" type="button" data-pass="1" aria-label="${passConfirm ? 'Confirm: buy' : 'Buy'} the Diamond Pass for ${G.PASS.price} diamonds">${passConfirm ? 'Confirm ' : ''}<i class="gem-i" aria-hidden="true"></i>${fmt(G.PASS.price)}</button>`;
+    return `<div class="offer diamonds pass-offer${owned ? ' sold' : ''}"><span class="of-tag">Season ${G.PASS.season}</span>
+      <div class="of-art pass-art"><img src="${cardImg('snowman', true)}" alt=""></div>
+      <b>Diamond Pass</b><small class="of-note">Snowman Evolution at tier 1 and ${G.PASS.tiers.length} more rewards</small>
+      <button type="button" class="of-see">See rewards</button>${btn}</div>`;
+  }
+  function buyPassClick() {
+    if (P().diamonds < G.PASS.price) { KCSound.play('error'); toast('Not enough diamonds. Diamonds will come from the SirSC wallet.'); return; }
+    if (!passConfirm) {
+      passConfirm = true; clearTimeout(passConfirmT);
+      passConfirmT = setTimeout(() => { passConfirm = false; renderShop(); }, 4000);
+      renderShop(); return;
+    }
+    passConfirm = false; clearTimeout(passConfirmT);
+    const r = G.buyPass();
+    if (!r.ok) { KCSound.play('error'); return; }
+    KCSound.play('buy');
+    toast('Diamond Pass active! Its rewards are ready to claim.');
+    refresh();
+    openPass();
+  }
+  function openPass() {
+    renderPass();
+    $('#passModal').hidden = false;
+    const first = $('#passTiers .pm-claim') || $('#passX');
+    first.focus();
+    const here = $('#passTiers .pm-tier.here');
+    if (here) here.scrollIntoView({ block: 'center' });
+  }
+  function closePass() { $('#passModal').hidden = true; }
+  function renderPass() {
+    const open = G.passOpen(), prem = G.passPremium(), tier = G.passTier(), per = G.PASS.crownsPerTier;
+    $('#passTitle').textContent = `Diamond Pass · Season ${G.PASS.season}`;
+    $('#passHead').innerHTML = `<div class="pm-prog"><span class="pass-tier"><b>${tier}</b></span><div class="pass-track"><i style="width:${(tier >= G.PASS.tiers.length ? 100 : G.passInto() / per * 100).toFixed(1)}%"></i></div>
+        <small>${!open ? 'Opens in Sunstone Arena' : tier >= G.PASS.tiers.length ? 'Every tier reached!' : `${G.passInto()} / ${per} crowns to tier ${tier + 1}`}</small></div>
+      <p class="dim">Every crown you take in a trophy battle moves you up. The free track is for everyone; the Diamond Pass track is for pass holders and members.</p>
+      ${prem ? '<span class="pm-owned">Diamond Pass active</span>' : open ? `<button type="button" class="buy-btn gem pm-buy" id="pmBuy"><i class="gem-i" aria-hidden="true"></i>${fmt(G.PASS.price)} · Get the Diamond Pass</button>` : ''}`;
+    $('#passTiers').innerHTML = G.PASS.tiers.map((T, i) => {
+      const cell = track => {
+        const st = G.passState(i, track), R = rewardArt(T[track]);
+        const act = st === 'ready' ? `<button type="button" class="pm-claim" data-tier="${i}" data-track="${track}">Claim</button>`
+          : st === 'claimed' ? '<span class="pm-done" aria-label="Claimed">&#x2713;</span>'
+            : st === 'premium' ? '<span class="pm-lock" title="Needs the Diamond Pass" aria-label="Needs the Diamond Pass"></span>' : '';
+        return `<div class="pm-cell ${track} ${st}">${R.art}<span class="pm-label">${esc(R.label)}</span>${act}</div>`;
+      };
+      return `<li class="pm-tier${i < tier ? ' reached' : ''}${i === tier ? ' here' : ''}"><span class="pm-num">${i + 1}</span>${cell('free')}${cell('paid')}</li>`;
+    }).join('');
+    for (const b of $$('#passTiers .pm-claim')) b.addEventListener('click', () => claimPassClick(+b.dataset.tier, b.dataset.track));
+    const buy = $('#pmBuy');
+    if (buy) buy.addEventListener('click', () => { closePass(); tab('shop'); });
+  }
+  function claimPassClick(i, track) {
+    const got = G.claimPass(i, track);
+    if (!got) return;
+    KCSound.play('crown');
+    refresh(); renderPass();
+    if (got.evo) evoScene(got.evo, 'pass');
+    else if (got.chest) showChest(got.chest, got);
+    else showChest(null, got, `Tier ${i + 1} reward`);
+  }
+
+  /* ---------- evolutions ---------- */
+  // The evolution unlock scene (js/upgrades.js).
+  function evoScene(id, from) {
+    const c = KC_CARDS[id];
+    KCUpgradeFX.play({ mode: 'evo', id, name: c.name, img: cardImg(id), imgEvo: cardImg(id, true), rarity: c.rarity, title: KC_EVOS[id].name, from,
+      before: { level: 1, count: 0, need: 0, max: true }, after: { level: 1, count: 0, need: 0, max: true }, stats: [], blurb: KC_EVOS[id].blurb,
+      onClose: () => { if (!$('#cardModal').hidden && modalId === id) { modalId = null; openCard(id); } } });
+  }
+  function unlockEvoClick(id) {
+    const r = G.useMagic('shards', id);
+    if (!r.ok) { KCSound.play('error'); toast('Not enough Evolution Shards yet.'); return; }
+    refresh();
+    if (!$('#cardModal').hidden && modalId === id) { modalId = null; openCard(id); }
+    evoScene(id, 'shards');
+  }
+  // The Evolution part of a card's window.
+  function modalEvo(id) {
+    const c = KC_CARDS[id], E = G.evoInfo(id), act = $('#mEvoAct'), box = $('#mEvoBox');
+    box.classList.toggle('built', !!E);
+    box.classList.toggle('owned', !!(E && E.has));
+    if (!E) { $('#mEvoTag').textContent = '(unlocks later)'; $('#mEvo').textContent = c.evo; act.hidden = true; return; }
+    $('#mEvo').textContent = E.blurb;
+    act.hidden = false;
+    if (E.has) { $('#mEvoTag').textContent = 'Unlocked'; act.innerHTML = `<img src="${cardImg(id, true)}" alt="${esc(c.name)} evolved"><span>In every battle, every third ${esc(c.name)} you play is evolved.</span>`; return; }
+    if (!E.open) { $('#mEvoTag').textContent = '(opens in Sunstone Arena)'; act.innerHTML = `<span>Reach Sunstone Arena (600 trophies) to unlock evolutions with Evolution Shards or the Diamond Pass.</span>`; return; }
+    $('#mEvoTag').textContent = `${Math.min(E.shards, E.need)} / ${E.need} shards`;
+    act.innerHTML = `<span class="evo-shards"><span class="mi-art">${itemSvg('shards')}</span><span class="pass-track"><i style="width:${Math.min(100, E.shards / E.need * 100).toFixed(0)}%"></i></span></span>
+      <button type="button" class="up-btn evo-btn" id="mEvoBtn" ${E.can ? '' : 'disabled'}><span>Unlock</span><small>${E.need} shards</small></button>`;
+    const b = $('#mEvoBtn');
+    if (b) b.addEventListener('click', () => unlockEvoClick(id));
+  }
+
   /* ---------- magic items ---------- */
   // Item art lives in js/items.js, each item built from parts that can fly together.
   const itemSvg = id => KCItems.svg(id);
@@ -648,13 +777,14 @@ const KCMenu = (() => {
     const pick = $('#magicPick');
     if (!magicSel) { pick.innerHTML = '<p class="dim">Pick an item to see what it does and use it on a card.</p>'; return; }
     const M = G.MAGIC[magicSel], n = G.magicCount(magicSel);
-    const cards = P().found.filter(id => M.rarity === 'any' || KC_CARDS[id].rarity === M.rarity);
-    const why = { full: 'Has the copies it needs', copies: 'Needs its copies first', max: 'Max level', rarity: 'Wrong rarity', 'none-held': 'You have none', 'not-found': 'Not found', none: '' };
+    const cards = P().found.filter(id => (M.kind === 'shard' ? !!KC_EVOS[id] : M.rarity === 'any' || KC_CARDS[id].rarity === M.rarity));
+    const why = { full: 'Has the copies it needs', copies: 'Needs its copies first', max: 'Max level', rarity: 'Wrong rarity', 'none-held': 'You have none', 'not-found': 'Not found', none: '',
+      'evo-owned': 'Evolution unlocked', 'evo-locked': 'Opens in Sunstone Arena', shards: `Needs ${M.kind === 'shard' ? (KC_EVOS.snowman.shards) : ''} shards`, 'no-evo': '' };
     const rows = M.soon ? '<p class="dim">Nothing gives evolution shards yet. They arrive with evolutions.</p>'
       : !cards.length ? `<p class="dim">You have no ${M.rarity} cards yet.</p>`
         : `<div class="mp-cards">${cards.map(id => {
           const r = G.magicFor(magicSel, id), u = G.upgradeInfo(id);
-          const what = r.ok ? (M.kind === 'hammer' ? `Upgrade to level ${r.level}` : `+${fmt(r.gives)} ${r.gives === 1 ? 'copy' : 'copies'}`) : why[r.reason] || '';
+          const what = r.ok ? (M.kind === 'shard' ? 'Unlock its evolution' : M.kind === 'hammer' ? `Upgrade to level ${r.level}` : `+${fmt(r.gives)} ${r.gives === 1 ? 'copy' : 'copies'}`) : why[r.reason] || '';
           return `<button type="button" class="mp-card${r.ok ? '' : ' off'}" data-card="${id}" ${r.ok ? '' : 'disabled'}>
             <img src="${cardImg(id)}" alt=""><span><b>${esc(KC_CARDS[id].name)}</b><small>Level ${u.level}${u.max ? '' : ` · ${fmt(u.count)} / ${fmt(u.need)}`}</small><em>${what}</em></span></button>`;
         }).join('')}</div>`;
@@ -662,6 +792,7 @@ const KCMenu = (() => {
     for (const b of $$('#magicPick .mp-card:not(.off)')) b.addEventListener('click', () => applyMagic(magicSel, b.dataset.card));
   }
   function applyMagic(item, id) {
+    if (G.MAGIC[item].kind === 'shard') { unlockEvoClick(id); return; }
     const before = G.upgradeInfo(id), r = G.useMagic(item, id);
     if (!r.ok) { toast('That item can\'t be used on that card right now.'); return; }
     const M = G.MAGIC[item], after = G.upgradeInfo(id);
@@ -683,7 +814,7 @@ const KCMenu = (() => {
   }
   // Buttons in a card's details window for the items that can be used on it.
   function modalMagic(id) {
-    const box = $('#mMagic'), btns = G.MAGIC_ORDER.filter(it => G.magicFor(it, id).ok).map(it => {
+    const box = $('#mMagic'), btns = G.MAGIC_ORDER.filter(it => it !== 'shards' && G.magicFor(it, id).ok).map(it => {
       const r = G.magicFor(it, id), M = G.MAGIC[it];
       return `<button type="button" class="mm-btn" data-item="${it}" title="${esc(M.blurb)}"><span class="mi-art">${itemSvg(it)}</span><span><b>${esc(M.name)}</b><small>${M.kind === 'hammer' ? 'Upgrade free' : `+${fmt(r.gives)} ${r.gives === 1 ? 'copy' : 'copies'}`} · ×${fmt(G.magicCount(it))}</small></span></button>`;
     });
@@ -757,7 +888,7 @@ const KCMenu = (() => {
     $('#collGrid').innerHTML = KC_ALL_CARDS.map(id => {
       const c = KC_CARDS[id], u = G.upgradeInfo(id);
       return `<button type="button" class="coll-card ${c.rarity}${u.found ? '' : ' not-found'}${u.can ? ' can-up' : ''}" data-id="${id}">
-        <span class="cc-art"><img src="${cardImg(id)}" alt=""><span class="cost">${c.cost}</span>${deck.includes(id) ? '<span class="in-deck" title="In your deck">In deck</span>' : ''}${u.can ? '<span class="up-arrow" aria-label="Upgrade ready"></span>' : ''}</span>
+        <span class="cc-art"><img src="${cardImg(id)}" alt=""><span class="cost">${c.cost}</span>${deck.includes(id) ? '<span class="in-deck" title="In your deck">In deck</span>' : ''}${u.can ? '<span class="up-arrow" aria-label="Upgrade ready"></span>' : ''}${G.hasEvo(id) ? '<span class="evo-badge" title="Evolution unlocked">Evo</span>' : ''}</span>
         <b>${esc(c.name)}</b><span class="rar">${c.rarity}</span>${lvlStrip(id)}</button>`;
     }).join('');
     for (const b of $$('#deckRow .mini-card')) b.addEventListener('click', () => (swapId ? doSwap(+b.dataset.slot) : openCard(b.dataset.id)));
@@ -805,7 +936,7 @@ const KCMenu = (() => {
       const up = next && (k === 'Health' || k === 'Damage') ? `<em>+${Math.round((k === 'Health' ? c.hp : c.dmg) * next) - val}</em>` : '';
       return `<div><small>${k}</small><b>${val}${up}</b></div>`;
     }).join('');
-    $('#mEvo').textContent = c.evo;
+    modalEvo(id);
     modalMagic(id);
     // level, copies and the buttons
     $('#mLevel').textContent = u.found ? (u.max ? `Level ${u.level} · Max` : `Level ${u.level}`) : 'Not found yet';
@@ -899,8 +1030,6 @@ const KCMenu = (() => {
   /* ---------- side plaques ---------- */
   function renderSides() {
     const p = P(), open = G.roadOpen(), next = G.nextTrainer();
-    $('#passText').innerHTML = open ? '<span class="tag-lock">Soon</span> The Kingdom Pass arrives in a later update. Members will get the premium track.'
-      : '<span class="tag-lock">Locked</span> Opens with the Trophy Road. Members get the premium track.';
     if (!open) {
       $('#leftTitle').textContent = 'Coming Up';
       const ups = [
@@ -962,6 +1091,7 @@ const KCMenu = (() => {
     $('#coinVal').textContent = fmt(p.coins);
     $('#gemVal').textContent = fmt(p.diamonds);
     $('#shopTag').hidden = !G.freeChestReady();
+    passPlaque();
     if (subNow === 'magic') renderMagic(); else $('#magicTag').textContent = String(G.MAGIC_ORDER.reduce((a, id) => a + (id.startsWith('wild_') ? 0 : G.magicCount(id)), 0) || '');
     $('#soundBtn').setAttribute('aria-label', KCSound.on ? 'Sound on' : 'Sound off');
     $('#soundBtn').classList.toggle('off', !KCSound.on);
@@ -1057,6 +1187,10 @@ const KCMenu = (() => {
     $('#testMagic').addEventListener('click', () => { G.grantMagic(); KCSound.play('buy'); refresh(); toast('Test: added wild cards, books and Hammers of Books'); }); // TEMPORARY
     $('#cardModal').addEventListener('click', e => { if (e.target.id === 'cardModal') closeCard(); });
     $('#mUpgrade').addEventListener('click', upgradeCard);
+    $('#passPlaque').addEventListener('click', () => { if (G.passOpen()) openPass(); else { KCSound.play('error'); toast('The Diamond Pass opens in Sunstone Arena (600 trophies).'); } });
+    $('#passX').addEventListener('click', closePass);
+    $('#passMini').addEventListener('click', openPass);
+    $('#passModal').addEventListener('click', e => { if (e.target.id === 'passModal') closePass(); });
     $('#mUse').addEventListener('click', () => startSwap(modalId));
     $('#swapCancel').addEventListener('click', endSwap);
     $('#chestOpen').addEventListener('click', e => { if (!e.target.closest('#coDone')) chestTap(); });
@@ -1068,8 +1202,8 @@ const KCMenu = (() => {
         else if (e.key === ' ' || e.key === 'Enter') { chestTap(); e.preventDefault(); }
         return;
       }
-      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); return; }
-      if (!$('#cardModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); return; }
+      if (!$('#cardModal').hidden || !$('#passModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
       const n = '12345'.indexOf(e.key);
       if (n >= 0) { tab(TABS[n]); e.preventDefault(); }
       else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(nextFoe()); e.preventDefault(); }

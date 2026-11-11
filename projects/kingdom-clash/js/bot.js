@@ -26,6 +26,9 @@ const KCBot = (() => {
     melee: ['skeletons', 'pots', 'wolves', 'gladiator', 'flail', 'cannon', 'hawks', 'footmen', 'gorilla', 'archers'],
   };
   const MELEE = { wolves: 1, gladiator: 1, gorilla: 1, rhino: 1, skeletons: 1, footmen: 1, flail: 1 };
+  // cards that go for towers: they start pushes, they don't defend
+  const WIN = ['rhino', 'ramcart', 'camel'];
+  const NO_DEFEND = { rhino: 1, ramcart: 1, camel: 1, mole: 1 };
 
   function create(team, opts) {
     opts = opts || {};
@@ -84,17 +87,17 @@ const KCBot = (() => {
 
     // 1. A spell on a big clump, or on troops hitting a tower. Fireball counts everything it hits;
     //    Spears only counts what it would finish off (swarms, flyers, ranged troops).
-    for (const spell of ['fireball', 'spears']) {
+    for (const spell of ['fireball', 'spears', 'sandstorm']) {
       if (!has(spell) || !afford(spell)) continue;
       const c = KC_CARDS[spell], reach = c.area - 0.2, dmg = c.dmg * KCSim.levelMult(s.cardLevels[me] && s.cardLevels[me][spell] || 1);
       let best = null, bv = 0;
       for (const f of foes) {
         let v = 0;
-        for (const g of foes) if (Math.hypot(g.x - f.x, g.y - f.y) < reach && (spell === 'fireball' || g.e.hp <= dmg)) v += g.v;
+        for (const g of foes) if (Math.hypot(g.x - f.x, g.y - f.y) < reach && (spell !== 'spears' || g.e.hp <= dmg)) v += g.v * (spell === 'sandstorm' ? 0.8 : 1);
         if (f.y > 20) v += 1;
         if (v > bv) { bv = v; best = f; }
       }
-      const need = spell === 'fireball' ? K.fireballValue : Math.max(3.5, K.fireballValue - 1);
+      const need = spell === 'fireball' ? K.fireballValue : spell === 'sandstorm' ? Math.max(4, K.fireballValue - 0.5) : Math.max(3.5, K.fireballValue - 1);
       if (best && bv >= need) {
         const lead = best.e.moving ? 0.8 : 0;
         return { card: spell, x: best.x, y: best.y + lead, exact: true, quick: true };
@@ -114,12 +117,12 @@ const KCBot = (() => {
       const guard = mine.filter(m => Math.hypot(m.x - cx, m.y - lead.y) < 5.5).reduce((a, m) => a + m.v, 0);
       if (guard < value * K.defend) {
         const cards = group.map(t => t.e.card);
-        const role = cards.includes('rhino') ? 'tank'
+        const role = cards.some(c => WIN.includes(c)) ? 'tank'
           : group.some(t => t.e.air) ? 'air'
           : cards.filter(c => c === 'wolves').length >= 3 ? 'swarm'
           : cards.some(c => c === 'archers' || c === 'snowman') ? 'ranged' : 'melee';
-        const pick = ROLE[role].find(id => has(id) && afford(id) && KC_CARDS[id].kind !== 'spell' && id !== 'rhino')
-          || hand.find(id => afford(id) && KC_CARDS[id].kind !== 'spell' && id !== 'rhino');
+        const pick = ROLE[role].find(id => has(id) && afford(id) && KC_CARDS[id].kind !== 'spell' && !NO_DEFEND[id])
+          || hand.find(id => afford(id) && KC_CARDS[id].kind !== 'spell' && !NO_DEFEND[id]);
         if (pick && KC_CARDS[pick].kind === 'building') {
           // a building goes in the middle of our side, a little toward the threatened lane, to pull it in
           return { card: pick, x: lead.x < 9 ? 7.5 : 10.5, y: 22.5, quick: lead.y > 21 };
@@ -134,7 +137,7 @@ const KCBot = (() => {
     }
 
     // 3. Back up a push that is already crossing.
-    const push = mine.find(m => m.e.card === 'rhino' && m.y < 19.5 && m.y > 11);
+    const push = mine.find(m => WIN.includes(m.e.card) && m.y < 19.5 && m.y > 11);
     if (push && E >= 4 && s.time - b.lastAttack > 2) {
       const pick = ['snowman', 'pots', 'archers', 'hawks', 'flail', 'gladiator', 'wolves'].find(id => has(id) && afford(id));
       if (pick) return { card: pick, x: push.x, y: Math.max(17.5, push.y + 2.5), attack: true };
@@ -145,7 +148,14 @@ const KCBot = (() => {
       const enemy = 1 - me;
       const weak = ['L', 'R'].map(l => S.tower(s, enemy, l)).filter(t => !t.dead).sort((a, c) => a.hp - c.hp)[0];
       const lx = weak ? weak.x : (b.rand() < 0.5 ? 3.5 : 14.5);
+      // the Mole tunnels to just behind the weakest tower (sometimes before anything else)
+      const moleAt = weak && { card: 'mole', x: weak.x + (weak.x < 9 ? -0.5 : 0.5), y: my(b, weak.y) - 2.4, attack: true, exact: true };
+      if (moleAt && has('mole') && afford('mole') && b.rand() < 0.45) return moleAt;
       if (has('rhino') && afford('rhino')) return { card: 'rhino', x: lx < 9 ? 5.5 : 12.5, y: 30.5, attack: true };
+      // a Camel Jockey from the back, a Ram Cart right at the bridge for a fast hit
+      if (has('camel') && afford('camel')) return { card: 'camel', x: lx < 9 ? 4.5 : 13.5, y: 29.5, attack: true };
+      if (has('ramcart') && afford('ramcart')) return { card: 'ramcart', x: lx, y: 18.5, attack: true };
+      if (moleAt && has('mole') && afford('mole')) return moleAt;
       const pick = ['gladiator', 'flail', 'hawks', 'archers', 'footmen', 'wolves', 'gorilla'].find(id => has(id) && afford(id));
       if (pick) return { card: pick, x: lx, y: 18.5, attack: true };
     }

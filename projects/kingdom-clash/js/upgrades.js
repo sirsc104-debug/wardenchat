@@ -210,7 +210,7 @@ const KCUpgradeFX = (() => {
     sizeFx(); FX.parts = []; FX.last = 0;
     if (!FX.raf) FX.raf = requestAnimationFrame(frame);
     if (calm) { finish(false); return; }
-    ({ upgrade: coinsRun, hammer: hammerRun, wild: wildRun, book: bookRun })[d.mode]();
+    ({ upgrade: coinsRun, hammer: hammerRun, wild: wildRun, book: bookRun, evo: evoRun })[d.mode]();
   }
   function tap() { if (!S) return; if (!S.finished) finish(true); else close(); }
   function end(quiet) {
@@ -238,6 +238,16 @@ const KCUpgradeFX = (() => {
     S.finished = true;
     const card = $('usCard'), lvl = d.mode === 'upgrade' || d.mode === 'hammer';
     $('usTool').className = 'us-tool gone';
+    if (d.mode === 'evo') {
+      $('usImg').src = d.imgEvo;
+      card.className = 'us-card done evolved';
+      $('usTitle').textContent = 'Evolution unlocked!';
+      $('usGain').innerHTML = `<span class="evo-name">${esc(d.title)}</span>`; $('usGain').className = 'us-gain on';
+      $('usNote').textContent = d.blurb; $('usNote').className = 'us-note evo';
+      if (quick && !calm) { const [x, y, w] = center(card); flash(x, y, w, '#c9a8ff'); sparks(x, y, 40, EVOC, 340); }
+      $('usHint').textContent = 'Click to continue';
+      return;
+    }
     card.className = 'us-card done' + (lvl ? ' leveled' : ' filled');
     bar(d.after.count, d.after.need, d.after.max);
     if (lvl) {
@@ -262,7 +272,7 @@ const KCUpgradeFX = (() => {
     if (quick && !calm) { const [x, y, w] = center(card); flash(x, y, w * 0.9, colors()[0]); sparks(x, y, 30, colors(), 300); }
     $('usHint').textContent = 'Click to continue';
   }
-  const colors = () => (S.d.mode === 'hammer' || S.d.item === 'book_books' ? RAINBOW : RCOL[S.d.rarity] || RCOL.common);
+  const colors = () => (S.d.mode === 'evo' ? EVOC : S.d.mode === 'hammer' || S.d.item === 'book_books' ? RAINBOW : RCOL[S.d.rarity] || RCOL.common);
 
   // The level number slams from old to new, the card bursts and the stats count up.
   function levelBurst(rainbow) {
@@ -311,6 +321,34 @@ const KCUpgradeFX = (() => {
     }, 420);
     later(() => { card.className = 'us-card charging'; snd('charge'); }, 1100);
     later(() => levelBurst(false), 2250);
+  }
+
+  /* ---------- an evolution unlocks ---------- */
+  // Shards (or the pass's diamonds) swirl in round the card, it shakes and glows violet, then bursts and
+  // turns into its evolved card.
+  const EVOC = ['#c9a8ff', '#b48cff', '#7ff0ff', '#ffffff', '#ff9ad8'];
+  function evoRun() {
+    const d = S.d, card = $('usCard');
+    later(() => {
+      const [cx, cy, w] = center(card), n = 12;
+      for (let i = 0; i < n; i++) later(() => {
+        const a = i / n * 6.283 + 0.4, R = Math.max(innerWidth, innerHeight) * 0.42;
+        fly('orb', cx + Math.cos(a) * R, cy + Math.sin(a) * R, cx + Math.cos(a) * w * 0.2, cy + Math.sin(a) * w * 0.2, 0.7, EVOC[i % EVOC.length], () => { snd('partSnap'); sparks(cx, cy, 4, EVOC, 160); });
+      }, i * 90);
+      $('usGain').innerHTML = `<span class="evo-name">${d.from === 'pass' ? 'Diamond Pass reward' : '6 Evolution Shards'}</span>`; $('usGain').className = 'us-gain on';
+    }, 350);
+    later(() => { card.className = 'us-card charging evo-charge'; snd('charge'); }, 1450);
+    later(() => {
+      const [x, y, w] = center(card);
+      $('usImg').src = d.imgEvo;
+      card.className = 'us-card leveled evolved';
+      el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+      $('usTitle').textContent = 'Evolution unlocked!';
+      flash(x, y, w * 1.2, '#c9a8ff'); sparks(x, y, 80, EVOC, 440);
+      later(() => sparks(x, y - w * 0.3, 30, EVOC, 300, true), 160);
+      snd('evo'); snd('levelUp');
+    }, 2600);
+    later(() => finish(false), 3400);
   }
 
   /* ---------- the Hammer of Books ---------- */

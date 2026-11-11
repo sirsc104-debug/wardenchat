@@ -1380,3 +1380,104 @@ button.slot:hover { transform: translateY(-3px); }
 @keyframes emBob { to { transform: translateY(-5px); } }
 @media (prefers-reduced-motion: reduce) { .emote-bub, .emote-bub * { animation: none !important; } }
 .emote-bub.no-tail::before, .emote-bub.no-tail::after { display: none; }
+
+/* an evolution in the hand: its charge pips, and a violet glow when the next play is evolved */
+.card .evo-pips { position: absolute; top: 4px; right: 6px; display: flex; gap: 3px; }
+.card .evo-pips i { width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--outline); background: #3a2a6a; }
+.card .evo-pips i.on { background: #c9a8ff; box-shadow: 0 0 6px #c9a8ff; }
+.card.evo-ready img { border-color: #c9a8ff; box-shadow: 0 0 0 2px var(--outline), 0 0 16px rgba(190, 140, 255, 0.95); animation: evoGlow 1s ease-in-out infinite alternate; }
+.card.evo-ready .evo-pips { display: none; }
+@keyframes evoGlow { to { box-shadow: 0 0 0 2px var(--outline), 0 0 26px rgba(190, 140, 255, 1); } }
+
+/* the evolution unlock scene */
+.up-scene.m-evo { --uc: #b48cff; }
+.m-evo .us-lvl, .m-evo .us-bar, .m-evo .us-stats { display: none; }
+.us-card.evo-charge::before { background: radial-gradient(circle, #c9a8ff, transparent 66%); }
+.us-card.evolved img { border-color: #c9a8ff; box-shadow: 0 0 0 3px var(--outline), 0 0 28px rgba(190, 140, 255, 0.95), 0 10px 0 rgba(0, 0, 0, 0.35); }
+.us-gain .evo-name { color: #d9c2ff; font-size: 22px; }
+.us-note.evo { max-width: 46ch; font-size: 14px; color: #e6dcff; font-weight: 800; line-height: 1.4; }
+
+/* the Diamond Pass plaque in the lobby */
+.pass-plaque { display: block; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.pass-plaque .pass-row { opacity: 1; }
+.pass-plaque.locked .pass-row { opacity: 0.55; }
+.pass-plaque:hover { filter: brightness(1.08); }
+.pass-plaque.has-ready { box-shadow: 0 0 0 3px #7fe0ff, 0 0 18px rgba(120, 220, 255, 0.6); }
+.pass-tier b { display: block; transform: rotate(-45deg); font-weight: 400; }
+.pass-tier { background: linear-gradient(#bff3ff, #3fa6e0); }
+.pass-track { overflow: hidden; }
+.pass-track i { display: block; height: 100%; width: 0; background: linear-gradient(#9ff0ff, #2fa0e0); border-radius: 999px; transition: width 0.3s; }
+.tag-new { display: inline-block; margin-right: 4px; font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 999px; background: #2fb36b; color: #fff; }
+
+/* the Diamond Pass window */
+.pass-card { width: min(760px, 100%); box-sizing: border-box; max-height: min(92vh, 720px); display: flex; flex-direction: column; gap: 10px; padding: 26px 18px 16px; animation: pop 0.2s ease-out; }
+.pm-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.pm-head .dim { flex: 1 1 260px; margin: 0; font-size: 13px; }
+.pm-prog { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; }
+.pm-prog .pass-track { flex: 1; height: 18px; border-radius: 999px; background: #120c22; border: 3px solid var(--outline); }
+.pm-prog small { font-weight: 900; white-space: nowrap; }
+.pm-owned { padding: 6px 14px; border-radius: 999px; background: linear-gradient(#bff3ff, #3fa6e0); color: var(--outline); font-weight: 900; border: 3px solid var(--outline); }
+.pm-buy { width: auto; padding: 8px 14px; }
+.pm-cols, .pm-tier { display: grid; grid-template-columns: 54px minmax(0, 1fr) minmax(0, 1fr); gap: 8px; align-items: center; }
+.pm-cols { font-weight: 900; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 0 6px; }
+.pm-cols span:last-child { color: #8fe3ff; }
+.pm-tiers { list-style: none; margin: 0; padding: 4px 6px 4px 0; overflow-y: auto; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+.pm-num { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; border: 3px solid var(--outline); background: #2a2050; font-family: var(--display); font-size: 18px; }
+.pm-tier.reached .pm-num { background: linear-gradient(#bff3ff, #3fa6e0); color: var(--outline); }
+.pm-tier.here .pm-num { box-shadow: 0 0 0 3px #ffe27a; }
+.pm-cell { position: relative; display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 4px 10px; border-radius: 12px; border: 3px solid var(--outline); background: rgba(0, 0, 0, 0.28); }
+.pm-cell.paid { background: linear-gradient(90deg, rgba(60, 160, 230, 0.28), rgba(0, 0, 0, 0.28)); }
+.pm-cell.claimed { opacity: 0.55; }
+.pm-cell.locked .pm-label { color: #b9acdf; }
+.pm-cell.ready { box-shadow: inset 0 0 0 2px #7fe0ff; }
+.pm-cell > :first-child { flex: none; width: 46px; height: 46px; display: grid; place-items: center; }
+.pm-cell svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.pm-cell .rv-pile.small { transform: scale(0.8); }
+.pr-evo { width: 38px !important; height: 46px !important; object-fit: cover; border-radius: 7px; border: 2px solid var(--outline); }
+.pm-label { flex: 1; min-width: 0; font-weight: 900; font-size: 13px; line-height: 1.2; }
+.pm-claim { flex: none; padding: 6px 12px; border-radius: 999px; border: 3px solid var(--outline); background: linear-gradient(#a8f39a, #2fb36b); font-weight: 900; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35); }
+.pm-done { flex: none; font-weight: 900; font-size: 20px; color: #a8f39a; }
+.pm-lock { flex: none; width: 18px; height: 22px; border-radius: 4px; background: #8fe3ff; border: 2px solid var(--outline); position: relative; }
+.pm-lock::before { content: ''; position: absolute; left: 2px; right: 2px; top: -9px; height: 10px; border: 3px solid #8fe3ff; border-bottom: 0; border-radius: 8px 8px 0 0; }
+
+/* the Diamond Pass in the Shop */
+.offers { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.pass-offer { background: linear-gradient(#4aa8e8, #1f5fae) !important; }
+.pass-art img { width: 64px; border-radius: 8px; border: 3px solid var(--outline); box-shadow: 0 0 14px rgba(190, 140, 255, 0.8); }
+.of-see { padding: 2px 10px; border-radius: 999px; border: 2px solid var(--outline); background: rgba(255, 255, 255, 0.85); color: var(--outline); font-weight: 900; font-size: 11px; }
+
+/* evolutions in the card window and the collection */
+.m-evo.built { background: rgba(176, 107, 255, 0.24); }
+.m-evo.owned { border-color: #c9a8ff; box-shadow: 0 0 12px rgba(190, 140, 255, 0.45); }
+.m-evo-act { display: flex; align-items: center; gap: 10px; margin-top: 6px; font-size: 13px; font-weight: 800; }
+.m-evo-act img { width: 44px; border-radius: 6px; border: 2px solid var(--outline); }
+.evo-shards { display: flex; align-items: center; gap: 6px; flex: 1; }
+.evo-shards .mi-art { width: 32px; height: 32px; }
+.evo-shards .pass-track { flex: 1; height: 14px; border-radius: 999px; background: #120c22; border: 2px solid var(--outline); }
+.evo-shards .pass-track i { background: linear-gradient(#e2ccff, #9a6ae8); }
+.evo-btn { padding: 4px 14px; }
+.evo-badge { position: absolute; top: 4px; right: 4px; padding: 1px 6px; border-radius: 999px; background: #9a6ae8; color: #fff; font-size: 10px; font-weight: 900; border: 2px solid var(--outline); }
+.rar.legendary, .legendary .rar { background: linear-gradient(90deg, #2fb3a6, #7a4cff, #d65aa8); color: #fff; }
+.rar.epic, .epic .rar { background: #7a3fd0; color: #f1dcff; }
+/* the Diamond Pass button for narrow screens (the side plaques are hidden there) */
+.pass-mini { display: none; align-items: center; gap: 10px; margin: 8px auto 0; padding: 6px 16px 6px 10px; border-radius: 999px; border: 3px solid var(--outline);
+  background: linear-gradient(#4aa8e8, #1f5fae); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); text-align: left; }
+.pass-mini .pass-tier { width: 24px; height: 24px; }
+.pass-mini b { display: block; font-size: 14px; }
+.pass-mini small { display: block; font-size: 11px; font-weight: 800; color: #e3f4ff; }
+.pass-mini.has-ready { box-shadow: 0 0 0 3px #7fe0ff, 0 4px 0 rgba(0, 0, 0, 0.35); }
+@media (max-width: 1080px) { .pass-mini:not([hidden]) { display: flex; } }
+.pr-coins { position: relative; }
+.pr-coins .coin-i { position: absolute; width: 26px; height: 26px; }
+.pr-coins .coin-i:first-child { left: 4px; top: 14px; }
+.pr-coins .coin-i:last-child { left: 16px; top: 6px; }
+@media (max-width: 560px) {
+  .pass-card { padding: 24px 10px 12px; }
+  .pm-cols, .pm-tier { grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
+  .pm-num { width: 30px; height: 30px; font-size: 14px; }
+  .pm-cell { flex-wrap: wrap; justify-content: center; gap: 2px 6px; padding: 4px 6px; text-align: center; }
+  .pm-cell > :first-child { width: 34px; height: 34px; }
+  .pm-label { flex: 1 1 100%; font-size: 11px; }
+  .pm-claim { padding: 3px 10px; font-size: 12px; }
+  .pm-head .dim { display: none; }
+}

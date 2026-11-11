@@ -47,6 +47,7 @@
     G.s = S.create({
       seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, T.towerDamage],
       decks: [trophy ? KCProgress.state.deck : KCProgress.trainingDeck(), T.deck || KC_STARTER_DECK], cardLevels: [KCProgress.cardLevels(), T.cardLevels || {}],
+      evos: [KCProgress.evoList(), T.evos || []],
     });
     G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9) });
     const where = trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
@@ -114,7 +115,8 @@
 
   /* ---------- the hand ---------- */
   function renderHand() {
-    const s = G.s, hand = s.hands[0], key = hand.join() + '|' + s.queues[0][0];
+    const s = G.s, hand = s.hands[0], evoKey = hand.concat(s.queues[0][0]).map(id => { const e = S.evoCharge(s, 0, id); return e ? e.n : ''; }).join();
+    const key = hand.join() + '|' + s.queues[0][0] + '|' + evoKey;
     if (key === G.handKey) return;
     const prev = G.handKey ? G.handKey.split('|')[0].split(',') : [];
     G.handKey = key;
@@ -126,11 +128,17 @@
       b.className = 'card' + (prev.length && prev[i] !== id ? ' enter' : '') + (G.sel === i ? ' sel' : '');
       b.dataset.slot = i;
       b.title = `${c.name} (${c.cost} energy)`;
-      b.innerHTML = `<img src="${cardImg(id)}" alt="${c.name}"><span class="ready"></span><span class="key">${i + 1}</span><span class="cost">${c.cost}</span>`;
+      // an evolution's charge: a pip for each play counted, and the evolved card when the next is it
+      const ev = S.evoCharge(s, 0, id);
+      if (ev && ev.ready) b.classList.add('evo-ready');
+      const pips = ev ? `<span class="evo-pips">${Array.from({ length: ev.cycle - 1 }, (_, j) => `<i class="${j < ev.n ? 'on' : ''}"></i>`).join('')}</span>` : '';
+      b.innerHTML = `<img src="${ev && ev.ready ? KCMenu.cardImg(id, true) : cardImg(id)}" alt="${c.name}${ev && ev.ready ? ' (evolved)' : ''}"><span class="ready"></span><span class="key">${i + 1}</span><span class="cost">${c.cost}</span>${pips}`;
+      if (ev && ev.ready) b.title = `${c.name}: evolved (${c.cost} energy)`;
       b.addEventListener('pointerdown', e => cardDown(e, i));
       el.appendChild(b);
     });
-    $('#nextImg').src = cardImg(s.queues[0][0]);
+    const nx = s.queues[0][0], nev = S.evoCharge(s, 0, nx);
+    $('#nextImg').src = nev && nev.ready ? KCMenu.cardImg(nx, true) : cardImg(nx);
   }
   function select(i) {
     G.sel = i;
@@ -244,7 +252,7 @@
   }
 
   /* ---------- sim events become sound and effects ---------- */
-  const SHOOT = { arrow: 'arrow', cannon: 'cannon', snowball: 'snow', pot: 'potThrow' };
+  const SHOOT = { arrow: 'arrow', cannon: 'cannon', snowball: 'snow', bigsnow: 'snow', pot: 'potThrow' };
   function handleEvents() {
     const s = G.s;
     for (const e of s.events) {
@@ -253,8 +261,33 @@
           KCSound.play('deploy');
           ring(e.x, e.y, e.team, 1.4);
           dust(e.x, e.y, 8);
+          if (e.evo) {
+            // an evolution arrives: a violet burst
+            KCSound.play('evo');
+            G.fx.push({ kind: 'evo', x: e.x, y: e.y, life: 0.9, max: 0.9 });
+            sparks(e.x, e.y, 18, '#c9a8ff', 4); sparks(e.x, e.y, 10, '#7ff0ff', 3);
+          }
           break;
-        case 'cast': KCSound.play(e.card === 'spears' ? 'spearsCast' : 'spell'); break;
+        case 'cast': KCSound.play(e.card === 'spears' ? 'spearsCast' : e.card === 'sandstorm' ? 'sandstorm' : 'spell'); break;
+        case 'burrow': KCSound.play('dig'); puff(e.x, e.y, 10, '#a07850', 0.6); break;
+        case 'surface':
+          KCSound.play('surface'); G.shake = Math.max(G.shake, 0.12);
+          puff(e.x, e.y, 14, '#a07850', 0.9);
+          for (let i = 0; i < 12; i++) { const a = Math.random() * 6.28, v = 1.5 + Math.random() * 3; G.fx.push({ kind: 'rock', x: e.x, y: e.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.6, z: 0, vz: 3 + Math.random() * 5, r: 0.08 + Math.random() * 0.12, life: 0.9, max: 0.9, col: Math.random() < 0.5 ? '#8a6440' : '#c9a070' }); }
+          break;
+        case 'ram':
+          KCSound.play('ramHit'); G.shake = Math.max(G.shake, 0.2 + 0.25 * (e.power - 1));
+          sparks(e.x, e.y, 14, '#ffd25a', 4);
+          G.fx.push({ kind: 'blast', x: (e.x + e.cx) / 2, y: (e.y + e.cy) / 2, r: 1.2, life: 0.4, max: 0.4 });
+          for (let i = 0; i < 14; i++) { const a = Math.random() * 6.28, v = 2 + Math.random() * 4; G.fx.push({ kind: 'rock', x: e.cx, y: e.cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.6, z: 0, vz: 4 + Math.random() * 6, r: 0.08 + Math.random() * 0.14, life: 1.1, max: 1.1, col: Math.random() < 0.3 ? '#ffcd33' : '#9a6a3a' }); }
+          break;
+        case 'breakup': puff(e.x, e.y, 8, '#c9a070', 0.7); break;
+        case 'lasso': KCSound.play('lasso'); break;
+        case 'snare': KCSound.play('snare'); G.fx.push({ kind: 'ring', x: e.x, y: e.y, r: 0.7, team: 1 - e.team, life: 0.35, max: 0.35 }); break;
+        case 'charge':
+          KCSound.play('smash'); G.shake = Math.max(G.shake, 0.22);
+          sparks(e.x, e.y, 10, '#fff3c4', 4); puff(e.x, e.y, 8, '#e0c08a', 0.8);
+          break;
         case 'shoot': KCSound.play(SHOOT[e.kind] || 'arrow'); break;
         case 'hit':
           if (e.card === 'gorilla' || e.card === 'rhino') { KCSound.play('smash'); G.shake = Math.max(G.shake, e.card === 'rhino' ? 0.12 : 0.18); sparks(e.x, e.y, 6, '#fff3c4'); }
@@ -339,7 +372,7 @@
     G.ended = 1.8;
     if (e.winner >= 0) KCScenery.celebrate(e.winner);
     select(-1);
-    G.res = KCMenu.recordResult(G.trainer, e.winner);
+    G.res = KCMenu.recordResult(G.trainer, e.winner, G.s.crowns[0]);
     $('#countdown').hidden = true;
     if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); }
     else if (e.winner === 1) { banner('Defeat'); setTimeout(() => KCSound.play('lose'), 300); KCEmotes.foeWon(); }
@@ -360,7 +393,8 @@
     const un = $('#resUnlock'), tr = $('#resTrophy');
     const notes = [res.unlockedNext ? `${res.unlockedNext.name} unlocked!` : '', res.roadOpened ? 'Trophy Road unlocked!' : '',
       res.chest ? `${res.chest.name} earned!` : '', res.slotsFull ? 'Chest slots full: open one to make room' : '',
-      res.newArena ? `${res.newArena.name} reached!` : '', res.newRewards ? 'Trophy Road reward ready!' : '', res.levelUp ? `Level ${res.levelUp}!` : ''].filter(Boolean);
+      res.newArena ? `${res.newArena.name} reached!` : '', res.newRewards ? 'Trophy Road reward ready!' : '', res.levelUp ? `Level ${res.levelUp}!` : '',
+      res.pass ? `+${res.pass.points} Diamond Pass crown${res.pass.points === 1 ? '' : 's'}${res.pass.tierUp ? ` · tier ${res.pass.tierUp} reached!` : ''}` : ''].filter(Boolean);
     un.hidden = !notes.length;
     un.textContent = notes.join('  ·  ');
     tr.hidden = res.kind !== 'trophy';
@@ -389,7 +423,7 @@
     c.drawImage(G.bg, 0, 0, G.bg.width / G.dpr, G.bg.height / G.dpr);
     if (G.art.fx === 'lava') lava(c, k, t); else water(c, k, t);
     const selId = G.sel >= 0 ? s.hands[0][G.sel] : null;
-    if (selId && KC_CARDS[selId].kind !== 'spell') drawZone(c, t);
+    if (selId && KC_CARDS[selId].kind !== 'spell' && !KC_CARDS[selId].anywhere) drawZone(c, t);
 
     const lerp = (e, a) => [e.px + (e.x - e.px) * a, e.py + (e.y - e.py) * a];
     const ground = [], air = [];
@@ -401,7 +435,7 @@
     air.sort((a, b) => a.z - b.z);
     for (const d of air) shadow(c, SX(d.x), SY(d.y), d.e.radius * k * 1.1);
     for (const d of ground) drawEnt(c, d, t);
-    for (const z of s.zones) drawZone2(c, z, k);
+    for (const z of s.zones) drawZone2(c, z, k, t);
     for (const p of s.projs) drawProj(c, p, alpha, t);
     for (const d of air) drawEnt(c, d, t);
     drawFx(c, t);
@@ -561,6 +595,8 @@
       c.restore();
       return;
     }
+    if (e.tunnel) { tunnel(c, e, x, y, t); return; }
+    if (e.card === 'mole' && e.deploy > 0) { surfacing(c, e, x, y, t); return; }
     const lift = e.air ? k * 1.1 : 0;
     if (!e.air) shadow(c, x, y, e.radius * k * 1.05);
     A.ell(c, x, y, e.radius * k * 1.0, e.radius * k * 0.42);
@@ -571,9 +607,29 @@
     if (e.deploy > 0) { sc = 1 - Math.max(0, e.deploy - 0.75) * 2; c.globalAlpha = 0.65; }
     if (sc < 1) c.scale(Math.max(0.2, sc), Math.max(0.2, sc));
     if (e.flash > 0) c.filter = 'brightness(1.8)';
-    const o = { team: e.team, t: t + e.id * 0.37, walk: e.moving, atk: Math.max(0, e.atk / 0.28), face: e.face, id: e.id, view: e.team === 0 ? 'back' : 'front' };
+    const o = { team: e.team, t: t + e.id * 0.37, walk: e.moving, atk: Math.max(0, e.atk / 0.28), face: e.face, id: e.id, view: e.team === 0 ? 'back' : 'front', evo: e.evo };
+    if (e.ram) o.power = Math.max(0, Math.min(1, (e.speed - e.baseSpeed) / (e.maxSpeed - e.baseSpeed)));
+    if (e.rider) o.ratk = Math.max(0, e.rider.atk / 0.4);
+    if (e.chargeHit) o.charged = e.run >= e.chargeHit;
     A.troop(c, e.card, k, o);
     c.restore();
+    // dust behind a rolling cart and a galloping camel
+    if (e.moving && e.deploy <= 0 && (e.ram || e.chargeHit) && Math.random() < (e.ram ? 0.25 + o.power * 0.5 : 0.4)) {
+      const back = e.team === 0 ? 0.6 : -0.6;
+      G.fx.push({ kind: 'puff', x: e.x + (Math.random() - 0.5) * 0.9, y: e.y + back * 0.5, vx: (Math.random() - 0.5) * 0.6, vy: back * 0.8, r: 0.16 + Math.random() * 0.2, col: 'rgba(226,196,138,0.75)', life: 0.5, max: 0.5 });
+    }
+    // a slowed troop: sand swirling round it, or the lasso round its legs
+    if (e.slowEnd > G.s.time) {
+      if (e.slowKind === 'lasso') {
+        A.ell(c, x, y - k * 0.2, e.radius * k * 0.9, e.radius * k * 0.35);
+        c.strokeStyle = A.OUT; c.lineWidth = k * 0.12; c.stroke(); c.strokeStyle = '#c8a070'; c.lineWidth = k * 0.07; c.stroke();
+      } else {
+        for (let i = 0; i < 4; i++) {
+          const a = t * 5 + i * 1.57 + e.id;
+          A.circ(c, x + Math.cos(a) * e.radius * k * 1.1, y - lift - k * 0.5 + Math.sin(a) * k * 0.25, k * 0.06); c.fillStyle = 'rgba(214,170,96,0.9)'; c.fill();
+        }
+      }
+    }
     if (e.deploy > 0) {
       const p = 1 - e.deploy / 1.0, r = k * 0.32, cy = y - lift - k * 1.6;
       A.circ(c, x, cy, r); c.fillStyle = 'rgba(20,12,40,0.7)'; c.fill();
@@ -581,9 +637,27 @@
       c.fillStyle = e.team === 0 ? '#8cc4ff' : '#ff9ea4'; c.fill();
     }
   }
+  // The Mole underground: a mound of earth moving along, leaving a trail of dirt.
+  function tunnel(c, e, x, y, t) {
+    const k = G.k, wob = Math.sin(t * 18 + e.id) * k * 0.04;
+    A.ell(c, x, y, k * 0.55, k * 0.24); c.fillStyle = 'rgba(0,0,0,0.22)'; c.fill();
+    A.ell(c, x, y - k * 0.12 + wob, k * 0.45, k * 0.24); A.paint(c, '#8a6440', k * 0.06);
+    for (let i = 0; i < 4; i++) { A.circ(c, x + (i - 1.5) * k * 0.2, y - k * 0.22 + Math.sin(t * 20 + i) * k * 0.05, k * 0.09); c.fillStyle = i % 2 ? '#a07850' : '#6e4e32'; c.fill(); }
+    if (Math.random() < 0.7) G.fx.push({ kind: 'puff', x: e.x + (Math.random() - 0.5) * 0.5, y: e.y + (Math.random() - 0.5) * 0.3, vx: 0, vy: 0, r: 0.14 + Math.random() * 0.14, col: 'rgba(138,100,64,0.7)', life: 0.9, max: 0.9 });
+  }
+  // The Mole bursting out: a hole, a ring of earth, and the Mole climbing up out of it.
+  function surfacing(c, e, x, y, t) {
+    const k = G.k, p = 1 - e.deploy / KC_CARDS.mole.burrow.surface;
+    A.ell(c, x, y, k * 0.62, k * 0.26); c.fillStyle = '#3a2716'; c.fill();
+    c.save(); c.beginPath(); c.rect(x - k * 2, y - k * 3, k * 4, k * 3 + k * 0.05); c.clip();
+    c.translate(x, y + (1 - Math.min(1, p * 1.4)) * k * 1.3);
+    A.troop(c, 'mole', k, { team: e.team, t, walk: false, atk: 0, face: e.face, id: e.id, view: e.team === 0 ? 'back' : 'front' });
+    c.restore();
+    for (let i = 0; i < 7; i++) { const a = i / 7 * Math.PI * 2; A.circ(c, x + Math.cos(a) * k * 0.6, y + Math.sin(a) * k * 0.26, k * 0.12); c.fillStyle = i % 2 ? '#a07850' : '#7a5636'; c.fill(); }
+  }
   function bars(c, d) {
     const e = d.e, k = G.k;
-    if (e.dead) return;
+    if (e.dead || e.tunnel) return;
     const x = SX(d.x), y = SY(d.y), blue = e.team === 0, T = A.TEAM[e.team];
     if (e.kind === 'tower') {
       const king = e.sub === 'king', w = (king ? 3.0 : 2.4) * k, h = Math.max(10, k * 0.5);
@@ -609,7 +683,7 @@
       return;
     }
     if (e.hp >= e.maxHp || e.deploy > 0) return;
-    const lift = e.air ? k * 1.1 : 0, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75, skeletons: 1.2, footmen: 1.6, flail: 1.95, pots: 1.6 }[e.card] || 1.4;
+    const lift = e.air ? k * 1.1 : 0, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: e.evo ? 2.35 : 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75, skeletons: 1.2, footmen: 1.6, flail: 1.95, pots: 1.6, ramcart: 1.95, ramsoldier: 1.45, mole: 1.45, camel: 2.45 }[e.card] || 1.4;
     const w = Math.max(0.8, e.radius * 1.9) * k, h = Math.max(5, k * 0.2), by = y - lift - top * k, bx = x - w / 2;
     A.rr(c, bx, by, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
     A.rr(c, bx + 1, by + 1, Math.max(0, (w - 2) * e.hp / e.maxHp), h - 2, (h - 2) / 2); c.fillStyle = blue ? '#5aa9ff' : '#ff5f69'; c.fill();
@@ -623,7 +697,8 @@
     c.fillText(String(level || 1), x, y + 1);
   }
   // Broken pottery on the ground: shards fading out as the damage ends.
-  function drawZone2(c, z, k) {
+  function drawZone2(c, z, k, t) {
+    if (z.kind === 'sandstorm') { storm(c, z, k, t); return; }
     const a = Math.max(0, z.left / z.dur), x = SX(z.x), y = SY(z.y);
     c.globalAlpha = 0.35 * a;
     A.ell(c, x, y, z.r * k, z.r * k * 0.55); c.fillStyle = '#7a3e1e'; c.fill();
@@ -637,10 +712,31 @@
     }
     c.globalAlpha = 1;
   }
+  // A sandstorm: a tinted circle of blowing sand, rings of sand turning, dust clouds and pebbles.
+  function storm(c, z, k, t) {
+    const age = z.dur - z.left, fade = Math.min(1, age / 0.3, z.left / 0.4), x = SX(z.x), y = SY(z.y), r = z.r * k;
+    c.globalAlpha = 0.85 * fade;
+    A.ell(c, x, y, r, r * 0.6); c.fillStyle = 'rgba(214,170,96,0.3)'; c.fill();
+    c.strokeStyle = 'rgba(255,230,170,0.75)'; c.lineWidth = Math.max(2, k * 0.08); c.setLineDash([k * 0.5, k * 0.3]); c.lineDashOffset = -t * k * 2; c.stroke(); c.setLineDash([]);
+    for (let i = 0; i < 4; i++) {
+      const rr = r * (0.3 + i * 0.2), a = t * (2.4 - i * 0.3) * (i % 2 ? -1 : 1) + i * 1.3;
+      c.beginPath(); c.ellipse(x, y - k * (0.3 + i * 0.25), rr, rr * 0.45, 0, a, a + Math.PI * 1.3);
+      c.strokeStyle = i % 2 ? 'rgba(232,194,122,0.85)' : 'rgba(200,150,80,0.8)'; c.lineWidth = k * (0.22 - i * 0.03); c.lineCap = 'round'; c.stroke();
+    }
+    for (let i = 0; i < 10; i++) {
+      const a = t * 3.2 + i * 0.63, d = r * (0.25 + (i % 4) * 0.2);
+      A.circ(c, x + Math.cos(a) * d, y - k * 0.6 + Math.sin(a) * d * 0.45, k * (0.05 + (i % 3) * 0.03)); c.fillStyle = i % 2 ? '#8a6440' : '#c9a070'; c.fill();
+    }
+    c.globalAlpha = 1;
+    if (Math.random() < 0.5) {
+      const a = Math.random() * 6.28, d = Math.random() * z.r;
+      G.fx.push({ kind: 'puff', x: z.x + Math.cos(a) * d, y: z.y + Math.sin(a) * d * 0.6, vx: Math.cos(a + 1.6) * 1.2, vy: Math.sin(a + 1.6) * 0.6 - 0.2, r: 0.3 + Math.random() * 0.3, col: 'rgba(222,190,130,0.55)', life: 0.8, max: 0.8 });
+    }
+  }
   function drawProj(c, p, alpha, t) {
     const k = G.k, px = p.px === undefined ? p.x : p.px + (p.x - p.px) * alpha, py = p.py === undefined ? p.y : p.py + (p.y - p.py) * alpha;
     const total = Math.hypot(p.tx - p.sx, p.ty - p.sy) || 1, done = Math.min(1, Math.hypot(px - p.sx, py - p.sy) / total);
-    const arcH = p.kind === 'snowball' || p.kind === 'pot' ? 1.6 : p.kind === 'fireball' ? 2.2 : p.kind === 'spears' ? 3 : p.kind === 'cannon' ? 0.8 : 0.5;
+    const arcH = p.kind === 'snowball' || p.kind === 'bigsnow' || p.kind === 'pot' ? 1.6 : p.kind === 'lasso' ? 1 : p.kind === 'fireball' ? 2.2 : p.kind === 'spears' ? 3 : p.kind === 'cannon' ? 0.8 : 0.5;
     const lift = Math.sin(done * Math.PI) * arcH * Math.min(1, total / 6) + (p.air ? 1.1 : 0.6) * (1 - done);
     const x = SX(px), y = SY(py) - lift * k;
     if (p.kind === 'fireball') {
@@ -683,6 +779,22 @@
       c.restore();
     } else if (p.kind === 'cannon') {
       A.circ(c, x, y, k * 0.2); A.paint(c, '#2a2c35', k * 0.05);
+    } else if (p.kind === 'lasso') {
+      // the rope runs back to the rider; a loop flies at the end
+      const from = G.s.ents.find(u => u.id === p.from);
+      if (from) {
+        const fx = SX(from.x), fy = SY(from.y) - k * 1.8;
+        c.beginPath(); c.moveTo(fx, fy); c.quadraticCurveTo((fx + x) / 2, Math.min(fy, y) - k * 0.6, x, y);
+        c.strokeStyle = A.OUT; c.lineWidth = k * 0.1; c.stroke(); c.strokeStyle = '#c8a070'; c.lineWidth = k * 0.06; c.stroke();
+      }
+      A.ell(c, x, y, k * 0.26, k * 0.14); c.strokeStyle = A.OUT; c.lineWidth = k * 0.1; c.stroke(); c.strokeStyle = '#c8a070'; c.lineWidth = k * 0.06; c.stroke();
+    } else if (p.kind === 'bigsnow') {
+      // the evolved Snowman's giant snowball, with a frosty trail
+      shadow(c, SX(px), SY(py), k * 0.32);
+      A.circ(c, x, y, k * 0.36); A.paint(c, '#ffffff', k * 0.07);
+      A.circ(c, x - k * 0.1, y - k * 0.1, k * 0.1); c.fillStyle = '#dfe9f7'; c.fill();
+      A.circ(c, x + k * 0.12, y + k * 0.08, k * 0.07); c.fillStyle = '#c9a8ff'; c.fill();
+      if (Math.random() < 0.7) G.fx.push({ kind: 'dot', x: px, y: py - lift, vx: (Math.random() - 0.5), vy: (Math.random() - 0.5), r: 0.12, col: Math.random() < 0.5 ? 'rgba(180,230,255,0.9)' : 'rgba(200,170,255,0.9)', life: 0.4, max: 0.4 });
     } else if (p.kind === 'snowball') {
       shadow(c, SX(px), SY(py), k * 0.2);
       A.circ(c, x, y, k * 0.24); A.paint(c, '#ffffff', k * 0.06);
@@ -712,6 +824,14 @@
         A.circ(c, SX(f.x), SY(f.y) - k * 0.4, f.r * k * 0.5 * a); c.fillStyle = 'rgba(255,240,180,0.8)'; c.fill();
       } else if (f.kind === 'rock') {
         c.globalAlpha = Math.min(1, a * 2); A.circ(c, SX(f.x), SY(f.y) - f.z * k * 0.3, f.r * k); A.paint(c, f.col, k * 0.04);
+      } else if (f.kind === 'evo') {
+        const p = 1 - a, x = SX(f.x), y = SY(f.y);
+        c.globalAlpha = a; c.globalCompositeOperation = 'lighter';
+        const g = c.createRadialGradient(x, y - k * 0.6, 0, x, y - k * 0.6, k * (1 + p * 2));
+        g.addColorStop(0, 'rgba(220,190,255,0.8)'); g.addColorStop(1, 'rgba(140,80,255,0)');
+        c.fillStyle = g; A.circ(c, x, y - k * 0.6, k * (1 + p * 2)); c.fill();
+        c.globalCompositeOperation = 'source-over';
+        A.ell(c, x, y, k * (0.6 + p * 1.8), k * (0.25 + p * 0.8)); c.strokeStyle = '#c9a8ff'; c.lineWidth = k * 0.14 * a; c.stroke();
       } else if (f.kind === 'crown') {
         const p = 1 - a, x = SX(f.x), y = SY(f.y) - k * (1.5 + p * 3);
         c.globalAlpha = Math.min(1, a * 3);
@@ -727,7 +847,18 @@
     const ok = S.canDeploy(s, 0, id, p.x, p.y), x = SX(p.x), y = SY(p.y);
     if (card.kind === 'spell') {
       A.ell(c, x, y, card.area * k, card.area * k * 0.62);
-      c.fillStyle = 'rgba(255,140,40,0.22)'; c.fill(); c.strokeStyle = 'rgba(255,220,150,0.95)'; c.lineWidth = 2.5; c.setLineDash([8, 6]); c.stroke(); c.setLineDash([]);
+      c.fillStyle = card.storm ? 'rgba(214,170,96,0.3)' : 'rgba(255,140,40,0.22)'; c.fill(); c.strokeStyle = 'rgba(255,220,150,0.95)'; c.lineWidth = 2.5; c.setLineDash([8, 6]); c.stroke(); c.setLineDash([]);
+      return;
+    }
+    if (card.anywhere) {
+      // the Mole: a dotted tunnel from your King Tower to the spot
+      const kx = SX(9), ky = SY(26.4);
+      c.beginPath(); c.moveTo(kx, ky); c.lineTo(x, y);
+      c.strokeStyle = ok ? 'rgba(160,120,80,0.9)' : 'rgba(229,65,75,0.8)'; c.lineWidth = k * 0.16; c.setLineDash([k * 0.25, k * 0.25]); c.stroke(); c.setLineDash([]);
+      A.ell(c, x, y, k * 0.62, k * 0.3); c.fillStyle = ok ? 'rgba(90,60,35,0.55)' : 'rgba(229,65,75,0.5)'; c.fill();
+      c.globalAlpha = ok ? 0.6 : 0.35;
+      c.save(); c.translate(x, y); A.troop(c, id, k, { team: 0, t, walk: false, atk: 0, face: 1, id: 1, view: 'back' }); c.restore();
+      c.globalAlpha = 1;
       return;
     }
     if (card.kind === 'building') {

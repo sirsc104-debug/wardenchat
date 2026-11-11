@@ -113,3 +113,59 @@ for (let i = 0; i < 12; i++) {
 }
 assert(n > 0, 'bots used the Cannon');
 console.log(`Bots with the new cards finished 12 matches and placed ${n} Cannons: ok`);
+
+// ---------- Sunstone Arena cards and the Snowman's evolution ----------
+{
+  const mk = (a, b, evos) => { const s = KCSim.create({ seed: 5, decks: [Array(8).fill(a), Array(8).fill(b)], evos }); s.energy = [10, 10]; return s; };
+  const put = (s, team, id, x, y) => { s.energy[team] = 10; s.hands[team][0] = id; return KCSim.play(s, team, 0, x, y); };
+  const run = (s, sec, fn) => { for (let i = 0; i < sec * 30; i++) { KCSim.step(s); if (fn) fn(s); s.events.length = 0; } };
+  // Mole: placed on the far side, nothing hits it while it tunnels, then it surfaces there
+  let s = mk('mole', 'archers');
+  assert.strictEqual(put(s, 0, 'mole', 3.5, 4.2), 'ok', 'the Mole can go on the far side');
+  assert.strictEqual(KCSim.canDeploy(s, 0, 'mole', 8.5, 16), false, 'but not in the river');
+  put(s, 1, 'archers', 3.5, 9.5);
+  const mole = s.ents.find(e => e.card === 'mole');
+  let hitUnder = false;
+  run(s, 2.5, () => { if (mole.tunnel && mole.hp < mole.maxHp) hitUnder = true; });
+  assert(!hitUnder, 'nothing hits the Mole underground');
+  run(s, 3);
+  assert(!mole.tunnel && Math.hypot(mole.x - 3.5, mole.y - 4.2) < 2.5, 'the Mole surfaced at the spot');
+  console.log('Mole: placed anywhere off the river, untouchable while tunneling, surfaces on the spot: ok');
+  // Sandstorm: slows and wears down enemies, never friends
+  s = mk('sandstorm', 'gladiator');
+  put(s, 1, 'gladiator', 9.5, 10.5); put(s, 0, 'gladiator', 9.5, 21.5);
+  run(s, 1.2);
+  put(s, 0, 'sandstorm', 9.5, 12);
+  run(s, 0.5);
+  const foe = s.ents.find(e => e.team === 1 && e.kind === 'troop'), mine = s.ents.find(e => e.team === 0 && e.kind === 'troop');
+  assert(foe.slowEnd > s.time && Math.abs(foe.slowF - 0.25) < 1e-9 && foe.hp < foe.maxHp, 'the enemy is slowed 25% and hurt');
+  assert(!(mine.slowEnd > s.time), 'friends are not slowed');
+  console.log('Sandstorm: 25% slow and damage over time on enemies only: ok');
+  // Ram Cart: speeds up, hits the tower, two soldiers come out
+  s = mk('ramcart', 'wolves');
+  put(s, 0, 'ramcart', 3.5, 18.5);
+  let ram = null, vmax = 0, soldiers = 0;
+  run(s, 12, t => { const c = t.ents.find(e => e.card === 'ramcart'); if (c) vmax = Math.max(vmax, c.speed); for (const e of t.events) if (e.type === 'ram') { ram = e; soldiers = t.ents.filter(u => u.card === 'ramsoldier' && !u.dead).length; } });
+  assert(ram && ram.power > 1.5, `the Ram Cart hit at speed (power ${ram && ram.power.toFixed(2)})`);
+  assert(vmax > 2 && soldiers === 2, `it sped up (${vmax.toFixed(2)}) and left two soldiers (${soldiers})`);
+  console.log(`Ram Cart: top speed ${vmax.toFixed(1)}, hit for ${ram.power.toFixed(2)}x, two soldiers: ok`);
+  // Camel Jockey: the camel goes for towers while the rider lassos troops, a slow every 4 s at most
+  s = mk('camel', 'gladiator');
+  assert.strictEqual(put(s, 0, 'camel', 3.5, 22.5), 'ok'); assert.strictEqual(put(s, 1, 'gladiator', 3.5, 11.5), 'ok');
+  const snares = [];
+  run(s, 9, t => { for (const e of t.events) if (e.type === 'snare') snares.push(t.time); });
+  const camel = s.ents.find(e => e.card === 'camel');
+  assert(snares.length >= 1, 'the rider slowed a troop');
+  for (let i = 1; i < snares.length; i++) assert(snares[i] - snares[i - 1] >= 3.9, 'slows are at least 4 s apart');
+  assert(!camel || camel.targets === 'buildings', 'the camel keeps to buildings');
+  console.log(`Camel Jockey: rider lassos troops (${snares.length} slows, 4 s apart) while the camel heads for towers: ok`);
+  // the Snowman's evolution: every third play, giant snowballs 1.5x faster, same damage
+  s = mk('snowman', 'wolves', [['snowman'], []]);
+  const evo = []; for (let i = 0; i < 6; i++) { put(s, 0, 'snowman', 9.5, 24.5); evo.push(s.ents.filter(e => e.card === 'snowman' && e.evo).length); }
+  assert.deepStrictEqual(evo, [0, 0, 1, 1, 1, 2], 'every third Snowman is evolved');
+  const e1 = s.ents.find(e => e.card === 'snowman' && e.evo), n1 = s.ents.find(e => e.card === 'snowman' && !e.evo);
+  assert(e1.dmg === n1.dmg && Math.abs(e1.projSpeed / n1.projSpeed - 1.5) < 1e-9 && Math.abs(e1.splash / n1.splash - 1.5) < 1e-9 && e1.proj === 'bigsnow');
+  const s2 = mk('snowman', 'wolves'); for (let i = 0; i < 3; i++) put(s2, 0, 'snowman', 9.5, 24.5);
+  assert.strictEqual(s2.ents.filter(e => e.evo).length, 0, 'no evolution without unlocking it');
+  console.log('Snowman evolution: every third play, 1.5x snowballs and speed, same damage: ok');
+}

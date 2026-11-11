@@ -43,11 +43,11 @@
         <!-- Battle tab -->
         <section class="tab battle-tab" id="tab-battle">
           <aside class="lobby-side" aria-label="Kingdom Pass and upcoming unlocks">
-            <div class="plaque">
-              <div class="ribbon"><span>Kingdom Pass</span></div>
-              <div class="pass-row"><span class="pass-tier">1</span><div class="pass-track"><i></i></div><small>0/10</small></div>
-              <p class="dim" id="passText"><span class="tag-lock">Locked</span> Opens with the Trophy Road. Members get the premium track.</p>
-            </div>
+            <button type="button" class="plaque pass-plaque" id="passPlaque" aria-label="Open the Diamond Pass">
+              <div class="ribbon"><span>Diamond Pass</span></div>
+              <div class="pass-row"><span class="pass-tier"><b id="passTier">0</b></span><div class="pass-track"><i id="passFill"></i></div><small id="passCount">0/8</small></div>
+              <p class="dim" id="passText"><span class="tag-lock">Locked</span> Opens in Sunstone Arena (600 trophies).</p>
+            </button>
             <div class="plaque">
               <div class="ribbon"><span id="leftTitle">Coming Up</span></div>
               <ul class="unlocks" id="unlocks"></ul>
@@ -79,6 +79,7 @@
               </div>
             </div>
             <div class="chests" id="chests" aria-label="Chest slots"></div>
+            <button type="button" class="pass-mini" id="passMini" hidden><span class="pass-tier"><b>&#9670;</b></span><span><b>Diamond Pass</b><small id="passMiniText">Tier 0</small></span></button>
           </div>
 
           <aside class="lobby-side" aria-label="Training rewards">
@@ -189,6 +190,17 @@
       </div>
     </div>
 
+    <!-- the Diamond Pass: every tier's free and Diamond Pass reward -->
+    <div class="modal" id="passModal" hidden>
+      <div class="pass-card plaque" role="dialog" aria-modal="true" aria-labelledby="passTitle">
+        <button class="modal-x" id="passX" type="button" aria-label="Close">&#x2715;</button>
+        <div class="ribbon"><span id="passTitle">Diamond Pass</span></div>
+        <div class="pm-head" id="passHead"></div>
+        <div class="pm-cols" aria-hidden="true"><span>Tier</span><span>Free</span><span>Diamond Pass</span></div>
+        <ol class="pm-tiers" id="passTiers"></ol>
+      </div>
+    </div>
+
     <div class="modal" id="cardModal" hidden>
       <div class="modal-card plaque" role="dialog" aria-modal="true" aria-labelledby="mName">
         <button class="modal-x" id="modalX" type="button" aria-label="Close">&#x2715;</button>
@@ -205,7 +217,7 @@
             <span class="m-note" id="mNote"></span>
           </div>
           <div class="m-magic" id="mMagic" hidden></div>
-          <div class="m-evo"><b>Evolution</b> <small>(unlocks later)</small><p id="mEvo"></p></div>
+          <div class="m-evo" id="mEvoBox"><b>Evolution</b> <small id="mEvoTag">(unlocks later)</small><p id="mEvo"></p><div class="m-evo-act" id="mEvoAct" hidden></div></div>
         </div>
       </div>
     </div>

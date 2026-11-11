@@ -44,7 +44,7 @@ const KC_CARDS = {
     hp: 420, dmg: 110, hit: 1.6, range: 5.5, speed: 1.0, targets: 'both', air: false,
     radius: 0.55, mass: 3, proj: 'snowball', projSpeed: 8, splash: 1.1,
     blurb: 'Throws big snowballs that hit everything they land near, in the air or on the ground.',
-    evo: 'Frostbite: targets are slowed 15% for 3 seconds.',
+    evo: 'Giant Snowballs: every third Snowman you play throws snowballs 1.5x the size, 1.5x as fast, for the same damage.',
   },
   gorilla: {
     id: 'gorilla', name: 'Gorilla', cost: 4, rarity: 'rare', kind: 'troop', role: 'Tank killer', count: 1,
@@ -102,9 +102,53 @@ const KC_CARDS = {
     blurb: 'Throws clay pots that shatter on ground troops. The broken pottery keeps hurting the spot for half a second.',
     evo: 'Fire Pots: every other pot leaves burning oil instead.',
   },
+  // Arena 3 (Sunstone Arena) cards, found on the Trophy Road.
+  sandstorm: {
+    id: 'sandstorm', name: 'Sandstorm', cost: 3, rarity: 'common', kind: 'spell', role: 'Spell', count: 1,
+    dmg: 180, area: 3.0, towerPct: 0.35, storm: { dur: 3, slow: 0.25 },
+    blurb: 'A swirling sandstorm over an area for 3 seconds. It wears down enemy troops on the ground and in the air, and slows them by 25%.',
+    evo: 'Dune: the storm grows a little each second.',
+  },
+  ramcart: {
+    id: 'ramcart', name: 'Ram Cart', cost: 4, rarity: 'rare', kind: 'troop', role: 'Win condition', count: 1,
+    hp: 1100, dmg: 200, hit: 1, range: 0.6, speed: 1.0, targets: 'buildings', air: false,
+    radius: 0.75, mass: 8, ram: { max: 2.3, accel: 0.75 }, onEnd: { card: 'ramsoldier', count: 2 },
+    blurb: 'Two soldiers push a battering ram with a golden ram\'s head. It speeds up as it rolls and hits the first building it reaches for up to double damage, then the soldiers jump out and fight on.',
+    evo: 'Second Wind: the soldiers come out with a shield each.',
+  },
+  // the two soldiers who push the Ram Cart (not a card of their own)
+  ramsoldier: {
+    id: 'ramsoldier', name: 'Cart Soldier', cost: 0, rarity: 'rare', kind: 'troop', role: 'Melee', count: 1, hidden: true,
+    hp: 340, dmg: 80, hit: 1.2, range: 0.5, speed: 1.2, targets: 'ground', air: false,
+    radius: 0.42, mass: 2,
+    blurb: 'A soldier from the Ram Cart.', evo: '',
+  },
+  mole: {
+    id: 'mole', name: 'Mole', cost: 3, rarity: 'rare', kind: 'troop', role: 'Tunneler', count: 1,
+    hp: 380, dmg: 75, hit: 1.2, range: 0.55, speed: 1.0, targets: 'ground', air: false,
+    radius: 0.48, mass: 3, anywhere: true, burrow: { speed: 5, surface: 0.7 }, towerDmg: 0.25,
+    blurb: 'Place it anywhere, even on the other side. It digs from your King Tower to the spot, can\'t be hit while tunneling, then bursts out and fights. Hits towers for less.',
+    evo: 'Cave-in: surfacing stuns enemies around it for half a second.',
+  },
+  camel: {
+    id: 'camel', name: 'Camel Jockey', cost: 5, rarity: 'legendary', kind: 'troop', role: 'Win condition', count: 1,
+    hp: 1150, dmg: 150, hit: 1.8, range: 0.7, speed: 1.5, targets: 'buildings', air: false,
+    radius: 0.75, mass: 8, chargeHit: 2.5,
+    rider: { dmg: 45, hit: 1.3, range: 5, slow: 0.5, slowDur: 1.6, slowCd: 4 },
+    blurb: 'A camel gallops for buildings and hits hard, double on the first hit after a run. Its rider lassos troops along the way, slowing them for a moment (once every 4 seconds).',
+    evo: 'Mirage: the first lasso of the match pulls its target in.',
+  },
+};
+
+// Evolutions: each has its own unlock (shards) and how often it comes round in a battle (every
+// cycle-th play of the card is the evolved one). Only the Snowman's is built so far.
+const KC_EVOS = {
+  snowman: { shards: 6, cycle: 3, name: 'Snowman Evolution', projSpeed: 1.5, splash: 1.5, size: 1.5,
+    blurb: 'Every third Snowman you play is evolved: its snowballs are 1.5x the size and 1.5x as fast, for the same damage.' },
 };
 
 // Every card in collection order: the starter deck, then cards found on the Trophy Road.
-const KC_ALL_CARDS = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball', 'skeletons', 'cannon', 'spears', 'footmen', 'flail', 'pots'];
+const KC_ALL_CARDS = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball', 'skeletons', 'cannon', 'spears', 'footmen', 'flail', 'pots',
+  'sandstorm', 'ramcart', 'mole', 'camel'];
 
 const KC_STARTER_DECK = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'];

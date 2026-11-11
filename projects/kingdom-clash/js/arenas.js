@@ -144,6 +144,48 @@ const KCArenas = (() => {
     },
   };
 
+  // Arena 3: Sunstone Arena. PLACEHOLDER art (img/sunstone_arena_*.webp, labelled "placeholder art"):
+  // replace the three images and, if the new art differs, the bar position, bench rows and lights below.
+  // The battlefield is drawn in code from the 'sunstone' palette until it has an illustration (add a
+  // field entry like Briar Hollow's).
+  ART.sunstone = {
+    name: 'Sunstone Arena',
+    centerpiece: { src: 'img/sunstone_arena_badge.webp', w: 1254, h: 1254, bar: { left: 24.2, top: 86.2, width: 51.7, height: 3.9 } },
+    field: null, palette: 'sunstone', margin: 0.6, fx: 'water',
+    scenery: {
+      left: {
+        src: 'img/sunstone_arena_left.webp', w: 793, h: 1983, anchor: [0.55, 0.6], stars: 0,
+        rows: [
+          { y: 0.438, slope: 0, size: 0.72, spans: [[0.2, 0.48], [0.58, 0.86]] },
+          { y: 0.484, slope: 0, size: 0.77, spans: [[0.2, 0.48], [0.58, 0.86]] },
+          { y: 0.53, slope: 0, size: 0.82, spans: [[0.2, 0.48], [0.58, 0.86]] },
+          { y: 0.577, slope: 0, size: 0.87, spans: [[0.2, 0.48], [0.58, 0.86]] },
+          { y: 0.623, slope: 0, size: 0.92, spans: [[0.2, 0.48], [0.58, 0.86]] },
+          { y: 0.67, slope: 0, size: 0.97, spans: [[0.2, 0.48], [0.58, 0.86]] },
+          { y: 0.716, slope: 0, size: 1.02, spans: [[0.2, 0.48], [0.58, 0.86]] },
+          { y: 0.762, slope: 0, size: 1.07, spans: [[0.2, 0.48], [0.58, 0.86]] },
+          { y: 0.809, slope: 0, size: 1.12, spans: [[0.2, 0.48], [0.58, 0.86]] },
+        ],
+        glows: [[0.151, 0.338, 0.8], [0.53, 0.338, 0.8], [0.908, 0.338, 0.8]],
+      },
+      right: {
+        src: 'img/sunstone_arena_right.webp', w: 793, h: 1983, anchor: [0.45, 0.6], stars: 0,
+        rows: [
+          { y: 0.438, slope: 0, size: 0.72, spans: [[0.14, 0.42], [0.52, 0.8]] },
+          { y: 0.484, slope: 0, size: 0.77, spans: [[0.14, 0.42], [0.52, 0.8]] },
+          { y: 0.53, slope: 0, size: 0.82, spans: [[0.14, 0.42], [0.52, 0.8]] },
+          { y: 0.577, slope: 0, size: 0.87, spans: [[0.14, 0.42], [0.52, 0.8]] },
+          { y: 0.623, slope: 0, size: 0.92, spans: [[0.14, 0.42], [0.52, 0.8]] },
+          { y: 0.67, slope: 0, size: 0.97, spans: [[0.14, 0.42], [0.52, 0.8]] },
+          { y: 0.716, slope: 0, size: 1.02, spans: [[0.14, 0.42], [0.52, 0.8]] },
+          { y: 0.762, slope: 0, size: 1.07, spans: [[0.14, 0.42], [0.52, 0.8]] },
+          { y: 0.809, slope: 0, size: 1.12, spans: [[0.14, 0.42], [0.52, 0.8]] },
+        ],
+        glows: [[0.088, 0.338, 0.8], [0.467, 0.338, 0.8], [0.845, 0.338, 0.8]],
+      },
+    },
+  };
+
   /* ---------- images: each loaded once ---------- */
   const imgs = {}, waiting = {};
   function image(src) {

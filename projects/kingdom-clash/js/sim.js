@@ -47,6 +47,8 @@ const KCSim = (() => {
       cardLevels: opts.cardLevels || [{}, {}],
       // How hard each team's troops and spells hit towers (Trainer Owen hits them at a quarter).
       towerDamage: opts.towerDamage || [1, 1],
+      // Each team's unlocked evolutions (card ids), and how many times each card has been played.
+      evos: opts.evos || [[], []], evoPlays: [{}, {}],
       rand: mulberry(opts.seed || 1),
     };
     for (const team of [0, 1]) {
@@ -83,7 +85,7 @@ const KCSim = (() => {
   const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
   const edge = (a, b) => dist(a, b) - a.radius - b.radius;
   function canHit(a, t) {
-    if (!t || t.dead || t.team === a.team) return false;
+    if (!t || t.dead || t.team === a.team || t.tunnel) return false;
     if (a.kind === 'building' && t.kind !== 'troop') return false;
     if (a.targets === 'buildings') return t.kind === 'tower' || t.kind === 'building';
     if (a.targets === 'ground') return !t.air;
@@ -103,6 +105,10 @@ const KCSim = (() => {
     const c = KC_CARDS[cardId];
     if (!c || x < 0.5 || x > W - 0.5 || y < 0.5 || y > H - 0.5) return false;
     if (c.kind === 'spell') return true;
+    if (c.anywhere) {
+      const inRiver = y > RIVER_TOP && y < RIVER_BOT && !BRIDGES.some(b => Math.abs(x - b) < BRIDGE_HALF);
+      return !inRiver && !inTower(s, x, y, 0.2);
+    }
     const my = own(team, y), half = c.kind === 'building' ? c.half : 0;
     let ok = my - half >= RIVER_BOT + 0.1;
     if (!ok && my - half >= POCKET) {
@@ -123,6 +129,14 @@ const KCSim = (() => {
     s.hands[team][slot] = s.queues[team].shift();
     s.queues[team].push(id);
     s.played[team]++;
+    if (c.storm) {
+      // a sandstorm: no projectile, the storm rises where it is cast
+      const lv = levelMult(cardLevel(s, team, id));
+      s.zones.push({ x, y, r: c.area, team, dps: Math.round(c.dmg / c.storm.dur * lv), left: c.storm.dur, dur: c.storm.dur, pulse: 0,
+        kind: 'sandstorm', targets: 'both', slow: c.storm.slow, towerPct: c.towerPct, card: id });
+      s.events.push({ type: 'cast', team, card: id, x, y });
+      return 'ok';
+    }
     if (c.kind === 'spell') {
       const k = tower(s, team, 'K');
       s.projs.push({ kind: c.projKind || 'fireball', spell: id, team, x: k.x, y: k.y, sx: k.x, sy: k.y, tx: x, ty: y, target: 0,
@@ -135,9 +149,24 @@ const KCSim = (() => {
       s.events.push({ type: 'deploy', team, card: id, x, y });
       return 'ok';
     }
+    if (c.burrow) {
+      // the Mole digs out from in front of its King Tower and tunnels to the spot
+      const k = tower(s, team, 'K'), sx = k.x, sy = own(team, own(team, k.y) - 2.6);
+      const u = spawn(s, team, id, sx, sy);
+      u.tunnel = { tx: x, ty: y }; u.deploy = 0;
+      s.events.push({ type: 'burrow', team, card: id, x: sx, y: sy, tx: x, ty: y });
+      return 'ok';
+    }
+    // an evolution comes round every cycle-th play of the card
+    let evo = false;
+    if (KC_EVOS[id] && s.evos[team].includes(id)) {
+      const n = s.evoPlays[team][id] || 0;
+      evo = n % KC_EVOS[id].cycle === KC_EVOS[id].cycle - 1;
+      s.evoPlays[team][id] = n + 1;
+    }
     const offs = formation(c.count);
-    for (const [ox, oy] of offs) spawn(s, team, id, x + ox, y + (team === 0 ? oy : -oy));
-    s.events.push({ type: 'deploy', team, card: id, x, y });
+    for (const [ox, oy] of offs) spawn(s, team, id, x + ox, y + (team === 0 ? oy : -oy), evo);
+    s.events.push({ type: 'deploy', team, card: id, x, y, evo });
     return 'ok';
   }
   function formation(n) {
@@ -157,8 +186,16 @@ const KCSim = (() => {
     s.ents.push(b);
     return b;
   }
-  function spawn(s, team, id, x, y) {
-    const c = KC_CARDS[id], level = cardLevel(s, team, id), m = levelMult(level);
+  // How an evolution stands for a team's card: null if it has none, else how many plays are counted
+  // toward the next evolved one and whether the next play is evolved.
+  function evoCharge(s, team, id) {
+    const E = KC_EVOS[id];
+    if (!E || !s.evos[team].includes(id)) return null;
+    const n = (s.evoPlays[team][id] || 0) % E.cycle;
+    return { n, cycle: E.cycle, ready: n === E.cycle - 1 };
+  }
+  function spawn(s, team, id, x, y, evo) {
+    const c = KC_CARDS[id], parent = c.hidden ? null : id, level = cardLevel(s, team, id), m = levelMult(level);
     const u = {
       id: s.nextId++, kind: 'troop', team, card: id, x, y, px: x, py: y, level,
       hp: Math.round(c.hp * m), maxHp: Math.round(c.hp * m), dmg: Math.round(c.dmg * m),
@@ -168,18 +205,28 @@ const KCSim = (() => {
       zone: c.zone ? { r: c.zone.r, dur: c.zone.dur, dps: Math.round(c.zone.dps * m) } : null,
       deploy: 1.0, cd: c.hit * 0.5, target: 0, locked: false, retarget: 0,
       face: team === 0 ? 1 : -1, moving: false, atk: 0, flash: 0, born: s.time, dead: false,
+      towerDmg: c.towerDmg || 1, slowEnd: 0, slowF: 0, run: 0,
     };
+    if (c.ram) Object.assign(u, { ram: true, baseSpeed: c.speed, maxSpeed: c.ram.max, accel: c.ram.accel });
+    if (c.chargeHit) u.chargeHit = c.chargeHit;
+    if (c.rider) u.rider = { dmg: Math.round(c.rider.dmg * m), hit: c.rider.hit, range: c.rider.range, slow: c.rider.slow, slowDur: c.rider.slowDur,
+      slowCd: c.rider.slowCd, cd: 0.6, snareCd: 0, atk: 0, aim: 0 };
+    if (evo && KC_EVOS[id]) {
+      const E = KC_EVOS[id];
+      Object.assign(u, { evo: true, proj: 'bigsnow', projSpeed: u.projSpeed * E.projSpeed, splash: u.splash * E.splash });
+    }
     clampArena(u);
     s.ents.push(u);
     return u;
   }
 
   /* ---------- damage ---------- */
-  function damage(s, e, amount, by) {
-    if (!e || e.dead) return;
+  // soft: steady damage over time (a storm, broken pottery), which doesn't flash its target each pulse
+  function damage(s, e, amount, by, soft) {
+    if (!e || e.dead || e.tunnel) return;
     if (e.kind === 'tower' && by !== undefined) amount = Math.max(1, Math.round(amount * s.towerDamage[by]));
     e.hp -= amount;
-    e.flash = 0.12;
+    if (!soft) e.flash = 0.12;
     if (e.kind === 'tower' && e.sub === 'king' && !e.active) {
       e.active = true;
       s.events.push({ type: 'king', team: e.team });
@@ -188,8 +235,31 @@ const KCSim = (() => {
       e.hp = 0;
       e.dead = true;
       if (e.kind === 'tower') towerDown(s, e);
-      else s.events.push({ type: 'death', team: e.team, card: e.card, x: e.x, y: e.y, air: e.air, building: e.kind === 'building' });
+      else {
+        s.events.push({ type: 'death', team: e.team, card: e.card, x: e.x, y: e.y, air: e.air, building: e.kind === 'building' });
+        breakUp(s, e);
+      }
     }
+  }
+  // A troop that leaves others behind when it ends (the Ram Cart's soldiers).
+  function breakUp(s, e) {
+    const c = KC_CARDS[e.card];
+    if (!c || !c.onEnd || e.brokeUp) return;
+    e.brokeUp = true;
+    for (let i = 0; i < c.onEnd.count; i++) {
+      const side = i % 2 ? 1 : -1, u = spawn(s, e.team, c.onEnd.card, e.x + side * 0.45, e.y);
+      u.level = e.level; u.deploy = 0.3;
+      const m = levelMult(e.level), base = KC_CARDS[c.onEnd.card];
+      u.hp = u.maxHp = Math.round(base.hp * m); u.dmg = Math.round(base.dmg * m);
+    }
+    s.events.push({ type: 'breakup', team: e.team, card: e.card, x: e.x, y: e.y });
+  }
+  // A slow: the strongest slow on a troop wins; it wears off at its end time.
+  function slowDown(s, e, f, dur, kind) {
+    if (e.kind !== 'troop' || e.dead) return;
+    const active = e.slowEnd > s.time;
+    if (!active || f >= e.slowF) { e.slowF = f; e.slowKind = kind; }
+    e.slowEnd = Math.max(active ? e.slowEnd : 0, s.time + dur);
   }
   function towerDown(s, t) {
     const other = 1 - t.team;
@@ -311,17 +381,52 @@ const KCSim = (() => {
     if (u.proj) {
       s.projs.push({ kind: u.proj, team: u.team, x: u.x, y: u.y, sx: u.x, sy: u.y, tx: t.x, ty: t.y,
         target: t.id, speed: u.projSpeed, dmg: u.dmg, splash: u.splash, targets: u.targets, card: u.card,
-        air: u.air, zone: u.zone });
+        air: u.air, zone: u.zone, evo: u.evo });
       s.events.push({ type: 'shoot', kind: u.proj, team: u.team, x: u.x, y: u.y });
     } else {
-      damage(s, t, u.dmg, u.team);
-      s.events.push({ type: 'hit', card: u.card, team: u.team, x: t.x, y: t.y, by: u.id });
+      let dmg = u.dmg, charged = false;
+      if (u.chargeHit && u.run >= u.chargeHit) { dmg *= 2; charged = true; }
+      u.run = 0;
+      if (t.kind === 'tower') dmg = Math.round(dmg * u.towerDmg);
+      damage(s, t, dmg, u.team);
+      s.events.push({ type: charged ? 'charge' : 'hit', card: u.card, team: u.team, x: t.x, y: t.y, by: u.id });
     }
+  }
+  // The Camel Jockey's rider: lassos the nearest enemy troop in range while the camel goes on. Every
+  // lasso hurts; one in every slowCd seconds also slows its target.
+  function riderStep(s, u) {
+    const R = u.rider;
+    R.cd -= DT; R.snareCd -= DT; if (R.atk > 0) R.atk -= DT;
+    if (R.cd > 0) return;
+    let best = null, bd = Infinity;
+    for (const e of s.ents) {
+      if (e.kind !== 'troop' || !canHit({ team: u.team, targets: 'both', kind: 'troop' }, e)) continue;
+      const d = edge(u, e);
+      if (d <= R.range && d < bd) { bd = d; best = e; }
+    }
+    if (!best) { R.cd = 0.15; return; }
+    R.cd = R.hit; R.atk = 0.4; R.aim = Math.atan2(best.y - u.y, best.x - u.x);
+    const snare = R.snareCd <= 0;
+    if (snare) R.snareCd = R.slowCd;
+    s.projs.push({ kind: 'lasso', team: u.team, x: u.x, y: u.y - 0.4, sx: u.x, sy: u.y - 0.4, tx: best.x, ty: best.y, target: best.id,
+      speed: 12, dmg: R.dmg, splash: 0, targets: 'both', card: u.card, from: u.id, slow: snare ? { f: R.slow, dur: R.slowDur } : null });
+    s.events.push({ type: 'lasso', team: u.team, x: u.x, y: u.y });
   }
   function troopStep(s, u) {
     if (u.flash > 0) u.flash -= DT;
+    if (u.tunnel) {
+      // underground: straight to the spot, under the river and the towers, and nothing can hit it
+      const dx = u.tunnel.tx - u.x, dy = u.tunnel.ty - u.y, d = Math.hypot(dx, dy), step = KC_CARDS[u.card].burrow.speed * DT;
+      u.moving = true;
+      if (d > step) { u.x += (dx / d) * step; u.y += (dy / d) * step; if (Math.abs(dx) > 0.02) u.face = Math.sign(dx); return; }
+      u.x = u.tunnel.tx; u.y = u.tunnel.ty; u.tunnel = null; u.moving = false;
+      u.deploy = KC_CARDS[u.card].burrow.surface;
+      s.events.push({ type: 'surface', team: u.team, card: u.card, x: u.x, y: u.y });
+      return;
+    }
     if (u.deploy > 0) { u.deploy -= DT; return; }
     if (u.atk > 0) u.atk -= DT;
+    if (u.rider) riderStep(s, u);
     u.cd -= DT;
     let t = byId(s, u.target);
     if (!t || !canHit(u, t)) { t = null; u.target = 0; u.locked = false; }
@@ -336,6 +441,18 @@ const KCSim = (() => {
     const d = edge(u, t);
     if (d <= u.range) {
       if (Math.abs(t.x - u.x) > 0.05) u.face = Math.sign(t.x - u.x);
+      if (u.ram) {
+        // the Ram Cart's charge ends against the building: up to double damage at full speed, then it
+        // breaks apart and its soldiers fight on
+        const f = 1 + Math.max(0, Math.min(1, (u.speed - u.baseSpeed) / (u.maxSpeed - u.baseSpeed)));
+        let dmg = Math.round(u.dmg * f);
+        if (t.kind === 'tower') dmg = Math.round(dmg * u.towerDmg);
+        damage(s, t, dmg, u.team);
+        s.events.push({ type: 'ram', card: u.card, team: u.team, x: t.x, y: t.y, power: f, cx: u.x, cy: u.y });
+        u.dead = true; u.hp = 0;
+        breakUp(s, u);
+        return;
+      }
       if (u.cd <= 0) { attack(s, u, t); u.cd = u.hit; u.locked = true; }
       return;
     }
@@ -344,7 +461,10 @@ const KCSim = (() => {
     const [nx, ny] = avoid(s, u, ...nav(u, t.x, t.y), t);
     const dx = nx - u.x, dy = ny - u.y, len = Math.hypot(dx, dy);
     if (len > 0.001) {
-      const step = Math.min(len, u.speed * DT);
+      if (u.ram) u.speed = Math.min(u.maxSpeed, u.speed + u.accel * DT);
+      const slow = u.slowEnd > s.time ? 1 - u.slowF : 1;
+      const step = Math.min(len, u.speed * slow * DT);
+      u.run += step;
       u.x += (dx / len) * step;
       u.y += (dy / len) * step;
       if (Math.abs(dx) > 0.02) u.face = Math.sign(dx);
@@ -360,7 +480,7 @@ const KCSim = (() => {
       t = null; e.target = 0;
       let bd = Infinity;
       for (const u of s.ents) {
-        if ((u.kind !== 'troop' && u.kind !== 'building') || u.team === e.team || u.dead) continue;
+        if ((u.kind !== 'troop' && u.kind !== 'building') || u.team === e.team || u.dead || u.tunnel) continue;
         const d = edge(e, u);
         if (d <= e.range && d < bd) { bd = d; t = u; }
       }
@@ -429,6 +549,7 @@ const KCSim = (() => {
         s.events.push({ type: 'splash', kind: p.kind, x: p.x, y: p.y, r: p.splash });
       } else if (t && !t.dead) {
         damage(s, t, p.dmg, p.team);
+        if (p.slow && !t.dead) { slowDown(s, t, p.slow.f, p.slow.dur, 'lasso'); s.events.push({ type: 'snare', team: p.team, x: t.x, y: t.y, id: t.id }); }
         s.events.push({ type: 'hit', kind: p.kind, team: p.team, x: p.x, y: p.y });
       }
     }
@@ -460,7 +581,9 @@ const KCSim = (() => {
       const amount = Math.max(1, Math.round(z.dps * 0.1));
       for (const e of s.ents) {
         if (e.dead || e.team === z.team || (z.targets === 'ground' && e.air)) continue;
-        if (Math.hypot(e.x - z.x, e.y - z.y) - e.radius <= z.r) damage(s, e, amount, z.team);
+        if (Math.hypot(e.x - z.x, e.y - z.y) - e.radius > z.r) continue;
+        damage(s, e, e.kind === 'tower' && z.towerPct ? Math.max(1, Math.round(amount * z.towerPct)) : amount, z.team, true);
+        if (z.slow) slowDown(s, e, z.slow, 0.25, 'sand');
       }
     }
     s.zones = s.zones.filter(z => z.left > 1e-9);
@@ -468,7 +591,7 @@ const KCSim = (() => {
 
   /* ---------- pushing apart ---------- */
   function collide(s) {
-    const troops = s.ents.filter(e => e.kind === 'troop' && !e.dead);
+    const troops = s.ents.filter(e => e.kind === 'troop' && !e.dead && !e.tunnel);
     for (let i = 0; i < troops.length; i++) {
       const a = troops[i];
       for (let j = i + 1; j < troops.length; j++) {
@@ -543,7 +666,7 @@ const KCSim = (() => {
 
   return {
     W, H, MID, RIVER_TOP, RIVER_BOT, BRIDGES, BRIDGE_HALF, DT, REGULAR, OVERTIME, MAX_ENERGY, TOWERS,
-    create, step, play, canDeploy, tower, laneOf, own, mulberry, levelMult,
+    create, step, play, canDeploy, tower, laneOf, own, mulberry, levelMult, evoCharge,
     // TEMPORARY: ends a match on the spot for the Simulate Win test button.
     forceEnd: (s, winner) => finish(s, winner, 'test'),
   };

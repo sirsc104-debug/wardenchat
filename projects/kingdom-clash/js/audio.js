@@ -77,6 +77,14 @@ const KCSound = (() => {
     em_cheeky: () => { noise(0.22, 0.12, 300, 'bandpass'); tone(200, 140, 0.2, 'square', 0.05); tone(990, 1320, 0.08, 'triangle', 0.08, 0.2); },
     em_think: () => { tone(392, 0, 0.14, 'triangle', 0.1); tone(330, 0, 0.14, 'triangle', 0.1, 0.16); tone(440, 0, 0.2, 'triangle', 0.1, 0.32); },
     emPhrase: () => { tone(700, 1050, 0.08, 'triangle', 0.12); noise(0.05, 0.05, 3000, 'highpass'); },
+    // Sunstone Arena cards and evolutions
+    sandstorm: () => { noise(1.4, 0.12, 700, 'bandpass'); noise(1.2, 0.06, 2600, 'bandpass', 0.2); tone(120, 220, 1.2, 'sine', 0.05); },
+    dig: () => { for (let i = 0; i < 4; i++) noise(0.08, 0.12, 380, 'lowpass', i * 0.07); },
+    surface: () => { tone(110, 50, 0.25, 'sine', 0.3); noise(0.35, 0.2, 500); noise(0.2, 0.08, 2400, 'bandpass', 0.05); },
+    ramHit: () => { tone(90, 40, 0.4, 'sine', 0.4); noise(0.4, 0.3, 450); noise(0.25, 0.15, 1600, 'bandpass', 0.04); tone(300, 120, 0.2, 'square', 0.06); },
+    lasso: () => { noise(0.25, 0.07, 1900, 'bandpass'); tone(500, 900, 0.18, 'sine', 0.04); },
+    snare: () => { tone(220, 330, 0.12, 'triangle', 0.09); noise(0.06, 0.06, 2800, 'highpass'); },
+    evo: () => { [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, 0, 0.25, 'triangle', 0.1, i * 0.05)); noise(0.6, 0.05, 6000, 'highpass', 0.1); tone(200, 800, 0.4, 'sine', 0.05); },
     buy: () => { tone(880, 1320, 0.1, 'triangle', 0.15); tone(1760, 0, 0.18, 'sine', 0.1, 0.09); },
     deploy: () => { tone(220, 90, 0.16, 'sine', 0.3); noise(0.12, 0.12, 600); },
     // Briar Hollow cards

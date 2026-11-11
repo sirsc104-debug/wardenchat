@@ -36,7 +36,9 @@ const KCProgress = (() => {
       blurb: 'A ruined fortress of forges and ash, where old cannons still guard the walls.' },
     { id: 'briar', number: 2, name: 'Briar Hollow', min: 300, theme: 'briar', cards: ['spears', 'pots', 'footmen', 'flail'],
       blurb: 'An overgrown forest of ancient stone ruins, giant tree roots, thorny vines and glowing lanterns.' },
-    { id: 'arena3', number: 3, name: 'Arena 3', min: 600, soon: true, blurb: 'Coming in a later update.' },
+    { id: 'sunstone', number: 3, name: 'Sunstone Arena', min: 600, theme: 'sunstone', cards: ['sandstorm', 'ramcart', 'mole', 'camel'],
+      blurb: 'A sun-baked desert fortress of sandstone walls and an oasis channel. Evolutions and the Diamond Pass open here.' },
+    { id: 'arena4', number: 4, name: 'Arena 4', min: 900, soon: true, blurb: 'Coming in a later update.' },
   ];
   // Fixed rewards along the road, claimed by the player.
   const ROAD = [
@@ -57,7 +59,15 @@ const KCProgress = (() => {
     { at: 480, kind: 'card', card: 'footmen', copies: 6 },
     { at: 520, kind: 'coins', amount: 400 },
     { at: 560, kind: 'card', card: 'flail', copies: 3 },
-    { at: 600, kind: 'arena', arena: 'arena3' },
+    { at: 600, kind: 'arena', arena: 'sunstone' },
+    { at: 630, kind: 'card', card: 'sandstorm', copies: 6 },
+    { at: 670, kind: 'coins', amount: 500 },
+    { at: 710, kind: 'card', card: 'ramcart', copies: 3 },
+    { at: 750, kind: 'chest', chest: 'gold' },
+    { at: 790, kind: 'card', card: 'mole', copies: 3 },
+    { at: 830, kind: 'coins', amount: 600 },
+    { at: 870, kind: 'card', card: 'camel', copies: 1 },
+    { at: 900, kind: 'arena', arena: 'arena4' },
   ];
   const CHESTS = {
     wooden: { name: 'Wooden Chest', seconds: 60, coins: [18, 26], cards: 6, kinds: 2 },
@@ -109,7 +119,7 @@ const KCProgress = (() => {
   };
   const blank = () => ({
     name: 'Player', xp: 0, beaten: {}, records: {}, roadSeen: false, opp: null,
-    mode: null, trophies: 0, best: 0, coins: 0, diamonds: 0, shop: null, freeChestDay: null, magic: {}, cards: {}, found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
+    mode: null, trophies: 0, best: 0, coins: 0, diamonds: 0, shop: null, freeChestDay: null, magic: {}, cards: {}, evos: [], pass: null, member: false, found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
     chests: [null, null, null, null], cycle: 0, claimed: {}, diff: 0.35, trophyRecord: { w: 0, l: 0, d: 0 },
   });
 
@@ -122,6 +132,8 @@ const KCProgress = (() => {
     for (const t of KC_TRAINERS) P.records[t.id] = Object.assign({ w: 0, l: 0, d: 0 }, P.records[t.id]);
     for (const id of KC_ALL_CARDS) P.cards[id] = Object.assign({ level: 1, count: 0 }, P.cards[id]);
     P.magic = Object.assign({}, P.magic);
+    P.evos = Array.isArray(P.evos) ? P.evos.filter(id => KC_EVOS[id]) : [];
+    P.pass = Object.assign({ season: 1, points: 0, premium: false, free: {}, paid: {} }, P.pass);
     P.found = KC_ALL_CARDS.filter(id => P.found.includes(id));
     if (!Array.isArray(P.deck) || P.deck.length !== 8 || new Set(P.deck).size !== 8 || P.deck.some(id => !P.found.includes(id))) P.deck = KC_STARTER_DECK.slice();
     while (P.chests.length < 4) P.chests.push(null);
@@ -235,6 +247,11 @@ const KCProgress = (() => {
     if (t >= 400) swap('pots', 0.5);
     if (t >= 480) swap('footmen', 0.5);
     if (t >= 560) swap('flail', 0.5);
+    // Sunstone Arena cards
+    if (t >= 630) swap('sandstorm', 0.5);
+    if (t >= 710) swap('ramcart', 0.5);
+    if (t >= 790) swap('mole', 0.5);
+    if (t >= 870) swap('camel', 0.45);
     const name = FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
     const foeTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
     const cardLevels = spreadLevels(foeUpgrades(foeTrophies), deck, rand);
@@ -242,9 +259,11 @@ const KCProgress = (() => {
     return {
       id: 'trophy', kind: 'trophy', name, short: name, level: lvl, tier: `${foeTrophies} trophies`,
       look: foeLook(rand), lines: null, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: foeTrophies,
+      // past 700 trophies about half the opponents with a Snowman have its evolution
+      evos: foeTrophies >= 700 && deck.includes('snowman') && rand() < 0.5 ? ['snowman'] : [],
     };
   }
-  function recordTrophy(winner) {
+  function recordTrophy(winner, crowns) {
     const r = P.trophyRecord, before = P.trophies, beforeArena = arena().id;
     if (winner === 0) { r.w++; P.trophies += TROPHIES.win; P.diff += 0.05; }
     else if (winner === 1) { r.l++; P.trophies = Math.max(arenaFloor(), P.trophies - TROPHIES.loss); P.diff -= 0.055; }
@@ -264,11 +283,13 @@ const KCProgress = (() => {
     }
     const xp = winner === 0 ? XP.win : winner === 1 ? XP.loss : XP.draw, levelUp = addXp(xp);
     const newArena = arena().id !== beforeArena ? arena() : null;
+    const pass = passAdd(crowns || 0);
     save();
-    return { kind: 'trophy', delta: P.trophies - before, trophies: P.trophies, chest, slotsFull, xp, levelUp, newArena, newRewards: claimable().length };
+    return { kind: 'trophy', delta: P.trophies - before, trophies: P.trophies, chest, slotsFull, xp, levelUp, newArena, newRewards: claimable().length, pass };
   }
 
   /* ---------- chests ---------- */
+  const LEGENDARY_IN = { wooden: 0.03, silver: 0.06, gold: 0.15, platinum: 0.3, legendary: 1, mythic: 1 };
   // Chest contents grow with the account level (not trophies): 15% more coins and cards per level.
   const chestMult = (lv = level()) => 1 + 0.15 * (Math.max(1, lv) - 1);
   function chestOdds(type, lv) {
@@ -283,13 +304,14 @@ const KCProgress = (() => {
     return TIERS[i];
   }
   function roll(type, rand = Math.random) {
-    const C = chestOdds(type), pool = P.found.filter(id => KC_CARDS[id]);
+    // a legendary card only turns up now and then, more often in the bigger chests
+    const C = chestOdds(type), pool = P.found.filter(id => KC_CARDS[id] && (KC_CARDS[id].rarity !== 'legendary' || rand() < (LEGENDARY_IN[type] || 0)));
     const coins = Math.round(lerp(C.coins[0], C.coins[1], rand()));
     const kinds = Math.min(C.kinds, pool.length), picks = [];
     const bag = pool.slice();
     for (let i = 0; i < kinds; i++) picks.push(bag.splice(Math.floor(rand() * bag.length), 1)[0]);
     // rares come in smaller stacks
-    const weight = id => (KC_CARDS[id].rarity === 'rare' ? 0.35 : 1);
+    const weight = id => ({ rare: 0.35, epic: 0.15, legendary: 0.04 }[KC_CARDS[id].rarity] || 1);
     const total = picks.reduce((a, id) => a + weight(id), 0);
     let left = C.cards;
     const cards = picks.map((id, i) => {
@@ -451,7 +473,7 @@ const KCProgress = (() => {
     book_legendary: { name: 'Book of Legendary', kind: 'book', rarity: 'legendary', blurb: 'Use on a legendary card to fill all the copies it still needs for its next level.' },
     book_books: { name: 'Book of Books', kind: 'book', rarity: 'any', blurb: 'Works on a card of any rarity: fills all the copies it still needs for its next level.' },
     hammer_books: { name: 'Hammer of Books', kind: 'hammer', rarity: 'any', blurb: 'Upgrades a card one level without spending coins. The card still needs its copies.' },
-    shards: { name: 'Evolution Shards', kind: 'shard', rarity: 'any', soon: true, blurb: 'Unlock and power card evolutions. Evolutions arrive in a later update.' },
+    shards: { name: 'Evolution Shards', kind: 'shard', rarity: 'any', blurb: 'Collect 6 and use them on a card that has an evolution to unlock it. Evolutions open in Sunstone Arena (Arena 3); the Snowman\'s is the first.' },
   };
   const MAGIC_ORDER = ['wild_common', 'wild_rare', 'wild_epic', 'wild_legendary', 'book_common', 'book_rare', 'book_epic', 'book_legendary', 'book_books', 'hammer_books', 'shards'];
   const MAGIC_RULES = {
@@ -495,6 +517,14 @@ const KCProgress = (() => {
     if (!M || !card || M.soon) return { ok: false, reason: 'none' };
     if (!magicCount(item)) return { ok: false, reason: 'none-held' };
     if (!P.found.includes(id)) return { ok: false, reason: 'not-found' };
+    if (M.kind === 'shard') {
+      const E = KC_EVOS[id];
+      if (!E) return { ok: false, reason: 'no-evo' };
+      if (hasEvo(id)) return { ok: false, reason: 'evo-owned' };
+      if (!evoOpen()) return { ok: false, reason: 'evo-locked' };
+      if (magicCount(item) < E.shards) return { ok: false, reason: 'shards', missing: E.shards - magicCount(item) };
+      return { ok: true, evo: true, uses: E.shards };
+    }
     if (M.rarity !== 'any' && M.rarity !== card.rarity) return { ok: false, reason: 'rarity' };
     const c = P.cards[id];
     if (c.level >= MAX_LEVEL) return { ok: false, reason: 'max' };
@@ -507,6 +537,12 @@ const KCProgress = (() => {
     const r = magicFor(item, id);
     if (!r.ok) return r;
     const M = MAGIC[item], c = P.cards[id];
+    if (M.kind === 'shard') {
+      P.magic[item] -= r.uses;
+      P.evos.push(id);
+      save();
+      return { ok: true, item, card: id, evo: true };
+    }
     if (M.kind === 'hammer') {
       c.count -= UPGRADE.copies[KC_CARDS[id].rarity][c.level - 1];
       c.level++;
@@ -525,6 +561,96 @@ const KCProgress = (() => {
     const add = { wild_common: 300, wild_rare: 60, wild_epic: 10, wild_legendary: 2, book_common: 3, book_rare: 3, book_epic: 1, book_legendary: 1, book_books: 2, hammer_books: 3 };
     for (const [k, v] of Object.entries(add)) P.magic[k] = magicCount(k) + v;
     save();
+  }
+
+  /* ---------- evolutions ----------
+     An evolution is unlocked once with Evolution Shards (6 for the Snowman) or from the Diamond Pass,
+     and then works in every battle: every cycle-th play of the card is the evolved one (js/sim.js).
+     Evolutions open when you first reach Sunstone Arena (Arena 3). */
+  const EVO_ARENA = 600;
+  const evoOpen = () => P.best >= EVO_ARENA;
+  const hasEvo = id => P.evos.includes(id);
+  const evoList = () => P.evos.filter(id => KC_EVOS[id] && P.found.includes(id));
+  function evoInfo(id) {
+    const E = KC_EVOS[id];
+    if (!E) return null;
+    return { has: hasEvo(id), open: evoOpen(), shards: magicCount('shards'), need: E.shards, name: E.name, blurb: E.blurb, can: !hasEvo(id) && evoOpen() && magicCount('shards') >= E.shards };
+  }
+
+  /* ---------- the Diamond Pass ----------
+     A season pass, open from Sunstone Arena (Arena 3). Every crown you win in a trophy battle is a pass
+     point; each tier takes crownsPerTier of them. Every tier has a free reward, and a Diamond Pass
+     reward for players who bought this season's pass in the Shop (members get it as part of their
+     membership). The free path gives 2 Evolution Shards in all; the Diamond Pass gives the Snowman
+     Evolution at tier 1. Rewards are fixed and shown in full before buying. */
+  const PASS = {
+    name: 'Diamond Pass', season: 1, price: 10, crownsPerTier: 8,
+    tiers: [
+      { free: { kind: 'coins', n: 300 }, paid: { kind: 'evo', card: 'snowman' } },
+      { free: { kind: 'item', item: 'wild_common', n: 20 }, paid: { kind: 'chest', chest: 'gold' } },
+      { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'coins', n: 1000 } },
+      { free: { kind: 'coins', n: 400 }, paid: { kind: 'item', item: 'wild_rare', n: 6 } },
+      { free: { kind: 'item', item: 'shards', n: 1 }, paid: { kind: 'chest', chest: 'gold' } },
+      { free: { kind: 'item', item: 'wild_rare', n: 3 }, paid: { kind: 'item', item: 'book_common', n: 1 } },
+      { free: { kind: 'coins', n: 500 }, paid: { kind: 'coins', n: 1500 } },
+      { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'item', item: 'shards', n: 2 } },
+      { free: { kind: 'item', item: 'wild_common', n: 30 }, paid: { kind: 'chest', chest: 'platinum' } },
+      { free: { kind: 'item', item: 'shards', n: 1 }, paid: { kind: 'item', item: 'wild_epic', n: 1 } },
+      { free: { kind: 'coins', n: 600 }, paid: { kind: 'chest', chest: 'gold' } },
+      { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'coins', n: 2000 } },
+      { free: { kind: 'item', item: 'wild_rare', n: 5 }, paid: { kind: 'item', item: 'shards', n: 2 } },
+      { free: { kind: 'coins', n: 800 }, paid: { kind: 'item', item: 'book_rare', n: 1 } },
+      { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'chest', chest: 'legendary' } },
+    ],
+  };
+  const passOpen = () => P.best >= EVO_ARENA;
+  const passPremium = () => !!(P.pass.premium || P.member);
+  const passMax = () => PASS.tiers.length * PASS.crownsPerTier;
+  // tiers reached (0 to the number of tiers), and the points toward the next one
+  const passTier = () => Math.min(PASS.tiers.length, Math.floor(P.pass.points / PASS.crownsPerTier));
+  const passInto = () => (passTier() >= PASS.tiers.length ? PASS.crownsPerTier : P.pass.points % PASS.crownsPerTier);
+  function passAdd(crowns) {
+    if (!passOpen() || crowns <= 0) return null;
+    const before = passTier();
+    P.pass.points = Math.min(passMax(), P.pass.points + crowns);
+    return { points: crowns, tierUp: passTier() > before ? passTier() : 0 };
+  }
+  // 'claimed' | 'ready' | 'locked' (tier not reached) | 'premium' (reached, but needs the Diamond Pass)
+  function passState(i, track) {
+    if (P.pass[track][i]) return 'claimed';
+    if (!passOpen() || i >= passTier()) return 'locked';
+    if (track === 'paid' && !passPremium()) return 'premium';
+    return 'ready';
+  }
+  const passClaimable = () => PASS.tiers.reduce((n, _, i) => n + (passState(i, 'free') === 'ready') + (passState(i, 'paid') === 'ready'), 0);
+  // Claim a tier's reward. Returns what it gave, in the same shape as a chest (coins, cards, items).
+  function claimPass(i, track) {
+    if (passState(i, track) !== 'ready') return null;
+    const R = PASS.tiers[i][track];
+    P.pass[track][i] = true;
+    let out = { reward: R, coins: 0, cards: [], items: [] };
+    if (R.kind === 'coins') { P.coins += R.n; out.coins = R.n; }
+    else if (R.kind === 'item') { P.magic[R.item] = magicCount(R.item) + R.n; out.items = [{ id: R.item, n: R.n }]; }
+    else if (R.kind === 'chest') {
+      const before = P.found.slice(), c = roll(R.chest);
+      apply(c);
+      out = Object.assign(out, c, { chest: R.chest, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)) });
+    } else if (R.kind === 'evo') {
+      // an evolution you already have comes as its shards instead
+      if (hasEvo(R.card)) { const n = KC_EVOS[R.card].shards; P.magic.shards = magicCount('shards') + n; out.items = [{ id: 'shards', n }]; }
+      else { P.evos.push(R.card); out.evo = R.card; }
+    }
+    save();
+    return out;
+  }
+  function buyPass() {
+    if (!passOpen()) return { error: 'locked' };
+    if (passPremium()) return { error: 'owned' };
+    if (P.diamonds < PASS.price) return { error: 'diamonds' };
+    P.diamonds -= PASS.price;
+    P.pass.premium = true;
+    save();
+    return { ok: true, price: PASS.price };
   }
 
   /* ---------- cards ---------- */
@@ -577,5 +703,7 @@ const KCProgress = (() => {
     SHOP, shop, shopEnds, refreshShop, buy, buyChest, grantTest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
     MAGIC, MAGIC_ORDER, MAGIC_RULES, wildActive, magicCount, magicFor, useMagic, grantMagic,
+    EVO_ARENA, evoOpen, hasEvo, evoList, evoInfo,
+    PASS, passOpen, passPremium, passTier, passInto, passMax, passState, passClaimable, claimPass, buyPass,
   };
 })();

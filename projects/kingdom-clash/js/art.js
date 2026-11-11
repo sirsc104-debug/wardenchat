@@ -234,7 +234,16 @@ const KCArt = (() => {
       sh(c, () => rr(c, q(-0.22), q(-1.54), q(0.44), q(0.07), q(0.03)), '#2a2836', null, 0);
       sh(c, () => rr(c, q(-0.14), q(-1.84), q(0.28), q(0.32), q(0.05)), '#2a2836', '#1c1a26', q(0.04));
       rr(c, q(-0.14), q(-1.62), q(0.28), q(0.06), 0); c.fillStyle = T.main; c.fill();
-      if (th < 0.6) sh(c, () => circ(c, hx, hy - q(0.04), q(0.13)), snow, snowSh, q(0.03));
+      if (o.evo) {
+        // evolved: an ice crown over the hat, frost shards on the shoulders, glowing eyes
+        // an ice crown on the hat
+        for (const [x, h] of [[-0.2, 0.26], [0, 0.4], [0.2, 0.26]]) sh(c, () => poly(c, [q(x - 0.13), q(-1.86), q(x), q(-1.88 - h), q(x + 0.13), q(-1.86)]), '#e6f8ff', '#a8e2f8', q(0.03));
+        sh(c, () => rr(c, q(-0.32), q(-1.92), q(0.64), q(0.14), q(0.05)), '#bdeeff', '#8fd0f0', q(0.03));
+        dot(c, 0, q(-1.85), q(0.05), '#b48cff');
+        for (const d of [-1, 1]) sh(c, () => poly(c, [d * q(0.18), q(-1.06), d * q(0.5), q(-1.34), d * q(0.38), q(-0.98)]), '#e2ccff', '#b48cff', q(0.02));
+        if (front) { dot(c, q(-0.08), q(-1.37), q(0.05), '#7ff0ff'); dot(c, q(0.08), q(-1.37), q(0.05), '#7ff0ff'); }
+      }
+      if (th < 0.6) sh(c, () => circ(c, hx, hy - q(0.04), q(o.evo ? 0.2 : 0.13)), snow, snowSh, q(0.03));
       c.restore();
     },
 
@@ -402,6 +411,202 @@ const KCArt = (() => {
       }
       rr(c, q(-0.3), q(-0.36), q(0.6), q(0.08), q(0.03)); paint(c, T.main, LW * 0.7);
     },
+
+    // A Ram Cart soldier: a desert fighter in a tunic and leather cap, with a wooden mallet.
+    ramsoldier(c, k, o) {
+      const q = v => v * k * 0.88, T = TEAM[o.team], st = o.walk ? Math.sin(o.t * 11) * q(0.05) : 0, front = o.view === 'front', sw = o.atk;
+      const tunic = '#e2c48a', tunicSh = '#bf9c5e', leather = '#a8703c', leatherSh = '#7e4f25';
+      for (const [x, ph] of [[-0.19, 1], [0.06, -1]]) sh(c, () => rr(c, q(x), q(-0.3) + st * ph, q(0.13), q(0.3) - st * ph, q(0.05)), '#6b4a30', null, 0);
+      const mallet = () => {
+        c.save(); c.translate(q(0.3), q(-0.72)); c.rotate(-0.4 + sw * 2.2);
+        line(c, 0, 0, 0, q(-0.5), OUT, q(0.09) + LW); line(c, 0, 0, 0, q(-0.5), '#8a5a2e', q(0.09));
+        sh(c, () => rr(c, q(-0.17), q(-0.68), q(0.34), q(0.2), q(0.06)), C.wood, C.woodSh, q(0.05));
+        rr(c, q(-0.17), q(-0.62), q(0.34), q(0.05), 0); c.fillStyle = C.gold; c.fill();
+        c.restore();
+      };
+      if (!front) mallet();
+      sh(c, () => rr(c, q(-0.27), q(-0.88), q(0.54), q(0.62), q(0.16)), tunic, tunicSh, q(0.06));
+      sh(c, () => poly(c, [q(-0.27), q(-0.84), q(-0.12), q(-0.88), q(0.27), q(-0.4), q(0.27), q(-0.26)]), T.main, T.sh, q(0.04));
+      sh(c, () => rr(c, q(-0.28), q(-0.4), q(0.56), q(0.09), q(0.03)), leather, null, 0);
+      sh(c, () => circ(c, 0, q(-1.1), q(0.25)), front ? C.skin : '#4a2f1e', front ? C.skinSh : '#36210f', q(0.05));
+      if (front) {
+        dot(c, q(-0.08), q(-1.1), q(0.035)); dot(c, q(0.08), q(-1.1), q(0.035));
+        line(c, q(-0.08), q(-0.98), q(0.08), q(-0.98), OUT, LW * 0.9);
+      }
+      sh(c, () => { c.beginPath(); c.arc(0, q(-1.13), q(0.27), Math.PI, 0); c.closePath(); }, leather, leatherSh, q(0.05));
+      sh(c, () => rr(c, q(-0.29), q(-1.16), q(0.58), q(0.08), q(0.03)), leatherSh, null, 0);
+      sh(c, () => ell(c, q(0.02), q(-1.45), q(0.07), q(0.13), 0.3), T.main, T.sh, q(0.03));
+      if (front) mallet();
+    },
+
+    // The Ram Cart: a wheeled frame carrying a log with a golden ram's head, pushed by two soldiers.
+    // o.power (0 to 1) is how fast it is going: the wheels spin faster and it leans into the charge.
+    ramcart(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', pw = o.power || 0;
+      const spin = o.walk ? o.t * (5 + pw * 14) : 0, lean = (front ? 1 : -1) * pw * q(0.06);
+      const wood = '#b07a43', woodSh = '#84552a';
+      const wheel = (x, y, r) => {
+        sh(c, () => circ(c, x, y, r), '#7a4f2a', '#5a3818', r * 0.25);
+        for (let i = 0; i < 4; i++) { const a = spin + i * Math.PI / 4; line(c, x - Math.cos(a) * r * 0.75, y - Math.sin(a) * r * 0.75, x + Math.cos(a) * r * 0.75, y + Math.sin(a) * r * 0.75, '#c9935a', Math.max(1, r * 0.16)); }
+        circ(c, x, y, r * 0.24); paint(c, C.gold, LW * 0.6);
+      };
+      const ramHead = (y, s) => {
+        c.save(); c.translate(0, y); c.scale(s, s);
+        for (const d of [-1, 1]) {
+          rope(c, () => { c.beginPath(); c.arc(d * q(0.24), q(-0.1), q(0.17), d > 0 ? Math.PI * 1.2 : -Math.PI * 0.2, d > 0 ? Math.PI * 2.7 : Math.PI * 1.3, d < 0); }, '#e8a91c', q(0.1));
+          circ(c, d * q(0.24), q(-0.1), q(0.06)); paint(c, '#c47f10', LW * 0.5);
+        }
+        sh(c, () => ell(c, 0, 0, q(0.22), q(0.26)), C.gold, C.goldSh, q(0.06));
+        sh(c, () => ell(c, 0, q(0.14), q(0.15), q(0.11)), '#ffe27a', C.goldSh, q(0.03));
+        if (front) {
+          dot(c, q(-0.09), q(-0.04), q(0.035)); dot(c, q(0.09), q(-0.04), q(0.035));
+          dot(c, q(-0.05), q(0.16), q(0.025), '#8a5a05'); dot(c, q(0.05), q(0.16), q(0.025), '#8a5a05');
+        }
+        c.restore();
+      };
+      const pushers = () => {
+        for (const x of [-0.34, 0.34]) {
+          c.save(); c.translate(q(x), front ? q(-1.05) : q(0.32)); c.scale(0.78, 0.78);
+          TROOPS.ramsoldier(c, k, Object.assign({}, o, { atk: 0, t: o.t + x * 3 }));
+          c.restore();
+        }
+      };
+      c.save(); c.translate(0, lean);
+      if (front) pushers();
+      // far wheels, the frame, the log, near wheels
+      wheel(q(-0.55), q(-1.05), q(0.2)); wheel(q(0.55), q(-1.05), q(0.2));
+      sh(c, () => rr(c, q(-0.5), q(-1.25), q(1.0), q(1.0), q(0.12)), wood, woodSh, q(0.1));
+      c.save(); rr(c, q(-0.5), q(-1.25), q(1.0), q(1.0), q(0.12)); c.clip();
+      for (const y of [-1.0, -0.72, -0.44]) line(c, q(-0.5), q(y), q(0.5), q(y), 'rgba(60,35,15,0.45)', LW * 0.8);
+      c.restore();
+      sh(c, () => rr(c, q(-0.5), q(-0.62), q(1.0), q(0.12), q(0.04)), T.main, T.sh, q(0.04));
+      sh(c, () => rr(c, q(-0.2), q(-1.5), q(0.4), q(1.45), q(0.18)), '#9a6a3a', '#734a26', q(0.08));
+      for (const y of [-1.25, -0.42]) sh(c, () => rr(c, q(-0.23), q(y), q(0.46), q(0.1), q(0.03)), '#5d6370', '#3f444f', q(0.03));
+      wheel(q(-0.58), q(-0.4), q(0.25)); wheel(q(0.58), q(-0.4), q(0.25));
+      if (front) ramHead(q(0.02), 1.15); else ramHead(q(-1.55), 0.85);
+      c.restore();
+      if (!front) pushers();
+    },
+
+    // The Mole: a burly digger in a miner's helmet with a lamp, big claws for digging and fighting.
+    mole(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], st = o.walk ? Math.sin(o.t * 10) * q(0.04) : 0, front = o.view === 'front', sw = o.atk;
+      const fur = '#7a5a44', furSh = '#5a412f', belly = '#b48e6c';
+      for (const [x, ph] of [[-0.22, 1], [0.08, -1]]) sh(c, () => ell(c, q(x + 0.07), q(-0.08) + st * ph, q(0.13), q(0.09)), '#e9a9a0', '#c98880', q(0.02));
+      const claw = (d) => {
+        c.save(); c.translate(d * q(0.38), q(-0.6)); c.rotate(d * (0.3 - sw * 1.6));
+        sh(c, () => ell(c, 0, q(0.08), q(0.14), q(0.18)), '#e9a9a0', '#c98880', q(0.04));
+        for (const a of [-0.35, 0, 0.35]) sh(c, () => poly(c, [q(a * 0.3) - q(0.04), q(0.2), q(a * 0.3) + q(0.04), q(0.2), q(a * 0.6), q(0.38)]), '#f3ead0', '#d4c8a6', q(0.02));
+        c.restore();
+      };
+      claw(-1);
+      sh(c, () => ell(c, 0, q(-0.46), q(0.38), q(0.4)), fur, furSh, q(0.09));
+      if (front) sh(c, () => ell(c, 0, q(-0.4), q(0.24), q(0.28)), belly, '#97735a', q(0.05));
+      else sh(c, () => ell(c, 0, q(-0.1), q(0.06), q(0.05)), '#e9a9a0', null, 0);
+      claw(1);
+      sh(c, () => circ(c, 0, q(-0.9), q(0.27)), fur, furSh, q(0.06));
+      if (front) {
+        sh(c, () => ell(c, 0, q(-0.8), q(0.15), q(0.11)), belly, '#97735a', q(0.03));
+        for (const d of [-1, 1]) { circ(c, d * q(0.1), q(-0.94), q(0.07)); paint(c, '#bfe6ff', LW * 0.8); dot(c, d * q(0.1), q(-0.94), q(0.025)); }
+        line(c, q(-0.03), q(-0.94), q(0.03), q(-0.94), OUT, LW);
+        for (let i = 0; i < 5; i++) { const a = i / 5 * TAU - Math.PI / 2; dot(c, Math.cos(a) * q(0.05), q(-0.83) + Math.sin(a) * q(0.05), q(0.03), '#ff8aa8'); }
+        circ(c, 0, q(-0.83), q(0.045)); paint(c, '#ff6f95', LW * 0.6);
+        rr(c, q(-0.045), q(-0.75), q(0.09), q(0.06), q(0.01)); paint(c, '#fff', LW * 0.5);
+      }
+      // the miner's helmet and its lamp
+      sh(c, () => { c.beginPath(); c.arc(0, q(-0.98), q(0.29), Math.PI, 0); c.closePath(); }, '#ffcd33', '#e09f12', q(0.05));
+      sh(c, () => rr(c, q(-0.31), q(-1.01), q(0.62), q(0.07), q(0.03)), T.main, T.sh, q(0.02));
+      if (front) {
+        sh(c, () => circ(c, 0, q(-1.12), q(0.08)), '#fff8d0', '#ffe27a', q(0.02));
+        const g = c.createRadialGradient(0, q(-1.12), 0, 0, q(-1.12), q(0.3));
+        g.addColorStop(0, 'rgba(255,245,190,0.6)'); g.addColorStop(1, 'rgba(255,245,190,0)');
+        c.fillStyle = g; circ(c, 0, q(-1.12), q(0.3)); c.fill();
+      }
+    },
+
+    // The Camel Jockey: a camel that gallops for buildings, and its rider who lassos troops.
+    // o.ratk (0 to 1) is the rider's throw; o.charged lights up the run before a charge hit.
+    camel(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', g = o.walk ? o.t * 11 : 0;
+      const tan = '#dba862', tanSh = '#b5853f', hoof = '#5a4030';
+      const bob = o.walk ? Math.abs(Math.sin(g)) * q(0.07) : 0, lunge = (front ? 1 : -1) * o.atk * q(0.2);
+      const leg = (x, ph) => {
+        const sw = Math.sin(g + ph) * q(0.12);
+        sh(c, () => rr(c, q(x) - q(0.09), q(-0.7) + Math.max(0, -sw) * 0.4, q(0.18), q(0.7) - Math.max(0, sw) * 0.5, q(0.07)), tan, tanSh, q(0.03));
+        sh(c, () => ell(c, q(x), q(-0.03) - Math.max(0, sw) * 0.5, q(0.09), q(0.05)), hoof, null, 0);
+      };
+      const rider = (y) => {
+        c.save(); c.translate(0, y);
+        const th = o.ratk || 0;
+        // the lasso, swung overhead before the throw
+        if (th > 0.05) {
+          // swung on the far side from the camel's head
+          const a = o.t * 18, sd = front ? 1 : -1, lx = sd * q(0.36), ly = q(-1.05);
+          rope(c, () => { c.beginPath(); c.moveTo(sd * q(0.2), q(-0.62)); c.lineTo(lx, ly); }, '#c8a070', q(0.04));
+          rope(c, () => ell(c, lx + Math.cos(a) * q(0.08), ly - q(0.06), q(0.24), q(0.09)), '#c8a070', q(0.04));
+        }
+        sh(c, () => rr(c, q(-0.24), q(-0.66), q(0.48), q(0.56), q(0.16)), T.main, T.sh, q(0.06));
+        sh(c, () => rr(c, q(-0.25), q(-0.3), q(0.5), q(0.08), q(0.03)), C.gold, null, 0);
+        sh(c, () => circ(c, 0, q(-0.86), q(0.22)), front ? C.skin : '#f3ead6', front ? C.skinSh : '#d8ccb0', q(0.05));
+        if (front) {
+          dot(c, q(-0.07), q(-0.88), q(0.032)); dot(c, q(0.07), q(-0.88), q(0.032));
+          rr(c, q(-0.1), q(-0.8), q(0.2), q(0.06), q(0.03)); c.fillStyle = '#5a3a24'; c.fill();
+        }
+        // a wrapped turban with a tail in the team's colour
+        sh(c, () => ell(c, 0, q(-1.03), q(0.25), q(0.15)), '#f3ead6', '#d8ccb0', q(0.04));
+        sh(c, () => circ(c, 0, q(-1.03), q(0.06)), T.main, T.sh, q(0.02));
+        if (!front) sh(c, () => poly(c, [q(-0.08), q(-0.98), q(0.06), q(-0.98), q(0.12), q(-0.6), q(-0.02), q(-0.64)]), T.main, T.sh, q(0.03));
+        c.restore();
+      };
+      c.save(); c.translate(0, lunge);
+      // the charge glow under it
+      if (o.charged) { ell(c, 0, q(-0.05), q(0.75), q(0.28)); c.fillStyle = 'rgba(255,210,120,0.35)'; c.fill(); }
+      const head = (x, y, sc) => {
+        c.save(); c.translate(x, y); c.scale(sc, sc);
+        for (const d of [-1, 1]) sh(c, () => ell(c, d * q(0.17), q(-0.14), q(0.07), q(0.045), d * 0.6), tan, tanSh, q(0.01));
+        sh(c, () => ell(c, 0, 0, q(0.2), q(0.17)), tan, tanSh, q(0.04));
+        sh(c, () => ell(c, 0, q(0.11), q(0.15), q(0.1)), '#c9965a', tanSh, q(0.03));
+        if (front) {
+          for (const d of [-1, 1]) {
+            circ(c, d * q(0.08), q(-0.05), q(0.045)); paint(c, '#fff', LW * 0.5); dot(c, d * q(0.08), q(-0.04), q(0.022));
+            line(c, d * q(0.13), q(-0.09), d * q(0.03), q(-0.08), OUT, LW * 0.9);
+            dot(c, d * q(0.05), q(0.11), q(0.02));
+          }
+          line(c, q(-0.06), q(0.17), q(0.06), q(0.17), OUT, LW * 0.8);
+        }
+        c.restore();
+      };
+      const body = () => {
+        sh(c, () => ell(c, 0, q(-0.82), q(0.6), q(0.4)), tan, tanSh, q(0.09));
+        // the hump rises above the saddle blanket
+        sh(c, () => ell(c, 0, q(-1.12), q(0.3), q(0.24)), tan, tanSh, q(0.06));
+        sh(c, () => poly(c, [q(-0.52), q(-0.92), q(0.52), q(-0.92), q(0.44), q(-0.62), q(-0.44), q(-0.62)]), T.main, T.sh, q(0.04));
+        for (let i = 0; i < 6; i++) dot(c, q(-0.38 + i * 0.152), q(-0.6), q(0.035), C.gold);
+      };
+      if (front) {
+        // facing you: hind legs, the body and hump, the rider behind, then the neck and a big head in front
+        leg(-0.34, 0); leg(0.34, Math.PI);
+        c.save(); c.translate(0, -bob);
+        body();
+        rider(q(-1.1));
+        rope(c, () => { c.beginPath(); c.moveTo(0, q(-0.86)); c.quadraticCurveTo(q(0.04), q(-0.62), 0, q(-0.5)); }, tan, q(0.22));
+        head(0, q(-0.46), 1.25);
+        c.restore();
+        leg(-0.24, Math.PI * 0.5); leg(0.24, Math.PI * 1.5);
+      } else {
+        // from behind: the neck reaches up past the rider, the head leads the way
+        leg(-0.26, Math.PI * 0.5); leg(0.26, Math.PI * 1.5);
+        c.save(); c.translate(0, -bob);
+        rope(c, () => { c.beginPath(); c.moveTo(q(0.1), q(-1.0)); c.quadraticCurveTo(q(0.42), q(-1.5), q(0.34), q(-2.05)); }, tan, q(0.2));
+        head(q(0.34), q(-2.14), 0.95);
+        body();
+        rope(c, () => { c.beginPath(); c.moveTo(0, q(-0.5)); c.quadraticCurveTo(q(0.12), q(-0.32), q(0.05), q(-0.24)); }, '#8a5a2e', q(0.04));
+        rider(q(-1.02));
+        c.restore();
+        leg(-0.34, 0); leg(0.34, Math.PI);
+      }
+      c.restore();
+    },
   };
 
   // The upper half of an archer (hood, cloak, bow), shared by the Archers card and the Archer Towers.
@@ -471,7 +676,33 @@ const KCArt = (() => {
     if (!f) return;
     LW = Math.max(1, k * 0.07);
     o.view = o.view || (o.team === 0 ? 'back' : 'front');
+    if (o.evo) {
+      // an evolution: a violet glow at its feet and a little more size
+      const pulse = 0.75 + Math.sin((o.t || 0) * 4) * 0.2;
+      const g = c.createRadialGradient(0, -k * 0.2, k * 0.1, 0, -k * 0.2, k * 1.1);
+      g.addColorStop(0, `rgba(190,140,255,${0.55 * pulse})`); g.addColorStop(1, 'rgba(150,90,255,0)');
+      c.fillStyle = g; ell(c, 0, -k * 0.2, k * 1.1, k * 0.7); c.fill();
+      c.save(); c.scale(1.12, 1.12); f(c, k, o); c.restore();
+      return;
+    }
+    // the camel stands taller than its footprint
+    if (card === 'camel') { c.save(); c.scale(1.18, 1.18); f(c, k, o); c.restore(); return; }
     f(c, k, o);
+  }
+  // Sandstorm: a swirling column of sand with dust and pebbles. t turns it.
+  function sandstormArt(c, k, t) {
+    for (let i = 0; i < 5; i++) {
+      const y = -k * (0.1 + i * 0.22), rx = k * (0.32 + i * 0.12), a = t * (3 + i * 0.6) + i;
+      c.beginPath(); c.ellipse(0, y, rx, rx * 0.32, 0, a, a + Math.PI * 1.4);
+      c.strokeStyle = OUT; c.lineWidth = k * 0.13 + LW; c.lineCap = 'round'; c.stroke();
+      c.strokeStyle = i % 2 ? '#e8c27a' : '#d6a24e'; c.lineWidth = k * 0.13; c.stroke();
+      c.beginPath(); c.ellipse(0, y, rx, rx * 0.32, 0, a + 0.2, a + Math.PI * 0.8);
+      c.strokeStyle = 'rgba(255,240,200,0.8)'; c.lineWidth = k * 0.04; c.stroke();
+    }
+    for (let i = 0; i < 9; i++) {
+      const a = t * 4 + i * 0.7, r = k * (0.35 + (i % 3) * 0.2), y = -k * (0.15 + (i % 4) * 0.25);
+      circ(c, Math.cos(a) * r, y + Math.sin(a) * r * 0.3, k * (0.04 + (i % 2) * 0.03)); paint(c, i % 3 ? '#9a7048' : '#c9a070', LW * 0.5);
+    }
   }
 
   /* ---------- towers ---------- */
@@ -576,13 +807,18 @@ const KCArt = (() => {
   const RARITY = {
     common: ['#8cc0f0', '#3f72b0', '#d4e8ff'],
     rare: ['#ffc463', '#dc761c', '#ffe7b3'],
+    epic: ['#d9a6ff', '#7a3fd0', '#f1dcff'],
+    legendary: ['#8ff0e0', '#7a4cff', '#fff2b3', '#ff8fd0'],
+    evo: ['#c79bff', '#4a22a8', '#e8d4ff'],
   };
-  function portrait(cardId, w, h) {
+  // opts.evo: the evolved version's card (a violet card with the evolved troop).
+  function portrait(cardId, w, h, opts) {
     const cv = document.createElement('canvas');
     cv.width = w; cv.height = h;
-    const c = cv.getContext('2d'), card = KC_CARDS[cardId], R = RARITY[card.rarity] || RARITY.common;
-    const g = c.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, R[0]); g.addColorStop(1, R[1]);
+    const evo = !!(opts && opts.evo);
+    const c = cv.getContext('2d'), card = KC_CARDS[cardId], R = evo ? RARITY.evo : RARITY[card.rarity] || RARITY.common;
+    const g = c.createLinearGradient(0, 0, w * 0.3, h);
+    g.addColorStop(0, R[0]); if (R[3]) g.addColorStop(0.55, R[3]); g.addColorStop(1, R[1]);
     rr(c, 0, 0, w, h, w * 0.1); c.fillStyle = g; c.fill();
     c.save(); rr(c, 0, 0, w, h, w * 0.1); c.clip();
     const glow = c.createRadialGradient(w * 0.5, h * 0.42, w * 0.05, w * 0.5, h * 0.42, w * 0.6);
@@ -590,9 +826,12 @@ const KCArt = (() => {
     c.fillStyle = glow; c.fillRect(0, 0, w, h);
     ell(c, w * 0.5, h * 0.86, w * 0.42, h * 0.07); c.fillStyle = 'rgba(0,0,0,0.18)'; c.fill();
     const k = w * 0.42;
-    const o = { team: 0, t: 0.3, walk: false, atk: 0, face: 1, id: 1, view: 'front' };
+    const o = { team: 0, t: 0.3, walk: false, atk: 0, face: 1, id: 1, view: 'front', evo };
     const at = (x, y, s, oo) => { c.save(); c.translate(w * x, h * y); troop(c, cardId, k * s, Object.assign({}, o, oo)); c.restore(); };
     if (cardId === 'fireball') { c.save(); c.translate(w * 0.54, h * 0.46); LW = Math.max(1, k * 0.07); fireballArt(c, k * 1.0, 0.4); c.restore(); }
+    else if (cardId === 'sandstorm') { c.save(); c.translate(w * 0.56, h * 0.76); LW = Math.max(1, k * 0.06); sandstormArt(c, k * 1.35, 0.6); c.restore(); }
+    else if (cardId === 'ramcart') at(0.5, 0.9, 1.05, { power: 0.4 });
+    else if (cardId === 'camel') at(0.5, 0.97, 0.86, { ratk: 0.6, t: 0.2 });
     else if (cardId === 'spears') { c.save(); c.translate(w * 0.5, h * 0.5); LW = Math.max(1, k * 0.06); spearsArt(c, k * 1.05, 0); c.restore(); }
     else if (cardId === 'footmen') { at(0.27, 0.72, 1.15, { t: 0.4 }); at(0.73, 0.72, 1.15, { t: 1.1 }); at(0.5, 0.92, 1.4, {}); }
     else if (cardId === 'wolves') { at(0.26, 0.7, 1.6, { t: 1.1 }); at(0.74, 0.7, 1.6, {}); at(0.5, 0.9, 2.0, { t: 0.6 }); }
@@ -601,7 +840,7 @@ const KCArt = (() => {
     else {
       if (cardId === 'skeletons') { at(0.26, 0.78, 1.55, { t: 0.4 }); at(0.74, 0.78, 1.55, { t: 1.2 }); at(0.5, 0.94, 1.85, {}); c.restore(); return finish(c, w, h, R, cv); }
       if (cardId === 'cannon') { c.save(); c.translate(w * 0.5, h * 0.62); cannon(c, k * 0.95, { team: 0, angle: Math.PI * 0.62 }); c.restore(); c.restore(); return finish(c, w, h, R, cv); }
-      const sc = { rhino: 1.6, gladiator: 1.5, snowman: 1.32, gorilla: 1.45, flail: 1.22, pots: 1.55 }[cardId] || 1;
+      const sc = { rhino: 1.6, gladiator: 1.5, snowman: evo ? 1.0 : 1.32, gorilla: 1.45, flail: 1.22, pots: 1.55, mole: 1.6, ramsoldier: 1.5 }[cardId] || 1;
       at(0.5, cardId === 'rhino' ? 0.86 : 0.92, sc, {});
     }
     c.restore();
@@ -610,6 +849,12 @@ const KCArt = (() => {
   function finish(c, w, h, R, cv) {
     rr(c, w * 0.025, w * 0.025, w * 0.95, h - w * 0.05, w * 0.085);
     c.lineWidth = w * 0.04; c.strokeStyle = R[2]; c.stroke();
+    if (R === RARITY.evo) {
+      // the evolution mark: a violet gem with a swirl, top left
+      const x = w * 0.16, y = w * 0.16, r = w * 0.1;
+      poly(c, [x, y - r, x + r, y, x, y + r, x - r, y]); paint(c, '#b48cff', Math.max(1.5, w * 0.018));
+      c.beginPath(); c.arc(x, y, r * 0.42, 0, Math.PI * 1.5); c.strokeStyle = '#fff'; c.lineWidth = Math.max(1.2, w * 0.014); c.stroke();
+    }
     return cv;
   }
   // Spears: a volley of spears coming down at an angle. t (0 to 1) slides them forward.
@@ -642,6 +887,7 @@ const KCArt = (() => {
   const THEMES = {
     training: { bg: '#5c5470', grass: ['#7cc653', '#73bd4b'], path: '#d6bf8a', pad: '#9d978d', river: ['#3d8fe0', '#2f75c4'], bank: '#5aa63e', wall: '#857c95', specks: ['#ffffff', '#ffd54a', '#ff8fb3', '#b68cff'] },
     briar: { bg: '#3b4636', grass: ['#5d8a45', '#557f3f'], path: '#8a6a44', pad: '#7e8579', river: ['#2e7a84', '#22636c'], bank: '#3f6a34', wall: '#5e6b56', specks: ['#d8ff8a', '#ffe48a', '#9fe0a0', '#c84a5a'] },
+    sunstone: { bg: '#6e4a2c', grass: ['#e8c47c', '#e0ba70'], path: '#c99a5a', pad: '#b3906a', river: ['#35b8c6', '#2794a6'], bank: '#9fb05a', wall: '#b07a4a', specks: ['#5fa84a', '#ffe08a', '#c96a3a', '#fff4d6'] },
     cinder: { bg: '#4d3f45', grass: ['#a6ad5a', '#9ba251'], path: '#c9a47c', pad: '#8d857e', river: ['#3a86c4', '#2c6aa3'], bank: '#7f8a42', wall: '#6f6168', specks: ['#ff8a3d', '#ffc261', '#5a4a44', '#e6dccd'] },
   };
   // The battlefield under the live game: the arena's illustration if it has one (js/arenas.js),
@@ -762,5 +1008,5 @@ const KCArt = (() => {
   }
   const owen = cv => trainer(cv, KC_TRAINERS[0].look);
 
-  return { OUT, TEAM, THEMES, cannon, spearsArt, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer, rr, circ, ell, line, paint, poly };
+  return { OUT, TEAM, THEMES, cannon, spearsArt, sandstormArt, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer, rr, circ, ell, line, paint, poly };
 })();

@@ -177,12 +177,13 @@ console.log('save and reload: ok');
   P5.trophies = 600; G.claim(300);
   for (const at of [330, 400, 480, 560]) { const r = G.claim(at); assert(r && r.cards[0].isNew, `card at ${at}`); }
   for (const id of ['spears', 'pots', 'footmen', 'flail']) assert(P5.found.includes(id));
-  assert.strictEqual(G.roadState(G.ROAD.find(m => m.at === 600)), 'soon', 'Arena 3 is coming soon');
+  assert.strictEqual(G.roadState(G.ROAD.find(m => m.at === 600)), 'ready', 'Arena 3, Sunstone Arena, opens at 600');
   assert.deepStrictEqual([...G.trainingDeck()].sort(), [...KC_STARTER_DECK].sort(), 'Briar cards stay out of the Training Grounds too');
   const late = G.trophyFoe(KCSim.mulberry(4));
   P5.trophies = 600; let sawBriar = 0; for (let i = 0; i < 40; i++) if (G.trophyFoe(KCSim.mulberry(i + 9)).deck.some(id => ['spears', 'pots', 'footmen', 'flail'].includes(id))) sawBriar++;
   assert(sawBriar > 20, 'opponents at 600 trophies play Briar Hollow cards');
   console.log('Arena 2 Briar Hollow, its road cards, wild cards from Arena 2: ok');
+
 
   // Books and the hammer: never in wooden, about 0.1% in silver, about 1% in mythic
   const finds = (type, n) => { let k = 0; const r = KCSim.mulberry(77); for (let i = 0; i < n; i++) if (G.roll(type, r).items.some(x => !x.id.startsWith('wild_'))) k++; return k / n; };
@@ -204,7 +205,7 @@ console.log('save and reload: ok');
   assert.strictEqual(G.magicFor('book_books', 'wolves').reason, 'full');
   mu = G.useMagic('hammer_books', 'wolves'); assert(mu.ok && P5.cards.wolves.level === 4 && P5.cards.wolves.count === 0 && P5.coins === 0, 'the hammer upgrades without coins');
   mu = G.useMagic('book_books', 'rhino'); assert(mu.ok && P5.cards.rhino.count === 2, 'the Book of Books works on a rare');
-  assert.strictEqual(G.magicFor('shards', 'rhino').reason, 'none');
+  assert.strictEqual(G.magicFor('shards', 'rhino').reason, 'none-held');
   const P6 = G.load(st0 = mem({ 'kc.progress': JSON.stringify(P5) }));
   assert.strictEqual(P6.cards.wolves.level, 4); assert.strictEqual(G.magicCount('book_books'), 0);
   console.log('wild cards, books, Book of Books and the Hammer of Books: ok');
@@ -236,6 +237,59 @@ for (const t of [0, 50, 100, 130, 150, 200, 265]) {
 assert(seenAhead.size >= 3, 'different opponents upgrade different cards first');
 console.log('opponent cards level up one at a time with trophies; no lines: ok');
 
+  // Arena 3, Sunstone Arena: its four cards, evolutions and the Diamond Pass
+  {
+    G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 590, best: 590, claimed: { 0: true }, coins: 0, diamonds: 20 }) }));
+    const P6 = G.state;
+    assert(!G.passOpen() && !G.evoOpen(), 'pass and evolutions wait for Arena 3');
+    assert.strictEqual(G.recordTrophy(1, 1).pass, null, 'no pass crowns before Arena 3');
+    P6.trophies = 590; G.recordTrophy(0, 3);
+    assert.strictEqual(G.arena().id, 'sunstone', 'Sunstone Arena at 600');
+    assert(G.passOpen() && G.evoOpen());
+    P6.trophies = 900; P6.best = 900;
+    for (const at of [630, 710, 790, 870]) { const r = G.claim(at); assert(r && r.cards[0].isNew, `card at ${at}`); }
+    for (const id of ['sandstorm', 'ramcart', 'mole', 'camel']) assert(P6.found.includes(id), id);
+    assert.strictEqual(G.roadState(G.ROAD.find(m => m.at === 900)), 'soon', 'Arena 4 is coming soon');
+    assert(!KC_ALL_CARDS.includes('ramsoldier'), 'the cart soldiers are not a card');
+    let sawSun = 0; for (let i = 0; i < 40; i++) if (G.trophyFoe(KCSim.mulberry(i + 31)).deck.some(id => ['sandstorm', 'ramcart', 'mole', 'camel'].includes(id))) sawSun++;
+    assert(sawSun > 20, 'opponents at 900 trophies play Sunstone cards');
+    // the free path's shards: exactly 2; the Diamond Pass's tier 1 is the Snowman Evolution
+    const freeShards = G.PASS.tiers.reduce((n, t) => n + (t.free.kind === 'item' && t.free.item === 'shards' ? t.free.n : 0), 0);
+    assert.strictEqual(freeShards, 2, 'the free path gives 2 shards');
+    assert.deepStrictEqual(G.PASS.tiers[0].paid, { kind: 'evo', card: 'snowman' });
+    assert(G.PASS.tiers.some(t => t.free.kind === 'chest' && t.free.chest === 'gold') && G.PASS.tiers.some(t => t.paid.kind === 'chest' && t.paid.chest === 'gold'), 'gold chests on the pass');
+    // crowns move you up; the paid track needs the pass
+    P6.pass.points = 0;
+    const per = G.PASS.crownsPerTier;
+    G.recordTrophy(0, per);
+    assert.strictEqual(G.passTier(), 1);
+    assert.strictEqual(G.passState(0, 'free'), 'ready');
+    assert.strictEqual(G.passState(0, 'paid'), 'premium');
+    assert(G.claimPass(0, 'free').coins === 300);
+    assert.strictEqual(G.claimPass(0, 'free'), null, 'a reward is claimed once');
+    assert.strictEqual(G.buyPass().ok, true); assert.strictEqual(P6.diamonds, 20 - G.PASS.price);
+    assert.strictEqual(G.buyPass().error, 'owned');
+    assert(G.claimPass(0, 'paid').evo === 'snowman' && G.hasEvo('snowman'), 'the pass gives the Snowman Evolution');
+    assert.deepStrictEqual(G.evoList(), ['snowman']);
+    // shards: 6 unlock an evolution (the Snowman's is already owned here, so it can't be used again)
+    P6.magic.shards = 6;
+    assert.strictEqual(G.magicFor('shards', 'snowman').reason, 'evo-owned');
+    assert.strictEqual(G.magicFor('shards', 'archers').reason, 'no-evo');
+    P6.evos = []; P6.magic.shards = 5;
+    assert.strictEqual(G.magicFor('shards', 'snowman').reason, 'shards');
+    P6.magic.shards = 6;
+    assert(G.useMagic('shards', 'snowman').evo && G.hasEvo('snowman') && G.magicCount('shards') === 0, 'six shards unlock it');
+    // free path: two shards over the whole pass
+    P6.pass.points = G.passMax();
+    let got = 0; for (let i = 0; i < G.PASS.tiers.length; i++) { const r = G.claimPass(i, 'free'); if (r) got += (r.items || []).filter(x => x.id === 'shards').reduce((a, x) => a + x.n, 0); }
+    assert.strictEqual(got, 2);
+    // legendaries are rare in small chests
+    const leg = type => { let k = 0; const r = KCSim.mulberry(5); for (let i = 0; i < 4000; i++) if (G.roll(type, r).cards.some(c => c.id === 'camel')) k++; return k / 4000; };
+    const lw = leg('wooden'), lm = leg('mythic');
+    assert(lw < 0.05 && lm > 0.5, `camel in wooden ${lw}, mythic ${lm}`);
+    console.log(`Arena 3 Sunstone Arena, its cards, evolutions and the Diamond Pass: ok (camel in wooden ${(lw * 100).toFixed(1)}%, mythic ${(lm * 100).toFixed(0)}%)`);
+  }
+
 // 9. Matchmaking: the win rate of a steady player who keeps their cards level with their trophies, and
 //    of one who never upgrades.
 const N = +process.argv[2] || 120;
@@ -257,4 +311,5 @@ for (const [label, skill, upgrades] of [['good player, upgrades as they climb', 
     if (i >= N / 3) { late++; if (w === 0) lateWins++; }
   }
   console.log(`${label}: won ${wins}/${N} overall, ${(lateWins / late * 100).toFixed(0)}% after settling; difficulty ${G.state.diff.toFixed(2)}, ${G.state.trophies} trophies (best ${G.state.best})`);
+
 }

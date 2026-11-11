@@ -13,13 +13,22 @@ const DECKS = {
   'Flail Knight for Gorilla': ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'flail', 'fireball'],
   'Pot Thrower for Wolves': ['rhino', 'pots', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'],
   'All four new cards': ['rhino', 'spears', 'footmen', 'hawks', 'archers', 'pots', 'flail', 'fireball'],
+  // Sunstone Arena
+  'Sandstorm for Wolves': ['rhino', 'sandstorm', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'],
+  'Ram Cart for Rhino': ['ramcart', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'],
+  'Mole for Gladiator': ['rhino', 'wolves', 'mole', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'],
+  'Camel Jockey for Rhino': ['camel', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'],
+  'Evolved Snowman': { deck: STARTER, evos: ['snowman'] },
 };
-for (const [name, deck] of Object.entries(DECKS)) {
+const only = process.argv[3];
+for (const [name, spec] of Object.entries(DECKS)) {
+  if (only && !name.toLowerCase().includes(only.toLowerCase())) continue;
+  const deck = Array.isArray(spec) ? spec : spec.deck, evo = Array.isArray(spec) ? [] : spec.evos;
   let w = 0, l = 0, d = 0;
   for (let i = 0; i < N; i++) {
     const newSide = i % 2;
     const decks = newSide ? [STARTER, deck] : [deck, STARTER];
-    const s = S.create({ seed: 900 + i, decks });
+    const s = S.create({ seed: 900 + i, decks, evos: newSide ? [[], evo] : [evo, []] });
     const bots = [KCBot.create(0, { skill: 'normal', seed: i }), KCBot.create(1, { skill: 'normal', seed: i + 500 })];
     while (!s.result) { S.step(s); bots.forEach(b => KCBot.update(b, s)); s.events.length = 0; }
     const win = s.result.winner;
@@ -41,4 +50,5 @@ function duel(a, b, ax = 9.5, ay = 19.5, bx = 9.5, by = 13.5) {
   }
   return `${KC_CARDS[a].name} vs ${KC_CARDS[b].name}: no result in 30 s`;
 }
-for (const [a, b] of [['flail', 'wolves'], ['flail', 'gladiator'], ['flail', 'gorilla'], ['footmen', 'gorilla'], ['footmen', 'gladiator'], ['footmen', 'snowman'], ['pots', 'wolves'], ['pots', 'skeletons'], ['pots', 'gladiator'], ['gorilla', 'footmen'], ['wolves', 'pots']]) console.log(duel(a, b));
+if (!only) for (const [a, b] of [['camel', 'gladiator'], ['camel', 'gorilla'], ['mole', 'archers'], ['mole', 'gladiator'], ['ramcart', 'skeletons']]) console.log(duel(a, b));
+if (!only) for (const [a, b] of [['flail', 'wolves'], ['flail', 'gladiator'], ['flail', 'gorilla'], ['footmen', 'gorilla'], ['footmen', 'gladiator'], ['footmen', 'snowman'], ['pots', 'wolves'], ['pots', 'skeletons'], ['pots', 'gladiator'], ['gorilla', 'footmen'], ['wolves', 'pots']]) console.log(duel(a, b));
