@@ -229,6 +229,11 @@ const KCMenu = (() => {
   const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   let co = null;
   const later = (fn, ms) => { const id = setTimeout(fn, calm ? Math.min(ms, 60) : ms); co.timers.push(id); return id; };
+  // the magic circle that turns behind an item while it forms
+  const SIGIL = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="none" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2 4.5"/>
+    <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="2.6" opacity=".75"/>
+    <path d="M50 12L83 69H17zM50 88L17 31H83z" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".7" stroke-linejoin="round"/>
+    <circle cx="50" cy="50" r="22" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="6 3" opacity=".8"/></svg>`;
   function stopTimers() { for (const t of co.timers) clearTimeout(t); co.timers = []; clearInterval(co.counter); co.counter = 0; }
 
   // sparkles and coins, drawn on one canvas over the scene
@@ -250,6 +255,20 @@ const KCMenu = (() => {
     }
     if (FX.parts.length > 260) FX.parts.splice(0, FX.parts.length - 260);
   }
+  // A glowing comet from (x0, y0) to (x1, y1) over dur seconds, trailing light: one flies in with
+  // each part of a magic item.
+  function fxComet(x0, y0, x1, y1, dur, col) {
+    if (calm) return;
+    FX.parts.push({ kind: 'comet', x0, y0, x1, y1, t: 0, dur, col, trail: [], life: dur + 0.25, max: dur + 0.25, x: x0, y: y0, vx: 0, vy: 0, g: 0, spin: 0 });
+  }
+  // A white flash and a shockwave ring in the item's colour, centred on el.
+  function fxFlash(el, col) {
+    if (calm || !el) return;
+    const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+    FX.parts.push({ kind: 'flash', x, y, vx: 0, vy: 0, g: 0, spin: 0, life: 0.5, max: 0.5, r: r.width * 0.9, col: '#ffffff' });
+    FX.parts.push({ kind: 'ring', x, y, vx: 0, vy: 0, g: 0, spin: 0, life: 0.7, max: 0.7, r: r.width * 1.5, col });
+    FX.parts.push({ kind: 'ring', x, y, vx: 0, vy: 0, g: 0, spin: 0, life: 0.55, max: 0.55, r: r.width * 1.0, col: '#ffffff' });
+  }
   function fxFrame(now) {
     FX.raf = requestAnimationFrame(fxFrame);
     const dt = Math.min(0.05, (now - (FX.last || now)) / 1000); FX.last = now;
@@ -259,6 +278,42 @@ const KCMenu = (() => {
     for (const p of FX.parts) {
       p.life -= dt; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.spin += dt * 8;
       c.globalAlpha = Math.max(0, Math.min(1, p.life * 2));
+      if (p.kind === 'comet') {
+        p.t += dt;
+        const q = Math.min(1, p.t / p.dur), e = 1 - Math.pow(1 - q, 3);
+        // a slight curve, so the comets swirl in rather than fly straight
+        const bend = Math.sin(q * Math.PI) * 0.18, dx = p.x1 - p.x0, dy = p.y1 - p.y0;
+        p.x = p.x0 + dx * e - dy * bend; p.y = p.y0 + dy * e + dx * bend;
+        if (q < 1) p.trail.push([p.x, p.y]);
+        if (p.trail.length > 14 || (q >= 1 && p.trail.length)) p.trail.shift();
+        c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
+        for (let k = 1; k < p.trail.length; k++) {
+          const f = k / p.trail.length;
+          c.globalAlpha = f * 0.8; c.strokeStyle = p.col; c.lineWidth = 1 + f * 7;
+          c.beginPath(); c.moveTo(p.trail[k - 1][0], p.trail[k - 1][1]); c.lineTo(p.trail[k][0], p.trail[k][1]); c.stroke();
+        }
+        if (q < 1) {
+          const g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, 12);
+          g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.4, p.col); g.addColorStop(1, 'rgba(0,0,0,0)');
+          c.globalAlpha = 1; c.fillStyle = g; c.beginPath(); c.arc(p.x, p.y, 12, 0, 6.3); c.fill();
+        }
+        c.restore();
+        continue;
+      }
+      if (p.kind === 'flash' || p.kind === 'ring') {
+        const a = 1 - p.life / p.max;
+        c.save(); c.globalCompositeOperation = 'lighter';
+        if (p.kind === 'flash') {
+          const rr = p.r * (0.4 + a * 0.8), g = c.createRadialGradient(p.x, p.y, 0, p.x, p.y, rr);
+          g.addColorStop(0, `rgba(255,255,255,${0.95 * (1 - a)})`); g.addColorStop(1, 'rgba(255,255,255,0)');
+          c.globalAlpha = 1; c.fillStyle = g; c.beginPath(); c.arc(p.x, p.y, rr, 0, 6.3); c.fill();
+        } else {
+          c.globalAlpha = (1 - a) * 0.9; c.strokeStyle = p.col; c.lineWidth = 2 + (1 - a) * 8;
+          c.beginPath(); c.arc(p.x, p.y, p.r * (0.25 + a * 0.75), 0, 6.3); c.stroke();
+        }
+        c.restore();
+        continue;
+      }
       if (p.kind === 'coin') {
         c.beginPath(); c.ellipse(p.x, p.y, p.r * Math.abs(Math.cos(p.spin)) + 1, p.r, 0, 0, 6.3);
         c.fillStyle = p.col; c.fill(); c.lineWidth = 1.5; c.strokeStyle = '#8a5a05'; c.stroke();
@@ -271,7 +326,7 @@ const KCMenu = (() => {
       }
     }
     c.globalAlpha = 1;
-    FX.parts = FX.parts.filter(p => p.life > 0 && p.y < innerHeight + 20);
+    FX.parts = FX.parts.filter(p => p.life > 0 && (p.kind === 'comet' || p.y < innerHeight + 20));
   }
   const SPARKS = { platinum: ['#dcfcff', '#8ff0ff', '#ffffff'], legendary: ['#ffd25a', '#ff9a3d', '#ff5a2e', '#ffffff'], mythic: ['#eadcff', '#a98bff', '#6ff0de', '#ff6bd5', '#ffffff'],
     wooden: ['#ffe9a0', '#ffc861', '#ffffff'], silver: ['#d8f0ff', '#9fd0ff', '#ffffff'], gold: ['#fff3a0', '#ffd23f', '#ff9a3d', '#ffffff'] };
@@ -358,7 +413,7 @@ const KCMenu = (() => {
     if (co.type) { chest.classList.remove('spit'); void chest.offsetWidth; chest.classList.add('spit'); }
     $('#coHint').textContent = '';
     box.hidden = false;
-    KCSound.play('cardFly');
+    KCSound.play(st.item ? 'itemGather' : 'cardFly');
     if (st.coins) {
       box.className = 'co-reward rv-coins';
       box.innerHTML = `<div class="rv-fly"><span class="rv-pile" aria-hidden="true"><i class="co-coin"></i><i class="co-coin"></i><i class="co-coin"></i></span></div>
@@ -372,16 +427,30 @@ const KCMenu = (() => {
       return;
     }
     if (st.item) {
+      // The item's parts fly in from all sides, each trailing a comet, and snap together; then it
+      // flashes, a shockwave rolls out and its name appears. Rarer items form more slowly.
       const M = G.MAGIC[st.item], big = M.kind !== 'wild' || M.rarity === 'epic' || M.rarity === 'legendary';
-      box.className = `co-reward rv-item r-${M.rarity}${big ? ' big' : ''}`;
-      box.innerHTML = `<div class="rv-fly"><span class="rv-itemart">${itemSvg(st.item)}</span></div>
+      const n = KCItems.partsOf(st.item), gap = big ? 150 : 105, fly = 470, lead = 180, formAt = lead + (n - 1) * gap + 600;
+      box.className = `co-reward rv-item r-${M.rarity} k-${M.kind}${big ? ' big' : ''}`;
+      box.innerHTML = `<div class="rv-fly"><span class="rv-sigil" aria-hidden="true">${SIGIL}</span><span class="rv-itemart forming" style="--gap:${gap}ms">${itemSvg(st.item)}</span></div>
         <div class="rv-info"><div class="rv-line"><b class="rv-name">${esc(M.name)}</b><span class="rv-n" id="rvN">×${fmt(st.n)}</span>${big ? '<em>Rare find!</em>' : ''}</div><small>${esc(M.blurb)}</small></div>`;
+      const art = $('#coReward .rv-itemart'), cols = KCItems.colors(st.item);
+      for (let i = 0; i < n; i++) {
+        later(() => {
+          const r = art.getBoundingClientRect(), sc = r.width / 100, cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+          const a = i * 2.39996 + 0.6 + (M.kind === 'hammer' ? -0.489 : 0), R = 120 + (i % 3) * 22; // the hammer is drawn turned 28 degrees
+          fxComet(cx + Math.cos(a) * R * sc, cy + Math.sin(a) * R * sc, cx + Math.cos(a) * 10 * sc, cy + Math.sin(a) * 10 * sc, fly / 1000, cols[i % cols.length]);
+        }, lead + i * gap);
+        later(() => { KCSound.play('partSnap'); fxBurst(art, 3, 'spark', cols); }, lead + i * gap + fly);
+      }
       later(() => {
+        art.classList.remove('forming'); art.classList.add('formed'); box.classList.add('formed');
         $('#coReward .rv-info').classList.add('on');
-        KCSound.play(big ? 'revealNew' : 'revealRare');
-        fxBurst($('#coReward .rv-fly'), big ? 40 : 16, 'spark', ['#fff3a0', '#d49bff', '#7ff0e0', '#ffffff']);
-      }, big ? 900 : 500);
-      later(shown, big ? 1500 : 950);
+        fxFlash(art, cols[0]);
+        KCSound.play(M.kind === 'hammer' ? 'hammerForm' : big ? 'revealNew' : 'revealRare');
+        fxBurst(art, big ? 46 : 20, 'spark', cols);
+      }, formAt);
+      later(shown, formAt + (big ? 700 : 450));
       return;
     }
     const c = KC_CARDS[st.id], special = st.isNew || c.rarity === 'rare';
@@ -431,7 +500,7 @@ const KCMenu = (() => {
     const st = co.steps[co.i], info = $('#coReward .rv-info');
     $('#coReward').classList.add('skip');
     if (info) info.classList.add('on');
-    if (st.item) { /* nothing counts up */ }
+    if (st.item) { const art = $('#coReward .rv-itemart'); if (art) { art.classList.remove('forming'); art.classList.add('formed'); } $('#coReward').classList.add('formed'); }
     else if (st.coins) $('#rvN').textContent = '+' + fmt(st.coins);
     else { $('#coReward .rv-fly').classList.add('tease'); $('#coReward .rv-flip').classList.add('flipped'); cardCount(st, st.n); }
     shown();
@@ -557,32 +626,8 @@ const KCMenu = (() => {
   }
 
   /* ---------- magic items ---------- */
-  const RCOL = { common: ['#8cc0f0', '#3f72b0'], rare: ['#ffc463', '#dc761c'], epic: ['#d49bff', '#8a3fd0'], legendary: ['#7ff0e0', '#ff7ad8'], any: ['#fff0a0', '#e0a020'] };
-  // Item art, drawn in SVG: wild cards are glowing cards, books are bound tomes, the hammer has a book on it.
-  function itemSvg(id) {
-    const M = G.MAGIC[id], O = '#1c1530', [a, b] = RCOL[M.rarity] || RCOL.any, gid = 'g' + id;
-    const grad = M.rarity === 'legendary' || id === 'book_books'
-      ? `<linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ff0e0"/><stop offset=".5" stop-color="#d49bff"/><stop offset="1" stop-color="#ffb347"/></linearGradient>`
-      : `<linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
-    if (M.kind === 'wild') return `<svg viewBox="0 0 64 64" aria-hidden="true"><defs>${grad}</defs>
-      <rect x="10" y="8" width="38" height="48" rx="6" transform="rotate(-8 29 32)" fill="${b}" stroke="${O}" stroke-width="3" opacity=".7"/>
-      <rect x="16" y="6" width="38" height="50" rx="6" fill="url(#${gid})" stroke="${O}" stroke-width="3"/>
-      <path d="M35 14l3.5 9 9.5 1-7 6.5 2 9.5-8-5-8 5 2-9.5-7-6.5 9.5-1z" fill="#fff" stroke="${O}" stroke-width="2.4" stroke-linejoin="round"/>
-      <path d="M22 46h26" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/></svg>`;
-    if (M.kind === 'book') return `<svg viewBox="0 0 64 64" aria-hidden="true"><defs>${grad}</defs>
-      <path d="M12 12h36a4 4 0 0 1 4 4v38H16a4 4 0 0 1-4-4z" fill="#f3ead6" stroke="${O}" stroke-width="3"/>
-      <path d="M10 10h34a4 4 0 0 1 4 4v38H14a4 4 0 0 1-4-4z" fill="url(#${gid})" stroke="${O}" stroke-width="3"/>
-      <rect x="10" y="10" width="7" height="42" fill="rgba(0,0,0,.2)"/>
-      <path d="M30 20l3 6 6.5.6-5 4.4 1.5 6.5L30 34l-6 3.5 1.5-6.5-5-4.4 6.5-.6z" fill="#fff6c8" stroke="${O}" stroke-width="2.2" stroke-linejoin="round"/>
-      ${id === 'book_books' ? '<path d="M20 44h20M20 48h14" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>' : `<text x="29" y="50" text-anchor="middle" font-family="Lilita One, Arial Black, sans-serif" font-size="9" fill="#fff" stroke="${O}" stroke-width="2" paint-order="stroke">${M.rarity.slice(0, 1).toUpperCase()}</text>`}</svg>`;
-    if (M.kind === 'hammer') return `<svg viewBox="0 0 64 64" aria-hidden="true"><defs>${grad}</defs>
-      <path d="M34 26l18 26-6 4-18-26z" fill="#a8703c" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
-      <path d="M8 18l20-12 10 16-20 12z" fill="#c7cfda" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
-      <path d="M14 20l12-7 5 8-12 7z" fill="url(#${gid})" stroke="${O}" stroke-width="2"/>
-      <path d="M19 20l6-3.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`;
-    return `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6l14 18-14 34-14-34z" fill="#b48cff" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
-      <path d="M32 6l6 18-6 34" fill="#8a5ae0"/><path d="M18 24h28" stroke="${O}" stroke-width="2.5"/><path d="M26 14l-3 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>`;
-  }
+  // Item art lives in js/items.js, each item built from parts that can fly together.
+  const itemSvg = id => KCItems.svg(id);
   let magicSel = null, subNow = 'cards';
   function sub(name) {
     subNow = name;

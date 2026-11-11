@@ -38,7 +38,7 @@ A battlefield image is only art under the live game; the 18 × 32 tile simulatio
 
 Reached at **300 trophies** (Arena 1's floor stays 0; Briar Hollow's is 300). An overgrown forest of stone ruins, roots, thorny vines and lanterns. Its four cards come from the Trophy Road: **Spears** at 330, **Pot Thrower** at 400, **Footmen** at 480 and **Flail Knight** at 560 (between them: 300 coins at 370, a Gold Chest at 440, 400 coins at 520). Arena 3 at 600 is marked *coming soon*. Like the Arena 1 cards, they stay out of Training Grounds matches. Opponents add them to their decks as their trophies pass those marks.
 
-**Art is placeholder for now** (`img/briar_hollow_badge.webp`, `img/briar_hollow_left.webp`, `img/briar_hollow_right.webp`, labelled "placeholder art"); the battlefield is drawn in code from the `briar` palette. Replacing them means swapping the files and updating the bar position, bench rows and lights in the `briar` entry of `js/arenas.js` (and adding a `field` entry for a battlefield image, as Cinder Keep has).
+**Art:** `img/briar_hollow_badge.webp` (lobby centerpiece), `img/briar_hollow_battlefield.webp` (the battlefield, laid onto the tile grid by its pads, stream edges and bridges), `img/briar_hollow_left.webp` (the king's statue and high stands) and `img/briar_hollow_right.webp` (the stands by the waterfall). All their measurements (bar, anchors, bridges, the four flickering wall lanterns, bench rows, lights, waterfall mist) are in the `briar` entry of `js/arenas.js`.
 
 | Card | Energy | Rarity | What it does (level 1) |
 | --- | --- | --- | --- |
@@ -57,7 +57,8 @@ A **Magic Items** tab sits beside the card collection (Cards → Magic Items). P
 - **Book of Common / Rare / Epic / Legendary** fill all the copies a card of that rarity still needs for its next level; the **Book of Books** works on any rarity. The **Hammer of Books** upgrades a card one level without spending coins (it still needs its copies, so a book plus the hammer is a free level).
 - Books and the hammer are rare finds: never in wooden chests, 0.1% in silver, 0.2% gold, 0.4% platinum, 0.7% legendary and 1% mythic (one roll per chest). Tested over 20,000–40,000 rolls.
 - **Evolution shards** have a slot in the tab; nothing gives them yet.
-- Chest reveals show wild cards and magic items after the cards; a book or the hammer gets a *Rare find!* reveal.
+- Item art is drawn in SVG (`js/items.js`), each item built from separate parts. In a chest reveal the parts fly in from every side, each trailing a comet, over a turning magic circle, and snap together; then the item flashes, a shockwave rolls out and its name appears. Books, the hammer and epic or legendary wild cards form more slowly and get a *Rare find!* tag.
+- The **Hammer of Books** has a living texture: its head shifts colour, runes scroll across it, a sheen sweeps over it and the book in its face glows, everywhere it is shown. Every item has a passing sheen. With reduced motion, none of it moves.
 - Rules and drop tables are `MAGIC` and `MAGIC_RULES` in `js/progress.js`.
 
 ## The Trophy Road and Arena 1
@@ -118,6 +119,7 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `js/trainers.js` | Owen, Romeo and Luc |
 | `js/arenas.js` | Arena art: each arena's centerpiece, scenery panels (with crowd rows and lights) and battlefield image with its tile mapping; loads each image once |
 | `js/progress.js` | Progress and its rules: trainers, trophies, bots, chests, road rewards, card levels, the deck |
+| `js/items.js` | Magic item art (SVG built from parts that fly together in a chest reveal) |
 | `js/menu.js` | The lobby, the Cards screen (deck, collection, upgrades), chest opening, the Trophy Road tab |
 | `js/sim.js` | The battle: fixed 30 steps a second, no DOM, seeded, so it runs the same in the page, in Node and later on both ends of an online match |
 | `js/bot.js` | The trainers' AI (one bot with a skill setting per trainer) |

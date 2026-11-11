@@ -23,6 +23,7 @@
 [hidden] { display: none !important; }
 html, body { height: 100%; }
 body {
+  margin: 0;
   background: var(--ink);
   color: var(--text);
   font-family: var(--body);
@@ -342,7 +343,7 @@ kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--out
 .sub-tag:empty { display: none; }
 .sub-cards { display: flex; flex-direction: column; gap: 34px; }
 .magic-plaque { display: flex; flex-direction: column; gap: 12px; }
-.sim-win.test-inline.magic-test { position: absolute; top: 8px; right: 12px; width: auto; padding: 2px 10px 3px; font-size: 12px; }
+.sim-win.test-inline.magic-test { position: absolute; top: 8px; right: 12px; bottom: auto; width: auto; padding: 2px 10px 3px; font-size: 12px; }
 .magic-wrap { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; margin-top: 6px; }
 .magic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; align-content: start; }
 .mi { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px 8px; border-radius: 14px; border: 3px solid var(--outline);
@@ -351,7 +352,7 @@ kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--out
 .mi.on { box-shadow: inset 0 0 0 3px var(--gold), 0 0 16px rgba(255, 207, 63, 0.6), 0 4px 0 rgba(0, 0, 0, 0.35); }
 .mi.none .mi-art { filter: grayscale(0.8) brightness(0.7); }
 .mi.none b { color: #a99cc8; }
-.mi-art { display: block; width: 52px; height: 52px; }
+.mi-art { display: block; width: 58px; height: 58px; }
 .mi-art svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.45)); }
 .mi-art.big { width: 74px; height: 74px; flex: none; }
 .mi b { font-size: 12px; font-weight: 900; line-height: 1.15; }
@@ -381,10 +382,37 @@ kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--out
 .mm-btn b { font-size: 13px; }
 .mm-btn small { font-size: 11px; color: #e0d6ff; font-weight: 800; }
 /* magic items in the chest reveal */
-.rv-item .rv-fly { width: 140px; aspect-ratio: 1; display: grid; place-items: center; }
-.rv-itemart { display: block; width: 120px; height: 120px; }
-.rv-itemart svg { width: 100%; height: 100%; filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.45)); }
-.rv-item.big .rv-fly::before { opacity: 1; --rvg: rgba(220, 160, 255, 0.95); animation: rvPulse 0.55s ease-in-out infinite alternate; }
+/* a magic item forms in the chest scene: its parts fly in (each with a comet on the effects canvas)
+   over a turning magic circle, then it flashes and glows */
+.rv-item { --ig: #ffd84a; }
+.rv-item.r-common { --ig: #8fd0ff; }
+.rv-item.r-rare { --ig: #ffb347; }
+.rv-item.r-epic { --ig: #d49bff; }
+.rv-item.r-legendary { --ig: #7ff0e0; }
+.rv-item .rv-fly { width: 170px; aspect-ratio: 1; display: grid; place-items: center; animation: none; }
+.rv-itemart { position: relative; z-index: 1; display: block; width: 150px; height: 150px; }
+.rv-itemart svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.45)); }
+.item-svg .ip { transform-box: fill-box; transform-origin: 50% 50%; }
+.forming .ip { animation: ipIn 0.6s cubic-bezier(.2, .85, .3, 1.25) both; animation-delay: calc(var(--i) * var(--gap, 110ms) + 180ms); }
+@keyframes ipIn {
+  0% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(0.3); }
+  30% { opacity: 1; }
+  78% { transform: translate(0, 0) rotate(0deg) scale(1.16); }
+  100% { opacity: 1; transform: none; }
+}
+.rv-itemart.formed { animation: itemPop 0.6s cubic-bezier(.2, .9, .3, 1.4); }
+.rv-itemart.formed svg { filter: drop-shadow(0 0 12px var(--ig)) drop-shadow(0 8px 6px rgba(0, 0, 0, 0.45)); }
+@keyframes itemPop { 35% { transform: scale(1.22) rotate(-3deg); } }
+.rv-sigil { position: absolute; z-index: 0; inset: -30px; color: var(--ig); opacity: 0; filter: drop-shadow(0 0 6px var(--ig));
+  animation: sigilIn 0.5s ease-out 0.05s forwards, sigilSpin 5s linear infinite; }
+.rv-sigil svg { width: 100%; height: 100%; display: block; }
+.rv-item.formed .rv-sigil { animation: sigilOut 0.7s ease-in forwards; }
+@keyframes sigilIn { from { opacity: 0; transform: scale(0.4) rotate(-90deg); } to { opacity: 0.9; transform: scale(1) rotate(0deg); } }
+@keyframes sigilSpin { to { rotate: 360deg; } }
+@keyframes sigilOut { from { opacity: 0.9; transform: scale(1); } to { opacity: 0; transform: scale(1.7); } }
+.rv-item .rv-fly::before { --rvg: var(--ig); }
+.rv-item.formed .rv-fly::before { opacity: 0.7; animation: rvPulse 0.9s ease-in-out infinite alternate; }
+.item-svg { overflow: visible; }
 .rv-item .rv-info small { max-width: 36ch; text-align: center; display: block; line-height: 1.35; }
 .cs-art { display: block; width: 70px; height: 70px; margin: 10px 11px; }
 .cs-art svg { width: 100%; height: 100%; }

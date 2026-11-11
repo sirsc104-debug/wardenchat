@@ -5,6 +5,7 @@
 const KCSound = (() => {
   let ac = null, master = null, on = true;
   const lastAt = {};
+  let snapN = 0, snapAt = 0;
   try { on = localStorage.getItem('kc.sound') !== 'off'; } catch (e) { /* storage blocked */ }
 
   function ensure() {
@@ -50,6 +51,16 @@ const KCSound = (() => {
     coinTick: () => tone(1250 + Math.random() * 500, 0, 0.05, 'square', 0.045),
     countTick: () => tone(900 + Math.random() * 200, 0, 0.035, 'triangle', 0.07),
     chestDone: () => [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0, i === 3 ? 0.45 : 0.16, 'triangle', 0.16, i * 0.1)),
+    // a magic item gathering, each part snapping in (a rising scale), and the item forming
+    itemGather: () => { noise(0.9, 0.05, 1800, 'bandpass'); tone(180, 760, 0.9, 'sine', 0.06); tone(240, 1020, 0.9, 'triangle', 0.03, 0.1); },
+    partSnap: () => {
+      const now = performance.now();
+      snapN = now - snapAt > 700 ? 0 : Math.min(snapN + 1, 14); snapAt = now;
+      const f = 520 * Math.pow(2, [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31, 33][snapN] / 12);
+      tone(f, 0, 0.09, 'triangle', 0.11); tone(f * 2, 0, 0.05, 'sine', 0.04); noise(0.03, 0.05, 4200, 'highpass');
+    },
+    hammerForm: () => { tone(1320, 1240, 0.5, 'square', 0.05); tone(1980, 1900, 0.7, 'triangle', 0.09); tone(95, 45, 0.3, 'sine', 0.35); noise(0.14, 0.2, 2400, 'bandpass');
+      [523, 784, 1047, 1568].forEach((f, i) => tone(f, 0, 0.5, 'triangle', 0.12, 0.12 + i * 0.07)); },
     buy: () => { tone(880, 1320, 0.1, 'triangle', 0.15); tone(1760, 0, 0.18, 'sine', 0.1, 0.09); },
     deploy: () => { tone(220, 90, 0.16, 'sine', 0.3); noise(0.12, 0.12, 600); },
     // Briar Hollow cards
