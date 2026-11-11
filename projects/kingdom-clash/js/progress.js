@@ -8,8 +8,10 @@
    - Opponents: their cards level up one at a time with their trophies (all level 1 below 50, then one
      card up a level every 12.5 trophies); their skill follows your recent results (up a step
      after a win, down a step after a loss), settling at about 52% wins for everyone.
-   - Chests: four slots. A chest is rolled the moment you win it; one chest unlocks at a time, on a
-     real-time timer. Opening gives coins and copies of cards you have found.
+   - Chests: six tiers (wooden, silver, gold, platinum, legendary, mythic) and four slots. A chest is
+     rolled the moment you win it; one chest unlocks at a time, on a real-time timer. Opening gives coins
+     and copies of cards you have found; how much grows with the account level. Each arena allows higher
+     tiers (CHEST_RULES; switched off for now, so every tier can drop anywhere).
    - Card levels: copies plus coins upgrade a card, up to level 15.
    - Arena cards (Skeleton Pack, Cannon) are found on the Trophy Road in Arena 1 only. Trainers never
      use them, and in a Training Grounds match your deck goes back to the starter cards.
@@ -51,9 +53,20 @@ const KCProgress = (() => {
     wooden: { name: 'Wooden Chest', seconds: 60, coins: [18, 26], cards: 6, kinds: 2 },
     silver: { name: 'Silver Chest', seconds: 15 * 60, coins: [60, 85], cards: 18, kinds: 3 },
     gold: { name: 'Gold Chest', seconds: 60 * 60, coins: [190, 250], cards: 45, kinds: 4 },
+    platinum: { name: 'Platinum Chest', seconds: 3 * 3600, coins: [450, 600], cards: 100, kinds: 5 },
+    legendary: { name: 'Legendary Chest', seconds: 8 * 3600, coins: [1100, 1400], cards: 220, kinds: 6 },
+    mythic: { name: 'Mythic Chest', seconds: 12 * 3600, coins: [2600, 3200], cards: 450, kinds: 8 },
   };
-  // The order chests are won in, repeating.
-  const CYCLE = ['wooden', 'wooden', 'silver', 'wooden', 'silver', 'wooden', 'wooden', 'gold', 'wooden', 'silver'];
+  // Chest tiers, lowest first.
+  const TIERS = ['wooden', 'silver', 'gold', 'platinum', 'legendary', 'mythic'];
+  // Which chests each arena can give: a tier starts at the arena number listed (so Arena 1 gives only
+  // wooden and silver, Arena 2 adds gold, and so on). Anything above the player's arena is given as the
+  // highest tier they have reached instead. allUnlocked turns the gate off: every tier everywhere.
+  // TEMPORARY: allUnlocked is on until more arenas exist; set it to false to switch the gate on.
+  const CHEST_RULES = { allUnlocked: true, arena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 5 } };
+  // The order chests are won in, repeating (before the arena gate is applied).
+  const CYCLE = ['wooden', 'wooden', 'silver', 'wooden', 'silver', 'wooden', 'wooden', 'gold', 'wooden', 'silver',
+    'wooden', 'silver', 'gold', 'wooden', 'platinum', 'silver', 'wooden', 'gold', 'silver', 'wooden', 'legendary', 'silver', 'gold', 'mythic'];
   // Copies and coins to go from level L to L+1 (index 0 is level 1 to 2).
   const UPGRADE = {
     copies: {
@@ -84,7 +97,7 @@ const KCProgress = (() => {
   };
   const blank = () => ({
     name: 'Player', xp: 0, beaten: {}, records: {}, roadSeen: false, opp: null,
-    mode: null, trophies: 0, best: 0, coins: 0, diamonds: 0, shop: null, cards: {}, found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
+    mode: null, trophies: 0, best: 0, coins: 0, diamonds: 0, shop: null, freeChestDay: null, cards: {}, found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
     chests: [null, null, null, null], cycle: 0, claimed: {}, diff: 0.35, trophyRecord: { w: 0, l: 0, d: 0 },
   });
 
@@ -165,9 +178,9 @@ const KCProgress = (() => {
       P.cards[m.card].count += m.copies;
       out = { kind: 'card', cards: [{ id: m.card, n: m.copies, isNew }], coins: 0 };
     } else if (m.kind === 'chest') {
-      const c = roll(m.chest);
+      const type = capChest(m.chest), c = roll(type);
       apply(c);
-      out = Object.assign({ kind: 'chest', chest: m.chest }, c);
+      out = Object.assign({ kind: 'chest', chest: type }, c);
     } else if (m.kind === 'arena') out.arena = m.arena;
     save();
     return out;
@@ -225,7 +238,7 @@ const KCProgress = (() => {
       const slot = P.chests.findIndex(c => !c);
       if (slot < 0) slotsFull = true;
       else {
-        const type = CYCLE[P.cycle % CYCLE.length];
+        const type = capChest(CYCLE[P.cycle % CYCLE.length]);
         P.cycle++;
         P.chests[slot] = { type, state: 'locked', contents: roll(type) };
         chest = { type, slot, name: CHESTS[type].name };
@@ -238,8 +251,21 @@ const KCProgress = (() => {
   }
 
   /* ---------- chests ---------- */
+  // Chest contents grow with the account level (not trophies): 15% more coins and cards per level.
+  const chestMult = (lv = level()) => 1 + 0.15 * (Math.max(1, lv) - 1);
+  function chestOdds(type, lv) {
+    const C = CHESTS[type], m = chestMult(lv);
+    return { cards: Math.round(C.cards * m), coins: [Math.round(C.coins[0] * m), Math.round(C.coins[1] * m)], kinds: C.kinds };
+  }
+  const chestAllowed = (type, n = arena().number) => CHEST_RULES.allUnlocked || (CHEST_RULES.arena[type] || 99) <= n;
+  // The tier actually given: the asked-for tier, or the highest one below it the arena allows.
+  function capChest(type, n) {
+    let i = Math.max(0, TIERS.indexOf(type));
+    while (i > 0 && !chestAllowed(TIERS[i], n)) i--;
+    return TIERS[i];
+  }
   function roll(type, rand = Math.random) {
-    const C = CHESTS[type], pool = P.found.filter(id => KC_CARDS[id]);
+    const C = chestOdds(type), pool = P.found.filter(id => KC_CARDS[id]);
     const coins = Math.round(lerp(C.coins[0], C.coins[1], rand()));
     const kinds = Math.min(C.kinds, pool.length), picks = [];
     const bag = pool.slice();
@@ -289,7 +315,7 @@ const KCProgress = (() => {
   // Five offers a day, made from the cards you have found and their levels. Every offer says exactly
   // what it gives. Prices: a copy is worth 10 coins (common) or 50 (rare); 1 diamond = 5,000 coins.
   // Chests are sold for coins only, one of each a day, with their contents shown before you buy.
-  const SHOP = { perCopy: { common: 10, rare: 50 }, coinsPerDiamond: 5000, maxQty: 250, chests: { wooden: 80, silver: 280, gold: 800 } };
+  const SHOP = { perCopy: { common: 10, rare: 50 }, coinsPerDiamond: 5000, maxQty: 250, chests: { wooden: 80, silver: 280, gold: 800, platinum: 1800, legendary: 4200, mythic: 9500 } };
   const pad2 = n => String(n).padStart(2, '0');
   const dayKey = now => { const d = new Date(now); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
   // When today's offers are replaced: the next local midnight.
@@ -338,26 +364,36 @@ const KCProgress = (() => {
     offers.push({ id: 'o' + offers.length, kind: 'coins', qty: SHOP.coinsPerDiamond, tag: 'Coin bundle', currency: 'diamonds', price: 1, repeat: true });
     return offers;
   }
-  // The chest row: each chest is rolled when the day's shop is made, so what is inside can be shown.
-  const makeChests = rand => Object.keys(SHOP.chests).map((type, i) => ({ id: 'c' + i, type, price: SHOP.chests[type], contents: roll(type, rand) }));
   // Today's offers (made the first time they are asked for each day).
   function shop(now = Date.now(), rand) {
     const day = dayKey(now);
-    if (!P.shop || P.shop.day !== day || !Array.isArray(P.shop.offers)) { P.shop = { day, offers: makeOffers(rand), chests: makeChests(rand), bought: {} }; save(); }
-    if (!Array.isArray(P.shop.chests)) { P.shop.chests = makeChests(rand); save(); } // a shop saved before chests were sold
+    if (!P.shop || P.shop.day !== day || !Array.isArray(P.shop.offers)) { P.shop = { day, offers: makeOffers(rand), bought: {} }; save(); }
     return P.shop;
   }
-  // Buy chest i with coins. Its contents go straight to you (no slot, no timer): the caller opens it.
-  function buyChest(i, now = Date.now()) {
-    const s = shop(now), c = s.chests[i];
-    if (!c) return { error: 'none' };
-    if (s.bought[c.id]) return { error: 'sold' };
-    if (P.coins < c.price) return { error: 'coins' };
-    P.coins -= c.price;
-    apply(c.contents);
-    s.bought[c.id] = 1;
+  // Shop chests cost coins only, as many as you like. What is inside is rolled at purchase and stays
+  // hidden until the chest is opened (the tile shows the card count and coin range). The price grows with
+  // the account level like the contents, so the coins inside are always less than the price.
+  const chestPrice = (type, lv) => Math.round(SHOP.chests[type] * chestMult(lv) / 5) * 5;
+  function buyChest(type, rand) {
+    if (!CHESTS[type] || !SHOP.chests[type]) return { error: 'none' };
+    if (!chestAllowed(type)) return { error: 'locked' };
+    const price = chestPrice(type);
+    if (P.coins < price) return { error: 'coins' };
+    P.coins -= price;
+    const c = roll(type, rand);
+    apply(c);
     save();
-    return { ok: true, chest: c.type, coins: c.contents.coins, cards: c.contents.cards.map(x => Object.assign({ isNew: false }, x)) };
+    return { ok: true, chest: type, price, coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: false }, x)) };
+  }
+  // One free Wooden Chest a day (local days, like the offers).
+  const freeChestReady = (now = Date.now()) => P.freeChestDay !== dayKey(now);
+  function claimFreeChest(now = Date.now(), rand) {
+    if (!freeChestReady(now)) return { error: 'claimed' };
+    P.freeChestDay = dayKey(now);
+    const c = roll('wooden', rand);
+    apply(c);
+    save();
+    return { ok: true, chest: 'wooden', coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: false }, x)) };
   }
   function refreshShop(rand, now = Date.now()) { P.shop = null; return shop(now, rand); }
   // Buy offer i. Returns { ok, coins, cards } or { error: 'sold' | 'coins' | 'diamonds' | 'none' }.
@@ -418,7 +454,8 @@ const KCProgress = (() => {
   const unlockAt = id => { const m = ROAD.find(r => r.kind === 'card' && r.card === id); return m ? m.at : null; };
 
   return {
-    MAX_LEVEL, XP_PER_LEVEL, TROPHIES, ARENAS, ROAD, CHESTS, CYCLE, UPGRADE,
+    MAX_LEVEL, XP_PER_LEVEL, TROPHIES, ARENAS, ROAD, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
+    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest,
     load, save, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,

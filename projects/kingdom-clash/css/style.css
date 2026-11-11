@@ -458,6 +458,28 @@ button.slot:hover { transform: translateY(-3px); }
 .co-count { position: absolute; z-index: 2; right: 8px; top: 30px; min-width: 36px; height: 36px; box-sizing: border-box; padding: 0 6px; display: grid; place-items: center; border-radius: 999px;
   background: var(--red); border: 3px solid var(--outline); font-family: var(--display); font-size: 19px; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35); animation: pop 0.25s ease-out; }
 
+/* the animated chests: legendary glows, flickers and has sparkles circling; mythic also shimmers through
+   colours and floats */
+.chest-svg .ch-aura { transform-box: view-box; transform-origin: 60px 58px; filter: blur(5px); animation: auraPulse 2.2s ease-in-out infinite; }
+@keyframes auraPulse { 0%, 100% { opacity: 0.55; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.06); } }
+.chest-svg .ch-orbit { transform-box: view-box; transform-origin: 60px 58px; animation: chestOrbit 5.5s linear infinite; }
+.chest-mythic .ch-orbit { animation-duration: 3.8s; }
+@keyframes chestOrbit { to { transform: rotate(360deg); } }
+.chest-legendary .ch-flame { transform-box: fill-box; transform-origin: 50% 100%; animation: flameFlick 0.8s ease-in-out infinite alternate; }
+@keyframes flameFlick { from { transform: scale(0.92, 0.88); } to { transform: scale(1.04, 1.12); } }
+.chest-mythic .ch-shell { animation: mythShimmer 3.4s ease-in-out infinite alternate; }
+@keyframes mythShimmer { from { filter: hue-rotate(-30deg) brightness(1); } to { filter: hue-rotate(35deg) brightness(1.18); } }
+.chest-mythic .ch-all { animation: mythFloat 2.6s ease-in-out infinite; }
+@keyframes mythFloat { 50% { transform: translateY(-5px); } }
+.chest-open.platinum { background: radial-gradient(ellipse at 50% 58%, rgba(120, 230, 255, 0.45), rgba(8, 20, 30, 0) 66%), #08131c; }
+.chest-open.legendary { background: radial-gradient(ellipse at 50% 58%, rgba(255, 140, 50, 0.5), rgba(40, 10, 40, 0) 64%), radial-gradient(ellipse at 50% 100%, rgba(150, 40, 180, 0.5), transparent 70%), #160818; }
+.chest-open.mythic { background: radial-gradient(ellipse at 50% 58%, rgba(170, 120, 255, 0.55), rgba(10, 10, 40, 0) 64%), radial-gradient(ellipse at 30% 100%, rgba(80, 240, 220, 0.35), transparent 60%), radial-gradient(ellipse at 70% 0%, rgba(255, 100, 210, 0.3), transparent 55%), #070720; }
+.co-rays.platinum { background: repeating-conic-gradient(from 0deg, rgba(170, 245, 255, 0) 0 9deg, rgba(170, 245, 255, 0.45) 9deg 18deg); }
+.co-rays.legendary { background: repeating-conic-gradient(from 0deg, rgba(255, 170, 70, 0) 0 8deg, rgba(255, 170, 70, 0.6) 8deg 16deg); }
+.co-rays.mythic { background: repeating-conic-gradient(from 0deg, rgba(180, 140, 255, 0) 0 8deg, rgba(180, 140, 255, 0.55) 8deg 16deg, rgba(110, 240, 222, 0) 16deg 24deg, rgba(110, 240, 222, 0.45) 24deg 32deg); }
+.co-rays.legendary.on, .co-rays.mythic.on { animation-duration: 9s; }
+.chest-open.mythic .co-rays.on { filter: hue-rotate(0deg); animation: coSpin 9s linear infinite, mythShimmer 3.4s ease-in-out infinite alternate; }
+
 /* one reward at a time */
 .co-reward { display: flex; flex-direction: column; align-items: center; gap: 8px; }
 .rv-fly { position: relative; isolation: isolate; width: 150px; aspect-ratio: 5 / 6; perspective: 800px; animation: rvFly 0.55s cubic-bezier(.2, .9, .3, 1.2) both; }
@@ -507,22 +529,22 @@ button.slot:hover { transform: translateY(-3px); }
 #coDone { min-width: 220px; }
 
 /* the Shop */
-.shop-tab { max-width: 1240px; margin: 0 auto; padding-top: 12px; display: flex; flex-direction: column; gap: 24px; }
-.shop-plaque { padding-top: 40px; }
-.chest-plaque { padding-top: 30px; }
+.shop-tab { max-width: 1240px; margin: 0 auto; padding-top: 12px; display: flex; flex-direction: column; gap: 22px; }
+.shop-plaque { padding-top: 36px; padding-bottom: 12px; }
+.chest-plaque { padding-top: 26px; padding-bottom: 12px; }
 /* the clock (and the test button) sit in the plaque's top-right corner */
 .shop-head { position: absolute; top: 6px; right: 12px; display: flex; align-items: center; gap: 10px; }
 .shop-head .sim-win.test-inline { padding: 2px 10px 3px; font-size: 12px; }
 .shop-timer { font-weight: 900; color: var(--muted); white-space: nowrap; }
 .shop-timer b { color: #fff; font-variant-numeric: tabular-nums; }
 .offers { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
-.offer { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 20px 10px 9px; border-radius: 14px; border: 3px solid var(--outline); text-align: center;
+.offer { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 18px 10px 8px; border-radius: 14px; border: 3px solid var(--outline); text-align: center;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 40%), linear-gradient(#4a3c7c, #2e2357);
   box-shadow: inset 0 0 0 2px rgba(217, 160, 50, 0.75), 0 5px 0 rgba(0, 0, 0, 0.35); }
 .offer.diamonds { background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 40%), linear-gradient(#2f6aae, #1c3a72); box-shadow: inset 0 0 0 2px #8fd8ff, 0 5px 0 rgba(0, 0, 0, 0.35); }
 .of-tag { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 11px; font-weight: 900; padding: 2px 10px; border-radius: 999px; border: 2px solid var(--outline); background: var(--gold); color: var(--outline); }
 .offer.diamonds .of-tag { background: #8fd8ff; }
-.of-art { position: relative; width: min(60%, 88px); }
+.of-art { position: relative; width: min(56%, 80px); }
 .of-art img { display: block; width: 100%; aspect-ratio: 5 / 6; border-radius: 10px; border: 3px solid var(--outline); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); }
 .of-qty { position: absolute; right: -14px; bottom: -6px; font-family: var(--display); font-size: 24px; color: var(--gold); text-shadow: 0 2px 0 var(--outline), 2px 0 0 var(--outline), -2px 0 0 var(--outline), 0 -2px 0 var(--outline); }
 .of-coins { display: grid; place-items: center; aspect-ratio: 5 / 6; }
@@ -543,30 +565,37 @@ button.slot:hover { transform: translateY(-3px); }
 .buy-btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.5); }
 .buy-btn:disabled { background: #4a4266; box-shadow: none; color: #b9b0d6; cursor: default; }
 .offer.sold .of-art, .offer.sold > b { opacity: 0.55; }
-.shop-note { margin-top: -10px; text-align: center; }
-/* the chest row: three tiles, chest on the left, what's inside and the price on the right */
-.shop-chests { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.chest-tile { display: flex; align-items: center; gap: 12px; padding: 7px 12px; border-radius: 14px; border: 3px solid var(--outline);
-  background: radial-gradient(ellipse at 20% 50%, rgba(255, 220, 140, 0.16), transparent 60%), linear-gradient(#3a2a22, #22160f);
+.shop-note { margin: -12px 0 0; text-align: center; font-size: 12px; }
+/* the chest row: the free daily chest, then one tile per tier */
+.shop-chests { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; }
+.chest-tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 9px 6px 6px; border-radius: 14px; border: 3px solid var(--outline); text-align: center;
+  background: radial-gradient(ellipse at 50% 30%, rgba(255, 220, 140, 0.16), transparent 60%), linear-gradient(#3a2a22, #22160f);
   box-shadow: inset 0 0 0 3px #7a4f2c, inset 0 0 0 5px #d9a032, 0 5px 0 rgba(0, 0, 0, 0.35); }
-.ct-art { flex: none; width: 76px; }
-.ct-art svg { display: block; width: 100%; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5)); }
-.chest-tile:not(.sold):hover .ct-art svg { animation: chestIdle 1.2s ease-in-out infinite; }
-.ct-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
-.ct-body > b { font-family: var(--display); font-weight: 400; font-size: 19px; }
-.ct-inside { display: flex; flex-wrap: wrap; gap: 3px 9px; align-items: center; }
-.ct-item { display: inline-flex; align-items: center; gap: 3px; font-weight: 900; font-size: 12px; font-variant-numeric: tabular-nums; }
-.ct-item img { width: 20px; border-radius: 4px; border: 2px solid var(--outline); }
-.ct-item .coin-i { width: 16px; height: 16px; }
-.chest-tile .buy-btn { flex: none; width: auto; min-width: 84px; margin-top: 0; padding: 6px 12px 8px; font-size: 19px; }
-.chest-tile.sold .ct-art, .chest-tile.sold .ct-inside { opacity: 0.5; }
-@media (max-width: 1000px) { .offers { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 24px; } .shop-chests { grid-template-columns: minmax(0, 1fr); } }
+.chest-tile.platinum { background: radial-gradient(ellipse at 50% 30%, rgba(150, 240, 255, 0.22), transparent 62%), linear-gradient(#24364a, #142030); }
+.chest-tile.legendary { background: radial-gradient(ellipse at 50% 30%, rgba(255, 150, 60, 0.32), transparent 62%), linear-gradient(#3e1f44, #1f1024); }
+.chest-tile.mythic { background: radial-gradient(ellipse at 50% 30%, rgba(170, 130, 255, 0.38), transparent 62%), linear-gradient(#1f2150, #0f1028); }
+.chest-tile.free { box-shadow: inset 0 0 0 3px #2f7a3c, inset 0 0 0 5px #7ee07e, 0 5px 0 rgba(0, 0, 0, 0.35); }
+.chest-tile.free .of-tag { background: #7ee07e; }
+.ct-art { width: 70%; max-width: 72px; }
+.ct-art svg { display: block; width: 100%; overflow: visible; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5)); }
+.chest-tile:not(.sold):not(.locked):hover .ct-art svg { animation: chestIdle 1.2s ease-in-out infinite; }
+.chest-tile > b { font-family: var(--display); font-weight: 400; font-size: 14px; line-height: 1.1; margin-top: 2px; }
+.ct-odds { color: var(--muted); font-size: 10px; font-weight: 800; line-height: 1.25; }
+.chest-tile .buy-btn { margin-top: auto; padding: 3px 4px 5px; font-size: 16px; }
+.chest-tile .buy-btn .coin-i { width: 16px; height: 16px; }
+.chest-tile.sold .ct-art { opacity: 0.5; }
+.chest-tile.sold .buy-btn { font-family: var(--body); font-size: 11px; font-weight: 900; text-shadow: none; }
+.chest-tile.locked .ct-art { filter: grayscale(1) brightness(0.55); }
+.chest-tile.locked .ct-art svg * { animation: none !important; }
+.ct-locked { margin-top: auto; display: flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 900; color: #cbbfec; padding: 5px 2px; }
+.ct-locked .slot-lock { width: 14px; height: 14px; }
+@media (max-width: 1000px) { .offers { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 24px; } .shop-chests { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 18px; } }
 @media (max-width: 560px) { .offers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* TEMPORARY test buttons beside the Battle button */
 .test-tools { position: absolute; left: calc(100% + 14px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; }
 .test-tools .sim-win, .sim-win.test-inline { position: static; padding: 6px 12px 7px; font-size: 13px; white-space: nowrap; }
-@media (max-width: 560px) { .shop-head { position: static; justify-content: center; margin-bottom: 10px; } .chest-tile { flex-wrap: wrap; } }
+@media (max-width: 560px) { .shop-head { position: static; justify-content: center; margin-bottom: 10px; } .shop-chests { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .test-tools { position: static; transform: none; flex-direction: row; justify-content: center; flex-wrap: wrap; margin-top: 8px; } }
 
 /* the Trophy Road */
@@ -1042,6 +1071,9 @@ button.slot:hover { transform: translateY(-3px); }
   .res-chip { min-width: 120px; }
 }
 @media (max-height: 720px) {
+  .shop-tab { padding-top: 2px; gap: 16px; }
+  .offer .of-art { width: min(44%, 62px); }
+  .chest-tile .ct-art { max-width: 62px; }
   .battle-btn { min-height: 70px; }
   .battle-btn span { font-size: 38px; }
   .chests { width: min(380px, 100%); }

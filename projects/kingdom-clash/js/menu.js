@@ -127,42 +127,71 @@ const KCMenu = (() => {
     wooden: { body: '#b2733a', bodySh: '#8a5426', lid: '#c98a48', lidSh: '#a36a30', band: '#5f6573', bandSh: '#474c58', trim: '#8a909e', lock: '#d9a032', glow: '#fff0b0' },
     silver: { body: '#8fa1ba', bodySh: '#6a7c96', lid: '#aebccf', lidSh: '#8797ae', band: '#eef2f8', bandSh: '#c5cfdd', trim: '#f6f9fc', lock: '#4aa8ff', glow: '#d8f0ff' },
     gold: { body: '#e6a81e', bodySh: '#b98008', lid: '#f8c636', lidSh: '#d99a10', band: '#b3202a', bandSh: '#8a1620', trim: '#fff0a0', lock: '#ff4d5a', glow: '#fff3a0' },
+    platinum: { body: '#c9d4e2', bodySh: '#9eadc2', lid: '#e4ebf4', lidSh: '#b9c6d8', band: '#4fbcd4', bandSh: '#358fa6', trim: '#ffffff', lock: '#2fe0cf', glow: '#dcfcff' },
+    legendary: { body: '#6a2a86', bodySh: '#4c1a63', lid: '#8a3aa8', lidSh: '#6c2a88', band: '#ff9a2e', bandSh: '#d9731a', trim: '#ffd25a', lock: '#ff5a2e', glow: '#ffd9a0', halo: '#ff9a3d' },
+    mythic: { body: '#24296a', bodySh: '#171a4a', lid: '#343c98', lidSh: '#262c78', band: '#6ff0de', bandSh: '#43c2b2', trim: '#d8c8ff', lock: '#ff6bd5', glow: '#eadcff', halo: '#a98bff' },
   };
+  // A small four-point sparkle centred on (x, y).
+  const spark = (x, y, r) => `<path d="M${x} ${y - r}l${r * 0.3} ${r * 0.7} ${r * 0.7} ${r * 0.3}-${r * 0.7} ${r * 0.3}-${r * 0.3} ${r * 0.7}-${r * 0.3}-${r * 0.7}-${r * 0.7}-${r * 0.3} ${r * 0.7}-${r * 0.3}z"/>`;
   function chestSvg(type, open) {
     const L = CHEST_LOOK[type] || CHEST_LOOK.wooden, O = '#1c1530';
-    const planks = type === 'wooden'
-      ? [44, 60, 76].map(x => `<path d="M${x} 59v36" stroke="${L.bodySh}" stroke-width="2"/>`).join('')
-      : type === 'silver'
-        ? [[44, 68], [76, 68], [44, 86], [76, 86]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" fill="${L.trim}"/>`).join('')
-        : `<path d="M46 62h28v26H46z" fill="${L.band}" stroke="${O}" stroke-width="2"/><path d="M52 78l3-9 5 6 5-6 3 9z" fill="${L.trim}"/>`;
+    const fancy = type === 'legendary' || type === 'mythic';
+    // decoration on the front of the base
+    const front = {
+      wooden: [44, 60, 76].map(x => `<path d="M${x} 59v36" stroke="${L.bodySh}" stroke-width="2"/>`).join(''),
+      silver: [[44, 68], [76, 68], [44, 86], [76, 86]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" fill="${L.trim}"/>`).join(''),
+      gold: `<path d="M46 62h28v26H46z" fill="${L.band}" stroke="${O}" stroke-width="2"/><path d="M52 78l3-9 5 6 5-6 3 9z" fill="${L.trim}"/>`,
+      platinum: [[42, 66], [78, 66], [42, 88], [78, 88]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" fill="${L.trim}"/>`).join('') +
+        `<path d="M60 62l9 10-9 11-9-11z" fill="${L.lock}" stroke="${O}" stroke-width="2.4" stroke-linejoin="round"/><path d="M57 68l3-3 3 3" stroke="#fff" stroke-width="1.6" fill="none"/>`,
+      legendary: `<path d="M45 61h30v28H45z" fill="${L.bodySh}" stroke="${O}" stroke-width="2"/>` +
+        `<path class="ch-flame" d="M60 64c7 6 9 12 4 19 1-6-4-8-4-8s-5 2-4 8c-5-7-3-13 4-19z" fill="${L.band}" stroke="${O}" stroke-width="1.8" stroke-linejoin="round"/>`,
+      mythic: `<path d="M45 61h30v28H45z" fill="${L.bodySh}" stroke="${O}" stroke-width="2"/>` +
+        `<path d="M60 63l3.2 7.3 7.8.9-5.8 5.3 1.6 7.7L60 80.3l-6.8 3.9 1.6-7.7-5.8-5.3 7.8-.9z" fill="${L.band}" stroke="${O}" stroke-width="1.8" stroke-linejoin="round"/>`,
+    }[type] || '';
     // drawn inside the lid group, so they lift with it
     const lidPlanks = type === 'wooden' ? [46, 60, 74].map(x => `<path d="M${x} 20v22" stroke="${L.lidSh}" stroke-width="2"/>`).join('') : '';
     const lock = type === 'wooden'
       ? `<rect x="52" y="42" width="16" height="20" rx="4" fill="${L.lock}" stroke="${O}" stroke-width="3"/><circle cx="60" cy="50" r="2.6" fill="${O}"/><path d="M60 50v6" stroke="${O}" stroke-width="2.4" stroke-linecap="round"/>`
       : `<rect x="51" y="41" width="18" height="22" rx="5" fill="${L.trim}" stroke="${O}" stroke-width="3"/><path d="M60 45l6 7-6 8-6-8z" fill="${L.lock}" stroke="${O}" stroke-width="2"/>`;
-    const crown = type === 'gold' ? `<path d="M48 16l2-12 6 7 4-9 4 9 6-7 2 12z" fill="${L.trim}" stroke="${O}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="60" cy="11" r="2" fill="${L.lock}"/>` : '';
-    const stars = type === 'gold' ? `<g class="ch-stars" fill="#fff"><path d="M20 30l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z"/><path d="M100 22l1.2 3.2 3.2 1.2-3.2 1.2-1.2 3.2-1.2-3.2-3.2-1.2 3.2-1.2z"/><path d="M98 70l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z"/></g>` : '';
+    const crown = type === 'gold' || fancy
+      ? `<path d="M48 16l2-12 6 7 4-9 4 9 6-7 2 12z" fill="${type === 'gold' ? L.trim : '#ffcf3f'}" stroke="${O}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="60" cy="11" r="2" fill="${L.lock}"/>`
+      : '';
+    const wings = type === 'platinum'
+      ? `<path d="M14 40c-8-2-12-8-12-14 5 3 8 3 12 2M106 40c8-2 12-8 12-14-5 3-8 3-12 2" fill="${L.trim}" stroke="${O}" stroke-width="2.4" stroke-linejoin="round"/>`
+      : '';
+    const stars = type === 'gold' || fancy
+      ? `<g class="ch-stars" fill="#fff">${spark(20, 34, 5)}${spark(101, 26, 4)}${spark(99, 74, 3.2)}</g>` : '';
+    // the animated chests: a glowing halo behind, and sparkles circling
+    const halo = fancy ? `<g class="ch-aura"><ellipse cx="60" cy="58" rx="58" ry="52" fill="${L.halo}" opacity="0.35"/><ellipse cx="60" cy="58" rx="42" ry="38" fill="${L.halo}" opacity="0.45"/></g>` : '';
+    const orbit = fancy
+      ? `<g class="ch-orbit" fill="${type === 'mythic' ? '#eadcff' : '#ffe1a0'}">${spark(60, 2, 4.5)}${spark(116, 58, 3.5)}${spark(60, 114, 4)}${spark(4, 58, 3.5)}</g>` : '';
     return `<svg class="chest-svg chest-${type}${open ? ' open' : ''}" viewBox="0 0 120 110" aria-hidden="true">
+      ${halo}
       <ellipse cx="60" cy="100" rx="46" ry="7" fill="rgba(0,0,0,0.3)"/>
-      <path class="ch-beam" d="M26 50L6 -40h108L94 50z" fill="${L.glow}"/>
-      <g class="ch-inside"><path d="M17 30h86v26H17z" fill="#1a0f1e" stroke="${O}" stroke-width="3"/><ellipse class="ch-glow" cx="60" cy="50" rx="38" ry="12" fill="${L.glow}"/></g>
-      <g class="ch-base">
-        <rect x="14" y="52" width="92" height="44" rx="6" fill="${L.body}" stroke="${O}" stroke-width="3"/>
-        <path d="M15.5 82h89v8a4.5 4.5 0 0 1-4.5 4.5h-80a4.5 4.5 0 0 1-4.5-4.5z" fill="${L.bodySh}"/>
-        ${planks}
-        <rect x="24" y="52" width="11" height="44" fill="${L.band}" stroke="${O}" stroke-width="2.5"/><rect x="85" y="52" width="11" height="44" fill="${L.band}" stroke="${O}" stroke-width="2.5"/>
-        <path d="M25.5 84h8v10.5h-8zM86.5 84h8v10.5h-8z" fill="${L.bandSh}"/>
-        <rect x="11" y="50" width="98" height="9" rx="3" fill="${L.trim}" stroke="${O}" stroke-width="3"/>
+      <g class="ch-all">
+        <path class="ch-beam" d="M26 50L6 -40h108L94 50z" fill="${L.glow}"/>
+        <g class="ch-inside"><path d="M17 30h86v26H17z" fill="#1a0f1e" stroke="${O}" stroke-width="3"/><ellipse class="ch-glow" cx="60" cy="50" rx="38" ry="12" fill="${L.glow}"/></g>
+        <g class="ch-shell">
+          <g class="ch-base">
+            <rect x="14" y="52" width="92" height="44" rx="6" fill="${L.body}" stroke="${O}" stroke-width="3"/>
+            <path d="M15.5 82h89v8a4.5 4.5 0 0 1-4.5 4.5h-80a4.5 4.5 0 0 1-4.5-4.5z" fill="${L.bodySh}"/>
+            ${front}
+            <rect x="24" y="52" width="11" height="44" fill="${L.band}" stroke="${O}" stroke-width="2.5"/><rect x="85" y="52" width="11" height="44" fill="${L.band}" stroke="${O}" stroke-width="2.5"/>
+            <path d="M25.5 84h8v10.5h-8zM86.5 84h8v10.5h-8z" fill="${L.bandSh}"/>
+            <rect x="11" y="50" width="98" height="9" rx="3" fill="${L.trim}" stroke="${O}" stroke-width="3"/>
+          </g>
+          <g class="ch-lid">
+            ${wings}
+            <path d="M14 52V38Q14 14 60 14Q106 14 106 38V52Z" fill="${L.lid}" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
+            ${lidPlanks}
+            <path d="M22 30Q30 19 52 17" stroke="rgba(255,255,255,0.45)" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M24 23.5L35 19V50H24zM85 19l11 4.5V50H85z" fill="${L.band}" stroke="${O}" stroke-width="2.5" stroke-linejoin="round"/>
+            <rect x="11" y="43" width="98" height="9" rx="3" fill="${L.trim}" stroke="${O}" stroke-width="3"/>
+            ${crown}${lock}
+          </g>
+        </g>
       </g>
-      <g class="ch-lid">
-        <path d="M14 52V38Q14 14 60 14Q106 14 106 38V52Z" fill="${L.lid}" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
-        ${lidPlanks}
-        <path d="M22 30Q30 19 52 17" stroke="rgba(255,255,255,0.45)" stroke-width="3" fill="none" stroke-linecap="round"/>
-        <path d="M24 23.5L35 19V50H24zM85 19l11 4.5V50H85z" fill="${L.band}" stroke="${O}" stroke-width="2.5" stroke-linejoin="round"/>
-        <rect x="11" y="43" width="98" height="9" rx="3" fill="${L.trim}" stroke="${O}" stroke-width="3"/>
-        ${crown}${lock}
-      </g>
-      ${stars}
+      ${orbit}${stars}
     </svg>`;
   }
   function renderChests() {
@@ -244,7 +273,8 @@ const KCMenu = (() => {
     c.globalAlpha = 1;
     FX.parts = FX.parts.filter(p => p.life > 0 && p.y < innerHeight + 20);
   }
-  const SPARKS = { wooden: ['#ffe9a0', '#ffc861', '#ffffff'], silver: ['#d8f0ff', '#9fd0ff', '#ffffff'], gold: ['#fff3a0', '#ffd23f', '#ff9a3d', '#ffffff'] };
+  const SPARKS = { platinum: ['#dcfcff', '#8ff0ff', '#ffffff'], legendary: ['#ffd25a', '#ff9a3d', '#ff5a2e', '#ffffff'], mythic: ['#eadcff', '#a98bff', '#6ff0de', '#ff6bd5', '#ffffff'],
+    wooden: ['#ffe9a0', '#ffc861', '#ffffff'], silver: ['#d8f0ff', '#9fd0ff', '#ffffff'], gold: ['#fff3a0', '#ffd23f', '#ff9a3d', '#ffffff'] };
 
   // type: 'wooden' | 'silver' | 'gold', or null for a reward with no chest. got: { coins, cards: [{ id, n, isNew }] },
   // already added to the player's collection.
@@ -301,7 +331,11 @@ const KCMenu = (() => {
       $('#coChest').className = 'co-chest opened';
       $('#coRays').classList.add('on');
       KCSound.play('chestOpen');
-      fxBurst(svg, co.type === 'gold' ? 60 : co.type === 'silver' ? 44 : 30, 'spark', SPARKS[co.type]);
+      fxBurst(svg, { wooden: 30, silver: 44, gold: 60, platinum: 72, legendary: 96, mythic: 120 }[co.type] || 40, 'spark', SPARKS[co.type] || SPARKS.gold);
+      if (co.type === 'legendary' || co.type === 'mythic') {
+        later(() => KCSound.play('revealNew'), 260);
+        later(() => fxBurst(svg, 60, 'spark', SPARKS[co.type]), 380);
+      }
       const n = $('#coCount'); n.textContent = co.steps.length; n.hidden = false;
       co.phase = 'opened';
       later(nextReward, 750);
@@ -434,31 +468,49 @@ const KCMenu = (() => {
       return `<div class="offer ${o.currency}${sold ? ' sold' : ''}"><span class="of-tag">${esc(o.tag)}</span>${body}${btn}</div>`;
     }).join('');
     for (const b of $$('#shopOffers .buy-btn[data-offer]')) b.addEventListener('click', e => { e.stopPropagation(); buyClick(+b.dataset.offer); });
-    // the chest row: coins only, contents listed
-    $('#shopChests').innerHTML = shop.chests.map((c, i) => {
-      const sold = !!shop.bought[c.id], C = G.CHESTS[c.type], poor = !sold && p.coins < c.price;
-      const inside = `<span class="ct-item"><i class="coin-i" aria-hidden="true"></i>${fmt(c.contents.coins)}</span>` +
-        c.contents.cards.map(x => `<span class="ct-item"><img src="${cardImg(x.id)}" alt="${esc(KC_CARDS[x.id].name)}" title="${esc(KC_CARDS[x.id].name)}">×${x.n}</span>`).join('');
-      return `<div class="chest-tile ${c.type}${sold ? ' sold' : ''}">
-        <div class="ct-art">${chestSvg(c.type)}</div>
-        <div class="ct-body"><b>${C.name}</b><div class="ct-inside" aria-label="Inside">${inside}</div></div>
-        ${sold ? '<button class="buy-btn" type="button" disabled>Bought</button>'
-    : `<button class="buy-btn${poor ? ' poor' : ''}" type="button" data-chest="${i}" aria-label="Buy the ${C.name} for ${c.price} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(c.price)}</button>`}
-        </div>`;
-    }).join('');
-    for (const b of $$('#shopChests .buy-btn[data-chest]')) b.addEventListener('click', e => { e.stopPropagation(); buyChestClick(+b.dataset.chest); });
+    // the chest row: a free Wooden Chest each day, then every tier for coins (contents stay hidden)
+    const oddsText = t => { const o = G.chestOdds(t); return `${fmt(o.cards)} cards<br>${fmt(o.coins[0])}–${fmt(o.coins[1])} coins`; };
+    const free = G.freeChestReady();
+    const tiles = [`<div class="chest-tile free wooden${free ? '' : ' sold'}"><span class="of-tag">Free daily</span>
+      <div class="ct-art">${chestSvg('wooden')}</div><b>Wooden Chest</b><small class="ct-odds">${oddsText('wooden')}</small>
+      ${free ? '<button class="buy-btn free-btn" type="button" data-free="1" aria-label="Open your free Wooden Chest">Free</button>'
+    : `<button class="buy-btn" type="button" disabled>Next in <span id="freeClock">${clock(G.shopEnds() - Date.now())}</span></button>`}</div>`];
+    for (const t of G.TIERS) {
+      const C = G.CHESTS[t];
+      if (!G.chestAllowed(t)) {
+        tiles.push(`<div class="chest-tile locked ${t}"><div class="ct-art">${chestSvg(t)}</div><b>${C.name}</b><small class="ct-odds">${oddsText(t)}</small>
+          <span class="ct-locked"><span class="slot-lock" aria-hidden="true"></span>Unlocks in Arena ${G.CHEST_RULES.arena[t]}</span></div>`);
+        continue;
+      }
+      const price = G.chestPrice(t), poor = p.coins < price;
+      tiles.push(`<div class="chest-tile ${t}"><div class="ct-art">${chestSvg(t)}</div><b>${C.name}</b><small class="ct-odds">${oddsText(t)}</small>
+        <button class="buy-btn${poor ? ' poor' : ''}" type="button" data-chest="${t}" aria-label="Buy a ${C.name} for ${price} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(price)}</button></div>`);
+    }
+    $('#shopChests').innerHTML = tiles.join('');
+    for (const b of $$('#shopChests .buy-btn[data-chest]')) b.addEventListener('click', e => { e.stopPropagation(); buyChestClick(b.dataset.chest); });
+    const fb = $('#shopChests .free-btn');
+    if (fb) fb.addEventListener('click', e => { e.stopPropagation(); freeChestClick(); });
     shopTimer();
   }
-  function shopTimer() { const el = $('#shopTimer'); if (el) el.textContent = clock(G.shopEnds() - Date.now()); }
-  function buyChestClick(i) {
-    const c = G.shop().chests[i];
-    if (!c) return;
-    const r = G.buyChest(i);
+  function shopTimer() {
+    const left = clock(G.shopEnds() - Date.now());
+    for (const el of [$('#shopTimer'), $('#freeClock')]) if (el) el.textContent = left;
+  }
+  function buyChestClick(type) {
+    const r = G.buyChest(type);
     if (r.error === 'coins') { KCSound.play('error'); toast('Not enough coins. Win battles and open chests to earn more.'); return; }
-    if (!r.ok) { toast(r.error === 'sold' ? 'You already bought that chest today.' : 'That chest is not available.'); refresh(); return; }
+    if (r.error === 'locked') { KCSound.play('error'); toast(`${G.CHESTS[type].name}s unlock in Arena ${G.CHEST_RULES.arena[type]}.`); return; }
+    if (!r.ok) { toast('That chest is not available.'); refresh(); return; }
     KCSound.play('buy');
     refresh();
     showChest(r.chest, r);
+  }
+  function freeChestClick() {
+    const r = G.claimFreeChest();
+    if (!r.ok) { toast('You already opened today\'s free chest. A new one arrives at midnight.'); refresh(); return; }
+    KCSound.play('buy');
+    refresh();
+    showChest('wooden', r, 'Free Wooden Chest');
   }
   function buyClick(i) {
     const o = G.shop().offers[i];
@@ -490,7 +542,7 @@ const KCMenu = (() => {
   /* ---------- the Trophy Road ---------- */
   function rewardHtml(m) {
     if (m.kind === 'coins') return `<span class="rw-coins"><span class="co-coin" aria-hidden="true"></span><b>${fmt(m.amount)}</b></span><small>Coins</small>`;
-    if (m.kind === 'chest') return `<span class="rw-chest">${chestSvg(m.chest)}</span><small>${G.CHESTS[m.chest].name}</small>`;
+    if (m.kind === 'chest') { const t = G.capChest(m.chest); return `<span class="rw-chest">${chestSvg(t)}</span><small>${G.CHESTS[t].name}</small>`; }
     if (m.kind === 'card') return `<img class="rw-card" src="${cardImg(m.card)}" alt=""><small>${esc(KC_CARDS[m.card].name)} ×${m.copies}</small>`;
     const a = G.ARENAS.find(x => x.id === m.arena);
     return `<span class="rw-arena"><b>${a.number}</b></span><small>${a.soon ? `Arena ${a.number} · coming soon` : `Arena ${a.number}: ${esc(a.name)}`}</small>`;
@@ -723,7 +775,7 @@ const KCMenu = (() => {
     $('#rightTitle').textContent = 'Next Rewards';
     const nxt = G.ROAD.filter(m => G.roadState(m) === 'ready' || G.roadState(m) === 'locked' || G.roadState(m) === 'soon').slice(0, 3);
     $('#rewards').innerHTML = nxt.map(m => {
-      const st = G.roadState(m), what = m.kind === 'coins' ? `${fmt(m.amount)} coins` : m.kind === 'chest' ? G.CHESTS[m.chest].name : m.kind === 'card' ? `${KC_CARDS[m.card].name} ×${m.copies}` : `Arena ${G.ARENAS.find(x => x.id === m.arena).number}`;
+      const st = G.roadState(m), what = m.kind === 'coins' ? `${fmt(m.amount)} coins` : m.kind === 'chest' ? G.CHESTS[G.capChest(m.chest)].name : m.kind === 'card' ? `${KC_CARDS[m.card].name} ×${m.copies}` : `Arena ${G.ARENAS.find(x => x.id === m.arena).number}`;
       return `<li class="${st === 'ready' ? 'now' : 'later'}"><span class="rw-mark" aria-hidden="true"></span><span><b>${esc(what)}</b><small>${st === 'ready' ? 'Ready to claim' : st === 'soon' ? `${m.at} trophies · coming soon` : `At ${m.at} trophies`}</small></span></li>`;
     }).join('') || '<li class="done"><span class="rw-mark" aria-hidden="true"></span><span><b>All claimed</b><small>More arenas are on the way</small></span></li>';
     $('#rightNote').textContent = G.claimable().length ? 'Claim rewards on the Trophy Road tab.' : 'Win trophy battles to reach the next reward.';
@@ -741,7 +793,7 @@ const KCMenu = (() => {
     }
     if (tabNow === 'shop') {
       const day = P().shop && P().shop.day;
-      if (G.shop().day !== day) renderShop(); else shopTimer();
+      if (G.shop().day !== day || (G.freeChestReady() && !$('#shopChests .free-btn'))) renderShop(); else shopTimer();
     }
   }
 
@@ -758,6 +810,7 @@ const KCMenu = (() => {
     $('#xpText').textContent = `${into} / ${G.XP_PER_LEVEL}`;
     $('#coinVal').textContent = fmt(p.coins);
     $('#gemVal').textContent = fmt(p.diamonds);
+    $('#shopTag').hidden = !G.freeChestReady();
     $('#soundBtn').setAttribute('aria-label', KCSound.on ? 'Sound on' : 'Sound off');
     $('#soundBtn').classList.toggle('off', !KCSound.on);
     $('#soundToggle').checked = KCSound.on;

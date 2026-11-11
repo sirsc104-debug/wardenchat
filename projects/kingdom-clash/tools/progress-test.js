@@ -38,9 +38,9 @@ assert.strictEqual(G.chestState(0, t0 + 59_000), 'unlocking');
 assert.strictEqual(G.openChest(0, t0 + 59_000), null);
 const coinsBefore = P.coins, countsBefore = KC_ALL_CARDS.reduce((a, id) => a + P.cards[id].count, 0);
 const got = G.openChest(0, t0 + 60_000);
-assert(got && got.coins >= 18 && got.coins <= 26 && got.cards.reduce((a, c) => a + c.n, 0) === 6);
+assert(got && got.coins >= 18 && got.cards.reduce((a, c) => a + c.n, 0) >= 6, 'at least a level-1 wooden chest');
 assert.strictEqual(P.coins, coinsBefore + got.coins);
-assert.strictEqual(KC_ALL_CARDS.reduce((a, id) => a + P.cards[id].count, 0), countsBefore + 6);
+assert.strictEqual(KC_ALL_CARDS.reduce((a, id) => a + P.cards[id].count, 0), countsBefore + got.cards.reduce((a, c) => a + c.n, 0));
 assert(got.cards.every(c => KC_STARTER_DECK.includes(c.id)), 'only found cards drop');
 assert.strictEqual(P.chests[0], null);
 console.log('chest unlock and open: ok', JSON.stringify(got));
@@ -120,21 +120,46 @@ console.log('save and reload: ok');
   for (const id of KC_STARTER_DECK) P3.cards[id].level = 15;
   const o3 = G.refreshShop(KCSim.mulberry(7), day2).offers;
   assert(o3.filter(x => x.kind === 'card').every(x => x.card === 'skeletons'), 'only the card that can still level up');
-  // the chest row: coins only, one of each a day, contents shown and exactly what you get
-  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, coins: 400, diamonds: 50 }) }));
-  const P4 = G.state, ch = G.shop(day1, KCSim.mulberry(9)).chests;
-  assert.deepStrictEqual(ch.map(c => [c.type, c.price]), [['wooden', 80], ['silver', 280], ['gold', 800]]);
-  assert(ch.every(c => c.contents.coins < c.price && c.contents.cards.length > 0), 'a chest never pays back its price in coins');
-  const total = id => P4.cards[id].count, w = ch[0], before4 = Object.fromEntries(w.contents.cards.map(x => [x.id, total(x.id)]));
-  let rc = G.buyChest(0, day1);
-  assert(rc.ok && rc.chest === 'wooden' && P4.coins === 400 - 80 + w.contents.coins && P4.diamonds === 50, 'paid in coins, diamonds untouched');
-  for (const x of w.contents.cards) assert.strictEqual(total(x.id), before4[x.id] + x.n, 'you get exactly what was shown');
-  assert.deepStrictEqual(rc.cards.map(x => [x.id, x.n]), w.contents.cards.map(x => [x.id, x.n]));
-  assert.strictEqual(G.buyChest(0, day1).error, 'sold');
-  assert.strictEqual(G.buyChest(2, day1).error, 'coins', 'the gold chest costs more coins than they have');
+  // the chest row: coins only, any number of times, contents hidden until opened, free wooden chest daily
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, coins: 2000, diamonds: 50 }) }));
+  const P4 = G.state;
+  assert.deepStrictEqual(G.TIERS.map(t => [t, G.chestPrice(t)]), [['wooden', 80], ['silver', 280], ['gold', 800], ['platinum', 1800], ['legendary', 4200], ['mythic', 9500]]);
+  for (const lv of [1, 5, 12, 30, 80]) for (const t of G.TIERS) assert(G.chestOdds(t, lv).coins[1] < G.chestPrice(t, lv), `a ${t} chest never pays back its price at level ${lv}`);
+  let rc = G.buyChest('silver', KCSim.mulberry(1));
+  assert(rc.ok && P4.coins === 2000 - 280 + rc.coins && P4.diamonds === 50, 'paid in coins, diamonds untouched');
+  assert.strictEqual(rc.cards.reduce((a, c) => a + c.n, 0), G.chestOdds('silver').cards);
+  const coinsNow = P4.coins; rc = G.buyChest('silver');
+  assert(rc.ok && P4.coins === coinsNow - 280 + rc.coins, 'the same chest can be bought again');
+  assert.strictEqual(G.buyChest('mythic').error, 'coins');
   assert.strictEqual(P4.chests.filter(Boolean).length, 0, 'shop chests do not use the chest slots');
-  assert.notDeepStrictEqual(G.shop(day2, KCSim.mulberry(10)).chests.map(c => c.contents), ch.map(c => c.contents), 'new chests the next day');
-  delete P4.shop.chests; assert.strictEqual(G.shop(day2).chests.length, 3, 'an older saved shop gains the chest row');
+  // free wooden chest, once a day
+  assert(G.freeChestReady(day1));
+  rc = G.claimFreeChest(day1); assert(rc.ok && rc.chest === 'wooden');
+  assert.strictEqual(G.claimFreeChest(day1 + 3600e3).error, 'claimed');
+  assert(G.freeChestReady(day2) && G.claimFreeChest(day2).ok, 'a new free chest the next day');
+  // contents follow the account level, not trophies
+  assert.strictEqual(G.chestOdds('gold', 1).cards, 45);
+  assert.strictEqual(G.chestOdds('gold', 11).cards, Math.round(45 * 2.5));
+  P4.xp = 0; P4.trophies = 5000; const low = G.chestOdds('gold');
+  P4.xp = 1000; P4.trophies = 0; const high = G.chestOdds('gold');
+  assert(low.cards === 45 && high.cards > low.cards && high.coins[0] > low.coins[0], 'level 11 beats level 1 whatever the trophies');
+  assert.strictEqual(G.chestPrice('gold'), Math.round(800 * 2.5 / 5) * 5);
+  // the arena gate (switched on just for this test): Arena 1 gives wooden and silver only
+  G.CHEST_RULES.allUnlocked = false;
+  P4.trophies = 0; P4.cycle = 7; P4.chests = [null, null, null, null];
+  assert(!G.chestAllowed('gold') && G.chestAllowed('silver'));
+  assert.strictEqual(G.capChest('mythic'), 'silver');
+  assert.strictEqual(G.capChest('gold', 2), 'gold');
+  assert.strictEqual(G.capChest('mythic', 3), 'platinum');
+  assert.strictEqual(G.buyChest('gold').error, 'locked');
+  let wr = G.recordTrophy(0); assert.strictEqual(wr.chest.type, 'silver', 'the gold chest in the cycle becomes silver in Arena 1');
+  P4.trophies = 250; P4.claimed = { 0: true };
+  for (const at of [20, 40, 60, 90, 120, 160, 200]) G.claim(at);
+  assert.strictEqual(G.claim(250).chest, 'silver', 'the Trophy Road gold chest is given as silver in Arena 1');
+  G.CHEST_RULES.allUnlocked = true;
+  assert.strictEqual(G.capChest('mythic'), 'mythic', 'with the gate off every tier is allowed');
+  for (const t of G.TIERS) assert(G.chestAllowed(t));
+  console.log('chests: tiers, gate, level scaling, repeat buys, free daily: ok');
   console.log('shop offers, prices, buying, daily change, chests for coins: ok');
 }
 
