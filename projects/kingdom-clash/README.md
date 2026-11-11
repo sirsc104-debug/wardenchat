@@ -49,6 +49,12 @@ Reached at **300 trophies** (Arena 1's floor stays 0; Briar Hollow's is 300). An
 
 `node tools/balance-test.js [matches]` plays the same bot with each new card swapped in for a card with the same job against the starter deck. At 100 matches: Spears 52%, Footmen 47%, Flail Knight 48%, Pot Thrower 58%, all four together 51%. It also times one-on-one trades (Flail Knight clears four Wolves in one swing; Footmen beat a Gorilla; a Snowman beats Footmen).
 
+## Emotes
+
+In battle, the speech-bubble button at the bottom left of the arena (or **E**) opens the emote panel over the bottom of the arena: a mute button for the opponent's emotes, eight picture emotes of the game's own King (laughing, crying, angry, thumbs up, amazed, yawning, cheeky, thinking), and six phrases (*Good luck!*, *Nice play!*, *Whoa!*, *Thanks!*, *Good game!*, *Oops!*). An emote pops up beside its player's King Tower, animated, with its own sound, for under three seconds. Three emotes in a row and the panel rests for 3.5 seconds.
+
+The opponent emotes back about a third of the time (more often to *Good game!* after the match), with a fitting reply, and about 40% of the time after taking one of your towers or winning. Muting hides its emotes for that battle. Everything lives in `js/emotes.js`; `KCEmotes.send(team, id)` is the one way an emote goes up, ready for an online opponent later. Chances are in `CHANCE` at the top.
+
 ## Magic items
 
 A **Magic Items** tab sits beside the card collection (Cards → Magic Items). Pick an item to see the cards it can be used on, or use it from a card's details window.
@@ -125,6 +131,7 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `js/trainers.js` | Owen, Romeo and Luc |
 | `js/arenas.js` | Arena art: each arena's centerpiece, scenery panels (with crowd rows and lights) and battlefield image with its tile mapping; loads each image once |
 | `js/progress.js` | Progress and its rules: trainers, trophies, bots, chests, road rewards, card levels, the deck |
+| `js/emotes.js` | Battle emotes: the panel, the King's faces, the bubbles, and when the opponent emotes |
 | `js/upgrades.js` | The full-screen scenes for upgrading a card and using a magic item on it |
 | `js/items.js` | Magic item art (SVG built from parts that fly together in a chest reveal) |
 | `js/menu.js` | The lobby, the Cards screen (deck, collection, upgrades), chest opening, the Trophy Road tab |

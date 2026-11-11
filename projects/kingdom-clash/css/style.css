@@ -1305,3 +1305,78 @@ button.slot:hover { transform: translateY(-3px); }
 .us-hint { margin: 0; min-height: 18px; font-size: 13px; color: #cfc4f5; font-weight: 800; }
 @media (max-height: 640px) { .us-center { height: 30vh; } .us-card { width: 20vh; } .us-title { font-size: 26px; } }
 @media (max-width: 560px) { .us-tool.wild, .us-tool.book { left: -40px; width: 96px; height: 96px; margin-top: -48px; } .us-tool.book .us-open { width: 140px; height: 90px; left: -20px; } .us-stats div { min-width: 88px; } }
+
+/* ---------- emotes (js/emotes.js) ---------- */
+.emote-btn { position: absolute; z-index: 5; left: 2.4%; bottom: calc(1.4% + 40px); width: 48px; height: 40px; padding: 0; border: 3px solid var(--outline); border-radius: 14px 14px 14px 4px;
+  background: #fff; color: var(--outline); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4); display: grid; place-items: center; transition: transform 0.1s; }
+.emote-btn:hover { transform: translateY(-2px); }
+.emote-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4); }
+.eb-dots { display: flex; gap: 4px; }
+.eb-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--outline); }
+.eb-x { display: none; font-size: 18px; font-weight: 900; }
+.emote-btn.open .eb-dots { display: none; }
+.emote-btn.open .eb-x { display: block; }
+.emote-panel { position: absolute; z-index: 4; left: 0; right: 0; bottom: 0; padding: 10px 10px calc(1.4% + 88px); display: flex; flex-direction: column; gap: 10px;
+  background: linear-gradient(rgba(28, 74, 160, 0.0), rgba(28, 74, 160, 0.92) 18%, #1e3f8f); border-radius: 0 0 17px 17px; animation: epUp 0.18s ease-out; }
+@keyframes epUp { from { transform: translateY(30px); opacity: 0; } }
+.ep-row { display: grid; gap: 8px; }
+.ep-faces { grid-template-columns: repeat(5, minmax(0, 1fr)); padding-top: 12px; }
+.ep-phrases { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ep-face, .ep-mute { aspect-ratio: 1.12; padding: 2px; border: 3px solid var(--outline); border-radius: 14px; background: #fff; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); display: grid; place-items: center; transition: transform 0.1s; }
+.ep-face svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.ep-face:hover, .ep-phrase:hover, .ep-mute:hover { transform: translateY(-2px); }
+.ep-face:active, .ep-phrase:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.35); }
+.ep-mute { color: #c8c2d6; }
+.ep-mute svg { width: 62%; }
+.ep-mute.on { color: #e5323e; background: #ffe9ea; }
+.ep-phrase { padding: 9px 6px; border: 3px solid var(--outline); border-radius: 999px; background: #fff; color: var(--outline); font-weight: 900; font-size: 14px; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); white-space: nowrap; transition: transform 0.1s; }
+.emote-panel.resting .ep-face, .emote-panel.resting .ep-phrase { filter: grayscale(0.9) brightness(0.7); pointer-events: none; }
+#battle.narrow .ep-phrase { font-size: 11px; padding: 7px 2px; }
+#battle.narrow .emote-btn { width: 40px; height: 34px; bottom: calc(1.4% + 36px); }
+
+/* an emote, shown beside its player's King Tower */
+.emote-bub { position: absolute; z-index: 3; transform: translateY(-50%); transform-origin: 0 50%; pointer-events: none; animation: emPop 0.35s cubic-bezier(.2, .9, .3, 1.5); }
+.emote-bub::before { content: ''; position: absolute; left: -14px; top: 50%; margin-top: -9px; border: 9px solid transparent; border-right: 14px solid var(--outline); border-left: 0; }
+.emote-bub::after { content: ''; position: absolute; left: -8px; top: 50%; margin-top: -6px; border: 6px solid transparent; border-right: 9px solid #fff; border-left: 0; }
+.emote-bub.is-face { width: clamp(64px, 17%, 120px); aspect-ratio: 1.1; padding: 4px; background: #fff; border: 3px solid var(--outline); border-radius: 18px; box-shadow: 0 5px 0 rgba(0, 0, 0, 0.3); }
+.emote-bub.is-face svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.emote-bub.is-text span { display: block; padding: 8px 14px; background: #fff; color: var(--outline); border: 3px solid var(--outline); border-radius: 16px; font-weight: 900; font-size: clamp(13px, 1.3vw, 17px); white-space: nowrap; box-shadow: 0 5px 0 rgba(0, 0, 0, 0.3); }
+@keyframes emPop { from { transform: translateY(-50%) scale(0.2) rotate(-12deg); opacity: 0; } 60% { transform: translateY(-50%) scale(1.12) rotate(3deg); } }
+/* each face moves its own way */
+.em-face .em-body { transform-box: view-box; transform-origin: 50% 90%; }
+.emote-bub .em-laugh .em-body { animation: emRock 0.32s ease-in-out infinite alternate; }
+.emote-bub .em-cry .em-body { animation: emShiver 0.12s linear infinite; }
+.emote-bub .em-angry .em-body { animation: emShake 0.09s linear infinite; }
+.emote-bub .em-thumbs .em-hand { animation: emPump 0.4s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+.emote-bub .em-wow .em-body { animation: emBoing 0.6s cubic-bezier(.3, 1.6, .5, 1) infinite; }
+.emote-bub .em-yawn .em-body { animation: emSway 1.4s ease-in-out infinite alternate; }
+.emote-bub .em-cheeky .em-body { animation: emWiggle 0.28s ease-in-out infinite alternate; }
+.emote-bub .em-cheeky .em-tongue { animation: emTongue 0.18s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 0; }
+.emote-bub .em-think .em-body { animation: emTilt 1s ease-in-out infinite alternate; }
+.emote-bub .em-tear, .emote-bub .em-drop { animation: emDrop 0.7s ease-in infinite; }
+.emote-bub .em-tear.t2, .emote-bub .em-drop.t2 { animation-delay: 0.35s; }
+.emote-bub .em-stream { animation: emStream 0.4s linear infinite; }
+.emote-bub .em-steam { animation: emSteam 0.8s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+.emote-bub .em-steam.t2 { animation-delay: 0.4s; }
+.emote-bub .em-spark { animation: emTwinkle 0.5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+.emote-bub .em-spark.t2 { animation-delay: 0.25s; }
+.emote-bub .em-z { animation: emZ 1.4s ease-out infinite; }
+.emote-bub .em-z.t2 { animation-delay: 0.7s; }
+.emote-bub .em-q { animation: emBob 0.6s ease-in-out infinite alternate; }
+@keyframes emRock { from { transform: rotate(-7deg) translateY(0); } to { transform: rotate(7deg) translateY(-3px); } }
+@keyframes emShiver { 50% { transform: translateX(1.2px); } }
+@keyframes emShake { 25% { transform: translate(-2px, 1px); } 75% { transform: translate(2px, -1px); } }
+@keyframes emPump { from { transform: translateY(0) rotate(0deg); } to { transform: translateY(-5px) rotate(-10deg); } }
+@keyframes emBoing { 0%, 100% { transform: scale(1); } 30% { transform: scale(1.1, 0.9); } 55% { transform: scale(0.95, 1.08); } }
+@keyframes emSway { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+@keyframes emWiggle { from { transform: rotate(-4deg) translateX(-1px); } to { transform: rotate(4deg) translateX(1px); } }
+@keyframes emTongue { to { transform: scaleY(1.25); } }
+@keyframes emTilt { from { transform: rotate(-3deg); } to { transform: rotate(-11deg); } }
+@keyframes emDrop { from { transform: translateY(0); opacity: 1; } to { transform: translateY(22px); opacity: 0; } }
+@keyframes emStream { to { stroke-dashoffset: -11; } }
+@keyframes emSteam { from { transform: translateY(4px) scale(0.6); opacity: 1; } to { transform: translateY(-12px) scale(1.3); opacity: 0; } }
+@keyframes emTwinkle { from { transform: scale(0.6) rotate(0deg); } to { transform: scale(1.2) rotate(30deg); } }
+@keyframes emZ { from { transform: translate(0, 6px); opacity: 0; } 30% { opacity: 1; } to { transform: translate(6px, -14px); opacity: 0; } }
+@keyframes emBob { to { transform: translateY(-5px); } }
+@media (prefers-reduced-motion: reduce) { .emote-bub, .emote-bub * { animation: none !important; } }
+.emote-bub.no-tail::before, .emote-bub.no-tail::after { display: none; }

@@ -56,6 +56,7 @@
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0 });
     $('#result').hidden = true; $('#leaveAsk').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
+    KCEmotes.reset();
     show('battle');
     layout();
     G.phase = 'intro'; G.intro = 1.7;
@@ -309,7 +310,7 @@
       if (e.sub !== 'king') speak('youTower');
     } else {
       G.fx.push({ kind: 'crown', x: e.x, y: e.y, life: 1.6, max: 1.6, team: 1 });
-      if (e.sub !== 'king') speak('myTower');
+      if (e.sub !== 'king') { speak('myTower'); KCEmotes.foeTookTower(); }
     }
   }
   function ring(x, y, team, r) { G.fx.push({ kind: 'ring', x, y, r, team, life: 0.45, max: 0.45 }); }
@@ -341,7 +342,7 @@
     G.res = KCMenu.recordResult(G.trainer, e.winner);
     $('#countdown').hidden = true;
     if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); }
-    else if (e.winner === 1) { banner('Defeat'); setTimeout(() => KCSound.play('lose'), 300); }
+    else if (e.winner === 1) { banner('Defeat'); setTimeout(() => KCSound.play('lose'), 300); KCEmotes.foeWon(); }
     else banner('Draw');
   }
   function showResult() {
@@ -834,6 +835,14 @@
     KCScenery.make($('#sceneL'), 'left');
     KCScenery.make($('#sceneR'), 'right');
     bindInput();
+    // emotes (js/emotes.js): a bubble beside each King Tower, placed in the arena box's pixels
+    KCEmotes.mount($('#arenaBox'), {
+      spot: team => { const cvs = $('#arena'); return { x: cvs.offsetLeft + SX(11.6), y: cvs.offsetTop + SY(team ? 3.4 : 28.4) }; },
+      canEmote: () => !$('#battle').hidden && (G.phase === 'play' || G.phase === 'end') && $('#result').hidden,
+      foeCanEmote: () => !$('#battle').hidden && $('#result').hidden && !!G.s,
+      ended: () => G.phase === 'end',
+      toast,
+    });
     $('#againBtn').addEventListener('click', () => startBattle(G.trainer.kind === 'trophy' ? KCMenu.nextFoe('trophy') : G.trainer));
     $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext));
     $('#homeBtn').addEventListener('click', goHome);

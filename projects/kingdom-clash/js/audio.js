@@ -67,6 +67,16 @@ const KCSound = (() => {
     anvil: () => { tone(1480, 1400, 0.45, 'square', 0.045); tone(2210, 2150, 0.6, 'triangle', 0.08); tone(110, 50, 0.22, 'sine', 0.35); noise(0.1, 0.22, 2600, 'bandpass'); },
     bookOpen: () => { noise(0.25, 0.12, 1400, 'bandpass'); tone(330, 990, 0.4, 'sine', 0.06); [784, 988, 1319].forEach((f, i) => tone(f, 0, 0.3, 'triangle', 0.1, 0.12 + i * 0.06)); },
     pageFlip: () => { noise(0.09, 0.08, 3400, 'highpass'); noise(0.06, 0.05, 1600, 'bandpass', 0.03); },
+    // emotes (js/emotes.js)
+    em_laugh: () => [0, 0.11, 0.22, 0.33].forEach((d, i) => { tone(520 - i * 20, 380, 0.09, 'square', 0.06, d); noise(0.06, 0.04, 2200, 'bandpass', d); }),
+    em_cry: () => { tone(620, 380, 0.5, 'triangle', 0.1); tone(560, 330, 0.55, 'sine', 0.06, 0.25); },
+    em_angry: () => { tone(140, 90, 0.35, 'sawtooth', 0.09); noise(0.35, 0.12, 500); },
+    em_thumbs: () => { tone(880, 0, 0.12, 'triangle', 0.14); tone(1320, 0, 0.22, 'triangle', 0.12, 0.09); },
+    em_wow: () => tone(330, 990, 0.35, 'triangle', 0.13),
+    em_yawn: () => { tone(420, 220, 0.7, 'sine', 0.1); noise(0.6, 0.03, 900, 'bandpass'); },
+    em_cheeky: () => { noise(0.22, 0.12, 300, 'bandpass'); tone(200, 140, 0.2, 'square', 0.05); tone(990, 1320, 0.08, 'triangle', 0.08, 0.2); },
+    em_think: () => { tone(392, 0, 0.14, 'triangle', 0.1); tone(330, 0, 0.14, 'triangle', 0.1, 0.16); tone(440, 0, 0.2, 'triangle', 0.1, 0.32); },
+    emPhrase: () => { tone(700, 1050, 0.08, 'triangle', 0.12); noise(0.05, 0.05, 3000, 'highpass'); },
     buy: () => { tone(880, 1320, 0.1, 'triangle', 0.15); tone(1760, 0, 0.18, 'sine', 0.1, 0.09); },
     deploy: () => { tone(220, 90, 0.16, 'sine', 0.3); noise(0.12, 0.12, 600); },
     // Briar Hollow cards
