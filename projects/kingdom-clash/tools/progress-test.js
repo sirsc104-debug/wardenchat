@@ -120,7 +120,22 @@ console.log('save and reload: ok');
   for (const id of KC_STARTER_DECK) P3.cards[id].level = 15;
   const o3 = G.refreshShop(KCSim.mulberry(7), day2).offers;
   assert(o3.filter(x => x.kind === 'card').every(x => x.card === 'skeletons'), 'only the card that can still level up');
-  console.log('shop offers, prices, buying, daily change: ok');
+  // the chest row: coins only, one of each a day, contents shown and exactly what you get
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, coins: 400, diamonds: 50 }) }));
+  const P4 = G.state, ch = G.shop(day1, KCSim.mulberry(9)).chests;
+  assert.deepStrictEqual(ch.map(c => [c.type, c.price]), [['wooden', 80], ['silver', 280], ['gold', 800]]);
+  assert(ch.every(c => c.contents.coins < c.price && c.contents.cards.length > 0), 'a chest never pays back its price in coins');
+  const total = id => P4.cards[id].count, w = ch[0], before4 = Object.fromEntries(w.contents.cards.map(x => [x.id, total(x.id)]));
+  let rc = G.buyChest(0, day1);
+  assert(rc.ok && rc.chest === 'wooden' && P4.coins === 400 - 80 + w.contents.coins && P4.diamonds === 50, 'paid in coins, diamonds untouched');
+  for (const x of w.contents.cards) assert.strictEqual(total(x.id), before4[x.id] + x.n, 'you get exactly what was shown');
+  assert.deepStrictEqual(rc.cards.map(x => [x.id, x.n]), w.contents.cards.map(x => [x.id, x.n]));
+  assert.strictEqual(G.buyChest(0, day1).error, 'sold');
+  assert.strictEqual(G.buyChest(2, day1).error, 'coins', 'the gold chest costs more coins than they have');
+  assert.strictEqual(P4.chests.filter(Boolean).length, 0, 'shop chests do not use the chest slots');
+  assert.notDeepStrictEqual(G.shop(day2, KCSim.mulberry(10)).chests.map(c => c.contents), ch.map(c => c.contents), 'new chests the next day');
+  delete P4.shop.chests; assert.strictEqual(G.shop(day2).chests.length, 3, 'an older saved shop gains the chest row');
+  console.log('shop offers, prices, buying, daily change, chests for coins: ok');
 }
 
 // 8. Opponents level their cards one at a time as their trophies rise, and they have no lines.

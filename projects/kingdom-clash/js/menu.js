@@ -131,10 +131,12 @@ const KCMenu = (() => {
   function chestSvg(type, open) {
     const L = CHEST_LOOK[type] || CHEST_LOOK.wooden, O = '#1c1530';
     const planks = type === 'wooden'
-      ? [44, 60, 76].map(x => `<path d="M${x} 59v36" stroke="${L.bodySh}" stroke-width="2"/>`).join('') + [46, 60, 74].map(x => `<path d="M${x} 20v24" stroke="${L.lidSh}" stroke-width="2"/>`).join('')
+      ? [44, 60, 76].map(x => `<path d="M${x} 59v36" stroke="${L.bodySh}" stroke-width="2"/>`).join('')
       : type === 'silver'
         ? [[44, 68], [76, 68], [44, 86], [76, 86]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" fill="${L.trim}"/>`).join('')
         : `<path d="M46 62h28v26H46z" fill="${L.band}" stroke="${O}" stroke-width="2"/><path d="M52 78l3-9 5 6 5-6 3 9z" fill="${L.trim}"/>`;
+    // drawn inside the lid group, so they lift with it
+    const lidPlanks = type === 'wooden' ? [46, 60, 74].map(x => `<path d="M${x} 20v22" stroke="${L.lidSh}" stroke-width="2"/>`).join('') : '';
     const lock = type === 'wooden'
       ? `<rect x="52" y="42" width="16" height="20" rx="4" fill="${L.lock}" stroke="${O}" stroke-width="3"/><circle cx="60" cy="50" r="2.6" fill="${O}"/><path d="M60 50v6" stroke="${O}" stroke-width="2.4" stroke-linecap="round"/>`
       : `<rect x="51" y="41" width="18" height="22" rx="5" fill="${L.trim}" stroke="${O}" stroke-width="3"/><path d="M60 45l6 7-6 8-6-8z" fill="${L.lock}" stroke="${O}" stroke-width="2"/>`;
@@ -154,6 +156,7 @@ const KCMenu = (() => {
       </g>
       <g class="ch-lid">
         <path d="M14 52V38Q14 14 60 14Q106 14 106 38V52Z" fill="${L.lid}" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
+        ${lidPlanks}
         <path d="M22 30Q30 19 52 17" stroke="rgba(255,255,255,0.45)" stroke-width="3" fill="none" stroke-linecap="round"/>
         <path d="M24 23.5L35 19V50H24zM85 19l11 4.5V50H85z" fill="${L.band}" stroke="${O}" stroke-width="2.5" stroke-linejoin="round"/>
         <rect x="11" y="43" width="98" height="9" rx="3" fill="${L.trim}" stroke="${O}" stroke-width="3"/>
@@ -422,8 +425,7 @@ const KCMenu = (() => {
         const pct = u.max ? 100 : Math.min(100, after / u.need * 100);
         body = `<div class="of-art ${c.rarity}"><img src="${cardImg(o.card)}" alt=""><span class="of-qty">×${fmt(o.qty)}</span></div>
           <b>${esc(c.name)}</b>
-          <span class="of-prog${!u.max && after >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.max ? 'Max level' : `${fmt(after)} / ${fmt(u.need)}`}</em></span>
-          <small class="of-note">Level ${u.level}${u.max ? '' : sold ? '' : after >= u.need ? ' · ready to upgrade after' : ' · after buying'}</small>`;
+          <span class="of-prog${!u.max && after >= u.need ? ' full' : ''}" title="${u.max ? 'Max level' : sold ? 'Your copies now' : 'Your copies after buying'}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.max ? 'Max level' : `Lv ${u.level} · ${fmt(after)} / ${fmt(u.need)}`}</em></span>`;
       }
       const price = `<i class="${gem ? 'gem-i' : 'coin-i'}" aria-hidden="true"></i>${fmt(o.price)}`;
       const btn = sold ? '<button class="buy-btn" type="button" disabled>Bought</button>'
@@ -432,9 +434,32 @@ const KCMenu = (() => {
       return `<div class="offer ${o.currency}${sold ? ' sold' : ''}"><span class="of-tag">${esc(o.tag)}</span>${body}${btn}</div>`;
     }).join('');
     for (const b of $$('#shopOffers .buy-btn[data-offer]')) b.addEventListener('click', e => { e.stopPropagation(); buyClick(+b.dataset.offer); });
+    // the chest row: coins only, contents listed
+    $('#shopChests').innerHTML = shop.chests.map((c, i) => {
+      const sold = !!shop.bought[c.id], C = G.CHESTS[c.type], poor = !sold && p.coins < c.price;
+      const inside = `<span class="ct-item"><i class="coin-i" aria-hidden="true"></i>${fmt(c.contents.coins)}</span>` +
+        c.contents.cards.map(x => `<span class="ct-item"><img src="${cardImg(x.id)}" alt="${esc(KC_CARDS[x.id].name)}" title="${esc(KC_CARDS[x.id].name)}">×${x.n}</span>`).join('');
+      return `<div class="chest-tile ${c.type}${sold ? ' sold' : ''}">
+        <div class="ct-art">${chestSvg(c.type)}</div>
+        <div class="ct-body"><b>${C.name}</b><div class="ct-inside" aria-label="Inside">${inside}</div></div>
+        ${sold ? '<button class="buy-btn" type="button" disabled>Bought</button>'
+    : `<button class="buy-btn${poor ? ' poor' : ''}" type="button" data-chest="${i}" aria-label="Buy the ${C.name} for ${c.price} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(c.price)}</button>`}
+        </div>`;
+    }).join('');
+    for (const b of $$('#shopChests .buy-btn[data-chest]')) b.addEventListener('click', e => { e.stopPropagation(); buyChestClick(+b.dataset.chest); });
     shopTimer();
   }
   function shopTimer() { const el = $('#shopTimer'); if (el) el.textContent = clock(G.shopEnds() - Date.now()); }
+  function buyChestClick(i) {
+    const c = G.shop().chests[i];
+    if (!c) return;
+    const r = G.buyChest(i);
+    if (r.error === 'coins') { KCSound.play('error'); toast('Not enough coins. Win battles and open chests to earn more.'); return; }
+    if (!r.ok) { toast(r.error === 'sold' ? 'You already bought that chest today.' : 'That chest is not available.'); refresh(); return; }
+    KCSound.play('buy');
+    refresh();
+    showChest(r.chest, r);
+  }
   function buyClick(i) {
     const o = G.shop().offers[i];
     if (!o) return;

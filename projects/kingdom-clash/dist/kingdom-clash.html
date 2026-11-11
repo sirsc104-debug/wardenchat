@@ -447,7 +447,8 @@ button.slot:hover { transform: translateY(-3px); }
 .chest-svg .ch-glow { animation: glowPulse 1.1s ease-in-out infinite alternate; }
 @keyframes glowPulse { from { opacity: 0.75; } to { opacity: 1; } }
 .chest-svg .ch-beam { opacity: 0; transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0.1); transition: opacity 0.3s, transform 0.45s ease-out; }
-.chest-svg.open .ch-beam { opacity: 0.38; transform: none; }
+.chest-svg.open .ch-beam { opacity: 0.22; transform: none; }
+.chest-svg .ch-beam, .chest-svg .ch-glow { filter: blur(3px); }
 .chest-svg .ch-stars path { transform-box: fill-box; transform-origin: center; animation: twinkle 1.6s ease-in-out infinite; }
 .chest-svg .ch-stars path:nth-child(2) { animation-delay: 0.5s; }
 .chest-svg .ch-stars path:nth-child(3) { animation-delay: 1s; }
@@ -512,23 +513,26 @@ button.slot:hover { transform: translateY(-3px); }
 #coDone { min-width: 220px; }
 
 /* the Shop */
-.shop-tab { max-width: 1240px; margin: 0 auto; padding-top: 12px; }
-.shop-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 4px 0 20px; }
-.shop-head .dim { flex: 1 1 320px; }
+.shop-tab { max-width: 1240px; margin: 0 auto; padding-top: 12px; display: flex; flex-direction: column; gap: 24px; }
+.shop-plaque { padding-top: 40px; }
+.chest-plaque { padding-top: 30px; }
+/* the clock (and the test button) sit in the plaque's top-right corner */
+.shop-head { position: absolute; top: 6px; right: 12px; display: flex; align-items: center; gap: 10px; }
+.shop-head .sim-win.test-inline { padding: 2px 10px 3px; font-size: 12px; }
 .shop-timer { font-weight: 900; color: var(--muted); white-space: nowrap; }
 .shop-timer b { color: #fff; font-variant-numeric: tabular-nums; }
 .offers { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
-.offer { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 24px 10px 10px; border-radius: 14px; border: 3px solid var(--outline); text-align: center;
+.offer { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 20px 10px 9px; border-radius: 14px; border: 3px solid var(--outline); text-align: center;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 40%), linear-gradient(#4a3c7c, #2e2357);
   box-shadow: inset 0 0 0 2px rgba(217, 160, 50, 0.75), 0 5px 0 rgba(0, 0, 0, 0.35); }
 .offer.diamonds { background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 40%), linear-gradient(#2f6aae, #1c3a72); box-shadow: inset 0 0 0 2px #8fd8ff, 0 5px 0 rgba(0, 0, 0, 0.35); }
 .of-tag { position: absolute; top: -11px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 11px; font-weight: 900; padding: 2px 10px; border-radius: 999px; border: 2px solid var(--outline); background: var(--gold); color: var(--outline); }
 .offer.diamonds .of-tag { background: #8fd8ff; }
-.of-art { position: relative; width: min(72%, 130px); }
+.of-art { position: relative; width: min(60%, 88px); }
 .of-art img { display: block; width: 100%; aspect-ratio: 5 / 6; border-radius: 10px; border: 3px solid var(--outline); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); }
 .of-qty { position: absolute; right: -14px; bottom: -6px; font-family: var(--display); font-size: 24px; color: var(--gold); text-shadow: 0 2px 0 var(--outline), 2px 0 0 var(--outline), -2px 0 0 var(--outline), 0 -2px 0 var(--outline); }
 .of-coins { display: grid; place-items: center; aspect-ratio: 5 / 6; }
-.offer > b { font-family: var(--display); font-weight: 400; font-size: 18px; margin-top: 4px; }
+.offer > b { font-family: var(--display); font-weight: 400; font-size: 18px; margin-top: 2px; }
 .of-prog { position: relative; display: block; width: 88%; height: 16px; border-radius: 999px; background: #120c22; border: 2px solid var(--outline); overflow: hidden; }
 .of-prog i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(#8cc4ff, #2f6fe4); }
 .of-prog.full i { background: linear-gradient(#a8f39a, #2fa84f); }
@@ -545,13 +549,30 @@ button.slot:hover { transform: translateY(-3px); }
 .buy-btn:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.5); }
 .buy-btn:disabled { background: #4a4266; box-shadow: none; color: #b9b0d6; cursor: default; }
 .offer.sold .of-art, .offer.sold > b { opacity: 0.55; }
-.shop-note { margin-top: 16px; text-align: center; }
-@media (max-width: 1000px) { .offers { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 24px; } }
+.shop-note { margin-top: -10px; text-align: center; }
+/* the chest row: three tiles, chest on the left, what's inside and the price on the right */
+.shop-chests { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.chest-tile { display: flex; align-items: center; gap: 12px; padding: 7px 12px; border-radius: 14px; border: 3px solid var(--outline);
+  background: radial-gradient(ellipse at 20% 50%, rgba(255, 220, 140, 0.16), transparent 60%), linear-gradient(#3a2a22, #22160f);
+  box-shadow: inset 0 0 0 3px #7a4f2c, inset 0 0 0 5px #d9a032, 0 5px 0 rgba(0, 0, 0, 0.35); }
+.ct-art { flex: none; width: 76px; }
+.ct-art svg { display: block; width: 100%; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, 0.5)); }
+.chest-tile:not(.sold):hover .ct-art svg { animation: chestIdle 1.2s ease-in-out infinite; }
+.ct-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.ct-body > b { font-family: var(--display); font-weight: 400; font-size: 19px; }
+.ct-inside { display: flex; flex-wrap: wrap; gap: 3px 9px; align-items: center; }
+.ct-item { display: inline-flex; align-items: center; gap: 3px; font-weight: 900; font-size: 12px; font-variant-numeric: tabular-nums; }
+.ct-item img { width: 20px; border-radius: 4px; border: 2px solid var(--outline); }
+.ct-item .coin-i { width: 16px; height: 16px; }
+.chest-tile .buy-btn { flex: none; width: auto; min-width: 84px; margin-top: 0; padding: 6px 12px 8px; font-size: 19px; }
+.chest-tile.sold .ct-art, .chest-tile.sold .ct-inside { opacity: 0.5; }
+@media (max-width: 1000px) { .offers { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 24px; } .shop-chests { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 560px) { .offers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 /* TEMPORARY test buttons beside the Battle button */
 .test-tools { position: absolute; left: calc(100% + 14px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; }
 .test-tools .sim-win, .sim-win.test-inline { position: static; padding: 6px 12px 7px; font-size: 13px; white-space: nowrap; }
+@media (max-width: 560px) { .shop-head { position: static; justify-content: center; margin-bottom: 10px; } .chest-tile { flex-wrap: wrap; } }
 @media (max-width: 760px) { .test-tools { position: static; transform: none; flex-direction: row; justify-content: center; flex-wrap: wrap; margin-top: 8px; } }
 
 /* the Trophy Road */
@@ -1182,14 +1203,17 @@ button.slot:hover { transform: translateY(-3px); }
           <div class="plaque shop-plaque">
             <div class="ribbon"><span>Daily Offers</span></div>
             <div class="shop-head">
-              <p class="dim">Picked from the cards you have found and their levels. Every offer shows exactly what you get.</p>
               <span class="shop-timer">New offers in <b id="shopTimer">0:00</b></span>
               <!-- TEMPORARY test button -->
               <button class="sim-win test-inline" id="testOffers" type="button" title="Test button: makes a fresh set of offers now"><small>Test</small>New offers</button>
             </div>
             <div class="offers" id="shopOffers"></div>
-            <p class="dim shop-note">1 diamond = 5,000 coins. Coins and diamonds are saved on this device until the SirSC wallet is connected.</p>
           </div>
+          <div class="plaque shop-plaque chest-plaque">
+            <div class="ribbon"><span>Chests</span></div>
+            <div class="shop-chests" id="shopChests"></div>
+          </div>
+          <p class="dim shop-note">Every offer shows exactly what you get. Chests cost coins only, one of each a day. 1 diamond = 5,000 coins.</p>
         </section>
         <section class="tab info-tab" id="tab-clan" hidden>
           <div class="plaque info-plaque">
@@ -2268,7 +2292,8 @@ const KCProgress = (() => {
   /* ---------- the Shop ---------- */
   // Five offers a day, made from the cards you have found and their levels. Every offer says exactly
   // what it gives. Prices: a copy is worth 10 coins (common) or 50 (rare); 1 diamond = 5,000 coins.
-  const SHOP = { perCopy: { common: 10, rare: 50 }, coinsPerDiamond: 5000, maxQty: 250 };
+  // Chests are sold for coins only, one of each a day, with their contents shown before you buy.
+  const SHOP = { perCopy: { common: 10, rare: 50 }, coinsPerDiamond: 5000, maxQty: 250, chests: { wooden: 80, silver: 280, gold: 800 } };
   const pad2 = n => String(n).padStart(2, '0');
   const dayKey = now => { const d = new Date(now); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
   // When today's offers are replaced: the next local midnight.
@@ -2317,11 +2342,26 @@ const KCProgress = (() => {
     offers.push({ id: 'o' + offers.length, kind: 'coins', qty: SHOP.coinsPerDiamond, tag: 'Coin bundle', currency: 'diamonds', price: 1, repeat: true });
     return offers;
   }
+  // The chest row: each chest is rolled when the day's shop is made, so what is inside can be shown.
+  const makeChests = rand => Object.keys(SHOP.chests).map((type, i) => ({ id: 'c' + i, type, price: SHOP.chests[type], contents: roll(type, rand) }));
   // Today's offers (made the first time they are asked for each day).
   function shop(now = Date.now(), rand) {
     const day = dayKey(now);
-    if (!P.shop || P.shop.day !== day || !Array.isArray(P.shop.offers)) { P.shop = { day, offers: makeOffers(rand), bought: {} }; save(); }
+    if (!P.shop || P.shop.day !== day || !Array.isArray(P.shop.offers)) { P.shop = { day, offers: makeOffers(rand), chests: makeChests(rand), bought: {} }; save(); }
+    if (!Array.isArray(P.shop.chests)) { P.shop.chests = makeChests(rand); save(); } // a shop saved before chests were sold
     return P.shop;
+  }
+  // Buy chest i with coins. Its contents go straight to you (no slot, no timer): the caller opens it.
+  function buyChest(i, now = Date.now()) {
+    const s = shop(now), c = s.chests[i];
+    if (!c) return { error: 'none' };
+    if (s.bought[c.id]) return { error: 'sold' };
+    if (P.coins < c.price) return { error: 'coins' };
+    P.coins -= c.price;
+    apply(c.contents);
+    s.bought[c.id] = 1;
+    save();
+    return { ok: true, chest: c.type, coins: c.contents.coins, cards: c.contents.cards.map(x => Object.assign({ isNew: false }, x)) };
   }
   function refreshShop(rand, now = Date.now()) { P.shop = null; return shop(now, rand); }
   // Buy offer i. Returns { ok, coins, cards } or { error: 'sold' | 'coins' | 'diamonds' | 'none' }.
@@ -2388,7 +2428,7 @@ const KCProgress = (() => {
     arena, nextArena, roadState, claimable, claim,
     trophyFoe, foeUpgrades, spreadLevels, recordTrophy,
     roll, chestState, unlockingSlot, startUnlock, openChest,
-    SHOP, shop, shopEnds, refreshShop, buy, grantTest,
+    SHOP, shop, shopEnds, refreshShop, buy, buyChest, grantTest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
   };
 })();
@@ -3822,10 +3862,12 @@ const KCMenu = (() => {
   function chestSvg(type, open) {
     const L = CHEST_LOOK[type] || CHEST_LOOK.wooden, O = '#1c1530';
     const planks = type === 'wooden'
-      ? [44, 60, 76].map(x => `<path d="M${x} 59v36" stroke="${L.bodySh}" stroke-width="2"/>`).join('') + [46, 60, 74].map(x => `<path d="M${x} 20v24" stroke="${L.lidSh}" stroke-width="2"/>`).join('')
+      ? [44, 60, 76].map(x => `<path d="M${x} 59v36" stroke="${L.bodySh}" stroke-width="2"/>`).join('')
       : type === 'silver'
         ? [[44, 68], [76, 68], [44, 86], [76, 86]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" fill="${L.trim}"/>`).join('')
         : `<path d="M46 62h28v26H46z" fill="${L.band}" stroke="${O}" stroke-width="2"/><path d="M52 78l3-9 5 6 5-6 3 9z" fill="${L.trim}"/>`;
+    // drawn inside the lid group, so they lift with it
+    const lidPlanks = type === 'wooden' ? [46, 60, 74].map(x => `<path d="M${x} 20v22" stroke="${L.lidSh}" stroke-width="2"/>`).join('') : '';
     const lock = type === 'wooden'
       ? `<rect x="52" y="42" width="16" height="20" rx="4" fill="${L.lock}" stroke="${O}" stroke-width="3"/><circle cx="60" cy="50" r="2.6" fill="${O}"/><path d="M60 50v6" stroke="${O}" stroke-width="2.4" stroke-linecap="round"/>`
       : `<rect x="51" y="41" width="18" height="22" rx="5" fill="${L.trim}" stroke="${O}" stroke-width="3"/><path d="M60 45l6 7-6 8-6-8z" fill="${L.lock}" stroke="${O}" stroke-width="2"/>`;
@@ -3845,6 +3887,7 @@ const KCMenu = (() => {
       </g>
       <g class="ch-lid">
         <path d="M14 52V38Q14 14 60 14Q106 14 106 38V52Z" fill="${L.lid}" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
+        ${lidPlanks}
         <path d="M22 30Q30 19 52 17" stroke="rgba(255,255,255,0.45)" stroke-width="3" fill="none" stroke-linecap="round"/>
         <path d="M24 23.5L35 19V50H24zM85 19l11 4.5V50H85z" fill="${L.band}" stroke="${O}" stroke-width="2.5" stroke-linejoin="round"/>
         <rect x="11" y="43" width="98" height="9" rx="3" fill="${L.trim}" stroke="${O}" stroke-width="3"/>
@@ -4113,8 +4156,7 @@ const KCMenu = (() => {
         const pct = u.max ? 100 : Math.min(100, after / u.need * 100);
         body = `<div class="of-art ${c.rarity}"><img src="${cardImg(o.card)}" alt=""><span class="of-qty">×${fmt(o.qty)}</span></div>
           <b>${esc(c.name)}</b>
-          <span class="of-prog${!u.max && after >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.max ? 'Max level' : `${fmt(after)} / ${fmt(u.need)}`}</em></span>
-          <small class="of-note">Level ${u.level}${u.max ? '' : sold ? '' : after >= u.need ? ' · ready to upgrade after' : ' · after buying'}</small>`;
+          <span class="of-prog${!u.max && after >= u.need ? ' full' : ''}" title="${u.max ? 'Max level' : sold ? 'Your copies now' : 'Your copies after buying'}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.max ? 'Max level' : `Lv ${u.level} · ${fmt(after)} / ${fmt(u.need)}`}</em></span>`;
       }
       const price = `<i class="${gem ? 'gem-i' : 'coin-i'}" aria-hidden="true"></i>${fmt(o.price)}`;
       const btn = sold ? '<button class="buy-btn" type="button" disabled>Bought</button>'
@@ -4123,9 +4165,32 @@ const KCMenu = (() => {
       return `<div class="offer ${o.currency}${sold ? ' sold' : ''}"><span class="of-tag">${esc(o.tag)}</span>${body}${btn}</div>`;
     }).join('');
     for (const b of $$('#shopOffers .buy-btn[data-offer]')) b.addEventListener('click', e => { e.stopPropagation(); buyClick(+b.dataset.offer); });
+    // the chest row: coins only, contents listed
+    $('#shopChests').innerHTML = shop.chests.map((c, i) => {
+      const sold = !!shop.bought[c.id], C = G.CHESTS[c.type], poor = !sold && p.coins < c.price;
+      const inside = `<span class="ct-item"><i class="coin-i" aria-hidden="true"></i>${fmt(c.contents.coins)}</span>` +
+        c.contents.cards.map(x => `<span class="ct-item"><img src="${cardImg(x.id)}" alt="${esc(KC_CARDS[x.id].name)}" title="${esc(KC_CARDS[x.id].name)}">×${x.n}</span>`).join('');
+      return `<div class="chest-tile ${c.type}${sold ? ' sold' : ''}">
+        <div class="ct-art">${chestSvg(c.type)}</div>
+        <div class="ct-body"><b>${C.name}</b><div class="ct-inside" aria-label="Inside">${inside}</div></div>
+        ${sold ? '<button class="buy-btn" type="button" disabled>Bought</button>'
+    : `<button class="buy-btn${poor ? ' poor' : ''}" type="button" data-chest="${i}" aria-label="Buy the ${C.name} for ${c.price} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(c.price)}</button>`}
+        </div>`;
+    }).join('');
+    for (const b of $$('#shopChests .buy-btn[data-chest]')) b.addEventListener('click', e => { e.stopPropagation(); buyChestClick(+b.dataset.chest); });
     shopTimer();
   }
   function shopTimer() { const el = $('#shopTimer'); if (el) el.textContent = clock(G.shopEnds() - Date.now()); }
+  function buyChestClick(i) {
+    const c = G.shop().chests[i];
+    if (!c) return;
+    const r = G.buyChest(i);
+    if (r.error === 'coins') { KCSound.play('error'); toast('Not enough coins. Win battles and open chests to earn more.'); return; }
+    if (!r.ok) { toast(r.error === 'sold' ? 'You already bought that chest today.' : 'That chest is not available.'); refresh(); return; }
+    KCSound.play('buy');
+    refresh();
+    showChest(r.chest, r);
+  }
   function buyClick(i) {
     const o = G.shop().offers[i];
     if (!o) return;

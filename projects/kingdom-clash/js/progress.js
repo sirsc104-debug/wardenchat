@@ -288,7 +288,8 @@ const KCProgress = (() => {
   /* ---------- the Shop ---------- */
   // Five offers a day, made from the cards you have found and their levels. Every offer says exactly
   // what it gives. Prices: a copy is worth 10 coins (common) or 50 (rare); 1 diamond = 5,000 coins.
-  const SHOP = { perCopy: { common: 10, rare: 50 }, coinsPerDiamond: 5000, maxQty: 250 };
+  // Chests are sold for coins only, one of each a day, with their contents shown before you buy.
+  const SHOP = { perCopy: { common: 10, rare: 50 }, coinsPerDiamond: 5000, maxQty: 250, chests: { wooden: 80, silver: 280, gold: 800 } };
   const pad2 = n => String(n).padStart(2, '0');
   const dayKey = now => { const d = new Date(now); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
   // When today's offers are replaced: the next local midnight.
@@ -337,11 +338,26 @@ const KCProgress = (() => {
     offers.push({ id: 'o' + offers.length, kind: 'coins', qty: SHOP.coinsPerDiamond, tag: 'Coin bundle', currency: 'diamonds', price: 1, repeat: true });
     return offers;
   }
+  // The chest row: each chest is rolled when the day's shop is made, so what is inside can be shown.
+  const makeChests = rand => Object.keys(SHOP.chests).map((type, i) => ({ id: 'c' + i, type, price: SHOP.chests[type], contents: roll(type, rand) }));
   // Today's offers (made the first time they are asked for each day).
   function shop(now = Date.now(), rand) {
     const day = dayKey(now);
-    if (!P.shop || P.shop.day !== day || !Array.isArray(P.shop.offers)) { P.shop = { day, offers: makeOffers(rand), bought: {} }; save(); }
+    if (!P.shop || P.shop.day !== day || !Array.isArray(P.shop.offers)) { P.shop = { day, offers: makeOffers(rand), chests: makeChests(rand), bought: {} }; save(); }
+    if (!Array.isArray(P.shop.chests)) { P.shop.chests = makeChests(rand); save(); } // a shop saved before chests were sold
     return P.shop;
+  }
+  // Buy chest i with coins. Its contents go straight to you (no slot, no timer): the caller opens it.
+  function buyChest(i, now = Date.now()) {
+    const s = shop(now), c = s.chests[i];
+    if (!c) return { error: 'none' };
+    if (s.bought[c.id]) return { error: 'sold' };
+    if (P.coins < c.price) return { error: 'coins' };
+    P.coins -= c.price;
+    apply(c.contents);
+    s.bought[c.id] = 1;
+    save();
+    return { ok: true, chest: c.type, coins: c.contents.coins, cards: c.contents.cards.map(x => Object.assign({ isNew: false }, x)) };
   }
   function refreshShop(rand, now = Date.now()) { P.shop = null; return shop(now, rand); }
   // Buy offer i. Returns { ok, coins, cards } or { error: 'sold' | 'coins' | 'diamonds' | 'none' }.
@@ -408,7 +424,7 @@ const KCProgress = (() => {
     arena, nextArena, roadState, claimable, claim,
     trophyFoe, foeUpgrades, spreadLevels, recordTrophy,
     roll, chestState, unlockingSlot, startUnlock, openChest,
-    SHOP, shop, shopEnds, refreshShop, buy, grantTest,
+    SHOP, shop, shopEnds, refreshShop, buy, buyChest, grantTest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
   };
 })();
