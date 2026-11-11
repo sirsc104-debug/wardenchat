@@ -93,39 +93,53 @@ const KCArenas = (() => {
     },
   };
 
-  // Arena 2: Briar Hollow. PLACEHOLDER art (img/briar_hollow_*.webp): replace the three images and,
-  // if the new art differs, the bar position, bench rows and lights below. The battlefield is drawn in
-  // code from the 'briar' palette until it has an illustration.
+  // Arena 2: Briar Hollow: mossy ruins in a forest, a stream for the river, lanterns on the walls.
   ART.briar = {
     name: 'Briar Hollow',
-    centerpiece: { src: 'img/briar_hollow_badge.webp', w: 1254, h: 1254, bar: { left: 23.3, top: 83.9, width: 53.4, height: 3.7 } },
-    field: null, palette: 'briar', margin: 0.6, fx: 'water',
+    centerpiece: { src: 'img/briar_hollow_badge.webp', w: 1254, h: 1254, bar: { left: 24.3, top: 86, width: 51.4, height: 4.3 } },
+    palette: 'briar', margin: 1.4, fx: 'water',
+    field: {
+      src: 'img/briar_hollow_battlefield.webp', w: 1024, h: 1536,
+      // tower pads at x 272 / 752 px over lanes 3.5 / 14.5
+      x: [[272, 3.5], [752, 14.5]],
+      // king pad, princess pads, the stream's edges, princess pads, king pad
+      y: [[232, 3], [393, 6.5], [725, 15], [818, 17], [1098, 25.5], [1275, 29]],
+      // the plank bridges, in tiles, redrawn over the moving water
+      bridges: [[2.0, 14.4, 5.6, 17.6], [13.4, 14.4, 16.9, 17.6]],
+      // the four wall lanterns, in tiles, which flicker
+      lanterns: [[0.25, 3.1], [17.55, 3.1], [0.25, 28.3], [17.55, 28.3]],
+    },
     scenery: {
+      // the king's statue and the high stands
       left: {
-        src: 'img/briar_hollow_left.webp', w: 793, h: 1983, anchor: [0.55, 0.66], stars: 18,
+        src: 'img/briar_hollow_left.webp', w: 793, h: 1983, anchor: [0.58, 0.56], stars: 8,
         rows: [
-            { y: 0.569, slope: 0, size: 0.8, spans: [[0.19, 0.45], [0.55, 0.98]] },
-            { y: 0.602, slope: 0, size: 0.85, spans: [[0.19, 0.45], [0.55, 0.98]] },
-            { y: 0.635, slope: 0, size: 0.9, spans: [[0.19, 0.45], [0.55, 0.98]] },
-            { y: 0.668, slope: 0, size: 0.95, spans: [[0.19, 0.45], [0.55, 0.98]] },
-            { y: 0.701, slope: 0, size: 1.0, spans: [[0.19, 0.45], [0.55, 0.98]] },
-            { y: 0.734, slope: 0, size: 1.05, spans: [[0.19, 0.45], [0.55, 0.98]] },
-            { y: 0.767, slope: 0, size: 1.1, spans: [[0.19, 0.45], [0.55, 0.98]] },
+          { y: 0.392, slope: 0.01, size: 0.66, spans: [[0.1, 0.44]] },
+          { y: 0.428, slope: 0.01, size: 0.7, spans: [[0.1, 0.47]] },
+          { y: 0.454, slope: 0.01, size: 0.72, spans: [[0.53, 0.92]] },
+          { y: 0.476, slope: 0.01, size: 0.74, spans: [[0.56, 0.96]] },
+          { y: 0.555, slope: 0.01, size: 0.84, spans: [[0.18, 0.55], [0.66, 0.99]] },
+          { y: 0.595, slope: 0.01, size: 0.9, spans: [[0.14, 0.66], [0.78, 0.99]] },
+          { y: 0.633, slope: 0.01, size: 0.96, spans: [[0.36, 0.8]] },
+          { y: 0.668, slope: 0.01, size: 1.02, spans: [[0.37, 0.8]] },
         ],
-        glows: [[0.2, 0.785, 1.1], [0.82, 0.785, 1.1], [0.5, 0.53, 0.8]],
+        glows: [[0.66, 0.135, 0.9], [0.155, 0.392, 1.1], [0.96, 0.7, 1.0]],
       },
+      // the stands beside the waterfall
       right: {
-        src: 'img/briar_hollow_right.webp', w: 793, h: 1983, anchor: [0.45, 0.66], stars: 18,
+        src: 'img/briar_hollow_right.webp', w: 793, h: 1983, anchor: [0.38, 0.5], stars: 10,
         rows: [
-            { y: 0.569, slope: 0, size: 0.8, spans: [[0.02, 0.45], [0.55, 0.81]] },
-            { y: 0.602, slope: 0, size: 0.85, spans: [[0.02, 0.45], [0.55, 0.81]] },
-            { y: 0.635, slope: 0, size: 0.9, spans: [[0.02, 0.45], [0.55, 0.81]] },
-            { y: 0.668, slope: 0, size: 0.95, spans: [[0.02, 0.45], [0.55, 0.81]] },
-            { y: 0.701, slope: 0, size: 1.0, spans: [[0.02, 0.45], [0.55, 0.81]] },
-            { y: 0.734, slope: 0, size: 1.05, spans: [[0.02, 0.45], [0.55, 0.81]] },
-            { y: 0.767, slope: 0, size: 1.1, spans: [[0.02, 0.45], [0.55, 0.81]] },
+          { y: 0.298, slope: 0, size: 0.6, spans: [[0.31, 0.62]] },
+          { y: 0.334, slope: 0, size: 0.64, spans: [[0.25, 0.6]] },
+          { y: 0.396, slope: 0, size: 0.7, spans: [[0.17, 0.58]] },
+          { y: 0.426, slope: 0, size: 0.74, spans: [[0.1, 0.54]] },
+          { y: 0.452, slope: 0, size: 0.77, spans: [[0.04, 0.49]] },
+          { y: 0.539, slope: 0, size: 0.86, spans: [[0.17, 0.48]] },
+          { y: 0.566, slope: 0, size: 0.9, spans: [[0.09, 0.43]] },
+          { y: 0.592, slope: 0, size: 0.94, spans: [[0.29, 0.41]] },
         ],
-        glows: [[0.2, 0.785, 1.1], [0.82, 0.785, 1.1], [0.5, 0.53, 0.8]],
+        glows: [[0.75, 0.207, 1.0], [0.26, 0.29, 0.9], [0.78, 0.81, 1.3]],
+        mist: [0.52, 0.72, 0.665],
       },
     },
   };

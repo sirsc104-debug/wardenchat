@@ -475,9 +475,23 @@
       c.beginPath(); c.moveTo(SX(x), SY(y)); c.quadraticCurveTo(SX(x + 0.3), SY(y - 0.12), SX(x + 0.6), SY(y)); c.stroke();
     }
     c.restore();
-    for (const b of S.BRIDGES) {
-      const x0 = SX(b - 1.1), w = 2.2 * k, y0 = SY(S.RIVER_TOP - 0.35), h = 2.7 * k;
+    // the bridges go back on top of the ripples: an illustrated arena lists its bridge decks
+    const f = G.art.field && KCArenas.ready(KCArenas.image(G.art.field.src)) ? G.art.field : null;
+    const decks = f && f.bridges ? f.bridges : S.BRIDGES.map(b => [b - 1.1, S.RIVER_TOP - 0.35, b + 1.1, S.RIVER_BOT + 0.35]);
+    for (const [bx0, by0, bx1, by1] of decks) {
+      const x0 = SX(bx0), y0 = SY(by0), w = (bx1 - bx0) * k, h = (by1 - by0) * k;
       c.drawImage(G.bg, x0 * G.dpr, y0 * G.dpr, w * G.dpr, h * G.dpr, x0, y0, w, h);
+    }
+    // Briar Hollow: the wall lanterns flicker
+    if (f && f.lanterns) {
+      c.save(); c.globalCompositeOperation = 'lighter';
+      f.lanterns.forEach(([lx, ly], i) => {
+        const fl = 0.75 + 0.15 * Math.sin(t * 7.3 + i * 2.1) + 0.1 * Math.sin(t * 13.1 + i), r = k * 1.5 * fl;
+        const g = c.createRadialGradient(SX(lx), SY(ly), 0, SX(lx), SY(ly), r);
+        g.addColorStop(0, `rgba(255,210,120,${0.42 * fl})`); g.addColorStop(1, 'rgba(255,160,60,0)');
+        c.fillStyle = g; c.beginPath(); c.arc(SX(lx), SY(ly), r, 0, Math.PI * 2); c.fill();
+      });
+      c.restore();
     }
   }
   // The area you can't place troops on, drawn while a troop or building card is picked up: a strong red
