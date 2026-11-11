@@ -743,6 +743,20 @@ const KCMenu = (() => {
       box.innerHTML = `<div class="ol-lock"><b>Opens at Stormspire</b><p>Reach Stormspire (${fmt(G.ONLINE_AT)} trophies) to battle other players online.</p></div>`;
       return;
     }
+    if (info.kind === 'off') {
+      // live play isn't switched on yet: show what's coming
+      box.innerHTML = `<div class="ol-soon"><span class="tag-lock">Coming soon</span><b>Online battles are coming soon</b>
+        <p>Battle other players with your own deck, card levels, King Tower and evolutions.</p></div>
+        <div class="ol-opts is-soon" aria-disabled="true">
+          <div class="ol-opt"><b>Quick match</b><p>Battle the next player who's looking.</p><button type="button" class="big-btn ol-go" disabled><span>Find a battle</span></button></div>
+          <div class="ol-opt"><b>Friendly battle</b><p>Make a room and share its code, or type a friend's code.</p>
+            <button type="button" class="pill gold" disabled>Make a room</button>
+            <div class="ol-join"><input maxlength="5" placeholder="Code" disabled aria-label="Room code"><button type="button" class="pill" disabled>Join</button></div>
+          </div>
+        </div>
+        <p class="dim ol-note">No trophies will be won or lost in online battles.</p>`;
+      return;
+    }
     if (info.kind === 'none') { box.innerHTML = '<div class="ol-lock"><b>Not available here</b><p>This browser can\'t connect to other players.</p></div>'; return; }
     const where = info.kind === 'room'
       ? `<p class="ol-where"><b>${fmt(info.online)}</b> other player${info.online === 1 ? '' : 's'} here now${info.seeking ? ` · ${fmt(info.seeking)} looking for a battle` : ''}.</p>`
@@ -1250,7 +1264,8 @@ const KCMenu = (() => {
     $('#gemVal').textContent = fmt(p.diamonds);
     $('#shopTag').hidden = !G.freeChestReady();
     passPlaque();
-    $('#onlineBtn').classList.toggle('locked', !G.onlineOpen());
+    $('#onlineBtn').classList.toggle('locked', !G.onlineOpen() || !KCNet.LIVE);
+    $('#onlineBtn').title = KCNet.LIVE ? 'Battle other players online' : 'Online battles are coming soon';
     $('#onlineBtn').hidden = !G.roadOpen();
     if (subNow === 'magic') renderMagic(); else $('#magicTag').textContent = String(G.MAGIC_ORDER.reduce((a, id) => a + (id.startsWith('wild_') ? 0 : G.magicCount(id)), 0) || '');
     $('#soundBtn').setAttribute('aria-label', KCSound.on ? 'Sound on' : 'Sound off');

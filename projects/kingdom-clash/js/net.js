@@ -22,6 +22,10 @@
 'use strict';
 
 const KCNet = (() => {
+  // LIVE PLAY IS OFF for now: only the front end is built. The screens show "coming soon" and nothing
+  // connects. When the multiplayer backend exists, connect it here (a transport with the same calls as
+  // the lobby below: emit, on, presence, peers, onPeers, join) and set LIVE to true.
+  const LIVE = false;
   const TOPICS = ['mp.invite', 'mp.start', 'mp.step', 'mp.emote', 'mp.bye'];
   const CODE_CHARS = 'abcdefghjkmnpqrstuvwxyz23456789';
   let lobby = null, kind = 'none', initP = null;
@@ -80,6 +84,7 @@ const KCNet = (() => {
   function init() {
     if (initP) return initP;
     initP = (async () => {
+      if (!LIVE) { kind = 'off'; changed(); return kind; }
       let room = null;
       try { room = window.claude && window.claude.use ? await window.claude.use('room') : null; } catch (e) { room = null; }
       if (room) { lobby = room; kind = 'room'; }
@@ -219,5 +224,5 @@ const KCNet = (() => {
   }
   function onChange(fn) { S.onChange = fn; changed(); }
 
-  return { TOPICS, init, info, quickMatch, createRoom, joinRoom, cancel, onChange, checkSetup, mySetup, get kind() { return kind; } };
+  return { LIVE, TOPICS, init, info, quickMatch, createRoom, joinRoom, cancel, onChange, checkSetup, mySetup, get kind() { return kind; } };
 })();

@@ -1635,3 +1635,7 @@ button.slot:hover { transform: translateY(-3px); }
 .card.pending img { filter: brightness(0.6) saturate(0.6); }
 .card.pending::after { content: ''; position: absolute; inset: 30% 30%; border-radius: 50%; border: 4px solid rgba(255, 255, 255, 0.3); border-top-color: #fff; animation: usSpin 0.7s linear infinite; }
 @media (max-width: 560px) { .ol-opts { grid-template-columns: minmax(0, 1fr); } }
+.ol-soon { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 6px 10px 2px; }
+.ol-soon b { font-family: var(--display); font-weight: 400; font-size: 22px; }
+.ol-soon p { margin: 0; color: var(--muted); font-size: 13px; }
+.ol-opts.is-soon { opacity: 0.5; filter: grayscale(0.6); pointer-events: none; }

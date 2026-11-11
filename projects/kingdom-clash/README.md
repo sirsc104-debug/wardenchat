@@ -66,7 +66,7 @@ Balance (`node tools/balance-test.js 120 <name>`; each new card takes a like-for
 
 ## Arena 4: Stormspire
 
-Reached at **900 trophies**: a fortress on a mountain peak above the clouds. **Its art is placeholder for now** (`img/stormspire_badge.webp`, `img/stormspire_left.webp`, `img/stormspire_right.webp`, labelled "placeholder art", made in code); the battlefield is drawn in code from the `stormspire` palette. Swap in real art the same way as the other arenas (the `stormspire` entry in `js/arenas.js`, plus a `field` entry for a battlefield illustration). Arena 5 at 1,200 is marked *coming soon*. **Online battles open here.**
+Reached at **900 trophies**: a fortress on a mountain peak above the clouds. **Its art is placeholder for now** (`img/stormspire_badge.webp`, `img/stormspire_left.webp`, `img/stormspire_right.webp`, labelled "placeholder art", made in code); the battlefield is drawn in code from the `stormspire` palette. Swap in real art the same way as the other arenas (the `stormspire` entry in `js/arenas.js`, plus a `field` entry for a battlefield illustration). Arena 5 at 1,200 is marked *coming soon*. **Online battles will open here** (their front end is built; live play is coming).
 
 Their card pictures are illustrations (`img/card_bees.webp`, `img/card_owl.webp`, `img/card_thundercloud.webp`, `img/card_griffin.webp`; any card can have one through its `art` field in `js/cards.js`, with the code-drawn picture standing in while it loads), and the troops in battle are drawn in code in the same style: a gold-helmed owl in blue armor, a purple storm cloud with glowing yellow eyes and blue-white lightning, a golden griffin in gold armor with blue gems and blue eyes. Its four cards are all flyers, on the Trophy Road: **Bees** at 930, **Owl** at 1,010, **Thunder Cloud** at 1,090 and **Griffin** at 1,170 (700 coins at 970, a Platinum Chest at 1,050, 800 coins at 1,130). Opponents add them as their trophies pass those marks.
 
@@ -79,18 +79,16 @@ Their card pictures are illustrations (`img/card_bees.webp`, `img/card_owl.webp`
 
 Balance (`node tools/balance-test.js 120 <name>`): Bees 56%, Owl 46%, Thunder Cloud 53%, Griffin 53%. The bot plays all four: Bees and the Griffin defend, the Owl backs up pushes, and the Thunder Cloud starts pushes from behind the King Tower; it answers a Thunder Cloud with air-hitters.
 
-## Online battles
+## Online battles (front end only, not live yet)
 
-From Stormspire on, the **Online** button beside *Trainers* in the lobby opens online play:
+From Stormspire on, the **Online** button beside *Trainers* in the lobby opens the online panel, which for now says **Online battles are coming soon** and shows what will be there (greyed out): **Quick match** (battle the next player who's looking) and **Friendly battle** (make a room and share its five-letter code, or type a friend's). Online battles will use each player's own deck, card levels, King Tower level and evolutions, and no trophies will be won or lost.
 
-- **Quick match**: battle the next player who looks for one. The two who have been looking longest are paired.
-- **Friendly battle**: *Make a room* shows a five-letter code; a friend types it under *Join*.
+**What is built** (the front end, waiting for a multiplayer backend):
+- The screens: the Online panel with its states (looking for a match, a room code to share, joining, starting), the *Waiting for your opponent…* note in battle, and the online result screen.
+- The battle side (`js/game.js`, the online part): both players run the same simulation from the same seed and send each other only their card plays (lockstep): a play made at tick *t* happens at tick *t* + 9 on both screens, a screen runs a tick only once it has every play the other made for it, each message repeats every play the other side hasn't confirmed, the second player sees the battle mirrored so each has their own side at the bottom, checksums are compared every two seconds (*out of sync* stops the battle), and a player who leaves loses. The simulation uses only exact arithmetic so two browsers compute the same battle (`tools/cards-test.js` checks both).
+- Matchmaking and room codes (`js/net.js`), written against a small transport: a lobby with `emit`, `on`, `presence`, `peers`, `onPeers` and `join(name)` for a room per battle. Everything a player sends (their setup and plays) is checked before use.
 
-Online battles use each player's own deck, card levels, King Tower level and evolutions, in the host's arena. **No trophies, chests or experience are won or lost.** Emotes go to the other player (and there are no automatic replies). If the other player leaves, you win once their last plays are used up; if nothing is heard for 12 seconds, the same.
-
-**How it works** (`js/net.js`, and the online part of `js/game.js`): on claude.ai the page uses the artifact **room** capability, which reaches the other people who have the game open right now; nothing is stored. Both players run the same simulation from the same seed and send each other only their card plays (lockstep): a play made at tick *t* happens at tick *t* + 9 (0.3 s) on both screens, and a screen only runs a tick once it knows every play the other made for it, so the faster screen waits briefly (a *Waiting for your opponent…* note shows if it is longer than a moment). Each message repeats every play the other side hasn't confirmed, so a dropped message loses nothing. The host is the blue side of the simulation; the guest sees it mirrored, so both players have their own side at the bottom. The simulation uses only exact arithmetic (`+ − × ÷` and square roots, no `Math.pow`, `hypot` or trigonometry) so two different browsers compute exactly the same battle; every two seconds both screens compare a checksum, and if they ever differ the battle stops as *out of sync*. Everything a player sends (their setup and plays) is checked before use.
-
-**Who can play**: people the artifact is shared with who can **Contribute or Edit** (the room only lets those levels send moves; view-only people can't). Outside claude.ai (the standalone file) the same code falls back to a BroadcastChannel, which connects other tabs of the same browser only; that is how `tools` tests it.
+**Live play is switched off**: `LIVE = false` at the top of `js/net.js`, so nothing connects. To go live, connect the backend there as a transport with those calls and set `LIVE` to true. Messages it must relay between the two players in a room: `mp.start` (from the host: the seed and both players' setups), `mp.step` (each player's plays, about 15 a second), `mp.emote`, `mp.bye`, plus `mp.invite` in the lobby for quick match.
 
 ## Evolutions
 
@@ -199,7 +197,7 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `js/trainers.js` | Owen, Romeo and Luc |
 | `js/arenas.js` | Arena art: each arena's centerpiece, scenery panels (with crowd rows and lights) and battlefield image with its tile mapping; loads each image once |
 | `js/progress.js` | Progress and its rules: trainers, trophies, bots, chests, road rewards, card levels, the deck |
-| `js/net.js` | Online battles: the connection (the room capability, or other tabs), quick match, room codes, checking what the other player sends |
+| `js/net.js` | Online battles (front end, live play off): quick match, room codes, checking what the other player sends, and where a backend connects |
 | `js/emotes.js` | Battle emotes: the panel, the King's faces, the bubbles, and when the opponent emotes |
 | `js/upgrades.js` | The full-screen scenes for upgrading a card and using a magic item on it |
 | `js/items.js` | Magic item art (SVG built from parts that fly together in a chest reveal) |

@@ -39,7 +39,7 @@ const KCProgress = (() => {
     { id: 'sunstone', number: 3, name: 'Sunstone Arena', min: 600, theme: 'sunstone', cards: ['sandstorm', 'ramcart', 'mole', 'camel'],
       blurb: 'A sun-baked desert fortress of sandstone walls and an oasis channel. Evolutions and the Diamond Pass open here.' },
     { id: 'stormspire', number: 4, name: 'Stormspire', min: 900, theme: 'stormspire', cards: ['bees', 'owl', 'thundercloud', 'griffin'],
-      blurb: 'A fortress on a mountain peak above the clouds, crackling with storms. Online battles open here.' },
+      blurb: 'A fortress on a mountain peak above the clouds, crackling with storms. Online battles are coming here.' },
     { id: 'arena5', number: 5, name: 'Arena 5', min: 1200, soon: true, blurb: 'Coming in a later update.' },
   ];
   // Fixed rewards along the road, claimed by the player.
