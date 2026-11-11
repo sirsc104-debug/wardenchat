@@ -1540,3 +1540,28 @@ button.slot:hover { transform: translateY(-3px); }
 .kg-actions { margin-top: 12px; display: flex; align-items: center; gap: 12px; }
 @media (max-width: 600px) { .king-card { grid-template-columns: minmax(0, 1fr); justify-items: center; } .king-chip small { display: none; } }
 .m-king .us-bar { display: none; }
+/* card emotes: the card's character with its name on a banner */
+.em-card { position: relative; display: block; width: 100%; height: 100%; }
+.em-card img { position: absolute; left: 8%; right: 8%; top: -2%; width: 84%; height: 84%; object-fit: contain; display: block; }
+.em-card b { position: absolute; left: 50%; bottom: 2%; transform: translateX(-50%); max-width: 100%; box-sizing: border-box; padding: 1px 6px; border-radius: 6px;
+  background: var(--tc, #2f6fe4); color: #fff; border: 2px solid var(--outline); font-family: var(--display); font-weight: 400; font-size: 10px; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 0 var(--outline); }
+.emote-bub.is-face .em-card b, .eo-art .em-card b { font-size: clamp(10px, 1.1vw, 13px); }
+:is(.emote-bub, .em-live) .em-card.k-troop img { animation: emHop 0.55s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+:is(.emote-bub, .em-live) .em-card.k-spell img { animation: emPulse 0.7s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-card.k-building img { animation: emRecoil 0.9s ease-in-out infinite; }
+:is(.emote-bub, .em-live) .em-card b { animation: emBanner 0.35s cubic-bezier(.2, .9, .3, 1.5) both; }
+@keyframes emHop { from { transform: translateY(0) scale(1, 1); } 70% { transform: translateY(-7%) scale(0.97, 1.03); } to { transform: translateY(-9%) rotate(3deg); } }
+@keyframes emPulse { from { transform: scale(0.92) rotate(-5deg); } to { transform: scale(1.08) rotate(5deg); } }
+@keyframes emRecoil { 0%, 70%, 100% { transform: none; } 78% { transform: translateY(5%) scale(1.04, 0.96); } }
+@keyframes emBanner { from { transform: translateX(-50%) scale(0.3); opacity: 0; } }
+.eo-btns { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.eo-or { font-size: 12px; font-weight: 900; color: #d8ccff; }
+.eo-body .eo-btns .buy-btn { padding: 6px 12px; }
+.ep-face .em-card b { font-size: 9px; padding: 0 4px; }
+.em-card b { max-width: none; overflow: visible; }
+.emote-bub.is-face .em-card b.mid, .eo-art .em-card b.mid { font-size: clamp(9px, 0.95vw, 11px); }
+.emote-bub.is-face .em-card b.long, .eo-art .em-card b.long, .ep-face .em-card b.mid { font-size: clamp(8px, 0.8vw, 9.5px); }
+.ep-face .em-card b.long { font-size: 7.5px; }
+.em-card.k-spell img { left: -12%; width: 124%; top: -14%; height: 104%; }
+.em-card.k-building img { left: -4%; width: 108%; top: -8%; height: 96%; }

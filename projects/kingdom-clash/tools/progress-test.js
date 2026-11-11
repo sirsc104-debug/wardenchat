@@ -309,7 +309,8 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   const foe = G.trophyFoe(KCSim.mulberry(3));
   assert(foe.kingLevel >= 1 && foe.kingLevel <= 15, 'opponents have a King Tower level');
   // emotes: 15 in all, the same 3 all day, a new set tomorrow, bought for coins
-  assert.strictEqual(G.EMOTES.length, 15);
+  assert.strictEqual(G.EMOTES.length, 15 + KC_ALL_CARDS.length, '15 emotes and one for every card');
+  for (const id of KC_ALL_CARDS) assert(G.EMOTES.some(e => e.id === 'card_' + id && e.name === KC_CARDS[id].name), 'a card emote for ' + id);
   const day = new Date(2026, 10, 11, 9).getTime(), later = new Date(2026, 10, 11, 21).getTime(), next = new Date(2026, 10, 12, 9).getTime();
   const today = G.emoteOffers(day);
   assert.strictEqual(today.length, 3);
@@ -317,9 +318,15 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   let changed = 0; for (let d = 0; d < 10; d++) if (G.emoteOffers(next + d * 864e5).map(o => o.id).join() !== today.map(o => o.id).join()) changed++;
   assert(changed >= 8, 'a new set on other days');
   P7.coins = 10000;
-  assert(G.buyEmote(today[0].id, day).ok && P7.emotes.includes(today[0].id) && P7.coins === 10000 - G.EMOTE_SHOP.price);
-  assert.strictEqual(G.buyEmote(today[0].id, day).error, 'owned');
-  assert.strictEqual(G.buyEmote(G.EMOTES.find(e => !today.some(o => o.id === e.id)).id, day).error, 'none', 'only today\'s three are for sale');
+  assert(G.EMOTE_SHOP.coins === 5000 && G.EMOTE_SHOP.diamonds === 1, '5,000 coins or 1 diamond');
+  P7.diamonds = 1;
+  assert(G.buyEmote(today[0].id, 'coins', day).ok && P7.emotes.includes(today[0].id) && P7.coins === 10000 - 5000);
+  assert.strictEqual(G.buyEmote(today[0].id, 'coins', day).error, 'owned');
+  assert(G.buyEmote(today[1].id, 'diamonds', day).ok && P7.diamonds === 0 && P7.coins === 5000, 'or one diamond');
+  assert.strictEqual(G.buyEmote(today[2].id, 'diamonds', day).error, 'diamonds');
+  assert.strictEqual(G.buyEmote(G.EMOTES.find(e => !today.some(o => o.id === e.id)).id, 'coins', day).error, 'none', 'only today\'s three are for sale');
+  let sawCard = 0; for (let d = 0; d < 30; d++) { P7.emoteShop = null; if (G.emoteOffers(next + d * 864e5).some(o => o.card)) sawCard++; }
+  assert(sawCard > 15, 'card emotes come up in the daily three');
   // chests: Briar Hollow cards can come out in Briar Hollow before the road gives them
   P7.found = KC_STARTER_DECK.slice(); P7.trophies = 320;
   assert(['spears', 'pots', 'footmen', 'flail', 'skeletons', 'cannon'].every(id => G.chestPool().includes(id)));
@@ -331,7 +338,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   const opened = G.openChest(0, 1);
   const fresh = opened.cards.filter(x => x.isNew).map(x => x.id);
   assert(fresh.length && fresh.every(id => P7.found.includes(id)), 'and it is found now');
-  console.log(`King Tower levels (L cards at level L), ${G.EMOTES.length} emotes with 3 a day, chests give arena cards early (${fresh.join(', ')}): ok`);
+  console.log(`King Tower levels (L cards at level L), ${G.EMOTES.length} emotes with 3 a day for 5,000 coins or 1 diamond, chests give arena cards early (${fresh.join(', ')}): ok`);
 }
 
 // 9. Matchmaking: the win rate of a steady player who keeps their cards level with their trophies, and

@@ -1550,6 +1550,31 @@ button.slot:hover { transform: translateY(-3px); }
 .kg-actions { margin-top: 12px; display: flex; align-items: center; gap: 12px; }
 @media (max-width: 600px) { .king-card { grid-template-columns: minmax(0, 1fr); justify-items: center; } .king-chip small { display: none; } }
 .m-king .us-bar { display: none; }
+/* card emotes: the card's character with its name on a banner */
+.em-card { position: relative; display: block; width: 100%; height: 100%; }
+.em-card img { position: absolute; left: 8%; right: 8%; top: -2%; width: 84%; height: 84%; object-fit: contain; display: block; }
+.em-card b { position: absolute; left: 50%; bottom: 2%; transform: translateX(-50%); max-width: 100%; box-sizing: border-box; padding: 1px 6px; border-radius: 6px;
+  background: var(--tc, #2f6fe4); color: #fff; border: 2px solid var(--outline); font-family: var(--display); font-weight: 400; font-size: 10px; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 0 var(--outline); }
+.emote-bub.is-face .em-card b, .eo-art .em-card b { font-size: clamp(10px, 1.1vw, 13px); }
+:is(.emote-bub, .em-live) .em-card.k-troop img { animation: emHop 0.55s ease-in-out infinite alternate; transform-origin: 50% 100%; }
+:is(.emote-bub, .em-live) .em-card.k-spell img { animation: emPulse 0.7s ease-in-out infinite alternate; }
+:is(.emote-bub, .em-live) .em-card.k-building img { animation: emRecoil 0.9s ease-in-out infinite; }
+:is(.emote-bub, .em-live) .em-card b { animation: emBanner 0.35s cubic-bezier(.2, .9, .3, 1.5) both; }
+@keyframes emHop { from { transform: translateY(0) scale(1, 1); } 70% { transform: translateY(-7%) scale(0.97, 1.03); } to { transform: translateY(-9%) rotate(3deg); } }
+@keyframes emPulse { from { transform: scale(0.92) rotate(-5deg); } to { transform: scale(1.08) rotate(5deg); } }
+@keyframes emRecoil { 0%, 70%, 100% { transform: none; } 78% { transform: translateY(5%) scale(1.04, 0.96); } }
+@keyframes emBanner { from { transform: translateX(-50%) scale(0.3); opacity: 0; } }
+.eo-btns { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.eo-or { font-size: 12px; font-weight: 900; color: #d8ccff; }
+.eo-body .eo-btns .buy-btn { padding: 6px 12px; }
+.ep-face .em-card b { font-size: 9px; padding: 0 4px; }
+.em-card b { max-width: none; overflow: visible; }
+.emote-bub.is-face .em-card b.mid, .eo-art .em-card b.mid { font-size: clamp(9px, 0.95vw, 11px); }
+.emote-bub.is-face .em-card b.long, .eo-art .em-card b.long, .ep-face .em-card b.mid { font-size: clamp(8px, 0.8vw, 9.5px); }
+.ep-face .em-card b.long { font-size: 7.5px; }
+.em-card.k-spell img { left: -12%; width: 124%; top: -14%; height: 104%; }
+.em-card.k-building img { left: -4%; width: 108%; top: -8%; height: 96%; }
 
 </style>
 </head>
@@ -3215,8 +3240,10 @@ const KCProgress = (() => {
     { id: 'kiss', name: 'Blow a Kiss' }, { id: 'wave', name: 'Hello!' }, { id: 'clap', name: 'Applause' },
     { id: 'shush', name: 'Shh!' }, { id: 'popcorn', name: 'Popcorn' }, { id: 'trophy', name: 'Champion' },
     { id: 'mindblown', name: 'Mind Blown' }, { id: 'smug', name: 'Smug' }, { id: 'salute', name: 'Salute' },
-  ];
-  const EMOTE_SHOP = { perDay: 3, price: 3000 };
+    // and one for every card: the card's character with its name
+  ].concat(KC_ALL_CARDS.map(id => ({ id: 'card_' + id, name: KC_CARDS[id].name, card: id })));
+  // each emote costs 5,000 coins or 1 diamond (the same at the exchange rate)
+  const EMOTE_SHOP = { perDay: 3, coins: 5000, diamonds: 1 };
   // Today's three: a shuffle seeded by the date, skipping emotes you own.
   function emoteOffers(now = Date.now()) {
     const day = dayKey(now), seed = [...day].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
@@ -3227,17 +3254,20 @@ const KCProgress = (() => {
       const open = order.filter(id => !P.emotes.includes(id));
       P.emoteShop = { day, ids: (open.length >= EMOTE_SHOP.perDay ? open : order).slice(0, EMOTE_SHOP.perDay) };
     }
-    return P.emoteShop.ids.map(id => ({ id, name: EMOTES.find(e => e.id === id).name, price: EMOTE_SHOP.price, owned: P.emotes.includes(id) }));
+    return P.emoteShop.ids.filter(id => EMOTES.some(e => e.id === id))
+      .map(id => { const e = EMOTES.find(x => x.id === id); return { id, name: e.name, card: e.card || null, coins: EMOTE_SHOP.coins, diamonds: EMOTE_SHOP.diamonds, owned: P.emotes.includes(id) }; });
   }
-  function buyEmote(id, now = Date.now()) {
+  // currency: 'coins' (5,000) or 'diamonds' (1)
+  function buyEmote(id, currency = 'coins', now = Date.now()) {
     const o = emoteOffers(now).find(x => x.id === id);
     if (!o) return { error: 'none' };
     if (o.owned) return { error: 'owned' };
-    if (P.coins < o.price) return { error: 'coins' };
-    P.coins -= o.price;
+    const wallet = currency === 'diamonds' ? 'diamonds' : 'coins', price = o[wallet];
+    if (P[wallet] < price) return { error: wallet };
+    P[wallet] -= price;
     P.emotes.push(id);
     save();
-    return { ok: true, id, price: o.price };
+    return { ok: true, id, price, currency: wallet };
   }
 
   // TEMPORARY: the test button's 1,000,000 coins and diamonds.
@@ -4768,18 +4798,32 @@ const KCArt = (() => {
   function portrait(cardId, w, h, opts) {
     const cv = document.createElement('canvas');
     cv.width = w; cv.height = h;
-    const evo = !!(opts && opts.evo);
+    // opts.bare: just the character, on a transparent background with no card (for the card emotes);
+    // opts.team: whose colours it wears
+    const evo = !!(opts && opts.evo), bare = !!(opts && opts.bare), team = (opts && opts.team) || 0;
     const c = cv.getContext('2d'), card = KC_CARDS[cardId], R = evo ? RARITY.evo : RARITY[card.rarity] || RARITY.common;
-    const g = c.createLinearGradient(0, 0, w * 0.3, h);
-    g.addColorStop(0, R[0]); if (R[3]) g.addColorStop(0.55, R[3]); g.addColorStop(1, R[1]);
-    rr(c, 0, 0, w, h, w * 0.1); c.fillStyle = g; c.fill();
+    if (!bare) {
+      const g = c.createLinearGradient(0, 0, w * 0.3, h);
+      g.addColorStop(0, R[0]); if (R[3]) g.addColorStop(0.55, R[3]); g.addColorStop(1, R[1]);
+      rr(c, 0, 0, w, h, w * 0.1); c.fillStyle = g; c.fill();
+    }
     c.save(); rr(c, 0, 0, w, h, w * 0.1); c.clip();
-    const glow = c.createRadialGradient(w * 0.5, h * 0.42, w * 0.05, w * 0.5, h * 0.42, w * 0.6);
-    glow.addColorStop(0, 'rgba(255,255,255,0.45)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
-    c.fillStyle = glow; c.fillRect(0, 0, w, h);
-    ell(c, w * 0.5, h * 0.86, w * 0.42, h * 0.07); c.fillStyle = 'rgba(0,0,0,0.18)'; c.fill();
+    if (!bare) {
+      const glow = c.createRadialGradient(w * 0.5, h * 0.42, w * 0.05, w * 0.5, h * 0.42, w * 0.6);
+      glow.addColorStop(0, 'rgba(255,255,255,0.45)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
+      c.fillStyle = glow; c.fillRect(0, 0, w, h);
+      ell(c, w * 0.5, h * 0.86, w * 0.42, h * 0.07); c.fillStyle = 'rgba(0,0,0,0.18)'; c.fill();
+    }
     const k = w * 0.42;
-    const o = { team: 0, t: 0.3, walk: false, atk: 0, face: 1, id: 1, view: 'front', evo };
+    const o = { team, t: 0.3, walk: false, atk: 0, face: 1, id: 1, view: 'front', evo };
+    if (bare) {
+      const fin = () => { c.restore(); return cv; };
+      const at2 = (x, y, s, oo) => { c.save(); c.translate(w * x, h * y); troop(c, cardId, k * s, Object.assign({}, o, oo)); c.restore(); };
+      if (cardId === 'fireball') { c.save(); c.translate(w * 0.54, h * 0.46); LW = Math.max(1, k * 0.07); fireballArt(c, k * 1.0, 0.4); c.restore(); return fin(); }
+      if (cardId === 'spears') { c.save(); c.translate(w * 0.5, h * 0.5); LW = Math.max(1, k * 0.06); spearsArt(c, k * 1.05, 0); c.restore(); return fin(); }
+      if (cardId === 'sandstorm') { c.save(); c.translate(w * 0.56, h * 0.76); LW = Math.max(1, k * 0.06); sandstormArt(c, k * 1.35, 0.6); c.restore(); return fin(); }
+      if (cardId === 'cannon') { c.save(); c.translate(w * 0.5, h * 0.62); cannon(c, k * 0.95, { team, angle: Math.PI * 0.62 }); c.restore(); return fin(); }
+    }
     const at = (x, y, s, oo) => { c.save(); c.translate(w * x, h * y); troop(c, cardId, k * s, Object.assign({}, o, oo)); c.restore(); };
     if (cardId === 'fireball') { c.save(); c.translate(w * 0.54, h * 0.46); LW = Math.max(1, k * 0.07); fireballArt(c, k * 1.0, 0.4); c.restore(); }
     else if (cardId === 'sandstorm') { c.save(); c.translate(w * 0.56, h * 0.76); LW = Math.max(1, k * 0.06); sandstormArt(c, k * 1.35, 0.6); c.restore(); }
@@ -4791,13 +4835,13 @@ const KCArt = (() => {
     else if (cardId === 'hawks') { at(0.3, 0.34, 1.1, { t: 0.9 }); at(0.58, 0.62, 1.45, {}); }
     else if (cardId === 'archers') { at(0.3, 0.86, 1.2, {}); at(0.64, 0.92, 1.35, { face: 1 }); }
     else {
-      if (cardId === 'skeletons') { at(0.26, 0.78, 1.55, { t: 0.4 }); at(0.74, 0.78, 1.55, { t: 1.2 }); at(0.5, 0.94, 1.85, {}); c.restore(); return finish(c, w, h, R, cv); }
+      if (cardId === 'skeletons') { at(0.26, 0.78, 1.55, { t: 0.4 }); at(0.74, 0.78, 1.55, { t: 1.2 }); at(0.5, 0.94, 1.85, {}); c.restore(); return bare ? cv : finish(c, w, h, R, cv); }
       if (cardId === 'cannon') { c.save(); c.translate(w * 0.5, h * 0.62); cannon(c, k * 0.95, { team: 0, angle: Math.PI * 0.62 }); c.restore(); c.restore(); return finish(c, w, h, R, cv); }
       const sc = { rhino: 1.6, gladiator: 1.5, snowman: evo ? 1.0 : 1.32, gorilla: 1.45, flail: 1.22, pots: 1.55, mole: 1.6, ramsoldier: 1.5 }[cardId] || 1;
       at(0.5, cardId === 'rhino' ? 0.86 : 0.92, sc, {});
     }
     c.restore();
-    return finish(c, w, h, R, cv);
+    return bare ? cv : finish(c, w, h, R, cv);
   }
   function finish(c, w, h, R, cv) {
     rr(c, w * 0.025, w * 0.025, w * 0.95, h - w * 0.05, w * 0.085);
@@ -5313,6 +5357,7 @@ const KCSound = (() => {
     em_mindblown: () => { noise(0.4, 0.2, 600); tone(120, 60, 0.3, 'sine', 0.25); tone(600, 1600, 0.3, 'triangle', 0.06, 0.1); },
     em_smug: () => { tone(330, 392, 0.2, 'triangle', 0.1); tone(523, 0, 0.18, 'triangle', 0.08, 0.2); },
     em_salute: () => { tone(392, 0, 0.12, 'square', 0.06); tone(523, 0, 0.12, 'square', 0.06, 0.12); tone(659, 0, 0.3, 'square', 0.06, 0.24); },
+    emCard: () => { tone(392, 784, 0.12, 'triangle', 0.1); [659, 988].forEach((f, i) => tone(f, 0, 0.18, 'triangle', 0.1, 0.12 + i * 0.09)); noise(0.1, 0.05, 3000, 'highpass', 0.1); },
     emPhrase: () => { tone(700, 1050, 0.08, 'triangle', 0.12); noise(0.05, 0.05, 3000, 'highpass'); },
     // Sunstone Arena cards and evolutions
     sandstorm: () => { noise(1.4, 0.12, 700, 'bandpass'); noise(1.2, 0.06, 2600, 'bandpass', 0.2); tone(120, 220, 1.2, 'sine', 0.05); },
@@ -6636,20 +6681,31 @@ const KCMenu = (() => {
     if (fb) fb.addEventListener('click', e => { e.stopPropagation(); freeChestClick(); });
     // emotes: today's three, each animated on its tile
     $('#shopEmotes').innerHTML = G.emoteOffers().map(o => {
-      const poor = P().coins < o.price;
-      const btn = o.owned ? '<button class="buy-btn" type="button" disabled>Owned</button>'
-        : `<button class="buy-btn${poor ? ' poor' : ''}" type="button" data-emote="${o.id}" aria-label="Buy the ${esc(o.name)} emote for ${o.price} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(o.price)}</button>`;
-      return `<div class="emote-offer${o.owned ? ' owned' : ''}"><span class="eo-art em-live">${KCEmotes.face(o.id, 0)}</span>
-        <span class="eo-body"><b>${esc(o.name)}</b><small>${o.owned ? 'In your emote panel' : 'Yours for good: use it in every battle'}</small>${btn}</span></div>`;
+      const poorC = P().coins < o.coins, poorD = P().diamonds < o.diamonds, conf = emoteConfirm === o.id;
+      const btns = o.owned ? '<button class="buy-btn" type="button" disabled>Owned</button>'
+        : `<span class="eo-btns"><button class="buy-btn${poorC ? ' poor' : ''}" type="button" data-emote="${o.id}" data-cur="coins" aria-label="Buy the ${esc(o.name)} emote for ${o.coins} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(o.coins)}</button>
+          <span class="eo-or">or</span>
+          <button class="buy-btn gem${poorD ? ' poor' : ''}${conf ? ' confirm' : ''}" type="button" data-emote="${o.id}" data-cur="diamonds" aria-label="${conf ? 'Confirm: buy' : 'Buy'} the ${esc(o.name)} emote for ${o.diamonds} diamond">${conf ? 'Confirm ' : ''}<i class="gem-i" aria-hidden="true"></i>${fmt(o.diamonds)}</button></span>`;
+      return `<div class="emote-offer${o.owned ? ' owned' : ''}${o.card ? ' card-emote' : ''}"><span class="eo-art em-live">${KCEmotes.face(o.id, 0)}</span>
+        <span class="eo-body"><b>${esc(o.card ? o.name + ' emote' : o.name)}</b><small>${o.owned ? 'In your emote panel' : 'Yours for good: use it in every battle'}</small>${btns}</span></div>`;
     }).join('');
-    for (const b of $$('#shopEmotes .buy-btn[data-emote]')) b.addEventListener('click', e => { e.stopPropagation(); buyEmoteClick(b.dataset.emote); });
+    for (const b of $$('#shopEmotes .buy-btn[data-emote]')) b.addEventListener('click', e => { e.stopPropagation(); buyEmoteClick(b.dataset.emote, b.dataset.cur); });
     shopTimer();
   }
-  function buyEmoteClick(id) {
-    const r = G.buyEmote(id);
+  let emoteConfirm = null, emoteConfirmT = 0;
+  function buyEmoteClick(id, cur) {
+    // a diamond takes a second click to confirm, like every diamond purchase
+    if (cur === 'diamonds' && P().diamonds >= G.EMOTE_SHOP.diamonds && emoteConfirm !== id) {
+      emoteConfirm = id; clearTimeout(emoteConfirmT);
+      emoteConfirmT = setTimeout(() => { emoteConfirm = null; renderShop(); }, 4000);
+      renderShop(); return;
+    }
+    emoteConfirm = null; clearTimeout(emoteConfirmT);
+    const r = G.buyEmote(id, cur);
     if (r.error === 'coins') { KCSound.play('error'); toast('Not enough coins. Win battles and open chests to earn more.'); return; }
+    if (r.error === 'diamonds') { KCSound.play('error'); toast('Not enough diamonds. Diamonds will come from the SirSC wallet.'); return; }
     if (!r.ok) return;
-    KCSound.play('buy'); setTimeout(() => KCSound.play('em_' + id), 250);
+    KCSound.play('buy'); setTimeout(() => KCSound.play(id.startsWith('card_') ? 'emCard' : 'em_' + id), 250);
     toast(`${KCEmotes.LABEL[id]} is in your emote panel!`);
     refresh();
   }
@@ -7393,7 +7449,16 @@ const KCEmotes = (() => {
 
   /* ---------- the King's faces, in SVG ---------- */
   const TEAMC = ['#2f6fe4', '#dc3640'];
+  // A card emote: the card's character (in the sender's colours) with its name on a banner.
+  const cardPics = {};
+  function cardFace(id, team) {
+    const key = id + ':' + team;
+    if (!cardPics[key]) cardPics[key] = KCArt.portrait(id, 200, 240, { bare: true, team }).toDataURL();
+    const c = KC_CARDS[id], kind = c.kind === 'spell' ? 'spell' : c.kind === 'building' ? 'building' : 'troop';
+    return `<span class="em-face em-card k-${kind} r-${c.rarity}" aria-hidden="true"><img src="${cardPics[key]}" alt=""><b class="${c.name.length > 11 ? 'long' : c.name.length > 7 ? 'mid' : ''}" style="--tc:${TEAMC[team] || TEAMC[0]}">${c.name}</b></span>`;
+  }
   function face(expr, team) {
+    if (expr.startsWith('card_')) return cardFace(expr.slice(5), team);
     const tc = TEAMC[team] || TEAMC[0];
     const eyes = {
       laugh: `<path d="M34 49q5-7 10 0M56 49q5-7 10 0" stroke="${O}" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
@@ -7595,7 +7660,7 @@ const KCEmotes = (() => {
     const room = box.clientWidth - 6 - b.offsetWidth;
     if (p.x > room) { b.style.left = Math.max(6, room) + 'px'; b.classList.add('no-tail'); }
     b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
-    KCSound.play(isFace(id) ? 'em_' + id : 'emPhrase');
+    KCSound.play(id.startsWith('card_') ? 'emCard' : isFace(id) ? 'em_' + id : 'emPhrase');
     clearTimeout(S.bubT[team]);
     S.bubT[team] = setTimeout(() => hideBub(team), calm ? 2400 : 2700);
   }

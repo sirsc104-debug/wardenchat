@@ -474,8 +474,10 @@ const KCProgress = (() => {
     { id: 'kiss', name: 'Blow a Kiss' }, { id: 'wave', name: 'Hello!' }, { id: 'clap', name: 'Applause' },
     { id: 'shush', name: 'Shh!' }, { id: 'popcorn', name: 'Popcorn' }, { id: 'trophy', name: 'Champion' },
     { id: 'mindblown', name: 'Mind Blown' }, { id: 'smug', name: 'Smug' }, { id: 'salute', name: 'Salute' },
-  ];
-  const EMOTE_SHOP = { perDay: 3, price: 3000 };
+    // and one for every card: the card's character with its name
+  ].concat(KC_ALL_CARDS.map(id => ({ id: 'card_' + id, name: KC_CARDS[id].name, card: id })));
+  // each emote costs 5,000 coins or 1 diamond (the same at the exchange rate)
+  const EMOTE_SHOP = { perDay: 3, coins: 5000, diamonds: 1 };
   // Today's three: a shuffle seeded by the date, skipping emotes you own.
   function emoteOffers(now = Date.now()) {
     const day = dayKey(now), seed = [...day].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
@@ -486,17 +488,20 @@ const KCProgress = (() => {
       const open = order.filter(id => !P.emotes.includes(id));
       P.emoteShop = { day, ids: (open.length >= EMOTE_SHOP.perDay ? open : order).slice(0, EMOTE_SHOP.perDay) };
     }
-    return P.emoteShop.ids.map(id => ({ id, name: EMOTES.find(e => e.id === id).name, price: EMOTE_SHOP.price, owned: P.emotes.includes(id) }));
+    return P.emoteShop.ids.filter(id => EMOTES.some(e => e.id === id))
+      .map(id => { const e = EMOTES.find(x => x.id === id); return { id, name: e.name, card: e.card || null, coins: EMOTE_SHOP.coins, diamonds: EMOTE_SHOP.diamonds, owned: P.emotes.includes(id) }; });
   }
-  function buyEmote(id, now = Date.now()) {
+  // currency: 'coins' (5,000) or 'diamonds' (1)
+  function buyEmote(id, currency = 'coins', now = Date.now()) {
     const o = emoteOffers(now).find(x => x.id === id);
     if (!o) return { error: 'none' };
     if (o.owned) return { error: 'owned' };
-    if (P.coins < o.price) return { error: 'coins' };
-    P.coins -= o.price;
+    const wallet = currency === 'diamonds' ? 'diamonds' : 'coins', price = o[wallet];
+    if (P[wallet] < price) return { error: wallet };
+    P[wallet] -= price;
     P.emotes.push(id);
     save();
-    return { ok: true, id, price: o.price };
+    return { ok: true, id, price, currency: wallet };
   }
 
   // TEMPORARY: the test button's 1,000,000 coins and diamonds.

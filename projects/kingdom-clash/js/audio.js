@@ -92,6 +92,7 @@ const KCSound = (() => {
     em_mindblown: () => { noise(0.4, 0.2, 600); tone(120, 60, 0.3, 'sine', 0.25); tone(600, 1600, 0.3, 'triangle', 0.06, 0.1); },
     em_smug: () => { tone(330, 392, 0.2, 'triangle', 0.1); tone(523, 0, 0.18, 'triangle', 0.08, 0.2); },
     em_salute: () => { tone(392, 0, 0.12, 'square', 0.06); tone(523, 0, 0.12, 'square', 0.06, 0.12); tone(659, 0, 0.3, 'square', 0.06, 0.24); },
+    emCard: () => { tone(392, 784, 0.12, 'triangle', 0.1); [659, 988].forEach((f, i) => tone(f, 0, 0.18, 'triangle', 0.1, 0.12 + i * 0.09)); noise(0.1, 0.05, 3000, 'highpass', 0.1); },
     emPhrase: () => { tone(700, 1050, 0.08, 'triangle', 0.12); noise(0.05, 0.05, 3000, 'highpass'); },
     // Sunstone Arena cards and evolutions
     sandstorm: () => { noise(1.4, 0.12, 700, 'bandpass'); noise(1.2, 0.06, 2600, 'bandpass', 0.2); tone(120, 220, 1.2, 'sine', 0.05); },

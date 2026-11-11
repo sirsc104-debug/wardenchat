@@ -815,18 +815,32 @@ const KCArt = (() => {
   function portrait(cardId, w, h, opts) {
     const cv = document.createElement('canvas');
     cv.width = w; cv.height = h;
-    const evo = !!(opts && opts.evo);
+    // opts.bare: just the character, on a transparent background with no card (for the card emotes);
+    // opts.team: whose colours it wears
+    const evo = !!(opts && opts.evo), bare = !!(opts && opts.bare), team = (opts && opts.team) || 0;
     const c = cv.getContext('2d'), card = KC_CARDS[cardId], R = evo ? RARITY.evo : RARITY[card.rarity] || RARITY.common;
-    const g = c.createLinearGradient(0, 0, w * 0.3, h);
-    g.addColorStop(0, R[0]); if (R[3]) g.addColorStop(0.55, R[3]); g.addColorStop(1, R[1]);
-    rr(c, 0, 0, w, h, w * 0.1); c.fillStyle = g; c.fill();
+    if (!bare) {
+      const g = c.createLinearGradient(0, 0, w * 0.3, h);
+      g.addColorStop(0, R[0]); if (R[3]) g.addColorStop(0.55, R[3]); g.addColorStop(1, R[1]);
+      rr(c, 0, 0, w, h, w * 0.1); c.fillStyle = g; c.fill();
+    }
     c.save(); rr(c, 0, 0, w, h, w * 0.1); c.clip();
-    const glow = c.createRadialGradient(w * 0.5, h * 0.42, w * 0.05, w * 0.5, h * 0.42, w * 0.6);
-    glow.addColorStop(0, 'rgba(255,255,255,0.45)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
-    c.fillStyle = glow; c.fillRect(0, 0, w, h);
-    ell(c, w * 0.5, h * 0.86, w * 0.42, h * 0.07); c.fillStyle = 'rgba(0,0,0,0.18)'; c.fill();
+    if (!bare) {
+      const glow = c.createRadialGradient(w * 0.5, h * 0.42, w * 0.05, w * 0.5, h * 0.42, w * 0.6);
+      glow.addColorStop(0, 'rgba(255,255,255,0.45)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
+      c.fillStyle = glow; c.fillRect(0, 0, w, h);
+      ell(c, w * 0.5, h * 0.86, w * 0.42, h * 0.07); c.fillStyle = 'rgba(0,0,0,0.18)'; c.fill();
+    }
     const k = w * 0.42;
-    const o = { team: 0, t: 0.3, walk: false, atk: 0, face: 1, id: 1, view: 'front', evo };
+    const o = { team, t: 0.3, walk: false, atk: 0, face: 1, id: 1, view: 'front', evo };
+    if (bare) {
+      const fin = () => { c.restore(); return cv; };
+      const at2 = (x, y, s, oo) => { c.save(); c.translate(w * x, h * y); troop(c, cardId, k * s, Object.assign({}, o, oo)); c.restore(); };
+      if (cardId === 'fireball') { c.save(); c.translate(w * 0.54, h * 0.46); LW = Math.max(1, k * 0.07); fireballArt(c, k * 1.0, 0.4); c.restore(); return fin(); }
+      if (cardId === 'spears') { c.save(); c.translate(w * 0.5, h * 0.5); LW = Math.max(1, k * 0.06); spearsArt(c, k * 1.05, 0); c.restore(); return fin(); }
+      if (cardId === 'sandstorm') { c.save(); c.translate(w * 0.56, h * 0.76); LW = Math.max(1, k * 0.06); sandstormArt(c, k * 1.35, 0.6); c.restore(); return fin(); }
+      if (cardId === 'cannon') { c.save(); c.translate(w * 0.5, h * 0.62); cannon(c, k * 0.95, { team, angle: Math.PI * 0.62 }); c.restore(); return fin(); }
+    }
     const at = (x, y, s, oo) => { c.save(); c.translate(w * x, h * y); troop(c, cardId, k * s, Object.assign({}, o, oo)); c.restore(); };
     if (cardId === 'fireball') { c.save(); c.translate(w * 0.54, h * 0.46); LW = Math.max(1, k * 0.07); fireballArt(c, k * 1.0, 0.4); c.restore(); }
     else if (cardId === 'sandstorm') { c.save(); c.translate(w * 0.56, h * 0.76); LW = Math.max(1, k * 0.06); sandstormArt(c, k * 1.35, 0.6); c.restore(); }
@@ -838,13 +852,13 @@ const KCArt = (() => {
     else if (cardId === 'hawks') { at(0.3, 0.34, 1.1, { t: 0.9 }); at(0.58, 0.62, 1.45, {}); }
     else if (cardId === 'archers') { at(0.3, 0.86, 1.2, {}); at(0.64, 0.92, 1.35, { face: 1 }); }
     else {
-      if (cardId === 'skeletons') { at(0.26, 0.78, 1.55, { t: 0.4 }); at(0.74, 0.78, 1.55, { t: 1.2 }); at(0.5, 0.94, 1.85, {}); c.restore(); return finish(c, w, h, R, cv); }
+      if (cardId === 'skeletons') { at(0.26, 0.78, 1.55, { t: 0.4 }); at(0.74, 0.78, 1.55, { t: 1.2 }); at(0.5, 0.94, 1.85, {}); c.restore(); return bare ? cv : finish(c, w, h, R, cv); }
       if (cardId === 'cannon') { c.save(); c.translate(w * 0.5, h * 0.62); cannon(c, k * 0.95, { team: 0, angle: Math.PI * 0.62 }); c.restore(); c.restore(); return finish(c, w, h, R, cv); }
       const sc = { rhino: 1.6, gladiator: 1.5, snowman: evo ? 1.0 : 1.32, gorilla: 1.45, flail: 1.22, pots: 1.55, mole: 1.6, ramsoldier: 1.5 }[cardId] || 1;
       at(0.5, cardId === 'rhino' ? 0.86 : 0.92, sc, {});
     }
     c.restore();
-    return finish(c, w, h, R, cv);
+    return bare ? cv : finish(c, w, h, R, cv);
   }
   function finish(c, w, h, R, cv) {
     rr(c, w * 0.025, w * 0.025, w * 0.95, h - w * 0.05, w * 0.085);

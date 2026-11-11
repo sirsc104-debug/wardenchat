@@ -28,7 +28,16 @@ const KCEmotes = (() => {
 
   /* ---------- the King's faces, in SVG ---------- */
   const TEAMC = ['#2f6fe4', '#dc3640'];
+  // A card emote: the card's character (in the sender's colours) with its name on a banner.
+  const cardPics = {};
+  function cardFace(id, team) {
+    const key = id + ':' + team;
+    if (!cardPics[key]) cardPics[key] = KCArt.portrait(id, 200, 240, { bare: true, team }).toDataURL();
+    const c = KC_CARDS[id], kind = c.kind === 'spell' ? 'spell' : c.kind === 'building' ? 'building' : 'troop';
+    return `<span class="em-face em-card k-${kind} r-${c.rarity}" aria-hidden="true"><img src="${cardPics[key]}" alt=""><b class="${c.name.length > 11 ? 'long' : c.name.length > 7 ? 'mid' : ''}" style="--tc:${TEAMC[team] || TEAMC[0]}">${c.name}</b></span>`;
+  }
   function face(expr, team) {
+    if (expr.startsWith('card_')) return cardFace(expr.slice(5), team);
     const tc = TEAMC[team] || TEAMC[0];
     const eyes = {
       laugh: `<path d="M34 49q5-7 10 0M56 49q5-7 10 0" stroke="${O}" stroke-width="3.4" fill="none" stroke-linecap="round"/>`,
@@ -230,7 +239,7 @@ const KCEmotes = (() => {
     const room = box.clientWidth - 6 - b.offsetWidth;
     if (p.x > room) { b.style.left = Math.max(6, room) + 'px'; b.classList.add('no-tail'); }
     b.style.animation = 'none'; void b.offsetWidth; b.style.animation = '';
-    KCSound.play(isFace(id) ? 'em_' + id : 'emPhrase');
+    KCSound.play(id.startsWith('card_') ? 'emCard' : isFace(id) ? 'em_' + id : 'emPhrase');
     clearTimeout(S.bubT[team]);
     S.bubT[team] = setTimeout(() => hideBub(team), calm ? 2400 : 2700);
   }

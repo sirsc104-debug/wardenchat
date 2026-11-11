@@ -584,20 +584,31 @@ const KCMenu = (() => {
     if (fb) fb.addEventListener('click', e => { e.stopPropagation(); freeChestClick(); });
     // emotes: today's three, each animated on its tile
     $('#shopEmotes').innerHTML = G.emoteOffers().map(o => {
-      const poor = P().coins < o.price;
-      const btn = o.owned ? '<button class="buy-btn" type="button" disabled>Owned</button>'
-        : `<button class="buy-btn${poor ? ' poor' : ''}" type="button" data-emote="${o.id}" aria-label="Buy the ${esc(o.name)} emote for ${o.price} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(o.price)}</button>`;
-      return `<div class="emote-offer${o.owned ? ' owned' : ''}"><span class="eo-art em-live">${KCEmotes.face(o.id, 0)}</span>
-        <span class="eo-body"><b>${esc(o.name)}</b><small>${o.owned ? 'In your emote panel' : 'Yours for good: use it in every battle'}</small>${btn}</span></div>`;
+      const poorC = P().coins < o.coins, poorD = P().diamonds < o.diamonds, conf = emoteConfirm === o.id;
+      const btns = o.owned ? '<button class="buy-btn" type="button" disabled>Owned</button>'
+        : `<span class="eo-btns"><button class="buy-btn${poorC ? ' poor' : ''}" type="button" data-emote="${o.id}" data-cur="coins" aria-label="Buy the ${esc(o.name)} emote for ${o.coins} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(o.coins)}</button>
+          <span class="eo-or">or</span>
+          <button class="buy-btn gem${poorD ? ' poor' : ''}${conf ? ' confirm' : ''}" type="button" data-emote="${o.id}" data-cur="diamonds" aria-label="${conf ? 'Confirm: buy' : 'Buy'} the ${esc(o.name)} emote for ${o.diamonds} diamond">${conf ? 'Confirm ' : ''}<i class="gem-i" aria-hidden="true"></i>${fmt(o.diamonds)}</button></span>`;
+      return `<div class="emote-offer${o.owned ? ' owned' : ''}${o.card ? ' card-emote' : ''}"><span class="eo-art em-live">${KCEmotes.face(o.id, 0)}</span>
+        <span class="eo-body"><b>${esc(o.card ? o.name + ' emote' : o.name)}</b><small>${o.owned ? 'In your emote panel' : 'Yours for good: use it in every battle'}</small>${btns}</span></div>`;
     }).join('');
-    for (const b of $$('#shopEmotes .buy-btn[data-emote]')) b.addEventListener('click', e => { e.stopPropagation(); buyEmoteClick(b.dataset.emote); });
+    for (const b of $$('#shopEmotes .buy-btn[data-emote]')) b.addEventListener('click', e => { e.stopPropagation(); buyEmoteClick(b.dataset.emote, b.dataset.cur); });
     shopTimer();
   }
-  function buyEmoteClick(id) {
-    const r = G.buyEmote(id);
+  let emoteConfirm = null, emoteConfirmT = 0;
+  function buyEmoteClick(id, cur) {
+    // a diamond takes a second click to confirm, like every diamond purchase
+    if (cur === 'diamonds' && P().diamonds >= G.EMOTE_SHOP.diamonds && emoteConfirm !== id) {
+      emoteConfirm = id; clearTimeout(emoteConfirmT);
+      emoteConfirmT = setTimeout(() => { emoteConfirm = null; renderShop(); }, 4000);
+      renderShop(); return;
+    }
+    emoteConfirm = null; clearTimeout(emoteConfirmT);
+    const r = G.buyEmote(id, cur);
     if (r.error === 'coins') { KCSound.play('error'); toast('Not enough coins. Win battles and open chests to earn more.'); return; }
+    if (r.error === 'diamonds') { KCSound.play('error'); toast('Not enough diamonds. Diamonds will come from the SirSC wallet.'); return; }
     if (!r.ok) return;
-    KCSound.play('buy'); setTimeout(() => KCSound.play('em_' + id), 250);
+    KCSound.play('buy'); setTimeout(() => KCSound.play(id.startsWith('card_') ? 'emCard' : 'em_' + id), 250);
     toast(`${KCEmotes.LABEL[id]} is in your emote panel!`);
     refresh();
   }
