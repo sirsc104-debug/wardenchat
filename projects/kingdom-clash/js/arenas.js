@@ -144,44 +144,45 @@ const KCArenas = (() => {
     },
   };
 
-  // Arena 3: Sunstone Arena. PLACEHOLDER art (img/sunstone_arena_*.webp, labelled "placeholder art"):
-  // replace the three images and, if the new art differs, the bar position, bench rows and lights below.
-  // The battlefield is drawn in code from the 'sunstone' palette until it has an illustration (add a
-  // field entry like Briar Hollow's).
+  // Arena 3: Sunstone Arena: a sandstone desert fortress with an oasis. The battlefield is drawn in code
+  // from the 'sunstone' palette until it has an illustration (add a field entry like Briar Hollow's).
   ART.sunstone = {
     name: 'Sunstone Arena',
-    centerpiece: { src: 'img/sunstone_arena_badge.webp', w: 1254, h: 1254, bar: { left: 24.2, top: 86.2, width: 51.7, height: 3.9 } },
+    centerpiece: { src: 'img/sunstone_arena_badge.webp', w: 1122, h: 1402, bar: { left: 23.6, top: 84.1, width: 52.8, height: 4.4 } },
     field: null, palette: 'sunstone', margin: 0.6, fx: 'water',
     scenery: {
+      // the sundial, the lion statues and the great stairs
       left: {
-        src: 'img/sunstone_arena_left.webp', w: 793, h: 1983, anchor: [0.55, 0.6], stars: 0,
+        src: 'img/sunstone_arena_left.webp', w: 793, h: 1983, anchor: [0.6, 0.5], stars: 0,
         rows: [
-          { y: 0.438, slope: 0, size: 0.72, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.484, slope: 0, size: 0.77, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.53, slope: 0, size: 0.82, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.577, slope: 0, size: 0.87, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.623, slope: 0, size: 0.92, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.67, slope: 0, size: 0.97, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.716, slope: 0, size: 1.02, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.762, slope: 0, size: 1.07, spans: [[0.2, 0.48], [0.58, 0.86]] },
-          { y: 0.809, slope: 0, size: 1.12, spans: [[0.2, 0.48], [0.58, 0.86]] },
+          { y: 0.365, slope: 0, size: 0.7, spans: [[0.36, 0.6]] },
+          { y: 0.39, slope: 0, size: 0.73, spans: [[0.37, 0.65]] },
+          { y: 0.415, slope: 0, size: 0.76, spans: [[0.37, 0.7]] },
+          { y: 0.44, slope: 0, size: 0.79, spans: [[0.37, 0.74]] },
+          { y: 0.465, slope: 0, size: 0.82, spans: [[0.45, 0.79]] },
+          { y: 0.49, slope: 0, size: 0.85, spans: [[0.5, 0.84]] },
+          { y: 0.515, slope: 0, size: 0.88, spans: [[0.6, 0.88]] },
+          { y: 0.54, slope: 0, size: 0.92, spans: [[0.62, 0.93]] },
         ],
-        glows: [[0.151, 0.338, 0.8], [0.53, 0.338, 0.8], [0.908, 0.338, 0.8]],
+        glows: [[0.65, 0.29, 0.7], [0.81, 0.31, 0.7], [0.95, 0.33, 0.6], [0.81, 0.555, 0.9], [0.16, 0.665, 1.3]],
+        mist: [0.58, 0.68, 0.76],
       },
+      // the stands by the waterfall, with the market stalls
       right: {
-        src: 'img/sunstone_arena_right.webp', w: 793, h: 1983, anchor: [0.45, 0.6], stars: 0,
+        src: 'img/sunstone_arena_right.webp', w: 793, h: 1983, anchor: [0.45, 0.5], stars: 0,
         rows: [
-          { y: 0.438, slope: 0, size: 0.72, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.484, slope: 0, size: 0.77, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.53, slope: 0, size: 0.82, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.577, slope: 0, size: 0.87, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.623, slope: 0, size: 0.92, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.67, slope: 0, size: 0.97, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.716, slope: 0, size: 1.02, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.762, slope: 0, size: 1.07, spans: [[0.14, 0.42], [0.52, 0.8]] },
-          { y: 0.809, slope: 0, size: 1.12, spans: [[0.14, 0.42], [0.52, 0.8]] },
+          { y: 0.305, slope: 0, size: 0.6, spans: [[0.42, 0.98]] },
+          { y: 0.33, slope: 0, size: 0.63, spans: [[0.38, 0.98]] },
+          { y: 0.355, slope: 0, size: 0.66, spans: [[0.35, 0.98]] },
+          { y: 0.53, slope: 0, size: 0.8, spans: [[0.3, 0.56]] },
+          { y: 0.555, slope: 0.02, size: 0.84, spans: [[0.33, 0.78]] },
+          { y: 0.58, slope: 0.02, size: 0.88, spans: [[0.35, 0.9]] },
+          { y: 0.605, slope: 0.02, size: 0.92, spans: [[0.4, 0.92]] },
+          { y: 0.63, slope: 0.02, size: 0.96, spans: [[0.46, 0.78]] },
+          { y: 0.655, slope: 0.02, size: 1.0, spans: [[0.55, 0.78]] },
         ],
-        glows: [[0.088, 0.338, 0.8], [0.467, 0.338, 0.8], [0.845, 0.338, 0.8]],
+        glows: [[0.52, 0.2, 0.6], [0.73, 0.21, 0.6], [0.535, 0.43, 0.6], [0.18, 0.525, 0.9], [0.87, 0.625, 1.2], [0.65, 0.865, 0.8]],
+        mist: [0.0, 0.18, 0.53],
       },
     },
   };
