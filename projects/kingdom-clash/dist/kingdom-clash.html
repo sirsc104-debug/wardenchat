@@ -5411,10 +5411,27 @@ const KCMenu = (() => {
     return { x: (e.clientX - r.left) / G.k - B, y: (e.clientY - r.top) / G.k - B };
   }
   const snap = w => ({ x: Math.max(0.5, Math.min(S.W - 0.5, Math.floor(w.x) + 0.5)), y: Math.max(0.5, Math.min(S.H - 0.5, Math.floor(w.y) + 0.5)) });
+  // Where a troop or building actually goes: the tile under the pointer if it can be placed there,
+  // otherwise the nearest tile it can be placed on (so a card dragged into the red area sticks at its
+  // edge). Spells go anywhere.
+  let placeKey = '', placeHit = null;
+  function placeAt(id, w) {
+    const p = snap(w), c = KC_CARDS[id];
+    if (!c || c.kind === 'spell' || S.canDeploy(G.s, 0, id, p.x, p.y)) return p;
+    const key = `${id}|${p.x},${p.y}|${G.zoneKey}|${G.s.ents.filter(e => e.kind === 'building').map(e => e.id).join()}`;
+    if (key === placeKey) return placeHit;
+    let best = p, bd = Infinity;
+    for (let y = 0; y < S.H; y++) for (let x = 0; x < S.W; x++) {
+      const tx = x + 0.5, ty = y + 0.5, d = (tx - w.x) ** 2 + (ty - w.y) ** 2;
+      if (d < bd && S.canDeploy(G.s, 0, id, tx, ty)) { bd = d; best = { x: tx, y: ty }; }
+    }
+    placeKey = key; placeHit = best;
+    return best;
+  }
   function tryPlay(w) {
     const s = G.s;
     if (!s || G.sel < 0 || G.phase !== 'play') return;
-    const p = snap(w), slot = G.sel, id = s.hands[0][slot];
+    const slot = G.sel, id = s.hands[0][slot], p = placeAt(id, w);
     const r = S.play(s, 0, slot, p.x, p.y);
     if (r === 'ok') { select(-1); G.idleHint = true; return; }
     KCSound.play('error');
@@ -5630,7 +5647,7 @@ const KCMenu = (() => {
     c.drawImage(G.bg, 0, 0, G.bg.width / G.dpr, G.bg.height / G.dpr);
     if (G.art.fx === 'lava') lava(c, k, t); else water(c, k, t);
     const selId = G.sel >= 0 ? s.hands[0][G.sel] : null;
-    if (selId && KC_CARDS[selId].kind === 'troop') drawZone(c);
+    if (selId && KC_CARDS[selId].kind !== 'spell') drawZone(c, t);
 
     const lerp = (e, a) => [e.px + (e.x - e.px) * a, e.py + (e.y - e.py) * a];
     const ground = [], air = [];
@@ -5722,22 +5739,48 @@ const KCMenu = (() => {
       c.drawImage(G.bg, x0 * G.dpr, y0 * G.dpr, w * G.dpr, h * G.dpr, x0, y0, w, h);
     }
   }
-  function drawZone(c) {
-    const s = G.s, key = s.ents.filter(e => e.kind === 'tower' && e.dead).map(e => e.id).join();
+  // The area you can't place troops on, drawn while a troop or building card is picked up: a strong red
+  // tint with a faint grid, outlined in bright red. Cached until a tower falls (which opens more ground).
+  function drawZone(c, t) {
+    const s = G.s, key = s.ents.filter(e => e.kind === 'tower' && e.dead).map(e => e.id).join(), k = G.k;
     if (key !== G.zoneKey || !G.zone) {
       G.zoneKey = key;
       const z = document.createElement('canvas');
       z.width = G.bg.width; z.height = G.bg.height;
       const zc = z.getContext('2d');
       zc.scale(G.dpr, G.dpr);
-      zc.fillStyle = 'rgba(229,65,75,0.3)';
+      const red = [];
+      for (let y = 0; y < S.H; y++) { red[y] = []; for (let x = 0; x < S.W; x++) red[y][x] = !(S.canDeploy(s, 0, 'gladiator', x + 0.5, y + 0.5) || y >= S.RIVER_BOT); }
+      const isRed = (x, y) => x >= 0 && y >= 0 && x < S.W && y < S.H && red[y][x];
+      zc.fillStyle = 'rgba(255,70,95,0.55)';
+      for (let y = 0; y < S.H; y++) for (let x = 0; x < S.W; x++) if (red[y][x]) zc.fillRect(SX(x), SY(y), k + 0.5, k + 0.5);
+      // the faint grid
+      zc.strokeStyle = 'rgba(255,225,230,0.35)'; zc.lineWidth = Math.max(1, k * 0.045);
+      zc.beginPath();
       for (let y = 0; y < S.H; y++) for (let x = 0; x < S.W; x++) {
-        const okHere = S.canDeploy(s, 0, 'gladiator', x + 0.5, y + 0.5) || (y >= S.RIVER_BOT);
-        if (!okHere) zc.fillRect(SX(x), SY(y), G.k + 0.5, G.k + 0.5);
+        if (!red[y][x]) continue;
+        if (isRed(x + 1, y)) { zc.moveTo(SX(x + 1), SY(y)); zc.lineTo(SX(x + 1), SY(y + 1)); }
+        if (isRed(x, y + 1)) { zc.moveTo(SX(x), SY(y + 1)); zc.lineTo(SX(x + 1), SY(y + 1)); }
       }
+      zc.stroke();
+      // the outline: every edge between a red tile and a tile you can use (or the arena's edge)
+      const edges = new Path2D();
+      for (let y = 0; y < S.H; y++) for (let x = 0; x < S.W; x++) {
+        if (!red[y][x]) continue;
+        if (!isRed(x, y - 1)) { edges.moveTo(SX(x), SY(y)); edges.lineTo(SX(x + 1), SY(y)); }
+        if (!isRed(x, y + 1)) { edges.moveTo(SX(x), SY(y + 1)); edges.lineTo(SX(x + 1), SY(y + 1)); }
+        if (!isRed(x - 1, y)) { edges.moveTo(SX(x), SY(y)); edges.lineTo(SX(x), SY(y + 1)); }
+        if (!isRed(x + 1, y)) { edges.moveTo(SX(x + 1), SY(y)); edges.lineTo(SX(x + 1), SY(y + 1)); }
+      }
+      zc.lineCap = 'square'; zc.lineJoin = 'miter';
+      zc.strokeStyle = 'rgba(70,0,12,0.65)'; zc.lineWidth = k * 0.34; zc.stroke(edges);
+      zc.strokeStyle = '#ff2b45'; zc.lineWidth = k * 0.2; zc.stroke(edges);
+      zc.strokeStyle = 'rgba(255,215,220,0.95)'; zc.lineWidth = k * 0.05; zc.stroke(edges);
       G.zone = z;
     }
+    c.globalAlpha = 0.9 + 0.1 * Math.sin((t || 0) * 5);
     c.drawImage(G.zone, 0, 0, G.zone.width / G.dpr, G.zone.height / G.dpr);
+    c.globalAlpha = 1;
   }
   function shadow(c, x, y, r) { A.ell(c, x, y, r, r * 0.42); c.fillStyle = 'rgba(0,0,0,0.25)'; c.fill(); }
   function drawEnt(c, d, t) {
@@ -5924,7 +5967,7 @@ const KCMenu = (() => {
     }
   }
   function ghost(c, id, t) {
-    const s = G.s, k = G.k, p = snap(G.hover), card = KC_CARDS[id];
+    const s = G.s, k = G.k, card = KC_CARDS[id], p = card.kind === 'spell' ? snap(G.hover) : placeAt(id, G.hover);
     const ok = S.canDeploy(s, 0, id, p.x, p.y), x = SX(p.x), y = SY(p.y);
     if (card.kind === 'spell') {
       A.ell(c, x, y, card.area * k, card.area * k * 0.62);
