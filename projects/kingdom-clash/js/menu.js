@@ -20,7 +20,16 @@ const KCMenu = (() => {
   const P = () => G.state;
 
   // A card's picture (evo: its evolved version's card), drawn once and kept.
-  const cardImg = (id, evo) => { const key = evo ? id + ':evo' : id; return imgs[key] || (imgs[key] = KCArt.portrait(id, 200, 240, { evo: !!evo }).toDataURL()); };
+  const cardImg = (id, evo) => {
+    const key = evo ? id + ':evo' : id;
+    if (imgs[key]) return imgs[key];
+    const url = KCArt.portrait(id, 200, 240, { evo: !!evo }).toDataURL(), art = !evo && KC_CARDS[id] && KC_CARDS[id].art;
+    // an illustrated picture still loading: don't keep the stand-in
+    if (art && !KCArenas.ready(KCArenas.image(art))) return url;
+    return (imgs[key] = url);
+  };
+  // once each illustrated card picture loads, redraw what shows it
+  for (const id of KC_ALL_CARDS) if (KC_CARDS[id].art) KCArenas.whenReady(KC_CARDS[id].art, () => { delete imgs[id]; if (P()) refresh(); });
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   const fmt = n => Number(n || 0).toLocaleString('en-US');
   const recText = r => (r.w + r.l + r.d ? `${r.w}W · ${r.l}L${r.d ? ` · ${r.d}D` : ''}` : 'No matches yet');

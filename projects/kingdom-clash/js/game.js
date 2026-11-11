@@ -301,14 +301,14 @@
           KCSound.play('thunder'); G.shake = Math.max(G.shake, 0.25);
           G.fx.push({ kind: 'bolt', x: e.x, y: e.y, fx: e.fx, fy: e.fy - LIFT.thundercloud + 0.3, seed: Math.random() * 1000, life: 0.35, max: 0.35 });
           G.fx.push({ kind: 'zap', x: e.x, y: e.y, r: 1.6, life: 0.4, max: 0.4 });
-          sparks(e.x, e.y, 16, '#fff6a0', 4);
+          sparks(e.x, e.y, 16, '#cfe6ff', 4);
           break;
         }
         case 'thunderclap':
           KCSound.play('thunderclap'); G.shake = Math.max(G.shake, 0.4);
           G.fx.push({ kind: 'zap', x: e.x, y: e.y, r: e.r * 1.6, life: 0.6, max: 0.6 });
           for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; G.fx.push({ kind: 'bolt', x: e.x + Math.cos(a) * e.r, y: e.y + Math.sin(a) * e.r * 0.6, fx: e.x, fy: e.y - 1.4, seed: Math.random() * 1000, life: 0.4, max: 0.4 }); }
-          puff(e.x, e.y - 1.2, 14, '#7a8296', 1.6);
+          puff(e.x, e.y - 1.2, 14, '#5a4c92', 1.6);
           break;
         case 'charge':
           KCSound.play('smash'); G.shake = Math.max(G.shake, 0.22);
@@ -1082,7 +1082,7 @@
         for (let i = 1; i < n; i++) { const r = Math.sin(f.seed + i * 12.9898) * 43758.5453; const j = (r - Math.floor(r) - 0.5) * k * 0.9; pts.push([x0 + (x1 - x0) * i / n + j, y0 + (y1 - y0) * i / n]); }
         pts.push([x1, y1]);
         c.save(); c.globalAlpha = a; c.lineCap = 'round'; c.lineJoin = 'round'; c.globalCompositeOperation = 'lighter';
-        for (const [w, col] of [[k * 0.4, 'rgba(255,240,150,0.5)'], [k * 0.15, '#fff6c0'], [k * 0.05, '#ffffff']]) {
+        for (const [w, col] of [[k * 0.45, 'rgba(110,160,255,0.5)'], [k * 0.16, '#cfe6ff'], [k * 0.05, '#ffffff']]) {
           c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (const [px, py] of pts.slice(1)) c.lineTo(px, py); c.strokeStyle = col; c.lineWidth = w; c.stroke();
         }
         c.restore();
@@ -1090,7 +1090,7 @@
         const p = 1 - a, x = SX(f.x), y = SY(f.y), r = f.r * k * (0.5 + p);
         c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = a;
         const g = c.createRadialGradient(x, y, 0, x, y, r);
-        g.addColorStop(0, 'rgba(255,255,220,0.9)'); g.addColorStop(0.5, 'rgba(255,230,120,0.4)'); g.addColorStop(1, 'rgba(200,220,255,0)');
+        g.addColorStop(0, 'rgba(240,248,255,0.9)'); g.addColorStop(0.5, 'rgba(130,180,255,0.45)'); g.addColorStop(1, 'rgba(120,140,255,0)');
         c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2);
         c.restore();
       } else if (f.kind === 'evo') {

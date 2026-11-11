@@ -1,4 +1,6 @@
-/* Kingdom Clash: the cards. Stats are level 1; every level adds 8% to HP and damage (level 15 is
+/* Kingdom Clash: the cards. A card with `art` has an illustrated card picture (img/card_*.webp); the
+   rest are drawn in code (js/art.js). Either way the troops in battle are drawn in code.
+   Kingdom Clash: the cards. Stats are level 1; every level adds 8% to HP and damage (level 15 is
    about 2.9x level 1). Kinds: troop, spell and building (a building stays where it is placed, attacks
    what comes in range and loses health over its lifetime). Distances are in arena tiles, speeds in tiles per second, times in seconds. */
 'use strict';
@@ -140,28 +142,28 @@ const KC_CARDS = {
   },
   // Arena 4 (Stormspire) cards, found on the Trophy Road.
   bees: {
-    id: 'bees', name: 'Bees', cost: 2, rarity: 'common', kind: 'troop', role: 'Air swarm', count: 5,
+    id: 'bees', name: 'Bees', cost: 2, rarity: 'common', kind: 'troop', role: 'Air swarm', count: 5, art: 'img/card_bees.webp',
     hp: 50, dmg: 40, hit: 0.75, range: 0.4, speed: 2.0, targets: 'both', air: true,
     radius: 0.28, mass: 0.5,
     blurb: 'A buzzing swarm of five angry bees. Fast, cheap and fragile: they sting anything, in the air or on the ground.',
     evo: 'Hive: one bee comes back once the swarm is gone.',
   },
   owl: {
-    id: 'owl', name: 'Owl', cost: 4, rarity: 'rare', kind: 'troop', role: 'Air ranged', count: 1,
+    id: 'owl', name: 'Owl', cost: 4, rarity: 'rare', kind: 'troop', role: 'Air ranged', count: 1, art: 'img/card_owl.webp',
     hp: 640, dmg: 135, hit: 1.1, range: 6, speed: 0.9, targets: 'both', air: true,
     radius: 0.55, mass: 3, proj: 'quill', projSpeed: 14,
     blurb: 'An armored battle owl that fires steel-tipped quills from high up, at troops and towers alike. Slow, but it hits from far away.',
     evo: 'Night Vision: its first quill at each target does double damage.',
   },
   thundercloud: {
-    id: 'thundercloud', name: 'Thunder Cloud', cost: 5, rarity: 'epic', kind: 'troop', role: 'Win condition', count: 1,
+    id: 'thundercloud', name: 'Thunder Cloud', cost: 5, rarity: 'epic', kind: 'troop', role: 'Win condition', count: 1, art: 'img/card_thundercloud.webp',
     hp: 1050, dmg: 480, hit: 2.6, range: 0.3, speed: 0.85, targets: 'buildings', air: true,
     radius: 0.8, mass: 6, strike: 1.2, deathBlast: { r: 2.2, dmg: 150 },
     blurb: 'A slow storm cloud that drifts straight for buildings and calls down lightning on them. When it is destroyed it bursts in a final thunderclap.',
     evo: 'Downpour: rain slows ground troops under it.',
   },
   griffin: {
-    id: 'griffin', name: 'Griffin', cost: 4, rarity: 'legendary', kind: 'troop', role: 'Tank killer', count: 1,
+    id: 'griffin', name: 'Griffin', cost: 4, rarity: 'legendary', kind: 'troop', role: 'Tank killer', count: 1, art: 'img/card_griffin.webp',
     hp: 950, dmg: 40, hit: 0.2, range: 3.5, speed: 1.0, targets: 'both', air: true,
     radius: 0.65, mass: 4, beam: { dps: [40, 120, 360], stage: 2 },
     blurb: 'A storm griffin that locks a lightning beam on one target. The longer the beam holds, the harder it hits; it starts over when it changes target or is knocked away.',

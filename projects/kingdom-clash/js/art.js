@@ -427,10 +427,10 @@ const KCArt = (() => {
       for (const y of [-0.04, 0.08]) { rr(c, q(-0.2), q(y), q(0.4), q(0.06), 0); c.fillStyle = '#2a2230'; c.fill(); }
       c.restore();
       ell(c, 0, 0, q(0.17), q(0.2)); c.lineWidth = LW; c.strokeStyle = OUT; c.stroke();
-      sh(c, () => circ(c, 0, q(-0.2), q(0.1)), '#2a2230', null, 0);
-      rr(c, q(-0.1), q(-0.25), q(0.2), q(0.04), q(0.02)); c.fillStyle = T.main; c.fill();
+      sh(c, () => circ(c, 0, q(-0.22), q(0.13)), front ? '#ffd23a' : '#2a2230', front ? '#e8a816' : null, q(0.02));
+      rr(c, q(-0.12), q(-0.32), q(0.24), q(0.045), q(0.02)); c.fillStyle = T.main; c.fill();
       if (front) {
-        for (const d of [-1, 1]) { dot(c, d * q(0.045), q(-0.19), q(0.025), '#fff'); line(c, d * q(0.1), q(-0.27), d * q(0.02), q(-0.23), '#fff', LW * 0.6); }
+        for (const d of [-1, 1]) { circ(c, d * q(0.055), q(-0.22), q(0.045)); c.fillStyle = '#fff'; c.fill(); dot(c, d * q(0.045), q(-0.21), q(0.022)); line(c, d * q(0.11), q(-0.3), d * q(0.02), q(-0.26), OUT, LW * 0.8); }
         poly(c, [q(-0.03), q(0.18), q(0.03), q(0.18), 0, q(0.28)]); paint(c, '#2a2230', LW * 0.5);
       }
       for (const d of [-1, 1]) line(c, d * q(0.04), q(-0.28), d * q(0.09), q(-0.38), OUT, LW * 0.7);
@@ -440,7 +440,7 @@ const KCArt = (() => {
     // Owl: a big battle owl in a steel helm and chest plate, firing quills from its wings.
     owl(c, k, o) {
       const q = v => v * k, T = TEAM[o.team], flap = Math.sin(o.t * 5 + (o.id || 0)), front = o.view === 'front', shot = o.atk;
-      const brown = '#b08050', brownSh = '#8a5e36', steel = '#c7cfda', steelSh = '#8f99a8';
+      const brown = '#b8875a', brownSh = '#8e6440', steel = '#3f7ee8', steelSh = '#2a5cb8';
       for (const d of [-1, 1]) {
         c.save(); c.scale(d, 1); c.translate(q(0.22), q(-0.05)); c.rotate(-0.2 - flap * 0.35 - shot * 0.5);
         // a broad rounded wing ending in soft feather tips
@@ -459,13 +459,14 @@ const KCArt = (() => {
       if (front) {
         sh(c, () => poly(c, [q(-0.22), q(-0.1), q(0.22), q(-0.1), q(0.18), q(0.28), 0, q(0.38), q(-0.18), q(0.28)]), steel, steelSh, q(0.05));
         sh(c, () => poly(c, [0, q(-0.02), q(0.07), q(0.1), 0, q(0.22), q(-0.07), q(0.1)]), C.gold, C.goldSh, q(0.02));
+        for (const d of [-1, 1]) sh(c, () => ell(c, d * q(0.27), q(-0.08), q(0.15), q(0.1), d * 0.3), steel, steelSh, q(0.03));
         for (const d of [-1, 1]) line(c, d * q(0.06), q(0.38), d * q(0.1), q(0.5), '#f2b824', q(0.06));
       } else sh(c, () => poly(c, [q(-0.12), q(0.38), q(0.12), q(0.38), q(0.18), q(0.6), 0, q(0.52), q(-0.18), q(0.6)]), brown, brownSh, q(0.04));
       // the head and its helm
       sh(c, () => circ(c, 0, q(-0.38), q(0.3)), brown, brownSh, q(0.06));
       for (const d of [-1, 1]) sh(c, () => poly(c, [d * q(0.16), q(-0.6), d * q(0.28), q(-0.72), d * q(0.27), q(-0.55)]), brown, brownSh, q(0.03));
-      sh(c, () => { c.beginPath(); c.arc(0, q(-0.42), q(0.31), Math.PI * 1.15, Math.PI * 1.85); c.closePath(); }, steel, steelSh, q(0.04));
-      rr(c, q(-0.04), q(-0.74), q(0.08), q(0.12), q(0.02)); paint(c, T.main, LW * 0.6);
+      sh(c, () => { c.beginPath(); c.arc(0, q(-0.42), q(0.31), Math.PI * 1.15, Math.PI * 1.85); c.closePath(); }, C.gold, C.goldSh, q(0.04));
+      poly(c, [0, q(-0.74), q(0.06), q(-0.66), 0, q(-0.58), q(-0.06), q(-0.66)]); paint(c, '#4a9cff', LW * 0.6);
       if (front) {
         // the round face disc
         for (const d of [-1, 1]) { circ(c, d * q(0.115), q(-0.35), q(0.16)); paint(c, '#f3e6cc', LW * 0.45); }
@@ -486,9 +487,9 @@ const KCArt = (() => {
       c.restore();
       c.save(); c.translate(drift, 0);
       for (const [x, y, r] of puffs) { circ(c, q(x), q(y), q(r)); c.lineWidth = LW * 2.2; c.strokeStyle = OUT; c.stroke(); }
-      for (const [x, y, r] of puffs) { circ(c, q(x), q(y), q(r)); c.fillStyle = '#5a6278'; c.fill(); }
-      for (const [x, y, r] of puffs) { circ(c, q(x) - q(r * 0.2), q(y) - q(r * 0.25), q(r * 0.62)); c.fillStyle = '#737c94'; c.fill(); }
-      rr(c, q(-0.7), q(0.18), q(1.4), q(0.18), q(0.08)); c.fillStyle = '#454b5e'; c.fill();
+      for (const [x, y, r] of puffs) { circ(c, q(x), q(y), q(r)); c.fillStyle = '#463a78'; c.fill(); }
+      for (const [x, y, r] of puffs) { circ(c, q(x) - q(r * 0.2), q(y) - q(r * 0.25), q(r * 0.62)); c.fillStyle = '#62549e'; c.fill(); }
+      rr(c, q(-0.7), q(0.18), q(1.4), q(0.18), q(0.08)); c.fillStyle = '#342a5c'; c.fill();
       rr(c, q(-0.4), q(0.26), q(0.8), q(0.07), q(0.03)); c.fillStyle = T.main; c.fill();
       if (front) {
         const glow = charge > 0.05 ? '#fff6a0' : '#ffe27a';
@@ -505,9 +506,9 @@ const KCArt = (() => {
       for (let i = 0; i < 2; i++) {
         const j = (spark + i * 2) % 4, a = [-2.4, -0.7, 2.6, 0.5][j];
         zig([-0.5, 0.4, -0.2, 0.25][j], [-0.1, -0.15, 0.1, -0.3][j], 0.35, a);
-        c.strokeStyle = 'rgba(255,240,140,0.95)'; c.lineWidth = Math.max(1.2, q(0.05)); c.stroke();
+        c.strokeStyle = 'rgba(200,230,255,0.95)'; c.lineWidth = Math.max(1.2, q(0.05)); c.stroke();
       }
-      if (charge > 0.05) { c.globalCompositeOperation = 'lighter'; circ(c, 0, q(-0.1), q(0.9)); c.fillStyle = `rgba(255,240,170,${0.25 * charge})`; c.fill(); }
+      if (charge > 0.05) { c.globalCompositeOperation = 'lighter'; circ(c, 0, q(-0.1), q(0.9)); c.fillStyle = `rgba(150,190,255,${0.3 * charge})`; c.fill(); }
       c.restore();
       c.restore();
     },
@@ -515,7 +516,7 @@ const KCArt = (() => {
     // Griffin: an eagle's head and wings on a lion's body, crackling with storm light.
     griffin(c, k, o) {
       const q = v => v * k, T = TEAM[o.team], flap = Math.sin(o.t * 6 + (o.id || 0)), front = o.view === 'front', beam = o.beam || 0;
-      const fur = '#d9a85a', furSh = '#b5853f', white = '#f7f5f0', whiteSh = '#d9d6e0', wingC = '#a87a3c', wingSh = '#84592a';
+      const fur = '#e8b04a', furSh = '#c08a2a', white = '#f7f2e6', whiteSh = '#dcd2bc', wingC = '#e6b453', wingSh = '#b8862c';
       for (const d of [-1, 1]) {
         c.save(); c.scale(d, 1); c.translate(q(0.25), q(-0.2)); c.rotate(-0.35 - flap * 0.4);
         const wing = () => { c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(q(0.5), q(-0.75), q(1.15), q(-0.55)); c.lineTo(q(1.0), q(-0.32)); c.lineTo(q(1.1), q(-0.16)); c.lineTo(q(0.84), q(-0.08)); c.lineTo(q(0.9), q(0.06)); c.lineTo(q(0.56), q(0.06)); c.quadraticCurveTo(q(0.26), q(0.2), 0, q(0.18)); c.closePath(); };
@@ -533,13 +534,15 @@ const KCArt = (() => {
         sh(c, () => circ(c, q(0.05), q(0.88), q(0.08)), '#8a5a2e', null, 0);
       }
       rr(c, q(-0.34), q(-0.02), q(0.68), q(0.1), q(0.04)); paint(c, T.main, LW * 0.7);
+      // gold shoulder armor with a blue gem
+      for (const d of [-1, 1]) { sh(c, () => ell(c, d * q(0.3), q(-0.12), q(0.17), q(0.13)), C.gold, C.goldSh, q(0.03)); poly(c, [d * q(0.3), q(-0.2), d * q(0.36), q(-0.12), d * q(0.3), q(-0.04), d * q(0.24), q(-0.12)]); paint(c, '#4a9cff', LW * 0.5); }
       // the eagle head
       sh(c, () => circ(c, 0, q(-0.36), q(0.3)), white, whiteSh, q(0.06));
       for (const d of [-1, 1]) sh(c, () => poly(c, [d * q(0.14), q(-0.6), d * q(0.34), q(-0.84), d * q(0.3), q(-0.5)]), white, whiteSh, q(0.03));
       if (front) {
         sh(c, () => poly(c, [q(-0.1), q(-0.34), q(0.1), q(-0.34), q(0.04), q(-0.1), 0, q(-0.04), q(-0.04), q(-0.1)]), '#ffc52e', '#e09f12', q(0.03));
         for (const d of [-1, 1]) {
-          circ(c, d * q(0.12), q(-0.42), q(0.06)); paint(c, beam ? '#9ff0ff' : '#ffcf3f', LW * 0.7); dot(c, d * q(0.12), q(-0.42), q(0.03));
+          circ(c, d * q(0.12), q(-0.42), q(0.06)); paint(c, beam ? '#cff6ff' : '#5ab0ff', LW * 0.7); dot(c, d * q(0.12), q(-0.42), q(0.03));
           line(c, d * q(0.22), q(-0.52), d * q(0.05), q(-0.47), OUT, LW * 1.1);
         }
       }
@@ -961,6 +964,15 @@ const KCArt = (() => {
     cv.width = bare ? w * 2 : w; cv.height = bare ? h * 2 : h;
     const c = cv.getContext('2d'), card = KC_CARDS[cardId], R = evo ? RARITY.evo : RARITY[card.rarity] || RARITY.common;
     if (bare) c.translate(w / 2, h / 2);
+    // an illustrated card picture, once it has loaded (the code-drawn one stands in until then)
+    const pic = !bare && !evo && card.art && typeof KCArenas !== 'undefined' ? KCArenas.image(card.art) : null;
+    if (pic && KCArenas.ready(pic)) {
+      c.save(); rr(c, 0, 0, w, h, w * 0.1); c.clip();
+      const sc = Math.max(w / pic.naturalWidth, h / pic.naturalHeight), dw = pic.naturalWidth * sc, dh = pic.naturalHeight * sc;
+      c.drawImage(pic, (w - dw) / 2, (h - dh) / 2, dw, dh);
+      c.restore();
+      return finish(c, w, h, RARITY[card.rarity] || RARITY.common, cv);
+    }
     if (!bare) {
       const g = c.createLinearGradient(0, 0, w * 0.3, h);
       g.addColorStop(0, R[0]); if (R[3]) g.addColorStop(0.55, R[3]); g.addColorStop(1, R[1]);
