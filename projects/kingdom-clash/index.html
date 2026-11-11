@@ -26,8 +26,8 @@
           <div class="lvl-bar"><i id="xpFill"></i><span id="xpText">0 / 100</span></div>
         </div>
         <div class="res">
-          <button class="res-chip" type="button" data-tab="shop" title="Coins arrive with the SirSC wallet"><span class="coin-i" aria-hidden="true"></span><b id="coinVal">&ndash;</b><span class="plus" aria-hidden="true">+</span><span class="sr">Coins</span></button>
-          <button class="res-chip" type="button" data-tab="shop" title="Diamonds arrive with the SirSC wallet"><span class="gem-i" aria-hidden="true"></span><b id="gemVal">&ndash;</b><span class="plus" aria-hidden="true">+</span><span class="sr">Diamonds</span></button>
+          <button class="res-chip" type="button" data-tab="shop" title="Coins: open the Shop"><span class="coin-i" aria-hidden="true"></span><b id="coinVal">0</b><span class="plus" aria-hidden="true">+</span><span class="sr">Coins</span></button>
+          <button class="res-chip" type="button" data-tab="shop" title="Diamonds: open the Shop"><span class="gem-i" aria-hidden="true"></span><b id="gemVal">0</b><span class="plus" aria-hidden="true">+</span><span class="sr">Diamonds</span></button>
         </div>
         <button class="icon-btn" id="soundBtn" type="button" aria-label="Sound on" title="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="soundWaves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
         <button class="icon-btn" id="settingsBtn" type="button" aria-label="Settings" aria-expanded="false" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm8.4 5.1l1.6 1.2-2 3.4-1.9-.7a7.6 7.6 0 0 1-2 1.2L15.8 21h-4l-.3-2.3a7.6 7.6 0 0 1-2-1.2l-1.9.7-2-3.4 1.6-1.2a7.4 7.4 0 0 1 0-2.4L5.6 9.6l2-3.4 1.9.7a7.6 7.6 0 0 1 2-1.2L11.8 3h4l.3 2.7a7.6 7.6 0 0 1 2 1.2l1.9-.7 2 3.4-1.6 1.2a7.4 7.4 0 0 1 0 2.4z" fill="currentColor"/></svg></button>
@@ -72,8 +72,11 @@
             </div>
             <div class="battle-wrap">
               <button class="battle-btn" id="battleBtn" type="button"><span>Battle</span><small id="battleSub">vs Trainer Owen</small></button>
-              <!-- TEMPORARY test button (lobby): remove with the other "TEMPORARY" blocks -->
-              <button class="sim-win sim-lobby" id="simWinLobby" type="button" title="Test button: counts a win against the current opponent without playing"><small>Test</small>Simulate Win</button>
+              <!-- TEMPORARY test buttons (lobby): remove with the other "TEMPORARY" blocks -->
+              <div class="test-tools">
+                <button class="sim-win" id="simWinLobby" type="button" title="Test button: counts a win against the current opponent without playing"><small>Test</small>Simulate Win</button>
+                <button class="sim-win" id="testRich" type="button" title="Test button: sets your coins and diamonds to 1,000,000"><small>Test</small>1,000,000 coins &amp; diamonds</button>
+              </div>
             </div>
             <div class="chests" id="chests" aria-label="Chest slots"></div>
           </div>
@@ -121,11 +124,17 @@
             <ol class="road-list" id="roadList"></ol>
           </div>
         </section>
-        <section class="tab info-tab" id="tab-shop" hidden>
-          <div class="plaque info-plaque">
-            <div class="big-soon" aria-hidden="true"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 20h32l-3 22H11z" fill="#c9792f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M6 14h36v8H6z" fill="#e8a33c" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M18 14a6 6 0 0 1 12 0" fill="none" stroke="#1c1530" stroke-width="3"/><rect x="20" y="24" width="8" height="8" rx="2" fill="#ffcf3f" stroke="#1c1530" stroke-width="2.5"/></svg></div>
-            <h3>The Shop is coming</h3>
-            <p>It opens with the SirSC wallet: coins you earn by playing, diamonds and SirSC Membership. Everything sold here will show exactly what you get.</p>
+        <section class="tab shop-tab" id="tab-shop" hidden>
+          <div class="plaque shop-plaque">
+            <div class="ribbon"><span>Daily Offers</span></div>
+            <div class="shop-head">
+              <p class="dim">Picked from the cards you have found and their levels. Every offer shows exactly what you get.</p>
+              <span class="shop-timer">New offers in <b id="shopTimer">0:00</b></span>
+              <!-- TEMPORARY test button -->
+              <button class="sim-win test-inline" id="testOffers" type="button" title="Test button: makes a fresh set of offers now"><small>Test</small>New offers</button>
+            </div>
+            <div class="offers" id="shopOffers"></div>
+            <p class="dim shop-note">1 diamond = 5,000 coins. Coins and diamonds are saved on this device until the SirSC wallet is connected.</p>
           </div>
         </section>
         <section class="tab info-tab" id="tab-clan" hidden>
@@ -139,7 +148,7 @@
 
       <nav class="bottomnav" aria-label="Menu">
         <span class="nb-glow" id="nbGlow" aria-hidden="true"></span>
-        <button class="nb" type="button" data-tab="shop"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 20h32l-3 22H11z" fill="#c9792f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M6 14h36v8H6z" fill="#e8a33c" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M18 14a6 6 0 0 1 12 0" fill="none" stroke="#1c1530" stroke-width="3"/><rect x="20" y="24" width="8" height="8" rx="2" fill="#ffcf3f" stroke="#1c1530" stroke-width="2.5"/></svg></span><span class="nb-label">Shop</span><i class="nb-tag">Soon</i></button>
+        <button class="nb" type="button" data-tab="shop"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 20h32l-3 22H11z" fill="#c9792f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M6 14h36v8H6z" fill="#e8a33c" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M18 14a6 6 0 0 1 12 0" fill="none" stroke="#1c1530" stroke-width="3"/><rect x="20" y="24" width="8" height="8" rx="2" fill="#ffcf3f" stroke="#1c1530" stroke-width="2.5"/></svg></span><span class="nb-label">Shop</span></button>
         <button class="nb" type="button" data-tab="cards"><i class="nb-tag up" id="cardsTag" hidden>0</i><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="10" width="22" height="30" rx="4" transform="rotate(-10 17 25)" fill="#7a5be0" stroke="#1c1530" stroke-width="3"/><rect x="20" y="8" width="22" height="30" rx="4" transform="rotate(8 31 23)" fill="#4f8ff0" stroke="#1c1530" stroke-width="3"/><circle cx="31" cy="22" r="5" fill="#ffcf3f" stroke="#1c1530" stroke-width="2.5"/></svg></span><span class="nb-label">Cards</span></button>
         <button class="nb nb-battle on" type="button" data-tab="battle"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 6l24 24-4 4L5 10V6z" fill="#dfe6ee" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M39 6v4L15 34l-4-4L35 6z" fill="#dfe6ee" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M8 32l8 8-4 3-7-7zM40 32l-8 8 4 3 7-7z" fill="#ffcf3f" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/></svg></span><span class="nb-label">Battle</span></button>
         <button class="nb" type="button" data-tab="clan"><span class="nb-ico"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4l16 6v12c0 10-7 18-16 22C15 40 8 32 8 22V10z" fill="#3d7de6" stroke="#1c1530" stroke-width="3" stroke-linejoin="round"/><path d="M24 10l10 4v8c0 7-4 12-10 15z" fill="#2a5fc0"/><path d="M17 26l5 5 9-11" fill="none" stroke="#ffcf3f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nb-label">Clan</span><i class="nb-tag">Soon</i></button>
@@ -150,12 +159,13 @@
     <div class="lobby-toast" id="lobbyToast" role="status" hidden></div>
 
     <div class="chest-open" id="chestOpen" hidden>
+      <canvas class="co-fx" id="coFx" aria-hidden="true"></canvas>
       <div class="co-stage" id="coStage">
         <p class="co-title" id="coTitle">Wooden Chest</p>
-        <div class="co-chest" id="coChest"></div>
-        <div class="co-reward" id="coReward" hidden></div>
+        <div class="co-zone"><div class="co-reward" id="coReward" hidden></div></div>
+        <div class="co-chest-wrap" id="coChestWrap"><span class="co-rays" id="coRays" aria-hidden="true"></span><div class="co-chest" id="coChest"></div><span class="co-count" id="coCount" hidden></span></div>
         <div class="co-summary" id="coSummary" hidden></div>
-        <p class="co-hint" id="coHint">Click to open</p>
+        <p class="co-hint" id="coHint" aria-live="polite">Click to open</p>
         <button class="big-btn" id="coDone" type="button" hidden><span>Done</span></button>
       </div>
     </div>

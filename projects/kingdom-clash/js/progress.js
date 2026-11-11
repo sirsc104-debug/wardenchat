@@ -14,7 +14,11 @@
    - Arena cards (Skeleton Pack, Cannon) are found on the Trophy Road in Arena 1 only. Trainers never
      use them, and in a Training Grounds match your deck goes back to the starter cards.
 
-   Coins are kept on this device for now. When the SirSC wallet is connected they move to it.
+   - The Shop: five offers a day built from the cards you have found and their levels, for coins
+     or diamonds (1 diamond = 5,000 coins). Each offer lists exactly what it gives.
+
+   Coins and diamonds are kept on this device for now. When the SirSC wallet is connected they move
+   to it, and prices and purchases must then be decided by the server.
    Everything is saved in localStorage under kc.progress; older saves are upgraded in place. */
 'use strict';
 
@@ -80,7 +84,7 @@ const KCProgress = (() => {
   };
   const blank = () => ({
     name: 'Player', xp: 0, beaten: {}, records: {}, roadSeen: false, opp: null,
-    mode: null, trophies: 0, best: 0, coins: 0, cards: {}, found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
+    mode: null, trophies: 0, best: 0, coins: 0, diamonds: 0, shop: null, cards: {}, found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
     chests: [null, null, null, null], cycle: 0, claimed: {}, diff: 0.35, trophyRecord: { w: 0, l: 0, d: 0 },
   });
 
@@ -281,6 +285,83 @@ const KCProgress = (() => {
     return Object.assign({ chest: c.type }, c.contents, { cards: c.contents.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)) });
   }
 
+  /* ---------- the Shop ---------- */
+  // Five offers a day, made from the cards you have found and their levels. Every offer says exactly
+  // what it gives. Prices: a copy is worth 10 coins (common) or 50 (rare); 1 diamond = 5,000 coins.
+  const SHOP = { perCopy: { common: 10, rare: 50 }, coinsPerDiamond: 5000, maxQty: 250 };
+  const pad2 = n => String(n).padStart(2, '0');
+  const dayKey = now => { const d = new Date(now); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
+  // When today's offers are replaced: the next local midnight.
+  const shopEnds = (now = Date.now()) => { const d = new Date(now); d.setHours(24, 0, 0, 0); return d.getTime(); };
+  const copiesNeed = id => UPGRADE.copies[KC_CARDS[id].rarity][P.cards[id].level - 1];
+  function copiesToMax(id) {
+    const c = P.cards[id], list = UPGRADE.copies[KC_CARDS[id].rarity];
+    let n = 0;
+    for (let l = c.level; l < MAX_LEVEL; l++) n += list[l - 1];
+    return Math.max(0, n - c.count);
+  }
+  function makeOffers(rand = Math.random) {
+    const open = P.found.filter(id => P.cards[id].level < MAX_LEVEL);
+    for (let i = open.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [open[i], open[j]] = [open[j], open[i]]; }
+    const used = new Set(), offers = [];
+    const lvl = id => P.cards[id].level, inDeck = id => (P.deck.includes(id) ? 1 : 0);
+    const missing = id => copiesNeed(id) - P.cards[id].count;
+    const free = () => { const f = open.filter(id => !used.has(id)); return f.length ? f : open.slice(); };
+    const add = (id, qty, tag, currency) => {
+      if (!id) return;
+      used.add(id);
+      qty = Math.max(1, Math.min(qty, copiesToMax(id) || 1));
+      const value = qty * SHOP.perCopy[KC_CARDS[id].rarity];
+      offers.push({ id: 'o' + offers.length, kind: 'card', card: id, qty, tag, currency,
+        price: currency === 'diamonds' ? Math.max(1, Math.ceil(value / SHOP.coinsPerDiamond)) : value });
+    };
+    if (open.length) {
+      // 1. the card closest to its next upgrade: exactly the copies it is missing
+      let pool = free().filter(id => missing(id) > 0).sort((a, b) => missing(a) - missing(b) || inDeck(b) - inDeck(a));
+      let id = pool[0] || free()[0];
+      add(id, Math.min(SHOP.maxQty, missing(id) > 0 ? missing(id) : copiesNeed(id)), 'Closest to upgrade', 'coins');
+      // 2. a rare card (a common if every rare is taken or maxed): one level's worth
+      pool = free().filter(c => KC_CARDS[c].rarity === 'rare');
+      id = pool[0] || free()[0];
+      add(id, Math.min(SHOP.maxQty, copiesNeed(id)), KC_CARDS[id].rarity === 'rare' ? 'Rare pick' : 'Card pick', 'coins');
+      // 3. your lowest-level card (cards found on the Trophy Road first): one level's worth
+      pool = free().sort((a, b) => lvl(a) - lvl(b) || (KC_STARTER_DECK.includes(a) ? 1 : 0) - (KC_STARTER_DECK.includes(b) ? 1 : 0));
+      id = pool[0];
+      add(id, Math.min(SHOP.maxQty, copiesNeed(id)), 'Catch up', 'coins');
+      // 4. a big bundle of your highest-level deck card: 5,000 coins' worth of copies for 1 diamond
+      pool = free().sort((a, b) => inDeck(b) - inDeck(a) || lvl(b) - lvl(a));
+      id = pool[0];
+      add(id, Math.floor(SHOP.coinsPerDiamond / SHOP.perCopy[KC_CARDS[id].rarity]), 'Mega bundle', 'diamonds');
+    }
+    // 5. coins for a diamond, at the exchange rate
+    offers.push({ id: 'o' + offers.length, kind: 'coins', qty: SHOP.coinsPerDiamond, tag: 'Coin bundle', currency: 'diamonds', price: 1, repeat: true });
+    return offers;
+  }
+  // Today's offers (made the first time they are asked for each day).
+  function shop(now = Date.now(), rand) {
+    const day = dayKey(now);
+    if (!P.shop || P.shop.day !== day || !Array.isArray(P.shop.offers)) { P.shop = { day, offers: makeOffers(rand), bought: {} }; save(); }
+    return P.shop;
+  }
+  function refreshShop(rand, now = Date.now()) { P.shop = null; return shop(now, rand); }
+  // Buy offer i. Returns { ok, coins, cards } or { error: 'sold' | 'coins' | 'diamonds' | 'none' }.
+  function buy(i, now = Date.now()) {
+    const s = shop(now), o = s.offers[i];
+    if (!o) return { error: 'none' };
+    if (s.bought[o.id] && !o.repeat) return { error: 'sold' };
+    const wallet = o.currency === 'diamonds' ? 'diamonds' : 'coins';
+    if (P[wallet] < o.price) return { error: wallet };
+    P[wallet] -= o.price;
+    let out;
+    if (o.kind === 'coins') { P.coins += o.qty; out = { coins: o.qty, cards: [] }; }
+    else { P.cards[o.card].count += o.qty; out = { coins: 0, cards: [{ id: o.card, n: o.qty, isNew: false }] }; }
+    s.bought[o.id] = (s.bought[o.id] || 0) + 1;
+    save();
+    return Object.assign({ ok: true, offer: o }, out);
+  }
+  // TEMPORARY: the test button's 1,000,000 coins and diamonds.
+  function grantTest() { P.coins = 1000000; P.diamonds = 1000000; save(); }
+
   /* ---------- cards ---------- */
   function upgradeInfo(id) {
     const c = P.cards[id], card = KC_CARDS[id];
@@ -327,6 +408,7 @@ const KCProgress = (() => {
     arena, nextArena, roadState, claimable, claim,
     trophyFoe, foeUpgrades, spreadLevels, recordTrophy,
     roll, chestState, unlockingSlot, startUnlock, openChest,
+    SHOP, shop, shopEnds, refreshShop, buy, grantTest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
   };
 })();

@@ -38,6 +38,19 @@ const KCSound = (() => {
   }
   const SFX = {
     select: () => tone(660, 880, 0.06, 'triangle', 0.12),
+    // chests and the Shop
+    chestDrop: () => { tone(130, 45, 0.22, 'sine', 0.4); noise(0.16, 0.25, 420); noise(0.08, 0.1, 2400, 'bandpass', 0.05); },
+    chestShake: () => { for (let i = 0; i < 5; i++) { noise(0.05, 0.13, 1500 + i * 250, 'bandpass', i * 0.09); tone(190 + i * 22, 150, 0.05, 'square', 0.04, i * 0.09); } },
+    chestOpen: () => { noise(0.6, 0.16, 2600, 'highpass'); tone(160, 720, 0.35, 'sawtooth', 0.06); [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0, 0.5 - i * 0.05, 'triangle', 0.15, 0.08 + i * 0.06)); },
+    cardFly: () => { noise(0.2, 0.07, 1300, 'bandpass'); tone(280, 920, 0.2, 'sine', 0.07); },
+    cardFlip: () => { tone(880, 1500, 0.07, 'triangle', 0.12); noise(0.05, 0.05, 3200, 'highpass'); },
+    revealCommon: () => [659, 880].forEach((f, i) => tone(f, 0, 0.16, 'triangle', 0.15, i * 0.08)),
+    revealRare: () => { [659, 880, 1175, 1568].forEach((f, i) => tone(f, 0, 0.22, 'triangle', 0.16, i * 0.07)); noise(0.4, 0.05, 5000, 'highpass', 0.1); },
+    revealNew: () => { [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, 0, i === 5 ? 0.6 : 0.2, 'triangle', 0.17, i * 0.08)); noise(0.6, 0.06, 5200, 'highpass', 0.1); },
+    coinTick: () => tone(1250 + Math.random() * 500, 0, 0.05, 'square', 0.045),
+    countTick: () => tone(900 + Math.random() * 200, 0, 0.035, 'triangle', 0.07),
+    chestDone: () => [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0, i === 3 ? 0.45 : 0.16, 'triangle', 0.16, i * 0.1)),
+    buy: () => { tone(880, 1320, 0.1, 'triangle', 0.15); tone(1760, 0, 0.18, 'sine', 0.1, 0.09); },
     deploy: () => { tone(220, 90, 0.16, 'sine', 0.3); noise(0.12, 0.12, 600); },
     spell: () => { noise(0.35, 0.12, 2200, 'bandpass'); tone(300, 600, 0.3, 'sawtooth', 0.05); },
     arrow: () => noise(0.06, 0.05, 3000, 'highpass'),

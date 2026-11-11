@@ -75,6 +75,54 @@ const P2 = G.load(st);
 assert.strictEqual(P2.trophies, 130); assert.strictEqual(P2.cards.wolves.level, 2); assert.strictEqual(P2.deck[0], 'skeletons');
 console.log('save and reload: ok');
 
+// 7b. The Shop: five offers from the cards you have found and their levels.
+{
+  const day1 = new Date(2026, 10, 11, 9, 0, 0).getTime(), day2 = new Date(2026, 10, 12, 0, 0, 5).getTime();
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, coins: 300, cards: { wolves: { level: 2, count: 3 }, rhino: { level: 3, count: 0 }, gladiator: { level: 1, count: 1 } } }) }));
+  const P3 = G.state;
+  assert.strictEqual(P3.diamonds, 0, 'old saves start with no diamonds');
+  const sh = G.shop(day1, KCSim.mulberry(5)), o = sh.offers;
+  assert.strictEqual(o.length, 5);
+  assert.deepStrictEqual(o.map(x => x.currency), ['coins', 'coins', 'coins', 'diamonds', 'diamonds']);
+  const cardsOffered = o.filter(x => x.kind === 'card').map(x => x.card);
+  assert.strictEqual(new Set(cardsOffered).size, 4, 'four different cards');
+  assert(cardsOffered.every(id => P3.found.includes(id)), 'only cards you have found');
+  assert(!cardsOffered.includes('skeletons') && !cardsOffered.includes('cannon'), 'no Arena 1 cards before they are found');
+  // 1: closest to upgrade is wolves (needs 4, has 3) or gladiator (needs 2, has 1): one copy short each
+  assert(['wolves', 'gladiator'].includes(o[0].card) && o[0].qty === 1 && o[0].price === 10, JSON.stringify(o[0]));
+  assert.strictEqual(KC_CARDS[o[1].card].rarity, 'rare');
+  assert.strictEqual(o[1].price, o[1].qty * 50);
+  assert.strictEqual(P3.cards[o[2].card].level, 1, 'catch-up offer is a lowest-level card');
+  assert(o[3].price === 1 && o[3].qty === (KC_CARDS[o[3].card].rarity === 'rare' ? 100 : 500), 'mega bundle: 5,000 coins of copies for 1 diamond');
+  assert.deepStrictEqual([o[4].kind, o[4].qty, o[4].price], ['coins', 5000, 1]);
+  assert.strictEqual(G.shop(day1 + 3600e3).offers, o, 'same offers all day');
+  // buying
+  const before = P3.cards[o[0].card].count;
+  let r = G.buy(0, day1);
+  assert(r.ok && P3.coins === 290 && P3.cards[o[0].card].count === before + 1);
+  assert.strictEqual(G.buy(0, day1).error, 'sold');
+  assert.strictEqual(G.buy(3, day1).error, 'diamonds', 'no diamonds yet');
+  P3.coins = 0; assert.strictEqual(G.buy(1, day1).error, 'coins');
+  G.grantTest();
+  assert(P3.coins === 1000000 && P3.diamonds === 1000000);
+  r = G.buy(4, day1); assert(r.ok && P3.diamonds === 999999 && P3.coins === 1005000);
+  r = G.buy(4, day1); assert(r.ok && P3.coins === 1010000, 'the coin bundle can be bought again');
+  r = G.buy(3, day1); assert(r.ok && P3.diamonds === 999997 && r.cards[0].n === o[3].qty);
+  // offers follow your cards: find the Skeleton Pack, level things up, next day
+  P3.trophies = 60; G.claim(40);
+  for (const id of ['hawks', 'archers', 'snowman', 'gorilla', 'fireball', 'gladiator', 'wolves', 'rhino']) P3.cards[id].level = 4;
+  const o2 = G.shop(day2, KCSim.mulberry(6)).offers;
+  assert.notStrictEqual(o2, o);
+  assert.strictEqual(o2[2].card, 'skeletons', 'the new, lowest-level card is the catch-up offer');
+  assert.deepStrictEqual(G.state.shop.bought, {}, 'a new day clears what was bought');
+  assert(G.shopEnds(day1) === new Date(2026, 10, 12, 0, 0, 0).getTime());
+  // a maxed card is never offered
+  for (const id of KC_STARTER_DECK) P3.cards[id].level = 15;
+  const o3 = G.refreshShop(KCSim.mulberry(7), day2).offers;
+  assert(o3.filter(x => x.kind === 'card').every(x => x.card === 'skeletons'), 'only the card that can still level up');
+  console.log('shop offers, prices, buying, daily change: ok');
+}
+
 // 8. Opponents level their cards one at a time as their trophies rise, and they have no lines.
 for (const [t, want] of [[0, 0], [49, 0], [50, 1], [62, 1], [63, 2], [137, 7], [138, 8], [149, 8], [150, 9], [250, 17], [1437, 111], [1438, 112], [9999, 112]]) assert.strictEqual(G.foeUpgrades(t), want, `upgrades at ${t}`);
 const tally = l => Object.values(l).sort().join('');

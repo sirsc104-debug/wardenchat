@@ -7,7 +7,8 @@
    from progress: trainers beaten in the Training Grounds, trophies toward the next arena once the
    Trophy Road is open. Under it: the opponent (trophy battle or a trainer, picked from a panel), the
    Battle button and four chest slots. Cards tab: the deck (swap cards in), the collection with levels
-   and copies, and a details window with Upgrade. Trophy Road tab: the road's rewards to claim. */
+   and copies, and a details window with Upgrade. Trophy Road tab: the road's rewards to claim. Shop tab:
+   the day's five offers. Chests, road cards and purchases all open in the same reveal scene. */
 'use strict';
 
 const KCMenu = (() => {
@@ -121,10 +122,45 @@ const KCMenu = (() => {
   }
 
   /* ---------- chests ---------- */
-  const CHEST_COL = { wooden: ['#b26b30', '#8a4f20', '#e3a14a'], silver: ['#9aa6b8', '#6f7b8e', '#e6ecf5'], gold: ['#f2b51f', '#c98806', '#fff0a0'] };
-  function chestSvg(type) {
-    const [a, b, trim] = CHEST_COL[type] || CHEST_COL.wooden;
-    return `<svg viewBox="0 0 64 52" aria-hidden="true"><path d="M6 22h52v24a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4z" fill="${b}" stroke="#1c1530" stroke-width="3"/><path d="M6 22c0-11 8-18 26-18s26 7 26 18z" fill="${a}" stroke="#1c1530" stroke-width="3"/><path d="M6 22h52v6H6z" fill="${trim}" stroke="#1c1530" stroke-width="3"/><path d="M14 8v38M50 8v38" stroke="${trim}" stroke-width="3" opacity=".7"/><rect x="27" y="22" width="10" height="13" rx="2" fill="#ffcf3f" stroke="#1c1530" stroke-width="3"/></svg>`;
+  // Each chest is drawn as a base and a lid, so the lid can lift when it opens (CSS: .chest-svg.open).
+  const CHEST_LOOK = {
+    wooden: { body: '#b2733a', bodySh: '#8a5426', lid: '#c98a48', lidSh: '#a36a30', band: '#5f6573', bandSh: '#474c58', trim: '#8a909e', lock: '#d9a032', glow: '#fff0b0' },
+    silver: { body: '#8fa1ba', bodySh: '#6a7c96', lid: '#aebccf', lidSh: '#8797ae', band: '#eef2f8', bandSh: '#c5cfdd', trim: '#f6f9fc', lock: '#4aa8ff', glow: '#d8f0ff' },
+    gold: { body: '#e6a81e', bodySh: '#b98008', lid: '#f8c636', lidSh: '#d99a10', band: '#b3202a', bandSh: '#8a1620', trim: '#fff0a0', lock: '#ff4d5a', glow: '#fff3a0' },
+  };
+  function chestSvg(type, open) {
+    const L = CHEST_LOOK[type] || CHEST_LOOK.wooden, O = '#1c1530';
+    const planks = type === 'wooden'
+      ? [44, 60, 76].map(x => `<path d="M${x} 59v36" stroke="${L.bodySh}" stroke-width="2"/>`).join('') + [46, 60, 74].map(x => `<path d="M${x} 20v24" stroke="${L.lidSh}" stroke-width="2"/>`).join('')
+      : type === 'silver'
+        ? [[44, 68], [76, 68], [44, 86], [76, 86]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" fill="${L.trim}"/>`).join('')
+        : `<path d="M46 62h28v26H46z" fill="${L.band}" stroke="${O}" stroke-width="2"/><path d="M52 78l3-9 5 6 5-6 3 9z" fill="${L.trim}"/>`;
+    const lock = type === 'wooden'
+      ? `<rect x="52" y="42" width="16" height="20" rx="4" fill="${L.lock}" stroke="${O}" stroke-width="3"/><circle cx="60" cy="50" r="2.6" fill="${O}"/><path d="M60 50v6" stroke="${O}" stroke-width="2.4" stroke-linecap="round"/>`
+      : `<rect x="51" y="41" width="18" height="22" rx="5" fill="${L.trim}" stroke="${O}" stroke-width="3"/><path d="M60 45l6 7-6 8-6-8z" fill="${L.lock}" stroke="${O}" stroke-width="2"/>`;
+    const crown = type === 'gold' ? `<path d="M48 16l2-12 6 7 4-9 4 9 6-7 2 12z" fill="${L.trim}" stroke="${O}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="60" cy="11" r="2" fill="${L.lock}"/>` : '';
+    const stars = type === 'gold' ? `<g class="ch-stars" fill="#fff"><path d="M20 30l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z"/><path d="M100 22l1.2 3.2 3.2 1.2-3.2 1.2-1.2 3.2-1.2-3.2-3.2-1.2 3.2-1.2z"/><path d="M98 70l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1z"/></g>` : '';
+    return `<svg class="chest-svg chest-${type}${open ? ' open' : ''}" viewBox="0 0 120 110" aria-hidden="true">
+      <ellipse cx="60" cy="100" rx="46" ry="7" fill="rgba(0,0,0,0.3)"/>
+      <path class="ch-beam" d="M26 50L6 -40h108L94 50z" fill="${L.glow}"/>
+      <g class="ch-inside"><path d="M17 30h86v26H17z" fill="#1a0f1e" stroke="${O}" stroke-width="3"/><ellipse class="ch-glow" cx="60" cy="50" rx="38" ry="12" fill="${L.glow}"/></g>
+      <g class="ch-base">
+        <rect x="14" y="52" width="92" height="44" rx="6" fill="${L.body}" stroke="${O}" stroke-width="3"/>
+        <path d="M15.5 82h89v8a4.5 4.5 0 0 1-4.5 4.5h-80a4.5 4.5 0 0 1-4.5-4.5z" fill="${L.bodySh}"/>
+        ${planks}
+        <rect x="24" y="52" width="11" height="44" fill="${L.band}" stroke="${O}" stroke-width="2.5"/><rect x="85" y="52" width="11" height="44" fill="${L.band}" stroke="${O}" stroke-width="2.5"/>
+        <path d="M25.5 84h8v10.5h-8zM86.5 84h8v10.5h-8z" fill="${L.bandSh}"/>
+        <rect x="11" y="50" width="98" height="9" rx="3" fill="${L.trim}" stroke="${O}" stroke-width="3"/>
+      </g>
+      <g class="ch-lid">
+        <path d="M14 52V38Q14 14 60 14Q106 14 106 38V52Z" fill="${L.lid}" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M22 30Q30 19 52 17" stroke="rgba(255,255,255,0.45)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M24 23.5L35 19V50H24zM85 19l11 4.5V50H85z" fill="${L.band}" stroke="${O}" stroke-width="2.5" stroke-linejoin="round"/>
+        <rect x="11" y="43" width="98" height="9" rx="3" fill="${L.trim}" stroke="${O}" stroke-width="3"/>
+        ${crown}${lock}
+      </g>
+      ${stars}
+    </svg>`;
   }
   function renderChests() {
     const open = G.roadOpen(), now = Date.now();
@@ -137,7 +173,8 @@ const KCMenu = (() => {
       const label = st === 'ready' ? 'Open!' : st === 'unlocking' ? clock(c.ends - now) : busy ? `${C.name.split(' ')[0]} · ${dur(C.seconds)}` : `Unlock ${dur(C.seconds)}`;
       const cls = st === 'ready' ? 'ready' : st === 'unlocking' ? 'unlocking' : 'chest';
       return `<button type="button" class="slot ${cls} ${c.type}" data-slot="${i}" aria-label="${C.name}: ${label}">${chestSvg(c.type)}<small>${label}</small></button>`;
-    }).join('') + `<p class="chest-note">${open ? (P().chests.some(Boolean) ? 'One chest unlocks at a time. Skipping the wait with diamonds arrives with the SirSC wallet.' : 'Win trophy battles to earn chests') : 'Chests unlock with the Trophy Road'}</p>`;
+    }).join('') + `<p class="chest-note">${open ? (P().chests.some(Boolean) ? 'One chest unlocks at a time.' : 'Win trophy battles to earn chests') : 'Chests unlock with the Trophy Road'}</p>`;
+    chestSig = open ? chestStates() : '';
     for (const b of $$('#chests button.slot')) b.addEventListener('click', () => chestClick(+b.dataset.slot));
   }
   function chestClick(i) {
@@ -147,52 +184,283 @@ const KCMenu = (() => {
       const r = G.startUnlock(i);
       if (r === 'busy') toast('Another chest is unlocking. One at a time!');
       else if (r === 'ok') { toast(`${G.CHESTS[c.type].name} is unlocking`); KCSound.play('select'); }
-    } else if (st === 'unlocking') toast(`Opens in ${clock(c.ends - Date.now())}. Diamonds will be able to skip the wait once the wallet connects.`);
+    } else if (st === 'unlocking') toast(`Opens in ${clock(c.ends - Date.now())}.`);
     refresh();
   }
 
-  // The chest opening scene: the chest, then coins, then each card, then a summary.
+  /* ---------- opening a chest ----------
+     The chest drops in and rattles; a click cracks it open in a burst of light. Then each reward comes
+     out one at a time: coins count up; a card flies out face down, glowing in its rarity's colour, flips
+     over, and its copies count into its level bar. A click during a reveal finishes it; a click after
+     moves on. Rares and new cards come last. The same scene shows Trophy Road cards and Shop purchases
+     (no chest, just the reveal). */
+  const calm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   let co = null;
-  function showChest(type, got) {
+  const later = (fn, ms) => { const id = setTimeout(fn, calm ? Math.min(ms, 60) : ms); co.timers.push(id); return id; };
+  function stopTimers() { for (const t of co.timers) clearTimeout(t); co.timers = []; clearInterval(co.counter); co.counter = 0; }
+
+  // sparkles and coins, drawn on one canvas over the scene
+  const FX = { parts: [], raf: 0, last: 0 };
+  function fxStart() {
+    const cv = $('#coFx'), dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = Math.round(innerWidth * dpr); cv.height = Math.round(innerHeight * dpr);
+    FX.dpr = dpr; FX.parts = []; FX.last = 0;
+    if (!FX.raf) FX.raf = requestAnimationFrame(fxFrame);
+  }
+  function fxStop() { cancelAnimationFrame(FX.raf); FX.raf = 0; FX.parts = []; }
+  function fxBurst(el, n, kind, cols) {
+    if (calm || !el) return;
+    const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height * 0.45;
+    for (let i = 0; i < n; i++) {
+      const a = -Math.PI / 2 + (Math.random() - 0.5) * (kind === 'coin' ? 1.8 : 3.6), v = (kind === 'coin' ? 320 : 240) * (0.5 + Math.random());
+      FX.parts.push({ kind, x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: kind === 'coin' ? 900 : 320, life: 0.9 + Math.random() * 0.8, max: 1.7,
+        r: kind === 'coin' ? 6 + Math.random() * 3 : 2 + Math.random() * 3, col: cols[Math.floor(Math.random() * cols.length)], spin: Math.random() * 6 });
+    }
+    if (FX.parts.length > 260) FX.parts.splice(0, FX.parts.length - 260);
+  }
+  function fxFrame(now) {
+    FX.raf = requestAnimationFrame(fxFrame);
+    const dt = Math.min(0.05, (now - (FX.last || now)) / 1000); FX.last = now;
+    const cv = $('#coFx'), c = cv.getContext('2d');
+    c.setTransform(FX.dpr, 0, 0, FX.dpr, 0, 0);
+    c.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of FX.parts) {
+      p.life -= dt; p.vy += p.g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.spin += dt * 8;
+      c.globalAlpha = Math.max(0, Math.min(1, p.life * 2));
+      if (p.kind === 'coin') {
+        c.beginPath(); c.ellipse(p.x, p.y, p.r * Math.abs(Math.cos(p.spin)) + 1, p.r, 0, 0, 6.3);
+        c.fillStyle = p.col; c.fill(); c.lineWidth = 1.5; c.strokeStyle = '#8a5a05'; c.stroke();
+      } else {
+        const s = p.r * (0.6 + 0.4 * Math.sin(p.spin * 2));
+        c.fillStyle = p.col; c.beginPath();
+        c.moveTo(p.x, p.y - s * 2); c.lineTo(p.x + s * 0.6, p.y - s * 0.6); c.lineTo(p.x + s * 2, p.y); c.lineTo(p.x + s * 0.6, p.y + s * 0.6);
+        c.lineTo(p.x, p.y + s * 2); c.lineTo(p.x - s * 0.6, p.y + s * 0.6); c.lineTo(p.x - s * 2, p.y); c.lineTo(p.x - s * 0.6, p.y - s * 0.6);
+        c.closePath(); c.fill();
+      }
+    }
+    c.globalAlpha = 1;
+    FX.parts = FX.parts.filter(p => p.life > 0 && p.y < innerHeight + 20);
+  }
+  const SPARKS = { wooden: ['#ffe9a0', '#ffc861', '#ffffff'], silver: ['#d8f0ff', '#9fd0ff', '#ffffff'], gold: ['#fff3a0', '#ffd23f', '#ff9a3d', '#ffffff'] };
+
+  // type: 'wooden' | 'silver' | 'gold', or null for a reward with no chest. got: { coins, cards: [{ id, n, isNew }] },
+  // already added to the player's collection.
+  function showChest(type, got, title) {
+    const rank = c => (c.isNew ? 2 : KC_CARDS[c.id].rarity === 'rare' ? 1 : 0);
+    const cards = got.cards.slice().sort((a, b) => rank(a) - rank(b));
     const steps = [];
     if (got.coins) steps.push({ coins: got.coins });
-    for (const c of got.cards) steps.push(c);
-    co = { type, got, steps, i: -1 };
-    $('#coTitle').textContent = type ? G.CHESTS[type].name : 'Reward';
-    $('#coChest').innerHTML = type ? chestSvg(type) : '';
-    $('#coChest').hidden = !type;
-    $('#coChest').className = 'co-chest shake';
-    $('#coReward').hidden = true; $('#coSummary').hidden = true; $('#coDone').hidden = true;
-    $('#coHint').hidden = false; $('#coHint').textContent = type ? 'Click to open' : 'Click to continue';
-    $('#chestOpen').hidden = false;
-    if (!type) advance();
-  }
-  function advance() {
-    if (!co) return;
-    co.i++;
-    if (co.i === 0 && co.type) { $('#coChest').className = 'co-chest burst'; KCSound.play('crown'); }
-    if (co.i >= co.steps.length) return summary();
-    const st = co.steps[co.i], box = $('#coReward');
-    box.hidden = false;
-    box.style.animation = 'none'; void box.offsetWidth; box.style.animation = '';
-    if (st.coins) box.innerHTML = `<span class="co-coin" aria-hidden="true"></span><b>+${fmt(st.coins)}</b><small>Coins</small>`;
-    else {
-      const c = KC_CARDS[st.id], u = G.upgradeInfo(st.id);
-      box.innerHTML = `<img src="${cardImg(st.id)}" alt=""><b>${esc(c.name)}</b><span class="co-n">×${st.n}</span>${st.isNew ? '<em>New card!</em>' : ''}
-        <small>${u.max ? 'Max level' : `Level ${u.level} · ${u.count} / ${u.need}${u.count >= u.need ? ' · upgrade ready' : ''}`}</small>`;
+    for (const c of cards) {
+      const u = G.upgradeInfo(c.id);
+      steps.push(Object.assign({ level: u.level, need: u.max ? 0 : u.need, after: u.count, before: Math.max(0, u.count - c.n) }, c));
     }
-    KCSound.play('select');
-    $('#coHint').textContent = co.i < co.steps.length - 1 ? `${co.steps.length - co.i - 1} more` : 'Click to finish';
+    if (co) stopTimers();
+    co = { type, got: { coins: got.coins, cards }, steps, i: -1, phase: 'drop', timers: [], counter: 0, done: false };
+    const chest = $('#coChest');
+    $('#coTitle').textContent = title || (type ? G.CHESTS[type].name : 'Reward');
+    $('#chestOpen').className = 'chest-open' + (type ? ' has-chest ' + type : ' no-chest');
+    $('#coChestWrap').hidden = !type;
+    chest.innerHTML = type ? chestSvg(type) : '';
+    $('#coRays').className = 'co-rays ' + (type || '');
+    $('#coCount').hidden = true;
+    $('#coReward').hidden = true; $('#coReward').innerHTML = '';
+    $('#coSummary').hidden = true; $('#coDone').hidden = true;
+    $('#coHint').hidden = false; $('#coHint').textContent = '';
+    $('#chestOpen').hidden = false;
+    fxStart();
+    if (!type) { co.phase = 'opened'; later(nextReward, 120); return; }
+    chest.className = 'co-chest drop';
+    later(() => KCSound.play('chestDrop'), 360);
+    later(settle, 760);
+  }
+  function settle() {
+    co.phase = 'idle';
+    $('#coChest').className = 'co-chest idle';
+    $('#coHint').textContent = 'Click to open';
+  }
+  // Any click (or Space / Enter) on the scene.
+  function chestTap() {
+    if (!co || co.done) return;
+    if (co.phase === 'drop') { stopTimers(); settle(); crack(); }
+    else if (co.phase === 'idle') crack();
+    else if (co.phase === 'reveal') finishReveal();
+    else if (co.phase === 'opened' || co.phase === 'shown') nextReward();
+  }
+  function crack() {
+    co.phase = 'opening';
+    $('#chestOpen').classList.add('revealing');
+    $('#coHint').textContent = '';
+    $('#coChest').className = 'co-chest rattle';
+    KCSound.play('chestShake');
+    later(() => {
+      const svg = $('#coChest svg');
+      svg.classList.add('open');
+      $('#coChest').className = 'co-chest opened';
+      $('#coRays').classList.add('on');
+      KCSound.play('chestOpen');
+      fxBurst(svg, co.type === 'gold' ? 60 : co.type === 'silver' ? 44 : 30, 'spark', SPARKS[co.type]);
+      const n = $('#coCount'); n.textContent = co.steps.length; n.hidden = false;
+      co.phase = 'opened';
+      later(nextReward, 750);
+    }, 560);
+  }
+  function nextReward() {
+    stopTimers();
+    co.i++;
+    if (co.i >= co.steps.length) return summary();
+    reveal(co.steps[co.i]);
+  }
+  const barText = (st, count) => (st.need ? `${count} / ${st.need}` : 'Max level');
+  const barPct = (st, count) => (st.need ? Math.min(100, count / st.need * 100) : 100);
+  function reveal(st) {
+    co.phase = 'reveal';
+    const left = co.steps.length - co.i - 1, box = $('#coReward'), chest = $('#coChest');
+    const badge = $('#coCount'); badge.textContent = left; badge.hidden = !co.type || left === 0;
+    if (co.type) { chest.classList.remove('spit'); void chest.offsetWidth; chest.classList.add('spit'); }
+    $('#coHint').textContent = '';
+    box.hidden = false;
+    KCSound.play('cardFly');
+    if (st.coins) {
+      box.className = 'co-reward rv-coins';
+      box.innerHTML = `<div class="rv-fly"><span class="rv-pile" aria-hidden="true"><i class="co-coin"></i><i class="co-coin"></i><i class="co-coin"></i></span></div>
+        <div class="rv-info"><span class="rv-n" id="rvN">+0</span><b class="rv-name">Coins</b></div>`;
+      later(() => {
+        $('#coReward .rv-info').classList.add('on');
+        fxBurst($('#coReward .rv-pile'), 26, 'coin', ['#ffd23f', '#ffe27a', '#f2b01e']);
+        count(900, p => { $('#rvN').textContent = '+' + fmt(Math.round(st.coins * p)); }, 'coinTick');
+      }, 480);
+      later(shown, 1500);
+      return;
+    }
+    const c = KC_CARDS[st.id], special = st.isNew || c.rarity === 'rare';
+    box.className = `co-reward rv-card ${c.rarity}${st.isNew ? ' is-new' : ''}`;
+    box.innerHTML = `<div class="rv-fly"><div class="rv-flip"><div class="rv-back"></div><img class="rv-front" src="${cardImg(st.id)}" alt=""></div></div>
+      <div class="rv-info">
+        <div class="rv-line"><b class="rv-name">${esc(c.name)}</b><span class="rv-n" id="rvN">×0</span>${st.isNew ? '<em>New card!</em>' : ''}</div>
+        <div class="rv-bar" id="rvBar"><i style="width:${barPct(st, st.before).toFixed(1)}%"></i><span>${barText(st, st.before)}</span></div>
+        <small id="rvNote"><span class="rar ${c.rarity}">${c.rarity}</span> Level ${st.level}</small>
+      </div>`;
+    const flipAt = special ? 1350 : 850;
+    later(() => { $('#coReward .rv-fly').classList.add('tease'); if (special) KCSound.play('chestShake'); }, 560);
+    later(() => { $('#coReward .rv-flip').classList.add('flipped'); KCSound.play('cardFlip'); }, flipAt);
+    later(() => {
+      $('#coReward .rv-info').classList.add('on');
+      KCSound.play(st.isNew ? 'revealNew' : c.rarity === 'rare' ? 'revealRare' : 'revealCommon');
+      fxBurst($('#coReward .rv-flip'), special ? 30 : 12, 'spark', c.rarity === 'rare' ? ['#ffd27a', '#ffb347', '#ffffff'] : ['#bfe0ff', '#ffffff']);
+      count(Math.min(1100, 350 + st.n * 30), p => cardCount(st, Math.round(st.n * p)), 'countTick');
+    }, flipAt + 420);
+    later(shown, flipAt + 420 + Math.min(1100, 350 + st.n * 30) + 250);
+  }
+  function cardCount(st, n) {
+    const now = st.before + n, bar = $('#rvBar');
+    $('#rvN').textContent = '×' + n;
+    bar.firstElementChild.style.width = barPct(st, now).toFixed(1) + '%';
+    bar.lastElementChild.textContent = barText(st, now);
+    const ready = st.need && now >= st.need;
+    bar.classList.toggle('full', !!ready);
+    if (ready && n === st.n) $('#rvNote').innerHTML = `<span class="rar ${KC_CARDS[st.id].rarity}">${KC_CARDS[st.id].rarity}</span> Level ${st.level} · <b class="rv-ready">Upgrade ready!</b>`;
+  }
+  // Runs fn(0..1) over ms, with a tick sound as it goes.
+  function count(ms, fn, sound) {
+    clearInterval(co.counter);
+    if (calm) { fn(1); return; }
+    const t0 = performance.now();
+    let lastTick = 0;
+    co.counter = setInterval(() => {
+      const p = Math.min(1, (performance.now() - t0) / ms);
+      fn(p);
+      if (performance.now() - lastTick > 70) { lastTick = performance.now(); KCSound.play(sound); }
+      if (p >= 1) { clearInterval(co.counter); co.counter = 0; }
+    }, 33);
+  }
+  // A click during a reveal: jump to its end.
+  function finishReveal() {
+    stopTimers();
+    const st = co.steps[co.i], info = $('#coReward .rv-info');
+    $('#coReward').classList.add('skip');
+    if (info) info.classList.add('on');
+    if (st.coins) $('#rvN').textContent = '+' + fmt(st.coins);
+    else { $('#coReward .rv-fly').classList.add('tease'); $('#coReward .rv-flip').classList.add('flipped'); cardCount(st, st.n); }
+    shown();
+  }
+  function shown() {
+    co.phase = 'shown';
+    const left = co.steps.length - co.i - 1;
+    $('#coHint').textContent = left ? `Click for the next one (${left} left)` : 'Click to finish';
   }
   function summary() {
-    $('#coReward').hidden = true; $('#coChest').hidden = true; $('#coHint').hidden = true;
-    const g = co.got;
-    $('#coSummary').innerHTML = (g.coins ? `<div class="cs-item"><span class="co-coin" aria-hidden="true"></span><b>+${fmt(g.coins)}</b></div>` : '') +
-      g.cards.map(c => `<div class="cs-item"><img src="${cardImg(c.id)}" alt="${esc(KC_CARDS[c.id].name)}"><b>×${c.n}</b>${c.isNew ? '<em>New</em>' : ''}</div>`).join('');
+    stopTimers();
+    co.phase = 'summary'; co.done = true;
+    $('#coReward').hidden = true; $('#coChestWrap').hidden = true; $('#coHint').hidden = true;
+    $('#chestOpen').classList.add('summing');
+    const g = co.got, items = [];
+    if (g.coins) items.push(`<span class="rv-pile small" aria-hidden="true"><i class="co-coin"></i><i class="co-coin"></i></span><b>+${fmt(g.coins)}</b>`);
+    for (const c of g.cards) items.push(`<img src="${cardImg(c.id)}" alt="${esc(KC_CARDS[c.id].name)}"><b>×${c.n}</b>${c.isNew ? '<em>New</em>' : ''}`);
+    $('#coSummary').innerHTML = items.map((h, i) => `<div class="cs-item" style="animation-delay:${(i * 0.12).toFixed(2)}s">${h}</div>`).join('');
     $('#coSummary').hidden = false; $('#coDone').hidden = false; $('#coDone').focus();
-    co.done = true;
+    KCSound.play('chestDone');
   }
-  function closeChest() { $('#chestOpen').hidden = true; co = null; refresh(); }
+  function closeChest() {
+    if (co) stopTimers();
+    fxStop();
+    $('#chestOpen').hidden = true; co = null; refresh();
+  }
+
+  /* ---------- the Shop ---------- */
+  let confirmOffer = -1, confirmT = 0;
+  function renderShop() {
+    const shop = G.shop(), p = P();
+    $('#shopOffers').innerHTML = shop.offers.map((o, i) => {
+      const sold = !!shop.bought[o.id] && !o.repeat, gem = o.currency === 'diamonds';
+      const poor = !sold && (gem ? p.diamonds : p.coins) < o.price;
+      let body;
+      if (o.kind === 'coins') {
+        body = `<div class="of-art of-coins" aria-hidden="true"><span class="rv-pile"><i class="co-coin"></i><i class="co-coin"></i><i class="co-coin"></i></span></div>
+          <b>${fmt(o.qty)} Coins</b><small class="of-note">Buy as many times as you like</small>`;
+      } else {
+        const c = KC_CARDS[o.card], u = G.upgradeInfo(o.card), after = u.count + (sold ? 0 : o.qty);
+        const pct = u.max ? 100 : Math.min(100, after / u.need * 100);
+        body = `<div class="of-art ${c.rarity}"><img src="${cardImg(o.card)}" alt=""><span class="of-qty">×${fmt(o.qty)}</span></div>
+          <b>${esc(c.name)}</b>
+          <span class="of-prog${!u.max && after >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.max ? 'Max level' : `${fmt(after)} / ${fmt(u.need)}`}</em></span>
+          <small class="of-note">Level ${u.level}${u.max ? '' : sold ? '' : after >= u.need ? ' · ready to upgrade after' : ' · after buying'}</small>`;
+      }
+      const price = `<i class="${gem ? 'gem-i' : 'coin-i'}" aria-hidden="true"></i>${fmt(o.price)}`;
+      const btn = sold ? '<button class="buy-btn" type="button" disabled>Bought</button>'
+        : `<button class="buy-btn${gem ? ' gem' : ''}${poor ? ' poor' : ''}${confirmOffer === i ? ' confirm' : ''}" type="button" data-offer="${i}"
+            aria-label="${confirmOffer === i ? 'Confirm: buy' : 'Buy'} for ${o.price} ${gem ? 'diamonds' : 'coins'}">${confirmOffer === i ? 'Confirm ' : ''}${price}</button>`;
+      return `<div class="offer ${o.currency}${sold ? ' sold' : ''}"><span class="of-tag">${esc(o.tag)}</span>${body}${btn}</div>`;
+    }).join('');
+    for (const b of $$('#shopOffers .buy-btn[data-offer]')) b.addEventListener('click', e => { e.stopPropagation(); buyClick(+b.dataset.offer); });
+    shopTimer();
+  }
+  function shopTimer() { const el = $('#shopTimer'); if (el) el.textContent = clock(G.shopEnds() - Date.now()); }
+  function buyClick(i) {
+    const o = G.shop().offers[i];
+    if (!o) return;
+    const gem = o.currency === 'diamonds';
+    if ((gem ? P().diamonds : P().coins) < o.price) {
+      KCSound.play('error');
+      toast(gem ? 'Not enough diamonds. Diamonds will come from the SirSC wallet.' : 'Not enough coins. Win battles and open chests to earn more.');
+      return;
+    }
+    // diamonds take a second click to confirm
+    if (gem && confirmOffer !== i) {
+      confirmOffer = i;
+      clearTimeout(confirmT);
+      confirmT = setTimeout(() => { confirmOffer = -1; if (tabNow === 'shop') renderShop(); }, 4000);
+      renderShop();
+      const again = $(`#shopOffers .buy-btn[data-offer="${i}"]`);
+      if (again) again.focus();
+      return;
+    }
+    clearTimeout(confirmT); confirmOffer = -1;
+    const r = G.buy(i);
+    if (!r.ok) { toast(r.error === 'sold' ? 'You already bought that today.' : 'That offer is not available.'); refresh(); return; }
+    KCSound.play('buy');
+    refresh();
+    showChest(null, r, 'Purchased');
+  }
 
   /* ---------- the Trophy Road ---------- */
   function rewardHtml(m) {
@@ -436,6 +704,22 @@ const KCMenu = (() => {
     $('#rightNote').textContent = G.claimable().length ? 'Claim rewards on the Trophy Road tab.' : 'Win trophy battles to reach the next reward.';
   }
 
+  // Once a second while the lobby shows: chest timers count down (the slots are only redrawn when a
+  // chest changes state, so their animations aren't restarted), and the Shop's clock runs.
+  let chestSig = '';
+  const chestStates = () => P().chests.map((c, i) => G.chestState(i)).join();
+  function tick() {
+    if ($('#home').hidden) return;
+    if (G.roadOpen() && P().chests.some(Boolean)) {
+      if (chestStates() !== chestSig) renderChests();
+      else for (const b of $$('#chests .slot.unlocking')) b.querySelector('small').textContent = clock(P().chests[+b.dataset.slot].ends - Date.now());
+    }
+    if (tabNow === 'shop') {
+      const day = P().shop && P().shop.day;
+      if (G.shop().day !== day) renderShop(); else shopTimer();
+    }
+  }
+
   /* ---------- keeping everything current ---------- */
   function refresh() {
     const p = P();
@@ -448,6 +732,7 @@ const KCMenu = (() => {
     $('#xpFill').style.width = (into / G.XP_PER_LEVEL * 100).toFixed(1) + '%';
     $('#xpText').textContent = `${into} / ${G.XP_PER_LEVEL}`;
     $('#coinVal').textContent = fmt(p.coins);
+    $('#gemVal').textContent = fmt(p.diamonds);
     $('#soundBtn').setAttribute('aria-label', KCSound.on ? 'Sound on' : 'Sound off');
     $('#soundBtn').classList.toggle('off', !KCSound.on);
     $('#soundToggle').checked = KCSound.on;
@@ -486,6 +771,7 @@ const KCMenu = (() => {
     $('#opp').classList.toggle('done', false);
     renderOpp();
     renderChests();
+    renderShop();
     renderSides();
     buildCards();
     // the nav tags
@@ -514,6 +800,8 @@ const KCMenu = (() => {
     for (const b of $$('[data-tab]')) b.addEventListener('click', () => tab(b.dataset.tab));
     $('#battleBtn').addEventListener('click', () => opts.onBattle && opts.onBattle(nextFoe()));
     $('#simWinLobby').addEventListener('click', simulateWin); // TEMPORARY
+    $('#testRich').addEventListener('click', () => { G.grantTest(); KCSound.play('buy'); refresh(); toast('Test: you now have 1,000,000 coins and 1,000,000 diamonds'); }); // TEMPORARY
+    $('#testOffers').addEventListener('click', () => { G.refreshShop(); confirmOffer = -1; KCSound.play('select'); refresh(); toast('Test: new offers made from your cards as they are now'); }); // TEMPORARY
     $('#oppChange').addEventListener('click', e => { e.stopPropagation(); toggle('#oppPanel', '#oppChange'); });
     $('#settingsBtn').addEventListener('click', e => {
       e.stopPropagation();
@@ -539,13 +827,13 @@ const KCMenu = (() => {
     $('#mUpgrade').addEventListener('click', upgradeCard);
     $('#mUse').addEventListener('click', () => startSwap(modalId));
     $('#swapCancel').addEventListener('click', endSwap);
-    $('#chestOpen').addEventListener('click', e => { if (e.target.id !== 'coDone' && !(co && co.done)) advance(); });
+    $('#chestOpen').addEventListener('click', e => { if (!e.target.closest('#coDone')) chestTap(); });
     $('#coDone').addEventListener('click', closeChest);
     window.addEventListener('keydown', e => {
       if ($('#home').hidden || e.repeat) return;
       if (!$('#chestOpen').hidden) {
         if (e.key === 'Escape' || (co && co.done && e.key === 'Enter')) { if (co && !co.done) summary(); else closeChest(); e.preventDefault(); }
-        else if (e.key === ' ' || e.key === 'Enter') { if (co && !co.done) advance(); e.preventDefault(); }
+        else if (e.key === ' ' || e.key === 'Enter') { chestTap(); e.preventDefault(); }
         return;
       }
       if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); return; }
@@ -560,7 +848,7 @@ const KCMenu = (() => {
     window.addEventListener('resize', placeGlow);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeGlow);
     clearInterval(ticker);
-    ticker = setInterval(() => { if (!$('#home').hidden && G.roadOpen() && P().chests.some(Boolean)) { renderChests(); } }, 1000);
+    ticker = setInterval(tick, 1000);
     refresh();
   }
 
