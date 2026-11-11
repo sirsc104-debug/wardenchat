@@ -40,7 +40,7 @@ const KCSim = (() => {
     opts = opts || {};
     const s = {
       tick: 0, time: 0, phase: 'regular', timeLeft: REGULAR, double: false,
-      ents: [], projs: [], events: [], nextId: 1,
+      ents: [], projs: [], zones: [], events: [], nextId: 1,
       energy: [START_ENERGY, START_ENERGY], crowns: [0, 0], result: null,
       hands: [], queues: [], levels: opts.levels || [1, 1], played: [0, 0],
       // Each team's card levels ({ cardId: level }); a card not listed uses the team's level.
@@ -125,7 +125,7 @@ const KCSim = (() => {
     s.played[team]++;
     if (c.kind === 'spell') {
       const k = tower(s, team, 'K');
-      s.projs.push({ kind: 'fireball', team, x: k.x, y: k.y, sx: k.x, sy: k.y, tx: x, ty: y, target: 0,
+      s.projs.push({ kind: c.projKind || 'fireball', spell: id, team, x: k.x, y: k.y, sx: k.x, sy: k.y, tx: x, ty: y, target: 0,
         speed: c.projSpeed, dmg: Math.round(c.dmg * levelMult(cardLevel(s, team, id))), card: id });
       s.events.push({ type: 'cast', team, card: id, x, y });
       return 'ok';
@@ -164,7 +164,8 @@ const KCSim = (() => {
       hp: Math.round(c.hp * m), maxHp: Math.round(c.hp * m), dmg: Math.round(c.dmg * m),
       hit: c.hit, range: c.range, speed: c.speed, targets: c.targets, air: !!c.air,
       radius: c.radius, mass: c.mass, heavy: !!c.heavy, proj: c.proj || null, projSpeed: c.projSpeed || 0,
-      splash: c.splash || 0, sight: Math.max(5.5, c.range + 1),
+      splash: c.splash || 0, sight: Math.max(5.5, c.range + 1), spin: c.spin || 0,
+      zone: c.zone ? { r: c.zone.r, dur: c.zone.dur, dps: Math.round(c.zone.dps * m) } : null,
       deploy: 1.0, cd: c.hit * 0.5, target: 0, locked: false, retarget: 0,
       face: team === 0 ? 1 : -1, moving: false, atk: 0, flash: 0, born: s.time, dead: false,
     };
@@ -298,10 +299,19 @@ const KCSim = (() => {
   }
   function attack(s, u, t) {
     u.atk = 0.28;
+    if (u.spin) {
+      // a full-circle swing: every ground enemy around the troop (towers and buildings too)
+      for (const e of s.ents) {
+        if (e.dead || e.team === u.team || e.air) continue;
+        if (e === t || edge(u, e) <= u.spin) damage(s, e, u.dmg, u.team);
+      }
+      s.events.push({ type: 'spin', card: u.card, team: u.team, x: u.x, y: u.y, r: u.spin + u.radius });
+      return;
+    }
     if (u.proj) {
       s.projs.push({ kind: u.proj, team: u.team, x: u.x, y: u.y, sx: u.x, sy: u.y, tx: t.x, ty: t.y,
         target: t.id, speed: u.projSpeed, dmg: u.dmg, splash: u.splash, targets: u.targets, card: u.card,
-        air: u.air });
+        air: u.air, zone: u.zone });
       s.events.push({ type: 'shoot', kind: u.proj, team: u.team, x: u.x, y: u.y });
     } else {
       damage(s, t, u.dmg, u.team);
@@ -407,13 +417,15 @@ const KCSim = (() => {
       const dx = p.tx - p.x, dy = p.ty - p.y, d = Math.hypot(dx, dy), step = p.speed * DT;
       if (d > step) { p.x += (dx / d) * step; p.y += (dy / d) * step; continue; }
       p.x = p.tx; p.y = p.ty; p.done = true;
-      if (p.kind === 'fireball') fireball(s, p);
+      if (p.spell) spellHit(s, p);
       else if (p.splash) {
         for (const e of s.ents) {
           if (e.dead || e.team === p.team) continue;
           if (p.targets === 'ground' && e.air) continue;
           if (Math.hypot(e.x - p.x, e.y - p.y) - e.radius <= p.splash) damage(s, e, p.dmg, p.team);
         }
+        // broken pottery (and the like) keeps hurting the spot for a moment
+        if (p.zone) s.zones.push({ x: p.x, y: p.y, r: p.zone.r, team: p.team, dps: p.zone.dps, left: p.zone.dur, dur: p.zone.dur, pulse: 0, kind: p.kind, targets: p.targets });
         s.events.push({ type: 'splash', kind: p.kind, x: p.x, y: p.y, r: p.splash });
       } else if (t && !t.dead) {
         damage(s, t, p.dmg, p.team);
@@ -422,21 +434,36 @@ const KCSim = (() => {
     }
     s.projs = s.projs.filter(p => !p.done);
   }
-  function fireball(s, p) {
-    const c = KC_CARDS.fireball;
+  // A spell landing: area damage (reduced on towers), and a knockback if the spell has one.
+  function spellHit(s, p) {
+    const c = KC_CARDS[p.spell] || KC_CARDS.fireball;
     for (const e of s.ents) {
       if (e.dead || e.team === p.team) continue;
       const d = Math.hypot(e.x - p.x, e.y - p.y);
       if (d - e.radius > c.area) continue;
       damage(s, e, e.kind === 'tower' ? Math.round(p.dmg * c.towerPct) : p.dmg, p.team);
-      if (e.kind === 'troop' && !e.dead && !e.heavy) {
+      if (c.knockback && e.kind === 'troop' && !e.dead && !e.heavy) {
         const k = c.knockback / Math.max(1, e.mass / 2);
         const nx = d > 0.01 ? (e.x - p.x) / d : 0, ny = d > 0.01 ? (e.y - p.y) / d : (e.team === 0 ? 1 : -1);
         e.x += nx * k; e.y += ny * k;
         clampArena(e);
       }
     }
-    s.events.push({ type: 'boom', team: p.team, x: p.x, y: p.y, r: c.area });
+    s.events.push({ type: 'boom', team: p.team, card: c.id, x: p.x, y: p.y, r: c.area });
+  }
+  // Lingering damage areas, in pulses of a tenth of a second.
+  function zoneStep(s) {
+    for (const z of s.zones) {
+      z.left -= DT; z.pulse += DT;
+      if (z.pulse < 0.1 - 1e-9) continue;
+      z.pulse -= 0.1;
+      const amount = Math.max(1, Math.round(z.dps * 0.1));
+      for (const e of s.ents) {
+        if (e.dead || e.team === z.team || (z.targets === 'ground' && e.air)) continue;
+        if (Math.hypot(e.x - z.x, e.y - z.y) - e.radius <= z.r) damage(s, e, amount, z.team);
+      }
+    }
+    s.zones = s.zones.filter(z => z.left > 1e-9);
   }
 
   /* ---------- pushing apart ---------- */
@@ -508,6 +535,7 @@ const KCSim = (() => {
       if (s.result) break;
     }
     if (!s.result) projStep(s);
+    if (!s.result) zoneStep(s);
     collide(s);
     s.ents = s.ents.filter(e => e.kind === 'tower' || !e.dead);
     if (!s.result) clock(s);

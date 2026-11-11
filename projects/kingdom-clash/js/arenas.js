@@ -93,6 +93,43 @@ const KCArenas = (() => {
     },
   };
 
+  // Arena 2: Briar Hollow. PLACEHOLDER art (img/briar_hollow_*.webp): replace the three images and,
+  // if the new art differs, the bar position, bench rows and lights below. The battlefield is drawn in
+  // code from the 'briar' palette until it has an illustration.
+  ART.briar = {
+    name: 'Briar Hollow',
+    centerpiece: { src: 'img/briar_hollow_badge.webp', w: 1254, h: 1254, bar: { left: 23.3, top: 83.9, width: 53.4, height: 3.7 } },
+    field: null, palette: 'briar', margin: 0.6, fx: 'water',
+    scenery: {
+      left: {
+        src: 'img/briar_hollow_left.webp', w: 793, h: 1983, anchor: [0.55, 0.66], stars: 18,
+        rows: [
+            { y: 0.569, slope: 0, size: 0.8, spans: [[0.19, 0.45], [0.55, 0.98]] },
+            { y: 0.602, slope: 0, size: 0.85, spans: [[0.19, 0.45], [0.55, 0.98]] },
+            { y: 0.635, slope: 0, size: 0.9, spans: [[0.19, 0.45], [0.55, 0.98]] },
+            { y: 0.668, slope: 0, size: 0.95, spans: [[0.19, 0.45], [0.55, 0.98]] },
+            { y: 0.701, slope: 0, size: 1.0, spans: [[0.19, 0.45], [0.55, 0.98]] },
+            { y: 0.734, slope: 0, size: 1.05, spans: [[0.19, 0.45], [0.55, 0.98]] },
+            { y: 0.767, slope: 0, size: 1.1, spans: [[0.19, 0.45], [0.55, 0.98]] },
+        ],
+        glows: [[0.2, 0.785, 1.1], [0.82, 0.785, 1.1], [0.5, 0.53, 0.8]],
+      },
+      right: {
+        src: 'img/briar_hollow_right.webp', w: 793, h: 1983, anchor: [0.45, 0.66], stars: 18,
+        rows: [
+            { y: 0.569, slope: 0, size: 0.8, spans: [[0.02, 0.45], [0.55, 0.81]] },
+            { y: 0.602, slope: 0, size: 0.85, spans: [[0.02, 0.45], [0.55, 0.81]] },
+            { y: 0.635, slope: 0, size: 0.9, spans: [[0.02, 0.45], [0.55, 0.81]] },
+            { y: 0.668, slope: 0, size: 0.95, spans: [[0.02, 0.45], [0.55, 0.81]] },
+            { y: 0.701, slope: 0, size: 1.0, spans: [[0.02, 0.45], [0.55, 0.81]] },
+            { y: 0.734, slope: 0, size: 1.05, spans: [[0.02, 0.45], [0.55, 0.81]] },
+            { y: 0.767, slope: 0, size: 1.1, spans: [[0.02, 0.45], [0.55, 0.81]] },
+        ],
+        glows: [[0.2, 0.785, 1.1], [0.82, 0.785, 1.1], [0.5, 0.53, 0.8]],
+      },
+    },
+  };
+
   /* ---------- images: each loaded once ---------- */
   const imgs = {}, waiting = {};
   function image(src) {

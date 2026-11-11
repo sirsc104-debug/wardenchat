@@ -287,8 +287,10 @@ const KCMenu = (() => {
       const u = G.upgradeInfo(c.id);
       steps.push(Object.assign({ level: u.level, need: u.max ? 0 : u.need, after: u.count, before: Math.max(0, u.count - c.n) }, c));
     }
+    const items = (got.items || []).slice().sort((a, b) => (a.id.startsWith('wild_') ? 0 : 1) - (b.id.startsWith('wild_') ? 0 : 1));
+    for (const it of items) steps.push({ item: it.id, n: it.n });
     if (co) stopTimers();
-    co = { type, got: { coins: got.coins, cards }, steps, i: -1, phase: 'drop', timers: [], counter: 0, done: false };
+    co = { type, got: { coins: got.coins, cards, items }, steps, i: -1, phase: 'drop', timers: [], counter: 0, done: false };
     const chest = $('#coChest');
     $('#coTitle').textContent = title || (type ? G.CHESTS[type].name : 'Reward');
     $('#chestOpen').className = 'chest-open' + (type ? ' has-chest ' + type : ' no-chest');
@@ -369,6 +371,19 @@ const KCMenu = (() => {
       later(shown, 1500);
       return;
     }
+    if (st.item) {
+      const M = G.MAGIC[st.item], big = M.kind !== 'wild' || M.rarity === 'epic' || M.rarity === 'legendary';
+      box.className = `co-reward rv-item r-${M.rarity}${big ? ' big' : ''}`;
+      box.innerHTML = `<div class="rv-fly"><span class="rv-itemart">${itemSvg(st.item)}</span></div>
+        <div class="rv-info"><div class="rv-line"><b class="rv-name">${esc(M.name)}</b><span class="rv-n" id="rvN">×${fmt(st.n)}</span>${big ? '<em>Rare find!</em>' : ''}</div><small>${esc(M.blurb)}</small></div>`;
+      later(() => {
+        $('#coReward .rv-info').classList.add('on');
+        KCSound.play(big ? 'revealNew' : 'revealRare');
+        fxBurst($('#coReward .rv-fly'), big ? 40 : 16, 'spark', ['#fff3a0', '#d49bff', '#7ff0e0', '#ffffff']);
+      }, big ? 900 : 500);
+      later(shown, big ? 1500 : 950);
+      return;
+    }
     const c = KC_CARDS[st.id], special = st.isNew || c.rarity === 'rare';
     box.className = `co-reward rv-card ${c.rarity}${st.isNew ? ' is-new' : ''}`;
     box.innerHTML = `<div class="rv-fly"><div class="rv-flip"><div class="rv-back"></div><img class="rv-front" src="${cardImg(st.id)}" alt=""></div></div>
@@ -416,7 +431,8 @@ const KCMenu = (() => {
     const st = co.steps[co.i], info = $('#coReward .rv-info');
     $('#coReward').classList.add('skip');
     if (info) info.classList.add('on');
-    if (st.coins) $('#rvN').textContent = '+' + fmt(st.coins);
+    if (st.item) { /* nothing counts up */ }
+    else if (st.coins) $('#rvN').textContent = '+' + fmt(st.coins);
     else { $('#coReward .rv-fly').classList.add('tease'); $('#coReward .rv-flip').classList.add('flipped'); cardCount(st, st.n); }
     shown();
   }
@@ -433,6 +449,7 @@ const KCMenu = (() => {
     const g = co.got, items = [];
     if (g.coins) items.push(`<span class="rv-pile small" aria-hidden="true"><i class="co-coin"></i><i class="co-coin"></i></span><b>+${fmt(g.coins)}</b>`);
     for (const c of g.cards) items.push(`<img src="${cardImg(c.id)}" alt="${esc(KC_CARDS[c.id].name)}"><b>×${c.n}</b>${c.isNew ? '<em>New</em>' : ''}`);
+    for (const it of g.items || []) items.push(`<span class="cs-art" title="${esc(G.MAGIC[it.id].name)}">${itemSvg(it.id)}</span><b>×${fmt(it.n)}</b>`);
     $('#coSummary').innerHTML = items.map((h, i) => `<div class="cs-item" style="animation-delay:${(i * 0.12).toFixed(2)}s">${h}</div>`).join('');
     $('#coSummary').hidden = false; $('#coDone').hidden = false; $('#coDone').focus();
     KCSound.play('chestDone');
@@ -469,7 +486,7 @@ const KCMenu = (() => {
     }).join('');
     for (const b of $$('#shopOffers .buy-btn[data-offer]')) b.addEventListener('click', e => { e.stopPropagation(); buyClick(+b.dataset.offer); });
     // the chest row: a free Wooden Chest each day, then every tier for coins (contents stay hidden)
-    const oddsText = t => { const o = G.chestOdds(t); return `${fmt(o.cards)} cards<br>${fmt(o.coins[0])}–${fmt(o.coins[1])} coins`; };
+    const oddsText = t => { const o = G.chestOdds(t), w = G.wildActive() && Object.keys(G.MAGIC_RULES.wild[t] || {}).length; return `${fmt(o.cards)} cards<br>${fmt(o.coins[0])}–${fmt(o.coins[1])} coins${w ? '<br>+ wild cards' : ''}`; };
     const free = G.freeChestReady();
     const tiles = [`<div class="chest-tile free wooden${free ? '' : ' sold'}"><span class="of-tag">Free daily</span>
       <div class="ct-art">${chestSvg('wooden')}</div><b>Wooden Chest</b><small class="ct-odds">${oddsText('wooden')}</small>
@@ -537,6 +554,85 @@ const KCMenu = (() => {
     KCSound.play('buy');
     refresh();
     showChest(null, r, 'Purchased');
+  }
+
+  /* ---------- magic items ---------- */
+  const RCOL = { common: ['#8cc0f0', '#3f72b0'], rare: ['#ffc463', '#dc761c'], epic: ['#d49bff', '#8a3fd0'], legendary: ['#7ff0e0', '#ff7ad8'], any: ['#fff0a0', '#e0a020'] };
+  // Item art, drawn in SVG: wild cards are glowing cards, books are bound tomes, the hammer has a book on it.
+  function itemSvg(id) {
+    const M = G.MAGIC[id], O = '#1c1530', [a, b] = RCOL[M.rarity] || RCOL.any, gid = 'g' + id;
+    const grad = M.rarity === 'legendary' || id === 'book_books'
+      ? `<linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ff0e0"/><stop offset=".5" stop-color="#d49bff"/><stop offset="1" stop-color="#ffb347"/></linearGradient>`
+      : `<linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
+    if (M.kind === 'wild') return `<svg viewBox="0 0 64 64" aria-hidden="true"><defs>${grad}</defs>
+      <rect x="10" y="8" width="38" height="48" rx="6" transform="rotate(-8 29 32)" fill="${b}" stroke="${O}" stroke-width="3" opacity=".7"/>
+      <rect x="16" y="6" width="38" height="50" rx="6" fill="url(#${gid})" stroke="${O}" stroke-width="3"/>
+      <path d="M35 14l3.5 9 9.5 1-7 6.5 2 9.5-8-5-8 5 2-9.5-7-6.5 9.5-1z" fill="#fff" stroke="${O}" stroke-width="2.4" stroke-linejoin="round"/>
+      <path d="M22 46h26" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/></svg>`;
+    if (M.kind === 'book') return `<svg viewBox="0 0 64 64" aria-hidden="true"><defs>${grad}</defs>
+      <path d="M12 12h36a4 4 0 0 1 4 4v38H16a4 4 0 0 1-4-4z" fill="#f3ead6" stroke="${O}" stroke-width="3"/>
+      <path d="M10 10h34a4 4 0 0 1 4 4v38H14a4 4 0 0 1-4-4z" fill="url(#${gid})" stroke="${O}" stroke-width="3"/>
+      <rect x="10" y="10" width="7" height="42" fill="rgba(0,0,0,.2)"/>
+      <path d="M30 20l3 6 6.5.6-5 4.4 1.5 6.5L30 34l-6 3.5 1.5-6.5-5-4.4 6.5-.6z" fill="#fff6c8" stroke="${O}" stroke-width="2.2" stroke-linejoin="round"/>
+      ${id === 'book_books' ? '<path d="M20 44h20M20 48h14" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>' : `<text x="29" y="50" text-anchor="middle" font-family="Lilita One, Arial Black, sans-serif" font-size="9" fill="#fff" stroke="${O}" stroke-width="2" paint-order="stroke">${M.rarity.slice(0, 1).toUpperCase()}</text>`}</svg>`;
+    if (M.kind === 'hammer') return `<svg viewBox="0 0 64 64" aria-hidden="true"><defs>${grad}</defs>
+      <path d="M34 26l18 26-6 4-18-26z" fill="#a8703c" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M8 18l20-12 10 16-20 12z" fill="#c7cfda" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M14 20l12-7 5 8-12 7z" fill="url(#${gid})" stroke="${O}" stroke-width="2"/>
+      <path d="M19 20l6-3.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`;
+    return `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 6l14 18-14 34-14-34z" fill="#b48cff" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M32 6l6 18-6 34" fill="#8a5ae0"/><path d="M18 24h28" stroke="${O}" stroke-width="2.5"/><path d="M26 14l-3 8" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>`;
+  }
+  let magicSel = null, subNow = 'cards';
+  function sub(name) {
+    subNow = name;
+    for (const b of $$('.subtab')) { const on = b.dataset.sub === name; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); }
+    $('#subCards').hidden = name !== 'cards';
+    $('#subMagic').hidden = name !== 'magic';
+    if (name === 'magic') renderMagic();
+  }
+  function renderMagic() {
+    const held = G.MAGIC_ORDER.filter(id => G.magicCount(id)).length;
+    $('#magicTag').textContent = held ? String(G.MAGIC_ORDER.reduce((a, id) => a + (id.startsWith('wild_') ? 0 : G.magicCount(id)), 0) || '') : '';
+    $('#magicGrid').innerHTML = G.MAGIC_ORDER.map(id => {
+      const M = G.MAGIC[id], n = G.magicCount(id);
+      return `<button type="button" class="mi ${M.kind} r-${M.rarity}${magicSel === id ? ' on' : ''}${n ? '' : ' none'}${M.soon ? ' soon' : ''}" data-item="${id}">
+        <span class="mi-art">${itemSvg(id)}</span><span class="mi-n">${M.soon ? 'Soon' : '×' + fmt(n)}</span><b>${esc(M.name)}</b></button>`;
+    }).join('');
+    for (const b of $$('#magicGrid .mi')) b.addEventListener('click', () => { magicSel = b.dataset.item; renderMagic(); });
+    const pick = $('#magicPick');
+    if (!magicSel) { pick.innerHTML = '<p class="dim">Pick an item to see what it does and use it on a card.</p>'; return; }
+    const M = G.MAGIC[magicSel], n = G.magicCount(magicSel);
+    const cards = P().found.filter(id => M.rarity === 'any' || KC_CARDS[id].rarity === M.rarity);
+    const why = { full: 'Has the copies it needs', copies: 'Needs its copies first', max: 'Max level', rarity: 'Wrong rarity', 'none-held': 'You have none', 'not-found': 'Not found', none: '' };
+    const rows = M.soon ? '<p class="dim">Nothing gives evolution shards yet. They arrive with evolutions.</p>'
+      : !cards.length ? `<p class="dim">You have no ${M.rarity} cards yet.</p>`
+        : `<div class="mp-cards">${cards.map(id => {
+          const r = G.magicFor(magicSel, id), u = G.upgradeInfo(id);
+          const what = r.ok ? (M.kind === 'hammer' ? `Upgrade to level ${r.level}` : `+${fmt(r.gives)} ${r.gives === 1 ? 'copy' : 'copies'}`) : why[r.reason] || '';
+          return `<button type="button" class="mp-card${r.ok ? '' : ' off'}" data-card="${id}" ${r.ok ? '' : 'disabled'}>
+            <img src="${cardImg(id)}" alt=""><span><b>${esc(KC_CARDS[id].name)}</b><small>Level ${u.level}${u.max ? '' : ` · ${fmt(u.count)} / ${fmt(u.need)}`}</small><em>${what}</em></span></button>`;
+        }).join('')}</div>`;
+    pick.innerHTML = `<div class="mp-head"><span class="mi-art big">${itemSvg(magicSel)}</span><div><b>${esc(M.name)}</b> <span class="mi-held">×${fmt(n)}</span><p>${esc(M.blurb)}</p></div></div>${rows}`;
+    for (const b of $$('#magicPick .mp-card:not(.off)')) b.addEventListener('click', () => applyMagic(magicSel, b.dataset.card));
+  }
+  function applyMagic(item, id) {
+    const r = G.useMagic(item, id);
+    if (!r.ok) { toast('That item can\'t be used on that card right now.'); return; }
+    KCSound.play(G.MAGIC[item].kind === 'hammer' ? 'double' : 'revealRare');
+    toast(G.MAGIC[item].kind === 'hammer' ? `${KC_CARDS[id].name} upgraded to level ${r.level} with no coins!` : `${KC_CARDS[id].name}: +${fmt(r.gives)} ${r.gives === 1 ? 'copy' : 'copies'}`);
+    refresh();
+    if (!$('#cardModal').hidden && modalId === id) { modalId = null; openCard(id); }
+  }
+  // Buttons in a card's details window for the items that can be used on it.
+  function modalMagic(id) {
+    const box = $('#mMagic'), btns = G.MAGIC_ORDER.filter(it => G.magicFor(it, id).ok).map(it => {
+      const r = G.magicFor(it, id), M = G.MAGIC[it];
+      return `<button type="button" class="mm-btn" data-item="${it}" title="${esc(M.blurb)}"><span class="mi-art">${itemSvg(it)}</span><span><b>${esc(M.name)}</b><small>${M.kind === 'hammer' ? 'Upgrade free' : `+${fmt(r.gives)} ${r.gives === 1 ? 'copy' : 'copies'}`} · ×${fmt(G.magicCount(it))}</small></span></button>`;
+    });
+    box.hidden = !btns.length;
+    box.innerHTML = btns.join('');
+    for (const b of box.querySelectorAll('.mm-btn')) b.addEventListener('click', () => applyMagic(b.dataset.item, id));
   }
 
   /* ---------- the Trophy Road ---------- */
@@ -653,6 +749,7 @@ const KCMenu = (() => {
       return `<div><small>${k}</small><b>${val}${up}</b></div>`;
     }).join('');
     $('#mEvo').textContent = c.evo;
+    modalMagic(id);
     // level, copies and the buttons
     $('#mLevel').textContent = u.found ? (u.max ? `Level ${u.level} · Max` : `Level ${u.level}`) : 'Not found yet';
     const pct = u.found && !u.max ? Math.min(100, u.count / u.need * 100) : u.max ? 100 : 0;
@@ -811,6 +908,7 @@ const KCMenu = (() => {
     $('#coinVal').textContent = fmt(p.coins);
     $('#gemVal').textContent = fmt(p.diamonds);
     $('#shopTag').hidden = !G.freeChestReady();
+    if (subNow === 'magic') renderMagic(); else $('#magicTag').textContent = String(G.MAGIC_ORDER.reduce((a, id) => a + (id.startsWith('wild_') ? 0 : G.magicCount(id)), 0) || '');
     $('#soundBtn').setAttribute('aria-label', KCSound.on ? 'Sound on' : 'Sound off');
     $('#soundBtn').classList.toggle('off', !KCSound.on);
     $('#soundToggle').checked = KCSound.on;
@@ -901,6 +999,8 @@ const KCMenu = (() => {
       closePops(); refresh();
     });
     $('#modalX').addEventListener('click', closeCard);
+    for (const b of $$('.subtab')) b.addEventListener('click', () => sub(b.dataset.sub));
+    $('#testMagic').addEventListener('click', () => { G.grantMagic(); KCSound.play('buy'); refresh(); toast('Test: added wild cards, books and Hammers of Books'); }); // TEMPORARY
     $('#cardModal').addEventListener('click', e => { if (e.target.id === 'cardModal') closeCard(); });
     $('#mUpgrade').addEventListener('click', upgradeCard);
     $('#mUse').addEventListener('click', () => startSwap(modalId));

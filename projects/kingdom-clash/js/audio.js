@@ -52,6 +52,12 @@ const KCSound = (() => {
     chestDone: () => [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0, i === 3 ? 0.45 : 0.16, 'triangle', 0.16, i * 0.1)),
     buy: () => { tone(880, 1320, 0.1, 'triangle', 0.15); tone(1760, 0, 0.18, 'sine', 0.1, 0.09); },
     deploy: () => { tone(220, 90, 0.16, 'sine', 0.3); noise(0.12, 0.12, 600); },
+    // Briar Hollow cards
+    spearsCast: () => { for (let i = 0; i < 6; i++) noise(0.14, 0.06, 2600 + i * 300, 'bandpass', i * 0.04); },
+    spears: () => { for (let i = 0; i < 7; i++) { noise(0.05, 0.1, 900, 'bandpass', i * 0.035); tone(260 - i * 12, 150, 0.04, 'square', 0.05, i * 0.035); } },
+    spin: () => { noise(0.3, 0.09, 1200, 'bandpass'); tone(160, 420, 0.25, 'sawtooth', 0.04); tone(140, 80, 0.12, 'square', 0.06, 0.22); },
+    potThrow: () => { noise(0.1, 0.05, 1800, 'bandpass'); tone(400, 600, 0.08, 'sine', 0.04); },
+    potBreak: () => { noise(0.18, 0.18, 3200, 'highpass'); [1800, 2400, 3100].forEach((f, i) => tone(f, f * 0.7, 0.05, 'triangle', 0.05, i * 0.03)); },
     spell: () => { noise(0.35, 0.12, 2200, 'bandpass'); tone(300, 600, 0.3, 'sawtooth', 0.05); },
     arrow: () => noise(0.06, 0.05, 3000, 'highpass'),
     cannon: () => { tone(140, 60, 0.12, 'square', 0.06); noise(0.08, 0.08, 500); },

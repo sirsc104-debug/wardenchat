@@ -226,7 +226,7 @@
   }
 
   /* ---------- sim events become sound and effects ---------- */
-  const SHOOT = { arrow: 'arrow', cannon: 'cannon', snowball: 'snow' };
+  const SHOOT = { arrow: 'arrow', cannon: 'cannon', snowball: 'snow', pot: 'potThrow' };
   function handleEvents() {
     const s = G.s;
     for (const e of s.events) {
@@ -236,16 +236,29 @@
           ring(e.x, e.y, e.team, 1.4);
           dust(e.x, e.y, 8);
           break;
-        case 'cast': KCSound.play('spell'); break;
+        case 'cast': KCSound.play(e.card === 'spears' ? 'spearsCast' : 'spell'); break;
         case 'shoot': KCSound.play(SHOOT[e.kind] || 'arrow'); break;
         case 'hit':
           if (e.card === 'gorilla' || e.card === 'rhino') { KCSound.play('smash'); G.shake = Math.max(G.shake, e.card === 'rhino' ? 0.12 : 0.18); sparks(e.x, e.y, 6, '#fff3c4'); }
           else if (e.kind === 'cannon') sparks(e.x, e.y, 5, '#ffd27a');
           else { KCSound.play('hit'); sparks(e.x, e.y, 3, '#ffffff'); }
           break;
-        case 'splash': puff(e.x, e.y, 9, '#ffffff', e.r); break;
+        case 'splash':
+          if (e.kind === 'pot') { KCSound.play('potBreak'); sparks(e.x, e.y, 10, '#d07a45', 3); puff(e.x, e.y, 6, '#c9a07a', e.r * 0.7); }
+          else puff(e.x, e.y, 9, '#ffffff', e.r);
+          break;
+        case 'spin':
+          KCSound.play('spin');
+          G.fx.push({ kind: 'ring', x: e.x, y: e.y, r: e.r, team: e.team, life: 0.3, max: 0.3 });
+          sparks(e.x, e.y, 6, '#e4e9f0', 3);
+          break;
         case 'death': KCSound.play('death'); puff(e.x, e.y - (e.air ? 1.1 : 0.3), 7, '#d9d4e8', 0.5); break;
         case 'boom':
+          if (e.card === 'spears') {
+            KCSound.play('spears'); G.shake = Math.max(G.shake, 0.12);
+            for (let i = 0; i < 14; i++) { const a = Math.random() * 6.28, d = Math.random() * e.r; puff(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d * 0.6, 1, 'rgba(220,200,170,0.9)', 0.2); }
+            break;
+          }
           KCSound.play('boom'); G.shake = Math.max(G.shake, 0.3);
           G.fx.push({ kind: 'blast', x: e.x, y: e.y, r: e.r, life: 0.5, max: 0.5 });
           if (G.art.fx === 'lava') G.fx.push({ kind: 'flash', x: e.x, y: e.y, r: e.r * 2.2, life: 0.45, max: 0.45 });
@@ -370,6 +383,7 @@
     air.sort((a, b) => a.z - b.z);
     for (const d of air) shadow(c, SX(d.x), SY(d.y), d.e.radius * k * 1.1);
     for (const d of ground) drawEnt(c, d, t);
+    for (const z of s.zones) drawZone2(c, z, k);
     for (const p of s.projs) drawProj(c, p, alpha, t);
     for (const d of air) drawEnt(c, d, t);
     drawFx(c, t);
@@ -537,7 +551,7 @@
       return;
     }
     if (e.hp >= e.maxHp || e.deploy > 0) return;
-    const lift = e.air ? k * 1.1 : 0, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75, skeletons: 1.2 }[e.card] || 1.4;
+    const lift = e.air ? k * 1.1 : 0, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75, skeletons: 1.2, footmen: 1.6, flail: 1.95, pots: 1.6 }[e.card] || 1.4;
     const w = Math.max(0.8, e.radius * 1.9) * k, h = Math.max(5, k * 0.2), by = y - lift - top * k, bx = x - w / 2;
     A.rr(c, bx, by, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
     A.rr(c, bx + 1, by + 1, Math.max(0, (w - 2) * e.hp / e.maxHp), h - 2, (h - 2) / 2); c.fillStyle = blue ? '#5aa9ff' : '#ff5f69'; c.fill();
@@ -550,10 +564,25 @@
     c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#fff';
     c.fillText(String(level || 1), x, y + 1);
   }
+  // Broken pottery on the ground: shards fading out as the damage ends.
+  function drawZone2(c, z, k) {
+    const a = Math.max(0, z.left / z.dur), x = SX(z.x), y = SY(z.y);
+    c.globalAlpha = 0.35 * a;
+    A.ell(c, x, y, z.r * k, z.r * k * 0.55); c.fillStyle = '#7a3e1e'; c.fill();
+    c.globalAlpha = Math.min(1, a * 1.5);
+    for (let i = 0; i < 7; i++) {
+      const ang = i * 0.9 + z.x * 3, d = (0.25 + (i % 3) * 0.22) * z.r;
+      const sx = x + Math.cos(ang) * d * k, sy = y + Math.sin(ang) * d * k * 0.55;
+      c.save(); c.translate(sx, sy); c.rotate(ang);
+      A.poly(c, [-k * 0.1, 0, 0, -k * 0.07, k * 0.11, k * 0.02, k * 0.02, k * 0.06]); A.paint(c, i % 2 ? '#d07a45' : '#a8582c', k * 0.03);
+      c.restore();
+    }
+    c.globalAlpha = 1;
+  }
   function drawProj(c, p, alpha, t) {
     const k = G.k, px = p.px === undefined ? p.x : p.px + (p.x - p.px) * alpha, py = p.py === undefined ? p.y : p.py + (p.y - p.py) * alpha;
     const total = Math.hypot(p.tx - p.sx, p.ty - p.sy) || 1, done = Math.min(1, Math.hypot(px - p.sx, py - p.sy) / total);
-    const arcH = p.kind === 'snowball' ? 1.6 : p.kind === 'fireball' ? 2.2 : p.kind === 'cannon' ? 0.8 : 0.5;
+    const arcH = p.kind === 'snowball' || p.kind === 'pot' ? 1.6 : p.kind === 'fireball' ? 2.2 : p.kind === 'spears' ? 3 : p.kind === 'cannon' ? 0.8 : 0.5;
     const lift = Math.sin(done * Math.PI) * arcH * Math.min(1, total / 6) + (p.air ? 1.1 : 0.6) * (1 - done);
     const x = SX(px), y = SY(py) - lift * k;
     if (p.kind === 'fireball') {
@@ -566,6 +595,25 @@
       A.fireballArt(c, k * 0.9, t * 4);
       c.restore();
       if (Math.random() < 0.6) G.fx.push({ kind: 'dot', x: px, y: py - lift, vx: (Math.random() - 0.5), vy: (Math.random() - 0.5), r: 0.18, col: 'rgba(255,150,40,0.8)', life: 0.3, max: 0.3 });
+      return;
+    }
+    if (p.kind === 'spears') {
+      const r = KC_CARDS.spears.area;
+      A.ell(c, SX(p.tx), SY(p.ty), r * k, r * k * 0.6);
+      c.fillStyle = 'rgba(255,255,255,0.1)'; c.fill(); c.strokeStyle = 'rgba(255,255,255,0.55)'; c.lineWidth = 2; c.stroke();
+      // the volley drops onto the area as it arrives
+      c.save(); c.translate(SX(p.tx), SY(p.ty) - (1 - done) * k * 5);
+      c.globalAlpha = Math.min(1, done * 3);
+      A.spearsArt(c, k * 1.6, done);
+      c.restore();
+      return;
+    }
+    if (p.kind === 'pot') {
+      shadow(c, SX(px), SY(py), k * 0.18);
+      c.save(); c.translate(x, y); c.rotate(done * 7);
+      A.ell(c, 0, 0, k * 0.2, k * 0.17); A.paint(c, '#d07a45', k * 0.05);
+      A.rr(c, -k * 0.1, -k * 0.24, k * 0.2, k * 0.08, k * 0.03); A.paint(c, '#a8582c', k * 0.03);
+      c.restore();
       return;
     }
     if (p.kind === 'arrow') {

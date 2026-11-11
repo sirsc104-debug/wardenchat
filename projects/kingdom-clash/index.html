@@ -92,6 +92,11 @@
 
         <!-- Cards tab -->
         <section class="tab cards-tab" id="tab-cards" hidden>
+          <div class="subtabs" role="tablist">
+            <button class="subtab on" type="button" role="tab" aria-selected="true" data-sub="cards">Cards</button>
+            <button class="subtab" type="button" role="tab" aria-selected="false" data-sub="magic">Magic Items <i class="sub-tag" id="magicTag"></i></button>
+          </div>
+          <div class="sub-cards" id="subCards">
           <div class="plaque deck-plaque">
             <div class="ribbon"><span>Battle Deck</span></div>
             <div class="avg" title="Average energy cost"><span class="drop" aria-hidden="true"></span><b id="avgCost">3.5</b><small>average energy</small></div>
@@ -103,6 +108,17 @@
             <small class="found" id="foundCount">8 / 8 found</small>
             <div class="coll-grid" id="collGrid"></div>
             <p class="dim" id="collNote">Collect copies from chests, then spend coins to level a card up (up to level 15).</p>
+          </div>
+          </div>
+          <div class="plaque magic-plaque" id="subMagic" hidden>
+            <div class="ribbon"><span>Magic Items</span></div>
+            <!-- TEMPORARY test button -->
+            <button class="sim-win test-inline magic-test" id="testMagic" type="button" title="Test button: adds wild cards, books and hammers"><small>Test</small>Give magic items</button>
+            <div class="magic-wrap">
+              <div class="magic-grid" id="magicGrid"></div>
+              <div class="magic-pick" id="magicPick"></div>
+            </div>
+            <p class="dim">Wild cards come from chests from Arena 2 on. Books and the Hammer of Books are rare finds in silver chests and up.</p>
           </div>
         </section>
 
@@ -188,6 +204,7 @@
             <button class="use-btn" id="mUse" type="button">Use</button>
             <span class="m-note" id="mNote"></span>
           </div>
+          <div class="m-magic" id="mMagic" hidden></div>
           <div class="m-evo"><b>Evolution</b> <small>(unlocks later)</small><p id="mEvo"></p></div>
         </div>
       </div>

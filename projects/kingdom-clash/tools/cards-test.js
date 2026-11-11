@@ -51,10 +51,60 @@ assert.strictEqual(sk[0].maxHp, Math.round(40 * Math.pow(1.08, 4)));
 assert.strictEqual(sk[0].level, 5);
 console.log('Skeleton Pack x3 at level 5: ok');
 
+// 4b. Arena 2 cards.
+const solo = (id, opts) => S.create(Object.assign({ seed: 9, decks: [deck(id), deck('wolves')] }, opts));
+const run = (s, secs) => { const ev = []; for (let i = 0; i < secs * 30; i++) { S.step(s); ev.push(...s.events); s.events.length = 0; } return ev; };
+// Spears hit ground and air, kill swarms, and do 30% to towers
+s = S.create({ seed: 5, decks: [deck('spears'), deck('wolves')] });
+s.energy = [10, 10]; s.hands[1][0] = 'hawks'; S.play(s, 1, 0, 9.5, 14.5); s.hands[1][1] = 'wolves'; S.play(s, 1, 1, 9.5, 13.5);
+run(s, 1.2);
+assert.strictEqual(S.play(s, 0, 0, 9.5, 14), 'ok');
+run(s, 1.5);
+assert.strictEqual(s.ents.filter(e => e.kind === 'troop' && e.team === 1).length, 0, 'spears cleared the hawks and wolves');
+s = S.create({ seed: 5, decks: [deck('spears'), deck('wolves')] }); s.energy[0] = 10;
+const lt = S.tower(s, 1, 'L'), lhp = lt.hp; S.play(s, 0, 0, 3.5, 6.5); run(s, 2);
+assert.strictEqual(lhp - lt.hp, Math.round(185 * 0.3), 'spears do 30% to towers');
+console.log('Spears: air and ground, 30% to towers: ok');
+// Footmen: four of them
+s = solo('footmen'); S.play(s, 0, 0, 9.5, 24.5);
+assert.strictEqual(s.ents.filter(e => e.card === 'footmen').length, 4);
+console.log('Footmen x4: ok');
+// Flail Knight hits every wolf around him in one swing
+s = S.create({ seed: 6, decks: [deck('flail'), deck('wolves')] }); s.energy = [10, 10];
+assert.strictEqual(S.play(s, 0, 0, 3.5, 18.5), 'ok'); run(s, 1.1);
+assert.strictEqual(S.play(s, 1, 0, 3.5, 14.5), 'ok');
+let ev = run(s, 5);
+const spins = ev.filter(e => e.type === 'spin').length;
+assert(spins >= 1, 'he swung');
+assert.strictEqual(s.ents.filter(e => e.card === 'wolves').length, 0, 'one or two swings clear a wolf pack');
+console.log(`Flail Knight cleared four wolves in ${spins} swing(s): ok`);
+// Pot Thrower: splash, then pottery that keeps hurting the spot for 0.5 s (ground only)
+s = S.create({ seed: 7, decks: [deck('pots'), deck('gladiator')] }); s.energy = [10, 10];
+assert.strictEqual(S.play(s, 0, 0, 3.5, 19.5), 'ok'); assert.strictEqual(S.play(s, 1, 0, 3.5, 13.5), 'ok');
+let sawZone = false, zoneDmg = 0, g0 = null;
+for (let i = 0; i < 30 * 8 && !zoneDmg; i++) {
+  const gl = s.ents.find(e => e.card === 'gladiator'); const before = gl ? gl.hp : 0;
+  S.step(s); s.events.length = 0;
+  if (s.zones.length) { sawZone = true; if (!g0) g0 = s.zones[0]; }
+  if (sawZone && !s.zones.length) zoneDmg = 1;
+}
+assert(sawZone, 'pottery left on the ground');
+assert(Math.abs(g0.dur - 0.5) < 1e-9 && g0.dps === 40);
+s = S.create({ seed: 7, decks: [deck('pots'), deck('hawks')] }); s.energy = [10, 10];
+S.play(s, 0, 0, 3.5, 21.5); S.play(s, 1, 0, 3.5, 12.5); ev = run(s, 6);
+assert(!ev.some(e => e.type === 'shoot' && e.kind === 'pot'), 'Pot Thrower ignores flyers');
+// zone damage total: about 0.5 s x 40 dps
+s = S.create({ seed: 8, decks: [deck('wolves'), deck('wolves')] });
+assert.strictEqual(S.play(s, 1, 0, 9.5, 12.5), 'ok'); const dummy = s.ents.filter(e => e.card === 'wolves')[0];
+const hp0 = dummy.hp; s.zones.push({ x: dummy.x, y: dummy.y, r: 1, team: 0, dps: 40, left: 0.5, dur: 0.5, pulse: 0, targets: 'ground' });
+for (let i = 0; i < 15; i++) { dummy.deploy = 1; S.step(s); s.events.length = 0; }
+assert.strictEqual(hp0 - dummy.hp, 20, 'five pulses of 4 damage');
+console.log('Pot Thrower: splash, 0.5 s of pottery damage, ground only: ok');
+
 // 5. Bots that hold the new cards play full matches without errors.
 let n = 0;
 for (let i = 0; i < 12; i++) {
-  const d = ['rhino', 'skeletons', 'gladiator', 'hawks', 'archers', 'cannon', 'gorilla', 'fireball'];
+  const d = i % 2 ? ['rhino', 'skeletons', 'gladiator', 'hawks', 'archers', 'cannon', 'gorilla', 'fireball'] : ['rhino', 'spears', 'footmen', 'flail', 'pots', 'archers', 'snowman', 'fireball'];
   s = S.create({ seed: 50 + i, decks: [d, d], cardLevels: [{ cannon: 3 }, { skeletons: 2 }] });
   const bots = [KCBot.create(0, { skill: 'normal', seed: i }), KCBot.create(1, { skill: 'romeo', seed: i + 9 })];
   let built = 0;

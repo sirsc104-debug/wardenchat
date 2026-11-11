@@ -266,6 +266,119 @@ const KCArt = (() => {
       if (!front) for (const sx of [-1, 1]) sh(c, () => poly(c, [0, q(-0.97), sx * q(0.1), q(-0.82), sx * q(0.03), q(-0.8)]), T.main, T.sh, q(0.02));
     },
 
+    // Footmen: four armored soldiers with a kettle helmet, mail, a team tabard, a short sword and a buckler.
+    footmen(c, k, o) {
+      const q = v => v * k * 0.9, T = TEAM[o.team], st = o.walk ? Math.sin(o.t * 10) * q(0.05) : 0, front = o.view === 'front';
+      const steel = '#c7cfda', steelSh = '#8f99a8', mail = '#9aa3b0', swing = o.atk;
+      for (const [x, ph] of [[-0.19, 1], [0.06, -1]]) {
+        sh(c, () => rr(c, q(x), q(-0.3) + st * ph, q(0.13), q(0.3) - st * ph, q(0.05)), '#5a5f6b', null, 0);
+        rr(c, q(x - 0.02), q(-0.07), q(0.17), q(0.07), q(0.03)); paint(c, '#3a3d46', LW * 0.6);
+      }
+      const buckler = side => {
+        sh(c, () => circ(c, side * q(0.3), q(-0.62), q(0.2)), steel, steelSh, q(0.05));
+        circ(c, side * q(0.3), q(-0.62), q(0.07)); paint(c, T.main, LW * 0.6);
+      };
+      const sword = (side, rot) => {
+        c.save(); c.translate(side * q(0.32), q(-0.74)); c.rotate(rot);
+        sh(c, () => rr(c, q(-0.04), q(-0.5), q(0.08), q(0.44), q(0.03)), '#eef2f7', '#c3ccd8', q(0.03));
+        sh(c, () => rr(c, q(-0.11), q(-0.08), q(0.22), q(0.06), q(0.02)), '#6b6f7a', null, 0);
+        circ(c, 0, q(0.02), q(0.06)); paint(c, '#7a5a44', LW * 0.6);
+        c.restore();
+      };
+      if (!front) buckler(-1);
+      // mail shirt and tabard
+      sh(c, () => rr(c, q(-0.28), q(-0.9), q(0.56), q(0.62), q(0.16)), mail, '#7d8694', q(0.06));
+      sh(c, () => poly(c, [q(-0.17), q(-0.86), q(0.17), q(-0.86), q(0.2), q(-0.3), q(-0.2), q(-0.3)]), T.main, T.sh, q(0.05));
+      if (front) { sh(c, () => rr(c, q(-0.07), q(-0.74), q(0.14), q(0.3), q(0.04)), C.gold, null, 0); }
+      sh(c, () => rr(c, q(-0.29), q(-0.42), q(0.58), q(0.08), q(0.03)), '#5d4030', null, 0);
+      if (front) sword(-1, -0.45 + swing * 1.7); else sword(1, 0.45 - swing * 1.7);
+      // head and kettle helmet
+      if (front) {
+        sh(c, () => circ(c, 0, q(-1.08), q(0.24)), C.skin, C.skinSh, q(0.04));
+        dot(c, q(-0.08), q(-1.07), q(0.035)); dot(c, q(0.08), q(-1.07), q(0.035));
+        line(c, 0, q(-1.2), 0, q(-1.0), steelSh, LW * 1.1);
+      } else sh(c, () => circ(c, 0, q(-1.08), q(0.25)), steel, steelSh, q(0.05));
+      sh(c, () => ell(c, 0, q(-1.2), q(0.38), q(0.09)), steel, steelSh, q(0.03));
+      sh(c, () => { c.beginPath(); c.arc(0, q(-1.2), q(0.25), Math.PI, 0); c.closePath(); }, steel, steelSh, q(0.05));
+      sh(c, () => ell(c, 0, q(-1.47), q(0.05), q(0.1)), T.main, T.sh, q(0.03));
+      if (front) buckler(1);
+    },
+
+    // Flail Knight: a heavy armored knight swinging a spiked ball on a chain in a full circle.
+    flail(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], st = o.walk ? Math.sin(o.t * 7) * q(0.05) : 0, front = o.view === 'front';
+      const plate = '#bfc7d3', plateSh = '#8a94a3';
+      // the ball goes once round the knight during an attack, and hangs and sways otherwise
+      const swinging = o.atk > 0.02, ang = swinging ? -Math.PI / 2 + (1 - o.atk) * Math.PI * 2 : Math.PI * 0.62 + Math.sin(o.t * 2.6) * 0.18;
+      const hx = q(0.36), hy = q(-0.7), reach = swinging ? q(1.25) : q(0.62);
+      const bx = hx + Math.cos(ang) * reach * (swinging ? 1 : 0.4), by = swinging ? q(-0.62) + Math.sin(ang) * reach * 0.45 : hy + reach;
+      const drawBall = () => {
+        c.beginPath(); c.moveTo(hx, hy);
+        c.quadraticCurveTo((hx + bx) / 2, Math.max(hy, by) + q(0.12), bx, by);
+        c.strokeStyle = OUT; c.lineWidth = q(0.07) + LW; c.stroke();
+        c.setLineDash([q(0.06), q(0.04)]); c.strokeStyle = '#9aa3b0'; c.lineWidth = q(0.07); c.stroke(); c.setLineDash([]);
+        for (let i = 0; i < 8; i++) {
+          const a = i / 8 * Math.PI * 2;
+          poly(c, [bx + Math.cos(a - 0.25) * q(0.17), by + Math.sin(a - 0.25) * q(0.17), bx + Math.cos(a) * q(0.3), by + Math.sin(a) * q(0.3), bx + Math.cos(a + 0.25) * q(0.17), by + Math.sin(a + 0.25) * q(0.17)]);
+          paint(c, '#d6dce5', LW * 0.6);
+        }
+        sh(c, () => circ(c, bx, by, q(0.19)), '#5d6370', '#3f444f', q(0.05));
+        circ(c, bx - q(0.06), by - q(0.06), q(0.05)); c.fillStyle = 'rgba(255,255,255,0.5)'; c.fill();
+      };
+      if (swinging) {
+        // a faint arc showing the sweep
+        c.beginPath(); c.ellipse(0, q(-0.62), q(1.25), q(0.56), 0, 0, Math.PI * 2);
+        c.strokeStyle = `rgba(255,255,255,${0.25 * o.atk})`; c.lineWidth = q(0.12); c.stroke();
+      }
+      const behind = swinging ? Math.sin(ang) < 0 : !front;
+      if (behind) drawBall();
+      for (const [x, ph] of [[-0.26, 1], [0.08, -1]]) sh(c, () => rr(c, q(x), q(-0.36) + st * ph, q(0.18), q(0.36) - st * ph, q(0.06)), plate, plateSh, q(0.05));
+      sh(c, () => rr(c, q(-0.4), q(-1.02), q(0.8), q(0.72), q(0.22)), plate, plateSh, q(0.1));
+      sh(c, () => poly(c, [q(-0.24), q(-0.98), q(0.24), q(-0.98), q(0.28), q(-0.34), q(-0.28), q(-0.34)]), T.main, T.sh, q(0.06));
+      if (front) sh(c, () => poly(c, [0, q(-0.86), q(0.1), q(-0.7), 0, q(-0.52), q(-0.1), q(-0.7)]), C.gold, C.goldSh, q(0.03));
+      sh(c, () => rr(c, q(-0.4), q(-0.46), q(0.8), q(0.1), q(0.04)), '#5d4030', null, 0);
+      for (const s of [-1, 1]) sh(c, () => ell(c, s * q(0.42), q(-0.98), q(0.2), q(0.14)), plate, plateSh, q(0.04));
+      // arm and handle
+      sh(c, () => rr(c, q(0.26), q(-0.92), q(0.18), q(0.3), q(0.08)), plate, plateSh, q(0.04));
+      sh(c, () => rr(c, q(0.3), q(-0.76), q(0.12), q(0.16), q(0.04)), '#6b4a30', null, 0);
+      // great helm
+      sh(c, () => rr(c, q(-0.27), q(-1.5), q(0.54), q(0.52), q(0.2)), plate, plateSh, q(0.07));
+      if (front) {
+        rr(c, q(-0.2), q(-1.3), q(0.4), q(0.07), q(0.03)); c.fillStyle = '#1c1a26'; c.fill();
+        line(c, 0, q(-1.24), 0, q(-1.06), plateSh, LW);
+      } else line(c, 0, q(-1.48), 0, q(-1.0), plateSh, LW);
+      sh(c, () => ell(c, 0, q(-1.6), q(0.08), q(0.16)), T.main, T.sh, q(0.04));
+      if (!behind) drawBall();
+    },
+
+    // Pot Thrower: a small hooded potter lobbing clay pots.
+    pots(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], st = o.walk ? Math.sin(o.t * 11) * q(0.05) : 0, front = o.view === 'front';
+      const robe = '#8a6a4a', robeSh = '#6a4e34', clay = '#d07a45', claySh = '#a8582c';
+      const th = o.atk; // 1 just after a throw
+      const pot = (x, y, s) => {
+        sh(c, () => { c.beginPath(); c.ellipse(x, y, q(0.17) * s, q(0.15) * s, 0, 0, Math.PI * 2); }, clay, claySh, q(0.04) * s);
+        sh(c, () => rr(c, x - q(0.09) * s, y - q(0.21) * s, q(0.18) * s, q(0.08) * s, q(0.03) * s), claySh, null, 0);
+        line(c, x - q(0.12) * s, y + q(0.02) * s, x + q(0.12) * s, y + q(0.02) * s, '#f0b080', LW * 0.6);
+      };
+      for (const [x, ph] of [[-0.15, 1], [0.04, -1]]) sh(c, () => rr(c, q(x), q(-0.26) + st * ph, q(0.11), q(0.26) - st * ph, q(0.05)), '#4a3a2c', null, 0);
+      // a satchel of pots on the back
+      if (!front) { pot(q(-0.22), q(-0.62), 0.9); pot(q(0.18), q(-0.6), 0.8); }
+      sh(c, () => poly(c, [q(-0.3), q(-0.22), q(0.3), q(-0.22), q(0.22), q(-0.82), q(-0.22), q(-0.82)]), robe, robeSh, q(0.06));
+      sh(c, () => rr(c, q(-0.26), q(-0.84), q(0.52), q(0.1), q(0.04)), T.main, T.sh, q(0.03));
+      // the throwing arm: pot held high, then empty after the throw
+      const ax = q(0.3), ay = q(-0.86 - (1 - th) * 0.3);
+      rope(c, () => { c.beginPath(); c.moveTo(q(0.16), q(-0.66)); c.lineTo(ax, ay); }, robe, q(0.1));
+      if (th < 0.35) pot(ax, ay - q(0.14), 1);
+      sh(c, () => circ(c, 0, q(-1.02), q(0.25)), robe, robeSh, q(0.05));
+      if (front) {
+        sh(c, () => ell(c, 0, q(-0.98), q(0.16), q(0.15)), C.skin, C.skinSh, q(0.03));
+        dot(c, q(-0.06), q(-1.0), q(0.03)); dot(c, q(0.06), q(-1.0), q(0.03));
+        line(c, q(-0.04), q(-0.92), q(0.05), q(-0.93), OUT, LW * 0.7);
+      }
+      sh(c, () => poly(c, [q(-0.14), q(-1.22), q(0.14), q(-1.22), 0, q(-1.42)]), robe, robeSh, q(0.03));
+    },
+
     gorilla(c, k, o) {
       const q = v => v * k, T = TEAM[o.team], st = o.walk ? Math.sin(o.t * 8) * q(0.05) : 0, front = o.view === 'front';
       const fur = '#454955', furSh = '#30333c', sm = o.atk;
@@ -480,13 +593,15 @@ const KCArt = (() => {
     const o = { team: 0, t: 0.3, walk: false, atk: 0, face: 1, id: 1, view: 'front' };
     const at = (x, y, s, oo) => { c.save(); c.translate(w * x, h * y); troop(c, cardId, k * s, Object.assign({}, o, oo)); c.restore(); };
     if (cardId === 'fireball') { c.save(); c.translate(w * 0.54, h * 0.46); LW = Math.max(1, k * 0.07); fireballArt(c, k * 1.0, 0.4); c.restore(); }
+    else if (cardId === 'spears') { c.save(); c.translate(w * 0.5, h * 0.5); LW = Math.max(1, k * 0.06); spearsArt(c, k * 1.05, 0); c.restore(); }
+    else if (cardId === 'footmen') { at(0.27, 0.72, 1.15, { t: 0.4 }); at(0.73, 0.72, 1.15, { t: 1.1 }); at(0.5, 0.92, 1.4, {}); }
     else if (cardId === 'wolves') { at(0.26, 0.7, 1.6, { t: 1.1 }); at(0.74, 0.7, 1.6, {}); at(0.5, 0.9, 2.0, { t: 0.6 }); }
     else if (cardId === 'hawks') { at(0.3, 0.34, 1.1, { t: 0.9 }); at(0.58, 0.62, 1.45, {}); }
     else if (cardId === 'archers') { at(0.3, 0.86, 1.2, {}); at(0.64, 0.92, 1.35, { face: 1 }); }
     else {
       if (cardId === 'skeletons') { at(0.26, 0.78, 1.55, { t: 0.4 }); at(0.74, 0.78, 1.55, { t: 1.2 }); at(0.5, 0.94, 1.85, {}); c.restore(); return finish(c, w, h, R, cv); }
       if (cardId === 'cannon') { c.save(); c.translate(w * 0.5, h * 0.62); cannon(c, k * 0.95, { team: 0, angle: Math.PI * 0.62 }); c.restore(); c.restore(); return finish(c, w, h, R, cv); }
-      const sc = { rhino: 1.6, gladiator: 1.5, snowman: 1.32, gorilla: 1.45 }[cardId] || 1;
+      const sc = { rhino: 1.6, gladiator: 1.5, snowman: 1.32, gorilla: 1.45, flail: 1.22, pots: 1.55 }[cardId] || 1;
       at(0.5, cardId === 'rhino' ? 0.86 : 0.92, sc, {});
     }
     c.restore();
@@ -496,6 +611,18 @@ const KCArt = (() => {
     rr(c, w * 0.025, w * 0.025, w * 0.95, h - w * 0.05, w * 0.085);
     c.lineWidth = w * 0.04; c.strokeStyle = R[2]; c.stroke();
     return cv;
+  }
+  // Spears: a volley of spears coming down at an angle. t (0 to 1) slides them forward.
+  function spearsArt(c, k, t) {
+    const spears = [[-0.42, -0.2, 0.95], [-0.12, -0.42, 1], [0.2, -0.24, 0.9], [-0.28, 0.16, 0.85], [0.06, 0.06, 1.05], [0.36, 0.14, 0.9], [-0.02, 0.4, 0.8]];
+    for (const [x, y, s] of spears) {
+      c.save(); c.translate(k * x, k * y + t * k * 0.2); c.rotate(0.55); c.scale(s, s);
+      line(c, 0, -k * 0.5, 0, k * 0.3, OUT, k * 0.09);
+      line(c, 0, -k * 0.5, 0, k * 0.3, '#9a6a3a', k * 0.05);
+      poly(c, [0, k * 0.52, -k * 0.08, k * 0.28, k * 0.08, k * 0.28]); paint(c, '#e4e9f0', LW);
+      poly(c, [0, -k * 0.5, -k * 0.09, -k * 0.62, 0, -k * 0.56, k * 0.09, -k * 0.62]); paint(c, '#dc3640', LW * 0.7);
+      c.restore();
+    }
   }
   function fireballArt(c, k, t) {
     for (let i = 4; i >= 0; i--) {
@@ -514,6 +641,7 @@ const KCArt = (() => {
   // Battlefield palettes: the Training Grounds, and Arena 1 (Cinder Keep: dry grass, ash and embers).
   const THEMES = {
     training: { bg: '#5c5470', grass: ['#7cc653', '#73bd4b'], path: '#d6bf8a', pad: '#9d978d', river: ['#3d8fe0', '#2f75c4'], bank: '#5aa63e', wall: '#857c95', specks: ['#ffffff', '#ffd54a', '#ff8fb3', '#b68cff'] },
+    briar: { bg: '#3b4636', grass: ['#5d8a45', '#557f3f'], path: '#8a6a44', pad: '#7e8579', river: ['#2e7a84', '#22636c'], bank: '#3f6a34', wall: '#5e6b56', specks: ['#d8ff8a', '#ffe48a', '#9fe0a0', '#c84a5a'] },
     cinder: { bg: '#4d3f45', grass: ['#a6ad5a', '#9ba251'], path: '#c9a47c', pad: '#8d857e', river: ['#3a86c4', '#2c6aa3'], bank: '#7f8a42', wall: '#6f6168', specks: ['#ff8a3d', '#ffc261', '#5a4a44', '#e6dccd'] },
   };
   // The battlefield under the live game: the arena's illustration if it has one (js/arenas.js),
@@ -634,5 +762,5 @@ const KCArt = (() => {
   }
   const owen = cv => trainer(cv, KC_TRAINERS[0].look);
 
-  return { OUT, TEAM, THEMES, cannon, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer, rr, circ, ell, line, paint, poly };
+  return { OUT, TEAM, THEMES, cannon, spearsArt, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer, rr, circ, ell, line, paint, poly };
 })();

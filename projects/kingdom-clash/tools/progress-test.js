@@ -1,5 +1,6 @@
 // Tests the progression rules (js/progress.js) without a browser: node tools/progress-test.js
 'use strict';
+let st0;
 const fs = require('fs'), path = require('path'), vm = require('vm'), assert = require('assert');
 for (const f of ['cards.js', 'trainers.js', 'sim.js', 'bot.js', 'progress.js']) vm.runInThisContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), { filename: f });
 const mem = data => { const m = new Map(Object.entries(data || {})); return { getItem: k => (m.has(k) ? m.get(k) : null), setItem: (k, v) => m.set(k, v), m }; };
@@ -160,6 +161,53 @@ console.log('save and reload: ok');
   assert.strictEqual(G.capChest('mythic'), 'mythic', 'with the gate off every tier is allowed');
   for (const t of G.TIERS) assert(G.chestAllowed(t));
   console.log('chests: tiers, gate, level scaling, repeat buys, free daily: ok');
+  // Arena 2: Briar Hollow at 300 trophies, its cards on the road, wild cards from Arena 2 on
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 290, claimed: { 0: true } }) }));
+  const P5 = G.state;
+  assert.strictEqual(G.arena().id, 'cinder');
+  assert(!G.wildActive());
+  const noWild = Array.from({ length: 200 }, (_, i) => G.roll('mythic', KCSim.mulberry(i + 1)).items).flat().filter(x => x.id.startsWith('wild_'));
+  assert.strictEqual(noWild.length, 0, 'no wild cards in Arena 1');
+  let wr2 = G.recordTrophy(0);
+  assert(wr2.newArena && wr2.newArena.id === 'briar' && G.arena().number === 2, 'Briar Hollow at 300');
+  assert(G.wildActive());
+  const silver = G.roll('silver', KCSim.mulberry(3)).items;
+  assert(silver.some(x => x.id === 'wild_common' && x.n >= 2), 'silver chests give common wild cards in Arena 2');
+  assert.strictEqual(G.roll('wooden', KCSim.mulberry(3)).items.filter(x => x.id.startsWith('wild_')).length, 0);
+  P5.trophies = 600; G.claim(300);
+  for (const at of [330, 400, 480, 560]) { const r = G.claim(at); assert(r && r.cards[0].isNew, `card at ${at}`); }
+  for (const id of ['spears', 'pots', 'footmen', 'flail']) assert(P5.found.includes(id));
+  assert.strictEqual(G.roadState(G.ROAD.find(m => m.at === 600)), 'soon', 'Arena 3 is coming soon');
+  assert.deepStrictEqual([...G.trainingDeck()].sort(), [...KC_STARTER_DECK].sort(), 'Briar cards stay out of the Training Grounds too');
+  const late = G.trophyFoe(KCSim.mulberry(4));
+  P5.trophies = 600; let sawBriar = 0; for (let i = 0; i < 40; i++) if (G.trophyFoe(KCSim.mulberry(i + 9)).deck.some(id => ['spears', 'pots', 'footmen', 'flail'].includes(id))) sawBriar++;
+  assert(sawBriar > 20, 'opponents at 600 trophies play Briar Hollow cards');
+  console.log('Arena 2 Briar Hollow, its road cards, wild cards from Arena 2: ok');
+
+  // Books and the hammer: never in wooden, about 0.1% in silver, about 1% in mythic
+  const finds = (type, n) => { let k = 0; const r = KCSim.mulberry(77); for (let i = 0; i < n; i++) if (G.roll(type, r).items.some(x => !x.id.startsWith('wild_'))) k++; return k / n; };
+  const fw = finds('wooden', 20000), fs = finds('silver', 40000), fm = finds('mythic', 20000);
+  assert.strictEqual(fw, 0, 'no books or hammers in wooden chests');
+  assert(fs > 0.0003 && fs < 0.002, `silver ${fs}`);
+  assert(fm > 0.007 && fm < 0.013, `mythic ${fm}`);
+  console.log(`magic finds: wooden ${fw}, silver ${(fs * 100).toFixed(2)}%, mythic ${(fm * 100).toFixed(2)}%: ok`);
+
+  // Using magic items
+  P5.cards.wolves.level = 3; P5.cards.wolves.count = 1;           // needs 10 for level 4
+  P5.cards.rhino.level = 2; P5.cards.rhino.count = 0;              // rare: needs 2
+  P5.coins = 0; P5.magic = { wild_common: 4, book_common: 1, book_rare: 1, book_books: 1, hammer_books: 1 };
+  assert.strictEqual(G.magicFor('wild_rare', 'wolves').reason, 'none-held');
+  assert.strictEqual(G.magicFor('book_rare', 'wolves').reason, 'rarity');
+  let mu = G.useMagic('wild_common', 'wolves'); assert(mu.ok && mu.gives === 4 && P5.cards.wolves.count === 5 && P5.magic.wild_common === 0, 'wild cards add up to what is held');
+  assert.strictEqual(G.magicFor('hammer_books', 'wolves').reason, 'copies');
+  mu = G.useMagic('book_common', 'wolves'); assert(mu.ok && P5.cards.wolves.count === 10 && P5.magic.book_common === 0, 'a book fills the rest');
+  assert.strictEqual(G.magicFor('book_books', 'wolves').reason, 'full');
+  mu = G.useMagic('hammer_books', 'wolves'); assert(mu.ok && P5.cards.wolves.level === 4 && P5.cards.wolves.count === 0 && P5.coins === 0, 'the hammer upgrades without coins');
+  mu = G.useMagic('book_books', 'rhino'); assert(mu.ok && P5.cards.rhino.count === 2, 'the Book of Books works on a rare');
+  assert.strictEqual(G.magicFor('shards', 'rhino').reason, 'none');
+  const P6 = G.load(st0 = mem({ 'kc.progress': JSON.stringify(P5) }));
+  assert.strictEqual(P6.cards.wolves.level, 4); assert.strictEqual(G.magicCount('book_books'), 0);
+  console.log('wild cards, books, Book of Books and the Hammer of Books: ok');
   console.log('shop offers, prices, buying, daily change, chests for coins: ok');
 }
 

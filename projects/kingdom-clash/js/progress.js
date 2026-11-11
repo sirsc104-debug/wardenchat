@@ -34,7 +34,9 @@ const KCProgress = (() => {
   const ARENAS = [
     { id: 'cinder', number: 1, name: 'Cinder Keep', min: 0, theme: 'cinder', cards: ['skeletons', 'cannon'],
       blurb: 'A ruined fortress of forges and ash, where old cannons still guard the walls.' },
-    { id: 'arena2', number: 2, name: 'Arena 2', min: 300, soon: true, blurb: 'Coming in a later update.' },
+    { id: 'briar', number: 2, name: 'Briar Hollow', min: 300, theme: 'briar', cards: ['spears', 'pots', 'footmen', 'flail'],
+      blurb: 'An overgrown forest of ancient stone ruins, giant tree roots, thorny vines and glowing lanterns.' },
+    { id: 'arena3', number: 3, name: 'Arena 3', min: 600, soon: true, blurb: 'Coming in a later update.' },
   ];
   // Fixed rewards along the road, claimed by the player.
   const ROAD = [
@@ -47,7 +49,15 @@ const KCProgress = (() => {
     { at: 160, kind: 'chest', chest: 'silver' },
     { at: 200, kind: 'coins', amount: 200 },
     { at: 250, kind: 'chest', chest: 'gold' },
-    { at: 300, kind: 'arena', arena: 'arena2' },
+    { at: 300, kind: 'arena', arena: 'briar' },
+    { at: 330, kind: 'card', card: 'spears', copies: 6 },
+    { at: 370, kind: 'coins', amount: 300 },
+    { at: 400, kind: 'card', card: 'pots', copies: 6 },
+    { at: 440, kind: 'chest', chest: 'gold' },
+    { at: 480, kind: 'card', card: 'footmen', copies: 6 },
+    { at: 520, kind: 'coins', amount: 400 },
+    { at: 560, kind: 'card', card: 'flail', copies: 3 },
+    { at: 600, kind: 'arena', arena: 'arena3' },
   ];
   const CHESTS = {
     wooden: { name: 'Wooden Chest', seconds: 60, coins: [18, 26], cards: 6, kinds: 2 },
@@ -72,6 +82,8 @@ const KCProgress = (() => {
     copies: {
       common: [2, 4, 10, 20, 40, 80, 150, 250, 400, 600, 800, 1000, 1500, 2000],
       rare: [1, 2, 4, 8, 15, 30, 50, 80, 120, 160, 200, 250, 300, 400],
+      epic: [1, 2, 4, 6, 10, 20, 30, 50, 70, 100, 130, 160, 200, 250],
+      legendary: [1, 2, 3, 4, 6, 10, 15, 20, 25, 30, 40, 50, 60, 80],
     },
     coins: [5, 20, 50, 150, 400, 1000, 2000, 4000, 6000, 9000, 14000, 20000, 30000, 50000],
   };
@@ -97,7 +109,7 @@ const KCProgress = (() => {
   };
   const blank = () => ({
     name: 'Player', xp: 0, beaten: {}, records: {}, roadSeen: false, opp: null,
-    mode: null, trophies: 0, best: 0, coins: 0, diamonds: 0, shop: null, freeChestDay: null, cards: {}, found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
+    mode: null, trophies: 0, best: 0, coins: 0, diamonds: 0, shop: null, freeChestDay: null, magic: {}, cards: {}, found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
     chests: [null, null, null, null], cycle: 0, claimed: {}, diff: 0.35, trophyRecord: { w: 0, l: 0, d: 0 },
   });
 
@@ -109,6 +121,7 @@ const KCProgress = (() => {
     if (old && !P.records.owen) { P.records.owen = old; if (old.w > 0) P.beaten.owen = true; }
     for (const t of KC_TRAINERS) P.records[t.id] = Object.assign({ w: 0, l: 0, d: 0 }, P.records[t.id]);
     for (const id of KC_ALL_CARDS) P.cards[id] = Object.assign({ level: 1, count: 0 }, P.cards[id]);
+    P.magic = Object.assign({}, P.magic);
     P.found = KC_ALL_CARDS.filter(id => P.found.includes(id));
     if (!Array.isArray(P.deck) || P.deck.length !== 8 || new Set(P.deck).size !== 8 || P.deck.some(id => !P.found.includes(id))) P.deck = KC_STARTER_DECK.slice();
     while (P.chests.length < 4) P.chests.push(null);
@@ -217,6 +230,11 @@ const KCProgress = (() => {
     };
     if (t >= 40) swap('skeletons', 0.6);
     if (t >= 120) swap('cannon', 0.6);
+    // Briar Hollow cards, as they unlock on the road
+    if (t >= 330) swap('spears', 0.5);
+    if (t >= 400) swap('pots', 0.5);
+    if (t >= 480) swap('footmen', 0.5);
+    if (t >= 560) swap('flail', 0.5);
     const name = FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
     const foeTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
     const cardLevels = spreadLevels(foeUpgrades(foeTrophies), deck, rand);
@@ -279,11 +297,12 @@ const KCProgress = (() => {
       left -= n;
       return { id, n: Math.max(1, n) };
     }).filter(c => c.n > 0);
-    return { coins, cards };
+    return { coins, cards, items: rollItems(type, rand) };
   }
   function apply(c) {
     P.coins += c.coins;
     for (const { id, n } of c.cards) P.cards[id].count += n;
+    for (const { id, n } of c.items || []) P.magic[id] = magicCount(id) + n;
   }
   function chestState(i, now = Date.now()) {
     const c = P.chests[i];
@@ -315,7 +334,7 @@ const KCProgress = (() => {
   // Five offers a day, made from the cards you have found and their levels. Every offer says exactly
   // what it gives. Prices: a copy is worth 10 coins (common) or 50 (rare); 1 diamond = 5,000 coins.
   // Chests are sold for coins only, one of each a day, with their contents shown before you buy.
-  const SHOP = { perCopy: { common: 10, rare: 50 }, coinsPerDiamond: 5000, maxQty: 250, chests: { wooden: 80, silver: 280, gold: 800, platinum: 1800, legendary: 4200, mythic: 9500 } };
+  const SHOP = { perCopy: { common: 10, rare: 50, epic: 400, legendary: 4000 }, coinsPerDiamond: 5000, maxQty: 250, chests: { wooden: 80, silver: 280, gold: 800, platinum: 1800, legendary: 4200, mythic: 9500 } };
   const pad2 = n => String(n).padStart(2, '0');
   const dayKey = now => { const d = new Date(now); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
   // When today's offers are replaced: the next local midnight.
@@ -383,7 +402,7 @@ const KCProgress = (() => {
     const c = roll(type, rand);
     apply(c);
     save();
-    return { ok: true, chest: type, price, coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: false }, x)) };
+    return { ok: true, chest: type, price, coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: false }, x)), items: c.items };
   }
   // One free Wooden Chest a day (local days, like the offers).
   const freeChestReady = (now = Date.now()) => P.freeChestDay !== dayKey(now);
@@ -393,7 +412,7 @@ const KCProgress = (() => {
     const c = roll('wooden', rand);
     apply(c);
     save();
-    return { ok: true, chest: 'wooden', coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: false }, x)) };
+    return { ok: true, chest: 'wooden', coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: false }, x)), items: c.items };
   }
   function refreshShop(rand, now = Date.now()) { P.shop = null; return shop(now, rand); }
   // Buy offer i. Returns { ok, coins, cards } or { error: 'sold' | 'coins' | 'diamonds' | 'none' }.
@@ -413,6 +432,100 @@ const KCProgress = (() => {
   }
   // TEMPORARY: the test button's 1,000,000 coins and diamonds.
   function grantTest() { P.coins = 1000000; P.diamonds = 1000000; save(); }
+
+
+  /* ---------- magic items ----------
+     Wild cards count as copies of any card of their rarity. A book fills every copy a card still needs
+     for its next level (the Book of Books works on any rarity). The Hammer of Books upgrades a card one
+     level without spending coins (it still needs its copies). Evolution shards have a place but nothing
+     gives them yet. Wild cards come from chests from Arena 2 on; books and the hammer are rare finds in
+     silver chests and up (0.1% in silver to 1% in mythic, never in wooden). */
+  const MAGIC = {
+    wild_common: { name: 'Common Wild Card', kind: 'wild', rarity: 'common', blurb: 'Counts as a copy of any common card. Use it on a common card to add copies toward its next level.' },
+    wild_rare: { name: 'Rare Wild Card', kind: 'wild', rarity: 'rare', blurb: 'Counts as a copy of any rare card.' },
+    wild_epic: { name: 'Epic Wild Card', kind: 'wild', rarity: 'epic', blurb: 'Counts as a copy of any epic card.' },
+    wild_legendary: { name: 'Legendary Wild Card', kind: 'wild', rarity: 'legendary', blurb: 'Counts as a copy of any legendary card.' },
+    book_common: { name: 'Book of Common', kind: 'book', rarity: 'common', blurb: 'Use on a common card to fill all the copies it still needs for its next level.' },
+    book_rare: { name: 'Book of Rare', kind: 'book', rarity: 'rare', blurb: 'Use on a rare card to fill all the copies it still needs for its next level.' },
+    book_epic: { name: 'Book of Epic', kind: 'book', rarity: 'epic', blurb: 'Use on an epic card to fill all the copies it still needs for its next level.' },
+    book_legendary: { name: 'Book of Legendary', kind: 'book', rarity: 'legendary', blurb: 'Use on a legendary card to fill all the copies it still needs for its next level.' },
+    book_books: { name: 'Book of Books', kind: 'book', rarity: 'any', blurb: 'Works on a card of any rarity: fills all the copies it still needs for its next level.' },
+    hammer_books: { name: 'Hammer of Books', kind: 'hammer', rarity: 'any', blurb: 'Upgrades a card one level without spending coins. The card still needs its copies.' },
+    shards: { name: 'Evolution Shards', kind: 'shard', rarity: 'any', soon: true, blurb: 'Unlock and power card evolutions. Evolutions arrive in a later update.' },
+  };
+  const MAGIC_ORDER = ['wild_common', 'wild_rare', 'wild_epic', 'wild_legendary', 'book_common', 'book_rare', 'book_epic', 'book_legendary', 'book_books', 'hammer_books', 'shards'];
+  const MAGIC_RULES = {
+    wildFromArena: 2,
+    // wild cards per chest at account level 1: [min, max] copies, or a chance of one
+    wild: {
+      wooden: {},
+      silver: { common: [2, 4], rare: 0.3 },
+      gold: { common: [4, 7], rare: [1, 2], epic: 0.05 },
+      platinum: { common: [8, 12], rare: [2, 4], epic: 0.2, legendary: 0.01 },
+      legendary: { common: [15, 22], rare: [4, 7], epic: [1, 1], legendary: 0.04 },
+      mythic: { common: [30, 40], rare: [8, 12], epic: [2, 3], legendary: 0.1 },
+    },
+    // the chance of a book or the hammer in a chest, and how often each one is the find
+    chance: { wooden: 0, silver: 0.001, gold: 0.002, platinum: 0.004, legendary: 0.007, mythic: 0.01 },
+    weights: { book_common: 34, book_rare: 26, book_epic: 14, book_legendary: 8, book_books: 6, hammer_books: 12 },
+  };
+  const wildActive = () => arena().number >= MAGIC_RULES.wildFromArena;
+  function rollItems(type, rand) {
+    const items = [];
+    if (wildActive()) {
+      const W = MAGIC_RULES.wild[type] || {}, m = chestMult();
+      for (const r of ['common', 'rare', 'epic', 'legendary']) {
+        const w = W[r];
+        if (w === undefined) continue;
+        const n = Array.isArray(w) ? Math.round((w[0] + rand() * (w[1] - w[0])) * m) : rand() < w ? 1 : 0;
+        if (n > 0) items.push({ id: 'wild_' + r, n });
+      }
+    }
+    if (rand() < (MAGIC_RULES.chance[type] || 0)) {
+      const ws = Object.entries(MAGIC_RULES.weights), total = ws.reduce((a, [, w]) => a + w, 0);
+      let x = rand() * total;
+      for (const [id, w] of ws) { x -= w; if (x <= 0) { items.push({ id, n: 1 }); break; } }
+    }
+    return items;
+  }
+  const magicCount = id => (P.magic && P.magic[id]) || 0;
+  // Can this item be used on this card, and what would it do?
+  function magicFor(item, id) {
+    const M = MAGIC[item], card = KC_CARDS[id];
+    if (!M || !card || M.soon) return { ok: false, reason: 'none' };
+    if (!magicCount(item)) return { ok: false, reason: 'none-held' };
+    if (!P.found.includes(id)) return { ok: false, reason: 'not-found' };
+    if (M.rarity !== 'any' && M.rarity !== card.rarity) return { ok: false, reason: 'rarity' };
+    const c = P.cards[id];
+    if (c.level >= MAX_LEVEL) return { ok: false, reason: 'max' };
+    const need = UPGRADE.copies[card.rarity][c.level - 1], missing = need - c.count;
+    if (M.kind === 'hammer') return missing > 0 ? { ok: false, reason: 'copies', missing } : { ok: true, level: c.level + 1 };
+    if (missing <= 0) return { ok: false, reason: 'full' };
+    return { ok: true, gives: M.kind === 'wild' ? Math.min(magicCount(item), missing) : missing, uses: M.kind === 'wild' ? Math.min(magicCount(item), missing) : 1 };
+  }
+  function useMagic(item, id) {
+    const r = magicFor(item, id);
+    if (!r.ok) return r;
+    const M = MAGIC[item], c = P.cards[id];
+    if (M.kind === 'hammer') {
+      c.count -= UPGRADE.copies[KC_CARDS[id].rarity][c.level - 1];
+      c.level++;
+      P.magic[item]--;
+      const levelUp = addXp(4 * c.level);
+      save();
+      return { ok: true, item, card: id, level: c.level, levelUp };
+    }
+    c.count += r.gives;
+    P.magic[item] -= r.uses;
+    save();
+    return { ok: true, item, card: id, gives: r.gives };
+  }
+  // TEMPORARY: the test button fills the Magic Items tab.
+  function grantMagic() {
+    const add = { wild_common: 300, wild_rare: 60, wild_epic: 10, wild_legendary: 2, book_common: 3, book_rare: 3, book_epic: 1, book_legendary: 1, book_books: 2, hammer_books: 3 };
+    for (const [k, v] of Object.entries(add)) P.magic[k] = magicCount(k) + v;
+    save();
+  }
 
   /* ---------- cards ---------- */
   function upgradeInfo(id) {
@@ -463,5 +576,6 @@ const KCProgress = (() => {
     roll, chestState, unlockingSlot, startUnlock, openChest,
     SHOP, shop, shopEnds, refreshShop, buy, buyChest, grantTest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
+    MAGIC, MAGIC_ORDER, MAGIC_RULES, wildActive, magicCount, magicFor, useMagic, grantMagic,
   };
 })();

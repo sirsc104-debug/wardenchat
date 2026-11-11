@@ -74,9 +74,37 @@ const KC_CARDS = {
     blurb: 'A sturdy cannon that guards your side. Rhinos go for it before your towers. It crumbles after 30 seconds.',
     evo: 'Overcharge: its first shot at each new target does double damage.',
   },
+  // Arena 2 (Briar Hollow) cards, found on the Trophy Road.
+  spears: {
+    id: 'spears', name: 'Spears', cost: 3, rarity: 'common', kind: 'spell', role: 'Spell', count: 1,
+    dmg: 185, area: 3.5, towerPct: 0.3, projSpeed: 19, projKind: 'spears',
+    blurb: 'A volley of spears rains down on a wide area, hitting ground and flying troops. Clears swarms in one go.',
+    evo: 'Second Volley: a lighter second wave lands a moment later.',
+  },
+  footmen: {
+    id: 'footmen', name: 'Footmen', cost: 5, rarity: 'common', kind: 'troop', role: 'Group', count: 4,
+    hp: 420, dmg: 85, hit: 1.3, range: 0.55, speed: 1.0, targets: 'ground', air: false,
+    radius: 0.5, mass: 3,
+    blurb: 'Four armored soldiers with swords and small shields. They chop down tanks but fear splash damage.',
+    evo: 'Shield Wall: the front two block the first hit each takes.',
+  },
+  flail: {
+    id: 'flail', name: 'Flail Knight', cost: 4, rarity: 'rare', kind: 'troop', role: 'Splash tank', count: 1,
+    hp: 1150, dmg: 150, hit: 1.7, range: 0.9, speed: 1.0, targets: 'ground', air: false,
+    radius: 0.62, mass: 5, spin: 1.6,
+    blurb: 'A sturdy knight who swings a spiked ball in a full circle, hitting every ground enemy around him.',
+    evo: 'Whirlwind: every third swing pulls nearby enemies in.',
+  },
+  pots: {
+    id: 'pots', name: 'Pot Thrower', cost: 2, rarity: 'common', kind: 'troop', role: 'Splash', count: 1,
+    hp: 150, dmg: 88, hit: 2.2, range: 4.5, speed: 1.0, targets: 'ground', air: false,
+    radius: 0.42, mass: 1.5, proj: 'pot', projSpeed: 7, splash: 1.1, zone: { r: 1.0, dps: 40, dur: 0.5 },
+    blurb: 'Throws clay pots that shatter on ground troops. The broken pottery keeps hurting the spot for half a second.',
+    evo: 'Fire Pots: every other pot leaves burning oil instead.',
+  },
 };
 
 // Every card in collection order: the starter deck, then cards found on the Trophy Road.
-const KC_ALL_CARDS = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball', 'skeletons', 'cannon'];
+const KC_ALL_CARDS = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball', 'skeletons', 'cannon', 'spears', 'footmen', 'flail', 'pots'];
 
 const KC_STARTER_DECK = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'];

@@ -19,13 +19,13 @@ const KCBot = (() => {
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
   const ROLE = {
-    tank: ['cannon', 'gorilla', 'skeletons', 'wolves', 'gladiator', 'archers', 'hawks'],
-    air: ['archers', 'snowman', 'hawks', 'fireball'],
-    swarm: ['snowman', 'archers', 'gladiator', 'fireball', 'hawks'],
-    ranged: ['gladiator', 'skeletons', 'wolves', 'hawks', 'gorilla', 'rhino'],
-    melee: ['skeletons', 'wolves', 'gladiator', 'cannon', 'hawks', 'gorilla', 'archers'],
+    tank: ['cannon', 'footmen', 'gorilla', 'skeletons', 'wolves', 'gladiator', 'flail', 'archers', 'hawks'],
+    air: ['archers', 'snowman', 'hawks', 'spears', 'fireball'],
+    swarm: ['flail', 'snowman', 'pots', 'archers', 'gladiator', 'spears', 'fireball', 'hawks'],
+    ranged: ['gladiator', 'skeletons', 'wolves', 'hawks', 'flail', 'footmen', 'gorilla', 'rhino'],
+    melee: ['skeletons', 'pots', 'wolves', 'gladiator', 'flail', 'cannon', 'hawks', 'footmen', 'gorilla', 'archers'],
   };
-  const MELEE = { wolves: 1, gladiator: 1, gorilla: 1, rhino: 1, skeletons: 1 };
+  const MELEE = { wolves: 1, gladiator: 1, gorilla: 1, rhino: 1, skeletons: 1, footmen: 1, flail: 1 };
 
   function create(team, opts) {
     opts = opts || {};
@@ -82,18 +82,22 @@ const KCBot = (() => {
     const has = id => hand.includes(id);
     const afford = id => KC_CARDS[id].cost <= E + 0.5;
 
-    // 1. Fireball a big clump, or troops hitting a tower.
-    if (has('fireball') && afford('fireball')) {
+    // 1. A spell on a big clump, or on troops hitting a tower. Fireball counts everything it hits;
+    //    Spears only counts what it would finish off (swarms, flyers, ranged troops).
+    for (const spell of ['fireball', 'spears']) {
+      if (!has(spell) || !afford(spell)) continue;
+      const c = KC_CARDS[spell], reach = c.area - 0.2, dmg = c.dmg * KCSim.levelMult(s.cardLevels[me] && s.cardLevels[me][spell] || 1);
       let best = null, bv = 0;
       for (const f of foes) {
         let v = 0;
-        for (const g of foes) if (Math.hypot(g.x - f.x, g.y - f.y) < 2.3) v += g.v;
+        for (const g of foes) if (Math.hypot(g.x - f.x, g.y - f.y) < reach && (spell === 'fireball' || g.e.hp <= dmg)) v += g.v;
         if (f.y > 20) v += 1;
         if (v > bv) { bv = v; best = f; }
       }
-      if (best && bv >= K.fireballValue) {
+      const need = spell === 'fireball' ? K.fireballValue : Math.max(3.5, K.fireballValue - 1);
+      if (best && bv >= need) {
         const lead = best.e.moving ? 0.8 : 0;
-        return { card: 'fireball', x: best.x, y: best.y + lead, exact: true, quick: true };
+        return { card: spell, x: best.x, y: best.y + lead, exact: true, quick: true };
       }
     }
 
@@ -114,7 +118,7 @@ const KCBot = (() => {
           : group.some(t => t.e.air) ? 'air'
           : cards.filter(c => c === 'wolves').length >= 3 ? 'swarm'
           : cards.some(c => c === 'archers' || c === 'snowman') ? 'ranged' : 'melee';
-        const pick = ROLE[role].find(id => has(id) && afford(id) && id !== 'fireball' && id !== 'rhino')
+        const pick = ROLE[role].find(id => has(id) && afford(id) && KC_CARDS[id].kind !== 'spell' && id !== 'rhino')
           || hand.find(id => afford(id) && KC_CARDS[id].kind !== 'spell' && id !== 'rhino');
         if (pick && KC_CARDS[pick].kind === 'building') {
           // a building goes in the middle of our side, a little toward the threatened lane, to pull it in
@@ -132,7 +136,7 @@ const KCBot = (() => {
     // 3. Back up a push that is already crossing.
     const push = mine.find(m => m.e.card === 'rhino' && m.y < 19.5 && m.y > 11);
     if (push && E >= 4 && s.time - b.lastAttack > 2) {
-      const pick = ['snowman', 'archers', 'hawks', 'gladiator', 'wolves'].find(id => has(id) && afford(id));
+      const pick = ['snowman', 'pots', 'archers', 'hawks', 'flail', 'gladiator', 'wolves'].find(id => has(id) && afford(id));
       if (pick) return { card: pick, x: push.x, y: Math.max(17.5, push.y + 2.5), attack: true };
     }
 
@@ -142,7 +146,7 @@ const KCBot = (() => {
       const weak = ['L', 'R'].map(l => S.tower(s, enemy, l)).filter(t => !t.dead).sort((a, c) => a.hp - c.hp)[0];
       const lx = weak ? weak.x : (b.rand() < 0.5 ? 3.5 : 14.5);
       if (has('rhino') && afford('rhino')) return { card: 'rhino', x: lx < 9 ? 5.5 : 12.5, y: 30.5, attack: true };
-      const pick = ['gladiator', 'hawks', 'archers', 'wolves', 'gorilla'].find(id => has(id) && afford(id));
+      const pick = ['gladiator', 'flail', 'hawks', 'archers', 'footmen', 'wolves', 'gorilla'].find(id => has(id) && afford(id));
       if (pick) return { card: pick, x: lx, y: 18.5, attack: true };
     }
     return null;
