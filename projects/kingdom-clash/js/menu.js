@@ -1095,22 +1095,59 @@ const KCMenu = (() => {
     $('#rhBest').textContent = `Best ${fmt(p.best)}`;
     const r = p.trophyRecord;
     $('#rhRecord').innerHTML = `<b>${r.w}</b><small>wins</small><b>${r.l}</b><small>losses</small>`;
-    $('#roadTrack').innerHTML = road.map((m, i) => {
-      const st = G.roadState(m), nextAt = road[i + 1] ? road[i + 1].at : m.at + 50;
-      const fill = Math.max(0, Math.min(1, (p.trophies - m.at) / (nextAt - m.at)));
-      return `<li class="rn ${st}" data-at="${m.at}">
-        <div class="rn-card">${rewardHtml(m)}
-          ${st === 'ready' ? `<button class="claim-btn" type="button" data-at="${m.at}">Claim</button>` : st === 'claimed' ? '<span class="rn-done" aria-label="Claimed"></span>' : st === 'soon' ? '<span class="rn-soon">Soon</span>' : '<span class="rn-lock" aria-label="Locked"></span>'}
-        </div>
-        <div class="rn-at"><i class="trophy-i" aria-hidden="true"></i>${m.at}</div>
-        ${i < road.length - 1 ? `<div class="rn-line"><i style="width:${(fill * 100).toFixed(1)}%"></i></div>` : ''}
-      </li>`;
+    // the next reward and how far it is, or rewards waiting to be claimed
+    const ready = road.filter(m => G.roadState(m) === 'ready'), next = road.find(m => G.roadState(m) === 'locked');
+    const label = m => m.kind === 'card' ? `${KC_CARDS[m.card].name} ×${m.copies}` : m.kind === 'coins' ? `${fmt(m.amount)} coins` : m.kind === 'chest' ? G.CHESTS[G.capChest(m.chest)].name
+      : (x => (x.soon ? `Arena ${x.number}` : x.name))(G.ARENAS.find(x => x.id === m.arena));
+    $('#roadNext').innerHTML = ready.length
+      ? `<span class="rnx-tag ready">${ready.length} reward${ready.length === 1 ? '' : 's'} to claim</span><button type="button" class="pill gold" id="roadGo">Show me</button>`
+      : next ? `<span class="rnx-tag">Next reward</span><b>${esc(label(next))}</b><span class="rnx-at"><i class="trophy-i" aria-hidden="true"></i>${fmt(next.at)}</span>
+        <span class="rnx-bar"><i style="width:${Math.max(4, Math.min(100, (p.trophies - (road[road.indexOf(next) - 1] || { at: 0 }).at) / (next.at - (road[road.indexOf(next) - 1] || { at: 0 }).at) * 100)).toFixed(0)}%"></i></span>
+        <small>${fmt(next.at - p.trophies)} to go</small><button type="button" class="pill" id="roadGo">Find me</button>`
+        : '<span class="rnx-tag ready">Every reward claimed!</span>';
+    // the arena each reward belongs to, for its section colour
+    let arenaNow = road[0].arena;
+    $('#roadTrack').innerHTML = road.map(m => {
+      if (m.kind === 'arena') arenaNow = m.arena;
+      const st = G.roadState(m), A = G.ARENAS.find(x => x.id === arenaNow) || {}, theme = A.theme || 'soon';
+      const act = st === 'ready' ? `<button class="claim-btn" type="button" data-at="${m.at}">Claim</button>` : st === 'claimed' ? '<span class="rn-done" aria-label="Claimed"></span>'
+        : st === 'soon' ? '<span class="rn-soon">Soon</span>' : '<span class="rn-lock" aria-label="Locked"></span>';
+      if (m.kind === 'arena') {
+        // an arena gate: its badge, number and name
+        const G2 = G.ARENAS.find(x => x.id === m.arena), art = !G2.soon && KCArenas.get(G2.theme);
+        return `<li class="rn gate ${st} t-${G2.theme || 'soon'}" data-at="${m.at}">
+          <div class="rn-top"><div class="rn-gate">${art ? `<img src="${art.centerpiece.src}" alt="">` : '<span class="rg-soon">?</span>'}<small>Arena ${G2.number}</small><b>${esc(G2.soon ? 'Coming soon' : G2.name)}</b>${act}</div></div>
+          <span class="rn-slot"><i class="rn-pin"></i></span><div class="rn-at"><i class="trophy-i" aria-hidden="true"></i>${fmt(m.at)}</div></li>`;
+      }
+      return `<li class="rn ${st} t-${theme}" data-at="${m.at}"><div class="rn-top"><div class="rn-card">${rewardHtml(m)}${act}</div></div>
+        <span class="rn-slot"><i class="rn-pin"></i></span><div class="rn-at"><i class="trophy-i" aria-hidden="true"></i>${fmt(m.at)}</div></li>`;
     }).join('');
     for (const b of $$('#roadTrack .claim-btn')) b.addEventListener('click', () => claimAt(+b.dataset.at));
+    const go = $('#roadGo');
+    if (go) go.addEventListener('click', () => scrollRoad(true));
+    requestAnimationFrame(placeRoadMe);
   }
-  function scrollRoad() {
+  // The track's fill and your marker, between the two rewards your trophies fall between.
+  function placeRoadMe() {
+    const nodes = [...$$('#roadTrack .rn')], t = P().trophies, track = $('#roadTrack');
+    if (!nodes.length) return;
+    const cx = n => n.offsetLeft + n.offsetWidth / 2;
+    let x = cx(nodes[0]);
+    for (let i = 0; i < nodes.length; i++) {
+      const at = +nodes[i].dataset.at, nx = nodes[i + 1];
+      if (t >= at && (!nx || t < +nx.dataset.at)) { x = nx ? cx(nodes[i]) + (cx(nx) - cx(nodes[i])) * (t - at) / (+nx.dataset.at - at) : cx(nodes[i]); break; }
+    }
+    // the track runs through every reward's slot row, below its card
+    const slot = nodes[0].querySelector('.rn-slot'), y = slot.offsetTop + slot.offsetHeight / 2;
+    $('.road-rail').style.top = y + 'px'; $('#roadMe').style.top = y + 'px';
+    $('.road-rail').style.width = track.scrollWidth + 'px';
+    $('#roadFill').style.width = x + 'px';
+    $('#roadMe').style.left = x + 'px';
+    $('#roadMeN').textContent = fmt(t);
+  }
+  function scrollRoad(smooth) {
     const box = $('#roadScroll'), here = $('#roadTrack .rn.ready') || [...$$('#roadTrack .rn')].reverse().find(n => +n.dataset.at <= P().trophies);
-    if (box && here) box.scrollLeft = Math.max(0, here.offsetLeft - box.clientWidth / 2 + here.clientWidth / 2);
+    if (box && here) box.scrollTo({ left: Math.max(0, here.offsetLeft - box.clientWidth / 2 + here.clientWidth / 2), behavior: smooth === true ? 'smooth' : 'auto' });
   }
   function claimAt(at) {
     const got = G.claim(at);
@@ -1456,6 +1493,12 @@ const KCMenu = (() => {
     $('#mUpgrade').addEventListener('click', upgradeCard);
     $('#passPlaque').addEventListener('click', () => { if (G.passOpen()) openPass(); else { KCSound.play('error'); toast('The Diamond Pass opens in Sunstone Arena (600 trophies).'); } });
     $('#passX').addEventListener('click', closePass);
+    // the road: arrows, and the mouse wheel scrolls it sideways
+    const rs = $('#roadScroll');
+    $('#roadLeft').addEventListener('click', () => rs.scrollBy({ left: -rs.clientWidth * 0.7, behavior: 'smooth' }));
+    $('#roadRight').addEventListener('click', () => rs.scrollBy({ left: rs.clientWidth * 0.7, behavior: 'smooth' }));
+    rs.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { rs.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
+    window.addEventListener('resize', () => { if (tabNow === 'road') placeRoadMe(); });
     $('#onlineBtn').addEventListener('click', openOnline);
     $('#onlineX').addEventListener('click', closeOnline);
     $('#onlineModal').addEventListener('click', e => { if (e.target.id === 'onlineModal') closeOnline(); });

@@ -133,7 +133,12 @@
               <div class="rh-arena"><small id="rhArenaNo">Arena 1</small><b id="rhArena">Cinder Keep</b><span id="rhBest">Best 0</span></div>
               <div class="rh-record" id="rhRecord"></div>
             </div>
-            <div class="road-scroll" id="roadScroll"><ol class="road-track" id="roadTrack"></ol></div>
+            <div class="road-next" id="roadNext"></div>
+            <div class="road-frame">
+              <button type="button" class="road-arrow left" id="roadLeft" aria-label="Scroll the road back">&#9664;</button>
+              <div class="road-scroll" id="roadScroll"><div class="road-rail" aria-hidden="true"><i id="roadFill"></i></div><span class="road-me" id="roadMe" aria-hidden="true"><b id="roadMeN">0</b></span><ol class="road-track" id="roadTrack"></ol></div>
+              <button type="button" class="road-arrow right" id="roadRight" aria-label="Scroll the road on">&#9654;</button>
+            </div>
             <p class="dim road-note">Win trophy battles to climb. A win is +30 trophies, a loss is &minus;20, and you never drop below your arena&rsquo;s floor. Claim each reward as you pass it.</p>
           </div>
           <div class="plaque info-plaque" id="roadLocked">

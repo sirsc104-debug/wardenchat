@@ -1725,3 +1725,110 @@ button.slot:hover { transform: translateY(-3px); }
 /* rare: a small burst of gold rays round the card, not the whole screen */
 .co-unlock.ul-rare > .ul-beams { width: 440px; height: 440px; margin: -220px 0 0 -220px;
   -webkit-mask: radial-gradient(circle, #000 18%, transparent 68%); mask: radial-gradient(circle, #000 18%, transparent 68%); }
+
+/* ---------- the Trophy Road ---------- */
+.road-next { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 8px 16px; margin: -4px auto 0; border-radius: 999px;
+  background: rgba(0, 0, 0, 0.3); border: 2px solid rgba(255, 255, 255, 0.1); font-weight: 900; }
+.road-next b { font-family: var(--display); font-weight: 400; font-size: 20px; }
+.rnx-tag { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #ffd27a; }
+.rnx-tag.ready { color: #8bf09a; font-size: 14px; letter-spacing: 0.04em; }
+.rnx-at { display: flex; align-items: center; gap: 4px; font-family: var(--display); font-size: 18px; }
+.rnx-bar { width: 140px; height: 12px; border-radius: 999px; background: #120c22; border: 2px solid var(--outline); overflow: hidden; }
+.rnx-bar i { display: block; height: 100%; background: linear-gradient(#ffe27a, #e09f12); }
+.road-next small { color: var(--muted); }
+.road-next .pill { padding: 5px 14px; font-size: 13px; }
+.road-frame { position: relative; flex: 1; min-height: 0; display: flex; }
+.road-frame .road-scroll { flex: 1; position: relative; scrollbar-width: thin; scrollbar-color: #d9a032 transparent; padding: 0; }
+.road-arrow { position: absolute; z-index: 3; top: 50%; width: 40px; height: 56px; margin-top: -28px; border-radius: 12px; border: 3px solid var(--outline);
+  background: linear-gradient(#5a6fd8, #3846a8); color: #fff; font-size: 16px; box-shadow: 0 3px 0 #1f2766; }
+.road-arrow.left { left: -14px; }
+.road-arrow.right { right: -14px; }
+.road-frame .road-track { position: relative; z-index: 1; padding: 0 60px; gap: 0; min-height: 100%; box-sizing: border-box; }
+/* one track under everything, filled to where you are */
+.road-rail { position: absolute; z-index: 0; left: 0; top: calc(50% + 8px); height: 14px; margin-top: -7px; background: #120c22; border-block: 3px solid var(--outline); }
+.road-rail i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(#ffe27a, #f0b020 60%, #c47a10); box-shadow: 0 0 12px rgba(255, 210, 80, 0.6); }
+.road-me { position: absolute; z-index: 2; top: calc(50% + 8px); width: 0; height: 0; pointer-events: none; }
+.road-me b { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 999px;
+  background: linear-gradient(#5aa9ff, #2f6fe4); border: 3px solid var(--outline); font-family: var(--display); font-weight: 400; font-size: 15px; white-space: nowrap;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25), 0 4px 0 rgba(0, 0, 0, 0.35); animation: bob 1.6s ease-in-out infinite; }
+.road-me b::before { content: ''; width: 14px; height: 14px; background: #fff3c4; clip-path: polygon(0 100%, 0 25%, 25% 55%, 50% 0, 75% 55%, 100% 25%, 100% 100%); }
+/* each reward: a card above the track, its trophy count below */
+.road-frame .rn { width: 150px; gap: 0; height: 100%; justify-content: center; padding: 0; }
+.road-frame .rn-card { width: 128px; min-height: clamp(140px, 24vh, 190px); margin-bottom: 52px; }
+.road-frame .rn-at { position: absolute; top: calc(50% + 34px); margin: 0; padding: 2px 10px; border-radius: 999px; background: rgba(0, 0, 0, 0.35); }
+.road-frame .rn-line { display: none; }
+.road-frame .rw-card { width: clamp(64px, 9vh, 88px); }
+.road-frame .rw-chest svg { width: clamp(76px, 10vh, 100px); }
+/* the arena each reward sits in tints its card */
+.rn.t-cinder .rn-card { background: linear-gradient(#6a3a34, #3a2026); }
+.rn.t-briar .rn-card { background: linear-gradient(#3e5a3a, #23361f); }
+.rn.t-sunstone .rn-card { background: linear-gradient(#8a5a2e, #4e321a); }
+.rn.t-stormspire .rn-card { background: linear-gradient(#3e4a8a, #232a56); }
+/* an arena gate */
+.road-frame .rn.gate { width: 230px; }
+.rn-gate { position: relative; z-index: 1; width: 200px; min-height: clamp(180px, 32vh, 250px); margin-bottom: 52px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  gap: 2px; padding: 8px 8px 26px; border-radius: 20px; border: 3px solid var(--outline); background: radial-gradient(ellipse at 50% 35%, rgba(255, 220, 140, 0.35), transparent 70%), linear-gradient(#4a3c7c, #241a48);
+  box-shadow: inset 0 0 0 3px #d9a032, 0 0 24px rgba(255, 210, 80, 0.25), 0 6px 0 rgba(0, 0, 0, 0.35); text-align: center; }
+.rn-gate img { width: 88%; max-height: 62%; object-fit: contain; filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.45)); }
+.rn-gate small { font-size: 11px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #ffd27a; }
+.rn-gate b { font-family: var(--display); font-weight: 400; font-size: 22px; line-height: 1; text-shadow: 0 2px 0 var(--outline); }
+.rg-soon { flex: 1; display: grid; place-items: center; font-family: var(--display); font-size: 70px; color: rgba(255, 255, 255, 0.3); }
+.rn.gate.locked .rn-gate, .rn.gate.soon .rn-gate { filter: saturate(0.4) brightness(0.75); }
+.rn.gate.ready .rn-gate { box-shadow: inset 0 0 0 3px var(--gold), 0 0 26px rgba(255, 210, 80, 0.7), 0 6px 0 rgba(0, 0, 0, 0.35); animation: bob 1.6s ease-in-out infinite; }
+.rn.gate.t-cinder .rn-gate { background: radial-gradient(ellipse at 50% 35%, rgba(255, 140, 60, 0.4), transparent 70%), linear-gradient(#5a2e2a, #2a1418); }
+.rn.gate.t-briar .rn-gate { background: radial-gradient(ellipse at 50% 35%, rgba(160, 230, 120, 0.35), transparent 70%), linear-gradient(#36502f, #1c2a18); }
+.rn.gate.t-sunstone .rn-gate { background: radial-gradient(ellipse at 50% 35%, rgba(255, 210, 120, 0.45), transparent 70%), linear-gradient(#7a4a24, #3e2612); }
+.rn.gate.t-stormspire .rn-gate { background: radial-gradient(ellipse at 50% 35%, rgba(130, 170, 255, 0.45), transparent 70%), linear-gradient(#323c7a, #1a1e48); }
+@media (max-width: 760px) { .road-arrow { display: none; } .road-next b { font-size: 16px; } .rnx-bar { width: 90px; } .road-frame .road-track { padding: 0 24px; } }
+
+/* every reward in three rows: its card, the track's row, its trophy count, so the track never crosses a card */
+.road-frame .rn { display: grid; grid-template-rows: minmax(0, 1fr) 52px 30px minmax(0, 0.35fr); justify-items: center; align-items: stretch; height: 100%; }
+.road-frame .rn-top { display: flex; align-items: flex-end; justify-content: center; padding-top: 14px; min-height: 0; }
+.road-frame .rn-card, .rn-gate { margin-bottom: 0; }
+.road-frame .rn-at { position: static; align-self: start; display: flex; align-items: center; height: 26px; box-sizing: border-box; }
+.rn-slot { position: relative; width: 100%; display: grid; place-items: center; }
+.rn-pin { width: 16px; height: 16px; border-radius: 50%; background: #3a2f60; border: 3px solid var(--outline); position: relative; z-index: 1; }
+.rn.claimed .rn-pin, .rn.ready .rn-pin { background: #ffd23f; }
+.rn.ready .rn-pin { box-shadow: 0 0 10px #ffd23f; }
+.road-rail { top: 0; margin-top: -7px; }
+.road-me { top: 0; z-index: 2; }
+/* claimed rewards dim without turning see-through */
+.road-frame .rn.claimed .rn-card { opacity: 1; filter: brightness(0.72) saturate(0.85); }
+.road-frame .rn { grid-template-rows: minmax(0, 1fr) 52px 30px 16px; }
+.rn-gate { min-height: min(clamp(170px, 30vh, 240px), 100%); }
+.road-frame .rn-top { padding-top: 16px; }
+/* the road fits its tab's width (it scrolls inside) */
+.road-view { width: 100%; min-width: 0; box-sizing: border-box; }
+@media (max-width: 760px) {
+  .road-view { min-height: calc(100vh - 230px); }
+  .road-next { border-radius: 16px; gap: 6px 10px; }
+  .road-frame .rn-gate { width: 170px; }
+  .road-frame .rn.gate { width: 190px; }
+  .road-frame .rn { width: 136px; }
+  .road-frame .rn-card { width: 118px; }
+}
+@media (max-width: 760px) {
+  .road-head { flex-wrap: nowrap; gap: 8px; }
+  .rh-count b { font-size: 30px; }
+  .rh-count small, .rh-record { display: none; }
+  .rh-arena { align-items: flex-end; }
+  .rh-arena b { font-size: 20px; }
+  .road-next { padding: 6px 10px; }
+  .road-next .rnx-tag:not(.ready) { display: none; }
+  .road-next b { font-size: 15px; }
+  .road-view { min-height: 0; height: max(360px, calc(100dvh - 330px)); }
+  .road-frame .rn { grid-template-rows: minmax(0, 1fr) 46px 28px 8px; }
+  .road-frame .rn-card { min-height: 130px; }
+  .rn-gate { min-height: min(170px, 100%); }
+  .road-note { display: none; }
+}
+@media (max-width: 760px) {
+  #tab-road { display: block; height: auto; }
+  .road-view { height: max(330px, calc(100dvh - 300px)); gap: 8px; }
+  .road-frame .road-scroll { min-height: 0; }
+  .road-next { flex-wrap: nowrap; padding: 6px 8px 6px 12px; font-size: 13px; }
+  .road-next .rnx-bar { display: none; }
+  .road-next .rnx-at { font-size: 15px; }
+  .road-next b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .road-next small { white-space: nowrap; }
+}
