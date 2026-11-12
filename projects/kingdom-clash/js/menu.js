@@ -256,13 +256,14 @@ const KCMenu = (() => {
     if (!FX.raf) FX.raf = requestAnimationFrame(fxFrame);
   }
   function fxStop() { cancelAnimationFrame(FX.raf); FX.raf = 0; FX.parts = []; }
-  function fxBurst(el, n, kind, cols) {
+  // size scales the sparkles (1 is the usual size)
+  function fxBurst(el, n, kind, cols, size = 1) {
     if (calm || !el) return;
     const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height * 0.45;
     for (let i = 0; i < n; i++) {
       const a = -Math.PI / 2 + (Math.random() - 0.5) * (kind === 'coin' ? 1.8 : 3.6), v = (kind === 'coin' ? 320 : 240) * (0.5 + Math.random());
       FX.parts.push({ kind, x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: kind === 'coin' ? 900 : 320, life: 0.9 + Math.random() * 0.8, max: 1.7,
-        r: kind === 'coin' ? 6 + Math.random() * 3 : 2 + Math.random() * 3, col: cols[Math.floor(Math.random() * cols.length)], spin: Math.random() * 6 });
+        r: kind === 'coin' ? 6 + Math.random() * 3 : (2 + Math.random() * 3) * size, col: cols[Math.floor(Math.random() * cols.length)], spin: Math.random() * 6 });
     }
     if (FX.parts.length > 260) FX.parts.splice(0, FX.parts.length - 260);
   }
@@ -519,7 +520,7 @@ const KCMenu = (() => {
       at(() => { fly.classList.add('tease'); fxBurst(flip, 14, 'spark', U.cols); }, 350);
     } else if (r === 'rare') {
       at(() => { fly.classList.add('tease'); KCSound.play('chestShake'); }, 300);
-      for (let i = 0; i < 6; i++) at(() => fxBurst(flip, 5, 'spark', U.cols), 400 + i * 180);
+      for (let i = 0; i < 6; i++) at(() => fxBurst(flip, 5, 'spark', U.cols, 0.5), 400 + i * 180);
       at(() => u.classList.add('beams'), 1100);
     } else if (r === 'epic') {
       at(() => u.classList.add('vortex'), 250);
@@ -546,9 +547,13 @@ const KCMenu = (() => {
       flip.classList.add('flipped'); KCSound.play('cardFlip');
       u.classList.add('reveal');
       const [x, y, w] = centre();
-      fxFlash(flip, U.cols[0]);
-      fxBurst(flip, { common: 24, rare: 40, epic: 56, legendary: 80 }[r], 'spark', U.cols);
-      if (r === 'rare' || r === 'legendary') setTimeout(() => fxFlash(flip, U.cols[1]), 160);
+      // the flash and sparkles wait until the card has turned face up, so the turn shows
+      setTimeout(() => {
+        if (!co || co.steps[co.i] !== st) return;
+        fxFlash(flip, U.cols[0]);
+        fxBurst(flip, { common: 24, rare: 30, epic: 56, legendary: 80 }[r], 'spark', U.cols, { common: 0.8, rare: 0.55, epic: 1, legendary: 1 }[r]);
+        if (r === 'rare' || r === 'legendary') setTimeout(() => fxFlash(flip, U.cols[1]), 160);
+      }, 300);
       if (r === 'legendary') for (let i = 0; i < 6; i++) setTimeout(() => {
         // fireworks round the card
         const fx = x + (Math.random() - 0.5) * innerWidth * 0.7, fy = y + (Math.random() - 0.6) * innerHeight * 0.5;
