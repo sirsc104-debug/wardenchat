@@ -424,14 +424,58 @@ const KCArenas = (() => {
     },
   };
 
-  /* Arenas 9 and 10: their art hasn't been made yet. Each is ready for the same four images as the arenas
+  // Arena 9: Skyward Sanctuary: a white marble and gold sanctuary on the clouds, a lily stream for the river.
+  ART.skyward = {
+    name: 'Skyward Sanctuary',
+    centerpiece: { src: 'img/skyward_badge.webp', w: 1228, h: 1254, bar: { left: 29.5, top: 82.4, width: 41.5, height: 3.8 } },
+    palette: 'skyward', margin: 1.4, fx: 'water',
+    field: {
+      src: 'img/skyward_battlefield.webp', w: 1024, h: 1536,
+      x: [[271, 3.5], [751, 14.5]],
+      y: [[343, 3], [446, 6.5], [712, 15], [832, 17], [1050, 25.5], [1140, 29]],
+      bridges: [[1.89, 13.85, 5.08, 17.15], [12.95, 13.85, 16.14, 17.15]],
+      // the four blue crystal braziers at the corners
+      lanterns: [[-0.03, -2.71], [18.04, -2.71], [0.5, 33.1], [17.58, 33.1]],
+    },
+    scenery: {
+      // the left stands: a wide marble staircase between banners, a griffin statue, waterfalls below
+      left: {
+        src: 'img/skyward_left.webp', w: 793, h: 1983, anchor: [0.55, 0.5], stars: 0,
+        rows: [
+          { y: 0.41, slope: 0, size: 0.74, spans: [[0.2, 0.7]] },
+          { y: 0.45, slope: 0, size: 0.78, spans: [[0.23, 0.5]] },
+          { y: 0.49, slope: 0, size: 0.82, spans: [[0.23, 0.5]] },
+          { y: 0.53, slope: 0, size: 0.86, spans: [[0.23, 0.5]] },
+          { y: 0.565, slope: 0, size: 0.9, spans: [[0.15, 0.6]] },
+          { y: 0.605, slope: 0, size: 0.94, spans: [[0.08, 0.56]] },
+        ],
+        glows: [[0.39, 0.28, 0.6], [0.64, 0.26, 0.6]],
+        mist: [0.1, 0.8, 0.84],
+      },
+      // the right stands: a carpeted staircase up to the arches between two griffins, and a lower flight
+      right: {
+        src: 'img/skyward_right.webp', w: 793, h: 1983, anchor: [0.45, 0.5], stars: 0,
+        rows: [
+          { y: 0.39, slope: 0, size: 0.74, spans: [[0.34, 0.7]] },
+          { y: 0.42, slope: 0, size: 0.78, spans: [[0.34, 0.74]] },
+          { y: 0.45, slope: 0, size: 0.82, spans: [[0.35, 0.78]] },
+          { y: 0.48, slope: 0, size: 0.86, spans: [[0.36, 0.8]] },
+          { y: 0.73, slope: 0, size: 0.94, spans: [[0.0, 0.18]] },
+          { y: 0.77, slope: 0, size: 0.98, spans: [[0.0, 0.26]] },
+        ],
+        glows: [[0.28, 0.22, 0.6], [0.54, 0.24, 0.6]],
+        mist: [0.45, 0.95, 0.74],
+      },
+    },
+  };
+
+  /* Arena 10: its art hasn't been made yet. Each is ready for the same four images as the arenas
      above: a lobby centerpiece with the arena's name, a battlefield (its tower pads, river and two bridges
      on the game's grid) and the two side panels. Until the images arrive (fill in `src`, the image size,
      the anchors, the crowd rows), the battlefield is drawn in code in the arena's own colours
      (KCArt.THEMES), the lobby shows the arena's name on a plaque and the side panels are a plain gradient
      in its colours: no other arena's art stands in. */
   const PENDING = {
-    skyward: { name: 'Skyward Sanctuary', panel: ['#6f8fca', '#e8eef8'], look: 'Clouds, white marble and gold.' },
     eclipse: { name: 'Eclipse Throne', panel: ['#0a0810', '#4a1420'], look: 'Obsidian, crimson energy and darkness.' },
   };
   for (const [id, P] of Object.entries(PENDING)) {
