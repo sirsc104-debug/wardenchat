@@ -118,8 +118,11 @@ const KCSim = (() => {
     const my = own(team, y), half = c.kind === 'building' ? c.half : 0;
     let ok = my - half >= RIVER_BOT + 0.1;
     if (!ok && my - half >= POCKET) {
+      // once that lane's tower is down: the ground up to the pocket line and, for a troop, that
+      // lane's bridge (never the water, and never a building on the bridge)
       const t = tower(s, 1 - team, laneOf(x));
-      ok = !!(t && t.dead) && (my + half < RIVER_TOP || my - half > RIVER_BOT);
+      const onBridge = !half && BRIDGES.some(b => Math.abs(x - b) <= BRIDGE_HALF - 0.15);
+      ok = !!(t && t.dead) && (my + half < RIVER_TOP || my - half > RIVER_BOT || onBridge);
     }
     if (half && (x - half < 0 || x + half > W || y - half < 0 || y + half > H)) return false;
     return ok && !inTower(s, x, y, half ? half + 0.05 : 0.2);

@@ -30,7 +30,7 @@ On a phone held upright the battle switches layout: the arena fills the top of t
 ## How a match works
 
 - **Energy**: start with 5, max 10, +1 every 2.8 seconds; double speed in the last minute and in overtime.
-- **Deploying**: drag a card onto the arena, or press `1`–`4` and click. Troops go on your side of the river; once an enemy Archer Tower falls you can also deploy in that lane on their side, up to 4 tiles past the river. Fireball goes anywhere. `Esc` cancels.
+- **Deploying**: drag a card onto the arena, or press `1`–`4` and click. Troops go on your side of the river; once an enemy Archer Tower falls you can also deploy in that lane on their side, up to 4 tiles past the river, and on that lane's bridge (troops only, not buildings). The red area pulls back off that half of the river, and off the whole river once both Archer Towers are down. The water itself is never open: a card dropped in the river lands on the nearer bank you can use (the far bank only in an open lane). Fireball goes anywhere. `Esc` cancels.
 - **Hand**: 4 cards plus the next one shown below; a played card goes to the back of the queue.
 - **Towers**: Archer Towers (1,400 HP) shoot from the start; the King Tower (2,400 HP) sleeps until it is hit or one of its Archer Towers falls.
 - **Winning**: an Archer Tower is 1 crown, the King Tower is all 3 and ends the match. After 3:00 the side with more crowns wins; if tied, 1:00 of overtime where the next tower wins; if still tied, the side whose weakest tower has more health wins.

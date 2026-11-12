@@ -843,6 +843,10 @@
       zc.scale(G.dpr, G.dpr);
       const red = [];
       for (let y = 0; y < S.H; y++) { red[y] = []; for (let x = 0; x < S.W; x++) red[y][x] = !(S.canDeploy(s, 0, 'gladiator', x + 0.5, y + 0.5) || y >= S.RIVER_BOT); }
+      // the river is never red on a lane whose tower is down (the water stays closed, but a card
+      // dropped there lands on the nearer bank, and the bridge is open); elsewhere it is red with the
+      // ground beyond it
+      for (let y = S.RIVER_TOP; y < S.RIVER_BOT; y++) for (let x = 0; x < S.W; x++) red[y][x] = red[S.RIVER_TOP - 1][x];
       const isRed = (x, y) => x >= 0 && y >= 0 && x < S.W && y < S.H && red[y][x];
       zc.fillStyle = 'rgba(255,70,95,0.55)';
       for (let y = 0; y < S.H; y++) for (let x = 0; x < S.W; x++) if (red[y][x]) zc.fillRect(SX(x), SY(y), k + 0.5, k + 0.5);

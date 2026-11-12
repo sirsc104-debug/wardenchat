@@ -238,3 +238,23 @@ console.log(`Bots with the new cards finished 12 matches and placed ${n} Cannons
   assert(!/Math\.(pow|hypot|atan2|sin|cos|tan|exp|log|random)\(/.test(src), 'no engine-dependent maths in the simulation');
   console.log(`online: the same seed and plays give the same battle to the last digit (${a.tick} ticks, ${plays.length} plays); exact maths only: ok`);
 }
+
+// The pocket: once a lane's tower is down, troops may go up to the pocket line and onto that lane's
+// bridge, never into the water; a building may not go on the bridge; the other lane stays closed.
+{
+  const S = KCSim, D = (team, x, y, card) => S.canDeploy(s2, team, card || 'gladiator', x, team === 0 ? y : S.H - y);
+  const s2 = S.create({ seed: 5, decks: [Array(8).fill('gladiator'), Array(8).fill('gladiator')] });
+  for (const team of [0, 1]) {
+    const lx = team === 0 ? 3.5 : 14.5, rx = team === 0 ? 14.5 : 3.5; // the bridge in the lane whose tower falls, and the other
+    const before = [D(team, lx, 15.5), D(team, lx, 14.5), D(team, lx, 17.5)];
+    assert.deepStrictEqual(before, [false, false, true], 'before a tower falls: only your own side');
+    S.tower(s2, 1 - team, S.laneOf(team === 0 ? 3.5 : 14.5)).dead = true;
+    assert(D(team, lx, 15.5) && D(team, lx, 16.5), 'the bridge in the open lane');
+    assert(D(team, lx, 14.5) && D(team, lx, 11.5) && !D(team, lx, 10.5), 'up to the pocket line');
+    assert(!D(team, lx + 2, 15.5) && !D(team, lx - 2 > 0 ? lx - 2 : lx + 3, 16.5), 'never the water beside the bridge');
+    assert(!D(team, rx, 15.5) && !D(team, rx, 14.5), 'the other lane stays closed');
+    assert(!D(team, lx, 15.5, 'cannon'), 'no building on the bridge');
+    S.tower(s2, 1 - team, S.laneOf(team === 0 ? 3.5 : 14.5)).dead = false;
+  }
+  console.log('pocket: bridge open once its lane falls, water and the other lane closed, no buildings on the bridge: ok');
+}
