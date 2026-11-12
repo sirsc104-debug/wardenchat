@@ -176,6 +176,12 @@ const KC_EVOS = {
     blurb: 'Every third Snowman you play is evolved: its snowballs are 1.5x the size and 1.5x as fast, for the same damage.' },
 };
 
+// The level a card of each rarity starts at when it is found (it can never be lower): a Rare starts at
+// level 3, an Epic at 6, a Legendary at 9. Every level adds the same 8%, so a level-9 Common and a
+// level-9 Legendary are as strong as each other.
+const KC_RARITY_START = { common: 1, rare: 3, epic: 6, legendary: 9 };
+const KC_MIN_LEVEL = id => (KC_CARDS[id] && KC_RARITY_START[KC_CARDS[id].rarity]) || 1;
+
 // Every card in collection order: the starter deck, then cards found on the Trophy Road.
 const KC_ALL_CARDS = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball', 'skeletons', 'cannon', 'spears', 'footmen', 'flail', 'pots',
   'sandstorm', 'ramcart', 'mole', 'camel', 'bees', 'owl', 'thundercloud', 'griffin'];

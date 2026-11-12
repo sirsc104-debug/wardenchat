@@ -147,6 +147,69 @@ A **Magic Items** tab sits beside the card collection (Cards → Magic Items). P
   A click (or Space or Enter) skips to the end, another click closes it, Escape closes it. With reduced motion it opens on the end.
 - Rules and drop tables are `MAGIC` and `MAGIC_RULES` in `js/progress.js`.
 
+## The economy
+
+Every number is in `ECONOMY` at the top of `js/progress.js`; `tools/economy-report.js` estimates what players earn with them, and `tools/progress-test.js` checks the rules.
+
+**Upgrades.** Gold per level is the same for every rarity: 5, 20, 50, 150, 400, 1,000, 2,000, 4,000, 10,000, 15,000, 25,000, 40,000, 60,000, 100,000 (level 1→2 first). A card starts at its rarity's level and pays only the steps from there:
+
+| Rarity | Starts at | Copies per level | Copies to 15 | Gold to 15 |
+| --- | --- | --- | --- | --- |
+| Common | 1 | 2, 4, 10, 20, 50, 100, 200, 400, 800, 1,000, 1,500, 2,500, 3,500, 5,500 | 15,586 | 257,625 |
+| Rare | 3 | 2, 4, 10, 20, 50, 100, 200, 300, 400, 550, 750, 1,000 | 3,386 | 257,600 |
+| Epic | 6 | 2, 4, 10, 20, 30, 50, 70, 100, 130 | 416 | 257,000 |
+| Legendary | 9 | 2, 4, 6, 9, 12, 14 | 47 | 250,000 |
+
+The first copy of a card unlocks it and isn't counted as a duplicate. The card window shows the level, copies and gold for the next level, what's still missing, the health and damage now and at the next level, and the copies and gold left to level 15; the collection shows each card's copies and gold cost. Levels 13, 14 and 15 get a grander upgrade scene (more waves of light, a gold fountain, a second fanfare; level 15 is rainbow and says *Max level!*).
+
+**Rewards scale with trophies first, then account level.** The arena your trophies put you in sets the base (gold ×1, ×1.5, ×2.1, ×2.8 and cards ×1, ×1.35, ×1.75, ×2.25 for Arenas 1–4), so reaching a new arena is a clear step up. Climbing through an arena adds up to 12% more, and past the last arena +6% every 400 trophies up to +30%. The account level multiplies that by 1.5% a level, up to level 40. Which cards can drop depends only on the **highest trophies you've reached** (the starter cards plus every arena card up to there), so a high account level never brings cards of an arena you haven't reached. Values loaded from a save are checked: negative or broken numbers become 0, levels are kept between the rarity's start and 15, best trophies are never below current trophies.
+
+**Chests** keep their names, looks and timers. At Arena 1, level 1:
+
+| Chest | Coins | Cards | Rares | Epics | Legendaries |
+| --- | --- | --- | --- | --- | --- |
+| Wooden | 15–25 | 6 | 12% chance of one | – | – |
+| Silver | 40–60 | 16 | at least 1 | 1% | – |
+| Gold | 120–170 | 40 | at least 3 (11%) | 4% | 0.3% |
+| Platinum | 320–420 | 90 | at least 8 (13%) | 30% | 2% |
+| Legendary | 800–1,000 | 200 | at least 20 (15%) | at least 1, +50% | 8% |
+| Mythic | 1,800–2,300 | 420 | at least 45 (16%) | at least 2, +50% | at least 1 |
+
+Coins and cards grow with the scaling above (epic and legendary chances grow more slowly). Rare floors are shown on the Shop's chest tiles. A rarity with nothing eligible yet is paid in the rarity below (a legendary as 3 epics, an epic as 5 rares). A chest's contents are rolled once, when it is won, bought or claimed, and saved with it, so reopening the game can't reroll them.
+
+**Other sources.** A trophy win pays 10 coins × the gold scaling, for the first 20 wins of each day. Trophy Road coins: 100, 250, 500, 1,200, 2,000, 3,500, 5,000, 7,500, 10,000. Diamond Pass coins: 2,500 to 7,000 on the free path, 7,500 to 15,000 on the paid one. **There are no daily quests or achievements in the game**, so nothing was changed there.
+
+**Estimates** (`node tools/economy-report.js`; it uses the game's own chest rolls; the assumptions are at the top of the file). A day for five kinds of player:
+
+| Player | Trophies | Level | Wins | Chests | Gold | (of it from wins) | Commons | Rares | Epics | Legendaries | Per common card | Per rare card |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| New player, low trophies | 60 | 2 | 6 | 5.21 | 1,085 | 60 | 214 | 37.1 | 0.00 | 0.00 | 35.6 | 9.29 |
+| Early Arena 1 | 200 | 6 | 8 | 7.99 | 1,864 | 96 | 365 | 67.3 | 0.00 | 0.00 | 60.8 | 16.8 |
+| Mid game, Arena 3 to 4 | 850 | 18 | 10 | 10.0 | 5,841 | 290 | 951 | 151.4 | 0.00 | 0.59 | 95.1 | 21.6 |
+| Advanced, high trophies | 2,000 | 32 | 12 | 12.0 | 11,039 | 552 | 1,733 | 251.3 | 4.38 | 0.74 | 157.5 | 31.4 |
+| Late game, chasing level 15 | 4,000 | 40 | 15 | 15.0 | 17,230 | 870 | 2,701 | 392.8 | 6.15 | 1.02 | 245.6 | 49.1 |
+
+A whole career with the starter deck (wild cards and Shop purchases left out):
+
+| Milestone | Spreading gold over the deck | Focusing one card first | Casual: half the play, trophies 1.6x slower |
+|---|---|---|---|
+| first card at 7 | day 4 | day 4 | day 8 |
+| whole deck at 7 | day 9 | day 7 | day 12 |
+| first card at 9 | day 11 | day 10 | day 20 |
+| deck levels after 2 weeks | 8 8 9 9 9 8 9 10 | 10 8 9 9 9 8 9 9 | 8 7 7 7 8 8 8 7 |
+| first card at 11 | day 28 | day 28 | day 55 |
+| whole deck at 10 | day 28 | day 30 | day 49 |
+| whole deck at 12 | day 62 (about 2.0 months) | day 62 (about 2.0 months) | day 113 (about 3.7 months) |
+| first card at 13 | day 66 (about 2.2 months) | day 66 (about 2.2 months) | day 122 (about 4.0 months) |
+| deck levels after 3 months | 13 13 13 13 13 13 12 12 | 13 13 13 13 13 13 12 12 | 11 12 12 12 11 11 11 11 |
+| first card at 14 | day 102 (about 3.4 months) | day 103 (about 3.4 months) | day 191 (about 6.3 months) |
+| whole deck at 14 | day 144 (about 4.7 months) | day 144 (about 4.7 months) | day 264 (about 8.7 months) |
+| first card at 15 | day 153 (about 5.0 months) | day 153 (about 5.0 months) | day 280 (about 9.2 months) |
+| whole deck at 15 | day 208 (about 6.8 months) | day 208 (about 6.8 months) | day 384 (about 12.6 months) |
+| deck levels after 1 year | all at 15 already | all at 15 already | 15 15 15 15 15 15 14 14 |
+
+**Open question:** opponents' card levels still follow the earlier rule (every card level 15 at about 1,440 trophies), which is now far ahead of how fast players can level cards. Rares, epics and legendaries in opponents' decks are raised to their rarity's start level.
+
 ## The Trophy Road and Arena 1
 
 Rules live in `js/progress.js` (no screen code; tested by `tools/progress-test.js`).
@@ -156,9 +219,9 @@ Rules live in `js/progress.js` (no screen code; tested by `tools/progress-test.j
 - **Opponents**: computer players with ordinary player names and portraits (nothing in the game labels them). They don't talk: no speech bubbles and no line on the result screen (trainers still do). Their **cards level up one at a time with their trophies**: all level 1 below 50 trophies; at 50 one card is level 2, and another card goes up every 12.5 trophies (two at about 60, all eight level 2 by about 140), then the first level 3 at 150, and so on, a full level per 100 trophies, until every card is level 15 at about 1,440. Which cards are ahead differs from opponent to opponent, and levels show on their units' health bars. Their skill follows your results: a step harder after a win, a step easier after a loss. In the headless test (150 matches), a good player who kept their cards level with their trophies won 51% once settled and a sloppy one 52%; a good player who never upgraded won 42% and slid back to about 300 trophies with the opponents near their easiest.
 - **Road rewards** (claimed on the Trophy Road tab): 20 trophies 50 coins · 40 **Skeleton Pack** ×6 · 60 Silver Chest · 90 100 coins · 120 **Cannon** ×4 · 160 Silver Chest · 200 200 coins · 250 Gold Chest · 300 Arena 2 (coming soon).
 - **Chests**: six tiers: Wooden, Silver, Gold, Platinum, Legendary and Mythic (Legendary and Mythic are animated: a pulsing halo, sparkles circling and, on the Mythic, a colour shimmer and float). A trophy win puts a chest in the first free slot (four slots), in a fixed repeating order of 24 that includes every tier. **Arena gate**: each arena allows higher tiers (Arena 1 wooden and silver, Arena 2 adds gold, Arena 3 platinum, Arena 4 legendary, Arena 5 mythic); a chest above the player's arena is given as the highest tier they have reached, in wins, Trophy Road rewards and the Shop. The gate is in `CHEST_RULES` in `js/progress.js` and is **switched off for now** (`allUnlocked: true`), so every tier drops everywhere. Its contents are decided when it is won. One chest unlocks at a time on a real-time timer (wooden 1 minute, silver 15 minutes, gold 1 hour, platinum 3 hours, legendary 8, mythic 12). **Opening** is a scene of its own: the chest (wooden planks and iron, steel with a blue gem, or gold with a crown) drops in and rattles; a click cracks the lid open in a burst of light rays and sparkles; then each reward comes out one at a time. Coins count up with a coin shower. A card flies out face down, glowing in its rarity's colour (rares and new cards shake and take longer), flips over, and its copies count into its level bar, ending on *Upgrade ready!* when it fills. A click during a reveal finishes it, a click after moves on; a badge on the chest counts what's left; a summary closes the scene. Every step has its own sound. Trophy Road cards and Shop purchases use the same reveal without a chest.
-- **The Shop** (Shop tab): five offers a day, made from the cards you have found and their levels, each showing exactly what you get. (1) *Closest to upgrade*: the copies your nearest card is missing. (2) *Rare pick*: a rare, one level's worth. (3) *Catch up*: your lowest-level card, cards found on the Trophy Road first. (4) *Mega bundle*: 5,000 coins' worth of copies of a deck card for 1 diamond. (5) *Coin bundle*: 5,000 coins for 1 diamond, buyable any number of times. A copy is priced at 10 coins (common) or 50 (rare); 1 diamond = 5,000 coins. Card offers sell once a day; offers change at local midnight (the clock on the tab is real). Cards you haven't found and cards at level 15 are never offered. Diamond purchases take a second click to confirm. A second row sells **chests for coins only**, any number of times, with what is inside hidden until opened (each tile shows the card count and coin range): a **free Wooden Chest** once a day, then Wooden, Silver, Gold, Platinum, Legendary and Mythic. A bought chest opens on the spot (no slot, no timer). **Contents and prices grow with the account level** (15% more per level), not trophies, and a chest's coins are always less than its price. Diamonds are a number saved on the device for now (0 unless the test button is used); there is no way to buy them in the game. When the SirSC wallet is connected, prices and purchases must be decided by the server.
+- **The Shop** (Shop tab): five offers a day, made from the cards you have found and their levels, each showing exactly what you get. (1) *Closest to upgrade*: the copies your nearest card is missing. (2) *Rare pick*: a rare, one level's worth. (3) *Catch up*: your lowest-level card, cards found on the Trophy Road first. (4) *Mega bundle*: 5,000 coins' worth of copies of a deck card for 1 diamond. (5) *Coin bundle*: 5,000 coins for 1 diamond, buyable any number of times. A copy is priced at 20 coins (common), 200 (rare), 2,000 (epic) or 40,000 (legendary); 1 diamond = 5,000 coins (diamonds buy coins; coins never buy diamonds). Card offers sell once a day; offers change at local midnight (the clock on the tab is real). Cards you haven't found and cards at level 15 are never offered. Diamond purchases take a second click to confirm. A second row sells **chests for coins only**, any number of times, with what is inside hidden until opened (each tile shows the card count and coin range): a **free Wooden Chest** once a day, then Wooden, Silver, Gold, Platinum, Legendary and Mythic. A bought chest opens on the spot (no slot, no timer). **Contents and prices follow the same reward scaling as won chests** (trophies first, then account level; see *The economy*), and a chest's coins are always less than its price (3× the chest's average coins). The free daily Wooden Chest holds 3× a normal wooden chest. Diamonds are a number saved on the device for now (0 unless the test button is used); there is no way to buy them in the game. When the SirSC wallet is connected, prices and purchases must be decided by the server.
 - **Test buttons (temporary)**: *Simulate Win* (in the lobby and in a battle), *1,000,000 coins & diamonds* (lobby), *New offers* (Shop) and *Give magic items* (Magic Items). Each is marked `TEMPORARY` in the code.
-- **Card levels**: copies plus coins level a card up, to 15 at most. Commons need 2, 4, 10, 20, 40… copies; rares 1, 2, 4, 8, 15…; coins 5, 20, 50, 150, 400… Each level adds 8% health and damage. Units in battle show their level on their health bar.
+- **Card levels**: copies plus coins level a card up, to 15 at most; rares start at level 3, epics at 6, legendaries at 9 (the tables are in *The economy*). Each level adds 8% health and damage. Units in battle show their level on their health bar.
 - **Arena cards stay in Arena 1**: Skeleton Pack and Cannon are only found on the Trophy Road. Trainers never use them, and in a Training Grounds match your deck goes back to the eight starter cards (each Arena 1 card swaps for a starter card you left out).
 - **Coins and diamonds** are kept on this device for now and move to the SirSC wallet when it is connected.
 - **Arena 1 art**: Cinder Keep has its own four illustrations: the lobby badge, the volcanic grandstand (left) and the lavafall (right) battle scenery, and the molten battlefield itself (dark stone, lava river, reinforced bridges, corner braziers), with ember, lava-glow, heat-shimmer and fiery-explosion effects on top.
@@ -230,6 +293,7 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `tools/path-test.js` | `node tools/path-test.js` places every ground troop behind and beside each tower, for both teams, and checks it walks around instead of getting stuck |
 | `tools/trainers-test.js` | `node tools/trainers-test.js 100 [trainer]` plays each trainer against a good player, a sloppy player, a random clicker and a player who does nothing, and prints how often the trainer wins |
 | `tools/cards-test.js` | `node tools/cards-test.js` checks the Cannon (pulls a Rhino, lasts 30 s, placement rules), the Skeleton Pack, card levels, the Briar Hollow cards, and the Sunstone cards (Mole tunneling and placement, Sandstorm slows, the Ram Cart's charge and soldiers, the Camel Jockey's lasso cooldown) and the Snowman's evolution |
+| `tools/economy-report.js` | `node tools/economy-report.js` prints a day's coins and copies for five kinds of player and the days to each upgrade milestone, using `ECONOMY` and the game's chest rolls |
 | `tools/progress-test.js` | `node tools/progress-test.js [matches]` checks old saves, trophies, chests and timers, road rewards, upgrades, the deck and the Training Grounds deck rule, the Shop's offers and purchases, Sunstone Arena, evolutions and the Diamond Pass (2 free shards, the Snowman Evolution at tier 1, claiming, buying), then plays trophy matches to check the 52% target |
 | `tools/balance-test.js` | `node tools/balance-test.js [matches]` plays decks with the Briar Hollow cards against the starter deck and times one-on-one trades |
 | `tools/sim-test.js` | `node tools/sim-test.js 40` plays 40 bot-vs-bot matches headless and checks they end cleanly (no NaNs, no troops in the river) |

@@ -22,7 +22,7 @@ const KC_TRAINERS = [
   },
   {
     id: 'romeo', name: 'Trainer Romeo', short: 'Romeo', level: 2, tier: 'Mid tier',
-    skill: 'romeo', towerDamage: 0.45,
+    skill: 'romeo', towerDamage: 0.38,
     blurb: 'Quick and cocky. Romeo defends his lanes, backs up his pushes and makes slow players pay.',
     look: { bg: ['#c99bff', '#7440cf'], hair: 'curly', hairCol: '#2a1d18', band: '#ffcd33', shirt: '#2fb36b', skin: '#d9a27a', extra: 'scarf', mouth: 'smirk' },
     lines: {
@@ -38,7 +38,7 @@ const KC_TRAINERS = [
   },
   {
     id: 'luc', name: 'Trainer Luc', short: 'Luc', level: 3, tier: 'Hard',
-    skill: 'luc', towerDamage: 0.6,
+    skill: 'luc', towerDamage: 0.35,
     blurb: 'The last test before the Trophy Road. Luc hits hard, defends well and uses every card.',
     look: { bg: ['#9fc0e0', '#3c5d8c'], hair: 'beard', hairCol: '#c9ccd6', shirt: '#3d4459', skin: '#efc19c', extra: 'armor', mouth: 'flat' },
     lines: {

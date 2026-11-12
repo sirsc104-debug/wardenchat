@@ -651,7 +651,9 @@ const KCMenu = (() => {
           <span class="of-prog${!u.max && after >= u.need ? ' full' : ''}" title="${u.max ? 'Max level' : sold ? 'Your copies now' : 'Your copies after buying'}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.max ? 'Max level' : `Lv ${u.level} · ${fmt(after)} / ${fmt(u.need)}`}</em></span>`;
       }
       const price = `<i class="${gem ? 'gem-i' : 'coin-i'}" aria-hidden="true"></i>${fmt(o.price)}`;
+      const maxed = o.card && G.upgradeInfo(o.card).max;
       const btn = sold ? '<button class="buy-btn" type="button" disabled>Bought</button>'
+        : maxed ? '<button class="buy-btn" type="button" disabled>Max level</button>'
         : `<button class="buy-btn${gem ? ' gem' : ''}${poor ? ' poor' : ''}${confirmOffer === i ? ' confirm' : ''}" type="button" data-offer="${i}"
             aria-label="${confirmOffer === i ? 'Confirm: buy' : 'Buy'} for ${o.price} ${gem ? 'diamonds' : 'coins'}">${confirmOffer === i ? 'Confirm ' : ''}${price}</button>`;
       return `<div class="offer ${o.currency}${sold ? ' sold' : ''}"><span class="of-tag">${esc(o.tag)}</span>${body}${btn}</div>`;
@@ -662,10 +664,14 @@ const KCMenu = (() => {
     const pv = $('#shopOffers .of-see');
     if (pv) pv.addEventListener('click', e => { e.stopPropagation(); openPass(); });
     // the chest row: a free Wooden Chest each day, then every tier for coins (contents stay hidden)
-    const oddsText = t => { const o = G.chestOdds(t), w = G.wildActive() && Object.keys(G.MAGIC_RULES.wild[t] || {}).length; return `${fmt(o.cards)} cards<br>${fmt(o.coins[0])}–${fmt(o.coins[1])} coins${w ? '<br>+ wild cards' : ''}`; };
+    const oddsText = (t, opts) => {
+      const o = G.chestOdds(t, opts), w = G.wildActive() && Object.keys(G.MAGIC_RULES.wild[t] || {}).length;
+      const sure = [o.rares ? `${fmt(o.rares)}+ rare` : '', o.epicMin ? `${o.epicMin}+ epic` : '', o.legendaryMin ? `${o.legendaryMin} legendary` : ''].filter(Boolean).join(', ');
+      return `${fmt(o.cards)} cards<br>${fmt(o.coins[0])}–${fmt(o.coins[1])} coins${sure ? `<br><span class="ct-sure">${sure}</span>` : ''}${w ? '<br>+ wild cards' : ''}`;
+    };
     const free = G.freeChestReady();
     const tiles = [`<div class="chest-tile free wooden${free ? '' : ' sold'}"><span class="of-tag">Free daily</span>
-      <div class="ct-art">${chestSvg('wooden')}</div><b>Wooden Chest</b><small class="ct-odds">${oddsText('wooden')}</small>
+      <div class="ct-art">${chestSvg('wooden')}</div><b>Wooden Chest</b><small class="ct-odds">${oddsText(G.ECONOMY.freeChest.type, { bonus: G.ECONOMY.freeChest.bonus })}</small>
       ${free ? '<button class="buy-btn free-btn" type="button" data-free="1" aria-label="Open your free Wooden Chest">Free</button>'
     : `<button class="buy-btn" type="button" disabled>Next in <span id="freeClock">${clock(G.shopEnds() - Date.now())}</span></button>`}</div>`];
     for (const t of G.TIERS) {
@@ -1168,8 +1174,8 @@ const KCMenu = (() => {
       const u = G.upgradeInfo(id);
       if (!u.found) return `<span class="lvl-strip locked">${G.unlockAt(id) !== null ? `Trophy Road · ${G.unlockAt(id)}` : 'Locked'}</span>`;
       if (u.max) return `<span class="lvl-strip max">Level ${u.level} · Max</span>`;
-      const pct = Math.min(100, u.count / u.need * 100);
-      return `<span class="lvl-strip"><span>Level ${u.level}</span><span class="cprog${u.count >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.count}/${u.need}</em></span></span>`;
+      const pct = Math.min(100, u.count / u.need * 100), short = u.count >= u.need && P().coins < u.cost;
+      return `<span class="lvl-strip"><span>Level ${u.level}</span><span class="cprog${u.count >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${fmt(u.count)}/${fmt(u.need)}</em></span><span class="lvl-gold${short ? ' short' : ''}"><i class="coin-i" aria-hidden="true"></i>${fmt(u.cost)}</span></span>`;
     };
     $('#deckRow').innerHTML = deck.map((id, i) => {
       const c = KC_CARDS[id], u = G.upgradeInfo(id);
@@ -1225,7 +1231,8 @@ const KCMenu = (() => {
           ['Speed', sp(c.speed)], ['Targets', tgt], ['Energy', c.cost]].concat(c.count > 1 ? [['Count', '×' + c.count]] : []);
     const next = u.found && !u.max ? KCSim.levelMult(lvl + 1) : null;
     $('#mStats').innerHTML = stats.map(([k, val]) => {
-      const up = next && (k === 'Health' || k === 'Damage') ? `<em>+${Math.round((k === 'Health' ? c.hp : c.dmg) * next) - val}</em>` : '';
+      const nv = next && (k === 'Health' || k === 'Damage' || k === 'Tower damage') ? (k === 'Tower damage' ? Math.round(Math.round(c.dmg * next) * c.towerPct) : Math.round((k === 'Health' ? c.hp : c.dmg) * next)) : null;
+      const up = nv !== null ? `<em title="At level ${lvl + 1}">→ ${nv}</em>` : '';
       return `<div><small>${k}</small><b>${val}${up}</b></div>`;
     }).join('');
     modalEvo(id);
@@ -1235,16 +1242,18 @@ const KCMenu = (() => {
     const pct = u.found && !u.max ? Math.min(100, u.count / u.need * 100) : u.max ? 100 : 0;
     $('#mProgFill').style.width = pct + '%';
     $('#mProgFill').parentElement.classList.toggle('full', !!u.can || (u.found && !u.max && u.count >= u.need));
-    $('#mProgText').textContent = !u.found ? `Trophy Road · ${G.unlockAt(id)} trophies` : u.max ? 'Max level' : `${u.count} / ${u.need} cards`;
+    $('#mProgText').textContent = !u.found ? `Trophy Road · ${G.unlockAt(id)} trophies` : u.max ? 'Max level' : `${fmt(u.count)} / ${fmt(u.need)} cards`;
     const upBtn = $('#mUpgrade');
     upBtn.hidden = !u.found || u.max;
     upBtn.disabled = !u.can;
     $('#mUpCost').innerHTML = `<i class="coin-i" aria-hidden="true"></i>${fmt(u.cost || 0)}`;
     const inDeck = P().deck.includes(id);
     $('#mUse').hidden = !u.found || inDeck;
+    const lack = [u.count < u.need ? `${fmt(u.need - u.count)} more card${u.need - u.count === 1 ? '' : 's'}` : '', P().coins < u.cost ? `${fmt(u.cost - P().coins)} more coins` : ''].filter(Boolean);
+    const toMax = u.found && !u.max ? ` To level ${G.MAX_LEVEL}: ${fmt(G.copiesToMax(id))} more cards and ${fmt(G.goldToMax(id))} coins.` : '';
     $('#mNote').textContent = !u.found ? 'Reach it on the Trophy Road to add it to your collection.'
-      : u.max ? '' : u.reason === 'copies' ? `Needs ${u.need - u.count} more card${u.need - u.count === 1 ? '' : 's'} from chests.`
-        : u.reason === 'coins' ? `Needs ${fmt(u.cost - P().coins)} more coins.` : inDeck ? 'In your deck.' : '';
+      : u.max ? `Level ${G.MAX_LEVEL}: this card is fully upgraded.`
+        : (lack.length ? `Needs ${lack.join(' and ')}.` : `Ready: uses ${fmt(u.need)} cards and ${fmt(u.cost)} coins.`) + toMax + (inDeck ? ' In your deck.' : '');
     $('#cardModal').hidden = false;
     (upBtn.hidden || upBtn.disabled ? $('#modalX') : upBtn).focus();
   }

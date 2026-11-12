@@ -193,7 +193,9 @@ const KCUpgradeFX = (() => {
     if (S) end(true);
     S = { d, timers: [], counters: [], finished: false };
     const lvlMode = d.mode === 'upgrade' || d.mode === 'hammer' || d.mode === 'king';
-    el.className = `up-scene m-${d.mode} r-${d.rarity}${d.item === 'book_books' ? ' rainbow' : ''}`;
+    // levels 13 to 15 of a card get a grander scene (15 the grandest)
+    const grand = d.mode !== 'king' && d.after && d.after.level > d.before.level && d.after.level >= 13 ? d.after.level : 0;
+    el.className = `up-scene m-${d.mode} r-${d.rarity}${d.item === 'book_books' ? ' rainbow' : ''}${grand ? ` grand g${grand}` : ''}`;
     $('usTitle').textContent = d.title;
     $('usImg').src = d.img; $('usImg').alt = d.name;
     $('usCard').className = 'us-card enter';
@@ -250,11 +252,12 @@ const KCUpgradeFX = (() => {
       $('usHint').textContent = 'Click to continue';
       return;
     }
-    card.className = 'us-card done' + (lvl ? ' leveled' : ' filled');
+    const grandN = lvl && d.mode !== 'king' && d.after.level >= 13 ? d.after.level : 0;
+    card.className = 'us-card done' + (lvl ? ' leveled' : ' filled') + (grandN ? ' grand' : '');
     bar(d.after.count, d.after.need, d.after.max);
     if (lvl) {
       $('usLvl').className = 'us-lvl up';
-      $('usTitle').textContent = 'Level up!';
+      $('usTitle').textContent = grandN ? grandTitle(grandN) : 'Level up!';
       for (const b of $('usStats').querySelectorAll('b')) {
         const s = d.stats.find(x => x[0] === b.dataset.k);
         b.innerHTML = `${fmt(s[2])}<em>+${fmt(s[2] - s[1])}</em>`;
@@ -277,15 +280,26 @@ const KCUpgradeFX = (() => {
   const colors = () => (S.d.mode === 'evo' ? EVOC : S.d.mode === 'hammer' || S.d.item === 'book_books' ? RAINBOW : RCOL[S.d.rarity] || RCOL.common);
 
   // The level number slams from old to new, the card bursts and the stats count up.
+  const grandTitle = n => (n >= 15 ? 'Max level!' : `Level ${n}!`);
+  // the extra show for levels 13 to 15: waves of rings, a fountain of gold and a second fanfare
+  function grandBurst(x, y, w, n) {
+    const gold = ['#fff6c8', '#ffe27a', '#ffd23f', '#ffb52e', '#ffffff'], waves = n - 11;   // 2, 3 or 4 waves
+    for (let i = 0; i < waves; i++) later(() => { flash(x, y, w * (1.3 + i * 0.45), i % 2 ? '#ffffff' : '#ffd23f'); sparks(x, y, 50, i === waves - 1 ? RAINBOW : gold, 520 + i * 90); }, 260 + i * 240);
+    for (let i = 0; i < 10 + waves * 4; i++) later(() => sparks(x + (Math.random() - 0.5) * w * 2.2, y + w * 0.9, 6, gold, 520, true), 400 + i * 45);
+    later(() => snd('crown'), 520);
+    if (n >= 15) later(() => { snd('levelUp'); sparks(x, y - w * 0.4, 90, RAINBOW, 640, true); }, 900);
+  }
   function levelBurst(rainbow) {
     const d = S.d, card = $('usCard'), [x, y, w] = center(card), cols = rainbow ? RAINBOW : ['#ffe27a', '#ffd23f', '#fff6c8', '#ffffff', colors()[0]];
-    card.className = 'us-card leveled';
+    const grand = d.mode !== 'king' && d.after.level >= 13 ? d.after.level : 0;
+    card.className = 'us-card leveled' + (grand ? ' grand' : '');
     $('usLvl').className = 'us-lvl up';
     el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
-    $('usTitle').textContent = 'Level up!';
+    $('usTitle').textContent = grand ? grandTitle(grand) : 'Level up!';
     flash(x, y, w * 1.1, cols[0]);
-    sparks(x, y, 70, cols, 420);
+    sparks(x, y, grand ? 110 : 70, cols, grand ? 520 : 420);
     later(() => sparks(x, y - w * 0.3, 30, cols, 300, true), 160);
+    if (grand) grandBurst(x, y, w, grand);
     snd('levelUp');
     later(() => {
       $('usStats').classList.add('on');
@@ -299,7 +313,7 @@ const KCUpgradeFX = (() => {
     later(() => {
       if (d.levelUp) { $('usNote').textContent = `You are now level ${d.levelUp}!`; $('usNote').className = 'us-note king'; snd('crown'); }
     }, 1500);
-    later(finish, d.levelUp ? 1900 : 1500);
+    later(finish, (d.levelUp ? 1900 : 1500) + (grand ? 700 : 0));
   }
 
   /* ---------- upgrade with coins ---------- */

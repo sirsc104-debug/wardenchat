@@ -76,7 +76,7 @@ const KCSim = (() => {
     });
   }
 
-  const cardLevel = (s, team, id) => (s.cardLevels[team] && s.cardLevels[team][id]) || s.levels[team] || 1;
+  const cardLevel = (s, team, id) => Math.max(KC_MIN_LEVEL(id), (s.cardLevels[team] && s.cardLevels[team][id]) || s.levels[team] || 1);
   const blocks = e => (e.kind === 'tower' || e.kind === 'building') && !e.dead;
   const byId = (s, id) => {
     if (!id) return null;
