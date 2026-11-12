@@ -1396,6 +1396,9 @@ const KCMenu = (() => {
   }
   function renderOpp() {
     const p = P(), open = G.roadOpen(), mode = G.mode(), T = G.trainer(), next = G.nextTrainer();
+    // after the Trophy Road opens the trainers can't be picked again: no Trainers button, no list
+    $('#oppChange').hidden = open;
+    if (open && !$('#oppPanel').hidden) { $('#oppPanel').hidden = true; $('#oppChange').setAttribute('aria-expanded', 'false'); }
     const pic = $('#oppPic');
     if (mode === 'trophy') {
       const a = G.arena();

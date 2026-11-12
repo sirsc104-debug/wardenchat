@@ -4151,8 +4151,9 @@ const KCProgress = (() => {
     return nextTrainer() || KC_TRAINERS[KC_TRAINERS.length - 1];
   }
   // What the Battle button plays: a trophy battle once the road is open (unless a trainer was picked).
-  const mode = () => (roadOpen() && P.mode !== 'trainer' ? 'trophy' : 'trainer');
-  function setMode(m, id) { P.mode = m; if (id) P.opp = id; save(); }
+  // Once the Trophy Road is open there is no going back to the trainers: every battle is a trophy battle.
+  const mode = () => (roadOpen() ? 'trophy' : 'trainer');
+  function setMode(m, id) { if (roadOpen()) m = 'trophy'; P.mode = m; if (id && m === 'trainer') P.opp = id; save(); }
 
   function recordTrainer(id, winner) {
     const r = P.records[id];
@@ -10218,6 +10219,9 @@ const KCMenu = (() => {
   }
   function renderOpp() {
     const p = P(), open = G.roadOpen(), mode = G.mode(), T = G.trainer(), next = G.nextTrainer();
+    // after the Trophy Road opens the trainers can't be picked again: no Trainers button, no list
+    $('#oppChange').hidden = open;
+    if (open && !$('#oppPanel').hidden) { $('#oppPanel').hidden = true; $('#oppChange').setAttribute('aria-expanded', 'false'); }
     const pic = $('#oppPic');
     if (mode === 'trophy') {
       const a = G.arena();

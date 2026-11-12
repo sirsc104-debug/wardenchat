@@ -17,6 +17,9 @@ console.log('old save carried over: ok');
 // 2. Beating Luc opens the road, switches to trophy battles and opens Arena 1.
 let r = G.recordTrainer('luc', 0);
 assert(r.roadOpened && G.roadOpen() && G.mode() === 'trophy');
+G.setMode('trainer', 'owen');
+assert.strictEqual(G.mode(), 'trophy', 'no going back to the trainers once the road is open');
+{ const st2 = mem({ 'kc.progress': JSON.stringify(Object.assign({}, G.state, { mode: 'trainer' })) }); G.load(st2); assert.strictEqual(G.mode(), 'trophy', 'an old save left on a trainer plays trophy battles'); G.load(st); P = G.state; }
 assert.strictEqual(G.arena().id, 'cinder'); assert.strictEqual(G.roadState(G.ROAD[0]), 'claimed');
 console.log('road opens after Luc: ok');
 
