@@ -51,11 +51,11 @@ function daily(p) {
   const pool = G.chestPool();
   for (let d = 0; d < DAYS; d++) {
     for (const t of dayOfChests(st, p.wins, p.unlockHours)) {
-      const c = G.roll(t, rand); sum.chests++; sum.gold += c.coins;
+      const c = G.roll(t, rand); sum.chests++; sum.gold += c.rubies;
       for (const x of c.cards) sum[rarityOf(x.id)] += x.n;
     }
     const f = G.roll(G.ECONOMY.freeChest.type, rand, { bonus: G.ECONOMY.freeChest.bonus });
-    sum.gold += f.coins; for (const x of f.cards) sum[rarityOf(x.id)] += x.n;
+    sum.gold += f.rubies; for (const x of f.cards) sum[rarityOf(x.id)] += x.n;
     sum.winGold += Math.min(p.wins, G.ECONOMY.winGold.dailyCap) * G.winGold();
   }
   const per = k => sum[k] / DAYS, n = r => pool.filter(id => rarityOf(id) === r).length || 1;
@@ -66,7 +66,7 @@ function daily(p) {
 
 const f0 = x => Math.round(x).toLocaleString('en-US'), f1 = x => (x < 10 ? x.toFixed(2) : x.toFixed(1));
 console.log('Part 1: one day for each kind of player (average of 120 days, free daily chest and win gold included)\n');
-console.log('| Player | Trophies | Level | Wins | Chests | Gold | (of it from wins) | Commons | Rares | Epics | Legendaries | Per common card | Per rare card |');
+console.log('| Player | Trophies | Level | Wins | Chests | Rubies | (of it from wins) | Commons | Rares | Epics | Legendaries | Per common card | Per rare card |');
 console.log('|---|---|---|---|---|---|---|---|---|---|---|---|---|');
 for (const p of PROFILES) {
   const r = daily(p);
@@ -75,13 +75,13 @@ for (const p of PROFILES) {
 
 // Part 2: a career. Trophies follow CAREER.trophies (day -> trophies, straight lines between points);
 // wins and unlock hours follow the profile for those trophies. Road rewards are claimed as reached,
-// the free pass path once. Gold goes into the deck: the lowest card first (spread), or one favourite
+// the free pass path once. Rubies go into the deck: the lowest card first (spread), or one favourite
 // card first (focused). Wild cards and the Shop aren't counted, so real players go a little faster.
-const CAREER = { trophies: [[0, 0], [4, 300], [14, 600], [35, 900], [90, 1500], [200, 2500], [400, 3500], [700, 4000]], days: 1100 };
+const CAREER = { trophies: [[0, 0], [5, 300], [12, 600], [21, 900], [35, 1200], [90, 1700], [200, 2500], [400, 3500], [700, 4000]], days: 1100 };
 const trophiesOn = d => { const T = CAREER.trophies; for (let i = 1; i < T.length; i++) if (d <= T[i][0]) return Math.round(T[i - 1][1] + (T[i][1] - T[i - 1][1]) * (d - T[i - 1][0]) / (T[i][0] - T[i - 1][0])); return T[T.length - 1][1]; };
 const profileFor = t => PROFILES.slice().reverse().find(p => t >= p.trophies) || PROFILES[0];
 
-function career(focused, pace = 1, slow = 1) {
+function career(focused, pace = 1, slow = 1, rich = false) {
   G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 0, best: 0, claimed: { 0: true } }) }));
   const P = G.state, st = { slots: [], cycle: 0, budget: 0 }, deck = KC_STARTER_DECK.slice(), fav = 'wolves';
   const marks = {}, mark = (k, d) => { if (marks[k] === undefined) marks[k] = d; };
@@ -91,10 +91,11 @@ function career(focused, pace = 1, slow = 1) {
     P.trophies = t; P.best = Math.max(P.best, t);
     P.xp += p.wins * 20 + (p.battles - p.wins) * 6;
     for (const m of G.ROAD) if (G.roadState(m) === 'ready') G.claim(m.at);
-    if (!passDone && G.passOpen()) { for (const x of G.PASS.tiers) if (x.free.kind === 'coins') P.coins += x.free.n; passDone = true; }
-    for (const type of dayOfChests(st, p.wins, p.unlockHours)) { const c = G.roll(type, rand); P.coins += c.coins; for (const x of c.cards) P.cards[x.id].count += x.n; }
-    const f = G.roll(G.ECONOMY.freeChest.type, rand, { bonus: G.ECONOMY.freeChest.bonus }); P.coins += f.coins; for (const x of f.cards) P.cards[x.id].count += x.n;
-    P.coins += Math.min(p.wins, G.ECONOMY.winGold.dailyCap) * G.winGold();
+    if (!passDone && G.passOpen()) { for (const x of G.PASS.tiers) if (x.free.kind === 'rubies') P.rubies += x.free.n; passDone = true; }
+    for (const type of dayOfChests(st, p.wins, p.unlockHours)) { const c = G.roll(type, rand); P.rubies += c.rubies; for (const x of c.cards) P.cards[x.id].count += x.n; }
+    const f = G.roll(G.ECONOMY.freeChest.type, rand, { bonus: G.ECONOMY.freeChest.bonus }); P.rubies += f.rubies; for (const x of f.cards) P.cards[x.id].count += x.n;
+    P.rubies += Math.min(p.wins, G.ECONOMY.winGold.dailyCap) * G.winGold();
+    if (rich) { P.wallet = 1e9; G.exchange(G.exchangeInfo(d * 86400e3).left, d * 86400e3); }   // swaps the daily limit every day
     // spend
     for (let guard = 0; guard < 200; guard++) {
       const order = deck.filter(id => G.upgradeInfo(id).can).sort((a, b) => (focused ? (b === fav) - (a === fav) : 0) || P.cards[a].level - P.cards[b].level);
@@ -105,6 +106,7 @@ function career(focused, pace = 1, slow = 1) {
     for (const k of [7, 9, 11, 13, 14, 15]) if (top >= k) mark('first card at ' + k, d);
     for (const k of [7, 10, 12, 14]) if (Math.min(...lv) >= k) mark('whole deck at ' + k, d);
     if (Math.min(...lv) >= 15) { mark('whole deck at 15', d); break; }
+    for (const T of [600, 900, 1200, 2000]) if (t >= T && !marks['cards at ' + T + ' trophies']) marks['cards at ' + T + ' trophies'] = `day ${d}: ${lv.join(' ')}`;
     if (d === 14) marks['deck levels after 2 weeks'] = lv.join(' ');
     if (d === 90) marks['deck levels after 3 months'] = lv.join(' ');
     if (d === 365) marks['deck levels after 1 year'] = lv.join(' ');
@@ -113,8 +115,8 @@ function career(focused, pace = 1, slow = 1) {
 }
 const asTime = d => (typeof d !== 'number' ? d : d < 60 ? `day ${d}` : d < 730 ? `day ${d} (about ${(d / 30.4).toFixed(1)} months)` : `day ${d} (about ${(d / 365).toFixed(1)} years)`);
 console.log('\nPart 2: one career (starter deck; trophies ' + CAREER.trophies.map(([d, t]) => `${t} by day ${d}`).join(', ') + ')\n');
-const spread = career(false), focus = career(true), casual = career(false, 0.5, 1.6);
-console.log('| Milestone | Spreading gold over the deck | Focusing one card first | Casual: half the play, trophies 1.6x slower |');
-console.log('|---|---|---|---|');
-const keys = new Set([...Object.keys(spread), ...Object.keys(focus), ...Object.keys(casual)]);
-for (const k of keys) console.log(`| ${k} | ${[spread, focus, casual].map(m => asTime(m[k]) || (k.startsWith('deck levels') ? 'all at 15 already' : 'not within 3 years')).join(' | ')} |`);
+const spread = career(false), focus = career(true), casual = career(false, 0.5, 1.6), rich = career(false, 1, 1, true);
+console.log('| Milestone | Spreading rubies over the deck | Focusing one card first | Casual: half the play, trophies 1.6x slower | Wallet-rich: swaps the daily Coin limit every day |');
+console.log('|---|---|---|---|---|');
+const keys = new Set([...Object.keys(spread), ...Object.keys(focus), ...Object.keys(casual), ...Object.keys(rich)]);
+for (const k of keys) console.log(`| ${k} | ${[spread, focus, casual, rich].map(m => asTime(m[k]) || (k.startsWith('deck levels') ? 'all at 15 already' : 'not within 3 years')).join(' | ')} |`);

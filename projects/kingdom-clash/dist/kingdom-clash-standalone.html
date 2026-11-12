@@ -170,8 +170,10 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 }
 .res-chip b { flex: 1; text-align: right; font-family: var(--display); font-weight: 400; font-size: 19px; color: #cbbfec; }
 .res-chip .plus { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; background: linear-gradient(#7ee07e, #2fa84f); border: 2px solid var(--outline); font-weight: 900; color: #fff; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4); }
-.coin-i, .gem-i { width: 28px; height: 28px; flex: none; }
-.coin-i { border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff1a6, var(--gold) 55%, #c7840c); border: 2px solid var(--outline); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2); }
+.ruby-i, .gem-i { width: 28px; height: 28px; flex: none; }
+.ruby-i { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 3h10l5 6-10 12L2 9z' fill='%23d8293a'/%3E%3Cpath d='M7 3h10l-2 6H9z' fill='%23ff8f98'/%3E%3Cpath d='M2 9h7l3 12z' fill='%23ff5260'/%3E%3Cpath d='M22 9h-7l-3 12z' fill='%23a3132a'/%3E%3Cpath d='M7 3L2 9l7 0zM17 3l5 6h-7z' fill='%23ff6b78'/%3E%3Cpath d='M7 3h10l5 6-10 12L2 9z' fill='none' stroke='%231c1530' stroke-width='1.7' stroke-linejoin='round'/%3E%3Cpath d='M9.5 4.6l-1.4 3' stroke='%23fff' stroke-width='1.3' stroke-linecap='round' opacity='.8'/%3E%3C/svg%3E") center / contain no-repeat; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.3)); }
+/* SirSC wallet Coins: a gold coin, only used for the Ruby exchange */
+.wcoin-i { width: 28px; height: 28px; flex: none; box-sizing: border-box; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff1a6, var(--gold) 55%, #c7840c); border: 2px solid var(--outline); box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2); }
 .gem-i { background: linear-gradient(135deg, #b8f2ff, #39b8f0 55%, #1f6fd0); clip-path: polygon(50% 0, 100% 35%, 50% 100%, 0 35%); }
 .icon-btn { width: 44px; height: 44px; border-radius: 12px; border: 3px solid var(--outline); background: linear-gradient(#5a6fd8, #3846a8); display: grid; place-items: center; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), 0 4px 0 #1f2766; transition: transform 0.08s; }
 .icon-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #1f2766; }
@@ -471,7 +473,7 @@ kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--out
 }
 .trophy-i { display: inline-block; width: 18px; height: 18px; vertical-align: -3px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 3h10v3h3v3a4 4 0 0 1-4 4h-.5A5 5 0 0 1 13 16v2h3v3H8v-3h3v-2a5 5 0 0 1-3.5-3H8a4 4 0 0 1-4-4V6h3z' fill='%23ffcf3f' stroke='%231c1530' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; }
 .trophy-i.big { width: 40px; height: 40px; }
-.co-coin { display: inline-block; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff1a6, var(--gold) 55%, #c7840c); border: 3px solid var(--outline); box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.2); }
+.co-ruby { display: inline-block; width: 34px; height: 34px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 3h10l5 6-10 12L2 9z' fill='%23d8293a'/%3E%3Cpath d='M7 3h10l-2 6H9z' fill='%23ff8f98'/%3E%3Cpath d='M2 9h7l3 12z' fill='%23ff5260'/%3E%3Cpath d='M22 9h-7l-3 12z' fill='%23a3132a'/%3E%3Cpath d='M7 3L2 9l7 0zM17 3l5 6h-7z' fill='%23ff6b78'/%3E%3Cpath d='M7 3h10l5 6-10 12L2 9z' fill='none' stroke='%231c1530' stroke-width='1.7' stroke-linejoin='round'/%3E%3Cpath d='M9.5 4.6l-1.4 3' stroke='%23fff' stroke-width='1.3' stroke-linecap='round' opacity='.8'/%3E%3C/svg%3E") center / contain no-repeat; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.3)); }
 
 /* chest slots as buttons */
 button.slot { padding: 0; font: inherit; color: inherit; cursor: pointer; transition: transform 0.12s; }
@@ -598,13 +600,13 @@ button.slot:hover { transform: translateY(-3px); }
 .rv-back { background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.14) 0 9px, transparent 9px 18px), linear-gradient(var(--rv1), var(--rv2)); display: grid; place-items: center; }
 .rv-back::after { content: ''; width: 56%; aspect-ratio: 1.4; background: #ffcf3f; clip-path: polygon(0 100%, 0 25%, 25% 55%, 50% 0, 75% 55%, 100% 25%, 100% 100%); filter: drop-shadow(0 3px 0 rgba(0, 0, 0, 0.3)); }
 .rv-front { transform: rotateY(180deg); object-fit: cover; }
-.rv-coins .rv-fly { width: auto; aspect-ratio: auto; height: 120px; display: grid; place-items: center; }
+.rv-rubies .rv-fly { width: auto; aspect-ratio: auto; height: 120px; display: grid; place-items: center; }
 .rv-pile { position: relative; display: block; width: 124px; height: 104px; }
-.rv-pile .co-coin { position: absolute; width: 72px; height: 72px; left: 0; bottom: 0; }
-.rv-pile .co-coin:nth-child(2) { left: auto; right: 0; }
-.rv-pile .co-coin:nth-child(3) { left: 26px; bottom: auto; top: 0; }
+.rv-pile .co-ruby { position: absolute; width: 72px; height: 72px; left: 0; bottom: 0; }
+.rv-pile .co-ruby:nth-child(2) { left: auto; right: 0; }
+.rv-pile .co-ruby:nth-child(3) { left: 26px; bottom: auto; top: 0; }
 .rv-pile.small { width: 74px; height: 62px; margin: 22px 8px; }
-.rv-pile.small .co-coin { width: 46px; height: 46px; }
+.rv-pile.small .co-ruby { width: 46px; height: 46px; }
 .rv-info { min-height: 104px; display: flex; flex-direction: column; align-items: center; gap: 5px; opacity: 0; transform: translateY(10px); transition: opacity 0.25s, transform 0.25s; }
 .rv-info.on { opacity: 1; transform: none; }
 .rv-line { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
@@ -645,7 +647,7 @@ button.slot:hover { transform: translateY(-3px); }
 .of-art { position: relative; width: min(56%, 80px); }
 .of-art img { display: block; width: 100%; aspect-ratio: 5 / 6; border-radius: 10px; border: 3px solid var(--outline); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); }
 .of-qty { position: absolute; right: -14px; bottom: -6px; font-family: var(--display); font-size: 24px; color: var(--gold); text-shadow: 0 2px 0 var(--outline), 2px 0 0 var(--outline), -2px 0 0 var(--outline), 0 -2px 0 var(--outline); }
-.of-coins { display: grid; place-items: center; aspect-ratio: 5 / 6; }
+.of-rubies { display: grid; place-items: center; aspect-ratio: 5 / 6; }
 .offer > b { font-family: var(--display); font-weight: 400; font-size: 18px; margin-top: 2px; }
 .of-prog { position: relative; display: block; width: 88%; height: 16px; border-radius: 999px; background: #120c22; border: 2px solid var(--outline); overflow: hidden; }
 .of-prog i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(#8cc4ff, #2f6fe4); }
@@ -655,7 +657,7 @@ button.slot:hover { transform: translateY(-3px); }
 .buy-btn { margin-top: auto; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 6px 9px; border-radius: 12px; border: 3px solid var(--outline);
   background: linear-gradient(#a8f39a, #45c25a 55%, #22873a); color: #fff; font-family: var(--display); font-size: 20px;
   text-shadow: 0 2px 0 var(--outline), 1px 0 0 var(--outline), -1px 0 0 var(--outline); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), 0 5px 0 #17602a; transition: transform 0.1s; }
-.buy-btn .coin-i, .buy-btn .gem-i { width: 20px; height: 20px; }
+.buy-btn .ruby-i, .buy-btn .gem-i { width: 20px; height: 20px; }
 .buy-btn.gem { background: linear-gradient(#9fdcff, #3f9ae6 55%, #2468c0); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), 0 5px 0 #163f7c; }
 .buy-btn.confirm { background: linear-gradient(#ffe98f, #f6b81f 55%, #cf8106); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6), 0 5px 0 #8a5a05; }
 .buy-btn.poor { filter: saturate(0.45) brightness(0.85); }
@@ -680,7 +682,7 @@ button.slot:hover { transform: translateY(-3px); }
 .chest-tile > b { font-family: var(--display); font-weight: 400; font-size: 14px; line-height: 1.1; margin-top: 2px; }
 .ct-odds { color: var(--muted); font-size: 10px; font-weight: 800; line-height: 1.25; }
 .chest-tile .buy-btn { margin-top: auto; padding: 3px 4px 5px; font-size: 16px; }
-.chest-tile .buy-btn .coin-i { width: 16px; height: 16px; }
+.chest-tile .buy-btn .ruby-i { width: 16px; height: 16px; }
 .chest-tile.sold .ct-art { opacity: 0.5; }
 .chest-tile.sold .buy-btn { font-family: var(--body); font-size: 11px; font-weight: 900; text-shadow: none; }
 .chest-tile.locked .ct-art { filter: grayscale(1) brightness(0.55); }
@@ -722,8 +724,8 @@ button.slot:hover { transform: translateY(-3px); }
 .rn.claimed .rn-card { opacity: 0.75; }
 .rw-card { width: 64px; border-radius: 8px; border: 2px solid var(--outline); }
 .rw-chest svg { width: 76px; }
-.rw-coins { display: flex; align-items: center; gap: 6px; }
-.rw-coins b { font-family: var(--display); font-weight: 400; font-size: 24px; }
+.rw-rubies { display: flex; align-items: center; gap: 6px; }
+.rw-rubies b { font-family: var(--display); font-weight: 400; font-size: 24px; }
 .rw-arena { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 16px; border: 3px solid var(--outline); background: linear-gradient(#ffd27a, #e98a2b); }
 .rw-arena b { font-family: var(--display); font-weight: 400; font-size: 34px; text-shadow: 0 2px 0 var(--outline), 1px 0 0 var(--outline), -1px 0 0 var(--outline); }
 .claim-btn { position: absolute; bottom: -16px; left: 50%; transform: translateX(-50%); padding: 6px 18px; border-radius: 12px; border: 3px solid var(--outline);
@@ -768,7 +770,7 @@ button.slot:hover { transform: translateY(-3px); }
   background: linear-gradient(#a8f39a, #45c25a 55%, #22873a); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), 0 5px 0 #17602a; transition: transform 0.1s; }
 .up-btn span { font-family: var(--display); font-size: 20px; text-shadow: 0 2px 0 var(--outline), 1px 0 0 var(--outline), -1px 0 0 var(--outline); }
 .up-btn small { display: flex; align-items: center; gap: 4px; font-weight: 900; }
-.up-btn .coin-i { width: 16px; height: 16px; }
+.up-btn .ruby-i { width: 16px; height: 16px; }
 .up-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #17602a; }
 .up-btn:disabled { filter: grayscale(0.9) brightness(0.75); cursor: not-allowed; transform: none; }
 .use-btn { padding: 10px 22px; border-radius: 14px; border: 3px solid var(--outline); background: linear-gradient(#5a6fd8, #3846a8); font-family: var(--display); font-size: 18px; box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), 0 5px 0 #1f2766; }
@@ -1278,7 +1280,7 @@ button.slot:hover { transform: translateY(-3px); }
 .us-gain .free { color: #ffd84a; font-size: 18px; }
 .us-gain .plus { color: #a8f39a; font-size: 26px; }
 .us-gain .spent { display: flex; align-items: center; gap: 4px; color: #ffd84a; }
-.us-gain .spent .coin-i { width: 20px; height: 20px; }
+.us-gain .spent .ruby-i { width: 20px; height: 20px; }
 .us-stats { display: flex; gap: 10px; opacity: 0; transform: translateY(10px); transition: 0.3s; }
 .us-stats.on { opacity: 1; transform: none; }
 .us-stats.none { display: none; }
@@ -1454,10 +1456,10 @@ button.slot:hover { transform: translateY(-3px); }
 .pass-mini small { display: block; font-size: 11px; font-weight: 800; color: #e3f4ff; }
 .pass-mini.has-ready { box-shadow: 0 0 0 3px #7fe0ff, 0 4px 0 rgba(0, 0, 0, 0.35); }
 @media (max-width: 1080px) { .pass-mini:not([hidden]) { display: flex; } }
-.pr-coins { position: relative; }
-.pr-coins .coin-i { position: absolute; width: 26px; height: 26px; }
-.pr-coins .coin-i:first-child { left: 4px; top: 14px; }
-.pr-coins .coin-i:last-child { left: 16px; top: 6px; }
+.pr-rubies { position: relative; }
+.pr-rubies .ruby-i { position: absolute; width: 26px; height: 26px; }
+.pr-rubies .ruby-i:first-child { left: 4px; top: 14px; }
+.pr-rubies .ruby-i:last-child { left: 16px; top: 6px; }
 @media (max-width: 560px) {
   .pass-card { padding: 24px 10px 12px; }
   .pm-cols, .pm-tier { grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
@@ -1844,7 +1846,7 @@ button.slot:hover { transform: translateY(-3px); }
 }
 /* the gold an upgrade costs, under the copies bar */
 .lvl-gold { display: flex; align-items: center; justify-content: center; gap: 2px; font-size: 9px; line-height: 11px; color: #ffe08a; }
-.lvl-gold .coin-i { width: 9px; height: 9px; }
+.lvl-gold .ruby-i { width: 9px; height: 9px; }
 .lvl-gold.short { color: #ff9a9a; }
 .ct-sure { color: #ffd27a; font-weight: 900; }
 #mStats b em { font-style: normal; color: #8ff08a; margin-left: 4px; font-size: 0.85em; }
@@ -1870,6 +1872,25 @@ button.slot:hover { transform: translateY(-3px); }
 .skip-btn.confirm { background: linear-gradient(#7ee07e, #2fa84f); }
 .skip-btn.poor { filter: saturate(0.4) brightness(0.85); }
 
+/* the wallet chip and the Coins to Rubies exchange */
+.res-chip.wallet { min-width: 120px; }
+.res-chip.wallet .plus { background: linear-gradient(#ffd84a, #e08a10); font-size: 15px; }
+.ex-card { width: min(440px, 100%); box-sizing: border-box; padding: 26px 22px 20px; display: flex; flex-direction: column; gap: 12px; animation: pop 0.2s ease-out; position: relative; }
+.ex-card h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; }
+.ex-card p { margin: 0; color: #d9cfee; font-size: 14px; line-height: 1.4; }
+.ex-rate { display: flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--display); font-size: 22px; }
+.ex-rate .wcoin-i, .ex-rate .ruby-i { width: 30px; height: 30px; }
+.ex-cap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ex-cap div { background: rgba(0, 0, 0, 0.3); border-radius: 10px; padding: 6px 8px; text-align: center; }
+.ex-cap small { display: block; font-size: 11px; color: #a99fc4; font-weight: 800; }
+.ex-cap b { font-family: var(--display); font-weight: 400; font-size: 18px; }
+.ex-row { display: flex; gap: 8px; align-items: stretch; }
+.ex-row input { flex: 1; min-width: 0; font: inherit; font-size: 18px; font-weight: 900; padding: 6px 10px; border-radius: 10px; border: 3px solid var(--outline); background: #120c22; color: #fff; }
+.ex-row .pill { padding: 6px 12px; }
+.ex-get { text-align: center; font-weight: 900; color: #ffb3b9; min-height: 20px; }
+.ex-go { align-self: center; }
+@media (max-width: 560px) { .res-chip.wallet { min-width: 0; } }
+
 </style>
 </head>
 <body>
@@ -1889,7 +1910,8 @@ button.slot:hover { transform: translateY(-3px); }
         </div>
         <button class="king-chip" id="kingBtn" type="button" title="Your King Tower: its level sets the strength of your towers"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 36V16h4v-4h4v4h8v-4h4v4h4v20z" fill="#d8d2cb" stroke="#1c1530" stroke-width="2.6" stroke-linejoin="round"/><path d="M12 12L14 4l4 4 2-6 2 6 4-4 2 8z" fill="#ffcd33" stroke="#1c1530" stroke-width="2.2" stroke-linejoin="round"/><rect x="16" y="22" width="8" height="14" rx="2" fill="#2f6fe4" stroke="#1c1530" stroke-width="2.2"/></svg><span><small>King Tower</small><b id="kingNum">1</b></span></button>
         <div class="res">
-          <button class="res-chip" type="button" data-tab="shop" title="Coins: open the Shop"><span class="coin-i" aria-hidden="true"></span><b id="coinVal">0</b><span class="plus" aria-hidden="true">+</span><span class="sr">Coins</span></button>
+          <button class="res-chip" type="button" data-tab="shop" title="Rubies: open the Shop"><span class="ruby-i" aria-hidden="true"></span><b id="rubyVal">0</b><span class="plus" aria-hidden="true">+</span><span class="sr">Rubies</span></button>
+          <button class="res-chip wallet" id="walletBtn" type="button" title="SirSC Coins: swap them for Rubies"><span class="wcoin-i" aria-hidden="true"></span><b id="walletVal">0</b><span class="plus" aria-hidden="true">&#x21C4;</span><span class="sr">Coins: exchange for Rubies</span></button>
           <button class="res-chip" type="button" data-tab="shop" title="Diamonds: open the Shop"><span class="gem-i" aria-hidden="true"></span><b id="gemVal">0</b><span class="plus" aria-hidden="true">+</span><span class="sr">Diamonds</span></button>
         </div>
         <button class="icon-btn" id="soundBtn" type="button" aria-label="Sound on" title="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="soundWaves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
@@ -1939,7 +1961,7 @@ button.slot:hover { transform: translateY(-3px); }
               <!-- TEMPORARY test buttons (lobby): remove with the other "TEMPORARY" blocks -->
               <div class="test-tools">
                 <button class="sim-win" id="simWinLobby" type="button" title="Test button: counts a win against the current opponent without playing"><small>Test</small>Simulate Win</button>
-                <button class="sim-win" id="testRich" type="button" title="Test button: sets your coins and diamonds to 1,000,000"><small>Test</small>1,000,000 coins &amp; diamonds</button>
+                <button class="sim-win" id="testRich" type="button" title="Test button: sets your rubies, wallet coins and diamonds to 1,000,000"><small>Test</small>1,000,000 rubies, coins &amp; diamonds</button>
               </div>
             </div>
             <div class="chests" id="chests" aria-label="Chest slots"></div>
@@ -1972,7 +1994,7 @@ button.slot:hover { transform: translateY(-3px); }
             <div class="ribbon"><span>Card Collection</span></div>
             <small class="found" id="foundCount">8 / 8 found</small>
             <div class="coll-grid" id="collGrid"></div>
-            <p class="dim" id="collNote">Collect copies from chests, then spend coins to level a card up (up to level 15).</p>
+            <p class="dim" id="collNote">Collect copies from chests, then spend rubies to level a card up (up to level 15).</p>
           </div>
           </div>
           <div class="plaque magic-plaque" id="subMagic" hidden>
@@ -2030,7 +2052,7 @@ button.slot:hover { transform: translateY(-3px); }
             <div class="shop-head"><span class="shop-timer">New emotes in <b id="emoteTimer">0:00</b></span></div>
             <div class="shop-emotes" id="shopEmotes"></div>
           </div>
-          <p class="dim shop-note">Offers show exactly what you get. Chests cost coins only, and what is inside stays hidden until you open them; their contents and price grow with your account level. 1 diamond = 5,000 coins.</p>
+          <p class="dim shop-note">Offers show exactly what you get. Chests cost rubies, one of each a day; what is inside stays hidden until you open them, and their contents and price grow with your trophies and account level. 1 diamond = 5,000 rubies. Swap SirSC Coins for rubies with the ⇄ button at the top.</p>
         </section>
         <section class="tab info-tab" id="tab-clan" hidden>
           <div class="plaque info-plaque">
@@ -2091,6 +2113,20 @@ button.slot:hover { transform: translateY(-3px); }
       </div>
     </div>
 
+    <!-- wallet Coins to Rubies, one way, with a daily cap -->
+    <div class="modal" id="exModal" hidden>
+      <div class="ex-card plaque" role="dialog" aria-modal="true" aria-labelledby="exTitle">
+        <button class="modal-x" id="exX" type="button" aria-label="Close">&#x2715;</button>
+        <h3 id="exTitle">Coins to Rubies</h3>
+        <p>Rubies are Kingdom Clash's own currency: chests, battles and the Trophy Road pay them, and upgrades, the Shop and emotes cost them. Your SirSC Coins can be swapped for Rubies, up to a daily limit that grows with your arena. Rubies can't be turned back into Coins.</p>
+        <div class="ex-rate"><span class="wcoin-i" aria-hidden="true"></span>1 Coin = <span id="exRate">1</span><span class="ruby-i" aria-hidden="true"></span></div>
+        <div class="ex-cap" id="exCap"></div>
+        <div class="ex-row"><input id="exAmount" type="number" min="1" step="1" inputmode="numeric" aria-label="Coins to swap"><button class="pill" id="exMax" type="button">Max</button></div>
+        <div class="ex-get" id="exGet" aria-live="polite"></div>
+        <button class="big-btn ex-go" id="exGo" type="button">Swap</button>
+      </div>
+    </div>
+
     <!-- the Diamond Pass: every tier's free and Diamond Pass reward -->
     <div class="modal" id="passModal" hidden>
       <div class="pass-card plaque" role="dialog" aria-modal="true" aria-labelledby="passTitle">
@@ -2113,7 +2149,7 @@ button.slot:hover { transform: translateY(-3px); }
           <div class="m-stats" id="mStats"></div>
           <div class="m-level"><span class="m-lvl" id="mLevel">Level 1</span><div class="m-prog"><i id="mProgFill"></i><span id="mProgText">0 / 2</span></div></div>
           <div class="m-actions">
-            <button class="up-btn" id="mUpgrade" type="button"><span>Upgrade</span><small id="mUpCost"><i class="coin-i" aria-hidden="true"></i>5</small></button>
+            <button class="up-btn" id="mUpgrade" type="button"><span>Upgrade</span><small id="mUpCost"><i class="ruby-i" aria-hidden="true"></i>5</small></button>
             <button class="use-btn" id="mUse" type="button">Use</button>
             <span class="m-note" id="mNote"></span>
           </div>
@@ -3168,22 +3204,22 @@ const KCSim = (() => {
    - The Training Grounds: beat Trainer Owen, Romeo and Luc in order to open the Trophy Road.
    - The Trophy Road: trophy battles against bots matched to your trophies. A win is +30 trophies
      and earns a chest if a slot is free; a loss is -20 (never below the arena's floor). Milestones on
-     the road give fixed rewards you claim: coins, chests, new cards and arenas.
+     the road give fixed rewards you claim: rubies, chests, new cards and arenas.
    - Opponents: their cards level up one at a time with their trophies (all level 1 below 50, then one
      card up a level every 12.5 trophies); their skill follows your recent results (up a step
      after a win, down a step after a loss), settling at about 52% wins for everyone.
    - Chests: six tiers (wooden, silver, gold, platinum, legendary, mythic) and four slots. A chest is
-     rolled the moment you win it; one chest unlocks at a time, on a real-time timer. Opening gives coins
+     rolled the moment you win it; one chest unlocks at a time, on a real-time timer. Opening gives rubies
      and copies of cards you have found; how much grows with the account level. Each arena allows higher
      tiers (CHEST_RULES; switched off for now, so every tier can drop anywhere).
-   - Card levels: copies plus coins upgrade a card, up to level 15.
+   - Card levels: copies plus rubies upgrade a card, up to level 15.
    - Arena cards (Skeleton Pack, Cannon) are found on the Trophy Road in Arena 1 only. Trainers never
      use them, and in a Training Grounds match your deck goes back to the starter cards.
 
-   - The Shop: five offers a day built from the cards you have found and their levels, for coins
-     or diamonds (1 diamond = 5,000 coins). Each offer lists exactly what it gives.
+   - The Shop: five offers a day built from the cards you have found and their levels, for rubies
+     or diamonds (1 diamond = 5,000 rubies). Each offer lists exactly what it gives.
 
-   Coins and diamonds are kept on this device for now. When the SirSC wallet is connected they move
+   Rubies and diamonds are kept on this device for now. When the SirSC wallet is connected they move
    to it, and prices and purchases must then be decided by the server.
    Everything is saved in localStorage under kc.progress; older saves are upgraded in place. */
 'use strict';
@@ -3196,6 +3232,10 @@ const KCProgress = (() => {
   const TROPHIES = { win: 30, loss: 20 };
 
   /* ---------- the economy: every number that sets costs and rewards ----------
+     Currency: Rubies (P.rubies) are the game's own and never leave it; "gold" below means Rubies. Wallet
+     Coins (P.wallet, the SirSC currency) only come in, through the capped exchange. Copies are what limit
+     progress, since a big wallet can pay Rubies but can't make copies, so rewards start small and grow
+     steeply past Arena 4 (beyond), aiming at cards of about 7-8 entering Arena 4.
      Upgrades: the same gold for every rarity at each level; copies by rarity. A card starts at its
      rarity's level (KC_RARITY_START): 1 Common, 3 Rare, 6 Epic, 9 Legendary; the first copy finds it
      and is not counted. To level 15: 15,586 / 3,386 / 416 / 47 copies and 257,625 / 257,600 / 257,000
@@ -3217,11 +3257,11 @@ const KCProgress = (() => {
       epic: [null, null, null, null, null, 2, 4, 10, 20, 30, 50, 70, 100, 130],
       legendary: [null, null, null, null, null, null, null, null, 2, 4, 6, 9, 12, 14],
     },
-    arenaGold: { 1: 1, 2: 1.5, 3: 2.1, 4: 2.8 },
-    arenaCards: { 1: 1, 2: 1.35, 3: 1.75, 4: 2.25 },
+    arenaGold: { 1: 0.26, 2: 0.33, 3: 0.42, 4: 0.53 },
+    arenaCards: { 1: 0.3, 2: 0.37, 3: 0.45, 4: 0.55 },
     nextArenaGrowth: 1.35, // for arenas past the table
-    withinArena: 0.12,
-    beyond: { every: 400, add: 0.06, max: 0.3 },
+    withinArena: 0.04,
+    beyond: { every: 300, add: 0.5, max: 5.5 },
     levelStep: 0.015, levelCap: 40,
     epicPow: 0.5, legendaryPow: 0.25,
     // each chest at tier 1, level 1: gold range, total cards, and the rarer cards among them
@@ -3243,8 +3283,20 @@ const KCProgress = (() => {
     freeChest: { type: 'wooden', bonus: 3 },
     // diamonds can skip a chest's timer: 1 diamond for every 5 minutes left (rounded up)
     skip: { secondsPerDiamond: 300 },
-    // the Shop: coins per copy, the most copies in one offer, and chest prices (times the chest's average gold)
-    shop: { perCopy: { common: 20, rare: 200, epic: 2000, legendary: 40000 }, maxQty: { common: 500, rare: 100, epic: 10, legendary: 1 }, chestPrice: 3 },
+    // the Shop: rubies per copy, the most copies in one offer, and chest prices (times the chest's average gold)
+    // the Shop, in Rubies: the value of a copy, the most copies in a daily card offer (no legendaries are
+    // offered) and in the 1-diamond mega bundle. Chests: one of each a day, priced at their rubies plus
+    // `chestCardShare` of the value of the cards inside, from the arena listed in `chestArena`.
+    shop: { perCopy: { common: 20, rare: 200, epic: 2000, legendary: 40000 }, maxQty: { common: 50, rare: 10, epic: 1, legendary: 0 },
+      megaQty: { common: 100, rare: 20, epic: 2, legendary: 0 }, chestCardShare: 0.5, chestsPerDay: 1,
+      chestArena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 4 } },
+    // wallet Coins (SirSC) to Rubies, one way: `rate` rubies a coin, up to a daily cap set by the highest
+    // arena reached; past the last arena the cap grows by `beyond.add` every `beyond.every` trophies.
+    exchange: { rate: 1, cap: { 1: 500, 2: 1000, 3: 2000, 4: 4000 }, beyond: { every: 300, add: 1000, max: 10000 } },
+    // opponents' card levels by trophies (straight lines between the points), matched to what a player
+    // has at those trophies (tools/economy-report.js); rares, epics and legendaries are then raised to
+    // where their rarity starts
+    foeLevels: [[0, 1], [50, 1], [300, 4.5], [600, 6.5], [900, 7.5], [1200, 8.5], [1500, 10], [2000, 12], [3000, 13.5], [4000, 15]],
   };
 
   const ARENAS = [
@@ -3261,37 +3313,37 @@ const KCProgress = (() => {
   // Fixed rewards along the road, claimed by the player.
   const ROAD = [
     { at: 0, kind: 'arena', arena: 'cinder' },
-    { at: 20, kind: 'coins', amount: 100 },
+    { at: 20, kind: 'rubies', amount: 10 },
     { at: 40, kind: 'card', card: 'skeletons', copies: 6 },
     { at: 60, kind: 'chest', chest: 'silver' },
-    { at: 90, kind: 'coins', amount: 250 },
+    { at: 90, kind: 'rubies', amount: 30 },
     { at: 120, kind: 'card', card: 'cannon', copies: 4 },
     { at: 160, kind: 'chest', chest: 'silver' },
-    { at: 200, kind: 'coins', amount: 500 },
+    { at: 200, kind: 'rubies', amount: 60 },
     { at: 250, kind: 'chest', chest: 'gold' },
     { at: 300, kind: 'arena', arena: 'briar' },
     { at: 330, kind: 'card', card: 'spears', copies: 6 },
-    { at: 370, kind: 'coins', amount: 1200 },
+    { at: 370, kind: 'rubies', amount: 145 },
     { at: 400, kind: 'card', card: 'pots', copies: 6 },
     { at: 440, kind: 'chest', chest: 'gold' },
     { at: 480, kind: 'card', card: 'footmen', copies: 6 },
-    { at: 520, kind: 'coins', amount: 2000 },
+    { at: 520, kind: 'rubies', amount: 240 },
     { at: 560, kind: 'card', card: 'flail', copies: 3 },
     { at: 600, kind: 'arena', arena: 'sunstone' },
     { at: 630, kind: 'card', card: 'sandstorm', copies: 6 },
-    { at: 670, kind: 'coins', amount: 3500 },
+    { at: 670, kind: 'rubies', amount: 420 },
     { at: 710, kind: 'card', card: 'ramcart', copies: 3 },
     { at: 750, kind: 'chest', chest: 'gold' },
     { at: 790, kind: 'card', card: 'mole', copies: 3 },
-    { at: 830, kind: 'coins', amount: 5000 },
+    { at: 830, kind: 'rubies', amount: 600 },
     { at: 870, kind: 'card', card: 'camel', copies: 1 },
     { at: 900, kind: 'arena', arena: 'stormspire' },
     { at: 930, kind: 'card', card: 'bees', copies: 6 },
-    { at: 970, kind: 'coins', amount: 7500 },
+    { at: 970, kind: 'rubies', amount: 900 },
     { at: 1010, kind: 'card', card: 'owl', copies: 3 },
     { at: 1050, kind: 'chest', chest: 'platinum' },
     { at: 1090, kind: 'card', card: 'thundercloud', copies: 1 },
-    { at: 1130, kind: 'coins', amount: 10000 },
+    { at: 1130, kind: 'rubies', amount: 1200 },
     { at: 1170, kind: 'card', card: 'griffin', copies: 1 },
     { at: 1200, kind: 'arena', arena: 'arena5' },
   ];
@@ -3314,9 +3366,9 @@ const KCProgress = (() => {
   // The order chests are won in, repeating (before the arena gate is applied).
   const CYCLE = ['wooden', 'wooden', 'silver', 'wooden', 'silver', 'wooden', 'wooden', 'gold', 'wooden', 'silver',
     'wooden', 'silver', 'gold', 'wooden', 'platinum', 'silver', 'wooden', 'gold', 'silver', 'wooden', 'legendary', 'silver', 'gold', 'mythic'];
-  // Copies and coins to go from level L to L+1 (index 0 is level 1 to 2).
-  // Copies and coins to go from level L to L+1 (index 0 is level 1 to 2); from the economy above.
-  const UPGRADE = { copies: ECONOMY.upgradeCopies, coins: ECONOMY.upgradeGold };
+  // Copies and rubies to go from level L to L+1 (index 0 is level 1 to 2).
+  // Copies and rubies to go from level L to L+1 (index 0 is level 1 to 2); from the economy above.
+  const UPGRADE = { copies: ECONOMY.upgradeCopies, rubies: ECONOMY.upgradeGold };
 
   // Trophy opponents look like any other player. They don't talk (no speech bubbles or result lines).
   const FOE_NAMES = ['EmberFox', 'Kestrel', 'MossKnight', 'Juno77', 'BrickTop', 'Lumen', 'NovaRae', 'Quillon', 'RowanK', 'Tidebreaker',
@@ -3340,13 +3392,20 @@ const KCProgress = (() => {
   };
   const blank = () => ({
     name: 'Player', xp: 0, beaten: {}, records: {}, roadSeen: false, opp: null,
-    mode: null, trophies: 0, best: 0, coins: 0, diamonds: 0, shop: null, freeChestDay: null, magic: {}, cards: {}, evos: [], pass: null, member: false, king: 1, emotes: [], found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
+    mode: null, trophies: 0, best: 0, rubies: 0, wallet: 0, walletDay: null, diamonds: 0, shop: null, freeChestDay: null, magic: {}, cards: {}, evos: [], pass: null, member: false, king: 1, emotes: [], found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
     chests: [null, null, null, null], cycle: 0, claimed: {}, diff: 0.35, trophyRecord: { w: 0, l: 0, d: 0 },
   });
 
   function load(st) {
     storage = st === undefined ? (typeof localStorage !== 'undefined' ? localStorage : null) : st;
-    P = Object.assign(blank(), store.get() || {});
+    const raw = store.get() || {};
+    // Rubies used to be called coins: an older save's coins become Rubies one for one, in its chests and
+    // Shop offers too. (Coins now mean the SirSC wallet's currency: `wallet`, never paid out by the game.)
+    if (raw.rubies === undefined && raw.coins !== undefined) raw.rubies = raw.coins;
+    delete raw.coins;
+    for (const c of raw.chests || []) if (c && c.contents && c.contents.rubies === undefined) { c.contents.rubies = c.contents.coins || 0; delete c.contents.coins; }
+    if (raw.shop && Array.isArray(raw.shop.offers)) for (const o of raw.shop.offers) { if (o.kind === 'coins') o.kind = 'rubies'; if (o.currency === 'coins') o.currency = 'rubies'; }
+    P = Object.assign(blank(), raw);
     let old = null; // the record kept before there were three trainers
     try { old = storage && JSON.parse(storage.getItem('kc.record') || 'null'); } catch (e) { old = null; }
     if (old && !P.records.owen) { P.records.owen = old; if (old.w > 0) P.beaten.owen = true; }
@@ -3357,7 +3416,8 @@ const KCProgress = (() => {
       const c = Object.assign({ level: 1, count: 0 }, P.cards[id]);
       P.cards[id] = { level: Math.max(KC_MIN_LEVEL(id), Math.min(MAX_LEVEL, nn(c.level) || 1)), count: nn(c.count) };
     }
-    P.coins = nn(P.coins); P.diamonds = nn(P.diamonds); P.xp = nn(P.xp); P.trophies = nn(P.trophies); P.best = Math.max(nn(P.best), P.trophies);
+    P.rubies = nn(P.rubies); P.wallet = nn(P.wallet); P.diamonds = nn(P.diamonds);
+    P.walletDay = P.walletDay && typeof P.walletDay.day === 'string' ? { day: P.walletDay.day, n: nn(P.walletDay.n) } : { day: '', n: 0 }; P.xp = nn(P.xp); P.trophies = nn(P.trophies); P.best = Math.max(nn(P.best), P.trophies);
     P.winDay = P.winDay && typeof P.winDay.day === 'string' ? { day: P.winDay.day, n: nn(P.winDay.n) } : { day: '', n: 0 };
     P.magic = Object.assign({}, P.magic);
     P.evos = Array.isArray(P.evos) ? P.evos.filter(id => KC_EVOS[id]) : [];
@@ -3420,18 +3480,18 @@ const KCProgress = (() => {
     return 'ready';
   }
   const claimable = () => ROAD.filter(m => roadState(m) === 'ready');
-  // Claim a road reward. Returns what it gave (coins, a card, or a chest's contents opened on the spot).
+  // Claim a road reward. Returns what it gave (rubies, a card, or a chest's contents opened on the spot).
   function claim(at) {
     const m = ROAD.find(r => r.at === at);
     if (!m || roadState(m) !== 'ready') return null;
     P.claimed[at] = true;
     let out = { kind: m.kind };
-    if (m.kind === 'coins') { P.coins += m.amount; out.coins = m.amount; }
+    if (m.kind === 'rubies') { P.rubies += m.amount; out.rubies = m.amount; }
     else if (m.kind === 'card') {
       const isNew = !P.found.includes(m.card);
       if (isNew) P.found = KC_ALL_CARDS.filter(id => id === m.card || P.found.includes(id));
       P.cards[m.card].count += m.copies - (isNew ? 1 : 0);      // the first copy unlocks it; it isn't a duplicate
-      out = { kind: 'card', cards: [{ id: m.card, n: m.copies, isNew }], coins: 0 };
+      out = { kind: 'card', cards: [{ id: m.card, n: m.copies, isNew }], rubies: 0 };
     } else if (m.kind === 'chest') {
       const type = capChest(m.chest), c = roll(type);
       apply(c);
@@ -3443,12 +3503,17 @@ const KCProgress = (() => {
 
   /* ---------- trophy battles ---------- */
   const lerp = (a, b, t) => a + (b - a) * t;
-  // Opponents level their cards one at a time as their trophies rise. Below 50 trophies every card is
-  // level 1. From 50, one card goes up a level every 12.5 trophies: one level-2 card at 50, two at
-  // 62.5 ... all eight at 137.5; then the first level 3 at 150, and so on (a full level per 100
-  // trophies) until every card is level 15 at 1,437.5.
-  const FOE_FIRST = 50, FOE_STEP = 12.5, DECK = 8;
-  const foeUpgrades = t => (t < FOE_FIRST ? 0 : Math.min((MAX_LEVEL - 1) * DECK, 1 + Math.floor((t - FOE_FIRST) / FOE_STEP)));
+  // Opponents level their cards one at a time as their trophies rise, along ECONOMY.foeLevels (the
+  // average card level a player has at those trophies): every card level 1 below 50 trophies, about 7
+  // in Arena 3, 7 to 8 entering Arena 4, 8 to 9 at 1,200, 12 at 2,000 and 15 at 4,000.
+  const DECK = 8;
+  function foeUpgrades(t) {
+    const C = ECONOMY.foeLevels;
+    t = Math.max(0, +t || 0);
+    let lv = C[C.length - 1][1];
+    for (let i = 1; i < C.length; i++) if (t < C[i][0]) { lv = C[i - 1][1] + (C[i][1] - C[i - 1][1]) * (t - C[i - 1][0]) / (C[i][0] - C[i - 1][0]); break; }
+    return Math.max(0, Math.min((MAX_LEVEL - 1) * DECK, Math.floor((lv - 1) * DECK)));
+  }
   // Spread n single-card upgrades over a deck: everyone gets floor(n / 8) levels, and n % 8 cards
   // (picked with rand, so each opponent differs) are one level ahead.
   function spreadLevels(n, ids, rand = Math.random) {
@@ -3456,6 +3521,11 @@ const KCProgress = (() => {
     let extra = n % ids.length;
     for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
     return Object.fromEntries(order.map(id => [id, Math.min(MAX_LEVEL, base + (extra-- > 0 ? 1 : 0))]));
+  }
+  function foeKing(levels) {
+    let k = 1;
+    for (let n = 2; n <= MAX_LEVEL; n++) if (levels.filter(v => v >= n).length >= Math.min(n, levels.length)) k = n; else break;
+    return k;
   }
   // The opponent for the next trophy battle: card levels follow their trophies, skill follows P.diff.
   function trophyFoe(rand = Math.random) {
@@ -3492,8 +3562,9 @@ const KCProgress = (() => {
     const cardLevels = spreadLevels(foeUpgrades(foeTrophies), deck, rand);
     for (const id of deck) cardLevels[id] = Math.max(KC_MIN_LEVEL(id), cardLevels[id]);
     const lvl = Math.min(...Object.values(cardLevels));
-    // their King Tower level: the average level of their cards
-    const kingLevel = Math.max(1, Math.min(MAX_LEVEL, Math.round(Object.values(cardLevels).reduce((a, v) => a + v, 0) / deck.length)));
+    // their King Tower: the players' rule (level N needs N cards at level N), counting the rest of their
+    // collection as levelled with their deck once all eight are past 8
+    const kingLevel = foeKing(Object.values(cardLevels));
     return {
       id: 'trophy', kind: 'trophy', name, short: name, level: lvl, tier: `${foeTrophies} trophies`,
       look: foeLook(rand), lines: null, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: foeTrophies, kingLevel,
@@ -3524,7 +3595,7 @@ const KCProgress = (() => {
     if (winner === 0) {
       const today = dayKey(Date.now());
       if (P.winDay.day !== today) P.winDay = { day: today, n: 0 };
-      if (P.winDay.n < ECONOMY.winGold.dailyCap) { P.winDay.n++; gold = winGold(); P.coins += gold; }
+      if (P.winDay.n < ECONOMY.winGold.dailyCap) { P.winDay.n++; gold = winGold(); P.rubies += gold; }
     }
     const xp = winner === 0 ? XP.win : winner === 1 ? XP.loss : XP.draw, levelUp = addXp(xp);
     const newArena = arena().id !== beforeArena ? arena() : null;
@@ -3564,7 +3635,7 @@ const KCProgress = (() => {
     const T = ECONOMY.chests[type], M = rewardTier(opts), cards = Math.round(T.cards * M.cards);
     const rareN = Math.max(Math.round((T.rare.min || 0) * M.cards), Math.round(cards * (T.rare.share || 0)));
     const ex = (r, pow) => { const e = T[r] || {}; return ((e.min || 0) + (e.chance || 0)) * Math.pow(M.cards, pow); };
-    return { cards, coins: [Math.round(T.gold[0] * M.gold), Math.round(T.gold[1] * M.gold)], kinds: T.kinds, rares: rareN, rareChance: T.rare.chance || 0,
+    return { cards, rubies: [Math.round(T.gold[0] * M.gold), Math.round(T.gold[1] * M.gold)], kinds: T.kinds, rares: rareN, rareChance: T.rare.chance || 0,
       epics: ex('epic', ECONOMY.epicPow), legendaries: ex('legendary', ECONOMY.legendaryPow),
       epicMin: (T.epic && T.epic.min) || 0, legendaryMin: (T.legendary && T.legendary.min) || 0, tier: M };
   }
@@ -3601,13 +3672,13 @@ const KCProgress = (() => {
     spread('rare', n.rare, Math.ceil(O.kinds / 2));
     spread('epic', n.epic, 2);
     spread('legendary', n.legendary, 1);
-    const coins = Math.round(lerp(O.coins[0], O.coins[1], rand()));
-    return { coins: Math.max(0, coins), cards, items: rollItems(type, rand, opts) };
+    const rubies = Math.round(lerp(O.rubies[0], O.rubies[1], rand()));
+    return { rubies: Math.max(0, rubies), cards, items: rollItems(type, rand, opts) };
   }
   // gold for one trophy-battle win
   const winGold = opts => Math.round(ECONOMY.winGold.base * rewardTier(opts).gold);
   function apply(c) {
-    P.coins += c.coins;
+    P.rubies += c.rubies;
     // a card that came out before you reached it on the Trophy Road is found now
     const fresh = c.cards.filter(x => !P.found.includes(x.id)).map(x => x.id);
     if (fresh.length) P.found = KC_ALL_CARDS.filter(id => P.found.includes(id) || fresh.includes(id));
@@ -3661,10 +3732,10 @@ const KCProgress = (() => {
 
   /* ---------- the Shop ---------- */
   // Five offers a day, made from the cards you have found and their levels. Every offer says exactly
-  // what it gives. Prices: a copy is worth 10 coins (common) or 50 (rare); 1 diamond = 5,000 coins.
-  // Chests are sold for coins only, one of each a day, with their contents shown before you buy.
-  const SHOP = { perCopy: ECONOMY.shop.perCopy, coinsPerDiamond: 5000, maxQty: ECONOMY.shop.maxQty, chests: ECONOMY.chests };
-  const maxQty = id => SHOP.maxQty[KC_CARDS[id].rarity] || 1;
+  // what it gives. Prices: a copy is worth 10 rubies (common) or 50 (rare); 1 diamond = 5,000 rubies.
+  // Chests are sold for rubies only, one of each a day, with their contents shown before you buy.
+  const SHOP = { perCopy: ECONOMY.shop.perCopy, rubiesPerDiamond: 5000, maxQty: ECONOMY.shop.maxQty, chests: ECONOMY.chests };
+  const maxQty = id => Math.max(1, SHOP.maxQty[KC_CARDS[id].rarity] || 0);
   const pad2 = n => String(n).padStart(2, '0');
   const dayKey = now => { const d = new Date(now); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
   // When today's offers are replaced: the next local midnight.
@@ -3679,11 +3750,11 @@ const KCProgress = (() => {
   // the gold still to pay to take a card to level 15
   function goldToMax(id) {
     let n = 0;
-    for (let l = P.cards[id].level; l < MAX_LEVEL; l++) n += UPGRADE.coins[l - 1] || 0;
+    for (let l = P.cards[id].level; l < MAX_LEVEL; l++) n += UPGRADE.rubies[l - 1] || 0;
     return n;
   }
   function makeOffers(rand = Math.random) {
-    const open = P.found.filter(id => P.cards[id].level < MAX_LEVEL);
+    const open = P.found.filter(id => P.cards[id].level < MAX_LEVEL && SHOP.maxQty[KC_CARDS[id].rarity] > 0);
     for (let i = open.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [open[i], open[j]] = [open[j], open[i]]; }
     const used = new Set(), offers = [];
     const lvl = id => P.cards[id].level, inDeck = id => (P.deck.includes(id) ? 1 : 0);
@@ -3695,28 +3766,28 @@ const KCProgress = (() => {
       qty = Math.max(1, Math.min(qty, copiesToMax(id) || 1));
       const value = qty * SHOP.perCopy[KC_CARDS[id].rarity];
       offers.push({ id: 'o' + offers.length, kind: 'card', card: id, qty, tag, currency,
-        price: currency === 'diamonds' ? Math.max(1, Math.ceil(value / SHOP.coinsPerDiamond)) : value });
+        price: currency === 'diamonds' ? Math.max(1, Math.ceil(value / SHOP.rubiesPerDiamond)) : value });
     };
     if (open.length) {
       // 1. the card closest to its next upgrade: exactly the copies it is missing
       let pool = free().filter(id => missing(id) > 0).sort((a, b) => missing(a) - missing(b) || inDeck(b) - inDeck(a));
       let id = pool[0] || free()[0];
-      add(id, Math.min(maxQty(id), missing(id) > 0 ? missing(id) : copiesNeed(id)), 'Closest to upgrade', 'coins');
+      add(id, Math.min(maxQty(id), missing(id) > 0 ? missing(id) : copiesNeed(id)), 'Closest to upgrade', 'rubies');
       // 2. a rare card (a common if every rare is taken or maxed): one level's worth
       pool = free().filter(c => KC_CARDS[c].rarity === 'rare');
       id = pool[0] || free()[0];
-      add(id, Math.min(maxQty(id), copiesNeed(id)), KC_CARDS[id].rarity === 'rare' ? 'Rare pick' : 'Card pick', 'coins');
+      add(id, Math.min(maxQty(id), copiesNeed(id)), KC_CARDS[id].rarity === 'rare' ? 'Rare pick' : 'Card pick', 'rubies');
       // 3. your lowest-level card (cards found on the Trophy Road first): one level's worth
       pool = free().sort((a, b) => lvl(a) - lvl(b) || (KC_STARTER_DECK.includes(a) ? 1 : 0) - (KC_STARTER_DECK.includes(b) ? 1 : 0));
       id = pool[0];
-      add(id, Math.min(maxQty(id), copiesNeed(id)), 'Catch up', 'coins');
-      // 4. a big bundle of your highest-level deck card: 5,000 coins' worth of copies for 1 diamond
-      pool = free().filter(c => SHOP.perCopy[KC_CARDS[c].rarity] <= SHOP.coinsPerDiamond).sort((a, b) => inDeck(b) - inDeck(a) || lvl(b) - lvl(a));
+      add(id, Math.min(maxQty(id), copiesNeed(id)), 'Catch up', 'rubies');
+      // 4. a big bundle of your highest-level deck card: 5,000 rubies' worth of copies for 1 diamond
+      pool = free().filter(c => ECONOMY.shop.megaQty[KC_CARDS[c].rarity] > 0).sort((a, b) => inDeck(b) - inDeck(a) || lvl(b) - lvl(a));
       id = pool[0];
-      if (id) add(id, Math.floor(SHOP.coinsPerDiamond / SHOP.perCopy[KC_CARDS[id].rarity]), 'Mega bundle', 'diamonds');
+      if (id) add(id, ECONOMY.shop.megaQty[KC_CARDS[id].rarity], 'Mega bundle', 'diamonds');
     }
-    // 5. coins for a diamond, at the exchange rate
-    offers.push({ id: 'o' + offers.length, kind: 'coins', qty: SHOP.coinsPerDiamond, tag: 'Coin bundle', currency: 'diamonds', price: 1, repeat: true });
+    // 5. rubies for a diamond, at the exchange rate
+    offers.push({ id: 'o' + offers.length, kind: 'rubies', qty: SHOP.rubiesPerDiamond, tag: 'Ruby bundle', currency: 'diamonds', price: 1, repeat: true });
     return offers;
   }
   // Today's offers (made the first time they are asked for each day).
@@ -3725,20 +3796,58 @@ const KCProgress = (() => {
     if (!P.shop || P.shop.day !== day || !Array.isArray(P.shop.offers)) { P.shop = { day, offers: makeOffers(rand), bought: {} }; save(); }
     return P.shop;
   }
-  // Shop chests cost coins only, as many as you like. What is inside is rolled at purchase and stays
-  // hidden until the chest is opened (the tile shows the card count and coin range). The price grows with
-  // the account level like the contents, so the coins inside are always less than the price.
-  const chestPrice = (type, opts) => { const o = chestOdds(type, opts); return Math.max(5, Math.round((o.coins[0] + o.coins[1]) / 2 * ECONOMY.shop.chestPrice / 5) * 5); };
-  function buyChest(type, rand) {
+  // Shop chests cost rubies, one of each a day, from the arena in ECONOMY.shop.chestArena (by the highest
+  // trophies reached). What is inside is rolled at purchase and stays hidden until the chest is opened
+  // (the tile shows the card count and ruby range). The price is the rubies inside plus half the value of
+  // its cards, so it always costs more than it pays back and the bigger chests cost tens of thousands.
+  function chestPrice(type, opts) {
+    const o = chestOdds(type, opts), v = ECONOMY.shop.perCopy, avg = (o.rubies[0] + o.rubies[1]) / 2;
+    const commons = Math.max(0, o.cards - o.rares - o.epics - o.legendaries);
+    const cards = commons * v.common + (o.rares + o.rareChance) * v.rare + o.epics * v.epic + o.legendaries * v.legendary;
+    return Math.max(5, Math.round((avg + cards * ECONOMY.shop.chestCardShare) / 5) * 5);
+  }
+  const bestArena = () => (ARENAS.filter(a => !a.soon && P.best >= a.min).pop() || ARENAS[0]).number;
+  const chestShopOpen = type => bestArena() >= (ECONOMY.shop.chestArena[type] || 99);
+  const chestsBought = (now = Date.now()) => (P.chestBuys && P.chestBuys.day === dayKey(now) ? P.chestBuys.n : {});
+  const chestBuyLeft = (type, now = Date.now()) => Math.max(0, ECONOMY.shop.chestsPerDay - (chestsBought(now)[type] || 0));
+  function buyChest(type, rand, now = Date.now()) {
     if (!CHESTS[type] || !SHOP.chests[type]) return { error: 'none' };
-    if (!chestAllowed(type)) return { error: 'locked' };
+    if (!chestAllowed(type) || !chestShopOpen(type)) return { error: 'locked' };
+    if (!chestBuyLeft(type, now)) return { error: 'sold' };
     const price = chestPrice(type);
-    if (P.coins < price) return { error: 'coins' };
-    P.coins -= price;
+    if (P.rubies < price) return { error: 'rubies' };
+    P.rubies -= price;
+    P.chestBuys = { day: dayKey(now), n: Object.assign({}, chestsBought(now), { [type]: (chestsBought(now)[type] || 0) + 1 }) };
     const c = roll(type, rand), before = P.found.slice();
     apply(c);
     save();
-    return { ok: true, chest: type, price, coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
+    return { ok: true, chest: type, price, rubies: c.rubies, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
+  }
+  // Wallet Coins to Rubies, one way, up to a daily cap by the highest arena reached. TEMPORARY: the wallet
+  // balance is kept on this device; once the SirSC wallet is connected the server must take the coins and
+  // enforce the cap, and the game never pays coins out.
+  function exchangeCap() {
+    const X = ECONOMY.exchange, top = Math.max(...Object.keys(X.cap).map(Number)), n = bestArena();
+    if (n < top) return X.cap[n] || X.cap[1];
+    const last = ARENAS.filter(a => !a.soon).find(a => a.number === top), over = Math.max(0, P.best - (last ? last.min : 0));
+    return Math.min(X.beyond.max, X.cap[top] + X.beyond.add * Math.floor(over / X.beyond.every));
+  }
+  function exchangeInfo(now = Date.now()) {
+    const used = P.walletDay.day === dayKey(now) ? P.walletDay.n : 0, cap = exchangeCap();
+    return { rate: ECONOMY.exchange.rate, cap, used, left: Math.max(0, cap - used), coins: P.wallet, ends: shopEnds(now) };
+  }
+  // Swap n coins for rubies. Returns { ok, coins, rubies } or { error: 'amount' | 'cap' | 'coins' }.
+  function exchange(n, now = Date.now()) {
+    n = Math.floor(+n);
+    const x = exchangeInfo(now);
+    if (!Number.isFinite(n) || n <= 0) return { error: 'amount' };
+    if (n > x.left) return { error: 'cap', left: x.left };
+    if (n > P.wallet) return { error: 'coins', have: P.wallet };
+    P.wallet -= n;
+    P.rubies += n * x.rate;
+    P.walletDay = { day: dayKey(now), n: x.used + n };
+    save();
+    return { ok: true, coins: n, rubies: n * x.rate };
   }
   // One free Wooden Chest a day (local days, like the offers).
   const freeChestReady = (now = Date.now()) => P.freeChestDay !== dayKey(now);
@@ -3748,28 +3857,28 @@ const KCProgress = (() => {
     const F = ECONOMY.freeChest, c = roll(F.type, rand, { bonus: F.bonus }), before = P.found.slice();
     apply(c);
     save();
-    return { ok: true, chest: F.type, coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
+    return { ok: true, chest: F.type, rubies: c.rubies, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
   }
   function refreshShop(rand, now = Date.now()) { P.shop = null; return shop(now, rand); }
-  // Buy offer i. Returns { ok, coins, cards } or { error: 'sold' | 'coins' | 'diamonds' | 'none' }.
+  // Buy offer i. Returns { ok, rubies, cards } or { error: 'sold' | 'rubies' | 'diamonds' | 'none' }.
   function buy(i, now = Date.now()) {
     const s = shop(now), o = s.offers[i];
     if (!o) return { error: 'none' };
     if (s.bought[o.id] && !o.repeat) return { error: 'sold' };
     if (o.card && P.cards[o.card] && P.cards[o.card].level >= MAX_LEVEL) return { error: 'max' };   // no paying for copies a maxed card can't use
-    const wallet = o.currency === 'diamonds' ? 'diamonds' : 'coins';
+    const wallet = o.currency === 'diamonds' ? 'diamonds' : 'rubies';
     if (P[wallet] < o.price) return { error: wallet };
     P[wallet] -= o.price;
     let out;
-    if (o.kind === 'coins') { P.coins += o.qty; out = { coins: o.qty, cards: [] }; }
-    else { P.cards[o.card].count += o.qty; out = { coins: 0, cards: [{ id: o.card, n: o.qty, isNew: false }] }; }
+    if (o.kind === 'rubies') { P.rubies += o.qty; out = { rubies: o.qty, cards: [] }; }
+    else { P.cards[o.card].count += o.qty; out = { rubies: 0, cards: [{ id: o.card, n: o.qty, isNew: false }] }; }
     s.bought[o.id] = (s.bought[o.id] || 0) + 1;
     save();
     return Object.assign({ ok: true, offer: o }, out);
   }
   /* ---------- emotes in the Shop ----------
      Fifteen emotes to buy, three of them on sale each day (the same three all day, a new set at
-     midnight; ones you own are skipped). Each costs coins and is yours for good: bought emotes join
+     midnight; ones you own are skipped). Each costs rubies and is yours for good: bought emotes join
      the eight everyone has in the battle emote panel. The art is in js/emotes.js. */
   const EMOTES = [
     { id: 'love', name: 'Love Struck' }, { id: 'cool', name: 'Too Cool' }, { id: 'party', name: 'Party Time' },
@@ -3779,8 +3888,8 @@ const KCProgress = (() => {
     { id: 'mindblown', name: 'Mind Blown' }, { id: 'smug', name: 'Smug' }, { id: 'salute', name: 'Salute' },
     // and one for every card: the card's character with its name
   ].concat(KC_ALL_CARDS.map(id => ({ id: 'card_' + id, name: KC_CARDS[id].name, card: id })));
-  // each emote costs 5,000 coins or 1 diamond (the same at the exchange rate)
-  const EMOTE_SHOP = { perDay: 3, coins: 5000, diamonds: 1 };
+  // each emote costs 5,000 rubies or 1 diamond (the same at the exchange rate)
+  const EMOTE_SHOP = { perDay: 3, rubies: 5000, diamonds: 1 };
   // Today's three: a shuffle seeded by the date, skipping emotes you own.
   function emoteOffers(now = Date.now()) {
     const day = dayKey(now), seed = [...day].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
@@ -3792,14 +3901,14 @@ const KCProgress = (() => {
       P.emoteShop = { day, ids: (open.length >= EMOTE_SHOP.perDay ? open : order).slice(0, EMOTE_SHOP.perDay) };
     }
     return P.emoteShop.ids.filter(id => EMOTES.some(e => e.id === id))
-      .map(id => { const e = EMOTES.find(x => x.id === id); return { id, name: e.name, card: e.card || null, coins: EMOTE_SHOP.coins, diamonds: EMOTE_SHOP.diamonds, owned: P.emotes.includes(id) }; });
+      .map(id => { const e = EMOTES.find(x => x.id === id); return { id, name: e.name, card: e.card || null, rubies: EMOTE_SHOP.rubies, diamonds: EMOTE_SHOP.diamonds, owned: P.emotes.includes(id) }; });
   }
-  // currency: 'coins' (5,000) or 'diamonds' (1)
-  function buyEmote(id, currency = 'coins', now = Date.now()) {
+  // currency: 'rubies' (5,000) or 'diamonds' (1)
+  function buyEmote(id, currency = 'rubies', now = Date.now()) {
     const o = emoteOffers(now).find(x => x.id === id);
     if (!o) return { error: 'none' };
     if (o.owned) return { error: 'owned' };
-    const wallet = currency === 'diamonds' ? 'diamonds' : 'coins', price = o[wallet];
+    const wallet = currency === 'diamonds' ? 'diamonds' : 'rubies', price = o[wallet];
     if (P[wallet] < price) return { error: wallet };
     P[wallet] -= price;
     P.emotes.push(id);
@@ -3807,14 +3916,14 @@ const KCProgress = (() => {
     return { ok: true, id, price, currency: wallet };
   }
 
-  // TEMPORARY: the test button's 1,000,000 coins and diamonds.
-  function grantTest() { P.coins = 1000000; P.diamonds = 1000000; save(); }
+  // TEMPORARY: the test button's 1,000,000 rubies and diamonds.
+  function grantTest() { P.rubies = 1000000; P.diamonds = 1000000; P.wallet = 1000000; save(); }
 
 
   /* ---------- magic items ----------
      Wild cards count as copies of any card of their rarity. A book fills every copy a card still needs
      for its next level (the Book of Books works on any rarity). The Hammer of Books upgrades a card one
-     level for free: it fills any missing copies and pays the coins. Evolution shards have a place but nothing
+     level for free: it fills any missing copies and pays the rubies. Evolution shards have a place but nothing
      gives them yet. Wild cards come from chests from Arena 2 on; books and the hammer are rare finds in
      silver chests and up (0.1% in silver to 1% in mythic, never in wooden). */
   const MAGIC = {
@@ -3827,7 +3936,7 @@ const KCProgress = (() => {
     book_epic: { name: 'Book of Epic', kind: 'book', rarity: 'epic', blurb: 'Use on an epic card to fill all the copies it still needs for its next level.' },
     book_legendary: { name: 'Book of Legendary', kind: 'book', rarity: 'legendary', blurb: 'Use on a legendary card to fill all the copies it still needs for its next level.' },
     book_books: { name: 'Book of Books', kind: 'book', rarity: 'any', blurb: 'Works on a card of any rarity: fills all the copies it still needs for its next level.' },
-    hammer_books: { name: 'Hammer of Books', kind: 'hammer', rarity: 'any', blurb: 'Upgrades a card one level for free: it fills any copies the card is missing and needs no coins.' },
+    hammer_books: { name: 'Hammer of Books', kind: 'hammer', rarity: 'any', blurb: 'Upgrades a card one level for free: it fills any copies the card is missing and needs no rubies.' },
     shards: { name: 'Evolution Shards', kind: 'shard', rarity: 'any', blurb: 'Collect 6 and use them on a card that has an evolution to unlock it. Evolutions open in Sunstone Arena (Arena 3); the Snowman\'s is the first.' },
   };
   const MAGIC_ORDER = ['wild_common', 'wild_rare', 'wild_epic', 'wild_legendary', 'book_common', 'book_rare', 'book_epic', 'book_legendary', 'book_books', 'hammer_books', 'shards'];
@@ -3884,7 +3993,7 @@ const KCProgress = (() => {
     const c = P.cards[id];
     if (c.level >= MAX_LEVEL) return { ok: false, reason: 'max' };
     const need = UPGRADE.copies[card.rarity][c.level - 1], missing = need - c.count;
-    // the hammer fills whatever copies are missing and pays the coins: one level up, whatever the card has
+    // the hammer fills whatever copies are missing and pays the rubies: one level up, whatever the card has
     if (M.kind === 'hammer') return { ok: true, level: c.level + 1, fills: Math.max(0, missing) };
     if (missing <= 0) return { ok: false, reason: 'full' };
     return { ok: true, gives: M.kind === 'wild' ? Math.min(magicCount(item), missing) : missing, uses: M.kind === 'wild' ? Math.min(magicCount(item), missing) : 1 };
@@ -3962,20 +4071,20 @@ const KCProgress = (() => {
   const PASS = {
     name: 'Diamond Pass', season: 1, price: 10, crownsPerTier: 8,
     tiers: [
-      { free: { kind: 'coins', n: 2500 }, paid: { kind: 'evo', card: 'snowman' } },
+      { free: { kind: 'rubies', n: 375 }, paid: { kind: 'evo', card: 'snowman' } },
       { free: { kind: 'item', item: 'wild_common', n: 20 }, paid: { kind: 'chest', chest: 'gold' } },
-      { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'coins', n: 7500 } },
-      { free: { kind: 'coins', n: 3500 }, paid: { kind: 'item', item: 'wild_rare', n: 6 } },
+      { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'rubies', n: 1125 } },
+      { free: { kind: 'rubies', n: 525 }, paid: { kind: 'item', item: 'wild_rare', n: 6 } },
       { free: { kind: 'item', item: 'shards', n: 1 }, paid: { kind: 'chest', chest: 'gold' } },
       { free: { kind: 'item', item: 'wild_rare', n: 3 }, paid: { kind: 'item', item: 'book_common', n: 1 } },
-      { free: { kind: 'coins', n: 4500 }, paid: { kind: 'coins', n: 10000 } },
+      { free: { kind: 'rubies', n: 675 }, paid: { kind: 'rubies', n: 1500 } },
       { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'item', item: 'shards', n: 2 } },
       { free: { kind: 'item', item: 'wild_common', n: 30 }, paid: { kind: 'chest', chest: 'platinum' } },
       { free: { kind: 'item', item: 'shards', n: 1 }, paid: { kind: 'item', item: 'wild_epic', n: 1 } },
-      { free: { kind: 'coins', n: 5500 }, paid: { kind: 'chest', chest: 'gold' } },
-      { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'coins', n: 15000 } },
+      { free: { kind: 'rubies', n: 825 }, paid: { kind: 'chest', chest: 'gold' } },
+      { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'rubies', n: 2250 } },
       { free: { kind: 'item', item: 'wild_rare', n: 5 }, paid: { kind: 'item', item: 'shards', n: 2 } },
-      { free: { kind: 'coins', n: 7000 }, paid: { kind: 'item', item: 'book_rare', n: 1 } },
+      { free: { kind: 'rubies', n: 1050 }, paid: { kind: 'item', item: 'book_rare', n: 1 } },
       { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'chest', chest: 'legendary' } },
     ],
   };
@@ -4002,13 +4111,13 @@ const KCProgress = (() => {
     return 'ready';
   }
   const passClaimable = () => PASS.tiers.reduce((n, _, i) => n + (passState(i, 'free') === 'ready') + (passState(i, 'paid') === 'ready'), 0);
-  // Claim a tier's reward. Returns what it gave, in the same shape as a chest (coins, cards, items).
+  // Claim a tier's reward. Returns what it gave, in the same shape as a chest (rubies, cards, items).
   function claimPass(i, track) {
     if (passState(i, track) !== 'ready') return null;
     const R = PASS.tiers[i][track];
     P.pass[track][i] = true;
-    let out = { reward: R, coins: 0, cards: [], items: [] };
-    if (R.kind === 'coins') { P.coins += R.n; out.coins = R.n; }
+    let out = { reward: R, rubies: 0, cards: [], items: [] };
+    if (R.kind === 'rubies') { P.rubies += R.n; out.rubies = R.n; }
     else if (R.kind === 'item') { P.magic[R.item] = magicCount(R.item) + R.n; out.items = [{ id: R.item, n: R.n }]; }
     else if (R.kind === 'chest') {
       const before = P.found.slice(), c = roll(R.chest);
@@ -4037,8 +4146,8 @@ const KCProgress = (() => {
     const c = P.cards[id], card = KC_CARDS[id];
     if (!P.found.includes(id)) return { found: false };
     if (c.level >= MAX_LEVEL) return { found: true, max: true, level: c.level, count: c.count };
-    const need = UPGRADE.copies[card.rarity][c.level - 1], cost = UPGRADE.coins[c.level - 1];
-    const reason = c.count < need ? 'copies' : P.coins < cost ? 'coins' : '';
+    const need = UPGRADE.copies[card.rarity][c.level - 1], cost = UPGRADE.rubies[c.level - 1];
+    const reason = c.count < need ? 'copies' : P.rubies < cost ? 'rubies' : '';
     return { found: true, level: c.level, count: c.count, need, cost, can: !reason, reason };
   }
   const upgradable = () => P.found.filter(id => upgradeInfo(id).can);
@@ -4046,7 +4155,7 @@ const KCProgress = (() => {
     const u = upgradeInfo(id);
     if (!u.can) return null;
     P.cards[id].count -= u.need;
-    P.coins -= u.cost;
+    P.rubies -= u.cost;
     P.cards[id].level++;
     const xp = 4 * P.cards[id].level, levelUp = addXp(xp);
     save();
@@ -4073,7 +4182,7 @@ const KCProgress = (() => {
 
   return {
     MAX_LEVEL, XP_PER_LEVEL, TROPHIES, ARENAS, ROAD, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
-    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest,
+    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, chestShopOpen, chestBuyLeft, foeKing,
     load, save, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,
@@ -6065,7 +6174,7 @@ const KCSound = (() => {
     revealCommon: () => [659, 880].forEach((f, i) => tone(f, 0, 0.16, 'triangle', 0.15, i * 0.08)),
     revealRare: () => { [659, 880, 1175, 1568].forEach((f, i) => tone(f, 0, 0.22, 'triangle', 0.16, i * 0.07)); noise(0.4, 0.05, 5000, 'highpass', 0.1); },
     revealNew: () => { [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, 0, i === 5 ? 0.6 : 0.2, 'triangle', 0.17, i * 0.08)); noise(0.6, 0.06, 5200, 'highpass', 0.1); },
-    coinTick: () => tone(1250 + Math.random() * 500, 0, 0.05, 'square', 0.045),
+    rubyTick: () => tone(1250 + Math.random() * 500, 0, 0.05, 'square', 0.045),
     countTick: () => tone(900 + Math.random() * 200, 0, 0.035, 'triangle', 0.07),
     chestDone: () => [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0, i === 3 ? 0.45 : 0.16, 'triangle', 0.16, i * 0.1)),
     // a magic item gathering, each part snapping in (a rising scale), and the item forming
@@ -6384,7 +6493,7 @@ const KCItems = (() => {
 
 /* Kingdom Clash: the full-screen scenes for growing a card. One scene for each way:
 
-   - Upgrade with coins: the card's copies stream out of its bar and coins pour in, the card charges up
+   - Upgrade with rubies: the card's copies stream out of its bar and rubies pour in, the card charges up
      and shakes, then bursts: the level number slams to the new one and the stats count up.
    - Hammer of Books: the hammer swings in and strikes the card three times (sparks, cracks of light,
      the screen shakes), and on the third strike the card bursts into a rainbow level-up.
@@ -6491,7 +6600,7 @@ const KCUpgradeFX = (() => {
         c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
         for (let k = 1; k < p.trail.length; k++) {
           const f = k / p.trail.length;
-          c.globalAlpha = f * 0.7; c.strokeStyle = p.col; c.lineWidth = 1 + f * (p.kind === 'coin' ? 4 : 6);
+          c.globalAlpha = f * 0.7; c.strokeStyle = p.col; c.lineWidth = 1 + f * (p.kind === 'ruby' ? 4 : 6);
           c.beginPath(); c.moveTo(p.trail[k - 1][0], p.trail[k - 1][1]); c.lineTo(p.trail[k][0], p.trail[k][1]); c.stroke();
         }
         c.restore();
@@ -6516,10 +6625,13 @@ const KCUpgradeFX = (() => {
   }
   function drawThing(c, p, sc) {
     const x = p.x, y = p.y;
-    if (p.kind === 'coin') {
-      const r = 8 * sc;
-      c.beginPath(); c.ellipse(x, y, r * Math.abs(Math.cos(p.spin)) + 1.2, r, 0, 0, 6.3);
-      c.fillStyle = '#ffd23f'; c.fill(); c.lineWidth = 1.6; c.strokeStyle = '#8a5a05'; c.stroke();
+    if (p.kind === 'ruby') {
+      // a little ruby, turning
+      const r = 8 * sc, k = Math.abs(Math.cos(p.spin)) * 0.8 + 0.2;
+      c.beginPath(); c.moveTo(x - r * 0.55 * k, y - r * 0.7); c.lineTo(x + r * 0.55 * k, y - r * 0.7); c.lineTo(x + r * k, y - r * 0.15); c.lineTo(x, y + r); c.lineTo(x - r * k, y - r * 0.15); c.closePath();
+      c.fillStyle = '#e0303f'; c.fill(); c.lineWidth = 1.6; c.strokeStyle = '#1c1530'; c.stroke();
+      c.beginPath(); c.moveTo(x - r * 0.55 * k, y - r * 0.7); c.lineTo(x + r * 0.55 * k, y - r * 0.7); c.lineTo(x + r * 0.3 * k, y - r * 0.15); c.lineTo(x - r * 0.3 * k, y - r * 0.15); c.closePath();
+      c.fillStyle = '#ff9aa2'; c.fill();
     } else if (p.kind === 'copy' || p.kind === 'page') {
       // a little card (a copy) or a page of a book, tumbling
       c.save(); c.translate(x, y); c.rotate(Math.sin(p.spin) * 0.6);
@@ -6570,7 +6682,7 @@ const KCUpgradeFX = (() => {
   /* ---------- open, skip, close ---------- */
   // d: { mode: 'upgrade' | 'hammer' | 'wild' | 'book', id, name, img, rarity, title, itemSvg (for the
   //      item modes), item, before: { level, count, need, max }, after: { level, count, need, max },
-  //      gives (copies added), cost (coins), xp, levelUp (new account level, if any),
+  //      gives (copies added), cost (rubies), xp, levelUp (new account level, if any),
   //      stats: [[label, before, after]], onClose }
   function play(d) {
     build();
@@ -6598,7 +6710,7 @@ const KCUpgradeFX = (() => {
     if (calm) { finish(false); return; }
     // a sound the moment the scene opens, so the tap is answered at once
     snd(d.mode === 'upgrade' || d.mode === 'king' ? 'upgradeGo' : 'itemGather');
-    ({ upgrade: coinsRun, hammer: hammerRun, wild: wildRun, book: bookRun, evo: evoRun, king: kingRun })[d.mode]();
+    ({ upgrade: rubiesRun, hammer: hammerRun, wild: wildRun, book: bookRun, evo: evoRun, king: kingRun })[d.mode]();
   }
   function tap() { if (!S) return; if (!S.finished) finish(true); else close(); }
   function end(quiet) {
@@ -6700,8 +6812,8 @@ const KCUpgradeFX = (() => {
     later(finish, (d.levelUp ? 1900 : 1500) + (grand ? 700 : 0));
   }
 
-  /* ---------- upgrade with coins ---------- */
-  function coinsRun() {
+  /* ---------- upgrade with rubies ---------- */
+  function rubiesRun() {
     const d = S.d, card = $('usCard'), barEl = $('usBar');
     later(() => {
       const [bx, by, bw] = center(barEl), [cx, cy] = center(card), copies = Math.min(10, Math.max(3, d.before.need));
@@ -6711,13 +6823,13 @@ const KCUpgradeFX = (() => {
         fly('copy', sx, by, cx + (Math.random() - 0.5) * 30, cy + (Math.random() - 0.5) * 30, 0.5, colors()[0], () => { snd('partSnap'); sparks(cx, cy, 3, colors(), 140); });
         bar(d.before.need * (1 - (i + 1) / copies), d.before.need, false);
       }, i * 70);
-      // coins pour in from below
-      const coins = 16;
-      for (let i = 0; i < coins; i++) later(() => {
+      // rubies pour in from below
+      const rubies = 16;
+      for (let i = 0; i < rubies; i++) later(() => {
         const a = Math.PI * (0.15 + 0.7 * Math.random()), R = Math.max(innerWidth, innerHeight) * 0.55;
-        fly('coin', cx + Math.cos(a) * R * (Math.random() < 0.5 ? -1 : 1), cy + Math.sin(a) * R, cx, cy, 0.55 + Math.random() * 0.2, '#ffd23f', () => snd('coinTick'));
+        fly('ruby', cx + Math.cos(a) * R * (Math.random() < 0.5 ? -1 : 1), cy + Math.sin(a) * R, cx, cy, 0.55 + Math.random() * 0.2, '#e0303f', () => snd('rubyTick'));
       }, 180 + i * 55);
-      $('usGain').innerHTML = `<span class="spent"><i class="coin-i" aria-hidden="true"></i>−${fmt(d.cost)}</span>`; $('usGain').className = 'us-gain on';
+      $('usGain').innerHTML = `<span class="spent"><i class="ruby-i" aria-hidden="true"></i>−${fmt(d.cost)}</span>`; $('usGain').className = 'us-gain on';
     }, 180);
     later(() => { card.className = 'us-card charging'; snd('charge'); }, 850);
     later(() => levelBurst(false), 1950);
@@ -7107,7 +7219,7 @@ const KCNet = (() => {
   return { LIVE, TOPICS, init, info, quickMatch, createRoom, joinRoom, cancel, onChange, checkSetup, mySetup, get kind() { return kind; } };
 })();
 
-/* Kingdom Clash: the lobby. A top bar (name, level and experience, coins and diamonds, sound,
+/* Kingdom Clash: the lobby. A top bar (name, level and experience, rubies and diamonds, sound,
    settings), the tabs (Shop, Cards, Battle, Clan, Trophy Road) and a bottom navigation bar.
 
    All progress and its rules live in KCProgress (progress.js); this file only shows them.
@@ -7367,7 +7479,7 @@ const KCMenu = (() => {
 
   /* ---------- opening a chest ----------
      The chest drops in and rattles; a click cracks it open in a burst of light. Then each reward comes
-     out one at a time: coins count up; a card flies out face down, glowing in its rarity's colour, flips
+     out one at a time: rubies count up; a card flies out face down, glowing in its rarity's colour, flips
      over, and its copies count into its level bar. A click during a reveal finishes it; a click after
      moves on. Rares and new cards come last. The same scene shows Trophy Road cards and Shop purchases
      (no chest, just the reveal). */
@@ -7381,7 +7493,7 @@ const KCMenu = (() => {
     <circle cx="50" cy="50" r="22" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="6 3" opacity=".8"/></svg>`;
   function stopTimers() { for (const t of co.timers) clearTimeout(t); co.timers = []; clearInterval(co.counter); co.counter = 0; }
 
-  // sparkles and coins, drawn on one canvas over the scene
+  // sparkles and rubies, drawn on one canvas over the scene
   const FX = { parts: [], raf: 0, last: 0 };
   function fxStart() {
     const cv = $('#coFx'), dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -7395,9 +7507,9 @@ const KCMenu = (() => {
     if (calm || !el) return;
     const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height * 0.45;
     for (let i = 0; i < n; i++) {
-      const a = -Math.PI / 2 + (Math.random() - 0.5) * (kind === 'coin' ? 1.8 : 3.6), v = (kind === 'coin' ? 320 : 240) * (0.5 + Math.random());
-      FX.parts.push({ kind, x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: kind === 'coin' ? 900 : 320, life: 0.9 + Math.random() * 0.8, max: 1.7,
-        r: kind === 'coin' ? 6 + Math.random() * 3 : (2 + Math.random() * 3) * size, col: cols[Math.floor(Math.random() * cols.length)], spin: Math.random() * 6 });
+      const a = -Math.PI / 2 + (Math.random() - 0.5) * (kind === 'ruby' ? 1.8 : 3.6), v = (kind === 'ruby' ? 320 : 240) * (0.5 + Math.random());
+      FX.parts.push({ kind, x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: kind === 'ruby' ? 900 : 320, life: 0.9 + Math.random() * 0.8, max: 1.7,
+        r: kind === 'ruby' ? 6 + Math.random() * 3 : (2 + Math.random() * 3) * size, col: cols[Math.floor(Math.random() * cols.length)], spin: Math.random() * 6 });
     }
     if (FX.parts.length > 260) FX.parts.splice(0, FX.parts.length - 260);
   }
@@ -7460,7 +7572,7 @@ const KCMenu = (() => {
         c.restore();
         continue;
       }
-      if (p.kind === 'coin') {
+      if (p.kind === 'ruby') {
         c.beginPath(); c.ellipse(p.x, p.y, p.r * Math.abs(Math.cos(p.spin)) + 1, p.r, 0, 0, 6.3);
         c.fillStyle = p.col; c.fill(); c.lineWidth = 1.5; c.strokeStyle = '#8a5a05'; c.stroke();
       } else {
@@ -7477,14 +7589,14 @@ const KCMenu = (() => {
   const SPARKS = { platinum: ['#dcfcff', '#8ff0ff', '#ffffff'], legendary: ['#ffd25a', '#ff9a3d', '#ff5a2e', '#ffffff'], mythic: ['#eadcff', '#a98bff', '#6ff0de', '#ff6bd5', '#ffffff'],
     wooden: ['#ffe9a0', '#ffc861', '#ffffff'], silver: ['#d8f0ff', '#9fd0ff', '#ffffff'], gold: ['#fff3a0', '#ffd23f', '#ff9a3d', '#ffffff'] };
 
-  // type: 'wooden' | 'silver' | 'gold', or null for a reward with no chest. got: { coins, cards: [{ id, n, isNew }] },
+  // type: 'wooden' | 'silver' | 'gold', or null for a reward with no chest. got: { rubies, cards: [{ id, n, isNew }] },
   // already added to the player's collection.
   function showChest(type, got, title) {
     // commons first, building up to the rarest; within a rarity, new cards last
     const rank = c => ({ common: 0, rare: 2, epic: 4, legendary: 6 }[KC_CARDS[c.id].rarity] || 0) + (c.isNew ? 1 : 0);
     const cards = got.cards.slice().sort((a, b) => rank(a) - rank(b));
     const steps = [];
-    if (got.coins) steps.push({ coins: got.coins });
+    if (got.rubies) steps.push({ rubies: got.rubies });
     for (const c of cards) {
       const u = G.upgradeInfo(c.id);
       steps.push(Object.assign({ level: u.level, need: u.max ? 0 : u.need, after: u.count, before: Math.max(0, u.count - c.n) }, c));
@@ -7492,7 +7604,7 @@ const KCMenu = (() => {
     const items = (got.items || []).slice().sort((a, b) => (a.id.startsWith('wild_') ? 0 : 1) - (b.id.startsWith('wild_') ? 0 : 1));
     for (const it of items) steps.push({ item: it.id, n: it.n });
     if (co) stopTimers();
-    co = { type, got: { coins: got.coins, cards, items }, steps, i: -1, phase: 'drop', timers: [], counter: 0, done: false };
+    co = { type, got: { rubies: got.rubies, cards, items }, steps, i: -1, phase: 'drop', timers: [], counter: 0, done: false };
     const chest = $('#coChest');
     $('#coTitle').textContent = title || (type ? G.CHESTS[type].name : 'Reward');
     $('#chestOpen').className = 'chest-open' + (type ? ' has-chest ' + type : ' no-chest');
@@ -7562,14 +7674,14 @@ const KCMenu = (() => {
     $('#coHint').textContent = '';
     box.hidden = false;
     KCSound.play(st.item ? 'itemGather' : 'cardFly');
-    if (st.coins) {
-      box.className = 'co-reward rv-coins';
-      box.innerHTML = `<div class="rv-fly"><span class="rv-pile" aria-hidden="true"><i class="co-coin"></i><i class="co-coin"></i><i class="co-coin"></i></span></div>
-        <div class="rv-info"><span class="rv-n" id="rvN">+0</span><b class="rv-name">Coins</b></div>`;
+    if (st.rubies) {
+      box.className = 'co-reward rv-rubies';
+      box.innerHTML = `<div class="rv-fly"><span class="rv-pile" aria-hidden="true"><i class="co-ruby"></i><i class="co-ruby"></i><i class="co-ruby"></i></span></div>
+        <div class="rv-info"><span class="rv-n" id="rvN">+0</span><b class="rv-name">Rubies</b></div>`;
       later(() => {
         $('#coReward .rv-info').classList.add('on');
-        fxBurst($('#coReward .rv-pile'), 26, 'coin', ['#ffd23f', '#ffe27a', '#f2b01e']);
-        count(900, p => { $('#rvN').textContent = '+' + fmt(Math.round(st.coins * p)); }, 'coinTick');
+        fxBurst($('#coReward .rv-pile'), 26, 'ruby', ['#ff5260', '#ff9aa2', '#d8293a', '#ffffff']);
+        count(900, p => { $('#rvN').textContent = '+' + fmt(Math.round(st.rubies * p)); }, 'rubyTick');
       }, 480);
       later(shown, 1500);
       return;
@@ -7734,7 +7846,7 @@ const KCMenu = (() => {
     $('#coReward').classList.add('skip');
     if (info) info.classList.add('on');
     if (st.item) { const art = $('#coReward .rv-itemart'); if (art) { art.classList.remove('forming'); art.classList.add('formed'); } $('#coReward').classList.add('formed'); }
-    else if (st.coins) $('#rvN').textContent = '+' + fmt(st.coins);
+    else if (st.rubies) $('#rvN').textContent = '+' + fmt(st.rubies);
     else {
       $('#coReward .rv-fly').classList.add('tease'); $('#coReward .rv-flip').classList.add('flipped'); cardCount(st, st.n);
       { $('#coUnlock').className = `co-unlock ul-${UL[KC_CARDS[st.id].rarity] ? KC_CARDS[st.id].rarity : 'common'} on reveal`; $('#chestOpen').classList.remove('rumble'); }
@@ -7753,7 +7865,7 @@ const KCMenu = (() => {
     $('#coReward').hidden = true; $('#coChestWrap').hidden = true; $('#coHint').hidden = true;
     $('#chestOpen').classList.add('summing');
     const g = co.got, items = [];
-    if (g.coins) items.push(`<span class="rv-pile small" aria-hidden="true"><i class="co-coin"></i><i class="co-coin"></i></span><b>+${fmt(g.coins)}</b>`);
+    if (g.rubies) items.push(`<span class="rv-pile small" aria-hidden="true"><i class="co-ruby"></i><i class="co-ruby"></i></span><b>+${fmt(g.rubies)}</b>`);
     for (const c of g.cards) items.push(`<img src="${cardImg(c.id)}" alt="${esc(KC_CARDS[c.id].name)}"><b>×${c.n}</b>${c.isNew ? '<em>New</em>' : ''}`);
     for (const it of g.items || []) items.push(`<span class="cs-art" title="${esc(G.MAGIC[it.id].name)}">${itemSvg(it.id)}</span><b>×${fmt(it.n)}</b>`);
     $('#coSummary').innerHTML = items.map((h, i) => `<div class="cs-item" style="animation-delay:${(i * 0.12).toFixed(2)}s">${h}</div>`).join('');
@@ -7772,11 +7884,11 @@ const KCMenu = (() => {
     const shop = G.shop(), p = P();
     $('#shopOffers').innerHTML = passTile() + shop.offers.map((o, i) => {
       const sold = !!shop.bought[o.id] && !o.repeat, gem = o.currency === 'diamonds';
-      const poor = !sold && (gem ? p.diamonds : p.coins) < o.price;
+      const poor = !sold && (gem ? p.diamonds : p.rubies) < o.price;
       let body;
-      if (o.kind === 'coins') {
-        body = `<div class="of-art of-coins" aria-hidden="true"><span class="rv-pile"><i class="co-coin"></i><i class="co-coin"></i><i class="co-coin"></i></span></div>
-          <b>${fmt(o.qty)} Coins</b><small class="of-note">Buy as many times as you like</small>`;
+      if (o.kind === 'rubies') {
+        body = `<div class="of-art of-rubies" aria-hidden="true"><span class="rv-pile"><i class="co-ruby"></i><i class="co-ruby"></i><i class="co-ruby"></i></span></div>
+          <b>${fmt(o.qty)} Rubies</b><small class="of-note">Buy as many times as you like</small>`;
       } else {
         const c = KC_CARDS[o.card], u = G.upgradeInfo(o.card), after = u.count + (sold ? 0 : o.qty);
         const pct = u.max ? 100 : Math.min(100, after / u.need * 100);
@@ -7784,12 +7896,12 @@ const KCMenu = (() => {
           <b>${esc(c.name)}</b>
           <span class="of-prog${!u.max && after >= u.need ? ' full' : ''}" title="${u.max ? 'Max level' : sold ? 'Your copies now' : 'Your copies after buying'}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.max ? 'Max level' : `Lv ${u.level} · ${fmt(after)} / ${fmt(u.need)}`}</em></span>`;
       }
-      const price = `<i class="${gem ? 'gem-i' : 'coin-i'}" aria-hidden="true"></i>${fmt(o.price)}`;
+      const price = `<i class="${gem ? 'gem-i' : 'ruby-i'}" aria-hidden="true"></i>${fmt(o.price)}`;
       const maxed = o.card && G.upgradeInfo(o.card).max;
       const btn = sold ? '<button class="buy-btn" type="button" disabled>Bought</button>'
         : maxed ? '<button class="buy-btn" type="button" disabled>Max level</button>'
         : `<button class="buy-btn${gem ? ' gem' : ''}${poor ? ' poor' : ''}${confirmOffer === i ? ' confirm' : ''}" type="button" data-offer="${i}"
-            aria-label="${confirmOffer === i ? 'Confirm: buy' : 'Buy'} for ${o.price} ${gem ? 'diamonds' : 'coins'}">${confirmOffer === i ? 'Confirm ' : ''}${price}</button>`;
+            aria-label="${confirmOffer === i ? 'Confirm: buy' : 'Buy'} for ${o.price} ${gem ? 'diamonds' : 'rubies'}">${confirmOffer === i ? 'Confirm ' : ''}${price}</button>`;
       return `<div class="offer ${o.currency}${sold ? ' sold' : ''}"><span class="of-tag">${esc(o.tag)}</span>${body}${btn}</div>`;
     }).join('');
     for (const b of $$('#shopOffers .buy-btn[data-offer]')) b.addEventListener('click', e => { e.stopPropagation(); buyClick(+b.dataset.offer); });
@@ -7797,11 +7909,11 @@ const KCMenu = (() => {
     if (pb) pb.addEventListener('click', e => { e.stopPropagation(); buyPassClick(); });
     const pv = $('#shopOffers .of-see');
     if (pv) pv.addEventListener('click', e => { e.stopPropagation(); openPass(); });
-    // the chest row: a free Wooden Chest each day, then every tier for coins (contents stay hidden)
+    // the chest row: a free Wooden Chest each day, then every tier for rubies (contents stay hidden)
     const oddsText = (t, opts) => {
       const o = G.chestOdds(t, opts), w = G.wildActive() && Object.keys(G.MAGIC_RULES.wild[t] || {}).length;
       const sure = [o.rares ? `${fmt(o.rares)}+ rare` : '', o.epicMin ? `${o.epicMin}+ epic` : '', o.legendaryMin ? `${o.legendaryMin} legendary` : ''].filter(Boolean).join(', ');
-      return `${fmt(o.cards)} cards<br>${fmt(o.coins[0])}–${fmt(o.coins[1])} coins${sure ? `<br><span class="ct-sure">${sure}</span>` : ''}${w ? '<br>+ wild cards' : ''}`;
+      return `${fmt(o.cards)} cards<br>${fmt(o.rubies[0])}–${fmt(o.rubies[1])} rubies${sure ? `<br><span class="ct-sure">${sure}</span>` : ''}${w ? '<br>+ wild cards' : ''}`;
     };
     const free = G.freeChestReady();
     const tiles = [`<div class="chest-tile free wooden${free ? '' : ' sold'}"><span class="of-tag">Free daily</span>
@@ -7810,14 +7922,16 @@ const KCMenu = (() => {
     : `<button class="buy-btn" type="button" disabled>Next in <span id="freeClock">${clock(G.shopEnds() - Date.now())}</span></button>`}</div>`];
     for (const t of G.TIERS) {
       const C = G.CHESTS[t];
-      if (!G.chestAllowed(t)) {
+      if (!G.chestAllowed(t) || !G.chestShopOpen(t)) {
+        const at = Math.max(G.CHEST_RULES.allUnlocked ? 0 : G.CHEST_RULES.arena[t], G.ECONOMY.shop.chestArena[t]);
         tiles.push(`<div class="chest-tile locked ${t}"><div class="ct-art">${chestSvg(t)}</div><b>${C.name}</b><small class="ct-odds">${oddsText(t)}</small>
-          <span class="ct-locked"><span class="slot-lock" aria-hidden="true"></span>Unlocks in Arena ${G.CHEST_RULES.arena[t]}</span></div>`);
+          <span class="ct-locked"><span class="slot-lock" aria-hidden="true"></span>In the Shop from Arena ${at}</span></div>`);
         continue;
       }
-      const price = G.chestPrice(t), poor = p.coins < price;
-      tiles.push(`<div class="chest-tile ${t}"><div class="ct-art">${chestSvg(t)}</div><b>${C.name}</b><small class="ct-odds">${oddsText(t)}</small>
-        <button class="buy-btn${poor ? ' poor' : ''}" type="button" data-chest="${t}" aria-label="Buy a ${C.name} for ${price} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(price)}</button></div>`);
+      const price = G.chestPrice(t), poor = p.rubies < price, left = G.chestBuyLeft(t);
+      tiles.push(`<div class="chest-tile ${t}${left ? '' : ' sold'}"><div class="ct-art">${chestSvg(t)}</div><b>${C.name}</b><small class="ct-odds">${oddsText(t)}</small>
+        ${left ? `<button class="buy-btn${poor ? ' poor' : ''}" type="button" data-chest="${t}" aria-label="Buy a ${C.name} for ${price} rubies"><i class="ruby-i" aria-hidden="true"></i>${fmt(price)}</button>`
+    : '<button class="buy-btn" type="button" disabled>Bought today</button>'}</div>`);
     }
     $('#shopChests').innerHTML = tiles.join('');
     for (const b of $$('#shopChests .buy-btn[data-chest]')) b.addEventListener('click', e => { e.stopPropagation(); buyChestClick(b.dataset.chest); });
@@ -7825,9 +7939,9 @@ const KCMenu = (() => {
     if (fb) fb.addEventListener('click', e => { e.stopPropagation(); freeChestClick(); });
     // emotes: today's three, each animated on its tile
     $('#shopEmotes').innerHTML = G.emoteOffers().map(o => {
-      const poorC = P().coins < o.coins, poorD = P().diamonds < o.diamonds, conf = emoteConfirm === o.id;
+      const poorC = P().rubies < o.rubies, poorD = P().diamonds < o.diamonds, conf = emoteConfirm === o.id;
       const btns = o.owned ? '<button class="buy-btn" type="button" disabled>Owned</button>'
-        : `<span class="eo-btns"><button class="buy-btn${poorC ? ' poor' : ''}" type="button" data-emote="${o.id}" data-cur="coins" aria-label="Buy the ${esc(o.name)} emote for ${o.coins} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(o.coins)}</button>
+        : `<span class="eo-btns"><button class="buy-btn${poorC ? ' poor' : ''}" type="button" data-emote="${o.id}" data-cur="rubies" aria-label="Buy the ${esc(o.name)} emote for ${o.rubies} rubies"><i class="ruby-i" aria-hidden="true"></i>${fmt(o.rubies)}</button>
           <span class="eo-or">or</span>
           <button class="buy-btn gem${poorD ? ' poor' : ''}${conf ? ' confirm' : ''}" type="button" data-emote="${o.id}" data-cur="diamonds" aria-label="${conf ? 'Confirm: buy' : 'Buy'} the ${esc(o.name)} emote for ${o.diamonds} diamond">${conf ? 'Confirm ' : ''}<i class="gem-i" aria-hidden="true"></i>${fmt(o.diamonds)}</button></span>`;
       return `<div class="emote-offer${o.owned ? ' owned' : ''}${o.card ? ' card-emote' : ''}"><span class="eo-art em-live">${KCEmotes.face(o.id, 0)}</span>
@@ -7846,7 +7960,7 @@ const KCMenu = (() => {
     }
     emoteConfirm = null; clearTimeout(emoteConfirmT);
     const r = G.buyEmote(id, cur);
-    if (r.error === 'coins') { KCSound.play('error'); toast('Not enough coins. Win battles and open chests to earn more.'); return; }
+    if (r.error === 'rubies') { KCSound.play('error'); toast('Not enough rubies. Win battles and open chests to earn more.'); return; }
     if (r.error === 'diamonds') { KCSound.play('error'); toast('Not enough diamonds. Diamonds will come from the SirSC wallet.'); return; }
     if (!r.ok) return;
     KCSound.play('buy'); setTimeout(() => KCSound.play(id.startsWith('card_') ? 'emCard' : 'em_' + id), 250);
@@ -7882,6 +7996,25 @@ const KCMenu = (() => {
     c.drawImage(t, 0, 24);
     return cv.toDataURL();
   }
+  /* ---------- wallet Coins to Rubies ---------- */
+  function renderExchange() {
+    const x = G.exchangeInfo(), inp = $('#exAmount'), most = Math.min(x.left, x.coins);
+    $('#exRate').textContent = fmt(x.rate);
+    $('#exCap').innerHTML = `<div><small>Your Coins</small><b>${fmt(x.coins)}</b></div><div><small>Today's limit</small><b>${fmt(x.cap)}</b></div><div><small>Left today</small><b>${fmt(x.left)}</b></div>`;
+    inp.max = String(most);
+    const n = Math.floor(+inp.value || 0), ok = n > 0 && n <= most;
+    $('#exGet').textContent = !most ? (x.left ? 'You have no Coins to swap.' : `Today's limit is used. More at midnight (${clock(x.ends - Date.now())}).`)
+      : n > x.left ? `Today you can swap up to ${fmt(x.left)}.` : n > x.coins ? `You have ${fmt(x.coins)} Coins.` : n > 0 ? `You get ${fmt(n * x.rate)} Rubies` : '';
+    $('#exGo').disabled = !ok;
+  }
+  function openExchange() { $('#exAmount').value = ''; renderExchange(); $('#exModal').hidden = false; $('#exAmount').focus(); }
+  function closeExchange() { $('#exModal').hidden = true; }
+  function doExchange() {
+    const r = G.exchange($('#exAmount').value);
+    if (!r.ok) { KCSound.play('error'); renderExchange(); return; }
+    KCSound.play('buy'); toast(`Swapped ${fmt(r.coins)} Coins for ${fmt(r.rubies)} Rubies`);
+    $('#exAmount').value = ''; refresh();
+  }
   function openKing() { renderKing(); $('#kingModal').hidden = false; ($('#kingUp').disabled ? $('#kingX') : $('#kingUp')).focus(); }
   function closeKing() { $('#kingModal').hidden = true; }
   function renderKing() {
@@ -7914,8 +8047,9 @@ const KCMenu = (() => {
   }
   function buyChestClick(type) {
     const r = G.buyChest(type);
-    if (r.error === 'coins') { KCSound.play('error'); toast('Not enough coins. Win battles and open chests to earn more.'); return; }
-    if (r.error === 'locked') { KCSound.play('error'); toast(`${G.CHESTS[type].name}s unlock in Arena ${G.CHEST_RULES.arena[type]}.`); return; }
+    if (r.error === 'rubies') { KCSound.play('error'); toast('Not enough rubies. Win battles and open chests to earn more.'); return; }
+    if (r.error === 'locked') { KCSound.play('error'); toast(`${G.CHESTS[type].name}s are in the Shop from Arena ${G.ECONOMY.shop.chestArena[type]}.`); return; }
+    if (r.error === 'sold') { KCSound.play('error'); toast(`One ${G.CHESTS[type].name} a day. A new one arrives at midnight.`); refresh(); return; }
     if (!r.ok) { toast('That chest is not available.'); refresh(); return; }
     KCSound.play('buy');
     refresh();
@@ -7932,9 +8066,9 @@ const KCMenu = (() => {
     const o = G.shop().offers[i];
     if (!o) return;
     const gem = o.currency === 'diamonds';
-    if ((gem ? P().diamonds : P().coins) < o.price) {
+    if ((gem ? P().diamonds : P().rubies) < o.price) {
       KCSound.play('error');
-      toast(gem ? 'Not enough diamonds. Diamonds will come from the SirSC wallet.' : 'Not enough coins. Win battles and open chests to earn more.');
+      toast(gem ? 'Not enough diamonds. Diamonds will come from the SirSC wallet.' : 'Not enough rubies. Win battles and open chests to earn more.');
       return;
     }
     // diamonds take a second click to confirm
@@ -8030,7 +8164,7 @@ const KCMenu = (() => {
   /* ---------- the Diamond Pass ---------- */
   // A pass reward as a small picture and a label.
   function rewardArt(R) {
-    if (R.kind === 'coins') return { art: '<span class="pr-coins" aria-hidden="true"><i class="coin-i"></i><i class="coin-i"></i></span>', label: `${fmt(R.n)} coins` };
+    if (R.kind === 'rubies') return { art: '<span class="pr-rubies" aria-hidden="true"><i class="ruby-i"></i><i class="ruby-i"></i></span>', label: `${fmt(R.n)} rubies` };
     if (R.kind === 'chest') return { art: `<span class="pr-chest">${chestSvg(R.chest)}</span>`, label: G.CHESTS[R.chest].name };
     if (R.kind === 'item') return { art: `<span class="pr-item">${itemSvg(R.item)}</span>`, label: `${G.MAGIC[R.item].name} ×${fmt(R.n)}` };
     if (R.kind === 'evo') return { art: `<img class="pr-evo" src="${cardImg(R.card, true)}" alt="">`, label: KC_EVOS[R.card].name };
@@ -8220,7 +8354,7 @@ const KCMenu = (() => {
 
   /* ---------- the Trophy Road ---------- */
   function rewardHtml(m) {
-    if (m.kind === 'coins') return `<span class="rw-coins"><span class="co-coin" aria-hidden="true"></span><b>${fmt(m.amount)}</b></span><small>Coins</small>`;
+    if (m.kind === 'rubies') return `<span class="rw-rubies"><span class="co-ruby" aria-hidden="true"></span><b>${fmt(m.amount)}</b></span><small>Rubies</small>`;
     if (m.kind === 'chest') { const t = G.capChest(m.chest); return `<span class="rw-chest">${chestSvg(t)}</span><small>${G.CHESTS[t].name}</small>`; }
     if (m.kind === 'card') return `<img class="rw-card" src="${cardImg(m.card)}" alt=""><small>${esc(KC_CARDS[m.card].name)} ×${m.copies}</small>`;
     const a = G.ARENAS.find(x => x.id === m.arena);
@@ -8237,7 +8371,7 @@ const KCMenu = (() => {
     $('#rhRecord').innerHTML = `<b>${r.w}</b><small>wins</small><b>${r.l}</b><small>losses</small>`;
     // the next reward and how far it is, or rewards waiting to be claimed
     const ready = road.filter(m => G.roadState(m) === 'ready'), next = road.find(m => G.roadState(m) === 'locked');
-    const label = m => m.kind === 'card' ? `${KC_CARDS[m.card].name} ×${m.copies}` : m.kind === 'coins' ? `${fmt(m.amount)} coins` : m.kind === 'chest' ? G.CHESTS[G.capChest(m.chest)].name
+    const label = m => m.kind === 'card' ? `${KC_CARDS[m.card].name} ×${m.copies}` : m.kind === 'rubies' ? `${fmt(m.amount)} rubies` : m.kind === 'chest' ? G.CHESTS[G.capChest(m.chest)].name
       : (x => (x.soon ? `Arena ${x.number}` : x.name))(G.ARENAS.find(x => x.id === m.arena));
     $('#roadNext').innerHTML = ready.length
       ? `<span class="rnx-tag ready">${ready.length} reward${ready.length === 1 ? '' : 's'} to claim</span><button type="button" class="pill gold" id="roadGo">Show me</button>`
@@ -8295,7 +8429,7 @@ const KCMenu = (() => {
     KCSound.play('crown');
     if (got.kind === 'chest') showChest(got.chest, got);
     else if (got.kind === 'card') showChest(null, got);
-    else if (got.kind === 'coins') toast(`+${fmt(got.coins)} coins`);
+    else if (got.kind === 'rubies') toast(`+${fmt(got.rubies)} rubies`);
     refresh();
   }
 
@@ -8308,8 +8442,8 @@ const KCMenu = (() => {
       const u = G.upgradeInfo(id);
       if (!u.found) return `<span class="lvl-strip locked">${G.unlockAt(id) !== null ? `Trophy Road · ${G.unlockAt(id)}` : 'Locked'}</span>`;
       if (u.max) return `<span class="lvl-strip max">Level ${u.level} · Max</span>`;
-      const pct = Math.min(100, u.count / u.need * 100), short = u.count >= u.need && P().coins < u.cost;
-      return `<span class="lvl-strip"><span>Level ${u.level}</span><span class="cprog${u.count >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${fmt(u.count)}/${fmt(u.need)}</em></span><span class="lvl-gold${short ? ' short' : ''}"><i class="coin-i" aria-hidden="true"></i>${fmt(u.cost)}</span></span>`;
+      const pct = Math.min(100, u.count / u.need * 100), short = u.count >= u.need && P().rubies < u.cost;
+      return `<span class="lvl-strip"><span>Level ${u.level}</span><span class="cprog${u.count >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${fmt(u.count)}/${fmt(u.need)}</em></span><span class="lvl-gold${short ? ' short' : ''}"><i class="ruby-i" aria-hidden="true"></i>${fmt(u.cost)}</span></span>`;
     };
     $('#deckRow').innerHTML = deck.map((id, i) => {
       const c = KC_CARDS[id], u = G.upgradeInfo(id);
@@ -8380,14 +8514,14 @@ const KCMenu = (() => {
     const upBtn = $('#mUpgrade');
     upBtn.hidden = !u.found || u.max;
     upBtn.disabled = !u.can;
-    $('#mUpCost').innerHTML = `<i class="coin-i" aria-hidden="true"></i>${fmt(u.cost || 0)}`;
+    $('#mUpCost').innerHTML = `<i class="ruby-i" aria-hidden="true"></i>${fmt(u.cost || 0)}`;
     const inDeck = P().deck.includes(id);
     $('#mUse').hidden = !u.found || inDeck;
-    const lack = [u.count < u.need ? `${fmt(u.need - u.count)} more card${u.need - u.count === 1 ? '' : 's'}` : '', P().coins < u.cost ? `${fmt(u.cost - P().coins)} more coins` : ''].filter(Boolean);
-    const toMax = u.found && !u.max ? ` To level ${G.MAX_LEVEL}: ${fmt(G.copiesToMax(id))} more cards and ${fmt(G.goldToMax(id))} coins.` : '';
+    const lack = [u.count < u.need ? `${fmt(u.need - u.count)} more card${u.need - u.count === 1 ? '' : 's'}` : '', P().rubies < u.cost ? `${fmt(u.cost - P().rubies)} more rubies` : ''].filter(Boolean);
+    const toMax = u.found && !u.max ? ` To level ${G.MAX_LEVEL}: ${fmt(G.copiesToMax(id))} more cards and ${fmt(G.goldToMax(id))} rubies.` : '';
     $('#mNote').textContent = !u.found ? 'Reach it on the Trophy Road to add it to your collection.'
       : u.max ? `Level ${G.MAX_LEVEL}: this card is fully upgraded.`
-        : (lack.length ? `Needs ${lack.join(' and ')}.` : `Ready: uses ${fmt(u.need)} cards and ${fmt(u.cost)} coins.`) + toMax + (inDeck ? ' In your deck.' : '');
+        : (lack.length ? `Needs ${lack.join(' and ')}.` : `Ready: uses ${fmt(u.need)} cards and ${fmt(u.cost)} rubies.`) + toMax + (inDeck ? ' In your deck.' : '');
     $('#cardModal').hidden = false;
     (upBtn.hidden || upBtn.disabled ? $('#modalX') : upBtn).focus();
   }
@@ -8494,7 +8628,7 @@ const KCMenu = (() => {
     $('#rightTitle').textContent = 'Next Rewards';
     const nxt = G.ROAD.filter(m => G.roadState(m) === 'ready' || G.roadState(m) === 'locked' || G.roadState(m) === 'soon').slice(0, 3);
     $('#rewards').innerHTML = nxt.map(m => {
-      const st = G.roadState(m), what = m.kind === 'coins' ? `${fmt(m.amount)} coins` : m.kind === 'chest' ? G.CHESTS[G.capChest(m.chest)].name : m.kind === 'card' ? `${KC_CARDS[m.card].name} ×${m.copies}` : `Arena ${G.ARENAS.find(x => x.id === m.arena).number}`;
+      const st = G.roadState(m), what = m.kind === 'rubies' ? `${fmt(m.amount)} rubies` : m.kind === 'chest' ? G.CHESTS[G.capChest(m.chest)].name : m.kind === 'card' ? `${KC_CARDS[m.card].name} ×${m.copies}` : `Arena ${G.ARENAS.find(x => x.id === m.arena).number}`;
       return `<li class="${st === 'ready' ? 'now' : 'later'}"><span class="rw-mark" aria-hidden="true"></span><span><b>${esc(what)}</b><small>${st === 'ready' ? 'Ready to claim' : st === 'soon' ? `${m.at} trophies · coming soon` : `At ${m.at} trophies`}</small></span></li>`;
     }).join('') || '<li class="done"><span class="rw-mark" aria-hidden="true"></span><span><b>All claimed</b><small>More arenas are on the way</small></span></li>';
     $('#rightNote').textContent = G.claimable().length ? 'Claim rewards on the Trophy Road tab.' : 'Win trophy battles to reach the next reward.';
@@ -8537,8 +8671,10 @@ const KCMenu = (() => {
     if (!$('#kingModal').hidden) renderKing();
     $('#xpFill').style.width = (into / G.XP_PER_LEVEL * 100).toFixed(1) + '%';
     $('#xpText').textContent = `${into} / ${G.XP_PER_LEVEL}`;
-    $('#coinVal').textContent = fmt(p.coins);
+    $('#rubyVal').textContent = fmt(p.rubies);
     $('#gemVal').textContent = fmt(p.diamonds);
+    $('#walletVal').textContent = fmt(p.wallet);
+    if (!$('#exModal').hidden) renderExchange();
     $('#shopTag').hidden = !G.freeChestReady();
     passPlaque();
     $('#onlineBtn').classList.toggle('locked', !G.onlineOpen() || !KCNet.LIVE);
@@ -8612,7 +8748,7 @@ const KCMenu = (() => {
     for (const b of $$('[data-tab]')) b.addEventListener('click', () => tab(b.dataset.tab));
     $('#battleBtn').addEventListener('click', () => opts.onBattle && opts.onBattle(nextFoe()));
     $('#simWinLobby').addEventListener('click', simulateWin); // TEMPORARY
-    $('#testRich').addEventListener('click', () => { G.grantTest(); KCSound.play('buy'); refresh(); toast('Test: you now have 1,000,000 coins and 1,000,000 diamonds'); }); // TEMPORARY
+    $('#testRich').addEventListener('click', () => { G.grantTest(); KCSound.play('buy'); refresh(); toast('Test: you now have 1,000,000 rubies, 1,000,000 wallet coins and 1,000,000 diamonds'); }); // TEMPORARY
     $('#testOffers').addEventListener('click', () => { G.refreshShop(); confirmOffer = -1; KCSound.play('select'); refresh(); toast('Test: new offers made from your cards as they are now'); }); // TEMPORARY
     $('#oppChange').addEventListener('click', e => { e.stopPropagation(); toggle('#oppPanel', '#oppChange'); });
     $('#settingsBtn').addEventListener('click', e => {
@@ -8655,6 +8791,13 @@ const KCMenu = (() => {
     $('#kingX').addEventListener('click', closeKing);
     $('#kingUp').addEventListener('click', upgradeKingClick);
     $('#kingModal').addEventListener('click', e => { if (e.target.id === 'kingModal') closeKing(); });
+    $('#walletBtn').addEventListener('click', openExchange);
+    $('#exX').addEventListener('click', closeExchange);
+    $('#exModal').addEventListener('click', e => { if (e.target.id === 'exModal') closeExchange(); });
+    $('#exAmount').addEventListener('input', renderExchange);
+    $('#exAmount').addEventListener('keydown', e => { if (e.key === 'Enter' && !$('#exGo').disabled) doExchange(); });
+    $('#exMax').addEventListener('click', () => { const x = G.exchangeInfo(); $('#exAmount').value = String(Math.min(x.left, x.coins)); renderExchange(); });
+    $('#exGo').addEventListener('click', doExchange);
     for (const b of $$('.shop-jump button')) b.addEventListener('click', () => $('#' + b.dataset.jump).scrollIntoView({ behavior: 'smooth', block: 'start' }));
     $('#passMini').addEventListener('click', openPass);
     $('#passModal').addEventListener('click', e => { if (e.target.id === 'passModal') closePass(); });
@@ -8669,8 +8812,8 @@ const KCMenu = (() => {
         else if (e.key === ' ' || e.key === 'Enter') { chestTap(); e.preventDefault(); }
         return;
       }
-      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); if (!$('#onlineModal').hidden) closeOnline(); return; }
-      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#onlineModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); closeExchange(); if (!$('#onlineModal').hidden) closeOnline(); return; }
+      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#exModal').hidden || !$('#onlineModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
       const n = '12345'.indexOf(e.key);
       if (n >= 0) { tab(TABS[n]); e.preventDefault(); }
       else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(nextFoe()); e.preventDefault(); }
@@ -9631,7 +9774,7 @@ const KCEmotes = (() => {
     $('#resLine').textContent = ((w === 0 && r.crowns[0] === 3 ? 'Three crowns! ' : '') + quote).trim();
     $('#resLine').hidden = !$('#resLine').textContent;
     const un = $('#resUnlock'), tr = $('#resTrophy');
-    const goldNote = res.gold ? `+${res.gold} coins${res.goldLeft === 0 ? ' (the last paid win today)' : ''}` : '';
+    const goldNote = res.gold ? `+${res.gold} rubies${res.goldLeft === 0 ? ' (the last paid win today)' : ''}` : '';
     const notes = [goldNote, res.unlockedNext ? `${res.unlockedNext.name} unlocked!` : '', res.roadOpened ? 'Trophy Road unlocked!' : '',
       res.chest ? `${res.chest.name} earned!` : '', res.slotsFull ? 'Chest slots full: open one to make room' : '',
       res.newArena ? `${res.newArena.name} reached!` : '', res.newRewards ? 'Trophy Road reward ready!' : '', res.levelUp ? `Level ${res.levelUp}!` : '',

@@ -4,22 +4,22 @@
    - The Training Grounds: beat Trainer Owen, Romeo and Luc in order to open the Trophy Road.
    - The Trophy Road: trophy battles against bots matched to your trophies. A win is +30 trophies
      and earns a chest if a slot is free; a loss is -20 (never below the arena's floor). Milestones on
-     the road give fixed rewards you claim: coins, chests, new cards and arenas.
+     the road give fixed rewards you claim: rubies, chests, new cards and arenas.
    - Opponents: their cards level up one at a time with their trophies (all level 1 below 50, then one
      card up a level every 12.5 trophies); their skill follows your recent results (up a step
      after a win, down a step after a loss), settling at about 52% wins for everyone.
    - Chests: six tiers (wooden, silver, gold, platinum, legendary, mythic) and four slots. A chest is
-     rolled the moment you win it; one chest unlocks at a time, on a real-time timer. Opening gives coins
+     rolled the moment you win it; one chest unlocks at a time, on a real-time timer. Opening gives rubies
      and copies of cards you have found; how much grows with the account level. Each arena allows higher
      tiers (CHEST_RULES; switched off for now, so every tier can drop anywhere).
-   - Card levels: copies plus coins upgrade a card, up to level 15.
+   - Card levels: copies plus rubies upgrade a card, up to level 15.
    - Arena cards (Skeleton Pack, Cannon) are found on the Trophy Road in Arena 1 only. Trainers never
      use them, and in a Training Grounds match your deck goes back to the starter cards.
 
-   - The Shop: five offers a day built from the cards you have found and their levels, for coins
-     or diamonds (1 diamond = 5,000 coins). Each offer lists exactly what it gives.
+   - The Shop: five offers a day built from the cards you have found and their levels, for rubies
+     or diamonds (1 diamond = 5,000 rubies). Each offer lists exactly what it gives.
 
-   Coins and diamonds are kept on this device for now. When the SirSC wallet is connected they move
+   Rubies and diamonds are kept on this device for now. When the SirSC wallet is connected they move
    to it, and prices and purchases must then be decided by the server.
    Everything is saved in localStorage under kc.progress; older saves are upgraded in place. */
 'use strict';
@@ -32,6 +32,10 @@ const KCProgress = (() => {
   const TROPHIES = { win: 30, loss: 20 };
 
   /* ---------- the economy: every number that sets costs and rewards ----------
+     Currency: Rubies (P.rubies) are the game's own and never leave it; "gold" below means Rubies. Wallet
+     Coins (P.wallet, the SirSC currency) only come in, through the capped exchange. Copies are what limit
+     progress, since a big wallet can pay Rubies but can't make copies, so rewards start small and grow
+     steeply past Arena 4 (beyond), aiming at cards of about 7-8 entering Arena 4.
      Upgrades: the same gold for every rarity at each level; copies by rarity. A card starts at its
      rarity's level (KC_RARITY_START): 1 Common, 3 Rare, 6 Epic, 9 Legendary; the first copy finds it
      and is not counted. To level 15: 15,586 / 3,386 / 416 / 47 copies and 257,625 / 257,600 / 257,000
@@ -53,11 +57,11 @@ const KCProgress = (() => {
       epic: [null, null, null, null, null, 2, 4, 10, 20, 30, 50, 70, 100, 130],
       legendary: [null, null, null, null, null, null, null, null, 2, 4, 6, 9, 12, 14],
     },
-    arenaGold: { 1: 1, 2: 1.5, 3: 2.1, 4: 2.8 },
-    arenaCards: { 1: 1, 2: 1.35, 3: 1.75, 4: 2.25 },
+    arenaGold: { 1: 0.26, 2: 0.33, 3: 0.42, 4: 0.53 },
+    arenaCards: { 1: 0.3, 2: 0.37, 3: 0.45, 4: 0.55 },
     nextArenaGrowth: 1.35, // for arenas past the table
-    withinArena: 0.12,
-    beyond: { every: 400, add: 0.06, max: 0.3 },
+    withinArena: 0.04,
+    beyond: { every: 300, add: 0.5, max: 5.5 },
     levelStep: 0.015, levelCap: 40,
     epicPow: 0.5, legendaryPow: 0.25,
     // each chest at tier 1, level 1: gold range, total cards, and the rarer cards among them
@@ -79,8 +83,20 @@ const KCProgress = (() => {
     freeChest: { type: 'wooden', bonus: 3 },
     // diamonds can skip a chest's timer: 1 diamond for every 5 minutes left (rounded up)
     skip: { secondsPerDiamond: 300 },
-    // the Shop: coins per copy, the most copies in one offer, and chest prices (times the chest's average gold)
-    shop: { perCopy: { common: 20, rare: 200, epic: 2000, legendary: 40000 }, maxQty: { common: 500, rare: 100, epic: 10, legendary: 1 }, chestPrice: 3 },
+    // the Shop: rubies per copy, the most copies in one offer, and chest prices (times the chest's average gold)
+    // the Shop, in Rubies: the value of a copy, the most copies in a daily card offer (no legendaries are
+    // offered) and in the 1-diamond mega bundle. Chests: one of each a day, priced at their rubies plus
+    // `chestCardShare` of the value of the cards inside, from the arena listed in `chestArena`.
+    shop: { perCopy: { common: 20, rare: 200, epic: 2000, legendary: 40000 }, maxQty: { common: 50, rare: 10, epic: 1, legendary: 0 },
+      megaQty: { common: 100, rare: 20, epic: 2, legendary: 0 }, chestCardShare: 0.5, chestsPerDay: 1,
+      chestArena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 4 } },
+    // wallet Coins (SirSC) to Rubies, one way: `rate` rubies a coin, up to a daily cap set by the highest
+    // arena reached; past the last arena the cap grows by `beyond.add` every `beyond.every` trophies.
+    exchange: { rate: 1, cap: { 1: 500, 2: 1000, 3: 2000, 4: 4000 }, beyond: { every: 300, add: 1000, max: 10000 } },
+    // opponents' card levels by trophies (straight lines between the points), matched to what a player
+    // has at those trophies (tools/economy-report.js); rares, epics and legendaries are then raised to
+    // where their rarity starts
+    foeLevels: [[0, 1], [50, 1], [300, 4.5], [600, 6.5], [900, 7.5], [1200, 8.5], [1500, 10], [2000, 12], [3000, 13.5], [4000, 15]],
   };
 
   const ARENAS = [
@@ -97,37 +113,37 @@ const KCProgress = (() => {
   // Fixed rewards along the road, claimed by the player.
   const ROAD = [
     { at: 0, kind: 'arena', arena: 'cinder' },
-    { at: 20, kind: 'coins', amount: 100 },
+    { at: 20, kind: 'rubies', amount: 10 },
     { at: 40, kind: 'card', card: 'skeletons', copies: 6 },
     { at: 60, kind: 'chest', chest: 'silver' },
-    { at: 90, kind: 'coins', amount: 250 },
+    { at: 90, kind: 'rubies', amount: 30 },
     { at: 120, kind: 'card', card: 'cannon', copies: 4 },
     { at: 160, kind: 'chest', chest: 'silver' },
-    { at: 200, kind: 'coins', amount: 500 },
+    { at: 200, kind: 'rubies', amount: 60 },
     { at: 250, kind: 'chest', chest: 'gold' },
     { at: 300, kind: 'arena', arena: 'briar' },
     { at: 330, kind: 'card', card: 'spears', copies: 6 },
-    { at: 370, kind: 'coins', amount: 1200 },
+    { at: 370, kind: 'rubies', amount: 145 },
     { at: 400, kind: 'card', card: 'pots', copies: 6 },
     { at: 440, kind: 'chest', chest: 'gold' },
     { at: 480, kind: 'card', card: 'footmen', copies: 6 },
-    { at: 520, kind: 'coins', amount: 2000 },
+    { at: 520, kind: 'rubies', amount: 240 },
     { at: 560, kind: 'card', card: 'flail', copies: 3 },
     { at: 600, kind: 'arena', arena: 'sunstone' },
     { at: 630, kind: 'card', card: 'sandstorm', copies: 6 },
-    { at: 670, kind: 'coins', amount: 3500 },
+    { at: 670, kind: 'rubies', amount: 420 },
     { at: 710, kind: 'card', card: 'ramcart', copies: 3 },
     { at: 750, kind: 'chest', chest: 'gold' },
     { at: 790, kind: 'card', card: 'mole', copies: 3 },
-    { at: 830, kind: 'coins', amount: 5000 },
+    { at: 830, kind: 'rubies', amount: 600 },
     { at: 870, kind: 'card', card: 'camel', copies: 1 },
     { at: 900, kind: 'arena', arena: 'stormspire' },
     { at: 930, kind: 'card', card: 'bees', copies: 6 },
-    { at: 970, kind: 'coins', amount: 7500 },
+    { at: 970, kind: 'rubies', amount: 900 },
     { at: 1010, kind: 'card', card: 'owl', copies: 3 },
     { at: 1050, kind: 'chest', chest: 'platinum' },
     { at: 1090, kind: 'card', card: 'thundercloud', copies: 1 },
-    { at: 1130, kind: 'coins', amount: 10000 },
+    { at: 1130, kind: 'rubies', amount: 1200 },
     { at: 1170, kind: 'card', card: 'griffin', copies: 1 },
     { at: 1200, kind: 'arena', arena: 'arena5' },
   ];
@@ -150,9 +166,9 @@ const KCProgress = (() => {
   // The order chests are won in, repeating (before the arena gate is applied).
   const CYCLE = ['wooden', 'wooden', 'silver', 'wooden', 'silver', 'wooden', 'wooden', 'gold', 'wooden', 'silver',
     'wooden', 'silver', 'gold', 'wooden', 'platinum', 'silver', 'wooden', 'gold', 'silver', 'wooden', 'legendary', 'silver', 'gold', 'mythic'];
-  // Copies and coins to go from level L to L+1 (index 0 is level 1 to 2).
-  // Copies and coins to go from level L to L+1 (index 0 is level 1 to 2); from the economy above.
-  const UPGRADE = { copies: ECONOMY.upgradeCopies, coins: ECONOMY.upgradeGold };
+  // Copies and rubies to go from level L to L+1 (index 0 is level 1 to 2).
+  // Copies and rubies to go from level L to L+1 (index 0 is level 1 to 2); from the economy above.
+  const UPGRADE = { copies: ECONOMY.upgradeCopies, rubies: ECONOMY.upgradeGold };
 
   // Trophy opponents look like any other player. They don't talk (no speech bubbles or result lines).
   const FOE_NAMES = ['EmberFox', 'Kestrel', 'MossKnight', 'Juno77', 'BrickTop', 'Lumen', 'NovaRae', 'Quillon', 'RowanK', 'Tidebreaker',
@@ -176,13 +192,20 @@ const KCProgress = (() => {
   };
   const blank = () => ({
     name: 'Player', xp: 0, beaten: {}, records: {}, roadSeen: false, opp: null,
-    mode: null, trophies: 0, best: 0, coins: 0, diamonds: 0, shop: null, freeChestDay: null, magic: {}, cards: {}, evos: [], pass: null, member: false, king: 1, emotes: [], found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
+    mode: null, trophies: 0, best: 0, rubies: 0, wallet: 0, walletDay: null, diamonds: 0, shop: null, freeChestDay: null, magic: {}, cards: {}, evos: [], pass: null, member: false, king: 1, emotes: [], found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
     chests: [null, null, null, null], cycle: 0, claimed: {}, diff: 0.35, trophyRecord: { w: 0, l: 0, d: 0 },
   });
 
   function load(st) {
     storage = st === undefined ? (typeof localStorage !== 'undefined' ? localStorage : null) : st;
-    P = Object.assign(blank(), store.get() || {});
+    const raw = store.get() || {};
+    // Rubies used to be called coins: an older save's coins become Rubies one for one, in its chests and
+    // Shop offers too. (Coins now mean the SirSC wallet's currency: `wallet`, never paid out by the game.)
+    if (raw.rubies === undefined && raw.coins !== undefined) raw.rubies = raw.coins;
+    delete raw.coins;
+    for (const c of raw.chests || []) if (c && c.contents && c.contents.rubies === undefined) { c.contents.rubies = c.contents.coins || 0; delete c.contents.coins; }
+    if (raw.shop && Array.isArray(raw.shop.offers)) for (const o of raw.shop.offers) { if (o.kind === 'coins') o.kind = 'rubies'; if (o.currency === 'coins') o.currency = 'rubies'; }
+    P = Object.assign(blank(), raw);
     let old = null; // the record kept before there were three trainers
     try { old = storage && JSON.parse(storage.getItem('kc.record') || 'null'); } catch (e) { old = null; }
     if (old && !P.records.owen) { P.records.owen = old; if (old.w > 0) P.beaten.owen = true; }
@@ -193,7 +216,8 @@ const KCProgress = (() => {
       const c = Object.assign({ level: 1, count: 0 }, P.cards[id]);
       P.cards[id] = { level: Math.max(KC_MIN_LEVEL(id), Math.min(MAX_LEVEL, nn(c.level) || 1)), count: nn(c.count) };
     }
-    P.coins = nn(P.coins); P.diamonds = nn(P.diamonds); P.xp = nn(P.xp); P.trophies = nn(P.trophies); P.best = Math.max(nn(P.best), P.trophies);
+    P.rubies = nn(P.rubies); P.wallet = nn(P.wallet); P.diamonds = nn(P.diamonds);
+    P.walletDay = P.walletDay && typeof P.walletDay.day === 'string' ? { day: P.walletDay.day, n: nn(P.walletDay.n) } : { day: '', n: 0 }; P.xp = nn(P.xp); P.trophies = nn(P.trophies); P.best = Math.max(nn(P.best), P.trophies);
     P.winDay = P.winDay && typeof P.winDay.day === 'string' ? { day: P.winDay.day, n: nn(P.winDay.n) } : { day: '', n: 0 };
     P.magic = Object.assign({}, P.magic);
     P.evos = Array.isArray(P.evos) ? P.evos.filter(id => KC_EVOS[id]) : [];
@@ -256,18 +280,18 @@ const KCProgress = (() => {
     return 'ready';
   }
   const claimable = () => ROAD.filter(m => roadState(m) === 'ready');
-  // Claim a road reward. Returns what it gave (coins, a card, or a chest's contents opened on the spot).
+  // Claim a road reward. Returns what it gave (rubies, a card, or a chest's contents opened on the spot).
   function claim(at) {
     const m = ROAD.find(r => r.at === at);
     if (!m || roadState(m) !== 'ready') return null;
     P.claimed[at] = true;
     let out = { kind: m.kind };
-    if (m.kind === 'coins') { P.coins += m.amount; out.coins = m.amount; }
+    if (m.kind === 'rubies') { P.rubies += m.amount; out.rubies = m.amount; }
     else if (m.kind === 'card') {
       const isNew = !P.found.includes(m.card);
       if (isNew) P.found = KC_ALL_CARDS.filter(id => id === m.card || P.found.includes(id));
       P.cards[m.card].count += m.copies - (isNew ? 1 : 0);      // the first copy unlocks it; it isn't a duplicate
-      out = { kind: 'card', cards: [{ id: m.card, n: m.copies, isNew }], coins: 0 };
+      out = { kind: 'card', cards: [{ id: m.card, n: m.copies, isNew }], rubies: 0 };
     } else if (m.kind === 'chest') {
       const type = capChest(m.chest), c = roll(type);
       apply(c);
@@ -279,12 +303,17 @@ const KCProgress = (() => {
 
   /* ---------- trophy battles ---------- */
   const lerp = (a, b, t) => a + (b - a) * t;
-  // Opponents level their cards one at a time as their trophies rise. Below 50 trophies every card is
-  // level 1. From 50, one card goes up a level every 12.5 trophies: one level-2 card at 50, two at
-  // 62.5 ... all eight at 137.5; then the first level 3 at 150, and so on (a full level per 100
-  // trophies) until every card is level 15 at 1,437.5.
-  const FOE_FIRST = 50, FOE_STEP = 12.5, DECK = 8;
-  const foeUpgrades = t => (t < FOE_FIRST ? 0 : Math.min((MAX_LEVEL - 1) * DECK, 1 + Math.floor((t - FOE_FIRST) / FOE_STEP)));
+  // Opponents level their cards one at a time as their trophies rise, along ECONOMY.foeLevels (the
+  // average card level a player has at those trophies): every card level 1 below 50 trophies, about 7
+  // in Arena 3, 7 to 8 entering Arena 4, 8 to 9 at 1,200, 12 at 2,000 and 15 at 4,000.
+  const DECK = 8;
+  function foeUpgrades(t) {
+    const C = ECONOMY.foeLevels;
+    t = Math.max(0, +t || 0);
+    let lv = C[C.length - 1][1];
+    for (let i = 1; i < C.length; i++) if (t < C[i][0]) { lv = C[i - 1][1] + (C[i][1] - C[i - 1][1]) * (t - C[i - 1][0]) / (C[i][0] - C[i - 1][0]); break; }
+    return Math.max(0, Math.min((MAX_LEVEL - 1) * DECK, Math.floor((lv - 1) * DECK)));
+  }
   // Spread n single-card upgrades over a deck: everyone gets floor(n / 8) levels, and n % 8 cards
   // (picked with rand, so each opponent differs) are one level ahead.
   function spreadLevels(n, ids, rand = Math.random) {
@@ -292,6 +321,11 @@ const KCProgress = (() => {
     let extra = n % ids.length;
     for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
     return Object.fromEntries(order.map(id => [id, Math.min(MAX_LEVEL, base + (extra-- > 0 ? 1 : 0))]));
+  }
+  function foeKing(levels) {
+    let k = 1;
+    for (let n = 2; n <= MAX_LEVEL; n++) if (levels.filter(v => v >= n).length >= Math.min(n, levels.length)) k = n; else break;
+    return k;
   }
   // The opponent for the next trophy battle: card levels follow their trophies, skill follows P.diff.
   function trophyFoe(rand = Math.random) {
@@ -328,8 +362,9 @@ const KCProgress = (() => {
     const cardLevels = spreadLevels(foeUpgrades(foeTrophies), deck, rand);
     for (const id of deck) cardLevels[id] = Math.max(KC_MIN_LEVEL(id), cardLevels[id]);
     const lvl = Math.min(...Object.values(cardLevels));
-    // their King Tower level: the average level of their cards
-    const kingLevel = Math.max(1, Math.min(MAX_LEVEL, Math.round(Object.values(cardLevels).reduce((a, v) => a + v, 0) / deck.length)));
+    // their King Tower: the players' rule (level N needs N cards at level N), counting the rest of their
+    // collection as levelled with their deck once all eight are past 8
+    const kingLevel = foeKing(Object.values(cardLevels));
     return {
       id: 'trophy', kind: 'trophy', name, short: name, level: lvl, tier: `${foeTrophies} trophies`,
       look: foeLook(rand), lines: null, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: foeTrophies, kingLevel,
@@ -360,7 +395,7 @@ const KCProgress = (() => {
     if (winner === 0) {
       const today = dayKey(Date.now());
       if (P.winDay.day !== today) P.winDay = { day: today, n: 0 };
-      if (P.winDay.n < ECONOMY.winGold.dailyCap) { P.winDay.n++; gold = winGold(); P.coins += gold; }
+      if (P.winDay.n < ECONOMY.winGold.dailyCap) { P.winDay.n++; gold = winGold(); P.rubies += gold; }
     }
     const xp = winner === 0 ? XP.win : winner === 1 ? XP.loss : XP.draw, levelUp = addXp(xp);
     const newArena = arena().id !== beforeArena ? arena() : null;
@@ -400,7 +435,7 @@ const KCProgress = (() => {
     const T = ECONOMY.chests[type], M = rewardTier(opts), cards = Math.round(T.cards * M.cards);
     const rareN = Math.max(Math.round((T.rare.min || 0) * M.cards), Math.round(cards * (T.rare.share || 0)));
     const ex = (r, pow) => { const e = T[r] || {}; return ((e.min || 0) + (e.chance || 0)) * Math.pow(M.cards, pow); };
-    return { cards, coins: [Math.round(T.gold[0] * M.gold), Math.round(T.gold[1] * M.gold)], kinds: T.kinds, rares: rareN, rareChance: T.rare.chance || 0,
+    return { cards, rubies: [Math.round(T.gold[0] * M.gold), Math.round(T.gold[1] * M.gold)], kinds: T.kinds, rares: rareN, rareChance: T.rare.chance || 0,
       epics: ex('epic', ECONOMY.epicPow), legendaries: ex('legendary', ECONOMY.legendaryPow),
       epicMin: (T.epic && T.epic.min) || 0, legendaryMin: (T.legendary && T.legendary.min) || 0, tier: M };
   }
@@ -437,13 +472,13 @@ const KCProgress = (() => {
     spread('rare', n.rare, Math.ceil(O.kinds / 2));
     spread('epic', n.epic, 2);
     spread('legendary', n.legendary, 1);
-    const coins = Math.round(lerp(O.coins[0], O.coins[1], rand()));
-    return { coins: Math.max(0, coins), cards, items: rollItems(type, rand, opts) };
+    const rubies = Math.round(lerp(O.rubies[0], O.rubies[1], rand()));
+    return { rubies: Math.max(0, rubies), cards, items: rollItems(type, rand, opts) };
   }
   // gold for one trophy-battle win
   const winGold = opts => Math.round(ECONOMY.winGold.base * rewardTier(opts).gold);
   function apply(c) {
-    P.coins += c.coins;
+    P.rubies += c.rubies;
     // a card that came out before you reached it on the Trophy Road is found now
     const fresh = c.cards.filter(x => !P.found.includes(x.id)).map(x => x.id);
     if (fresh.length) P.found = KC_ALL_CARDS.filter(id => P.found.includes(id) || fresh.includes(id));
@@ -497,10 +532,10 @@ const KCProgress = (() => {
 
   /* ---------- the Shop ---------- */
   // Five offers a day, made from the cards you have found and their levels. Every offer says exactly
-  // what it gives. Prices: a copy is worth 10 coins (common) or 50 (rare); 1 diamond = 5,000 coins.
-  // Chests are sold for coins only, one of each a day, with their contents shown before you buy.
-  const SHOP = { perCopy: ECONOMY.shop.perCopy, coinsPerDiamond: 5000, maxQty: ECONOMY.shop.maxQty, chests: ECONOMY.chests };
-  const maxQty = id => SHOP.maxQty[KC_CARDS[id].rarity] || 1;
+  // what it gives. Prices: a copy is worth 10 rubies (common) or 50 (rare); 1 diamond = 5,000 rubies.
+  // Chests are sold for rubies only, one of each a day, with their contents shown before you buy.
+  const SHOP = { perCopy: ECONOMY.shop.perCopy, rubiesPerDiamond: 5000, maxQty: ECONOMY.shop.maxQty, chests: ECONOMY.chests };
+  const maxQty = id => Math.max(1, SHOP.maxQty[KC_CARDS[id].rarity] || 0);
   const pad2 = n => String(n).padStart(2, '0');
   const dayKey = now => { const d = new Date(now); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; };
   // When today's offers are replaced: the next local midnight.
@@ -515,11 +550,11 @@ const KCProgress = (() => {
   // the gold still to pay to take a card to level 15
   function goldToMax(id) {
     let n = 0;
-    for (let l = P.cards[id].level; l < MAX_LEVEL; l++) n += UPGRADE.coins[l - 1] || 0;
+    for (let l = P.cards[id].level; l < MAX_LEVEL; l++) n += UPGRADE.rubies[l - 1] || 0;
     return n;
   }
   function makeOffers(rand = Math.random) {
-    const open = P.found.filter(id => P.cards[id].level < MAX_LEVEL);
+    const open = P.found.filter(id => P.cards[id].level < MAX_LEVEL && SHOP.maxQty[KC_CARDS[id].rarity] > 0);
     for (let i = open.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [open[i], open[j]] = [open[j], open[i]]; }
     const used = new Set(), offers = [];
     const lvl = id => P.cards[id].level, inDeck = id => (P.deck.includes(id) ? 1 : 0);
@@ -531,28 +566,28 @@ const KCProgress = (() => {
       qty = Math.max(1, Math.min(qty, copiesToMax(id) || 1));
       const value = qty * SHOP.perCopy[KC_CARDS[id].rarity];
       offers.push({ id: 'o' + offers.length, kind: 'card', card: id, qty, tag, currency,
-        price: currency === 'diamonds' ? Math.max(1, Math.ceil(value / SHOP.coinsPerDiamond)) : value });
+        price: currency === 'diamonds' ? Math.max(1, Math.ceil(value / SHOP.rubiesPerDiamond)) : value });
     };
     if (open.length) {
       // 1. the card closest to its next upgrade: exactly the copies it is missing
       let pool = free().filter(id => missing(id) > 0).sort((a, b) => missing(a) - missing(b) || inDeck(b) - inDeck(a));
       let id = pool[0] || free()[0];
-      add(id, Math.min(maxQty(id), missing(id) > 0 ? missing(id) : copiesNeed(id)), 'Closest to upgrade', 'coins');
+      add(id, Math.min(maxQty(id), missing(id) > 0 ? missing(id) : copiesNeed(id)), 'Closest to upgrade', 'rubies');
       // 2. a rare card (a common if every rare is taken or maxed): one level's worth
       pool = free().filter(c => KC_CARDS[c].rarity === 'rare');
       id = pool[0] || free()[0];
-      add(id, Math.min(maxQty(id), copiesNeed(id)), KC_CARDS[id].rarity === 'rare' ? 'Rare pick' : 'Card pick', 'coins');
+      add(id, Math.min(maxQty(id), copiesNeed(id)), KC_CARDS[id].rarity === 'rare' ? 'Rare pick' : 'Card pick', 'rubies');
       // 3. your lowest-level card (cards found on the Trophy Road first): one level's worth
       pool = free().sort((a, b) => lvl(a) - lvl(b) || (KC_STARTER_DECK.includes(a) ? 1 : 0) - (KC_STARTER_DECK.includes(b) ? 1 : 0));
       id = pool[0];
-      add(id, Math.min(maxQty(id), copiesNeed(id)), 'Catch up', 'coins');
-      // 4. a big bundle of your highest-level deck card: 5,000 coins' worth of copies for 1 diamond
-      pool = free().filter(c => SHOP.perCopy[KC_CARDS[c].rarity] <= SHOP.coinsPerDiamond).sort((a, b) => inDeck(b) - inDeck(a) || lvl(b) - lvl(a));
+      add(id, Math.min(maxQty(id), copiesNeed(id)), 'Catch up', 'rubies');
+      // 4. a big bundle of your highest-level deck card: 5,000 rubies' worth of copies for 1 diamond
+      pool = free().filter(c => ECONOMY.shop.megaQty[KC_CARDS[c].rarity] > 0).sort((a, b) => inDeck(b) - inDeck(a) || lvl(b) - lvl(a));
       id = pool[0];
-      if (id) add(id, Math.floor(SHOP.coinsPerDiamond / SHOP.perCopy[KC_CARDS[id].rarity]), 'Mega bundle', 'diamonds');
+      if (id) add(id, ECONOMY.shop.megaQty[KC_CARDS[id].rarity], 'Mega bundle', 'diamonds');
     }
-    // 5. coins for a diamond, at the exchange rate
-    offers.push({ id: 'o' + offers.length, kind: 'coins', qty: SHOP.coinsPerDiamond, tag: 'Coin bundle', currency: 'diamonds', price: 1, repeat: true });
+    // 5. rubies for a diamond, at the exchange rate
+    offers.push({ id: 'o' + offers.length, kind: 'rubies', qty: SHOP.rubiesPerDiamond, tag: 'Ruby bundle', currency: 'diamonds', price: 1, repeat: true });
     return offers;
   }
   // Today's offers (made the first time they are asked for each day).
@@ -561,20 +596,58 @@ const KCProgress = (() => {
     if (!P.shop || P.shop.day !== day || !Array.isArray(P.shop.offers)) { P.shop = { day, offers: makeOffers(rand), bought: {} }; save(); }
     return P.shop;
   }
-  // Shop chests cost coins only, as many as you like. What is inside is rolled at purchase and stays
-  // hidden until the chest is opened (the tile shows the card count and coin range). The price grows with
-  // the account level like the contents, so the coins inside are always less than the price.
-  const chestPrice = (type, opts) => { const o = chestOdds(type, opts); return Math.max(5, Math.round((o.coins[0] + o.coins[1]) / 2 * ECONOMY.shop.chestPrice / 5) * 5); };
-  function buyChest(type, rand) {
+  // Shop chests cost rubies, one of each a day, from the arena in ECONOMY.shop.chestArena (by the highest
+  // trophies reached). What is inside is rolled at purchase and stays hidden until the chest is opened
+  // (the tile shows the card count and ruby range). The price is the rubies inside plus half the value of
+  // its cards, so it always costs more than it pays back and the bigger chests cost tens of thousands.
+  function chestPrice(type, opts) {
+    const o = chestOdds(type, opts), v = ECONOMY.shop.perCopy, avg = (o.rubies[0] + o.rubies[1]) / 2;
+    const commons = Math.max(0, o.cards - o.rares - o.epics - o.legendaries);
+    const cards = commons * v.common + (o.rares + o.rareChance) * v.rare + o.epics * v.epic + o.legendaries * v.legendary;
+    return Math.max(5, Math.round((avg + cards * ECONOMY.shop.chestCardShare) / 5) * 5);
+  }
+  const bestArena = () => (ARENAS.filter(a => !a.soon && P.best >= a.min).pop() || ARENAS[0]).number;
+  const chestShopOpen = type => bestArena() >= (ECONOMY.shop.chestArena[type] || 99);
+  const chestsBought = (now = Date.now()) => (P.chestBuys && P.chestBuys.day === dayKey(now) ? P.chestBuys.n : {});
+  const chestBuyLeft = (type, now = Date.now()) => Math.max(0, ECONOMY.shop.chestsPerDay - (chestsBought(now)[type] || 0));
+  function buyChest(type, rand, now = Date.now()) {
     if (!CHESTS[type] || !SHOP.chests[type]) return { error: 'none' };
-    if (!chestAllowed(type)) return { error: 'locked' };
+    if (!chestAllowed(type) || !chestShopOpen(type)) return { error: 'locked' };
+    if (!chestBuyLeft(type, now)) return { error: 'sold' };
     const price = chestPrice(type);
-    if (P.coins < price) return { error: 'coins' };
-    P.coins -= price;
+    if (P.rubies < price) return { error: 'rubies' };
+    P.rubies -= price;
+    P.chestBuys = { day: dayKey(now), n: Object.assign({}, chestsBought(now), { [type]: (chestsBought(now)[type] || 0) + 1 }) };
     const c = roll(type, rand), before = P.found.slice();
     apply(c);
     save();
-    return { ok: true, chest: type, price, coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
+    return { ok: true, chest: type, price, rubies: c.rubies, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
+  }
+  // Wallet Coins to Rubies, one way, up to a daily cap by the highest arena reached. TEMPORARY: the wallet
+  // balance is kept on this device; once the SirSC wallet is connected the server must take the coins and
+  // enforce the cap, and the game never pays coins out.
+  function exchangeCap() {
+    const X = ECONOMY.exchange, top = Math.max(...Object.keys(X.cap).map(Number)), n = bestArena();
+    if (n < top) return X.cap[n] || X.cap[1];
+    const last = ARENAS.filter(a => !a.soon).find(a => a.number === top), over = Math.max(0, P.best - (last ? last.min : 0));
+    return Math.min(X.beyond.max, X.cap[top] + X.beyond.add * Math.floor(over / X.beyond.every));
+  }
+  function exchangeInfo(now = Date.now()) {
+    const used = P.walletDay.day === dayKey(now) ? P.walletDay.n : 0, cap = exchangeCap();
+    return { rate: ECONOMY.exchange.rate, cap, used, left: Math.max(0, cap - used), coins: P.wallet, ends: shopEnds(now) };
+  }
+  // Swap n coins for rubies. Returns { ok, coins, rubies } or { error: 'amount' | 'cap' | 'coins' }.
+  function exchange(n, now = Date.now()) {
+    n = Math.floor(+n);
+    const x = exchangeInfo(now);
+    if (!Number.isFinite(n) || n <= 0) return { error: 'amount' };
+    if (n > x.left) return { error: 'cap', left: x.left };
+    if (n > P.wallet) return { error: 'coins', have: P.wallet };
+    P.wallet -= n;
+    P.rubies += n * x.rate;
+    P.walletDay = { day: dayKey(now), n: x.used + n };
+    save();
+    return { ok: true, coins: n, rubies: n * x.rate };
   }
   // One free Wooden Chest a day (local days, like the offers).
   const freeChestReady = (now = Date.now()) => P.freeChestDay !== dayKey(now);
@@ -584,28 +657,28 @@ const KCProgress = (() => {
     const F = ECONOMY.freeChest, c = roll(F.type, rand, { bonus: F.bonus }), before = P.found.slice();
     apply(c);
     save();
-    return { ok: true, chest: F.type, coins: c.coins, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
+    return { ok: true, chest: F.type, rubies: c.rubies, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
   }
   function refreshShop(rand, now = Date.now()) { P.shop = null; return shop(now, rand); }
-  // Buy offer i. Returns { ok, coins, cards } or { error: 'sold' | 'coins' | 'diamonds' | 'none' }.
+  // Buy offer i. Returns { ok, rubies, cards } or { error: 'sold' | 'rubies' | 'diamonds' | 'none' }.
   function buy(i, now = Date.now()) {
     const s = shop(now), o = s.offers[i];
     if (!o) return { error: 'none' };
     if (s.bought[o.id] && !o.repeat) return { error: 'sold' };
     if (o.card && P.cards[o.card] && P.cards[o.card].level >= MAX_LEVEL) return { error: 'max' };   // no paying for copies a maxed card can't use
-    const wallet = o.currency === 'diamonds' ? 'diamonds' : 'coins';
+    const wallet = o.currency === 'diamonds' ? 'diamonds' : 'rubies';
     if (P[wallet] < o.price) return { error: wallet };
     P[wallet] -= o.price;
     let out;
-    if (o.kind === 'coins') { P.coins += o.qty; out = { coins: o.qty, cards: [] }; }
-    else { P.cards[o.card].count += o.qty; out = { coins: 0, cards: [{ id: o.card, n: o.qty, isNew: false }] }; }
+    if (o.kind === 'rubies') { P.rubies += o.qty; out = { rubies: o.qty, cards: [] }; }
+    else { P.cards[o.card].count += o.qty; out = { rubies: 0, cards: [{ id: o.card, n: o.qty, isNew: false }] }; }
     s.bought[o.id] = (s.bought[o.id] || 0) + 1;
     save();
     return Object.assign({ ok: true, offer: o }, out);
   }
   /* ---------- emotes in the Shop ----------
      Fifteen emotes to buy, three of them on sale each day (the same three all day, a new set at
-     midnight; ones you own are skipped). Each costs coins and is yours for good: bought emotes join
+     midnight; ones you own are skipped). Each costs rubies and is yours for good: bought emotes join
      the eight everyone has in the battle emote panel. The art is in js/emotes.js. */
   const EMOTES = [
     { id: 'love', name: 'Love Struck' }, { id: 'cool', name: 'Too Cool' }, { id: 'party', name: 'Party Time' },
@@ -615,8 +688,8 @@ const KCProgress = (() => {
     { id: 'mindblown', name: 'Mind Blown' }, { id: 'smug', name: 'Smug' }, { id: 'salute', name: 'Salute' },
     // and one for every card: the card's character with its name
   ].concat(KC_ALL_CARDS.map(id => ({ id: 'card_' + id, name: KC_CARDS[id].name, card: id })));
-  // each emote costs 5,000 coins or 1 diamond (the same at the exchange rate)
-  const EMOTE_SHOP = { perDay: 3, coins: 5000, diamonds: 1 };
+  // each emote costs 5,000 rubies or 1 diamond (the same at the exchange rate)
+  const EMOTE_SHOP = { perDay: 3, rubies: 5000, diamonds: 1 };
   // Today's three: a shuffle seeded by the date, skipping emotes you own.
   function emoteOffers(now = Date.now()) {
     const day = dayKey(now), seed = [...day].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
@@ -628,14 +701,14 @@ const KCProgress = (() => {
       P.emoteShop = { day, ids: (open.length >= EMOTE_SHOP.perDay ? open : order).slice(0, EMOTE_SHOP.perDay) };
     }
     return P.emoteShop.ids.filter(id => EMOTES.some(e => e.id === id))
-      .map(id => { const e = EMOTES.find(x => x.id === id); return { id, name: e.name, card: e.card || null, coins: EMOTE_SHOP.coins, diamonds: EMOTE_SHOP.diamonds, owned: P.emotes.includes(id) }; });
+      .map(id => { const e = EMOTES.find(x => x.id === id); return { id, name: e.name, card: e.card || null, rubies: EMOTE_SHOP.rubies, diamonds: EMOTE_SHOP.diamonds, owned: P.emotes.includes(id) }; });
   }
-  // currency: 'coins' (5,000) or 'diamonds' (1)
-  function buyEmote(id, currency = 'coins', now = Date.now()) {
+  // currency: 'rubies' (5,000) or 'diamonds' (1)
+  function buyEmote(id, currency = 'rubies', now = Date.now()) {
     const o = emoteOffers(now).find(x => x.id === id);
     if (!o) return { error: 'none' };
     if (o.owned) return { error: 'owned' };
-    const wallet = currency === 'diamonds' ? 'diamonds' : 'coins', price = o[wallet];
+    const wallet = currency === 'diamonds' ? 'diamonds' : 'rubies', price = o[wallet];
     if (P[wallet] < price) return { error: wallet };
     P[wallet] -= price;
     P.emotes.push(id);
@@ -643,14 +716,14 @@ const KCProgress = (() => {
     return { ok: true, id, price, currency: wallet };
   }
 
-  // TEMPORARY: the test button's 1,000,000 coins and diamonds.
-  function grantTest() { P.coins = 1000000; P.diamonds = 1000000; save(); }
+  // TEMPORARY: the test button's 1,000,000 rubies and diamonds.
+  function grantTest() { P.rubies = 1000000; P.diamonds = 1000000; P.wallet = 1000000; save(); }
 
 
   /* ---------- magic items ----------
      Wild cards count as copies of any card of their rarity. A book fills every copy a card still needs
      for its next level (the Book of Books works on any rarity). The Hammer of Books upgrades a card one
-     level for free: it fills any missing copies and pays the coins. Evolution shards have a place but nothing
+     level for free: it fills any missing copies and pays the rubies. Evolution shards have a place but nothing
      gives them yet. Wild cards come from chests from Arena 2 on; books and the hammer are rare finds in
      silver chests and up (0.1% in silver to 1% in mythic, never in wooden). */
   const MAGIC = {
@@ -663,7 +736,7 @@ const KCProgress = (() => {
     book_epic: { name: 'Book of Epic', kind: 'book', rarity: 'epic', blurb: 'Use on an epic card to fill all the copies it still needs for its next level.' },
     book_legendary: { name: 'Book of Legendary', kind: 'book', rarity: 'legendary', blurb: 'Use on a legendary card to fill all the copies it still needs for its next level.' },
     book_books: { name: 'Book of Books', kind: 'book', rarity: 'any', blurb: 'Works on a card of any rarity: fills all the copies it still needs for its next level.' },
-    hammer_books: { name: 'Hammer of Books', kind: 'hammer', rarity: 'any', blurb: 'Upgrades a card one level for free: it fills any copies the card is missing and needs no coins.' },
+    hammer_books: { name: 'Hammer of Books', kind: 'hammer', rarity: 'any', blurb: 'Upgrades a card one level for free: it fills any copies the card is missing and needs no rubies.' },
     shards: { name: 'Evolution Shards', kind: 'shard', rarity: 'any', blurb: 'Collect 6 and use them on a card that has an evolution to unlock it. Evolutions open in Sunstone Arena (Arena 3); the Snowman\'s is the first.' },
   };
   const MAGIC_ORDER = ['wild_common', 'wild_rare', 'wild_epic', 'wild_legendary', 'book_common', 'book_rare', 'book_epic', 'book_legendary', 'book_books', 'hammer_books', 'shards'];
@@ -720,7 +793,7 @@ const KCProgress = (() => {
     const c = P.cards[id];
     if (c.level >= MAX_LEVEL) return { ok: false, reason: 'max' };
     const need = UPGRADE.copies[card.rarity][c.level - 1], missing = need - c.count;
-    // the hammer fills whatever copies are missing and pays the coins: one level up, whatever the card has
+    // the hammer fills whatever copies are missing and pays the rubies: one level up, whatever the card has
     if (M.kind === 'hammer') return { ok: true, level: c.level + 1, fills: Math.max(0, missing) };
     if (missing <= 0) return { ok: false, reason: 'full' };
     return { ok: true, gives: M.kind === 'wild' ? Math.min(magicCount(item), missing) : missing, uses: M.kind === 'wild' ? Math.min(magicCount(item), missing) : 1 };
@@ -798,20 +871,20 @@ const KCProgress = (() => {
   const PASS = {
     name: 'Diamond Pass', season: 1, price: 10, crownsPerTier: 8,
     tiers: [
-      { free: { kind: 'coins', n: 2500 }, paid: { kind: 'evo', card: 'snowman' } },
+      { free: { kind: 'rubies', n: 375 }, paid: { kind: 'evo', card: 'snowman' } },
       { free: { kind: 'item', item: 'wild_common', n: 20 }, paid: { kind: 'chest', chest: 'gold' } },
-      { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'coins', n: 7500 } },
-      { free: { kind: 'coins', n: 3500 }, paid: { kind: 'item', item: 'wild_rare', n: 6 } },
+      { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'rubies', n: 1125 } },
+      { free: { kind: 'rubies', n: 525 }, paid: { kind: 'item', item: 'wild_rare', n: 6 } },
       { free: { kind: 'item', item: 'shards', n: 1 }, paid: { kind: 'chest', chest: 'gold' } },
       { free: { kind: 'item', item: 'wild_rare', n: 3 }, paid: { kind: 'item', item: 'book_common', n: 1 } },
-      { free: { kind: 'coins', n: 4500 }, paid: { kind: 'coins', n: 10000 } },
+      { free: { kind: 'rubies', n: 675 }, paid: { kind: 'rubies', n: 1500 } },
       { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'item', item: 'shards', n: 2 } },
       { free: { kind: 'item', item: 'wild_common', n: 30 }, paid: { kind: 'chest', chest: 'platinum' } },
       { free: { kind: 'item', item: 'shards', n: 1 }, paid: { kind: 'item', item: 'wild_epic', n: 1 } },
-      { free: { kind: 'coins', n: 5500 }, paid: { kind: 'chest', chest: 'gold' } },
-      { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'coins', n: 15000 } },
+      { free: { kind: 'rubies', n: 825 }, paid: { kind: 'chest', chest: 'gold' } },
+      { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'rubies', n: 2250 } },
       { free: { kind: 'item', item: 'wild_rare', n: 5 }, paid: { kind: 'item', item: 'shards', n: 2 } },
-      { free: { kind: 'coins', n: 7000 }, paid: { kind: 'item', item: 'book_rare', n: 1 } },
+      { free: { kind: 'rubies', n: 1050 }, paid: { kind: 'item', item: 'book_rare', n: 1 } },
       { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'chest', chest: 'legendary' } },
     ],
   };
@@ -838,13 +911,13 @@ const KCProgress = (() => {
     return 'ready';
   }
   const passClaimable = () => PASS.tiers.reduce((n, _, i) => n + (passState(i, 'free') === 'ready') + (passState(i, 'paid') === 'ready'), 0);
-  // Claim a tier's reward. Returns what it gave, in the same shape as a chest (coins, cards, items).
+  // Claim a tier's reward. Returns what it gave, in the same shape as a chest (rubies, cards, items).
   function claimPass(i, track) {
     if (passState(i, track) !== 'ready') return null;
     const R = PASS.tiers[i][track];
     P.pass[track][i] = true;
-    let out = { reward: R, coins: 0, cards: [], items: [] };
-    if (R.kind === 'coins') { P.coins += R.n; out.coins = R.n; }
+    let out = { reward: R, rubies: 0, cards: [], items: [] };
+    if (R.kind === 'rubies') { P.rubies += R.n; out.rubies = R.n; }
     else if (R.kind === 'item') { P.magic[R.item] = magicCount(R.item) + R.n; out.items = [{ id: R.item, n: R.n }]; }
     else if (R.kind === 'chest') {
       const before = P.found.slice(), c = roll(R.chest);
@@ -873,8 +946,8 @@ const KCProgress = (() => {
     const c = P.cards[id], card = KC_CARDS[id];
     if (!P.found.includes(id)) return { found: false };
     if (c.level >= MAX_LEVEL) return { found: true, max: true, level: c.level, count: c.count };
-    const need = UPGRADE.copies[card.rarity][c.level - 1], cost = UPGRADE.coins[c.level - 1];
-    const reason = c.count < need ? 'copies' : P.coins < cost ? 'coins' : '';
+    const need = UPGRADE.copies[card.rarity][c.level - 1], cost = UPGRADE.rubies[c.level - 1];
+    const reason = c.count < need ? 'copies' : P.rubies < cost ? 'rubies' : '';
     return { found: true, level: c.level, count: c.count, need, cost, can: !reason, reason };
   }
   const upgradable = () => P.found.filter(id => upgradeInfo(id).can);
@@ -882,7 +955,7 @@ const KCProgress = (() => {
     const u = upgradeInfo(id);
     if (!u.can) return null;
     P.cards[id].count -= u.need;
-    P.coins -= u.cost;
+    P.rubies -= u.cost;
     P.cards[id].level++;
     const xp = 4 * P.cards[id].level, levelUp = addXp(xp);
     save();
@@ -909,7 +982,7 @@ const KCProgress = (() => {
 
   return {
     MAX_LEVEL, XP_PER_LEVEL, TROPHIES, ARENAS, ROAD, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
-    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest,
+    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, chestShopOpen, chestBuyLeft, foeKing,
     load, save, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,

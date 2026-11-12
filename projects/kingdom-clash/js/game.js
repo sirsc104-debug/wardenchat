@@ -633,7 +633,7 @@
     $('#resLine').textContent = ((w === 0 && r.crowns[0] === 3 ? 'Three crowns! ' : '') + quote).trim();
     $('#resLine').hidden = !$('#resLine').textContent;
     const un = $('#resUnlock'), tr = $('#resTrophy');
-    const goldNote = res.gold ? `+${res.gold} coins${res.goldLeft === 0 ? ' (the last paid win today)' : ''}` : '';
+    const goldNote = res.gold ? `+${res.gold} rubies${res.goldLeft === 0 ? ' (the last paid win today)' : ''}` : '';
     const notes = [goldNote, res.unlockedNext ? `${res.unlockedNext.name} unlocked!` : '', res.roadOpened ? 'Trophy Road unlocked!' : '',
       res.chest ? `${res.chest.name} earned!` : '', res.slotsFull ? 'Chest slots full: open one to make room' : '',
       res.newArena ? `${res.newArena.name} reached!` : '', res.newRewards ? 'Trophy Road reward ready!' : '', res.levelUp ? `Level ${res.levelUp}!` : '',

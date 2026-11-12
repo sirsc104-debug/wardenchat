@@ -1,6 +1,6 @@
 /* Kingdom Clash: the full-screen scenes for growing a card. One scene for each way:
 
-   - Upgrade with coins: the card's copies stream out of its bar and coins pour in, the card charges up
+   - Upgrade with rubies: the card's copies stream out of its bar and rubies pour in, the card charges up
      and shakes, then bursts: the level number slams to the new one and the stats count up.
    - Hammer of Books: the hammer swings in and strikes the card three times (sparks, cracks of light,
      the screen shakes), and on the third strike the card bursts into a rainbow level-up.
@@ -107,7 +107,7 @@ const KCUpgradeFX = (() => {
         c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
         for (let k = 1; k < p.trail.length; k++) {
           const f = k / p.trail.length;
-          c.globalAlpha = f * 0.7; c.strokeStyle = p.col; c.lineWidth = 1 + f * (p.kind === 'coin' ? 4 : 6);
+          c.globalAlpha = f * 0.7; c.strokeStyle = p.col; c.lineWidth = 1 + f * (p.kind === 'ruby' ? 4 : 6);
           c.beginPath(); c.moveTo(p.trail[k - 1][0], p.trail[k - 1][1]); c.lineTo(p.trail[k][0], p.trail[k][1]); c.stroke();
         }
         c.restore();
@@ -132,10 +132,13 @@ const KCUpgradeFX = (() => {
   }
   function drawThing(c, p, sc) {
     const x = p.x, y = p.y;
-    if (p.kind === 'coin') {
-      const r = 8 * sc;
-      c.beginPath(); c.ellipse(x, y, r * Math.abs(Math.cos(p.spin)) + 1.2, r, 0, 0, 6.3);
-      c.fillStyle = '#ffd23f'; c.fill(); c.lineWidth = 1.6; c.strokeStyle = '#8a5a05'; c.stroke();
+    if (p.kind === 'ruby') {
+      // a little ruby, turning
+      const r = 8 * sc, k = Math.abs(Math.cos(p.spin)) * 0.8 + 0.2;
+      c.beginPath(); c.moveTo(x - r * 0.55 * k, y - r * 0.7); c.lineTo(x + r * 0.55 * k, y - r * 0.7); c.lineTo(x + r * k, y - r * 0.15); c.lineTo(x, y + r); c.lineTo(x - r * k, y - r * 0.15); c.closePath();
+      c.fillStyle = '#e0303f'; c.fill(); c.lineWidth = 1.6; c.strokeStyle = '#1c1530'; c.stroke();
+      c.beginPath(); c.moveTo(x - r * 0.55 * k, y - r * 0.7); c.lineTo(x + r * 0.55 * k, y - r * 0.7); c.lineTo(x + r * 0.3 * k, y - r * 0.15); c.lineTo(x - r * 0.3 * k, y - r * 0.15); c.closePath();
+      c.fillStyle = '#ff9aa2'; c.fill();
     } else if (p.kind === 'copy' || p.kind === 'page') {
       // a little card (a copy) or a page of a book, tumbling
       c.save(); c.translate(x, y); c.rotate(Math.sin(p.spin) * 0.6);
@@ -186,7 +189,7 @@ const KCUpgradeFX = (() => {
   /* ---------- open, skip, close ---------- */
   // d: { mode: 'upgrade' | 'hammer' | 'wild' | 'book', id, name, img, rarity, title, itemSvg (for the
   //      item modes), item, before: { level, count, need, max }, after: { level, count, need, max },
-  //      gives (copies added), cost (coins), xp, levelUp (new account level, if any),
+  //      gives (copies added), cost (rubies), xp, levelUp (new account level, if any),
   //      stats: [[label, before, after]], onClose }
   function play(d) {
     build();
@@ -214,7 +217,7 @@ const KCUpgradeFX = (() => {
     if (calm) { finish(false); return; }
     // a sound the moment the scene opens, so the tap is answered at once
     snd(d.mode === 'upgrade' || d.mode === 'king' ? 'upgradeGo' : 'itemGather');
-    ({ upgrade: coinsRun, hammer: hammerRun, wild: wildRun, book: bookRun, evo: evoRun, king: kingRun })[d.mode]();
+    ({ upgrade: rubiesRun, hammer: hammerRun, wild: wildRun, book: bookRun, evo: evoRun, king: kingRun })[d.mode]();
   }
   function tap() { if (!S) return; if (!S.finished) finish(true); else close(); }
   function end(quiet) {
@@ -316,8 +319,8 @@ const KCUpgradeFX = (() => {
     later(finish, (d.levelUp ? 1900 : 1500) + (grand ? 700 : 0));
   }
 
-  /* ---------- upgrade with coins ---------- */
-  function coinsRun() {
+  /* ---------- upgrade with rubies ---------- */
+  function rubiesRun() {
     const d = S.d, card = $('usCard'), barEl = $('usBar');
     later(() => {
       const [bx, by, bw] = center(barEl), [cx, cy] = center(card), copies = Math.min(10, Math.max(3, d.before.need));
@@ -327,13 +330,13 @@ const KCUpgradeFX = (() => {
         fly('copy', sx, by, cx + (Math.random() - 0.5) * 30, cy + (Math.random() - 0.5) * 30, 0.5, colors()[0], () => { snd('partSnap'); sparks(cx, cy, 3, colors(), 140); });
         bar(d.before.need * (1 - (i + 1) / copies), d.before.need, false);
       }, i * 70);
-      // coins pour in from below
-      const coins = 16;
-      for (let i = 0; i < coins; i++) later(() => {
+      // rubies pour in from below
+      const rubies = 16;
+      for (let i = 0; i < rubies; i++) later(() => {
         const a = Math.PI * (0.15 + 0.7 * Math.random()), R = Math.max(innerWidth, innerHeight) * 0.55;
-        fly('coin', cx + Math.cos(a) * R * (Math.random() < 0.5 ? -1 : 1), cy + Math.sin(a) * R, cx, cy, 0.55 + Math.random() * 0.2, '#ffd23f', () => snd('coinTick'));
+        fly('ruby', cx + Math.cos(a) * R * (Math.random() < 0.5 ? -1 : 1), cy + Math.sin(a) * R, cx, cy, 0.55 + Math.random() * 0.2, '#e0303f', () => snd('rubyTick'));
       }, 180 + i * 55);
-      $('usGain').innerHTML = `<span class="spent"><i class="coin-i" aria-hidden="true"></i>−${fmt(d.cost)}</span>`; $('usGain').className = 'us-gain on';
+      $('usGain').innerHTML = `<span class="spent"><i class="ruby-i" aria-hidden="true"></i>−${fmt(d.cost)}</span>`; $('usGain').className = 'us-gain on';
     }, 180);
     later(() => { card.className = 'us-card charging'; snd('charge'); }, 850);
     later(() => levelBurst(false), 1950);

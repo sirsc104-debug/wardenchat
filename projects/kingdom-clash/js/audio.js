@@ -48,7 +48,7 @@ const KCSound = (() => {
     revealCommon: () => [659, 880].forEach((f, i) => tone(f, 0, 0.16, 'triangle', 0.15, i * 0.08)),
     revealRare: () => { [659, 880, 1175, 1568].forEach((f, i) => tone(f, 0, 0.22, 'triangle', 0.16, i * 0.07)); noise(0.4, 0.05, 5000, 'highpass', 0.1); },
     revealNew: () => { [523, 659, 784, 1047, 1319, 1568].forEach((f, i) => tone(f, 0, i === 5 ? 0.6 : 0.2, 'triangle', 0.17, i * 0.08)); noise(0.6, 0.06, 5200, 'highpass', 0.1); },
-    coinTick: () => tone(1250 + Math.random() * 500, 0, 0.05, 'square', 0.045),
+    rubyTick: () => tone(1250 + Math.random() * 500, 0, 0.05, 'square', 0.045),
     countTick: () => tone(900 + Math.random() * 200, 0, 0.035, 'triangle', 0.07),
     chestDone: () => [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0, i === 3 ? 0.45 : 0.16, 'triangle', 0.16, i * 0.1)),
     // a magic item gathering, each part snapping in (a rising scale), and the item forming

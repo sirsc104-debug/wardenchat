@@ -37,10 +37,10 @@ assert.strictEqual(G.startUnlock(0, t0), 'ok');
 assert.strictEqual(G.startUnlock(1, t0), 'busy');
 assert.strictEqual(G.chestState(0, t0 + 59_000), 'unlocking');
 assert.strictEqual(G.openChest(0, t0 + 59_000), null);
-const coinsBefore = P.coins, countsBefore = KC_ALL_CARDS.reduce((a, id) => a + P.cards[id].count, 0);
+const rubiesBefore = P.rubies, countsBefore = KC_ALL_CARDS.reduce((a, id) => a + P.cards[id].count, 0);
 const got = G.openChest(0, t0 + 60_000);
-assert(got && got.coins >= 15 && got.cards.reduce((a, c) => a + c.n, 0) >= 6, 'at least a tier-1 wooden chest');
-assert.strictEqual(P.coins, coinsBefore + got.coins);
+assert(got && got.rubies >= G.chestOdds('wooden', { trophies: 0, level: 1 }).rubies[0] && got.cards.reduce((a, c) => a + c.n, 0) >= G.chestOdds('wooden', { trophies: 0, level: 1 }).cards, 'at least an Arena 1 wooden chest');
+assert.strictEqual(P.rubies, rubiesBefore + got.rubies);
 assert.strictEqual(KC_ALL_CARDS.reduce((a, id) => a + P.cards[id].count, 0), countsBefore + got.cards.reduce((a, c) => a + c.n - (c.isNew ? 1 : 0), 0), 'a new card\'s first copy unlocks it');
 assert(got.cards.every(c => KC_STARTER_DECK.includes(c.id) || G.ARENAS[0].cards.includes(c.id)), 'only found cards and cards of your arena drop');
 assert.strictEqual(P.chests[0], null);
@@ -53,13 +53,13 @@ assert.deepStrictEqual(claimed, [20, 40, 60, 90, 120]);
 for (const at of claimed) assert(G.claim(at));
 assert(P.found.includes('skeletons') && P.found.includes('cannon'));
 assert.strictEqual(G.claim(160), null, 'not reached yet');
-console.log('road rewards: ok, coins', P.coins);
+console.log('road rewards: ok, rubies', P.rubies);
 
-// 6. Upgrades need copies and coins; the deck takes found cards and swaps.
-P.coins = 1000; P.cards.wolves.count = 5;
+// 6. Upgrades need copies and rubies; the deck takes found cards and swaps.
+P.rubies = 1000; P.cards.wolves.count = 5;
 let u = G.upgradeInfo('wolves'); assert(u.can && u.need === 2 && u.cost === 5);
 assert.strictEqual(G.upgrade('wolves').level, 2);
-assert.strictEqual(P.cards.wolves.count, 3); assert.strictEqual(P.coins, 995);
+assert.strictEqual(P.cards.wolves.count, 3); assert.strictEqual(P.rubies, 995);
 assert.strictEqual(G.upgradeInfo('wolves').need, 4);
 assert(G.setDeck(1, 'skeletons')); assert.strictEqual(P.deck[1], 'skeletons'); assert(!P.deck.includes('wolves'));
 assert(G.setDeck(0, 'skeletons')); assert.strictEqual(P.deck[0], 'skeletons'); assert.strictEqual(P.deck[1], 'rhino');
@@ -79,12 +79,12 @@ console.log('save and reload: ok');
 // 7b. The Shop: five offers from the cards you have found and their levels.
 {
   const day1 = new Date(2026, 10, 11, 9, 0, 0).getTime(), day2 = new Date(2026, 10, 12, 0, 0, 5).getTime();
-  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, coins: 300, cards: { wolves: { level: 2, count: 3 }, rhino: { level: 3, count: 0 }, gladiator: { level: 1, count: 1 } } }) }));
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, rubies: 300, cards: { wolves: { level: 2, count: 3 }, rhino: { level: 3, count: 0 }, gladiator: { level: 1, count: 1 } } }) }));
   const P3 = G.state;
   assert.strictEqual(P3.diamonds, 0, 'old saves start with no diamonds');
   const sh = G.shop(day1, KCSim.mulberry(5)), o = sh.offers;
   assert.strictEqual(o.length, 5);
-  assert.deepStrictEqual(o.map(x => x.currency), ['coins', 'coins', 'coins', 'diamonds', 'diamonds']);
+  assert.deepStrictEqual(o.map(x => x.currency), ['rubies', 'rubies', 'rubies', 'diamonds', 'diamonds']);
   const cardsOffered = o.filter(x => x.kind === 'card').map(x => x.card);
   assert.strictEqual(new Set(cardsOffered).size, 4, 'four different cards');
   assert(cardsOffered.every(id => P3.found.includes(id)), 'only cards you have found');
@@ -94,20 +94,20 @@ console.log('save and reload: ok');
   assert.strictEqual(KC_CARDS[o[1].card].rarity, 'rare');
   assert.strictEqual(o[1].price, o[1].qty * 200);
   assert.strictEqual(P3.cards[o[2].card].level, 1, 'catch-up offer is a lowest-level card');
-  assert(o[3].price === 1 && o[3].qty === (KC_CARDS[o[3].card].rarity === 'rare' ? 25 : 250), 'mega bundle: 5,000 coins of copies for 1 diamond');
-  assert.deepStrictEqual([o[4].kind, o[4].qty, o[4].price], ['coins', 5000, 1]);
+  assert(o[3].price === 1 && o[3].qty === G.ECONOMY.shop.megaQty[KC_CARDS[o[3].card].rarity], 'mega bundle: 100 commons or 20 rares for 1 diamond');
+  assert.deepStrictEqual([o[4].kind, o[4].qty, o[4].price], ['rubies', 5000, 1]);
   assert.strictEqual(G.shop(day1 + 3600e3).offers, o, 'same offers all day');
   // buying
   const before = P3.cards[o[0].card].count;
   let r = G.buy(0, day1);
-  assert(r.ok && P3.coins === 280 && P3.cards[o[0].card].count === before + 1);
+  assert(r.ok && P3.rubies === 280 && P3.cards[o[0].card].count === before + 1);
   assert.strictEqual(G.buy(0, day1).error, 'sold');
   assert.strictEqual(G.buy(3, day1).error, 'diamonds', 'no diamonds yet');
-  P3.coins = 0; assert.strictEqual(G.buy(1, day1).error, 'coins');
+  P3.rubies = 0; assert.strictEqual(G.buy(1, day1).error, 'rubies');
   G.grantTest();
-  assert(P3.coins === 1000000 && P3.diamonds === 1000000);
-  r = G.buy(4, day1); assert(r.ok && P3.diamonds === 999999 && P3.coins === 1005000);
-  r = G.buy(4, day1); assert(r.ok && P3.coins === 1010000, 'the coin bundle can be bought again');
+  assert(P3.rubies === 1000000 && P3.diamonds === 1000000);
+  r = G.buy(4, day1); assert(r.ok && P3.diamonds === 999999 && P3.rubies === 1005000);
+  r = G.buy(4, day1); assert(r.ok && P3.rubies === 1010000, 'the ruby bundle can be bought again');
   r = G.buy(3, day1); assert(r.ok && P3.diamonds === 999997 && r.cards[0].n === o[3].qty);
   // offers follow your cards: find the Skeleton Pack, level things up, next day
   P3.trophies = 60; G.claim(40);
@@ -121,20 +121,27 @@ console.log('save and reload: ok');
   for (const id of KC_STARTER_DECK) P3.cards[id].level = 15;
   const o3 = G.refreshShop(KCSim.mulberry(7), day2).offers;
   assert(o3.filter(x => x.kind === 'card').every(x => x.card === 'skeletons'), 'only the card that can still level up');
-  // the chest row: coins only, any number of times, contents hidden until opened, free wooden chest daily
-  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, coins: 2000, diamonds: 50 }) }));
+  // the chest row: rubies only, one of each a day, bigger chests from later arenas, free wooden chest daily
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, rubies: 2000, diamonds: 50 }) }));
   const P4 = G.state;
   const prices = G.TIERS.map(t => G.chestPrice(t));
   assert(prices.every((v, i) => i === 0 || v > prices[i - 1]), 'better chests cost more ' + prices);
   for (const lv of [1, 5, 12, 30, 80]) for (const tr of [0, 400, 900, 4000]) for (const t of G.TIERS)
-    assert(G.chestOdds(t, { level: lv, trophies: tr }).coins[1] < G.chestPrice(t, { level: lv, trophies: tr }), `a ${t} chest never pays back its price (level ${lv}, ${tr} trophies)`);
+    assert(G.chestOdds(t, { level: lv, trophies: tr }).rubies[1] < G.chestPrice(t, { level: lv, trophies: tr }), `a ${t} chest never pays back its price (level ${lv}, ${tr} trophies)`);
   const silverPrice = G.chestPrice('silver');
   let rc = G.buyChest('silver', KCSim.mulberry(1));
-  assert(rc.ok && P4.coins === 2000 - silverPrice + rc.coins && P4.diamonds === 50, 'paid in coins, diamonds untouched');
+  assert(rc.ok && P4.rubies === 2000 - silverPrice + rc.rubies && P4.diamonds === 50, 'paid in rubies, diamonds untouched');
   assert(rc.cards.reduce((a, c) => a + c.n, 0) >= G.chestOdds('silver').cards);
-  const coinsNow = P4.coins; rc = G.buyChest('silver');
-  assert(rc.ok && P4.coins === coinsNow - silverPrice + rc.coins, 'the same chest can be bought again');
-  assert.strictEqual(G.buyChest('mythic').error, 'coins');
+  const rubiesNow = P4.rubies;
+  assert(G.buyChest('silver').error === 'sold' && P4.rubies === rubiesNow && G.chestBuyLeft('silver') === 0, 'one silver chest a day');
+  assert(G.chestBuyLeft('silver', Date.now() + 86400e3) === 1, 'another tomorrow');
+  assert(G.buyChest('silver', KCSim.mulberry(2), Date.now() + 86400e3).ok, 'bought the next day');
+  assert.strictEqual(G.buyChest('gold').error, 'locked', 'gold chests are sold from Arena 2');
+  assert(!G.chestShopOpen('platinum') && !G.chestShopOpen('mythic'));
+  P4.best = 950; P4.trophies = 950; P4.rubies = 100;
+  assert(G.chestShopOpen('mythic') && G.buyChest('mythic').error === 'rubies', 'mythic in the Shop from Arena 4, priced high');
+  assert(G.chestPrice('mythic') > 20000, 'a bought mythic costs tens of thousands of rubies ' + G.chestPrice('mythic'));
+  P4.best = 0; P4.trophies = 0;
   assert.strictEqual(P4.chests.filter(Boolean).length, 0, 'shop chests do not use the chest slots');
   // free wooden chest, once a day
   assert(G.freeChestReady(day1));
@@ -143,13 +150,14 @@ console.log('save and reload: ok');
   assert(G.freeChestReady(day2) && G.claimFreeChest(day2).ok, 'a new free chest the next day');
   // contents follow trophies first, then account level; a new arena is a clear step up
   const odds = (lv, tr) => G.chestOdds('gold', { level: lv, trophies: tr });
-  assert.strictEqual(odds(1, 0).cards, 40);
-  assert(odds(1, 300).cards > odds(1, 299).cards * 1.15 && odds(1, 300).coins[0] > odds(1, 299).coins[0] * 1.2, 'reaching an arena is a step up');
-  assert(odds(12, 100).cards > odds(2, 100).cards && odds(12, 100).coins[0] > odds(2, 100).coins[0], 'account level adds more in the same arena');
-  assert(odds(12, 4000).coins[0] > odds(2, 100).coins[0] * 3 && odds(12, 4000).cards > odds(2, 100).cards * 2.5, 'level 12 at 4,000 trophies far beyond level 2 at 100');
-  assert.strictEqual(odds(40, 900).coins[0], odds(400, 900).coins[0], 'the level bonus stops at the cap');
-  assert(odds(1, 1e9).coins[0] === odds(1, 900 + 300 * 100).coins[0], 'past the last arena the bonus stops too');
-  assert(odds(-5, -100).cards === 40 && Number.isFinite(odds('x', NaN).cards), 'bad numbers are treated as the lowest');
+  assert.strictEqual(odds(1, 0).cards, Math.round(40 * G.ECONOMY.arenaCards[1]));
+  assert(odds(1, 300).cards > odds(1, 299).cards * 1.15 && odds(1, 300).rubies[0] > odds(1, 299).rubies[0] * 1.15, 'reaching an arena is a step up');
+  assert(odds(1, 1500).rubies[0] > odds(1, 1199).rubies[0] * 1.8, 'past Arena 4 rewards climb steeply');
+  assert(odds(12, 100).cards > odds(2, 100).cards && odds(12, 100).rubies[0] > odds(2, 100).rubies[0], 'account level adds more in the same arena');
+  assert(odds(12, 4000).rubies[0] > odds(2, 100).rubies[0] * 3 && odds(12, 4000).cards > odds(2, 100).cards * 2.5, 'level 12 at 4,000 trophies far beyond level 2 at 100');
+  assert.strictEqual(odds(40, 900).rubies[0], odds(400, 900).rubies[0], 'the level bonus stops at the cap');
+  assert(odds(1, 1e9).rubies[0] === odds(1, 900 + 300 * 100).rubies[0], 'past the last arena the bonus stops too');
+  assert(odds(-5, -100).cards === odds(1, 0).cards && Number.isFinite(odds('x', NaN).cards), 'bad numbers are treated as the lowest');
   // a high account level alone never brings cards of arenas you haven't reached
   P4.xp = 99999; P4.trophies = 0; P4.best = 0;
   assert(!G.chestPool().some(id => ['spears', 'mole', 'owl', 'camel', 'thundercloud'].includes(id)));
@@ -181,7 +189,7 @@ console.log('save and reload: ok');
   assert(wr2.newArena && wr2.newArena.id === 'briar' && G.arena().number === 2, 'Briar Hollow at 300');
   assert(G.wildActive());
   const silver = G.roll('silver', KCSim.mulberry(3)).items;
-  assert(silver.some(x => x.id === 'wild_common' && x.n >= 2), 'silver chests give common wild cards in Arena 2');
+  assert(silver.some(x => x.id === 'wild_common' && x.n >= 1), 'silver chests give common wild cards in Arena 2');
   assert.strictEqual(G.roll('wooden', KCSim.mulberry(3)).items.filter(x => x.id.startsWith('wild_')).length, 0);
   P5.trophies = 600; G.claim(300);
   for (const at of [330, 400, 480, 560]) { const r = G.claim(at); assert(r && r.cards[0].isNew, `card at ${at}`); }
@@ -205,24 +213,31 @@ console.log('save and reload: ok');
   // Using magic items
   P5.cards.wolves.level = 3; P5.cards.wolves.count = 1;           // needs 10 for level 4
   P5.cards.rhino.level = 3; P5.cards.rhino.count = 0;              // rare, from level 3: needs 2
-  P5.coins = 0; P5.magic = { wild_common: 4, book_common: 1, book_rare: 1, book_books: 1, hammer_books: 1 };
+  P5.rubies = 0; P5.magic = { wild_common: 4, book_common: 1, book_rare: 1, book_books: 1, hammer_books: 1 };
   assert.strictEqual(G.magicFor('wild_rare', 'wolves').reason, 'none-held');
   assert.strictEqual(G.magicFor('book_rare', 'wolves').reason, 'rarity');
   let mu = G.useMagic('wild_common', 'wolves'); assert(mu.ok && mu.gives === 4 && P5.cards.wolves.count === 5 && P5.magic.wild_common === 0, 'wild cards add up to what is held');
   assert(G.magicFor('hammer_books', 'wolves').ok && G.magicFor('hammer_books', 'wolves').fills === 5, 'the hammer fills missing copies');
   mu = G.useMagic('book_common', 'wolves'); assert(mu.ok && P5.cards.wolves.count === 10 && P5.magic.book_common === 0, 'a book fills the rest');
   assert.strictEqual(G.magicFor('book_books', 'wolves').reason, 'full');
-  mu = G.useMagic('hammer_books', 'wolves'); assert(mu.ok && P5.cards.wolves.level === 4 && P5.cards.wolves.count === 0 && P5.coins === 0, 'the hammer upgrades without coins');
+  mu = G.useMagic('hammer_books', 'wolves'); assert(mu.ok && P5.cards.wolves.level === 4 && P5.cards.wolves.count === 0 && P5.rubies === 0, 'the hammer upgrades without rubies');
   mu = G.useMagic('book_books', 'rhino'); assert(mu.ok && P5.cards.rhino.count === 2, 'the Book of Books works on a rare');
   assert.strictEqual(G.magicFor('shards', 'rhino').reason, 'none-held');
   const P6 = G.load(st0 = mem({ 'kc.progress': JSON.stringify(P5) }));
   assert.strictEqual(P6.cards.wolves.level, 4); assert.strictEqual(G.magicCount('book_books'), 0);
   console.log('wild cards, books, Book of Books and the Hammer of Books: ok');
-  console.log('shop offers, prices, buying, daily change, chests for coins: ok');
+  console.log('shop offers, prices, buying, daily change, chests for rubies: ok');
 }
 
 // 8. Opponents level their cards one at a time as their trophies rise, and they have no lines.
-for (const [t, want] of [[0, 0], [49, 0], [50, 1], [62, 1], [63, 2], [137, 7], [138, 8], [149, 8], [150, 9], [250, 17], [1437, 111], [1438, 112], [9999, 112]]) assert.strictEqual(G.foeUpgrades(t), want, `upgrades at ${t}`);
+// the curve: average card level (before rares are raised) 1 at 50, 4.5 at 300, 6.5 at 600, 7.5 at 900, 8.5 at 1,200, 12 at 2,000, 15 at 4,000
+for (const [t, want] of [[0, 0], [49, 0], [50, 0], [300, 28], [600, 44], [900, 52], [1200, 60], [1500, 72], [2000, 88], [3000, 100], [4000, 112], [9999, 112], [-5, 0]]) assert.strictEqual(G.foeUpgrades(t), want, `upgrades at ${t}`);
+for (let t = 0; t < 4500; t += 10) assert(G.foeUpgrades(t + 10) >= G.foeUpgrades(t), 'never fewer upgrades with more trophies');
+// their King Tower uses the players' rule (N cards at level N), counting their collection along with the deck past 8
+assert.strictEqual(G.foeKing([3, 3, 3, 3, 2, 2, 1, 1]), 3);
+assert.strictEqual(G.foeKing([9, 9, 9, 9, 8, 8, 8, 8]), 8);
+assert.strictEqual(G.foeKing([9, 9, 9, 9, 9, 9, 9, 9]), 9);
+assert.strictEqual(G.foeKing(Array(8).fill(15)), 15);
 const tally = l => Object.values(l).sort().join('');
 const ids8 = KC_STARTER_DECK;
 assert.strictEqual(tally(G.spreadLevels(0, ids8)), '11111111');
@@ -251,7 +266,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
 
   // Arena 3, Sunstone Arena: its four cards, evolutions and the Diamond Pass
   {
-    G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 590, best: 590, claimed: { 0: true }, coins: 0, diamonds: 20 }) }));
+    G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 590, best: 590, claimed: { 0: true }, rubies: 0, diamonds: 20 }) }));
     const P6 = G.state;
     assert(!G.passOpen() && !G.evoOpen(), 'pass and evolutions wait for Arena 3');
     assert.strictEqual(G.recordTrophy(1, 1).pass, null, 'no pass crowns before Arena 3');
@@ -284,7 +299,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
     assert.strictEqual(G.passTier(), 1);
     assert.strictEqual(G.passState(0, 'free'), 'ready');
     assert.strictEqual(G.passState(0, 'paid'), 'premium');
-    assert(G.claimPass(0, 'free').coins === 2500);
+    assert(G.claimPass(0, 'free').rubies === 375);
     assert.strictEqual(G.claimPass(0, 'free'), null, 'a reward is claimed once');
     assert.strictEqual(G.buyPass().ok, true); assert.strictEqual(P6.diamonds, 20 - G.PASS.price);
     assert.strictEqual(G.buyPass().error, 'owned');
@@ -325,22 +340,22 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   }
   for (const id of KC_ALL_CARDS) assert.strictEqual(KC_MIN_LEVEL(id), start[KC_CARDS[id].rarity], id);
   // an old save with a level-1 legendary, bad numbers and a hacked level is repaired, not reset
-  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 1300, best: 900, coins: -50, diamonds: 'lots', xp: 4000,
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 1300, best: 900, rubies: -50, diamonds: 'lots', xp: 4000,
     found: ['wolves', 'rhino', 'griffin'], cards: { wolves: { level: 99, count: -3 }, rhino: { level: 1, count: 7 }, griffin: { level: 2, count: 1.7 } } }) }));
   const Q = G.state;
-  assert(Q.coins === 0 && Q.diamonds === 0 && Q.xp === 4000 && Q.best === 1300, 'bad wallets go to 0; best is at least the trophies');
+  assert(Q.rubies === 0 && Q.diamonds === 0 && Q.xp === 4000 && Q.best === 1300, 'bad wallets go to 0; best is at least the trophies');
   assert(Q.cards.wolves.level === 15 && Q.cards.wolves.count === 0, 'levels above 15 are capped, negative copies cleared');
   assert(Q.cards.rhino.level === 3 && Q.cards.rhino.count === 7 && Q.cards.griffin.level === 9 && Q.cards.griffin.count === 1, 'rarities lifted to their start, copies kept');
   // upgrade costs come straight from the tables
-  Q.cards.rhino.count = 2; Q.coins = 50;
+  Q.cards.rhino.count = 2; Q.rubies = 50;
   let u = G.upgradeInfo('rhino'); assert(u.need === 2 && u.cost === 50 && u.can, JSON.stringify(u));
-  assert(G.upgrade('rhino') && Q.cards.rhino.level === 4 && Q.coins === 0 && Q.cards.rhino.count === 0, 'upgrading takes the copies and the gold');
+  assert(G.upgrade('rhino') && Q.cards.rhino.level === 4 && Q.rubies === 0 && Q.cards.rhino.count === 0, 'upgrading takes the copies and the gold');
   u = G.upgradeInfo('rhino'); assert(u.need === 4 && u.cost === 150 && !u.can);
   // a new card: the first copy unlocks it and isn't a duplicate
   Q.found = ['wolves', 'rhino']; Q.cards.owl.count = 0;
   const before = Q.cards.wolves.count;
   G.load(mem({ 'kc.progress': JSON.stringify(Q) }));
-  const c = { coins: 0, cards: [{ id: 'owl', n: 3 }, { id: 'wolves', n: 5 }], items: [] };
+  const c = { rubies: 0, cards: [{ id: 'owl', n: 3 }, { id: 'wolves', n: 5 }], items: [] };
   G.state.chests = [{ type: 'wooden', state: 'unlocking', ends: 0, contents: c }, null, null, null];
   G.openChest(0, 1);
   assert(G.state.found.includes('owl') && G.state.cards.owl.count === 2 && G.state.cards.wolves.count === before + 5, 'first copy unlocks');
@@ -353,7 +368,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
       assert(x.cards.reduce((a, k) => a + k.n, 0) >= o.cards, `${t} gives all its cards`);
       assert(cnt(x, 'rare') >= o.rares, `${t} rare floor`);
       assert(cnt(x, 'epic') >= o.epicMin && cnt(x, 'legendary') >= o.legendaryMin, `${t} epic and legendary floors`);
-      assert(x.coins >= o.coins[0] && x.coins <= o.coins[1]);
+      assert(x.rubies >= o.rubies[0] && x.rubies <= o.rubies[1]);
     }
     assert(cnt(G.roll('wooden', rr), 'legendary') === 0, 'no legendaries from wooden chests');
   }
@@ -363,7 +378,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   for (let i = 0; i < 200; i++) assert(G.roll('mythic', rr).cards.every(k => G.chestPool().includes(k.id)));
   assert(!G.chestPool().some(id => ['bees', 'owl', 'thundercloud', 'griffin', 'camel'].includes(id)), 'level alone opens no arena cards');
   // win gold: a few per win, for the first 20 wins of a day only
-  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 100, best: 100, claimed: { 0: true }, coins: 0 }) }));
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 100, best: 100, claimed: { 0: true }, rubies: 0 }) }));
   let paid = 0, last;
   for (let i = 0; i < 25; i++) { const g = G.winGold(); last = G.recordTrophy(0, 1); if (last.gold) { paid++; assert(last.gold >= g && last.gold < g * 1.5); } }
   assert.strictEqual(paid, 20, 'twenty paid wins a day');
@@ -375,8 +390,8 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
 
 // Diamonds skip a chest's timer: 1 per 5 minutes left, rounded up
 {
-  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 100, best: 100, claimed: { 0: true }, diamonds: 200, coins: 0 }) }));
-  const Q = G.state, t0 = 1e12, mk = type => ({ type, state: 'locked', contents: { coins: 10, cards: [{ id: 'wolves', n: 2 }], items: [] } });
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 100, best: 100, claimed: { 0: true }, diamonds: 200, rubies: 0 }) }));
+  const Q = G.state, t0 = 1e12, mk = type => ({ type, state: 'locked', contents: { rubies: 10, cards: [{ id: 'wolves', n: 2 }], items: [] } });
   Q.chests = [mk('wooden'), mk('silver'), mk('mythic'), mk('gold')];
   assert.deepStrictEqual([0, 1, 2, 3].map(i => G.skipCost(i, t0)), [1, 3, 144, 12], 'whole timers: 1 min, 15 min, 12 h, 1 h');
   G.startUnlock(3, t0);
@@ -385,7 +400,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   assert.strictEqual(G.skipCost(3, t0 + 3600e3), 0, 'nothing to skip once it is ready');
   const w = Q.cards.wolves.count;
   let r = G.skipChest(1, t0 + 60e3);
-  assert(r.chest === 'silver' && r.cost === 3 && Q.diamonds === 197 && Q.chests[1] === null && Q.coins === 10 && Q.cards.wolves.count === w + 2, 'pays and opens at once');
+  assert(r.chest === 'silver' && r.cost === 3 && Q.diamonds === 197 && Q.chests[1] === null && Q.rubies === 10 && Q.cards.wolves.count === w + 2, 'pays and opens at once');
   assert.strictEqual(G.chestState(3, t0 + 60e3), 'unlocking', 'the chest already unlocking carries on');
   Q.diamonds = 100;
   r = G.skipChest(2, t0); assert(r.error === 'diamonds' && r.cost === 144 && Q.diamonds === 100 && Q.chests[2], 'not enough diamonds: nothing changes');
@@ -393,9 +408,39 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   console.log('skipping chest timers with diamonds (1 per 5 minutes): ok');
 }
 
+// Rubies: an older save's coins become rubies (in its chests and Shop offers too); wallet Coins swap
+// one way for rubies, up to a daily cap set by the highest arena reached
+{
+  const old = { beaten: { owen: true, romeo: true, luc: true }, trophies: 950, best: 950, coins: 12345, diamonds: 7,
+    chests: [{ type: 'silver', state: 'locked', contents: { coins: 40, cards: [{ id: 'wolves', n: 3 }], items: [] } }, null, null, null],
+    shop: { day: 'x', offers: [{ id: 'o4', kind: 'coins', qty: 5000, currency: 'diamonds', price: 1 }], bought: {} } };
+  G.load(mem({ 'kc.progress': JSON.stringify(old) }));
+  const Q = G.state;
+  assert(Q.rubies === 12345 && Q.coins === undefined && Q.wallet === 0 && Q.diamonds === 7, 'coins became rubies one for one');
+  assert(Q.chests[0].contents.rubies === 40 && Q.chests[0].contents.coins === undefined && Q.shop.offers[0].kind === 'rubies', 'in chests and offers too');
+  const t0 = new Date(2026, 10, 12, 10).getTime();
+  assert.deepStrictEqual([G.exchangeInfo(t0).cap, G.exchangeInfo(t0).left], [4000, 4000], 'Arena 4: 4,000 a day');
+  assert.strictEqual(G.exchange(10, t0).error, 'coins', 'no coins yet');
+  Q.wallet = 1e6;
+  for (const bad of [0, -5, 'x', NaN]) assert.strictEqual(G.exchange(bad, t0).error, 'amount');
+  let x = G.exchange(2500.7, t0);
+  assert(x.ok && x.coins === 2500 && Q.wallet === 1e6 - 2500 && Q.rubies === 12345 + 2500, 'whole coins, one ruby each');
+  assert.strictEqual(G.exchange(1501, t0).error, 'cap', 'only 1,500 left today');
+  assert(G.exchange(1500, t0 + 3600e3).ok && G.exchangeInfo(t0).left === 0);
+  assert(G.exchangeInfo(t0 + 86400e3).left === 4000, 'a new limit the next day');
+  const caps = [[0, 500], [300, 1000], [600, 2000], [900, 4000], [1199, 4000], [1200, 5000], [2100, 8000], [9000, 10000]].map(([b, c]) => { Q.best = b; return [b, G.exchangeInfo(t0).cap === c]; });
+  assert(caps.every(c => c[1]), 'caps by arena ' + JSON.stringify(caps));
+  Q.best = 1500; Q.trophies = 200;
+  assert.strictEqual(G.exchangeInfo(t0 + 86400e3).cap, 6000, 'the cap follows the best trophies, not a drop');
+  G.load(mem({ 'kc.progress': JSON.stringify(Object.assign({}, Q, { wallet: -9, walletDay: 'junk' })) }));
+  assert(G.state.wallet === 0 && G.state.walletDay.n === 0, 'bad wallet values are cleared');
+  assert(G.state.rubies === 12345 + 4000, 'rubies carried over');
+  console.log('rubies from old coins, wallet Coins to Rubies with daily caps by arena: ok');
+}
+
 // King Tower levels, emotes in the Shop, and chests giving cards of your arena before the road does
 {
-  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 320, best: 320, claimed: { 0: true }, coins: 10000 }) }));
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 320, best: 320, claimed: { 0: true }, rubies: 10000 }) }));
   const P7 = G.state;
   assert.strictEqual(G.kingInfo().level, 1);
   assert(P7.found.filter(id => KC_MIN_LEVEL(id) > 1).every(id => P7.cards[id].level === KC_MIN_LEVEL(id)), 'rares arrive at level 3');
@@ -414,7 +459,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   assert.strictEqual(G.upgradeKing().level, 15); assert(G.kingInfo().max && G.upgradeKing() === null);
   const foe = G.trophyFoe(KCSim.mulberry(3));
   assert(foe.kingLevel >= 1 && foe.kingLevel <= 15, 'opponents have a King Tower level');
-  // emotes: 15 in all, the same 3 all day, a new set tomorrow, bought for coins
+  // emotes: 15 in all, the same 3 all day, a new set tomorrow, bought for rubies
   assert.strictEqual(G.EMOTES.length, 15 + KC_ALL_CARDS.length, '15 emotes and one for every card');
   for (const id of KC_ALL_CARDS) assert(G.EMOTES.some(e => e.id === 'card_' + id && e.name === KC_CARDS[id].name), 'a card emote for ' + id);
   const day = new Date(2026, 10, 11, 9).getTime(), later = new Date(2026, 10, 11, 21).getTime(), next = new Date(2026, 10, 12, 9).getTime();
@@ -423,14 +468,14 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   assert.deepStrictEqual(today.map(o => o.id), G.emoteOffers(later).map(o => o.id), 'the same three all day');
   let changed = 0; for (let d = 0; d < 10; d++) if (G.emoteOffers(next + d * 864e5).map(o => o.id).join() !== today.map(o => o.id).join()) changed++;
   assert(changed >= 8, 'a new set on other days');
-  P7.coins = 10000;
-  assert(G.EMOTE_SHOP.coins === 5000 && G.EMOTE_SHOP.diamonds === 1, '5,000 coins or 1 diamond');
+  P7.rubies = 10000;
+  assert(G.EMOTE_SHOP.rubies === 5000 && G.EMOTE_SHOP.diamonds === 1, '5,000 rubies or 1 diamond');
   P7.diamonds = 1;
-  assert(G.buyEmote(today[0].id, 'coins', day).ok && P7.emotes.includes(today[0].id) && P7.coins === 10000 - 5000);
-  assert.strictEqual(G.buyEmote(today[0].id, 'coins', day).error, 'owned');
-  assert(G.buyEmote(today[1].id, 'diamonds', day).ok && P7.diamonds === 0 && P7.coins === 5000, 'or one diamond');
+  assert(G.buyEmote(today[0].id, 'rubies', day).ok && P7.emotes.includes(today[0].id) && P7.rubies === 10000 - 5000);
+  assert.strictEqual(G.buyEmote(today[0].id, 'rubies', day).error, 'owned');
+  assert(G.buyEmote(today[1].id, 'diamonds', day).ok && P7.diamonds === 0 && P7.rubies === 5000, 'or one diamond');
   assert.strictEqual(G.buyEmote(today[2].id, 'diamonds', day).error, 'diamonds');
-  assert.strictEqual(G.buyEmote(G.EMOTES.find(e => !today.some(o => o.id === e.id)).id, 'coins', day).error, 'none', 'only today\'s three are for sale');
+  assert.strictEqual(G.buyEmote(G.EMOTES.find(e => !today.some(o => o.id === e.id)).id, 'rubies', day).error, 'none', 'only today\'s three are for sale');
   let sawCard = 0; for (let d = 0; d < 30; d++) { P7.emoteShop = null; if (G.emoteOffers(next + d * 864e5).some(o => o.card)) sawCard++; }
   assert(sawCard > 15, 'card emotes come up in the daily three');
   // chests: Briar Hollow cards can come out in Briar Hollow before the road gives them
@@ -444,7 +489,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   const opened = G.openChest(0, 1);
   const fresh = opened.cards.filter(x => x.isNew).map(x => x.id);
   assert(fresh.length && fresh.every(id => P7.found.includes(id)), 'and it is found now');
-  console.log(`King Tower levels (L cards at level L), ${G.EMOTES.length} emotes with 3 a day for 5,000 coins or 1 diamond, chests give arena cards early (${fresh.join(', ')}): ok`);
+  console.log(`King Tower levels (L cards at level L), ${G.EMOTES.length} emotes with 3 a day for 5,000 rubies or 1 diamond, chests give arena cards early (${fresh.join(', ')}): ok`);
 }
 
 // 9. Matchmaking: the win rate of a steady player who keeps their cards level with their trophies, and

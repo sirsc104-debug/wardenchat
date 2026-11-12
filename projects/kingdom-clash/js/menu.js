@@ -1,4 +1,4 @@
-/* Kingdom Clash: the lobby. A top bar (name, level and experience, coins and diamonds, sound,
+/* Kingdom Clash: the lobby. A top bar (name, level and experience, rubies and diamonds, sound,
    settings), the tabs (Shop, Cards, Battle, Clan, Trophy Road) and a bottom navigation bar.
 
    All progress and its rules live in KCProgress (progress.js); this file only shows them.
@@ -258,7 +258,7 @@ const KCMenu = (() => {
 
   /* ---------- opening a chest ----------
      The chest drops in and rattles; a click cracks it open in a burst of light. Then each reward comes
-     out one at a time: coins count up; a card flies out face down, glowing in its rarity's colour, flips
+     out one at a time: rubies count up; a card flies out face down, glowing in its rarity's colour, flips
      over, and its copies count into its level bar. A click during a reveal finishes it; a click after
      moves on. Rares and new cards come last. The same scene shows Trophy Road cards and Shop purchases
      (no chest, just the reveal). */
@@ -272,7 +272,7 @@ const KCMenu = (() => {
     <circle cx="50" cy="50" r="22" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="6 3" opacity=".8"/></svg>`;
   function stopTimers() { for (const t of co.timers) clearTimeout(t); co.timers = []; clearInterval(co.counter); co.counter = 0; }
 
-  // sparkles and coins, drawn on one canvas over the scene
+  // sparkles and rubies, drawn on one canvas over the scene
   const FX = { parts: [], raf: 0, last: 0 };
   function fxStart() {
     const cv = $('#coFx'), dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -286,9 +286,9 @@ const KCMenu = (() => {
     if (calm || !el) return;
     const r = el.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height * 0.45;
     for (let i = 0; i < n; i++) {
-      const a = -Math.PI / 2 + (Math.random() - 0.5) * (kind === 'coin' ? 1.8 : 3.6), v = (kind === 'coin' ? 320 : 240) * (0.5 + Math.random());
-      FX.parts.push({ kind, x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: kind === 'coin' ? 900 : 320, life: 0.9 + Math.random() * 0.8, max: 1.7,
-        r: kind === 'coin' ? 6 + Math.random() * 3 : (2 + Math.random() * 3) * size, col: cols[Math.floor(Math.random() * cols.length)], spin: Math.random() * 6 });
+      const a = -Math.PI / 2 + (Math.random() - 0.5) * (kind === 'ruby' ? 1.8 : 3.6), v = (kind === 'ruby' ? 320 : 240) * (0.5 + Math.random());
+      FX.parts.push({ kind, x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: kind === 'ruby' ? 900 : 320, life: 0.9 + Math.random() * 0.8, max: 1.7,
+        r: kind === 'ruby' ? 6 + Math.random() * 3 : (2 + Math.random() * 3) * size, col: cols[Math.floor(Math.random() * cols.length)], spin: Math.random() * 6 });
     }
     if (FX.parts.length > 260) FX.parts.splice(0, FX.parts.length - 260);
   }
@@ -351,7 +351,7 @@ const KCMenu = (() => {
         c.restore();
         continue;
       }
-      if (p.kind === 'coin') {
+      if (p.kind === 'ruby') {
         c.beginPath(); c.ellipse(p.x, p.y, p.r * Math.abs(Math.cos(p.spin)) + 1, p.r, 0, 0, 6.3);
         c.fillStyle = p.col; c.fill(); c.lineWidth = 1.5; c.strokeStyle = '#8a5a05'; c.stroke();
       } else {
@@ -368,14 +368,14 @@ const KCMenu = (() => {
   const SPARKS = { platinum: ['#dcfcff', '#8ff0ff', '#ffffff'], legendary: ['#ffd25a', '#ff9a3d', '#ff5a2e', '#ffffff'], mythic: ['#eadcff', '#a98bff', '#6ff0de', '#ff6bd5', '#ffffff'],
     wooden: ['#ffe9a0', '#ffc861', '#ffffff'], silver: ['#d8f0ff', '#9fd0ff', '#ffffff'], gold: ['#fff3a0', '#ffd23f', '#ff9a3d', '#ffffff'] };
 
-  // type: 'wooden' | 'silver' | 'gold', or null for a reward with no chest. got: { coins, cards: [{ id, n, isNew }] },
+  // type: 'wooden' | 'silver' | 'gold', or null for a reward with no chest. got: { rubies, cards: [{ id, n, isNew }] },
   // already added to the player's collection.
   function showChest(type, got, title) {
     // commons first, building up to the rarest; within a rarity, new cards last
     const rank = c => ({ common: 0, rare: 2, epic: 4, legendary: 6 }[KC_CARDS[c.id].rarity] || 0) + (c.isNew ? 1 : 0);
     const cards = got.cards.slice().sort((a, b) => rank(a) - rank(b));
     const steps = [];
-    if (got.coins) steps.push({ coins: got.coins });
+    if (got.rubies) steps.push({ rubies: got.rubies });
     for (const c of cards) {
       const u = G.upgradeInfo(c.id);
       steps.push(Object.assign({ level: u.level, need: u.max ? 0 : u.need, after: u.count, before: Math.max(0, u.count - c.n) }, c));
@@ -383,7 +383,7 @@ const KCMenu = (() => {
     const items = (got.items || []).slice().sort((a, b) => (a.id.startsWith('wild_') ? 0 : 1) - (b.id.startsWith('wild_') ? 0 : 1));
     for (const it of items) steps.push({ item: it.id, n: it.n });
     if (co) stopTimers();
-    co = { type, got: { coins: got.coins, cards, items }, steps, i: -1, phase: 'drop', timers: [], counter: 0, done: false };
+    co = { type, got: { rubies: got.rubies, cards, items }, steps, i: -1, phase: 'drop', timers: [], counter: 0, done: false };
     const chest = $('#coChest');
     $('#coTitle').textContent = title || (type ? G.CHESTS[type].name : 'Reward');
     $('#chestOpen').className = 'chest-open' + (type ? ' has-chest ' + type : ' no-chest');
@@ -453,14 +453,14 @@ const KCMenu = (() => {
     $('#coHint').textContent = '';
     box.hidden = false;
     KCSound.play(st.item ? 'itemGather' : 'cardFly');
-    if (st.coins) {
-      box.className = 'co-reward rv-coins';
-      box.innerHTML = `<div class="rv-fly"><span class="rv-pile" aria-hidden="true"><i class="co-coin"></i><i class="co-coin"></i><i class="co-coin"></i></span></div>
-        <div class="rv-info"><span class="rv-n" id="rvN">+0</span><b class="rv-name">Coins</b></div>`;
+    if (st.rubies) {
+      box.className = 'co-reward rv-rubies';
+      box.innerHTML = `<div class="rv-fly"><span class="rv-pile" aria-hidden="true"><i class="co-ruby"></i><i class="co-ruby"></i><i class="co-ruby"></i></span></div>
+        <div class="rv-info"><span class="rv-n" id="rvN">+0</span><b class="rv-name">Rubies</b></div>`;
       later(() => {
         $('#coReward .rv-info').classList.add('on');
-        fxBurst($('#coReward .rv-pile'), 26, 'coin', ['#ffd23f', '#ffe27a', '#f2b01e']);
-        count(900, p => { $('#rvN').textContent = '+' + fmt(Math.round(st.coins * p)); }, 'coinTick');
+        fxBurst($('#coReward .rv-pile'), 26, 'ruby', ['#ff5260', '#ff9aa2', '#d8293a', '#ffffff']);
+        count(900, p => { $('#rvN').textContent = '+' + fmt(Math.round(st.rubies * p)); }, 'rubyTick');
       }, 480);
       later(shown, 1500);
       return;
@@ -625,7 +625,7 @@ const KCMenu = (() => {
     $('#coReward').classList.add('skip');
     if (info) info.classList.add('on');
     if (st.item) { const art = $('#coReward .rv-itemart'); if (art) { art.classList.remove('forming'); art.classList.add('formed'); } $('#coReward').classList.add('formed'); }
-    else if (st.coins) $('#rvN').textContent = '+' + fmt(st.coins);
+    else if (st.rubies) $('#rvN').textContent = '+' + fmt(st.rubies);
     else {
       $('#coReward .rv-fly').classList.add('tease'); $('#coReward .rv-flip').classList.add('flipped'); cardCount(st, st.n);
       { $('#coUnlock').className = `co-unlock ul-${UL[KC_CARDS[st.id].rarity] ? KC_CARDS[st.id].rarity : 'common'} on reveal`; $('#chestOpen').classList.remove('rumble'); }
@@ -644,7 +644,7 @@ const KCMenu = (() => {
     $('#coReward').hidden = true; $('#coChestWrap').hidden = true; $('#coHint').hidden = true;
     $('#chestOpen').classList.add('summing');
     const g = co.got, items = [];
-    if (g.coins) items.push(`<span class="rv-pile small" aria-hidden="true"><i class="co-coin"></i><i class="co-coin"></i></span><b>+${fmt(g.coins)}</b>`);
+    if (g.rubies) items.push(`<span class="rv-pile small" aria-hidden="true"><i class="co-ruby"></i><i class="co-ruby"></i></span><b>+${fmt(g.rubies)}</b>`);
     for (const c of g.cards) items.push(`<img src="${cardImg(c.id)}" alt="${esc(KC_CARDS[c.id].name)}"><b>×${c.n}</b>${c.isNew ? '<em>New</em>' : ''}`);
     for (const it of g.items || []) items.push(`<span class="cs-art" title="${esc(G.MAGIC[it.id].name)}">${itemSvg(it.id)}</span><b>×${fmt(it.n)}</b>`);
     $('#coSummary').innerHTML = items.map((h, i) => `<div class="cs-item" style="animation-delay:${(i * 0.12).toFixed(2)}s">${h}</div>`).join('');
@@ -663,11 +663,11 @@ const KCMenu = (() => {
     const shop = G.shop(), p = P();
     $('#shopOffers').innerHTML = passTile() + shop.offers.map((o, i) => {
       const sold = !!shop.bought[o.id] && !o.repeat, gem = o.currency === 'diamonds';
-      const poor = !sold && (gem ? p.diamonds : p.coins) < o.price;
+      const poor = !sold && (gem ? p.diamonds : p.rubies) < o.price;
       let body;
-      if (o.kind === 'coins') {
-        body = `<div class="of-art of-coins" aria-hidden="true"><span class="rv-pile"><i class="co-coin"></i><i class="co-coin"></i><i class="co-coin"></i></span></div>
-          <b>${fmt(o.qty)} Coins</b><small class="of-note">Buy as many times as you like</small>`;
+      if (o.kind === 'rubies') {
+        body = `<div class="of-art of-rubies" aria-hidden="true"><span class="rv-pile"><i class="co-ruby"></i><i class="co-ruby"></i><i class="co-ruby"></i></span></div>
+          <b>${fmt(o.qty)} Rubies</b><small class="of-note">Buy as many times as you like</small>`;
       } else {
         const c = KC_CARDS[o.card], u = G.upgradeInfo(o.card), after = u.count + (sold ? 0 : o.qty);
         const pct = u.max ? 100 : Math.min(100, after / u.need * 100);
@@ -675,12 +675,12 @@ const KCMenu = (() => {
           <b>${esc(c.name)}</b>
           <span class="of-prog${!u.max && after >= u.need ? ' full' : ''}" title="${u.max ? 'Max level' : sold ? 'Your copies now' : 'Your copies after buying'}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.max ? 'Max level' : `Lv ${u.level} · ${fmt(after)} / ${fmt(u.need)}`}</em></span>`;
       }
-      const price = `<i class="${gem ? 'gem-i' : 'coin-i'}" aria-hidden="true"></i>${fmt(o.price)}`;
+      const price = `<i class="${gem ? 'gem-i' : 'ruby-i'}" aria-hidden="true"></i>${fmt(o.price)}`;
       const maxed = o.card && G.upgradeInfo(o.card).max;
       const btn = sold ? '<button class="buy-btn" type="button" disabled>Bought</button>'
         : maxed ? '<button class="buy-btn" type="button" disabled>Max level</button>'
         : `<button class="buy-btn${gem ? ' gem' : ''}${poor ? ' poor' : ''}${confirmOffer === i ? ' confirm' : ''}" type="button" data-offer="${i}"
-            aria-label="${confirmOffer === i ? 'Confirm: buy' : 'Buy'} for ${o.price} ${gem ? 'diamonds' : 'coins'}">${confirmOffer === i ? 'Confirm ' : ''}${price}</button>`;
+            aria-label="${confirmOffer === i ? 'Confirm: buy' : 'Buy'} for ${o.price} ${gem ? 'diamonds' : 'rubies'}">${confirmOffer === i ? 'Confirm ' : ''}${price}</button>`;
       return `<div class="offer ${o.currency}${sold ? ' sold' : ''}"><span class="of-tag">${esc(o.tag)}</span>${body}${btn}</div>`;
     }).join('');
     for (const b of $$('#shopOffers .buy-btn[data-offer]')) b.addEventListener('click', e => { e.stopPropagation(); buyClick(+b.dataset.offer); });
@@ -688,11 +688,11 @@ const KCMenu = (() => {
     if (pb) pb.addEventListener('click', e => { e.stopPropagation(); buyPassClick(); });
     const pv = $('#shopOffers .of-see');
     if (pv) pv.addEventListener('click', e => { e.stopPropagation(); openPass(); });
-    // the chest row: a free Wooden Chest each day, then every tier for coins (contents stay hidden)
+    // the chest row: a free Wooden Chest each day, then every tier for rubies (contents stay hidden)
     const oddsText = (t, opts) => {
       const o = G.chestOdds(t, opts), w = G.wildActive() && Object.keys(G.MAGIC_RULES.wild[t] || {}).length;
       const sure = [o.rares ? `${fmt(o.rares)}+ rare` : '', o.epicMin ? `${o.epicMin}+ epic` : '', o.legendaryMin ? `${o.legendaryMin} legendary` : ''].filter(Boolean).join(', ');
-      return `${fmt(o.cards)} cards<br>${fmt(o.coins[0])}–${fmt(o.coins[1])} coins${sure ? `<br><span class="ct-sure">${sure}</span>` : ''}${w ? '<br>+ wild cards' : ''}`;
+      return `${fmt(o.cards)} cards<br>${fmt(o.rubies[0])}–${fmt(o.rubies[1])} rubies${sure ? `<br><span class="ct-sure">${sure}</span>` : ''}${w ? '<br>+ wild cards' : ''}`;
     };
     const free = G.freeChestReady();
     const tiles = [`<div class="chest-tile free wooden${free ? '' : ' sold'}"><span class="of-tag">Free daily</span>
@@ -701,14 +701,16 @@ const KCMenu = (() => {
     : `<button class="buy-btn" type="button" disabled>Next in <span id="freeClock">${clock(G.shopEnds() - Date.now())}</span></button>`}</div>`];
     for (const t of G.TIERS) {
       const C = G.CHESTS[t];
-      if (!G.chestAllowed(t)) {
+      if (!G.chestAllowed(t) || !G.chestShopOpen(t)) {
+        const at = Math.max(G.CHEST_RULES.allUnlocked ? 0 : G.CHEST_RULES.arena[t], G.ECONOMY.shop.chestArena[t]);
         tiles.push(`<div class="chest-tile locked ${t}"><div class="ct-art">${chestSvg(t)}</div><b>${C.name}</b><small class="ct-odds">${oddsText(t)}</small>
-          <span class="ct-locked"><span class="slot-lock" aria-hidden="true"></span>Unlocks in Arena ${G.CHEST_RULES.arena[t]}</span></div>`);
+          <span class="ct-locked"><span class="slot-lock" aria-hidden="true"></span>In the Shop from Arena ${at}</span></div>`);
         continue;
       }
-      const price = G.chestPrice(t), poor = p.coins < price;
-      tiles.push(`<div class="chest-tile ${t}"><div class="ct-art">${chestSvg(t)}</div><b>${C.name}</b><small class="ct-odds">${oddsText(t)}</small>
-        <button class="buy-btn${poor ? ' poor' : ''}" type="button" data-chest="${t}" aria-label="Buy a ${C.name} for ${price} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(price)}</button></div>`);
+      const price = G.chestPrice(t), poor = p.rubies < price, left = G.chestBuyLeft(t);
+      tiles.push(`<div class="chest-tile ${t}${left ? '' : ' sold'}"><div class="ct-art">${chestSvg(t)}</div><b>${C.name}</b><small class="ct-odds">${oddsText(t)}</small>
+        ${left ? `<button class="buy-btn${poor ? ' poor' : ''}" type="button" data-chest="${t}" aria-label="Buy a ${C.name} for ${price} rubies"><i class="ruby-i" aria-hidden="true"></i>${fmt(price)}</button>`
+    : '<button class="buy-btn" type="button" disabled>Bought today</button>'}</div>`);
     }
     $('#shopChests').innerHTML = tiles.join('');
     for (const b of $$('#shopChests .buy-btn[data-chest]')) b.addEventListener('click', e => { e.stopPropagation(); buyChestClick(b.dataset.chest); });
@@ -716,9 +718,9 @@ const KCMenu = (() => {
     if (fb) fb.addEventListener('click', e => { e.stopPropagation(); freeChestClick(); });
     // emotes: today's three, each animated on its tile
     $('#shopEmotes').innerHTML = G.emoteOffers().map(o => {
-      const poorC = P().coins < o.coins, poorD = P().diamonds < o.diamonds, conf = emoteConfirm === o.id;
+      const poorC = P().rubies < o.rubies, poorD = P().diamonds < o.diamonds, conf = emoteConfirm === o.id;
       const btns = o.owned ? '<button class="buy-btn" type="button" disabled>Owned</button>'
-        : `<span class="eo-btns"><button class="buy-btn${poorC ? ' poor' : ''}" type="button" data-emote="${o.id}" data-cur="coins" aria-label="Buy the ${esc(o.name)} emote for ${o.coins} coins"><i class="coin-i" aria-hidden="true"></i>${fmt(o.coins)}</button>
+        : `<span class="eo-btns"><button class="buy-btn${poorC ? ' poor' : ''}" type="button" data-emote="${o.id}" data-cur="rubies" aria-label="Buy the ${esc(o.name)} emote for ${o.rubies} rubies"><i class="ruby-i" aria-hidden="true"></i>${fmt(o.rubies)}</button>
           <span class="eo-or">or</span>
           <button class="buy-btn gem${poorD ? ' poor' : ''}${conf ? ' confirm' : ''}" type="button" data-emote="${o.id}" data-cur="diamonds" aria-label="${conf ? 'Confirm: buy' : 'Buy'} the ${esc(o.name)} emote for ${o.diamonds} diamond">${conf ? 'Confirm ' : ''}<i class="gem-i" aria-hidden="true"></i>${fmt(o.diamonds)}</button></span>`;
       return `<div class="emote-offer${o.owned ? ' owned' : ''}${o.card ? ' card-emote' : ''}"><span class="eo-art em-live">${KCEmotes.face(o.id, 0)}</span>
@@ -737,7 +739,7 @@ const KCMenu = (() => {
     }
     emoteConfirm = null; clearTimeout(emoteConfirmT);
     const r = G.buyEmote(id, cur);
-    if (r.error === 'coins') { KCSound.play('error'); toast('Not enough coins. Win battles and open chests to earn more.'); return; }
+    if (r.error === 'rubies') { KCSound.play('error'); toast('Not enough rubies. Win battles and open chests to earn more.'); return; }
     if (r.error === 'diamonds') { KCSound.play('error'); toast('Not enough diamonds. Diamonds will come from the SirSC wallet.'); return; }
     if (!r.ok) return;
     KCSound.play('buy'); setTimeout(() => KCSound.play(id.startsWith('card_') ? 'emCard' : 'em_' + id), 250);
@@ -773,6 +775,25 @@ const KCMenu = (() => {
     c.drawImage(t, 0, 24);
     return cv.toDataURL();
   }
+  /* ---------- wallet Coins to Rubies ---------- */
+  function renderExchange() {
+    const x = G.exchangeInfo(), inp = $('#exAmount'), most = Math.min(x.left, x.coins);
+    $('#exRate').textContent = fmt(x.rate);
+    $('#exCap').innerHTML = `<div><small>Your Coins</small><b>${fmt(x.coins)}</b></div><div><small>Today's limit</small><b>${fmt(x.cap)}</b></div><div><small>Left today</small><b>${fmt(x.left)}</b></div>`;
+    inp.max = String(most);
+    const n = Math.floor(+inp.value || 0), ok = n > 0 && n <= most;
+    $('#exGet').textContent = !most ? (x.left ? 'You have no Coins to swap.' : `Today's limit is used. More at midnight (${clock(x.ends - Date.now())}).`)
+      : n > x.left ? `Today you can swap up to ${fmt(x.left)}.` : n > x.coins ? `You have ${fmt(x.coins)} Coins.` : n > 0 ? `You get ${fmt(n * x.rate)} Rubies` : '';
+    $('#exGo').disabled = !ok;
+  }
+  function openExchange() { $('#exAmount').value = ''; renderExchange(); $('#exModal').hidden = false; $('#exAmount').focus(); }
+  function closeExchange() { $('#exModal').hidden = true; }
+  function doExchange() {
+    const r = G.exchange($('#exAmount').value);
+    if (!r.ok) { KCSound.play('error'); renderExchange(); return; }
+    KCSound.play('buy'); toast(`Swapped ${fmt(r.coins)} Coins for ${fmt(r.rubies)} Rubies`);
+    $('#exAmount').value = ''; refresh();
+  }
   function openKing() { renderKing(); $('#kingModal').hidden = false; ($('#kingUp').disabled ? $('#kingX') : $('#kingUp')).focus(); }
   function closeKing() { $('#kingModal').hidden = true; }
   function renderKing() {
@@ -805,8 +826,9 @@ const KCMenu = (() => {
   }
   function buyChestClick(type) {
     const r = G.buyChest(type);
-    if (r.error === 'coins') { KCSound.play('error'); toast('Not enough coins. Win battles and open chests to earn more.'); return; }
-    if (r.error === 'locked') { KCSound.play('error'); toast(`${G.CHESTS[type].name}s unlock in Arena ${G.CHEST_RULES.arena[type]}.`); return; }
+    if (r.error === 'rubies') { KCSound.play('error'); toast('Not enough rubies. Win battles and open chests to earn more.'); return; }
+    if (r.error === 'locked') { KCSound.play('error'); toast(`${G.CHESTS[type].name}s are in the Shop from Arena ${G.ECONOMY.shop.chestArena[type]}.`); return; }
+    if (r.error === 'sold') { KCSound.play('error'); toast(`One ${G.CHESTS[type].name} a day. A new one arrives at midnight.`); refresh(); return; }
     if (!r.ok) { toast('That chest is not available.'); refresh(); return; }
     KCSound.play('buy');
     refresh();
@@ -823,9 +845,9 @@ const KCMenu = (() => {
     const o = G.shop().offers[i];
     if (!o) return;
     const gem = o.currency === 'diamonds';
-    if ((gem ? P().diamonds : P().coins) < o.price) {
+    if ((gem ? P().diamonds : P().rubies) < o.price) {
       KCSound.play('error');
-      toast(gem ? 'Not enough diamonds. Diamonds will come from the SirSC wallet.' : 'Not enough coins. Win battles and open chests to earn more.');
+      toast(gem ? 'Not enough diamonds. Diamonds will come from the SirSC wallet.' : 'Not enough rubies. Win battles and open chests to earn more.');
       return;
     }
     // diamonds take a second click to confirm
@@ -921,7 +943,7 @@ const KCMenu = (() => {
   /* ---------- the Diamond Pass ---------- */
   // A pass reward as a small picture and a label.
   function rewardArt(R) {
-    if (R.kind === 'coins') return { art: '<span class="pr-coins" aria-hidden="true"><i class="coin-i"></i><i class="coin-i"></i></span>', label: `${fmt(R.n)} coins` };
+    if (R.kind === 'rubies') return { art: '<span class="pr-rubies" aria-hidden="true"><i class="ruby-i"></i><i class="ruby-i"></i></span>', label: `${fmt(R.n)} rubies` };
     if (R.kind === 'chest') return { art: `<span class="pr-chest">${chestSvg(R.chest)}</span>`, label: G.CHESTS[R.chest].name };
     if (R.kind === 'item') return { art: `<span class="pr-item">${itemSvg(R.item)}</span>`, label: `${G.MAGIC[R.item].name} ×${fmt(R.n)}` };
     if (R.kind === 'evo') return { art: `<img class="pr-evo" src="${cardImg(R.card, true)}" alt="">`, label: KC_EVOS[R.card].name };
@@ -1111,7 +1133,7 @@ const KCMenu = (() => {
 
   /* ---------- the Trophy Road ---------- */
   function rewardHtml(m) {
-    if (m.kind === 'coins') return `<span class="rw-coins"><span class="co-coin" aria-hidden="true"></span><b>${fmt(m.amount)}</b></span><small>Coins</small>`;
+    if (m.kind === 'rubies') return `<span class="rw-rubies"><span class="co-ruby" aria-hidden="true"></span><b>${fmt(m.amount)}</b></span><small>Rubies</small>`;
     if (m.kind === 'chest') { const t = G.capChest(m.chest); return `<span class="rw-chest">${chestSvg(t)}</span><small>${G.CHESTS[t].name}</small>`; }
     if (m.kind === 'card') return `<img class="rw-card" src="${cardImg(m.card)}" alt=""><small>${esc(KC_CARDS[m.card].name)} ×${m.copies}</small>`;
     const a = G.ARENAS.find(x => x.id === m.arena);
@@ -1128,7 +1150,7 @@ const KCMenu = (() => {
     $('#rhRecord').innerHTML = `<b>${r.w}</b><small>wins</small><b>${r.l}</b><small>losses</small>`;
     // the next reward and how far it is, or rewards waiting to be claimed
     const ready = road.filter(m => G.roadState(m) === 'ready'), next = road.find(m => G.roadState(m) === 'locked');
-    const label = m => m.kind === 'card' ? `${KC_CARDS[m.card].name} ×${m.copies}` : m.kind === 'coins' ? `${fmt(m.amount)} coins` : m.kind === 'chest' ? G.CHESTS[G.capChest(m.chest)].name
+    const label = m => m.kind === 'card' ? `${KC_CARDS[m.card].name} ×${m.copies}` : m.kind === 'rubies' ? `${fmt(m.amount)} rubies` : m.kind === 'chest' ? G.CHESTS[G.capChest(m.chest)].name
       : (x => (x.soon ? `Arena ${x.number}` : x.name))(G.ARENAS.find(x => x.id === m.arena));
     $('#roadNext').innerHTML = ready.length
       ? `<span class="rnx-tag ready">${ready.length} reward${ready.length === 1 ? '' : 's'} to claim</span><button type="button" class="pill gold" id="roadGo">Show me</button>`
@@ -1186,7 +1208,7 @@ const KCMenu = (() => {
     KCSound.play('crown');
     if (got.kind === 'chest') showChest(got.chest, got);
     else if (got.kind === 'card') showChest(null, got);
-    else if (got.kind === 'coins') toast(`+${fmt(got.coins)} coins`);
+    else if (got.kind === 'rubies') toast(`+${fmt(got.rubies)} rubies`);
     refresh();
   }
 
@@ -1199,8 +1221,8 @@ const KCMenu = (() => {
       const u = G.upgradeInfo(id);
       if (!u.found) return `<span class="lvl-strip locked">${G.unlockAt(id) !== null ? `Trophy Road · ${G.unlockAt(id)}` : 'Locked'}</span>`;
       if (u.max) return `<span class="lvl-strip max">Level ${u.level} · Max</span>`;
-      const pct = Math.min(100, u.count / u.need * 100), short = u.count >= u.need && P().coins < u.cost;
-      return `<span class="lvl-strip"><span>Level ${u.level}</span><span class="cprog${u.count >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${fmt(u.count)}/${fmt(u.need)}</em></span><span class="lvl-gold${short ? ' short' : ''}"><i class="coin-i" aria-hidden="true"></i>${fmt(u.cost)}</span></span>`;
+      const pct = Math.min(100, u.count / u.need * 100), short = u.count >= u.need && P().rubies < u.cost;
+      return `<span class="lvl-strip"><span>Level ${u.level}</span><span class="cprog${u.count >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${fmt(u.count)}/${fmt(u.need)}</em></span><span class="lvl-gold${short ? ' short' : ''}"><i class="ruby-i" aria-hidden="true"></i>${fmt(u.cost)}</span></span>`;
     };
     $('#deckRow').innerHTML = deck.map((id, i) => {
       const c = KC_CARDS[id], u = G.upgradeInfo(id);
@@ -1271,14 +1293,14 @@ const KCMenu = (() => {
     const upBtn = $('#mUpgrade');
     upBtn.hidden = !u.found || u.max;
     upBtn.disabled = !u.can;
-    $('#mUpCost').innerHTML = `<i class="coin-i" aria-hidden="true"></i>${fmt(u.cost || 0)}`;
+    $('#mUpCost').innerHTML = `<i class="ruby-i" aria-hidden="true"></i>${fmt(u.cost || 0)}`;
     const inDeck = P().deck.includes(id);
     $('#mUse').hidden = !u.found || inDeck;
-    const lack = [u.count < u.need ? `${fmt(u.need - u.count)} more card${u.need - u.count === 1 ? '' : 's'}` : '', P().coins < u.cost ? `${fmt(u.cost - P().coins)} more coins` : ''].filter(Boolean);
-    const toMax = u.found && !u.max ? ` To level ${G.MAX_LEVEL}: ${fmt(G.copiesToMax(id))} more cards and ${fmt(G.goldToMax(id))} coins.` : '';
+    const lack = [u.count < u.need ? `${fmt(u.need - u.count)} more card${u.need - u.count === 1 ? '' : 's'}` : '', P().rubies < u.cost ? `${fmt(u.cost - P().rubies)} more rubies` : ''].filter(Boolean);
+    const toMax = u.found && !u.max ? ` To level ${G.MAX_LEVEL}: ${fmt(G.copiesToMax(id))} more cards and ${fmt(G.goldToMax(id))} rubies.` : '';
     $('#mNote').textContent = !u.found ? 'Reach it on the Trophy Road to add it to your collection.'
       : u.max ? `Level ${G.MAX_LEVEL}: this card is fully upgraded.`
-        : (lack.length ? `Needs ${lack.join(' and ')}.` : `Ready: uses ${fmt(u.need)} cards and ${fmt(u.cost)} coins.`) + toMax + (inDeck ? ' In your deck.' : '');
+        : (lack.length ? `Needs ${lack.join(' and ')}.` : `Ready: uses ${fmt(u.need)} cards and ${fmt(u.cost)} rubies.`) + toMax + (inDeck ? ' In your deck.' : '');
     $('#cardModal').hidden = false;
     (upBtn.hidden || upBtn.disabled ? $('#modalX') : upBtn).focus();
   }
@@ -1385,7 +1407,7 @@ const KCMenu = (() => {
     $('#rightTitle').textContent = 'Next Rewards';
     const nxt = G.ROAD.filter(m => G.roadState(m) === 'ready' || G.roadState(m) === 'locked' || G.roadState(m) === 'soon').slice(0, 3);
     $('#rewards').innerHTML = nxt.map(m => {
-      const st = G.roadState(m), what = m.kind === 'coins' ? `${fmt(m.amount)} coins` : m.kind === 'chest' ? G.CHESTS[G.capChest(m.chest)].name : m.kind === 'card' ? `${KC_CARDS[m.card].name} ×${m.copies}` : `Arena ${G.ARENAS.find(x => x.id === m.arena).number}`;
+      const st = G.roadState(m), what = m.kind === 'rubies' ? `${fmt(m.amount)} rubies` : m.kind === 'chest' ? G.CHESTS[G.capChest(m.chest)].name : m.kind === 'card' ? `${KC_CARDS[m.card].name} ×${m.copies}` : `Arena ${G.ARENAS.find(x => x.id === m.arena).number}`;
       return `<li class="${st === 'ready' ? 'now' : 'later'}"><span class="rw-mark" aria-hidden="true"></span><span><b>${esc(what)}</b><small>${st === 'ready' ? 'Ready to claim' : st === 'soon' ? `${m.at} trophies · coming soon` : `At ${m.at} trophies`}</small></span></li>`;
     }).join('') || '<li class="done"><span class="rw-mark" aria-hidden="true"></span><span><b>All claimed</b><small>More arenas are on the way</small></span></li>';
     $('#rightNote').textContent = G.claimable().length ? 'Claim rewards on the Trophy Road tab.' : 'Win trophy battles to reach the next reward.';
@@ -1428,8 +1450,10 @@ const KCMenu = (() => {
     if (!$('#kingModal').hidden) renderKing();
     $('#xpFill').style.width = (into / G.XP_PER_LEVEL * 100).toFixed(1) + '%';
     $('#xpText').textContent = `${into} / ${G.XP_PER_LEVEL}`;
-    $('#coinVal').textContent = fmt(p.coins);
+    $('#rubyVal').textContent = fmt(p.rubies);
     $('#gemVal').textContent = fmt(p.diamonds);
+    $('#walletVal').textContent = fmt(p.wallet);
+    if (!$('#exModal').hidden) renderExchange();
     $('#shopTag').hidden = !G.freeChestReady();
     passPlaque();
     $('#onlineBtn').classList.toggle('locked', !G.onlineOpen() || !KCNet.LIVE);
@@ -1503,7 +1527,7 @@ const KCMenu = (() => {
     for (const b of $$('[data-tab]')) b.addEventListener('click', () => tab(b.dataset.tab));
     $('#battleBtn').addEventListener('click', () => opts.onBattle && opts.onBattle(nextFoe()));
     $('#simWinLobby').addEventListener('click', simulateWin); // TEMPORARY
-    $('#testRich').addEventListener('click', () => { G.grantTest(); KCSound.play('buy'); refresh(); toast('Test: you now have 1,000,000 coins and 1,000,000 diamonds'); }); // TEMPORARY
+    $('#testRich').addEventListener('click', () => { G.grantTest(); KCSound.play('buy'); refresh(); toast('Test: you now have 1,000,000 rubies, 1,000,000 wallet coins and 1,000,000 diamonds'); }); // TEMPORARY
     $('#testOffers').addEventListener('click', () => { G.refreshShop(); confirmOffer = -1; KCSound.play('select'); refresh(); toast('Test: new offers made from your cards as they are now'); }); // TEMPORARY
     $('#oppChange').addEventListener('click', e => { e.stopPropagation(); toggle('#oppPanel', '#oppChange'); });
     $('#settingsBtn').addEventListener('click', e => {
@@ -1546,6 +1570,13 @@ const KCMenu = (() => {
     $('#kingX').addEventListener('click', closeKing);
     $('#kingUp').addEventListener('click', upgradeKingClick);
     $('#kingModal').addEventListener('click', e => { if (e.target.id === 'kingModal') closeKing(); });
+    $('#walletBtn').addEventListener('click', openExchange);
+    $('#exX').addEventListener('click', closeExchange);
+    $('#exModal').addEventListener('click', e => { if (e.target.id === 'exModal') closeExchange(); });
+    $('#exAmount').addEventListener('input', renderExchange);
+    $('#exAmount').addEventListener('keydown', e => { if (e.key === 'Enter' && !$('#exGo').disabled) doExchange(); });
+    $('#exMax').addEventListener('click', () => { const x = G.exchangeInfo(); $('#exAmount').value = String(Math.min(x.left, x.coins)); renderExchange(); });
+    $('#exGo').addEventListener('click', doExchange);
     for (const b of $$('.shop-jump button')) b.addEventListener('click', () => $('#' + b.dataset.jump).scrollIntoView({ behavior: 'smooth', block: 'start' }));
     $('#passMini').addEventListener('click', openPass);
     $('#passModal').addEventListener('click', e => { if (e.target.id === 'passModal') closePass(); });
@@ -1560,8 +1591,8 @@ const KCMenu = (() => {
         else if (e.key === ' ' || e.key === 'Enter') { chestTap(); e.preventDefault(); }
         return;
       }
-      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); if (!$('#onlineModal').hidden) closeOnline(); return; }
-      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#onlineModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); closeExchange(); if (!$('#onlineModal').hidden) closeOnline(); return; }
+      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#exModal').hidden || !$('#onlineModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
       const n = '12345'.indexOf(e.key);
       if (n >= 0) { tab(TABS[n]); e.preventDefault(); }
       else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(nextFoe()); e.preventDefault(); }
