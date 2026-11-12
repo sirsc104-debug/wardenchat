@@ -87,6 +87,54 @@ Their cards and troops are drawn in code, styled after concept art: a gold-helme
 
 Balance (`node tools/balance-test.js 120 <name>`): Bees 56%, Owl 46%, Thunder Cloud 53%, Griffin 53%. The bot plays all four: Bees and the Griffin defend, the Owl backs up pushes, and the Thunder Cloud starts pushes from behind the King Tower; it answers a Thunder Cloud with air-hitters.
 
+## Arenas 5 to 10
+
+Six more arenas follow Stormspire on the Trophy Road, four cards each (24 in all). Every card works like a well-known card of the genre (the *Works like* column) with Kingdom Clash's own name, look, sounds and description; its numbers are that card's tournament-level stats brought to this game's level-1 scale (health ×0.69, damage ×0.46, buildings a little sturdier), so they sit beside the older cards. Rarity sets the starting level as for every card (Rare 3, Epic 6, Legendary 9), and they use the same Level 15 upgrade tables and Ruby costs. Cards are in `js/cards.js`, their mechanics in `js/sim.js`, their art in `js/art2.js`, and `node tools/arenas5-10-test.js` checks every mechanic below.
+
+| Arena | Trophies | Theme |
+| --- | --- | --- |
+| 5 Frostfang Keep | 2,000 | ice and snow |
+| 6 Blackwater Harbor | 2,600 | pirates and ocean |
+| 7 Gearforge Citadel | 3,300 | machinery and electricity |
+| 8 Crystal Chasm | 4,100 | underground crystals |
+| 9 Skyward Sanctuary | 5,000 | floating islands and healing |
+| 10 Eclipse Throne | 6,000 | dark magic and a fallen kingdom |
+
+| Card | Energy | Rarity | Works like | What it does in the game |
+| --- | --- | --- | --- | --- |
+| Frost Sprite | 1 | Common | Ice Spirit | Very fast; leaps at the first enemy within 2.5 tiles (air or ground) and bursts, freezing everything within 1.5 tiles for 1.2 s. Used up by the leap. |
+| Icebound Giant | 2 | Rare | Ice Golem | Slow, cheap tank that only walks for buildings; when it shatters it damages and slows (35%, 1 s) air and ground in 2 tiles. |
+| Winter Sage | 3 | Legendary | Ice Wizard | Range 5.5, small splash, every hit slows 35% for 2.5 s; a frost blast (3 tiles) as he lands. |
+| Flash Freeze | 4 | Epic | Freeze | Instant: freezes every enemy troop, building and tower within 3 tiles for 4 s (no moving, no attacking, reloads start over), with a little damage. |
+| Dock Raiders | 3 | Common | Goblin Gang | Three very fast cutlass pirates (ground) and two harpoon throwers (range 5, air and ground). |
+| Boarding Barrel | 3 | Epic | Goblin Barrel | Thrown from your King Tower to anywhere; breaks on landing and lets out three cutlass pirates. |
+| Harpoon Captain | 3 | Legendary | Fisherman | Melee; throws his harpoon at a ground enemy 3.5 to 7 tiles away (0.4 s wind-up, 3 s between throws): a troop is reeled in to him and slowed; a building or tower can't move, so he pulls himself to it. Pulled troops cross the river on the rope. |
+| Broadside Cart | 5 | Epic | Cannon Cart | Fast, range 5.5, ground only, behind a plank shield that takes every hit; when the shield breaks it stops and becomes a cannon building (its full health) that crumbles over 30 s. |
+| Coil Tower | 4 | Common | Tesla | A building hidden underground (troops and towers can't target it; spells can) until an enemy comes within 5.5 tiles; it rises (0.6 s), zaps air and ground, and sinks again after 1 s with nothing in range. Lasts 30 s. |
+| Sparkbots | 4 | Rare | Zappies | Three robots, range 4.5, air and ground; every shot stuns for 0.5 s. |
+| Steel Titan | 8 | Epic | Golem | Huge, slow, buildings only; when destroyed it bursts (2 tiles) and splits into two Titanlings, which also go for buildings and burst when they fall. |
+| Arc Cannon | 6 | Legendary | Sparky | Slow; charges for 4 s (while moving too) and fires only with a full charge: a 1.8-tile ground splash for very high damage. Any stun or freeze drains the charge. |
+| Gem Flash | 2 | Common | Zap | Instant: damage and a 0.5 s stun on troops, buildings and towers within 2.5 tiles. |
+| Shard Guards | 3 | Epic | Guards | Three fragile spearmen (range 1.6) with crystal shields: a shield takes the whole of the next hit, however big, before it shatters. |
+| Crystal Drill | 4 | Epic | Goblin Drill | A building placed anywhere: it bores from your King Tower (untouchable underground), bursts up (damage in 2 tiles), sends out a Crystal Imp every 3 s and two more when it breaks. Lasts 10 s. |
+| Prism Archer | 4 | Legendary | Magic Archer | Range 7; each bolt flies on in a straight line past its target and hits every enemy in its way once. |
+| Sun Sprite | 1 | Rare | Heal Spirit | Leaps at an enemy, a small burst of damage, then a glow that heals friendly troops within 2.5 tiles for a second. |
+| Celestial Guardian | 4 | Rare | Battle Healer | Melee tank; every swing heals friendly troops within 4 tiles (herself too); she mends herself while not fighting. |
+| Cloud Drake | 4 | Epic | Baby Dragon | Flying, range 3.5, splash on air and ground. |
+| Dawn Phoenix | 4 | Legendary | Phoenix | Flying melee on air and ground; when destroyed it bursts in flame and leaves an egg; if the egg lasts 4.3 s the Phoenix is reborn (once). |
+| Wraith Army | 3 | Epic | Skeleton Army | Fifteen fragile spectral swordsmen. |
+| Doom Meteor | 6 | Rare | Rocket | A slow meteor from your King Tower; huge damage in a 2-tile area, a quarter of it on towers, with a knockback. |
+| Abyss Gate | 5 | Legendary | Graveyard | A portal over any spot (4 tiles) for 10 s: 13 wraiths climb out at random spots inside it, from 2.2 s on. |
+| Dread Knight | 7 | Legendary | Mega Knight | Heavy; a shockwave as he lands (2.2 tiles), every swing splashes ground troops around his target, and he leaps onto a ground enemy 3.5 to 5 tiles away (untouchable in the air), landing with the same shockwave. |
+
+**Rules the engine gained** (all in the deterministic simulation, so they work online too): stuns and freezes (towers and buildings too; a stun resets the reload, drains a charge, breaks a beam, cancels a half-thrown hook), shields that absorb a whole hit, healing (pulses and zones), mixed squads, units that spawn units (on a timer, on death, out of a barrel or a portal), a troop that turns into a building, hidden buildings, piercing straight-line bolts, a hook that pulls troops or its thrower, leaps that cross the river, and an egg that hatches. Old cards are untouched.
+
+**Unlocking:** each card is on the Trophy Road in its arena, and from the moment your best trophies reach an arena its cards are in your chests (never before). Opponents pick them up as their trophies pass where they unlock, and computer players use every one: spells on clumps (Gem Flash and Flash Freeze value stopping a charge or a beam), the Doom Meteor on a tower it would finish, the barrel and portal on the weakest tower, the drill beside it, the Steel Titan from the back, the Sun Sprite to heal hurt defenders.
+
+**Balance** (`node tools/balance-test.js 40 ": "`, each new card in place of a starter card with the same job, both decks at level 9): most new cards win 40 to 68% of decided games against the starter deck. The outliers come down to how the computer plays them: the Coil Tower (23%) and Gem Flash (28%) replace a troop the computer attacks with; the Doom Meteor (90%) finishes towers; the Phoenix was trimmed a little.
+
+**Arena art:** none of the six arenas has its images yet. Each is set up in `js/arenas.js` for the same four images as the arenas before it (a lobby centerpiece with the name, a battlefield on the game's grid with its tower pads, river and two bridges, and two side panels). Until they arrive the battlefield is drawn in code in the arena's own colours, the lobby and the Trophy Road show the arena's name and number on a plaque, and the side panels are a plain gradient in its colours. No other arena's art is used.
+
 ## Online battles (front end only, not live yet)
 
 From Stormspire on, the **Online** button beside *Trainers* in the lobby opens the online panel, which for now says **Online battles are coming soon** and shows what will be there (greyed out): **Quick match** (battle the next player who's looking) and **Friendly battle** (make a room and share its five-letter code, or type a friend's). Online battles will use each player's own deck, card levels, King Tower level and evolutions, and no trophies will be won or lost.
@@ -153,7 +201,7 @@ Every number is in `ECONOMY` at the top of `js/progress.js`; `tools/economy-repo
 
 **Three currencies.**
 - **Rubies** (red gems) are the game's own currency: chests, battle wins, the Trophy Road and the Pass pay them; card upgrades, the Shop's card offers and chests, and emotes cost them. They never leave the game, so Kingdom Clash can't be farmed for SirSC Coins. Older saves' coins became Rubies one for one (in their chest slots and Shop offers too); nothing was reset.
-- **Coins** are the SirSC wallet's currency (the gold coin chip with ⇄ in the top bar). The game never pays Coins out. They can be swapped one way for Rubies, **1 Coin = 1 Ruby**, up to a **daily limit set by the highest arena reached**: 500 in Arena 1, 1,000 in Arena 2, 2,000 in Arena 3, 4,000 in Arena 4, then +1,000 every 300 trophies past 1,200, up to 10,000. A player with a big wallet gets a head start on Rubies, but copies still hold them back (see the *wallet-rich* column below). **TEMPORARY:** the Coin balance is kept on the device; when the wallet is connected the server must take the Coins and enforce the limit.
+- **Coins** are the SirSC wallet's currency (the gold coin chip with ⇄ in the top bar). The game never pays Coins out. They can be swapped one way for Rubies, **1 Coin = 1 Ruby**, up to a **daily limit set by the highest arena reached**: 500 in Arena 1, 1,000 in Arena 2, 2,000 in Arena 3, 4,000 in Arena 4, 6,000 in Arena 5, then 7,000, 8,000, 9,000 and 10,000 from Arena 9. A player with a big wallet gets a head start on Rubies, but copies still hold them back (see the *wallet-rich* column below). **TEMPORARY:** the Coin balance is kept on the device; when the wallet is connected the server must take the Coins and enforce the limit.
 - **Diamonds** are the premium currency: the Diamond Pass, chest skips, the mega bundle, emotes, and the 5,000-Ruby bundle. Rubies and Coins never buy Diamonds.
 
 **Upgrades.** Rubies per level are the same for every rarity: 5, 20, 50, 150, 400, 1,000, 2,000, 4,000, 10,000, 15,000, 25,000, 40,000, 60,000, 100,000 (level 1→2 first). A card starts at its rarity's level and pays only the steps from there:
@@ -167,7 +215,7 @@ Every number is in `ECONOMY` at the top of `js/progress.js`; `tools/economy-repo
 
 The first copy of a card unlocks it and isn't counted as a duplicate. The card window shows the level, copies and Rubies for the next level, what's still missing, the health and damage now and at the next level, and what's left to level 15; the collection shows each card's copies and Ruby cost. Levels 13, 14 and 15 get a grander upgrade scene (level 15 is rainbow and says *Max level!*).
 
-**Rewards scale with trophies first, then account level.** Copies are what limit progress (a big wallet can pay Rubies; it can't make copies), so rewards start small and grow late. The arena your trophies put you in sets the base: Rubies ×0.26, ×0.33, ×0.42, ×0.53 and cards ×0.30, ×0.37, ×0.45, ×0.55 for Arenas 1–4 (about +20% at each new arena), plus up to 4% climbing through an arena. **Past 1,200 trophies** every 300 trophies adds +50% of the base, up to ×6.5 at about 4,200, so the late game pays what level 15 costs. The account level multiplies that by 1.5% a level, up to level 40. Which cards can drop depends only on the **highest trophies you've reached**, so a high account level never brings cards of an arena you haven't reached. Values loaded from a save are checked: negative or broken numbers become 0, levels stay between the rarity's start and 15, best trophies are never below current trophies.
+**Rewards scale with trophies first, then account level.** Copies are what limit progress (a big wallet can pay Rubies; it can't make copies), so rewards start small and grow late. The arena your trophies put you in sets the base: cards ×0.30, 0.37, 0.45, 0.55, 1.375, 1.925, 2.75, 3.3, 4.1 and 5.0 for Arenas 1 to 10 (Rubies a little less). Inside an arena rewards climb toward the next arena's, stopping 20% short, so every new arena is a clear step up (at least +15%); the long Stormspire stretch (900 to 2,000) climbs the most, so the late game pays what level 15 costs. Past Eclipse Throne, +5% every 500 trophies up to +30%. The account level multiplies that by 1.5% a level, up to level 40. Which cards can drop depends only on the **highest trophies you've reached**, so a high account level never brings cards of an arena you haven't reached. Values loaded from a save are checked: negative or broken numbers become 0, levels stay between the rarity's start and 15, best trophies are never below current trophies.
 
 **Chests** keep their names, looks and timers. Their base contents (multiplied by the scaling above):
 
@@ -193,7 +241,7 @@ Epic and legendary chances grow more slowly than the scaling. Floors are shown o
 
 **Other sources.** A trophy win pays 10 Rubies × the Ruby scaling for the first 20 wins of each day. Trophy Road Rubies: 10, 30, 60, 145, 240, 420, 600, 900, 1,200. Diamond Pass Rubies: 375 to 1,050 on the free path, 1,125 to 2,250 on the paid one. **There are no daily quests or achievements in the game.**
 
-**Opponents** follow the same curve as players (`ECONOMY.foeLevels`): average card level 1 below 50 trophies, about 4.5 at 300, 6.5 at 600, 7.5 at 900, 8.5 at 1,200, 10 at 1,500, 12 at 2,000, 13.5 at 3,000 and 15 at 4,000 (rares, epics and legendaries are then raised to where their rarity starts). Their King Tower uses the players' rule (level N needs N cards at level N), counting the rest of their collection as levelled with their deck once all eight are past 8.
+**Opponents** follow the same curve as players (`ECONOMY.foeLevels`): average card level 1 below 50 trophies, about 4.5 at 300, 6.5 at 600, 7.5 at 900, 8.5 at 1,200, 10 at 1,500, 12 at 2,000, 13.5 at 3,000, 14.5 at 4,000 and 15 from 5,000 (rares, epics and legendaries are then raised to where their rarity starts). Their King Tower uses the players' rule (level N needs N cards at level N), counting the rest of their collection as levelled with their deck once all eight are past 8.
 
 **Estimates** (`node tools/economy-report.js`; it uses the game's own chest rolls; the assumptions are at the top of the file). A day for five kinds of player:
 
@@ -311,6 +359,8 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `tools/path-test.js` | `node tools/path-test.js` places every ground troop behind and beside each tower, for both teams, and checks it walks around instead of getting stuck |
 | `tools/trainers-test.js` | `node tools/trainers-test.js 100 [trainer]` plays each trainer against a good player, a sloppy player, a random clicker and a player who does nothing, and prints how often the trainer wins |
 | `tools/cards-test.js` | `node tools/cards-test.js` checks the Cannon (pulls a Rhino, lasts 30 s, placement rules), the Skeleton Pack, card levels, the Briar Hollow cards, and the Sunstone cards (Mole tunneling and placement, Sandstorm slows, the Ram Cart's charge and soldiers, the Camel Jockey's lasso cooldown) and the Snowman's evolution |
+| `js/art2.js` | The troops, buildings, card pictures and spell art of Arenas 5 to 10, drawn in code in the style of `js/art.js` and added to it |
+| `tools/arenas5-10-test.js` | `node tools/arenas5-10-test.js` deploys all 24 new cards, checks each one's energy and rarity and every special mechanic (freeze, stun, shields, splitting, charging, hooks, hiding, piercing, healing, the egg, the portal, the jump), and has the computer play every card in full battles |
 | `tools/economy-report.js` | `node tools/economy-report.js` prints a day's rubies and copies for five kinds of player and the days to each upgrade milestone, using `ECONOMY` and the game's chest rolls |
 | `tools/progress-test.js` | `node tools/progress-test.js [matches]` checks old saves, trophies, chests and timers, road rewards, upgrades, the deck and the Training Grounds deck rule, the Shop's offers and purchases, Sunstone Arena, evolutions and the Diamond Pass (2 free shards, the Snowman Evolution at tier 1, claiming, buying), then plays trophy matches to check the 52% target |
 | `tools/balance-test.js` | `node tools/balance-test.js [matches]` plays decks with the Briar Hollow cards against the starter deck and times one-on-one trades |

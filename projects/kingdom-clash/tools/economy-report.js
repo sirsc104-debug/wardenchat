@@ -77,7 +77,7 @@ for (const p of PROFILES) {
 // wins and unlock hours follow the profile for those trophies. Road rewards are claimed as reached,
 // the free pass path once. Rubies go into the deck: the lowest card first (spread), or one favourite
 // card first (focused). Wild cards and the Shop aren't counted, so real players go a little faster.
-const CAREER = { trophies: [[0, 0], [5, 300], [12, 600], [21, 900], [35, 1200], [90, 1700], [200, 2500], [400, 3500], [700, 4000]], days: 1100 };
+const CAREER = { trophies: [[0, 0], [5, 300], [12, 600], [21, 900], [35, 1200], [90, 1700], [200, 2500], [400, 3500], [700, 4500], [900, 5500], [1100, 6200]], days: 1100 };
 const trophiesOn = d => { const T = CAREER.trophies; for (let i = 1; i < T.length; i++) if (d <= T[i][0]) return Math.round(T[i - 1][1] + (T[i][1] - T[i - 1][1]) * (d - T[i - 1][0]) / (T[i][0] - T[i - 1][0])); return T[T.length - 1][1]; };
 const profileFor = t => PROFILES.slice().reverse().find(p => t >= p.trophies) || PROFILES[0];
 

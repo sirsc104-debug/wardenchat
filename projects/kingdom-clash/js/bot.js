@@ -19,18 +19,29 @@ const KCBot = (() => {
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
   const ROLE = {
-    tank: ['griffin', 'cannon', 'footmen', 'gorilla', 'bees', 'skeletons', 'wolves', 'gladiator', 'flail', 'archers', 'hawks'],
-    air: ['archers', 'owl', 'bees', 'snowman', 'hawks', 'griffin', 'spears', 'fireball'],
+    tank: ['griffin', 'wraiths', 'harpoon', 'coil', 'cannon', 'dreadknight', 'footmen', 'gorilla', 'shardguards', 'dockraiders', 'bees', 'skeletons', 'wolves', 'prism', 'broadside', 'sparkbots',
+      'gladiator', 'guardian', 'flail', 'archers', 'hawks', 'frostsprite'],
+    air: ['archers', 'prism', 'drake', 'owl', 'phoenix', 'bees', 'wintersage', 'sparkbots', 'dockraiders', 'coil', 'snowman', 'hawks', 'griffin', 'frostsprite', 'spears', 'fireball'],
     // a building-chaser in the air (the Thunder Cloud): only air-hitters stop it
-    airwin: ['griffin', 'archers', 'owl', 'bees', 'hawks', 'snowman'],
-    swarm: ['flail', 'snowman', 'pots', 'archers', 'gladiator', 'spears', 'fireball', 'hawks', 'owl'],
-    ranged: ['gladiator', 'bees', 'skeletons', 'wolves', 'hawks', 'flail', 'footmen', 'gorilla', 'rhino'],
-    melee: ['skeletons', 'pots', 'bees', 'wolves', 'gladiator', 'flail', 'cannon', 'hawks', 'footmen', 'gorilla', 'owl', 'archers'],
+    airwin: ['griffin', 'phoenix', 'prism', 'archers', 'owl', 'drake', 'bees', 'coil', 'sparkbots', 'hawks', 'dockraiders', 'wintersage', 'snowman'],
+    swarm: ['flail', 'drake', 'wintersage', 'arccannon', 'dreadknight', 'snowman', 'pots', 'archers', 'guardian', 'gladiator', 'spears', 'fireball', 'hawks', 'owl', 'frostsprite'],
+    ranged: ['harpoon', 'gladiator', 'dockraiders', 'bees', 'skeletons', 'shardguards', 'wolves', 'hawks', 'flail', 'footmen', 'gorilla', 'dreadknight', 'frostsprite', 'rhino'],
+    melee: ['skeletons', 'pots', 'wintersage', 'bees', 'wolves', 'prism', 'gladiator', 'flail', 'coil', 'cannon', 'drake', 'hawks', 'sparkbots', 'footmen', 'guardian', 'gorilla', 'broadside',
+      'owl', 'archers', 'dockraiders', 'shardguards', 'phoenix', 'arccannon'],
   };
-  const MELEE = { wolves: 1, gladiator: 1, gorilla: 1, rhino: 1, skeletons: 1, footmen: 1, flail: 1, bees: 1, griffin: 1 };
+  const MELEE = { wolves: 1, gladiator: 1, gorilla: 1, rhino: 1, skeletons: 1, footmen: 1, flail: 1, bees: 1, griffin: 1,
+    frostsprite: 1, sunsprite: 1, dockraiders: 1, shardguards: 1, harpoon: 1, guardian: 1, phoenix: 1, wraiths: 1, dreadknight: 1, icegiant: 1 };
   // cards that go for towers: they start pushes, they don't defend
-  const WIN = ['rhino', 'ramcart', 'camel', 'thundercloud'];
-  const NO_DEFEND = { rhino: 1, ramcart: 1, camel: 1, mole: 1, thundercloud: 1 };
+  const WIN = ['rhino', 'ramcart', 'camel', 'thundercloud', 'titan', 'icegiant', 'titanling'];
+  const NO_DEFEND = { rhino: 1, ramcart: 1, camel: 1, mole: 1, thundercloud: 1, titan: 1, icegiant: 1, drill: 1, sunsprite: 1 };
+  // what a unit is worth, for the units cards bring with them (they cost nothing themselves)
+  const WORTH = { raider: 1, raidergun: 0.8, imp: 1.2, wraith: 0.45, titanling: 2.5, phoenixegg: 2.5, ramsoldier: 1.2 };
+  const worth = id => WORTH[id] !== undefined ? WORTH[id] : KC_CARDS[id].cost / KC_CARDS[id].count;
+  // the spells it casts on clumps: how many energy's worth of enemies a cast must hit (above the skill's
+  // Fireball setting), and whether it only counts what it would finish off
+  const SPELLS = [
+    ['meteor', 3.5, false], ['fireball', 0, false], ['flashfreeze', 1.5, false], ['spears', -1, true], ['gemflash', -2, true], ['sandstorm', -0.5, false],
+  ];
 
   function create(team, opts) {
     opts = opts || {};
@@ -82,28 +93,39 @@ const KCBot = (() => {
   function decide(b, s) {
     const K = b.skill, me = b.team, E = s.energy[me], hand = s.hands[me];
     const troops = s.ents.filter(e => e.kind === 'troop' && !e.dead);
-    const foes = troops.filter(e => e.team !== me).map(e => ({ e, x: e.x, y: my(b, e.y), v: KC_CARDS[e.card].cost / KC_CARDS[e.card].count }));
-    const mine = troops.filter(e => e.team === me).map(e => ({ e, x: e.x, y: my(b, e.y), v: KC_CARDS[e.card].cost / KC_CARDS[e.card].count }));
+    const foes = troops.filter(e => e.team !== me).map(e => ({ e, x: e.x, y: my(b, e.y), v: worth(e.card) }));
+    const mine = troops.filter(e => e.team === me).map(e => ({ e, x: e.x, y: my(b, e.y), v: worth(e.card) }));
     const has = id => hand.includes(id);
     const afford = id => KC_CARDS[id].cost <= E + 0.5;
 
     // 1. A spell on a big clump, or on troops hitting a tower. Fireball counts everything it hits;
     //    Spears only counts what it would finish off (swarms, flyers, ranged troops).
-    for (const spell of ['fireball', 'spears', 'sandstorm']) {
+    for (const [spell, extra, finishOnly] of SPELLS) {
       if (!has(spell) || !afford(spell)) continue;
       const c = KC_CARDS[spell], reach = c.area - 0.2, dmg = c.dmg * KCSim.levelMult(s.cardLevels[me] && s.cardLevels[me][spell] || 1);
       let best = null, bv = 0;
       for (const f of foes) {
         let v = 0;
-        for (const g of foes) if (Math.hypot(g.x - f.x, g.y - f.y) < reach && (spell !== 'spears' || g.e.hp <= dmg)) v += g.v * (spell === 'sandstorm' ? 0.8 : 1);
+        for (const g of foes) {
+          if (Math.hypot(g.x - f.x, g.y - f.y) >= reach) continue;
+          if (!finishOnly || g.e.hp <= dmg) v += g.v * (spell === 'sandstorm' ? 0.8 : 1);
+          // a stun is worth more on something charging up (the Arc Cannon, the Griffin's beam)
+          if (c.stun && (g.e.chargeT > 2 || g.e.beamTime > 1.5)) v += 3;
+        }
         if (f.y > 20) v += 1;
         if (v > bv) { bv = v; best = f; }
       }
-      const need = spell === 'fireball' ? K.fireballValue : spell === 'sandstorm' ? Math.max(4, K.fireballValue - 0.5) : Math.max(3.5, K.fireballValue - 1);
+      const need = spell === 'fireball' ? K.fireballValue : Math.max(spell === 'gemflash' ? 2.5 : 3.5, K.fireballValue + extra);
       if (best && bv >= need) {
-        const lead = best.e.moving ? 0.8 : 0;
+        const lead = best.e.moving && !c.instant ? 0.8 : 0;
         return { card: spell, x: best.x, y: best.y + lead, exact: true, quick: true };
       }
+    }
+    // a Doom Meteor finishes off a tower it would bring down
+    if (has('meteor') && afford('meteor')) {
+      const md = KC_CARDS.meteor.dmg * KC_CARDS.meteor.towerPct * KCSim.levelMult(s.cardLevels[me] && s.cardLevels[me].meteor || 1);
+      const low = s.ents.find(e => e.kind === 'tower' && e.team !== me && !e.dead && e.hp <= md);
+      if (low) return { card: 'meteor', x: low.x, y: my(b, low.y), exact: true, quick: true };
     }
 
     // 2. Defend the lane under the most pressure.
@@ -116,7 +138,10 @@ const KCBot = (() => {
       const lead = group.reduce((a, t) => (t.y > a.y ? t : a), group[0]);
       const cx = group.reduce((a, t) => a + t.x, 0) / group.length;
       const value = group.reduce((a, t) => a + t.v, 0);
-      const guard = mine.filter(m => Math.hypot(m.x - cx, m.y - lead.y) < 5.5).reduce((a, m) => a + m.v, 0);
+      const guards = mine.filter(m => Math.hypot(m.x - cx, m.y - lead.y) < 5.5), guard = guards.reduce((a, m) => a + m.v, 0);
+      // defenders already fighting and hurt: a Sun Sprite onto the attackers heals them
+      const hurt = guards.filter(m => m.e.hp < m.e.maxHp * 0.65).reduce((a, m) => a + m.v, 0);
+      if (hurt >= 2 && has('sunsprite') && afford('sunsprite')) return { card: 'sunsprite', x: lead.x, y: Math.min(30.5, Math.max(17.5, lead.y + 2)), quick: true };
       if (guard < value * K.defend) {
         const cards = group.map(t => t.e.card);
         const role = cards.includes('thundercloud') ? 'airwin' : cards.some(c => WIN.includes(c)) ? 'tank'
@@ -141,8 +166,11 @@ const KCBot = (() => {
     // 3. Back up a push that is already crossing.
     const push = mine.find(m => WIN.includes(m.e.card) && m.y < 19.5 && m.y > 11);
     if (push && E >= 4 && s.time - b.lastAttack > 2) {
-      const pick = ['snowman', 'owl', 'pots', 'archers', 'hawks', 'griffin', 'bees', 'flail', 'gladiator', 'wolves'].find(id => has(id) && afford(id));
+      const pick = ['arccannon', 'wintersage', 'snowman', 'drake', 'owl', 'pots', 'prism', 'sparkbots', 'archers', 'hawks', 'griffin', 'phoenix', 'guardian', 'bees', 'flail', 'dockraiders', 'gladiator', 'wolves']
+        .find(id => has(id) && afford(id));
       if (pick) return { card: pick, x: push.x, y: Math.max(17.5, push.y + 2.5), attack: true };
+      // a Sun Sprite right behind the push, to heal it when it bursts
+      if (has('sunsprite') && afford('sunsprite') && push.e.hp < push.e.maxHp * 0.8) return { card: 'sunsprite', x: push.x, y: Math.max(17.5, push.y + 1.5), attack: true };
     }
 
     // 4. Start a push once energy is high enough (a trainer sometimes just waits).
@@ -153,15 +181,28 @@ const KCBot = (() => {
       // the Mole tunnels to just behind the weakest tower (sometimes before anything else)
       const moleAt = weak && { card: 'mole', x: weak.x + (weak.x < 9 ? -0.5 : 0.5), y: my(b, weak.y) - 2.4, attack: true, exact: true };
       if (moleAt && has('mole') && afford('mole') && b.rand() < 0.45) return moleAt;
+      // cards that go straight to a tower from anywhere: the barrel and the portal on it, the drill beside it
+      if (weak) {
+        const ty = my(b, weak.y);
+        if (has('barrel') && afford('barrel') && b.rand() < 0.7) return { card: 'barrel', x: weak.x, y: ty + 1.6, attack: true, exact: true };
+        if (has('abyss') && afford('abyss') && b.rand() < 0.7) return { card: 'abyss', x: weak.x + (weak.x < 9 ? 0.8 : -0.8), y: ty + 1.2, attack: true, exact: true };
+        if (has('drill') && afford('drill') && b.rand() < 0.7) return { card: 'drill', x: weak.x + (weak.x < 9 ? 2.6 : -2.6), y: ty - 0.5, attack: true, exact: true };
+      }
+      // the Steel Titan walks from behind the King Tower; the Icebound Giant leads at the bridge
+      if (has('titan') && afford('titan')) return { card: 'titan', x: lx < 9 ? 6.5 : 11.5, y: 30.5, attack: true };
       if (has('rhino') && afford('rhino')) return { card: 'rhino', x: lx < 9 ? 5.5 : 12.5, y: 30.5, attack: true };
+      if (has('icegiant') && afford('icegiant')) return { card: 'icegiant', x: lx, y: 18.5, attack: true };
       // a Camel Jockey from the back, a Ram Cart right at the bridge for a fast hit
       if (has('camel') && afford('camel')) return { card: 'camel', x: lx < 9 ? 4.5 : 13.5, y: 29.5, attack: true };
       // the Thunder Cloud drifts in from behind the King Tower's side, on the weak lane
       if (has('thundercloud') && afford('thundercloud')) return { card: 'thundercloud', x: lx < 9 ? 3.5 : 14.5, y: 27.5, attack: true };
       if (has('ramcart') && afford('ramcart')) return { card: 'ramcart', x: lx, y: 18.5, attack: true };
       if (moleAt && has('mole') && afford('mole')) return moleAt;
-      const pick = ['gladiator', 'flail', 'hawks', 'owl', 'archers', 'footmen', 'wolves', 'gorilla'].find(id => has(id) && afford(id));
+      const pick = ['dreadknight', 'broadside', 'gladiator', 'flail', 'phoenix', 'drake', 'hawks', 'owl', 'guardian', 'harpoon', 'archers', 'prism', 'sparkbots', 'footmen', 'dockraiders',
+        'shardguards', 'wraiths', 'wolves', 'gorilla', 'wintersage', 'arccannon'].find(id => has(id) && afford(id));
       if (pick) return { card: pick, x: lx, y: 18.5, attack: true };
+      // nothing else to start with: the anywhere cards anyway
+      if (weak) for (const id of ['barrel', 'abyss', 'drill']) if (has(id) && afford(id)) return { card: id, x: weak.x, y: my(b, weak.y) + (id === 'drill' ? -0.5 : 1.4), attack: true, exact: true };
     }
     return null;
   }

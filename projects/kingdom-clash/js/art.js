@@ -815,6 +815,14 @@ const KCArt = (() => {
     sh(c, () => circ(c, 0, q(-0.18), q(0.16)), '#ffcd33', '#e09f12', q(0.04));
   }
 
+  // Buildings drawn by other files (js/art2.js); the Cannon is drawn here.
+  const BUILDINGS = {};
+  // Card pictures drawn by other files: PORTRAITS[id](c, w, h, k, at) draws the card's art.
+  const PORTRAITS = {};
+  function building(c, card, k, o) {
+    LW = Math.max(1, k * 0.07);
+    (BUILDINGS[card] || cannon)(c, k, o);
+  }
   function troop(c, card, k, o) {
     const f = TROOPS[card];
     if (!f) return;
@@ -1005,6 +1013,7 @@ const KCArt = (() => {
     else if (cardId === 'griffin') at(0.5, 0.62, 0.82, { t: 0.2, beam: 1 });
     else if (cardId === 'camel') at(0.5, 0.97, 0.86, { ratk: 0.6, t: 0.2 });
     else if (cardId === 'spears') { c.save(); c.translate(w * 0.5, h * 0.5); LW = Math.max(1, k * 0.06); spearsArt(c, k * 1.05, 0); c.restore(); }
+    else if (PORTRAITS[cardId]) { LW = Math.max(1, k * 0.07); PORTRAITS[cardId](c, w, h, k, at, team); }
     else if (cardId === 'footmen') { at(0.27, 0.72, 1.15, { t: 0.4 }); at(0.73, 0.72, 1.15, { t: 1.1 }); at(0.5, 0.92, 1.4, {}); }
     else if (cardId === 'wolves') { at(0.26, 0.7, 1.6, { t: 1.1 }); at(0.74, 0.7, 1.6, {}); at(0.5, 0.9, 2.0, { t: 0.6 }); }
     else if (cardId === 'hawks') { at(0.3, 0.34, 1.1, { t: 0.9 }); at(0.58, 0.62, 1.45, {}); }
@@ -1062,6 +1071,13 @@ const KCArt = (() => {
     stormspire: { bg: '#2e3348', grass: ['#9aa6bd', '#919db5'], path: '#c9d2e2', pad: '#6f7891', river: ['#6fc4ff', '#4a9ee0'], bank: '#5a647e', wall: '#505a74', specks: ['#ffe27a', '#bfe6ff', '#ffffff', '#8f9bb5'] },
     sunstone: { bg: '#6e4a2c', grass: ['#e8c47c', '#e0ba70'], path: '#c99a5a', pad: '#b3906a', river: ['#35b8c6', '#2794a6'], bank: '#9fb05a', wall: '#b07a4a', specks: ['#5fa84a', '#ffe08a', '#c96a3a', '#fff4d6'] },
     cinder: { bg: '#4d3f45', grass: ['#a6ad5a', '#9ba251'], path: '#c9a47c', pad: '#8d857e', river: ['#3a86c4', '#2c6aa3'], bank: '#7f8a42', wall: '#6f6168', specks: ['#ff8a3d', '#ffc261', '#5a4a44', '#e6dccd'] },
+    // Arenas 5 to 10, drawn in code until their battlefield images arrive (js/arenas.js)
+    frostfang: { bg: '#2f3f58', grass: ['#dce8f2', '#d0dfec'], path: '#b9cadb', pad: '#8fa3b8', river: ['#7fd0f0', '#5fb2e0'], bank: '#a9c4d8', wall: '#6f86a0', specks: ['#ffffff', '#bfe6ff', '#8fb8d8', '#e8f4ff'] },
+    blackwater: { bg: '#2a2f3a', grass: ['#7b6a4e', '#72624a'], path: '#a88a5e', pad: '#6e6a64', river: ['#1f5f7a', '#174a60'], bank: '#4e5a4a', wall: '#4a4038', specks: ['#d9c08a', '#3f8fa8', '#8a6a44', '#e8e0d0'] },
+    gearforge: { bg: '#3a2f28', grass: ['#8a7a66', '#827260'], path: '#b08a52', pad: '#7a6a5a', river: ['#3fa0b0', '#2f8090'], bank: '#5a5046', wall: '#6a5038', specks: ['#ffcf5a', '#d39a48', '#6ad0ff', '#3a3a44'] },
+    crystal: { bg: '#1e1a34', grass: ['#4a4470', '#433e68'], path: '#6a5a90', pad: '#5a5680', river: ['#5ae0e8', '#3ab8d0'], bank: '#3a3460', wall: '#2e2850', specks: ['#b48cff', '#7ff0ff', '#ff8fd8', '#e8d8ff'] },
+    skyward: { bg: '#8aa6d8', grass: ['#eef0f4', '#e4e8ef'], path: '#e8d6a0', pad: '#cfd3dc', river: ['#bfe2ff', '#9fd0ff'], bank: '#d8e0ea', wall: '#c8b07a', specks: ['#ffe27a', '#ffffff', '#bfe6ff', '#ffd0f0'] },
+    eclipse: { bg: '#14101c', grass: ['#3a3040', '#342a3a'], path: '#5a3a4a', pad: '#4a404e', river: ['#c0283a', '#901c2c'], bank: '#2a2230', wall: '#241c2a', specks: ['#ff4a5a', '#8a2a4a', '#5a4a6a', '#ffb0a0'] },
   };
   // The battlefield under the live game: the arena's illustration if it has one (js/arenas.js),
   // otherwise drawn here from its palette.
@@ -1181,5 +1197,8 @@ const KCArt = (() => {
   }
   const owen = cv => trainer(cv, KC_TRAINERS[0].look);
 
-  return { OUT, TEAM, THEMES, cannon, spearsArt, sandstormArt, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer, rr, circ, ell, line, paint, poly };
+  // for js/art2.js: the shared helpers, the colours, and a way to add troops, buildings and card pictures
+  const add = (troops, buildings, portraits) => { Object.assign(TROOPS, troops || {}); Object.assign(BUILDINGS, buildings || {}); Object.assign(PORTRAITS, portraits || {}); };
+  return { OUT, TEAM, THEMES, C, cannon, building, spearsArt, sandstormArt, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer,
+    rr, circ, ell, line, paint, poly, sh, rope, dot, eye, add, lw: () => LW, setLw: v => { LW = v; } };
 })();

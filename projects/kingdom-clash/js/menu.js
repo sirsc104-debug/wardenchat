@@ -1096,6 +1096,9 @@ const KCMenu = (() => {
   // The Evolution part of a card's window.
   function modalEvo(id) {
     const c = KC_CARDS[id], E = G.evoInfo(id), act = $('#mEvoAct'), box = $('#mEvoBox');
+    // a card with no evolution planned (the Arena 5 to 10 cards) shows no evolution box
+    box.hidden = !E && !c.evo;
+    if (box.hidden) return;
     box.classList.toggle('built', !!E);
     box.classList.toggle('owned', !!(E && E.has));
     if (!E) { $('#mEvoTag').textContent = '(unlocks later)'; $('#mEvo').textContent = c.evo; act.hidden = true; return; }
@@ -1217,7 +1220,7 @@ const KCMenu = (() => {
         // an arena gate: its badge, number and name
         const G2 = G.ARENAS.find(x => x.id === m.arena), art = !G2.soon && KCArenas.get(G2.theme);
         return `<li class="rn gate ${st} t-${G2.theme || 'soon'}" data-at="${m.at}">
-          <div class="rn-top"><div class="rn-gate">${art ? `<img src="${art.centerpiece.src}" alt="">` : '<span class="rg-soon">?</span>'}<small>Arena ${G2.number}</small><b>${esc(G2.soon ? 'Coming soon' : G2.name)}</b>${act}</div></div>
+          <div class="rn-top"><div class="rn-gate">${art && art.centerpiece.src ? `<img src="${art.centerpiece.src}" alt="">` : art ? `<span class="rg-soon rg-pending">${G2.number}</span>` : '<span class="rg-soon">?</span>'}<small>Arena ${G2.number}</small><b>${esc(G2.soon ? 'Coming soon' : G2.name)}</b>${act}</div></div>
           <span class="rn-slot"><i class="rn-pin"></i></span><div class="rn-at"><i class="trophy-i" aria-hidden="true"></i>${fmt(m.at)}</div></li>`;
       }
       return `<li class="rn ${st} t-${theme}" data-at="${m.at}"><div class="rn-top"><div class="rn-card">${rewardHtml(m)}${act}</div></div>
@@ -1318,12 +1321,17 @@ const KCMenu = (() => {
     const lvl = u.found ? u.level : 1, m = KCSim.levelMult(lvl), v = x => Math.round(x * m);
     const tgt = { buildings: 'Towers & buildings', ground: 'Ground', both: 'Air & ground' }[c.targets];
     const sp = s => (s >= 1.8 ? 'Very fast' : s >= 1.4 ? 'Fast' : s >= 1 ? 'Medium' : 'Slow');
-    const stats = c.kind === 'spell'
-      ? [['Damage', v(c.dmg)], ['Tower damage', Math.round(v(c.dmg) * c.towerPct)], ['Radius', c.area + ' tiles'], ['Energy', c.cost]]
+    const sub = id2 => KC_CARDS[id2];
+    const stats = c.barrel ? [['Pirates', '×' + c.barrel.n], ['Pirate health', v(sub(c.barrel.card).hp)], ['Pirate damage', v(sub(c.barrel.card).dmg)], ['Lands', 'Anywhere'], ['Energy', c.cost]]
+      : c.gate ? [['Wraiths', '×' + c.gate.n], ['Duration', c.gate.dur + ' s'], ['Radius', c.area + ' tiles'], ['Wraith health', v(sub(c.gate.card).hp)], ['Wraith damage', v(sub(c.gate.card).dmg)], ['Energy', c.cost]]
+      : c.spawner ? [['Health', v(c.hp)], ['Lifetime', c.lifetime + ' s'], ['Imp every', c.spawner.every + ' s'], ['Imp health', v(sub(c.spawner.card).hp)], ['Imp damage', v(sub(c.spawner.card).dmg)], ['Energy', c.cost]]
+      : c.kind === 'spell'
+      ? [['Damage', v(c.dmg)], ['Tower damage', Math.round(v(c.dmg) * c.towerPct)], ['Radius', c.area + ' tiles']].concat(c.stun ? [[c.stun >= 2 ? 'Freeze' : 'Stun', c.stun + ' s']] : [], [['Energy', c.cost]])
       : c.kind === 'building'
         ? [['Health', v(c.hp)], ['Damage', v(c.dmg)], ['Hit speed', c.hit + ' s'], ['Range', c.range + ' tiles'], ['Lifetime', c.lifetime + ' s'], ['Targets', tgt], ['Energy', c.cost]]
         : [['Health', v(c.hp)], ['Damage', v(c.dmg)], ['Hit speed', c.hit + ' s'], ['Range', c.range < 1 ? 'Melee' : c.range + ' tiles'],
-          ['Speed', sp(c.speed)], ['Targets', tgt], ['Energy', c.cost]].concat(c.count > 1 ? [['Count', '×' + c.count]] : []);
+          ['Speed', sp(c.speed)], ['Targets', tgt], ['Energy', c.cost]].concat(c.count > 1 ? [['Count', '×' + c.count]] : [],
+          c.shield ? [['Shield', v(c.shield)]] : [], c.charge ? [['Charge', c.charge + ' s']] : [], c.stunHit ? [['Stun', c.stunHit + ' s']] : [], c.healHit ? [['Heal per hit', v(c.healHit.amount)]] : []);
     const next = u.found && !u.max ? KCSim.levelMult(lvl + 1) : null;
     $('#mStats').innerHTML = stats.map(([k, val]) => {
       const nv = next && (k === 'Health' || k === 'Damage' || k === 'Tower damage') ? (k === 'Tower damage' ? Math.round(Math.round(c.dmg * next) * c.towerPct) : Math.round((k === 'Health' ? c.hp : c.dmg) * next)) : null;
@@ -1516,7 +1524,14 @@ const KCMenu = (() => {
     const cp = $('#cp'), bar = $('#cpBar');
     // the arena's own centerpiece (js/arenas.js), its progress bar placed over the art's empty bar
     const art = KCArenas.get(open ? G.arena().theme : 'training'), C = art.centerpiece, img = $('#cpImg');
-    if (img.dataset.src !== C.src) {
+    if (!C.src) {
+      // an arena whose centerpiece hasn't been made yet: its name on a plaque, the bar beneath
+      if (img.dataset.src !== 'none:' + art.name) {
+        img.dataset.src = 'none:' + art.name; img.removeAttribute('src'); img.hidden = true; cp.classList.add('no-art');
+        cp.style.setProperty('--cpw', C.w); cp.style.setProperty('--cph', C.h);
+        for (const [k, v] of Object.entries(C.bar)) bar.style.setProperty(k, v + '%');
+      }
+    } else if (img.dataset.src !== C.src) {
       img.dataset.src = C.src;
       img.hidden = false;
       img.onerror = () => { img.hidden = true; cp.classList.add('no-art'); };

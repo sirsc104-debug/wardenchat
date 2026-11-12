@@ -299,9 +299,13 @@
   }
 
   /* ---------- sim events become sound and effects ---------- */
-  const SHOOT = { arrow: 'arrow', cannon: 'cannon', snowball: 'snow', bigsnow: 'snow', pot: 'potThrow', quill: 'quill' };
+  const SHOOT = { arrow: 'arrow', cannon: 'cannon', snowball: 'snow', bigsnow: 'snow', pot: 'potThrow', quill: 'quill',
+    frostbolt: 'frostShot', harpoonlet: 'arrow', arc: 'coilZap', spark: 'sparkShot', arcblast: 'arcBlast', prismray: 'prism', cloudpuff: 'puffShot' };
   // how high each flyer floats (in tiles)
-  const LIFT = { thundercloud: 1.7, griffin: 1.3, owl: 1.25 };
+  const LIFT = { thundercloud: 1.7, griffin: 1.3, owl: 1.25, drake: 1.3, phoenix: 1.25 };
+  // a colored ring that spreads out (shockwaves, healing pulses, freezes)
+  const shock = (x, y, r, col, life) => G.fx.push({ kind: 'ring', x, y, r, col, life: life || 0.45, max: life || 0.45 });
+  const debris = (x, y, n, cols, v) => { for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, sp = (v || 3) * (0.4 + Math.random()); G.fx.push({ kind: 'rock', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6, z: 0, vz: 3 + Math.random() * 4, r: 0.07 + Math.random() * 0.12, life: 0.9, max: 0.9, col: cols[i % cols.length] }); } };
   const liftOf = e => (e.air ? LIFT[e.card] || 1.1 : 0);
   function handleEvents() {
     const s = G.s;
@@ -319,7 +323,37 @@
             sparks(e.x, e.y, 18, '#c9a8ff', 4); sparks(e.x, e.y, 10, '#7ff0ff', 3);
           }
           break;
-        case 'cast': KCSound.play(e.card === 'spears' ? 'spearsCast' : e.card === 'sandstorm' ? 'sandstorm' : 'spell'); break;
+        case 'cast': KCSound.play({ spears: 'spearsCast', sandstorm: 'sandstorm', flashfreeze: 'freezeCast', gemflash: 'gemFlash', meteor: 'meteorCast', barrel: 'barrelThrow', abyss: 'portal' }[e.card] || 'spell'); break;
+        case 'stun':
+          if (e.kind === 'freeze') { if (e.dur < 2) sparks(e.x, e.y, 5, '#cfeeff', 2); }
+          else { KCSound.play('stunZap'); sparks(e.x, e.y - 0.6, 5, '#bff4ff', 2.5); }
+          break;
+        case 'shieldbreak':
+          KCSound.play('shieldBreak');
+          debris(e.x, e.y - 0.5, 10, e.card === 'broadside' ? ['#a8743e', '#835628', '#5a5f6a'] : ['#e4d2ff', '#a882f0', '#ffffff'], 3);
+          break;
+        case 'transform': KCSound.play('clunk'); puff(e.x, e.y, 8, '#c9a070', 0.8); break;
+        case 'rise':
+          if (e.card === 'coil') { KCSound.play('coilRise'); puff(e.x, e.y, 6, '#8a8590', 0.6); }
+          else { KCSound.play('wraithRise'); puff(e.x, e.y, 6, 'rgba(150,90,230,0.8)', 0.5); }
+          break;
+        case 'hide': KCSound.play('coilHide'); break;
+        case 'hookthrow': KCSound.play('hookThrow'); break;
+        case 'hooked': KCSound.play('hookHit'); shock(e.x, e.y, 0.8, '#d8b880', 0.35); break;
+        case 'jump': KCSound.play('jump'); dust(e.x, e.y, 10); break;
+        case 'slam':
+          // a landing knight, an arriving sage, a drill bursting up: a shockwave on the ground
+          if (e.card === 'wintersage') { KCSound.play('freeze'); shock(e.x, e.y, e.r, '#cfeeff', 0.5); sparks(e.x, e.y, 14, '#e9f8ff', 3); break; }
+          KCSound.play('slam'); G.shake = Math.max(G.shake, e.card === 'dreadknight' ? 0.35 : 0.18);
+          shock(e.x, e.y, e.r, e.card === 'dreadknight' ? '#ff4a5a' : '#c9a8ff', 0.5);
+          debris(e.x, e.y, 14, e.card === 'dreadknight' ? ['#3a3346', '#c0283a', '#6a6070'] : ['#6e5a90', '#c9a8ff', '#4a3e66'], 4);
+          break;
+        case 'egg': KCSound.play('egg'); sparks(e.x, e.y, 10, '#ffcd33', 3); break;
+        case 'hatch': KCSound.play('rebirth'); G.fx.push({ kind: 'flash', x: e.x, y: e.y - 0.5, r: 2.2, life: 0.6, max: 0.6 }); sparks(e.x, e.y, 22, '#ffd23f', 4); break;
+        case 'leap': KCSound.play(e.card === 'sunsprite' ? 'chime' : 'leap'); break;
+        case 'barrel': KCSound.play('barrelBreak'); debris(e.x, e.y, 14, ['#b4733c', '#8c5427', '#5a5f6a'], 3.5); puff(e.x, e.y, 8, '#d8c0a0', 0.7); break;
+        case 'healpulse': KCSound.play('heal'); shock(e.x, e.y, e.r, '#ffe27a', 0.5); break;
+        case 'spawn': KCSound.play('pop'); puff(e.x, e.y, 4, 'rgba(200,170,255,0.8)', 0.4); break;
         case 'burrow': KCSound.play('dig'); puff(e.x, e.y, 10, '#a07850', 0.6); break;
         case 'surface':
           KCSound.play('surface'); G.shake = Math.max(G.shake, 0.12);
@@ -344,6 +378,10 @@
           break;
         }
         case 'thunderclap':
+          // a death burst: the Icebound Giant shatters, the Steel Titan bursts, the Phoenix goes up in flame
+          if (e.card === 'icegiant') { KCSound.play('iceShatter'); shock(e.x, e.y, e.r, '#cfeeff', 0.55); debris(e.x, e.y - 0.6, 18, ['#cfeeff', '#9fd4f0', '#ffffff'], 4); break; }
+          if (e.card === 'titan' || e.card === 'titanling') { KCSound.play('smash'); G.shake = Math.max(G.shake, e.card === 'titan' ? 0.45 : 0.2); G.fx.push({ kind: 'blast', x: e.x, y: e.y, r: e.r, life: 0.45, max: 0.45 }); debris(e.x, e.y - 0.8, e.card === 'titan' ? 20 : 10, ['#d39a48', '#a8712a', '#6a5a48'], 4.5); break; }
+          if (e.card === 'phoenix') { KCSound.play('fireBurst'); G.fx.push({ kind: 'flash', x: e.x, y: e.y - 1.1, r: e.r * 1.6, life: 0.5, max: 0.5 }); sparks(e.x, e.y - 1.1, 18, '#ffb52e', 4); break; }
           KCSound.play('thunderclap'); G.shake = Math.max(G.shake, 0.4);
           G.fx.push({ kind: 'zap', x: e.x, y: e.y, r: e.r * 1.6, life: 0.6, max: 0.6 });
           for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; G.fx.push({ kind: 'bolt', x: e.x + Math.cos(a) * e.r, y: e.y + Math.sin(a) * e.r * 0.6, fx: e.x, fy: e.y - 1.4, seed: Math.random() * 1000, life: 0.4, max: 0.4 }); }
@@ -357,10 +395,16 @@
         case 'hit':
           if (e.card === 'gorilla' || e.card === 'rhino') { KCSound.play('smash'); G.shake = Math.max(G.shake, e.card === 'rhino' ? 0.12 : 0.18); sparks(e.x, e.y, 6, '#fff3c4'); }
           else if (e.kind === 'cannon') sparks(e.x, e.y, 5, '#ffd27a');
+          else if (e.kind === 'prismray') sparks(e.x, e.y - 0.5, 4, '#efe2ff', 2.5);
+          else if (e.r) { KCSound.play('smash'); shock(e.x, e.y, e.r, '#ff6a7a', 0.3); }
           else { KCSound.play('hit'); sparks(e.x, e.y, 3, '#ffffff'); }
           break;
         case 'splash':
           if (e.kind === 'pot') { KCSound.play('potBreak'); sparks(e.x, e.y, 10, '#d07a45', 3); puff(e.x, e.y, 6, '#c9a07a', e.r * 0.7); }
+          else if (e.kind === 'frostbolt' || e.kind === 'frostleap') { KCSound.play('iceHit'); shock(e.x, e.y, e.r, '#cfeeff', 0.35); sparks(e.x, e.y, 8, '#e9f8ff', 2.5); }
+          else if (e.kind === 'sunleap') { shock(e.x, e.y, e.r, '#ffe27a', 0.4); sparks(e.x, e.y, 10, '#fff1a6', 3); }
+          else if (e.kind === 'arcblast') { KCSound.play('thunder'); G.shake = Math.max(G.shake, 0.3); G.fx.push({ kind: 'zap', x: e.x, y: e.y, r: e.r * 1.2, life: 0.45, max: 0.45 }); sparks(e.x, e.y, 18, '#cfe6ff', 4.5); }
+          else if (e.kind === 'cloudpuff') puff(e.x, e.y, 8, 'rgba(230,240,255,0.9)', e.r * 0.8);
           else puff(e.x, e.y, 9, '#ffffff', e.r);
           break;
         case 'spin':
@@ -370,6 +414,18 @@
           break;
         case 'death': KCSound.play('death'); puff(e.x, e.y - (e.air ? 1.1 : 0.3), 7, '#d9d4e8', 0.5); break;
         case 'boom':
+          if (e.card === 'flashfreeze') {
+            KCSound.play('freeze'); shock(e.x, e.y, e.r, '#cfeeff', 0.7); shock(e.x, e.y, e.r * 0.6, '#ffffff', 0.5);
+            for (let i = 0; i < 16; i++) { const a = Math.random() * 6.28, d = Math.random() * e.r; sparks(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d * 0.6, 1, '#e9f8ff', 1.5); }
+            break;
+          }
+          if (e.card === 'gemflash') { KCSound.play('gemBoom'); shock(e.x, e.y, e.r, '#c9a8ff', 0.4); G.fx.push({ kind: 'zap', x: e.x, y: e.y, r: e.r, life: 0.35, max: 0.35 }); sparks(e.x, e.y, 16, '#efe2ff', 4); break; }
+          if (e.card === 'meteor') {
+            KCSound.play('meteor'); G.shake = Math.max(G.shake, 0.6);
+            G.fx.push({ kind: 'blast', x: e.x, y: e.y, r: e.r * 1.2, life: 0.6, max: 0.6 }); shock(e.x, e.y, e.r * 1.4, '#ff4a5a', 0.6);
+            debris(e.x, e.y, 22, ['#3a2e3e', '#ff4a5a', '#241c2a'], 5); sparks(e.x, e.y, 20, '#ff6a5a', 5);
+            break;
+          }
           if (e.card === 'spears') {
             KCSound.play('spears'); G.shake = Math.max(G.shake, 0.12);
             for (let i = 0; i < 14; i++) { const a = Math.random() * 6.28, d = Math.random() * e.r; puff(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d * 0.6, 1, 'rgba(220,200,170,0.9)', 0.2); }
@@ -833,18 +889,23 @@
       c.restore();
       return;
     }
+    if (e.kind === 'building' && e.tunnel) { tunnel(c, e, x, y, t); return; }
     if (e.kind === 'building') {
       c.save(); c.translate(x, y);
       if (e.deploy > 0) { const sc = Math.max(0.3, 1 - Math.max(0, e.deploy - 0.6) * 2); c.globalAlpha = 0.7; c.scale(sc, sc); }
       if (e.flash > 0) c.filter = 'brightness(1.6)';
-      A.cannon(c, k, { team: e.team, angle: Math.atan2(e.aimY, e.aimX), atk: Math.max(0, e.atk / 0.25) });
+      A.building(c, e.card, k, { team: e.team, angle: Math.atan2(e.aimY, e.aimX), atk: Math.max(0, e.atk / 0.25), hidden: e.hidden, rise: e.rise, t: t + e.id * 0.37 });
       c.restore();
+      frozen(c, e, x, y, k * 1.1, t);
       return;
     }
     if (e.tunnel) { tunnel(c, e, x, y, t); return; }
     if (e.card === 'mole' && e.deploy > 0) { surfacing(c, e, x, y, t); return; }
-    const lift = liftOf(e) * k;
+    // the Dread Knight mid-leap rises in an arc; a troop on the end of a harpoon rope is off the ground
+    const leapF = e.leap ? Math.min(1, e.leap.t / e.leap.dur) : 0;
+    const lift = (liftOf(e) + (e.leap ? Math.sin(leapF * Math.PI) * 2.2 : 0) + (e.pulled ? 0.35 : 0)) * k;
     if (!e.air) shadow(c, x, y, e.radius * k * 1.05);
+    ropes(c, e, x, y - lift);
     // the Griffin's beam: a crackling line of storm light to its target, thicker as it powers up
     if (e.beam && e.beamOn) {
       const tg = G.s.ents.find(u => u.id === e.beamOn);
@@ -866,9 +927,14 @@
     if (e.ram) o.power = Math.max(0, Math.min(1, (e.speed - e.baseSpeed) / (e.maxSpeed - e.baseSpeed)));
     if (e.rider) o.ratk = Math.max(0, e.rider.atk / 0.4);
     if (e.chargeHit) o.charged = e.run >= e.chargeHit;
+    if (e.maxShield) o.shield = e.shield > 0 ? 1 : 0;
+    if (e.chargeT !== undefined) o.charge = e.chargeT / KC_CARDS[e.card].charge;
+    if (e.hookT) o.hook = 1;
+    if (e.hatch !== undefined) o.hatch = 1 - e.hatch / KC_CARDS.phoenix.egg.hatch;
     if (e.beam) o.beam = e.beamOn ? 1 + Math.min(2, Math.floor(e.beamTime / e.beamStage)) : 0;
     A.troop(c, e.card, k, o);
     c.restore();
+    frozen(c, e, x, y - lift, e.radius * k * 1.25, t);
     // dust behind a rolling cart and a galloping camel
     if (e.moving && e.deploy <= 0 && (e.ram || e.chargeHit) && Math.random() < (e.ram ? 0.25 + o.power * 0.5 : 0.4)) {
       const back = e.team === 0 ? 0.6 : -0.6;
@@ -876,7 +942,9 @@
     }
     // a slowed troop: sand swirling round it, or the lasso round its legs
     if (e.slowEnd > G.s.time) {
-      if (e.slowKind === 'lasso') {
+      if (e.slowKind === 'frost') {
+        for (let i = 0; i < 3; i++) { const a = t * 3 + i * 2.1 + e.id; A.circ(c, x + Math.cos(a) * e.radius * k, y - lift - k * 0.4 + Math.sin(a) * k * 0.2, k * 0.06); c.fillStyle = 'rgba(200,240,255,0.95)'; c.fill(); }
+      } else if (e.slowKind === 'lasso') {
         A.ell(c, x, y - k * 0.2, e.radius * k * 0.9, e.radius * k * 0.35);
         c.strokeStyle = A.OUT; c.lineWidth = k * 0.12; c.stroke(); c.strokeStyle = '#c8a070'; c.lineWidth = k * 0.07; c.stroke();
       } else {
@@ -892,6 +960,28 @@
       c.beginPath(); c.moveTo(x, cy); c.arc(x, cy, r * 0.8, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); c.closePath();
       c.fillStyle = e.team === 0 ? '#8cc4ff' : '#ff9ea4'; c.fill();
     }
+  }
+  // Frozen: a block of ice around it; stunned: crackling sparks over it.
+  function frozen(c, e, x, y, r, t) {
+    if (!(e.stunEnd > G.s.time)) return;
+    if (e.stunKind === 'freeze') {
+      c.save(); c.globalAlpha = 0.55;
+      A.rr(c, x - r, y - r * 1.7, r * 2, r * 1.9, r * 0.3); c.fillStyle = 'rgba(190,235,255,0.6)'; c.fill();
+      c.lineWidth = Math.max(1.5, G.k * 0.06); c.strokeStyle = 'rgba(240,252,255,0.95)'; c.stroke();
+      A.line(c, x - r * 0.6, y - r * 1.4, x - r * 0.2, y - r * 1.0, 'rgba(255,255,255,0.9)', Math.max(1, G.k * 0.05));
+      c.restore();
+    } else for (let i = 0; i < 3; i++) {
+      const a = t * 20 + i * 2.1 + e.id, x0 = x + Math.cos(a) * r * 0.6, y0 = y - r * 1.3 + Math.sin(a * 1.3) * r * 0.3;
+      A.line(c, x0, y0, x0 + r * 0.25, y0 - r * 0.2, '#bff4ff', Math.max(1, G.k * 0.05));
+    }
+  }
+  // The Harpoon Captain's rope: to a troop he is reeling in, or to the building he is pulling himself to.
+  function ropes(c, e, x, y) {
+    const k = G.k, by = e.pulled ? G.s.ents.find(u => u.id === e.pulled.by) : e.reel ? G.s.ents.find(u => u.id === e.reel.to) : null;
+    if (!by) return;
+    const bx = SX(by.x), byy = SY(by.y) - (by.kind === 'troop' ? k * 1.1 : k * 0.8);
+    c.beginPath(); c.moveTo(bx, byy); c.lineTo(x, y - k * 0.5);
+    c.strokeStyle = A.OUT; c.lineWidth = k * 0.1; c.stroke(); c.strokeStyle = '#d8b880'; c.lineWidth = k * 0.06; c.stroke();
   }
   // A storm beam from (x0, y0) to (x1, y1): jagged, flickering, brighter and thicker each stage.
   function beamTo(c, x0, y0, x1, y1, stage, t, team) {
@@ -953,11 +1043,19 @@
       levelBadge(c, bx - h * 0.6, by + h / 2, h * 0.95, e.team, e.level);
       return;
     }
-    if (e.hp >= e.maxHp || e.deploy > 0) return;
-    const lift = liftOf(e) * k, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: e.evo ? 2.35 : 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75, skeletons: 1.2, footmen: 1.6, flail: 1.95, pots: 1.6, ramcart: 1.95, ramsoldier: 1.45, mole: 1.45, camel: 2.45, bees: 0.55, owl: 1.15, thundercloud: 0.85, griffin: 1.2 }[e.card] || 1.4;
+    const shieldHit = e.maxShield && e.shield < e.maxShield;
+    if ((e.hp >= e.maxHp && !shieldHit) || e.deploy > 0) return;
+    const lift = liftOf(e) * k, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: e.evo ? 2.35 : 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75, skeletons: 1.2, footmen: 1.6, flail: 1.95, pots: 1.6, ramcart: 1.95, ramsoldier: 1.45, mole: 1.45, camel: 2.45, bees: 0.55, owl: 1.15, thundercloud: 0.85, griffin: 1.2,
+      frostsprite: 1.0, icegiant: 1.4, wintersage: 1.85, raider: 1.15, raidergun: 1.15, harpoon: 1.85, broadside: 1.3, sparkbots: 1.2, titan: 2.2, titanling: 1.4, arccannon: 1.75, shardguards: 1.5, imp: 1.0,
+      prism: 1.7, sunsprite: 1.0, guardian: 1.85, drake: 0.95, phoenix: 1.0, phoenixegg: 1.0, wraiths: 1.4, wraith: 1.4, dreadknight: 2.3 }[e.card] || 1.4;
     const w = Math.max(0.8, e.radius * 1.9) * k, h = Math.max(5, k * 0.2), by = y - lift - top * k, bx = x - w / 2;
     A.rr(c, bx, by, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
     A.rr(c, bx + 1, by + 1, Math.max(0, (w - 2) * e.hp / e.maxHp), h - 2, (h - 2) / 2); c.fillStyle = blue ? '#5aa9ff' : '#ff5f69'; c.fill();
+    if (e.maxShield && e.shield > 0) {
+      // a shield: a white bar over the health bar, emptying as the shield takes damage
+      A.rr(c, bx, by - h - 1, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
+      A.rr(c, bx + 1, by - h, Math.max(0, (w - 2) * e.shield / e.maxShield), h - 2, (h - 2) / 2); c.fillStyle = '#e8edf5'; c.fill();
+    }
     levelBadge(c, bx - h * 0.6, by + h / 2, h * 0.95, e.team, e.level);
   }
   function levelBadge(c, x, y, r, team, level) {
@@ -970,6 +1068,26 @@
   // Broken pottery on the ground: shards fading out as the damage ends.
   function drawZone2(c, z, k, t) {
     if (z.kind === 'sandstorm') { storm(c, z, k, t); return; }
+    if (z.kind === 'gate') {
+      // the Abyss Gate: a dark swirling portal over the circle it lets wraiths out of
+      const x = SX(z.x), y = SY(z.y), fade = Math.min(1, z.left / 0.6, (z.dur - z.left) / 0.4 + 0.2);
+      c.save(); c.globalAlpha = 0.85 * fade;
+      A.ell(c, x, y, z.r * k, z.r * k * 0.6); c.fillStyle = 'rgba(40,10,60,0.35)'; c.fill();
+      c.strokeStyle = 'rgba(190,120,255,0.8)'; c.lineWidth = Math.max(2, k * 0.08); c.setLineDash([k * 0.4, k * 0.3]); c.lineDashOffset = -t * k * 2; c.stroke(); c.setLineDash([]);
+      c.translate(x, y - k * 1.6); A.portalArt(c, k * 1.4, t * 2, z.team);
+      c.restore();
+      return;
+    }
+    if (z.kind === 'heal') {
+      const x = SX(z.x), y = SY(z.y), a = Math.max(0, z.left / z.dur);
+      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.6 * a;
+      const g = c.createRadialGradient(x, y, 0, x, y, z.r * k);
+      g.addColorStop(0, 'rgba(255,230,140,0.7)'); g.addColorStop(1, 'rgba(255,200,80,0)');
+      c.fillStyle = g; A.ell(c, x, y, z.r * k, z.r * k * 0.6); c.fill();
+      c.restore();
+      if (Math.random() < 0.6) G.fx.push({ kind: 'dot', x: z.x + (Math.random() - 0.5) * z.r * 1.4, y: z.y + (Math.random() - 0.5) * z.r * 0.8, vx: 0, vy: -1.2, r: 0.08, col: 'rgba(255,240,170,0.95)', life: 0.6, max: 0.6 });
+      return;
+    }
     const a = Math.max(0, z.left / z.dur), x = SX(z.x), y = SY(z.y);
     c.globalAlpha = 0.35 * a;
     A.ell(c, x, y, z.r * k, z.r * k * 0.55); c.fillStyle = '#7a3e1e'; c.fill();
@@ -1004,11 +1122,32 @@
       G.fx.push({ kind: 'puff', x: z.x + Math.cos(a) * d, y: z.y + Math.sin(a) * d * 0.6, vx: Math.cos(a + 1.6) * 1.2, vy: Math.sin(a + 1.6) * 0.6 - 0.2, r: 0.3 + Math.random() * 0.3, col: 'rgba(222,190,130,0.55)', life: 0.8, max: 0.8 });
     }
   }
+  const ARCS = new WeakSet();
   function drawProj(c, p, alpha, t) {
     const k = G.k, px = p.px === undefined ? p.x : p.px + (p.x - p.px) * alpha, py = p.py === undefined ? p.y : p.py + (p.y - p.py) * alpha;
     const total = Math.hypot(p.tx - p.sx, p.ty - p.sy) || 1, done = Math.min(1, Math.hypot(px - p.sx, py - p.sy) / total);
-    const arcH = p.kind === 'snowball' || p.kind === 'bigsnow' || p.kind === 'pot' ? 1.6 : p.kind === 'lasso' ? 1 : p.kind === 'fireball' ? 2.2 : p.kind === 'spears' ? 3 : p.kind === 'cannon' ? 0.8 : 0.5;
-    const lift = Math.sin(done * Math.PI) * arcH * Math.min(1, total / 6) + (p.air ? 1.1 : 0.6) * (1 - done);
+    if (p.kind === 'prismray') {
+      // the Prism Archer's bolt flies straight and level: a bright crystal streak
+      const x = SX(px), y = SY(py) - k * 0.9, ex = x - p.dx * k * 1.1, ey = y - p.dy * k * 1.1;
+      c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(ex, ey); c.lineTo(x, y); c.strokeStyle = 'rgba(200,160,255,0.55)'; c.lineWidth = k * 0.28; c.stroke();
+      c.beginPath(); c.moveTo(ex, ey); c.lineTo(x, y); c.strokeStyle = '#ffffff'; c.lineWidth = k * 0.08; c.stroke();
+      c.restore();
+      return;
+    }
+    const arcH = { snowball: 1.6, bigsnow: 1.6, pot: 1.6, lasso: 1, fireball: 2.2, spears: 3, cannon: 0.8, frostleap: 1.0, sunleap: 1.0, frostbolt: 0.8, hook: 0.7,
+      spark: 0.3, arcblast: 0.6, cloudpuff: 0.3, barrel: 2.6, meteor: 3.5, arc: 0 }[p.kind];
+    if (p.kind === 'arc') {
+      // the Coil Tower's lightning: a jagged bolt from the coil's sphere to the target
+      // (drawn once per shot, as a short-lived bolt; the shot itself is not changed)
+      if (!ARCS.has(p)) {
+        ARCS.add(p);
+        const from = G.s.ents.find(u => u.id === p.from);
+        if (from) G.fx.push({ kind: 'bolt', x: p.tx, y: p.ty - 0.5, fx: from.x, fy: from.y - 1.5, seed: Math.random() * 1000, life: 0.18, max: 0.18 });
+      }
+      return;
+    }
+    const lift = Math.sin(done * Math.PI) * (arcH === undefined ? 0.5 : arcH) * Math.min(1, total / 6) + (p.air ? 1.1 : 0.6) * (1 - done) + (p.kind === 'meteor' ? (1 - done) * 6 : 0);
     const x = SX(px), y = SY(py) - lift * k;
     if (p.kind === 'fireball') {
       A.ell(c, SX(p.tx), SY(p.ty), KC_CARDS.fireball.area * k, KC_CARDS.fireball.area * k * 0.6);
@@ -1090,6 +1229,45 @@
       shadow(c, SX(px), SY(py), k * 0.2);
       A.circ(c, x, y, k * 0.24); A.paint(c, '#ffffff', k * 0.06);
       A.circ(c, x - k * 0.07, y - k * 0.07, k * 0.07); c.fillStyle = '#dfe9f7'; c.fill();
+    } else if (p.kind === 'frostleap' || p.kind === 'sunleap') {
+      // a sprite in mid-leap
+      shadow(c, SX(px), SY(py), k * 0.25);
+      c.save(); c.translate(x, y + k * 0.3); A.troop(c, p.card, k, { team: p.team, t, walk: false, atk: 0, face: 1, id: 1, view: p.team === 0 ? 'back' : 'front' }); c.restore();
+    } else if (p.kind === 'frostbolt') {
+      A.glow(c, x, y, k * 0.5, 'rgb(170,230,255)', 0.6);
+      A.circ(c, x, y, k * 0.16); A.paint(c, '#e9f8ff', k * 0.05);
+      if (Math.random() < 0.6) G.fx.push({ kind: 'dot', x: px, y: py - lift, vx: 0, vy: 0, r: 0.08, col: 'rgba(200,240,255,0.9)', life: 0.3, max: 0.3 });
+    } else if (p.kind === 'harpoonlet' || p.kind === 'hook') {
+      const ang = Math.atan2((p.ty - p.sy) * k, (p.tx - p.sx) * k);
+      if (p.kind === 'hook') {
+        const from = G.s.ents.find(u => u.id === p.hook);
+        if (from) { c.beginPath(); c.moveTo(SX(from.x), SY(from.y) - k * 1.2); c.lineTo(x, y); c.strokeStyle = A.OUT; c.lineWidth = k * 0.1; c.stroke(); c.strokeStyle = '#d8b880'; c.lineWidth = k * 0.06; c.stroke(); }
+      }
+      c.save(); c.translate(x, y); c.rotate(ang);
+      const L = p.kind === 'hook' ? 0.5 : 0.35;
+      A.line(c, -k * L, 0, k * 0.2, 0, '#6a4a2a', Math.max(1.5, k * 0.06));
+      A.poly(c, [k * 0.36, 0, k * 0.18, -k * 0.1, k * 0.18, k * 0.1]); A.paint(c, '#dfe6ee', Math.max(1, k * 0.04));
+      if (p.kind === 'hook') { A.line(c, k * 0.22, -k * 0.1, k * 0.12, -k * 0.2, A.OUT, k * 0.05); A.line(c, k * 0.22, k * 0.1, k * 0.12, k * 0.2, A.OUT, k * 0.05); }
+      c.restore();
+    } else if (p.kind === 'spark') {
+      A.glow(c, x, y, k * 0.45, 'rgb(150,230,255)', 0.8);
+      A.circ(c, x, y, k * 0.1); c.fillStyle = '#ffffff'; c.fill();
+    } else if (p.kind === 'arcblast') {
+      A.glow(c, x, y, k * 1.1, 'rgb(140,220,255)', 0.8);
+      A.circ(c, x, y, k * 0.3); A.paint(c, '#e8fbff', k * 0.06);
+      for (let i = 0; i < 4; i++) { const a = t * 30 + i * 1.6; A.line(c, x, y, x + Math.cos(a) * k * 0.6, y + Math.sin(a) * k * 0.6, '#cfeeff', Math.max(1, k * 0.04)); }
+    } else if (p.kind === 'cloudpuff') {
+      for (let i = 0; i < 3; i++) { A.circ(c, x + (i - 1) * k * 0.14, y + Math.sin(t * 9 + i) * k * 0.05, k * (0.16 + (i === 1 ? 0.06 : 0))); c.fillStyle = 'rgba(235,245,255,0.95)'; c.fill(); }
+    } else if (p.kind === 'barrel') {
+      A.ell(c, SX(p.tx), SY(p.ty), k * 1.0, k * 0.6); c.strokeStyle = 'rgba(255,220,150,0.7)'; c.lineWidth = 2; c.setLineDash([6, 5]); c.stroke(); c.setLineDash([]);
+      shadow(c, SX(px), SY(py), k * 0.4);
+      c.save(); c.translate(x, y); A.barrelArt(c, k * 0.75, t * 8, p.team); c.restore();
+    } else if (p.kind === 'meteor') {
+      const r = KC_CARDS.meteor.area;
+      A.ell(c, SX(p.tx), SY(p.ty), r * k, r * k * 0.6); c.fillStyle = 'rgba(255,40,70,0.12)'; c.fill(); c.strokeStyle = 'rgba(255,90,110,0.7)'; c.lineWidth = 2; c.stroke();
+      shadow(c, SX(px), SY(py), k * 0.6 * (0.4 + done));
+      c.save(); c.translate(x, y); c.rotate(-0.6); A.meteorArt(c, k * 1.1, t); c.restore();
+      if (Math.random() < 0.8) G.fx.push({ kind: 'dot', x: px, y: py - lift, vx: (Math.random() - 0.5), vy: -0.5, r: 0.2, col: Math.random() < 0.5 ? 'rgba(255,70,90,0.8)' : 'rgba(80,60,90,0.8)', life: 0.4, max: 0.4 });
     }
   }
   function drawFx(c, t) {
@@ -1100,7 +1278,7 @@
       else if (f.kind === 'puff') { c.globalAlpha = a * 0.8; A.circ(c, SX(f.x), SY(f.y), f.r * k * (1.6 - a * 0.6)); c.fillStyle = f.col; c.fill(); }
       else if (f.kind === 'ring') {
         c.globalAlpha = a; A.ell(c, SX(f.x), SY(f.y), f.r * k * (1.2 - a * 0.6), f.r * k * 0.5 * (1.2 - a * 0.6));
-        c.strokeStyle = f.team === 0 ? '#8cc4ff' : '#ff9ea4'; c.lineWidth = k * 0.12; c.stroke();
+        c.strokeStyle = f.col || (f.team === 0 ? '#8cc4ff' : '#ff9ea4'); c.lineWidth = k * 0.12; c.stroke();
       } else if (f.kind === 'flash') {
         const r = f.r * k * (0.6 + (1 - a) * 0.6), x = SX(f.x), y = SY(f.y);
         c.globalCompositeOperation = 'lighter'; c.globalAlpha = a;
@@ -1155,7 +1333,8 @@
     const s = G.s, k = G.k, card = KC_CARDS[id], p = card.kind === 'spell' ? snap(G.hover) : placeAt(id, G.hover);
     const ok = S.canDeploy(s, 0, id, p.x, p.y), x = SX(p.x), y = SY(p.y);
     if (card.kind === 'spell') {
-      A.ell(c, x, y, card.area * k, card.area * k * 0.62);
+      const ar = card.area || 1;
+      A.ell(c, x, y, ar * k, ar * k * 0.62);
       c.fillStyle = card.storm ? 'rgba(214,170,96,0.3)' : 'rgba(255,140,40,0.22)'; c.fill(); c.strokeStyle = 'rgba(255,220,150,0.95)'; c.lineWidth = 2.5; c.setLineDash([8, 6]); c.stroke(); c.setLineDash([]);
       return;
     }
@@ -1166,7 +1345,9 @@
       c.strokeStyle = ok ? 'rgba(160,120,80,0.9)' : 'rgba(229,65,75,0.8)'; c.lineWidth = k * 0.16; c.setLineDash([k * 0.25, k * 0.25]); c.stroke(); c.setLineDash([]);
       A.ell(c, x, y, k * 0.62, k * 0.3); c.fillStyle = ok ? 'rgba(90,60,35,0.55)' : 'rgba(229,65,75,0.5)'; c.fill();
       c.globalAlpha = ok ? 0.6 : 0.35;
-      c.save(); c.translate(x, y); A.troop(c, id, k, { team: 0, t, walk: false, atk: 0, face: 1, id: 1, view: 'back' }); c.restore();
+      c.save(); c.translate(x, y);
+      if (card.kind === 'building') A.building(c, id, k, { team: 0, t, angle: -Math.PI / 2 }); else A.troop(c, id, k, { team: 0, t, walk: false, atk: 0, face: 1, id: 1, view: 'back' });
+      c.restore();
       c.globalAlpha = 1;
       return;
     }
@@ -1175,7 +1356,7 @@
       A.rr(c, SX(p.x - hf), SY(p.y - hf), hf * 2 * k, hf * 2 * k, k * 0.2);
       c.fillStyle = ok ? 'rgba(255,255,255,0.3)' : 'rgba(229,65,75,0.5)'; c.fill();
       c.globalAlpha = ok ? 0.65 : 0.35;
-      c.save(); c.translate(x, y); A.cannon(c, k, { team: 0, angle: -Math.PI / 2 }); c.restore();
+      c.save(); c.translate(x, y); A.building(c, id, k, { team: 0, angle: -Math.PI / 2, t }); c.restore();
       c.globalAlpha = 1;
       A.ell(c, x, y, (card.range + card.radius) * k, (card.range + card.radius) * k);
       c.strokeStyle = 'rgba(255,255,255,0.45)'; c.lineWidth = 1.5; c.setLineDash([5, 6]); c.stroke(); c.setLineDash([]);

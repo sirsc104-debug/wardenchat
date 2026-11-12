@@ -57,11 +57,14 @@ const KCProgress = (() => {
       epic: [null, null, null, null, null, 2, 4, 10, 20, 30, 50, 70, 100, 130],
       legendary: [null, null, null, null, null, null, null, null, 2, 4, 6, 9, 12, 14],
     },
-    arenaGold: { 1: 0.26, 2: 0.33, 3: 0.42, 4: 0.53 },
-    arenaCards: { 1: 0.3, 2: 0.37, 3: 0.45, 4: 0.55 },
+    arenaGold: { 1: 0.26, 2: 0.33, 3: 0.42, 4: 0.53, 5: 1.33, 6: 1.86, 7: 2.65, 8: 3.18, 9: 3.95, 10: 4.8 },
+    arenaCards: { 1: 0.3, 2: 0.37, 3: 0.45, 4: 0.55, 5: 1.375, 6: 1.925, 7: 2.75, 8: 3.3, 9: 4.1, 10: 5.0 },
+    // inside an arena rewards climb toward the next arena's, stopping `arenaJump` short of it, so reaching
+    // the next arena is always a clear step up (at least `withinArena` of climbing in a short arena)
+    arenaJump: 1.2,
     nextArenaGrowth: 1.35, // for arenas past the table
     withinArena: 0.04,
-    beyond: { every: 300, add: 0.5, max: 5.5 },
+    beyond: { every: 500, add: 0.05, max: 0.3 },
     levelStep: 0.015, levelCap: 40,
     epicPow: 0.5, legendaryPow: 0.25,
     // each chest at tier 1, level 1: gold range, total cards, and the rarer cards among them
@@ -118,11 +121,11 @@ const KCProgress = (() => {
     },
     // wallet Coins (SirSC) to Rubies, one way: `rate` rubies a coin, up to a daily cap set by the highest
     // arena reached; past the last arena the cap grows by `beyond.add` every `beyond.every` trophies.
-    exchange: { rate: 1, cap: { 1: 500, 2: 1000, 3: 2000, 4: 4000 }, beyond: { every: 300, add: 1000, max: 10000 } },
+    exchange: { rate: 1, cap: { 1: 500, 2: 1000, 3: 2000, 4: 4000, 5: 6000, 6: 7000, 7: 8000, 8: 9000, 9: 10000, 10: 10000 }, beyond: { every: 500, add: 0, max: 10000 } },
     // opponents' card levels by trophies (straight lines between the points), matched to what a player
     // has at those trophies (tools/economy-report.js); rares, epics and legendaries are then raised to
     // where their rarity starts
-    foeLevels: [[0, 1], [50, 1], [300, 4.5], [600, 6.5], [900, 7.5], [1200, 8.5], [1500, 10], [2000, 12], [3000, 13.5], [4000, 15]],
+    foeLevels: [[0, 1], [50, 1], [300, 4.5], [600, 6.5], [900, 7.5], [1200, 8.5], [1500, 10], [2000, 12], [3000, 13.5], [4000, 14.5], [5000, 15]],
   };
 
   const ARENAS = [
@@ -134,7 +137,18 @@ const KCProgress = (() => {
       blurb: 'A sun-baked desert fortress of sandstone walls and an oasis channel. Evolutions and the Diamond Pass open here.' },
     { id: 'stormspire', number: 4, name: 'Stormspire', min: 900, theme: 'stormspire', cards: ['bees', 'owl', 'thundercloud', 'griffin'],
       blurb: 'A fortress on a mountain peak above the clouds, crackling with storms. Online battles are coming here.' },
-    { id: 'arena5', number: 5, name: 'Arena 5', min: 1200, soon: true, blurb: 'Coming in a later update.' },
+    { id: 'frostfang', number: 5, name: 'Frostfang Keep', min: 2000, theme: 'frostfang', cards: ['frostsprite', 'icegiant', 'wintersage', 'flashfreeze'],
+      blurb: 'A frozen mountain fortress of ice and snow. Its cards freeze, slow and hold the line.' },
+    { id: 'blackwater', number: 6, name: 'Blackwater Harbor', min: 2600, theme: 'blackwater', cards: ['dockraiders', 'barrel', 'harpoon', 'broadside'],
+      blurb: 'A pirate harbor of ships, docks and dark water, full of surprise attacks and siege guns.' },
+    { id: 'gearforge', number: 7, name: 'Gearforge Citadel', min: 3300, theme: 'gearforge', cards: ['coil', 'sparkbots', 'titan', 'arccannon'],
+      blurb: 'An industrial fortress of bronze machinery, turning gears and crackling electricity.' },
+    { id: 'crystal', number: 8, name: 'Crystal Chasm', min: 4100, theme: 'crystal', cards: ['gemflash', 'shardguards', 'drill', 'prism'],
+      blurb: 'An underground cavern of glowing crystals and old mining machines.' },
+    { id: 'skyward', number: 9, name: 'Skyward Sanctuary', min: 5000, theme: 'skyward', cards: ['sunsprite', 'guardian', 'drake', 'phoenix'],
+      blurb: 'A kingdom of white marble and gold floating above the clouds, where healers and firebirds live.' },
+    { id: 'eclipse', number: 10, name: 'Eclipse Throne', min: 6000, theme: 'eclipse', cards: ['wraiths', 'meteor', 'abyss', 'dreadknight'],
+      blurb: 'The obsidian fortress of a fallen king under an endless eclipse. Its cards are the most powerful of all.' },
   ];
   // Fixed rewards along the road, claimed by the player.
   const ROAD = [
@@ -171,7 +185,71 @@ const KCProgress = (() => {
     { at: 1090, kind: 'card', card: 'thundercloud', copies: 1 },
     { at: 1130, kind: 'rubies', amount: 1200 },
     { at: 1170, kind: 'card', card: 'griffin', copies: 1 },
-    { at: 1200, kind: 'arena', arena: 'arena5' },
+    // the rest of Stormspire
+    { at: 1250, kind: 'chest', chest: 'gold' },
+    { at: 1340, kind: 'rubies', amount: 1500 },
+    { at: 1430, kind: 'chest', chest: 'platinum' },
+    { at: 1530, kind: 'rubies', amount: 1800 },
+    { at: 1630, kind: 'chest', chest: 'legendary' },
+    { at: 1730, kind: 'rubies', amount: 2200 },
+    { at: 1830, kind: 'chest', chest: 'platinum' },
+    { at: 1920, kind: 'rubies', amount: 2600 },
+    // Arena 5: Frostfang Keep
+    { at: 2000, kind: 'arena', arena: 'frostfang' },
+    { at: 2060, kind: 'card', card: 'frostsprite', copies: 6 },
+    { at: 2140, kind: 'rubies', amount: 3000 },
+    { at: 2220, kind: 'card', card: 'icegiant', copies: 3 },
+    { at: 2300, kind: 'chest', chest: 'platinum' },
+    { at: 2380, kind: 'card', card: 'flashfreeze', copies: 1 },
+    { at: 2460, kind: 'rubies', amount: 3500 },
+    { at: 2540, kind: 'card', card: 'wintersage', copies: 1 },
+    // Arena 6: Blackwater Harbor
+    { at: 2600, kind: 'arena', arena: 'blackwater' },
+    { at: 2670, kind: 'card', card: 'dockraiders', copies: 6 },
+    { at: 2760, kind: 'rubies', amount: 4000 },
+    { at: 2850, kind: 'card', card: 'barrel', copies: 1 },
+    { at: 2940, kind: 'chest', chest: 'legendary' },
+    { at: 3030, kind: 'card', card: 'broadside', copies: 1 },
+    { at: 3120, kind: 'rubies', amount: 4500 },
+    { at: 3210, kind: 'card', card: 'harpoon', copies: 1 },
+    // Arena 7: Gearforge Citadel
+    { at: 3300, kind: 'arena', arena: 'gearforge' },
+    { at: 3380, kind: 'card', card: 'coil', copies: 6 },
+    { at: 3480, kind: 'rubies', amount: 5000 },
+    { at: 3580, kind: 'card', card: 'sparkbots', copies: 3 },
+    { at: 3680, kind: 'chest', chest: 'legendary' },
+    { at: 3780, kind: 'card', card: 'titan', copies: 1 },
+    { at: 3880, kind: 'rubies', amount: 6000 },
+    { at: 3980, kind: 'card', card: 'arccannon', copies: 1 },
+    // Arena 8: Crystal Chasm
+    { at: 4100, kind: 'arena', arena: 'crystal' },
+    { at: 4200, kind: 'card', card: 'gemflash', copies: 6 },
+    { at: 4310, kind: 'rubies', amount: 7000 },
+    { at: 4420, kind: 'card', card: 'shardguards', copies: 1 },
+    { at: 4530, kind: 'chest', chest: 'legendary' },
+    { at: 4640, kind: 'card', card: 'drill', copies: 1 },
+    { at: 4750, kind: 'rubies', amount: 8000 },
+    { at: 4860, kind: 'card', card: 'prism', copies: 1 },
+    // Arena 9: Skyward Sanctuary
+    { at: 5000, kind: 'arena', arena: 'skyward' },
+    { at: 5110, kind: 'card', card: 'sunsprite', copies: 3 },
+    { at: 5230, kind: 'rubies', amount: 9000 },
+    { at: 5350, kind: 'card', card: 'guardian', copies: 3 },
+    { at: 5470, kind: 'chest', chest: 'mythic' },
+    { at: 5590, kind: 'card', card: 'drake', copies: 1 },
+    { at: 5710, kind: 'rubies', amount: 10000 },
+    { at: 5830, kind: 'card', card: 'phoenix', copies: 1 },
+    // Arena 10: Eclipse Throne
+    { at: 6000, kind: 'arena', arena: 'eclipse' },
+    { at: 6100, kind: 'card', card: 'wraiths', copies: 1 },
+    { at: 6200, kind: 'chest', chest: 'legendary' },
+    { at: 6300, kind: 'card', card: 'meteor', copies: 3 },
+    { at: 6400, kind: 'rubies', amount: 12000 },
+    { at: 6500, kind: 'card', card: 'abyss', copies: 1 },
+    { at: 6600, kind: 'chest', chest: 'mythic' },
+    { at: 6700, kind: 'card', card: 'dreadknight', copies: 1 },
+    { at: 6850, kind: 'rubies', amount: 15000 },
+    { at: 7000, kind: 'chest', chest: 'mythic' },
   ];
   // Names and unlock times; what each holds is in ECONOMY.chests.
   const CHESTS = {
@@ -383,6 +461,15 @@ const KCProgress = (() => {
     if (t >= 1010) swap('owl', 0.5);
     if (t >= 1090) swap('thundercloud', 0.45);
     if (t >= 1170) swap('griffin', 0.4);
+    // Arenas 5 to 10: troops take a middle slot; win conditions can take the Rhino's, spells the Fireball's
+    const swapAt = (id, i, p) => { if (rand() <= p && !deck.includes(id)) deck[i] = id; };
+    const NEWER = [[2060, 'frostsprite', 0.45], [2220, 'icegiant', 0.4, 0], [2380, 'flashfreeze', 0.35, 7], [2540, 'wintersage', 0.45],
+      [2670, 'dockraiders', 0.45], [2850, 'barrel', 0.4, 0], [3030, 'broadside', 0.4], [3210, 'harpoon', 0.45],
+      [3380, 'coil', 0.4], [3580, 'sparkbots', 0.45], [3780, 'titan', 0.4, 0], [3980, 'arccannon', 0.4],
+      [4200, 'gemflash', 0.4, 7], [4420, 'shardguards', 0.45], [4640, 'drill', 0.4, 0], [4860, 'prism', 0.45],
+      [5110, 'sunsprite', 0.35], [5350, 'guardian', 0.4], [5590, 'drake', 0.45], [5830, 'phoenix', 0.45],
+      [6100, 'wraiths', 0.45], [6300, 'meteor', 0.35, 7], [6500, 'abyss', 0.4, 0], [6700, 'dreadknight', 0.45]];
+    for (const [at, id, pr, slot] of NEWER) if (t >= at) { if (slot !== undefined) swapAt(id, slot, pr); else swap(id, pr); }
     const name = FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
     const foeTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
     const cardLevels = spreadLevels(foeUpgrades(foeTrophies), deck, rand);
@@ -448,11 +535,13 @@ const KCProgress = (() => {
     const E = ECONOMY, top = Math.max(...Object.keys(E.arenaGold).map(Number));
     const at = (tab, n) => (tab[n] || tab[top] * Math.pow(E.nextArenaGrowth, n - top));
     // climbing through the arena, or past the last one
-    const climb = next ? 1 + E.withinArena * Math.min(1, (t - here.min) / (next.min - here.min))
-      : 1 + Math.min(E.beyond.max, E.beyond.add * Math.floor((t - here.min) / E.beyond.every));
+    const f = next ? Math.min(1, (t - here.min) / (next.min - here.min)) : 0;
+    const rise = tab => (next ? 1 + f * Math.max(E.withinArena, at(tab, next.number) / (at(tab, here.number) * E.arenaJump) - 1)
+      : 1 + Math.min(E.beyond.max, E.beyond.add * Math.floor((t - here.min) / E.beyond.every)));
+    const climb = rise(E.arenaCards), climbG = rise(E.arenaGold);
     const lvl = 1 + E.levelStep * (Math.min(lv, E.levelCap) - 1);
     const bonus = Math.min(10, Math.max(1, Number(opts.bonus) || 1));
-    return { arena: here.number, gold: at(E.arenaGold, here.number) * climb * lvl * bonus, cards: at(E.arenaCards, here.number) * climb * lvl * bonus, climb, level: lvl };
+    return { arena: here.number, gold: at(E.arenaGold, here.number) * climbG * lvl * bonus, cards: at(E.arenaCards, here.number) * climb * lvl * bonus, climb, level: lvl };
   }
   // kept for older callers: the card multiplier
   const chestMult = lv => rewardTier(lv ? { level: lv } : {}).cards;

@@ -244,9 +244,35 @@ const KCArenas = (() => {
     },
   };
 
+  /* Arenas 5 to 10: their art hasn't been made yet. Each is ready for the same four images as the arenas
+     above: a lobby centerpiece with the arena's name, a battlefield (its tower pads, river and two bridges
+     on the game's grid) and the two side panels. Until the images arrive (fill in `src`, the image size,
+     the anchors, the crowd rows), the battlefield is drawn in code in the arena's own colours
+     (KCArt.THEMES), the lobby shows the arena's name on a plaque and the side panels are a plain gradient
+     in its colours: no other arena's art stands in. */
+  const PENDING = {
+    frostfang: { name: 'Frostfang Keep', panel: ['#24324a', '#6f86a0'], look: 'Snow, ice and frozen stone.' },
+    blackwater: { name: 'Blackwater Harbor', panel: ['#16222e', '#3a4a52'], look: 'Ships, docks and ocean water.' },
+    gearforge: { name: 'Gearforge Citadel', panel: ['#2a1f18', '#6a5038'], look: 'Bronze machinery and turning gears.' },
+    crystal: { name: 'Crystal Chasm', panel: ['#120e24', '#3a2f70'], look: 'Glowing crystals in an underground cavern.' },
+    skyward: { name: 'Skyward Sanctuary', panel: ['#6f8fca', '#e8eef8'], look: 'Clouds, white marble and gold.' },
+    eclipse: { name: 'Eclipse Throne', panel: ['#0a0810', '#4a1420'], look: 'Obsidian, crimson energy and darkness.' },
+  };
+  for (const [id, P] of Object.entries(PENDING)) {
+    const side = () => ({ src: null, w: 793, h: 1983, anchor: [0.5, 0.5], stars: 0, rows: [], glows: [], panel: P.panel });
+    ART[id] = {
+      name: P.name, pending: true, look: P.look, palette: id, margin: 1.4, fx: 'water',
+      // the bar's place over the art's empty progress bar, until the centerpiece image says otherwise
+      centerpiece: { src: null, w: 1122, h: 1402, bar: { left: 10, top: 64, width: 80, height: 7 } },
+      field: null,
+      scenery: { left: side(), right: side() },
+    };
+  }
+
   /* ---------- images: each loaded once ---------- */
   const imgs = {}, waiting = {};
   function image(src) {
+    if (!src) return null;
     if (imgs[src]) return imgs[src];
     const im = new Image();
     im.decoding = 'async';
@@ -260,6 +286,7 @@ const KCArenas = (() => {
   // Calls fn once the image is ready (now, if it already is). A failed image never calls back: callers
   // keep their fallback (a drawn battlefield, a plain gradient behind the crowd).
   function whenReady(src, fn) {
+    if (!src) return;
     const im = image(src);
     if (ready(im)) fn(im);
     else if (!im.failed) (waiting[src] = waiting[src] || []).push(fn);
@@ -269,7 +296,7 @@ const KCArenas = (() => {
   function preload(id) {
     const a = get(id);
     image(a.centerpiece.src);
-    if (a.field) image(a.field.src);
+    if (a.field && a.field.src) image(a.field.src);
     image(a.scenery.left.src); image(a.scenery.right.src);
   }
 
@@ -287,7 +314,7 @@ const KCArenas = (() => {
   // canvas's own frame (tile (x, y) is at ((x + m) k, (y + m) k)). Returns false if not ready.
   function drawField(c, id, k, m, W, H) {
     const f = get(id).field;
-    if (!f) return false;
+    if (!f || !f.src) return false;
     const im = image(f.src);
     if (!ready(im)) return false;
     const px = axis(f.x), py = axis(f.y);

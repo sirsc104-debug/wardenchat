@@ -25,8 +25,8 @@ const KCScenery = (() => {
 
   function attach(s) {
     s.L = layoutOf(s);
-    s.img = KCArenas.image(s.L.src);
-    KCArenas.whenReady(s.L.src, () => { s.cacheKey = ''; });
+    s.img = s.L.src ? KCArenas.image(s.L.src) : null;
+    if (s.L.src) KCArenas.whenReady(s.L.src, () => { s.cacheKey = ''; });
   }
 
   function make(cv, side) {
@@ -98,7 +98,9 @@ const KCScenery = (() => {
       c.drawImage(s.img, cv.ox, cv.oy, cv.dw, cv.dh);
     } else {
       const g = c.createLinearGradient(0, 0, 0, s.h);
-      g.addColorStop(0, '#2a1758'); g.addColorStop(1, arenaId === 'cinder' ? '#5a2a2a' : '#4b3a7a');
+      // a panel still waiting for its artwork is a plain gradient in the arena's own colours
+      const P = s.L.panel || ['#2a1758', arenaId === 'cinder' ? '#5a2a2a' : '#4b3a7a'];
+      g.addColorStop(0, P[0]); g.addColorStop(1, P[1]);
       c.fillStyle = g; c.fillRect(0, 0, s.w, s.h);
     }
   }

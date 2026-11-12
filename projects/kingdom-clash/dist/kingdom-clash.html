@@ -2429,6 +2429,188 @@ const KC_CARDS = {
     blurb: 'A storm griffin that locks a lightning beam on one target. The longer the beam holds, the harder it hits; it starts over when it changes target or is knocked away.',
     evo: 'Static: the beam jumps to a second target at full power.',
   },
+
+  /* Arenas 5 to 10. Each works like a well-known card from the genre; its numbers are the reference card's
+     tournament-level stats brought to this game's level-1 scale (health x0.69, damage x0.46, buildings a
+     little sturdier), so they sit beside the cards above. Units a card brings with it are hidden cards. */
+  // Arena 5: Frostfang Keep
+  frostsprite: {
+    id: 'frostsprite', name: 'Frost Sprite', cost: 1, rarity: 'common', kind: 'troop', role: 'Freeze', count: 1,
+    hp: 160, dmg: 51, hit: 0.3, range: 2.5, speed: 2.0, targets: 'both', air: false,
+    radius: 0.32, mass: 0.6, leap: { r: 1.5, stun: 1.2, speed: 7 },
+    blurb: 'A tiny ice creature that leaps onto the first enemy it sees and bursts, freezing everything around it for a moment.',
+  },
+  icegiant: {
+    id: 'icegiant', name: 'Icebound Giant', cost: 2, rarity: 'rare', kind: 'troop', role: 'Mini tank', count: 1,
+    hp: 830, dmg: 39, hit: 2.5, range: 0.75, speed: 0.75, targets: 'buildings', air: false,
+    radius: 0.7, mass: 7, deathBlast: { r: 2.0, dmg: 39, air: true, slow: 0.35, slowDur: 1 },
+    blurb: 'A slow giant of packed ice that only walks for buildings, soaking up hits. When it shatters it slows everything around it.',
+  },
+  wintersage: {
+    id: 'wintersage', name: 'Winter Sage', cost: 3, rarity: 'legendary', kind: 'troop', role: 'Slow splash', count: 1,
+    hp: 475, dmg: 42, hit: 1.7, range: 5.5, speed: 1.0, targets: 'both', air: false,
+    radius: 0.48, mass: 2.5, proj: 'frostbolt', projSpeed: 9, splash: 1.0, slowHit: { f: 0.35, dur: 2.5 },
+    deployBlast: { r: 3, dmg: 42 },
+    blurb: 'A frost-bearded sage whose icy bolts hit a small area and slow everything they touch. He arrives in a gust of frost.',
+  },
+  flashfreeze: {
+    id: 'flashfreeze', name: 'Flash Freeze', cost: 4, rarity: 'epic', kind: 'spell', role: 'Freeze', count: 1,
+    dmg: 53, area: 3.0, towerPct: 0.35, instant: true, stun: 4,
+    blurb: 'Freezes every enemy troop, building and tower in the area solid for 4 seconds: nothing frozen moves or attacks.',
+  },
+  // Arena 6: Blackwater Harbor
+  dockraiders: {
+    id: 'dockraiders', name: 'Dock Raiders', cost: 3, rarity: 'common', kind: 'troop', role: 'Swarm', count: 5,
+    squad: [{ card: 'raider', n: 3 }, { card: 'raidergun', n: 2 }], hp: 140, dmg: 55, hit: 1.1, range: 0.5, speed: 2.0, targets: 'ground', air: false, radius: 0.36, mass: 1,
+    blurb: 'Three cutlass pirates rush in while two more throw harpoons from behind, at ground and air alike.',
+  },
+  raider: {
+    id: 'raider', name: 'Dock Raider', cost: 0, rarity: 'common', kind: 'troop', role: 'Melee', count: 1, hidden: true,
+    hp: 140, dmg: 55, hit: 1.1, range: 0.5, speed: 2.0, targets: 'ground', air: false, radius: 0.36, mass: 1,
+    blurb: 'A quick pirate with a cutlass.',
+  },
+  raidergun: {
+    id: 'raidergun', name: 'Harpoon Raider', cost: 0, rarity: 'common', kind: 'troop', role: 'Ranged', count: 1, hidden: true,
+    hp: 92, dmg: 37, hit: 1.7, range: 5, speed: 2.0, targets: 'both', air: false, radius: 0.34, mass: 1, proj: 'harpoonlet', projSpeed: 12,
+    blurb: 'A pirate who throws small harpoons.',
+  },
+  barrel: {
+    id: 'barrel', name: 'Boarding Barrel', cost: 3, rarity: 'epic', kind: 'spell', role: 'Win condition', count: 1,
+    dmg: 0, area: 0, towerPct: 0, projSpeed: 8, projKind: 'barrel', barrel: { card: 'raider', n: 3 },
+    blurb: 'A barrel flung from your King Tower to anywhere in the arena. It smashes open on landing and three pirates jump out.',
+  },
+  harpoon: {
+    id: 'harpoon', name: 'Harpoon Captain', cost: 3, rarity: 'legendary', kind: 'troop', role: 'Puller', count: 1,
+    hp: 670, dmg: 98, hit: 1.3, range: 1.2, speed: 1.0, targets: 'ground', air: false,
+    radius: 0.6, mass: 5, hook: { min: 3.5, max: 7, speed: 12, cd: 3, slow: 0.35, slowDur: 1.5, windup: 0.4 },
+    blurb: 'A burly captain who throws his harpoon at a ground enemy 3.5 to 7 tiles away and reels it in. Thrown at a building, he pulls himself to it.',
+  },
+  broadside: {
+    id: 'broadside', name: 'Broadside Cart', cost: 5, rarity: 'epic', kind: 'troop', role: 'Ranged', count: 1,
+    hp: 720, dmg: 80, hit: 0.9, range: 5.5, speed: 1.5, targets: 'ground', air: false,
+    radius: 0.7, mass: 6, proj: 'cannon', projSpeed: 12, shield: 560, turret: { lifetime: 30, half: 0.9 },
+    blurb: 'A ship\'s cannon on a wooden cart, rolling forward behind a plank shield and firing at ground troops. Break the shield and the cart stops for good, becoming a cannon that crumbles over 30 seconds.',
+  },
+  // Arena 7: Gearforge Citadel
+  coil: {
+    id: 'coil', name: 'Coil Tower', cost: 4, rarity: 'common', kind: 'building', role: 'Defense', count: 1,
+    hp: 980, dmg: 76, hit: 1.1, range: 5.5, targets: 'both', air: false,
+    radius: 0.9, half: 0.9, lifetime: 30, proj: 'arc', projSpeed: 40, hide: { rise: 0.6, idle: 1.0 },
+    blurb: 'An electric coil that waits hidden in the ground, where troops can\'t touch it, and springs up to zap ground and air enemies in range.',
+  },
+  sparkbots: {
+    id: 'sparkbots', name: 'Sparkbots', cost: 4, rarity: 'rare', kind: 'troop', role: 'Stun', count: 3,
+    hp: 365, dmg: 54, hit: 2.1, range: 4.5, speed: 1.0, targets: 'both', air: false,
+    radius: 0.45, mass: 2.5, proj: 'spark', projSpeed: 16, stunHit: 0.5,
+    blurb: 'Three little robots with sparking antennas. Every shot stuns its target for half a second, interrupting charges and beams.',
+  },
+  titan: {
+    id: 'titan', name: 'Steel Titan', cost: 8, rarity: 'epic', kind: 'troop', role: 'Win condition', count: 1,
+    hp: 2940, dmg: 119, hit: 2.5, range: 0.75, speed: 0.75, targets: 'buildings', air: false,
+    radius: 1.0, mass: 20, heavy: true, deathBlast: { r: 2.0, dmg: 119 }, onEnd: { card: 'titanling', count: 2 },
+    blurb: 'An enormous clockwork titan that marches only for buildings. When it falls it bursts and splits into two smaller titans that carry on.',
+  },
+  titanling: {
+    id: 'titanling', name: 'Titanling', cost: 0, rarity: 'epic', kind: 'troop', role: 'Tank', count: 1, hidden: true,
+    hp: 590, dmg: 24, hit: 2.5, range: 0.75, speed: 0.75, targets: 'buildings', air: false,
+    radius: 0.6, mass: 8, deathBlast: { r: 1.5, dmg: 24 },
+    blurb: 'A small piece of the Steel Titan.',
+  },
+  arccannon: {
+    id: 'arccannon', name: 'Arc Cannon', cost: 6, rarity: 'legendary', kind: 'troop', role: 'Splash', count: 1,
+    hp: 1000, dmg: 612, hit: 4, range: 5, speed: 0.75, targets: 'ground', air: false,
+    radius: 0.8, mass: 8, proj: 'arcblast', projSpeed: 18, splash: 1.8, charge: 4,
+    blurb: 'A rolling engine with a huge electric cannon. It takes 4 seconds to charge each blast, which wipes out ground troops in an area. Any stun or freeze drains the charge.',
+  },
+  // Arena 8: Crystal Chasm
+  gemflash: {
+    id: 'gemflash', name: 'Gem Flash', cost: 2, rarity: 'common', kind: 'spell', role: 'Spell', count: 1,
+    dmg: 88, area: 2.5, towerPct: 0.3, instant: true, stun: 0.5,
+    blurb: 'An instant burst of crystal light: it damages and stuns troops and buildings in the area for half a second.',
+  },
+  shardguards: {
+    id: 'shardguards', name: 'Shard Guards', cost: 3, rarity: 'epic', kind: 'troop', role: 'Swarm', count: 3,
+    hp: 62, dmg: 41, hit: 1.0, range: 1.6, speed: 1.5, targets: 'ground', air: false,
+    radius: 0.4, mass: 1.2, shield: 137,
+    blurb: 'Three guards in crystal armor with long spears. Each crystal shield takes the next blow, however hard, before it shatters.',
+  },
+  drill: {
+    id: 'drill', name: 'Crystal Drill', cost: 4, rarity: 'epic', kind: 'building', role: 'Win condition', count: 1,
+    hp: 850, dmg: 0, hit: 3, range: 0, targets: 'ground', air: false,
+    radius: 0.85, half: 0.85, lifetime: 10, anywhere: true, burrow: { speed: 5, surface: 0.5 }, emerge: { r: 2, dmg: 24 },
+    spawner: { card: 'imp', every: 3, first: 1, onDeath: 2 },
+    blurb: 'A crystal-powered drill that bores from your King Tower to anywhere, even beside an enemy tower. It bursts up, then sends out a crystal imp every 3 seconds, and two more when it breaks.',
+  },
+  imp: {
+    id: 'imp', name: 'Crystal Imp', cost: 0, rarity: 'epic', kind: 'troop', role: 'Melee', count: 1, hidden: true,
+    hp: 140, dmg: 55, hit: 1.1, range: 0.5, speed: 2.0, targets: 'ground', air: false, radius: 0.34, mass: 1,
+    blurb: 'A quick little imp of living crystal.',
+  },
+  prism: {
+    id: 'prism', name: 'Prism Archer', cost: 4, rarity: 'legendary', kind: 'troop', role: 'Ranged', count: 1,
+    hp: 367, dmg: 62, hit: 1.1, range: 7, speed: 1.0, targets: 'both', air: false,
+    radius: 0.45, mass: 2, proj: 'prismray', projSpeed: 12, pierce: { width: 0.3, extra: 4 },
+    blurb: 'A crystal archer who shoots from very far away. Each bolt flies on through its target and hits every enemy in a straight line.',
+  },
+  // Arena 9: Skyward Sanctuary
+  sunsprite: {
+    id: 'sunsprite', name: 'Sun Sprite', cost: 1, rarity: 'rare', kind: 'troop', role: 'Healer', count: 1,
+    hp: 160, dmg: 24, hit: 0.3, range: 2.5, speed: 2.0, targets: 'both', air: false,
+    radius: 0.32, mass: 0.6, leap: { r: 1.5, speed: 7, heal: { r: 2.5, amount: 90, dur: 1 } },
+    blurb: 'A tiny glowing sprite that leaps at an enemy and bursts into warm light, healing every friendly troop nearby.',
+  },
+  guardian: {
+    id: 'guardian', name: 'Celestial Guardian', cost: 4, rarity: 'rare', kind: 'troop', role: 'Healer tank', count: 1,
+    hp: 1185, dmg: 68, hit: 1.5, range: 0.75, speed: 1.0, targets: 'ground', air: false,
+    radius: 0.62, mass: 6, healHit: { r: 4, amount: 44 }, selfHeal: { dps: 7, after: 1 },
+    blurb: 'A guardian in radiant armor. Every swing of her hammer heals the friendly troops around her, and she mends herself while she isn\'t fighting.',
+  },
+  drake: {
+    id: 'drake', name: 'Cloud Drake', cost: 4, rarity: 'epic', kind: 'troop', role: 'Air splash', count: 1,
+    hp: 795, dmg: 74, hit: 1.5, range: 3.5, speed: 1.5, targets: 'both', air: true,
+    radius: 0.6, mass: 4, proj: 'cloudpuff', projSpeed: 10, splash: 1.5,
+    blurb: 'A young flying drake that breathes bursts of stormy cloud, splashing everything near its target in the air and on the ground.',
+  },
+  phoenix: {
+    id: 'phoenix', name: 'Dawn Phoenix', cost: 4, rarity: 'legendary', kind: 'troop', role: 'Air', count: 1,
+    hp: 690, dmg: 94, hit: 1.0, range: 1.6, speed: 1.5, targets: 'both', air: true,
+    radius: 0.6, mass: 3, deathBlast: { r: 2.0, dmg: 100, air: true }, egg: { card: 'phoenixegg', hatch: 4.3 },
+    blurb: 'A golden firebird that strikes air and ground. When it falls it bursts in flame and leaves an egg; if the egg survives, the Phoenix is reborn.',
+  },
+  phoenixegg: {
+    id: 'phoenixegg', name: 'Phoenix Egg', cost: 0, rarity: 'legendary', kind: 'troop', role: 'Egg', count: 1, hidden: true,
+    hp: 137, dmg: 0, hit: 1, range: 0, speed: 0, targets: 'none', air: false, radius: 0.45, mass: 30,
+    blurb: 'A glowing egg. If it survives, the Phoenix is reborn.',
+  },
+  // Arena 10: Eclipse Throne
+  wraiths: {
+    id: 'wraiths', name: 'Wraith Army', cost: 3, rarity: 'epic', kind: 'troop', role: 'Swarm', count: 15,
+    hp: 40, dmg: 40, hit: 1.0, range: 0.4, speed: 1.5, targets: 'ground', air: false,
+    radius: 0.3, mass: 0.8,
+    blurb: 'A horde of fifteen spectral swordsmen. They shred any single big troop but scatter before splash damage.',
+  },
+  wraith: {
+    id: 'wraith', name: 'Wraith', cost: 0, rarity: 'legendary', kind: 'troop', role: 'Melee', count: 1, hidden: true,
+    hp: 40, dmg: 40, hit: 1.0, range: 0.4, speed: 1.5, targets: 'ground', air: false, radius: 0.3, mass: 0.8,
+    blurb: 'A spectral swordsman.',
+  },
+  meteor: {
+    id: 'meteor', name: 'Doom Meteor', cost: 6, rarity: 'rare', kind: 'spell', role: 'Spell', count: 1,
+    dmg: 683, area: 2.0, towerPct: 0.25, projSpeed: 8, projKind: 'meteor', knockback: 1.2,
+    blurb: 'Calls down a slow, enormous dark meteor. It crushes everything in a small area, even towers.',
+  },
+  abyss: {
+    id: 'abyss', name: 'Abyss Gate', cost: 5, rarity: 'legendary', kind: 'spell', role: 'Win condition', count: 1,
+    dmg: 0, area: 4, towerPct: 0, gate: { card: 'wraith', n: 13, first: 2.2, every: 0.55, dur: 10 },
+    blurb: 'Opens a dark portal over any spot for 10 seconds. Thirteen wraiths climb out of it, one after another, somewhere inside the circle.',
+  },
+  dreadknight: {
+    id: 'dreadknight', name: 'Dread Knight', cost: 7, rarity: 'legendary', kind: 'troop', role: 'Splash tank', count: 1,
+    hp: 2280, dmg: 102, hit: 1.7, range: 1.2, speed: 1.0, targets: 'ground', air: false,
+    radius: 0.85, mass: 18, heavy: true, meleeSplash: 1.3, deployBlast: { r: 2.2, dmg: 204 },
+    jump: { min: 3.5, max: 5, dmg: 204, r: 2.2, time: 0.9, cd: 1.0 },
+    blurb: 'A towering knight in black armor. He lands with a shockwave, every swing hits all ground troops around his target, and he leaps onto enemies 3.5 to 5 tiles away.',
+  },
 };
 
 // Evolutions: each has its own unlock (shards) and how often it comes round in a battle (every
@@ -2446,7 +2628,10 @@ const KC_MIN_LEVEL = id => (KC_CARDS[id] && KC_RARITY_START[KC_CARDS[id].rarity]
 
 // Every card in collection order: the starter deck, then cards found on the Trophy Road.
 const KC_ALL_CARDS = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball', 'skeletons', 'cannon', 'spears', 'footmen', 'flail', 'pots',
-  'sandstorm', 'ramcart', 'mole', 'camel', 'bees', 'owl', 'thundercloud', 'griffin'];
+  'sandstorm', 'ramcart', 'mole', 'camel', 'bees', 'owl', 'thundercloud', 'griffin',
+  'frostsprite', 'icegiant', 'flashfreeze', 'wintersage', 'dockraiders', 'barrel', 'broadside', 'harpoon',
+  'coil', 'sparkbots', 'titan', 'arccannon', 'gemflash', 'shardguards', 'drill', 'prism',
+  'sunsprite', 'guardian', 'drake', 'phoenix', 'wraiths', 'meteor', 'abyss', 'dreadknight'];
 
 const KC_STARTER_DECK = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'];
 
@@ -2586,18 +2771,19 @@ const KCSim = (() => {
   }
 
   const cardLevel = (s, team, id) => Math.max(KC_MIN_LEVEL(id), (s.cardLevels[team] && s.cardLevels[team][id]) || s.levels[team] || 1);
-  const blocks = e => (e.kind === 'tower' || e.kind === 'building') && !e.dead;
+  const blocks = e => (e.kind === 'tower' || e.kind === 'building') && !e.dead && !e.tunnel;
   const byId = (s, id) => {
     if (!id) return null;
     for (const e of s.ents) if (e.id === id) return e;
     return null;
   };
   const tower = (s, team, lane) => s.ents.find(e => e.kind === 'tower' && e.team === team && e.lane === lane);
+  const stunned = (s, e) => e.stunEnd > s.time;
   const laneOf = x => (x < W / 2 ? 'L' : 'R');
   const dist = (a, b) => hyp(a.x - b.x, a.y - b.y);
   const edge = (a, b) => dist(a, b) - a.radius - b.radius;
   function canHit(a, t) {
-    if (!t || t.dead || t.team === a.team || t.tunnel) return false;
+    if (!t || t.dead || t.team === a.team || t.tunnel || t.leap || t.hidden || a.targets === 'none') return false;
     if (a.kind === 'building' && t.kind !== 'troop') return false;
     if (a.targets === 'buildings') return t.kind === 'tower' || t.kind === 'building';
     if (a.targets === 'ground') return !t.air;
@@ -2619,7 +2805,9 @@ const KCSim = (() => {
     if (c.kind === 'spell') return true;
     if (c.anywhere) {
       const inRiver = y > RIVER_TOP && y < RIVER_BOT && !BRIDGES.some(b => Math.abs(x - b) < BRIDGE_HALF);
-      return !inRiver && !inTower(s, x, y, 0.2);
+      const hf = c.half || 0;
+      if (hf && (x - hf < 0 || x + hf > W || y - hf < 0 || y + hf > H)) return false;
+      return !inRiver && !inTower(s, x, y, hf ? hf + 0.05 : 0.2);
     }
     const my = own(team, y), half = c.kind === 'building' ? c.half : 0;
     let ok = my - half >= RIVER_BOT + 0.1;
@@ -2649,11 +2837,40 @@ const KCSim = (() => {
       s.events.push({ type: 'cast', team, card: id, x, y });
       return 'ok';
     }
+    if (c.instant) {
+      // Flash Freeze, Gem Flash: no travel time, everything in the area at once
+      const lv = levelMult(cardLevel(s, team, id)), dmg = Math.round(c.dmg * lv);
+      for (const e of s.ents) {
+        if (e.dead || e.team === team || e.tunnel || e.leap) continue;
+        if (hyp(e.x - x, e.y - y) - e.radius > c.area) continue;
+        damage(s, e, e.kind === 'tower' ? Math.max(1, Math.round(dmg * c.towerPct)) : dmg, team);
+        if (!e.dead) stun(s, e, c.stun, id === 'flashfreeze' ? 'freeze' : 'zap');
+      }
+      s.events.push({ type: 'cast', team, card: id, x, y });
+      s.events.push({ type: 'boom', team, card: id, x, y, r: c.area });
+      return 'ok';
+    }
+    if (c.gate) {
+      // Abyss Gate: a portal that lets wraiths out one by one for its duration
+      const G = c.gate;
+      s.zones.push({ x, y, r: c.area, team, dps: 0, left: G.dur, dur: G.dur, pulse: 0, kind: 'gate', targets: 'ground', card: id,
+        gate: { card: G.card, n: G.n, every: G.every, next: G.first, done: 0, level: cardLevel(s, team, id) }, age: 0 });
+      s.events.push({ type: 'cast', team, card: id, x, y });
+      return 'ok';
+    }
     if (c.kind === 'spell') {
       const k = tower(s, team, 'K');
       s.projs.push({ kind: c.projKind || 'fireball', spell: id, team, x: k.x, y: k.y, sx: k.x, sy: k.y, tx: x, ty: y, target: 0,
-        speed: c.projSpeed, dmg: Math.round(c.dmg * levelMult(cardLevel(s, team, id))), card: id });
+        speed: c.projSpeed, dmg: Math.round(c.dmg * levelMult(cardLevel(s, team, id))), card: id, level: cardLevel(s, team, id) });
       s.events.push({ type: 'cast', team, card: id, x, y });
+      return 'ok';
+    }
+    if (c.kind === 'building' && c.burrow) {
+      // the Crystal Drill bores from in front of its King Tower to the spot, then comes up as a building
+      const k = tower(s, team, 'K'), sx = k.x, sy = own(team, own(team, k.y) - 2.6);
+      const b = spawnBuilding(s, team, id, sx, sy);
+      b.tunnel = { tx: x, ty: y }; b.deploy = 0;
+      s.events.push({ type: 'burrow', team, card: id, x: sx, y: sy, tx: x, ty: y });
       return 'ok';
     }
     if (c.kind === 'building') {
@@ -2676,16 +2893,30 @@ const KCSim = (() => {
       evo = n % KC_EVOS[id].cycle === KC_EVOS[id].cycle - 1;
       s.evoPlays[team][id] = n + 1;
     }
-    const offs = formation(c.count);
-    for (const [ox, oy] of offs) spawn(s, team, id, x + ox, y + (team === 0 ? oy : -oy), evo);
+    const offs = formation(c.count), lvl = cardLevel(s, team, id);
+    if (c.squad) {
+      // a mixed group (Dock Raiders): the melee ones in front, the throwers behind, all at the card's level
+      let i = 0;
+      for (const g of c.squad) for (let n = 0; n < g.n; n++, i++) { const [ox, oy] = offs[i]; spawn(s, team, g.card, x + ox, y + (team === 0 ? oy : -oy), false, lvl); }
+    } else for (const [ox, oy] of offs) spawn(s, team, id, x + ox, y + (team === 0 ? oy : -oy), evo);
     s.events.push({ type: 'deploy', team, card: id, x, y, evo });
     return 'ok';
   }
+  // Where each of a card's units stands, around the spot it was placed (front first, toward the enemy).
   function formation(n) {
     if (n === 2) return [[-0.5, 0], [0.5, 0]];
     if (n === 3) return [[-0.55, 0.3], [0.55, 0.3], [0, -0.45]];
     if (n === 4) return [[-0.45, -0.45], [0.45, -0.45], [-0.45, 0.45], [0.45, 0.45]];
     if (n === 5) return [[0, -0.5], [-0.5, -0.1], [0.5, -0.1], [-0.3, 0.45], [0.3, 0.45]];
+    if (n > 5) {
+      // a horde: a centre and rings around it (fixed points, no trigonometry)
+      const ring = [[1, 0], [0.5, 0.87], [-0.5, 0.87], [-1, 0], [-0.5, -0.87], [0.5, -0.87]];
+      const ring2 = [[1, 0], [0.71, 0.71], [0, 1], [-0.71, 0.71], [-1, 0], [-0.71, -0.71], [0, -1], [0.71, -0.71]];
+      const out = [[0, 0]];
+      for (const [a, b] of ring) out.push([a * 0.6, b * 0.6]);
+      for (let r = 1.2; out.length < n; r += 0.6) for (const [a, b] of ring2) out.push([a * r, b * r]);
+      return out.slice(0, n);
+    }
     return [[0, 0]];
   }
   function spawnBuilding(s, team, id, x, y) {
@@ -2694,8 +2925,11 @@ const KCSim = (() => {
       id: s.nextId++, kind: 'building', team, card: id, x, y, px: x, py: y, level,
       hp, maxHp: hp, dmg: Math.round(c.dmg * m), hit: c.hit, range: c.range, targets: c.targets, air: false,
       radius: c.radius, half: c.half, decay: hp / c.lifetime, proj: c.proj, projSpeed: c.projSpeed,
-      deploy: 1.0, cd: 0, target: 0, aimX: 0, aimY: team === 0 ? -1 : 1, atk: 0, flash: 0, dead: false,
+      deploy: 1.0, cd: 0, target: 0, aimX: 0, aimY: team === 0 ? -1 : 1, atk: 0, flash: 0, dead: false, stunEnd: 0,
     };
+    // the Coil Tower waits hidden underground until something comes in range
+    if (c.hide) Object.assign(b, { hidden: true, rise: 0, idle: 0 });
+    if (c.spawner) b.spawnT = c.spawner.first;
     s.ents.push(b);
     return b;
   }
@@ -2707,8 +2941,8 @@ const KCSim = (() => {
     const n = (s.evoPlays[team][id] || 0) % E.cycle;
     return { n, cycle: E.cycle, ready: n === E.cycle - 1 };
   }
-  function spawn(s, team, id, x, y, evo) {
-    const c = KC_CARDS[id], parent = c.hidden ? null : id, level = cardLevel(s, team, id), m = levelMult(level);
+  function spawn(s, team, id, x, y, evo, lvl) {
+    const c = KC_CARDS[id], parent = c.hidden ? null : id, level = lvl || cardLevel(s, team, id), m = levelMult(level);
     const u = {
       id: s.nextId++, kind: 'troop', team, card: id, x, y, px: x, py: y, level,
       hp: Math.round(c.hp * m), maxHp: Math.round(c.hp * m), dmg: Math.round(c.dmg * m),
@@ -2718,13 +2952,27 @@ const KCSim = (() => {
       zone: c.zone ? { r: c.zone.r, dur: c.zone.dur, dps: Math.round(c.zone.dps * m) } : null,
       deploy: 1.0, cd: c.hit * 0.5, target: 0, locked: false, retarget: 0,
       face: team === 0 ? 1 : -1, moving: false, atk: 0, flash: 0, born: s.time, dead: false,
-      towerDmg: c.towerDmg || 1, slowEnd: 0, slowF: 0, run: 0,
+      towerDmg: c.towerDmg || 1, slowEnd: 0, slowF: 0, run: 0, stunEnd: 0,
     };
+    if (c.hook) { u.sight = c.hook.max + 0.5; u.hookCd = 0; u.hookT = 0; }
+    if (c.shield) u.shield = u.maxShield = Math.round(c.shield * m);
+    if (c.charge) { u.chargeT = 0; u.cd = 0; }
+    if (c.leap) u.leapDmg = Math.round(c.dmg * m);
+    if (c.healHit) u.healHit = { r: c.healHit.r, amount: Math.round(c.healHit.amount * m) };
+    if (c.selfHeal) { u.selfHeal = { dps: c.selfHeal.dps * m, after: c.selfHeal.after }; u.lastAtk = -99; }
+    if (c.meleeSplash) u.meleeSplash = c.meleeSplash;
+    if (c.deployBlast) u.deployBlast = { r: c.deployBlast.r, dmg: Math.round(c.deployBlast.dmg * m) };
+    if (c.jump) u.jump = { min: c.jump.min, max: c.jump.max, dmg: Math.round(c.jump.dmg * m), r: c.jump.r, time: c.jump.time, cd: c.jump.cd, ready: 0 };
+    if (c.stunHit) u.stunHit = c.stunHit;
+    if (c.slowHit) u.slowHit = c.slowHit;
+    if (c.pierce) u.pierce = c.pierce;
+    if (c.egg) u.egg = c.egg;
+    if (id === 'phoenixegg') u.hatch = KC_CARDS.phoenix.egg.hatch;
     if (c.ram) Object.assign(u, { ram: true, baseSpeed: c.speed, maxSpeed: c.ram.max, accel: c.ram.accel });
     if (c.chargeHit) u.chargeHit = c.chargeHit;
     if (c.strike) u.strike = c.strike;
     if (c.beam) Object.assign(u, { beam: c.beam.dps.map(d => d * m), beamStage: c.beam.stage, beamTime: 0, beamOn: 0, beamTick: 0 });
-    if (c.deathBlast) u.deathBlast = { r: c.deathBlast.r, dmg: Math.round(c.deathBlast.dmg * m) };
+    if (c.deathBlast) u.deathBlast = { r: c.deathBlast.r, dmg: Math.round(c.deathBlast.dmg * m), air: !!c.deathBlast.air, slow: c.deathBlast.slow, slowDur: c.deathBlast.slowDur };
     if (c.rider) u.rider = { dmg: Math.round(c.rider.dmg * m), hit: c.rider.hit, range: c.rider.range, slow: c.rider.slow, slowDur: c.rider.slowDur,
       slowCd: c.rider.slowCd, cd: 0.6, snareCd: 0, atk: 0, aim: 0 };
     if (evo && KC_EVOS[id]) {
@@ -2739,8 +2987,18 @@ const KCSim = (() => {
   /* ---------- damage ---------- */
   // soft: steady damage over time (a storm, broken pottery), which doesn't flash its target each pulse
   function damage(s, e, amount, by, soft) {
-    if (!e || e.dead || e.tunnel) return;
+    if (!e || e.dead || e.tunnel || e.leap) return;
     if (e.kind === 'tower' && by !== undefined) amount = Math.max(1, Math.round(amount * s.towerDamage[by]));
+    if (e.shield > 0) {
+      // a shield takes the whole of the next blow, however big, before it breaks (nothing carries over)
+      e.shield = Math.max(0, e.shield - amount);
+      if (!soft) e.flash = 0.12;
+      if (!e.shield) {
+        s.events.push({ type: 'shieldbreak', team: e.team, card: e.card, x: e.x, y: e.y });
+        if (KC_CARDS[e.card] && KC_CARDS[e.card].turret) toTurret(s, e);
+      }
+      return;
+    }
     e.hp -= amount;
     if (!soft) e.flash = 0.12;
     if (e.kind === 'tower' && e.sub === 'king' && !e.active) {
@@ -2751,19 +3009,69 @@ const KCSim = (() => {
       e.hp = 0;
       e.dead = true;
       if (e.kind === 'tower') towerDown(s, e);
+      else if (e.kind === 'building') buildingGone(s, e);
       else {
-        s.events.push({ type: 'death', team: e.team, card: e.card, x: e.x, y: e.y, air: e.air, building: e.kind === 'building' });
+        s.events.push({ type: 'death', team: e.team, card: e.card, x: e.x, y: e.y, air: e.air, building: false });
         breakUp(s, e);
-        if (e.deathBlast) {
-          // a final thunderclap: damage to everything on the ground under it
-          for (const o of s.ents) {
-            if (o.dead || o.team === e.team || o.air || o.tunnel) continue;
-            if (hyp(o.x - e.x, o.y - e.y) - o.radius <= e.deathBlast.r) damage(s, o, e.deathBlast.dmg, e.team);
-          }
-          s.events.push({ type: 'thunderclap', team: e.team, x: e.x, y: e.y, r: e.deathBlast.r });
+        if (e.deathBlast) deathBlast(s, e);
+        // the Phoenix leaves an egg behind (not when it has already been reborn once)
+        if (e.egg && !e.reborn) {
+          const g = spawn(s, e.team, e.egg.card, e.x, e.y, false, e.level);
+          g.deploy = 0; clampArena(g);
+          s.events.push({ type: 'egg', team: e.team, x: g.x, y: g.y });
         }
       }
     }
+  }
+  // A burst when a troop is destroyed: the Thunder Cloud's thunderclap (ground only), the Steel Titan's,
+  // the Icebound Giant's freezing shatter (air too, and slows), the Phoenix's flames.
+  function deathBlast(s, e) {
+    const B = e.deathBlast;
+    for (const o of s.ents) {
+      if (o.dead || o.team === e.team || o.tunnel || o.leap || (o.air && !B.air)) continue;
+      if (hyp(o.x - e.x, o.y - e.y) - o.radius > B.r) continue;
+      damage(s, o, B.dmg, e.team);
+      if (B.slow && !o.dead) slowDown(s, o, B.slow, B.slowDur, 'frost');
+    }
+    s.events.push({ type: 'thunderclap', team: e.team, card: e.card, x: e.x, y: e.y, r: B.r });
+  }
+  // A building ends (destroyed or worn out): the Crystal Drill lets its last imps out.
+  function buildingGone(s, b) {
+    s.events.push({ type: 'death', team: b.team, card: b.card, x: b.x, y: b.y, building: true });
+    const sp = KC_CARDS[b.card] && KC_CARDS[b.card].spawner;
+    if (sp) for (let i = 0; i < sp.onDeath; i++) spawnFrom(s, b, sp.card, i % 2 ? 0.55 : -0.55);
+  }
+  function spawnFrom(s, b, card, ox) {
+    const u = spawn(s, b.team, card, b.x + ox, b.y + (b.team === 0 ? -1 : 1) * (b.half + 0.3), false, b.level);
+    u.deploy = 0.3;
+    return u;
+  }
+  // Stunned or frozen: no moving, no attacking; it also starts the next attack over, drains a charge and
+  // breaks a beam or a half-thrown hook.
+  function stun(s, e, dur, kind) {
+    if (!e || e.dead || e.tunnel || e.leap || !dur) return;
+    e.stunEnd = Math.max(e.stunEnd || 0, s.time + dur); e.stunKind = kind || 'zap';
+    if (e.hit) e.cd = Math.max(e.cd || 0, e.hit * 0.5);
+    if (e.chargeT !== undefined) e.chargeT = 0;
+    if (e.beam) { e.beamOn = 0; e.beamTime = 0; e.beamTick = 0; }
+    if (e.hookT) e.hookT = 0;
+    s.events.push({ type: 'stun', team: e.team, id: e.id, x: e.x, y: e.y, kind: e.stunKind, dur });
+  }
+  function heal(e, amount) {
+    if (!e || e.dead || e.kind !== 'troop' || e.hp >= e.maxHp) return 0;
+    const h = Math.min(amount, e.maxHp - e.hp);
+    e.hp += h;
+    return h;
+  }
+  // The Broadside Cart's shield is gone: the cart stops and becomes a cannon where it stands.
+  function toTurret(s, u) {
+    const c = KC_CARDS[u.card];
+    u.dead = true;
+    const b = spawnBuilding(s, u.team, u.card, u.x, u.y);
+    const m = levelMult(u.level);
+    b.level = u.level; b.hp = b.maxHp = Math.round(c.hp * m); b.dmg = u.dmg; b.half = c.turret.half; b.radius = c.radius;
+    b.decay = b.hp / c.turret.lifetime; b.deploy = 0.4; b.turret = true;
+    s.events.push({ type: 'transform', team: u.team, card: u.card, x: u.x, y: u.y });
   }
   // A troop that leaves others behind when it ends (the Ram Cart's soldiers).
   function breakUp(s, e) {
@@ -2771,16 +3079,14 @@ const KCSim = (() => {
     if (!c || !c.onEnd || e.brokeUp) return;
     e.brokeUp = true;
     for (let i = 0; i < c.onEnd.count; i++) {
-      const side = i % 2 ? 1 : -1, u = spawn(s, e.team, c.onEnd.card, e.x + side * 0.45, e.y);
-      u.level = e.level; u.deploy = 0.3;
-      const m = levelMult(e.level), base = KC_CARDS[c.onEnd.card];
-      u.hp = u.maxHp = Math.round(base.hp * m); u.dmg = Math.round(base.dmg * m);
+      const side = i % 2 ? 1 : -1, u = spawn(s, e.team, c.onEnd.card, e.x + side * 0.45, e.y, false, e.level);
+      u.deploy = 0.3;
     }
     s.events.push({ type: 'breakup', team: e.team, card: e.card, x: e.x, y: e.y });
   }
   // A slow: the strongest slow on a troop wins; it wears off at its end time.
   function slowDown(s, e, f, dur, kind) {
-    if (e.kind !== 'troop' || e.dead) return;
+    if (e.kind !== 'troop' || e.dead || e.tunnel) return;
     const active = e.slowEnd > s.time;
     if (!active || f >= e.slowF) { e.slowF = f; e.slowKind = kind; }
     e.slowEnd = Math.max(active ? e.slowEnd : 0, s.time + dur);
@@ -2862,7 +3168,8 @@ const KCSim = (() => {
   function clampArena(u) {
     u.x = Math.max(u.radius * 0.6, Math.min(W - u.radius * 0.6, u.x));
     u.y = Math.max(u.radius * 0.6, Math.min(H - u.radius * 0.6, u.y));
-    if (!u.air && u.y > RIVER_TOP && u.y < RIVER_BOT) {
+    // a troop on the end of a harpoon rope, or in the middle of a leap, is in the air over the river
+    if (!u.air && !u.pulled && !u.reel && !u.leap && u.y > RIVER_TOP && u.y < RIVER_BOT) {
       const onBridge = BRIDGES.some(b => Math.abs(u.x - b) <= BRIDGE_HALF - 0.15);
       if (!onBridge) {
         const b = BRIDGES.reduce((p, q) => (Math.abs(u.x - q) < Math.abs(u.x - p) ? q : p));
@@ -2876,6 +3183,7 @@ const KCSim = (() => {
 
   /* ---------- troops ---------- */
   function findTarget(s, u) {
+    if (u.targets === 'none') return null;
     let best = null, bd = Infinity;
     for (const e of s.ents) {
       if (!canHit(u, e)) continue;
@@ -2912,10 +3220,25 @@ const KCSim = (() => {
       s.events.push({ type: 'strike', card: u.card, team: u.team, x: t.x, y: t.y, fx: u.x, fy: u.y, r: u.strike });
       return;
     }
+    u.lastAtk = s.time;
+    if (u.healHit) {
+      // the Celestial Guardian: every swing heals the friendly troops around her, herself included
+      let any = false;
+      for (const o of s.ents) if (o.kind === 'troop' && o.team === u.team && !o.dead && !o.tunnel && hyp(o.x - u.x, o.y - u.y) <= u.healHit.r && heal(o, u.healHit.amount)) any = true;
+      if (any) s.events.push({ type: 'healpulse', team: u.team, x: u.x, y: u.y, r: u.healHit.r });
+    }
+    if (u.pierce) {
+      // the Prism Archer: a bolt that keeps flying in a straight line through everything in its way
+      const dx = t.x - u.x, dy = t.y - u.y, d = hyp(dx, dy) || 1;
+      s.projs.push({ kind: u.proj, team: u.team, x: u.x, y: u.y, sx: u.x, sy: u.y, dx: dx / d, dy: dy / d, left: u.range + u.radius + u.pierce.extra,
+        speed: u.projSpeed, dmg: u.dmg, width: u.pierce.width, pierce: true, hitIds: [], targets: u.targets, card: u.card, tx: t.x, ty: t.y });
+      s.events.push({ type: 'shoot', kind: u.proj, team: u.team, x: u.x, y: u.y });
+      return;
+    }
     if (u.proj) {
       s.projs.push({ kind: u.proj, team: u.team, x: u.x, y: u.y, sx: u.x, sy: u.y, tx: t.x, ty: t.y,
         target: t.id, speed: u.projSpeed, dmg: u.dmg, splash: u.splash, targets: u.targets, card: u.card,
-        air: u.air, zone: u.zone, evo: u.evo });
+        air: u.air, zone: u.zone, evo: u.evo, stun: u.stunHit || 0, slowHit: u.slowHit || null });
       s.events.push({ type: 'shoot', kind: u.proj, team: u.team, x: u.x, y: u.y });
     } else {
       let dmg = u.dmg, charged = false;
@@ -2923,8 +3246,63 @@ const KCSim = (() => {
       u.run = 0;
       if (t.kind === 'tower') dmg = Math.round(dmg * u.towerDmg);
       damage(s, t, dmg, u.team);
-      s.events.push({ type: charged ? 'charge' : 'hit', card: u.card, team: u.team, x: t.x, y: t.y, by: u.id });
+      if (u.meleeSplash) {
+        // the Dread Knight's swing: every ground enemy around the one he hits
+        for (const o of s.ents) {
+          if (o === t || o.dead || o.team === u.team || o.air || o.tunnel || o.leap || o.kind === 'tower') continue;
+          if (hyp(o.x - t.x, o.y - t.y) - o.radius <= u.meleeSplash) damage(s, o, u.dmg, u.team);
+        }
+      }
+      s.events.push({ type: charged ? 'charge' : 'hit', card: u.card, team: u.team, x: t.x, y: t.y, by: u.id, r: u.meleeSplash || 0 });
     }
+  }
+  // Area damage on the ground around a spot (a landing knight, a sage arriving, a drill surfacing).
+  function blast(s, team, x, y, r, dmg, card) {
+    for (const o of s.ents) {
+      if (o.dead || o.team === team || o.air || o.tunnel || o.leap) continue;
+      if (hyp(o.x - x, o.y - y) - o.radius <= r) damage(s, o, dmg, team);
+    }
+    s.events.push({ type: 'slam', team, card, x, y, r });
+  }
+  // The Harpoon Captain: a hook thrown at a ground enemy 3.5 to 7 tiles away. A troop is reeled in to
+  // him and slowed; a building or tower can't move, so he pulls himself to it instead.
+  function hookStep(s, u, t, d) {
+    const H = KC_CARDS[u.card].hook;
+    u.hookCd -= DT;
+    if (u.hookT > 0) {
+      u.hookT -= DT;
+      if (u.hookT <= 0) {
+        u.hookT = 0; u.hookCd = H.cd;
+        const tg = byId(s, u.hookAt);
+        if (tg && canHit(u, tg)) {
+          s.projs.push({ kind: 'hook', team: u.team, x: u.x, y: u.y, sx: u.x, sy: u.y, tx: tg.x, ty: tg.y, target: tg.id, speed: H.speed, dmg: 0, hook: u.id, card: u.card });
+          s.events.push({ type: 'hookthrow', team: u.team, x: u.x, y: u.y });
+        }
+      }
+      return true;
+    }
+    if (u.hookCd > 0 || !t || t.air || d < H.min || d > H.max) return false;
+    u.hookT = H.windup; u.hookAt = t.id; u.moving = false;
+    return true;
+  }
+  function hooked(s, p, t) {
+    const u = byId(s, p.hook), H = KC_CARDS.harpoon.hook;
+    if (!u || u.dead || !t || t.dead) return;
+    if (t.kind === 'troop') {
+      t.pulled = { by: u.id, speed: 9 };
+      slowDown(s, t, H.slow, H.slowDur + 0.6, 'hook');
+      if (t.beam) { t.beamOn = 0; t.beamTime = 0; }
+    } else u.reel = { to: t.id, speed: 9 };
+    s.events.push({ type: 'hooked', team: u.team, x: t.x, y: t.y, id: t.id, by: u.id, self: t.kind !== 'troop' });
+  }
+  // The Dread Knight leaps at an enemy 3.5 to 5 tiles away (troops and buildings, not towers).
+  function jumpStep(s, u, t, d) {
+    const J = u.jump;
+    if (J.ready > 0) J.ready -= DT;
+    if (u.leap || J.ready > 0 || !t || t.kind === 'tower' || t.air || d < J.min || d > J.max) return false;
+    u.leap = { sx: u.x, sy: u.y, tx: t.x, ty: t.y, t: 0, dur: J.time, tid: t.id };
+    s.events.push({ type: 'jump', team: u.team, x: u.x, y: u.y, tx: t.x, ty: t.y });
+    return true;
   }
   // The Camel Jockey's rider: lassos the nearest enemy troop in range while the camel goes on. Every
   // lasso hurts; one in every slowCd seconds also slows its target.
@@ -2958,8 +3336,59 @@ const KCSim = (() => {
       s.events.push({ type: 'surface', team: u.team, card: u.card, x: u.x, y: u.y });
       return;
     }
-    if (u.deploy > 0) { u.deploy -= DT; return; }
+    if (u.leap) {
+      // mid-leap: in the air (untouchable) on its way to the landing spot
+      const L = u.leap; L.t += DT;
+      const f = Math.min(1, L.t / L.dur);
+      u.x = L.sx + (L.tx - L.sx) * f; u.y = L.sy + (L.ty - L.sy) * f; u.moving = true;
+      if (f >= 1) {
+        u.leap = null; clampArena(u);
+        blast(s, u.team, u.x, u.y, u.jump.r, u.jump.dmg, u.card);
+        u.jump.ready = u.jump.cd; u.cd = Math.min(u.cd, u.hit * 0.4); u.target = L.tid; u.locked = false;
+      }
+      return;
+    }
+    if (u.deploy > 0) {
+      u.deploy -= DT;
+      // the Dread Knight lands, and the Winter Sage arrives, with a burst around them
+      if (u.deploy <= 0 && u.deployBlast) blast(s, u.team, u.x, u.y, u.deployBlast.r, u.deployBlast.dmg, u.card);
+      return;
+    }
+    if (u.hatch !== undefined) {
+      // the Phoenix egg: if it lasts, the Phoenix comes back
+      u.hatch -= DT;
+      if (u.hatch <= 0) {
+        u.dead = true;
+        const ph = spawn(s, u.team, 'phoenix', u.x, u.y, false, u.level);
+        ph.reborn = true; ph.deploy = 0.6;
+        s.events.push({ type: 'hatch', team: u.team, x: u.x, y: u.y });
+      }
+      return;
+    }
+    if (u.pulled) {
+      // on the end of the Harpoon Captain's rope: dragged to him, nothing else
+      const by = byId(s, u.pulled.by);
+      if (!by || by.dead) { u.pulled = null; clampArena(u); return; }
+      const dx = by.x - u.x, dy = by.y - u.y, dd = hyp(dx, dy), stop = by.radius + u.radius + 0.25;
+      if (dd <= stop + 0.05) { u.pulled = null; clampArena(u); return; }
+      const st = Math.min(dd - stop, u.pulled.speed * DT);
+      u.x += dx / dd * st; u.y += dy / dd * st; u.moving = false;
+      return;
+    }
+    if (u.reel) {
+      // the Harpoon Captain pulling himself along his rope to a building
+      const to = byId(s, u.reel.to);
+      if (!to || to.dead) { u.reel = null; return; }
+      const dx = to.x - u.x, dy = to.y - u.y, dd = hyp(dx, dy), stop = to.radius + u.radius + 0.1;
+      if (dd <= stop + 0.05) { u.reel = null; u.target = to.id; clampArena(u); return; }
+      const st = Math.min(dd - stop, u.reel.speed * DT);
+      u.x += dx / dd * st; u.y += dy / dd * st; u.moving = true;
+      return;
+    }
+    if (stunned(s, u)) { u.moving = false; return; }
     if (u.atk > 0) u.atk -= DT;
+    if (u.selfHeal && s.time - u.lastAtk > u.selfHeal.after) heal(u, u.selfHeal.dps * DT);
+    if (u.chargeT !== undefined) u.chargeT = Math.min(KC_CARDS[u.card].charge, u.chargeT + DT);
     if (u.rider) riderStep(s, u);
     u.cd -= DT;
     let t = byId(s, u.target);
@@ -2973,6 +3402,18 @@ const KCSim = (() => {
     u.moving = false;
     if (!t) return;
     const d = edge(u, t);
+    if (u.hookCd !== undefined && hookStep(s, u, t, d)) return;
+    if (u.jump && jumpStep(s, u, t, d)) return;
+    if (u.leapDmg !== undefined && d <= u.range) {
+      // a sprite leaps onto its target and bursts (it is used up)
+      const L = KC_CARDS[u.card].leap;
+      u.dead = true; u.hp = 0;
+      s.projs.push({ kind: u.card === 'sunsprite' ? 'sunleap' : 'frostleap', team: u.team, x: u.x, y: u.y, sx: u.x, sy: u.y, tx: t.x, ty: t.y, target: t.id,
+        speed: L.speed, dmg: u.leapDmg, splash: L.r, targets: 'both', card: u.card, leapStun: L.stun || 0,
+        heal: L.heal ? { r: L.heal.r, amount: Math.round(L.heal.amount * levelMult(u.level)), dur: L.heal.dur } : null });
+      s.events.push({ type: 'leap', team: u.team, card: u.card, x: u.x, y: u.y });
+      return;
+    }
     if (u.beam) {
       // once locked it holds a little past its range, and follows the target while beaming
       if (d <= u.range || (u.beamOn === t.id && d <= u.range + 0.8)) {
@@ -3005,6 +3446,11 @@ const KCSim = (() => {
         breakUp(s, u);
         return;
       }
+      if (u.chargeT !== undefined) {
+        // the Arc Cannon fires only with a full charge, then starts charging again
+        if (u.chargeT >= KC_CARDS[u.card].charge - 1e-9) { attack(s, u, t); u.chargeT = 0; u.locked = true; }
+        return;
+      }
       if (u.cd <= 0) { attack(s, u, t); u.cd = u.hit; u.locked = true; }
       return;
     }
@@ -3029,14 +3475,14 @@ const KCSim = (() => {
   }
   function towerStep(s, e) {
     if (e.flash > 0) e.flash -= DT;
-    if (!e.active) return;
+    if (!e.active || stunned(s, e)) return;
     e.cd -= DT;
     let t = byId(s, e.target);
-    if (!t || t.dead || t.kind === 'tower' || edge(e, t) > e.range) {
+    if (!t || t.dead || t.kind === 'tower' || t.hidden || t.leap || edge(e, t) > e.range) {
       t = null; e.target = 0;
       let bd = Infinity;
       for (const u of s.ents) {
-        if ((u.kind !== 'troop' && u.kind !== 'building') || u.team === e.team || u.dead || u.tunnel) continue;
+        if ((u.kind !== 'troop' && u.kind !== 'building') || u.team === e.team || u.dead || u.tunnel || u.leap || u.hidden) continue;
         const d = edge(e, u);
         if (d <= e.range && d < bd) { bd = d; t = u; }
       }
@@ -3054,15 +3500,52 @@ const KCSim = (() => {
   /* ---------- buildings ---------- */
   function buildingStep(s, b) {
     if (b.flash > 0) b.flash -= DT;
+    const c = KC_CARDS[b.card];
+    if (b.tunnel) {
+      // the Crystal Drill underground: straight to the spot, under the river and the towers
+      const dx = b.tunnel.tx - b.x, dy = b.tunnel.ty - b.y, d = hyp(dx, dy), step = c.burrow.speed * DT;
+      if (d > step) { b.x += (dx / d) * step; b.y += (dy / d) * step; return; }
+      b.x = b.tunnel.tx; b.y = b.tunnel.ty; b.tunnel = null; b.deploy = c.burrow.surface;
+      // it bursts out of the ground, hurting what stands on the spot, and pushes troops off its footprint
+      blast(s, b.team, b.x, b.y, c.emerge.r, Math.round(c.emerge.dmg * levelMult(b.level)), b.card);
+      s.events.push({ type: 'surface', team: b.team, card: b.card, x: b.x, y: b.y });
+      return;
+    }
     if (b.deploy > 0) { b.deploy -= DT; return; }
     b.hp -= b.decay * DT;
     if (b.hp <= 0) {
       b.hp = 0; b.dead = true;
-      s.events.push({ type: 'death', team: b.team, card: b.card, x: b.x, y: b.y, building: true });
+      buildingGone(s, b);
       return;
     }
+    if (stunned(s, b)) return;
+    if (c.spawner) {
+      // a spawner: one unit every few seconds
+      b.spawnT -= DT;
+      if (b.spawnT <= 0) { b.spawnT += c.spawner.every; spawnFrom(s, b, c.spawner.card, 0); s.events.push({ type: 'spawn', team: b.team, card: b.card, x: b.x, y: b.y }); }
+    }
+    if (!b.dmg) return;
     if (b.atk > 0) b.atk -= DT;
     b.cd -= DT;
+    if (c.hide) {
+      // the Coil Tower: hidden (troops can't target it) until an enemy comes in range; then it rises,
+      // which takes a moment, fights, and sinks back once nothing has been in range for a second
+      let near = false;
+      for (const u of s.ents) if (canHit(b, u) && edge(b, u) <= b.range) { near = true; break; }
+      if (b.hidden) {
+        if (!near) return;
+        b.hidden = false; b.rise = c.hide.rise; b.idle = 0;
+        s.events.push({ type: 'rise', team: b.team, card: b.card, x: b.x, y: b.y });
+        return;
+      }
+      if (b.rise > 0) { b.rise -= DT; return; }
+      if (!near) {
+        b.idle += DT;
+        if (b.idle >= c.hide.idle) { b.hidden = true; b.target = 0; s.events.push({ type: 'hide', team: b.team, card: b.card, x: b.x, y: b.y }); }
+        return;
+      }
+      b.idle = 0;
+    }
     let t = byId(s, b.target);
     if (!t || !canHit(b, t) || edge(b, t) > b.range) {
       t = null; b.target = 0;
@@ -3082,7 +3565,7 @@ const KCSim = (() => {
       b.cd = b.hit; b.atk = 0.25;
       const mx = b.x + b.aimX * 0.7, my = b.y + b.aimY * 0.7 - 0.3;
       s.projs.push({ kind: b.proj, team: b.team, x: mx, y: my, sx: mx, sy: my, tx: t.x, ty: t.y, target: t.id,
-        speed: b.projSpeed, dmg: b.dmg, splash: 0, targets: b.targets, card: b.card });
+        speed: b.projSpeed, dmg: b.dmg, splash: 0, targets: b.targets, card: b.card, from: b.id });
       s.events.push({ type: 'shoot', kind: b.proj, team: b.team, x: b.x, y: b.y });
     }
   }
@@ -3090,32 +3573,65 @@ const KCSim = (() => {
   /* ---------- projectiles ---------- */
   function projStep(s) {
     for (const p of s.projs) {
+      if (p.pierce) { pierceStep(s, p); continue; }
       const t = byId(s, p.target);
       if (t && !t.dead) { p.tx = t.x; p.ty = t.y; }
       const dx = p.tx - p.x, dy = p.ty - p.y, d = hyp(dx, dy), step = p.speed * DT;
       if (d > step) { p.x += (dx / d) * step; p.y += (dy / d) * step; continue; }
       p.x = p.tx; p.y = p.ty; p.done = true;
+      if (p.hook) { hooked(s, p, t); continue; }
       if (p.spell) spellHit(s, p);
       else if (p.splash) {
         for (const e of s.ents) {
-          if (e.dead || e.team === p.team) continue;
+          if (e.dead || e.team === p.team || e.tunnel || e.leap) continue;
           if (p.targets === 'ground' && e.air) continue;
-          if (hyp(e.x - p.x, e.y - p.y) - e.radius <= p.splash) damage(s, e, p.dmg, p.team);
+          if (hyp(e.x - p.x, e.y - p.y) - e.radius > p.splash) continue;
+          damage(s, e, p.dmg, p.team);
+          if (e.dead) continue;
+          if (p.leapStun) stun(s, e, p.leapStun, 'freeze');
+          if (p.slowHit) slowDown(s, e, p.slowHit.f, p.slowHit.dur, 'frost');
         }
+        // the Sun Sprite's burst of light heals friendly troops around it for a second
+        if (p.heal) { s.zones.push({ x: p.x, y: p.y, r: p.heal.r, team: p.team, dps: 0, heal: p.heal.amount / p.heal.dur, left: p.heal.dur, dur: p.heal.dur, pulse: 0, kind: 'heal', targets: 'both' }); }
         // broken pottery (and the like) keeps hurting the spot for a moment
         if (p.zone) s.zones.push({ x: p.x, y: p.y, r: p.zone.r, team: p.team, dps: p.zone.dps, left: p.zone.dur, dur: p.zone.dur, pulse: 0, kind: p.kind, targets: p.targets });
         s.events.push({ type: 'splash', kind: p.kind, x: p.x, y: p.y, r: p.splash });
       } else if (t && !t.dead) {
         damage(s, t, p.dmg, p.team);
+        if (p.stun && !t.dead) stun(s, t, p.stun, 'zap');
         if (p.slow && !t.dead) { slowDown(s, t, p.slow.f, p.slow.dur, 'lasso'); s.events.push({ type: 'snare', team: p.team, x: t.x, y: t.y, id: t.id }); }
         s.events.push({ type: 'hit', kind: p.kind, team: p.team, x: p.x, y: p.y });
       }
     }
     s.projs = s.projs.filter(p => !p.done);
   }
-  // A spell landing: area damage (reduced on towers), and a knockback if the spell has one.
+  // The Prism Archer's bolt: straight on from where it was shot, hitting each enemy it passes once.
+  function pierceStep(s, p) {
+    const step = Math.min(p.left, p.speed * DT), x0 = p.x, y0 = p.y;
+    p.x += p.dx * step; p.y += p.dy * step; p.left -= step;
+    for (const e of s.ents) {
+      if (e.dead || e.team === p.team || e.tunnel || e.leap || e.hidden || p.hitIds.includes(e.id)) continue;
+      if (p.targets === 'ground' && e.air) continue;
+      // distance from the enemy to the bit of line flown this tick
+      const vx = p.x - x0, vy = p.y - y0, l2 = vx * vx + vy * vy || 1e-9;
+      const f = Math.max(0, Math.min(1, ((e.x - x0) * vx + (e.y - y0) * vy) / l2));
+      if (hyp(e.x - (x0 + vx * f), e.y - (y0 + vy * f)) > e.radius + p.width) continue;
+      p.hitIds.push(e.id);
+      damage(s, e, p.dmg, p.team);
+      s.events.push({ type: 'hit', kind: p.kind, team: p.team, x: e.x, y: e.y });
+    }
+    if (p.left <= 1e-9 || p.x < -1 || p.x > W + 1 || p.y < -1 || p.y > H + 1) p.done = true;
+  }
+  // A spell landing: area damage (reduced on towers), and a knockback if the spell has one; a Boarding
+  // Barrel breaks open and lets its pirates out.
   function spellHit(s, p) {
     const c = KC_CARDS[p.spell] || KC_CARDS.fireball;
+    if (c.barrel) {
+      const offs = formation(c.barrel.n);
+      for (const [ox, oy] of offs) { const u = spawn(s, p.team, c.barrel.card, p.x + ox, p.y + (p.team === 0 ? oy : -oy), false, p.level); u.deploy = 0.4; }
+      s.events.push({ type: 'barrel', team: p.team, card: c.id, x: p.x, y: p.y });
+      return;
+    }
     for (const e of s.ents) {
       if (e.dead || e.team === p.team) continue;
       const d = hyp(e.x - p.x, e.y - p.y);
@@ -3135,8 +3651,14 @@ const KCSim = (() => {
   function zoneStep(s) {
     for (const z of s.zones) {
       z.left -= DT; z.pulse += DT;
+      if (z.gate) { gateStep(s, z); continue; }
       if (z.pulse < 0.1 - 1e-9) continue;
       z.pulse -= 0.1;
+      if (z.heal) {
+        // a healing glow: friendly troops inside get back health every tenth of a second
+        for (const e of s.ents) if (e.kind === 'troop' && e.team === z.team && !e.dead && !e.tunnel && hyp(e.x - z.x, e.y - z.y) - e.radius <= z.r) heal(e, Math.max(1, Math.round(z.heal * 0.1)));
+        continue;
+      }
       const amount = Math.max(1, Math.round(z.dps * 0.1));
       for (const e of s.ents) {
         if (e.dead || e.team === z.team || (z.targets === 'ground' && e.air)) continue;
@@ -3147,10 +3669,29 @@ const KCSim = (() => {
     }
     s.zones = s.zones.filter(z => z.left > 1e-9);
   }
+  // The Abyss Gate: a wraith climbs out somewhere inside the circle on a steady beat.
+  function gateStep(s, z) {
+    const G = z.gate;
+    z.age += DT;
+    while (G.done < G.n && z.age >= G.next - 1e-9) {
+      G.done++; G.next += G.every;
+      let x = z.x, y = z.y;
+      for (let i = 0; i < 8; i++) {
+        const a = s.rand() * 2 - 1, b = s.rand() * 2 - 1;
+        if (a * a + b * b > 1) { i--; continue; }
+        x = z.x + a * (z.r - 0.4); y = z.y + b * (z.r - 0.4);
+        const inRiver = y > RIVER_TOP && y < RIVER_BOT && !BRIDGES.some(bx => Math.abs(x - bx) < BRIDGE_HALF);
+        if (!inRiver && !inTower(s, x, y, 0.2) && x > 0.4 && x < W - 0.4 && y > 0.4 && y < H - 0.4) break;
+      }
+      const u = spawn(s, z.team, G.card, x, y, false, G.level);
+      u.deploy = 0.5;
+      s.events.push({ type: 'rise', team: z.team, card: G.card, x: u.x, y: u.y });
+    }
+  }
 
   /* ---------- pushing apart ---------- */
   function collide(s) {
-    const troops = s.ents.filter(e => e.kind === 'troop' && !e.dead && !e.tunnel);
+    const troops = s.ents.filter(e => e.kind === 'troop' && !e.dead && !e.tunnel && !e.leap && !e.pulled && !e.reel);
     for (let i = 0; i < troops.length; i++) {
       const a = troops[i];
       for (let j = i + 1; j < troops.length; j++) {
@@ -3225,7 +3766,7 @@ const KCSim = (() => {
 
   return {
     W, H, MID, RIVER_TOP, RIVER_BOT, BRIDGES, BRIDGE_HALF, DT, REGULAR, OVERTIME, MAX_ENERGY, TOWERS,
-    create, step, play, canDeploy, tower, laneOf, own, mulberry, levelMult, evoCharge,
+    create, step, play, canDeploy, tower, laneOf, own, mulberry, levelMult, evoCharge, formation,
     // Ends a match on the spot: the Simulate Win test button (TEMPORARY), and an online battle whose
     // opponent left ('left') or fell out of step ('desync').
     forceEnd: (s, winner, reason) => finish(s, winner, reason || 'test'),
@@ -3291,11 +3832,14 @@ const KCProgress = (() => {
       epic: [null, null, null, null, null, 2, 4, 10, 20, 30, 50, 70, 100, 130],
       legendary: [null, null, null, null, null, null, null, null, 2, 4, 6, 9, 12, 14],
     },
-    arenaGold: { 1: 0.26, 2: 0.33, 3: 0.42, 4: 0.53 },
-    arenaCards: { 1: 0.3, 2: 0.37, 3: 0.45, 4: 0.55 },
+    arenaGold: { 1: 0.26, 2: 0.33, 3: 0.42, 4: 0.53, 5: 1.33, 6: 1.86, 7: 2.65, 8: 3.18, 9: 3.95, 10: 4.8 },
+    arenaCards: { 1: 0.3, 2: 0.37, 3: 0.45, 4: 0.55, 5: 1.375, 6: 1.925, 7: 2.75, 8: 3.3, 9: 4.1, 10: 5.0 },
+    // inside an arena rewards climb toward the next arena's, stopping `arenaJump` short of it, so reaching
+    // the next arena is always a clear step up (at least `withinArena` of climbing in a short arena)
+    arenaJump: 1.2,
     nextArenaGrowth: 1.35, // for arenas past the table
     withinArena: 0.04,
-    beyond: { every: 300, add: 0.5, max: 5.5 },
+    beyond: { every: 500, add: 0.05, max: 0.3 },
     levelStep: 0.015, levelCap: 40,
     epicPow: 0.5, legendaryPow: 0.25,
     // each chest at tier 1, level 1: gold range, total cards, and the rarer cards among them
@@ -3352,11 +3896,11 @@ const KCProgress = (() => {
     },
     // wallet Coins (SirSC) to Rubies, one way: `rate` rubies a coin, up to a daily cap set by the highest
     // arena reached; past the last arena the cap grows by `beyond.add` every `beyond.every` trophies.
-    exchange: { rate: 1, cap: { 1: 500, 2: 1000, 3: 2000, 4: 4000 }, beyond: { every: 300, add: 1000, max: 10000 } },
+    exchange: { rate: 1, cap: { 1: 500, 2: 1000, 3: 2000, 4: 4000, 5: 6000, 6: 7000, 7: 8000, 8: 9000, 9: 10000, 10: 10000 }, beyond: { every: 500, add: 0, max: 10000 } },
     // opponents' card levels by trophies (straight lines between the points), matched to what a player
     // has at those trophies (tools/economy-report.js); rares, epics and legendaries are then raised to
     // where their rarity starts
-    foeLevels: [[0, 1], [50, 1], [300, 4.5], [600, 6.5], [900, 7.5], [1200, 8.5], [1500, 10], [2000, 12], [3000, 13.5], [4000, 15]],
+    foeLevels: [[0, 1], [50, 1], [300, 4.5], [600, 6.5], [900, 7.5], [1200, 8.5], [1500, 10], [2000, 12], [3000, 13.5], [4000, 14.5], [5000, 15]],
   };
 
   const ARENAS = [
@@ -3368,7 +3912,18 @@ const KCProgress = (() => {
       blurb: 'A sun-baked desert fortress of sandstone walls and an oasis channel. Evolutions and the Diamond Pass open here.' },
     { id: 'stormspire', number: 4, name: 'Stormspire', min: 900, theme: 'stormspire', cards: ['bees', 'owl', 'thundercloud', 'griffin'],
       blurb: 'A fortress on a mountain peak above the clouds, crackling with storms. Online battles are coming here.' },
-    { id: 'arena5', number: 5, name: 'Arena 5', min: 1200, soon: true, blurb: 'Coming in a later update.' },
+    { id: 'frostfang', number: 5, name: 'Frostfang Keep', min: 2000, theme: 'frostfang', cards: ['frostsprite', 'icegiant', 'wintersage', 'flashfreeze'],
+      blurb: 'A frozen mountain fortress of ice and snow. Its cards freeze, slow and hold the line.' },
+    { id: 'blackwater', number: 6, name: 'Blackwater Harbor', min: 2600, theme: 'blackwater', cards: ['dockraiders', 'barrel', 'harpoon', 'broadside'],
+      blurb: 'A pirate harbor of ships, docks and dark water, full of surprise attacks and siege guns.' },
+    { id: 'gearforge', number: 7, name: 'Gearforge Citadel', min: 3300, theme: 'gearforge', cards: ['coil', 'sparkbots', 'titan', 'arccannon'],
+      blurb: 'An industrial fortress of bronze machinery, turning gears and crackling electricity.' },
+    { id: 'crystal', number: 8, name: 'Crystal Chasm', min: 4100, theme: 'crystal', cards: ['gemflash', 'shardguards', 'drill', 'prism'],
+      blurb: 'An underground cavern of glowing crystals and old mining machines.' },
+    { id: 'skyward', number: 9, name: 'Skyward Sanctuary', min: 5000, theme: 'skyward', cards: ['sunsprite', 'guardian', 'drake', 'phoenix'],
+      blurb: 'A kingdom of white marble and gold floating above the clouds, where healers and firebirds live.' },
+    { id: 'eclipse', number: 10, name: 'Eclipse Throne', min: 6000, theme: 'eclipse', cards: ['wraiths', 'meteor', 'abyss', 'dreadknight'],
+      blurb: 'The obsidian fortress of a fallen king under an endless eclipse. Its cards are the most powerful of all.' },
   ];
   // Fixed rewards along the road, claimed by the player.
   const ROAD = [
@@ -3405,7 +3960,71 @@ const KCProgress = (() => {
     { at: 1090, kind: 'card', card: 'thundercloud', copies: 1 },
     { at: 1130, kind: 'rubies', amount: 1200 },
     { at: 1170, kind: 'card', card: 'griffin', copies: 1 },
-    { at: 1200, kind: 'arena', arena: 'arena5' },
+    // the rest of Stormspire
+    { at: 1250, kind: 'chest', chest: 'gold' },
+    { at: 1340, kind: 'rubies', amount: 1500 },
+    { at: 1430, kind: 'chest', chest: 'platinum' },
+    { at: 1530, kind: 'rubies', amount: 1800 },
+    { at: 1630, kind: 'chest', chest: 'legendary' },
+    { at: 1730, kind: 'rubies', amount: 2200 },
+    { at: 1830, kind: 'chest', chest: 'platinum' },
+    { at: 1920, kind: 'rubies', amount: 2600 },
+    // Arena 5: Frostfang Keep
+    { at: 2000, kind: 'arena', arena: 'frostfang' },
+    { at: 2060, kind: 'card', card: 'frostsprite', copies: 6 },
+    { at: 2140, kind: 'rubies', amount: 3000 },
+    { at: 2220, kind: 'card', card: 'icegiant', copies: 3 },
+    { at: 2300, kind: 'chest', chest: 'platinum' },
+    { at: 2380, kind: 'card', card: 'flashfreeze', copies: 1 },
+    { at: 2460, kind: 'rubies', amount: 3500 },
+    { at: 2540, kind: 'card', card: 'wintersage', copies: 1 },
+    // Arena 6: Blackwater Harbor
+    { at: 2600, kind: 'arena', arena: 'blackwater' },
+    { at: 2670, kind: 'card', card: 'dockraiders', copies: 6 },
+    { at: 2760, kind: 'rubies', amount: 4000 },
+    { at: 2850, kind: 'card', card: 'barrel', copies: 1 },
+    { at: 2940, kind: 'chest', chest: 'legendary' },
+    { at: 3030, kind: 'card', card: 'broadside', copies: 1 },
+    { at: 3120, kind: 'rubies', amount: 4500 },
+    { at: 3210, kind: 'card', card: 'harpoon', copies: 1 },
+    // Arena 7: Gearforge Citadel
+    { at: 3300, kind: 'arena', arena: 'gearforge' },
+    { at: 3380, kind: 'card', card: 'coil', copies: 6 },
+    { at: 3480, kind: 'rubies', amount: 5000 },
+    { at: 3580, kind: 'card', card: 'sparkbots', copies: 3 },
+    { at: 3680, kind: 'chest', chest: 'legendary' },
+    { at: 3780, kind: 'card', card: 'titan', copies: 1 },
+    { at: 3880, kind: 'rubies', amount: 6000 },
+    { at: 3980, kind: 'card', card: 'arccannon', copies: 1 },
+    // Arena 8: Crystal Chasm
+    { at: 4100, kind: 'arena', arena: 'crystal' },
+    { at: 4200, kind: 'card', card: 'gemflash', copies: 6 },
+    { at: 4310, kind: 'rubies', amount: 7000 },
+    { at: 4420, kind: 'card', card: 'shardguards', copies: 1 },
+    { at: 4530, kind: 'chest', chest: 'legendary' },
+    { at: 4640, kind: 'card', card: 'drill', copies: 1 },
+    { at: 4750, kind: 'rubies', amount: 8000 },
+    { at: 4860, kind: 'card', card: 'prism', copies: 1 },
+    // Arena 9: Skyward Sanctuary
+    { at: 5000, kind: 'arena', arena: 'skyward' },
+    { at: 5110, kind: 'card', card: 'sunsprite', copies: 3 },
+    { at: 5230, kind: 'rubies', amount: 9000 },
+    { at: 5350, kind: 'card', card: 'guardian', copies: 3 },
+    { at: 5470, kind: 'chest', chest: 'mythic' },
+    { at: 5590, kind: 'card', card: 'drake', copies: 1 },
+    { at: 5710, kind: 'rubies', amount: 10000 },
+    { at: 5830, kind: 'card', card: 'phoenix', copies: 1 },
+    // Arena 10: Eclipse Throne
+    { at: 6000, kind: 'arena', arena: 'eclipse' },
+    { at: 6100, kind: 'card', card: 'wraiths', copies: 1 },
+    { at: 6200, kind: 'chest', chest: 'legendary' },
+    { at: 6300, kind: 'card', card: 'meteor', copies: 3 },
+    { at: 6400, kind: 'rubies', amount: 12000 },
+    { at: 6500, kind: 'card', card: 'abyss', copies: 1 },
+    { at: 6600, kind: 'chest', chest: 'mythic' },
+    { at: 6700, kind: 'card', card: 'dreadknight', copies: 1 },
+    { at: 6850, kind: 'rubies', amount: 15000 },
+    { at: 7000, kind: 'chest', chest: 'mythic' },
   ];
   // Names and unlock times; what each holds is in ECONOMY.chests.
   const CHESTS = {
@@ -3617,6 +4236,15 @@ const KCProgress = (() => {
     if (t >= 1010) swap('owl', 0.5);
     if (t >= 1090) swap('thundercloud', 0.45);
     if (t >= 1170) swap('griffin', 0.4);
+    // Arenas 5 to 10: troops take a middle slot; win conditions can take the Rhino's, spells the Fireball's
+    const swapAt = (id, i, p) => { if (rand() <= p && !deck.includes(id)) deck[i] = id; };
+    const NEWER = [[2060, 'frostsprite', 0.45], [2220, 'icegiant', 0.4, 0], [2380, 'flashfreeze', 0.35, 7], [2540, 'wintersage', 0.45],
+      [2670, 'dockraiders', 0.45], [2850, 'barrel', 0.4, 0], [3030, 'broadside', 0.4], [3210, 'harpoon', 0.45],
+      [3380, 'coil', 0.4], [3580, 'sparkbots', 0.45], [3780, 'titan', 0.4, 0], [3980, 'arccannon', 0.4],
+      [4200, 'gemflash', 0.4, 7], [4420, 'shardguards', 0.45], [4640, 'drill', 0.4, 0], [4860, 'prism', 0.45],
+      [5110, 'sunsprite', 0.35], [5350, 'guardian', 0.4], [5590, 'drake', 0.45], [5830, 'phoenix', 0.45],
+      [6100, 'wraiths', 0.45], [6300, 'meteor', 0.35, 7], [6500, 'abyss', 0.4, 0], [6700, 'dreadknight', 0.45]];
+    for (const [at, id, pr, slot] of NEWER) if (t >= at) { if (slot !== undefined) swapAt(id, slot, pr); else swap(id, pr); }
     const name = FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
     const foeTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
     const cardLevels = spreadLevels(foeUpgrades(foeTrophies), deck, rand);
@@ -3682,11 +4310,13 @@ const KCProgress = (() => {
     const E = ECONOMY, top = Math.max(...Object.keys(E.arenaGold).map(Number));
     const at = (tab, n) => (tab[n] || tab[top] * Math.pow(E.nextArenaGrowth, n - top));
     // climbing through the arena, or past the last one
-    const climb = next ? 1 + E.withinArena * Math.min(1, (t - here.min) / (next.min - here.min))
-      : 1 + Math.min(E.beyond.max, E.beyond.add * Math.floor((t - here.min) / E.beyond.every));
+    const f = next ? Math.min(1, (t - here.min) / (next.min - here.min)) : 0;
+    const rise = tab => (next ? 1 + f * Math.max(E.withinArena, at(tab, next.number) / (at(tab, here.number) * E.arenaJump) - 1)
+      : 1 + Math.min(E.beyond.max, E.beyond.add * Math.floor((t - here.min) / E.beyond.every)));
+    const climb = rise(E.arenaCards), climbG = rise(E.arenaGold);
     const lvl = 1 + E.levelStep * (Math.min(lv, E.levelCap) - 1);
     const bonus = Math.min(10, Math.max(1, Number(opts.bonus) || 1));
-    return { arena: here.number, gold: at(E.arenaGold, here.number) * climb * lvl * bonus, cards: at(E.arenaCards, here.number) * climb * lvl * bonus, climb, level: lvl };
+    return { arena: here.number, gold: at(E.arenaGold, here.number) * climbG * lvl * bonus, cards: at(E.arenaCards, here.number) * climb * lvl * bonus, climb, level: lvl };
   }
   // kept for older callers: the card multiplier
   const chestMult = lv => rewardTier(lv ? { level: lv } : {}).cards;
@@ -4345,18 +4975,29 @@ const KCBot = (() => {
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
   const ROLE = {
-    tank: ['griffin', 'cannon', 'footmen', 'gorilla', 'bees', 'skeletons', 'wolves', 'gladiator', 'flail', 'archers', 'hawks'],
-    air: ['archers', 'owl', 'bees', 'snowman', 'hawks', 'griffin', 'spears', 'fireball'],
+    tank: ['griffin', 'wraiths', 'harpoon', 'coil', 'cannon', 'dreadknight', 'footmen', 'gorilla', 'shardguards', 'dockraiders', 'bees', 'skeletons', 'wolves', 'prism', 'broadside', 'sparkbots',
+      'gladiator', 'guardian', 'flail', 'archers', 'hawks', 'frostsprite'],
+    air: ['archers', 'prism', 'drake', 'owl', 'phoenix', 'bees', 'wintersage', 'sparkbots', 'dockraiders', 'coil', 'snowman', 'hawks', 'griffin', 'frostsprite', 'spears', 'fireball'],
     // a building-chaser in the air (the Thunder Cloud): only air-hitters stop it
-    airwin: ['griffin', 'archers', 'owl', 'bees', 'hawks', 'snowman'],
-    swarm: ['flail', 'snowman', 'pots', 'archers', 'gladiator', 'spears', 'fireball', 'hawks', 'owl'],
-    ranged: ['gladiator', 'bees', 'skeletons', 'wolves', 'hawks', 'flail', 'footmen', 'gorilla', 'rhino'],
-    melee: ['skeletons', 'pots', 'bees', 'wolves', 'gladiator', 'flail', 'cannon', 'hawks', 'footmen', 'gorilla', 'owl', 'archers'],
+    airwin: ['griffin', 'phoenix', 'prism', 'archers', 'owl', 'drake', 'bees', 'coil', 'sparkbots', 'hawks', 'dockraiders', 'wintersage', 'snowman'],
+    swarm: ['flail', 'drake', 'wintersage', 'arccannon', 'dreadknight', 'snowman', 'pots', 'archers', 'guardian', 'gladiator', 'spears', 'fireball', 'hawks', 'owl', 'frostsprite'],
+    ranged: ['harpoon', 'gladiator', 'dockraiders', 'bees', 'skeletons', 'shardguards', 'wolves', 'hawks', 'flail', 'footmen', 'gorilla', 'dreadknight', 'frostsprite', 'rhino'],
+    melee: ['skeletons', 'pots', 'wintersage', 'bees', 'wolves', 'prism', 'gladiator', 'flail', 'coil', 'cannon', 'drake', 'hawks', 'sparkbots', 'footmen', 'guardian', 'gorilla', 'broadside',
+      'owl', 'archers', 'dockraiders', 'shardguards', 'phoenix', 'arccannon'],
   };
-  const MELEE = { wolves: 1, gladiator: 1, gorilla: 1, rhino: 1, skeletons: 1, footmen: 1, flail: 1, bees: 1, griffin: 1 };
+  const MELEE = { wolves: 1, gladiator: 1, gorilla: 1, rhino: 1, skeletons: 1, footmen: 1, flail: 1, bees: 1, griffin: 1,
+    frostsprite: 1, sunsprite: 1, dockraiders: 1, shardguards: 1, harpoon: 1, guardian: 1, phoenix: 1, wraiths: 1, dreadknight: 1, icegiant: 1 };
   // cards that go for towers: they start pushes, they don't defend
-  const WIN = ['rhino', 'ramcart', 'camel', 'thundercloud'];
-  const NO_DEFEND = { rhino: 1, ramcart: 1, camel: 1, mole: 1, thundercloud: 1 };
+  const WIN = ['rhino', 'ramcart', 'camel', 'thundercloud', 'titan', 'icegiant', 'titanling'];
+  const NO_DEFEND = { rhino: 1, ramcart: 1, camel: 1, mole: 1, thundercloud: 1, titan: 1, icegiant: 1, drill: 1, sunsprite: 1 };
+  // what a unit is worth, for the units cards bring with them (they cost nothing themselves)
+  const WORTH = { raider: 1, raidergun: 0.8, imp: 1.2, wraith: 0.45, titanling: 2.5, phoenixegg: 2.5, ramsoldier: 1.2 };
+  const worth = id => WORTH[id] !== undefined ? WORTH[id] : KC_CARDS[id].cost / KC_CARDS[id].count;
+  // the spells it casts on clumps: how many energy's worth of enemies a cast must hit (above the skill's
+  // Fireball setting), and whether it only counts what it would finish off
+  const SPELLS = [
+    ['meteor', 3.5, false], ['fireball', 0, false], ['flashfreeze', 1.5, false], ['spears', -1, true], ['gemflash', -2, true], ['sandstorm', -0.5, false],
+  ];
 
   function create(team, opts) {
     opts = opts || {};
@@ -4408,28 +5049,39 @@ const KCBot = (() => {
   function decide(b, s) {
     const K = b.skill, me = b.team, E = s.energy[me], hand = s.hands[me];
     const troops = s.ents.filter(e => e.kind === 'troop' && !e.dead);
-    const foes = troops.filter(e => e.team !== me).map(e => ({ e, x: e.x, y: my(b, e.y), v: KC_CARDS[e.card].cost / KC_CARDS[e.card].count }));
-    const mine = troops.filter(e => e.team === me).map(e => ({ e, x: e.x, y: my(b, e.y), v: KC_CARDS[e.card].cost / KC_CARDS[e.card].count }));
+    const foes = troops.filter(e => e.team !== me).map(e => ({ e, x: e.x, y: my(b, e.y), v: worth(e.card) }));
+    const mine = troops.filter(e => e.team === me).map(e => ({ e, x: e.x, y: my(b, e.y), v: worth(e.card) }));
     const has = id => hand.includes(id);
     const afford = id => KC_CARDS[id].cost <= E + 0.5;
 
     // 1. A spell on a big clump, or on troops hitting a tower. Fireball counts everything it hits;
     //    Spears only counts what it would finish off (swarms, flyers, ranged troops).
-    for (const spell of ['fireball', 'spears', 'sandstorm']) {
+    for (const [spell, extra, finishOnly] of SPELLS) {
       if (!has(spell) || !afford(spell)) continue;
       const c = KC_CARDS[spell], reach = c.area - 0.2, dmg = c.dmg * KCSim.levelMult(s.cardLevels[me] && s.cardLevels[me][spell] || 1);
       let best = null, bv = 0;
       for (const f of foes) {
         let v = 0;
-        for (const g of foes) if (Math.hypot(g.x - f.x, g.y - f.y) < reach && (spell !== 'spears' || g.e.hp <= dmg)) v += g.v * (spell === 'sandstorm' ? 0.8 : 1);
+        for (const g of foes) {
+          if (Math.hypot(g.x - f.x, g.y - f.y) >= reach) continue;
+          if (!finishOnly || g.e.hp <= dmg) v += g.v * (spell === 'sandstorm' ? 0.8 : 1);
+          // a stun is worth more on something charging up (the Arc Cannon, the Griffin's beam)
+          if (c.stun && (g.e.chargeT > 2 || g.e.beamTime > 1.5)) v += 3;
+        }
         if (f.y > 20) v += 1;
         if (v > bv) { bv = v; best = f; }
       }
-      const need = spell === 'fireball' ? K.fireballValue : spell === 'sandstorm' ? Math.max(4, K.fireballValue - 0.5) : Math.max(3.5, K.fireballValue - 1);
+      const need = spell === 'fireball' ? K.fireballValue : Math.max(spell === 'gemflash' ? 2.5 : 3.5, K.fireballValue + extra);
       if (best && bv >= need) {
-        const lead = best.e.moving ? 0.8 : 0;
+        const lead = best.e.moving && !c.instant ? 0.8 : 0;
         return { card: spell, x: best.x, y: best.y + lead, exact: true, quick: true };
       }
+    }
+    // a Doom Meteor finishes off a tower it would bring down
+    if (has('meteor') && afford('meteor')) {
+      const md = KC_CARDS.meteor.dmg * KC_CARDS.meteor.towerPct * KCSim.levelMult(s.cardLevels[me] && s.cardLevels[me].meteor || 1);
+      const low = s.ents.find(e => e.kind === 'tower' && e.team !== me && !e.dead && e.hp <= md);
+      if (low) return { card: 'meteor', x: low.x, y: my(b, low.y), exact: true, quick: true };
     }
 
     // 2. Defend the lane under the most pressure.
@@ -4442,7 +5094,10 @@ const KCBot = (() => {
       const lead = group.reduce((a, t) => (t.y > a.y ? t : a), group[0]);
       const cx = group.reduce((a, t) => a + t.x, 0) / group.length;
       const value = group.reduce((a, t) => a + t.v, 0);
-      const guard = mine.filter(m => Math.hypot(m.x - cx, m.y - lead.y) < 5.5).reduce((a, m) => a + m.v, 0);
+      const guards = mine.filter(m => Math.hypot(m.x - cx, m.y - lead.y) < 5.5), guard = guards.reduce((a, m) => a + m.v, 0);
+      // defenders already fighting and hurt: a Sun Sprite onto the attackers heals them
+      const hurt = guards.filter(m => m.e.hp < m.e.maxHp * 0.65).reduce((a, m) => a + m.v, 0);
+      if (hurt >= 2 && has('sunsprite') && afford('sunsprite')) return { card: 'sunsprite', x: lead.x, y: Math.min(30.5, Math.max(17.5, lead.y + 2)), quick: true };
       if (guard < value * K.defend) {
         const cards = group.map(t => t.e.card);
         const role = cards.includes('thundercloud') ? 'airwin' : cards.some(c => WIN.includes(c)) ? 'tank'
@@ -4467,8 +5122,11 @@ const KCBot = (() => {
     // 3. Back up a push that is already crossing.
     const push = mine.find(m => WIN.includes(m.e.card) && m.y < 19.5 && m.y > 11);
     if (push && E >= 4 && s.time - b.lastAttack > 2) {
-      const pick = ['snowman', 'owl', 'pots', 'archers', 'hawks', 'griffin', 'bees', 'flail', 'gladiator', 'wolves'].find(id => has(id) && afford(id));
+      const pick = ['arccannon', 'wintersage', 'snowman', 'drake', 'owl', 'pots', 'prism', 'sparkbots', 'archers', 'hawks', 'griffin', 'phoenix', 'guardian', 'bees', 'flail', 'dockraiders', 'gladiator', 'wolves']
+        .find(id => has(id) && afford(id));
       if (pick) return { card: pick, x: push.x, y: Math.max(17.5, push.y + 2.5), attack: true };
+      // a Sun Sprite right behind the push, to heal it when it bursts
+      if (has('sunsprite') && afford('sunsprite') && push.e.hp < push.e.maxHp * 0.8) return { card: 'sunsprite', x: push.x, y: Math.max(17.5, push.y + 1.5), attack: true };
     }
 
     // 4. Start a push once energy is high enough (a trainer sometimes just waits).
@@ -4479,15 +5137,28 @@ const KCBot = (() => {
       // the Mole tunnels to just behind the weakest tower (sometimes before anything else)
       const moleAt = weak && { card: 'mole', x: weak.x + (weak.x < 9 ? -0.5 : 0.5), y: my(b, weak.y) - 2.4, attack: true, exact: true };
       if (moleAt && has('mole') && afford('mole') && b.rand() < 0.45) return moleAt;
+      // cards that go straight to a tower from anywhere: the barrel and the portal on it, the drill beside it
+      if (weak) {
+        const ty = my(b, weak.y);
+        if (has('barrel') && afford('barrel') && b.rand() < 0.7) return { card: 'barrel', x: weak.x, y: ty + 1.6, attack: true, exact: true };
+        if (has('abyss') && afford('abyss') && b.rand() < 0.7) return { card: 'abyss', x: weak.x + (weak.x < 9 ? 0.8 : -0.8), y: ty + 1.2, attack: true, exact: true };
+        if (has('drill') && afford('drill') && b.rand() < 0.7) return { card: 'drill', x: weak.x + (weak.x < 9 ? 2.6 : -2.6), y: ty - 0.5, attack: true, exact: true };
+      }
+      // the Steel Titan walks from behind the King Tower; the Icebound Giant leads at the bridge
+      if (has('titan') && afford('titan')) return { card: 'titan', x: lx < 9 ? 6.5 : 11.5, y: 30.5, attack: true };
       if (has('rhino') && afford('rhino')) return { card: 'rhino', x: lx < 9 ? 5.5 : 12.5, y: 30.5, attack: true };
+      if (has('icegiant') && afford('icegiant')) return { card: 'icegiant', x: lx, y: 18.5, attack: true };
       // a Camel Jockey from the back, a Ram Cart right at the bridge for a fast hit
       if (has('camel') && afford('camel')) return { card: 'camel', x: lx < 9 ? 4.5 : 13.5, y: 29.5, attack: true };
       // the Thunder Cloud drifts in from behind the King Tower's side, on the weak lane
       if (has('thundercloud') && afford('thundercloud')) return { card: 'thundercloud', x: lx < 9 ? 3.5 : 14.5, y: 27.5, attack: true };
       if (has('ramcart') && afford('ramcart')) return { card: 'ramcart', x: lx, y: 18.5, attack: true };
       if (moleAt && has('mole') && afford('mole')) return moleAt;
-      const pick = ['gladiator', 'flail', 'hawks', 'owl', 'archers', 'footmen', 'wolves', 'gorilla'].find(id => has(id) && afford(id));
+      const pick = ['dreadknight', 'broadside', 'gladiator', 'flail', 'phoenix', 'drake', 'hawks', 'owl', 'guardian', 'harpoon', 'archers', 'prism', 'sparkbots', 'footmen', 'dockraiders',
+        'shardguards', 'wraiths', 'wolves', 'gorilla', 'wintersage', 'arccannon'].find(id => has(id) && afford(id));
       if (pick) return { card: pick, x: lx, y: 18.5, attack: true };
+      // nothing else to start with: the anywhere cards anyway
+      if (weak) for (const id of ['barrel', 'abyss', 'drill']) if (has(id) && afford(id)) return { card: id, x: weak.x, y: my(b, weak.y) + (id === 'drill' ? -0.5 : 1.4), attack: true, exact: true };
     }
     return null;
   }
@@ -4741,9 +5412,35 @@ const KCArenas = (() => {
     },
   };
 
+  /* Arenas 5 to 10: their art hasn't been made yet. Each is ready for the same four images as the arenas
+     above: a lobby centerpiece with the arena's name, a battlefield (its tower pads, river and two bridges
+     on the game's grid) and the two side panels. Until the images arrive (fill in `src`, the image size,
+     the anchors, the crowd rows), the battlefield is drawn in code in the arena's own colours
+     (KCArt.THEMES), the lobby shows the arena's name on a plaque and the side panels are a plain gradient
+     in its colours: no other arena's art stands in. */
+  const PENDING = {
+    frostfang: { name: 'Frostfang Keep', panel: ['#24324a', '#6f86a0'], look: 'Snow, ice and frozen stone.' },
+    blackwater: { name: 'Blackwater Harbor', panel: ['#16222e', '#3a4a52'], look: 'Ships, docks and ocean water.' },
+    gearforge: { name: 'Gearforge Citadel', panel: ['#2a1f18', '#6a5038'], look: 'Bronze machinery and turning gears.' },
+    crystal: { name: 'Crystal Chasm', panel: ['#120e24', '#3a2f70'], look: 'Glowing crystals in an underground cavern.' },
+    skyward: { name: 'Skyward Sanctuary', panel: ['#6f8fca', '#e8eef8'], look: 'Clouds, white marble and gold.' },
+    eclipse: { name: 'Eclipse Throne', panel: ['#0a0810', '#4a1420'], look: 'Obsidian, crimson energy and darkness.' },
+  };
+  for (const [id, P] of Object.entries(PENDING)) {
+    const side = () => ({ src: null, w: 793, h: 1983, anchor: [0.5, 0.5], stars: 0, rows: [], glows: [], panel: P.panel });
+    ART[id] = {
+      name: P.name, pending: true, look: P.look, palette: id, margin: 1.4, fx: 'water',
+      // the bar's place over the art's empty progress bar, until the centerpiece image says otherwise
+      centerpiece: { src: null, w: 1122, h: 1402, bar: { left: 10, top: 64, width: 80, height: 7 } },
+      field: null,
+      scenery: { left: side(), right: side() },
+    };
+  }
+
   /* ---------- images: each loaded once ---------- */
   const imgs = {}, waiting = {};
   function image(src) {
+    if (!src) return null;
     if (imgs[src]) return imgs[src];
     const im = new Image();
     im.decoding = 'async';
@@ -4757,6 +5454,7 @@ const KCArenas = (() => {
   // Calls fn once the image is ready (now, if it already is). A failed image never calls back: callers
   // keep their fallback (a drawn battlefield, a plain gradient behind the crowd).
   function whenReady(src, fn) {
+    if (!src) return;
     const im = image(src);
     if (ready(im)) fn(im);
     else if (!im.failed) (waiting[src] = waiting[src] || []).push(fn);
@@ -4766,7 +5464,7 @@ const KCArenas = (() => {
   function preload(id) {
     const a = get(id);
     image(a.centerpiece.src);
-    if (a.field) image(a.field.src);
+    if (a.field && a.field.src) image(a.field.src);
     image(a.scenery.left.src); image(a.scenery.right.src);
   }
 
@@ -4784,7 +5482,7 @@ const KCArenas = (() => {
   // canvas's own frame (tile (x, y) is at ((x + m) k, (y + m) k)). Returns false if not ready.
   function drawField(c, id, k, m, W, H) {
     const f = get(id).field;
-    if (!f) return false;
+    if (!f || !f.src) return false;
     const im = image(f.src);
     if (!ready(im)) return false;
     const px = axis(f.x), py = axis(f.y);
@@ -5627,6 +6325,14 @@ const KCArt = (() => {
     sh(c, () => circ(c, 0, q(-0.18), q(0.16)), '#ffcd33', '#e09f12', q(0.04));
   }
 
+  // Buildings drawn by other files (js/art2.js); the Cannon is drawn here.
+  const BUILDINGS = {};
+  // Card pictures drawn by other files: PORTRAITS[id](c, w, h, k, at) draws the card's art.
+  const PORTRAITS = {};
+  function building(c, card, k, o) {
+    LW = Math.max(1, k * 0.07);
+    (BUILDINGS[card] || cannon)(c, k, o);
+  }
   function troop(c, card, k, o) {
     const f = TROOPS[card];
     if (!f) return;
@@ -5817,6 +6523,7 @@ const KCArt = (() => {
     else if (cardId === 'griffin') at(0.5, 0.62, 0.82, { t: 0.2, beam: 1 });
     else if (cardId === 'camel') at(0.5, 0.97, 0.86, { ratk: 0.6, t: 0.2 });
     else if (cardId === 'spears') { c.save(); c.translate(w * 0.5, h * 0.5); LW = Math.max(1, k * 0.06); spearsArt(c, k * 1.05, 0); c.restore(); }
+    else if (PORTRAITS[cardId]) { LW = Math.max(1, k * 0.07); PORTRAITS[cardId](c, w, h, k, at, team); }
     else if (cardId === 'footmen') { at(0.27, 0.72, 1.15, { t: 0.4 }); at(0.73, 0.72, 1.15, { t: 1.1 }); at(0.5, 0.92, 1.4, {}); }
     else if (cardId === 'wolves') { at(0.26, 0.7, 1.6, { t: 1.1 }); at(0.74, 0.7, 1.6, {}); at(0.5, 0.9, 2.0, { t: 0.6 }); }
     else if (cardId === 'hawks') { at(0.3, 0.34, 1.1, { t: 0.9 }); at(0.58, 0.62, 1.45, {}); }
@@ -5874,6 +6581,13 @@ const KCArt = (() => {
     stormspire: { bg: '#2e3348', grass: ['#9aa6bd', '#919db5'], path: '#c9d2e2', pad: '#6f7891', river: ['#6fc4ff', '#4a9ee0'], bank: '#5a647e', wall: '#505a74', specks: ['#ffe27a', '#bfe6ff', '#ffffff', '#8f9bb5'] },
     sunstone: { bg: '#6e4a2c', grass: ['#e8c47c', '#e0ba70'], path: '#c99a5a', pad: '#b3906a', river: ['#35b8c6', '#2794a6'], bank: '#9fb05a', wall: '#b07a4a', specks: ['#5fa84a', '#ffe08a', '#c96a3a', '#fff4d6'] },
     cinder: { bg: '#4d3f45', grass: ['#a6ad5a', '#9ba251'], path: '#c9a47c', pad: '#8d857e', river: ['#3a86c4', '#2c6aa3'], bank: '#7f8a42', wall: '#6f6168', specks: ['#ff8a3d', '#ffc261', '#5a4a44', '#e6dccd'] },
+    // Arenas 5 to 10, drawn in code until their battlefield images arrive (js/arenas.js)
+    frostfang: { bg: '#2f3f58', grass: ['#dce8f2', '#d0dfec'], path: '#b9cadb', pad: '#8fa3b8', river: ['#7fd0f0', '#5fb2e0'], bank: '#a9c4d8', wall: '#6f86a0', specks: ['#ffffff', '#bfe6ff', '#8fb8d8', '#e8f4ff'] },
+    blackwater: { bg: '#2a2f3a', grass: ['#7b6a4e', '#72624a'], path: '#a88a5e', pad: '#6e6a64', river: ['#1f5f7a', '#174a60'], bank: '#4e5a4a', wall: '#4a4038', specks: ['#d9c08a', '#3f8fa8', '#8a6a44', '#e8e0d0'] },
+    gearforge: { bg: '#3a2f28', grass: ['#8a7a66', '#827260'], path: '#b08a52', pad: '#7a6a5a', river: ['#3fa0b0', '#2f8090'], bank: '#5a5046', wall: '#6a5038', specks: ['#ffcf5a', '#d39a48', '#6ad0ff', '#3a3a44'] },
+    crystal: { bg: '#1e1a34', grass: ['#4a4470', '#433e68'], path: '#6a5a90', pad: '#5a5680', river: ['#5ae0e8', '#3ab8d0'], bank: '#3a3460', wall: '#2e2850', specks: ['#b48cff', '#7ff0ff', '#ff8fd8', '#e8d8ff'] },
+    skyward: { bg: '#8aa6d8', grass: ['#eef0f4', '#e4e8ef'], path: '#e8d6a0', pad: '#cfd3dc', river: ['#bfe2ff', '#9fd0ff'], bank: '#d8e0ea', wall: '#c8b07a', specks: ['#ffe27a', '#ffffff', '#bfe6ff', '#ffd0f0'] },
+    eclipse: { bg: '#14101c', grass: ['#3a3040', '#342a3a'], path: '#5a3a4a', pad: '#4a404e', river: ['#c0283a', '#901c2c'], bank: '#2a2230', wall: '#241c2a', specks: ['#ff4a5a', '#8a2a4a', '#5a4a6a', '#ffb0a0'] },
   };
   // The battlefield under the live game: the arena's illustration if it has one (js/arenas.js),
   // otherwise drawn here from its palette.
@@ -5993,7 +6707,528 @@ const KCArt = (() => {
   }
   const owen = cv => trainer(cv, KC_TRAINERS[0].look);
 
-  return { OUT, TEAM, THEMES, cannon, spearsArt, sandstormArt, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer, rr, circ, ell, line, paint, poly };
+  // for js/art2.js: the shared helpers, the colours, and a way to add troops, buildings and card pictures
+  const add = (troops, buildings, portraits) => { Object.assign(TROOPS, troops || {}); Object.assign(BUILDINGS, buildings || {}); Object.assign(PORTRAITS, portraits || {}); };
+  return { OUT, TEAM, THEMES, C, cannon, building, spearsArt, sandstormArt, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer,
+    rr, circ, ell, line, paint, poly, sh, rope, dot, eye, add, lw: () => LW, setLw: v => { LW = v; } };
+})();
+
+/* Kingdom Clash: the troops, buildings and card pictures of Arenas 5 to 10 (Frostfang Keep, Blackwater
+   Harbor, Gearforge Citadel, Crystal Chasm, Skyward Sanctuary, Eclipse Throne), drawn in code in the same
+   style as js/art.js and added to it. Every drawing stands on (0, 0) at its feet, k pixels to a tile;
+   o = { team, t, walk, atk (0 to 1 while hitting), face, view: 'front' | 'back', ... }. */
+'use strict';
+
+(() => {
+  const A = KCArt, { OUT, TEAM, C, rr, circ, ell, line, paint, poly, sh, rope, dot } = A;
+  const LW = () => A.lw();
+  const ICE = ['#cfeeff', '#9fd4f0', '#e9f8ff'], CRYSTAL = ['#c9a8ff', '#8a5cf0', '#efe2ff'], GOLD = [C.gold, C.goldSh];
+  const BRONZE = [C.bronze, C.bronzeSh], STEEL = ['#c9d0db', '#9aa3b2'], DARK = ['#3a3346', '#25202f'];
+  const walkOf = (o, f) => (o.walk ? Math.sin(o.t * (f || 10)) : 0);
+  // eyes looking out of a face (front view only)
+  const eyes = (c, q, y, gap, r, col) => { for (const s of [-1, 1]) { circ(c, s * q(gap), q(y), q(r)); c.fillStyle = col || OUT; c.fill(); } };
+  // a glow (additive), for crystals, sparks and fire
+  function glow(c, x, y, r, col, a) {
+    const g = c.createRadialGradient(x, y, 0, x, y, Math.max(1, r));
+    g.addColorStop(0, col.replace(')', `,${a == null ? 0.7 : a})`).replace('rgb(', 'rgba(')); g.addColorStop(1, col.replace(')', ',0)').replace('rgb(', 'rgba('));
+    c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = g; c.fillRect(x - r, y - r, r * 2, r * 2); c.restore();
+  }
+  // a little ice shard or crystal: a diamond shape
+  const shard = (c, x, y, w, h, cols) => sh(c, () => poly(c, [x, y - h, x + w, y - h * 0.35, x, y, x - w, y - h * 0.35]), cols[0], cols[1], h * 0.2);
+  // two legs for a walking humanoid
+  function legs(c, q, o, col, sep, h, w) {
+    const st = walkOf(o) * q(0.05);
+    for (const [x, ph] of [[-sep, 1], [sep, -1]]) sh(c, () => rr(c, q(x) - q(w / 2), -q(h) + st * ph, q(w), q(h) - st * ph, q(w * 0.4)), col, null, 0);
+  }
+
+  const T5 = {
+    /* ---------- Arena 5: Frostfang Keep ---------- */
+    // Frost Sprite: a hopping ball of frost with a crown of ice shards
+    frostsprite(c, k, o) {
+      const q = v => v * k * 1.3, T = TEAM[o.team], hop = Math.abs(Math.sin(o.t * 9)) * q(o.walk ? 0.18 : 0.06), front = o.view === 'front';
+      c.save(); c.translate(0, -hop);
+      glow(c, 0, q(-0.35), q(0.6), 'rgb(170,230,255)', 0.35);
+      for (const [x, h] of [[-0.18, 0.28], [0, 0.36], [0.18, 0.28]]) shard(c, q(x), q(-0.5), q(0.08), q(h), ICE);
+      sh(c, () => ell(c, 0, q(-0.3), q(0.3), q(0.27)), ICE[0], ICE[1], q(0.06));
+      sh(c, () => rr(c, q(-0.2), q(-0.18), q(0.4), q(0.08), q(0.04)), T.main, T.sh, q(0.02));
+      if (front) { eyes(c, q, -0.34, 0.1, 0.045, '#1f3a6a'); line(c, q(-0.05), q(-0.24), q(0.05), q(-0.24), '#1f3a6a', LW() * 0.8); }
+      c.restore();
+    },
+    // Icebound Giant: a hulking giant of packed ice, blue rune on its chest
+    icegiant(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], st = walkOf(o, 6), sw = o.atk, front = o.view === 'front';
+      for (const s of [-1, 1]) sh(c, () => rr(c, s * q(0.24) - q(0.13), q(-0.36) + st * s * q(0.05), q(0.26), q(0.36), q(0.1)), ICE[1], '#7fb6d8', q(0.05));
+      for (const s of [-1, 1]) {
+        c.save(); c.translate(s * q(0.48), q(-0.86)); c.rotate(s * (0.25 + (s > 0 ? sw : 0) * 0.9));
+        sh(c, () => rr(c, -q(0.14), 0, q(0.28), q(0.62), q(0.13)), ICE[0], ICE[1], q(0.06));
+        shard(c, 0, q(0.1), q(0.07), q(0.2), [ICE[2], ICE[1]]);
+        c.restore();
+      }
+      sh(c, () => rr(c, q(-0.46), q(-1.12), q(0.92), q(0.82), q(0.32)), ICE[0], ICE[1], q(0.1));
+      for (const [x, y, h] of [[-0.3, -1.08, 0.24], [0.02, -1.14, 0.3], [0.3, -1.06, 0.22]]) shard(c, q(x), q(y), q(0.09), q(h), [ICE[2], ICE[1]]);
+      if (front) {
+        sh(c, () => poly(c, [0, q(-0.88), q(0.12), q(-0.72), 0, q(-0.56), q(-0.12), q(-0.72)]), T.light, T.main, q(0.03));
+        eyes(c, q, -0.98, 0.15, 0.05, '#1f3a6a');
+        line(c, q(-0.24), q(-1.06), q(-0.06), q(-1.02), '#5f94bd', q(0.05)); line(c, q(0.24), q(-1.06), q(0.06), q(-1.02), '#5f94bd', q(0.05));
+      } else sh(c, () => rr(c, q(-0.2), q(-0.95), q(0.4), q(0.08), q(0.04)), T.main, T.sh, q(0.02));
+    },
+    // Winter Sage: an old frost wizard in a team robe, a white beard and an ice-tipped staff
+    wintersage(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', cast = o.atk;
+      legs(c, q, o, '#5a6a88', 0.1, 0.2, 0.12);
+      sh(c, () => poly(c, [q(-0.36), q(-0.16), q(0.36), q(-0.16), q(0.22), q(-0.86), q(-0.22), q(-0.86)]), T.main, T.sh, q(0.07));
+      sh(c, () => rr(c, q(-0.37), q(-0.24), q(0.74), q(0.1), q(0.04)), ICE[0], ICE[1], q(0.03));
+      // the staff
+      c.save(); c.translate(q(0.36), q(-0.5)); c.rotate(-0.15 - cast * 0.5);
+      rope(c, () => { c.beginPath(); c.moveTo(0, q(0.32)); c.lineTo(0, q(-0.72)); }, '#8a6a4a', q(0.06));
+      shard(c, 0, q(-0.72), q(0.1), q(0.3), ICE);
+      if (cast > 0.2) glow(c, 0, q(-0.86), q(0.4), 'rgb(170,230,255)', 0.6 * cast);
+      c.restore();
+      sh(c, () => circ(c, 0, q(-1.0), q(0.22)), C.skin, C.skinSh, q(0.04));
+      if (front) {
+        sh(c, () => poly(c, [q(-0.2), q(-0.98), q(0.2), q(-0.98), q(0.1), q(-0.62), 0, q(-0.54), q(-0.1), q(-0.62)]), '#f4f6fb', '#c9d2e2', q(0.04));
+        eyes(c, q, -1.05, 0.08, 0.03);
+      }
+      sh(c, () => poly(c, [q(-0.3), q(-1.1), q(0.3), q(-1.1), q(0.06), q(-1.62), q(-0.04), q(-1.6)]), T.main, T.sh, q(0.05));
+      sh(c, () => rr(c, q(-0.31), q(-1.16), q(0.62), q(0.09), q(0.04)), ICE[0], ICE[1], q(0.02));
+      shard(c, 0, q(-1.24), q(0.05), q(0.12), [ICE[2], ICE[1]]);
+    },
+
+    /* ---------- Arena 6: Blackwater Harbor ---------- */
+    // a Dock Raider: a quick pirate with a team bandana, a striped shirt and a cutlass
+    raider(c, k, o) {
+      const q = v => v * k * 0.85, T = TEAM[o.team], front = o.view === 'front', sw = o.atk;
+      legs(c, q, o, '#4a3a2a', 0.1, 0.3, 0.12);
+      sh(c, () => rr(c, q(-0.24), q(-0.7), q(0.48), q(0.42), q(0.12)), '#f3efe6', '#cfc8b8', q(0.05));
+      for (const y of [-0.62, -0.52, -0.42]) line(c, q(-0.22), q(y), q(0.22), q(y), T.main, q(0.04));
+      c.save(); c.translate(q(0.26), q(-0.58)); c.rotate(-0.7 + sw * 1.6);
+      sh(c, () => { c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(q(0.14), q(-0.3), q(0.04), q(-0.58)); c.lineTo(-q(0.03), q(-0.02)); c.closePath(); }, STEEL[0], STEEL[1], q(0.03));
+      sh(c, () => rr(c, q(-0.07), q(-0.02), q(0.14), q(0.05), q(0.02)), GOLD[0], null, 0);
+      c.restore();
+      sh(c, () => circ(c, 0, q(-0.92), q(0.22)), C.skin, C.skinSh, q(0.04));
+      if (front) { eyes(c, q, -0.94, 0.08, 0.03); line(c, q(-0.1), q(-0.82), q(0.1), q(-0.82), OUT, LW() * 0.8); }
+      sh(c, () => { c.beginPath(); c.arc(0, q(-0.96), q(0.23), Math.PI, 0); c.closePath(); }, T.main, T.sh, q(0.04));
+      sh(c, () => poly(c, [q(-0.22), q(-0.98), q(-0.36), q(-0.9), q(-0.3), q(-0.82)]), T.main, T.sh, q(0.02));
+    },
+    // the Dock Raiders card itself (the placement ghost): one of its cutlass pirates
+    dockraiders(c, k, o) { T5.raider(c, k, o); },
+    // a Harpoon Raider: a pirate in a vest with a bundle of little harpoons to throw
+    raidergun(c, k, o) {
+      const q = v => v * k * 0.85, T = TEAM[o.team], front = o.view === 'front', th = o.atk;
+      legs(c, q, o, '#4a3a2a', 0.1, 0.3, 0.12);
+      sh(c, () => rr(c, q(-0.24), q(-0.7), q(0.48), q(0.42), q(0.12)), '#f3efe6', '#cfc8b8', q(0.05));
+      sh(c, () => poly(c, [q(-0.24), q(-0.7), q(-0.06), q(-0.7), q(-0.08), q(-0.3), q(-0.24), q(-0.3)]), '#6a4a2e', '#4e3420', q(0.03));
+      sh(c, () => poly(c, [q(0.24), q(-0.7), q(0.06), q(-0.7), q(0.08), q(-0.3), q(0.24), q(-0.3)]), '#6a4a2e', '#4e3420', q(0.03));
+      c.save(); c.translate(q(0.28), q(-0.62)); c.rotate(-0.4 - th * 1.2);
+      line(c, 0, q(0.1), 0, q(-0.56), OUT, q(0.07)); line(c, 0, q(0.1), 0, q(-0.56), '#9a6a3a', q(0.04));
+      poly(c, [0, q(-0.7), q(-0.06), q(-0.54), q(0.06), q(-0.54)]); paint(c, STEEL[0], LW() * 0.8);
+      c.restore();
+      sh(c, () => circ(c, 0, q(-0.92), q(0.22)), C.skin, C.skinSh, q(0.04));
+      if (front) eyes(c, q, -0.94, 0.08, 0.03);
+      sh(c, () => { c.beginPath(); c.arc(0, q(-0.96), q(0.23), Math.PI, 0); c.closePath(); }, T.main, T.sh, q(0.04));
+    },
+    // Harpoon Captain: a burly pirate captain, tricorn hat, beard, a great harpoon and a coil of rope
+    harpoon(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', sw = o.atk, throwing = o.hook || 0;
+      legs(c, q, o, '#3e3024', 0.15, 0.36, 0.16);
+      sh(c, () => rr(c, q(-0.4), q(-0.98), q(0.8), q(0.66), q(0.22)), '#5a3e28', '#3e2a1a', q(0.07));
+      sh(c, () => rr(c, q(-0.18), q(-0.96), q(0.36), q(0.6), q(0.1)), '#f3efe6', '#cfc8b8', q(0.04));
+      sh(c, () => rr(c, q(-0.41), q(-0.5), q(0.82), q(0.1), q(0.04)), T.main, T.sh, q(0.02));
+      // the rope coil on his hip
+      ell(c, q(-0.34), q(-0.48), q(0.14), q(0.11)); c.lineWidth = q(0.07); c.strokeStyle = OUT; c.stroke(); c.lineWidth = q(0.04); c.strokeStyle = '#d8b880'; c.stroke();
+      // the harpoon
+      c.save(); c.translate(q(0.42), q(-0.72)); c.rotate(-0.25 - sw * 1.1 - throwing * 0.8);
+      rope(c, () => { c.beginPath(); c.moveTo(0, q(0.5)); c.lineTo(0, q(-0.9)); }, '#8a6a44', q(0.07));
+      if (throwing < 0.5) { poly(c, [0, q(-1.12), q(-0.1), q(-0.88), q(0.1), q(-0.88)]); paint(c, STEEL[0], LW()); line(c, q(-0.1), q(-0.88), q(-0.16), q(-0.98), OUT, q(0.04)); }
+      c.restore();
+      sh(c, () => circ(c, 0, q(-1.2), q(0.28)), C.skin, C.skinSh, q(0.05));
+      if (front) {
+        sh(c, () => { c.beginPath(); c.arc(0, q(-1.12), q(0.27), 0.2, Math.PI - 0.2); c.closePath(); }, '#7a4a2a', '#5a341c', q(0.04));
+        eyes(c, q, -1.26, 0.1, 0.035);
+      }
+      sh(c, () => poly(c, [q(-0.46), q(-1.36), q(0.46), q(-1.36), q(0.3), q(-1.6), 0, q(-1.52), q(-0.3), q(-1.6)]), DARK[0], DARK[1], q(0.05));
+      sh(c, () => rr(c, q(-0.3), q(-1.42), q(0.6), q(0.08), q(0.03)), T.main, T.sh, q(0.02));
+    },
+    // Broadside Cart: a ship's cannon on a wooden cart, behind a plank shield while the shield holds
+    broadside(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', roll = o.t * (o.walk ? 6 : 0), rec = o.atk * q(0.12);
+      for (const s of [-1, 1]) {
+        sh(c, () => circ(c, s * q(0.5), q(-0.2), q(0.2)), C.wood, C.woodSh, q(0.05));
+        for (let i = 0; i < 3; i++) { const a = roll + i * 1.05; line(c, s * q(0.5) - Math.cos(a) * q(0.16), q(-0.2) - Math.sin(a) * q(0.16), s * q(0.5) + Math.cos(a) * q(0.16), q(-0.2) + Math.sin(a) * q(0.16), C.woodSh, LW() * 0.8); }
+      }
+      sh(c, () => rr(c, q(-0.62), q(-0.56), q(1.24), q(0.34), q(0.06)), C.wood, C.woodSh, q(0.06));
+      sh(c, () => rr(c, q(-0.62), q(-0.36), q(1.24), q(0.06), q(0.02)), T.main, T.sh, q(0.02));
+      // the cannon barrel, pointing where it faces
+      c.save(); c.translate(0, q(-0.72) + (front ? rec : -rec));
+      sh(c, () => rr(c, q(-0.2), q(-0.18), q(0.4), q(0.36), q(0.16)), '#3e414c', '#2a2c34', q(0.05));
+      sh(c, () => ell(c, 0, front ? q(0.18) : q(-0.2), q(0.17), q(0.1)), '#555a66', null, 0);
+      if (front) { ell(c, 0, q(0.18), q(0.1), q(0.06)); c.fillStyle = '#15161b'; c.fill(); }
+      c.restore();
+      if (o.shield) {
+        // the plank shield in front, with iron bands
+        const y0 = front ? -0.5 : -1.0;
+        sh(c, () => rr(c, q(-0.58), q(y0), q(1.16), q(0.5), q(0.06)), '#a8743e', '#835628', q(0.05));
+        for (const x of [-0.29, 0, 0.29]) line(c, q(x), q(y0), q(x), q(y0 + 0.5), '#6e4622', LW() * 0.7);
+        for (const y of [0.12, 0.38]) line(c, q(-0.58), q(y0 + y), q(0.58), q(y0 + y), '#5a5f6a', q(0.05));
+      }
+    },
+
+    /* ---------- Arena 7: Gearforge Citadel ---------- */
+    // a Sparkbot: a little boxy robot on treads with a sparking antenna
+    sparkbots(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', zap = o.atk, bob = walkOf(o, 14) * q(0.03);
+      sh(c, () => rr(c, q(-0.3), q(-0.18), q(0.6), q(0.18), q(0.08)), '#4a4a55', '#33333c', q(0.04));
+      c.save(); c.translate(0, bob);
+      sh(c, () => rr(c, q(-0.28), q(-0.66), q(0.56), q(0.5), q(0.1)), BRONZE[0], BRONZE[1], q(0.06));
+      sh(c, () => rr(c, q(-0.2), q(-0.4), q(0.4), q(0.14), q(0.04)), T.main, T.sh, q(0.02));
+      if (front) { sh(c, () => circ(c, 0, q(-0.52), q(0.09)), '#bff4ff', '#6fd0f0', q(0.02)); glow(c, 0, q(-0.52), q(0.2), 'rgb(120,220,255)', 0.4); }
+      line(c, 0, q(-0.66), 0, q(-0.92), OUT, q(0.06)); line(c, 0, q(-0.66), 0, q(-0.92), '#c9d0db', q(0.03));
+      sh(c, () => circ(c, 0, q(-0.96), q(0.07)), '#ffe27a', '#e0b030', q(0.02));
+      if (zap > 0.1 || Math.sin(o.t * 7) > 0.8) glow(c, 0, q(-0.96), q(0.3 + zap * 0.3), 'rgb(150,230,255)', 0.7);
+      c.restore();
+    },
+    // Steel Titan: an enormous clockwork giant, bronze plates, turning gears and a glowing core
+    titan(c, k, o) { titanArt(c, k * 1.0, o, true); },
+    titanling(c, k, o) { titanArt(c, k * 0.62, o, false); },
+    // Arc Cannon: a heavy engine on treads with a great coil cannon that glows as it charges
+    arccannon(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', ch = Math.max(0, Math.min(1, o.charge || 0));
+      sh(c, () => rr(c, q(-0.66), q(-0.3), q(1.32), q(0.3), q(0.14)), '#3e3e48', '#2a2a32', q(0.05));
+      for (let i = 0; i < 5; i++) dot(c, q(-0.5 + i * 0.25), q(-0.15), q(0.06), '#6a6a76');
+      sh(c, () => rr(c, q(-0.56), q(-0.78), q(1.12), q(0.52), q(0.14)), BRONZE[0], BRONZE[1], q(0.07));
+      sh(c, () => rr(c, q(-0.56), q(-0.5), q(1.12), q(0.08), q(0.03)), T.main, T.sh, q(0.02));
+      // the coil barrel
+      const y = front ? -0.98 : -1.08;
+      sh(c, () => rr(c, q(-0.24), q(y - 0.34), q(0.48), q(0.62), q(0.2)), '#555a66', '#3a3e48', q(0.05));
+      for (let i = 0; i < 4; i++) line(c, q(-0.25), q(y - 0.24 + i * 0.13), q(0.25), q(y - 0.24 + i * 0.13), '#d39a48', q(0.05));
+      const cy = q(y - 0.42);
+      sh(c, () => circ(c, 0, cy, q(0.16)), ch > 0.95 ? '#e8fbff' : '#8fd8ff', '#4a9ee0', q(0.03));
+      if (ch > 0.05) glow(c, 0, cy, q(0.3 + ch * 0.7), 'rgb(140,220,255)', 0.3 + ch * 0.5);
+      if (ch > 0.95) for (let i = 0; i < 3; i++) { const a = o.t * 9 + i * 2.1; line(c, Math.cos(a) * q(0.16), cy + Math.sin(a) * q(0.16), Math.cos(a) * q(0.42), cy + Math.sin(a) * q(0.42), '#e8fbff', q(0.03)); }
+    },
+
+    /* ---------- Arena 8: Crystal Chasm ---------- */
+    // a Shard Guard: crystal armor, a crystal kite shield (while it holds) and a long spear
+    shardguards(c, k, o) {
+      const q = v => v * k * 0.9, T = TEAM[o.team], front = o.view === 'front', thrust = o.atk;
+      legs(c, q, o, '#3e3a52', 0.1, 0.3, 0.12);
+      sh(c, () => rr(c, q(-0.24), q(-0.72), q(0.48), q(0.44), q(0.12)), CRYSTAL[0], CRYSTAL[1], q(0.06));
+      sh(c, () => rr(c, q(-0.25), q(-0.4), q(0.5), q(0.08), q(0.03)), T.main, T.sh, q(0.02));
+      c.save(); c.translate(q(0.28), q(-0.6) - thrust * q(0.2));
+      line(c, 0, q(0.4), 0, q(-0.9), OUT, q(0.07)); line(c, 0, q(0.4), 0, q(-0.9), '#9a8ab8', q(0.04));
+      shard(c, 0, q(-0.88), q(0.07), q(0.24), CRYSTAL);
+      c.restore();
+      if (o.shield) {
+        c.save(); c.translate(q(-0.26), q(-0.56));
+        sh(c, () => poly(c, [0, q(-0.3), q(0.2), q(-0.16), q(0.14), q(0.2), 0, q(0.32), q(-0.14), q(0.2), q(-0.2), q(-0.16)]), '#e4d2ff', '#a882f0', q(0.04));
+        glow(c, 0, 0, q(0.35), 'rgb(200,170,255)', 0.35);
+        c.restore();
+      }
+      sh(c, () => circ(c, 0, q(-0.94), q(0.21)), front ? C.skin : CRYSTAL[1], front ? C.skinSh : CRYSTAL[1], q(0.04));
+      if (front) eyes(c, q, -0.96, 0.08, 0.03);
+      sh(c, () => poly(c, [q(-0.24), q(-0.98), q(0.24), q(-0.98), q(0.12), q(-1.32), 0, q(-1.42), q(-0.12), q(-1.32)]), CRYSTAL[0], CRYSTAL[1], q(0.04));
+    },
+    // a Crystal Imp: a little hopping creature of living crystal
+    imp(c, k, o) {
+      const q = v => v * k * 0.8, T = TEAM[o.team], front = o.view === 'front', hop = Math.abs(walkOf(o, 12)) * q(0.12);
+      c.save(); c.translate(0, -hop);
+      legs(c, q, o, CRYSTAL[1], 0.1, 0.22, 0.1);
+      sh(c, () => poly(c, [0, q(-0.98), q(0.28), q(-0.62), q(0.22), q(-0.22), q(-0.22), q(-0.22), q(-0.28), q(-0.62)]), CRYSTAL[0], CRYSTAL[1], q(0.06));
+      sh(c, () => rr(c, q(-0.2), q(-0.36), q(0.4), q(0.07), q(0.03)), T.main, T.sh, q(0.02));
+      if (front) eyes(c, q, -0.6, 0.08, 0.045, '#fff6a8');
+      for (const s of [-1, 1]) line(c, s * q(0.24), q(-0.52), s * q(0.38), q(-0.4 - (s > 0 ? o.atk * 0.3 : 0)), CRYSTAL[1], q(0.06));
+      c.restore();
+    },
+    // Prism Archer: a hooded archer with a crystal bow and a glowing quiver
+    prism(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', draw = o.atk;
+      legs(c, q, o, '#3a3450', 0.1, 0.32, 0.13);
+      sh(c, () => poly(c, [q(-0.3), q(-0.3), q(0.3), q(-0.3), q(0.22), q(-0.86), q(-0.22), q(-0.86)]), T.main, T.sh, q(0.06));
+      sh(c, () => rr(c, q(-0.3), q(-0.4), q(0.6), q(0.08), q(0.03)), CRYSTAL[0], CRYSTAL[1], q(0.02));
+      // the bow
+      c.save(); c.translate(q(0.34), q(-0.68));
+      c.beginPath(); c.arc(0, 0, q(0.42), -1.2, 1.2); c.lineWidth = q(0.1); c.strokeStyle = OUT; c.stroke(); c.lineWidth = q(0.06); c.strokeStyle = CRYSTAL[0]; c.stroke();
+      line(c, Math.cos(-1.2) * q(0.42), Math.sin(-1.2) * q(0.42), -draw * q(0.16), 0, '#efe2ff', q(0.02));
+      line(c, -draw * q(0.16), 0, Math.cos(1.2) * q(0.42), Math.sin(1.2) * q(0.42), '#efe2ff', q(0.02));
+      if (draw > 0.2) glow(c, 0, 0, q(0.4), 'rgb(220,190,255)', 0.5 * draw);
+      c.restore();
+      sh(c, () => circ(c, 0, q(-1.04), q(0.22)), C.skin, C.skinSh, q(0.04));
+      if (front) eyes(c, q, -1.04, 0.08, 0.03);
+      sh(c, () => { c.beginPath(); c.arc(0, q(-1.06), q(0.27), Math.PI * 0.95, Math.PI * 0.05); c.lineTo(q(0.12), q(-1.44)); c.lineTo(q(-0.12), q(-1.44)); c.closePath(); }, T.main, T.sh, q(0.05));
+      shard(c, q(-0.28), q(-0.78), q(0.06), q(0.3), CRYSTAL);
+    },
+
+    /* ---------- Arena 9: Skyward Sanctuary ---------- */
+    // Sun Sprite: a little ball of warm light with a ring of rays
+    sunsprite(c, k, o) {
+      const q = v => v * k * 1.3, T = TEAM[o.team], hop = Math.abs(Math.sin(o.t * 9)) * q(o.walk ? 0.18 : 0.06), front = o.view === 'front';
+      c.save(); c.translate(0, -hop);
+      glow(c, 0, q(-0.34), q(0.7), 'rgb(255,220,120)', 0.45);
+      for (let i = 0; i < 8; i++) { const a = i * 0.785 + o.t * 1.5; line(c, Math.cos(a) * q(0.26), q(-0.34) + Math.sin(a) * q(0.26), Math.cos(a) * q(0.4), q(-0.34) + Math.sin(a) * q(0.4), '#ffd23f', q(0.06)); }
+      sh(c, () => circ(c, 0, q(-0.34), q(0.24)), '#fff1a6', '#ffcd33', q(0.05));
+      sh(c, () => rr(c, q(-0.16), q(-0.16), q(0.32), q(0.06), q(0.03)), T.main, T.sh, q(0.02));
+      if (front) { eyes(c, q, -0.37, 0.08, 0.035, '#8a5a10'); c.beginPath(); c.arc(0, q(-0.3), q(0.07), 0.2, Math.PI - 0.2); c.strokeStyle = '#8a5a10'; c.lineWidth = LW() * 0.8; c.stroke(); }
+      c.restore();
+    },
+    // Celestial Guardian: radiant armor, a halo, small wings and a glowing hammer that heals
+    guardian(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', sw = o.atk;
+      for (const s of [-1, 1]) sh(c, () => poly(c, [s * q(0.2), q(-0.9), s * q(0.62), q(-1.16), s * q(0.56), q(-0.84), s * q(0.48), q(-0.62), s * q(0.2), q(-0.6)]), '#ffffff', '#d9dfe9', q(0.04));
+      legs(c, q, o, STEEL[1], 0.13, 0.34, 0.15);
+      sh(c, () => rr(c, q(-0.32), q(-0.92), q(0.64), q(0.6), q(0.16)), '#f1f3f8', '#c9cfdc', q(0.06));
+      sh(c, () => poly(c, [0, q(-0.86), q(0.12), q(-0.7), 0, q(-0.54), q(-0.12), q(-0.7)]), GOLD[0], GOLD[1], q(0.03));
+      sh(c, () => rr(c, q(-0.33), q(-0.44), q(0.66), q(0.1), q(0.04)), T.main, T.sh, q(0.02));
+      c.save(); c.translate(q(0.38), q(-0.72)); c.rotate(-0.4 + sw * 1.6);
+      rope(c, () => { c.beginPath(); c.moveTo(0, q(0.18)); c.lineTo(0, q(-0.54)); }, '#c9a060', q(0.06));
+      sh(c, () => rr(c, q(-0.2), q(-0.74), q(0.4), q(0.24), q(0.06)), GOLD[0], GOLD[1], q(0.04));
+      glow(c, 0, q(-0.62), q(0.35 + sw * 0.3), 'rgb(255,230,140)', 0.4 + sw * 0.4);
+      c.restore();
+      sh(c, () => circ(c, 0, q(-1.14), q(0.24)), C.skin, C.skinSh, q(0.04));
+      if (front) eyes(c, q, -1.14, 0.08, 0.03);
+      sh(c, () => { c.beginPath(); c.arc(0, q(-1.18), q(0.26), Math.PI, 0); c.lineTo(q(0.26), q(-1.1)); c.lineTo(q(-0.26), q(-1.1)); c.closePath(); }, '#f1f3f8', '#c9cfdc', q(0.04));
+      ell(c, 0, q(-1.5), q(0.22), q(0.07)); c.lineWidth = q(0.07); c.strokeStyle = OUT; c.stroke(); c.lineWidth = q(0.04); c.strokeStyle = '#ffe27a'; c.stroke();
+    },
+    // Cloud Drake: a young flying drake of storm-blue scales with cloud-white wings
+    drake(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], flap = Math.sin(o.t * 8 + (o.id || 0)), front = o.view === 'front', breath = o.atk;
+      for (const s of [-1, 1]) {
+        c.save(); c.scale(s, 1); c.translate(q(0.2), q(-0.1)); c.rotate(-0.2 - flap * 0.4);
+        sh(c, () => { c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(q(0.4), q(-0.6), q(0.86), q(-0.42)); c.quadraticCurveTo(q(0.62), q(-0.2), q(0.7), q(0.02)); c.quadraticCurveTo(q(0.4), q(-0.04), q(0.34), q(0.12)); c.quadraticCurveTo(q(0.16), q(0.06), 0, q(0.12)); c.closePath(); }, '#eef6ff', '#bcd2ea', q(0.05));
+        c.restore();
+      }
+      sh(c, () => poly(c, [0, q(0.1), q(0.12), q(0.5), q(0.02), q(0.7), q(-0.06), q(0.52)]), '#6fa8d8', '#4a84b8', q(0.04));
+      sh(c, () => ell(c, 0, 0, q(0.26), q(0.32)), '#6fa8d8', '#4a84b8', q(0.06));
+      sh(c, () => ell(c, 0, q(0.06), q(0.15), q(0.2)), '#dff0ff', '#b4d2ee', q(0.04));
+      sh(c, () => rr(c, q(-0.22), q(-0.06), q(0.44), q(0.07), q(0.03)), T.main, T.sh, q(0.02));
+      sh(c, () => ell(c, 0, q(-0.38), q(0.2), q(0.18)), '#6fa8d8', '#4a84b8', q(0.04));
+      for (const s of [-1, 1]) sh(c, () => poly(c, [s * q(0.1), q(-0.5), s * q(0.2), q(-0.68), s * q(0.16), q(-0.46)]), '#eef6ff', '#bcd2ea', q(0.02));
+      if (front) { eyes(c, q, -0.4, 0.08, 0.035); if (breath > 0.2) glow(c, 0, q(-0.22), q(0.4), 'rgb(220,240,255)', 0.6 * breath); }
+    },
+    // Dawn Phoenix (and the reborn one): a golden firebird with a tail of flame
+    phoenix(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], flap = Math.sin(o.t * 10 + (o.id || 0)), front = o.view === 'front';
+      glow(c, 0, 0, q(0.9), 'rgb(255,170,60)', 0.35);
+      for (let i = 0; i < 3; i++) sh(c, () => poly(c, [q(-0.08 + i * 0.08), q(0.1), q(-0.2 + i * 0.2), q(0.7 + Math.sin(o.t * 12 + i) * 0.06), q(0.04 + i * 0.04), q(0.2)]), i === 1 ? '#ffd23f' : '#ff8a2a', '#e05a1a', q(0.03));
+      for (const s of [-1, 1]) {
+        c.save(); c.scale(s, 1); c.translate(q(0.16), q(-0.1)); c.rotate(-0.25 - flap * 0.5);
+        sh(c, () => { c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(q(0.36), q(-0.56), q(0.84), q(-0.5)); c.lineTo(q(0.66), q(-0.32)); c.lineTo(q(0.74), q(-0.18)); c.lineTo(q(0.5), q(-0.1)); c.lineTo(q(0.52), q(0.04)); c.quadraticCurveTo(q(0.2), q(0.1), 0, q(0.12)); c.closePath(); }, '#ffb52e', '#e0761a', q(0.05));
+        c.restore();
+      }
+      sh(c, () => ell(c, 0, 0, q(0.22), q(0.3)), '#ffcd33', '#e09f12', q(0.06));
+      sh(c, () => rr(c, q(-0.2), q(-0.02), q(0.4), q(0.06), q(0.03)), T.main, T.sh, q(0.02));
+      sh(c, () => circ(c, 0, q(-0.34), q(0.18)), '#ffcd33', '#e09f12', q(0.04));
+      for (const x of [-0.08, 0, 0.08]) sh(c, () => poly(c, [q(x - 0.04), q(-0.46), q(x), q(-0.7), q(x + 0.04), q(-0.46)]), '#ff8a2a', '#e05a1a', q(0.02));
+      if (front) { eyes(c, q, -0.36, 0.07, 0.03); sh(c, () => poly(c, [q(-0.05), q(-0.3), q(0.05), q(-0.3), 0, q(-0.18)]), '#fff1c0', '#e0c080', q(0.02)); }
+    },
+    // the Phoenix egg: a warm, glowing egg that pulses as it gets ready to hatch
+    phoenixegg(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], p = o.hatch || 0, beat = 0.5 + 0.5 * Math.sin(o.t * (4 + p * 10));
+      glow(c, 0, q(-0.36), q(0.6 + beat * 0.2), 'rgb(255,170,60)', 0.3 + p * 0.4);
+      sh(c, () => ell(c, 0, q(-0.36), q(0.28), q(0.36)), '#ffe9a8', '#f0b44a', q(0.07));
+      for (const [x, y] of [[-0.1, -0.5], [0.12, -0.3], [-0.06, -0.18]]) dot(c, q(x), q(y), q(0.04), '#ff8a2a');
+      sh(c, () => rr(c, q(-0.24), q(-0.12), q(0.48), q(0.06), q(0.03)), T.main, T.sh, q(0.02));
+    },
+
+    /* ---------- Arena 10: Eclipse Throne ---------- */
+    // a wraith (the Wraith Army's, and the Abyss Gate's): a spectral swordsman, half see-through
+    wraiths(c, k, o) { wraithArt(c, k, o); },
+    wraith(c, k, o) { wraithArt(c, k, o); },
+    // Dread Knight: a towering knight in black plate with crimson light in the seams, a great blade
+    dreadknight(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', sw = o.atk;
+      legs(c, q, o, DARK[1], 0.2, 0.44, 0.22);
+      for (const s of [-1, 1]) sh(c, () => rr(c, s * q(0.58) - q(0.2), q(-1.32), q(0.4), q(0.28), q(0.12)), DARK[0], DARK[1], q(0.05));
+      sh(c, () => rr(c, q(-0.5), q(-1.32), q(1.0), q(0.92), q(0.22)), DARK[0], DARK[1], q(0.08));
+      for (const y of [-1.06, -0.8]) line(c, q(-0.42), q(y), q(0.42), q(y), '#c0283a', q(0.04));
+      glow(c, 0, q(-0.94), q(0.5), 'rgb(220,40,60)', 0.3);
+      sh(c, () => rr(c, q(-0.51), q(-0.5), q(1.02), q(0.12), q(0.05)), T.main, T.sh, q(0.03));
+      c.save(); c.translate(q(0.62), q(-1.0)); c.rotate(-0.5 + sw * 1.8);
+      sh(c, () => poly(c, [q(-0.1), 0, q(0.1), 0, q(0.08), q(-1.2), 0, q(-1.36), q(-0.08), q(-1.2)]), '#5a5466', '#3a3446', q(0.05));
+      line(c, 0, q(-0.1), 0, q(-1.2), '#c0283a', q(0.03));
+      sh(c, () => rr(c, q(-0.24), q(-0.04), q(0.48), q(0.1), q(0.04)), '#8a8496', null, 0);
+      c.restore();
+      sh(c, () => rr(c, q(-0.3), q(-1.82), q(0.6), q(0.56), q(0.2)), DARK[0], DARK[1], q(0.06));
+      if (front) { rr(c, q(-0.22), q(-1.6), q(0.44), q(0.08), q(0.03)); c.fillStyle = '#ff3a4a'; c.fill(); glow(c, 0, q(-1.56), q(0.4), 'rgb(255,60,80)', 0.5); }
+      for (const s of [-1, 1]) sh(c, () => poly(c, [s * q(0.22), q(-1.74), s * q(0.5), q(-2.1), s * q(0.32), q(-1.68)]), DARK[0], DARK[1], q(0.03));
+    },
+  };
+
+  // Steel Titan (big) and a Titanling (small): bronze plates, gear shoulders, a glowing core
+  function titanArt(c, k, o, big) {
+    const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', st = walkOf(o, 5), sw = o.atk;
+    for (const s of [-1, 1]) sh(c, () => rr(c, s * q(0.36) - q(0.18), q(-0.5) + st * s * q(0.06), q(0.36), q(0.5), q(0.12)), '#6a5a48', '#4e4234', q(0.06));
+    for (const s of [-1, 1]) {
+      c.save(); c.translate(s * q(0.72), q(-1.3)); c.rotate(s * (0.2 + (s > 0 ? sw * 1.0 : 0)));
+      sh(c, () => rr(c, -q(0.2), 0, q(0.4), q(0.9), q(0.16)), BRONZE[0], BRONZE[1], q(0.07));
+      sh(c, () => circ(c, 0, q(0.92), q(0.22)), '#6a5a48', '#4e4234', q(0.05));
+      c.restore();
+      // a turning gear on each shoulder
+      c.save(); c.translate(s * q(0.62), q(-1.36)); c.rotate(o.t * 2 * s);
+      for (let i = 0; i < 6; i++) { c.rotate(Math.PI / 3); rr(c, -q(0.05), -q(0.26), q(0.1), q(0.1), q(0.02)); paint(c, BRONZE[1], LW() * 0.6); }
+      sh(c, () => circ(c, 0, 0, q(0.2)), BRONZE[0], BRONZE[1], q(0.04));
+      dot(c, 0, 0, q(0.06), '#3a2f24');
+      c.restore();
+    }
+    sh(c, () => rr(c, q(-0.6), q(-1.6), q(1.2), q(1.14), q(0.3)), BRONZE[0], BRONZE[1], q(0.1));
+    for (const [x, y] of [[-0.46, -1.48], [0.46, -1.48], [-0.46, -0.6], [0.46, -0.6]]) dot(c, q(x), q(y), q(0.04), '#6a4a24');
+    sh(c, () => rr(c, q(-0.61), q(-0.7), q(1.22), q(0.12), q(0.05)), T.main, T.sh, q(0.03));
+    if (front) {
+      sh(c, () => circ(c, 0, q(-1.08), q(0.2)), '#ffe9a8', '#ffb52e', q(0.04));
+      glow(c, 0, q(-1.08), q(big ? 0.6 : 0.4), 'rgb(255,190,80)', 0.45);
+    }
+    sh(c, () => rr(c, q(-0.28), q(-1.98), q(0.56), q(0.42), q(0.12)), BRONZE[0], BRONZE[1], q(0.06));
+    if (front) { rr(c, q(-0.18), q(-1.84), q(0.36), q(0.1), q(0.04)); c.fillStyle = '#7fe0ff'; c.fill(); }
+  }
+  // a wraith: hooded, see-through, a ghostly blade
+  function wraithArt(c, k, o) {
+    const q = v => v * k * 0.9, T = TEAM[o.team], front = o.view === 'front', sw = o.atk, drift = Math.sin(o.t * 3 + (o.id || 0)) * q(0.04);
+    c.save(); c.globalAlpha *= 0.85; c.translate(0, drift);
+    glow(c, 0, q(-0.5), q(0.55), 'rgb(170,120,255)', 0.3);
+    sh(c, () => { c.beginPath(); c.moveTo(q(-0.22), q(-0.9)); c.quadraticCurveTo(q(-0.3), q(-0.3), q(-0.24), 0); c.lineTo(q(-0.12), q(-0.1)); c.lineTo(0, 0); c.lineTo(q(0.12), q(-0.1)); c.lineTo(q(0.24), 0); c.quadraticCurveTo(q(0.3), q(-0.3), q(0.22), q(-0.9)); c.closePath(); }, '#5a4a7a', '#3e3058', q(0.05));
+    sh(c, () => rr(c, q(-0.23), q(-0.5), q(0.46), q(0.07), q(0.03)), T.main, T.sh, q(0.02));
+    c.save(); c.translate(q(0.24), q(-0.56)); c.rotate(-0.6 + sw * 1.6);
+    sh(c, () => poly(c, [q(-0.03), 0, q(0.03), 0, q(0.02), q(-0.46), 0, q(-0.52), q(-0.02), q(-0.46)]), '#d9c8ff', '#a88ae0', q(0.02));
+    c.restore();
+    sh(c, () => { c.beginPath(); c.arc(0, q(-0.98), q(0.2), Math.PI * 0.9, Math.PI * 0.1); c.lineTo(0, q(-1.3)); c.closePath(); }, '#4a3a6a', '#32264a', q(0.04));
+    if (front) eyes(c, q, -0.96, 0.07, 0.03, '#c9a8ff');
+    c.restore();
+  }
+
+  /* ---------- buildings ---------- */
+  const BUILD = {
+    // Coil Tower: a copper coil on a stone base with a sphere on top; hidden, it is just a hatch in the ground
+    coil(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], up = o.hidden ? 0 : Math.max(0, Math.min(1, 1 - (o.rise || 0) / 0.6));
+      ell(c, 0, q(0.4), q(0.95), q(0.36)); c.fillStyle = 'rgba(0,0,0,0.28)'; c.fill();
+      sh(c, () => rr(c, q(-0.85), q(-0.1), q(1.7), q(0.6), q(0.16)), '#8a8590', '#5f5b66', q(0.1));
+      sh(c, () => rr(c, q(-0.86), q(0.28), q(1.72), q(0.1), q(0.04)), T.main, T.sh, q(0.03));
+      ell(c, 0, q(0.05), q(0.5), q(0.2)); c.fillStyle = '#2a2632'; c.fill();
+      if (up <= 0) { for (const s of [-1, 1]) line(c, s * q(0.45), q(0.05), 0, q(0.05), '#5f5b66', LW()); return; }
+      c.save(); c.translate(0, (1 - up) * q(1.4));
+      c.beginPath(); c.rect(-q(1), -q(3), q(2), q(3) + (1 - up) * -q(1.4) + q(0.1)); c.clip();
+      sh(c, () => rr(c, q(-0.2), q(-1.3), q(0.4), q(1.35), q(0.1)), '#555a66', '#3a3e48', q(0.05));
+      for (let i = 0; i < 6; i++) line(c, q(-0.28), q(-1.18 + i * 0.2), q(0.28), q(-1.12 + i * 0.2), '#d38a3a', q(0.07));
+      sh(c, () => circ(c, 0, q(-1.5), q(0.24)), '#bff4ff', '#6fd0f0', q(0.05));
+      const at = o.atk || 0;
+      glow(c, 0, q(-1.5), q(0.5 + at * 0.4), 'rgb(140,220,255)', 0.4 + at * 0.5);
+      c.restore();
+    },
+    // the Broadside Cart once its shield is gone: the cart chocked in place, its cannon free to turn
+    broadside(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team];
+      ell(c, 0, q(0.42), q(0.9), q(0.32)); c.fillStyle = 'rgba(0,0,0,0.28)'; c.fill();
+      for (const s of [-1, 1]) { sh(c, () => circ(c, s * q(0.55), q(0.18), q(0.22)), C.wood, C.woodSh, q(0.05)); sh(c, () => poly(c, [s * q(0.4), q(0.42), s * q(0.7), q(0.42), s * q(0.55), q(0.22)]), '#6e4622', null, 0); }
+      sh(c, () => rr(c, q(-0.68), q(-0.24), q(1.36), q(0.42), q(0.08)), C.wood, C.woodSh, q(0.06));
+      sh(c, () => rr(c, q(-0.68), q(0.02), q(1.36), q(0.07), q(0.02)), T.main, T.sh, q(0.02));
+      c.save(); c.translate(0, -q(0.3)); c.rotate(o.angle || 0);
+      const rec = (o.atk || 0) * q(0.14);
+      sh(c, () => rr(c, -q(0.3) - rec, -q(0.2), q(1.0), q(0.4), q(0.18)), '#3e414c', '#2a2c34', q(0.07));
+      circ(c, q(0.7) - rec, 0, q(0.12)); c.fillStyle = '#15161b'; c.fill();
+      c.restore();
+    },
+    // Crystal Drill: a conical crystal drill bit on a mining frame, spinning; imps climb out of it
+    drill(c, k, o) {
+      const q = v => v * k, T = TEAM[o.team], spin = o.t * 8;
+      ell(c, 0, q(0.38), q(0.9), q(0.32)); c.fillStyle = 'rgba(0,0,0,0.3)'; c.fill();
+      for (let i = 0; i < 7; i++) { const a = i * 0.9; circ(c, Math.cos(a) * q(0.72), q(0.25) + Math.sin(a) * q(0.24), q(0.12)); c.fillStyle = i % 2 ? '#6e5a90' : '#4a3e66'; c.fill(); }
+      sh(c, () => rr(c, q(-0.7), q(-0.3), q(1.4), q(0.5), q(0.12)), '#6a5a48', '#4e4234', q(0.07));
+      sh(c, () => rr(c, q(-0.71), q(-0.06), q(1.42), q(0.08), q(0.03)), T.main, T.sh, q(0.02));
+      for (const s of [-1, 1]) line(c, s * q(0.5), q(-0.3), s * q(0.2), q(-1.3), '#8a7a66', q(0.08));
+      c.save(); c.translate(0, q(-0.75));
+      sh(c, () => poly(c, [q(-0.36), q(-0.5), q(0.36), q(-0.5), 0, q(0.5)]), CRYSTAL[0], CRYSTAL[1], q(0.06));
+      for (let i = 0; i < 3; i++) { const y = ((spin * 0.1 + i / 3) % 1) - 0.4; line(c, q(-0.32 * (0.5 - y)), q(y), q(0.32 * (0.5 - y)), q(y + 0.1), '#efe2ff', q(0.04)); }
+      glow(c, 0, 0, q(0.6), 'rgb(200,170,255)', 0.35);
+      c.restore();
+    },
+  };
+
+  /* ---------- card pictures ---------- */
+  const one = (y, s, oo) => (c, w, h, k, at) => at(0.5, y, s, oo || {});
+  const PICS = {
+    frostsprite: (c, w, h, k, at) => { at(0.5, 0.86, 2.0, {}); },
+    icegiant: one(0.92, 1.0),
+    wintersage: one(0.94, 1.05),
+    dockraiders: (c, w, h, k, at) => { at(0.27, 0.72, 1.0, { card: 'raidergun' }); at(0.73, 0.72, 1.0, { card: 'raidergun' }); at(0.5, 0.94, 1.25, { card: 'raider' }); },
+    harpoon: one(0.94, 0.88),
+    broadside: (c, w, h, k, at) => at(0.5, 0.9, 1.05, { shield: 1, view: 'back' }),
+    sparkbots: (c, w, h, k, at) => { at(0.27, 0.7, 1.1, { t: 0.5 }); at(0.73, 0.7, 1.1, { t: 1.2 }); at(0.5, 0.92, 1.4, { atk: 1 }); },
+    titan: one(0.95, 0.66),
+    arccannon: (c, w, h, k, at) => at(0.5, 0.92, 1.0, { charge: 1 }),
+    shardguards: (c, w, h, k, at) => { at(0.27, 0.74, 1.0, { shield: 1 }); at(0.73, 0.74, 1.0, { shield: 1 }); at(0.5, 0.95, 1.2, { shield: 1 }); },
+    prism: (c, w, h, k, at) => at(0.5, 0.94, 0.95, { atk: 0.8 }),
+    sunsprite: (c, w, h, k, at) => at(0.5, 0.82, 2.0, {}),
+    guardian: (c, w, h, k, at) => at(0.5, 0.94, 0.95, { atk: 0.4 }),
+    drake: (c, w, h, k, at) => at(0.5, 0.6, 1.25, { t: 0.3 }),
+    phoenix: (c, w, h, k, at) => at(0.5, 0.58, 1.25, { t: 0.2 }),
+    wraiths: (c, w, h, k, at) => { for (const [x, y, s] of [[0.22, 0.66, 1.0], [0.5, 0.62, 1.0], [0.78, 0.66, 1.0], [0.34, 0.84, 1.2], [0.66, 0.84, 1.2], [0.5, 0.98, 1.4]]) at(x, y, s, { t: x * 7 }); },
+    dreadknight: one(0.97, 0.7),
+    // buildings and spells
+    coil: (c, w, h, k) => { c.save(); c.translate(w * 0.5, h * 0.72); BUILD.coil(c, k * 0.82, { team: 0, t: 0.3, atk: 0.6 }); c.restore(); },
+    drill: (c, w, h, k) => { c.save(); c.translate(w * 0.5, h * 0.76); BUILD.drill(c, k * 0.9, { team: 0, t: 0.2 }); c.restore(); },
+    flashfreeze: (c, w, h, k) => { c.save(); c.translate(w * 0.5, h * 0.48); snowflake(c, k * 1.05); c.restore(); },
+    gemflash: (c, w, h, k) => { c.save(); c.translate(w * 0.5, h * 0.48); gemburst(c, k * 1.0); c.restore(); },
+    meteor: (c, w, h, k) => { c.save(); c.translate(w * 0.56, h * 0.5); meteorArt(c, k * 1.0, 0.3); c.restore(); },
+    barrel: (c, w, h, k) => { c.save(); c.translate(w * 0.5, h * 0.62); barrelArt(c, k * 1.1, 0.2, 0); c.restore(); },
+    abyss: (c, w, h, k) => { c.save(); c.translate(w * 0.5, h * 0.6); portalArt(c, k * 1.1, 0.5, 0); c.restore(); },
+  };
+  // the card picture's at() draws its own card; a picture can show another unit with { card }
+  for (const [id, f] of Object.entries(PICS)) {
+    PICS[id] = (c, w, h, k, at, team) => f(c, w, h, k, (x, y, s, oo) => {
+      if (oo && oo.card) { c.save(); c.translate(w * x, h * y); A.troop(c, oo.card, k * s, Object.assign({ team: team || 0, t: 0.3, walk: false, atk: 0, face: 1, id: 1, view: 'front' }, oo)); c.restore(); }
+      else at(x, y, s, oo);
+    });
+  }
+
+  /* ---------- spell art (card pictures, and in battle) ---------- */
+  function snowflake(c, k) {
+    const q = v => v * k;
+    glow(c, 0, 0, q(0.8), 'rgb(170,230,255)', 0.5);
+    for (let i = 0; i < 6; i++) {
+      c.save(); c.rotate(i * Math.PI / 3);
+      rope(c, () => { c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -q(0.62)); }, '#e9f8ff', q(0.09));
+      for (const y of [0.28, 0.46]) rope(c, () => { c.beginPath(); c.moveTo(-q(0.14), -q(y + 0.1)); c.lineTo(0, -q(y)); c.lineTo(q(0.14), -q(y + 0.1)); }, '#cfeeff', q(0.06));
+      c.restore();
+    }
+    shard(c, 0, q(0.18), q(0.16), q(0.36), ICE);
+  }
+  function gemburst(c, k) {
+    const q = v => v * k;
+    glow(c, 0, 0, q(0.9), 'rgb(210,180,255)', 0.55);
+    for (let i = 0; i < 8; i++) { c.save(); c.rotate(i * Math.PI / 4); poly(c, [0, -q(0.7), q(0.07), -q(0.3), -q(0.07), -q(0.3)]); paint(c, i % 2 ? '#efe2ff' : '#7ff0ff', A.lw() * 0.7); c.restore(); }
+    shard(c, 0, q(0.24), q(0.2), q(0.5), CRYSTAL);
+  }
+  function meteorArt(c, k, t) {
+    const q = v => v * k;
+    for (let i = 4; i >= 0; i--) { circ(c, -q(0.24 + i * 0.13), -q(0.24 + i * 0.13), q(0.26 - i * 0.04)); c.fillStyle = `rgba(${200 - i * 20},${40 + i * 10},${80 + i * 20},${0.75 - i * 0.12})`; c.fill(); }
+    glow(c, 0, 0, q(0.7), 'rgb(220,40,70)', 0.45);
+    sh(c, () => { c.beginPath(); for (let i = 0; i < 9; i++) { const a = i / 9 * Math.PI * 2, r = q(0.4 + ((i * 37) % 7) * 0.012); i ? c.lineTo(Math.cos(a) * r, Math.sin(a) * r) : c.moveTo(Math.cos(a) * r, Math.sin(a) * r); } c.closePath(); }, '#3a2e3e', '#241c2a', q(0.08));
+    for (const [x, y] of [[-0.12, -0.08], [0.14, 0.1], [0.02, 0.2]]) { circ(c, q(x), q(y), q(0.06)); c.fillStyle = '#ff4a5a'; c.fill(); }
+  }
+  function barrelArt(c, k, t, team) {
+    const q = v => v * k, T = TEAM[team || 0];
+    c.save(); c.rotate(t);
+    sh(c, () => rr(c, q(-0.34), q(-0.44), q(0.68), q(0.88), q(0.22)), C.wood, C.woodSh, q(0.08));
+    for (const y of [-0.28, 0.26]) sh(c, () => rr(c, q(-0.36), q(y), q(0.72), q(0.08), q(0.03)), '#5a5f6a', null, 0);
+    for (const x of [-0.16, 0, 0.16]) line(c, q(x), q(-0.42), q(x), q(0.42), C.woodSh, A.lw() * 0.7);
+    sh(c, () => rr(c, q(-0.36), q(-0.04), q(0.72), q(0.08), q(0.03)), T.main, T.sh, q(0.02));
+    c.restore();
+  }
+  function portalArt(c, k, t, team) {
+    const q = v => v * k;
+    glow(c, 0, 0, q(1.0), 'rgb(150,60,220)', 0.5);
+    for (let i = 0; i < 4; i++) {
+      ell(c, 0, 0, q(0.75 - i * 0.15), q(0.36 - i * 0.07), t * (i % 2 ? -1.5 : 1.2));
+      c.lineWidth = q(0.07); c.strokeStyle = OUT; c.stroke();
+      c.lineWidth = q(0.04); c.strokeStyle = i % 2 ? '#c0283a' : '#9a6ad6'; c.stroke();
+    }
+    ell(c, 0, 0, q(0.25), q(0.12)); c.fillStyle = '#120a1e'; c.fill();
+  }
+
+  // every drawing gets safe defaults, so a missing option can never become a non-finite size
+  const safe = f => (c, k, o) => f(c, k, Object.assign({ t: 0, atk: 0, walk: false, face: 1, id: 1, team: 0, view: 'front' }, o, { atk: (o && o.atk) || 0, t: (o && o.t) || 0 }));
+  for (const tb of [T5, BUILD]) for (const id of Object.keys(tb)) tb[id] = safe(tb[id]);
+  A.add(T5, BUILD, PICS);
+  Object.assign(A, { snowflake, gemburst, meteorArt, barrelArt, portalArt, glow });
 })();
 
 /* Kingdom Clash: the arena scenery beside the battlefield.
@@ -6023,8 +7258,8 @@ const KCScenery = (() => {
 
   function attach(s) {
     s.L = layoutOf(s);
-    s.img = KCArenas.image(s.L.src);
-    KCArenas.whenReady(s.L.src, () => { s.cacheKey = ''; });
+    s.img = s.L.src ? KCArenas.image(s.L.src) : null;
+    if (s.L.src) KCArenas.whenReady(s.L.src, () => { s.cacheKey = ''; });
   }
 
   function make(cv, side) {
@@ -6096,7 +7331,9 @@ const KCScenery = (() => {
       c.drawImage(s.img, cv.ox, cv.oy, cv.dw, cv.dh);
     } else {
       const g = c.createLinearGradient(0, 0, 0, s.h);
-      g.addColorStop(0, '#2a1758'); g.addColorStop(1, arenaId === 'cinder' ? '#5a2a2a' : '#4b3a7a');
+      // a panel still waiting for its artwork is a plain gradient in the arena's own colours
+      const P = s.L.panel || ['#2a1758', arenaId === 'cinder' ? '#5a2a2a' : '#4b3a7a'];
+      g.addColorStop(0, P[0]); g.addColorStop(1, P[1]);
       c.fillStyle = g; c.fillRect(0, 0, s.w, s.h);
     }
   }
@@ -6394,6 +7631,41 @@ const KCSound = (() => {
     fight: () => { [392, 523, 659, 784].forEach((f, i) => tone(f, 0, 0.2, 'sawtooth', 0.07, i * 0.07)); noise(0.3, 0.1, 900, 'bandpass', 0.28); },
     win: () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tone(f, 0, i === 5 ? 0.6 : 0.2, 'triangle', 0.18, i * 0.14)),
     lose: () => [440, 392, 330, 262].forEach((f, i) => tone(f, 0, 0.3, 'triangle', 0.15, i * 0.2)),
+    // Arenas 5 to 10
+    freezeCast: () => { noise(0.3, 0.1, 6000, 'highpass'); tone(1400, 2600, 0.25, 'sine', 0.07); },
+    freeze: () => { noise(0.7, 0.16, 5200, 'highpass'); [1568, 2093, 2637].forEach((f, i) => tone(f, f * 1.02, 0.5, 'sine', 0.06, i * 0.05)); },
+    iceHit: () => { noise(0.12, 0.08, 4800, 'highpass'); tone(1800, 1200, 0.08, 'triangle', 0.05); },
+    iceShatter: () => { noise(0.5, 0.2, 3600, 'highpass'); for (let i = 0; i < 5; i++) tone(2000 + Math.random() * 1500, 0, 0.08, 'triangle', 0.05, i * 0.05); },
+    frostShot: () => { noise(0.14, 0.06, 5000, 'highpass'); tone(1200, 1800, 0.1, 'sine', 0.05); },
+    stunZap: () => { noise(0.08, 0.06, 3000, 'bandpass'); tone(1800, 600, 0.07, 'square', 0.03); },
+    gemFlash: () => { noise(0.15, 0.12, 4000, 'bandpass'); tone(900, 2400, 0.12, 'sawtooth', 0.05); },
+    gemBoom: () => { noise(0.3, 0.2, 2500, 'bandpass'); [1319, 1760, 2349].forEach((f, i) => tone(f, 0, 0.3, 'triangle', 0.07, i * 0.03)); },
+    shieldBreak: () => { noise(0.25, 0.18, 2200, 'bandpass'); tone(700, 260, 0.2, 'triangle', 0.08); },
+    clunk: () => { tone(160, 90, 0.18, 'square', 0.08); noise(0.12, 0.12, 700); },
+    coilRise: () => { tone(120, 420, 0.4, 'sawtooth', 0.05); noise(0.3, 0.05, 1500, 'bandpass'); },
+    coilHide: () => tone(380, 110, 0.3, 'sawtooth', 0.04),
+    coilZap: () => { noise(0.15, 0.14, 3500, 'bandpass'); tone(1600, 300, 0.12, 'square', 0.05); },
+    sparkShot: () => { noise(0.1, 0.08, 4200, 'bandpass'); tone(2200, 900, 0.08, 'square', 0.035); },
+    arcBlast: () => { noise(0.6, 0.3, 900); tone(220, 60, 0.5, 'sawtooth', 0.12); tone(2400, 300, 0.3, 'square', 0.05); },
+    prism: () => { tone(1800, 2600, 0.12, 'sine', 0.06); tone(2700, 3600, 0.1, 'triangle', 0.03, 0.02); },
+    puffShot: () => noise(0.2, 0.1, 900, 'lowpass'),
+    hookThrow: () => { noise(0.25, 0.08, 1400, 'bandpass'); tone(500, 900, 0.2, 'triangle', 0.05); },
+    hookHit: () => { tone(320, 160, 0.12, 'square', 0.08); noise(0.1, 0.1, 1200); },
+    barrelThrow: () => { noise(0.3, 0.08, 900, 'bandpass'); tone(300, 500, 0.3, 'triangle', 0.05); },
+    barrelBreak: () => { noise(0.3, 0.22, 900); tone(180, 80, 0.2, 'square', 0.08); },
+    jump: () => { noise(0.3, 0.1, 600); tone(150, 360, 0.3, 'sawtooth', 0.06); },
+    slam: () => { noise(0.5, 0.32, 300); tone(80, 35, 0.4, 'sine', 0.3); },
+    heal: () => [784, 1047, 1319].forEach((f, i) => tone(f, 0, 0.25, 'sine', 0.06, i * 0.06)),
+    chime: () => [1047, 1319, 1568].forEach((f, i) => tone(f, 0, 0.2, 'triangle', 0.06, i * 0.05)),
+    leap: () => tone(500, 1100, 0.15, 'triangle', 0.06),
+    egg: () => { tone(600, 400, 0.15, 'triangle', 0.07); noise(0.1, 0.05, 2000, 'bandpass'); },
+    rebirth: () => { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0, 0.3, 'triangle', 0.1, i * 0.07)); noise(0.6, 0.1, 2500, 'bandpass', 0.1); },
+    fireBurst: () => { noise(0.5, 0.25, 1200); tone(300, 90, 0.4, 'sawtooth', 0.08); },
+    portal: () => { tone(90, 60, 1.2, 'sawtooth', 0.06); tone(180, 120, 1.2, 'sine', 0.06); noise(1.0, 0.06, 500, 'lowpass'); },
+    wraithRise: () => { tone(260, 180, 0.3, 'sine', 0.05); noise(0.2, 0.04, 1800, 'bandpass'); },
+    meteorCast: () => { tone(200, 60, 1.0, 'sawtooth', 0.06); noise(1.0, 0.08, 400, 'lowpass'); },
+    meteor: () => { noise(1.0, 0.5, 250); tone(60, 25, 0.9, 'sine', 0.45); },
+    pop: () => tone(700, 1100, 0.06, 'triangle', 0.05),
   };
   function play(name) {
     if (!on || !SFX[name]) return;
@@ -8444,6 +9716,9 @@ const KCMenu = (() => {
   // The Evolution part of a card's window.
   function modalEvo(id) {
     const c = KC_CARDS[id], E = G.evoInfo(id), act = $('#mEvoAct'), box = $('#mEvoBox');
+    // a card with no evolution planned (the Arena 5 to 10 cards) shows no evolution box
+    box.hidden = !E && !c.evo;
+    if (box.hidden) return;
     box.classList.toggle('built', !!E);
     box.classList.toggle('owned', !!(E && E.has));
     if (!E) { $('#mEvoTag').textContent = '(unlocks later)'; $('#mEvo').textContent = c.evo; act.hidden = true; return; }
@@ -8565,7 +9840,7 @@ const KCMenu = (() => {
         // an arena gate: its badge, number and name
         const G2 = G.ARENAS.find(x => x.id === m.arena), art = !G2.soon && KCArenas.get(G2.theme);
         return `<li class="rn gate ${st} t-${G2.theme || 'soon'}" data-at="${m.at}">
-          <div class="rn-top"><div class="rn-gate">${art ? `<img src="${art.centerpiece.src}" alt="">` : '<span class="rg-soon">?</span>'}<small>Arena ${G2.number}</small><b>${esc(G2.soon ? 'Coming soon' : G2.name)}</b>${act}</div></div>
+          <div class="rn-top"><div class="rn-gate">${art && art.centerpiece.src ? `<img src="${art.centerpiece.src}" alt="">` : art ? `<span class="rg-soon rg-pending">${G2.number}</span>` : '<span class="rg-soon">?</span>'}<small>Arena ${G2.number}</small><b>${esc(G2.soon ? 'Coming soon' : G2.name)}</b>${act}</div></div>
           <span class="rn-slot"><i class="rn-pin"></i></span><div class="rn-at"><i class="trophy-i" aria-hidden="true"></i>${fmt(m.at)}</div></li>`;
       }
       return `<li class="rn ${st} t-${theme}" data-at="${m.at}"><div class="rn-top"><div class="rn-card">${rewardHtml(m)}${act}</div></div>
@@ -8666,12 +9941,17 @@ const KCMenu = (() => {
     const lvl = u.found ? u.level : 1, m = KCSim.levelMult(lvl), v = x => Math.round(x * m);
     const tgt = { buildings: 'Towers & buildings', ground: 'Ground', both: 'Air & ground' }[c.targets];
     const sp = s => (s >= 1.8 ? 'Very fast' : s >= 1.4 ? 'Fast' : s >= 1 ? 'Medium' : 'Slow');
-    const stats = c.kind === 'spell'
-      ? [['Damage', v(c.dmg)], ['Tower damage', Math.round(v(c.dmg) * c.towerPct)], ['Radius', c.area + ' tiles'], ['Energy', c.cost]]
+    const sub = id2 => KC_CARDS[id2];
+    const stats = c.barrel ? [['Pirates', '×' + c.barrel.n], ['Pirate health', v(sub(c.barrel.card).hp)], ['Pirate damage', v(sub(c.barrel.card).dmg)], ['Lands', 'Anywhere'], ['Energy', c.cost]]
+      : c.gate ? [['Wraiths', '×' + c.gate.n], ['Duration', c.gate.dur + ' s'], ['Radius', c.area + ' tiles'], ['Wraith health', v(sub(c.gate.card).hp)], ['Wraith damage', v(sub(c.gate.card).dmg)], ['Energy', c.cost]]
+      : c.spawner ? [['Health', v(c.hp)], ['Lifetime', c.lifetime + ' s'], ['Imp every', c.spawner.every + ' s'], ['Imp health', v(sub(c.spawner.card).hp)], ['Imp damage', v(sub(c.spawner.card).dmg)], ['Energy', c.cost]]
+      : c.kind === 'spell'
+      ? [['Damage', v(c.dmg)], ['Tower damage', Math.round(v(c.dmg) * c.towerPct)], ['Radius', c.area + ' tiles']].concat(c.stun ? [[c.stun >= 2 ? 'Freeze' : 'Stun', c.stun + ' s']] : [], [['Energy', c.cost]])
       : c.kind === 'building'
         ? [['Health', v(c.hp)], ['Damage', v(c.dmg)], ['Hit speed', c.hit + ' s'], ['Range', c.range + ' tiles'], ['Lifetime', c.lifetime + ' s'], ['Targets', tgt], ['Energy', c.cost]]
         : [['Health', v(c.hp)], ['Damage', v(c.dmg)], ['Hit speed', c.hit + ' s'], ['Range', c.range < 1 ? 'Melee' : c.range + ' tiles'],
-          ['Speed', sp(c.speed)], ['Targets', tgt], ['Energy', c.cost]].concat(c.count > 1 ? [['Count', '×' + c.count]] : []);
+          ['Speed', sp(c.speed)], ['Targets', tgt], ['Energy', c.cost]].concat(c.count > 1 ? [['Count', '×' + c.count]] : [],
+          c.shield ? [['Shield', v(c.shield)]] : [], c.charge ? [['Charge', c.charge + ' s']] : [], c.stunHit ? [['Stun', c.stunHit + ' s']] : [], c.healHit ? [['Heal per hit', v(c.healHit.amount)]] : []);
     const next = u.found && !u.max ? KCSim.levelMult(lvl + 1) : null;
     $('#mStats').innerHTML = stats.map(([k, val]) => {
       const nv = next && (k === 'Health' || k === 'Damage' || k === 'Tower damage') ? (k === 'Tower damage' ? Math.round(Math.round(c.dmg * next) * c.towerPct) : Math.round((k === 'Health' ? c.hp : c.dmg) * next)) : null;
@@ -8864,7 +10144,14 @@ const KCMenu = (() => {
     const cp = $('#cp'), bar = $('#cpBar');
     // the arena's own centerpiece (js/arenas.js), its progress bar placed over the art's empty bar
     const art = KCArenas.get(open ? G.arena().theme : 'training'), C = art.centerpiece, img = $('#cpImg');
-    if (img.dataset.src !== C.src) {
+    if (!C.src) {
+      // an arena whose centerpiece hasn't been made yet: its name on a plaque, the bar beneath
+      if (img.dataset.src !== 'none:' + art.name) {
+        img.dataset.src = 'none:' + art.name; img.removeAttribute('src'); img.hidden = true; cp.classList.add('no-art');
+        cp.style.setProperty('--cpw', C.w); cp.style.setProperty('--cph', C.h);
+        for (const [k, v] of Object.entries(C.bar)) bar.style.setProperty(k, v + '%');
+      }
+    } else if (img.dataset.src !== C.src) {
       img.dataset.src = C.src;
       img.hidden = false;
       img.onerror = () => { img.hidden = true; cp.classList.add('no-art'); };
@@ -9615,9 +10902,13 @@ const KCEmotes = (() => {
   }
 
   /* ---------- sim events become sound and effects ---------- */
-  const SHOOT = { arrow: 'arrow', cannon: 'cannon', snowball: 'snow', bigsnow: 'snow', pot: 'potThrow', quill: 'quill' };
+  const SHOOT = { arrow: 'arrow', cannon: 'cannon', snowball: 'snow', bigsnow: 'snow', pot: 'potThrow', quill: 'quill',
+    frostbolt: 'frostShot', harpoonlet: 'arrow', arc: 'coilZap', spark: 'sparkShot', arcblast: 'arcBlast', prismray: 'prism', cloudpuff: 'puffShot' };
   // how high each flyer floats (in tiles)
-  const LIFT = { thundercloud: 1.7, griffin: 1.3, owl: 1.25 };
+  const LIFT = { thundercloud: 1.7, griffin: 1.3, owl: 1.25, drake: 1.3, phoenix: 1.25 };
+  // a colored ring that spreads out (shockwaves, healing pulses, freezes)
+  const shock = (x, y, r, col, life) => G.fx.push({ kind: 'ring', x, y, r, col, life: life || 0.45, max: life || 0.45 });
+  const debris = (x, y, n, cols, v) => { for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, sp = (v || 3) * (0.4 + Math.random()); G.fx.push({ kind: 'rock', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6, z: 0, vz: 3 + Math.random() * 4, r: 0.07 + Math.random() * 0.12, life: 0.9, max: 0.9, col: cols[i % cols.length] }); } };
   const liftOf = e => (e.air ? LIFT[e.card] || 1.1 : 0);
   function handleEvents() {
     const s = G.s;
@@ -9635,7 +10926,37 @@ const KCEmotes = (() => {
             sparks(e.x, e.y, 18, '#c9a8ff', 4); sparks(e.x, e.y, 10, '#7ff0ff', 3);
           }
           break;
-        case 'cast': KCSound.play(e.card === 'spears' ? 'spearsCast' : e.card === 'sandstorm' ? 'sandstorm' : 'spell'); break;
+        case 'cast': KCSound.play({ spears: 'spearsCast', sandstorm: 'sandstorm', flashfreeze: 'freezeCast', gemflash: 'gemFlash', meteor: 'meteorCast', barrel: 'barrelThrow', abyss: 'portal' }[e.card] || 'spell'); break;
+        case 'stun':
+          if (e.kind === 'freeze') { if (e.dur < 2) sparks(e.x, e.y, 5, '#cfeeff', 2); }
+          else { KCSound.play('stunZap'); sparks(e.x, e.y - 0.6, 5, '#bff4ff', 2.5); }
+          break;
+        case 'shieldbreak':
+          KCSound.play('shieldBreak');
+          debris(e.x, e.y - 0.5, 10, e.card === 'broadside' ? ['#a8743e', '#835628', '#5a5f6a'] : ['#e4d2ff', '#a882f0', '#ffffff'], 3);
+          break;
+        case 'transform': KCSound.play('clunk'); puff(e.x, e.y, 8, '#c9a070', 0.8); break;
+        case 'rise':
+          if (e.card === 'coil') { KCSound.play('coilRise'); puff(e.x, e.y, 6, '#8a8590', 0.6); }
+          else { KCSound.play('wraithRise'); puff(e.x, e.y, 6, 'rgba(150,90,230,0.8)', 0.5); }
+          break;
+        case 'hide': KCSound.play('coilHide'); break;
+        case 'hookthrow': KCSound.play('hookThrow'); break;
+        case 'hooked': KCSound.play('hookHit'); shock(e.x, e.y, 0.8, '#d8b880', 0.35); break;
+        case 'jump': KCSound.play('jump'); dust(e.x, e.y, 10); break;
+        case 'slam':
+          // a landing knight, an arriving sage, a drill bursting up: a shockwave on the ground
+          if (e.card === 'wintersage') { KCSound.play('freeze'); shock(e.x, e.y, e.r, '#cfeeff', 0.5); sparks(e.x, e.y, 14, '#e9f8ff', 3); break; }
+          KCSound.play('slam'); G.shake = Math.max(G.shake, e.card === 'dreadknight' ? 0.35 : 0.18);
+          shock(e.x, e.y, e.r, e.card === 'dreadknight' ? '#ff4a5a' : '#c9a8ff', 0.5);
+          debris(e.x, e.y, 14, e.card === 'dreadknight' ? ['#3a3346', '#c0283a', '#6a6070'] : ['#6e5a90', '#c9a8ff', '#4a3e66'], 4);
+          break;
+        case 'egg': KCSound.play('egg'); sparks(e.x, e.y, 10, '#ffcd33', 3); break;
+        case 'hatch': KCSound.play('rebirth'); G.fx.push({ kind: 'flash', x: e.x, y: e.y - 0.5, r: 2.2, life: 0.6, max: 0.6 }); sparks(e.x, e.y, 22, '#ffd23f', 4); break;
+        case 'leap': KCSound.play(e.card === 'sunsprite' ? 'chime' : 'leap'); break;
+        case 'barrel': KCSound.play('barrelBreak'); debris(e.x, e.y, 14, ['#b4733c', '#8c5427', '#5a5f6a'], 3.5); puff(e.x, e.y, 8, '#d8c0a0', 0.7); break;
+        case 'healpulse': KCSound.play('heal'); shock(e.x, e.y, e.r, '#ffe27a', 0.5); break;
+        case 'spawn': KCSound.play('pop'); puff(e.x, e.y, 4, 'rgba(200,170,255,0.8)', 0.4); break;
         case 'burrow': KCSound.play('dig'); puff(e.x, e.y, 10, '#a07850', 0.6); break;
         case 'surface':
           KCSound.play('surface'); G.shake = Math.max(G.shake, 0.12);
@@ -9660,6 +10981,10 @@ const KCEmotes = (() => {
           break;
         }
         case 'thunderclap':
+          // a death burst: the Icebound Giant shatters, the Steel Titan bursts, the Phoenix goes up in flame
+          if (e.card === 'icegiant') { KCSound.play('iceShatter'); shock(e.x, e.y, e.r, '#cfeeff', 0.55); debris(e.x, e.y - 0.6, 18, ['#cfeeff', '#9fd4f0', '#ffffff'], 4); break; }
+          if (e.card === 'titan' || e.card === 'titanling') { KCSound.play('smash'); G.shake = Math.max(G.shake, e.card === 'titan' ? 0.45 : 0.2); G.fx.push({ kind: 'blast', x: e.x, y: e.y, r: e.r, life: 0.45, max: 0.45 }); debris(e.x, e.y - 0.8, e.card === 'titan' ? 20 : 10, ['#d39a48', '#a8712a', '#6a5a48'], 4.5); break; }
+          if (e.card === 'phoenix') { KCSound.play('fireBurst'); G.fx.push({ kind: 'flash', x: e.x, y: e.y - 1.1, r: e.r * 1.6, life: 0.5, max: 0.5 }); sparks(e.x, e.y - 1.1, 18, '#ffb52e', 4); break; }
           KCSound.play('thunderclap'); G.shake = Math.max(G.shake, 0.4);
           G.fx.push({ kind: 'zap', x: e.x, y: e.y, r: e.r * 1.6, life: 0.6, max: 0.6 });
           for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; G.fx.push({ kind: 'bolt', x: e.x + Math.cos(a) * e.r, y: e.y + Math.sin(a) * e.r * 0.6, fx: e.x, fy: e.y - 1.4, seed: Math.random() * 1000, life: 0.4, max: 0.4 }); }
@@ -9673,10 +10998,16 @@ const KCEmotes = (() => {
         case 'hit':
           if (e.card === 'gorilla' || e.card === 'rhino') { KCSound.play('smash'); G.shake = Math.max(G.shake, e.card === 'rhino' ? 0.12 : 0.18); sparks(e.x, e.y, 6, '#fff3c4'); }
           else if (e.kind === 'cannon') sparks(e.x, e.y, 5, '#ffd27a');
+          else if (e.kind === 'prismray') sparks(e.x, e.y - 0.5, 4, '#efe2ff', 2.5);
+          else if (e.r) { KCSound.play('smash'); shock(e.x, e.y, e.r, '#ff6a7a', 0.3); }
           else { KCSound.play('hit'); sparks(e.x, e.y, 3, '#ffffff'); }
           break;
         case 'splash':
           if (e.kind === 'pot') { KCSound.play('potBreak'); sparks(e.x, e.y, 10, '#d07a45', 3); puff(e.x, e.y, 6, '#c9a07a', e.r * 0.7); }
+          else if (e.kind === 'frostbolt' || e.kind === 'frostleap') { KCSound.play('iceHit'); shock(e.x, e.y, e.r, '#cfeeff', 0.35); sparks(e.x, e.y, 8, '#e9f8ff', 2.5); }
+          else if (e.kind === 'sunleap') { shock(e.x, e.y, e.r, '#ffe27a', 0.4); sparks(e.x, e.y, 10, '#fff1a6', 3); }
+          else if (e.kind === 'arcblast') { KCSound.play('thunder'); G.shake = Math.max(G.shake, 0.3); G.fx.push({ kind: 'zap', x: e.x, y: e.y, r: e.r * 1.2, life: 0.45, max: 0.45 }); sparks(e.x, e.y, 18, '#cfe6ff', 4.5); }
+          else if (e.kind === 'cloudpuff') puff(e.x, e.y, 8, 'rgba(230,240,255,0.9)', e.r * 0.8);
           else puff(e.x, e.y, 9, '#ffffff', e.r);
           break;
         case 'spin':
@@ -9686,6 +11017,18 @@ const KCEmotes = (() => {
           break;
         case 'death': KCSound.play('death'); puff(e.x, e.y - (e.air ? 1.1 : 0.3), 7, '#d9d4e8', 0.5); break;
         case 'boom':
+          if (e.card === 'flashfreeze') {
+            KCSound.play('freeze'); shock(e.x, e.y, e.r, '#cfeeff', 0.7); shock(e.x, e.y, e.r * 0.6, '#ffffff', 0.5);
+            for (let i = 0; i < 16; i++) { const a = Math.random() * 6.28, d = Math.random() * e.r; sparks(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d * 0.6, 1, '#e9f8ff', 1.5); }
+            break;
+          }
+          if (e.card === 'gemflash') { KCSound.play('gemBoom'); shock(e.x, e.y, e.r, '#c9a8ff', 0.4); G.fx.push({ kind: 'zap', x: e.x, y: e.y, r: e.r, life: 0.35, max: 0.35 }); sparks(e.x, e.y, 16, '#efe2ff', 4); break; }
+          if (e.card === 'meteor') {
+            KCSound.play('meteor'); G.shake = Math.max(G.shake, 0.6);
+            G.fx.push({ kind: 'blast', x: e.x, y: e.y, r: e.r * 1.2, life: 0.6, max: 0.6 }); shock(e.x, e.y, e.r * 1.4, '#ff4a5a', 0.6);
+            debris(e.x, e.y, 22, ['#3a2e3e', '#ff4a5a', '#241c2a'], 5); sparks(e.x, e.y, 20, '#ff6a5a', 5);
+            break;
+          }
           if (e.card === 'spears') {
             KCSound.play('spears'); G.shake = Math.max(G.shake, 0.12);
             for (let i = 0; i < 14; i++) { const a = Math.random() * 6.28, d = Math.random() * e.r; puff(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d * 0.6, 1, 'rgba(220,200,170,0.9)', 0.2); }
@@ -10149,18 +11492,23 @@ const KCEmotes = (() => {
       c.restore();
       return;
     }
+    if (e.kind === 'building' && e.tunnel) { tunnel(c, e, x, y, t); return; }
     if (e.kind === 'building') {
       c.save(); c.translate(x, y);
       if (e.deploy > 0) { const sc = Math.max(0.3, 1 - Math.max(0, e.deploy - 0.6) * 2); c.globalAlpha = 0.7; c.scale(sc, sc); }
       if (e.flash > 0) c.filter = 'brightness(1.6)';
-      A.cannon(c, k, { team: e.team, angle: Math.atan2(e.aimY, e.aimX), atk: Math.max(0, e.atk / 0.25) });
+      A.building(c, e.card, k, { team: e.team, angle: Math.atan2(e.aimY, e.aimX), atk: Math.max(0, e.atk / 0.25), hidden: e.hidden, rise: e.rise, t: t + e.id * 0.37 });
       c.restore();
+      frozen(c, e, x, y, k * 1.1, t);
       return;
     }
     if (e.tunnel) { tunnel(c, e, x, y, t); return; }
     if (e.card === 'mole' && e.deploy > 0) { surfacing(c, e, x, y, t); return; }
-    const lift = liftOf(e) * k;
+    // the Dread Knight mid-leap rises in an arc; a troop on the end of a harpoon rope is off the ground
+    const leapF = e.leap ? Math.min(1, e.leap.t / e.leap.dur) : 0;
+    const lift = (liftOf(e) + (e.leap ? Math.sin(leapF * Math.PI) * 2.2 : 0) + (e.pulled ? 0.35 : 0)) * k;
     if (!e.air) shadow(c, x, y, e.radius * k * 1.05);
+    ropes(c, e, x, y - lift);
     // the Griffin's beam: a crackling line of storm light to its target, thicker as it powers up
     if (e.beam && e.beamOn) {
       const tg = G.s.ents.find(u => u.id === e.beamOn);
@@ -10182,9 +11530,14 @@ const KCEmotes = (() => {
     if (e.ram) o.power = Math.max(0, Math.min(1, (e.speed - e.baseSpeed) / (e.maxSpeed - e.baseSpeed)));
     if (e.rider) o.ratk = Math.max(0, e.rider.atk / 0.4);
     if (e.chargeHit) o.charged = e.run >= e.chargeHit;
+    if (e.maxShield) o.shield = e.shield > 0 ? 1 : 0;
+    if (e.chargeT !== undefined) o.charge = e.chargeT / KC_CARDS[e.card].charge;
+    if (e.hookT) o.hook = 1;
+    if (e.hatch !== undefined) o.hatch = 1 - e.hatch / KC_CARDS.phoenix.egg.hatch;
     if (e.beam) o.beam = e.beamOn ? 1 + Math.min(2, Math.floor(e.beamTime / e.beamStage)) : 0;
     A.troop(c, e.card, k, o);
     c.restore();
+    frozen(c, e, x, y - lift, e.radius * k * 1.25, t);
     // dust behind a rolling cart and a galloping camel
     if (e.moving && e.deploy <= 0 && (e.ram || e.chargeHit) && Math.random() < (e.ram ? 0.25 + o.power * 0.5 : 0.4)) {
       const back = e.team === 0 ? 0.6 : -0.6;
@@ -10192,7 +11545,9 @@ const KCEmotes = (() => {
     }
     // a slowed troop: sand swirling round it, or the lasso round its legs
     if (e.slowEnd > G.s.time) {
-      if (e.slowKind === 'lasso') {
+      if (e.slowKind === 'frost') {
+        for (let i = 0; i < 3; i++) { const a = t * 3 + i * 2.1 + e.id; A.circ(c, x + Math.cos(a) * e.radius * k, y - lift - k * 0.4 + Math.sin(a) * k * 0.2, k * 0.06); c.fillStyle = 'rgba(200,240,255,0.95)'; c.fill(); }
+      } else if (e.slowKind === 'lasso') {
         A.ell(c, x, y - k * 0.2, e.radius * k * 0.9, e.radius * k * 0.35);
         c.strokeStyle = A.OUT; c.lineWidth = k * 0.12; c.stroke(); c.strokeStyle = '#c8a070'; c.lineWidth = k * 0.07; c.stroke();
       } else {
@@ -10208,6 +11563,28 @@ const KCEmotes = (() => {
       c.beginPath(); c.moveTo(x, cy); c.arc(x, cy, r * 0.8, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); c.closePath();
       c.fillStyle = e.team === 0 ? '#8cc4ff' : '#ff9ea4'; c.fill();
     }
+  }
+  // Frozen: a block of ice around it; stunned: crackling sparks over it.
+  function frozen(c, e, x, y, r, t) {
+    if (!(e.stunEnd > G.s.time)) return;
+    if (e.stunKind === 'freeze') {
+      c.save(); c.globalAlpha = 0.55;
+      A.rr(c, x - r, y - r * 1.7, r * 2, r * 1.9, r * 0.3); c.fillStyle = 'rgba(190,235,255,0.6)'; c.fill();
+      c.lineWidth = Math.max(1.5, G.k * 0.06); c.strokeStyle = 'rgba(240,252,255,0.95)'; c.stroke();
+      A.line(c, x - r * 0.6, y - r * 1.4, x - r * 0.2, y - r * 1.0, 'rgba(255,255,255,0.9)', Math.max(1, G.k * 0.05));
+      c.restore();
+    } else for (let i = 0; i < 3; i++) {
+      const a = t * 20 + i * 2.1 + e.id, x0 = x + Math.cos(a) * r * 0.6, y0 = y - r * 1.3 + Math.sin(a * 1.3) * r * 0.3;
+      A.line(c, x0, y0, x0 + r * 0.25, y0 - r * 0.2, '#bff4ff', Math.max(1, G.k * 0.05));
+    }
+  }
+  // The Harpoon Captain's rope: to a troop he is reeling in, or to the building he is pulling himself to.
+  function ropes(c, e, x, y) {
+    const k = G.k, by = e.pulled ? G.s.ents.find(u => u.id === e.pulled.by) : e.reel ? G.s.ents.find(u => u.id === e.reel.to) : null;
+    if (!by) return;
+    const bx = SX(by.x), byy = SY(by.y) - (by.kind === 'troop' ? k * 1.1 : k * 0.8);
+    c.beginPath(); c.moveTo(bx, byy); c.lineTo(x, y - k * 0.5);
+    c.strokeStyle = A.OUT; c.lineWidth = k * 0.1; c.stroke(); c.strokeStyle = '#d8b880'; c.lineWidth = k * 0.06; c.stroke();
   }
   // A storm beam from (x0, y0) to (x1, y1): jagged, flickering, brighter and thicker each stage.
   function beamTo(c, x0, y0, x1, y1, stage, t, team) {
@@ -10269,11 +11646,19 @@ const KCEmotes = (() => {
       levelBadge(c, bx - h * 0.6, by + h / 2, h * 0.95, e.team, e.level);
       return;
     }
-    if (e.hp >= e.maxHp || e.deploy > 0) return;
-    const lift = liftOf(e) * k, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: e.evo ? 2.35 : 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75, skeletons: 1.2, footmen: 1.6, flail: 1.95, pots: 1.6, ramcart: 1.95, ramsoldier: 1.45, mole: 1.45, camel: 2.45, bees: 0.55, owl: 1.15, thundercloud: 0.85, griffin: 1.2 }[e.card] || 1.4;
+    const shieldHit = e.maxShield && e.shield < e.maxShield;
+    if ((e.hp >= e.maxHp && !shieldHit) || e.deploy > 0) return;
+    const lift = liftOf(e) * k, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: e.evo ? 2.35 : 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75, skeletons: 1.2, footmen: 1.6, flail: 1.95, pots: 1.6, ramcart: 1.95, ramsoldier: 1.45, mole: 1.45, camel: 2.45, bees: 0.55, owl: 1.15, thundercloud: 0.85, griffin: 1.2,
+      frostsprite: 1.0, icegiant: 1.4, wintersage: 1.85, raider: 1.15, raidergun: 1.15, harpoon: 1.85, broadside: 1.3, sparkbots: 1.2, titan: 2.2, titanling: 1.4, arccannon: 1.75, shardguards: 1.5, imp: 1.0,
+      prism: 1.7, sunsprite: 1.0, guardian: 1.85, drake: 0.95, phoenix: 1.0, phoenixegg: 1.0, wraiths: 1.4, wraith: 1.4, dreadknight: 2.3 }[e.card] || 1.4;
     const w = Math.max(0.8, e.radius * 1.9) * k, h = Math.max(5, k * 0.2), by = y - lift - top * k, bx = x - w / 2;
     A.rr(c, bx, by, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
     A.rr(c, bx + 1, by + 1, Math.max(0, (w - 2) * e.hp / e.maxHp), h - 2, (h - 2) / 2); c.fillStyle = blue ? '#5aa9ff' : '#ff5f69'; c.fill();
+    if (e.maxShield && e.shield > 0) {
+      // a shield: a white bar over the health bar, emptying as the shield takes damage
+      A.rr(c, bx, by - h - 1, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
+      A.rr(c, bx + 1, by - h, Math.max(0, (w - 2) * e.shield / e.maxShield), h - 2, (h - 2) / 2); c.fillStyle = '#e8edf5'; c.fill();
+    }
     levelBadge(c, bx - h * 0.6, by + h / 2, h * 0.95, e.team, e.level);
   }
   function levelBadge(c, x, y, r, team, level) {
@@ -10286,6 +11671,26 @@ const KCEmotes = (() => {
   // Broken pottery on the ground: shards fading out as the damage ends.
   function drawZone2(c, z, k, t) {
     if (z.kind === 'sandstorm') { storm(c, z, k, t); return; }
+    if (z.kind === 'gate') {
+      // the Abyss Gate: a dark swirling portal over the circle it lets wraiths out of
+      const x = SX(z.x), y = SY(z.y), fade = Math.min(1, z.left / 0.6, (z.dur - z.left) / 0.4 + 0.2);
+      c.save(); c.globalAlpha = 0.85 * fade;
+      A.ell(c, x, y, z.r * k, z.r * k * 0.6); c.fillStyle = 'rgba(40,10,60,0.35)'; c.fill();
+      c.strokeStyle = 'rgba(190,120,255,0.8)'; c.lineWidth = Math.max(2, k * 0.08); c.setLineDash([k * 0.4, k * 0.3]); c.lineDashOffset = -t * k * 2; c.stroke(); c.setLineDash([]);
+      c.translate(x, y - k * 1.6); A.portalArt(c, k * 1.4, t * 2, z.team);
+      c.restore();
+      return;
+    }
+    if (z.kind === 'heal') {
+      const x = SX(z.x), y = SY(z.y), a = Math.max(0, z.left / z.dur);
+      c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.6 * a;
+      const g = c.createRadialGradient(x, y, 0, x, y, z.r * k);
+      g.addColorStop(0, 'rgba(255,230,140,0.7)'); g.addColorStop(1, 'rgba(255,200,80,0)');
+      c.fillStyle = g; A.ell(c, x, y, z.r * k, z.r * k * 0.6); c.fill();
+      c.restore();
+      if (Math.random() < 0.6) G.fx.push({ kind: 'dot', x: z.x + (Math.random() - 0.5) * z.r * 1.4, y: z.y + (Math.random() - 0.5) * z.r * 0.8, vx: 0, vy: -1.2, r: 0.08, col: 'rgba(255,240,170,0.95)', life: 0.6, max: 0.6 });
+      return;
+    }
     const a = Math.max(0, z.left / z.dur), x = SX(z.x), y = SY(z.y);
     c.globalAlpha = 0.35 * a;
     A.ell(c, x, y, z.r * k, z.r * k * 0.55); c.fillStyle = '#7a3e1e'; c.fill();
@@ -10320,11 +11725,32 @@ const KCEmotes = (() => {
       G.fx.push({ kind: 'puff', x: z.x + Math.cos(a) * d, y: z.y + Math.sin(a) * d * 0.6, vx: Math.cos(a + 1.6) * 1.2, vy: Math.sin(a + 1.6) * 0.6 - 0.2, r: 0.3 + Math.random() * 0.3, col: 'rgba(222,190,130,0.55)', life: 0.8, max: 0.8 });
     }
   }
+  const ARCS = new WeakSet();
   function drawProj(c, p, alpha, t) {
     const k = G.k, px = p.px === undefined ? p.x : p.px + (p.x - p.px) * alpha, py = p.py === undefined ? p.y : p.py + (p.y - p.py) * alpha;
     const total = Math.hypot(p.tx - p.sx, p.ty - p.sy) || 1, done = Math.min(1, Math.hypot(px - p.sx, py - p.sy) / total);
-    const arcH = p.kind === 'snowball' || p.kind === 'bigsnow' || p.kind === 'pot' ? 1.6 : p.kind === 'lasso' ? 1 : p.kind === 'fireball' ? 2.2 : p.kind === 'spears' ? 3 : p.kind === 'cannon' ? 0.8 : 0.5;
-    const lift = Math.sin(done * Math.PI) * arcH * Math.min(1, total / 6) + (p.air ? 1.1 : 0.6) * (1 - done);
+    if (p.kind === 'prismray') {
+      // the Prism Archer's bolt flies straight and level: a bright crystal streak
+      const x = SX(px), y = SY(py) - k * 0.9, ex = x - p.dx * k * 1.1, ey = y - p.dy * k * 1.1;
+      c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(ex, ey); c.lineTo(x, y); c.strokeStyle = 'rgba(200,160,255,0.55)'; c.lineWidth = k * 0.28; c.stroke();
+      c.beginPath(); c.moveTo(ex, ey); c.lineTo(x, y); c.strokeStyle = '#ffffff'; c.lineWidth = k * 0.08; c.stroke();
+      c.restore();
+      return;
+    }
+    const arcH = { snowball: 1.6, bigsnow: 1.6, pot: 1.6, lasso: 1, fireball: 2.2, spears: 3, cannon: 0.8, frostleap: 1.0, sunleap: 1.0, frostbolt: 0.8, hook: 0.7,
+      spark: 0.3, arcblast: 0.6, cloudpuff: 0.3, barrel: 2.6, meteor: 3.5, arc: 0 }[p.kind];
+    if (p.kind === 'arc') {
+      // the Coil Tower's lightning: a jagged bolt from the coil's sphere to the target
+      // (drawn once per shot, as a short-lived bolt; the shot itself is not changed)
+      if (!ARCS.has(p)) {
+        ARCS.add(p);
+        const from = G.s.ents.find(u => u.id === p.from);
+        if (from) G.fx.push({ kind: 'bolt', x: p.tx, y: p.ty - 0.5, fx: from.x, fy: from.y - 1.5, seed: Math.random() * 1000, life: 0.18, max: 0.18 });
+      }
+      return;
+    }
+    const lift = Math.sin(done * Math.PI) * (arcH === undefined ? 0.5 : arcH) * Math.min(1, total / 6) + (p.air ? 1.1 : 0.6) * (1 - done) + (p.kind === 'meteor' ? (1 - done) * 6 : 0);
     const x = SX(px), y = SY(py) - lift * k;
     if (p.kind === 'fireball') {
       A.ell(c, SX(p.tx), SY(p.ty), KC_CARDS.fireball.area * k, KC_CARDS.fireball.area * k * 0.6);
@@ -10406,6 +11832,45 @@ const KCEmotes = (() => {
       shadow(c, SX(px), SY(py), k * 0.2);
       A.circ(c, x, y, k * 0.24); A.paint(c, '#ffffff', k * 0.06);
       A.circ(c, x - k * 0.07, y - k * 0.07, k * 0.07); c.fillStyle = '#dfe9f7'; c.fill();
+    } else if (p.kind === 'frostleap' || p.kind === 'sunleap') {
+      // a sprite in mid-leap
+      shadow(c, SX(px), SY(py), k * 0.25);
+      c.save(); c.translate(x, y + k * 0.3); A.troop(c, p.card, k, { team: p.team, t, walk: false, atk: 0, face: 1, id: 1, view: p.team === 0 ? 'back' : 'front' }); c.restore();
+    } else if (p.kind === 'frostbolt') {
+      A.glow(c, x, y, k * 0.5, 'rgb(170,230,255)', 0.6);
+      A.circ(c, x, y, k * 0.16); A.paint(c, '#e9f8ff', k * 0.05);
+      if (Math.random() < 0.6) G.fx.push({ kind: 'dot', x: px, y: py - lift, vx: 0, vy: 0, r: 0.08, col: 'rgba(200,240,255,0.9)', life: 0.3, max: 0.3 });
+    } else if (p.kind === 'harpoonlet' || p.kind === 'hook') {
+      const ang = Math.atan2((p.ty - p.sy) * k, (p.tx - p.sx) * k);
+      if (p.kind === 'hook') {
+        const from = G.s.ents.find(u => u.id === p.hook);
+        if (from) { c.beginPath(); c.moveTo(SX(from.x), SY(from.y) - k * 1.2); c.lineTo(x, y); c.strokeStyle = A.OUT; c.lineWidth = k * 0.1; c.stroke(); c.strokeStyle = '#d8b880'; c.lineWidth = k * 0.06; c.stroke(); }
+      }
+      c.save(); c.translate(x, y); c.rotate(ang);
+      const L = p.kind === 'hook' ? 0.5 : 0.35;
+      A.line(c, -k * L, 0, k * 0.2, 0, '#6a4a2a', Math.max(1.5, k * 0.06));
+      A.poly(c, [k * 0.36, 0, k * 0.18, -k * 0.1, k * 0.18, k * 0.1]); A.paint(c, '#dfe6ee', Math.max(1, k * 0.04));
+      if (p.kind === 'hook') { A.line(c, k * 0.22, -k * 0.1, k * 0.12, -k * 0.2, A.OUT, k * 0.05); A.line(c, k * 0.22, k * 0.1, k * 0.12, k * 0.2, A.OUT, k * 0.05); }
+      c.restore();
+    } else if (p.kind === 'spark') {
+      A.glow(c, x, y, k * 0.45, 'rgb(150,230,255)', 0.8);
+      A.circ(c, x, y, k * 0.1); c.fillStyle = '#ffffff'; c.fill();
+    } else if (p.kind === 'arcblast') {
+      A.glow(c, x, y, k * 1.1, 'rgb(140,220,255)', 0.8);
+      A.circ(c, x, y, k * 0.3); A.paint(c, '#e8fbff', k * 0.06);
+      for (let i = 0; i < 4; i++) { const a = t * 30 + i * 1.6; A.line(c, x, y, x + Math.cos(a) * k * 0.6, y + Math.sin(a) * k * 0.6, '#cfeeff', Math.max(1, k * 0.04)); }
+    } else if (p.kind === 'cloudpuff') {
+      for (let i = 0; i < 3; i++) { A.circ(c, x + (i - 1) * k * 0.14, y + Math.sin(t * 9 + i) * k * 0.05, k * (0.16 + (i === 1 ? 0.06 : 0))); c.fillStyle = 'rgba(235,245,255,0.95)'; c.fill(); }
+    } else if (p.kind === 'barrel') {
+      A.ell(c, SX(p.tx), SY(p.ty), k * 1.0, k * 0.6); c.strokeStyle = 'rgba(255,220,150,0.7)'; c.lineWidth = 2; c.setLineDash([6, 5]); c.stroke(); c.setLineDash([]);
+      shadow(c, SX(px), SY(py), k * 0.4);
+      c.save(); c.translate(x, y); A.barrelArt(c, k * 0.75, t * 8, p.team); c.restore();
+    } else if (p.kind === 'meteor') {
+      const r = KC_CARDS.meteor.area;
+      A.ell(c, SX(p.tx), SY(p.ty), r * k, r * k * 0.6); c.fillStyle = 'rgba(255,40,70,0.12)'; c.fill(); c.strokeStyle = 'rgba(255,90,110,0.7)'; c.lineWidth = 2; c.stroke();
+      shadow(c, SX(px), SY(py), k * 0.6 * (0.4 + done));
+      c.save(); c.translate(x, y); c.rotate(-0.6); A.meteorArt(c, k * 1.1, t); c.restore();
+      if (Math.random() < 0.8) G.fx.push({ kind: 'dot', x: px, y: py - lift, vx: (Math.random() - 0.5), vy: -0.5, r: 0.2, col: Math.random() < 0.5 ? 'rgba(255,70,90,0.8)' : 'rgba(80,60,90,0.8)', life: 0.4, max: 0.4 });
     }
   }
   function drawFx(c, t) {
@@ -10416,7 +11881,7 @@ const KCEmotes = (() => {
       else if (f.kind === 'puff') { c.globalAlpha = a * 0.8; A.circ(c, SX(f.x), SY(f.y), f.r * k * (1.6 - a * 0.6)); c.fillStyle = f.col; c.fill(); }
       else if (f.kind === 'ring') {
         c.globalAlpha = a; A.ell(c, SX(f.x), SY(f.y), f.r * k * (1.2 - a * 0.6), f.r * k * 0.5 * (1.2 - a * 0.6));
-        c.strokeStyle = f.team === 0 ? '#8cc4ff' : '#ff9ea4'; c.lineWidth = k * 0.12; c.stroke();
+        c.strokeStyle = f.col || (f.team === 0 ? '#8cc4ff' : '#ff9ea4'); c.lineWidth = k * 0.12; c.stroke();
       } else if (f.kind === 'flash') {
         const r = f.r * k * (0.6 + (1 - a) * 0.6), x = SX(f.x), y = SY(f.y);
         c.globalCompositeOperation = 'lighter'; c.globalAlpha = a;
@@ -10471,7 +11936,8 @@ const KCEmotes = (() => {
     const s = G.s, k = G.k, card = KC_CARDS[id], p = card.kind === 'spell' ? snap(G.hover) : placeAt(id, G.hover);
     const ok = S.canDeploy(s, 0, id, p.x, p.y), x = SX(p.x), y = SY(p.y);
     if (card.kind === 'spell') {
-      A.ell(c, x, y, card.area * k, card.area * k * 0.62);
+      const ar = card.area || 1;
+      A.ell(c, x, y, ar * k, ar * k * 0.62);
       c.fillStyle = card.storm ? 'rgba(214,170,96,0.3)' : 'rgba(255,140,40,0.22)'; c.fill(); c.strokeStyle = 'rgba(255,220,150,0.95)'; c.lineWidth = 2.5; c.setLineDash([8, 6]); c.stroke(); c.setLineDash([]);
       return;
     }
@@ -10482,7 +11948,9 @@ const KCEmotes = (() => {
       c.strokeStyle = ok ? 'rgba(160,120,80,0.9)' : 'rgba(229,65,75,0.8)'; c.lineWidth = k * 0.16; c.setLineDash([k * 0.25, k * 0.25]); c.stroke(); c.setLineDash([]);
       A.ell(c, x, y, k * 0.62, k * 0.3); c.fillStyle = ok ? 'rgba(90,60,35,0.55)' : 'rgba(229,65,75,0.5)'; c.fill();
       c.globalAlpha = ok ? 0.6 : 0.35;
-      c.save(); c.translate(x, y); A.troop(c, id, k, { team: 0, t, walk: false, atk: 0, face: 1, id: 1, view: 'back' }); c.restore();
+      c.save(); c.translate(x, y);
+      if (card.kind === 'building') A.building(c, id, k, { team: 0, t, angle: -Math.PI / 2 }); else A.troop(c, id, k, { team: 0, t, walk: false, atk: 0, face: 1, id: 1, view: 'back' });
+      c.restore();
       c.globalAlpha = 1;
       return;
     }
@@ -10491,7 +11959,7 @@ const KCEmotes = (() => {
       A.rr(c, SX(p.x - hf), SY(p.y - hf), hf * 2 * k, hf * 2 * k, k * 0.2);
       c.fillStyle = ok ? 'rgba(255,255,255,0.3)' : 'rgba(229,65,75,0.5)'; c.fill();
       c.globalAlpha = ok ? 0.65 : 0.35;
-      c.save(); c.translate(x, y); A.cannon(c, k, { team: 0, angle: -Math.PI / 2 }); c.restore();
+      c.save(); c.translate(x, y); A.building(c, id, k, { team: 0, angle: -Math.PI / 2, t }); c.restore();
       c.globalAlpha = 1;
       A.ell(c, x, y, (card.range + card.radius) * k, (card.range + card.radius) * k);
       c.strokeStyle = 'rgba(255,255,255,0.45)'; c.lineWidth = 1.5; c.setLineDash([5, 6]); c.stroke(); c.setLineDash([]);

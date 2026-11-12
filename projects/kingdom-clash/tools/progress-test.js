@@ -152,11 +152,13 @@ console.log('save and reload: ok');
   const odds = (lv, tr) => G.chestOdds('gold', { level: lv, trophies: tr });
   assert.strictEqual(odds(1, 0).cards, Math.round(40 * G.ECONOMY.arenaCards[1]));
   assert(odds(1, 300).cards > odds(1, 299).cards * 1.15 && odds(1, 300).rubies[0] > odds(1, 299).rubies[0] * 1.15, 'reaching an arena is a step up');
-  assert(odds(1, 1500).rubies[0] > odds(1, 1199).rubies[0] * 1.8, 'past Arena 4 rewards climb steeply');
+  for (const a of G.ARENAS.slice(1)) assert(odds(1, a.min).cards > odds(1, a.min - 1).cards * 1.15 && odds(1, a.min).rubies[0] > odds(1, a.min - 1).rubies[0] * 1.15, `a step up at Arena ${a.number}`);
+  assert(odds(1, 1999).rubies[0] > odds(1, 900).rubies[0] * 1.8, 'Stormspire climbs steeply toward Arena 5');
+  assert(odds(1, 6000).cards > odds(1, 2000).cards * 3, 'the late arenas pay far more');
   assert(odds(12, 100).cards > odds(2, 100).cards && odds(12, 100).rubies[0] > odds(2, 100).rubies[0], 'account level adds more in the same arena');
   assert(odds(12, 4000).rubies[0] > odds(2, 100).rubies[0] * 3 && odds(12, 4000).cards > odds(2, 100).cards * 2.5, 'level 12 at 4,000 trophies far beyond level 2 at 100');
   assert.strictEqual(odds(40, 900).rubies[0], odds(400, 900).rubies[0], 'the level bonus stops at the cap');
-  assert(odds(1, 1e9).rubies[0] === odds(1, 900 + 300 * 100).rubies[0], 'past the last arena the bonus stops too');
+  assert(odds(1, 1e9).rubies[0] === odds(1, 6000 + 500 * 100).rubies[0] && odds(1, 9000).rubies[0] > odds(1, 6000).rubies[0], 'past the last arena a little more, then it stops');
   assert(odds(-5, -100).cards === odds(1, 0).cards && Number.isFinite(odds('x', NaN).cards), 'bad numbers are treated as the lowest');
   // a high account level alone never brings cards of arenas you haven't reached
   P4.xp = 99999; P4.trophies = 0; P4.best = 0;
@@ -231,7 +233,7 @@ console.log('save and reload: ok');
 
 // 8. Opponents level their cards one at a time as their trophies rise, and they have no lines.
 // the curve: average card level (before rares are raised) 1 at 50, 4.5 at 300, 6.5 at 600, 7.5 at 900, 8.5 at 1,200, 12 at 2,000, 15 at 4,000
-for (const [t, want] of [[0, 0], [49, 0], [50, 0], [300, 28], [600, 44], [900, 52], [1200, 60], [1500, 72], [2000, 88], [3000, 100], [4000, 112], [9999, 112], [-5, 0]]) assert.strictEqual(G.foeUpgrades(t), want, `upgrades at ${t}`);
+for (const [t, want] of [[0, 0], [49, 0], [50, 0], [300, 28], [600, 44], [900, 52], [1200, 60], [1500, 72], [2000, 88], [3000, 100], [4000, 108], [5000, 112], [9999, 112], [-5, 0]]) assert.strictEqual(G.foeUpgrades(t), want, `upgrades at ${t}`);
 for (let t = 0; t < 4500; t += 10) assert(G.foeUpgrades(t + 10) >= G.foeUpgrades(t), 'never fewer upgrades with more trophies');
 // their King Tower uses the players' rule (N cards at level N), counting their collection along with the deck past 8
 assert.strictEqual(G.foeKing([3, 3, 3, 3, 2, 2, 1, 1]), 3);
@@ -281,7 +283,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
     P6.trophies = 1200; P6.best = 1200;
     for (const at of [930, 1010, 1090, 1170]) { const r = G.claim(at); assert(r && r.cards[0].isNew, `card at ${at}`); }
     for (const id of ['bees', 'owl', 'thundercloud', 'griffin']) assert(P6.found.includes(id), id);
-    assert.strictEqual(G.roadState(G.ROAD.find(m => m.at === 1200)), 'soon', 'Arena 5 is coming soon');
+    assert.strictEqual(G.roadState(G.ROAD.find(m => m.at === 2000)), 'locked', 'Arena 5 waits for 2,000 trophies');
     let sawStorm = 0; for (let i = 0; i < 40; i++) if (G.trophyFoe(KCSim.mulberry(i + 77)).deck.some(id => ['bees', 'owl', 'thundercloud', 'griffin'].includes(id))) sawStorm++;
     assert(sawStorm > 20, 'opponents at 1,200 trophies play Stormspire cards');
     assert(!KC_ALL_CARDS.includes('ramsoldier'), 'the cart soldiers are not a card');
@@ -428,10 +430,10 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   assert.strictEqual(G.exchange(1501, t0).error, 'cap', 'only 1,500 left today');
   assert(G.exchange(1500, t0 + 3600e3).ok && G.exchangeInfo(t0).left === 0);
   assert(G.exchangeInfo(t0 + 86400e3).left === 4000, 'a new limit the next day');
-  const caps = [[0, 500], [300, 1000], [600, 2000], [900, 4000], [1199, 4000], [1200, 5000], [2100, 8000], [9000, 10000]].map(([b, c]) => { Q.best = b; return [b, G.exchangeInfo(t0).cap === c]; });
+  const caps = [[0, 500], [300, 1000], [600, 2000], [900, 4000], [1999, 4000], [2000, 6000], [2600, 7000], [3300, 8000], [4100, 9000], [5000, 10000], [9000, 10000]].map(([b, c]) => { Q.best = b; return [b, G.exchangeInfo(t0).cap === c]; });
   assert(caps.every(c => c[1]), 'caps by arena ' + JSON.stringify(caps));
-  Q.best = 1500; Q.trophies = 200;
-  assert.strictEqual(G.exchangeInfo(t0 + 86400e3).cap, 6000, 'the cap follows the best trophies, not a drop');
+  Q.best = 1500; Q.trophies = 200; assert.strictEqual(G.exchangeInfo(t0).cap, 4000);
+  assert.strictEqual(G.exchangeInfo(t0 + 86400e3).cap, 4000, 'the cap follows the best trophies, not a drop'); Q.best = 2700; assert.strictEqual(G.exchangeInfo(t0 + 86400e3).cap, 7000);
   G.load(mem({ 'kc.progress': JSON.stringify(Object.assign({}, Q, { wallet: -9, walletDay: 'junk' })) }));
   assert(G.state.wallet === 0 && G.state.walletDay.n === 0, 'bad wallet values are cleared');
   assert(G.state.rubies === 12345 + 4000, 'rubies carried over');
@@ -481,6 +483,50 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   assert(hi.deals.every(d => d.worth > 2) && hi.deals[1].wild.epic > 0 && hi.deals[0].price > sh.deals[0].price, 'bigger deals later');
   for (let k = 0; k < 40; k++) { G.state.shop = null; const m = G.shop(day, KCSim.mulberry(100 + k)).magicItems; assert(m.length === 4 && m.every(x => G.magicUsable(x.item))); }
   console.log(`diamond Shop sections: deals worth ${sh.deals.map(d => d.worth + 'x').join(' and ')}, magic items 1 to 25 diamonds, the three best cards: ok`);
+}
+
+// Arenas 5 to 10: their trophies, four cards each, the road, chest pools by best trophies, opponents
+{
+  const A = [['frostfang', 5, 2000, ['frostsprite', 'icegiant', 'wintersage', 'flashfreeze']], ['blackwater', 6, 2600, ['dockraiders', 'barrel', 'harpoon', 'broadside']],
+    ['gearforge', 7, 3300, ['coil', 'sparkbots', 'titan', 'arccannon']], ['crystal', 8, 4100, ['gemflash', 'shardguards', 'drill', 'prism']],
+    ['skyward', 9, 5000, ['sunsprite', 'guardian', 'drake', 'phoenix']], ['eclipse', 10, 6000, ['wraiths', 'meteor', 'abyss', 'dreadknight']]];
+  assert.deepStrictEqual(G.ARENAS.map(a => a.name).slice(0, 4), ['Cinder Keep', 'Briar Hollow', 'Sunstone Arena', 'Stormspire'], 'Arenas 1 to 4 unchanged');
+  assert.strictEqual(G.ARENAS.length, 10);
+  for (const [id, n, min, cards] of A) {
+    const a = G.ARENAS.find(x => x.id === id);
+    assert(a && a.number === n && a.min === min && !a.soon, id);
+    assert.deepStrictEqual(a.cards.slice().sort(), cards.slice().sort(), id + ' cards');
+    assert(G.ROAD.some(m => m.kind === 'arena' && m.arena === id && m.at === min), id + ' on the road');
+    for (const c of cards) { const m = G.ROAD.find(r => r.kind === 'card' && r.card === c); assert(m && m.at > min && m.at < (G.ARENAS.find(x => x.number === n + 1) || { min: 1e9 }).min, c + ' on the road in its arena'); }
+  }
+  // the road climbs in order and every reward is claimable once
+  for (let i = 1; i < G.ROAD.length; i++) assert(G.ROAD[i].at > G.ROAD[i - 1].at, 'road in order at ' + G.ROAD[i].at);
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 7100, best: 7100, claimed: { 0: true }, rubies: 0 }) }));
+  const Z = G.state;
+  let got = 0;
+  for (const m of G.ROAD) if (G.roadState(m) === 'ready') { const r = G.claim(m.at); assert(r, 'claim ' + m.at); got++; }
+  assert(G.ROAD.every(m => G.roadState(m) === 'claimed'), 'all claimed');
+  for (const [, , , cards] of A) for (const c of cards) assert(Z.found.includes(c) && Z.cards[c].level === KC_MIN_LEVEL(c), c + ' found at its rarity level');
+  assert.strictEqual(G.arena().number, 10);
+  // chest pools by best trophies: a card only drops once its arena is reached
+  for (const [, n, min, cards] of A) {
+    G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: min - 1, best: min - 1, claimed: { 0: true }, xp: 99999 }) }));
+    assert(!cards.some(c => G.chestPool().includes(c)), `Arena ${n} cards not before ${min}`);
+    G.state.best = min; G.state.trophies = min;
+    assert(cards.every(c => G.chestPool().includes(c)), `Arena ${n} cards from ${min}`);
+    const r = KCSim.mulberry(n); let seen = new Set();
+    for (let i = 0; i < 200; i++) for (const x of G.roll('mythic', r).cards) seen.add(x.id);
+    assert(cards.some(c => seen.has(c)), `Arena ${n} cards come out of chests`);
+    const next = G.ARENAS.find(x => x.number === n + 1);
+    if (next) assert(!next.cards.some(c => seen.has(c)), `no Arena ${n + 1} cards yet`);
+  }
+  // high up, opponents play the new cards and are at full strength
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 6800, best: 6800, claimed: { 0: true } }) }));
+  const newer = A.flatMap(a => a[3]);
+  let withNew = 0;
+  for (let i = 0; i < 60; i++) { const f = G.trophyFoe(KCSim.mulberry(400 + i)); if (f.deck.some(c => newer.includes(c))) withNew++; assert(new Set(f.deck).size === 8); }
+  assert(withNew > 50, 'opponents at 6,800 trophies play the new cards ' + withNew);
+  console.log(`Arenas 5 to 10: road (${got} rewards to 7,000), chest pools by arena, opponents use the new cards: ok`);
 }
 
 // King Tower levels, emotes in the Shop, and chests giving cards of your arena before the road does
