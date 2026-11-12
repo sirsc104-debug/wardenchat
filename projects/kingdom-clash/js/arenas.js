@@ -297,13 +297,13 @@ const KCArenas = (() => {
     palette: 'blackwater', margin: 1.4, fx: 'water',
     field: {
       src: 'img/blackwater_battlefield.webp', w: 1024, h: 1536,
-      x: [[265, 3.5], [760, 14.5]],
-      // the art's king pads sit closer to the princess pads than the game's towers do, so the king anchors
-      // are a compromise (a light stretch there), with the image's top and bottom edges held in place
-      y: [[0, -6.68], [330, 3], [415, 6.5], [705, 15], [790, 17], [1045, 25.5], [1130, 29], [1536, 42.5]],
-      bridges: [[1.61, 13.24, 5.5, 18.33], [12.5, 13.24, 16.39, 18.33]],
+      x: [[265, 3.5], [759, 14.5]],
+      // king pad, princess pads, the sea channel's edges, princess pads, king pad; the king pads sit a little
+      // close to the princess pads, so the image's top and bottom edges are held at the field's own scale
+      y: [[0, -7.8], [350, 3], [437, 6.5], [712, 15], [788, 17], [1047, 25.5], [1130, 29], [1536, 41.5]],
+      bridges: [[1.61, 13.45, 5.24, 18.54], [12.74, 13.45, 16.41, 18.54]],
       // the fire bowls at the bottom corners and the two hanging lanterns at the top
-      lanterns: [[-0.57, 29.57], [18.61, 29.57], [4.88, -1.84], [13.01, -1.84]],
+      lanterns: [[-0.57, 29.92], [18.57, 29.92], [4.84, -1.47], [13.12, -1.47]],
     },
     scenery: {
       // the left stands: the ship's-wheel wall, stone stairs, a market stall, the harbor walk below

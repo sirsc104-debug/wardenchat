@@ -1904,3 +1904,22 @@ button.slot:hover { transform: translateY(-3px); }
 .ds-blurb { min-height: 28px; line-height: 1.25; }
 @media (max-width: 760px) { .dshop.magic { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .dshop.deals { grid-template-columns: 1fr; } .dshop.cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ds-ic { width: 44px; height: 44px; } }
+
+/* the trophy counter beside the currencies; the centerpiece's bar without its text, the centerpiece as a link to the road */
+.res-chip.trophy-chip { min-width: 120px; padding-right: 10px; }
+.res-chip.trophy-chip .trophy-i { width: 28px; height: 28px; vertical-align: 0; flex: none; }
+.res-chip.trophy-chip b { color: #ffd76a; }
+#cpText { display: none; }
+.cp.to-road { cursor: pointer; }
+.cp.to-road:hover { filter: brightness(1.06); }
+.cp.to-road:focus-visible { outline: 3px solid #ffd76a; outline-offset: 4px; border-radius: 12px; }
+@media (max-width: 760px) { .res-chip.trophy-chip { min-width: 0; } }
+/* phones: four counters (trophies, rubies, coins, diamonds) share the row, wrapping if they must */
+@media (max-width: 560px) {
+  .res { flex-wrap: wrap; gap: 6px; }
+  .res-chip { height: 34px; gap: 4px; padding: 0 3px 0 4px; }
+  .res-chip b { font-size: 15px; }
+  .res-chip .ruby-i, .res-chip .gem-i, .res-chip .wcoin-i, .res-chip.trophy-chip .trophy-i { width: 20px; height: 20px; }
+  .res-chip .plus { width: 22px; height: 22px; font-size: 13px; }
+  .res-chip.trophy-chip { padding-right: 6px; }
+}

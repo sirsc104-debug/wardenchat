@@ -1507,6 +1507,11 @@ const KCMenu = (() => {
     $('#xpFill').style.width = (into / G.XP_PER_LEVEL * 100).toFixed(1) + '%';
     $('#xpText').textContent = `${into} / ${G.XP_PER_LEVEL}`;
     $('#rubyVal').textContent = fmt(p.rubies);
+    // trophies, beside the currencies, once the Trophy Road is open (a click opens it)
+    $('#trophyChip').hidden = !G.roadOpen();
+    $('#trophyVal').textContent = fmt(p.trophies);
+    $('#cp').classList.toggle('to-road', G.roadOpen());
+    $('#cp').title = G.roadOpen() ? 'Open the Trophy Road' : '';
     $('#gemVal').textContent = fmt(p.diamonds);
     $('#walletVal').textContent = fmt(p.wallet);
     if (!$('#exModal').hidden) renderExchange();
@@ -1634,6 +1639,10 @@ const KCMenu = (() => {
     $('#kingUp').addEventListener('click', upgradeKingClick);
     $('#kingModal').addEventListener('click', e => { if (e.target.id === 'kingModal') closeKing(); });
     $('#walletBtn').addEventListener('click', openExchange);
+    // the arena centerpiece opens the Trophy Road (where each arena's trophies are shown)
+    const cpGo = () => { if (G.roadOpen()) { KCSound.play('select'); tab('road'); } };
+    $('#cp').addEventListener('click', cpGo);
+    $('#cp').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && G.roadOpen()) { e.preventDefault(); cpGo(); } });
     $('#exX').addEventListener('click', closeExchange);
     $('#exModal').addEventListener('click', e => { if (e.target.id === 'exModal') closeExchange(); });
     $('#exAmount').addEventListener('input', renderExchange);

@@ -27,6 +27,7 @@
         </div>
         <button class="king-chip" id="kingBtn" type="button" title="Your King Tower: its level sets the strength of your towers"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 36V16h4v-4h4v4h8v-4h4v4h4v20z" fill="#d8d2cb" stroke="#1c1530" stroke-width="2.6" stroke-linejoin="round"/><path d="M12 12L14 4l4 4 2-6 2 6 4-4 2 8z" fill="#ffcd33" stroke="#1c1530" stroke-width="2.2" stroke-linejoin="round"/><rect x="16" y="22" width="8" height="14" rx="2" fill="#2f6fe4" stroke="#1c1530" stroke-width="2.2"/></svg><span><small>King Tower</small><b id="kingNum">1</b></span></button>
         <div class="res">
+          <button class="res-chip trophy-chip" id="trophyChip" type="button" data-tab="road" title="Trophies: open the Trophy Road" hidden><i class="trophy-i" aria-hidden="true"></i><b id="trophyVal">0</b><span class="sr">Trophies</span></button>
           <button class="res-chip" type="button" data-tab="shop" title="Rubies: open the Shop"><span class="ruby-i" aria-hidden="true"></span><b id="rubyVal">0</b><span class="plus" aria-hidden="true">+</span><span class="sr">Rubies</span></button>
           <button class="res-chip wallet" id="walletBtn" type="button" title="SirSC Coins: swap them for Rubies"><span class="wcoin-i" aria-hidden="true"></span><b id="walletVal">0</b><span class="plus" aria-hidden="true">&#x21C4;</span><span class="sr">Coins: exchange for Rubies</span></button>
           <button class="res-chip" type="button" data-tab="shop" title="Diamonds: open the Shop"><span class="gem-i" aria-hidden="true"></span><b id="gemVal">0</b><span class="plus" aria-hidden="true">+</span><span class="sr">Diamonds</span></button>
@@ -58,7 +59,7 @@
 
           <div class="center">
             <div class="cp-row">
-              <div class="cp" id="cp">
+              <div class="cp" id="cp" tabindex="0" aria-label="Arena: open the Trophy Road">
                 <img id="cpImg" alt="Training Grounds arena" draggable="false">
                 <div class="cp-fallback" id="cpFallback" aria-hidden="true">Training Grounds</div>
                 <div class="cp-bar" role="progressbar" aria-label="Trainers defeated" aria-valuemin="0" aria-valuemax="3" aria-valuenow="0" id="cpBar">
