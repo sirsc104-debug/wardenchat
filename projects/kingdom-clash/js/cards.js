@@ -349,6 +349,181 @@ const KC_CARDS = {
     jump: { min: 3.5, max: 5, dmg: 204, r: 2.2, time: 0.9, cd: 1.0 },
     blurb: 'A towering knight in black armor. He lands with a shockwave, every swing hits all ground troops around his target, and he leaps onto enemies 3.5 to 5 tiles away.',
   },
+
+  /* The expansion: 24 more cards, 14 spells, 9 buildings and a troop, spread over all ten arenas. Each
+     works like a well-known card of the genre, brought to this game's scale the same way (troops and
+     spells: health x0.69, damage x0.46; buildings: health x0.85, damage x0.33, as the Cannon and the Coil
+     Tower are). Spell damage grows with the card's level; durations, radii, lifetimes and energy don't. */
+  // Arena 1: Cinder Keep
+  magmaquake: {
+    id: 'magmaquake', name: 'Magma Quake', cost: 3, rarity: 'rare', kind: 'spell', role: 'Building killer', count: 1,
+    dmg: 100, area: 3.5, towerPct: 0.35, zone: { dur: 3, every: 1, targets: 'ground', bldMult: 4.5, slow: 0.5 },
+    blurb: 'The ground splits open in volcanic cracks for 3 seconds. Three tremors hurt ground troops and slow them, and hit buildings four and a half times as hard. Flying troops float above it.',
+  },
+  ashfall: {
+    id: 'ashfall', name: 'Ashfall', cost: 4, rarity: 'epic', kind: 'spell', role: 'Damage over time', count: 1,
+    dmg: 335, area: 3.5, towerPct: 0.3, zone: { dur: 8, every: 1, targets: 'both' },
+    blurb: 'A cloud of burning volcanic ash hangs over an area for 8 seconds, searing every enemy troop and building under it, on the ground or in the air.',
+  },
+  magmaturret: {
+    id: 'magmaturret', name: 'Magma Turret', cost: 4, rarity: 'rare', kind: 'building', role: 'Splash defense', count: 1,
+    hp: 1150, dmg: 73, hit: 1.8, range: 6, targets: 'ground', air: false, splash: 1.5,
+    radius: 0.9, half: 0.95, lifetime: 30, proj: 'magmarock', projSpeed: 9, deathBlast: { r: 2.5, dmg: 73 },
+    blurb: 'A forge turret that lobs exploding molten rocks at ground troops, splashing everything near where they land. When it is destroyed or burns out, it erupts one last time.',
+  },
+  // Arena 2: Briar Hollow
+  thornroller: {
+    id: 'thornroller', name: 'Thornroller', cost: 2, rarity: 'legendary', kind: 'spell', role: 'Spell', count: 1, ownSide: true,
+    dmg: 133, area: 1.95, towerPct: 0.2, roll: { dist: 10.1, speed: 7.5, knock: 0.9 },
+    blurb: 'A huge thorn-covered log rolls forward from where you place it, flattening ground troops in its path and knocking them back. It grazes towers for less. Placed on your side, like a troop.',
+  },
+  briarbind: {
+    id: 'briarbind', name: 'Briar Bind', cost: 3, rarity: 'epic', kind: 'spell', role: 'Control', count: 1,
+    dmg: 70, area: 2.5, towerPct: 0, bind: { n: 3, dur: 2 },
+    blurb: 'Enchanted vines burst from the ground and seize the three toughest enemy troops or buildings in the area for 2 seconds: they can\'t move or attack, and flying troops are dragged down where ground troops can reach them.',
+  },
+  bramblenest: {
+    id: 'bramblenest', name: 'Bramble Nest', cost: 4, rarity: 'rare', kind: 'building', role: 'Spawner', count: 1,
+    hp: 935, dmg: 0, hit: 1, range: 0, targets: 'ground', air: false,
+    radius: 0.9, half: 0.95, lifetime: 29, spawner: { card: 'thornling', every: 4.5, first: 1, onDeath: 0, n: 1 },
+    blurb: 'A hut of living briars. Every few seconds a thornling scurries out and throws thorns at ground and air troops alike.',
+  },
+  thornling: {
+    id: 'thornling', name: 'Thornling', cost: 0, rarity: 'rare', kind: 'troop', role: 'Ranged', count: 1, hidden: true,
+    hp: 92, dmg: 37, hit: 1.7, range: 5, speed: 2.0, targets: 'both', air: false, radius: 0.34, mass: 1, proj: 'thorn', projSpeed: 12,
+    blurb: 'A little forest creature that throws thorns.',
+  },
+  // Arena 3: Sunstone Arena
+  scarabshrine: {
+    id: 'scarabshrine', name: 'Scarab Shrine', cost: 3, rarity: 'rare', kind: 'building', role: 'Spawner', count: 1,
+    hp: 430, dmg: 0, hit: 1, range: 0, targets: 'ground', air: false,
+    radius: 0.85, half: 0.9, lifetime: 30, spawner: { card: 'scarab', every: 3.5, first: 1, onDeath: 4, n: 2 },
+    blurb: 'An old sandstone tomb. Scarab warriors crawl out of it two at a time, and four more spill out when it crumbles.',
+  },
+  scarab: {
+    id: 'scarab', name: 'Scarab', cost: 0, rarity: 'rare', kind: 'troop', role: 'Swarm', count: 1, hidden: true,
+    hp: 40, dmg: 40, hit: 1.0, range: 0.4, speed: 1.5, targets: 'ground', air: false, radius: 0.3, mass: 0.8,
+    blurb: 'A fragile scarab warrior.',
+  },
+  dunemortar: {
+    id: 'dunemortar', name: 'Dune Mortar', cost: 4, rarity: 'common', kind: 'building', role: 'Siege', count: 1,
+    hp: 1160, dmg: 88, hit: 5, range: 11.5, minRange: 3.5, targets: 'ground', air: false, siege: true, splash: 2,
+    radius: 0.95, half: 1.0, lifetime: 30, deployTime: 3.5, proj: 'mortarshell', projSpeed: 5, lob: true,
+    blurb: 'A sandstone siege cannon that lobs huge stones at ground troops, buildings and towers up to 11.5 tiles away, even from your own side. It can\'t hit anything closer than 3.5 tiles, and it takes a while to set up.',
+  },
+  // Arena 4: Stormspire
+  judgment: {
+    id: 'judgment', name: 'Judgment Bolt', cost: 6, rarity: 'epic', kind: 'spell', role: 'Spell', count: 1,
+    dmg: 486, area: 3.5, towerPct: 0.3, bolts: { n: 3, every: 0.3, stun: 0.5 },
+    blurb: 'Three bolts of lightning strike the three toughest enemies in the area, troops, buildings or towers, one after another, stunning each for a moment.',
+  },
+  cyclone: {
+    id: 'cyclone', name: 'Cyclone', cost: 3, rarity: 'epic', kind: 'spell', role: 'Control', count: 1,
+    dmg: 115, area: 5.5, towerPct: 0.3, zone: { dur: 1.5, every: 0.1, targets: 'both', pull: 3.5 },
+    blurb: 'A howling storm spins for a second and a half, dragging enemy troops on the ground and in the air toward its eye and buffeting them. Heavy troops resist the pull; buildings don\'t move.',
+  },
+  conductor: {
+    id: 'conductor', name: 'Storm Conductor', cost: 5, rarity: 'rare', kind: 'building', role: 'Tank killer', count: 1,
+    hp: 1490, dmg: 33, hit: 0.4, range: 6, targets: 'both', air: false,
+    radius: 0.9, half: 0.95, lifetime: 30, beam: { dps: [33, 105, 380], stage: 2 },
+    blurb: 'A tall tower of glowing storm crystals that locks a lightning beam onto one ground or flying enemy. The longer the beam holds, the harder it hits; it starts over on a new target or when stunned.',
+  },
+  // Arena 5: Frostfang Keep
+  glacierslam: {
+    id: 'glacierslam', name: 'Glacier Slam', cost: 2, rarity: 'common', kind: 'spell', role: 'Spell', count: 1,
+    dmg: 88, area: 2.5, towerPct: 0.3, projSpeed: 9, projKind: 'glacier', knockback: 1.5, slowHit: { f: 0.35, dur: 2.5 },
+    blurb: 'A great ball of magic ice hurled from your King Tower. It hits everything in the area, air and ground, knocks them back and slows them for 2.5 seconds.',
+  },
+  cage: {
+    id: 'cage', name: 'Frostfang Cage', cost: 4, rarity: 'rare', kind: 'building', role: 'Defense', count: 1,
+    hp: 890, dmg: 0, hit: 1, range: 0, targets: 'ground', air: false,
+    radius: 0.9, half: 0.95, lifetime: 20, spawner: { card: 'frostbrute', every: 0, first: 0, onDeath: 1, n: 1 },
+    blurb: 'An ice prison that draws enemy troops to it. When it breaks or melts, the Frost Brute locked inside bursts out and fights.',
+  },
+  frostbrute: {
+    id: 'frostbrute', name: 'Frost Brute', cost: 0, rarity: 'rare', kind: 'troop', role: 'Melee', count: 1, hidden: true,
+    hp: 704, dmg: 116, hit: 1.2, range: 0.6, speed: 1.5, targets: 'ground', air: false, radius: 0.55, mass: 4,
+    blurb: 'A hulking brawler of the frozen north.',
+  },
+  // Arena 6: Blackwater Harbor
+  powderkeg: {
+    id: 'powderkeg', name: 'Powder Keg', cost: 2, rarity: 'epic', kind: 'spell', role: 'Spell', count: 1, ownSide: true,
+    dmg: 111, area: 1.3, towerPct: 0, roll: { dist: 4.5, speed: 6, knock: 0, spawn: 'buccaneer' },
+    blurb: 'A gunpowder keg rolls forward from where you place it, bowling over ground troops in its way, then bursts and a pirate jumps out. Placed on your side, like a troop.',
+  },
+  barracks: {
+    id: 'barracks', name: 'Pirate Barracks', cost: 6, rarity: 'rare', kind: 'building', role: 'Spawner', count: 1,
+    hp: 1250, dmg: 0, hit: 1, range: 0, targets: 'ground', air: false,
+    radius: 1.0, half: 1.05, lifetime: 35, spawner: { card: 'buccaneer', every: 14, first: 1, onDeath: 1, n: 2 },
+    blurb: 'A fort built from shipwreck timber. Every 14 seconds two cutlass pirates march out, and one more when it falls.',
+  },
+  buccaneer: {
+    id: 'buccaneer', name: 'Buccaneer', cost: 0, rarity: 'rare', kind: 'troop', role: 'Melee', count: 1, hidden: true,
+    hp: 495, dmg: 88, hit: 1.4, range: 0.6, speed: 1.0, targets: 'ground', air: false, radius: 0.5, mass: 3,
+    blurb: 'A burly pirate with a cutlass.',
+  },
+  // Arena 7: Gearforge Citadel
+  overclock: {
+    id: 'overclock', name: 'Overclock', cost: 2, rarity: 'epic', kind: 'spell', role: 'Boost', count: 1,
+    dmg: 40, area: 3, towerPct: 0.3, rage: { dur: 6, boost: 1.35, linger: 1 },
+    blurb: 'A field of humming gears and sparks. For 6 seconds your troops and buildings inside move and attack 35% faster (for a second after they leave, too). It jolts enemies a little as it lands.',
+  },
+  foundry: {
+    id: 'foundry', name: 'Energy Foundry', cost: 6, rarity: 'rare', kind: 'building', role: 'Economy', count: 1,
+    hp: 910, dmg: 0, hit: 1, range: 0, targets: 'ground', air: false,
+    radius: 0.9, half: 0.95, lifetime: 70, produce: { every: 9 },
+    blurb: 'A clanking generator that makes 1 battle energy every 9 seconds for 70 seconds, up to your energy limit. It only adds energy in this battle.',
+  },
+  smelter: {
+    id: 'smelter', name: 'Walking Smelter', cost: 4, rarity: 'rare', kind: 'troop', role: 'Spawner', count: 1,
+    hp: 775, dmg: 0, hit: 1, range: 0.6, speed: 0.6, targets: 'buildings', air: false,
+    radius: 0.7, mass: 9, spawner: { card: 'emberling', every: 5, first: 1, n: 2 },
+    blurb: 'A furnace on iron legs that clanks slowly toward enemy buildings. Every 5 seconds it spits out two little emberlings that leap onto enemies and burst.',
+  },
+  emberling: {
+    id: 'emberling', name: 'Emberling', cost: 0, rarity: 'rare', kind: 'troop', role: 'Splash', count: 1, hidden: true,
+    hp: 159, dmg: 95, hit: 0.3, range: 2.5, speed: 2.0, targets: 'both', air: false, radius: 0.3, mass: 0.6, leap: { r: 1.25, speed: 7 },
+    blurb: 'A little flame that leaps at enemies and bursts.',
+  },
+  // Arena 8: Crystal Chasm
+  prismecho: {
+    id: 'prismecho', name: 'Prism Echo', cost: 3, rarity: 'epic', kind: 'spell', role: 'Boost', count: 1,
+    dmg: 0, area: 3, towerPct: 0, clone: true,
+    blurb: 'A flash of mirrored crystal makes a copy of each of your troops in the area. The copies fight just like the real ones, but have only 1 health. Buildings aren\'t copied.',
+  },
+  // Arena 9: Skyward Sanctuary
+  heavensguard: {
+    id: 'heavensguard', name: 'Heaven\'s Guard', cost: 3, rarity: 'common', kind: 'spell', role: 'Spell', count: 1, ownSide: true,
+    dmg: 200, area: 3, towerPct: 0.3, delivery: { delay: 2, card: 'sentinel' },
+    blurb: 'A golden capsule falls from the sky onto your side of the arena. After 2 seconds it lands, hurting enemies around it, and a shielded Heavenly Sentinel steps out.',
+  },
+  sentinel: {
+    id: 'sentinel', name: 'Heavenly Sentinel', cost: 0, rarity: 'common', kind: 'troop', role: 'Melee', count: 1, hidden: true,
+    hp: 304, dmg: 51, hit: 1.3, range: 1.6, speed: 1.0, targets: 'ground', air: false, radius: 0.5, mass: 3, shield: 137,
+    blurb: 'A guardian in golden armor with a spear and a shield.',
+  },
+  reflection: {
+    id: 'reflection', name: 'Divine Reflection', cost: 1, rarity: 'epic', kind: 'spell', role: 'Copy', count: 1, mirror: true,
+    dmg: 0, area: 0, towerPct: 0,
+    blurb: 'Plays the last card you used again, one level higher, for 1 more energy than it cost. Its cost in your hand changes with every card you play. It can\'t copy itself.',
+  },
+  ballista: {
+    id: 'ballista', name: 'Golden Ballista', cost: 6, rarity: 'epic', kind: 'building', role: 'Siege', count: 1,
+    hp: 1130, dmg: 9, hit: 0.3, range: 11.5, targets: 'ground', air: false, siege: true,
+    radius: 0.95, half: 1.0, lifetime: 30, deployTime: 3.5, proj: 'bolt', projSpeed: 22,
+    blurb: 'A great golden crossbow on a marble stand that fires a rapid stream of bolts at ground troops, buildings and towers up to 11.5 tiles away, even from your own side. It takes a while to set up.',
+  },
+  // Arena 10: Eclipse Throne
+  soulblight: {
+    id: 'soulblight', name: 'Soulblight', cost: 2, rarity: 'epic', kind: 'spell', role: 'Curse', count: 1,
+    dmg: 90, area: 3, towerPct: 0.3, zone: { dur: 6, every: 0.5, targets: 'both' }, curse: { amp: 1.2, card: 'wraith' },
+    blurb: 'A sinister curse hangs over an area for 6 seconds. Cursed enemies wither, take 20% more damage from your side, and any enemy troop that falls under it rises again as a wraith on your side.',
+  },
+  collapse: {
+    id: 'collapse', name: 'Abyssal Collapse', cost: 5, rarity: 'epic', kind: 'spell', role: 'Spell', count: 1,
+    dmg: 470, area: 2.5, towerPct: 0.25, void: { pulses: 3, every: 1, first: 0.6, tiers: [[1, 1], [4, 0.48], [99, 0.21]] },
+    blurb: 'A rift of dark energy opens over an area and strikes three times. The fewer enemies inside, the harder each strike hits: one enemy takes it all, a crowd shares much less.',
+  },
 };
 
 // Evolutions: each has its own unlock (shards) and how often it comes round in a battle (every
@@ -369,6 +544,10 @@ const KC_ALL_CARDS = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowm
   'sandstorm', 'ramcart', 'mole', 'camel', 'bees', 'owl', 'thundercloud', 'griffin',
   'frostsprite', 'icegiant', 'flashfreeze', 'wintersage', 'dockraiders', 'barrel', 'broadside', 'harpoon',
   'coil', 'sparkbots', 'titan', 'arccannon', 'gemflash', 'shardguards', 'drill', 'prism',
-  'sunsprite', 'guardian', 'drake', 'phoenix', 'wraiths', 'meteor', 'abyss', 'dreadknight'];
+  'sunsprite', 'guardian', 'drake', 'phoenix', 'wraiths', 'meteor', 'abyss', 'dreadknight',
+  // the expansion, by arena
+  'magmaquake', 'ashfall', 'magmaturret', 'thornroller', 'briarbind', 'bramblenest', 'scarabshrine', 'dunemortar',
+  'judgment', 'cyclone', 'conductor', 'glacierslam', 'cage', 'powderkeg', 'barracks', 'overclock', 'foundry', 'smelter',
+  'prismecho', 'heavensguard', 'reflection', 'ballista', 'soulblight', 'collapse'];
 
 const KC_STARTER_DECK = ['rhino', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'];

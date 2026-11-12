@@ -450,18 +450,22 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   const Q = G.state, sh = G.shop(day, KCSim.mulberry(4));
   // deals: two, wild cards and rubies, always worth over twice their price
   assert.strictEqual(sh.deals.length, 2);
-  for (const d of sh.deals) assert(d.rubies > 0 && d.wild.common > 0 && d.wild.rare > 0 && !d.wild.epic && d.worth > 2, JSON.stringify(d));
+  // (epic wild cards only once an epic card can drop: Arena 1 has one since the expansion, Ashfall)
+  const epicHere = G.chestPool().some(id => KC_CARDS[id].rarity === 'epic');
+  for (const d of sh.deals) assert(d.rubies > 0 && d.wild.common > 0 && d.wild.rare > 0 && (epicHere || !d.wild.epic) && d.worth > 2, JSON.stringify(d));
   // magic: four different usable items, cheapest first; the hammer costs 25 and nothing costs more
   const M = G.ECONOMY.diamondShop.magic;
   assert.strictEqual(sh.magicItems.length, 4);
   assert.strictEqual(new Set(sh.magicItems.map(m => m.item)).size, 4);
-  assert(sh.magicItems.every(m => G.magicUsable(m.item)) && !sh.magicItems.some(m => m.item === 'shards' || m.item.endsWith('_epic') || m.item.endsWith('_legendary')), 'only items you can use');
+  assert(sh.magicItems.every(m => G.magicUsable(m.item)) && !sh.magicItems.some(m => m.item === 'shards' || (!epicHere && m.item.endsWith('_epic')) || m.item.endsWith('_legendary')), 'only items you can use');
   assert(M.hammer_books.price === 25 && Object.values(M).every(m => m.price <= 25), 'the Hammer of Books costs the most');
   const order = ['wild_common', 'wild_rare', 'wild_epic', 'wild_legendary'], bk = ['book_common', 'book_rare', 'book_epic', 'book_legendary', 'book_books', 'hammer_books'];
   for (const list of [order, bk]) for (let i = 1; i < list.length; i++) assert(M[list[i]].price > M[list[i - 1]].price, 'rarer costs more: ' + list[i]);
-  // cards: the three best cards the arena can give, rares here
+  // cards: the three best cards the arena can give, rarest first (Ashfall, the one epic, then rares here)
   assert.strictEqual(sh.cardShop.length, 3);
-  assert(sh.cardShop.every(c => KC_CARDS[c.card].rarity === 'rare' && G.chestPool().includes(c.card)), JSON.stringify(sh.cardShop));
+  const RK = { common: 0, rare: 1, epic: 2, legendary: 3 }, best = Math.max(...G.chestPool().map(id => RK[KC_CARDS[id].rarity]));
+  assert(sh.cardShop.every(c => G.chestPool().includes(c.card)) && RK[KC_CARDS[sh.cardShop[0].card].rarity] === best
+    && sh.cardShop.every((c, i) => !i || RK[KC_CARDS[c.card].rarity] <= RK[KC_CARDS[sh.cardShop[i - 1].card].rarity]), JSON.stringify(sh.cardShop));
   // buying: diamonds only, once a day each, a confirm-free rule call here
   let r = G.buyDiamond('deals', 0, day);
   const d0 = sh.deals[0];
@@ -469,8 +473,9 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   assert.strictEqual(G.buyDiamond('deals', 0, day).error, 'sold', 'once a day');
   const hm = sh.magicItems[0], had = Q.magic[hm.item] || 0;
   r = G.buyDiamond('magic', 0, day); assert(r.ok && Q.magic[hm.item] === had + hm.qty, 'a magic item');
-  const c0 = sh.cardShop[0], cnt = Q.cards[c0.card].count;
-  r = G.buyDiamond('cards', 0, day); assert(r.ok && Q.cards[c0.card].count === cnt + c0.qty && r.cards[0].n === c0.qty, 'a card pack');
+  const c0 = sh.cardShop[0], cnt = Q.cards[c0.card].count, wasFound = Q.found.includes(c0.card);
+  // (a card not found yet: its first copy unlocks it and isn't counted as a duplicate)
+  r = G.buyDiamond('cards', 0, day); assert(r.ok && Q.cards[c0.card].count === cnt + c0.qty - (wasFound ? 0 : 1) && r.cards[0].n === c0.qty && Q.found.includes(c0.card), 'a card pack');
   Q.diamonds = 0; assert.strictEqual(G.buyDiamond('cards', 1, day).error, 'diamonds');
   Q.rubies = 1e6; assert.strictEqual(G.buyDiamond('cards', 1, day).error, 'diamonds', 'rubies never buy these');
   // the same items all day, new ones tomorrow; a saved day's sections survive a reload
@@ -482,7 +487,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   // later arenas: legendaries and epics in the Card Shop; deals grow with price, still over 2x
   G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 1300, best: 1300, claimed: { 0: true }, diamonds: 100 }) }));
   const hi = G.shop(day, KCSim.mulberry(5));
-  assert(hi.cardShop.map(c => KC_CARDS[c.card].rarity).join() === 'legendary,legendary,epic', JSON.stringify(hi.cardShop));
+  assert(hi.cardShop.every(c => KC_CARDS[c.card].rarity === 'legendary'), JSON.stringify(hi.cardShop)); // Camel, Griffin, Thornroller
   assert(hi.deals.every(d => d.worth > 2) && hi.deals[1].wild.epic > 0 && hi.deals[0].price > sh.deals[0].price, 'bigger deals later');
   for (let k = 0; k < 40; k++) { G.state.shop = null; const m = G.shop(day, KCSim.mulberry(100 + k)).magicItems; assert(m.length === 4 && m.every(x => G.magicUsable(x.item))); }
   console.log(`diamond Shop sections: deals worth ${sh.deals.map(d => d.worth + 'x').join(' and ')}, magic items 1 to 25 diamonds, the three best cards: ok`);
@@ -498,7 +503,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   for (const [id, n, min, cards] of A) {
     const a = G.ARENAS.find(x => x.id === id);
     assert(a && a.number === n && a.min === min && !a.soon, id);
-    assert.deepStrictEqual(a.cards.slice().sort(), cards.slice().sort(), id + ' cards');
+    assert(cards.every(c => a.cards.includes(c)), id + ' cards (its first four; the expansion adds more, see tools/expansion-test.js)');
     assert(G.ROAD.some(m => m.kind === 'arena' && m.arena === id && m.at === min), id + ' on the road');
     for (const c of cards) { const m = G.ROAD.find(r => r.kind === 'card' && r.card === c); assert(m && m.at > min && m.at < (G.ARENAS.find(x => x.number === n + 1) || { min: 1e9 }).min, c + ' on the road in its arena'); }
   }

@@ -52,6 +52,8 @@ const KCSim = (() => {
       towerDamage: opts.towerDamage || [1, 1],
       // Each team's unlocked evolutions (card ids), and how many times each card has been played.
       evos: opts.evos || [[], []], evoPlays: [{}, {}],
+      // the last card each team played that Divine Reflection can copy (never Divine Reflection itself)
+      last: [null, null],
       rand: mulberry(opts.seed || 1),
     };
     for (const team of [0, 1]) {
@@ -76,7 +78,20 @@ const KCSim = (() => {
     });
   }
 
-  const cardLevel = (s, team, id) => Math.max(KC_MIN_LEVEL(id), (s.cardLevels[team] && s.cardLevels[team][id]) || s.levels[team] || 1);
+  let forceLvl = 0; // set while Divine Reflection plays a card one level higher
+  const cardLevel = (s, team, id) => forceLvl || Math.max(KC_MIN_LEVEL(id), (s.cardLevels[team] && s.cardLevels[team][id]) || s.levels[team] || 1);
+  // What a card costs to play now: Divine Reflection costs the card it would copy, plus one.
+  function costOf(s, team, id) {
+    const c = KC_CARDS[id];
+    if (!c) return Infinity;
+    if (!c.mirror) return c.cost;
+    const l = s.last && s.last[team];
+    return l ? Math.min(MAX_ENERGY, KC_CARDS[l].cost + 1) : Infinity;
+  }
+  // The card a play really is: Divine Reflection stands for the last card played (null if none yet).
+  const resolve = (s, team, id) => (KC_CARDS[id] && KC_CARDS[id].mirror ? (s.last && s.last[team]) || null : id);
+  // Overclock: friendly troops and buildings inside move and attack faster
+  const rageOf = (s, e) => (e.rageEnd > s.time ? e.rageF || 1 : 1);
   const blocks = e => (e.kind === 'tower' || e.kind === 'building') && !e.dead && !e.tunnel;
   const byId = (s, id) => {
     if (!id) return null;
@@ -90,7 +105,7 @@ const KCSim = (() => {
   const edge = (a, b) => dist(a, b) - a.radius - b.radius;
   function canHit(a, t) {
     if (!t || t.dead || t.team === a.team || t.tunnel || t.leap || t.hidden || a.targets === 'none') return false;
-    if (a.kind === 'building' && t.kind !== 'troop') return false;
+    if (a.kind === 'building' && t.kind !== 'troop' && !a.siege) return false;
     if (a.targets === 'buildings') return t.kind === 'tower' || t.kind === 'building';
     if (a.targets === 'ground') return !t.air;
     return true;
@@ -108,7 +123,8 @@ const KCSim = (() => {
   function canDeploy(s, team, cardId, x, y) {
     const c = KC_CARDS[cardId];
     if (!c || x < 0.5 || x > W - 0.5 || y < 0.5 || y > H - 0.5) return false;
-    if (c.kind === 'spell') return true;
+    if (c.mirror) { const l = resolve(s, team, cardId); return !!l && canDeploy(s, team, l, x, y); }
+    if (c.kind === 'spell' && !c.ownSide) return true;
     if (c.anywhere) {
       const inRiver = y > RIVER_TOP && y < RIVER_BOT && !BRIDGES.some(b => Math.abs(x - b) < BRIDGE_HALF);
       const hf = c.half || 0;
@@ -128,16 +144,130 @@ const KCSim = (() => {
     return ok && !inTower(s, x, y, half ? half + 0.05 : 0.2);
   }
 
+
+  /* ---------- the expansion's spells ---------- */
+  // Enemies a spell can touch at (x, y) within r: troops and buildings (and towers when `towers`), on the
+  // ground or in the air as `targets` says; never anything underground, mid-leap or hidden.
+  function inArea(s, team, x, y, r, targets, towers) {
+    const out = [];
+    for (const e of s.ents) {
+      if (e.dead || e.team === team || e.tunnel || e.leap || e.hidden) continue;
+      if (e.kind === 'tower' && !towers) continue;
+      if (targets === 'ground' && e.air) continue;
+      if (hyp(e.x - x, e.y - y) - e.radius > r) continue;
+      out.push(e);
+    }
+    return out;
+  }
+  // The toughest first (most health; the older one on a tie), for Briar Bind and Judgment Bolt.
+  const toughest = (list, n) => list.slice().sort((a, b) => b.hp - a.hp || a.id - b.id).slice(0, n);
+  function castSpell(s, team, id, x, y) {
+    const c = KC_CARDS[id], lvl = cardLevel(s, team, id), m = levelMult(lvl), dmg = Math.round(c.dmg * m);
+    const zone = (z) => { s.zones.push(Object.assign({ x, y, r: c.area, team, pulse: 0, card: id, age: 0, towerPct: c.towerPct, level: lvl, bldMult: 1 }, z)); };
+    if (c.zone) {
+      // Magma Quake, Ashfall, Cyclone, Soulblight: a lingering area that hits on a steady beat (the first
+      // beat as it lands); its total damage is the card's damage
+      const Z = c.zone, beats = Math.max(1, Math.round(Z.dur / Z.every));
+      zone({ kind: id, dps: 0, hitEach: Math.max(1, Math.round(dmg / beats)), every: Z.every, pulse: Z.every, left: Z.dur - Z.every / 2, dur: Z.dur,
+        targets: Z.targets, bldMult: Z.bldMult || 1, slow: Z.slow || 0, pull: Z.pull || 0, curse: c.curse ? { amp: c.curse.amp, card: c.curse.card } : null });
+      s.events.push({ type: 'cast', team, card: id, x, y });
+      return true;
+    }
+    if (c.roll) {
+      // Thornroller, Powder Keg: rolls straight ahead (toward the enemy) from the spot it is placed
+      const R = c.roll, dy = team === 0 ? -1 : 1;
+      s.projs.push({ kind: id, roll: true, team, x, y, sx: x, sy: y, dx: 0, dy, left: R.dist, speed: R.speed, dmg, width: c.area,
+        knock: R.knock, towerPct: c.towerPct, hitIds: [], spawn: R.spawn || null, level: lvl, card: id, tx: x, ty: y + dy * R.dist });
+      s.events.push({ type: 'cast', team, card: id, x, y });
+      return true;
+    }
+    if (c.bind) {
+      // Briar Bind: the three toughest enemy troops or buildings in the area are held fast (flying troops
+      // pulled down to the ground) and hurt over the hold
+      const held = toughest(inArea(s, team, x, y, c.area, 'both', false), c.bind.n);
+      for (const e of held) {
+        stun(s, e, c.bind.dur, 'vines');
+        e.boundEnd = s.time + c.bind.dur;
+        if (e.kind === 'troop' && e.baseAir) e.air = false;
+      }
+      zone({ kind: id, ids: held.map(e => e.id), dps: 0, hitEach: Math.max(1, Math.round(dmg / 8)), every: c.bind.dur / 8, pulse: 0, left: c.bind.dur, dur: c.bind.dur, targets: 'both' });
+      s.events.push({ type: 'cast', team, card: id, x, y });
+      s.events.push({ type: 'bind', team, card: id, x, y, ids: held.map(e => e.id) });
+      return true;
+    }
+    if (c.bolts) {
+      // Judgment Bolt: three strikes, one after another, on the three toughest enemies in the area
+      // (towers too), chosen as it is cast
+      const B = c.bolts, picks = toughest(inArea(s, team, x, y, c.area, 'both', true), B.n);
+      zone({ kind: id, strikes: picks.map(e => e.id), dps: 0, hitEach: dmg, every: B.every, pulse: 0, left: B.every * Math.max(1, picks.length) + 0.05, dur: B.every * B.n, stun: B.stun, targets: 'both' });
+      s.events.push({ type: 'cast', team, card: id, x, y });
+      return true;
+    }
+    if (c.rage) {
+      // Overclock: a field where your troops and buildings move and attack faster; a jolt as it lands
+      for (const e of inArea(s, team, x, y, c.area, 'both', true)) damage(s, e, e.kind === 'tower' ? Math.max(1, Math.round(dmg * c.towerPct)) : dmg, team);
+      zone({ kind: id, dps: 0, rage: c.rage, left: c.rage.dur, dur: c.rage.dur, every: 0.1, targets: 'both' });
+      s.events.push({ type: 'cast', team, card: id, x, y });
+      return true;
+    }
+    if (c.clone) {
+      // Prism Echo: a 1-health copy of each of your troops in the area, standing beside it
+      let troops = 0;
+      for (const e of s.ents) if (e.kind === 'troop' && !e.dead) troops++;
+      const src = s.ents.filter(e => e.kind === 'troop' && e.team === team && !e.dead && !e.tunnel && !e.leap && !e.pulled && !e.reel
+        && e.hatch === undefined && hyp(e.x - x, e.y - y) - e.radius <= c.area);
+      for (const e of src) {
+        if (troops >= 220) break; // a limit, so copies of copies can't flood the battle
+        const side = (e.id % 2 ? 1 : -1) * Math.max(0.45, e.radius * 1.2);
+        const u = spawn(s, team, e.card, e.x + side, e.y, e.evo, e.level);
+        u.hp = u.maxHp = 1; u.shield = u.maxShield = 0; u.clone = true; u.deploy = 0.25; u.reborn = true;
+        troops++;
+      }
+      s.events.push({ type: 'cast', team, card: id, x, y });
+      s.events.push({ type: 'clone', team, card: id, x, y, r: c.area, n: src.length });
+      return true;
+    }
+    if (c.delivery) {
+      // Heaven's Guard: a capsule that lands after a moment, hurting enemies around it; a Sentinel steps out
+      zone({ kind: id, dps: 0, delay: c.delivery.delay, hitEach: dmg, spawnCard: c.delivery.card, left: c.delivery.delay + 0.05, dur: c.delivery.delay, every: 99, targets: 'both' });
+      s.events.push({ type: 'cast', team, card: id, x, y });
+      return true;
+    }
+    if (c.void) {
+      // Abyssal Collapse: three strikes; each is shared out by how many enemies are inside
+      const V = c.void;
+      zone({ kind: id, dps: 0, hitEach: dmg, tiers: V.tiers, every: V.every, pulse: V.every - V.first, left: V.first + V.every * (V.pulses - 1) + 0.05, dur: V.first + V.every * (V.pulses - 1), targets: 'both' });
+      s.events.push({ type: 'cast', team, card: id, x, y });
+      return true;
+    }
+    return false;
+  }
   function play(s, team, slot, x, y) {
     if (s.result) return 'over';
-    const id = s.hands[team][slot], c = KC_CARDS[id];
-    if (!c) return 'card';
-    if (s.energy[team] < c.cost) return 'energy';
-    if (!canDeploy(s, team, id, x, y)) return 'zone';
-    s.energy[team] -= c.cost;
+    const id0 = s.hands[team][slot], c0 = KC_CARDS[id0];
+    if (!c0) return 'card';
+    const id = resolve(s, team, id0);
+    if (!id) return 'card';
+    const cost = costOf(s, team, id0);
+    if (s.energy[team] < cost) return 'energy';
+    if (!canDeploy(s, team, id0, x, y)) return 'zone';
+    s.energy[team] -= cost;
     s.hands[team][slot] = s.queues[team].shift();
-    s.queues[team].push(id);
+    s.queues[team].push(id0);
     s.played[team]++;
+    if (!c0.mirror) s.last[team] = id0;
+    if (c0.mirror) {
+      // Divine Reflection: the last card again, one level higher (no evolution, no new "last card")
+      s.events.push({ type: 'mirror', team, card: id, x, y });
+      forceLvl = Math.min(15, cardLevel(s, team, id) + 1);
+      try { return cast(s, team, id, x, y, true); } finally { forceLvl = 0; }
+    }
+    return cast(s, team, id, x, y, false);
+  }
+  // A card coming into play (after its cost is paid): every kind of card, by what it does.
+  function cast(s, team, id, x, y, mirrored) {
+    const c = KC_CARDS[id];
+    if (c.kind === 'spell' && castSpell(s, team, id, x, y)) return 'ok';
     if (c.storm) {
       // a sandstorm: no projectile, the storm rises where it is cast
       const lv = levelMult(cardLevel(s, team, id));
@@ -197,7 +327,7 @@ const KCSim = (() => {
     }
     // an evolution comes round every cycle-th play of the card
     let evo = false;
-    if (KC_EVOS[id] && s.evos[team].includes(id)) {
+    if (KC_EVOS[id] && s.evos[team].includes(id) && !mirrored) {
       const n = s.evoPlays[team][id] || 0;
       evo = n % KC_EVOS[id].cycle === KC_EVOS[id].cycle - 1;
       s.evoPlays[team][id] = n + 1;
@@ -234,11 +364,15 @@ const KCSim = (() => {
       id: s.nextId++, kind: 'building', team, card: id, x, y, px: x, py: y, level,
       hp, maxHp: hp, dmg: Math.round(c.dmg * m), hit: c.hit, range: c.range, targets: c.targets, air: false,
       radius: c.radius, half: c.half, decay: hp / c.lifetime, proj: c.proj, projSpeed: c.projSpeed,
-      deploy: 1.0, cd: 0, target: 0, aimX: 0, aimY: team === 0 ? -1 : 1, atk: 0, flash: 0, dead: false, stunEnd: 0,
+      deploy: c.deployTime || 1.0, cd: 0, target: 0, aimX: 0, aimY: team === 0 ? -1 : 1, atk: 0, flash: 0, dead: false, stunEnd: 0,
+      splash: c.splash || 0, siege: !!c.siege, minRange: c.minRange || 0,
     };
+    if (c.beam) Object.assign(b, { beam: c.beam.dps.map(d => d * m), beamStage: c.beam.stage, beamTime: 0, beamOn: 0, beamTick: 0 });
+    if (c.deathBlast) b.deathBlast = { r: c.deathBlast.r, dmg: Math.round(c.deathBlast.dmg * m) };
+    if (c.produce) b.prodT = c.produce.every;
     // the Coil Tower waits hidden underground until something comes in range
     if (c.hide) Object.assign(b, { hidden: true, rise: 0, idle: 0 });
-    if (c.spawner) b.spawnT = c.spawner.first;
+    if (c.spawner && c.spawner.every) b.spawnT = c.spawner.first;
     s.ents.push(b);
     return b;
   }
@@ -264,6 +398,8 @@ const KCSim = (() => {
       towerDmg: c.towerDmg || 1, slowEnd: 0, slowF: 0, run: 0, stunEnd: 0,
     };
     if (c.hook) { u.sight = c.hook.max + 0.5; u.hookCd = 0; u.hookT = 0; }
+    if (c.air) u.baseAir = true;
+    if (c.spawner) u.spawnT = c.spawner.first;
     if (c.shield) u.shield = u.maxShield = Math.round(c.shield * m);
     if (c.charge) { u.chargeT = 0; u.cd = 0; }
     if (c.leap) u.leapDmg = Math.round(c.dmg * m);
@@ -308,6 +444,8 @@ const KCSim = (() => {
       }
       return;
     }
+    // Soulblight: a cursed enemy takes more from the curse's side
+    if (e.curse && e.curse.end > s.time && by === e.curse.team) amount = Math.round(amount * e.curse.amp);
     e.hp -= amount;
     if (!soft) e.flash = 0.12;
     if (e.kind === 'tower' && e.sub === 'king' && !e.active) {
@@ -322,6 +460,13 @@ const KCSim = (() => {
       else {
         s.events.push({ type: 'death', team: e.team, card: e.card, x: e.x, y: e.y, air: e.air, building: false });
         breakUp(s, e);
+        // Soulblight: a troop that falls under the curse rises as a wraith on the curse's side
+        if (e.curse && e.curse.card && e.curse.end > s.time && !e.clone && e.hatch === undefined && !e.cursedOut) {
+          e.cursedOut = true;
+          const w = spawn(s, e.curse.team, e.curse.card, e.x, e.y, false, e.curse.level);
+          w.deploy = 0.5;
+          s.events.push({ type: 'rise', team: e.curse.team, card: e.curse.card, x: w.x, y: w.y, curse: true });
+        }
         if (e.deathBlast) deathBlast(s, e);
         // the Phoenix leaves an egg behind (not when it has already been reborn once)
         if (e.egg && !e.reborn) {
@@ -348,10 +493,24 @@ const KCSim = (() => {
   function buildingGone(s, b) {
     s.events.push({ type: 'death', team: b.team, card: b.card, x: b.x, y: b.y, building: true });
     const sp = KC_CARDS[b.card] && KC_CARDS[b.card].spawner;
-    if (sp) for (let i = 0; i < sp.onDeath; i++) spawnFrom(s, b, sp.card, i % 2 ? 0.55 : -0.55);
+    if (sp) for (let i = 0; i < sp.onDeath; i++) spawnFrom(s, b, sp.card, sp.onDeath === 1 ? 0 : (i % 2 ? 1 : -1) * (0.35 + 0.3 * Math.floor(i / 2)));
+    // the Magma Turret's last eruption
+    if (b.deathBlast) {
+      for (const o of s.ents) {
+        if (o.dead || o.team === b.team || o.air || o.tunnel || o.leap) continue;
+        if (hyp(o.x - b.x, o.y - b.y) - o.radius <= b.deathBlast.r) damage(s, o, b.deathBlast.dmg, b.team);
+      }
+      s.events.push({ type: 'thunderclap', team: b.team, card: b.card, x: b.x, y: b.y, r: b.deathBlast.r });
+    }
+  }
+  // A wave of units from a spawner (a building or the Walking Smelter), side by side.
+  function wave(s, from, sp) {
+    const n = sp.n || 1;
+    for (let i = 0; i < n; i++) spawnFrom(s, from, sp.card, n === 1 ? 0 : (i - (n - 1) / 2) * 0.6);
+    s.events.push({ type: 'spawn', team: from.team, card: from.card, x: from.x, y: from.y });
   }
   function spawnFrom(s, b, card, ox) {
-    const u = spawn(s, b.team, card, b.x + ox, b.y + (b.team === 0 ? -1 : 1) * (b.half + 0.3), false, b.level);
+    const u = spawn(s, b.team, card, b.x + ox, b.y + (b.team === 0 ? -1 : 1) * ((b.half || b.radius) + 0.3), false, b.level);
     u.deploy = 0.3;
     return u;
   }
@@ -695,11 +854,17 @@ const KCSim = (() => {
       return;
     }
     if (stunned(s, u)) { u.moving = false; return; }
+    const rf = rageOf(s, u);
+    if (u.spawnT !== undefined) {
+      // the Walking Smelter: a pair of emberlings every few seconds as it walks
+      u.spawnT -= DT * rf;
+      if (u.spawnT <= 0) { const sp = KC_CARDS[u.card].spawner; u.spawnT += sp.every; wave(s, u, sp); }
+    }
     if (u.atk > 0) u.atk -= DT;
     if (u.selfHeal && s.time - u.lastAtk > u.selfHeal.after) heal(u, u.selfHeal.dps * DT);
-    if (u.chargeT !== undefined) u.chargeT = Math.min(KC_CARDS[u.card].charge, u.chargeT + DT);
+    if (u.chargeT !== undefined) u.chargeT = Math.min(KC_CARDS[u.card].charge, u.chargeT + DT * rf);
     if (u.rider) riderStep(s, u);
-    u.cd -= DT;
+    u.cd -= DT * rf;
     let t = byId(s, u.target);
     if (!t || !canHit(u, t)) { t = null; u.target = 0; u.locked = false; }
     u.retarget -= DT;
@@ -717,7 +882,7 @@ const KCSim = (() => {
       // a sprite leaps onto its target and bursts (it is used up)
       const L = KC_CARDS[u.card].leap;
       u.dead = true; u.hp = 0;
-      s.projs.push({ kind: u.card === 'sunsprite' ? 'sunleap' : 'frostleap', team: u.team, x: u.x, y: u.y, sx: u.x, sy: u.y, tx: t.x, ty: t.y, target: t.id,
+      s.projs.push({ kind: u.card === 'sunsprite' ? 'sunleap' : u.card === 'emberling' ? 'emberleap' : 'frostleap', team: u.team, x: u.x, y: u.y, sx: u.x, sy: u.y, tx: t.x, ty: t.y, target: t.id,
         speed: L.speed, dmg: u.leapDmg, splash: L.r, targets: 'both', card: u.card, leapStun: L.stun || 0,
         heal: L.heal ? { r: L.heal.r, amount: Math.round(L.heal.amount * levelMult(u.level)), dur: L.heal.dur } : null });
       s.events.push({ type: 'leap', team: u.team, card: u.card, x: u.x, y: u.y });
@@ -730,7 +895,7 @@ const KCSim = (() => {
         if (u.beamOn !== t.id) { u.beamOn = t.id; u.beamTime = 0; u.beamTick = 0; }
         if (Math.abs(t.x - u.x) > 0.05) u.face = Math.sign(t.x - u.x);
         u.locked = true; u.moving = false;
-        u.beamTime += DT; u.beamTick += DT;
+        u.beamTime += DT; u.beamTick += DT * rf;
         if (u.beamTick >= u.hit - 1e-9) {
           u.beamTick -= u.hit;
           const stage = Math.min(u.beam.length - 1, Math.floor(u.beamTime / u.beamStage));
@@ -760,6 +925,8 @@ const KCSim = (() => {
         if (u.chargeT >= KC_CARDS[u.card].charge - 1e-9) { attack(s, u, t); u.chargeT = 0; u.locked = true; }
         return;
       }
+      // the Walking Smelter has no attack: it stops at the building and keeps making emberlings
+      if (!u.dmg) { u.locked = true; return; }
       if (u.cd <= 0) { attack(s, u, t); u.cd = u.hit; u.locked = true; }
       return;
     }
@@ -774,7 +941,7 @@ const KCSim = (() => {
     if (len > 0.001) {
       if (u.ram) u.speed = Math.min(u.maxSpeed, u.speed + u.accel * DT);
       const slow = u.slowEnd > s.time ? 1 - u.slowF : 1;
-      const step = Math.min(len, u.speed * slow * DT);
+      const step = Math.min(len, u.speed * slow * rageOf(s, u) * DT);
       u.run += step;
       u.x += (dx / len) * step;
       u.y += (dy / len) * step;
@@ -827,15 +994,25 @@ const KCSim = (() => {
       buildingGone(s, b);
       return;
     }
+    if (b.prodT !== undefined) {
+      // the Energy Foundry: one battle energy every few seconds, never past the limit
+      b.prodT -= DT;
+      if (b.prodT <= 0) {
+        b.prodT += c.produce.every;
+        s.energy[b.team] = Math.min(MAX_ENERGY, s.energy[b.team] + 1);
+        s.events.push({ type: 'energy', team: b.team, card: b.card, x: b.x, y: b.y });
+      }
+    }
     if (stunned(s, b)) return;
-    if (c.spawner) {
-      // a spawner: one unit every few seconds
-      b.spawnT -= DT;
-      if (b.spawnT <= 0) { b.spawnT += c.spawner.every; spawnFrom(s, b, c.spawner.card, 0); s.events.push({ type: 'spawn', team: b.team, card: b.card, x: b.x, y: b.y }); }
+    const rf = rageOf(s, b);
+    if (b.spawnT !== undefined) {
+      // a spawner: a wave of units every few seconds
+      b.spawnT -= DT * rf;
+      if (b.spawnT <= 0) { b.spawnT += c.spawner.every; wave(s, b, c.spawner); }
     }
     if (!b.dmg) return;
     if (b.atk > 0) b.atk -= DT;
-    b.cd -= DT;
+    b.cd -= DT * rf;
     if (c.hide) {
       // the Coil Tower: hidden (troops can't target it) until an enemy comes in range; then it rises,
       // which takes a moment, fights, and sinks back once nothing has been in range for a second
@@ -856,25 +1033,41 @@ const KCSim = (() => {
       b.idle = 0;
     }
     let t = byId(s, b.target);
-    if (!t || !canHit(b, t) || edge(b, t) > b.range) {
+    if (!t || !canHit(b, t) || edge(b, t) > b.range || (b.minRange && edge(b, t) < b.minRange)) {
       t = null; b.target = 0;
       let bd = Infinity;
       for (const u of s.ents) {
         if (!canHit(b, u)) continue;
         const d = edge(b, u);
-        if (d <= b.range && d < bd) { bd = d; t = u; }
+        // a siege building can't hit what is too close (the Dune Mortar)
+        if (d <= b.range && d >= b.minRange && d < bd) { bd = d; t = u; }
       }
       if (t) b.target = t.id;
     }
-    if (!t) return;
+    if (!t) { if (b.beam) { b.beamOn = 0; b.beamTime = 0; b.beamTick = 0; } return; }
+    if (b.beam) {
+      // the Storm Conductor: a beam on one target that grows stronger the longer it holds
+      const ax = t.x - b.x, ay = t.y - b.y, al = hyp(ax, ay) || 1;
+      b.aimX = ax / al; b.aimY = ay / al;
+      if (b.beamOn !== t.id) { b.beamOn = t.id; b.beamTime = 0; b.beamTick = 0; }
+      b.beamTime += DT; b.beamTick += DT * rf;
+      if (b.beamTick >= b.hit - 1e-9) {
+        b.beamTick -= b.hit;
+        const stage = Math.min(b.beam.length - 1, Math.floor(b.beamTime / b.beamStage));
+        damage(s, t, Math.max(1, Math.round(b.beam[stage] * b.hit)), b.team);
+      }
+      return;
+    }
     // where it aims (a direction, for drawing the barrel); the muzzle is 0.7 tiles along it
     const ax = t.x - b.x, ay = t.y - b.y, al = hyp(ax, ay) || 1;
     b.aimX = ax / al; b.aimY = ay / al;
     if (b.cd <= 0) {
       b.cd = b.hit; b.atk = 0.25;
       const mx = b.x + b.aimX * 0.7, my = b.y + b.aimY * 0.7 - 0.3;
-      s.projs.push({ kind: b.proj, team: b.team, x: mx, y: my, sx: mx, sy: my, tx: t.x, ty: t.y, target: t.id,
-        speed: b.projSpeed, dmg: b.dmg, splash: 0, targets: b.targets, card: b.card, from: b.id });
+      // a lobbed shell (the Dune Mortar) lands where its target stood when it fired; a tower or building
+      // hit by splash takes it like a troop does
+      s.projs.push({ kind: b.proj, team: b.team, x: mx, y: my, sx: mx, sy: my, tx: t.x, ty: t.y, target: c.lob ? 0 : t.id,
+        speed: b.projSpeed, dmg: b.dmg, splash: b.splash, targets: b.targets, card: b.card, from: b.id, lob: !!c.lob });
       s.events.push({ type: 'shoot', kind: b.proj, team: b.team, x: b.x, y: b.y });
     }
   }
@@ -883,6 +1076,7 @@ const KCSim = (() => {
   function projStep(s) {
     for (const p of s.projs) {
       if (p.pierce) { pierceStep(s, p); continue; }
+      if (p.roll) { rollStep(s, p); continue; }
       const t = byId(s, p.target);
       if (t && !t.dead) { p.tx = t.x; p.ty = t.y; }
       const dx = p.tx - p.x, dy = p.ty - p.y, d = hyp(dx, dy), step = p.speed * DT;
@@ -913,6 +1107,41 @@ const KCSim = (() => {
       }
     }
     s.projs = s.projs.filter(p => !p.done);
+  }
+
+  // Thornroller and Powder Keg: rolling straight on, hitting each ground enemy it passes once (towers for
+  // less, buildings without moving them) and shoving troops ahead of it; the keg bursts at the end and a
+  // pirate jumps out.
+  function rollStep(s, p) {
+    const step = Math.min(p.left, p.speed * DT);
+    p.x += p.dx * step; p.y += p.dy * step; p.left -= step;
+    for (const e of s.ents) {
+      if (e.dead || e.team === p.team || e.tunnel || e.leap || e.hidden || e.air || p.hitIds.includes(e.id)) continue;
+      if (e.kind === 'tower' && !p.towerPct) continue;
+      if (Math.abs(e.x - p.x) > p.width + e.radius || Math.abs(e.y - p.y) > 0.45 + e.radius) continue;
+      p.hitIds.push(e.id);
+      damage(s, e, e.kind === 'tower' ? Math.max(1, Math.round(p.dmg * p.towerPct)) : p.dmg, p.team);
+      if (p.knock && e.kind === 'troop' && !e.dead && !e.heavy) {
+        e.y += p.dy * p.knock / Math.max(1, e.mass / 3);
+        if (e.beam) { e.beamOn = 0; e.beamTime = 0; }
+        clampArena(e);
+      }
+      s.events.push({ type: 'hit', kind: p.kind, team: p.team, x: e.x, y: e.y });
+    }
+    if (p.left <= 1e-9) {
+      p.done = true;
+      if (p.spawn) {
+        // the pirate lands on the nearer bank if the keg stops over the water (back toward its side on a tie)
+        let x = p.x, y = Math.max(0.6, Math.min(H - 0.6, p.y));
+        if (y > RIVER_TOP && y < RIVER_BOT && !BRIDGES.some(b => Math.abs(x - b) < BRIDGE_HALF)) {
+          const back = p.dy < 0 ? RIVER_BOT + 0.1 : RIVER_TOP - 0.1, on = p.dy < 0 ? RIVER_TOP - 0.1 : RIVER_BOT + 0.1;
+          y = Math.abs(y - on) < Math.abs(y - back) ? on : back;
+        }
+        const u = spawn(s, p.team, p.spawn, x, y, false, p.level);
+        u.deploy = 0.4;
+        s.events.push({ type: 'barrel', team: p.team, card: p.card, x: p.x, y: p.y });
+      } else s.events.push({ type: 'rollend', team: p.team, card: p.card, x: p.x, y: p.y });
+    }
   }
   // The Prism Archer's bolt: straight on from where it was shot, hitting each enemy it passes once.
   function pierceStep(s, p) {
@@ -946,6 +1175,7 @@ const KCSim = (() => {
       const d = hyp(e.x - p.x, e.y - p.y);
       if (d - e.radius > c.area) continue;
       damage(s, e, e.kind === 'tower' ? Math.round(p.dmg * c.towerPct) : p.dmg, p.team);
+      if (c.slowHit && !e.dead) slowDown(s, e, c.slowHit.f, c.slowHit.dur, 'frost');
       if (c.knockback && e.kind === 'troop' && !e.dead && !e.heavy) {
         if (e.beam) { e.beamOn = 0; e.beamTime = 0; }
         const k = c.knockback / Math.max(1, e.mass / 2);
@@ -961,6 +1191,7 @@ const KCSim = (() => {
     for (const z of s.zones) {
       z.left -= DT; z.pulse += DT;
       if (z.gate) { gateStep(s, z); continue; }
+      if (z.hitEach !== undefined || z.rage) { newZone(s, z); continue; }
       if (z.pulse < 0.1 - 1e-9) continue;
       z.pulse -= 0.1;
       if (z.heal) {
@@ -977,6 +1208,77 @@ const KCSim = (() => {
       }
     }
     s.zones = s.zones.filter(z => z.left > 1e-9);
+  }
+
+  // The expansion's lingering spells, every tick.
+  function newZone(s, z) {
+    z.age += DT;
+    if (z.rage) {
+      // Overclock: your troops and buildings inside are sped up (and for a moment after leaving)
+      for (const e of s.ents) {
+        if (e.dead || e.team !== z.team || e.kind === 'tower' || e.tunnel) continue;
+        if (hyp(e.x - z.x, e.y - z.y) - e.radius > z.r) continue;
+        e.rageEnd = s.time + z.rage.linger; e.rageF = z.rage.boost;
+      }
+      return;
+    }
+    if (z.pull) {
+      // Cyclone: every enemy troop inside is dragged toward the eye (heavy ones much less)
+      for (const e of s.ents) {
+        if (e.dead || e.team === z.team || e.kind !== 'troop' || e.tunnel || e.leap || e.pulled || e.reel || e.deploy > 0.5) continue;
+        const dx = z.x - e.x, dy = z.y - e.y, d = hyp(dx, dy);
+        if (d - e.radius > z.r || d < 0.05) continue;
+        const pull = Math.min(d, z.pull * DT / Math.max(1, e.mass / 4) * (e.heavy ? 0.35 : 1));
+        e.x += dx / d * pull; e.y += dy / d * pull;
+        if (e.beam) { e.beamOn = 0; e.beamTime = 0; }
+        clampArena(e);
+      }
+    }
+    if (z.delay !== undefined) {
+      // Heaven's Guard: nothing until it lands
+      if (z.age < z.delay - 1e-9 || z.landed) return;
+      z.landed = true; z.left = 0;
+      for (const e of inArea(s, z.team, z.x, z.y, z.r, 'both', true)) damage(s, e, e.kind === 'tower' ? Math.max(1, Math.round(z.hitEach * z.towerPct)) : z.hitEach, z.team);
+      const u = spawn(s, z.team, z.spawnCard, z.x, z.y, false, z.level);
+      u.deploy = 0.4;
+      s.events.push({ type: 'land', team: z.team, card: z.card, x: z.x, y: z.y, r: z.r });
+      return;
+    }
+    if (z.pulse < z.every - 1e-9) return;
+    z.pulse -= z.every;
+    if (z.strikes) {
+      // Judgment Bolt: the next strike, on the next of the chosen targets (if it is still there)
+      const i = z.done || 0; z.done = i + 1;
+      const e = byId(s, z.strikes[i]);
+      if (e && !e.dead && !e.tunnel && !e.leap) {
+        damage(s, e, e.kind === 'tower' ? Math.max(1, Math.round(z.hitEach * z.towerPct)) : z.hitEach, z.team);
+        if (!e.dead) stun(s, e, z.stun, 'zap');
+        s.events.push({ type: 'bolt', team: z.team, card: z.card, x: e.x, y: e.y, id: e.id });
+      }
+      if (z.done >= z.strikes.length) z.left = 0;
+      return;
+    }
+    if (z.tiers) {
+      // Abyssal Collapse: one strike on everything inside, shared out by how many there are
+      const hit = inArea(s, z.team, z.x, z.y, z.r, 'both', true);
+      if (hit.length) {
+        const f = z.tiers.find(t => hit.length <= t[0])[1], each = Math.max(1, Math.round(z.hitEach * f));
+        for (const e of hit) damage(s, e, e.kind === 'tower' ? Math.max(1, Math.round(each * z.towerPct)) : each, z.team);
+      }
+      s.events.push({ type: 'voidstrike', team: z.team, card: z.card, x: z.x, y: z.y, r: z.r, n: hit.length });
+      return;
+    }
+    const list = z.ids ? z.ids.map(i => byId(s, i)).filter(e => e && !e.dead) : inArea(s, z.team, z.x, z.y, z.r, z.targets, true);
+    for (const e of list) {
+      if (z.curse && e.kind === 'troop') e.curse = { team: z.team, end: s.time + z.every + 0.15, card: z.curse.card, amp: z.curse.amp, level: z.level };
+      if (z.curse && e.kind !== 'troop') e.curse = { team: z.team, end: s.time + z.every + 0.15, amp: z.curse.amp };
+      let amount = z.hitEach;
+      if (e.kind === 'building') amount = Math.round(amount * z.bldMult);
+      if (e.kind === 'tower') amount = Math.max(1, Math.round(amount * (z.bldMult || 1) * z.towerPct));
+      damage(s, e, amount, z.team, true);
+      if (z.slow && !e.dead) slowDown(s, e, z.slow, z.every + 0.15, 'quake');
+    }
+    if (z.every >= 0.5) s.events.push({ type: 'pulse', team: z.team, card: z.card, x: z.x, y: z.y, r: z.r });
   }
   // The Abyss Gate: a wraith climbs out somewhere inside the circle on a steady beat.
   function gateStep(s, z) {
@@ -1059,7 +1361,10 @@ const KCSim = (() => {
     s.time += DT;
     const mult = s.double || s.phase === 'overtime' ? 2 : 1;
     for (const t of [0, 1]) s.energy[t] = Math.min(MAX_ENERGY, s.energy[t] + REGEN * mult * DT);
-    for (const e of s.ents) { e.px = e.x; e.py = e.y; }
+    for (const e of s.ents) {
+      e.px = e.x; e.py = e.y;
+      if (e.baseAir && !e.air && !(e.boundEnd > s.time)) e.air = true;
+    }
     for (const p of s.projs) { p.px = p.x; p.py = p.y; }
     for (const e of s.ents) {
       if (e.dead) continue;
@@ -1075,7 +1380,7 @@ const KCSim = (() => {
 
   return {
     W, H, MID, RIVER_TOP, RIVER_BOT, BRIDGES, BRIDGE_HALF, DT, REGULAR, OVERTIME, MAX_ENERGY, TOWERS,
-    create, step, play, canDeploy, tower, laneOf, own, mulberry, levelMult, evoCharge, formation,
+    create, step, play, canDeploy, tower, laneOf, own, mulberry, levelMult, evoCharge, formation, costOf, resolve,
     // Ends a match on the spot: the Simulate Win test button (TEMPORARY), and an online battle whose
     // opponent left ('left') or fell out of step ('desync').
     forceEnd: (s, winner, reason) => finish(s, winner, reason || 'test'),

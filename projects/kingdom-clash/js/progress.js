@@ -129,25 +129,25 @@ const KCProgress = (() => {
   };
 
   const ARENAS = [
-    { id: 'cinder', number: 1, name: 'Cinder Keep', min: 0, theme: 'cinder', cards: ['skeletons', 'cannon'],
+    { id: 'cinder', number: 1, name: 'Cinder Keep', min: 0, theme: 'cinder', cards: ['skeletons', 'cannon', 'magmaquake', 'ashfall', 'magmaturret'],
       blurb: 'A ruined fortress of forges and ash, where old cannons still guard the walls.' },
-    { id: 'briar', number: 2, name: 'Briar Hollow', min: 300, theme: 'briar', cards: ['spears', 'pots', 'footmen', 'flail'],
+    { id: 'briar', number: 2, name: 'Briar Hollow', min: 300, theme: 'briar', cards: ['spears', 'pots', 'footmen', 'flail', 'thornroller', 'briarbind', 'bramblenest'],
       blurb: 'An overgrown forest of ancient stone ruins, giant tree roots, thorny vines and glowing lanterns.' },
-    { id: 'sunstone', number: 3, name: 'Sunstone Arena', min: 600, theme: 'sunstone', cards: ['sandstorm', 'ramcart', 'mole', 'camel'],
+    { id: 'sunstone', number: 3, name: 'Sunstone Arena', min: 600, theme: 'sunstone', cards: ['sandstorm', 'ramcart', 'mole', 'camel', 'scarabshrine', 'dunemortar'],
       blurb: 'A sun-baked desert fortress of sandstone walls and an oasis channel. Evolutions and the Diamond Pass open here.' },
-    { id: 'stormspire', number: 4, name: 'Stormspire', min: 900, theme: 'stormspire', cards: ['bees', 'owl', 'thundercloud', 'griffin'],
+    { id: 'stormspire', number: 4, name: 'Stormspire', min: 900, theme: 'stormspire', cards: ['bees', 'owl', 'thundercloud', 'griffin', 'judgment', 'cyclone', 'conductor'],
       blurb: 'A fortress on a mountain peak above the clouds, crackling with storms. Online battles are coming here.' },
-    { id: 'frostfang', number: 5, name: 'Frostfang Keep', min: 2000, theme: 'frostfang', cards: ['frostsprite', 'icegiant', 'wintersage', 'flashfreeze'],
+    { id: 'frostfang', number: 5, name: 'Frostfang Keep', min: 2000, theme: 'frostfang', cards: ['frostsprite', 'icegiant', 'wintersage', 'flashfreeze', 'glacierslam', 'cage'],
       blurb: 'A frozen mountain fortress of ice and snow. Its cards freeze, slow and hold the line.' },
-    { id: 'blackwater', number: 6, name: 'Blackwater Harbor', min: 2600, theme: 'blackwater', cards: ['dockraiders', 'barrel', 'harpoon', 'broadside'],
+    { id: 'blackwater', number: 6, name: 'Blackwater Harbor', min: 2600, theme: 'blackwater', cards: ['dockraiders', 'barrel', 'harpoon', 'broadside', 'powderkeg', 'barracks'],
       blurb: 'A pirate harbor of ships, docks and dark water, full of surprise attacks and siege guns.' },
-    { id: 'gearforge', number: 7, name: 'Gearforge Citadel', min: 3300, theme: 'gearforge', cards: ['coil', 'sparkbots', 'titan', 'arccannon'],
+    { id: 'gearforge', number: 7, name: 'Gearforge Citadel', min: 3300, theme: 'gearforge', cards: ['coil', 'sparkbots', 'titan', 'arccannon', 'overclock', 'foundry', 'smelter'],
       blurb: 'An industrial fortress of bronze machinery, turning gears and crackling electricity.' },
-    { id: 'crystal', number: 8, name: 'Crystal Chasm', min: 4100, theme: 'crystal', cards: ['gemflash', 'shardguards', 'drill', 'prism'],
+    { id: 'crystal', number: 8, name: 'Crystal Chasm', min: 4100, theme: 'crystal', cards: ['gemflash', 'shardguards', 'drill', 'prism', 'prismecho'],
       blurb: 'An underground cavern of glowing crystals and old mining machines.' },
-    { id: 'skyward', number: 9, name: 'Skyward Sanctuary', min: 5000, theme: 'skyward', cards: ['sunsprite', 'guardian', 'drake', 'phoenix'],
+    { id: 'skyward', number: 9, name: 'Skyward Sanctuary', min: 5000, theme: 'skyward', cards: ['sunsprite', 'guardian', 'drake', 'phoenix', 'heavensguard', 'reflection', 'ballista'],
       blurb: 'A kingdom of white marble and gold floating above the clouds, where healers and firebirds live.' },
-    { id: 'eclipse', number: 10, name: 'Eclipse Throne', min: 6000, theme: 'eclipse', cards: ['wraiths', 'meteor', 'abyss', 'dreadknight'],
+    { id: 'eclipse', number: 10, name: 'Eclipse Throne', min: 6000, theme: 'eclipse', cards: ['wraiths', 'meteor', 'abyss', 'dreadknight', 'soulblight', 'collapse'],
       blurb: 'The obsidian fortress of a fallen king under an endless eclipse. Its cards are the most powerful of all.' },
   ];
   // Fixed rewards along the road, claimed by the player.
@@ -158,22 +158,30 @@ const KCProgress = (() => {
     { at: 60, kind: 'chest', chest: 'silver' },
     { at: 90, kind: 'rubies', amount: 30 },
     { at: 120, kind: 'card', card: 'cannon', copies: 4 },
+    { at: 140, kind: 'card', card: 'magmaquake', copies: 3 },
     { at: 160, kind: 'chest', chest: 'silver' },
+    { at: 180, kind: 'card', card: 'magmaturret', copies: 3 },
     { at: 200, kind: 'rubies', amount: 60 },
+    { at: 230, kind: 'card', card: 'ashfall', copies: 1 },
     { at: 250, kind: 'chest', chest: 'gold' },
     { at: 300, kind: 'arena', arena: 'briar' },
     { at: 330, kind: 'card', card: 'spears', copies: 6 },
     { at: 370, kind: 'rubies', amount: 145 },
     { at: 400, kind: 'card', card: 'pots', copies: 6 },
+    { at: 420, kind: 'card', card: 'bramblenest', copies: 3 },
     { at: 440, kind: 'chest', chest: 'gold' },
     { at: 480, kind: 'card', card: 'footmen', copies: 6 },
+    { at: 500, kind: 'card', card: 'briarbind', copies: 1 },
     { at: 520, kind: 'rubies', amount: 240 },
     { at: 560, kind: 'card', card: 'flail', copies: 3 },
+    { at: 580, kind: 'card', card: 'thornroller', copies: 1 },
     { at: 600, kind: 'arena', arena: 'sunstone' },
     { at: 630, kind: 'card', card: 'sandstorm', copies: 6 },
     { at: 670, kind: 'rubies', amount: 420 },
+    { at: 690, kind: 'card', card: 'scarabshrine', copies: 3 },
     { at: 710, kind: 'card', card: 'ramcart', copies: 3 },
     { at: 750, kind: 'chest', chest: 'gold' },
+    { at: 770, kind: 'card', card: 'dunemortar', copies: 6 },
     { at: 790, kind: 'card', card: 'mole', copies: 3 },
     { at: 830, kind: 'rubies', amount: 600 },
     { at: 870, kind: 'card', card: 'camel', copies: 1 },
@@ -186,8 +194,11 @@ const KCProgress = (() => {
     { at: 1130, kind: 'rubies', amount: 1200 },
     { at: 1170, kind: 'card', card: 'griffin', copies: 1 },
     // the rest of Stormspire
+    { at: 1210, kind: 'card', card: 'judgment', copies: 1 },
     { at: 1250, kind: 'chest', chest: 'gold' },
+    { at: 1290, kind: 'card', card: 'cyclone', copies: 1 },
     { at: 1340, kind: 'rubies', amount: 1500 },
+    { at: 1380, kind: 'card', card: 'conductor', copies: 3 },
     { at: 1430, kind: 'chest', chest: 'platinum' },
     { at: 1530, kind: 'rubies', amount: 1800 },
     { at: 1630, kind: 'chest', chest: 'legendary' },
@@ -197,28 +208,35 @@ const KCProgress = (() => {
     // Arena 5: Frostfang Keep
     { at: 2000, kind: 'arena', arena: 'frostfang' },
     { at: 2060, kind: 'card', card: 'frostsprite', copies: 6 },
+    { at: 2100, kind: 'card', card: 'glacierslam', copies: 6 },
     { at: 2140, kind: 'rubies', amount: 3000 },
     { at: 2220, kind: 'card', card: 'icegiant', copies: 3 },
     { at: 2300, kind: 'chest', chest: 'platinum' },
     { at: 2380, kind: 'card', card: 'flashfreeze', copies: 1 },
+    { at: 2420, kind: 'card', card: 'cage', copies: 3 },
     { at: 2460, kind: 'rubies', amount: 3500 },
     { at: 2540, kind: 'card', card: 'wintersage', copies: 1 },
     // Arena 6: Blackwater Harbor
     { at: 2600, kind: 'arena', arena: 'blackwater' },
     { at: 2670, kind: 'card', card: 'dockraiders', copies: 6 },
+    { at: 2720, kind: 'card', card: 'powderkeg', copies: 1 },
     { at: 2760, kind: 'rubies', amount: 4000 },
     { at: 2850, kind: 'card', card: 'barrel', copies: 1 },
     { at: 2940, kind: 'chest', chest: 'legendary' },
+    { at: 2990, kind: 'card', card: 'barracks', copies: 3 },
     { at: 3030, kind: 'card', card: 'broadside', copies: 1 },
     { at: 3120, kind: 'rubies', amount: 4500 },
     { at: 3210, kind: 'card', card: 'harpoon', copies: 1 },
     // Arena 7: Gearforge Citadel
     { at: 3300, kind: 'arena', arena: 'gearforge' },
     { at: 3380, kind: 'card', card: 'coil', copies: 6 },
+    { at: 3430, kind: 'card', card: 'overclock', copies: 1 },
     { at: 3480, kind: 'rubies', amount: 5000 },
     { at: 3580, kind: 'card', card: 'sparkbots', copies: 3 },
+    { at: 3630, kind: 'card', card: 'foundry', copies: 3 },
     { at: 3680, kind: 'chest', chest: 'legendary' },
     { at: 3780, kind: 'card', card: 'titan', copies: 1 },
+    { at: 3830, kind: 'card', card: 'smelter', copies: 3 },
     { at: 3880, kind: 'rubies', amount: 6000 },
     { at: 3980, kind: 'card', card: 'arccannon', copies: 1 },
     // Arena 8: Crystal Chasm
@@ -231,20 +249,26 @@ const KCProgress = (() => {
     { at: 4750, kind: 'rubies', amount: 8000 },
     { at: 4860, kind: 'card', card: 'prism', copies: 1 },
     // Arena 9: Skyward Sanctuary
+    { at: 4930, kind: 'card', card: 'prismecho', copies: 1 },
     { at: 5000, kind: 'arena', arena: 'skyward' },
     { at: 5110, kind: 'card', card: 'sunsprite', copies: 3 },
+    { at: 5170, kind: 'card', card: 'heavensguard', copies: 6 },
     { at: 5230, kind: 'rubies', amount: 9000 },
     { at: 5350, kind: 'card', card: 'guardian', copies: 3 },
     { at: 5470, kind: 'chest', chest: 'mythic' },
     { at: 5590, kind: 'card', card: 'drake', copies: 1 },
+    { at: 5650, kind: 'card', card: 'reflection', copies: 1 },
     { at: 5710, kind: 'rubies', amount: 10000 },
     { at: 5830, kind: 'card', card: 'phoenix', copies: 1 },
     // Arena 10: Eclipse Throne
+    { at: 5900, kind: 'card', card: 'ballista', copies: 1 },
     { at: 6000, kind: 'arena', arena: 'eclipse' },
     { at: 6100, kind: 'card', card: 'wraiths', copies: 1 },
+    { at: 6150, kind: 'card', card: 'soulblight', copies: 1 },
     { at: 6200, kind: 'chest', chest: 'legendary' },
     { at: 6300, kind: 'card', card: 'meteor', copies: 3 },
     { at: 6400, kind: 'rubies', amount: 12000 },
+    { at: 6450, kind: 'card', card: 'collapse', copies: 1 },
     { at: 6500, kind: 'card', card: 'abyss', copies: 1 },
     { at: 6600, kind: 'chest', chest: 'mythic' },
     { at: 6700, kind: 'card', card: 'dreadknight', copies: 1 },
@@ -447,21 +471,32 @@ const KCProgress = (() => {
     };
     if (t >= 40) swap('skeletons', 0.6);
     if (t >= 120) swap('cannon', 0.6);
+    if (t >= 140) swap('magmaquake', 0.35);
+    if (t >= 180) swap('magmaturret', 0.4);
+    if (t >= 230) swap('ashfall', 0.35);
     // Briar Hollow cards, as they unlock on the road
     if (t >= 330) swap('spears', 0.5);
     if (t >= 400) swap('pots', 0.5);
     if (t >= 480) swap('footmen', 0.5);
     if (t >= 560) swap('flail', 0.5);
+    if (t >= 420) swap('bramblenest', 0.35);
+    if (t >= 500) swap('briarbind', 0.35);
+    if (t >= 580) swap('thornroller', 0.4);
     // Sunstone Arena cards
     if (t >= 630) swap('sandstorm', 0.5);
     if (t >= 710) swap('ramcart', 0.5);
     if (t >= 790) swap('mole', 0.5);
     if (t >= 870) swap('camel', 0.45);
+    if (t >= 690) swap('scarabshrine', 0.35);
+    if (t >= 770) swap('dunemortar', 0.3);
     // Stormspire cards
     if (t >= 930) swap('bees', 0.5);
     if (t >= 1010) swap('owl', 0.5);
     if (t >= 1090) swap('thundercloud', 0.45);
     if (t >= 1170) swap('griffin', 0.4);
+    if (t >= 1210) swap('judgment', 0.3);
+    if (t >= 1290) swap('cyclone', 0.35);
+    if (t >= 1380) swap('conductor', 0.4);
     // Arenas 5 to 10: troops take a middle slot; win conditions can take the Rhino's, spells the Fireball's
     const swapAt = (id, i, p) => { if (rand() <= p && !deck.includes(id)) deck[i] = id; };
     const NEWER = [[2060, 'frostsprite', 0.45], [2220, 'icegiant', 0.4, 0], [2380, 'flashfreeze', 0.35, 7], [2540, 'wintersage', 0.45],
@@ -469,7 +504,11 @@ const KCProgress = (() => {
       [3380, 'coil', 0.4], [3580, 'sparkbots', 0.45], [3780, 'titan', 0.4, 0], [3980, 'arccannon', 0.4],
       [4200, 'gemflash', 0.4, 7], [4420, 'shardguards', 0.45], [4640, 'drill', 0.4, 0], [4860, 'prism', 0.45],
       [5110, 'sunsprite', 0.35], [5350, 'guardian', 0.4], [5590, 'drake', 0.45], [5830, 'phoenix', 0.45],
-      [6100, 'wraiths', 0.45], [6300, 'meteor', 0.35, 7], [6500, 'abyss', 0.4, 0], [6700, 'dreadknight', 0.45]];
+      [6100, 'wraiths', 0.45], [6300, 'meteor', 0.35, 7], [6500, 'abyss', 0.4, 0], [6700, 'dreadknight', 0.45],
+      // the expansion's cards from Arena 5 on
+      [2100, 'glacierslam', 0.35], [2420, 'cage', 0.35], [2720, 'powderkeg', 0.35], [2990, 'barracks', 0.3],
+      [3430, 'overclock', 0.3], [3630, 'foundry', 0.25], [3830, 'smelter', 0.35], [4930, 'prismecho', 0.25],
+      [5170, 'heavensguard', 0.35], [5650, 'reflection', 0.3], [5900, 'ballista', 0.3, 0], [6150, 'soulblight', 0.35], [6450, 'collapse', 0.35, 7]];
     for (const [at, id, pr, slot] of NEWER) if (t >= at) { if (slot !== undefined) swapAt(id, slot, pr); else swap(id, pr); }
     const name = FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
     const foeTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
