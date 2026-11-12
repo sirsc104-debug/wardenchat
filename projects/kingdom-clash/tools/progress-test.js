@@ -373,6 +373,26 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   console.log(`economy tables, start levels, floors, first copies, win gold (${G.winGold()} a win, 20 a day), safe loading: ok`);
 }
 
+// Diamonds skip a chest's timer: 1 per 5 minutes left, rounded up
+{
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 100, best: 100, claimed: { 0: true }, diamonds: 200, coins: 0 }) }));
+  const Q = G.state, t0 = 1e12, mk = type => ({ type, state: 'locked', contents: { coins: 10, cards: [{ id: 'wolves', n: 2 }], items: [] } });
+  Q.chests = [mk('wooden'), mk('silver'), mk('mythic'), mk('gold')];
+  assert.deepStrictEqual([0, 1, 2, 3].map(i => G.skipCost(i, t0)), [1, 3, 144, 12], 'whole timers: 1 min, 15 min, 12 h, 1 h');
+  G.startUnlock(3, t0);
+  assert.strictEqual(G.skipCost(3, t0 + 44 * 60e3), 4, '16 minutes left costs 4');
+  assert.strictEqual(G.skipCost(3, t0 + 55 * 60e3 + 1), 1, 'under 5 minutes left costs 1');
+  assert.strictEqual(G.skipCost(3, t0 + 3600e3), 0, 'nothing to skip once it is ready');
+  const w = Q.cards.wolves.count;
+  let r = G.skipChest(1, t0 + 60e3);
+  assert(r.chest === 'silver' && r.cost === 3 && Q.diamonds === 197 && Q.chests[1] === null && Q.coins === 10 && Q.cards.wolves.count === w + 2, 'pays and opens at once');
+  assert.strictEqual(G.chestState(3, t0 + 60e3), 'unlocking', 'the chest already unlocking carries on');
+  Q.diamonds = 100;
+  r = G.skipChest(2, t0); assert(r.error === 'diamonds' && r.cost === 144 && Q.diamonds === 100 && Q.chests[2], 'not enough diamonds: nothing changes');
+  assert.strictEqual(G.skipChest(1, t0).error, 'none', 'an empty slot has nothing to skip');
+  console.log('skipping chest timers with diamonds (1 per 5 minutes): ok');
+}
+
 // King Tower levels, emotes in the Shop, and chests giving cards of your arena before the road does
 {
   G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 320, best: 320, claimed: { 0: true }, coins: 10000 }) }));

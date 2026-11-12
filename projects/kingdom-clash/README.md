@@ -177,6 +177,8 @@ The first copy of a card unlocks it and isn't counted as a duplicate. The card w
 
 Coins and cards grow with the scaling above (epic and legendary chances grow more slowly). Rare floors are shown on the Shop's chest tiles. A rarity with nothing eligible yet is paid in the rarity below (a legendary as 3 epics, an epic as 5 rares). A chest's contents are rolled once, when it is won, bought or claimed, and saved with it, so reopening the game can't reroll them.
 
+**Skipping a chest timer.** Under every waiting chest a blue button opens it now for diamonds: 1 for every 5 minutes of timer left, rounded up (`ECONOMY.skip`). A locked chest costs its whole timer (wooden 1, silver 3, gold 12, platinum 36, legendary 96, mythic 144); an unlocking one gets cheaper as it runs. The first click asks (*Open?*), the second pays and opens it at once; a chest already unlocking in another slot carries on. With too few diamonds it says how many are needed and nothing is spent.
+
 **Other sources.** A trophy win pays 10 coins × the gold scaling, for the first 20 wins of each day. Trophy Road coins: 100, 250, 500, 1,200, 2,000, 3,500, 5,000, 7,500, 10,000. Diamond Pass coins: 2,500 to 7,000 on the free path, 7,500 to 15,000 on the paid one. **There are no daily quests or achievements in the game**, so nothing was changed there.
 
 **Estimates** (`node tools/economy-report.js`; it uses the game's own chest rolls; the assumptions are at the top of the file). A day for five kinds of player:

@@ -215,10 +215,35 @@ const KCMenu = (() => {
       const C = G.CHESTS[c.type];
       const label = st === 'ready' ? 'Open!' : st === 'unlocking' ? clock(c.ends - now) : busy ? `${C.name.split(' ')[0]} · ${dur(C.seconds)}` : `Unlock ${dur(C.seconds)}`;
       const cls = st === 'ready' ? 'ready' : st === 'unlocking' ? 'unlocking' : 'chest';
-      return `<button type="button" class="slot ${cls} ${c.type}" data-slot="${i}" aria-label="${C.name}: ${label}">${chestSvg(c.type)}<small>${label}</small></button>`;
-    }).join('') + `<p class="chest-note">${open ? (P().chests.some(Boolean) ? 'One chest unlocks at a time.' : 'Win trophy battles to earn chests') : 'Chests unlock with the Trophy Road'}</p>`;
+      const slot = `<button type="button" class="slot ${cls} ${c.type}" data-slot="${i}" aria-label="${C.name}: ${label}">${chestSvg(c.type)}<small>${label}</small></button>`;
+      return st === 'ready' ? slot : `<div class="slot-wrap">${slot}${skipBtn(i, now)}</div>`;
+    }).join('') + `<p class="chest-note">${open ? (P().chests.some(Boolean) ? 'One chest unlocks at a time, or open one now with diamonds: 1 for every 5 minutes left.' : 'Win trophy battles to earn chests') : 'Chests unlock with the Trophy Road'}</p>`;
     chestSig = open ? chestStates() : '';
     for (const b of $$('#chests button.slot')) b.addEventListener('click', () => chestClick(+b.dataset.slot));
+    bindSkips();
+  }
+  // Skipping a timer with diamonds: 1 per 5 minutes left. The first click asks, the second pays.
+  let confirmSkip = -1, confirmSkipT = 0;
+  function skipBtn(i, now = Date.now()) {
+    const cost = G.skipCost(i, now), ask = confirmSkip === i, poor = P().diamonds < cost;
+    return `<button type="button" class="skip-btn${ask ? ' confirm' : ''}${poor ? ' poor' : ''}" data-skip="${i}" aria-label="${ask ? 'Confirm: open' : 'Open'} now for ${cost} diamond${cost === 1 ? '' : 's'}">${ask ? 'Open? ' : ''}<i class="gem-i" aria-hidden="true"></i><b>${fmt(cost)}</b></button>`;
+  }
+  function bindSkips() {
+    for (const b of $$('#chests .skip-btn:not([data-bound])')) { b.dataset.bound = '1'; b.addEventListener('click', e => { e.stopPropagation(); skipClick(+b.dataset.skip); }); }
+  }
+  function skipClick(i) {
+    const cost = G.skipCost(i);
+    if (!cost) return refresh();
+    if (P().diamonds < cost) { confirmSkip = -1; toast(`Opening it now takes ${fmt(cost)} diamond${cost === 1 ? '' : 's'}. You have ${fmt(P().diamonds)}.`); return; }
+    if (confirmSkip !== i) {
+      confirmSkip = i; clearTimeout(confirmSkipT);
+      confirmSkipT = setTimeout(() => { confirmSkip = -1; renderChests(); }, 4000);
+      KCSound.play('select'); renderChests(); return;
+    }
+    clearTimeout(confirmSkipT); confirmSkip = -1;
+    const got = G.skipChest(i);
+    if (got && !got.error) { KCSound.play('buy'); showChest(got.chest, got); }
+    refresh();
   }
   function chestClick(i) {
     const st = G.chestState(i), c = P().chests[i];
@@ -1374,7 +1399,12 @@ const KCMenu = (() => {
     if ($('#home').hidden) return;
     if (G.roadOpen() && P().chests.some(Boolean)) {
       if (chestStates() !== chestSig) renderChests();
-      else for (const b of $$('#chests .slot.unlocking')) b.querySelector('small').textContent = clock(P().chests[+b.dataset.slot].ends - Date.now());
+      else {
+        for (const b of $$('#chests .slot.unlocking')) b.querySelector('small').textContent = clock(P().chests[+b.dataset.slot].ends - Date.now());
+        // the diamond price drops as the timer runs
+        for (const b of $$('#chests .skip-btn')) if (b.querySelector('b').textContent !== fmt(G.skipCost(+b.dataset.skip))) b.outerHTML = skipBtn(+b.dataset.skip);
+        bindSkips();
+      }
     }
     if (tabNow === 'shop') {
       const day = P().shop && P().shop.day;

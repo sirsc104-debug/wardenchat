@@ -77,6 +77,8 @@ const KCProgress = (() => {
     winGold: { base: 10, dailyCap: 20 },
     // the free daily chest: a wooden chest with this many times its usual contents
     freeChest: { type: 'wooden', bonus: 3 },
+    // diamonds can skip a chest's timer: 1 diamond for every 5 minutes left (rounded up)
+    skip: { secondsPerDiamond: 300 },
     // the Shop: coins per copy, the most copies in one offer, and chest prices (times the chest's average gold)
     shop: { perCopy: { common: 20, rare: 200, epic: 2000, legendary: 40000 }, maxQty: { common: 500, rare: 100, epic: 10, legendary: 1 }, chestPrice: 3 },
   };
@@ -464,6 +466,24 @@ const KCProgress = (() => {
     c.ends = now + CHESTS[c.type].seconds * 1000;
     save();
     return 'ok';
+  }
+  // Diamonds to open chest i now: 1 per 5 minutes of its timer still to run (a locked chest's whole
+  // timer, an unlocking one's time left), rounded up. 0 when there is nothing to skip.
+  function skipCost(i, now = Date.now()) {
+    const st = chestState(i, now), c = P.chests[i];
+    if (st !== 'locked' && st !== 'unlocking') return 0;
+    const left = st === 'locked' ? CHESTS[c.type].seconds : Math.max(0, (c.ends - now) / 1000);
+    return Math.max(1, Math.ceil(left / ECONOMY.skip.secondsPerDiamond));
+  }
+  // Pay the diamonds and open chest i at once. Another chest that is unlocking carries on.
+  // Returns the opened contents (as openChest does) plus { cost }, or { error: 'none' | 'diamonds', cost }.
+  function skipChest(i, now = Date.now()) {
+    const cost = skipCost(i, now);
+    if (!cost) return { error: 'none', cost: 0 };
+    if (P.diamonds < cost) return { error: 'diamonds', cost };
+    P.diamonds -= cost;
+    P.chests[i].state = 'unlocking'; P.chests[i].ends = now;
+    return Object.assign(openChest(i, now), { cost });
   }
   function openChest(i, now = Date.now()) {
     if (chestState(i, now) !== 'ready') return null;
@@ -889,7 +909,7 @@ const KCProgress = (() => {
 
   return {
     MAX_LEVEL, XP_PER_LEVEL, TROPHIES, ARENAS, ROAD, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
-    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax,
+    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest,
     load, save, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,
