@@ -3285,10 +3285,10 @@ const KCProgress = (() => {
     skip: { secondsPerDiamond: 300 },
     // the Shop: rubies per copy, the most copies in one offer, and chest prices (times the chest's average gold)
     // the Shop, in Rubies: the value of a copy, the most copies in a daily card offer (no legendaries are
-    // offered) and in the 1-diamond mega bundle. Chests: one of each a day, priced at their rubies plus
-    // `chestCardShare` of the value of the cards inside, from the arena listed in `chestArena`.
+    // offered) and in the 1-diamond mega bundle. Chests: one of each a day, priced at `chestPriceScale` x
+    // (their rubies plus `chestCardShare` of the value of the cards inside), from the arena in `chestArena`.
     shop: { perCopy: { common: 20, rare: 200, epic: 2000, legendary: 40000 }, maxQty: { common: 50, rare: 10, epic: 1, legendary: 0 },
-      megaQty: { common: 100, rare: 20, epic: 2, legendary: 0 }, chestCardShare: 0.5, chestsPerDay: 1,
+      megaQty: { common: 100, rare: 20, epic: 2, legendary: 0 }, chestCardShare: 0.5, chestPriceScale: 2, chestsPerDay: 1,
       chestArena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 4 } },
     // wallet Coins (SirSC) to Rubies, one way: `rate` rubies a coin, up to a daily cap set by the highest
     // arena reached; past the last arena the cap grows by `beyond.add` every `beyond.every` trophies.
@@ -3798,13 +3798,13 @@ const KCProgress = (() => {
   }
   // Shop chests cost rubies, one of each a day, from the arena in ECONOMY.shop.chestArena (by the highest
   // trophies reached). What is inside is rolled at purchase and stays hidden until the chest is opened
-  // (the tile shows the card count and ruby range). The price is the rubies inside plus half the value of
-  // its cards, so it always costs more than it pays back and the bigger chests cost tens of thousands.
+  // (the tile shows the card count and ruby range). The price is twice (the rubies inside plus half the
+  // value of its cards), so it always costs more than it pays back and the bigger chests cost tens of thousands.
   function chestPrice(type, opts) {
     const o = chestOdds(type, opts), v = ECONOMY.shop.perCopy, avg = (o.rubies[0] + o.rubies[1]) / 2;
     const commons = Math.max(0, o.cards - o.rares - o.epics - o.legendaries);
     const cards = commons * v.common + (o.rares + o.rareChance) * v.rare + o.epics * v.epic + o.legendaries * v.legendary;
-    return Math.max(5, Math.round((avg + cards * ECONOMY.shop.chestCardShare) / 5) * 5);
+    return Math.max(5, Math.round((avg + cards * ECONOMY.shop.chestCardShare) * ECONOMY.shop.chestPriceScale / 5) * 5);
   }
   const bestArena = () => (ARENAS.filter(a => !a.soon && P.best >= a.min).pop() || ARENAS[0]).number;
   const chestShopOpen = type => bestArena() >= (ECONOMY.shop.chestArena[type] || 99);
