@@ -8,6 +8,8 @@ Plain HTML, CSS and JavaScript with no build step and no dependencies. Open `ind
 
 ## Screens
 
+On the Trophy Road a **Claim all** button claims every reward that's ready at once (chests are opened on the spot) and shows them together in one reveal. In battle a troop faces the way it is heading: one that turns round to chase something coming at your towers turns to face it. Every character is drawn with soft light from above, a darker base for roundness, a bright rim, shine in the eyes and a soft shadow on the ground.
+
 The top bar shows your **trophies** beside the Rubies, Coins and Diamonds once the Trophy Road is open (a click opens the road). The arena centerpiece in the lobby shows how far you are toward the next arena as a bar with no numbers; clicking it opens the Trophy Road, where each arena's trophy count is shown.
 
 | Screen | What's on it |

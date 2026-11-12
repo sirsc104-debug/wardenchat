@@ -11,7 +11,12 @@
   const BRONZE = [C.bronze, C.bronzeSh], STEEL = ['#c9d0db', '#9aa3b2'], DARK = ['#3a3346', '#25202f'];
   const walkOf = (o, f) => (o.walk ? Math.sin(o.t * (f || 10)) : 0);
   // eyes looking out of a face (front view only)
-  const eyes = (c, q, y, gap, r, col) => { for (const s of [-1, 1]) { circ(c, s * q(gap), q(y), q(r)); c.fillStyle = col || OUT; c.fill(); } };
+  const eyes = (c, q, y, gap, r, col) => {
+    for (const s of [-1, 1]) {
+      circ(c, s * q(gap), q(y), q(r)); c.fillStyle = col || OUT; c.fill();
+      if (q(r) > 1.1) { circ(c, s * q(gap) - q(r) * 0.32, q(y) - q(r) * 0.34, q(r) * 0.38); c.fillStyle = 'rgba(255,255,255,0.9)'; c.fill(); }
+    }
+  };
   // a glow (additive), for crystals, sparks and fire
   function glow(c, x, y, r, col, a) {
     const g = c.createRadialGradient(x, y, 0, x, y, Math.max(1, r));

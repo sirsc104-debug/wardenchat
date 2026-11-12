@@ -58,7 +58,7 @@
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
     A.trainer($('#introFoe'), T.look);
-    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {} });
+    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {} });
     $('#simWinBtn').hidden = false; $('#netWait').hidden = true;
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
@@ -874,7 +874,14 @@
     c.drawImage(G.zone, 0, 0, G.zone.width / G.dpr, G.zone.height / G.dpr);
     c.globalAlpha = 1;
   }
-  function shadow(c, x, y, r) { A.ell(c, x, y, r, r * 0.42); c.fillStyle = 'rgba(0,0,0,0.25)'; c.fill(); }
+  // a soft shadow under a troop: dark in the middle, fading out at the edge
+  function shadow(c, x, y, r) {
+    const g = c.createRadialGradient(x, y, 0, x, y, Math.max(1, r * 1.1));
+    g.addColorStop(0, 'rgba(0,0,0,0.34)'); g.addColorStop(0.65, 'rgba(0,0,0,0.22)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.save(); c.translate(x, y); c.scale(1, 0.42); c.translate(-x, -y);
+    c.fillStyle = g; c.beginPath(); c.arc(x, y, Math.max(1, r * 1.1), 0, Math.PI * 2); c.fill();
+    c.restore();
+  }
   function drawEnt(c, d, t) {
     const e = d.e, k = G.k, x = SX(d.x), y = SY(d.y);
     if (e.kind === 'tower') {
@@ -923,7 +930,7 @@
     if (e.deploy > 0) { sc = 1 - Math.max(0, e.deploy - 0.75) * 2; c.globalAlpha = 0.65; }
     if (sc < 1) c.scale(Math.max(0.2, sc), Math.max(0.2, sc));
     if (e.flash > 0) c.filter = 'brightness(1.8)';
-    const o = { team: e.team, t: t + e.id * 0.37, walk: e.moving, atk: Math.max(0, e.atk / 0.28), face: e.face, id: e.id, view: e.team === 0 ? 'back' : 'front', evo: e.evo };
+    const o = { team: e.team, t: t + e.id * 0.37, walk: e.moving, atk: Math.max(0, e.atk / 0.28), face: e.face, id: e.id, view: facingOf(e), evo: e.evo };
     if (e.ram) o.power = Math.max(0, Math.min(1, (e.speed - e.baseSpeed) / (e.maxSpeed - e.baseSpeed)));
     if (e.rider) o.ratk = Math.max(0, e.rider.atk / 0.4);
     if (e.chargeHit) o.charged = e.run >= e.chargeHit;
@@ -960,6 +967,22 @@
       c.beginPath(); c.moveTo(x, cy); c.arc(x, cy, r * 0.8, -Math.PI / 2, -Math.PI / 2 + p * Math.PI * 2); c.closePath();
       c.fillStyle = e.team === 0 ? '#8cc4ff' : '#ff9ea4'; c.fill();
     }
+  }
+  // Which way a troop faces: away from you (its back) while it heads up the arena, toward you (its front)
+  // while it heads down, so a troop that turns round to chase something coming at your towers turns to
+  // face it. Moving, it faces the way it walks; standing, the way its target is. Small sideways moves
+  // keep the last facing, so it doesn't flicker.
+  function facingOf(e) {
+    const mem = G.views || (G.views = {});
+    let v = mem[e.id] || (e.team === 0 ? 'back' : 'front');
+    let dy = e.moving ? e.y - e.py : 0;
+    if (Math.abs(dy) < 0.004) {
+      const t = e.target && G.s.ents.find(u => u.id === e.target);
+      dy = t ? (Math.abs(t.y - e.y) > 0.35 ? (t.y - e.y) * 0.01 : 0) : 0;
+    }
+    if (dy > 0.004) v = 'front'; else if (dy < -0.004) v = 'back';
+    mem[e.id] = v;
+    return v;
   }
   // Frozen: a block of ice around it; stunned: crackling sparks over it.
   function frozen(c, e, x, y, r, t) {

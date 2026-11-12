@@ -20,15 +20,23 @@ const KCArt = (() => {
   const TAU = Math.PI * 2;
   let LW = 2;
 
-  function ell(c, x, y, rx, ry, rot) { c.beginPath(); c.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), rot || 0, 0, TAU); }
-  function circ(c, x, y, r) { c.beginPath(); c.arc(x, y, Math.max(0.1, r), 0, TAU); }
+  // The box of the last shape built (in the canvas's current frame), so shading can light it from above.
+  let BOX = null;
+  const box = (x0, y0, x1, y1) => { BOX = { x: Math.min(x0, x1), y: Math.min(y0, y1), w: Math.abs(x1 - x0), h: Math.abs(y1 - y0) }; };
+  function ell(c, x, y, rx, ry, rot) { c.beginPath(); c.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), rot || 0, 0, TAU); const m = rot ? Math.max(Math.abs(rx), Math.abs(ry)) : 0; box(x - (m || rx), y - (m || ry), x + (m || rx), y + (m || ry)); }
+  function circ(c, x, y, r) { c.beginPath(); c.arc(x, y, Math.max(0.1, r), 0, TAU); box(x - r, y - r, x + r, y + r); }
   function rr(c, x, y, w, h, r) {
-    c.beginPath();
+    c.beginPath(); box(x, y, x + w, y + h);
     r = Math.max(0, Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2));
     c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
     c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
   }
-  function poly(c, pts) { c.beginPath(); c.moveTo(pts[0], pts[1]); for (let i = 2; i < pts.length; i += 2) c.lineTo(pts[i], pts[i + 1]); c.closePath(); }
+  function poly(c, pts) {
+    c.beginPath(); c.moveTo(pts[0], pts[1]);
+    let x0 = pts[0], x1 = pts[0], y0 = pts[1], y1 = pts[1];
+    for (let i = 2; i < pts.length; i += 2) { c.lineTo(pts[i], pts[i + 1]); x0 = Math.min(x0, pts[i]); x1 = Math.max(x1, pts[i]); y0 = Math.min(y0, pts[i + 1]); y1 = Math.max(y1, pts[i + 1]); }
+    c.closePath(); box(x0, y0, x1, y1);
+  }
   function paint(c, fill, lw) {
     c.fillStyle = fill; c.fill();
     if (lw) { c.lineWidth = lw; c.strokeStyle = OUT; c.lineJoin = 'round'; c.stroke(); }
@@ -36,10 +44,24 @@ const KCArt = (() => {
   function line(c, x1, y1, x2, y2, col, w) {
     c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.strokeStyle = col; c.lineWidth = w; c.lineCap = 'round'; c.stroke();
   }
-  // Fill a shape, shade a crescent along its bottom, then outline it.
+  // Fill a shape, shade a crescent along its bottom, light its top (a soft sheen, as if lit from above),
+  // then outline it. Every troop, building and card picture is built from these, so they all get the light.
   function sh(c, build, base, shade, off) {
-    build(); c.fillStyle = shade || base; c.fill();
+    BOX = null; build(); const b = BOX; c.fillStyle = shade || base; c.fill();
     if (shade) { c.save(); build(); c.clip(); c.translate(0, -off); build(); c.fillStyle = base; c.fill(); c.restore(); }
+    if (b && b.h > LW * 2.5 && b.w > LW * 2) {
+      c.save(); build(); c.clip();
+      const g = c.createLinearGradient(0, b.y, 0, b.y + b.h * 0.6);
+      g.addColorStop(0, 'rgba(255,255,255,0.46)'); g.addColorStop(0.4, 'rgba(255,255,255,0.14)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+      c.fillStyle = g; c.fillRect(b.x - 1, b.y - 1, b.w + 2, b.h * 0.62 + 1);
+      // and a little darker toward the bottom, for roundness
+      const d = c.createLinearGradient(0, b.y + b.h * 0.55, 0, b.y + b.h);
+      d.addColorStop(0, 'rgba(20,10,40,0)'); d.addColorStop(1, 'rgba(20,10,40,0.16)');
+      c.fillStyle = d; c.fillRect(b.x - 1, b.y + b.h * 0.55, b.w + 2, b.h * 0.46 + 1);
+      // a thin bright rim along the upper left edge
+      c.translate(LW * 0.55, LW * 0.55); build(); c.lineWidth = LW * 0.9; c.strokeStyle = 'rgba(255,255,255,0.32)'; c.stroke();
+      c.restore();
+    }
     build(); c.lineWidth = LW; c.strokeStyle = OUT; c.lineJoin = 'round'; c.stroke();
   }
   // A thick outlined stroke: dark underneath, colour on top.
@@ -48,7 +70,11 @@ const KCArt = (() => {
     c.strokeStyle = OUT; c.lineWidth = w + LW * 2; c.stroke();
     c.strokeStyle = col; c.lineWidth = w; c.stroke();
   }
-  function dot(c, x, y, r, col) { circ(c, x, y, r); c.fillStyle = col || OUT; c.fill(); }
+  // a dot; a dark one (an eye) gets a glint of light
+  function dot(c, x, y, r, col) {
+    circ(c, x, y, r); c.fillStyle = col || OUT; c.fill();
+    if (!col && r > 1.1) { circ(c, x - r * 0.32, y - r * 0.34, r * 0.38); c.fillStyle = 'rgba(255,255,255,0.92)'; c.fill(); }
+  }
   function crownIcon(c, x, y, s, fill) {
     poly(c, [x - s, y + s * 0.5, x - s, y - s * 0.4, x - s * 0.5, y, x, y - s * 0.7, x + s * 0.5, y, x + s, y - s * 0.4, x + s, y + s * 0.5]);
     paint(c, fill || C.gold, Math.max(1, s * 0.22));

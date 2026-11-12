@@ -1204,7 +1204,7 @@ const KCMenu = (() => {
     const label = m => m.kind === 'card' ? `${KC_CARDS[m.card].name} ×${m.copies}` : m.kind === 'rubies' ? `${fmt(m.amount)} rubies` : m.kind === 'chest' ? G.CHESTS[G.capChest(m.chest)].name
       : (x => (x.soon ? `Arena ${x.number}` : x.name))(G.ARENAS.find(x => x.id === m.arena));
     $('#roadNext').innerHTML = ready.length
-      ? `<span class="rnx-tag ready">${ready.length} reward${ready.length === 1 ? '' : 's'} to claim</span><button type="button" class="pill gold" id="roadGo">Show me</button>`
+      ? `<span class="rnx-tag ready">${ready.length} reward${ready.length === 1 ? '' : 's'} to claim</span><button type="button" class="pill gold" id="roadClaimAll">Claim all</button>`
       : next ? `<span class="rnx-tag">Next reward</span><b>${esc(label(next))}</b><span class="rnx-at"><i class="trophy-i" aria-hidden="true"></i>${fmt(next.at)}</span>
         <span class="rnx-bar"><i style="width:${Math.max(4, Math.min(100, (p.trophies - (road[road.indexOf(next) - 1] || { at: 0 }).at) / (next.at - (road[road.indexOf(next) - 1] || { at: 0 }).at) * 100)).toFixed(0)}%"></i></span>
         <small>${fmt(next.at - p.trophies)} to go</small><button type="button" class="pill" id="roadGo">Find me</button>`
@@ -1229,6 +1229,8 @@ const KCMenu = (() => {
     for (const b of $$('#roadTrack .claim-btn')) b.addEventListener('click', () => claimAt(+b.dataset.at));
     const go = $('#roadGo');
     if (go) go.addEventListener('click', () => scrollRoad(true));
+    const all = $('#roadClaimAll');
+    if (all) all.addEventListener('click', claimAll);
     requestAnimationFrame(placeRoadMe);
   }
   // The track's fill and your marker, between the two rewards your trophies fall between.
@@ -1261,6 +1263,30 @@ const KCMenu = (() => {
     else if (got.kind === 'card') showChest(null, got);
     else if (got.kind === 'rubies') toast(`+${fmt(got.rubies)} rubies`);
     refresh();
+  }
+
+  // Claim every reward that's ready, in road order, and show them all in one reveal: rubies added up,
+  // copies of the same card together, chests opened on the spot like a single claim would.
+  function claimAll() {
+    const got = { rubies: 0, cards: [], items: [] };
+    let n = 0;
+    for (const m of G.ROAD) {
+      if (G.roadState(m) !== 'ready') continue;
+      const r = G.claim(m.at);
+      if (!r) continue;
+      n++;
+      got.rubies += r.rubies || 0;
+      for (const c of r.cards || []) {
+        const had = got.cards.find(x => x.id === c.id);
+        if (had) { had.n += c.n; had.isNew = had.isNew || c.isNew; } else got.cards.push(Object.assign({}, c));
+      }
+      for (const it of r.items || []) { const had = got.items.find(x => x.id === it.id); if (had) had.n += it.n; else got.items.push(Object.assign({}, it)); }
+    }
+    if (!n) return;
+    KCSound.play('crown');
+    refresh();
+    if (got.rubies || got.cards.length || got.items.length) showChest(null, got, `Trophy Road · ${n} reward${n === 1 ? '' : 's'}`);
+    else toast(`${n} reward${n === 1 ? '' : 's'} claimed`);
   }
 
   /* ---------- the Cards tab ---------- */
