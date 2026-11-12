@@ -130,14 +130,14 @@ The opponent emotes back about a third of the time (more often to *Good game!* a
 A **Magic Items** tab sits beside the card collection (Cards → Magic Items). Pick an item to see the cards it can be used on, or use it from a card's details window.
 
 - **Wild cards** (common, rare, epic, legendary) count as copies of any card of that rarity and fill up to the copies the card needs for its next level. They come from chests **from Arena 2 on**: none in wooden chests, from 2–4 common in silver up to 30–40 common, 8–12 rare, 2–3 epic and a 10% chance of a legendary in mythic (more with account level).
-- **Book of Common / Rare / Epic / Legendary** fill all the copies a card of that rarity still needs for its next level; the **Book of Books** works on any rarity. The **Hammer of Books** upgrades a card one level without spending coins (it still needs its copies, so a book plus the hammer is a free level).
+- **Book of Common / Rare / Epic / Legendary** fill all the copies a card of that rarity still needs for its next level; the **Book of Books** works on any rarity. The **Hammer of Books** upgrades a card one level for free: it fills any copies the card is missing and needs no coins.
 - Books and the hammer are rare finds: never in wooden chests, 0.1% in silver, 0.2% gold, 0.4% platinum, 0.7% legendary and 1% mythic (one roll per chest). Tested over 20,000–40,000 rolls.
 - **Evolution shards** have a slot in the tab; nothing gives them yet.
 - Item art is drawn in SVG (`js/items.js`), each item built from separate parts. In a chest reveal the parts fly in from every side, each trailing a comet, over a turning magic circle, and snap together; then the item flashes, a shockwave rolls out and its name appears. Books, the hammer and epic or legendary wild cards form more slowly and get a *Rare find!* tag.
 - The **Hammer of Books** has a living texture: its head shifts colour, runes scroll across it, a sheen sweeps over it and the book in its face glows, everywhere it is shown. Every item has a passing sheen. With reduced motion, none of it moves.
 - **Growing a card has its own scene** (`js/upgrades.js`), over everything, for every way a card grows:
   - *Upgrade with coins*: copies stream out of the card's bar and coins pour in from below, the card charges up and shakes, then bursts; the level number slams to the new one, Health and Damage count up, and the XP (and any account level-up) shows.
-  - *Hammer of Books*: the hammer swings in and strikes the card three times (sparks, cracks of light, the screen shakes); the third strike bursts it into a rainbow level-up, *No coins spent!*
+  - *Hammer of Books*: the hammer swings in and strikes the card three times (sparks, cracks of light, the screen shakes); the third strike bursts it into a rainbow level-up, *Free upgrade!*
   - *Wild cards*: the wild cards fly in one after another and melt into the card, each counting into its bar.
   - *Books and the Book of Books*: the book drops in, shakes and falls open, its pages turn and fly into the card as light, filling its bar; *Upgrade ready!* if it can now level.
   A click (or Space or Enter) skips to the end, another click closes it, Escape closes it. With reduced motion it opens on the end.

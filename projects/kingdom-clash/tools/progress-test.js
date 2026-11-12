@@ -200,7 +200,7 @@ console.log('save and reload: ok');
   assert.strictEqual(G.magicFor('wild_rare', 'wolves').reason, 'none-held');
   assert.strictEqual(G.magicFor('book_rare', 'wolves').reason, 'rarity');
   let mu = G.useMagic('wild_common', 'wolves'); assert(mu.ok && mu.gives === 4 && P5.cards.wolves.count === 5 && P5.magic.wild_common === 0, 'wild cards add up to what is held');
-  assert.strictEqual(G.magicFor('hammer_books', 'wolves').reason, 'copies');
+  assert(G.magicFor('hammer_books', 'wolves').ok && G.magicFor('hammer_books', 'wolves').fills === 5, 'the hammer fills missing copies');
   mu = G.useMagic('book_common', 'wolves'); assert(mu.ok && P5.cards.wolves.count === 10 && P5.magic.book_common === 0, 'a book fills the rest');
   assert.strictEqual(G.magicFor('book_books', 'wolves').reason, 'full');
   mu = G.useMagic('hammer_books', 'wolves'); assert(mu.ok && P5.cards.wolves.level === 4 && P5.cards.wolves.count === 0 && P5.coins === 0, 'the hammer upgrades without coins');

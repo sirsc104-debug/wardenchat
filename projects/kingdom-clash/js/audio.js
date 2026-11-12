@@ -62,6 +62,7 @@ const KCSound = (() => {
     hammerForm: () => { tone(1320, 1240, 0.5, 'square', 0.05); tone(1980, 1900, 0.7, 'triangle', 0.09); tone(95, 45, 0.3, 'sine', 0.35); noise(0.14, 0.2, 2400, 'bandpass');
       [523, 784, 1047, 1568].forEach((f, i) => tone(f, 0, 0.5, 'triangle', 0.12, 0.12 + i * 0.07)); },
     // a card growing (js/upgrades.js)
+    upgradeGo: () => { tone(392, 784, 0.12, 'triangle', 0.13); tone(784, 0, 0.14, 'triangle', 0.1, 0.08); noise(0.08, 0.06, 3000, 'highpass'); },
     charge: () => { tone(160, 980, 1.1, 'sawtooth', 0.04); tone(240, 1470, 1.1, 'triangle', 0.05); noise(1.1, 0.05, 900, 'bandpass'); },
     levelUp: () => { tone(70, 35, 0.5, 'sine', 0.4); noise(0.5, 0.2, 700); [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => tone(f, 0, i === 6 ? 0.8 : 0.25, 'triangle', 0.15, 0.05 + i * 0.065)); noise(0.9, 0.05, 6000, 'highpass', 0.3); },
     anvil: () => { tone(1480, 1400, 0.45, 'square', 0.045); tone(2210, 2150, 0.6, 'triangle', 0.08); tone(110, 50, 0.22, 'sine', 0.35); noise(0.1, 0.22, 2600, 'bandpass'); },

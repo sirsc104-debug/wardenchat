@@ -210,6 +210,8 @@ const KCUpgradeFX = (() => {
     sizeFx(); FX.parts = []; FX.last = 0;
     if (!FX.raf) FX.raf = requestAnimationFrame(frame);
     if (calm) { finish(false); return; }
+    // a sound the moment the scene opens, so the tap is answered at once
+    snd(d.mode === 'upgrade' || d.mode === 'king' ? 'upgradeGo' : 'itemGather');
     ({ upgrade: coinsRun, hammer: hammerRun, wild: wildRun, book: bookRun, evo: evoRun, king: kingRun })[d.mode]();
   }
   function tap() { if (!S) return; if (!S.finished) finish(true); else close(); }
@@ -258,7 +260,7 @@ const KCUpgradeFX = (() => {
         b.innerHTML = `${fmt(s[2])}<em>+${fmt(s[2] - s[1])}</em>`;
       }
       $('usStats').classList.add('on');
-      $('usGain').innerHTML = `<span class="xp">+${fmt(d.xp)} XP</span>${d.mode === 'hammer' ? '<span class="free">No coins spent!</span>' : ''}`;
+      $('usGain').innerHTML = `<span class="xp">+${fmt(d.xp)} XP</span>${d.mode === 'hammer' ? '<span class="free">Free upgrade!</span>' : ''}`;
       $('usGain').className = 'us-gain on';
       $('usNote').textContent = d.levelUp ? `You are now level ${d.levelUp}!` : '';
       if (d.levelUp) $('usNote').className = 'us-note king';
@@ -293,7 +295,7 @@ const KCUpgradeFX = (() => {
         b.innerHTML = `${fmt(v)}${p >= 1 ? `<em>+${fmt(s[2] - s[1])}</em>` : ''}`;
       }), 'countTick');
     }, 350);
-    later(() => { $('usGain').innerHTML = `<span class="xp">+${fmt(d.xp)} XP</span>${d.mode === 'hammer' ? '<span class="free">No coins spent!</span>' : ''}`; $('usGain').className = 'us-gain on'; snd('buy'); }, 1150);
+    later(() => { $('usGain').innerHTML = `<span class="xp">+${fmt(d.xp)} XP</span>${d.mode === 'hammer' ? '<span class="free">Free upgrade!</span>' : ''}`; $('usGain').className = 'us-gain on'; snd('buy'); }, 1150);
     later(() => {
       if (d.levelUp) { $('usNote').textContent = `You are now level ${d.levelUp}!`; $('usNote').className = 'us-note king'; snd('crown'); }
     }, 1500);
@@ -318,9 +320,9 @@ const KCUpgradeFX = (() => {
         fly('coin', cx + Math.cos(a) * R * (Math.random() < 0.5 ? -1 : 1), cy + Math.sin(a) * R, cx, cy, 0.55 + Math.random() * 0.2, '#ffd23f', () => snd('coinTick'));
       }, 180 + i * 55);
       $('usGain').innerHTML = `<span class="spent"><i class="coin-i" aria-hidden="true"></i>−${fmt(d.cost)}</span>`; $('usGain').className = 'us-gain on';
-    }, 420);
-    later(() => { card.className = 'us-card charging'; snd('charge'); }, 1100);
-    later(() => levelBurst(false), 2250);
+    }, 180);
+    later(() => { card.className = 'us-card charging'; snd('charge'); }, 850);
+    later(() => levelBurst(false), 1950);
   }
 
   /* ---------- an evolution unlocks ---------- */

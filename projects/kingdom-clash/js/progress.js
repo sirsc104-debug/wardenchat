@@ -526,7 +526,7 @@ const KCProgress = (() => {
   /* ---------- magic items ----------
      Wild cards count as copies of any card of their rarity. A book fills every copy a card still needs
      for its next level (the Book of Books works on any rarity). The Hammer of Books upgrades a card one
-     level without spending coins (it still needs its copies). Evolution shards have a place but nothing
+     level for free: it fills any missing copies and pays the coins. Evolution shards have a place but nothing
      gives them yet. Wild cards come from chests from Arena 2 on; books and the hammer are rare finds in
      silver chests and up (0.1% in silver to 1% in mythic, never in wooden). */
   const MAGIC = {
@@ -539,7 +539,7 @@ const KCProgress = (() => {
     book_epic: { name: 'Book of Epic', kind: 'book', rarity: 'epic', blurb: 'Use on an epic card to fill all the copies it still needs for its next level.' },
     book_legendary: { name: 'Book of Legendary', kind: 'book', rarity: 'legendary', blurb: 'Use on a legendary card to fill all the copies it still needs for its next level.' },
     book_books: { name: 'Book of Books', kind: 'book', rarity: 'any', blurb: 'Works on a card of any rarity: fills all the copies it still needs for its next level.' },
-    hammer_books: { name: 'Hammer of Books', kind: 'hammer', rarity: 'any', blurb: 'Upgrades a card one level without spending coins. The card still needs its copies.' },
+    hammer_books: { name: 'Hammer of Books', kind: 'hammer', rarity: 'any', blurb: 'Upgrades a card one level for free: it fills any copies the card is missing and needs no coins.' },
     shards: { name: 'Evolution Shards', kind: 'shard', rarity: 'any', blurb: 'Collect 6 and use them on a card that has an evolution to unlock it. Evolutions open in Sunstone Arena (Arena 3); the Snowman\'s is the first.' },
   };
   const MAGIC_ORDER = ['wild_common', 'wild_rare', 'wild_epic', 'wild_legendary', 'book_common', 'book_rare', 'book_epic', 'book_legendary', 'book_books', 'hammer_books', 'shards'];
@@ -596,7 +596,8 @@ const KCProgress = (() => {
     const c = P.cards[id];
     if (c.level >= MAX_LEVEL) return { ok: false, reason: 'max' };
     const need = UPGRADE.copies[card.rarity][c.level - 1], missing = need - c.count;
-    if (M.kind === 'hammer') return missing > 0 ? { ok: false, reason: 'copies', missing } : { ok: true, level: c.level + 1 };
+    // the hammer fills whatever copies are missing and pays the coins: one level up, whatever the card has
+    if (M.kind === 'hammer') return { ok: true, level: c.level + 1, fills: Math.max(0, missing) };
     if (missing <= 0) return { ok: false, reason: 'full' };
     return { ok: true, gives: M.kind === 'wild' ? Math.min(magicCount(item), missing) : missing, uses: M.kind === 'wild' ? Math.min(magicCount(item), missing) : 1 };
   }
@@ -611,7 +612,8 @@ const KCProgress = (() => {
       return { ok: true, item, card: id, evo: true };
     }
     if (M.kind === 'hammer') {
-      c.count -= UPGRADE.copies[KC_CARDS[id].rarity][c.level - 1];
+      // the copies it has go toward the level; whatever is missing the hammer fills
+      c.count = Math.max(0, c.count - UPGRADE.copies[KC_CARDS[id].rarity][c.level - 1]);
       c.level++;
       P.magic[item]--;
       const levelUp = addXp(4 * c.level);

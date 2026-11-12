@@ -1038,7 +1038,7 @@ const KCMenu = (() => {
       : !cards.length ? `<p class="dim">You have no ${M.rarity} cards yet.</p>`
         : `<div class="mp-cards">${cards.map(id => {
           const r = G.magicFor(magicSel, id), u = G.upgradeInfo(id);
-          const what = r.ok ? (M.kind === 'shard' ? 'Unlock its evolution' : M.kind === 'hammer' ? `Upgrade to level ${r.level}` : `+${fmt(r.gives)} ${r.gives === 1 ? 'copy' : 'copies'}`) : why[r.reason] || '';
+          const what = r.ok ? (M.kind === 'shard' ? 'Unlock its evolution' : M.kind === 'hammer' ? `Upgrade to level ${r.level}${r.fills ? ` (+${fmt(r.fills)} copies)` : ''}` : `+${fmt(r.gives)} ${r.gives === 1 ? 'copy' : 'copies'}`) : why[r.reason] || '';
           return `<button type="button" class="mp-card${r.ok ? '' : ' off'}" data-card="${id}" ${r.ok ? '' : 'disabled'}>
             <img src="${cardImg(id)}" alt=""><span><b>${esc(KC_CARDS[id].name)}</b><small>Level ${u.level}${u.max ? '' : ` · ${fmt(u.count)} / ${fmt(u.need)}`}</small><em>${what}</em></span></button>`;
         }).join('')}</div>`;
