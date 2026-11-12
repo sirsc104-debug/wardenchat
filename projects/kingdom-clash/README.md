@@ -166,14 +166,14 @@ Rules live in `js/progress.js` (no screen code; tested by `tools/progress-test.j
 
 ## Unlocking a new card
 
-The first time a card comes out of a chest, the Trophy Road, the Shop or the Diamond Pass, it gets an unlock show for its rarity (`unlock` in `js/menu.js`), each with its own sound and banner:
+Every time a card comes out of a chest, the Trophy Road, the Shop or the Diamond Pass, it gets the show for its rarity (`unlock` in `js/menu.js`), each with its own sound and banner (*New …!* the first time, then *Rare!*, *Epic!* or *Legendary!*; commons show no banner once found):
 
 - **Common** (*New card!*): a blue sparkle burst, then the card flips with a shine.
 - **Rare** (*New Rare!*): the card shakes as embers rise off it, gold rays fan out behind it, then it flips in a double flash.
 - **Epic** (*New Epic!*): the screen dims, a violet vortex turns behind the shaking card and lightning streaks into it, then the vortex implodes and the card flips in a shockwave.
 - **Legendary** (*Legendary!*): the screen goes dark, rainbow beams sweep, the card comes down slowly inside a spinning rainbow halo while rainbow comets pour into it, the screen rumbles, a white-out, then the card flips to rainbow fireworks and a shimmering banner.
 
-A click skips to the end. Cards you already have keep the normal reveal.
+A click skips to the end.
 
 ## The starter deck (level 1)
 

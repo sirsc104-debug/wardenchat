@@ -7155,7 +7155,8 @@ const KCMenu = (() => {
   // type: 'wooden' | 'silver' | 'gold', or null for a reward with no chest. got: { coins, cards: [{ id, n, isNew }] },
   // already added to the player's collection.
   function showChest(type, got, title) {
-    const rank = c => (c.isNew ? 2 : KC_CARDS[c.id].rarity === 'rare' ? 1 : 0);
+    // commons first, building up to the rarest; within a rarity, new cards last
+    const rank = c => ({ common: 0, rare: 2, epic: 4, legendary: 6 }[KC_CARDS[c.id].rarity] || 0) + (c.isNew ? 1 : 0);
     const cards = got.cards.slice().sort((a, b) => rank(a) - rank(b));
     const steps = [];
     if (got.coins) steps.push({ coins: got.coins });
@@ -7283,7 +7284,8 @@ const KCMenu = (() => {
         <div class="rv-bar" id="rvBar"><i style="width:${barPct(st, st.before).toFixed(1)}%"></i><span>${barText(st, st.before)}</span></div>
         <small id="rvNote"><span class="rar ${c.rarity}">${c.rarity}</span> Level ${st.level}</small>
       </div>`;
-    if (st.isNew) { unlock(st, c); return; }
+    // every card gets its rarity's show; a new one says so on the banner
+    unlock(st, c); return;
     const flipAt = special ? 1350 : 850;
     later(() => { $('#coReward .rv-fly').classList.add('tease'); if (special) KCSound.play('chestShake'); }, 560);
     later(() => { $('#coReward .rv-flip').classList.add('flipped'); KCSound.play('cardFlip'); }, flipAt);
@@ -7302,10 +7304,10 @@ const KCMenu = (() => {
      rainbow beams sweep, the card comes down slowly in a spinning halo while rainbow comets pour into
      it, the screen rumbles, a white-out, and rainbow fireworks. Each ends on its own banner. */
   const UL = {
-    common: { flip: 900, cols: ['#8fd0ff', '#cdeaff', '#ffffff'], banner: 'New card!' },
-    rare: { flip: 1700, cols: ['#ffb347', '#ffd98a', '#ff8a3d', '#ffffff'], banner: 'New Rare!' },
-    epic: { flip: 2500, cols: ['#d49bff', '#efd4ff', '#9a5ae8', '#ffffff'], banner: 'New Epic!' },
-    legendary: { flip: 3600, cols: ['#7ff0e0', '#9fb8ff', '#d49bff', '#ff8fd8', '#ffc35a', '#ffffff'], banner: 'Legendary!' },
+    common: { flip: 900, cols: ['#8fd0ff', '#cdeaff', '#ffffff'], banner: 'New card!', again: '' },
+    rare: { flip: 1700, cols: ['#ffb347', '#ffd98a', '#ff8a3d', '#ffffff'], banner: 'New Rare!', again: 'Rare!' },
+    epic: { flip: 2500, cols: ['#d49bff', '#efd4ff', '#9a5ae8', '#ffffff'], banner: 'New Epic!', again: 'Epic!' },
+    legendary: { flip: 3600, cols: ['#7ff0e0', '#9fb8ff', '#d49bff', '#ff8fd8', '#ffc35a', '#ffffff'], banner: 'Legendary!', again: 'Legendary!' },
   };
   function unlockReset() {
     const u = $('#coUnlock');
@@ -7315,7 +7317,7 @@ const KCMenu = (() => {
     const r = UL[c.rarity] ? c.rarity : 'common', U = UL[r], u = $('#coUnlock'), fly = $('#coReward .rv-fly'), flip = $('#coReward .rv-flip');
     const at = (fn, ms) => later(fn, ms);
     const centre = () => { const b = flip.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2, b.width]; };
-    $('#ulBanner').textContent = U.banner;
+    $('#ulBanner').textContent = st.isNew ? U.banner : U.again;
     u.className = `co-unlock ul-${r} on`;
     // centre the light on where the card comes to rest
     // (from its layout box, not its rect, since its entrance animation is moving it)
@@ -7368,7 +7370,7 @@ const KCMenu = (() => {
     const infoAt = U.flip + (r === 'legendary' ? 700 : 450);
     at(() => {
       $('#coReward .rv-info').classList.add('on');
-      KCSound.play(r === 'legendary' ? 'unlockFanfare' : 'revealNew');
+      KCSound.play(r === 'legendary' ? 'unlockFanfare' : st.isNew || r !== 'common' ? 'revealNew' : 'revealCommon');
       count(Math.min(1100, 350 + st.n * 30), p => cardCount(st, Math.round(st.n * p)), 'countTick');
     }, infoAt);
     at(shown, infoAt + Math.min(1100, 350 + st.n * 30) + 300);
@@ -7405,7 +7407,7 @@ const KCMenu = (() => {
     else if (st.coins) $('#rvN').textContent = '+' + fmt(st.coins);
     else {
       $('#coReward .rv-fly').classList.add('tease'); $('#coReward .rv-flip').classList.add('flipped'); cardCount(st, st.n);
-      if (st.isNew) { $('#coUnlock').className = `co-unlock ul-${UL[KC_CARDS[st.id].rarity] ? KC_CARDS[st.id].rarity : 'common'} on reveal`; $('#chestOpen').classList.remove('rumble'); }
+      { $('#coUnlock').className = `co-unlock ul-${UL[KC_CARDS[st.id].rarity] ? KC_CARDS[st.id].rarity : 'common'} on reveal`; $('#chestOpen').classList.remove('rumble'); }
     }
     shown();
   }
