@@ -353,7 +353,7 @@ const KC_CARDS = {
   /* The expansion: 24 more cards, 14 spells, 9 buildings and a troop, spread over all ten arenas. Each
      works like a well-known card of the genre, brought to this game's scale the same way (troops and
      spells: health x0.69, damage x0.46; buildings: health x0.85, damage x0.33, as the Cannon and the Coil
-     Tower are). Spell damage grows with the card's level; durations, radii, lifetimes and energy don't. */
+     Tower are; the two siege buildings, made to hit towers, take the troops' x0.46 for damage). Spell damage grows with the card's level; durations, radii, lifetimes and energy don't. */
   // Arena 1: Cinder Keep
   magmaquake: {
     id: 'magmaquake', name: 'Magma Quake', cost: 3, rarity: 'rare', kind: 'spell', role: 'Building killer', count: 1,
@@ -362,7 +362,7 @@ const KC_CARDS = {
   },
   ashfall: {
     id: 'ashfall', name: 'Ashfall', cost: 4, rarity: 'epic', kind: 'spell', role: 'Damage over time', count: 1,
-    dmg: 335, area: 3.5, towerPct: 0.3, zone: { dur: 8, every: 1, targets: 'both' },
+    dmg: 305, area: 3.5, towerPct: 0.3, zone: { dur: 8, every: 1, targets: 'both' },
     blurb: 'A cloud of burning volcanic ash hangs over an area for 8 seconds, searing every enemy troop and building under it, on the ground or in the air.',
   },
   magmaturret: {
@@ -379,7 +379,7 @@ const KC_CARDS = {
   },
   briarbind: {
     id: 'briarbind', name: 'Briar Bind', cost: 3, rarity: 'epic', kind: 'spell', role: 'Control', count: 1,
-    dmg: 70, area: 2.5, towerPct: 0, bind: { n: 3, dur: 2 },
+    dmg: 90, area: 2.5, towerPct: 0, bind: { n: 3, dur: 2 },
     blurb: 'Enchanted vines burst from the ground and seize the three toughest enemy troops or buildings in the area for 2 seconds: they can\'t move or attack, and flying troops are dragged down where ground troops can reach them.',
   },
   bramblenest: {
@@ -397,7 +397,7 @@ const KC_CARDS = {
   scarabshrine: {
     id: 'scarabshrine', name: 'Scarab Shrine', cost: 3, rarity: 'rare', kind: 'building', role: 'Spawner', count: 1,
     hp: 430, dmg: 0, hit: 1, range: 0, targets: 'ground', air: false,
-    radius: 0.85, half: 0.9, lifetime: 30, spawner: { card: 'scarab', every: 3.5, first: 1, onDeath: 4, n: 2 },
+    radius: 0.85, half: 0.9, lifetime: 30, spawner: { card: 'scarab', every: 4, first: 1, onDeath: 4, n: 2 },
     blurb: 'An old sandstone tomb. Scarab warriors crawl out of it two at a time, and four more spill out when it crumbles.',
   },
   scarab: {
@@ -407,7 +407,7 @@ const KC_CARDS = {
   },
   dunemortar: {
     id: 'dunemortar', name: 'Dune Mortar', cost: 4, rarity: 'common', kind: 'building', role: 'Siege', count: 1,
-    hp: 1160, dmg: 88, hit: 5, range: 11.5, minRange: 3.5, targets: 'ground', air: false, siege: true, splash: 2,
+    hp: 1250, dmg: 110, hit: 5, range: 11.5, minRange: 3.5, targets: 'ground', air: false, siege: true, splash: 2,
     radius: 0.95, half: 1.0, lifetime: 30, deployTime: 3.5, proj: 'mortarshell', projSpeed: 5, lob: true,
     blurb: 'A sandstone siege cannon that lobs huge stones at ground troops, buildings and towers up to 11.5 tiles away, even from your own side. It can\'t hit anything closer than 3.5 tiles, and it takes a while to set up.',
   },
@@ -419,13 +419,13 @@ const KC_CARDS = {
   },
   cyclone: {
     id: 'cyclone', name: 'Cyclone', cost: 3, rarity: 'epic', kind: 'spell', role: 'Control', count: 1,
-    dmg: 115, area: 5.5, towerPct: 0.3, zone: { dur: 1.5, every: 0.1, targets: 'both', pull: 3.5 },
+    dmg: 135, area: 5.5, towerPct: 0.3, zone: { dur: 1.5, every: 0.1, targets: 'both', pull: 3.5 },
     blurb: 'A howling storm spins for a second and a half, dragging enemy troops on the ground and in the air toward its eye and buffeting them. Heavy troops resist the pull; buildings don\'t move.',
   },
   conductor: {
     id: 'conductor', name: 'Storm Conductor', cost: 5, rarity: 'rare', kind: 'building', role: 'Tank killer', count: 1,
     hp: 1490, dmg: 33, hit: 0.4, range: 6, targets: 'both', air: false,
-    radius: 0.9, half: 0.95, lifetime: 30, beam: { dps: [33, 105, 380], stage: 2 },
+    radius: 0.9, half: 0.95, lifetime: 30, beam: { dps: [36, 115, 400], stage: 2 },
     blurb: 'A tall tower of glowing storm crystals that locks a lightning beam onto one ground or flying enemy. The longer the beam holds, the harder it hits; it starts over on a new target or when stunned.',
   },
   // Arena 5: Frostfang Keep
@@ -459,7 +459,7 @@ const KC_CARDS = {
   },
   buccaneer: {
     id: 'buccaneer', name: 'Buccaneer', cost: 0, rarity: 'rare', kind: 'troop', role: 'Melee', count: 1, hidden: true,
-    hp: 495, dmg: 88, hit: 1.4, range: 0.6, speed: 1.0, targets: 'ground', air: false, radius: 0.5, mass: 3,
+    hp: 470, dmg: 88, hit: 1.4, range: 0.6, speed: 1.0, targets: 'ground', air: false, radius: 0.5, mass: 3,
     blurb: 'A burly pirate with a cutlass.',
   },
   // Arena 7: Gearforge Citadel
@@ -509,7 +509,7 @@ const KC_CARDS = {
   },
   ballista: {
     id: 'ballista', name: 'Golden Ballista', cost: 6, rarity: 'epic', kind: 'building', role: 'Siege', count: 1,
-    hp: 1130, dmg: 9, hit: 0.3, range: 11.5, targets: 'ground', air: false, siege: true,
+    hp: 1250, dmg: 12, hit: 0.3, range: 11.5, targets: 'ground', air: false, siege: true,
     radius: 0.95, half: 1.0, lifetime: 30, deployTime: 3.5, proj: 'bolt', projSpeed: 22,
     blurb: 'A great golden crossbow on a marble stand that fires a rapid stream of bolts at ground troops, buildings and towers up to 11.5 tiles away, even from your own side. It takes a while to set up.',
   },
@@ -521,7 +521,7 @@ const KC_CARDS = {
   },
   collapse: {
     id: 'collapse', name: 'Abyssal Collapse', cost: 5, rarity: 'epic', kind: 'spell', role: 'Spell', count: 1,
-    dmg: 470, area: 2.5, towerPct: 0.25, void: { pulses: 3, every: 1, first: 0.6, tiers: [[1, 1], [4, 0.48], [99, 0.21]] },
+    dmg: 400, area: 2.5, towerPct: 0.25, void: { pulses: 3, every: 1, first: 0.6, tiers: [[1, 1], [4, 0.48], [99, 0.21]] },
     blurb: 'A rift of dark energy opens over an area and strikes three times. The fewer enemies inside, the harder each strike hits: one enemy takes it all, a crowd shares much less.',
   },
 };

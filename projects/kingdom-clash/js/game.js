@@ -161,7 +161,7 @@
   function renderHand() {
     const s = G.s, hand = s.hands[0], evoKey = hand.concat(s.queues[0][0]).map(id => { const e = S.evoCharge(s, 0, id); return e ? e.n : ''; }).join();
     const pend = G.online ? G.online.mine.filter(q => !q.applied).map(q => q.card) : [];
-    const key = hand.join() + '|' + s.queues[0][0] + '|' + evoKey + '|' + pend.join();
+    const key = hand.join() + '|' + s.queues[0][0] + '|' + evoKey + '|' + pend.join() + '|' + ((s.last && s.last[0]) || '');
     if (key === G.handKey) return;
     const prev = G.handKey ? G.handKey.split('|')[0].split(',') : [];
     G.handKey = key;
@@ -172,13 +172,14 @@
       b.type = 'button';
       b.className = 'card' + (prev.length && prev[i] !== id ? ' enter' : '') + (G.sel === i ? ' sel' : '');
       b.dataset.slot = i;
-      b.title = `${c.name} (${c.cost} energy)`;
+      const cost = S.costOf(s, 0, id), costTxt = Number.isFinite(cost) ? cost : '?';
+      b.title = c.mirror ? (s.last[0] ? `${c.name}: plays ${KC_CARDS[s.last[0]].name} again, a level higher (${cost} energy)` : `${c.name}: play another card first`) : `${c.name} (${c.cost} energy)`;
       // an evolution's charge: a pip for each play counted, and the evolved card when the next is it
       const ev = S.evoCharge(s, 0, id);
       if (ev && ev.ready) b.classList.add('evo-ready');
       if (pend.includes(id)) b.classList.add('pending');
       const pips = ev ? `<span class="evo-pips">${Array.from({ length: ev.cycle - 1 }, (_, j) => `<i class="${j < ev.n ? 'on' : ''}"></i>`).join('')}</span>` : '';
-      b.innerHTML = `<img src="${ev && ev.ready ? KCMenu.cardImg(id, true) : cardImg(id)}" alt="${c.name}${ev && ev.ready ? ' (evolved)' : ''}"><span class="ready"></span><span class="key">${i + 1}</span><span class="cost">${c.cost}</span>${pips}`;
+      b.innerHTML = `<img src="${ev && ev.ready ? KCMenu.cardImg(id, true) : cardImg(id)}" alt="${c.name}${ev && ev.ready ? ' (evolved)' : ''}"><span class="ready"></span><span class="key">${i + 1}</span><span class="cost${c.mirror ? ' mirror' : ''}">${c.mirror ? costTxt : c.cost}</span>${pips}${c.mirror && s.last[0] ? `<span class="mirror-of"><img src="${cardImg(s.last[0])}" alt=""></span>` : ''}`;
       if (ev && ev.ready) b.title = `${c.name}: evolved (${c.cost} energy)`;
       b.addEventListener('pointerdown', e => cardDown(e, i));
       el.appendChild(b);
@@ -212,9 +213,9 @@
   // edge). Spells go anywhere.
   let placeKey = '', placeHit = null;
   function placeAt(id, w) {
-    const p = snap(w), c = KC_CARDS[id];
-    if (!c || c.kind === 'spell' || S.canDeploy(G.s, 0, id, p.x, p.y)) return p;
-    const key = `${id}|${p.x},${p.y}|${G.zoneKey}|${G.s.ents.filter(e => e.kind === 'building').map(e => e.id).join()}`;
+    const p = snap(w), c = KC_CARDS[S.resolve(G.s, 0, id) || id];
+    if (!c || (c.kind === 'spell' && !c.ownSide) || S.canDeploy(G.s, 0, id, p.x, p.y)) return p;
+    const key = `${id}|${(G.s.last && G.s.last[0]) || ''}|${p.x},${p.y}|${G.zoneKey}|${G.s.ents.filter(e => e.kind === 'building').map(e => e.id).join()}`;
     if (key === placeKey) return placeHit;
     let best = p, bd = Infinity;
     for (let y = 0; y < S.H; y++) for (let x = 0; x < S.W; x++) {
@@ -238,6 +239,7 @@
       const card = document.querySelector(`.card[data-slot="${slot}"]`);
       if (card) { card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake'); }
     } else if (r === 'zone') toast('Place troops on your side of the river');
+    else if (r === 'card' && KC_CARDS[id].mirror) toast(`${KC_CARDS[id].name} copies your last card: play another card first`);
   }
   function bindInput() {
     cv.addEventListener('pointermove', e => { G.hover = toWorld(e); });
@@ -300,7 +302,8 @@
 
   /* ---------- sim events become sound and effects ---------- */
   const SHOOT = { arrow: 'arrow', cannon: 'cannon', snowball: 'snow', bigsnow: 'snow', pot: 'potThrow', quill: 'quill',
-    frostbolt: 'frostShot', harpoonlet: 'arrow', arc: 'coilZap', spark: 'sparkShot', arcblast: 'arcBlast', prismray: 'prism', cloudpuff: 'puffShot' };
+    frostbolt: 'frostShot', harpoonlet: 'arrow', arc: 'coilZap', spark: 'sparkShot', arcblast: 'arcBlast', prismray: 'prism', cloudpuff: 'puffShot',
+    magmarock: 'potThrow', mortarshell: 'cannon', bolt: 'arrow', thorn: 'arrow' };
   // how high each flyer floats (in tiles)
   const LIFT = { thundercloud: 1.7, griffin: 1.3, owl: 1.25, drake: 1.3, phoenix: 1.25 };
   // a colored ring that spreads out (shockwaves, healing pulses, freezes)
@@ -323,7 +326,50 @@
             sparks(e.x, e.y, 18, '#c9a8ff', 4); sparks(e.x, e.y, 10, '#7ff0ff', 3);
           }
           break;
-        case 'cast': KCSound.play({ spears: 'spearsCast', sandstorm: 'sandstorm', flashfreeze: 'freezeCast', gemflash: 'gemFlash', meteor: 'meteorCast', barrel: 'barrelThrow', abyss: 'portal' }[e.card] || 'spell'); break;
+        case 'cast':
+          KCSound.play({ spears: 'spearsCast', sandstorm: 'sandstorm', flashfreeze: 'freezeCast', gemflash: 'gemFlash', meteor: 'meteorCast', barrel: 'barrelThrow', abyss: 'portal',
+            magmaquake: 'slam', ashfall: 'sandstorm', thornroller: 'dig', briarbind: 'dig', cyclone: 'sandstorm', powderkeg: 'barrelThrow', overclock: 'coilRise',
+            prismecho: 'chime', heavensguard: 'chime', soulblight: 'portal', collapse: 'portal' }[e.card] || 'spell');
+          if (e.card === 'overclock') { shock(e.x, e.y, KC_CARDS.overclock.area, '#ffb52e', 0.5); sparks(e.x, e.y, 14, '#ffd27a', 3.5); }
+          if (e.card === 'briarbind') debris(e.x, e.y, 10, ['#6a8a3a', '#5a4020', '#a8c46a'], 3);
+          break;
+        // the expansion's spells and buildings
+        case 'pulse':
+          if (e.card === 'magmaquake') { KCSound.play('slam'); G.shake = Math.max(G.shake, 0.22); shock(e.x, e.y, e.r, '#ff8a2a', 0.45); debris(e.x, e.y, 12, ['#4a4256', '#ff8a2a', '#2f2a38'], 3.5); }
+          else if (e.card === 'ashfall') puff(e.x, e.y - 0.4, 5, 'rgba(120,105,100,0.7)', e.r * 0.6);
+          else if (e.card === 'soulblight') { puff(e.x, e.y, 4, 'rgba(130,230,130,0.55)', e.r * 0.5); }
+          break;
+        case 'bolt':
+          KCSound.play('thunder'); G.shake = Math.max(G.shake, 0.3);
+          G.fx.push({ kind: 'bolt', x: e.x, y: e.y - 0.4, fx: e.x + (Math.random() - 0.5) * 2, fy: e.y - 9, seed: Math.random() * 1000, life: 0.4, max: 0.4 });
+          G.fx.push({ kind: 'zap', x: e.x, y: e.y - 0.4, r: 1.5, life: 0.45, max: 0.45 });
+          sparks(e.x, e.y - 0.5, 14, '#fff6c8', 4);
+          break;
+        case 'land':
+          KCSound.play('slam'); G.shake = Math.max(G.shake, 0.25);
+          G.fx.push({ kind: 'flash', x: e.x, y: e.y - 0.4, r: e.r * 0.9, life: 0.5, max: 0.5 });
+          shock(e.x, e.y, e.r, '#ffe27a', 0.55); sparks(e.x, e.y, 18, '#fff6c8', 4); debris(e.x, e.y, 10, ['#ffcd33', '#ffffff', '#e09f12'], 3);
+          break;
+        case 'voidstrike':
+          KCSound.play('thunder');
+          shock(e.x, e.y, e.r, '#b48cff', 0.4); shock(e.x, e.y, e.r * 0.5, '#ffffff', 0.3);
+          sparks(e.x, e.y - 0.4, 10 + Math.min(10, e.n * 2), '#d8b8ff', 3.5);
+          break;
+        case 'energy':
+          KCSound.play('pop');
+          G.fx.push({ kind: 'txt', x: e.x, y: e.y - 1.6, txt: '+1', col: e.team === 0 ? '#ff8ad8' : '#ffb0b8', life: 1.1, max: 1.1 });
+          sparks(e.x + 0.5, e.y - 0.9, 6, '#ff8ad8', 2);
+          break;
+        case 'clone':
+          KCSound.play('chime');
+          shock(e.x, e.y, e.r, '#9fe6ff', 0.55); sparks(e.x, e.y, 18, '#e8fbff', 3.5);
+          break;
+        case 'bind': KCSound.play('snare'); break;
+        case 'mirror':
+          KCSound.play('chime');
+          shock(e.x, e.y, 1.6, '#ffe27a', 0.5); sparks(e.x, e.y, 12, '#fff6c8', 3);
+          break;
+        case 'rollend': puff(e.x, e.y, 8, e.card === 'thornroller' ? '#a07850' : '#d8c0a0', 0.8); debris(e.x, e.y, 8, ['#8a5a34', '#a8c46a', '#5a3a1e'], 3); break;
         case 'stun':
           if (e.kind === 'freeze') { if (e.dur < 2) sparks(e.x, e.y, 5, '#cfeeff', 2); }
           else { KCSound.play('stunZap'); sparks(e.x, e.y - 0.6, 5, '#bff4ff', 2.5); }
@@ -381,6 +427,7 @@
           // a death burst: the Icebound Giant shatters, the Steel Titan bursts, the Phoenix goes up in flame
           if (e.card === 'icegiant') { KCSound.play('iceShatter'); shock(e.x, e.y, e.r, '#cfeeff', 0.55); debris(e.x, e.y - 0.6, 18, ['#cfeeff', '#9fd4f0', '#ffffff'], 4); break; }
           if (e.card === 'titan' || e.card === 'titanling') { KCSound.play('smash'); G.shake = Math.max(G.shake, e.card === 'titan' ? 0.45 : 0.2); G.fx.push({ kind: 'blast', x: e.x, y: e.y, r: e.r, life: 0.45, max: 0.45 }); debris(e.x, e.y - 0.8, e.card === 'titan' ? 20 : 10, ['#d39a48', '#a8712a', '#6a5a48'], 4.5); break; }
+          if (e.card === 'magmaturret') { KCSound.play('fireBurst'); G.shake = Math.max(G.shake, 0.3); G.fx.push({ kind: 'flash', x: e.x, y: e.y - 0.6, r: e.r * 1.2, life: 0.55, max: 0.55 }); debris(e.x, e.y - 0.6, 18, ['#ff8a2a', '#4a4256', '#ffe27a'], 4.5); break; }
           if (e.card === 'phoenix') { KCSound.play('fireBurst'); G.fx.push({ kind: 'flash', x: e.x, y: e.y - 1.1, r: e.r * 1.6, life: 0.5, max: 0.5 }); sparks(e.x, e.y - 1.1, 18, '#ffb52e', 4); break; }
           KCSound.play('thunderclap'); G.shake = Math.max(G.shake, 0.4);
           G.fx.push({ kind: 'zap', x: e.x, y: e.y, r: e.r * 1.6, life: 0.6, max: 0.6 });
@@ -405,6 +452,9 @@
           else if (e.kind === 'sunleap') { shock(e.x, e.y, e.r, '#ffe27a', 0.4); sparks(e.x, e.y, 10, '#fff1a6', 3); }
           else if (e.kind === 'arcblast') { KCSound.play('thunder'); G.shake = Math.max(G.shake, 0.3); G.fx.push({ kind: 'zap', x: e.x, y: e.y, r: e.r * 1.2, life: 0.45, max: 0.45 }); sparks(e.x, e.y, 18, '#cfe6ff', 4.5); }
           else if (e.kind === 'cloudpuff') puff(e.x, e.y, 8, 'rgba(230,240,255,0.9)', e.r * 0.8);
+          else if (e.kind === 'magmarock') { KCSound.play('fireBurst'); G.fx.push({ kind: 'flash', x: e.x, y: e.y - 0.2, r: e.r * 1.1, life: 0.35, max: 0.35 }); debris(e.x, e.y, 8, ['#ff8a2a', '#4a4256'], 2.5); }
+          else if (e.kind === 'mortarshell') { KCSound.play('smash'); G.shake = Math.max(G.shake, 0.18); G.fx.push({ kind: 'blast', x: e.x, y: e.y, r: e.r * 0.8, life: 0.4, max: 0.4 }); debris(e.x, e.y, 10, ['#c4a264', '#8a6a4a', '#e6c98e'], 3.5); }
+          else if (e.kind === 'emberleap') { KCSound.play('fireBurst'); G.fx.push({ kind: 'flash', x: e.x, y: e.y - 0.3, r: e.r * 1.2, life: 0.35, max: 0.35 }); sparks(e.x, e.y, 8, '#ffb52e', 3); }
           else puff(e.x, e.y, 9, '#ffffff', e.r);
           break;
         case 'spin':
@@ -414,6 +464,7 @@
           break;
         case 'death': KCSound.play('death'); puff(e.x, e.y - (e.air ? 1.1 : 0.3), 7, '#d9d4e8', 0.5); break;
         case 'boom':
+          if (e.card === 'glacierslam') { KCSound.play('iceShatter'); G.shake = Math.max(G.shake, 0.2); shock(e.x, e.y, e.r, '#cfeeff', 0.55); debris(e.x, e.y, 16, ['#e8f8ff', '#9fd4f0', '#ffffff'], 4); break; }
           if (e.card === 'flashfreeze') {
             KCSound.play('freeze'); shock(e.x, e.y, e.r, '#cfeeff', 0.7); shock(e.x, e.y, e.r * 0.6, '#ffffff', 0.5);
             for (let i = 0; i < 16; i++) { const a = Math.random() * 6.28, d = Math.random() * e.r; sparks(e.x + Math.cos(a) * d, e.y + Math.sin(a) * d * 0.6, 1, '#e9f8ff', 1.5); }
@@ -637,8 +688,9 @@
   function onlinePlay(slot, id, p) {
     const O = G.online, c = KC_CARDS[id];
     if (O.mine.some(q => !q.applied && q.card === id)) { toast(`${c.name} is on its way`); return; }
-    const pending = O.mine.filter(q => !q.applied).reduce((a, q) => a + KC_CARDS[q.card].cost, 0);
-    if (G.s.energy[0] - pending < c.cost) { KCSound.play('error'); toast(`Not enough energy for ${c.name}`); return; }
+    const pending = O.mine.filter(q => !q.applied).reduce((a, q) => a + S.costOf(G.s, 0, q.card), 0);
+    if (c.mirror && !S.resolve(G.s, 0, id)) { KCSound.play('error'); toast(`${c.name} copies your last card: play another card first`); return; }
+    if (G.s.energy[0] - pending < S.costOf(G.s, 0, id)) { KCSound.play('error'); toast(`Not enough energy for ${c.name}`); return; }
     if (!S.canDeploy(G.s, 0, id, p.x, p.y)) { KCSound.play('error'); toast('Place troops on your side of the river'); return; }
     O.mine.push({ seq: ++O.mySeq, at: G.sim.tick + DELAY, card: id, x: p.x, y: O.team === 0 ? p.y : S.H - p.y, team: O.team, vx: p.x, vy: p.y, applied: false });
     select(-1); G.idleHint = true; G.handKey = '';
@@ -878,6 +930,23 @@
     c.drawImage(G.zone, 0, 0, G.zone.width / G.dpr, G.zone.height / G.dpr);
     c.globalAlpha = 1;
   }
+  // Overclock: a ring of orange energy under a sped-up troop or building
+  function raged(c, e, x, y, k, t) {
+    c.save(); c.globalCompositeOperation = 'lighter';
+    A.ell(c, x, y, (e.radius + 0.2) * k, (e.radius + 0.2) * k * 0.42);
+    c.strokeStyle = `rgba(255,170,60,${0.55 + 0.25 * Math.sin(t * 10)})`; c.lineWidth = k * 0.1; c.stroke();
+    c.restore();
+  }
+  // Briar Bind: thorny vines wrapped round a held enemy
+  function vines(c, e, x, y, k, t) {
+    const r = e.radius * k * 1.05;
+    for (let i = 0; i < 3; i++) {
+      const h = k * (0.25 + i * 0.35);
+      A.ell(c, x, y - h, r * (1 - i * 0.12), r * 0.32);
+      c.strokeStyle = A.OUT; c.lineWidth = k * 0.13; c.stroke(); c.strokeStyle = i % 2 ? '#7aaa3a' : '#5a8a2a'; c.lineWidth = k * 0.08; c.stroke();
+    }
+    for (let i = 0; i < 5; i++) { const a = i * 1.26 + e.id; A.poly(c, [x + Math.cos(a) * r, y - k * 0.4, x + Math.cos(a) * r * 1.25, y - k * 0.5, x + Math.cos(a) * r, y - k * 0.55]); c.fillStyle = '#c4d88a'; c.fill(); }
+  }
   // a soft shadow under a troop: dark in the middle, fading out at the edge
   function shadow(c, x, y, r) {
     const g = c.createRadialGradient(x, y, 0, x, y, Math.max(1, r * 1.1));
@@ -905,8 +974,17 @@
       c.save(); c.translate(x, y);
       if (e.deploy > 0) { const sc = Math.max(0.3, 1 - Math.max(0, e.deploy - 0.6) * 2); c.globalAlpha = 0.7; c.scale(sc, sc); }
       if (e.flash > 0) c.filter = 'brightness(1.6)';
-      A.building(c, e.card, k, { team: e.team, angle: Math.atan2(e.aimY, e.aimX), atk: Math.max(0, e.atk / 0.25), hidden: e.hidden, rise: e.rise, t: t + e.id * 0.37 });
+      A.building(c, e.card, k, { team: e.team, angle: Math.atan2(e.aimY, e.aimX), atk: Math.max(0, e.atk / 0.25 + (e.beamOn ? 0.6 : 0)), hidden: e.hidden, rise: e.rise, t: t + e.id * 0.37 });
       c.restore();
+      if (e.beam && e.beamOn) {
+        const tg = G.s.ents.find(u => u.id === e.beamOn);
+        if (tg && !tg.dead) {
+          const stage = Math.min(e.beam.length - 1, Math.floor(e.beamTime / e.beamStage));
+          if (stage !== G.beamStage[e.id]) { G.beamStage[e.id] = stage; if (stage) KCSound.play('beamUp'); }
+          beamTo(c, x, y - k * 2.0, SX(tg.x), SY(tg.y) - liftOf(tg) * k - k * 0.4, stage, t, e.team);
+        }
+      } else if (e.beam) G.beamStage[e.id] = -1;
+      if (e.rageEnd > G.s.time) raged(c, e, x, y, k, t);
       frozen(c, e, x, y, k * 1.1, t);
       return;
     }
@@ -934,6 +1012,8 @@
     if (e.deploy > 0) { sc = 1 - Math.max(0, e.deploy - 0.75) * 2; c.globalAlpha = 0.65; }
     if (sc < 1) c.scale(Math.max(0.2, sc), Math.max(0.2, sc));
     if (e.flash > 0) c.filter = 'brightness(1.8)';
+    // a Prism Echo copy: a shimmering, see-through crystal double
+    if (e.clone) { c.globalAlpha *= 0.72; c.filter = e.flash > 0 ? 'brightness(1.8)' : 'saturate(0.55) brightness(1.3) hue-rotate(165deg)'; }
     const o = { team: e.team, t: t + e.id * 0.37, walk: e.moving, atk: Math.max(0, e.atk / 0.28), face: e.face, id: e.id, view: facingOf(e), evo: e.evo };
     if (e.ram) o.power = Math.max(0, Math.min(1, (e.speed - e.baseSpeed) / (e.maxSpeed - e.baseSpeed)));
     if (e.rider) o.ratk = Math.max(0, e.rider.atk / 0.4);
@@ -943,9 +1023,14 @@
     if (e.hookT) o.hook = 1;
     if (e.hatch !== undefined) o.hatch = 1 - e.hatch / KC_CARDS.phoenix.egg.hatch;
     if (e.beam) o.beam = e.beamOn ? 1 + Math.min(2, Math.floor(e.beamTime / e.beamStage)) : 0;
+    if (e.rageEnd > G.s.time) raged(c, e, 0, lift, k, t);
     A.troop(c, e.card, k, o);
     c.restore();
     frozen(c, e, x, y - lift, e.radius * k * 1.25, t);
+    if (e.boundEnd > G.s.time) vines(c, e, x, y, k, t);
+    if (e.curse && e.curse.card && e.curse.end > G.s.time) {
+      for (let i = 0; i < 3; i++) { const a = t * 2.5 + i * 2.1 + e.id; A.circ(c, x + Math.cos(a) * e.radius * k, y - lift - k * (0.6 + 0.3 * Math.sin(a * 1.3)), k * 0.06); c.fillStyle = 'rgba(140,255,140,0.85)'; c.fill(); }
+    }
     // dust behind a rolling cart and a galloping camel
     if (e.moving && e.deploy <= 0 && (e.ram || e.chargeHit) && Math.random() < (e.ram ? 0.25 + o.power * 0.5 : 0.4)) {
       const back = e.team === 0 ? 0.6 : -0.6;
@@ -1074,7 +1159,8 @@
     if ((e.hp >= e.maxHp && !shieldHit) || e.deploy > 0) return;
     const lift = liftOf(e) * k, top = { rhino: 1.45, gorilla: 1.75, gladiator: 1.95, snowman: e.evo ? 2.35 : 2.0, archers: 1.55, wolves: 1.05, hawks: 0.75, skeletons: 1.2, footmen: 1.6, flail: 1.95, pots: 1.6, ramcart: 1.95, ramsoldier: 1.45, mole: 1.45, camel: 2.45, bees: 0.55, owl: 1.15, thundercloud: 0.85, griffin: 1.2,
       frostsprite: 1.0, icegiant: 1.4, wintersage: 1.85, raider: 1.15, raidergun: 1.15, harpoon: 1.85, broadside: 1.3, sparkbots: 1.2, titan: 2.2, titanling: 1.4, arccannon: 1.75, shardguards: 1.5, imp: 1.0,
-      prism: 1.7, sunsprite: 1.0, guardian: 1.85, drake: 0.95, phoenix: 1.0, phoenixegg: 1.0, wraiths: 1.4, wraith: 1.4, dreadknight: 2.3 }[e.card] || 1.4;
+      prism: 1.7, sunsprite: 1.0, guardian: 1.85, drake: 0.95, phoenix: 1.0, phoenixegg: 1.0, wraiths: 1.4, wraith: 1.4, dreadknight: 2.3,
+      thornling: 1.05, scarab: 0.8, frostbrute: 1.95, buccaneer: 1.6, sentinel: 1.75, emberling: 0.95, smelter: 2.15 }[e.card] || 1.4;
     const w = Math.max(0.8, e.radius * 1.9) * k, h = Math.max(5, k * 0.2), by = y - lift - top * k, bx = x - w / 2;
     A.rr(c, bx, by, w, h, h / 2); c.fillStyle = '#1b1430'; c.fill();
     A.rr(c, bx + 1, by + 1, Math.max(0, (w - 2) * e.hp / e.maxHp), h - 2, (h - 2) / 2); c.fillStyle = blue ? '#5aa9ff' : '#ff5f69'; c.fill();
@@ -1095,6 +1181,7 @@
   // Broken pottery on the ground: shards fading out as the damage ends.
   function drawZone2(c, z, k, t) {
     if (z.kind === 'sandstorm') { storm(c, z, k, t); return; }
+    if (NEWZ[z.kind]) { NEWZ[z.kind](c, z, k, t); return; }
     if (z.kind === 'gate') {
       // the Abyss Gate: a dark swirling portal over the circle it lets wraiths out of
       const x = SX(z.x), y = SY(z.y), fade = Math.min(1, z.left / 0.6, (z.dur - z.left) / 0.4 + 0.2);
@@ -1128,6 +1215,75 @@
     }
     c.globalAlpha = 1;
   }
+
+  // The expansion's lingering spells on the field.
+  const fadeOf = z => Math.max(0, Math.min(1, (z.dur - z.left) / 0.3 + 0.15, z.left / 0.4));
+  const disc = (c, z, k, fill, stroke, dash, t) => {
+    A.ell(c, SX(z.x), SY(z.y), z.r * k, z.r * k * 0.6); c.fillStyle = fill; c.fill();
+    if (stroke) { c.strokeStyle = stroke; c.lineWidth = Math.max(2, k * 0.08); if (dash) { c.setLineDash([k * 0.4, k * 0.3]); c.lineDashOffset = -t * k * 2; } c.stroke(); c.setLineDash([]); }
+  };
+  const NEWZ = {
+    magmaquake(c, z, k, t) {
+      c.save(); c.globalAlpha = 0.9 * fadeOf(z);
+      disc(c, z, k, 'rgba(70,40,40,0.35)', 'rgba(255,140,60,0.8)', true, t);
+      c.translate(SX(z.x), SY(z.y)); c.scale(1, 0.6); A.setLw(Math.max(1, k * 0.06)); KCArt5.quakeArt(c, z.r * k * 0.75, t);
+      c.restore();
+    },
+    ashfall(c, z, k, t) {
+      c.save(); c.globalAlpha = 0.85 * fadeOf(z);
+      disc(c, z, k, 'rgba(90,70,70,0.3)', 'rgba(255,150,80,0.6)', true, t);
+      c.translate(SX(z.x), SY(z.y) - k * 2.4); A.setLw(Math.max(1, k * 0.06)); KCArt5.ashArt(c, z.r * k * 0.8, t);
+      c.restore();
+      if (Math.random() < 0.7) G.fx.push({ kind: 'dot', x: z.x + (Math.random() - 0.5) * z.r * 1.6, y: z.y - 1.8 + Math.random() * 0.4, vx: 0, vy: 2.2, r: 0.07, col: Math.random() < 0.4 ? '#ff8a2a' : '#8a7e7e', life: 0.8, max: 0.8 });
+    },
+    cyclone(c, z, k, t) {
+      c.save(); c.globalAlpha = 0.9 * fadeOf(z);
+      disc(c, z, k, 'rgba(170,210,240,0.22)', 'rgba(220,240,255,0.8)', true, t);
+      c.translate(SX(z.x), SY(z.y)); A.setLw(Math.max(1, k * 0.06)); KCArt5.cycloneArt(c, k * 2.0, t * 2);
+      c.restore();
+    },
+    soulblight(c, z, k, t) {
+      c.save(); c.globalAlpha = 0.8 * fadeOf(z);
+      disc(c, z, k, 'rgba(40,80,40,0.3)', 'rgba(140,255,140,0.75)', true, t);
+      c.translate(SX(z.x), SY(z.y) - k * 0.3); c.scale(1, 0.6); A.setLw(Math.max(1, k * 0.05)); KCArt5.curseArt(c, z.r * k * 0.7, t);
+      c.restore();
+    },
+    briarbind(c, z, k, t) {
+      // vines wrap each held enemy (drawn on them, see drawEnt); a ring of roots on the ground
+      c.save(); c.globalAlpha = 0.6 * fadeOf(z);
+      disc(c, z, k, 'rgba(90,64,32,0.25)', 'rgba(170,200,110,0.6)', true, t);
+      c.restore();
+    },
+    judgment(c, z, k, t) {
+      c.save(); c.globalAlpha = 0.5 * fadeOf(z);
+      disc(c, z, k, 'rgba(255,240,150,0.12)', 'rgba(255,240,150,0.7)', true, t);
+      c.restore();
+    },
+    overclock(c, z, k, t) {
+      c.save(); c.globalAlpha = 0.75 * fadeOf(z);
+      disc(c, z, k, 'rgba(255,170,60,0.16)', 'rgba(255,200,90,0.85)', true, t);
+      c.translate(SX(z.x), SY(z.y)); c.scale(1, 0.6); c.globalAlpha *= 0.55; A.setLw(Math.max(1, k * 0.05)); KCArt5.gearArt(c, z.r * k * 0.55, t);
+      c.restore();
+    },
+    heavensguard(c, z, k, t) {
+      // the capsule falls from high above onto its spot, a beam of light marking where
+      const f = Math.min(1, z.age / z.delay), x = SX(z.x), y = SY(z.y);
+      c.save();
+      disc(c, z, k, 'rgba(255,230,140,0.15)', 'rgba(255,230,140,0.85)', true, t);
+      c.globalCompositeOperation = 'lighter'; c.globalAlpha = 0.35;
+      const g = c.createLinearGradient(x, y - k * 9, x, y); g.addColorStop(0, 'rgba(255,240,180,0)'); g.addColorStop(1, 'rgba(255,240,180,0.8)');
+      c.fillStyle = g; c.fillRect(x - k * 0.7, y - k * 9, k * 1.4, k * 9);
+      c.restore();
+      shadow(c, x, y, k * (0.4 + f * 0.6));
+      c.save(); c.translate(x, y - k * (0.8 + (1 - f * f) * 9)); A.setLw(Math.max(1, k * 0.06)); KCArt5.capsuleArt(c, k * 0.8, t, z.team); c.restore();
+    },
+    collapse(c, z, k, t) {
+      c.save(); c.globalAlpha = 0.9 * fadeOf(z);
+      disc(c, z, k, 'rgba(30,10,50,0.35)', 'rgba(180,120,255,0.75)', true, t);
+      c.translate(SX(z.x), SY(z.y) - k * 2.6); A.setLw(Math.max(1, k * 0.05)); KCArt5.riftArt(c, z.r * k * 0.6, t);
+      c.restore();
+    },
+  };
   // A sandstorm: a tinted circle of blowing sand, rings of sand turning, dust clouds and pebbles.
   function storm(c, z, k, t) {
     const age = z.dur - z.left, fade = Math.min(1, age / 0.3, z.left / 0.4), x = SX(z.x), y = SY(z.y), r = z.r * k;
@@ -1163,7 +1319,18 @@
       return;
     }
     const arcH = { snowball: 1.6, bigsnow: 1.6, pot: 1.6, lasso: 1, fireball: 2.2, spears: 3, cannon: 0.8, frostleap: 1.0, sunleap: 1.0, frostbolt: 0.8, hook: 0.7,
-      spark: 0.3, arcblast: 0.6, cloudpuff: 0.3, barrel: 2.6, meteor: 3.5, arc: 0 }[p.kind];
+      spark: 0.3, arcblast: 0.6, cloudpuff: 0.3, barrel: 2.6, meteor: 3.5, arc: 0, glacier: 2.4, magmarock: 2.0, mortarshell: 4.5, bolt: 0.15, thorn: 0.5, emberleap: 1.0 }[p.kind];
+    if (p.roll) {
+      // Thornroller and Powder Keg roll along the ground toward the enemy
+      const x = SX(px), y = SY(py);
+      shadow(c, x, y, k * p.width * 0.9);
+      c.save(); c.translate(x, y - k * 0.5); A.setLw(Math.max(1, k * 0.06));
+      if (p.kind === 'thornroller') KCArt5.logArt(c, k * 0.62, t * (p.dy < 0 ? 1 : -1), p.width / 0.62 * 0.86);
+      else { c.rotate(Math.PI / 2 + t * 12 * (p.dy < 0 ? -1 : 1)); KCArt5.kegArt(c, k * 0.6, t, p.team); }
+      c.restore();
+      if (Math.random() < 0.6) G.fx.push({ kind: 'puff', x: p.x + (Math.random() - 0.5) * p.width * 1.6, y: p.y - p.dy * 0.4, vx: 0, vy: -p.dy * 0.4, r: 0.18, col: 'rgba(200,170,120,0.6)', life: 0.5, max: 0.5 });
+      return;
+    }
     if (p.kind === 'arc') {
       // the Coil Tower's lightning: a jagged bolt from the coil's sphere to the target
       // (drawn once per shot, as a short-lived bolt; the shot itself is not changed)
@@ -1218,6 +1385,32 @@
       A.ell(c, 0, 0, k * 0.2, k * 0.17); A.paint(c, '#d07a45', k * 0.05);
       A.rr(c, -k * 0.1, -k * 0.24, k * 0.2, k * 0.08, k * 0.03); A.paint(c, '#a8582c', k * 0.03);
       c.restore();
+      return;
+    }
+    if (p.kind === 'glacier') {
+      shadow(c, SX(px), SY(py), k * 0.5 * (0.4 + done));
+      c.save(); c.translate(x, y); c.rotate(t * 4); A.setLw(Math.max(1, k * 0.05)); KCArt5.glacierArt(c, k * 0.7, t); c.restore();
+      A.ell(c, SX(p.tx), SY(p.ty), KC_CARDS.glacierslam.area * k, KC_CARDS.glacierslam.area * k * 0.6); c.strokeStyle = 'rgba(200,240,255,0.6)'; c.lineWidth = 2; c.stroke();
+      return;
+    }
+    if (p.kind === 'magmarock' || p.kind === 'mortarshell') {
+      const lava = p.kind === 'magmarock';
+      shadow(c, SX(px), SY(py), k * 0.3);
+      A.circ(c, x, y, k * (lava ? 0.2 : 0.26)); A.paint(c, lava ? '#4a4256' : '#8a6a4a', k * 0.05);
+      if (lava) { A.circ(c, x, y, k * 0.11); c.fillStyle = '#ff9a2a'; c.fill(); if (Math.random() < 0.5) G.fx.push({ kind: 'dot', x: px, y: py - lift, vx: 0, vy: -0.4, r: 0.08, col: 'rgba(255,140,40,0.8)', life: 0.3, max: 0.3 }); }
+      else { A.circ(c, x - k * 0.08, y - k * 0.08, k * 0.07); c.fillStyle = 'rgba(255,255,255,0.4)'; c.fill(); A.ell(c, SX(p.tx), SY(p.ty), k * 1.6, k * 0.95); c.strokeStyle = 'rgba(255,220,160,0.5)'; c.lineWidth = 2; c.setLineDash([5, 5]); c.stroke(); c.setLineDash([]); }
+      return;
+    }
+    if (p.kind === 'bolt' || p.kind === 'thorn') {
+      const ang = Math.atan2((p.ty - p.sy) * k, (p.tx - p.sx) * k), L = p.kind === 'bolt' ? 0.5 : 0.25;
+      c.save(); c.translate(x, y); c.rotate(ang);
+      A.line(c, -k * L, 0, k * L * 0.6, 0, A.OUT, Math.max(2, k * 0.1)); A.line(c, -k * L, 0, k * L * 0.6, 0, p.kind === 'bolt' ? '#ffcd33' : '#6a4a2a', Math.max(1, k * 0.05));
+      A.poly(c, [k * L, 0, k * L * 0.55, -k * 0.08, k * L * 0.55, k * 0.08]); c.fillStyle = p.kind === 'bolt' ? '#fff6c8' : '#e8f0c8'; c.fill();
+      c.restore();
+      return;
+    }
+    if (p.kind === 'emberleap') {
+      c.save(); c.translate(x, y + k * 0.3); A.setLw(Math.max(1, k * 0.05)); KCArt5.flame(c, 0, 0, k * 0.55, t); c.restore();
       return;
     }
     if (p.kind === 'arrow') {
@@ -1318,6 +1511,11 @@
         c.globalAlpha = a; A.ell(c, SX(f.x), SY(f.y), f.r * k * (0.4 + p), f.r * k * 0.6 * (0.4 + p));
         c.fillStyle = 'rgba(255,170,60,0.45)'; c.fill(); c.strokeStyle = '#ffe08a'; c.lineWidth = k * 0.18; c.stroke();
         A.circ(c, SX(f.x), SY(f.y) - k * 0.4, f.r * k * 0.5 * a); c.fillStyle = 'rgba(255,240,180,0.8)'; c.fill();
+      } else if (f.kind === 'txt') {
+        c.globalAlpha = Math.min(1, a * 2);
+        c.font = `${Math.round(k * 0.8)}px "Lilita One", "Arial Black", sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+        const ty = SY(f.y) - (1 - a) * k * 1.2;
+        c.lineWidth = Math.max(2, k * 0.12); c.strokeStyle = A.OUT; c.strokeText(f.txt, SX(f.x), ty); c.fillStyle = f.col; c.fillText(f.txt, SX(f.x), ty);
       } else if (f.kind === 'rock') {
         c.globalAlpha = Math.min(1, a * 2); A.circ(c, SX(f.x), SY(f.y) - f.z * k * 0.3, f.r * k); A.paint(c, f.col, k * 0.04);
       } else if (f.kind === 'bolt') {
@@ -1357,10 +1555,23 @@
     }
   }
   function ghost(c, id, t) {
-    const s = G.s, k = G.k, card = KC_CARDS[id], p = card.kind === 'spell' ? snap(G.hover) : placeAt(id, G.hover);
-    const ok = S.canDeploy(s, 0, id, p.x, p.y), x = SX(p.x), y = SY(p.y);
+    const s = G.s, k = G.k, orig = id;
+    id = S.resolve(s, 0, id) || id;
+    const card = KC_CARDS[id], p = card.kind === 'spell' && !card.ownSide ? snap(G.hover) : placeAt(orig, G.hover);
+    const ok = S.canDeploy(s, 0, orig, p.x, p.y), x = SX(p.x), y = SY(p.y);
+    if (card.roll) {
+      // Thornroller, Powder Keg: the strip it will roll along, from the spot toward the enemy
+      const len = card.roll.dist, w = card.area;
+      A.rr(c, SX(p.x - w), SY(p.y - len), w * 2 * k, len * k, k * 0.4);
+      c.fillStyle = ok ? 'rgba(255,220,150,0.16)' : 'rgba(229,65,75,0.3)'; c.fill();
+      c.strokeStyle = ok ? 'rgba(255,220,150,0.9)' : 'rgba(229,65,75,0.9)'; c.lineWidth = 2.5; c.setLineDash([8, 6]); c.stroke(); c.setLineDash([]);
+      c.beginPath(); c.moveTo(x, y); c.lineTo(x, SY(p.y - len) + k * 0.6); c.lineTo(x - k * 0.4, SY(p.y - len) + k * 1.1); c.moveTo(x, SY(p.y - len) + k * 0.6); c.lineTo(x + k * 0.4, SY(p.y - len) + k * 1.1);
+      c.strokeStyle = 'rgba(255,255,255,0.8)'; c.lineWidth = 3; c.stroke();
+      return;
+    }
     if (card.kind === 'spell') {
       const ar = card.area || 1;
+      if (card.ownSide && !ok) { A.ell(c, x, y, ar * k, ar * k * 0.62); c.fillStyle = 'rgba(229,65,75,0.35)'; c.fill(); return; }
       A.ell(c, x, y, ar * k, ar * k * 0.62);
       c.fillStyle = card.storm ? 'rgba(214,170,96,0.3)' : 'rgba(255,140,40,0.22)'; c.fill(); c.strokeStyle = 'rgba(255,220,150,0.95)'; c.lineWidth = 2.5; c.setLineDash([8, 6]); c.stroke(); c.setLineDash([]);
       return;
@@ -1420,7 +1631,7 @@
     const dbl = s.double || s.phase === 'overtime';
     if (u.dbl !== dbl) { u.dbl = dbl; $('#x2').hidden = !dbl; }
     document.querySelectorAll('.card').forEach(b => {
-      const id = s.hands[0][+b.dataset.slot], cost = KC_CARDS[id].cost, p = Math.min(1, en / cost);
+      const id = s.hands[0][+b.dataset.slot], cost = S.costOf(s, 0, id), p = Number.isFinite(cost) ? Math.min(1, en / cost) : 0;
       b.classList.toggle('poor', en < cost);
       b.style.setProperty('--p', p.toFixed(3));
     });

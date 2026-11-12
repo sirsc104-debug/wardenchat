@@ -1348,7 +1348,30 @@ const KCMenu = (() => {
     const tgt = { buildings: 'Towers & buildings', ground: 'Ground', both: 'Air & ground' }[c.targets];
     const sp = s => (s >= 1.8 ? 'Very fast' : s >= 1.4 ? 'Fast' : s >= 1 ? 'Medium' : 'Slow');
     const sub = id2 => KC_CARDS[id2];
-    const stats = c.barrel ? [['Pirates', '×' + c.barrel.n], ['Pirate health', v(sub(c.barrel.card).hp)], ['Pirate damage', v(sub(c.barrel.card).dmg)], ['Lands', 'Anywhere'], ['Energy', c.cost]]
+    // the expansion's cards: the numbers that matter for each
+    const T2 = t => ({ ground: 'Ground', both: 'Air & ground' }[t] || t), boostPct = f => Math.round((f - 1) * 100) + '%';
+    const special = c.zone ? [['Damage', v(c.dmg)], ['Duration', c.zone.dur + ' s'], ['Radius', c.area + ' tiles'], ['Targets', T2(c.zone.targets)]].concat(
+        c.zone.bldMult > 1 ? [['Building damage', '×' + c.zone.bldMult]] : [], c.zone.slow ? [['Slow', Math.round(c.zone.slow * 100) + '%']] : [],
+        c.zone.pull ? [['Pull', 'Toward the eye']] : [], c.curse ? [['Damage taken', '+' + boostPct(c.curse.amp)], ['Fallen enemies', 'Rise as wraiths']] : [], [['Energy', c.cost]])
+      : c.roll ? [['Damage', v(c.dmg)], ['Tower damage', Math.round(v(c.dmg) * c.towerPct)], ['Rolls', c.roll.dist + ' tiles'], ['Width', (c.area * 2).toFixed(1) + ' tiles'], ['Targets', 'Ground']].concat(
+        c.roll.spawn ? [['Pirate health', v(sub(c.roll.spawn).hp)], ['Pirate damage', v(sub(c.roll.spawn).dmg)]] : [['Knockback', 'Yes']], [['Placed', 'Your side'], ['Energy', c.cost]])
+      : c.bind ? [['Damage', v(c.dmg)], ['Holds', 'The ' + c.bind.n + ' toughest'], ['Hold', c.bind.dur + ' s'], ['Radius', c.area + ' tiles'], ['Fliers', 'Pulled down'], ['Energy', c.cost]]
+      : c.bolts ? [['Damage per bolt', v(c.dmg)], ['Tower damage', Math.round(v(c.dmg) * c.towerPct)], ['Bolts', c.bolts.n], ['Stun', c.bolts.stun + ' s'], ['Radius', c.area + ' tiles'], ['Energy', c.cost]]
+      : c.rage ? [['Speed and attack', '+' + boostPct(c.rage.boost)], ['Duration', c.rage.dur + ' s'], ['Radius', c.area + ' tiles'], ['Damage', v(c.dmg)], ['Energy', c.cost]]
+      : c.clone ? [['Copies', 'Your troops in the area'], ['Copy health', 1], ['Radius', c.area + ' tiles'], ['Energy', c.cost]]
+      : c.delivery ? [['Damage', v(c.dmg)], ['Radius', c.area + ' tiles'], ['Lands after', c.delivery.delay + ' s'], ['Sentinel health', v(sub(c.delivery.card).hp)], ['Sentinel shield', v(sub(c.delivery.card).shield)], ['Sentinel damage', v(sub(c.delivery.card).dmg)], ['Placed', 'Your side'], ['Energy', c.cost]]
+      : c.mirror ? [['Plays', 'Your last card again'], ['Level', 'One higher'], ['Energy', 'That card + 1']]
+      : c.void ? [['One enemy', v(c.dmg) + ' ×' + c.void.pulses], ['2 to 4 enemies', Math.round(v(c.dmg) * c.void.tiers[1][1]) + ' each'], ['5 or more', Math.round(v(c.dmg) * c.void.tiers[2][1]) + ' each'], ['Tower damage', Math.round(v(c.dmg) * c.towerPct)], ['Radius', c.area + ' tiles'], ['Energy', c.cost]]
+      : c.produce ? [['Health', v(c.hp)], ['Energy', '+1 every ' + c.produce.every + ' s'], ['Lifetime', c.lifetime + ' s'], ['Makes', Math.floor(c.lifetime / c.produce.every) + ' energy'], ['Cost', c.cost]]
+      : c.beam && c.kind === 'building' ? [['Health', v(c.hp)], ['Beam damage', c.beam.dps.map(d => v(d)).join(' → ') + '/s'], ['Range', c.range + ' tiles'], ['Lifetime', c.lifetime + ' s'], ['Targets', tgt], ['Energy', c.cost]]
+      : c.siege ? [['Health', v(c.hp)], ['Damage', v(c.dmg)], ['Hit speed', c.hit + ' s'], ['Range', (c.minRange ? c.minRange + ' to ' : '') + c.range + ' tiles'], ['Set-up', c.deployTime + ' s'], ['Lifetime', c.lifetime + ' s'], ['Targets', 'Ground, towers'], ['Energy', c.cost]]
+      : c.spawner && c.kind === 'troop' ? [['Health', v(c.hp)], ['Speed', sp(c.speed)], [sub(c.spawner.card).name + 's', '×' + (c.spawner.n || 1) + ' every ' + c.spawner.every + ' s'], [sub(c.spawner.card).name + ' damage', v(sub(c.spawner.card).dmg)], ['Targets', tgt], ['Energy', c.cost]]
+      : c.spawner && !c.spawner.every ? [['Health', v(c.hp)], ['Lifetime', c.lifetime + ' s'], ['Inside', sub(c.spawner.card).name], [sub(c.spawner.card).name + ' health', v(sub(c.spawner.card).hp)], [sub(c.spawner.card).name + ' damage', v(sub(c.spawner.card).dmg)], ['Energy', c.cost]]
+      : c.spawner && c.spawner.card !== 'imp' ? [['Health', v(c.hp)], ['Lifetime', c.lifetime + ' s'], [sub(c.spawner.card).name + 's', '×' + (c.spawner.n || 1) + ' every ' + c.spawner.every + ' s'], ['When destroyed', c.spawner.onDeath ? '×' + c.spawner.onDeath : 'Nothing'], [sub(c.spawner.card).name + ' health', v(sub(c.spawner.card).hp)], [sub(c.spawner.card).name + ' damage', v(sub(c.spawner.card).dmg)], ['Energy', c.cost]]
+      : c.deathBlast && c.kind === 'building' ? [['Health', v(c.hp)], ['Damage', v(c.dmg)], ['Hit speed', c.hit + ' s'], ['Range', c.range + ' tiles'], ['Splash', c.splash + ' tiles'], ['Last eruption', v(c.deathBlast.dmg)], ['Lifetime', c.lifetime + ' s'], ['Targets', tgt], ['Energy', c.cost]]
+      : c.kind === 'spell' && c.slowHit ? [['Damage', v(c.dmg)], ['Tower damage', Math.round(v(c.dmg) * c.towerPct)], ['Radius', c.area + ' tiles'], ['Slow', Math.round(c.slowHit.f * 100) + '% for ' + c.slowHit.dur + ' s'], ['Knockback', 'Yes'], ['Energy', c.cost]]
+      : null;
+    const stats = special ? special : c.barrel ? [['Pirates', '×' + c.barrel.n], ['Pirate health', v(sub(c.barrel.card).hp)], ['Pirate damage', v(sub(c.barrel.card).dmg)], ['Lands', 'Anywhere'], ['Energy', c.cost]]
       : c.gate ? [['Wraiths', '×' + c.gate.n], ['Duration', c.gate.dur + ' s'], ['Radius', c.area + ' tiles'], ['Wraith health', v(sub(c.gate.card).hp)], ['Wraith damage', v(sub(c.gate.card).dmg)], ['Energy', c.cost]]
       : c.spawner ? [['Health', v(c.hp)], ['Lifetime', c.lifetime + ' s'], ['Imp every', c.spawner.every + ' s'], ['Imp health', v(sub(c.spawner.card).hp)], ['Imp damage', v(sub(c.spawner.card).dmg)], ['Energy', c.cost]]
       : c.kind === 'spell'
