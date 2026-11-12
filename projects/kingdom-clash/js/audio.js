@@ -108,6 +108,14 @@ const KCSound = (() => {
     lasso: () => { noise(0.25, 0.07, 1900, 'bandpass'); tone(500, 900, 0.18, 'sine', 0.04); },
     snare: () => { tone(220, 330, 0.12, 'triangle', 0.09); noise(0.06, 0.06, 2800, 'highpass'); },
     evo: () => { [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, 0, 0.25, 'triangle', 0.1, i * 0.05)); noise(0.6, 0.05, 6000, 'highpass', 0.1); tone(200, 800, 0.4, 'sine', 0.05); },
+    // a new card's unlock, by rarity
+    unlock_common: () => { tone(523, 1046, 0.25, 'triangle', 0.08); noise(0.2, 0.05, 4000, 'highpass', 0.1); },
+    unlock_rare: () => { tone(220, 660, 1.4, 'sawtooth', 0.04); noise(1.2, 0.05, 2200, 'bandpass'); [659, 784, 988].forEach((f, i) => tone(f, 0, 0.3, 'triangle', 0.08, 1.2 + i * 0.08)); },
+    unlock_epic: () => { tone(110, 440, 2.2, 'sawtooth', 0.05); tone(165, 660, 2.2, 'triangle', 0.05); noise(2.2, 0.06, 900, 'bandpass'); },
+    unlock_legendary: () => { tone(55, 220, 3.4, 'sawtooth', 0.06); tone(82, 330, 3.4, 'triangle', 0.06); noise(3.2, 0.05, 600, 'bandpass'); [262, 330, 392, 523].forEach((f, i) => tone(f, f * 1.01, 0.9, 'sine', 0.05, 0.6 + i * 0.6)); },
+    rumble: () => { noise(0.8, 0.25, 140, 'lowpass'); tone(50, 35, 0.8, 'sine', 0.3); },
+    firework: () => { noise(0.05, 0.2, 5000, 'highpass'); noise(0.5, 0.1, 2400, 'bandpass', 0.05); },
+    unlockFanfare: () => [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => tone(f, 0, i === 6 ? 1 : 0.25, 'triangle', 0.16, i * 0.1)),
     buy: () => { tone(880, 1320, 0.1, 'triangle', 0.15); tone(1760, 0, 0.18, 'sine', 0.1, 0.09); },
     deploy: () => { tone(220, 90, 0.16, 'sine', 0.3); noise(0.12, 0.12, 600); },
     // Briar Hollow cards

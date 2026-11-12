@@ -1674,3 +1674,49 @@ button.slot:hover { transform: translateY(-3px); }
 #battle.phone .sim-win { padding: 2px 8px 3px; font-size: 11px; }
 #battle.phone .emote-btn { width: 40px; height: 34px; }
 #battle.phone .ep-phrase { font-size: 11px; padding: 7px 2px; }
+
+/* ---------- a new card's unlock, by rarity (js/menu.js, unlock) ---------- */
+.rv-card.epic { --rv1: #d9a6ff; --rv2: #7a3fd0; --rvg: rgba(200, 130, 255, 0.95); }
+.rv-card.legendary { --rv1: #8ff0e0; --rv2: #7a4cff; --rvg: rgba(255, 220, 140, 0.95); }
+.rv-card.legendary .rv-back { background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.16) 0 9px, transparent 9px 18px), linear-gradient(135deg, #7ff0e0, #9fb8ff 35%, #d49bff 65%, #ffc35a); }
+.rv-card.epic .tease .rv-flip:not(.flipped), .rv-card.legendary .tease .rv-flip:not(.flipped) { animation: shake 0.18s linear infinite; }
+.co-unlock { position: absolute; inset: 0; z-index: 0; pointer-events: none; display: none; }
+.co-unlock.on { display: block; }
+.co-unlock > span { position: absolute; inset: 0; opacity: 0; transition: opacity 0.4s; }
+.ul-dark { background: radial-gradient(ellipse at 50% 42%, rgba(10, 5, 25, 0.2), #05020e 75%); }
+.co-unlock > .ul-beams { inset: auto; left: var(--ux, 50%); top: var(--uy, 40%); width: 1500px; height: 1500px; margin: -750px 0 0 -750px; border-radius: 50%;
+  -webkit-mask: radial-gradient(circle, #000 10%, transparent 62%); mask: radial-gradient(circle, #000 10%, transparent 62%); animation: usSpin 9s linear infinite; }
+.co-unlock > .ul-vortex { inset: auto; left: var(--ux, 50%); top: var(--uy, 40%); width: 520px; height: 520px; margin: -260px 0 0 -260px; border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, rgba(160, 90, 255, 0.9) 0 14deg, rgba(40, 10, 90, 0.2) 14deg 30deg);
+  -webkit-mask: radial-gradient(circle, transparent 12%, #000 30%, transparent 68%); mask: radial-gradient(circle, transparent 12%, #000 30%, transparent 68%); }
+.co-unlock > .ul-halo { inset: auto; left: var(--ux, 50%); top: var(--uy, 40%); width: 360px; height: 360px; margin: -180px 0 0 -180px; border-radius: 50%;
+  background: conic-gradient(#7ff0e0, #9fb8ff, #d49bff, #ff8fd8, #ffc35a, #7ff0e0); -webkit-mask: radial-gradient(circle, transparent 54%, #000 58%, #000 64%, transparent 68%); mask: radial-gradient(circle, transparent 54%, #000 58%, #000 64%, transparent 68%);
+  filter: drop-shadow(0 0 12px #fff); animation: usSpin 2.4s linear infinite; }
+.ul-banner { position: absolute; left: 50%; top: 9%; transform: translateX(-50%) scale(0.3); opacity: 0; white-space: nowrap; font-family: var(--display); font-weight: 400; font-size: clamp(34px, 6vw, 60px);
+  color: #fff; text-shadow: 0 4px 0 var(--outline), 3px 0 0 var(--outline), -3px 0 0 var(--outline), 0 -3px 0 var(--outline); transition: transform 0.45s cubic-bezier(.2, .9, .3, 1.5), opacity 0.25s; }
+.co-unlock.reveal .ul-banner { opacity: 1; transform: translateX(-50%) scale(1); }
+.ul-common .ul-banner { color: #cdeaff; }
+.ul-rare .ul-banner { color: #ffd98a; }
+.ul-epic .ul-banner { color: #efd4ff; }
+.ul-legendary .ul-banner { background: linear-gradient(90deg, #7ff0e0, #9fb8ff, #d49bff, #ff8fd8, #ffc35a, #7ff0e0); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: none; -webkit-text-stroke: 3px var(--outline); paint-order: stroke fill; animation: ulShimmer 2s linear infinite; font-size: clamp(42px, 8vw, 78px); }
+@keyframes ulShimmer { to { background-position: 200% 0; } }
+/* rare: gold rays */
+.co-unlock.ul-rare.beams > .ul-beams { opacity: 1; background: repeating-conic-gradient(from 0deg, rgba(255, 190, 80, 0) 0 8deg, rgba(255, 190, 80, 0.5) 8deg 16deg); }
+/* epic: dim, a vortex that turns and then implodes into a shockwave */
+.co-unlock.ul-epic > .ul-dark { opacity: 0.8; }
+.co-unlock.ul-epic.vortex > .ul-vortex { opacity: 1; animation: usSpin 1.2s linear infinite; }
+.co-unlock.ul-epic.implode > .ul-vortex { transition: transform 0.4s ease-in, opacity 0.4s; transform: scale(0.1) rotate(180deg); opacity: 0; animation: none; }
+.co-unlock.ul-epic.reveal > .ul-dark { opacity: 0.4; }
+/* legendary: darkness, rainbow beams, a halo, a white-out */
+.co-unlock.ul-legendary > .ul-dark { opacity: 1; transition: opacity 0.6s; }
+.co-unlock.ul-legendary.beams > .ul-beams { opacity: 1; background: repeating-conic-gradient(from 0deg, rgba(127, 240, 224, 0.45) 0 6deg, transparent 6deg 15deg, rgba(212, 155, 255, 0.45) 15deg 21deg, transparent 21deg 30deg, rgba(255, 195, 90, 0.45) 30deg 36deg, transparent 36deg 45deg); }
+.co-unlock.ul-legendary.halo > .ul-halo { opacity: 1; }
+.ul-legendary.whiteout::after { content: ''; position: absolute; inset: 0; background: #fff; animation: ulWhite 0.7s ease-out forwards; }
+@keyframes ulWhite { from { opacity: 0; } 30% { opacity: 1; } to { opacity: 0; } }
+.co-unlock.ul-legendary.reveal > .ul-dark { opacity: 0.55; }
+.rv-fly.descend { animation: ulDescend 2.6s cubic-bezier(.2, .8, .3, 1) both; }
+@keyframes ulDescend { from { transform: translateY(-110vh) scale(0.8) rotate(-8deg); } 70% { transform: translateY(6px) rotate(1deg); } to { transform: none; } }
+.chest-open.rumble .co-stage { animation: usShake 0.12s linear infinite; }
+.co-stage { z-index: 3; }
+.co-fx { z-index: 4; }

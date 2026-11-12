@@ -411,6 +411,7 @@ const KCMenu = (() => {
   }
   function nextReward() {
     stopTimers();
+    unlockReset();
     co.i++;
     if (co.i >= co.steps.length) return summary();
     reveal(co.steps[co.i]);
@@ -464,7 +465,7 @@ const KCMenu = (() => {
       later(shown, formAt + (big ? 700 : 450));
       return;
     }
-    const c = KC_CARDS[st.id], special = st.isNew || c.rarity === 'rare';
+    const c = KC_CARDS[st.id], special = st.isNew || c.rarity !== 'common';
     box.className = `co-reward rv-card ${c.rarity}${st.isNew ? ' is-new' : ''}`;
     box.innerHTML = `<div class="rv-fly"><div class="rv-flip"><div class="rv-back"></div><img class="rv-front" src="${cardImg(st.id)}" alt=""></div></div>
       <div class="rv-info">
@@ -472,6 +473,7 @@ const KCMenu = (() => {
         <div class="rv-bar" id="rvBar"><i style="width:${barPct(st, st.before).toFixed(1)}%"></i><span>${barText(st, st.before)}</span></div>
         <small id="rvNote"><span class="rar ${c.rarity}">${c.rarity}</span> Level ${st.level}</small>
       </div>`;
+    if (st.isNew) { unlock(st, c); return; }
     const flipAt = special ? 1350 : 850;
     later(() => { $('#coReward .rv-fly').classList.add('tease'); if (special) KCSound.play('chestShake'); }, 560);
     later(() => { $('#coReward .rv-flip').classList.add('flipped'); KCSound.play('cardFlip'); }, flipAt);
@@ -482,6 +484,84 @@ const KCMenu = (() => {
       count(Math.min(1100, 350 + st.n * 30), p => cardCount(st, Math.round(st.n * p)), 'countTick');
     }, flipAt + 420);
     later(shown, flipAt + 420 + Math.min(1100, 350 + st.n * 30) + 250);
+  }
+  /* ---------- a new card's unlock, one show for each rarity ----------
+     Common: a blue burst and a shine. Rare: the card shakes, embers rise and gold rays fan out before
+     it flips in a double flash. Epic: the screen dims, a violet vortex turns behind the shaking card and
+     lightning streaks into it, then it implodes into a shockwave. Legendary: the screen goes dark,
+     rainbow beams sweep, the card comes down slowly in a spinning halo while rainbow comets pour into
+     it, the screen rumbles, a white-out, and rainbow fireworks. Each ends on its own banner. */
+  const UL = {
+    common: { flip: 900, cols: ['#8fd0ff', '#cdeaff', '#ffffff'], banner: 'New card!' },
+    rare: { flip: 1700, cols: ['#ffb347', '#ffd98a', '#ff8a3d', '#ffffff'], banner: 'New Rare!' },
+    epic: { flip: 2500, cols: ['#d49bff', '#efd4ff', '#9a5ae8', '#ffffff'], banner: 'New Epic!' },
+    legendary: { flip: 3600, cols: ['#7ff0e0', '#9fb8ff', '#d49bff', '#ff8fd8', '#ffc35a', '#ffffff'], banner: 'Legendary!' },
+  };
+  function unlockReset() {
+    const u = $('#coUnlock');
+    if (u) u.className = 'co-unlock';
+  }
+  function unlock(st, c) {
+    const r = UL[c.rarity] ? c.rarity : 'common', U = UL[r], u = $('#coUnlock'), fly = $('#coReward .rv-fly'), flip = $('#coReward .rv-flip');
+    const at = (fn, ms) => later(fn, ms);
+    const centre = () => { const b = flip.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2, b.width]; };
+    $('#ulBanner').textContent = U.banner;
+    u.className = `co-unlock ul-${r} on`;
+    // centre the light on where the card comes to rest
+    // (from its layout box, not its rect, since its entrance animation is moving it)
+    const op = fly.offsetParent.getBoundingClientRect(), host = $('#chestOpen').getBoundingClientRect();
+    u.style.setProperty('--ux', (op.left + fly.offsetLeft + fly.offsetWidth / 2 - host.left) + 'px');
+    u.style.setProperty('--uy', (op.top + fly.offsetTop + fly.offsetHeight / 2 - host.top) + 'px');
+    KCSound.play('unlock_' + r);
+    if (r === 'common') {
+      at(() => { fly.classList.add('tease'); fxBurst(flip, 14, 'spark', U.cols); }, 350);
+    } else if (r === 'rare') {
+      at(() => { fly.classList.add('tease'); KCSound.play('chestShake'); }, 300);
+      for (let i = 0; i < 6; i++) at(() => fxBurst(flip, 5, 'spark', U.cols), 400 + i * 180);
+      at(() => u.classList.add('beams'), 1100);
+    } else if (r === 'epic') {
+      at(() => u.classList.add('vortex'), 250);
+      at(() => { fly.classList.add('tease'); KCSound.play('chestShake'); }, 500);
+      for (let i = 0; i < 8; i++) at(() => {
+        const [x, y, w] = centre(), a = i * 2.4 + 0.5, R = Math.max(innerWidth, innerHeight) * 0.45;
+        fxComet(x + Math.cos(a) * R, y + Math.sin(a) * R, x, y, 0.45, U.cols[i % 3]);
+      }, 700 + i * 170);
+      at(() => { u.classList.add('implode'); KCSound.play('rumble'); }, 2050);
+    } else {
+      fly.classList.add('descend');
+      at(() => u.classList.add('beams'), 300);
+      at(() => u.classList.add('halo'), 700);
+      for (let i = 0; i < 16; i++) at(() => {
+        const [x, y] = centre(), a = i * 2.39996, R = Math.max(innerWidth, innerHeight) * 0.55;
+        fxComet(x + Math.cos(a) * R, y + Math.sin(a) * R, x, y, 0.55, U.cols[i % U.cols.length]);
+        if (i % 4 === 0) KCSound.play('partSnap');
+      }, 900 + i * 110);
+      at(() => { fly.classList.add('tease'); $('#chestOpen').classList.add('rumble'); KCSound.play('rumble'); }, 2700);
+      at(() => u.classList.add('whiteout'), 3400);
+    }
+    at(() => {
+      $('#chestOpen').classList.remove('rumble');
+      flip.classList.add('flipped'); KCSound.play('cardFlip');
+      u.classList.add('reveal');
+      const [x, y, w] = centre();
+      fxFlash(flip, U.cols[0]);
+      fxBurst(flip, { common: 24, rare: 40, epic: 56, legendary: 80 }[r], 'spark', U.cols);
+      if (r === 'rare' || r === 'legendary') setTimeout(() => fxFlash(flip, U.cols[1]), 160);
+      if (r === 'legendary') for (let i = 0; i < 6; i++) setTimeout(() => {
+        // fireworks round the card
+        const fx = x + (Math.random() - 0.5) * innerWidth * 0.7, fy = y + (Math.random() - 0.6) * innerHeight * 0.5;
+        FX.parts.push({ kind: 'ring', x: fx, y: fy, vx: 0, vy: 0, g: 0, spin: 0, life: 0.6, max: 0.6, r: 90, col: U.cols[i % U.cols.length] });
+        for (let k = 0; k < 18; k++) { const a = Math.random() * 6.283, v = 120 + Math.random() * 200; FX.parts.push({ kind: 'spark', x: fx, y: fy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 180, life: 0.8 + Math.random() * 0.5, max: 1.3, r: 2 + Math.random() * 3, col: U.cols[k % U.cols.length], spin: 0 }); }
+        KCSound.play('firework');
+      }, 250 + i * 260);
+    }, U.flip);
+    const infoAt = U.flip + (r === 'legendary' ? 700 : 450);
+    at(() => {
+      $('#coReward .rv-info').classList.add('on');
+      KCSound.play(r === 'legendary' ? 'unlockFanfare' : 'revealNew');
+      count(Math.min(1100, 350 + st.n * 30), p => cardCount(st, Math.round(st.n * p)), 'countTick');
+    }, infoAt);
+    at(shown, infoAt + Math.min(1100, 350 + st.n * 30) + 300);
   }
   function cardCount(st, n) {
     const now = st.before + n, bar = $('#rvBar');
@@ -513,7 +593,10 @@ const KCMenu = (() => {
     if (info) info.classList.add('on');
     if (st.item) { const art = $('#coReward .rv-itemart'); if (art) { art.classList.remove('forming'); art.classList.add('formed'); } $('#coReward').classList.add('formed'); }
     else if (st.coins) $('#rvN').textContent = '+' + fmt(st.coins);
-    else { $('#coReward .rv-fly').classList.add('tease'); $('#coReward .rv-flip').classList.add('flipped'); cardCount(st, st.n); }
+    else {
+      $('#coReward .rv-fly').classList.add('tease'); $('#coReward .rv-flip').classList.add('flipped'); cardCount(st, st.n);
+      if (st.isNew) { $('#coUnlock').className = `co-unlock ul-${UL[KC_CARDS[st.id].rarity] ? KC_CARDS[st.id].rarity : 'common'} on reveal`; $('#chestOpen').classList.remove('rumble'); }
+    }
     shown();
   }
   function shown() {
@@ -523,6 +606,7 @@ const KCMenu = (() => {
   }
   function summary() {
     stopTimers();
+    unlockReset(); $('#chestOpen').classList.remove('rumble');
     co.phase = 'summary'; co.done = true;
     $('#coReward').hidden = true; $('#coChestWrap').hidden = true; $('#coHint').hidden = true;
     $('#chestOpen').classList.add('summing');
@@ -1403,7 +1487,7 @@ const KCMenu = (() => {
   }
 
   return {
-    init, refresh, recordResult, nextFoe, cardImg, tab,
+    init, refresh, recordResult, nextFoe, cardImg, tab, showChest,
     get name() { return P() ? P().name : 'Player'; },
     show() { refresh(); requestAnimationFrame(placeGlow); },
   };
