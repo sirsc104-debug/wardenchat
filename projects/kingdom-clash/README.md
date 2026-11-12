@@ -350,7 +350,7 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `js/arenas.js` | Arena art: each arena's centerpiece, scenery panels (with crowd rows and lights) and battlefield image with its tile mapping; loads each image once |
 | `js/progress.js` | Progress and its rules: trainers, trophies, bots, chests, road rewards, card levels, the deck |
 | `js/net.js` | Online battles (front end, live play off): quick match, room codes, checking what the other player sends, and where a backend connects |
-| `js/emotes.js` | Battle emotes: the panel, the King's faces, the bubbles, and when the opponent emotes |
+| `js/emotes.js` | Battle emotes: the panel, the King's faces (shaded SVG: lit skin, a curly beard, a jewelled gold crown over velvet in the sender's colour, glints in the eyes), the bubbles, and when the opponent emotes |
 | `js/upgrades.js` | The full-screen scenes for upgrading a card and using a magic item on it |
 | `js/items.js` | Magic item art (SVG built from parts that fly together in a chest reveal) |
 | `js/menu.js` | The lobby, the Cards screen (deck, collection, upgrades), chest opening, the Trophy Road tab |
@@ -364,6 +364,8 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `tools/trainers-test.js` | `node tools/trainers-test.js 100 [trainer]` plays each trainer against a good player, a sloppy player, a random clicker and a player who does nothing, and prints how often the trainer wins |
 | `tools/cards-test.js` | `node tools/cards-test.js` checks the Cannon (pulls a Rhino, lasts 30 s, placement rules), the Skeleton Pack, card levels, the Briar Hollow cards, and the Sunstone cards (Mole tunneling and placement, Sandstorm slows, the Ram Cart's charge and soldiers, the Camel Jockey's lasso cooldown) and the Snowman's evolution |
 | `js/art2.js` | The troops, buildings, card pictures and spell art of Arenas 5 to 10, drawn in code in the style of `js/art.js` and added to it |
+| `js/art3.js` | The second design of every character from the starter deck to Arena 4: chibi proportions, big eyes with glints, brows that frown and mouths that open in a fight, layered outfits in the team's colours. Its drawing helpers (eyes, mouth, head, legs, torso, arm, sword) are shared as `KCArt3`. Each design keeps its first design's size and options, and replaces it through `KCArt.add` |
+| `js/art4.js` | The second design of the Arena 5 to 10 characters and of the Coil Tower and Crystal Drill, built on `KCArt3`'s helpers |
 | `tools/arenas5-10-test.js` | `node tools/arenas5-10-test.js` deploys all 24 new cards, checks each one's energy and rarity and every special mechanic (freeze, stun, shields, splitting, charging, hooks, hiding, piercing, healing, the egg, the portal, the jump), and has the computer play every card in full battles |
 | `tools/economy-report.js` | `node tools/economy-report.js` prints a day's rubies and copies for five kinds of player and the days to each upgrade milestone, using `ECONOMY` and the game's chest rolls |
 | `tools/progress-test.js` | `node tools/progress-test.js [matches]` checks old saves, trophies, chests and timers, road rewards, upgrades, the deck and the Training Grounds deck rule, the Shop's offers and purchases, Sunstone Arena, evolutions and the Diamond Pass (2 free shards, the Snowman Evolution at tier 1, claiming, buying), then plays trophy matches to check the 52% target |

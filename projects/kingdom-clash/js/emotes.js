@@ -71,6 +71,7 @@ const KCEmotes = (() => {
     const c = KC_CARDS[id], kind = c.kind === 'spell' ? 'spell' : c.kind === 'building' ? 'building' : 'troop';
     return `<span class="em-face em-card c-${id} k-${kind}" aria-hidden="true"><img src="${cardPics[key]}" alt=""><svg class="em-fx" viewBox="0 0 100 100">${FX[id] || ''}</svg></span>`;
   }
+  let faceN = 0;
   function face(expr, team) {
     if (expr.startsWith('card_')) return cardFace(expr.slice(5), team);
     const tc = TEAMC[team] || TEAMC[0];
@@ -150,18 +151,35 @@ const KCEmotes = (() => {
       smug: `<path class="em-spark" d="M82 50l2 4 4 2-4 2-2 4-2-4-4-2 4-2z" fill="#fff" stroke="${O}" stroke-width="1.4"/>`,
       salute: `<g class="em-salute"><rect x="80" y="38" width="10" height="30" rx="5" fill="${tc}" stroke="${O}" stroke-width="2.4" transform="rotate(12 85 53)"/><path d="M76 26l10-4 3 8-11 4z" fill="#f7c6a0" stroke="${O}" stroke-width="2.4" stroke-linejoin="round"/><path d="M78 24l-6 2" stroke="${O}" stroke-width="2" stroke-linecap="round"/></g>`,
     }[expr];
-    return `<svg class="em-face em-${expr}" viewBox="0 0 100 100" aria-hidden="true"><g class="em-body">
-      <circle cx="22" cy="55" r="6.5" fill="#f7c6a0" stroke="${O}" stroke-width="2.6"/><circle cx="78" cy="55" r="6.5" fill="#f7c6a0" stroke="${O}" stroke-width="2.6"/>
-      <circle cx="50" cy="53" r="29" fill="#f7c6a0" stroke="${O}" stroke-width="3.4"/>
-      <ellipse cx="33" cy="60" rx="5" ry="3" fill="#ff9aa0" opacity=".55"/><ellipse cx="67" cy="60" rx="5" ry="3" fill="#ff9aa0" opacity=".55"/>
-      <path d="M23 58Q25 94 50 96Q75 94 77 58Q72 76 62 78Q50 66 38 78Q28 76 23 58Z" fill="#f7f5f0" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
+    // a glint of light in every round dark eye
+    const lit = (eyes || '').replace(/<circle cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)" fill="#1c1530"\/>/g,
+      (m, x, y, r) => `${m}<circle cx="${(+x - r * 0.35).toFixed(1)}" cy="${(+y - r * 0.38).toFixed(1)}" r="${(r * 0.36).toFixed(1)}" fill="#fff"/>`);
+    const t = team ? 1 : 0, u = 'kf' + (++faceN);
+    return `<svg class="em-face em-${expr}" viewBox="0 0 100 100" aria-hidden="true"><defs>
+      <radialGradient id="${u}Skin" cx=".38" cy=".3" r=".75"><stop offset="0" stop-color="#ffe0c6"/><stop offset=".55" stop-color="#f7c6a0"/><stop offset="1" stop-color="#e2a07a"/></radialGradient>
+      <linearGradient id="${u}Beard" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#d9dbe6"/></linearGradient>
+      <linearGradient id="${u}Gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0a0"/><stop offset=".45" stop-color="#ffcd33"/><stop offset="1" stop-color="#d98c10"/></linearGradient>
+      <linearGradient id="${u}Cap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${t ? '#ff6a72' : '#6aa6ff'}"/><stop offset="1" stop-color="${tc}"/></linearGradient>
+    </defs><g class="em-body">
+      <ellipse cx="50" cy="97" rx="26" ry="3" fill="#000" opacity=".18"/>
+      <circle cx="22" cy="55" r="6.5" fill="url(#${u}Skin)" stroke="${O}" stroke-width="2.6"/><circle cx="78" cy="55" r="6.5" fill="url(#${u}Skin)" stroke="${O}" stroke-width="2.6"/>
+      <path d="M20 54q2-3 4 0M76 54q2-3 4 0" stroke="#d08a66" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <circle cx="50" cy="53" r="29" fill="url(#${u}Skin)" stroke="${O}" stroke-width="3.4"/>
+      <ellipse cx="40" cy="38" rx="10" ry="5" fill="#fff" opacity=".35" transform="rotate(-15 40 38)"/>
+      <ellipse cx="32" cy="61" rx="5.5" ry="3.2" fill="#ff8a94" opacity=".55"/><ellipse cx="68" cy="61" rx="5.5" ry="3.2" fill="#ff8a94" opacity=".55"/>
+      <path d="M23 58Q22 78 32 88Q40 97 50 96Q60 97 68 88Q78 78 77 58Q72 76 62 78Q50 66 38 78Q28 76 23 58Z" fill="url(#${u}Beard)" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M30 80q3 4 7 3M40 88q4 3 8 1M54 89q4 1 7-2M64 82q3-1 5-4" stroke="#b9bccb" stroke-width="1.6" fill="none" stroke-linecap="round"/>
       ${mouth}
-      <path d="M50 66q-9-7-20-1q6 7 20 3zM50 66q9-7 20-1q-6 7-20 3z" fill="#f7f5f0" stroke="${O}" stroke-width="2.6" stroke-linejoin="round"/>
-      <circle cx="50" cy="60" r="4.6" fill="#f0b18a" stroke="${O}" stroke-width="2"/>
-      ${eyes}
-      <g class="em-crown"><path d="M27 30L30 9 40 19 50 4 60 19 70 9 73 30Z" fill="#ffcd33" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
-      <rect x="26" y="25" width="48" height="8" rx="3" fill="#e09f12" stroke="${O}" stroke-width="2.6"/>
-      <circle cx="50" cy="29" r="3.6" fill="${tc}" stroke="${O}" stroke-width="1.8"/><circle cx="36" cy="29" r="2.2" fill="#fff6c8"/><circle cx="64" cy="29" r="2.2" fill="#fff6c8"/></g>
+      <path d="M50 66q-8-7-17-3q-5 2-7-2q0 7 7 8q9 1 17-1zM50 66q8-7 17-3q5 2 7-2q0 7-7 8q-9 1-17-1z" fill="url(#${u}Beard)" stroke="${O}" stroke-width="2.6" stroke-linejoin="round"/>
+      <ellipse cx="50" cy="60" rx="5" ry="4.4" fill="#f0a882" stroke="${O}" stroke-width="2"/><ellipse cx="48.4" cy="58.4" rx="1.6" ry="1.1" fill="#fff" opacity=".7"/>
+      ${lit}
+      <g class="em-crown"><path d="M29 28Q30 14 40 17Q50 10 60 17Q70 14 71 28Z" fill="url(#${u}Cap)" stroke="${O}" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M27 30L30 9 40 19 50 4 60 19 70 9 73 30Z" fill="url(#${u}Gold)" stroke="${O}" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M31 25l1-9M50 10v8M69 25l-1-9" stroke="#fff6c8" stroke-width="1.6" stroke-linecap="round" opacity=".8"/>
+      <circle cx="30" cy="8.5" r="3" fill="#fff6c8" stroke="${O}" stroke-width="1.8"/><circle cx="50" cy="3.6" r="3.4" fill="#fff6c8" stroke="${O}" stroke-width="1.8"/><circle cx="70" cy="8.5" r="3" fill="#fff6c8" stroke="${O}" stroke-width="1.8"/>
+      <rect x="25" y="25" width="50" height="9" rx="3.5" fill="url(#${u}Gold)" stroke="${O}" stroke-width="2.6"/>
+      <path d="M50 25.6l4 3.9-4 3.9-4-3.9z" fill="${tc}" stroke="${O}" stroke-width="1.6"/><path d="M48.6 28l1.4-1.2" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      <circle cx="35" cy="29.5" r="2.4" fill="#4ad0a0" stroke="${O}" stroke-width="1.3"/><circle cx="65" cy="29.5" r="2.4" fill="#c77dff" stroke="${O}" stroke-width="1.3"/></g>
       ${extra}</g></svg>`;
   }
   const SHOP_FACES = KCProgress.EMOTES.map(e => e.id);

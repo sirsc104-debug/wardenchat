@@ -435,7 +435,7 @@
   /* ---------- card pictures ---------- */
   const one = (y, s, oo) => (c, w, h, k, at) => at(0.5, y, s, oo || {});
   const PICS = {
-    frostsprite: (c, w, h, k, at) => { at(0.5, 0.86, 2.0, {}); },
+    frostsprite: (c, w, h, k, at) => { at(0.5, 0.84, 1.45, {}); },
     icegiant: one(0.92, 1.0),
     wintersage: one(0.94, 1.05),
     dockraiders: (c, w, h, k, at) => { at(0.27, 0.72, 1.0, { card: 'raidergun' }); at(0.73, 0.72, 1.0, { card: 'raidergun' }); at(0.5, 0.94, 1.25, { card: 'raider' }); },
@@ -446,12 +446,12 @@
     arccannon: (c, w, h, k, at) => at(0.5, 0.92, 1.0, { charge: 1 }),
     shardguards: (c, w, h, k, at) => { at(0.27, 0.74, 1.0, { shield: 1 }); at(0.73, 0.74, 1.0, { shield: 1 }); at(0.5, 0.95, 1.2, { shield: 1 }); },
     prism: (c, w, h, k, at) => at(0.5, 0.94, 0.95, { atk: 0.8 }),
-    sunsprite: (c, w, h, k, at) => at(0.5, 0.82, 2.0, {}),
+    sunsprite: (c, w, h, k, at) => at(0.5, 0.8, 1.4, {}),
     guardian: (c, w, h, k, at) => at(0.5, 0.94, 0.95, { atk: 0.4 }),
     drake: (c, w, h, k, at) => at(0.5, 0.6, 1.25, { t: 0.3 }),
     phoenix: (c, w, h, k, at) => at(0.5, 0.58, 1.25, { t: 0.2 }),
     wraiths: (c, w, h, k, at) => { for (const [x, y, s] of [[0.22, 0.66, 1.0], [0.5, 0.62, 1.0], [0.78, 0.66, 1.0], [0.34, 0.84, 1.2], [0.66, 0.84, 1.2], [0.5, 0.98, 1.4]]) at(x, y, s, { t: x * 7 }); },
-    dreadknight: one(0.97, 0.7),
+    dreadknight: one(0.97, 0.82, { atk: 0.3 }),
     // buildings and spells
     coil: (c, w, h, k) => { c.save(); c.translate(w * 0.5, h * 0.72); BUILD.coil(c, k * 0.82, { team: 0, t: 0.3, atk: 0.6 }); c.restore(); },
     drill: (c, w, h, k) => { c.save(); c.translate(w * 0.5, h * 0.76); BUILD.drill(c, k * 0.9, { team: 0, t: 0.2 }); c.restore(); },

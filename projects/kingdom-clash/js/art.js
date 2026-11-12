@@ -1013,12 +1013,7 @@ const KCArt = (() => {
       rr(c, 0, 0, w, h, w * 0.1); c.fillStyle = g; c.fill();
     }
     c.save(); if (!bare) { rr(c, 0, 0, w, h, w * 0.1); c.clip(); }
-    if (!bare) {
-      const glow = c.createRadialGradient(w * 0.5, h * 0.42, w * 0.05, w * 0.5, h * 0.42, w * 0.6);
-      glow.addColorStop(0, 'rgba(255,255,255,0.45)'); glow.addColorStop(1, 'rgba(255,255,255,0)');
-      c.fillStyle = glow; c.fillRect(0, 0, w, h);
-      ell(c, w * 0.5, h * 0.86, w * 0.42, h * 0.07); c.fillStyle = 'rgba(0,0,0,0.18)'; c.fill();
-    }
+    if (!bare) backdrop(c, w, h, card, R);
     const k = w * 0.42;
     const o = { team, t: 0.3, walk: false, atk: 0, face: 1, id: 1, view: 'front', evo };
     if (bare) {
@@ -1037,25 +1032,65 @@ const KCArt = (() => {
     else if (cardId === 'owl') at(0.5, 0.58, 1.0, { t: 0.4 });
     else if (cardId === 'thundercloud') at(0.5, 0.52, 0.9, { t: 0.3, atk: 0.4 });
     else if (cardId === 'griffin') at(0.5, 0.62, 0.82, { t: 0.2, beam: 1 });
-    else if (cardId === 'camel') at(0.5, 0.97, 0.86, { ratk: 0.6, t: 0.2 });
+    else if (cardId === 'camel') at(0.5, 0.95, 0.72, { ratk: 0.6, t: 0.2 });
     else if (cardId === 'spears') { c.save(); c.translate(w * 0.5, h * 0.5); LW = Math.max(1, k * 0.06); spearsArt(c, k * 1.05, 0); c.restore(); }
     else if (PORTRAITS[cardId]) { LW = Math.max(1, k * 0.07); PORTRAITS[cardId](c, w, h, k, at, team); }
     else if (cardId === 'footmen') { at(0.27, 0.72, 1.15, { t: 0.4 }); at(0.73, 0.72, 1.15, { t: 1.1 }); at(0.5, 0.92, 1.4, {}); }
-    else if (cardId === 'wolves') { at(0.26, 0.7, 1.6, { t: 1.1 }); at(0.74, 0.7, 1.6, {}); at(0.5, 0.9, 2.0, { t: 0.6 }); }
+    else if (cardId === 'wolves') { at(0.27, 0.7, 1.2, { t: 1.1 }); at(0.73, 0.7, 1.2, {}); at(0.5, 0.92, 1.5, { t: 0.6 }); }
     else if (cardId === 'hawks') { at(0.3, 0.34, 1.1, { t: 0.9 }); at(0.58, 0.62, 1.45, {}); }
     else if (cardId === 'archers') { at(0.3, 0.86, 1.2, {}); at(0.64, 0.92, 1.35, { face: 1 }); }
     else {
       if (cardId === 'skeletons') { at(0.26, 0.78, 1.55, { t: 0.4 }); at(0.74, 0.78, 1.55, { t: 1.2 }); at(0.5, 0.94, 1.85, {}); c.restore(); return bare ? cv : finish(c, w, h, R, cv); }
       if (cardId === 'cannon') { c.save(); c.translate(w * 0.5, h * 0.62); cannon(c, k * 0.95, { team: 0, angle: Math.PI * 0.62 }); c.restore(); c.restore(); return finish(c, w, h, R, cv); }
-      const sc = { rhino: 1.6, gladiator: 1.5, snowman: evo ? 1.0 : 1.32, gorilla: 1.45, flail: 1.22, pots: 1.55, mole: 1.6, ramsoldier: 1.5 }[cardId] || 1;
+      const sc = { rhino: 1.22, gladiator: 1.5, snowman: evo ? 1.0 : 1.32, gorilla: 1.22, flail: 1.22, pots: 1.55, mole: 1.35, ramsoldier: 1.5 }[cardId] || 1;
       at(0.5, cardId === 'rhino' ? 0.86 : 0.92, sc, {});
     }
     c.restore();
     return bare ? cv : finish(c, w, h, R, cv);
   }
+  // The card picture's background: the rarity's colours, a sunburst of soft rays, a light behind the
+  // character, a little stone stage to stand on, sparkles on the rarer cards and a darker edge.
+  function backdrop(c, w, h, card, R) {
+    const cx = w * 0.5, cy = h * 0.44;
+    c.save(); c.translate(cx, cy); c.globalAlpha = 0.16;
+    for (let i = 0; i < 14; i++) { c.rotate(Math.PI / 7); c.beginPath(); c.moveTo(0, 0); c.lineTo(-w * 0.12, -h); c.lineTo(w * 0.12, -h); c.closePath(); c.fillStyle = '#fff'; c.fill(); }
+    c.restore();
+    const g = c.createRadialGradient(cx, cy, w * 0.04, cx, cy, w * 0.62);
+    g.addColorStop(0, 'rgba(255,255,255,0.55)'); g.addColorStop(0.5, 'rgba(255,255,255,0.14)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = g; c.fillRect(0, 0, w, h);
+    if (card.kind !== 'spell') {
+      // a round stone stage
+      ell(c, cx, h * 0.9, w * 0.46, h * 0.085); c.fillStyle = 'rgba(20,12,40,0.28)'; c.fill();
+      ell(c, cx, h * 0.88, w * 0.42, h * 0.07); c.fillStyle = 'rgba(255,255,255,0.22)'; c.fill();
+      ell(c, cx, h * 0.875, w * 0.34, h * 0.05); c.fillStyle = 'rgba(255,255,255,0.12)'; c.fill();
+    }
+    if (card.rarity !== 'common') {
+      const n = { rare: 4, epic: 6, legendary: 9 }[card.rarity] || 4;
+      for (let i = 0; i < n; i++) {
+        const x = w * (0.12 + ((i * 0.618 + 0.21) % 1) * 0.76), y = h * (0.1 + ((i * 0.382 + 0.13) % 1) * 0.55), r = w * (0.02 + (i % 3) * 0.008);
+        poly(c, [x, y - r * 2, x + r * 0.5, y - r * 0.5, x + r * 2, y, x + r * 0.5, y + r * 0.5, x, y + r * 2, x - r * 0.5, y + r * 0.5, x - r * 2, y, x - r * 0.5, y - r * 0.5]);
+        c.fillStyle = 'rgba(255,255,255,0.75)'; c.fill();
+      }
+    }
+    const v = c.createRadialGradient(cx, h * 0.5, w * 0.35, cx, h * 0.5, w * 0.85);
+    v.addColorStop(0, 'rgba(20,10,40,0)'); v.addColorStop(1, 'rgba(20,10,40,0.38)');
+    c.fillStyle = v; c.fillRect(0, 0, w, h);
+  }
+  // The frame: a dark outer edge, the rarity's bright border with a light bevel, and corner jewels on
+  // the epic and legendary cards.
   function finish(c, w, h, R, cv) {
-    rr(c, w * 0.025, w * 0.025, w * 0.95, h - w * 0.05, w * 0.085);
-    c.lineWidth = w * 0.04; c.strokeStyle = R[2]; c.stroke();
+    const lw = w * 0.04;
+    rr(c, lw * 0.5, lw * 0.5, w - lw, h - lw, w * 0.095); c.lineWidth = lw; c.strokeStyle = 'rgba(20,12,40,0.85)'; c.stroke();
+    rr(c, w * 0.03, w * 0.03, w * 0.94, h - w * 0.06, w * 0.085);
+    c.lineWidth = w * 0.035; c.strokeStyle = R[2]; c.stroke();
+    rr(c, w * 0.05, w * 0.05, w * 0.9, h - w * 0.1, w * 0.07); c.lineWidth = Math.max(1, w * 0.008); c.strokeStyle = 'rgba(255,255,255,0.55)'; c.stroke();
+    const g = c.createLinearGradient(0, 0, 0, h * 0.35);
+    g.addColorStop(0, 'rgba(255,255,255,0.22)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    c.save(); rr(c, w * 0.05, w * 0.05, w * 0.9, h - w * 0.1, w * 0.07); c.clip(); c.fillStyle = g; c.fillRect(0, 0, w, h * 0.35); c.restore();
+    if (R === RARITY.epic || R === RARITY.legendary) {
+      const col = R === RARITY.epic ? '#c77dff' : '#ffd84a', r = w * 0.04;
+      for (const [x, y] of [[w * 0.06, h - w * 0.06], [w * 0.94, h - w * 0.06]]) { poly(c, [x, y - r, x + r, y, x, y + r, x - r, y]); paint(c, col, Math.max(1, w * 0.012)); circ(c, x - r * 0.25, y - r * 0.3, r * 0.25); c.fillStyle = 'rgba(255,255,255,0.85)'; c.fill(); }
+    }
     if (R === RARITY.evo) {
       // the evolution mark: a violet gem with a swirl, top left
       const x = w * 0.16, y = w * 0.16, r = w * 0.1;
