@@ -244,17 +244,193 @@ const KCArenas = (() => {
     },
   };
 
-  /* Arenas 5 to 10: their art hasn't been made yet. Each is ready for the same four images as the arenas
+  // Arena 5: Frostfang Keep: a frozen mountain fortress, an icy stream for the river, blue fire bowls.
+  ART.frostfang = {
+    name: 'Frostfang Keep',
+    centerpiece: { src: 'img/frostfang_badge.webp', w: 1122, h: 1402, bar: { left: 25, top: 82.5, width: 51, height: 4.3 } },
+    palette: 'frostfang', margin: 1.4, fx: 'water',
+    field: {
+      src: 'img/frostfang_battlefield.webp', w: 1024, h: 1536,
+      // tower pads at x 262 / 762 px over lanes 3.5 / 14.5
+      x: [[262, 3.5], [762, 14.5]],
+      // king pad, princess pads, the icy stream's edges, princess pads, king pad
+      y: [[355, 3], [457, 6.5], [720, 15], [790, 17], [1045, 25.5], [1177, 29]],
+      // the plank bridges, in tiles, redrawn over the moving water
+      bridges: [[2.18, 13.29, 5.15, 18.4], [13.07, 13.29, 16.04, 18.4]],
+      // the four corner fire bowls, in tiles, which flicker
+      lanterns: [[0.53, -1.98], [17.54, -1.98], [0.71, 32.98], [17.36, 32.98]],
+    },
+    scenery: {
+      // the left stands: snowy arches with lanterns, wooden benches, a blue fire bowl, frozen falls below
+      left: {
+        src: 'img/frostfang_left.webp', w: 793, h: 1190, anchor: [0.55, 0.5], stars: 0,
+        rows: [
+          { y: 0.46, slope: 0.06, size: 0.78, spans: [[0.4, 0.62]] },
+          { y: 0.495, slope: 0.06, size: 0.82, spans: [[0.38, 0.72]] },
+          { y: 0.53, slope: 0.06, size: 0.86, spans: [[0.36, 0.75]] },
+          { y: 0.565, slope: 0.06, size: 0.9, spans: [[0.37, 0.78]] },
+          { y: 0.6, slope: 0.06, size: 0.94, spans: [[0.4, 0.8]] },
+        ],
+        glows: [[0.3, 0.29, 0.7], [0.53, 0.33, 0.6], [0.72, 0.38, 0.6], [0.14, 0.53, 1.0], [0.88, 0.44, 0.8]],
+        mist: [0.35, 0.9, 0.86],
+      },
+      // the right stands: a wide staircase up to the arches, a waterfall beside it
+      right: {
+        src: 'img/frostfang_right.webp', w: 793, h: 1190, anchor: [0.45, 0.5], stars: 0,
+        rows: [
+          { y: 0.47, slope: -0.08, size: 0.8, spans: [[0.36, 0.66]] },
+          { y: 0.515, slope: -0.08, size: 0.84, spans: [[0.32, 0.66]] },
+          { y: 0.56, slope: -0.08, size: 0.88, spans: [[0.25, 0.62]] },
+          { y: 0.605, slope: -0.08, size: 0.92, spans: [[0.12, 0.6]] },
+          { y: 0.65, slope: -0.08, size: 0.96, spans: [[0.1, 0.45]] },
+        ],
+        glows: [[0.4, 0.35, 0.6], [0.67, 0.31, 0.7], [0.25, 0.24, 0.6], [0.5, 0.17, 0.6], [0.85, 0.06, 0.7]],
+        mist: [0.0, 0.5, 0.86],
+      },
+    },
+  };
+
+  // Arena 6: Blackwater Harbor: a sunny pirate harbor, a channel of sea water for the river, rope bridges.
+  ART.blackwater = {
+    name: 'Blackwater Harbor',
+    centerpiece: { src: 'img/blackwater_badge.webp', w: 1122, h: 1402, bar: { left: 22.5, top: 81.3, width: 55, height: 4 } },
+    palette: 'blackwater', margin: 1.4, fx: 'water',
+    field: {
+      src: 'img/blackwater_battlefield.webp', w: 1024, h: 1536,
+      x: [[265, 3.5], [760, 14.5]],
+      // the art's king pads sit closer to the princess pads than the game's towers do, so the king anchors
+      // are a compromise (a light stretch there), with the image's top and bottom edges held in place
+      y: [[0, -6.68], [330, 3], [415, 6.5], [705, 15], [790, 17], [1045, 25.5], [1130, 29], [1536, 42.5]],
+      bridges: [[1.61, 13.24, 5.5, 18.33], [12.5, 13.24, 16.39, 18.33]],
+      // the fire bowls at the bottom corners and the two hanging lanterns at the top
+      lanterns: [[-0.57, 29.57], [18.61, 29.57], [4.88, -1.84], [13.01, -1.84]],
+    },
+    scenery: {
+      // the left stands: the ship's-wheel wall, stone stairs, a market stall, the harbor walk below
+      left: {
+        src: 'img/blackwater_left.webp', w: 793, h: 1190, anchor: [0.55, 0.5], stars: 0,
+        rows: [
+          { y: 0.44, slope: 0.05, size: 0.78, spans: [[0.35, 0.62]] },
+          { y: 0.48, slope: 0.05, size: 0.82, spans: [[0.37, 0.7]] },
+          { y: 0.52, slope: 0.05, size: 0.86, spans: [[0.4, 0.75]] },
+          { y: 0.56, slope: 0.05, size: 0.9, spans: [[0.42, 0.85]] },
+          { y: 0.6, slope: 0.05, size: 0.94, spans: [[0.45, 0.9]] },
+        ],
+        glows: [[0.5, 0.3, 0.6], [0.8, 0.36, 0.6], [0.92, 0.36, 0.5], [0.1, 0.75, 1.1], [0.7, 0.58, 0.9]],
+        mist: [0.25, 0.75, 0.8],
+      },
+      // the right stands: the great stairs to the harbor wall, a cannon by the stall, a ship beyond
+      right: {
+        src: 'img/blackwater_right.webp', w: 793, h: 1190, anchor: [0.45, 0.5], stars: 0,
+        rows: [
+          { y: 0.42, slope: -0.03, size: 0.78, spans: [[0.35, 0.75]] },
+          { y: 0.46, slope: -0.03, size: 0.82, spans: [[0.3, 0.78]] },
+          { y: 0.5, slope: -0.03, size: 0.86, spans: [[0.25, 0.8]] },
+          { y: 0.54, slope: -0.03, size: 0.9, spans: [[0.18, 0.75]] },
+          { y: 0.58, slope: -0.03, size: 0.94, spans: [[0.12, 0.75]] },
+          { y: 0.62, slope: -0.03, size: 0.98, spans: [[0.1, 0.72]] },
+          { y: 0.66, slope: -0.03, size: 1.02, spans: [[0.1, 0.6]] },
+        ],
+        glows: [[0.12, 0.38, 0.8], [0.8, 0.34, 0.9], [0.92, 0.79, 1.0], [0.4, 0.32, 0.5], [0.57, 0.3, 0.5], [0.79, 0.25, 0.5], [0.9, 0.57, 0.5]],
+        mist: [0.0, 0.4, 0.92],
+      },
+    },
+  };
+
+  // Arena 7: Gearforge Citadel: a bronze fortress of furnaces and gears, a channel of glowing coolant.
+  ART.gearforge = {
+    name: 'Gearforge Citadel',
+    centerpiece: { src: 'img/gearforge_badge.webp', w: 1122, h: 1402, bar: { left: 22.5, top: 76.6, width: 55, height: 4 } },
+    palette: 'gearforge', margin: 1.4, fx: 'water',
+    field: {
+      src: 'img/gearforge_battlefield.webp', w: 1024, h: 1536,
+      x: [[258, 3.5], [762, 14.5]],
+      y: [[355, 3], [465, 6.5], [727, 15], [817, 17], [1057, 25.5], [1174, 29]],
+      bridges: [[1.95, 13.05, 5.22, 18.59], [12.86, 13.05, 16.14, 18.59]],
+      // the burning braziers at the top corners and the two lower furnace stacks
+      lanterns: [[0.1, -3.05], [18.1, -3.05], [3.11, 32.83], [14.89, 32.83]],
+    },
+    scenery: {
+      left: {
+        src: 'img/gearforge_left.webp', w: 793, h: 1409, anchor: [0.55, 0.5], stars: 0,
+        rows: [
+          { y: 0.4, slope: 0.08, size: 0.74, spans: [[0.18, 0.45]] },
+          { y: 0.44, slope: 0.08, size: 0.76, spans: [[0.2, 0.55]] },
+          { y: 0.505, slope: 0.06, size: 0.82, spans: [[0.42, 0.82]] },
+          { y: 0.545, slope: 0.06, size: 0.86, spans: [[0.42, 0.85]] },
+          { y: 0.585, slope: 0.06, size: 0.9, spans: [[0.4, 0.88]] },
+          { y: 0.625, slope: 0.06, size: 0.94, spans: [[0.4, 0.88]] },
+        ],
+        glows: [[0.13, 0.58, 1.1], [0.86, 0.46, 0.9], [0.25, 0.26, 0.6], [0.47, 0.31, 0.6], [0.68, 0.34, 0.6], [0.82, 0.37, 0.5]],
+        mist: [0.3, 0.95, 0.86],
+      },
+      right: {
+        src: 'img/gearforge_right.webp', w: 793, h: 1409, anchor: [0.45, 0.5], stars: 0,
+        rows: [
+          { y: 0.38, slope: -0.05, size: 0.74, spans: [[0.45, 0.85]] },
+          { y: 0.42, slope: -0.05, size: 0.78, spans: [[0.4, 0.85]] },
+          { y: 0.46, slope: -0.05, size: 0.82, spans: [[0.32, 0.82]] },
+          { y: 0.5, slope: -0.05, size: 0.86, spans: [[0.25, 0.8]] },
+          { y: 0.54, slope: -0.05, size: 0.9, spans: [[0.18, 0.78]] },
+          { y: 0.58, slope: -0.05, size: 0.94, spans: [[0.12, 0.75]] },
+          { y: 0.62, slope: -0.05, size: 0.98, spans: [[0.1, 0.6]] },
+        ],
+        glows: [[0.82, 0.48, 1.1], [0.83, 0.05, 0.8], [0.27, 0.22, 0.6], [0.42, 0.25, 0.5], [0.75, 0.18, 0.6]],
+        mist: [0.05, 0.5, 0.85],
+      },
+    },
+  };
+
+  // Arena 8: Crystal Chasm: an underground cavern of glowing crystals, a stream of light for the river.
+  ART.crystal = {
+    name: 'Crystal Chasm',
+    centerpiece: { src: 'img/crystal_badge.webp', w: 1122, h: 1402, bar: { left: 20, top: 77.6, width: 60, height: 3.9 } },
+    palette: 'crystal', margin: 1.4, fx: 'water',
+    field: {
+      src: 'img/crystal_battlefield.webp', w: 1024, h: 1536,
+      x: [[262, 3.5], [762, 14.5]],
+      y: [[372, 3], [477, 6.5], [730, 15], [815, 17], [1062, 25.5], [1177, 29]],
+      bridges: [[1.85, 13.15, 5.15, 18.62], [12.74, 13.15, 16.04, 18.62]],
+      lanterns: [[0.53, -2.67], [17.54, -2.67], [0.64, 33.57], [17.47, 33.57]],
+    },
+    scenery: {
+      left: {
+        src: 'img/crystal_left.webp', w: 793, h: 1409, anchor: [0.55, 0.5], stars: 0,
+        rows: [
+          { y: 0.38, slope: 0.08, size: 0.72, spans: [[0.18, 0.45]] },
+          { y: 0.43, slope: 0.06, size: 0.78, spans: [[0.25, 0.6]] },
+          { y: 0.47, slope: 0.06, size: 0.82, spans: [[0.35, 0.82]] },
+          { y: 0.51, slope: 0.06, size: 0.86, spans: [[0.35, 0.85]] },
+          { y: 0.55, slope: 0.06, size: 0.9, spans: [[0.33, 0.85]] },
+          { y: 0.59, slope: 0.06, size: 0.94, spans: [[0.35, 0.85]] },
+        ],
+        glows: [[0.1, 0.58, 1.0], [0.22, 0.28, 0.6], [0.43, 0.31, 0.6], [0.6, 0.35, 0.5], [0.75, 0.38, 0.5], [0.9, 0.39, 0.5]],
+        mist: [0.3, 0.9, 0.86],
+      },
+      right: {
+        src: 'img/crystal_right.webp', w: 793, h: 1409, anchor: [0.45, 0.5], stars: 0,
+        rows: [
+          { y: 0.35, slope: -0.04, size: 0.74, spans: [[0.3, 0.85]] },
+          { y: 0.39, slope: -0.04, size: 0.78, spans: [[0.2, 0.85]] },
+          { y: 0.43, slope: -0.04, size: 0.82, spans: [[0.15, 0.85]] },
+          { y: 0.47, slope: -0.04, size: 0.86, spans: [[0.15, 0.7]] },
+          { y: 0.51, slope: -0.04, size: 0.9, spans: [[0.15, 0.7]] },
+          { y: 0.55, slope: -0.04, size: 0.94, spans: [[0.15, 0.7]] },
+          { y: 0.59, slope: -0.04, size: 0.98, spans: [[0.1, 0.65]] },
+        ],
+        glows: [[0.42, 0.24, 0.6], [0.66, 0.17, 0.7]],
+        mist: [0.0, 0.4, 0.86],
+      },
+    },
+  };
+
+  /* Arenas 9 and 10: their art hasn't been made yet. Each is ready for the same four images as the arenas
      above: a lobby centerpiece with the arena's name, a battlefield (its tower pads, river and two bridges
      on the game's grid) and the two side panels. Until the images arrive (fill in `src`, the image size,
      the anchors, the crowd rows), the battlefield is drawn in code in the arena's own colours
      (KCArt.THEMES), the lobby shows the arena's name on a plaque and the side panels are a plain gradient
      in its colours: no other arena's art stands in. */
   const PENDING = {
-    frostfang: { name: 'Frostfang Keep', panel: ['#24324a', '#6f86a0'], look: 'Snow, ice and frozen stone.' },
-    blackwater: { name: 'Blackwater Harbor', panel: ['#16222e', '#3a4a52'], look: 'Ships, docks and ocean water.' },
-    gearforge: { name: 'Gearforge Citadel', panel: ['#2a1f18', '#6a5038'], look: 'Bronze machinery and turning gears.' },
-    crystal: { name: 'Crystal Chasm', panel: ['#120e24', '#3a2f70'], look: 'Glowing crystals in an underground cavern.' },
     skyward: { name: 'Skyward Sanctuary', panel: ['#6f8fca', '#e8eef8'], look: 'Clouds, white marble and gold.' },
     eclipse: { name: 'Eclipse Throne', panel: ['#0a0810', '#4a1420'], look: 'Obsidian, crimson energy and darkness.' },
   };
