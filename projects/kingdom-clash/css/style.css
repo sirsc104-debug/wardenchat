@@ -1722,3 +1722,6 @@ button.slot:hover { transform: translateY(-3px); }
 .chest-open.rumble .co-stage { animation: usShake 0.12s linear infinite; }
 .co-stage { z-index: 3; }
 .co-fx { z-index: 4; }
+/* rare: a small burst of gold rays round the card, not the whole screen */
+.co-unlock.ul-rare > .ul-beams { width: 440px; height: 440px; margin: -220px 0 0 -220px;
+  -webkit-mask: radial-gradient(circle, #000 18%, transparent 68%); mask: radial-gradient(circle, #000 18%, transparent 68%); }
