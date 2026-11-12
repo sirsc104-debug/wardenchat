@@ -7341,7 +7341,6 @@ const KCMenu = (() => {
     } else if (r === 'rare') {
       at(() => { fly.classList.add('tease'); KCSound.play('chestShake'); }, 300);
       for (let i = 0; i < 6; i++) at(() => fxBurst(flip, 5, 'spark', U.cols, 0.5), 400 + i * 180);
-      at(() => u.classList.add('beams'), 1100);
     } else if (r === 'epic') {
       at(() => u.classList.add('vortex'), 250);
       at(() => { fly.classList.add('tease'); KCSound.play('chestShake'); }, 500);
@@ -7366,6 +7365,8 @@ const KCMenu = (() => {
       $('#chestOpen').classList.remove('rumble');
       flip.classList.add('flipped'); KCSound.play('cardFlip');
       u.classList.add('reveal');
+      // the rare's gold rays come out as the card turns over
+      if (r === 'rare') u.classList.add('beams');
       const [x, y, w] = centre();
       // the flash and sparkles wait until the card has turned face up, so the turn shows
       setTimeout(() => {
