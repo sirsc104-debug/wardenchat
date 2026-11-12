@@ -150,7 +150,7 @@
           </div>
         </section>
         <section class="tab shop-tab" id="tab-shop" hidden>
-          <nav class="shop-jump" aria-label="Shop sections"><button type="button" data-jump="shopOffersPlaque">Daily Offers</button><button type="button" data-jump="shopChestPlaque">Chests</button><button type="button" data-jump="shopEmotePlaque">Emotes</button></nav>
+          <nav class="shop-jump" aria-label="Shop sections"><button type="button" data-jump="shopOffersPlaque">Daily Offers</button><button type="button" data-jump="shopDealsPlaque">Daily Deals</button><button type="button" data-jump="shopMagicPlaque">Magic Shop</button><button type="button" data-jump="shopCardsPlaque">Card Shop</button><button type="button" data-jump="shopChestPlaque">Chests</button><button type="button" data-jump="shopEmotePlaque">Emotes</button></nav>
           <div class="plaque shop-plaque" id="shopOffersPlaque">
             <div class="ribbon"><span>Daily Offers</span></div>
             <div class="shop-head">
@@ -159,6 +159,22 @@
               <button class="sim-win test-inline" id="testOffers" type="button" title="Test button: makes a fresh set of offers now"><small>Test</small>New offers</button>
             </div>
             <div class="offers" id="shopOffers"></div>
+          </div>
+          <!-- the three diamond-only sections, made fresh each day; each item sells once a day -->
+          <div class="plaque shop-plaque dshop-plaque" id="shopDealsPlaque">
+            <div class="ribbon"><span>Daily Deals</span></div>
+            <div class="shop-head"><span class="shop-timer">New deals in <b id="dealTimer">0:00</b></span><span class="dshop-tag"><i class="gem-i" aria-hidden="true"></i>Diamonds only</span></div>
+            <div class="dshop deals" id="shopDeals"></div>
+          </div>
+          <div class="plaque shop-plaque dshop-plaque" id="shopMagicPlaque">
+            <div class="ribbon"><span>Magic Shop</span></div>
+            <div class="shop-head"><span class="shop-timer">New items in <b id="magicTimer">0:00</b></span><span class="dshop-tag"><i class="gem-i" aria-hidden="true"></i>Diamonds only</span></div>
+            <div class="dshop magic" id="shopMagic"></div>
+          </div>
+          <div class="plaque shop-plaque dshop-plaque" id="shopCardsPlaque">
+            <div class="ribbon"><span>Card Shop</span></div>
+            <div class="shop-head"><span class="shop-timer">New cards in <b id="cardTimer">0:00</b></span><span class="dshop-tag"><i class="gem-i" aria-hidden="true"></i>Diamonds only</span></div>
+            <div class="dshop cards" id="shopCards"></div>
           </div>
           <div class="plaque shop-plaque chest-plaque" id="shopChestPlaque">
             <div class="ribbon"><span>Chests</span></div>

@@ -1887,6 +1887,30 @@ button.slot:hover { transform: translateY(-3px); }
 .ex-go { align-self: center; }
 @media (max-width: 560px) { .res-chip.wallet { min-width: 0; } }
 
+/* the diamond-only Shop sections */
+.dshop-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 900; color: #8fd8ff; }
+.dshop-tag .gem-i { width: 16px; height: 16px; }
+.dshop { display: grid; gap: 22px 14px; padding-top: 8px; }
+.dshop.deals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dshop.magic { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.dshop.cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.dshop .offer { justify-content: space-between; }
+.ds-deals { padding-top: 20px; }
+.ds-worth { align-self: center; font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 999px; background: #7ee07e; color: var(--outline); border: 2px solid var(--outline); transform: rotate(4deg); }
+.ds-items { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; margin: 6px 0 4px; }
+.ds-line { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 76px; }
+.ds-ic { display: grid; place-items: center; width: 54px; height: 54px; }
+.ds-ic svg { width: 100%; height: 100%; }
+.ds-ic .co-ruby { width: 44px; height: 44px; }
+.ds-line b { font-family: var(--display); font-weight: 400; font-size: 22px; line-height: 1; }
+.ds-line small { font-size: 11px; font-weight: 800; color: #cfe8ff; }
+.of-art.mi { display: grid; place-items: center; aspect-ratio: 5 / 6; }
+.of-art.mi .mi-art { width: 100%; }
+.of-art.mi .mi-art svg { width: 100%; height: auto; display: block; }
+.ds-blurb { min-height: 28px; line-height: 1.25; }
+@media (max-width: 760px) { .dshop.magic { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .dshop.deals { grid-template-columns: 1fr; } .dshop.cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ds-ic { width: 44px; height: 44px; } }
+
 </style>
 <div id="app">
 
@@ -2027,7 +2051,7 @@ button.slot:hover { transform: translateY(-3px); }
           </div>
         </section>
         <section class="tab shop-tab" id="tab-shop" hidden>
-          <nav class="shop-jump" aria-label="Shop sections"><button type="button" data-jump="shopOffersPlaque">Daily Offers</button><button type="button" data-jump="shopChestPlaque">Chests</button><button type="button" data-jump="shopEmotePlaque">Emotes</button></nav>
+          <nav class="shop-jump" aria-label="Shop sections"><button type="button" data-jump="shopOffersPlaque">Daily Offers</button><button type="button" data-jump="shopDealsPlaque">Daily Deals</button><button type="button" data-jump="shopMagicPlaque">Magic Shop</button><button type="button" data-jump="shopCardsPlaque">Card Shop</button><button type="button" data-jump="shopChestPlaque">Chests</button><button type="button" data-jump="shopEmotePlaque">Emotes</button></nav>
           <div class="plaque shop-plaque" id="shopOffersPlaque">
             <div class="ribbon"><span>Daily Offers</span></div>
             <div class="shop-head">
@@ -2036,6 +2060,22 @@ button.slot:hover { transform: translateY(-3px); }
               <button class="sim-win test-inline" id="testOffers" type="button" title="Test button: makes a fresh set of offers now"><small>Test</small>New offers</button>
             </div>
             <div class="offers" id="shopOffers"></div>
+          </div>
+          <!-- the three diamond-only sections, made fresh each day; each item sells once a day -->
+          <div class="plaque shop-plaque dshop-plaque" id="shopDealsPlaque">
+            <div class="ribbon"><span>Daily Deals</span></div>
+            <div class="shop-head"><span class="shop-timer">New deals in <b id="dealTimer">0:00</b></span><span class="dshop-tag"><i class="gem-i" aria-hidden="true"></i>Diamonds only</span></div>
+            <div class="dshop deals" id="shopDeals"></div>
+          </div>
+          <div class="plaque shop-plaque dshop-plaque" id="shopMagicPlaque">
+            <div class="ribbon"><span>Magic Shop</span></div>
+            <div class="shop-head"><span class="shop-timer">New items in <b id="magicTimer">0:00</b></span><span class="dshop-tag"><i class="gem-i" aria-hidden="true"></i>Diamonds only</span></div>
+            <div class="dshop magic" id="shopMagic"></div>
+          </div>
+          <div class="plaque shop-plaque dshop-plaque" id="shopCardsPlaque">
+            <div class="ribbon"><span>Card Shop</span></div>
+            <div class="shop-head"><span class="shop-timer">New cards in <b id="cardTimer">0:00</b></span><span class="dshop-tag"><i class="gem-i" aria-hidden="true"></i>Diamonds only</span></div>
+            <div class="dshop cards" id="shopCards"></div>
           </div>
           <div class="plaque shop-plaque chest-plaque" id="shopChestPlaque">
             <div class="ribbon"><span>Chests</span></div>
@@ -3284,6 +3324,32 @@ const KCProgress = (() => {
     shop: { perCopy: { common: 20, rare: 200, epic: 2000, legendary: 40000 }, maxQty: { common: 50, rare: 10, epic: 1, legendary: 0 },
       megaQty: { common: 100, rare: 20, epic: 2, legendary: 0 }, chestCardShare: 0.5, chestPriceScale: 2, chestsPerDay: 1,
       chestArena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 4 } },
+    // the three diamond-only Shop sections, made fresh each day:
+    //  - deals: two bundles of wild cards and rubies, always worth over twice their price. Contents and
+    //    price grow together with the arena (`dealScale`: card tier / Arena 4's, between min and max); epic
+    //    wild cards only once an epic card can drop.
+    //  - magic: `magicPerDay` different magic items, each with its own price (rarer items cost more; the
+    //    Hammer of Books the most); only items you can use are offered.
+    //  - cards: the three best cards your arena can give (highest rarity first, maxed cards skipped), a
+    //    pack of each: `cardPacks` copies for a price by rarity.
+    //  Each item sells once a day.
+    diamondShop: {
+      deals: [
+        { tag: 'Daily deal', price: 2, rubies: 4000, wild: { common: 300, rare: 20 } },
+        { tag: 'Big deal', price: 6, rubies: 15000, wild: { common: 800, rare: 80, epic: 2 } },
+      ],
+      dealScale: { min: 0.5, max: 3 },
+      magicPerDay: 4,
+      magic: {
+        wild_common: { qty: 40, price: 1, weight: 10 }, wild_rare: { qty: 8, price: 2, weight: 8 }, wild_epic: { qty: 1, price: 4, weight: 5 },
+        wild_legendary: { qty: 1, price: 12, weight: 2 }, book_common: { qty: 1, price: 6, weight: 6 }, book_rare: { qty: 1, price: 9, weight: 5 },
+        book_epic: { qty: 1, price: 13, weight: 3 }, book_legendary: { qty: 1, price: 17, weight: 2 }, book_books: { qty: 1, price: 21, weight: 1.5 },
+        hammer_books: { qty: 1, price: 25, weight: 1 }, shards: { qty: 1, price: 6, weight: 3 },
+      },
+      cardPacks: { common: { qty: 150, price: 2 }, rare: { qty: 25, price: 3 }, epic: { qty: 3, price: 6 }, legendary: { qty: 1, price: 10 } },
+      // what each counts as when the deals' value is shown, in diamonds (the mega bundle's and the ruby bundle's rates)
+      worth: { common: 1 / 100, rare: 1 / 20, epic: 1 / 2, legendary: 8, ruby: 1 / 5000 },
+    },
     // wallet Coins (SirSC) to Rubies, one way: `rate` rubies a coin, up to a daily cap set by the highest
     // arena reached; past the last arena the cap grows by `beyond.add` every `beyond.every` trophies.
     exchange: { rate: 1, cap: { 1: 500, 2: 1000, 3: 2000, 4: 4000 }, beyond: { every: 300, add: 1000, max: 10000 } },
@@ -3784,11 +3850,78 @@ const KCProgress = (() => {
     offers.push({ id: 'o' + offers.length, kind: 'rubies', qty: SHOP.rubiesPerDiamond, tag: 'Ruby bundle', currency: 'diamonds', price: 1, repeat: true });
     return offers;
   }
-  // Today's offers (made the first time they are asked for each day).
+  /* ---------- the diamond-only sections: Daily Deals, the Magic Shop and the Card Shop ---------- */
+  const RARITY_RANK = { common: 0, rare: 1, epic: 2, legendary: 3 };
+  const poolHas = r => chestPool().some(id => KC_CARDS[id].rarity === r);
+  function dealWorth(d) {
+    const W = ECONOMY.diamondShop.worth;
+    return d.rubies * W.ruby + Object.entries(d.wild).reduce((a, [r, n]) => a + n * W[r], 0);
+  }
+  function makeDeals() {
+    const D = ECONOMY.diamondShop, S = D.dealScale;
+    const k = Math.max(S.min, Math.min(S.max, rewardTier().cards / ECONOMY.arenaCards[4]));
+    return D.deals.map((d, i) => {
+      const wild = {};
+      for (const [r, n] of Object.entries(d.wild)) if (poolHas(r)) wild[r] = Math.max(1, Math.round(n * k));
+      // contents and price grow together, so a deal is always worth about the same multiple of its price
+      const price = Math.max(1, Math.round(d.price * k)), kk = price / d.price;
+      for (const r of Object.keys(wild)) wild[r] = Math.max(1, Math.round(d.wild[r] * kk));
+      const deal = { id: 'd' + i, tag: d.tag, price, rubies: Math.round(d.rubies * kk / 100) * 100, wild };
+      deal.worth = Math.round(dealWorth(deal) / price * 10) / 10;   // how many times its price it is worth
+      return deal;
+    });
+  }
+  function magicUsable(id) {
+    const M = MAGIC[id];
+    if (!M) return false;
+    if (M.kind === 'shard') return evoOpen();
+    return M.rarity === 'any' || P.found.some(c => KC_CARDS[c].rarity === M.rarity);
+  }
+  function makeMagic(rand = Math.random) {
+    const D = ECONOMY.diamondShop, bag = Object.entries(D.magic).filter(([id]) => magicUsable(id)), out = [];
+    while (out.length < D.magicPerDay && bag.length) {
+      let x = rand() * bag.reduce((a, [, m]) => a + m.weight, 0), i = 0;
+      for (; i < bag.length - 1; i++) { x -= bag[i][1].weight; if (x <= 0) break; }
+      const [id, m] = bag.splice(i, 1)[0];
+      out.push({ id: 'm' + out.length, item: id, qty: m.qty, price: m.price });
+    }
+    return out.sort((a, b) => a.price - b.price);
+  }
+  function makeCardShop(rand = Math.random) {
+    const pool = chestPool().filter(id => P.cards[id].level < MAX_LEVEL);
+    for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+    pool.sort((a, b) => RARITY_RANK[KC_CARDS[b].rarity] - RARITY_RANK[KC_CARDS[a].rarity]);
+    return pool.slice(0, 3).map((id, i) => { const pk = ECONOMY.diamondShop.cardPacks[KC_CARDS[id].rarity]; return { id: 'c' + i, card: id, qty: pk.qty, price: pk.price }; });
+  }
+  // Today's offers (made the first time they are asked for each day), and today's diamond sections.
   function shop(now = Date.now(), rand) {
     const day = dayKey(now);
     if (!P.shop || P.shop.day !== day || !Array.isArray(P.shop.offers)) { P.shop = { day, offers: makeOffers(rand), bought: {} }; save(); }
+    if (!P.shop.deals || !P.shop.magicItems || !P.shop.cardShop) {
+      P.shop.deals = makeDeals(); P.shop.magicItems = makeMagic(rand); P.shop.cardShop = makeCardShop(rand);
+      P.shop.dBought = P.shop.dBought || {};
+      save();
+    }
     return P.shop;
+  }
+  // Buy from a diamond section: 'deals', 'magic' or 'cards', item i. Diamonds only, once each a day.
+  // Returns what it gave (like a chest: { rubies, cards, items }) or { error: 'none' | 'sold' | 'diamonds' | 'max' }.
+  function buyDiamond(section, i, now = Date.now()) {
+    const s = shop(now), list = { deals: s.deals, magic: s.magicItems, cards: s.cardShop }[section], o = list && list[i];
+    if (!o) return { error: 'none' };
+    const key = section + ':' + o.id;
+    if (s.dBought[key]) return { error: 'sold' };
+    if (o.card && P.cards[o.card].level >= MAX_LEVEL) return { error: 'max' };
+    if (P.diamonds < o.price) return { error: 'diamonds' };
+    P.diamonds -= o.price;
+    const before = P.found.slice();
+    const got = section === 'deals' ? { rubies: o.rubies, cards: [], items: Object.entries(o.wild).map(([r, n]) => ({ id: 'wild_' + r, n })) }
+      : section === 'magic' ? { rubies: 0, cards: [], items: [{ id: o.item, n: o.qty }] }
+        : { rubies: 0, cards: [{ id: o.card, n: o.qty }], items: [] };
+    apply(got);
+    s.dBought[key] = true;
+    save();
+    return Object.assign({ ok: true, price: o.price }, got, { cards: got.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)) });
   }
   // Shop chests cost rubies, one of each a day, from the arena in ECONOMY.shop.chestArena (by the highest
   // trophies reached). What is inside is rolled at purchase and stays hidden until the chest is opened
@@ -4176,7 +4309,7 @@ const KCProgress = (() => {
 
   return {
     MAX_LEVEL, XP_PER_LEVEL, TROPHIES, ARENAS, ROAD, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
-    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, chestShopOpen, chestBuyLeft, foeKing,
+    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, chestShopOpen, chestBuyLeft, foeKing, buyDiamond, magicUsable,
     load, save, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,
@@ -7942,7 +8075,55 @@ const KCMenu = (() => {
         <span class="eo-body"><b>${esc(o.card ? o.name + ' emote' : o.name)}</b><small>${o.owned ? 'In your emote panel' : 'Yours for good: use it in every battle'}</small>${btns}</span></div>`;
     }).join('');
     for (const b of $$('#shopEmotes .buy-btn[data-emote]')) b.addEventListener('click', e => { e.stopPropagation(); buyEmoteClick(b.dataset.emote, b.dataset.cur); });
+    renderDiamondShop();
     shopTimer();
+  }
+  /* the diamond-only sections: Daily Deals, the Magic Shop and the Card Shop (one of each item a day) */
+  let dConfirm = '', dConfirmT = 0;
+  const WILD_NAME = { common: 'Common', rare: 'Rare', epic: 'Epic', legendary: 'Legendary' };
+  function renderDiamondShop() {
+    const s = G.shop(), p = P();
+    const btn = (sec, i, o) => {
+      const sold = !!s.dBought[sec + ':' + o.id], ask = dConfirm === sec + ':' + i, poor = p.diamonds < o.price;
+      if (sold) return '<button class="buy-btn" type="button" disabled>Bought today</button>';
+      if (o.card && G.upgradeInfo(o.card).max) return '<button class="buy-btn" type="button" disabled>Max level</button>';
+      return `<button class="buy-btn gem${poor ? ' poor' : ''}${ask ? ' confirm' : ''}" type="button" data-dsec="${sec}" data-di="${i}" aria-label="${ask ? 'Confirm: buy' : 'Buy'} for ${o.price} diamond${o.price === 1 ? '' : 's'}">${ask ? 'Confirm ' : ''}<i class="gem-i" aria-hidden="true"></i>${fmt(o.price)}</button>`;
+    };
+    const tile = (sec, o, i, tag, body) => `<div class="offer diamonds ds-${sec}${s.dBought[sec + ':' + o.id] ? ' sold' : ''}"><span class="of-tag">${esc(tag)}</span>${body}${btn(sec, i, o)}</div>`;
+    $('#shopDeals').innerHTML = s.deals.map((d, i) => tile('deals', d, i, d.tag, `<span class="ds-worth">${d.worth}× value</span>
+      <div class="ds-items">${Object.entries(d.wild).map(([r, n]) => `<span class="ds-line"><span class="ds-ic">${itemSvg('wild_' + r)}</span><b>${fmt(n)}</b><small>${WILD_NAME[r]} Wild Card${n === 1 ? '' : 's'}</small></span>`).join('')}
+        <span class="ds-line"><span class="ds-ic"><i class="co-ruby"></i></span><b>${fmt(d.rubies)}</b><small>Rubies</small></span></div>`)).join('');
+    $('#shopMagic').innerHTML = s.magicItems.map((m, i) => {
+      const M = G.MAGIC[m.item], tag = m.item === 'hammer_books' ? 'Rarest' : M.kind === 'wild' ? 'Wild cards' : M.kind === 'shard' ? 'Evolution' : 'Magic';
+      return tile('magic', m, i, tag, `<div class="of-art mi"><span class="mi-art">${itemSvg(m.item)}</span>${m.qty > 1 ? `<span class="of-qty">×${fmt(m.qty)}</span>` : ''}</div><b>${esc(M.name)}</b><small class="of-note ds-blurb">${esc(M.blurb.split('. ')[0].replace(/\.$/, ''))}.</small>`);
+    }).join('');
+    $('#shopCards').innerHTML = s.cardShop.length ? s.cardShop.map((c, i) => {
+      const K = KC_CARDS[c.card], u = G.upgradeInfo(c.card), sold = !!s.dBought['cards:' + c.id], after = u.count + (sold ? 0 : c.qty);
+      const pct = u.max ? 100 : Math.min(100, after / u.need * 100);
+      const prog = !u.found ? '<small class="of-note">New card: this unlocks it</small>'
+        : `<span class="of-prog${!u.max && after >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.max ? 'Max level' : `Lv ${u.level} · ${fmt(after)} / ${fmt(u.need)}`}</em></span>`;
+      return tile('cards', c, i, K.rarity[0].toUpperCase() + K.rarity.slice(1), `<div class="of-art ${K.rarity}"><img src="${cardImg(c.card)}" alt=""><span class="of-qty">×${fmt(c.qty)}</span></div><b>${esc(K.name)}</b>${prog}`);
+    }).join('') : '<p class="dim">Every card you can buy here is at level 15.</p>';
+    for (const b of $$('.dshop .buy-btn[data-dsec]')) b.addEventListener('click', e => { e.stopPropagation(); buyDiamondClick(b.dataset.dsec, +b.dataset.di); });
+  }
+  function buyDiamondClick(sec, i) {
+    const s = G.shop(), o = { deals: s.deals, magic: s.magicItems, cards: s.cardShop }[sec][i];
+    if (!o) return;
+    if (P().diamonds < o.price) { KCSound.play('error'); toast(`That costs ${fmt(o.price)} diamond${o.price === 1 ? '' : 's'}. Diamonds will come from the SirSC wallet.`); return; }
+    const key = sec + ':' + i;
+    if (dConfirm !== key) {   // diamonds take a second click to confirm
+      dConfirm = key; clearTimeout(dConfirmT);
+      dConfirmT = setTimeout(() => { dConfirm = ''; if (tabNow === 'shop') renderDiamondShop(); }, 4000);
+      renderDiamondShop();
+      const again = $(`.dshop .buy-btn[data-dsec="${sec}"][data-di="${i}"]`); if (again) again.focus();
+      return;
+    }
+    clearTimeout(dConfirmT); dConfirm = '';
+    const r = G.buyDiamond(sec, i);
+    if (!r.ok) { KCSound.play('error'); toast(r.error === 'sold' ? 'You already bought that today. New ones arrive at midnight.' : 'That is not available.'); refresh(); return; }
+    KCSound.play('buy');
+    refresh();
+    showChest(null, r, sec === 'deals' ? o.tag : sec === 'magic' ? 'Magic Shop' : 'Card Shop');
   }
   let emoteConfirm = null, emoteConfirmT = 0;
   function buyEmoteClick(id, cur) {
@@ -7963,7 +8144,7 @@ const KCMenu = (() => {
   }
   function shopTimer() {
     const left = clock(G.shopEnds() - Date.now());
-    for (const el of [$('#shopTimer'), $('#freeClock'), $('#emoteTimer')]) if (el) el.textContent = left;
+    for (const el of [$('#shopTimer'), $('#freeClock'), $('#emoteTimer'), $('#dealTimer'), $('#magicTimer'), $('#cardTimer')]) if (el) el.textContent = left;
   }
 
   /* ---------- the King Tower ---------- */

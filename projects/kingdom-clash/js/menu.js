@@ -727,7 +727,55 @@ const KCMenu = (() => {
         <span class="eo-body"><b>${esc(o.card ? o.name + ' emote' : o.name)}</b><small>${o.owned ? 'In your emote panel' : 'Yours for good: use it in every battle'}</small>${btns}</span></div>`;
     }).join('');
     for (const b of $$('#shopEmotes .buy-btn[data-emote]')) b.addEventListener('click', e => { e.stopPropagation(); buyEmoteClick(b.dataset.emote, b.dataset.cur); });
+    renderDiamondShop();
     shopTimer();
+  }
+  /* the diamond-only sections: Daily Deals, the Magic Shop and the Card Shop (one of each item a day) */
+  let dConfirm = '', dConfirmT = 0;
+  const WILD_NAME = { common: 'Common', rare: 'Rare', epic: 'Epic', legendary: 'Legendary' };
+  function renderDiamondShop() {
+    const s = G.shop(), p = P();
+    const btn = (sec, i, o) => {
+      const sold = !!s.dBought[sec + ':' + o.id], ask = dConfirm === sec + ':' + i, poor = p.diamonds < o.price;
+      if (sold) return '<button class="buy-btn" type="button" disabled>Bought today</button>';
+      if (o.card && G.upgradeInfo(o.card).max) return '<button class="buy-btn" type="button" disabled>Max level</button>';
+      return `<button class="buy-btn gem${poor ? ' poor' : ''}${ask ? ' confirm' : ''}" type="button" data-dsec="${sec}" data-di="${i}" aria-label="${ask ? 'Confirm: buy' : 'Buy'} for ${o.price} diamond${o.price === 1 ? '' : 's'}">${ask ? 'Confirm ' : ''}<i class="gem-i" aria-hidden="true"></i>${fmt(o.price)}</button>`;
+    };
+    const tile = (sec, o, i, tag, body) => `<div class="offer diamonds ds-${sec}${s.dBought[sec + ':' + o.id] ? ' sold' : ''}"><span class="of-tag">${esc(tag)}</span>${body}${btn(sec, i, o)}</div>`;
+    $('#shopDeals').innerHTML = s.deals.map((d, i) => tile('deals', d, i, d.tag, `<span class="ds-worth">${d.worth}× value</span>
+      <div class="ds-items">${Object.entries(d.wild).map(([r, n]) => `<span class="ds-line"><span class="ds-ic">${itemSvg('wild_' + r)}</span><b>${fmt(n)}</b><small>${WILD_NAME[r]} Wild Card${n === 1 ? '' : 's'}</small></span>`).join('')}
+        <span class="ds-line"><span class="ds-ic"><i class="co-ruby"></i></span><b>${fmt(d.rubies)}</b><small>Rubies</small></span></div>`)).join('');
+    $('#shopMagic').innerHTML = s.magicItems.map((m, i) => {
+      const M = G.MAGIC[m.item], tag = m.item === 'hammer_books' ? 'Rarest' : M.kind === 'wild' ? 'Wild cards' : M.kind === 'shard' ? 'Evolution' : 'Magic';
+      return tile('magic', m, i, tag, `<div class="of-art mi"><span class="mi-art">${itemSvg(m.item)}</span>${m.qty > 1 ? `<span class="of-qty">×${fmt(m.qty)}</span>` : ''}</div><b>${esc(M.name)}</b><small class="of-note ds-blurb">${esc(M.blurb.split('. ')[0].replace(/\.$/, ''))}.</small>`);
+    }).join('');
+    $('#shopCards').innerHTML = s.cardShop.length ? s.cardShop.map((c, i) => {
+      const K = KC_CARDS[c.card], u = G.upgradeInfo(c.card), sold = !!s.dBought['cards:' + c.id], after = u.count + (sold ? 0 : c.qty);
+      const pct = u.max ? 100 : Math.min(100, after / u.need * 100);
+      const prog = !u.found ? '<small class="of-note">New card: this unlocks it</small>'
+        : `<span class="of-prog${!u.max && after >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.max ? 'Max level' : `Lv ${u.level} · ${fmt(after)} / ${fmt(u.need)}`}</em></span>`;
+      return tile('cards', c, i, K.rarity[0].toUpperCase() + K.rarity.slice(1), `<div class="of-art ${K.rarity}"><img src="${cardImg(c.card)}" alt=""><span class="of-qty">×${fmt(c.qty)}</span></div><b>${esc(K.name)}</b>${prog}`);
+    }).join('') : '<p class="dim">Every card you can buy here is at level 15.</p>';
+    for (const b of $$('.dshop .buy-btn[data-dsec]')) b.addEventListener('click', e => { e.stopPropagation(); buyDiamondClick(b.dataset.dsec, +b.dataset.di); });
+  }
+  function buyDiamondClick(sec, i) {
+    const s = G.shop(), o = { deals: s.deals, magic: s.magicItems, cards: s.cardShop }[sec][i];
+    if (!o) return;
+    if (P().diamonds < o.price) { KCSound.play('error'); toast(`That costs ${fmt(o.price)} diamond${o.price === 1 ? '' : 's'}. Diamonds will come from the SirSC wallet.`); return; }
+    const key = sec + ':' + i;
+    if (dConfirm !== key) {   // diamonds take a second click to confirm
+      dConfirm = key; clearTimeout(dConfirmT);
+      dConfirmT = setTimeout(() => { dConfirm = ''; if (tabNow === 'shop') renderDiamondShop(); }, 4000);
+      renderDiamondShop();
+      const again = $(`.dshop .buy-btn[data-dsec="${sec}"][data-di="${i}"]`); if (again) again.focus();
+      return;
+    }
+    clearTimeout(dConfirmT); dConfirm = '';
+    const r = G.buyDiamond(sec, i);
+    if (!r.ok) { KCSound.play('error'); toast(r.error === 'sold' ? 'You already bought that today. New ones arrive at midnight.' : 'That is not available.'); refresh(); return; }
+    KCSound.play('buy');
+    refresh();
+    showChest(null, r, sec === 'deals' ? o.tag : sec === 'magic' ? 'Magic Shop' : 'Card Shop');
   }
   let emoteConfirm = null, emoteConfirmT = 0;
   function buyEmoteClick(id, cur) {
@@ -748,7 +796,7 @@ const KCMenu = (() => {
   }
   function shopTimer() {
     const left = clock(G.shopEnds() - Date.now());
-    for (const el of [$('#shopTimer'), $('#freeClock'), $('#emoteTimer')]) if (el) el.textContent = left;
+    for (const el of [$('#shopTimer'), $('#freeClock'), $('#emoteTimer'), $('#dealTimer'), $('#magicTimer'), $('#cardTimer')]) if (el) el.textContent = left;
   }
 
   /* ---------- the King Tower ---------- */

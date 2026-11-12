@@ -90,6 +90,32 @@ const KCProgress = (() => {
     shop: { perCopy: { common: 20, rare: 200, epic: 2000, legendary: 40000 }, maxQty: { common: 50, rare: 10, epic: 1, legendary: 0 },
       megaQty: { common: 100, rare: 20, epic: 2, legendary: 0 }, chestCardShare: 0.5, chestPriceScale: 2, chestsPerDay: 1,
       chestArena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 4 } },
+    // the three diamond-only Shop sections, made fresh each day:
+    //  - deals: two bundles of wild cards and rubies, always worth over twice their price. Contents and
+    //    price grow together with the arena (`dealScale`: card tier / Arena 4's, between min and max); epic
+    //    wild cards only once an epic card can drop.
+    //  - magic: `magicPerDay` different magic items, each with its own price (rarer items cost more; the
+    //    Hammer of Books the most); only items you can use are offered.
+    //  - cards: the three best cards your arena can give (highest rarity first, maxed cards skipped), a
+    //    pack of each: `cardPacks` copies for a price by rarity.
+    //  Each item sells once a day.
+    diamondShop: {
+      deals: [
+        { tag: 'Daily deal', price: 2, rubies: 4000, wild: { common: 300, rare: 20 } },
+        { tag: 'Big deal', price: 6, rubies: 15000, wild: { common: 800, rare: 80, epic: 2 } },
+      ],
+      dealScale: { min: 0.5, max: 3 },
+      magicPerDay: 4,
+      magic: {
+        wild_common: { qty: 40, price: 1, weight: 10 }, wild_rare: { qty: 8, price: 2, weight: 8 }, wild_epic: { qty: 1, price: 4, weight: 5 },
+        wild_legendary: { qty: 1, price: 12, weight: 2 }, book_common: { qty: 1, price: 6, weight: 6 }, book_rare: { qty: 1, price: 9, weight: 5 },
+        book_epic: { qty: 1, price: 13, weight: 3 }, book_legendary: { qty: 1, price: 17, weight: 2 }, book_books: { qty: 1, price: 21, weight: 1.5 },
+        hammer_books: { qty: 1, price: 25, weight: 1 }, shards: { qty: 1, price: 6, weight: 3 },
+      },
+      cardPacks: { common: { qty: 150, price: 2 }, rare: { qty: 25, price: 3 }, epic: { qty: 3, price: 6 }, legendary: { qty: 1, price: 10 } },
+      // what each counts as when the deals' value is shown, in diamonds (the mega bundle's and the ruby bundle's rates)
+      worth: { common: 1 / 100, rare: 1 / 20, epic: 1 / 2, legendary: 8, ruby: 1 / 5000 },
+    },
     // wallet Coins (SirSC) to Rubies, one way: `rate` rubies a coin, up to a daily cap set by the highest
     // arena reached; past the last arena the cap grows by `beyond.add` every `beyond.every` trophies.
     exchange: { rate: 1, cap: { 1: 500, 2: 1000, 3: 2000, 4: 4000 }, beyond: { every: 300, add: 1000, max: 10000 } },
@@ -590,11 +616,78 @@ const KCProgress = (() => {
     offers.push({ id: 'o' + offers.length, kind: 'rubies', qty: SHOP.rubiesPerDiamond, tag: 'Ruby bundle', currency: 'diamonds', price: 1, repeat: true });
     return offers;
   }
-  // Today's offers (made the first time they are asked for each day).
+  /* ---------- the diamond-only sections: Daily Deals, the Magic Shop and the Card Shop ---------- */
+  const RARITY_RANK = { common: 0, rare: 1, epic: 2, legendary: 3 };
+  const poolHas = r => chestPool().some(id => KC_CARDS[id].rarity === r);
+  function dealWorth(d) {
+    const W = ECONOMY.diamondShop.worth;
+    return d.rubies * W.ruby + Object.entries(d.wild).reduce((a, [r, n]) => a + n * W[r], 0);
+  }
+  function makeDeals() {
+    const D = ECONOMY.diamondShop, S = D.dealScale;
+    const k = Math.max(S.min, Math.min(S.max, rewardTier().cards / ECONOMY.arenaCards[4]));
+    return D.deals.map((d, i) => {
+      const wild = {};
+      for (const [r, n] of Object.entries(d.wild)) if (poolHas(r)) wild[r] = Math.max(1, Math.round(n * k));
+      // contents and price grow together, so a deal is always worth about the same multiple of its price
+      const price = Math.max(1, Math.round(d.price * k)), kk = price / d.price;
+      for (const r of Object.keys(wild)) wild[r] = Math.max(1, Math.round(d.wild[r] * kk));
+      const deal = { id: 'd' + i, tag: d.tag, price, rubies: Math.round(d.rubies * kk / 100) * 100, wild };
+      deal.worth = Math.round(dealWorth(deal) / price * 10) / 10;   // how many times its price it is worth
+      return deal;
+    });
+  }
+  function magicUsable(id) {
+    const M = MAGIC[id];
+    if (!M) return false;
+    if (M.kind === 'shard') return evoOpen();
+    return M.rarity === 'any' || P.found.some(c => KC_CARDS[c].rarity === M.rarity);
+  }
+  function makeMagic(rand = Math.random) {
+    const D = ECONOMY.diamondShop, bag = Object.entries(D.magic).filter(([id]) => magicUsable(id)), out = [];
+    while (out.length < D.magicPerDay && bag.length) {
+      let x = rand() * bag.reduce((a, [, m]) => a + m.weight, 0), i = 0;
+      for (; i < bag.length - 1; i++) { x -= bag[i][1].weight; if (x <= 0) break; }
+      const [id, m] = bag.splice(i, 1)[0];
+      out.push({ id: 'm' + out.length, item: id, qty: m.qty, price: m.price });
+    }
+    return out.sort((a, b) => a.price - b.price);
+  }
+  function makeCardShop(rand = Math.random) {
+    const pool = chestPool().filter(id => P.cards[id].level < MAX_LEVEL);
+    for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+    pool.sort((a, b) => RARITY_RANK[KC_CARDS[b].rarity] - RARITY_RANK[KC_CARDS[a].rarity]);
+    return pool.slice(0, 3).map((id, i) => { const pk = ECONOMY.diamondShop.cardPacks[KC_CARDS[id].rarity]; return { id: 'c' + i, card: id, qty: pk.qty, price: pk.price }; });
+  }
+  // Today's offers (made the first time they are asked for each day), and today's diamond sections.
   function shop(now = Date.now(), rand) {
     const day = dayKey(now);
     if (!P.shop || P.shop.day !== day || !Array.isArray(P.shop.offers)) { P.shop = { day, offers: makeOffers(rand), bought: {} }; save(); }
+    if (!P.shop.deals || !P.shop.magicItems || !P.shop.cardShop) {
+      P.shop.deals = makeDeals(); P.shop.magicItems = makeMagic(rand); P.shop.cardShop = makeCardShop(rand);
+      P.shop.dBought = P.shop.dBought || {};
+      save();
+    }
     return P.shop;
+  }
+  // Buy from a diamond section: 'deals', 'magic' or 'cards', item i. Diamonds only, once each a day.
+  // Returns what it gave (like a chest: { rubies, cards, items }) or { error: 'none' | 'sold' | 'diamonds' | 'max' }.
+  function buyDiamond(section, i, now = Date.now()) {
+    const s = shop(now), list = { deals: s.deals, magic: s.magicItems, cards: s.cardShop }[section], o = list && list[i];
+    if (!o) return { error: 'none' };
+    const key = section + ':' + o.id;
+    if (s.dBought[key]) return { error: 'sold' };
+    if (o.card && P.cards[o.card].level >= MAX_LEVEL) return { error: 'max' };
+    if (P.diamonds < o.price) return { error: 'diamonds' };
+    P.diamonds -= o.price;
+    const before = P.found.slice();
+    const got = section === 'deals' ? { rubies: o.rubies, cards: [], items: Object.entries(o.wild).map(([r, n]) => ({ id: 'wild_' + r, n })) }
+      : section === 'magic' ? { rubies: 0, cards: [], items: [{ id: o.item, n: o.qty }] }
+        : { rubies: 0, cards: [{ id: o.card, n: o.qty }], items: [] };
+    apply(got);
+    s.dBought[key] = true;
+    save();
+    return Object.assign({ ok: true, price: o.price }, got, { cards: got.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)) });
   }
   // Shop chests cost rubies, one of each a day, from the arena in ECONOMY.shop.chestArena (by the highest
   // trophies reached). What is inside is rolled at purchase and stays hidden until the chest is opened
@@ -982,7 +1075,7 @@ const KCProgress = (() => {
 
   return {
     MAX_LEVEL, XP_PER_LEVEL, TROPHIES, ARENAS, ROAD, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
-    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, chestShopOpen, chestBuyLeft, foeKing,
+    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, chestShopOpen, chestBuyLeft, foeKing, buyDiamond, magicUsable,
     load, save, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,

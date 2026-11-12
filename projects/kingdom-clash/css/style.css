@@ -1880,3 +1880,27 @@ button.slot:hover { transform: translateY(-3px); }
 .ex-get { text-align: center; font-weight: 900; color: #ffb3b9; min-height: 20px; }
 .ex-go { align-self: center; }
 @media (max-width: 560px) { .res-chip.wallet { min-width: 0; } }
+
+/* the diamond-only Shop sections */
+.dshop-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 900; color: #8fd8ff; }
+.dshop-tag .gem-i { width: 16px; height: 16px; }
+.dshop { display: grid; gap: 22px 14px; padding-top: 8px; }
+.dshop.deals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dshop.magic { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.dshop.cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.dshop .offer { justify-content: space-between; }
+.ds-deals { padding-top: 20px; }
+.ds-worth { align-self: center; font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 999px; background: #7ee07e; color: var(--outline); border: 2px solid var(--outline); transform: rotate(4deg); }
+.ds-items { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; margin: 6px 0 4px; }
+.ds-line { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 76px; }
+.ds-ic { display: grid; place-items: center; width: 54px; height: 54px; }
+.ds-ic svg { width: 100%; height: 100%; }
+.ds-ic .co-ruby { width: 44px; height: 44px; }
+.ds-line b { font-family: var(--display); font-weight: 400; font-size: 22px; line-height: 1; }
+.ds-line small { font-size: 11px; font-weight: 800; color: #cfe8ff; }
+.of-art.mi { display: grid; place-items: center; aspect-ratio: 5 / 6; }
+.of-art.mi .mi-art { width: 100%; }
+.of-art.mi .mi-art svg { width: 100%; height: auto; display: block; }
+.ds-blurb { min-height: 28px; line-height: 1.25; }
+@media (max-width: 760px) { .dshop.magic { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .dshop.deals { grid-template-columns: 1fr; } .dshop.cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ds-ic { width: 44px; height: 44px; } }

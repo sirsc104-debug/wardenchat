@@ -438,6 +438,51 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   console.log('rubies from old coins, wallet Coins to Rubies with daily caps by arena: ok');
 }
 
+// The diamond-only Shop sections: Daily Deals, the Magic Shop, the Card Shop
+{
+  const day = new Date(2026, 10, 12, 10).getTime();
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 100, best: 100, claimed: { 0: true }, diamonds: 100, rubies: 0 }) }));
+  const Q = G.state, sh = G.shop(day, KCSim.mulberry(4));
+  // deals: two, wild cards and rubies, always worth over twice their price
+  assert.strictEqual(sh.deals.length, 2);
+  for (const d of sh.deals) assert(d.rubies > 0 && d.wild.common > 0 && d.wild.rare > 0 && !d.wild.epic && d.worth > 2, JSON.stringify(d));
+  // magic: four different usable items, cheapest first; the hammer costs 25 and nothing costs more
+  const M = G.ECONOMY.diamondShop.magic;
+  assert.strictEqual(sh.magicItems.length, 4);
+  assert.strictEqual(new Set(sh.magicItems.map(m => m.item)).size, 4);
+  assert(sh.magicItems.every(m => G.magicUsable(m.item)) && !sh.magicItems.some(m => m.item === 'shards' || m.item.endsWith('_epic') || m.item.endsWith('_legendary')), 'only items you can use');
+  assert(M.hammer_books.price === 25 && Object.values(M).every(m => m.price <= 25), 'the Hammer of Books costs the most');
+  const order = ['wild_common', 'wild_rare', 'wild_epic', 'wild_legendary'], bk = ['book_common', 'book_rare', 'book_epic', 'book_legendary', 'book_books', 'hammer_books'];
+  for (const list of [order, bk]) for (let i = 1; i < list.length; i++) assert(M[list[i]].price > M[list[i - 1]].price, 'rarer costs more: ' + list[i]);
+  // cards: the three best cards the arena can give, rares here
+  assert.strictEqual(sh.cardShop.length, 3);
+  assert(sh.cardShop.every(c => KC_CARDS[c.card].rarity === 'rare' && G.chestPool().includes(c.card)), JSON.stringify(sh.cardShop));
+  // buying: diamonds only, once a day each, a confirm-free rule call here
+  let r = G.buyDiamond('deals', 0, day);
+  const d0 = sh.deals[0];
+  assert(r.ok && Q.diamonds === 100 - d0.price && Q.rubies === d0.rubies && Q.magic.wild_common === d0.wild.common && Q.magic.wild_rare === d0.wild.rare, 'the deal pays out');
+  assert.strictEqual(G.buyDiamond('deals', 0, day).error, 'sold', 'once a day');
+  const hm = sh.magicItems[0], had = Q.magic[hm.item] || 0;
+  r = G.buyDiamond('magic', 0, day); assert(r.ok && Q.magic[hm.item] === had + hm.qty, 'a magic item');
+  const c0 = sh.cardShop[0], cnt = Q.cards[c0.card].count;
+  r = G.buyDiamond('cards', 0, day); assert(r.ok && Q.cards[c0.card].count === cnt + c0.qty && r.cards[0].n === c0.qty, 'a card pack');
+  Q.diamonds = 0; assert.strictEqual(G.buyDiamond('cards', 1, day).error, 'diamonds');
+  Q.rubies = 1e6; assert.strictEqual(G.buyDiamond('cards', 1, day).error, 'diamonds', 'rubies never buy these');
+  // the same items all day, new ones tomorrow; a saved day's sections survive a reload
+  assert.deepStrictEqual(G.shop(day + 3600e3).magicItems, sh.magicItems);
+  G.load(mem({ 'kc.progress': JSON.stringify(Q) }));
+  assert(G.shop(day).dBought['deals:d0'] && G.buyDiamond('deals', 0, day).error === 'sold', 'bought stays bought after a reload');
+  const tomorrow = G.shop(day + 86400e3, KCSim.mulberry(9));
+  assert(!Object.keys(tomorrow.dBought).length, 'a new day, nothing bought');
+  // later arenas: legendaries and epics in the Card Shop; deals grow with price, still over 2x
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 1300, best: 1300, claimed: { 0: true }, diamonds: 100 }) }));
+  const hi = G.shop(day, KCSim.mulberry(5));
+  assert(hi.cardShop.map(c => KC_CARDS[c.card].rarity).join() === 'legendary,legendary,epic', JSON.stringify(hi.cardShop));
+  assert(hi.deals.every(d => d.worth > 2) && hi.deals[1].wild.epic > 0 && hi.deals[0].price > sh.deals[0].price, 'bigger deals later');
+  for (let k = 0; k < 40; k++) { G.state.shop = null; const m = G.shop(day, KCSim.mulberry(100 + k)).magicItems; assert(m.length === 4 && m.every(x => G.magicUsable(x.item))); }
+  console.log(`diamond Shop sections: deals worth ${sh.deals.map(d => d.worth + 'x').join(' and ')}, magic items 1 to 25 diamonds, the three best cards: ok`);
+}
+
 // King Tower levels, emotes in the Shop, and chests giving cards of your arena before the road does
 {
   G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 320, best: 320, claimed: { 0: true }, rubies: 10000 }) }));
