@@ -60,6 +60,8 @@ const KCMenu = (() => {
     refresh();
     toast(`Simulated win vs ${foe.name}${bits.length ? ': ' + bits.join(', ') : ''}`);
     if (r.chestNow) showChest(r.chestNow.chest, r.chestNow, r.chestNow.name);
+    if (r.roadOpened) milestone({ kind: 'road' });
+    if (r.newArena) milestone({ kind: 'arena', arena: r.newArena });
   }
 
   /* ---------- small messages ---------- */
@@ -84,6 +86,9 @@ const KCMenu = (() => {
     if (prev && prev !== next && !$('#home').hidden) slideTabs(prev, next, TABS.indexOf(name) > TABS.indexOf(prev.id.slice(4)) ? 1 : -1);
     else { finishSlide(); for (const el of $$('.lobby-main .tab')) el.hidden = el !== next; }
     if (name === 'road' && G.roadOpen() && !P().roadSeen) { P().roadSeen = true; G.save(); }
+    if (name === 'road') hintDone('road');
+    if (name === 'cards') { if (G.upgradable().length) hintDone('upgrade'); if (P().found.some(id => !KC_STARTER_DECK.includes(id))) hintDone('deck'); }
+    hintsRender();
     refresh();
     if (name === 'road') requestAnimationFrame(scrollRoad);
   }
@@ -250,6 +255,7 @@ const KCMenu = (() => {
     const st = G.chestState(i), c = P().chests[i];
     if (st === 'ready') { const got = G.openChest(i); if (got) showChest(got.chest, got); }
     else if (st === 'locked') {
+      hintDone('chest');
       const r = G.startUnlock(i);
       if (r === 'busy') toast('Another chest is unlocking. One at a time!');
       else if (r === 'ok') { toast(`${G.CHESTS[c.type].name} is unlocking`); KCSound.play('select'); }
@@ -656,6 +662,8 @@ const KCMenu = (() => {
     if (co) stopTimers();
     fxStop();
     $('#chestOpen').hidden = true; co = null; refresh();
+    // a milestone waiting for the chest to close
+    if (sceneQueue.length && $('#scene').hidden) nextScene();
   }
 
   /* ---------- the Shop ---------- */
@@ -837,6 +845,42 @@ const KCMenu = (() => {
   }
   function openExchange() { $('#exAmount').value = ''; renderExchange(); $('#exModal').hidden = false; $('#exAmount').focus(); }
   function closeExchange() { $('#exModal').hidden = true; }
+
+  /* ---------- milestones: a full-screen scene for a new arena and for the Trophy Road opening ---------- */
+  const sceneQueue = [];
+  function milestone(m) { sceneQueue.push(m); setTimeout(() => { if ($('#scene').hidden && $('#chestOpen').hidden) nextScene(); }, 0); }
+  function nextScene() {
+    const m = sceneQueue.shift();
+    if (!m) { $('#scene').hidden = true; return; }
+    const a = m.arena || G.arena(), art = KCArenas.get(a.theme), C = art.centerpiece;
+    $('#sceneKicker').textContent = m.kind === 'road' ? 'The Trophy Road is open!' : `Arena ${a.number} reached!`;
+    $('#sceneTitle').textContent = a.name;
+    const img = $('#sceneArt');
+    if (C.src) { img.src = C.src; img.hidden = false; img.alt = `${a.name} arena`; } else img.hidden = true;
+    $('#sceneText').textContent = m.kind === 'road'
+      ? 'Trophy battles now: win trophies, earn chests and climb the road to new arenas and cards. Your chest slots, daily quests and the Shop are open.'
+      : `${a.blurb || ''} Its cards can now come out of your chests, and the Trophy Road gives them as you climb.`.trim();
+    $('#sceneCards').innerHTML = (a.cards || []).filter(id => KC_CARDS[id]).map(id => `<figure><img src="${cardImg(id)}" alt=""><figcaption>${esc(KC_CARDS[id].name)}</figcaption></figure>`).join('');
+    $('#sceneCards').hidden = !(a.cards || []).length;
+    const sc = $('#scene'); sc.hidden = false;
+    sc.style.animation = 'none'; void sc.offsetWidth; sc.style.animation = '';
+    KCSound.play('unlockFanfare');
+    setTimeout(() => $('#sceneGo').focus(), 60);
+  }
+
+  /* ---------- first-time pointers in the lobby (each shown until you do it once) ---------- */
+  function hintsRender() {
+    const p = P(), H = p.hints || (p.hints = {}), open = G.roadOpen();
+    for (const el of $$('.hint-tip')) el.parentNode.removeChild(el);
+    const put = (el, text) => { if (!el) return; const t = document.createElement('span'); t.className = 'hint-tip'; t.textContent = text; el.appendChild(t); };
+    if (!open) return;
+    const now = Date.now();
+    if (!H.chest && G.unlockingSlot(now) < 0) { const i = p.chests.findIndex((c, k) => c && G.chestState(k, now) === 'locked'); if (i >= 0) put($(`#chests button.slot[data-slot="${i}"]`), 'Tap to unlock'); }
+    if (!H.upgrade && G.upgradable().length && tabNow !== 'cards') put($('.nb[data-tab="cards"]'), 'Upgrade a card!');
+    else if (!H.deck && p.found.some(id => !KC_STARTER_DECK.includes(id)) && tabNow !== 'cards') put($('.nb[data-tab="cards"]'), 'New card!');
+    if (!H.road && G.claimable().length && tabNow !== 'road') put($('.nb[data-tab="road"]'), 'Claim rewards!');
+  }
+  function hintDone(id) { const p = P(); p.hints = p.hints || {}; if (!p.hints[id]) { p.hints[id] = true; G.save(); } }
 
   /* ---------- daily quests and the crown chest ---------- */
   function renderDaily() {
@@ -1621,6 +1665,7 @@ const KCMenu = (() => {
     $('#shopTag').hidden = !G.freeChestReady();
     passPlaque();
     renderDaily();
+    hintsRender();
     $('#onlineBtn').classList.toggle('locked', !G.onlineOpen() || !KCNet.LIVE);
     $('#onlineBtn').title = KCNet.LIVE ? 'Battle other players online' : 'Online battles are coming soon';
     $('#onlineBtn').hidden = !G.roadOpen();
@@ -1749,6 +1794,7 @@ const KCMenu = (() => {
     $('#cp').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && G.roadOpen()) { e.preventDefault(); cpGo(); } });
     $('#exX').addEventListener('click', closeExchange);
     $('#questBtn').addEventListener('click', openQuests);
+    $('#sceneGo').addEventListener('click', () => { KCSound.play('select'); nextScene(); });
     $('#crownBtn').addEventListener('click', openQuests);
     $('#questX').addEventListener('click', closeQuests);
     $('#questModal').addEventListener('click', e => {
@@ -1796,7 +1842,7 @@ const KCMenu = (() => {
   }
 
   return {
-    init, refresh, recordResult, nextFoe, cardImg, tab, showChest, chestSvg, openQuests,
+    init, refresh, recordResult, nextFoe, cardImg, tab, showChest, chestSvg, openQuests, milestone,
     get name() { return P() ? P().name : 'Player'; },
     show() { refresh(); requestAnimationFrame(placeGlow); },
   };

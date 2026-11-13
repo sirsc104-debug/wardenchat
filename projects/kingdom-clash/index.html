@@ -266,6 +266,17 @@
       </div>
     </div>
 
+    <!-- a milestone: a new arena, the Trophy Road opening -->
+    <div class="scene" id="scene" hidden role="dialog" aria-modal="true" aria-labelledby="sceneTitle">
+      <div class="scene-rays" aria-hidden="true"></div>
+      <small class="scene-kicker" id="sceneKicker">New Arena!</small>
+      <h2 id="sceneTitle">Briar Hollow</h2>
+      <img class="scene-art" id="sceneArt" alt="" draggable="false">
+      <p class="scene-text" id="sceneText"></p>
+      <div class="scene-cards" id="sceneCards"></div>
+      <button type="button" class="big-btn" id="sceneGo"><span>Let's go!</span></button>
+    </div>
+
     <!-- today's quests, the crown chest and the win streak -->
     <div class="modal" id="questModal" hidden>
       <div class="quest-card plaque" role="dialog" aria-modal="true" aria-labelledby="questTitle">
@@ -326,6 +337,7 @@
         <canvas id="arena" aria-label="Battle arena"></canvas>
         <div class="nameplate"><b id="foeName">Trainer Owen</b><small id="foeTier">Training Grounds</small></div>
         <div class="bubble" id="bubble" hidden></div>
+        <div class="coach" id="coach" hidden role="status" aria-live="polite"><canvas id="coachFace" width="96" height="96" aria-hidden="true"></canvas><p id="coachText"></p><button type="button" class="coach-skip" id="coachSkip">Skip tips</button></div>
         <div class="banner" id="banner" hidden></div>
         <div class="countdown" id="countdown" hidden></div>
         <div class="toast" id="toast" hidden></div>

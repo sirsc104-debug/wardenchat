@@ -30,6 +30,13 @@
     $('#result').hidden = true;
     show('home');
     KCMenu.show();
+    // a milestone from the last battle: the Trophy Road opening, a new arena
+    const res = G.res;
+    if (res && !res.sceneShown) {
+      res.sceneShown = true;
+      if (res.roadOpened) KCMenu.milestone({ kind: 'road' });
+      if (res.newArena) KCMenu.milestone({ kind: 'arena', arena: res.newArena });
+    }
   }
 
   /* ---------- starting a battle ---------- */
@@ -87,6 +94,7 @@
   function begin() {
     $('#intro').hidden = true;
     G.phase = 'play';
+    tutStart();
     // a trophy battle left before it ends (reload, closed tab) counts as a loss next time the game loads
     if (!G.online) {
       KCProgress.battleStarted(G.trainer);
@@ -252,7 +260,7 @@
     const slot = G.sel, id = s.hands[0][slot], p = placeAt(id, w);
     if (G.online) { onlinePlay(slot, id, p); return; }
     const r = S.play(s, 0, slot, p.x, p.y);
-    if (r === 'ok') { select(-1); G.idleHint = true; return; }
+    if (r === 'ok') { select(-1); G.idleHint = true; tutPlayed(id); return; }
     KCSound.play('error');
     if (r === 'energy') {
       toast(`Not enough energy for ${KC_CARDS[id].name}`);
@@ -293,9 +301,101 @@
   }
 
   /* ---------- messages ---------- */
+  /* ---------- the guided first battle ----------
+     The very first battle against Trainer Owen comes with a coach: a card and a spot light up and Owen
+     waits until you place it, then tips appear as things happen (his first attack, a chance for a spell,
+     the first tower down). Skip tips ends it. Done once (KCProgress.state.tutorial). */
+  const TUT = {
+    place: { text: 'Drag a card from your hand onto the glowing spot on your side of the river. (Or tap the card, then tap the spot.)', pick: 'troop', spot: [3.5, 21.5], hold: true },
+    walk: { text: 'Your troops walk to the nearest enemy tower on their own. Every card costs energy, and the energy bar refills over time.', ms: 7000 },
+    defend: { text: 'Owen is attacking! Put a troop in his path: your towers shoot at whatever comes near them.', pick: 'troop', ms: 11000 },
+    spell: { text: 'Spells hit everything in an area. Drag your Fireball onto his troops!', pick: 'spell', ms: 9000 },
+    tower: { text: 'A tower down is a crown! Bring down the King Tower in the middle and you win with all three.', ms: 6500 },
+    double: { text: 'Double energy: it refills twice as fast for the last minute. A good time to push!', ms: 6000 },
+  };
+  function tutStart() {
+    const P = KCProgress.state, r = P.records && P.records.owen, played = r ? r.w + r.l + r.d : 0;
+    G.tut = G.trainer && G.trainer.id === 'owen' && !P.tutorial && !P.beaten.owen && !played && !G.online ? { step: null, until: 0, seen: {}, slot: -1, spot: null } : null;
+    $('#coach').hidden = true;
+    if (G.tut) { A.trainer($('#coachFace'), G.trainer.look); tutGo('place'); }
+  }
+  function tutGo(step) {
+    const T = G.tut;
+    if (!T || T.seen[step]) return;
+    T.seen[step] = true; T.step = step;
+    const st = TUT[step];
+    T.until = st.ms ? G.s.time + st.ms / 1000 : Infinity;
+    T.spot = st.spot ? { x: st.spot[0], y: st.spot[1] } : null;
+    $('#coachText').textContent = st.text;
+    const box = $('#coach'); box.hidden = false;
+    box.style.animation = 'none'; void box.offsetWidth; box.style.animation = '';
+    $('#bubble').hidden = true;
+    tutPick();
+  }
+  function tutDone(all) {
+    const T = G.tut;
+    if (!T) return;
+    T.step = null; T.spot = null; T.slot = -1;
+    $('#coach').hidden = true;
+    tutPick();
+    if (all) { G.tut = null; KCProgress.finishTutorial(); }
+  }
+  // the card to light up in your hand
+  function tutPick() {
+    const T = G.tut, s = G.s;
+    let slot = -1;
+    if (T && T.step && TUT[T.step].pick && s) {
+      const want = TUT[T.step].pick, hand = s.hands[0];
+      slot = hand.findIndex(id => (want === 'spell' ? KC_CARDS[id].kind === 'spell' && KC_CARDS[id].dmg > 0 : KC_CARDS[id].kind === 'troop' && !KC_CARDS[id].anywhere));
+    }
+    if (T) T.slot = slot;
+    document.querySelectorAll('#hand .card').forEach(b => b.classList.toggle('coach-pick', +b.dataset.slot === slot));
+  }
+  // each tick: move on when you have done what it asked, or show a tip when its moment comes
+  function tutTick() {
+    const T = G.tut, s = G.s;
+    if (!T || !s || G.phase !== 'play') return;
+    if (T.step && s.time >= T.until) tutDone();
+    const foes = s.ents.filter(e => e.team === 1 && e.kind === 'troop' && !e.dead);
+    if (!T.seen.defend && T.seen.walk && T.step !== 'place') {
+      const near = foes.find(e => e.y > 13.5);
+      if (near) { tutGo('defend'); T.spot = { x: near.x < 9 ? 4.5 : 13.5, y: Math.max(19, Math.min(24, near.y + 3)) }; }
+    }
+    if (!T.seen.spell && T.seen.defend && T.step !== 'defend') {
+      const hasSpell = s.hands[0].some(id => KC_CARDS[id].kind === 'spell' && KC_CARDS[id].dmg > 0 && S.costOf(s, 0, id) <= s.energy[0]);
+      const clump = foes.find(a => foes.filter(b => Math.abs(a.x - b.x) < 2.5 && Math.abs(a.y - b.y) < 2.5).length >= 2);
+      if (hasSpell && clump) tutGo('spell');
+    }
+    if (T.step && TUT[T.step].pick) tutPick();
+  }
+  // a card was played: the steps that asked for it are done
+  function tutPlayed(id) {
+    const T = G.tut;
+    if (!T || !T.step) return;
+    const c = KC_CARDS[id];
+    if (T.step === 'place') { tutDone(); setTimeout(() => G.tut && tutGo('walk'), 900); }
+    else if (T.step === 'defend' && c.kind !== 'spell') tutDone();
+    else if (T.step === 'spell' && c.kind === 'spell') tutDone();
+  }
+  function drawCoachSpot(c, t) {
+    const T = G.tut;
+    if (!T || !T.spot) return;
+    const k = G.k, x = SX(T.spot.x), y = SY(T.spot.y), r = k * (1.1 + 0.15 * Math.sin(t * 5));
+    c.save();
+    c.globalAlpha = 1;
+    c.lineWidth = Math.max(3, k * 0.24); c.strokeStyle = '#fff2a8'; c.setLineDash([k * 0.4, k * 0.25]); c.lineDashOffset = -t * k * 2;
+    c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2); c.stroke();
+    c.setLineDash([]);
+    const g = c.createRadialGradient(x, y, 0, x, y, r * 1.6);
+    g.addColorStop(0, 'rgba(255,224,102,0.7)'); g.addColorStop(1, 'rgba(255,224,102,0)');
+    c.fillStyle = g; c.beginPath(); c.arc(x, y, r * 1.6, 0, Math.PI * 2); c.fill();
+    c.restore();
+  }
+
   let bubbleT = 0, toastT = 0;
   // The opponent says one of their lines, if they have any (trainers do, trophy opponents don't).
   function speak(key) {
+    if (G.tut && G.tut.step) return;
     const L = G.trainer && G.trainer.lines, line = L && L[key];
     if (line) say(Array.isArray(line) ? pick(line) : line);
   }
@@ -508,8 +608,8 @@
           if (G.art.fx === 'lava') G.fx.push({ kind: 'flash', x: e.x, y: e.y, r: e.r * 2.2, life: 0.45, max: 0.45 });
           sparks(e.x, e.y, 18, '#ffb030', 4);
           break;
-        case 'tower': towerFx(e); break;
-        case 'double': banner('×2 Energy!', 'Last minute'); KCSound.play('double'); speak('double'); break;
+        case 'tower': towerFx(e); if (G.tut && e.team === 1 && e.sub !== 'king') setTimeout(() => G.tut && tutGo('tower'), 1400); break;
+        case 'double': banner('×2 Energy!', 'Last minute'); KCSound.play('double'); speak('double'); if (G.tut) tutGo('double'); break;
         case 'overtime': banner('Overtime!', 'Next tower wins'); KCSound.play('double'); speak('overtime'); break;
         case 'sudden': banner('Sudden Death!', 'Every tower is crumbling: the weakest falls first'); KCSound.play('thunderclap'); G.shake = Math.max(G.shake, 0.4); break;
         case 'end': endBattle(e); break;
@@ -789,6 +889,7 @@
   /* ---------- the end ---------- */
   function endBattle(e) {
     G.phase = 'end';
+    if (G.tut) tutDone(true);
     G.ended = e.reason === 'king' || e.reason === 'sudden' ? 2.6 : 1.8;
     if (e.winner >= 0) KCScenery.celebrate(e.winner);
     select(-1);
@@ -950,6 +1051,7 @@
     for (const d of ground.concat(air)) bars(c, d);
     drawPending(c, t);
     if (selId && G.hover) ghost(c, selId, t);
+    drawCoachSpot(c, t);
     const W2 = (S.W + 2 * B) * k, H2 = (S.H + 2 * B) * k;
     if (s.phase === 'sudden' && !s.result) {
       // sudden death: a red pulse round the edge of the arena
@@ -1881,7 +1983,7 @@
       cd.classList.remove('tick'); void cd.offsetWidth; cd.classList.add('tick');
       KCSound.play('tick');
     } else if (left > 10 && !$('#countdown').hidden) $('#countdown').hidden = true;
-    if (G.phase === 'play' && !G.idleHint && s.time > 7 && s.played[0] === 0) {
+    if (G.phase === 'play' && !G.idleHint && !G.tut && s.time > 7 && s.played[0] === 0) {
       G.idleHint = true;
       if (G.trainer.lines) say('Tip: drag a card from the left onto your side of the arena.', 4000);
       else toast('Tip: drag a card from the left onto your side of the arena.');
@@ -1908,12 +2010,15 @@
       G.acc += dt * slow;
       let n = 0;
       while (G.acc >= S.DT && n < 6 && G.phase === 'play') {
+        // in the guided first battle, the clock and Owen wait while you place your first card
+        if (G.tut && G.tut.step && TUT[G.tut.step].hold) { G.acc = 0; break; }
         S.step(G.s);
         KCBot.update(G.bot, G.s);
         handleEvents();
         G.acc -= S.DT; n++;
       }
       if (n === 6) G.acc = 0;
+      tutTick();
     } else if (G.phase === 'end') {
       if (G.online && !G.online.done && now - G.online.sentAt > 150) sendStep(G.online);
       G.ended -= dt;
@@ -1945,6 +2050,7 @@
     $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext));
     $('#homeBtn').addEventListener('click', () => { if (G.res && G.res.chestNow && !G.res.chestShown) openChestNow(); else goHome(); });
     $('#chestNowBtn').addEventListener('click', openChestNow);
+    $('#coachSkip').addEventListener('click', () => tutDone(true));
     $('#claimNowBtn').addEventListener('click', () => { goHome(); KCMenu.openQuests(); });
     // Surrender: tap once to ask, again within 3 s to give up the battle (a loss, as if the King fell).
     // Online it tells the other player, who wins.

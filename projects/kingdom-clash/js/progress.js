@@ -405,6 +405,8 @@ const KCProgress = (() => {
     return P;
   }
   // A trophy battle is starting: if it is never finished, it counts as a loss at the next load.
+  // the guided first battle has been played (or skipped)
+  function finishTutorial() { P.tutorial = true; save(); }
   function battleStarted(foe) {
     P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, trophies: foe.trophies, at: Date.now() } : null;
     save();
@@ -1349,7 +1351,7 @@ const KCProgress = (() => {
   return {
     MAX_LEVEL, XP_PER_LEVEL, TROPHIES, MATCH, FOE_SKILL, FIRST_STEPS, stakes, nextStakes, ARENAS, ROAD, skillFor, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
     chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, chestShopOpen, chestBuyLeft, foeKing, buyDiamond, magicUsable,
-    load, save, battleStarted, get state() { return P; },
+    load, save, battleStarted, finishTutorial, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,
     trophyFoe, foeUpgrades, spreadLevels, recordTrophy,
