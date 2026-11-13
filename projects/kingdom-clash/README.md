@@ -33,7 +33,82 @@ On a phone held upright the battle switches layout: the arena fills the top of t
 - **Deploying**: drag a card onto the arena, or press `1`–`4` and click. Troops go on your side of the river; once an enemy Archer Tower falls you can also deploy in that lane on their side, up to 4 tiles past the river, and on that lane's bridge (troops only, not buildings). The red area pulls back off that half of the river, and off the whole river once both Archer Towers are down. The water itself is never open: a card dropped in the river lands on the nearer bank you can use (the far bank only in an open lane). Fireball goes anywhere. `Esc` cancels.
 - **Hand**: 4 cards plus the next one shown below; a played card goes to the back of the queue.
 - **Towers**: Archer Towers (1,400 HP) shoot from the start; the King Tower (2,400 HP) sleeps until it is hit or one of its Archer Towers falls.
-- **Winning**: an Archer Tower is 1 crown, the King Tower is all 3 and ends the match. After 3:00 the side with more crowns wins; if tied, 1:00 of overtime where the next tower wins; if still tied, the side whose weakest tower has more health wins.
+- **Winning**: an Archer Tower is 1 crown, the King Tower is all 3 and ends the match. After 3:00 the side with more crowns wins; if tied, 1:00 of overtime where the next tower wins; if still tied, sudden death (below).
+
+## Sudden death, surrender and leaving
+
+- **Sudden death**: if overtime ends level, every standing tower crumbles by the same share of its health, faster and faster, until one falls: that side loses (an exact tie is a draw). So every match ends on a falling tower. A red pulse rims the arena and a lead bar shows each side's weakest tower.
+- **A tower falling**: a moment of slow motion and a flash, the tower shakes, sinks and crumbles to rubble, its crown flies to the score, and the crowd roars; a King Tower adds fireworks. Towers show cracks and smoke as they are damaged.
+- **Surrender**: the flag on the arena, tapped twice within 3 seconds.
+- **Leaving counts as a loss**: a trophy battle that is never finished (the page was reloaded or closed) counts as a loss the next time the game loads, and the lobby says so once.
+
+## Matchmaking, trophies and pacing
+
+Rules in `js/progress.js` (`TROPHIES`, `MATCH`, `FOE_SKILL`, `ECONOMY.foeLevels`); `node tools/economy-report.js` prints the careers below.
+
+- **What a battle is worth**: against an opponent with as many trophies as you, a win is +30 and a loss −30; every 10 trophies they have more than you add 1 to a win and take 1 off a loss (the other way round when they have fewer), always between 20 and 40. The VS screen shows the stakes (*Win +27 · Loss −34*) and the lobby an estimate.
+- **Where opponents are found**: about 35 trophies below you (give or take 20), so a win pays about 27 and a loss costs about 33. A player therefore holds their place winning about 55–56% of their battles, and climbs when their cards or play get better. Two losses in a row bring an opponent from 65 below, three or more from 110 below with weaker play (a breather); three wins in a row, one level with you.
+- **No hidden handicap**: opponents' troops hit your towers at full strength. How well they play rises with *their* trophies (`FOE_SKILL`: a beginner at 0, steady from 900, better from 4,000, the best at 7,000), and their card levels follow the curve a player's cards follow under the economy plan (`ECONOMY.foeLevels`: 4.5 at 300, 8.5 at 1,200, 11.6 at 2,000, 15 at 4,100). Cards that fall behind hold a player back; good play lets them sit higher than their cards alone would.
+- **Careers on the ladder** (Part 3 of the economy report: trophies from simulated battles, upgrades from the real chest rolls and costs; an average player is assumed to play even with an opponent with the same cards, opponents' better play past 4,000 is taken as worth up to 1.2 card levels at 7,000, and players improve by 0.4 of a level a year of play):
+
+| Trophies | An average player | A strong player | A casual player (half the battles) |
+| --- | --- | --- | --- |
+| 900 | day 19 | day 14 | day 44 |
+| 2,000 | 3.5 months | 2.2 months | 7.6 months |
+| 4,100 | 9.8 months | 5.9 months | 19 months |
+| 5,000 | 10 months | 7 months | not within 3 years |
+| 7,000 (end of the road) | not within 3 years | 9 months | not within 3 years |
+
+  On the way they win 52–59% of their battles, with cards within about one level of their opponents'. Before this, the difficulty adapted to every player and steered everyone to about 50% wins, so everyone climbed about 6 trophies a battle and finished the road in 2–3 months with cards 3–4 levels behind.
+- **The first hour**: every win against a trainer gives a chest opened on the spot (silver for the first win over each, wooden for a rematch); the first three trophy battles are against beginners with starter decks and level 1 cards; an opponent's King Tower counts only the levels they upgraded (a rare's starting level 3 no longer gives a new opponent a level 3 King Tower).
+
+## Opponents
+
+Every trophy opponent has a **play style** (`STYLES` in `js/bot.js`) and builds a deck for it from the cards the Trophy Road gives by their trophies (now and then one a little early, as chests give them): **Heavy pusher** (a tank from behind the King Tower), **Bridge rusher** (fast win conditions at the bridge), **Spell cycler** (cheap cards, spells on towers), **Counter-puncher** (defends, then counter-pushes), **Sky raider** (flyers) and **Spawner** (buildings that make troops). Every deck follows the same rules (`buildDeck`): one or two win conditions, two or three spells, at least three cards that hit air but no more than three flyers, a cheap card, an average cost between 2.9 and 4.4.
+
+In battle the computer finishes a tower with any spell that would bring it down, chips the weakest tower when behind late on, deals with siege buildings before they set up, opens with a probe, backs up defenders that survive into a counter-push and switches lanes, each by its style. Its preferred lane is picked per match. Opponents have names (with clan tags for most) and a temperament for emotes: sporty, friendly, cocky or quiet (a greeting, a reaction when they take or lose a tower, a good game at the end). Trophy battles start with a short *Finding an opponent* moment; the VS screen shows your King (or your avatar) and trophies.
+
+## Daily quests, the crown chest and win streaks
+
+Under *Next Rewards* on wide screens (under the Battle button on narrow ones):
+- **Daily quests**: three a day from nine kinds (win trophy battles, play them, take crowns, play cards, cast spells, deploy troops, a three-crown win, upgrade cards, open chests), the same all day, new at local midnight. Each gives a small chest (wooden, or silver for the harder ones) opened when claimed, plus rubies.
+- **Crown chest**: ten crowns in a day's trophy battles fill a silver chest.
+- **Win streak**: three or more trophy wins in a row pay each win's rubies twice.
+
+The **result screen** of a trophy battle counts up the trophies and rubies, fills a bar toward the next Trophy Road reward, shows the chest won (or that the slots are full), the quests and the crown chest, and has a **Claim Rewards** button when something is ready. After a defeat it gives a tip: about card levels when the opponent's were half a level or more above yours, otherwise about play.
+
+## The first battle and milestones
+
+- **A guided first battle**: the first battle against Trainer Owen has a coach. A card and a glowing spot light up and Owen and the clock wait until you place it; then tips come as things happen (how troops and energy work, his first attack, a chance for a Fireball, the first tower down, double energy). *Skip tips* ends it; it is shown once.
+- **Milestones**: the Trophy Road opening and every new arena get a full-screen scene with the arena and its cards (after any chest from that battle has been opened).
+- **First-time pointers**: the lobby points at the first chest to unlock, the first upgrade or new card, and the first Trophy Road rewards, until each is done once.
+
+## Decks and practice
+
+- **Five deck slots** on the Cards tab (an older deck fills them all to begin with). Each slot keeps its own deck; the one picked is the one you battle with.
+- **Deck warnings** under the deck: too few cards for flyers, no damage spell, no win condition, no cheap card, too expensive.
+- **Suggest a deck** builds one from your cards in a play style you have the cards for (the same rules as the opponents' decks).
+- **The collection** sorts by arena, energy, rarity, level or name, and shows all cards, troops, spells, buildings, cards that can be upgraded or cards not found yet.
+- **Practice** (beside *Online*): a battle against an opponent like those in trophy battles with nothing at stake: no trophies, chests, rubies or quests. **Try it** in a card's window starts one with that card in your deck (found or not), at your deck's average level.
+
+## Daily challenges
+
+One mode a day, in turn: **Triple Energy** (energy refills three times as fast), **Sudden Death** (the first tower down wins), **Draft** (pick one card from each of eight pairs: a win condition, two spells, two for flyers, three of anything; the one you leave goes to your opponent), **Mirror Match** (both sides play your deck) and **Random Decks**. Both sides' cards and towers are at the same level (your deck's average), so it comes down to play. No trophies are won or lost; the first three wins a day each give a chest opened on the spot.
+
+## Profile, battle log and replays
+
+Your name in the top bar opens your **profile**: an avatar (any card you have found), trophies and best, King Tower, record and win rate, three-crown wins, cards found and the card you play most.
+- **Battle log**: the last 20 battles, each with **Watch**. A replay runs the same simulation from the same starting options (seed, decks, levels) with the same plays at the same ticks, so it is the battle exactly as it was (at 1×, 2× or 4×).
+- **Deck codes**: `KC1-` and 16 letters and numbers; paste one to put that deck in your current slot (if you have the cards).
+- **Challenge a friend**: a friend code carries your name, deck, card levels and King Tower. A friend who pastes it battles a computer player playing your deck at your levels. Nothing is won or lost. (Live online battles are not switched on yet.)
+
+## Music and sound
+
+All synthesized with Web Audio, no sound files: a calm lobby tune and a driving battle tune (original chord progressions played by a small sequencer) that speeds up and adds hi-hats at double energy and turns darker with tom rolls in overtime and sudden death; a crowd murmur under battles that roars when a tower falls; deploy sounds by what lands (heavy troops, swarms, flyers, ranged troops, buildings); and battle sounds that vary a little in pitch. Settings has separate switches for **Sound effects** and **Music**; the speaker in the top bar switches both.
+
+## Frame rate
+
+Flashes on hit units and towers are drawn as a second, lighter pass instead of a canvas filter, which was the main cost on Chromebooks; Prism Echo copies get a cyan glow the same way.
 
 ## Arena art (js/arenas.js)
 
@@ -80,7 +155,7 @@ Balance (`node tools/balance-test.js 120 <name>`; each new card takes a like-for
 
 Reached at **900 trophies**: a fortress on a mountain peak above the clouds. **Art:** `img/stormspire_badge.webp` (lobby centerpiece), `img/stormspire_battlefield.webp` (the battlefield, laid onto the tile grid by its pads, the stream's edges and the bridges, with flickering corner fire bowls), and `img/stormspire_left.webp` / `img/stormspire_right.webp` (the stands, with lanterns, fire bowls and waterfall mist); all measured in the `stormspire` entry of `js/arenas.js`. Arena 5 at 1,200 is marked *coming soon*. **Online battles will open here** (their front end is built; live play is coming).
 
-Their cards and troops are drawn in code, styled after concept art: a gold-helmed owl in blue armor, a purple storm cloud with glowing yellow eyes and blue-white lightning, a golden griffin in gold armor with blue gems and blue eyes. Its four cards are all flyers, on the Trophy Road: **Bees** at 930, **Owl** at 1,010, **Thunder Cloud** at 1,090 and **Griffin** at 1,170 (700 rubies at 970, a Platinum Chest at 1,050, 800 rubies at 1,130). Opponents add them as their trophies pass those marks.
+Their cards and troops are drawn in code, styled after concept art: a gold-helmed owl in blue armor, a purple storm cloud with glowing yellow eyes and blue-white lightning, a golden griffin in gold armor with blue gems and blue eyes. Its four cards are all flyers, on the Trophy Road: **Bees** at 930, **Owl** at 1,040, **Thunder Cloud** at 1,160 and **Griffin** at 1,420 (Judgment Bolt at 1,290, Cyclone at 1,560 and Storm Conductor at 1,700, with rubies and chests between, so the long arena has a new card every 130 trophies or so). Opponents add them as their trophies pass those marks.
 
 | Card | Cost | Rarity | Role | What it does (level 1) |
 |---|---|---|---|---|
@@ -324,8 +399,8 @@ A whole career with the starter deck (wild cards and Shop purchases left out; tr
 Rules live in `js/progress.js` (no screen code; tested by `tools/progress-test.js`).
 
 - **Opening it**: beat Owen, Romeo and Luc. The Battle button then plays trophy battles in **Arena 1: Cinder Keep** (the trainers can't be played again once the road is open: the Trainers button is gone and every battle is a trophy battle).
-- **Trophies**: a win is +30, a loss is −20, never below the arena's floor (0 in Arena 1). Arena 2 is at 300 trophies and is marked *coming soon*.
-- **Opponents**: computer players with ordinary player names and portraits (nothing in the game labels them). They don't talk: no speech bubbles and no line on the result screen (trainers still do). Their **cards level up one at a time with their trophies**, along the same curve as a player's cards (see *The economy*: about 7–8 entering Arena 4, 15 at 4,000 trophies). Which cards are ahead differs from opponent to opponent, and levels show on their units' health bars. Their skill follows your results: a step harder after a win, a step easier after a loss. In the headless test (150 matches), a good player who kept their cards level with their trophies won 51% once settled and a sloppy one 52%; a good player who never upgraded won 42% and slid back to about 300 trophies with the opponents near their easiest.
+- **Trophies**: a win is about +27 and a loss about −33 (they depend on the opponent's trophies: see *Matchmaking, trophies and pacing*), never below the arena's floor (0 in Arena 1).
+- **Opponents**: computer players with ordinary player names and portraits (nothing in the game labels them). They don't talk: no speech bubbles and no line on the result screen (trainers still do). Their **cards level up one at a time with their trophies**, along the same curve as a player's cards (see *The economy*: about 7–8 entering Arena 4, 15 at 4,000 trophies). Which cards are ahead differs from opponent to opponent, and levels show on their units' health bars. How well they play follows their trophies (see *Matchmaking, trophies and pacing* and *Opponents*). In the headless test (120 matches), players who kept their cards level with their best trophies won 56–61% once settled, near 1,000 trophies; one who never upgraded won 49% and stayed near 300.
 - **Road rewards** (claimed on the Trophy Road tab): 20 trophies 50 rubies · 40 **Skeleton Pack** ×6 · 60 Silver Chest · 90 100 rubies · 120 **Cannon** ×4 · 160 Silver Chest · 200 200 rubies · 250 Gold Chest · 300 Arena 2 (coming soon).
 - **Chests**: six tiers: Wooden, Silver, Gold, Platinum, Legendary and Mythic (Legendary and Mythic are animated: a pulsing halo, sparkles circling and, on the Mythic, a colour shimmer and float). A trophy win puts a chest in the first free slot (four slots), in a fixed repeating order of 24 that includes every tier. **Arena gate**: each arena allows higher tiers (Arena 1 wooden and silver, Arena 2 adds gold, Arena 3 platinum, Arena 4 legendary, Arena 5 mythic); a chest above the player's arena is given as the highest tier they have reached, in wins, Trophy Road rewards and the Shop. The gate is in `CHEST_RULES` in `js/progress.js` and is **switched off for now** (`allUnlocked: true`), so every tier drops everywhere. Its contents are decided when it is won. One chest unlocks at a time on a real-time timer (wooden 1 minute, silver 15 minutes, gold 1 hour, platinum 3 hours, legendary 8, mythic 12). **Opening** is a scene of its own: the chest (wooden planks and iron, steel with a blue gem, or gold with a crown) drops in and rattles; a click cracks the lid open in a burst of light rays and sparkles; then each reward comes out one at a time. Rubies count up with a ruby shower. A card flies out face down, glowing in its rarity's colour (rares and new cards shake and take longer), flips over, and its copies count into its level bar, ending on *Upgrade ready!* when it fills. A click during a reveal finishes it, a click after moves on; a badge on the chest counts what's left; a summary closes the scene. Every step has its own sound. Trophy Road cards and Shop purchases use the same reveal without a chest.
 - **The Shop** (Shop tab): five offers a day, made from the cards you have found and their levels, each showing exactly what you get. (1) *Closest to upgrade*: the copies your nearest card is missing. (2) *Rare pick*: a rare, one level's worth. (3) *Catch up*: your lowest-level card, cards found on the Trophy Road first. (4) *Mega bundle*: 100 commons, 20 rares or 2 epics of a deck card for 1 diamond. (5) *Ruby bundle*: 5,000 rubies for 1 diamond, buyable any number of times. Card offers hold at most 50 commons, 10 rares or 1 epic; legendaries aren't offered. A copy is priced at 20 rubies (common), 200 (rare), 2,000 (epic) or 40,000 (legendary); 1 diamond = 5,000 rubies (diamonds buy rubies; rubies never buy diamonds). Card offers sell once a day; offers change at local midnight (the clock on the tab is real). Cards you haven't found and cards at level 15 are never offered. Diamond purchases take a second click to confirm. Three more sections sell for diamonds only: **Daily Deals**, the **Magic Shop** and the **Card Shop** (see *The economy*). A second row sells **chests for rubies only**, one of each a day (bigger chests from later arenas), with what is inside hidden until opened (each tile shows the card count and ruby range): a **free Wooden Chest** once a day, then Wooden, Silver, Gold, Platinum, Legendary and Mythic. A bought chest opens on the spot (no slot, no timer). **Contents and prices follow the same reward scaling as won chests** (trophies first, then account level; see *The economy*), and a chest's price is twice its rubies plus half the value of its cards. The free daily Wooden Chest holds 3× a normal wooden chest. Diamonds are a number saved on the device for now (0 unless the test button is used); there is no way to buy them in the game. When the SirSC wallet is connected, prices and purchases must be decided by the server.
@@ -394,10 +469,10 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `js/items.js` | Magic item art (SVG built from parts that fly together in a chest reveal) |
 | `js/menu.js` | The lobby, the Cards screen (deck, collection, upgrades), chest opening, the Trophy Road tab |
 | `js/sim.js` | The battle: fixed 30 steps a second, no DOM, seeded, so it runs the same in the page, in Node and later on both ends of an online match |
-| `js/bot.js` | The trainers' AI (one bot with a skill setting per trainer) |
+| `js/bot.js` | The computer player: one bot with a skill setting (per trainer, or from an opponent's trophies), the play styles and their deck rules (`STYLES`, `buildDeck`) |
 | `js/art.js` | Every troop, tower, card portrait and the arena, drawn in code. Each troop and tower has two views: your side is seen from behind (facing up the arena, toward the enemy) and the enemy faces you; cards use the front view |
 | `js/scenery.js` | The Training Grounds side panels. Each draws its illustrated background (`img/grounds-left.webp`, `img/grounds-right.webp`) once into a cache cropped to cover the panel, then each frame the animated spectators seated on the illustrated benches (team-coloured outfits, flags; they jump for the side that takes a tower, celebrate the winner and slump if their side lost), torch glow, embers, twinkling stars and waterfall mist. Bench positions are in `LAYOUT`, in image coordinates |
-| `js/audio.js` | Sound effects made with Web Audio (no sound files) |
+| `js/audio.js` | Sound effects, music and the crowd, made with Web Audio (no sound files) |
 | `js/game.js` | Screens, the game loop, drawing the battle, input |
 | `tools/path-test.js` | `node tools/path-test.js` places every ground troop behind and beside each tower, for both teams, and checks it walks around instead of getting stuck |
 | `tools/trainers-test.js` | `node tools/trainers-test.js 100 [trainer]` plays each trainer against a good player, a sloppy player, a random clicker and a player who does nothing, and prints how often the trainer wins |
@@ -408,8 +483,8 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `js/art5.js` | The expansion's art: its buildings, the units they bring, the Walking Smelter, the spell pictures (on cards and in battle) and all 24 card portraits, built on `KCArt3`'s helpers |
 | `tools/expansion-test.js` | `node tools/expansion-test.js` checks the 24 expansion cards: collection, costs, arenas and road, every mechanic, levels, the computer playing them, collecting and upgrading |
 | `tools/arenas5-10-test.js` | `node tools/arenas5-10-test.js` deploys all 24 new cards, checks each one's energy and rarity and every special mechanic (freeze, stun, shields, splitting, charging, hooks, hiding, piercing, healing, the egg, the portal, the jump), and has the computer play every card in full battles |
-| `tools/economy-report.js` | `node tools/economy-report.js` prints a day's rubies and copies for five kinds of player and the days to each upgrade milestone, using `ECONOMY` and the game's chest rolls |
-| `tools/progress-test.js` | `node tools/progress-test.js [matches]` checks old saves, trophies, chests and timers, road rewards, upgrades, the deck and the Training Grounds deck rule, the Shop's offers and purchases, Sunstone Arena, evolutions and the Diamond Pass (2 free shards, the Snowman Evolution at tier 1, claiming, buying), then plays trophy matches to check the 52% target |
+| `tools/economy-report.js` | `node tools/economy-report.js` prints a day's rubies and copies for five kinds of player, the days to each upgrade milestone, and careers on the ladder (trophies from battles), using `ECONOMY`, the matchmaking rules and the game's chest rolls |
+| `tools/progress-test.js` | `node tools/progress-test.js [matches]` checks old saves, trophies, chests and timers, road rewards, upgrades, the deck and the Training Grounds deck rule, the Shop's offers and purchases, Sunstone Arena, evolutions and the Diamond Pass (2 free shards, the Snowman Evolution at tier 1, claiming, buying), the trophy stakes, the first steps, the deck rules, daily quests, the crown chest and win streaks, deck slots, practice, the daily challenge, the battle log (a replay is the same battle), deck and friend codes, then plays trophy matches to check where players settle |
 | `tools/balance-test.js` | `node tools/balance-test.js [matches]` plays decks with the Briar Hollow cards against the starter deck and times one-on-one trades |
 | `tools/sim-test.js` | `node tools/sim-test.js 40` plays 40 bot-vs-bot matches headless and checks they end cleanly (no NaNs, no troops in the river) |
 | `img/` | Arena art (see *Arena art*): the Training Grounds and Cinder Keep centerpieces (transparent), scenery panels (793 × 1983) and the Cinder Keep battlefield (1024 × 1536) |
