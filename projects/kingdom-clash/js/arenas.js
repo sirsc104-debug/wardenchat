@@ -469,14 +469,58 @@ const KCArenas = (() => {
     },
   };
 
-  /* Arena 10: its art hasn't been made yet. Each is ready for the same four images as the arenas
-     above: a lobby centerpiece with the arena's name, a battlefield (its tower pads, river and two bridges
+  // Arena 10: Eclipse Throne: an obsidian fortress under a black sun, a river of lava, violet fire bowls.
+  ART.eclipse = {
+    name: 'Eclipse Throne',
+    centerpiece: { src: 'img/eclipse_badge.webp', w: 1218, h: 1254, bar: { left: 30.4, top: 87, width: 41.5, height: 3.4 } },
+    palette: 'eclipse', margin: 1.4, fx: 'lava',
+    field: {
+      src: 'img/eclipse_battlefield.webp', w: 1024, h: 1536,
+      x: [[297, 3.5], [727, 14.5]],
+      // the top edge (so the throne steps show), king pad, archer pads, the lava's banks, archer pads, king pad.
+      // The top king pad sits close to its archer pads in the picture, so that strip is lightly stretched.
+      y: [[255, -1.4], [410, 3], [499, 6.5], [738, 15], [822, 17], [1040, 25.5], [1166, 29]],
+      bridges: [[1.91, 13.47, 5.11, 17.9], [12.91, 13.47, 16.11, 17.9]],
+      // the four violet fire bowls at the corners, which glow and throw sparks
+      braziers: [[-0.21, -2.1], [18.21, -2.1], [-0.31, 30.56], [18.26, 30.56]],
+      brazierGlow: ['225,160,255', '170,70,255'], brazierEmber: '#d9a8ff',
+    },
+    scenery: {
+      // the left stands: wide obsidian steps below lantern arches, beside a crowned stone watcher
+      left: {
+        src: 'img/eclipse_left.webp', w: 793, h: 1409, anchor: [0.55, 0.5], stars: 0, embers: true,
+        rows: [
+          { y: 0.447, slope: 0.03, size: 0.74, spans: [[0.3, 0.62]] },
+          { y: 0.487, slope: 0.03, size: 0.78, spans: [[0.3, 0.6]] },
+          { y: 0.532, slope: 0.03, size: 0.82, spans: [[0.31, 0.62]] },
+          { y: 0.58, slope: 0.03, size: 0.87, spans: [[0.33, 0.66]] },
+          { y: 0.63, slope: 0.03, size: 0.92, spans: [[0.37, 0.74]] },
+          { y: 0.682, slope: 0.03, size: 0.97, spans: [[0.44, 0.8]] },
+        ],
+        glows: [[0.31, 0.305, 0.6], [0.47, 0.34, 0.6], [0.595, 0.375, 0.5], [0.69, 0.4, 0.5], [0.915, 0.325, 0.8]],
+      },
+      // the right stands: a broad staircase climbing to the arches between violet fire bowls
+      right: {
+        src: 'img/eclipse_right.webp', w: 793, h: 1409, anchor: [0.45, 0.5], stars: 0, embers: true,
+        rows: [
+          { y: 0.437, slope: -0.03, size: 0.74, spans: [[0.38, 0.58]] },
+          { y: 0.477, slope: -0.03, size: 0.78, spans: [[0.3, 0.58]] },
+          { y: 0.522, slope: -0.03, size: 0.83, spans: [[0.24, 0.58]] },
+          { y: 0.567, slope: -0.03, size: 0.88, spans: [[0.2, 0.6]] },
+          { y: 0.612, slope: -0.03, size: 0.93, spans: [[0.14, 0.42]] },
+        ],
+        glows: [[0.17, 0.385, 0.5], [0.255, 0.345, 0.5], [0.535, 0.31, 0.6], [0.68, 0.285, 0.6], [0.1, 0.47, 0.7], [0.67, 0.415, 0.8], [0.55, 0.65, 1.1]],
+      },
+    },
+  };
+
+  /* Arenas whose art hasn't been made yet (none at the moment; a new arena goes here until its images
+     arrive). Each is ready for the same four images as the arenas above: a lobby centerpiece with the arena's name, a battlefield (its tower pads, river and two bridges
      on the game's grid) and the two side panels. Until the images arrive (fill in `src`, the image size,
      the anchors, the crowd rows), the battlefield is drawn in code in the arena's own colours
      (KCArt.THEMES), the lobby shows the arena's name on a plaque and the side panels are a plain gradient
      in its colours: no other arena's art stands in. */
   const PENDING = {
-    eclipse: { name: 'Eclipse Throne', panel: ['#0a0810', '#4a1420'], look: 'Obsidian, crimson energy and darkness.' },
   };
   for (const [id, P] of Object.entries(PENDING)) {
     const side = () => ({ src: null, w: 793, h: 1983, anchor: [0.5, 0.5], stars: 0, rows: [], glows: [], panel: P.panel });

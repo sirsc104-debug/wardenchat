@@ -813,11 +813,12 @@
       bg.addColorStop(0, 'rgba(255,230,120,0.35)'); bg.addColorStop(1, 'rgba(255,160,40,0)');
       c.fillStyle = bg; c.fillRect(x - r, y - r, r * 2, r * 2);
     }
-    // corner braziers
+    // corner braziers (orange fire, or the arena's own colour: Eclipse Throne's are violet)
+    const BG = f.brazierGlow || ['255,190,90', '255,120,40'];
     for (const [bx, by] of f.braziers) {
       const x = SX(bx), y = SY(by) - k * 0.4, r = k * (1.9 + Math.sin(t * 13 + bx) * 0.12 + Math.sin(t * 7.1 + by) * 0.1);
       const bg = c.createRadialGradient(x, y, 0, x, y, r);
-      bg.addColorStop(0, 'rgba(255,190,90,0.4)'); bg.addColorStop(1, 'rgba(255,120,40,0)');
+      bg.addColorStop(0, `rgba(${BG[0]},0.4)`); bg.addColorStop(1, `rgba(${BG[1]},0)`);
       c.fillStyle = bg; c.fillRect(x - r, y - r, r * 2, r * 2);
     }
     c.globalCompositeOperation = 'source-over';
@@ -843,13 +844,13 @@
     if (E.length < 34 && Math.random() < 0.5) {
       const fromBrazier = Math.random() < 0.25, br = f.braziers[Math.floor(Math.random() * 4)];
       E.push(fromBrazier
-        ? { x: br[0] + (Math.random() - 0.5) * 0.5, y: br[1] - 0.6, vy: -1.4 - Math.random(), life: 1.6, max: 1.6, ph: Math.random() * 6 }
+        ? { x: br[0] + (Math.random() - 0.5) * 0.5, y: br[1] - 0.6, vy: -1.4 - Math.random(), life: 1.6, max: 1.6, ph: Math.random() * 6, col: f.brazierEmber }
         : { x: Math.random() * S.W, y: 15.2 + Math.random() * 1.6, vy: -0.6 - Math.random() * 0.8, life: 2.5 + Math.random() * 2, max: 4.5, ph: Math.random() * 6 });
     }
     for (const e of E) {
       e.life -= 1 / 60; e.y += e.vy / 60; e.x += Math.sin(t * 2 + e.ph) * 0.006;
       c.globalAlpha = Math.max(0, Math.min(1, e.life / e.max * 2)) * (0.55 + 0.45 * Math.sin(t * 10 + e.ph));
-      c.fillStyle = '#ffb347';
+      c.fillStyle = e.col || '#ffb347';
       c.fillRect(SX(e.x), SY(e.y), Math.max(1.5, k * 0.08), Math.max(1.5, k * 0.08));
     }
     c.globalAlpha = 1;
