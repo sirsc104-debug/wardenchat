@@ -10,6 +10,8 @@
   min_links             leave out items with fewer Wikipedia pages than this (trims junk entries)
   pad                   share of answers that are Launch Pad (default 3.5%, at most pad_max = 14)
   short                 allow 2-letter aliases (element symbols, state codes)
+  trim                  a regex cut off the end of shown names ("Saab Automobile" -> "Saab")
+  nick                  nicknames and slang Wikidata doesn't record: {answer: [nickname, …]}
 """
 HUMAN = 'P31=Q5'
 # sovereign states that still exist (no dissolution date), optionally on one continent
@@ -156,7 +158,8 @@ CATEGORIES = [
     dict(id='airlines', name='Airlines', icon='✈️', q='Name an **airline**, past or present.', src=['P31=Q46970'], br=['new-airlines'],
          strip=['airline', 'airlines', 'airways', 'air'], junk=['Pan Am'], gem='Air Koryo', min_links=6),
     dict(id='carmakers', name='Car brands', icon='🚗', q='Name a **car maker**, past or present.', src=['P31=Q786820'], br=['carbrands'],
-         strip=['motors', 'motor', 'cars', 'company'], junk=['DeLorean Motor Company'], gem='Koenigsegg', min_links=4),
+         strip=['motors', 'motor', 'cars', 'company'], junk=['DeLorean Motor Company'], gem='Koenigsegg', min_links=4,
+         trim=r'\s+(Automobile|Automobiles|Cars|Motor Company|Motor Corporation|Motors|Motor Cars|Automotive|Car Company)$'),
     dict(id='currencies', name='Currencies', icon='💱', q='Name a **currency**, past or present.', src=['P31=Q8142'], br=['currencies'],
          strip=['currency'], junk=['Bitcoin'], gem='Tugrik', min_links=4),
     dict(id='instruments', name='Instruments', icon='🎻', q='Name a **musical instrument**.', src=['is=Q34379'], br=['instruments'],
@@ -269,3 +272,32 @@ MIXED = {'capitals', 'europe', 'africa', 'asia', 'greekgods', 'dances', 'spices'
          'mountains', 'currencies', 'genres', 'cats', 'apples', 'birds', 'mammals', 'heroes', 'social', 'browsers'}
 for c in CATEGORIES:
     c.setdefault('level', 2 if c['id'] in MIXED else 1 if c['id'] in EVERYDAY else 3 if c['id'] in EXPERT else 2)
+
+# Nicknames and slang that Wikidata's aliases don't have. Each key names an answer (any of its names).
+NICKNAMES = {
+    'carmakers': {
+        'Subaru': ['Scooby', 'Subie', 'Subi'], 'Chevrolet': ['Chevy'], 'Volkswagen': ['VW', 'Vee-Dub', 'Volks'],
+        'BMW': ['Beemer', 'Bimmer', 'Beamer'], 'Mercedes-Benz': ['Mercedes', 'Merc', 'Benz', 'Merz'],
+        'Lamborghini': ['Lambo'], 'Cadillac': ['Caddy', 'Caddie'], 'Rolls-Royce': ['Rolls', 'Roller'],
+        'Aston Martin': ['Aston'], 'Alfa Romeo': ['Alfa'], 'Land Rover': ['Landie', 'Landy'], 'Mitsubishi': ['Mitsu', 'Mitsi'],
+        'Toyota': ['Yota', 'Toy'], 'Oldsmobile': ['Olds'], 'Maserati': ['Masi'], 'Ferrari': ['Ferrari'],
+        'Porsche': ['Porsh'], 'Mazda': ['Mazzy'], 'Volvo': ['Volvo'], 'Pontiac': ['Ponch'],
+    },
+    'dogs': {
+        'Labrador Retriever': ['Lab', 'Labrador'], 'Golden Retriever': ['Golden', 'Goldie'],
+        'American Pit Bull Terrier': ['Pit bull', 'Pitbull', 'Pittie', 'Pitty'], 'Dachshund': ['Doxie', 'Wiener dog', 'Sausage dog', 'Weenie dog'],
+        'French Bulldog': ['Frenchie'], 'Yorkshire Terrier': ['Yorkie'], 'Siberian Husky': ['Husky'], 'Pomeranian': ['Pom'],
+        'Rottweiler': ['Rottie', 'Rotty'], 'Dobermann': ['Doberman', 'Dobie', 'Dobey'], 'Australian Shepherd': ['Aussie'],
+        'German Shepherd': ['GSD', 'Alsatian', 'Shepherd'], 'Pembroke Welsh Corgi': ['Corgi'], 'Cavalier King Charles Spaniel': ['Cavalier'],
+        'Staffordshire Bull Terrier': ['Staffy', 'Staffie'], 'Chihuahua': ['Chi'], 'Bichon Frisé': ['Bichon'],
+        'Jack Russell Terrier': ['Jack Russell', 'JRT'], 'West Highland White Terrier': ['Westie'], 'Boston Terrier': ['Boston'],
+        'Shetland Sheepdog': ['Sheltie'], 'Old English Sheepdog': ['Bobtail'], 'Bernese Mountain Dog': ['Berner'],
+    },
+    'states': {'California': ['Cali'], 'Massachusetts': ['Mass'], 'Pennsylvania': ['PA', 'Penn'], 'New Jersey': ['Jersey'], 'Mississippi': ['Miss']},
+    'countries': {'United States': ['Murica', 'US of A'], 'United Kingdom': ['Blighty'], 'Netherlands': ['Holland'], 'Czech Republic': ['Czechia']},
+    'presidents': {'Abraham Lincoln': ['Abe', 'Honest Abe'], 'Franklin D. Roosevelt': ['FDR'], 'John F. Kennedy': ['JFK'], 'Lyndon B. Johnson': ['LBJ'],
+                   'Dwight D. Eisenhower': ['Ike'], 'Ronald Reagan': ['The Gipper'], 'Barack Obama': ['Obama'], 'Theodore Roosevelt': ['Teddy', 'Teddy Roosevelt', 'TR']},
+    'social': {'Facebook': ['FB'], 'Instagram': ['Insta', 'IG']},
+}
+for c in CATEGORIES:
+    if c['id'] in NICKNAMES: c.setdefault('nick', NICKNAMES[c['id']])

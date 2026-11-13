@@ -92,11 +92,12 @@ const Quiz = (function () {
   }
 
   // A rough "sounds like" spelling, so misspellings by ear still match: ph/f, c/k/ck/q, s/z, x/ks,
-  // y/i, "hu" before a vowel as w (chihuahua ~ chiwawa), silent h, and doubled letters.
+  // "hu" before a vowel as w (chihuahua ~ chiwawa), silent h, any vowel for any vowel (soob ~ saab),
+  // and doubled letters.
   function sound(k) {
     return k.replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/c(?=[eiy])/g, 's').replace(/[cq]/g, 'k')
       .replace(/x/g, 'ks').replace(/z/g, 's').replace(/y/g, 'i').replace(/hu(?=[aeio])/g, 'w').replace(/wh/g, 'w')
-      .replace(/(?!^)h/g, '').replace(/(.)\1+/g, '$1');
+      .replace(/(?!^)h/g, '').replace(/[aeiouy]/g, 'a').replace(/(.)\1+/g, '$1');
   }
   // How many letters can be wrong: lenient on purpose (about a third of a long name).
   const allowance = n => (n < 4 ? 0 : n < 6 ? 1 : n < 9 ? 2 : n < 13 ? 3 : 4);

@@ -46,8 +46,9 @@ def shown(item, cat):
     # only a lower-case trailing word: "Dalmatian dog" -> "Dalmatian", but "Spanish Water Dog" stays
     while len(words) > 1 and words[-1] in cat.get('strip', []) and len(' '.join(words[:-1])) >= 3: words.pop()
     t = ' '.join(words)
-    lab = item.get('label') or t
-    # Wikidata labels for common things are lower case ("beagle"); the article title isn't.
+    if cat.get('trim'):
+        short = re.sub(cat['trim'], '', t)
+        if len(short) >= 2: t = short
     return t
 
 
@@ -101,6 +102,12 @@ def build(cat, report=False):
         e = {'name': names[0], 'names': names, 'links': 0, 'br': 4}
         ents.append(e)
         for n in names: by_key[key(n)] = e
+    # nicknames and slang ("Soob" for Subaru): added to whichever answer has that name
+    for target, nicks in cat.get('nick', {}).items():
+        e = by_key.get(key(target))
+        if not e: print(f"  !! {cat['id']}: no answer called {target} for its nicknames"); continue
+        for n in nicks:
+            if key(n) not in by_key: e['names'].append(n); by_key[key(n)] = e
     # merge entries that ended up with the same shown name (the same thing under two items)
     merged = {}
     for e in ents:
