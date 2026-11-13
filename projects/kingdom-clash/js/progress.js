@@ -356,7 +356,20 @@ const KCProgress = (() => {
     if (!Array.isArray(P.deck) || P.deck.length !== 8 || new Set(P.deck).size !== 8 || P.deck.some(id => !P.found.includes(id))) P.deck = KC_STARTER_DECK.slice();
     while (P.chests.length < 4) P.chests.push(null);
     if (roadOpen() && !P.claimed[0]) P.claimed[0] = true; // the first arena opens with the road
+    // A trophy battle that was left before it ended (the page was reloaded or closed) counts as a loss,
+    // so a loss can't be dodged. `abandoned` tells the lobby to say so once.
+    P.abandoned = null;
+    if (P.live && P.live.kind === 'trophy') {
+      const name = P.live.name, r = recordTrophy(1, 0);
+      P.abandoned = { name, delta: r.delta };
+    }
+    P.live = null;
     return P;
+  }
+  // A trophy battle is starting: if it is never finished, it counts as a loss at the next load.
+  function battleStarted(foe) {
+    P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, at: Date.now() } : null;
+    save();
   }
   const save = () => store.set(P);
 
@@ -526,6 +539,7 @@ const KCProgress = (() => {
     };
   }
   function recordTrophy(winner, crowns) {
+    P.live = null;
     const r = P.trophyRecord, before = P.trophies, beforeArena = arena().id;
     if (winner === 0) { r.w++; P.trophies += TROPHIES.win; P.diff += 0.05; }
     else if (winner === 1) { r.l++; P.trophies = Math.max(arenaFloor(), P.trophies - TROPHIES.loss); P.diff -= 0.055; }
@@ -1205,7 +1219,7 @@ const KCProgress = (() => {
   return {
     MAX_LEVEL, XP_PER_LEVEL, TROPHIES, ARENAS, ROAD, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
     chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, chestShopOpen, chestBuyLeft, foeKing, buyDiamond, magicUsable,
-    load, save, get state() { return P; },
+    load, save, battleStarted, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,
     trophyFoe, foeUpgrades, spreadLevels, recordTrophy,

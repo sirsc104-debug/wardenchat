@@ -53,7 +53,9 @@ const KCBot = (() => {
     opts = opts || {};
     // A skill is a name from SKILLS or a settings object of the same shape (the trophy bots build one).
     const skill = typeof opts.skill === 'object' ? opts.skill : SKILLS[opts.skill || 'trainer'];
-    return { team, skill, rand: S.mulberry(opts.seed || 99), plan: null, wait: 2.5, lastAttack: 0, lastPlay: null };
+    const rand = S.mulberry(opts.seed || 99);
+    // the lane it favours when both towers are even (chosen per match, so it isn't always the left)
+    return { team, skill, rand, plan: null, wait: 2.5, lastAttack: 0, lastPlay: null, lane: rand() < 0.5 ? 'L' : 'R' };
   }
 
   const my = (b, y) => S.own(b.team, y);
@@ -185,7 +187,14 @@ const KCBot = (() => {
           const tx = MELEE[pick] ? lead.x : (lead.x + (lead.x < 9 ? 3.5 : 14.5)) / 2;
           return { card: pick, x: tx, y: Math.min(30.5, ahead), quick: lead.y > 22 };
         }
-        return null;
+        // no troop or building to defend with: a damage spell on the attackers, or, with energy about to
+        // overflow, anything that can be played (a counter-push in the other lane) rather than freezing
+        const zap = hand.find(id => afford(id) && KC_CARDS[id].kind === 'spell' && KC_CARDS[id].dmg > 0 && !KC_CARDS[id].ownSide && !KC_CARDS[id].mirror);
+        if (zap && (lead.y > 21 || E >= 9.5)) return { card: zap, x: lead.x, y: lead.y + (lead.e.moving ? 0.8 : 0), exact: true, quick: true };
+        if (E >= 9.5) {
+          const any = hand.filter(id => afford(id) && !KC_CARDS[id].mirror && (KC_CARDS[id].kind !== 'spell' || KC_CARDS[id].ownSide)).sort((a, c) => KC_CARDS[a].cost - KC_CARDS[c].cost)[0];
+          if (any) return { card: any, x: lead.x < 9 ? 14.5 : 3.5, y: 18.5, attack: true };
+        }
       }
     }
 
@@ -220,7 +229,11 @@ const KCBot = (() => {
     // 4. Start a push once energy is high enough (a trainer sometimes just waits).
     if (E >= K.attackAt || (E >= 9.9 && b.rand() > K.idle)) {
       const enemy = 1 - me;
-      const weak = ['L', 'R'].map(l => S.tower(s, enemy, l)).filter(t => !t.dead).sort((a, c) => a.hp - c.hp)[0];
+      // the weaker tower; when both are even, the lane this bot favours this match (and now and then the
+      // other one, so the attack isn't always where it was last time)
+      const pref = b.rand() < 0.25 ? (b.lane === 'L' ? 'R' : 'L') : b.lane;
+      const weak = ['L', 'R'].map(l => S.tower(s, enemy, l)).filter(t => !t.dead)
+        .sort((a, c) => (a.hp / a.maxHp - c.hp / c.maxHp) || (a.lane === pref ? -1 : 1))[0];
       const lx = weak ? weak.x : (b.rand() < 0.5 ? 3.5 : 14.5);
       // the Mole tunnels to just behind the weakest tower (sometimes before anything else)
       const moleAt = weak && { card: 'mole', x: weak.x + (weak.x < 9 ? -0.5 : 0.5), y: my(b, weak.y) - 2.4, attack: true, exact: true };

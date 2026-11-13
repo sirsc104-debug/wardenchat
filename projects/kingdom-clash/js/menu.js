@@ -1729,6 +1729,9 @@ const KCMenu = (() => {
     clearInterval(ticker);
     ticker = setInterval(tick, 1000);
     refresh();
+    // a trophy battle that was left unfinished last time counted as a loss
+    const ab = P().abandoned;
+    if (ab) { P().abandoned = null; setTimeout(() => toast(`Your battle against ${ab.name} was left before it ended, so it counted as a loss (${ab.delta} trophies).`), 600); }
   }
 
   return {

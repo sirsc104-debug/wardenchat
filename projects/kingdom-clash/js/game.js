@@ -54,12 +54,15 @@
     });
     G.sim = G.s;
     G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9) });
+    // a trophy battle left before it ends (reload, closed tab) counts as a loss next time the game loads
+    KCProgress.battleStarted(T);
     const where = trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {} });
     $('#simWinBtn').hidden = false; $('#netWait').hidden = true;
+    $('#leaveBtn').hidden = false; $('#leaveBtn').classList.remove('ask');
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
     KCEmotes.reset();
@@ -758,7 +761,7 @@
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
     if (res.kind === 'online') { un.hidden = false; un.textContent = 'Online battle · no trophies won or lost'; }
     $('#againBtn').hidden = res.kind === 'online';
-    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).' }[r.reason];
+    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).', surrender: 'You surrendered.' }[r.reason];
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
     $('#resSmall').textContent = res.kind === 'online' ? `${why} ${m}:${sec} played, ${s.played[0]} cards from you.` : `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
     $('#result').hidden = false;
@@ -956,6 +959,17 @@
     c.fillStyle = g; c.beginPath(); c.arc(x, y, Math.max(1, r * 1.1), 0, Math.PI * 2); c.fill();
     c.restore();
   }
+  // A hit flash: the sprite drawn a second time on top, added to itself, so it brightens for a moment.
+  // (A canvas filter did this before, but filters are slow: every dropped frame landed on a hit.)
+  function lit(c, flash, f, alpha) {
+    f();
+    if (flash > 0) {
+      const a = c.globalAlpha, op = c.globalCompositeOperation;
+      c.globalCompositeOperation = 'lighter'; c.globalAlpha = a * (alpha || 0.5) * Math.min(1, flash / 0.08);
+      f();
+      c.globalCompositeOperation = op; c.globalAlpha = a;
+    }
+  }
   function drawEnt(c, d, t) {
     const e = d.e, k = G.k, x = SX(d.x), y = SY(d.y);
     if (e.kind === 'tower') {
@@ -964,8 +978,8 @@
       c.save(); c.translate(x, y);
       if (e.dead) A.rubble(c, k, { team: e.team, sub: e.sub });
       else {
-        if (e.flash > 0) c.filter = 'brightness(1.5)';
-        (e.sub === 'king' ? A.kingTower : A.archerTower)(c, k, { team: e.team, face, active: e.active, t, view: e.team === 0 ? 'back' : 'front', atk: Math.max(0, e.cd / e.hit - 0.6) * 2.5 });
+        const o = { team: e.team, face, active: e.active, t, view: e.team === 0 ? 'back' : 'front', atk: Math.max(0, e.cd / e.hit - 0.6) * 2.5, hurt: 1 - e.hp / e.maxHp };
+        lit(c, e.flash, () => (e.sub === 'king' ? A.kingTower : A.archerTower)(c, k, o), 0.35);
       }
       c.restore();
       return;
@@ -974,8 +988,8 @@
     if (e.kind === 'building') {
       c.save(); c.translate(x, y);
       if (e.deploy > 0) { const sc = Math.max(0.3, 1 - Math.max(0, e.deploy - 0.6) * 2); c.globalAlpha = 0.7; c.scale(sc, sc); }
-      if (e.flash > 0) c.filter = 'brightness(1.6)';
-      A.building(c, e.card, k, { team: e.team, angle: Math.atan2(e.aimY, e.aimX), atk: Math.max(0, e.atk / 0.25 + (e.beamOn ? 0.6 : 0)), hidden: e.hidden, rise: e.rise, t: t + e.id * 0.37 });
+      const bo = { team: e.team, angle: Math.atan2(e.aimY, e.aimX), atk: Math.max(0, e.atk / 0.25 + (e.beamOn ? 0.6 : 0)), hidden: e.hidden, rise: e.rise, t: t + e.id * 0.37 };
+      lit(c, e.flash, () => A.building(c, e.card, k, bo), 0.45);
       c.restore();
       if (e.beam && e.beamOn) {
         const tg = G.s.ents.find(u => u.id === e.beamOn);
@@ -1012,9 +1026,14 @@
     let sc = 1;
     if (e.deploy > 0) { sc = 1 - Math.max(0, e.deploy - 0.75) * 2; c.globalAlpha = 0.65; }
     if (sc < 1) c.scale(Math.max(0.2, sc), Math.max(0.2, sc));
-    if (e.flash > 0) c.filter = 'brightness(1.8)';
-    // a Prism Echo copy: a shimmering, see-through crystal double
-    if (e.clone) { c.globalAlpha *= 0.72; c.filter = e.flash > 0 ? 'brightness(1.8)' : 'saturate(0.55) brightness(1.3) hue-rotate(165deg)'; }
+    // a Prism Echo copy: a shimmering, see-through crystal double (a cyan glow behind it, the troop drawn
+    // faint, then added over itself so it shines)
+    if (e.clone) {
+      const g = c.createRadialGradient(0, -k * 0.6, 0, 0, -k * 0.6, k * 1.1);
+      g.addColorStop(0, 'rgba(150,240,255,0.45)'); g.addColorStop(1, 'rgba(150,240,255,0)');
+      c.fillStyle = g; c.fillRect(-k * 1.1, -k * 1.7, k * 2.2, k * 2.2);
+      c.globalAlpha *= 0.55;
+    }
     const o = { team: e.team, t: t + e.id * 0.37, walk: e.moving, atk: Math.max(0, e.atk / 0.28), face: e.face, id: e.id, view: facingOf(e), evo: e.evo };
     if (e.ram) o.power = Math.max(0, Math.min(1, (e.speed - e.baseSpeed) / (e.maxSpeed - e.baseSpeed)));
     if (e.rider) o.ratk = Math.max(0, e.rider.atk / 0.4);
@@ -1025,7 +1044,7 @@
     if (e.hatch !== undefined) o.hatch = 1 - e.hatch / KC_CARDS.phoenix.egg.hatch;
     if (e.beam) o.beam = e.beamOn ? 1 + Math.min(2, Math.floor(e.beamTime / e.beamStage)) : 0;
     if (e.rageEnd > G.s.time) raged(c, e, 0, lift, k, t);
-    A.troop(c, e.card, k, o);
+    lit(c, e.clone ? Math.max(e.flash, 0.08) : e.flash, () => A.troop(c, e.card, k, o), e.clone ? 0.6 : 0.6);
     c.restore();
     frozen(c, e, x, y - lift, e.radius * k * 1.25, t);
     if (e.boundEnd > G.s.time) vines(c, e, x, y, k, t);
@@ -1644,10 +1663,13 @@
       $('#timerLabel').textContent = ot ? 'Overtime' : 'Time left';
       $('#timer').classList.toggle('ot', ot);
       $('#timer').classList.toggle('low', !ot && left <= 30);
-      $('#miniTimer').innerHTML = `${ot ? 'Overtime' : 'Time'}<br>${tl}`;
+      $('#miniTimer').classList.toggle('low', !ot && left <= 30);
     }
     const cr = s.crowns.join();
     if (u.cr !== cr) { u.cr = cr; $('#crownYou').textContent = s.crowns[0]; $('#crownFoe').textContent = s.crowns[1]; }
+    // on small screens the clock sits on the arena with the crown score under it
+    const mt = `${tl}|${ot}|${cr}`;
+    if (u.mt !== mt) { u.mt = mt; $('#miniTimer').innerHTML = `${ot ? 'Overtime' : 'Time'}<br><b>${tl}</b><span class="mt-cr" aria-label="Crowns: you ${s.crowns[0]}, opponent ${s.crowns[1]}"><span class="y">${s.crowns[0]}</span> – <span class="f">${s.crowns[1]}</span></span>`; }
     if (G.phase === 'play' && left <= 10 && left > 0 && left !== G.lastSec) {
       G.lastSec = left;
       const cd = $('#countdown');
@@ -1714,6 +1736,18 @@
     $('#againBtn').addEventListener('click', () => startBattle(G.trainer.kind === 'trophy' ? KCMenu.nextFoe('trophy') : G.trainer));
     $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext));
     $('#homeBtn').addEventListener('click', goHome);
+    // Surrender: tap once to ask, again within 3 s to give up the battle (a loss, as if the King fell).
+    // Online it tells the other player, who wins.
+    let leaveT = 0;
+    $('#leaveBtn').addEventListener('click', () => {
+      const b = $('#leaveBtn');
+      if (G.phase !== 'play' || !G.s || G.s.result) return;
+      if (!b.classList.contains('ask')) { b.classList.add('ask'); KCSound.play('select'); clearTimeout(leaveT); leaveT = setTimeout(() => b.classList.remove('ask'), 3000); return; }
+      b.classList.remove('ask'); clearTimeout(leaveT);
+      if (G.online) { try { Promise.resolve(G.online.room.emit('mp.bye', {})).catch(() => {}); } catch (e) { /* gone */ } S.forceEnd(G.sim, 1 - G.online.team, 'surrender'); G.s = viewOf(G.sim); }
+      else S.forceEnd(G.s, 1, 'surrender');
+      handleEvents();
+    });
     // TEMPORARY test button: ends the match as a win, with the same rewards as a real one.
     $('#simWinBtn').addEventListener('click', () => {
       if (G.phase !== 'play' || !G.s || G.s.result) return;

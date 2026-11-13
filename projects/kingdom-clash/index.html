@@ -12,6 +12,7 @@
 </head>
 <body>
 <div id="app">
+  <div class="rotate-hint" aria-live="polite"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="14" y="4" width="20" height="40" rx="4" fill="none" stroke="#ffe27a" stroke-width="4"/><circle cx="24" cy="38" r="2" fill="#ffe27a"/></svg>Turn your phone upright to play</div>
 
   <!-- HOME: the lobby. Top bar, the tabs, and a bottom navigation bar. -->
   <section class="screen" id="home">
@@ -313,6 +314,7 @@
         <div class="countdown" id="countdown" hidden></div>
         <div class="toast" id="toast" hidden></div>
         <div class="mini-timer" id="miniTimer"></div>
+        <button class="leave-btn" id="leaveBtn" type="button" title="Surrender this battle" aria-label="Surrender"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M7 4h11l-3 4 3 4H7z" fill="currentColor"/></svg><span>Surrender?</span></button>
         <div class="net-wait" id="netWait" hidden><span class="nw-spin" aria-hidden="true"></span>Waiting for your opponent…</div>
         <!-- TEMPORARY test button: remove this line and the "TEMPORARY" blocks in js/game.js, js/sim.js and css/style.css -->
         <button class="sim-win" id="simWinBtn" type="button" title="Test button: ends this match as a win"><small>Test</small>Simulate Win</button>
