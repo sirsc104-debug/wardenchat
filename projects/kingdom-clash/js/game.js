@@ -49,7 +49,7 @@
     if (typeof foe === 'string') foe = KC_TRAINER[foe];
     const T = G.trainer = foe || KCMenu.nextFoe();
     G.online = null;
-    const practice = T.kind === 'practice', trophy = T.kind === 'trophy' || practice, arenaNow = KCProgress.arena();
+    const challenge = T.kind === 'challenge', practice = T.kind === 'practice' || challenge, trophy = T.kind === 'trophy' || practice, arenaNow = KCProgress.arena();
     G.theme = trophy ? arenaNow.theme : 'training';
     G.art = KCArenas.get(G.theme);
     B = G.art.margin;
@@ -59,17 +59,19 @@
       seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, T.towerDamage],
       decks: [practice ? T.yourDeck : trophy ? KCProgress.state.deck : KCProgress.trainingDeck(), T.deck || KC_STARTER_DECK],
       cardLevels: [practice ? T.yourLevels : KCProgress.cardLevels(), T.cardLevels || {}],
-      evos: [KCProgress.evoList(), T.evos || []],
+      evos: [challenge ? [] : KCProgress.evoList(), T.evos || []],
+      // a challenge's rules (Triple Energy, Sudden Death)
+      energyMult: challenge && T.sim.energyMult, firstTower: challenge && T.sim.firstTower,
       // tower levels: your King Tower's level; a trophy opponent's from its cards; trainers stay at 1
-      levels: [KCProgress.kingInfo().level, trophy ? T.kingLevel || 1 : 1],
+      levels: [challenge ? T.towerLevel : KCProgress.kingInfo().level, trophy ? T.kingLevel || 1 : 1],
     });
     G.sim = G.s;
     G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9), style: T.style });
-    const where = practice ? `Practice · ${arenaNow.name}` : trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
+    const where = challenge ? `Daily Challenge · ${T.challenge.name}` : practice ? `Practice · ${arenaNow.name}` : trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
       ['#introFoeClan', T.clan || ''], ['#introYouTier', trophy ? `${KCProgress.state.trophies} trophies` : 'Training'],
-      ['#introStakes', practice ? (T.tryCard && T.tryCard.out ? `Practice · trying ${KC_CARDS[T.tryCard.card].name}` : 'Practice · nothing at stake') : trophy && T.stakes ? `Win +${T.stakes.win} · Loss −${T.stakes.loss}` : '']]) $(sel).textContent = text;
+      ['#introStakes', challenge ? `Daily Challenge · ${T.challenge.name}` : practice ? (T.tryCard && T.tryCard.out ? `Practice · trying ${KC_CARDS[T.tryCard.card].name}` : 'Practice · nothing at stake') : trophy && T.stakes ? `Win +${T.stakes.win} · Loss −${T.stakes.loss}` : '']]) $(sel).textContent = text;
     introYou();
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {},
@@ -1006,8 +1008,9 @@
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
     if (res.kind === 'online') { un.hidden = false; un.textContent = 'Online battle · no trophies won or lost'; }
     if (res.kind === 'practice') { un.hidden = false; un.textContent = 'Practice battle · nothing won or lost'; }
+    if (res.kind === 'challenge') { un.hidden = false; un.textContent = `Daily Challenge · ${res.name} · ${res.left ? `${res.left} chest win${res.left === 1 ? '' : 's'} left today` : 'all of today\'s chests won'}`; }
     $('#againBtn').hidden = res.kind === 'online';
-    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', sudden: w === 0 ? 'Sudden death: their tower crumbled first.' : 'Sudden death: your tower crumbled first.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).', surrender: 'You surrendered.' }[r.reason];
+    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', sudden: w === 0 ? 'Sudden death: their tower crumbled first.' : 'Sudden death: your tower crumbled first.', first: 'Sudden Death challenge: the first tower down wins.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).', surrender: 'You surrendered.' }[r.reason];
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
     $('#resSmall').textContent = res.kind === 'online' ? `${why} ${m}:${sec} played, ${s.played[0]} cards from you.` : `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
     $('#result').hidden = false;
@@ -2048,7 +2051,11 @@
       online: () => !!G.online,
       onSend: id => { if (G.online && !G.online.done) G.online.room.emit('mp.emote', { id }).catch(() => {}); },
     });
-    $('#againBtn').addEventListener('click', () => startBattle(G.trainer.kind === 'trophy' ? KCMenu.nextFoe('trophy') : G.trainer.kind === 'practice' ? KCMenu.practiceAgain(G.trainer) : G.trainer));
+    $('#againBtn').addEventListener('click', () => {
+      const T = G.trainer;
+      if (T.kind === 'challenge') { G.res.chestShown = true; goHome(); KCMenu.openChallenge(); return; }
+      startBattle(T.kind === 'trophy' ? KCMenu.nextFoe('trophy') : T.kind === 'practice' ? KCMenu.practiceAgain(T) : T);
+    });
     $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext));
     $('#homeBtn').addEventListener('click', () => { if (G.res && G.res.chestNow && !G.res.chestShown) openChestNow(); else goHome(); });
     $('#chestNowBtn').addEventListener('click', openChestNow);

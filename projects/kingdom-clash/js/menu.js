@@ -45,6 +45,7 @@ const KCMenu = (() => {
   // crowns: the crowns you took, which count toward the Diamond Pass in trophy battles.
   function recordResult(foe, winner, crowns, stats) {
     if (foe.kind === 'practice') return { kind: 'practice' };
+    if (foe.kind === 'challenge') return G.recordChallenge(winner);
     const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns, foe.trophies, stats) : G.recordTrainer(foe.id, winner);
     return r;
   }
@@ -883,6 +884,36 @@ const KCMenu = (() => {
   }
   function hintDone(id) { const p = P(); p.hints = p.hints || {}; if (!p.hints[id]) { p.hints[id] = true; G.save(); } }
 
+  /* ---------- the daily challenge ---------- */
+  let draft = null;
+  function openChallenge() {
+    const C = G.challenge();
+    $('#chTitle').textContent = C.name;
+    $('#chText').textContent = C.text;
+    $('#chRules').textContent = `Both sides' cards and towers are at level ${G.challengeLevel()}, so it comes down to how you play. No trophies won or lost. ` +
+      (C.left ? `Your next ${C.left} win${C.left === 1 ? '' : 's'} today ${C.left === 1 ? 'gives' : 'each give'} a ${C.chestName}.` : 'You have won today\'s chests: play on for fun. A new challenge comes at midnight.');
+    draft = C.draft ? { pairs: G.draftPairs(), picks: [] } : null;
+    $('#draft').hidden = !draft;
+    $('#chGo').hidden = !!draft;
+    if (draft) renderDraft();
+    $('#chModal').hidden = false;
+    ($('#chGo').hidden ? $('#chX') : $('#chGo')).focus();
+  }
+  function closeChallenge() { $('#chModal').hidden = true; }
+  function renderDraft() {
+    const i = draft.picks.length, pair = draft.pairs[i];
+    $('#draftStep').textContent = i < 8 ? `Pick ${i + 1} of 8: the other card goes to your opponent` : 'Your deck is ready!';
+    $('#draftPair').innerHTML = i < 8 ? pair.map(id => { const c = KC_CARDS[id]; return `<button type="button" class="draft-card ${c.rarity}" data-id="${id}"><img src="${cardImg(id)}" alt=""><span class="cost">${c.cost}</span><b>${esc(c.name)}</b><small>${esc(c.role || c.kind)}</small></button>`; }).join('<span class="draft-or">or</span>') : '';
+    $('#draftPicks').innerHTML = Array.from({ length: 8 }, (_, k) => (draft.picks[k] ? `<img src="${cardImg(draft.picks[k])}" alt="${esc(KC_CARDS[draft.picks[k]].name)}">` : '<i></i>')).join('');
+    $('#chGo').hidden = i < 8;
+    if (i >= 8) $('#chGo').focus();
+  }
+  function challengeGo() {
+    if (draft && draft.picks.length < 8) return;
+    closeChallenge();
+    opts.onBattle && opts.onBattle(G.challengeFoe(draft));
+  }
+
   /* ---------- daily quests and the crown chest ---------- */
   function renderDaily() {
     const open = G.roadOpen();
@@ -891,6 +922,10 @@ const KCMenu = (() => {
     const qs = G.quests(), done = qs.filter(q => q.done).length, ready = G.questsReady(), cc = G.crownChest();
     $('#questSum').textContent = ready ? `${ready} reward${ready === 1 ? '' : 's'} to claim!` : done === 3 ? 'All done · new ones at midnight' : `${done} / 3 done`;
     $('#questDot').hidden = !ready;
+    const ch = G.challenge();
+    $('#challengeName').textContent = `Challenge: ${ch.name}`;
+    $('#challengeSum').textContent = ch.left ? `${ch.left} chest win${ch.left === 1 ? '' : 's'} left today` : 'Chests won · new one at midnight';
+    $('#challengeDot').hidden = ch.played > 0;
     $('#crownSum').textContent = cc.opened ? 'Opened · a new one tomorrow' : cc.ready ? 'Ready to open!' : `${cc.crowns} / ${cc.need} crowns`;
     $('#crownFill').style.width = (cc.opened ? 100 : cc.crowns / cc.need * 100) + '%';
     $('#crownDot').hidden = !cc.ready;
@@ -1822,6 +1857,15 @@ const KCMenu = (() => {
     $('#cp').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && G.roadOpen()) { e.preventDefault(); cpGo(); } });
     $('#exX').addEventListener('click', closeExchange);
     $('#questBtn').addEventListener('click', openQuests);
+    $('#challengeBtn').addEventListener('click', openChallenge);
+    $('#chX').addEventListener('click', closeChallenge);
+    $('#chGo').addEventListener('click', challengeGo);
+    $('#chModal').addEventListener('click', e => {
+      if (e.target.id === 'chModal') { closeChallenge(); return; }
+      const b = e.target.closest('.draft-card');
+      if (!b || !draft || draft.picks.length >= 8) return;
+      draft.picks.push(b.dataset.id); KCSound.play('cardFlip'); renderDraft();
+    });
     $('#sceneGo').addEventListener('click', () => { KCSound.play('select'); nextScene(); });
     $('#crownBtn').addEventListener('click', openQuests);
     $('#questX').addEventListener('click', closeQuests);
@@ -1861,8 +1905,8 @@ const KCMenu = (() => {
         else if (e.key === ' ' || e.key === 'Enter') { chestTap(); e.preventDefault(); }
         return;
       }
-      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); closeExchange(); closeQuests(); if (!$('#onlineModal').hidden) closeOnline(); return; }
-      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#exModal').hidden || !$('#onlineModal').hidden || !$('#questModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); closeExchange(); closeQuests(); closeChallenge(); if (!$('#onlineModal').hidden) closeOnline(); return; }
+      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#exModal').hidden || !$('#onlineModal').hidden || !$('#questModal').hidden || !$('#chModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
       const n = '12345'.indexOf(e.key);
       if (n >= 0) { tab(TABS[n]); e.preventDefault(); }
       else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(nextFoe()); e.preventDefault(); }
@@ -1882,7 +1926,7 @@ const KCMenu = (() => {
 
   return {
     init, refresh, recordResult, nextFoe, cardImg, tab, showChest, chestSvg, openQuests, milestone,
-    practiceAgain: T => G.practiceFoe(T && T.tryCard ? T.tryCard.card : null),
+    practiceAgain: T => G.practiceFoe(T && T.tryCard ? T.tryCard.card : null), openChallenge,
     get name() { return P() ? P().name : 'Player'; },
     show() { refresh(); requestAnimationFrame(placeGlow); },
   };

@@ -682,6 +682,30 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   console.log(`deck slots, warnings, a suggested ${sg.name} deck, practice with a card to try: ok`);
 }
 
+// The daily challenge: a mode a day, equal levels, three chest wins a day, no trophies
+{
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 1500, best: 1500, claimed: { 0: true }, trophyRecord: { w: 9, l: 9, d: 0 } }) }));
+  const PC = G.state, day = new Date(2026, 10, 13, 12).getTime();
+  const seen = new Set(); for (let d = 0; d < 5; d++) { PC.challenge = null; seen.add(G.challenge(day + d * 864e5).id); }
+  assert.strictEqual(seen.size, 5, 'five modes in turn');
+  const pairs = G.draftPairs(KCSim.mulberry(4));
+  assert.strictEqual(pairs.length, 8); assert.strictEqual(new Set(pairs.flat()).size, 16, 'sixteen different cards in a draft');
+  const f = G.challengeFoe(null, KCSim.mulberry(6));
+  assert(f.kind === 'challenge' && f.towerLevel === G.challengeLevel(), 'towers at your deck level');
+  assert(Object.values(f.cardLevels).concat(Object.values(f.yourLevels)).every(v => v >= 1), 'levels for both decks');
+  const t0 = PC.trophies; let chests = 0;
+  for (let i = 0; i < 5; i++) if (G.recordChallenge(0).chestNow) chests++;
+  assert.strictEqual(chests, 3, 'three chest wins a day'); assert.strictEqual(PC.trophies, t0, 'no trophies');
+  // the sim rules: triple energy and first tower down
+  const s3 = KCSim.create({ seed: 2, energyMult: 3 }), s1 = KCSim.create({ seed: 2 });
+  for (let i = 0; i < 30; i++) { KCSim.step(s3); KCSim.step(s1); }
+  assert(s3.energy[0] - 5 > (s1.energy[0] - 5) * 2.9, 'three times the energy');
+  const sf = KCSim.create({ seed: 2, firstTower: true }), bots = [KCBot.create(0, { skill: 'normal', seed: 1 }), KCBot.create(1, { skill: 'normal', seed: 2 })];
+  while (!sf.result) { KCSim.step(sf); bots.forEach(b => KCBot.update(b, sf)); sf.events.length = 0; }
+  assert(['first', 'overtime', 'sudden'].includes(sf.result.reason) && sf.crowns[0] + sf.crowns[1] === 1, `the first tower down wins (${sf.result.reason} at ${Math.round(sf.time)} s)`);
+  console.log(`daily challenge (${[...seen].join(', ')}), draft pairs, equal levels, three chest wins: ok`);
+}
+
 // 9. Matchmaking: the win rate of a steady player who keeps their cards level with their trophies, and
 //    of one who never upgrades.
 const N = +process.argv[2] || 120;

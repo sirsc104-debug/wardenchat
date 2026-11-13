@@ -59,6 +59,8 @@ const KCSim = (() => {
       // the last card each team played that Divine Reflection can copy (never Divine Reflection itself)
       last: [null, null],
       rand: mulberry(opts.seed || 1),
+      // challenge rules: energy refilling faster all battle, and the first tower down winning
+      energyMult: opts.energyMult || 1, firstTower: !!opts.firstTower,
     };
     for (const team of [0, 1]) {
       const deck = (opts.decks && opts.decks[team]) || KC_STARTER_DECK;
@@ -582,6 +584,7 @@ const KCSim = (() => {
     if (k && !k.dead && !k.active) { k.active = true; s.events.push({ type: 'king', team: t.team }); }
     if (s.phase === 'overtime') finish(s, other, 'overtime');
     if (s.phase === 'sudden') finish(s, other, 'sudden');
+    if (s.firstTower && !s.result) finish(s, other, 'first');
   }
   // Sudden death: every standing tower loses the same share of its health; the first to fall loses the
   // match for its side. Two towers of different sides falling in the same tick: the one further below
@@ -1392,7 +1395,7 @@ const KCSim = (() => {
     if (s.result) return;
     s.tick++;
     s.time += DT;
-    const mult = s.double || s.phase === 'overtime' || s.phase === 'sudden' ? 2 : 1;
+    const mult = Math.max(s.energyMult || 1, s.double || s.phase === 'overtime' || s.phase === 'sudden' ? 2 : 1);
     for (const t of [0, 1]) s.energy[t] = Math.min(MAX_ENERGY, s.energy[t] + REGEN * mult * DT);
     for (const e of s.ents) {
       e.px = e.x; e.py = e.y;

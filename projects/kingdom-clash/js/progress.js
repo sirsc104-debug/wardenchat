@@ -1392,6 +1392,59 @@ const KCProgress = (() => {
     return { style: st, name: Bot.STYLES[st].name, deck: Bot.buildDeck(st, P.found.slice(), rand) };
   }
 
+  /* ---------- the daily challenge ----------
+     One mode a day, in turn. Both sides' cards and towers are at the same level (your deck's average),
+     so it comes down to play; opponents play as well as those at your trophies. The first `wins` wins a
+     day each give a chest, opened on the spot. No trophies are won or lost. */
+  const CHALLENGES = [
+    { id: 'triple', name: 'Triple Energy', text: 'Energy refills three times as fast for the whole battle.', sim: { energyMult: 3 } },
+    { id: 'sudden', name: 'Sudden Death', text: 'The first tower to fall wins the battle.', sim: { firstTower: true } },
+    { id: 'draft', name: 'Draft', text: 'Pick one card from each of eight pairs. The card you leave goes to your opponent.', draft: true },
+    { id: 'mirror', name: 'Mirror Match', text: 'You and your opponent battle with the same deck: yours.', mirror: true },
+    { id: 'random', name: 'Random Decks', text: 'Both sides get a deck built at random from every card in the game.', random: true },
+  ];
+  const CHALLENGE_PAY = { wins: 3, chest: 'silver' };
+  const dayNumber = now => { const d = new Date(now); return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 864e5); };
+  function challenge(now = Date.now()) {
+    const day = dayKey(now), C = CHALLENGES[dayNumber(now) % CHALLENGES.length];
+    if (!P.challenge || P.challenge.day !== day) P.challenge = { day, wins: 0, played: 0 };
+    return Object.assign({}, C, { wins: P.challenge.wins, played: P.challenge.played, left: Math.max(0, CHALLENGE_PAY.wins - P.challenge.wins), endsAt: shopEnds(now), chestName: CHESTS[capChest(CHALLENGE_PAY.chest)].name });
+  }
+  const challengeLevel = () => Math.max(1, Math.round(P.deck.reduce((a, id) => a + P.cards[id].level, 0) / P.deck.length));
+  // the eight pairs of a draft: a win condition, two spells, two cards for flyers, three of anything
+  function draftPairs(rand = Math.random) {
+    const Bot = typeof KCBot !== 'undefined' ? KCBot : null, used = new Set(), all = KC_ALL_CARDS.filter(id => !KC_CARDS[id].mirror);
+    const take = test => { const pool = all.filter(id => !used.has(id) && test(id)); const a = pool.splice(Math.floor(rand() * pool.length), 1)[0], b = pool[Math.floor(rand() * pool.length)]; used.add(a); used.add(b); return [a, b]; };
+    const win = id => Bot && Bot.WIN_CARDS.has(id), spell = id => KC_CARDS[id].kind === 'spell' && KC_CARDS[id].dmg > 0, air = id => Bot && Bot.hitsAir(id);
+    return [take(win), take(spell), take(spell), take(air), take(air), take(() => true), take(() => true), take(() => true)];
+  }
+  // the opponent for today's challenge; picks: your draft picks (with the pairs they came from)
+  function challengeFoe(draft, rand = Math.random) {
+    const C = challenge(), f = trophyFoe(rand), L = challengeLevel();
+    let mine = P.deck.slice(), theirs = f.deck;
+    const Bot = typeof KCBot !== 'undefined' ? KCBot : null;
+    if (C.mirror) theirs = mine.slice();
+    if (C.random && Bot) { mine = Bot.buildDeck(Bot.STYLE_IDS[Math.floor(rand() * Bot.STYLE_IDS.length)], KC_ALL_CARDS.slice(), rand); theirs = Bot.buildDeck(f.style || 'beatdown', KC_ALL_CARDS.slice(), rand); }
+    if (C.draft && draft) { mine = draft.picks.slice(); theirs = draft.pairs.map((p, i) => (p[0] === draft.picks[i] ? p[1] : p[0])); }
+    const lv = ids => Object.fromEntries(ids.map(id => [id, Math.max(KC_MIN_LEVEL(id), L)]));
+    return Object.assign(f, { id: 'challenge', kind: 'challenge', tier: C.name, stakes: null, challenge: C, deck: theirs, cardLevels: lv(theirs), yourDeck: mine, yourLevels: lv(mine),
+      kingLevel: L, towerLevel: L, sim: C.sim || {}, evos: [], level: L });
+  }
+  function recordChallenge(winner) {
+    const C = challenge();
+    P.challenge.played++;
+    let chestNow = null;
+    if (winner === 0 && P.challenge.wins < CHALLENGE_PAY.wins) {
+      P.challenge.wins++;
+      const type = capChest(CHALLENGE_PAY.chest), c = roll(type), before = P.found.slice();
+      apply(c);
+      chestNow = { chest: type, name: CHESTS[type].name, rubies: c.rubies, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
+    }
+    const xp = winner === 0 ? XP.win : winner === 1 ? XP.loss : XP.draw, levelUp = addXp(xp);
+    save();
+    return { kind: 'challenge', name: C.name, chestNow, xp, levelUp, wins: P.challenge.wins, left: Math.max(0, CHALLENGE_PAY.wins - P.challenge.wins) };
+  }
+
   /* ---------- practice ----------
      A battle against an opponent like those in trophy battles, with nothing at stake: no trophies,
      chests, rubies or quests. tryCard: a card to try out (found or not), swapped into your deck at the
@@ -1426,6 +1479,7 @@ const KCProgress = (() => {
     SHOP, shop, shopEnds, refreshShop, buy, buyChest, grantTest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
     DECK_SLOTS, useDeckSlot, setWholeDeck, deckWarnings, suggestDeck, practiceFoe,
+    CHALLENGES, CHALLENGE_PAY, challenge, challengeLevel, draftPairs, challengeFoe, recordChallenge,
     MAGIC, MAGIC_ORDER, MAGIC_RULES, wildActive, magicCount, magicFor, useMagic, grantMagic,
     EVO_ARENA, evoOpen, hasEvo, evoList, evoInfo,
     QUESTS, CROWN_CHEST, STREAK, quests, questAdd, claimQuest, questsReady, crownChest, openCrownChest,
