@@ -24,9 +24,17 @@ assert.strictEqual(G.arena().id, 'cinder'); assert.strictEqual(G.roadState(G.ROA
 console.log('road opens after Luc: ok');
 
 // 3. Trophy wins and losses, chests into slots, slots full.
-r = G.recordTrophy(0);
+// what a battle is worth: 30 either way against as many trophies, a tenth of the difference more or less
+assert.deepStrictEqual(G.stakes(1000, 1000), { win: 30, loss: 30 });
+assert.deepStrictEqual(G.stakes(1000, 1100), { win: 40, loss: 20 });
+assert.deepStrictEqual(G.stakes(1000, 700), { win: 20, loss: 40 }, 'never under 20 or over 40');
+{ const s0 = G.stakes(1000, 1000 + G.MATCH.offset); assert(s0.win < 30 && s0.loss > 30, 'opponents a little below you: a win pays a bit less');
+  const even = s0.loss / (s0.win + s0.loss); assert(even > 0.54 && even < 0.57, `you hold your place winning ${even}`); }
+const f0 = G.trophyFoe(KCSim.mulberry(1));
+assert(f0.first && f0.deck.join() === KC_STARTER_DECK.join() && f0.kingLevel === 1 && f0.skillLevel === 0, 'the first trophy battles are gentle');
+r = G.recordTrophy(0, 0, 0);
 assert.strictEqual(r.delta, 30); assert.strictEqual(r.chest.type, 'wooden'); assert.strictEqual(P.chests[0].type, 'wooden');
-r = G.recordTrophy(1); assert.strictEqual(r.delta, -20); assert.strictEqual(r.chest, null);
+r = G.recordTrophy(1, 0, 30); assert.strictEqual(r.delta, -30); assert.strictEqual(r.chest, null);
 r = G.recordTrophy(1); assert.strictEqual(P.trophies, 0, 'never below the arena floor');
 for (let i = 0; i < 4; i++) G.recordTrophy(0);
 assert.strictEqual(P.chests.filter(Boolean).length, 4);
@@ -235,8 +243,8 @@ console.log('save and reload: ok');
 }
 
 // 8. Opponents level their cards one at a time as their trophies rise, and they have no lines.
-// the curve: average card level (before rares are raised) 1 at 50, 4.5 at 300, 6.5 at 600, 7.5 at 900, 8.5 at 1,200, 12 at 2,000, 15 at 4,000
-for (const [t, want] of [[0, 0], [49, 0], [50, 0], [300, 28], [600, 44], [900, 52], [1200, 60], [1500, 72], [2000, 88], [3000, 100], [4000, 108], [5000, 112], [9999, 112], [-5, 0]]) assert.strictEqual(G.foeUpgrades(t), want, `upgrades at ${t}`);
+// the curve: average card level (before rares are raised) 1 at 50, 4.5 at 300, 6.5 at 600, 7.5 at 900, 8.5 at 1,200, 11.6 at 2,000, 15 at 4,100
+for (const [t, want] of [[0, 0], [49, 0], [50, 0], [300, 28], [600, 44], [900, 52], [1200, 60], [1500, 72], [2000, 84], [2500, 91], [3000, 100], [3500, 107], [4000, 111], [5000, 112], [9999, 112], [-5, 0]]) assert.strictEqual(G.foeUpgrades(t), want, `upgrades at ${t}`);
 for (let t = 0; t < 4500; t += 10) assert(G.foeUpgrades(t + 10) >= G.foeUpgrades(t), 'never fewer upgrades with more trophies');
 // their King Tower uses the players' rule (N cards at level N), counting their collection along with the deck past 8
 assert.strictEqual(G.foeKing([3, 3, 3, 3, 2, 2, 1, 1]), 3);
@@ -263,7 +271,7 @@ for (const t of [0, 50, 100, 130, 150, 200, 265]) {
     const low = foe.deck.filter(id => foe.cardLevels[id] > KC_MIN_LEVEL(id) || KC_MIN_LEVEL(id) === 1).map(id => foe.cardLevels[id]);
     assert(lv.reduce((a, l) => a + l - 1, 0) >= n, 'at least as many upgrades as their trophies give');
     assert(!low.length || Math.max(...low) - Math.min(...low) <= 1, 'spread levels are at most one apart');
-    if (t === 50 && n === 1) seenAhead.add(Object.keys(foe.cardLevels).find(id => foe.cardLevels[id] === 2));
+    if (n === 1) seenAhead.add(Object.keys(foe.cardLevels).find(id => foe.cardLevels[id] === 2));
   }
 }
 assert(seenAhead.size >= 3, 'different opponents upgrade different cards first');
@@ -283,8 +291,11 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
     for (const id of ['sandstorm', 'ramcart', 'mole', 'camel']) assert(P6.found.includes(id), id);
     assert.strictEqual(G.roadState(G.ROAD.find(m => m.at === 900)), 'ready', 'Arena 4, Stormspire, opens at 900');
     assert(G.onlineOpen(), 'online battles open at Stormspire');
-    P6.trophies = 1200; P6.best = 1200;
-    for (const at of [930, 1010, 1090, 1170]) { const r = G.claim(at); assert(r && r.cards[0].isNew, `card at ${at}`); }
+    P6.trophies = 1450; P6.best = 1450;
+    for (const at of [930, 1040, 1160, 1420]) { const r = G.claim(at); assert(r && r.cards[0].isNew, `card at ${at}`); }
+    // no long stretch of the road without a new card
+    { const cards = G.ROAD.filter(m => m.kind === 'card' || m.kind === 'arena').map(m => m.at);
+      for (let i = 1; i < cards.length; i++) assert(cards[i] - cards[i - 1] <= 300, `a new card or arena within 300 trophies of ${cards[i - 1]}`); }
     for (const id of ['bees', 'owl', 'thundercloud', 'griffin']) assert(P6.found.includes(id), id);
     assert.strictEqual(G.roadState(G.ROAD.find(m => m.at === 2000)), 'locked', 'Arena 5 waits for 2,000 trophies');
     let sawStorm = 0; for (let i = 0; i < 40; i++) if (G.trophyFoe(KCSim.mulberry(i + 77)).deck.some(id => ['bees', 'owl', 'thundercloud', 'griffin'].includes(id))) sawStorm++;
@@ -616,23 +627,29 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
 // 9. Matchmaking: the win rate of a steady player who keeps their cards level with their trophies, and
 //    of one who never upgrades.
 const N = +process.argv[2] || 120;
+const results = [];
 for (const [label, skill, upgrades] of [['good player, upgrades as they climb', 'normal', true], ['sloppy player, upgrades as they climb', 'trainer', true], ['good player, never upgrades', 'normal', false]]) {
   G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true } }) }));
   let wins = 0, late = 0, lateWins = 0;
   for (let i = 0; i < N; i++) {
     if (upgrades) {
       const lv = G.spreadLevels(G.foeUpgrades(G.state.best), G.state.deck, KCSim.mulberry(11));
-      for (const id of G.state.deck) G.state.cards[id].level = lv[id];
+      for (const id of G.state.deck) G.state.cards[id].level = Math.max(KC_MIN_LEVEL(id), lv[id]);
+      while (G.kingInfo().can) G.upgradeKing();
     }
     const foe = G.trophyFoe(KCSim.mulberry(700 + i));
-    const s = KCSim.create({ seed: 3000 + i, towerDamage: [1, foe.towerDamage], decks: [G.state.deck, foe.deck], cardLevels: [G.cardLevels(), foe.cardLevels] });
-    const me = KCBot.create(0, { skill, seed: i }), bot = KCBot.create(1, { skill: foe.skill, seed: 50 + i });
+    assert.strictEqual(foe.towerDamage, 1, 'no hidden handicap on the opponent');
+    const s = KCSim.create({ seed: 3000 + i, towerDamage: [1, foe.towerDamage], decks: [G.state.deck, foe.deck], cardLevels: [G.cardLevels(), foe.cardLevels], levels: [G.kingInfo().level, foe.kingLevel] });
+    const me = KCBot.create(0, { skill, seed: i }), bot = KCBot.create(1, { skill: foe.skill, seed: 50 + i, style: foe.style });
     while (!s.result) { KCSim.step(s); KCBot.update(me, s); KCBot.update(bot, s); s.events.length = 0; }
     const w = s.result.winner;
-    G.recordTrophy(w);
+    G.recordTrophy(w, s.crowns[0], foe.trophies);
     if (w === 0) wins++;
     if (i >= N / 3) { late++; if (w === 0) lateWins++; }
   }
-  console.log(`${label}: won ${wins}/${N} overall, ${(lateWins / late * 100).toFixed(0)}% after settling; difficulty ${G.state.diff.toFixed(2)}, ${G.state.trophies} trophies (best ${G.state.best})`);
+  console.log(`${label}: won ${wins}/${N} overall, ${(lateWins / late * 100).toFixed(0)}% after settling; ${G.state.trophies} trophies (best ${G.state.best})`);
+  results.push({ label, trophies: G.state.trophies, best: G.state.best });
 
 }
+// cards matter: a player who never upgrades is held back
+assert(results[2].best < results[0].best, 'a player who never upgrades climbs less far');

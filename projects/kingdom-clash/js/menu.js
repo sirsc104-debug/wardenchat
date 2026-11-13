@@ -44,7 +44,7 @@ const KCMenu = (() => {
   // Called by the game when a match ends; returns what changed, for the result screen.
   // crowns: the crowns you took, which count toward the Diamond Pass in trophy battles.
   function recordResult(foe, winner, crowns) {
-    const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns) : G.recordTrainer(foe.id, winner);
+    const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns, foe.trophies) : G.recordTrainer(foe.id, winner);
     return r;
   }
 
@@ -59,6 +59,7 @@ const KCMenu = (() => {
     KCSound.play('crown');
     refresh();
     toast(`Simulated win vs ${foe.name}${bits.length ? ': ' + bits.join(', ') : ''}`);
+    if (r.chestNow) showChest(r.chestNow.chest, r.chestNow, r.chestNow.name);
   }
 
   /* ---------- small messages ---------- */
@@ -1453,7 +1454,8 @@ const KCMenu = (() => {
       const a = G.arena();
       $('#oppLabel').textContent = 'Trophy Battle';
       $('#oppName').textContent = `${a.name}`;
-      $('#oppMeta').textContent = `${fmt(p.trophies)} trophies · win +${G.TROPHIES.win} / loss −${G.TROPHIES.loss}`;
+      const st = G.nextStakes();
+      $('#oppMeta').textContent = `${fmt(p.trophies)} trophies · win about +${st.win} / loss about −${st.loss}`;
       if (pic.dataset.id !== TROPHY_ID) { pic.dataset.id = TROPHY_ID; trophyPic(pic); }
       $('#battleSub').textContent = `Trophy battle · ${a.name}`;
     } else {

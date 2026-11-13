@@ -29,7 +29,22 @@ const KCProgress = (() => {
   const MAX_LEVEL = 15;
   const XP_PER_LEVEL = 100;
   const XP = { win: 20, draw: 10, loss: 6, firstWin: 30 };
-  const TROPHIES = { win: 30, loss: 20 };
+  // Trophies for a trophy battle. Against an opponent with as many trophies as you a win is worth 30 and a
+  // loss costs 30; every 10 trophies they have more than you add one to a win and take one off a loss (the
+  // other way round when they have fewer), always between 20 and 40. Opponents are usually found a little
+  // below you (MATCH), so a win pays about 27 and a loss costs about 33: you hold your place winning about
+  // 55% of your battles, and climb as your cards and your play get better. Opponents' cards follow their
+  // trophies (ECONOMY.foeLevels), so cards that fall behind hold you back.
+  const TROPHIES = { win: 30, loss: 30, per: 0.1, min: 20, max: 40 };
+  // How far from your trophies the next opponent is found: `offset` as a rule (give or take `spread / 2`),
+  // further below after two or three losses in a row (a breather), level with you after three wins in a row.
+  const MATCH = { offset: -35, spread: 40, lost2: -65, lost3: -110, won3: -10 };
+  // How well opponents play (0 a beginner, 1 the best) by their trophies, and how much less in a breather.
+  // From about 4,100 trophies every opponent's cards are at level 15 (as yours are by then, about a year
+  // in), and from 4,000 their play gets better, to the best at 7,000.
+  const FOE_SKILL = { curve: [[0, 0.05], [300, 0.25], [900, 0.4], [2000, 0.5], [4000, 0.6], [5500, 0.8], [7000, 1]], breather: 0.15 };
+  // Your first few trophy battles are gentle: beginners with starter decks and level 1 cards.
+  const FIRST_STEPS = 3;
 
   /* ---------- the economy: every number that sets costs and rewards ----------
      Currency: Rubies (P.rubies) are the game's own and never leave it; "gold" below means Rubies. Wallet
@@ -125,7 +140,7 @@ const KCProgress = (() => {
     // opponents' card levels by trophies (straight lines between the points), matched to what a player
     // has at those trophies (tools/economy-report.js); rares, epics and legendaries are then raised to
     // where their rarity starts
-    foeLevels: [[0, 1], [50, 1], [300, 4.5], [600, 6.5], [900, 7.5], [1200, 8.5], [1500, 10], [2000, 12], [3000, 13.5], [4000, 14.5], [5000, 15]],
+    foeLevels: [[0, 1], [50, 1], [300, 4.5], [600, 6.5], [900, 7.5], [1200, 8.5], [1500, 10], [2000, 11.6], [2500, 12.4], [3000, 13.6], [3500, 14.4], [4100, 15]],
   };
 
   const ARENAS = [
@@ -186,25 +201,25 @@ const KCProgress = (() => {
     { at: 830, kind: 'rubies', amount: 600 },
     { at: 870, kind: 'card', card: 'camel', copies: 1 },
     { at: 900, kind: 'arena', arena: 'stormspire' },
+    // Stormspire's cards spread over the whole arena, so there is a new card every 130 trophies or so
     { at: 930, kind: 'card', card: 'bees', copies: 6 },
-    { at: 970, kind: 'rubies', amount: 900 },
-    { at: 1010, kind: 'card', card: 'owl', copies: 3 },
-    { at: 1050, kind: 'chest', chest: 'platinum' },
-    { at: 1090, kind: 'card', card: 'thundercloud', copies: 1 },
-    { at: 1130, kind: 'rubies', amount: 1200 },
-    { at: 1170, kind: 'card', card: 'griffin', copies: 1 },
-    // the rest of Stormspire
-    { at: 1210, kind: 'card', card: 'judgment', copies: 1 },
-    { at: 1250, kind: 'chest', chest: 'gold' },
-    { at: 1290, kind: 'card', card: 'cyclone', copies: 1 },
-    { at: 1340, kind: 'rubies', amount: 1500 },
-    { at: 1380, kind: 'card', card: 'conductor', copies: 3 },
-    { at: 1430, kind: 'chest', chest: 'platinum' },
-    { at: 1530, kind: 'rubies', amount: 1800 },
-    { at: 1630, kind: 'chest', chest: 'legendary' },
-    { at: 1730, kind: 'rubies', amount: 2200 },
-    { at: 1830, kind: 'chest', chest: 'platinum' },
-    { at: 1920, kind: 'rubies', amount: 2600 },
+    { at: 980, kind: 'rubies', amount: 900 },
+    { at: 1040, kind: 'card', card: 'owl', copies: 3 },
+    { at: 1100, kind: 'chest', chest: 'platinum' },
+    { at: 1160, kind: 'card', card: 'thundercloud', copies: 1 },
+    { at: 1220, kind: 'rubies', amount: 1200 },
+    { at: 1290, kind: 'card', card: 'judgment', copies: 1 },
+    { at: 1350, kind: 'chest', chest: 'gold' },
+    { at: 1420, kind: 'card', card: 'griffin', copies: 1 },
+    { at: 1480, kind: 'rubies', amount: 1500 },
+    { at: 1560, kind: 'card', card: 'cyclone', copies: 1 },
+    { at: 1620, kind: 'chest', chest: 'platinum' },
+    { at: 1700, kind: 'card', card: 'conductor', copies: 3 },
+    { at: 1760, kind: 'rubies', amount: 1800 },
+    { at: 1830, kind: 'chest', chest: 'legendary' },
+    { at: 1880, kind: 'rubies', amount: 2200 },
+    { at: 1930, kind: 'chest', chest: 'platinum' },
+    { at: 1970, kind: 'rubies', amount: 2600 },
     // Arena 5: Frostfang Keep
     { at: 2000, kind: 'arena', arena: 'frostfang' },
     { at: 2060, kind: 'card', card: 'frostsprite', copies: 6 },
@@ -344,7 +359,7 @@ const KCProgress = (() => {
   const blank = () => ({
     name: 'Player', xp: 0, beaten: {}, records: {}, roadSeen: false, opp: null,
     mode: null, trophies: 0, best: 0, rubies: 0, wallet: 0, walletDay: null, diamonds: 0, shop: null, freeChestDay: null, magic: {}, cards: {}, evos: [], pass: null, member: false, king: 1, emotes: [], found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
-    chests: [null, null, null, null], cycle: 0, claimed: {}, diff: 0.35, trophyRecord: { w: 0, l: 0, d: 0 },
+    chests: [null, null, null, null], cycle: 0, claimed: {}, streak: 0, trophyRecord: { w: 0, l: 0, d: 0 },
   });
 
   function load(st) {
@@ -391,7 +406,7 @@ const KCProgress = (() => {
   }
   // A trophy battle is starting: if it is never finished, it counts as a loss at the next load.
   function battleStarted(foe) {
-    P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, at: Date.now() } : null;
+    P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, trophies: foe.trophies, at: Date.now() } : null;
     save();
   }
   const save = () => store.set(P);
@@ -429,9 +444,17 @@ const KCProgress = (() => {
       if (unlockedNext) P.opp = unlockedNext.id;
       if (opened) { P.mode = 'trophy'; P.claimed[0] = true; }
     }
+    // a chest for every win while you are still with the trainers, opened straight away: silver for the
+    // first win over a trainer, wooden for a rematch
+    let chestNow = null;
+    if (winner === 0 && (firstWin || !roadOpen())) {
+      const type = firstWin ? 'silver' : 'wooden', c = roll(type), before = P.found.slice();
+      apply(c);
+      chestNow = { chest: type, name: CHESTS[type].name, rubies: c.rubies, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
+    }
     const levelUp = addXp(xp);
     save();
-    return { kind: 'trainer', xp, firstWin, unlockedNext, roadOpened: opened, levelUp };
+    return { kind: 'trainer', xp, firstWin, unlockedNext, roadOpened: opened, levelUp, chestNow };
   }
 
   /* ---------- arenas and the road ---------- */
@@ -492,19 +515,37 @@ const KCProgress = (() => {
     for (let n = 2; n <= MAX_LEVEL; n++) if (levels.filter(v => v >= n).length >= Math.min(n, levels.length)) k = n; else break;
     return k;
   }
+  // a value along a curve of [x, y] points, straight between them
+  const curve = (C, x) => { if (x <= C[0][0]) return C[0][1]; for (let i = 1; i < C.length; i++) if (x < C[i][0]) return C[i - 1][1] + (C[i][1] - C[i - 1][1]) * (x - C[i - 1][0]) / (C[i][0] - C[i - 1][0]); return C[C.length - 1][1]; };
+  // where the next opponent is found, from your wins or losses in a row
+  function matchOffset() {
+    const k = P.streak || 0;
+    return k <= -3 ? MATCH.lost3 : k === -2 ? MATCH.lost2 : k >= 3 ? MATCH.won3 : MATCH.offset;
+  }
+  // what a win and a loss are worth against an opponent with `foe` trophies when you have `me`
+  function stakes(me, foe) {
+    const k = (foe - me) * TROPHIES.per, clamp = v => Math.max(TROPHIES.min, Math.min(TROPHIES.max, Math.round(v)));
+    return { win: clamp(TROPHIES.win + k), loss: clamp(TROPHIES.loss - k) };
+  }
+  // what the next trophy battle is likely to be worth (the opponent isn't found until it starts)
+  const nextStakes = () => stakes(P.trophies, P.trophies + matchOffset());
+  // How well a computer opponent plays, from 0 (a beginner) to 1.
+  const skillFor = d => ({
+    react: [lerp(2.2, 0.6, d), lerp(3.6, 1.2, d)], sloppy: lerp(0.5, 0.12, d), attackAt: lerp(9.8, 8, d), idle: lerp(0.45, 0.08, d),
+    fireballValue: lerp(8, 5, d), defend: lerp(0.4, 1, d), gap: [lerp(2.6, 0.5, d), lerp(4.2, 1.1, d)],
+  });
   // The opponent for the next trophy battle: card levels follow their trophies, skill follows P.diff.
   function trophyFoe(rand = Math.random) {
-    const d = Math.max(0, Math.min(1, P.diff)), t = P.trophies;
-    const skill = {
-      react: [lerp(2.2, 0.6, d), lerp(3.6, 1.2, d)], sloppy: lerp(0.5, 0.12, d), attackAt: lerp(9.8, 8, d), idle: lerp(0.45, 0.08, d),
-      fireballValue: lerp(8, 5, d), defend: lerp(0.4, 1, d), gap: [lerp(2.6, 0.5, d), lerp(4.2, 1.1, d)],
-    };
+    const t = P.trophies, rec = P.trophyRecord, first = rec.w + rec.l + rec.d < FIRST_STEPS && t < 100;
+    const off = matchOffset(), breather = off <= MATCH.lost2;
+    const foeT = Math.max(0, t + off + Math.round((rand() - 0.5) * MATCH.spread));
+    const d = first ? 0 : Math.max(0, curve(FOE_SKILL.curve, foeT) - (breather ? FOE_SKILL.breather : 0));
+    const skill = skillFor(d);
     // a play style, and a deck for it from the cards they could have (bot.js: STYLES, buildDeck)
-    const foeT = Math.max(0, t + Math.round((rand() - 0.5) * 30));
     const pool = foePool(foeT, rand);
     const Bot = typeof KCBot !== 'undefined' ? KCBot : null;
     let style = null, deck = KC_STARTER_DECK.slice();
-    if (Bot) {
+    if (Bot && !first) {
       const ok = Bot.STYLE_IDS.filter(id => Bot.STYLES[id].win.some(w => pool.includes(w)));
       const choices = ok.length ? ok : ['beatdown'];
       style = choices[Math.floor(rand() * choices.length)];
@@ -514,27 +555,29 @@ const KCProgress = (() => {
     let mood = 'sporty', mw = rand() * MOODS.reduce((a, m) => a + m[1], 0);
     for (const [m, w] of MOODS) { if ((mw -= w) < 0) { mood = m; break; } }
     const foeTrophies = foeT;
-    const cardLevels = spreadLevels(foeUpgrades(foeTrophies), deck, rand);
+    const upgrades = spreadLevels(first ? 0 : foeUpgrades(foeTrophies), deck, rand), cardLevels = Object.assign({}, upgrades);
     for (const id of deck) cardLevels[id] = Math.max(KC_MIN_LEVEL(id), cardLevels[id]);
     const lvl = Math.min(...Object.values(cardLevels));
     // their King Tower: the players' rule (level N needs N cards at level N), counting the rest of their
-    // collection as levelled with their deck once all eight are past 8
-    const kingLevel = foeKing(Object.values(cardLevels));
+    // collection as levelled with their deck once all eight are past 8, and only levels they upgraded to
+    // (a rare card starts at level 3, but that doesn't raise a new player's King Tower)
+    const kingLevel = foeKing(Object.values(upgrades));
     return {
       id: 'trophy', kind: 'trophy', name, short: name, level: lvl, tier: `${foeTrophies} trophies`,
-      look: foeLook(rand), lines: null, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: foeTrophies, kingLevel,
-      style, styleName: style && Bot ? Bot.STYLES[style].name : null, clan, mood,
+      look: foeLook(rand), lines: null, skill, towerDamage: 1, deck, cardLevels, trophies: foeTrophies, kingLevel,
+      style, styleName: style && Bot ? Bot.STYLES[style].name : null, clan, mood, stakes: stakes(t, foeTrophies), breather, first, skillLevel: d,
       // past 700 trophies about half the opponents with a Snowman have its evolution
       evos: foeTrophies >= 700 && deck.includes('snowman') && rand() < 0.5 ? ['snowman'] : [],
     };
   }
-  function recordTrophy(winner, crowns) {
+  // foeTrophies: the opponent's trophies (from the battle that was started if not given)
+  function recordTrophy(winner, crowns, foeTrophies) {
+    if (foeTrophies === undefined) foeTrophies = P.live && P.live.trophies !== undefined ? P.live.trophies : Math.max(0, P.trophies + MATCH.offset);
     P.live = null;
-    const r = P.trophyRecord, before = P.trophies, beforeArena = arena().id;
-    if (winner === 0) { r.w++; P.trophies += TROPHIES.win; P.diff += 0.05; }
-    else if (winner === 1) { r.l++; P.trophies = Math.max(arenaFloor(), P.trophies - TROPHIES.loss); P.diff -= 0.055; }
-    else r.d++;
-    P.diff = Math.max(0, Math.min(1, P.diff));
+    const r = P.trophyRecord, before = P.trophies, beforeArena = arena().id, st = stakes(P.trophies, foeTrophies);
+    if (winner === 0) { r.w++; P.trophies += st.win; P.streak = Math.max(1, (P.streak || 0) + 1); }
+    else if (winner === 1) { r.l++; P.trophies = Math.max(arenaFloor(), P.trophies - st.loss); P.streak = Math.min(-1, (P.streak || 0) - 1); }
+    else { r.d++; P.streak = 0; }
     P.best = Math.max(P.best, P.trophies);
     let chest = null, slotsFull = false;
     if (winner === 0) {
@@ -1207,7 +1250,7 @@ const KCProgress = (() => {
   const unlockAt = id => { const m = ROAD.find(r => r.kind === 'card' && r.card === id); return m ? m.at : null; };
 
   return {
-    MAX_LEVEL, XP_PER_LEVEL, TROPHIES, ARENAS, ROAD, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
+    MAX_LEVEL, XP_PER_LEVEL, TROPHIES, MATCH, FOE_SKILL, FIRST_STEPS, stakes, nextStakes, ARENAS, ROAD, skillFor, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
     chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, chestShopOpen, chestBuyLeft, foeKing, buyDiamond, magicUsable,
     load, save, battleStarted, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,

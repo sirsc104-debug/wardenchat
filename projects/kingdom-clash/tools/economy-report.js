@@ -120,3 +120,69 @@ console.log('| Milestone | Spreading rubies over the deck | Focusing one card fi
 console.log('|---|---|---|---|---|');
 const keys = new Set([...Object.keys(spread), ...Object.keys(focus), ...Object.keys(casual), ...Object.keys(rich)]);
 for (const k of keys) console.log(`| ${k} | ${[spread, focus, casual, rich].map(m => asTime(m[k]) || (k.startsWith('deck levels') ? 'all at 15 already' : 'not within 3 years')).join(' | ')} |`);
+
+// Part 3: careers on the ladder. Trophies now come from battles instead of CAREER: each opponent is found
+// the way the game finds them (G.MATCH: a little below you, a breather after losses in a row), their cards
+// follow ECONOMY.foeLevels, and a battle is won with a chance that follows the gap between your average
+// card level and theirs (a logistic curve, LADDER.slope a level) plus how well you play (`edge`, in the
+// same units: 1 is about one card level). Trophies change by G.stakes, never below the arena floor.
+// Chests, rubies and upgrades are as in Part 2 (spreading rubies over the deck).
+// Assumptions: an average player plays even with an opponent of their own trophies whose cards are as
+// good as theirs; past 4,000 trophies (where cards reach 15) the opponents' better play (G.FOE_SKILL) is
+// worth up to `topPlay` levels at 7,000; and players get a little better with practice (`learn` a year, at
+// most `learnMax`).
+const LADDER = {
+  slope: 1.1, topPlay: 1.2, learn: 0.4, learnMax: 0.8,
+  players: [['average', 'An average player', 0, 1], ['strong', 'A strong player (plays about a level above their cards)', 1, 1],
+    ['casual', 'A casual player (half the battles, plays a little worse)', -0.5, 0.5]],
+  days: 1100,
+};
+const G_curve = (C, x) => { if (x <= C[0][0]) return C[0][1]; for (let i = 1; i < C.length; i++) if (x < C[i][0]) return C[i - 1][1] + (C[i][1] - C[i - 1][1]) * (x - C[i - 1][0]) / (C[i][0] - C[i - 1][0]); return C[C.length - 1][1]; };
+function ladder(edge, pace) {
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 0, best: 0, claimed: { 0: true } }) }));
+  const P = G.state, st = { slots: [], cycle: 0, budget: 0 }, deck = KC_STARTER_DECK.slice(), M = G.MATCH, r = KCSim.mulberry(77);
+  const marks = {}, foeAvg = t => { const base = 1 + G.foeUpgrades(t) / 8; return deck.reduce((a, id) => a + Math.max(KC_MIN_LEVEL(id), base), 0) / deck.length; };
+  let T = 0, streak = 0, n = 0, w = 0, best = 0, passDone = false, gap = 0;
+  for (let d = 1; d <= LADDER.days; d++) {
+    const q = profileFor(T), battles = Math.max(1, Math.round(q.battles * pace));
+    const my = deck.reduce((a, id) => a + P.cards[id].level, 0) / deck.length;
+    let wins = 0;
+    for (let i = 0; i < battles; i++) {
+      const off = streak <= -3 ? M.lost3 : streak === -2 ? M.lost2 : streak >= 3 ? M.won3 : M.offset;
+      const foeT = Math.max(0, T + off + Math.round((r() - 0.5) * M.spread));
+      const play = Math.max(0, G_curve(G.FOE_SKILL.curve, foeT) - 0.6) / 0.4 * LADDER.topPlay, learnt = Math.min(LADDER.learnMax, LADDER.learn * d / 365);
+      const g = my - foeAvg(foeT), p = 1 / (1 + Math.exp(-(LADDER.slope * (g + edge + learnt - play))));
+      const s = G.stakes(T, foeT), floor = G.ARENAS.filter(a => !a.soon && T >= a.min).pop().min;
+      if (r() < p) { T += s.win; wins++; streak = Math.max(1, streak + 1); } else { T = Math.max(floor, T - s.loss); streak = Math.min(-1, streak - 1); }
+      n++; gap += g;
+    }
+    w += wins;
+    best = Math.max(best, T);
+    P.trophies = T; P.best = best;
+    P.xp += wins * 20 + (battles - wins) * 6;
+    for (const m of G.ROAD) if (G.roadState(m) === 'ready') G.claim(m.at);
+    if (!passDone && G.passOpen()) { for (const x of G.PASS.tiers) if (x.free.kind === 'rubies') P.rubies += x.free.n; passDone = true; }
+    for (const type of dayOfChests(st, wins, q.unlockHours * pace)) { const c = G.roll(type, rand); P.rubies += c.rubies; for (const x of c.cards) P.cards[x.id].count += x.n; }
+    const f = G.roll(G.ECONOMY.freeChest.type, rand, { bonus: G.ECONOMY.freeChest.bonus }); P.rubies += f.rubies; for (const x of f.cards) P.cards[x.id].count += x.n;
+    P.rubies += Math.min(wins, G.ECONOMY.winGold.dailyCap) * G.winGold();
+    for (let guard = 0; guard < 200; guard++) {
+      const order = deck.filter(id => G.upgradeInfo(id).can).sort((a, b) => P.cards[a].level - P.cards[b].level);
+      if (!order.length) break;
+      G.upgrade(order[0]);
+    }
+    for (const k of [300, 600, 900, 1200, 1500, 2000, 2600, 3300, 4100, 5000, 6000, 7000]) if (best >= k && !marks[k]) {
+      marks[k] = { d, rate: w / n, gap: gap / n, lv: deck.map(id => P.cards[id].level).join(' ') };
+      w = 0; n = 0; gap = 0;
+    }
+    if (d === 30 || d === 90 || d === 365 || d === 730) marks['day ' + d] = { trophies: T };
+  }
+  return marks;
+}
+console.log('\nPart 3: careers on the ladder (trophies from battles; opponents found as the game finds them)\n');
+const runs = LADDER.players.map(([, , edge, pace]) => ladder(edge, pace));
+console.log('| Trophies | ' + LADDER.players.map(p => p[1]).join(' | ') + ' |');
+console.log('|---|' + LADDER.players.map(() => '---').join('|') + '|');
+for (const k of [300, 600, 900, 1200, 1500, 2000, 2600, 3300, 4100, 5000, 6000, 7000]) {
+  console.log(`| ${f0(k)} | ${runs.map(m => (m[k] ? `${asTime(m[k].d)}; won ${Math.round(m[k].rate * 100)}% on the way; cards ${m[k].gap >= 0 ? '+' : ''}${m[k].gap.toFixed(1)} vs theirs` : 'not within 3 years')).join(' | ')} |`);
+}
+for (const d of [30, 90, 365, 730]) console.log(`| after ${d} days | ${runs.map(m => `${f0(m['day ' + d].trophies)} trophies`).join(' | ')} |`);

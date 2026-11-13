@@ -2010,3 +2010,9 @@ button.slot:hover { transform: translateY(-3px); }
 @keyframes vsPop { from { transform: scale(0.6); opacity: 0; } }
 @media (max-width: 760px) { .vs-pic { width: 76px; height: 76px; } .vs-find { min-height: 76px; font-size: 15px; } }
 @media (prefers-reduced-motion: reduce) { .vs-find i { animation-duration: 2.4s; } }
+
+.vs { position: relative; }
+.vs-stakes { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); white-space: nowrap; font-size: 16px; color: #fff; letter-spacing: 0.02em;
+  background: rgba(20, 14, 40, 0.55); padding: 4px 12px; border-radius: 999px; }
+.vs-stakes:empty { display: none; }
+.intro.finding .vs-stakes { visibility: hidden; }

@@ -60,7 +60,8 @@
     const where = trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
-      ['#introFoeClan', T.clan || ''], ['#introYouTier', trophy ? `${KCProgress.state.trophies} trophies` : 'Training']]) $(sel).textContent = text;
+      ['#introFoeClan', T.clan || ''], ['#introYouTier', trophy ? `${KCProgress.state.trophies} trophies` : 'Training'],
+      ['#introStakes', trophy && T.stakes ? `Win +${T.stakes.win} · Loss −${T.stakes.loss}` : '']]) $(sel).textContent = text;
     introYou();
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {},
@@ -670,7 +671,7 @@
     O.unsub.push(m.room.onPeers(ch => { if ((ch.left || []).some(p => p.peer === O.peer)) O.leftAt = O.leftAt || performance.now(); if ((ch.joined || []).some(p => p.peer === O.peer)) O.leftAt = 0; }));
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', `Online · ${T.tier}`], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', `Online battle · King Tower ${foe.king}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
-      ['#introFoeClan', ''], ['#introYouTier', `${KCProgress.state.trophies} trophies`]]) $(sel).textContent = text;
+      ['#introFoeClan', ''], ['#introYouTier', `${KCProgress.state.trophies} trophies`], ['#introStakes', '']]) $(sel).textContent = text;
     introYou();
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {},
@@ -823,8 +824,12 @@
       tr.className = 'res-trophy' + (res.delta > 0 ? ' up' : res.delta < 0 ? ' down' : '');
       tr.innerHTML = `<i class="trophy-i" aria-hidden="true"></i><b>${res.delta > 0 ? '+' : ''}${res.delta}</b><small>${res.trophies} trophies</small>`;
     }
+    // a trainer's chest, opened on the spot
+    $('#chestNowBtn').hidden = !res.chestNow;
+    if (res.chestNow) { $('#chestNowText').textContent = `Open ${res.chestNow.name}`; res.chestShown = false; }
     $('#nextBtn').hidden = !res.unlockedNext;
-    $('#againBtn').className = res.unlockedNext ? 'pill' : 'big-btn';
+    $('#nextBtn').className = res.chestNow ? 'pill' : 'big-btn';
+    $('#againBtn').className = res.unlockedNext || res.chestNow ? 'pill' : 'big-btn';
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
     if (res.kind === 'online') { un.hidden = false; un.textContent = 'Online battle · no trophies won or lost'; }
     $('#againBtn').hidden = res.kind === 'online';
@@ -832,7 +837,15 @@
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
     $('#resSmall').textContent = res.kind === 'online' ? `${why} ${m}:${sec} played, ${s.played[0]} cards from you.` : `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
     $('#result').hidden = false;
-    setTimeout(() => (res.unlockedNext ? $('#nextBtn') : $('#againBtn')).focus(), 50);
+    setTimeout(() => (res.chestNow ? $('#chestNowBtn') : res.unlockedNext ? $('#nextBtn') : $('#againBtn')).focus(), 50);
+  }
+  // open the trainer's chest: back to the lobby, where the chest opening plays
+  function openChestNow() {
+    const res = G.res;
+    if (!res || !res.chestNow || res.chestShown) return;
+    res.chestShown = true;
+    goHome();
+    KCMenu.showChest(res.chestNow.chest, res.chestNow, res.chestNow.name);
   }
 
   /* ---------- drawing ---------- */
@@ -1858,7 +1871,8 @@
     });
     $('#againBtn').addEventListener('click', () => startBattle(G.trainer.kind === 'trophy' ? KCMenu.nextFoe('trophy') : G.trainer));
     $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext));
-    $('#homeBtn').addEventListener('click', goHome);
+    $('#homeBtn').addEventListener('click', () => { if (G.res && G.res.chestNow && !G.res.chestShown) openChestNow(); else goHome(); });
+    $('#chestNowBtn').addEventListener('click', openChestNow);
     // Surrender: tap once to ask, again within 3 s to give up the battle (a loss, as if the King fell).
     // Online it tells the other player, who wins.
     let leaveT = 0;
