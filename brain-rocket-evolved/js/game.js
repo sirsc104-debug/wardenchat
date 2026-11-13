@@ -556,9 +556,7 @@
     sheet('⟲ Archive', items.length ? `<p>Play any past Daily Launch. Archive launches don't change your streak or that day's score.</p><div class="arch-list">${items.join('')}</div>` : '<p>Launch #1 is today, so there are no past launches yet. Come back tomorrow!</p>');
     $('sheetBody').querySelectorAll('.arch-day').forEach(b => b.addEventListener('click', () => {
       Sound.click(); closeSheet();
-      const n = +b.dataset.n, d = days()[n];
-      if (d && d.done && !confirm(`You already played #${n} on the day. Play it again as an archive launch?`)) return;
-      startDaily(n, true);
+      startDaily(+b.dataset.n, true);
     }));
   }
   function howSheet() {
