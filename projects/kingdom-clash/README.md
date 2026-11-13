@@ -75,7 +75,9 @@ Under *Next Rewards* on wide screens (under the Battle button on narrow ones):
 - **Crown chest**: ten crowns in a day's trophy battles fill a silver chest.
 - **Win streak**: three or more trophy wins in a row pay each win's rubies twice.
 
-The **result screen** of a trophy battle counts up the trophies and rubies, fills a bar toward the next Trophy Road reward, shows the chest won (or that the slots are full), the quests and the crown chest, and has a **Claim Rewards** button when something is ready. After a defeat it gives a tip: about card levels when the opponent's were half a level or more above yours, otherwise about play.
+A trophy win pays rubies by arena (about 30 at the start, 200 at 1,300 trophies, 900 at 4,100, 1,500 at 7,000; twice that on a win streak; the first 20 wins a day). The **result screen** of a trophy battle counts up the trophies and rubies, fills a bar toward the next Trophy Road reward, shows the chest won (or that the slots are full), the quests and the crown chest, and has a **Claim Rewards** button when something is ready. After a defeat it gives a tip: about card levels when the opponent's were half a level or more above yours, otherwise about play. On wide screens the result is two columns (the score on the left, the rewards on the right) with the buttons always in view. One result in five, chosen at random whatever the outcome, shows today's Shop offers in place of the rewards (with a line for what the battle earned): the first three that can still be bought, exactly as the Shop lists them and at its prices; buying one plays its reveal in the lobby.
+
+**Under the VS screen** the battle is already laid out, so until the fight starts the opponent's name reads *Loading…* and your cards lie face down with a question mark; they flip over when it begins. In trophy battles the lobby has no opponent bar: the Battle button says what a win and a loss are worth, and **Practice** and **Online** sit with the daily buttons.
 
 ## The first battle and milestones
 

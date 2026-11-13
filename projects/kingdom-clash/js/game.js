@@ -75,6 +75,7 @@
       ['#introFoeClan', T.clan || ''], ['#introYouTier', trophy ? `${KCProgress.state.trophies} trophies` : 'Training'],
       ['#introStakes', challenge ? `Daily Challenge · ${T.challenge.name}` : practice ? (T.tryCard && T.tryCard.out ? `Practice · trying ${KC_CARDS[T.tryCard.card].name}` : 'Practice · nothing at stake') : trophy && T.stakes ? `Win +${T.stakes.win} · Loss −${T.stakes.loss}` : '']]) $(sel).textContent = text;
     introYou();
+    veil(T.name, where);
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {},
       falls: {}, slowmo: 0, flash: 0, fireworks: 0 });
@@ -91,6 +92,28 @@
     $('#intro').classList.toggle('finding', G.finding);
     $('#intro').hidden = false;
   }
+  // Under the VS screen the battle is already laid out: until it starts, the opponent's name reads
+  // Loading… and your cards lie face down; they flip over when the fight begins.
+  function veil(name, tier) {
+    G.reveal = { name, tier };
+    for (const sel of ['#foeName', '#scoreFoe']) $(sel).textContent = 'Loading…';
+    $('#foeTier').textContent = '';
+    $('#battle').classList.add('veiled');
+    $('#battle').classList.remove('unveil');
+  }
+  function unveil() {
+    const R = G.reveal;
+    if (!R) return;
+    G.reveal = null;
+    for (const sel of ['#foeName', '#scoreFoe']) $(sel).textContent = R.name;
+    $('#foeTier').textContent = R.tier;
+    const b = $('#battle');
+    b.classList.remove('veiled');
+    b.classList.add('unveil');
+    document.querySelectorAll('#hand .card').forEach((c, i) => { c.style.animationDelay = (i * 0.09) + 's'; });
+    setTimeout(() => b.classList.remove('unveil'), 1200);
+    KCSound.play('cardFlip');
+  }
   // your side of the VS screen: your King, in blue
   function introYou() {
     const el = $('#introYouPic'), av = KCProgress.profile().avatar;
@@ -99,6 +122,7 @@
   function begin() {
     $('#intro').hidden = true;
     G.phase = 'play';
+    unveil();
     KCSound.music('battle'); KCSound.crowd(true);
     tutStart();
     // a trophy battle left before it ends (reload, closed tab) counts as a loss next time the game loads
@@ -793,6 +817,7 @@
       ['#introFoeTier', `Online battle · King Tower ${foe.king}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
       ['#introFoeClan', ''], ['#introYouTier', `${KCProgress.state.trophies} trophies`], ['#introStakes', '']]) $(sel).textContent = text;
     introYou();
+    veil(T.name, `Online · ${T.tier}`);
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {},
       views: {}, falls: {}, slowmo: 0, flash: 0, fireworks: 0, finding: false });
@@ -967,6 +992,44 @@
     if (res.tip) rows.push(`<p class="rr rr-tip">${res.tip}</p>`);
     return rows.join('');
   }
+  const SHOP_CHANCE = 0.2;
+  // what the battle earned, in one line (when the Shop takes the rewards' place)
+  function earnedLine(res) {
+    const bits = [res.chest ? `${res.chest.name} (slot ${res.chest.slot + 1})` : res.slotsFull ? 'chest slots full' : '', res.gold ? `+${res.gold.toLocaleString('en-US')} rubies${res.streakBonus ? ' (win streak)' : ''}` : '',
+      res.finished && res.finished.length ? `quest done: ${res.finished.join(', ')}` : ''].filter(Boolean);
+    return bits.length ? `<p class="rr rr-earned">Earned: ${bits.join(' · ')}</p>` : '';
+  }
+  // today's Shop offers that can still be bought, in the Shop's own order and at its prices
+  function shopOffersHtml() {
+    const shop = KCProgress.shop(), P = KCProgress.state, list = [];
+    shop.offers.forEach((o, i) => {
+      const sold = !!shop.bought[o.id] && !o.repeat, maxed = o.card && KCProgress.upgradeInfo(o.card).max;
+      if (!sold && !maxed && list.length < 3) list.push([o, i]);
+    });
+    if (!list.length) return '';
+    return `<div class="rr rr-shop"><b class="rs-head">From today's Shop</b><div class="rs-offers">${list.map(([o, i]) => {
+      const gem = o.currency === 'diamonds', poor = (gem ? P.diamonds : P.rubies) < o.price;
+      const art = o.kind === 'rubies' ? '<span class="rs-art rs-rubies"><i class="ruby-i"></i></span>' : `<span class="rs-art ${KC_CARDS[o.card].rarity}"><img src="${KCMenu.cardImg(o.card)}" alt=""><em>×${o.qty.toLocaleString('en-US')}</em></span>`;
+      const name = o.kind === 'rubies' ? `${o.qty.toLocaleString('en-US')} Rubies` : KC_CARDS[o.card].name;
+      return `<div class="rs-offer"><small>${o.tag}</small>${art}<b>${name}</b><button type="button" class="buy-btn${gem ? ' gem' : ''}${poor ? ' poor' : ''}" data-roffer="${i}"><i class="${gem ? 'gem-i' : 'ruby-i'}" aria-hidden="true"></i>${o.price.toLocaleString('en-US')}</button></div>`;
+    }).join('')}</div></div>`;
+  }
+  // buying from the result screen: diamonds take a second click, as in the Shop; the reveal plays in the lobby
+  let rConfirm = -1;
+  function resultBuy(btn) {
+    const i = +btn.dataset.roffer, o = KCProgress.shop().offers[i], P = KCProgress.state;
+    if (!o) return;
+    const gem = o.currency === 'diamonds';
+    if ((gem ? P.diamonds : P.rubies) < o.price) { KCSound.play('error'); btn.textContent = gem ? 'Not enough diamonds' : 'Not enough rubies'; return; }
+    if (gem && rConfirm !== i) { rConfirm = i; btn.classList.add('confirm'); btn.textContent = 'Confirm?'; KCSound.play('select'); return; }
+    rConfirm = -1;
+    const r = KCProgress.buy(i);
+    if (!r || !r.ok) { KCSound.play('error'); btn.disabled = true; btn.textContent = 'Not available'; return; }
+    KCSound.play('buy');
+    if (G.res) G.res.chestShown = true;
+    goHome();
+    KCMenu.showChest(null, r, 'Purchased');
+  }
   // count numbers up and fill bars, a moment after the result shows
   function playRewards() {
     const box = $('#resRewards');
@@ -1014,6 +1077,7 @@
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', 'Replay'], ['#scoreFoe', T.name], ['#introFoeName', T.name], ['#introFoeTier', 'Replay'],
       ['#resFoeName', T.name], ['#introYou', KCMenu.name], ['#introFoeClan', ''], ['#introYouTier', ''], ['#introStakes', 'Replay']]) $(sel).textContent = text;
     introYou();
+    veil(T.name, 'Replay');
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {}, views: {},
       falls: {}, slowmo: 0, flash: 0, fireworks: 0, finding: false });
@@ -1069,7 +1133,12 @@
       tr.innerHTML = `<i class="trophy-i" aria-hidden="true"></i><b data-count="${res.delta}">${res.delta > 0 ? '+' : ''}0</b><small>${res.trophies.toLocaleString('en-US')} trophies</small>`;
     }
     const rw = $('#resRewards');
-    rw.innerHTML = res.kind === 'trophy' ? rewardsHtml(res) : res.tip ? `<p class="rr rr-tip">${res.tip}</p>` : '';
+    // One result in five (whatever the outcome) shows today's Shop offers instead, exactly as the Shop
+    // lists them, with a line for what this battle earned.
+    const shopNow = res.kind === 'trophy' && Math.random() < SHOP_CHANCE ? shopOffersHtml() : '';
+    res.shopShown = !!shopNow;
+    rw.innerHTML = shopNow ? earnedLine(res) + shopNow : res.kind === 'trophy' ? rewardsHtml(res) : res.tip ? `<p class="rr rr-tip">${res.tip}</p>` : '';
+    rw.classList.toggle('shop-mode', !!shopNow);
     rw.hidden = !rw.innerHTML;
     // quest rewards and the crown chest can be claimed straight from here
     const claimable = res.kind === 'trophy' && ((res.quests || []).some(q => q.done && !q.claimed) || (res.crown && res.crown.ready));
@@ -2141,6 +2210,7 @@
     $('#replaySpeed').addEventListener('click', () => { if (!G.replay) return; G.replay.speed = G.replay.speed === 1 ? 2 : G.replay.speed === 2 ? 4 : 1; $('#replaySpeed').textContent = G.replay.speed + '×'; });
     $('#replayExit').addEventListener('click', () => { if (!G.replay) return; G.replay = null; $('#replayBar').hidden = true; G.res = null; goHome(); KCMenu.openProfile(); });
     $('#claimNowBtn').addEventListener('click', () => { goHome(); KCMenu.openQuests(); });
+    $('#resRewards').addEventListener('click', e => { const b = e.target.closest('button[data-roffer]'); if (b && !b.disabled) resultBuy(b); });
     // Surrender: tap once to ask, again within 3 s to give up the battle (a loss, as if the King fell).
     // Online it tells the other player, who wins.
     let leaveT = 0;

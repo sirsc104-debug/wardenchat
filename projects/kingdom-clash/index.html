@@ -73,8 +73,6 @@
               <canvas id="oppPic" width="96" height="96" aria-hidden="true"></canvas>
               <div class="opp-text"><small id="oppLabel">Next Opponent</small><b id="oppName">Trainer Owen</b><span id="oppMeta">Tutorial</span></div>
               <button class="opp-change" id="oppChange" type="button" aria-expanded="false" aria-controls="oppPanel">Trainers <span aria-hidden="true">&#9662;</span></button>
-              <button class="online-btn practice-btn" id="practiceBtn" type="button" title="A practice battle: no trophies, nothing won or lost" hidden>Practice</button>
-              <button class="online-btn" id="onlineBtn" type="button" title="Battle other players online"><span class="ob-dot" aria-hidden="true"></span>Online</button>
               <div class="opp-panel" id="oppPanel" hidden><ul id="oppList"></ul></div>
             </div>
             <div class="battle-wrap">
@@ -88,6 +86,10 @@
             <div class="daily" id="daily" hidden>
               <button type="button" class="daily-btn" id="questBtn" aria-haspopup="dialog"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="9" y="5" width="22" height="30" rx="4" fill="#f3e6c4" stroke="#1c1530" stroke-width="2.6"/><path d="M14 13h12M14 19h12M14 25h8" stroke="#8a6a3c" stroke-width="2.6" stroke-linecap="round"/><circle cx="30" cy="30" r="7" fill="#2fb36b" stroke="#1c1530" stroke-width="2.4"/><path d="M26.8 30l2.2 2.2 4-4.4" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="db-text"><b>Daily Quests</b><small id="questSum">0 / 3 done</small></span><i class="db-dot" id="questDot" hidden></i></button>
               <button type="button" class="daily-btn challenge-btn" id="challengeBtn"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="#ff7a3d" stroke="#1c1530" stroke-width="2.6"/><path d="M22 7l-9 15h7l-3 11 10-16h-7z" fill="#ffe066" stroke="#1c1530" stroke-width="2.2" stroke-linejoin="round"/></svg><span class="db-text"><b id="challengeName">Daily Challenge</b><small id="challengeSum">3 chest wins left today</small></span><i class="db-dot" id="challengeDot" hidden></i></button>
+              <div class="daily-modes">
+                <button class="online-btn practice-btn" id="practiceBtn" type="button" title="A practice battle: no trophies, nothing won or lost" hidden>Practice</button>
+                <button class="online-btn" id="onlineBtn" type="button" title="Battle other players online"><span class="ob-dot" aria-hidden="true"></span>Online</button>
+              </div>
               <button type="button" class="daily-btn" id="crownBtn" aria-haspopup="dialog"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 31l-2-18 9 7 7-12 7 12 9-7-2 18z" fill="#ffcd33" stroke="#1c1530" stroke-width="2.6" stroke-linejoin="round"/><rect x="6" y="30" width="28" height="5" rx="2" fill="#e8a91f" stroke="#1c1530" stroke-width="2.4"/></svg><span class="db-text"><b>Crown Chest</b><small id="crownSum">0 / 10 crowns</small><span class="db-bar"><i id="crownFill"></i></span></span><i class="db-dot" id="crownDot" hidden></i></button>
             </div>
             <div class="chests" id="chests" aria-label="Chest slots"></div>
@@ -278,7 +280,7 @@
     </div>
 
     <!-- a milestone: a new arena, the Trophy Road opening -->
-    <div class="scene" id="scene" hidden role="dialog" aria-modal="true" aria-labelledby="sceneTitle">
+    <div class="ms-scene" id="scene" hidden role="dialog" aria-modal="true" aria-labelledby="sceneTitle">
       <div class="scene-rays" aria-hidden="true"></div>
       <small class="scene-kicker" id="sceneKicker">New Arena!</small>
       <h2 id="sceneTitle">Briar Hollow</h2>

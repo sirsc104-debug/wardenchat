@@ -1652,6 +1652,7 @@ const KCMenu = (() => {
     const p = P(), open = G.roadOpen(), mode = G.mode(), T = G.trainer(), next = G.nextTrainer();
     // after the Trophy Road opens the trainers can't be picked again: no Trainers button, no list
     $('#oppChange').hidden = open;
+    $('#opp').hidden = open;
     if (open && !$('#oppPanel').hidden) { $('#oppPanel').hidden = true; $('#oppChange').setAttribute('aria-expanded', 'false'); }
     const pic = $('#oppPic');
     if (mode === 'trophy') {
@@ -1661,7 +1662,8 @@ const KCMenu = (() => {
       const st = G.nextStakes();
       $('#oppMeta').textContent = `${fmt(p.trophies)} trophies · win about +${st.win} / loss about −${st.loss}`;
       if (pic.dataset.id !== TROPHY_ID) { pic.dataset.id = TROPHY_ID; trophyPic(pic); }
-      $('#battleSub').textContent = `Trophy battle · ${a.name}`;
+      // the opponent bar is only for the trainers: in trophy battles the Battle button says what's at stake
+      $('#battleSub').textContent = `Trophy battle · win about +${st.win} / loss −${st.loss}`;
     } else {
       $('#oppLabel').textContent = open ? 'Trainer rematch · starter deck · no trophies' : next && T.id === next.id ? 'Next Opponent' : 'Rematch';
       $('#oppName').textContent = T.name;

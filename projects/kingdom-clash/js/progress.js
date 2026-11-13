@@ -96,7 +96,7 @@ const KCProgress = (() => {
     // what a missing rarity is paid in instead
     fallback: { legendary: ['epic', 3], epic: ['rare', 5] },
     // gold for each trophy-battle win (times the gold tier), for the first `dailyCap` wins of a day
-    winGold: { base: 10, dailyCap: 20 },
+    winGold: { base: 250, dailyCap: 20 },
     // the free daily chest: a wooden chest with this many times its usual contents
     freeChest: { type: 'wooden', bonus: 3 },
     // diamonds can skip a chest's timer: 1 diamond for every 5 minutes left (rounded up)
