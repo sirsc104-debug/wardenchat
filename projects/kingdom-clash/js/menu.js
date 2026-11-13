@@ -46,6 +46,7 @@ const KCMenu = (() => {
   function recordResult(foe, winner, crowns, stats) {
     if (foe.kind === 'practice') return { kind: 'practice' };
     if (foe.kind === 'challenge') return G.recordChallenge(winner);
+    if (foe.kind === 'friend') return { kind: 'friend' };
     const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns, foe.trophies, stats) : G.recordTrainer(foe.id, winner);
     return r;
   }
@@ -884,6 +885,44 @@ const KCMenu = (() => {
   }
   function hintDone(id) { const p = P(); p.hints = p.hints || {}; if (!p.hints[id]) { p.hints[id] = true; G.save(); } }
 
+  /* ---------- your profile ---------- */
+  const ago = t => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
+  const KIND = { trophy: 'Trophy battle', practice: 'Practice', challenge: 'Daily Challenge', friend: 'Friend', trainer: 'Training' };
+  function renderProfile() {
+    const pr = G.profile();
+    $('#profName').textContent = pr.name;
+    $('#profSub').textContent = `Level ${pr.level} · Arena ${pr.arena.number} · ${pr.arena.name}`;
+    $('#profPic').innerHTML = pr.avatar ? `<img src="${cardImg(pr.avatar)}" alt="">` : KCEmotes.face('thumbs', 0);
+    const fav = pr.favorite ? KC_CARDS[pr.favorite].name : '·';
+    const stats = [['Trophies', fmt(pr.trophies)], ['Best', fmt(pr.best)], ['King Tower', pr.king], ['Trophy battles', `${pr.record.w}W · ${pr.record.l}L${pr.record.d ? ` · ${pr.record.d}D` : ''}`],
+      ['Win rate', pr.winRate === null ? '·' : Math.round(pr.winRate * 100) + '%'], ['Three-crown wins', fmt(pr.three)], ['Cards found', `${pr.found} / ${pr.all}`], ['Most played', fav]];
+    $('#profStats').innerHTML = stats.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(String(v))}</dd></div>`).join('');
+    const log = G.battleLog();
+    $('#profLog').innerHTML = log.length ? log.map((b, i) => {
+      const res = b.winner === 0 ? 'win' : b.winner === 1 ? 'loss' : 'draw';
+      return `<li class="pl ${res}"><span class="pl-res">${res === 'win' ? 'Win' : res === 'loss' ? 'Loss' : 'Draw'}</span>
+        <span class="pl-text"><b>${esc(b.name)}</b><small>${KIND[b.kind] || 'Battle'} · ${b.crowns[0]}–${b.crowns[1]}${b.delta ? ` · ${b.delta > 0 ? '+' : ''}${b.delta} trophies` : ''} · ${ago(b.at)}</small></span>
+        <button type="button" class="mini-btn pl-watch" data-log="${i}" title="Watch this battle again">Watch</button></li>`;
+    }).join('') : '<li class="pl empty">Your battles show up here, with a replay of each.</li>';
+    $('#deckCodeOut').value = G.deckCode();
+    $('#friendOut').value = G.friendCode();
+  }
+  function openProfile() { renderProfile(); $('#profAvatars').hidden = true; $('#deckMsg').textContent = ''; $('#friendMsg').textContent = ''; $('#profModal').hidden = false; $('#profX').focus(); }
+  function closeProfile() { $('#profModal').hidden = true; }
+  function copyField(sel, msgSel) {
+    const el = $(sel), done = () => { $(msgSel).textContent = 'Copied!'; KCSound.play('select'); };
+    el.select();
+    try { navigator.clipboard.writeText(el.value).then(done, () => { document.execCommand('copy'); done(); }); } catch (e) { try { document.execCommand('copy'); done(); } catch (e2) { $(msgSel).textContent = 'Select the code and copy it.'; } }
+  }
+  function avatarPicker() {
+    const box = $('#profAvatars');
+    if (!box.hidden) { box.hidden = true; return; }
+    const cur = G.profile().avatar;
+    box.innerHTML = `<button type="button" class="av${cur ? '' : ' on'}" data-av="">${KCEmotes.face('thumbs', 0)}</button>` +
+      P().found.map(id => `<button type="button" class="av${cur === id ? ' on' : ''}" data-av="${id}" title="${esc(KC_CARDS[id].name)}"><img src="${cardImg(id)}" alt="${esc(KC_CARDS[id].name)}"></button>`).join('');
+    box.hidden = false;
+  }
+
   /* ---------- the daily challenge ---------- */
   let draft = null;
   function openChallenge() {
@@ -1706,6 +1745,9 @@ const KCMenu = (() => {
     const total = KC_TRAINERS.length, n = G.beatenCount(), open = G.roadOpen();
     // top bar
     $('#playerName').textContent = p.name;
+    const avId = G.profile().avatar, crest = $('.who-crest');
+    if (crest.dataset.av !== (avId || '')) { crest.dataset.av = avId || ''; if (avId) crest.innerHTML = `<img src="${cardImg(avId)}" alt="">`; else if (crest.dataset.svg) crest.innerHTML = crest.dataset.svg; }
+    if (!crest.dataset.svg && !avId) crest.dataset.svg = crest.innerHTML;
     const lv = G.level(), into = p.xp % G.XP_PER_LEVEL;
     $('#lvlNum').textContent = lv;
     const ki = G.kingInfo();
@@ -1814,11 +1856,7 @@ const KCMenu = (() => {
       e.stopPropagation();
       if (toggle('#settings', '#settingsBtn')) $('#nameInput').value = P().name;
     });
-    $('#whoBtn').addEventListener('click', e => {
-      e.stopPropagation();
-      if ($('#settings').hidden) toggle('#settings', '#settingsBtn');
-      const i = $('#nameInput'); i.value = P().name; i.focus(); i.select();
-    });
+    $('#whoBtn').addEventListener('click', e => { e.stopPropagation(); closePops(); openProfile(); });
     for (const el of ['#settings', '#oppPanel']) $(el).addEventListener('click', e => e.stopPropagation());
     document.addEventListener('click', () => closePops());
     $('#soundBtn').addEventListener('click', () => { KCSound.on = !KCSound.on; refresh(); });
@@ -1857,6 +1895,31 @@ const KCMenu = (() => {
     $('#cp').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && G.roadOpen()) { e.preventDefault(); cpGo(); } });
     $('#exX').addEventListener('click', closeExchange);
     $('#questBtn').addEventListener('click', openQuests);
+    $('#profX').addEventListener('click', closeProfile);
+    $('#profPic').addEventListener('click', avatarPicker);
+    $('#profRename').addEventListener('click', e => { e.stopPropagation(); closeProfile(); if ($('#settings').hidden) toggle('#settings', '#settingsBtn'); const i = $('#nameInput'); i.value = P().name; i.focus(); i.select(); });
+    $('#deckCopy').addEventListener('click', () => copyField('#deckCodeOut', '#deckMsg'));
+    $('#friendCopy').addEventListener('click', () => copyField('#friendOut', '#friendMsg'));
+    $('#deckUse').addEventListener('click', () => {
+      const r = G.readDeckCode($('#deckCodeIn').value);
+      if (r.error) { $('#deckMsg').textContent = 'That is not a deck code (they look like KC1- and 16 letters and numbers).'; KCSound.play('error'); return; }
+      if (r.missing.length) { $('#deckMsg').textContent = `You haven't found ${r.missing.map(id => KC_CARDS[id].name).join(', ')} yet.`; KCSound.play('error'); return; }
+      G.setWholeDeck(r.deck); KCSound.play('buy'); refresh(); renderProfile();
+      $('#deckMsg').textContent = `Deck ${P().deckSlot + 1} is now this deck.`;
+    });
+    $('#friendGo').addEventListener('click', () => {
+      const f = G.friendFoe($('#friendIn').value);
+      if (f.error) { $('#friendMsg').textContent = 'That is not a friend code (they start with KCF1-).'; KCSound.play('error'); return; }
+      closeProfile();
+      opts.onBattle && opts.onBattle(f);
+    });
+    $('#profModal').addEventListener('click', e => {
+      if (e.target.id === 'profModal') { closeProfile(); return; }
+      const w = e.target.closest('.pl-watch');
+      if (w) { const entry = G.battleLog()[+w.dataset.log]; closeProfile(); if (opts.onReplay) opts.onReplay(entry); return; }
+      const av = e.target.closest('.av');
+      if (av) { G.setAvatar(av.dataset.av || null); KCSound.play('select'); $('#profAvatars').hidden = true; renderProfile(); refresh(); }
+    });
     $('#challengeBtn').addEventListener('click', openChallenge);
     $('#chX').addEventListener('click', closeChallenge);
     $('#chGo').addEventListener('click', challengeGo);
@@ -1905,8 +1968,8 @@ const KCMenu = (() => {
         else if (e.key === ' ' || e.key === 'Enter') { chestTap(); e.preventDefault(); }
         return;
       }
-      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); closeExchange(); closeQuests(); closeChallenge(); if (!$('#onlineModal').hidden) closeOnline(); return; }
-      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#exModal').hidden || !$('#onlineModal').hidden || !$('#questModal').hidden || !$('#chModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); closeExchange(); closeQuests(); closeChallenge(); closeProfile(); if (!$('#onlineModal').hidden) closeOnline(); return; }
+      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#exModal').hidden || !$('#onlineModal').hidden || !$('#questModal').hidden || !$('#chModal').hidden || !$('#profModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
       const n = '12345'.indexOf(e.key);
       if (n >= 0) { tab(TABS[n]); e.preventDefault(); }
       else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(nextFoe()); e.preventDefault(); }
@@ -1926,7 +1989,7 @@ const KCMenu = (() => {
 
   return {
     init, refresh, recordResult, nextFoe, cardImg, tab, showChest, chestSvg, openQuests, milestone,
-    practiceAgain: T => G.practiceFoe(T && T.tryCard ? T.tryCard.card : null), openChallenge,
+    practiceAgain: T => G.practiceFoe(T && T.tryCard ? T.tryCard.card : null), openChallenge, openProfile,
     get name() { return P() ? P().name : 'Player'; },
     show() { refresh(); requestAnimationFrame(placeGlow); },
   };

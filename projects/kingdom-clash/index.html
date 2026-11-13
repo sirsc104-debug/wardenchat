@@ -18,7 +18,7 @@
   <section class="screen" id="home">
     <div class="lobby">
       <header class="topbar">
-        <button class="who" id="whoBtn" type="button" title="Change your name in Settings">
+        <button class="who" id="whoBtn" type="button" title="Your profile, battle log and deck codes">
           <span class="who-crest" aria-hidden="true"><svg viewBox="0 0 100 70"><path d="M8 62 L8 22 L30 40 L50 6 L70 40 L92 22 L92 62 Z" fill="#ffcf3f" stroke="#1c1530" stroke-width="8" stroke-linejoin="round"/><circle cx="50" cy="46" r="8" fill="#e5414b" stroke="#1c1530" stroke-width="5"/></svg></span>
           <span class="who-text"><b id="playerName">Player</b><small>Training Grounds</small></span>
         </button>
@@ -285,6 +285,32 @@
       <button type="button" class="big-btn" id="sceneGo"><span>Let's go!</span></button>
     </div>
 
+    <!-- your profile: stats, an avatar, the battle log with replays, deck codes, a friend challenge -->
+    <div class="modal" id="profModal" hidden>
+      <div class="quest-card plaque prof-card" role="dialog" aria-modal="true" aria-labelledby="profName">
+        <button class="modal-x" id="profX" type="button" aria-label="Close">&#x2715;</button>
+        <div class="prof-head">
+          <button type="button" class="prof-pic" id="profPic" title="Choose an avatar"></button>
+          <div class="prof-id"><h3 id="profName">Player</h3><small id="profSub"></small></div>
+          <button type="button" class="mini-btn" id="profRename">Rename</button>
+        </div>
+        <div class="prof-avatars" id="profAvatars" hidden></div>
+        <dl class="prof-stats" id="profStats"></dl>
+        <h4>Battle log</h4>
+        <ul class="prof-log" id="profLog"></ul>
+        <h4>Deck code</h4>
+        <p class="q-sub">Share your deck, or paste a code to use someone else's.</p>
+        <div class="prof-row"><input id="deckCodeOut" readonly aria-label="Your deck code"><button type="button" class="mini-btn" id="deckCopy">Copy</button></div>
+        <div class="prof-row"><input id="deckCodeIn" placeholder="Paste a deck code (KC1-...)" aria-label="A deck code to use" autocomplete="off"><button type="button" class="mini-btn" id="deckUse">Use</button></div>
+        <p class="prof-msg" id="deckMsg" aria-live="polite"></p>
+        <h4>Challenge a friend</h4>
+        <p class="q-sub">Send your friend this code: they battle a computer player with your deck and your card levels. Paste theirs to battle theirs. Nothing is won or lost.</p>
+        <div class="prof-row"><input id="friendOut" readonly aria-label="Your friend code"><button type="button" class="mini-btn" id="friendCopy">Copy</button></div>
+        <div class="prof-row"><input id="friendIn" placeholder="Paste a friend's code (KCF1-...)" aria-label="A friend's code" autocomplete="off"><button type="button" class="mini-btn" id="friendGo">Battle</button></div>
+        <p class="prof-msg" id="friendMsg" aria-live="polite"></p>
+      </div>
+    </div>
+
     <!-- the daily challenge: its rules, and the draft's eight picks -->
     <div class="modal" id="chModal" hidden>
       <div class="quest-card plaque ch-card" role="dialog" aria-modal="true" aria-labelledby="chTitle">
@@ -363,6 +389,7 @@
         <canvas id="arena" aria-label="Battle arena"></canvas>
         <div class="nameplate"><b id="foeName">Trainer Owen</b><small id="foeTier">Training Grounds</small></div>
         <div class="bubble" id="bubble" hidden></div>
+        <div class="replay-bar" id="replayBar" hidden><span class="rb-dot" aria-hidden="true"></span><b>Replay</b><button type="button" id="replaySpeed" title="Speed">1×</button><button type="button" id="replayExit">Exit</button></div>
         <div class="coach" id="coach" hidden role="status" aria-live="polite"><canvas id="coachFace" width="96" height="96" aria-hidden="true"></canvas><p id="coachText"></p><button type="button" class="coach-skip" id="coachSkip">Skip tips</button></div>
         <div class="banner" id="banner" hidden></div>
         <div class="countdown" id="countdown" hidden></div>

@@ -49,13 +49,14 @@
     if (typeof foe === 'string') foe = KC_TRAINER[foe];
     const T = G.trainer = foe || KCMenu.nextFoe();
     G.online = null;
-    const challenge = T.kind === 'challenge', practice = T.kind === 'practice' || challenge, trophy = T.kind === 'trophy' || practice, arenaNow = KCProgress.arena();
+    G.replay = null;
+    const challenge = T.kind === 'challenge', practice = T.kind === 'practice' || T.kind === 'friend' || challenge, trophy = T.kind === 'trophy' || practice, arenaNow = KCProgress.arena();
     G.theme = trophy ? arenaNow.theme : 'training';
     G.art = KCArenas.get(G.theme);
     B = G.art.margin;
     KCScenery.setArena(G.theme);
     G.embers = [];
-    G.s = S.create({
+    G.s = S.create(G.simOpts = {
       seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, T.towerDamage],
       decks: [practice ? T.yourDeck : trophy ? KCProgress.state.deck : KCProgress.trainingDeck(), T.deck || KC_STARTER_DECK],
       cardLevels: [practice ? T.yourLevels : KCProgress.cardLevels(), T.cardLevels || {}],
@@ -78,7 +79,7 @@
       falls: {}, slowmo: 0, flash: 0, fireworks: 0 });
     for (const el of document.querySelectorAll('.fly-crown')) el.remove();
     $('#simWinBtn').hidden = false; $('#netWait').hidden = true;
-    $('#leaveBtn').hidden = false; $('#leaveBtn').classList.remove('ask');
+    $('#leaveBtn').hidden = false; $('#leaveBtn').classList.remove('ask'); $('#replayBar').hidden = true;
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
     KCEmotes.reset(T.mood);
@@ -91,8 +92,8 @@
   }
   // your side of the VS screen: your King, in blue
   function introYou() {
-    const el = $('#introYouPic');
-    if (el) el.innerHTML = KCEmotes.face('thumbs', 0);
+    const el = $('#introYouPic'), av = KCProgress.profile().avatar;
+    if (el) el.innerHTML = av ? `<img src="${KCMenu.cardImg(av)}" alt="">` : KCEmotes.face('thumbs', 0);
   }
   function begin() {
     $('#intro').hidden = true;
@@ -225,7 +226,7 @@
     if (i >= 0) KCSound.play('select');
   }
   function cardDown(e, i) {
-    if (G.phase !== 'play') return;
+    if (G.phase !== 'play' || G.replay) return;
     e.preventDefault();
     G.toggle = G.sel === i;
     select(i);
@@ -259,7 +260,7 @@
   }
   function tryPlay(w) {
     const s = G.s;
-    if (!s || G.sel < 0 || G.phase !== 'play') return;
+    if (!s || G.sel < 0 || G.phase !== 'play' || G.replay) return;
     const slot = G.sel, id = s.hands[0][slot], p = placeAt(id, w);
     if (G.online) { onlinePlay(slot, id, p); return; }
     const r = S.play(s, 0, slot, p.x, p.y);
@@ -744,6 +745,7 @@
     return (Math.imul(h, 31) + Math.round(s.energy[0] * 64) * 3 + Math.round(s.energy[1] * 64) * 5) | 0;
   }
   function startOnline(m) {
+    G.replay = null; $('#replayBar').hidden = true;
     KCSound.unlock();
     const st = m.start, team = m.role === 'host' ? 0 : 1, foe = team === 0 ? st.guest : st.host;
     const lv = x => Object.fromEntries(x.deck.map((id, i) => [id, x.levels[i]]));
@@ -899,7 +901,9 @@
     // what you played, for the daily quests
     const mine = G.s.log.filter(l => l[1] === 0).map(l => KC_CARDS[l[5]]);
     const stats = { cards: mine.length, spells: mine.filter(c => c.kind === 'spell').length, troops: mine.filter(c => c.kind === 'troop').length };
+    if (G.replay) { G.res = { kind: 'replay' }; $('#countdown').hidden = true; banner(e.winner === 0 ? 'Victory!' : e.winner === 1 ? 'Defeat' : 'Draw'); return; }
     G.res = G.online ? { kind: 'online' } : KCMenu.recordResult(G.trainer, e.winner, G.s.crowns[0], stats);
+    if (!G.online && G.simOpts) logThis(e);
     G.res.tip = e.winner === 1 && !G.online ? lossTip() : '';
     if (G.online) endOnline();
     $('#countdown').hidden = true;
@@ -966,6 +970,61 @@
       }
     }, 650);
   }
+  // the battle, kept in the log with what it takes to watch it again
+  function logThis(e) {
+    const s = G.s, T = G.trainer, o = G.simOpts;
+    const trim = (lv, deck) => Object.fromEntries((deck || []).map(id => [id, lv && lv[id] !== undefined ? lv[id] : 1]));
+    KCProgress.logBattle({ at: Date.now(), kind: T.kind || 'trainer', name: T.name, trophies: T.trophies || null, look: T.look, theme: G.theme,
+      winner: e.winner, crowns: s.crowns.slice(), reason: e.reason, time: Math.round(s.time), delta: G.res && G.res.delta || 0,
+      opts: { seed: o.seed, towerDamage: o.towerDamage, decks: o.decks, cardLevels: [trim(o.cardLevels[0], o.decks[0]), trim(o.cardLevels[1], o.decks[1])], evos: o.evos, levels: o.levels,
+        energyMult: o.energyMult || undefined, firstTower: o.firstTower || undefined },
+      plays: s.log.map(p => p.slice()), end: { tick: s.tick, winner: e.winner, reason: e.reason } });
+  }
+
+  /* ---------- replays ----------
+     The same simulation, from the same starting options, with the same plays at the same ticks. */
+  function startReplay(entry) {
+    if (!entry || !entry.opts) return;
+    KCSound.unlock();
+    const T = G.trainer = { id: 'replay', kind: 'replay', name: entry.name, short: entry.name, look: entry.look, lines: null, tier: 'Replay', level: 1 };
+    G.online = null; G.tut = null;
+    G.theme = entry.theme || 'training';
+    G.art = KCArenas.get(G.theme);
+    B = G.art.margin;
+    KCScenery.setArena(G.theme);
+    G.s = G.sim = S.create(Object.assign({}, entry.opts));
+    G.bot = null; G.simOpts = null;
+    G.replay = { plays: entry.plays || [], i: 0, speed: 1, entry };
+    for (const [sel, text] of [['#foeName', T.name], ['#foeTier', 'Replay'], ['#scoreFoe', T.name], ['#introFoeName', T.name], ['#introFoeTier', 'Replay'],
+      ['#resFoeName', T.name], ['#introYou', KCMenu.name], ['#introFoeClan', ''], ['#introYouTier', ''], ['#introStakes', 'Replay']]) $(sel).textContent = text;
+    introYou();
+    A.trainer($('#introFoe'), T.look);
+    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {}, views: {},
+      falls: {}, slowmo: 0, flash: 0, fireworks: 0, finding: false });
+    for (const el of document.querySelectorAll('.fly-crown')) el.parentNode.removeChild(el);
+    $('#simWinBtn').hidden = true; $('#netWait').hidden = true; $('#leaveBtn').hidden = true;
+    $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true; $('#coach').hidden = true;
+    $('#replayBar').hidden = false; $('#replaySpeed').textContent = '1×';
+    $('#intro').classList.remove('finding');
+    KCScenery.reset();
+    KCEmotes.reset('quiet');
+    show('battle');
+    layout();
+    G.phase = 'intro'; G.intro = 1.2;
+    $('#intro').hidden = false;
+  }
+  // before each step, the plays made at this tick
+  function replayPlays() {
+    const R = G.replay, s = G.s;
+    while (R.i < R.plays.length && R.plays[R.i][0] <= s.tick) {
+      const [, team, slot, x, y] = R.plays[R.i++];
+      S.play(s, team, slot, x, y);
+    }
+    // a battle that ended early (a surrender) ends at the same moment
+    const end = R.entry.end;
+    if (end && s.tick >= end.tick && !s.result) S.forceEnd(s, end.winner, end.reason);
+  }
+
   function showResult() {
     const s = G.s, r = s.result, w = r.winner;
     const h = $('#resTitle');
@@ -1008,6 +1067,7 @@
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
     if (res.kind === 'online') { un.hidden = false; un.textContent = 'Online battle · no trophies won or lost'; }
     if (res.kind === 'practice') { un.hidden = false; un.textContent = 'Practice battle · nothing won or lost'; }
+    if (res.kind === 'friend') { un.hidden = false; un.textContent = `Friend challenge against ${G.trainer.name}'s deck · nothing won or lost`; }
     if (res.kind === 'challenge') { un.hidden = false; un.textContent = `Daily Challenge · ${res.name} · ${res.left ? `${res.left} chest win${res.left === 1 ? '' : 's'} left today` : 'all of today\'s chests won'}`; }
     $('#againBtn').hidden = res.kind === 'online';
     const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', sudden: w === 0 ? 'Sudden death: their tower crumbled first.' : 'Sudden death: your tower crumbled first.', first: 'Sudden Death challenge: the first tower down wins.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).', surrender: 'You surrendered.' }[r.reason];
@@ -2010,15 +2070,16 @@
       onlineTick(dt, now);
     } else if (G.phase === 'play') {
       // a moment of slow motion as a tower falls
-      const slow = G.slowmo > 0 ? 0.3 : 1;
+      const slow = (G.slowmo > 0 ? 0.3 : 1) * (G.replay ? G.replay.speed : 1);
       if (G.slowmo > 0) G.slowmo -= dt;
       G.acc += dt * slow;
       let n = 0;
       while (G.acc >= S.DT && n < 6 && G.phase === 'play') {
         // in the guided first battle, the clock and Owen wait while you place your first card
         if (G.tut && G.tut.step && TUT[G.tut.step].hold) { G.acc = 0; break; }
+        if (G.replay) replayPlays();
         S.step(G.s);
-        KCBot.update(G.bot, G.s);
+        if (G.bot) KCBot.update(G.bot, G.s);
         handleEvents();
         G.acc -= S.DT; n++;
       }
@@ -2027,7 +2088,8 @@
     } else if (G.phase === 'end') {
       if (G.online && !G.online.done && now - G.online.sentAt > 150) sendStep(G.online);
       G.ended -= dt;
-      if (G.ended <= 0 && $('#result').hidden) showResult();
+      if (G.ended <= 0 && G.replay) { G.replay = null; $('#replayBar').hidden = true; G.res = null; goHome(); KCMenu.openProfile(); }
+      else if (G.ended <= 0 && $('#result').hidden) showResult();
     }
     updateFx(dt * (G.slowmo > 0 ? 0.4 : 1));
     draw(G.phase === 'play' ? Math.min(1, G.acc / S.DT) : 1, now / 1000);
@@ -2036,7 +2098,7 @@
 
   function boot() {
     cv = $('#arena'); ctx = cv.getContext('2d');
-    KCMenu.init({ onBattle: startBattle, onOnline: startOnline });
+    KCMenu.init({ onBattle: startBattle, onOnline: startOnline, onReplay: startReplay });
     KCScenery.make($('#sceneL'), 'left');
     KCScenery.make($('#sceneR'), 'right');
     bindInput();
@@ -2060,6 +2122,8 @@
     $('#homeBtn').addEventListener('click', () => { if (G.res && G.res.chestNow && !G.res.chestShown) openChestNow(); else goHome(); });
     $('#chestNowBtn').addEventListener('click', openChestNow);
     $('#coachSkip').addEventListener('click', () => tutDone(true));
+    $('#replaySpeed').addEventListener('click', () => { if (!G.replay) return; G.replay.speed = G.replay.speed === 1 ? 2 : G.replay.speed === 2 ? 4 : 1; $('#replaySpeed').textContent = G.replay.speed + '×'; });
+    $('#replayExit').addEventListener('click', () => { if (!G.replay) return; G.replay = null; $('#replayBar').hidden = true; G.res = null; goHome(); KCMenu.openProfile(); });
     $('#claimNowBtn').addEventListener('click', () => { goHome(); KCMenu.openQuests(); });
     // Surrender: tap once to ask, again within 3 s to give up the battle (a loss, as if the King fell).
     // Online it tells the other player, who wins.

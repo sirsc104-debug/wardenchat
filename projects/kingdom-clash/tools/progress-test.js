@@ -706,6 +706,38 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   console.log(`daily challenge (${[...seen].join(', ')}), draft pairs, equal levels, three chest wins: ok`);
 }
 
+// The battle log, replays, deck codes and friend codes
+{
+  global.btoa = global.btoa || (x => Buffer.from(x, 'binary').toString('base64'));
+  global.atob = global.atob || (x => Buffer.from(x, 'base64').toString('binary'));
+  G.load(mem({ 'kc.progress': JSON.stringify({ name: 'Zoë', beaten: { owen: true, romeo: true, luc: true }, trophies: 1500, best: 1500, claimed: { 0: true } }) }));
+  const PL = G.state;
+  // a battle, logged, then replayed from its starting options and plays: the same battle
+  const opts = { seed: 777, decks: [KC_STARTER_DECK, ['ramcart', 'spears', 'fireball', 'bees', 'gladiator', 'hawks', 'archers', 'wolves']], cardLevels: [{}, {}], levels: [4, 4], evos: [[], []], towerDamage: [1, 1] };
+  const s = KCSim.create(JSON.parse(JSON.stringify(opts))), bots = [KCBot.create(0, { skill: 'normal', seed: 3 }), KCBot.create(1, { skill: 'normal', seed: 4, style: 'rush' })];
+  while (!s.result) { KCSim.step(s); bots.forEach(b => KCBot.update(b, s)); s.events.length = 0; }
+  for (let i = 0; i < 25; i++) G.logBattle({ at: i, kind: 'trophy', name: 'Foe ' + i, winner: s.result.winner, crowns: s.crowns.slice(), opts, plays: s.log.map(p => p.slice()) });
+  assert.strictEqual(G.battleLog().length, G.LOG_MAX, 'the last 20 battles');
+  assert.strictEqual(G.battleLog()[0].name, 'Foe 24', 'newest first');
+  const e = G.battleLog()[0], r = KCSim.create(JSON.parse(JSON.stringify(e.opts)));
+  let i = 0;
+  while (!r.result) { while (i < e.plays.length && e.plays[i][0] <= r.tick) { const p = e.plays[i++]; KCSim.play(r, p[1], p[2], p[3], p[4]); } KCSim.step(r); r.events.length = 0; }
+  assert.deepStrictEqual([r.result.winner, r.crowns, r.tick, r.ents.filter(x => x.kind === 'tower').map(x => x.hp)], [s.result.winner, s.crowns, s.tick, s.ents.filter(x => x.kind === 'tower').map(x => x.hp)], 'a replay is the same battle');
+  assert(G.profile().battles === 25 && G.profile().favorite, 'stats and a most-played card');
+  // deck codes
+  const code = G.deckCode(['rhino', 'meteor', 'fireball', 'hawks', 'archers', 'snowman', 'gorilla', 'wolves']);
+  assert(/^KC1-[0-9A-Z]{16}$/.test(code));
+  const rd = G.readDeckCode(code.toLowerCase());
+  assert(rd.deck.includes('meteor') && rd.missing.join() === 'meteor', 'a deck code reads back, with what you have not found');
+  assert(G.readDeckCode('KC1-0000000000000000').error && G.readDeckCode('hello').error, 'bad codes are refused');
+  // friend codes: your name (any letters), deck, levels and King Tower
+  const fc = G.friendCode(), ff = G.friendFoe(fc);
+  assert(ff.kind === 'friend' && ff.name === 'Zoë' && ff.deck.join() === PL.deck.join() && ff.towerDamage === 1, 'a friend code makes a computer player with your deck');
+  assert(G.friendFoe('KCF1-!!!').error && G.friendFoe('').error);
+  assert(G.setAvatar('gorilla') && G.profile().avatar === 'gorilla' && !G.setAvatar('meteor'), 'an avatar from your cards');
+  console.log(`battle log (${G.LOG_MAX}), replays match the battle, deck codes (${code}), friend codes, avatar: ok`);
+}
+
 // 9. Matchmaking: the win rate of a steady player who keeps their cards level with their trophies, and
 //    of one who never upgrades.
 const N = +process.argv[2] || 120;

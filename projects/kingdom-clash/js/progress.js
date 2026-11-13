@@ -1392,6 +1392,65 @@ const KCProgress = (() => {
     return { style: st, name: Bot.STYLES[st].name, deck: Bot.buildDeck(st, P.found.slice(), rand) };
   }
 
+  /* ---------- the battle log, stats, deck codes and friend codes ----------
+     The last LOG_MAX battles are kept with everything needed to watch them again: the simulation's
+     starting options (its seed, decks, levels) and every play. A replay runs the same simulation with the
+     same plays, so it is the battle exactly as it was. */
+  const LOG_MAX = 20;
+  function logBattle(entry) {
+    if (!entry) return;
+    P.log = (Array.isArray(P.log) ? P.log : []).concat(entry).slice(-LOG_MAX);
+    const S2 = P.stats = Object.assign({ battles: 0, wins: 0, three: 0, played: {} }, P.stats);
+    S2.battles++;
+    if (entry.winner === 0) S2.wins++;
+    if (entry.winner === 0 && entry.crowns && entry.crowns[0] >= 3) S2.three++;
+    for (const p of entry.plays || []) if (p[1] === 0 && p[5]) S2.played[p[5]] = (S2.played[p[5]] || 0) + 1;
+    // the plays only need the tick, team, slot and spot; the card names came along for the stats
+    entry.plays = (entry.plays || []).map(p => p.slice(0, 5));
+    save();
+  }
+  const battleLog = () => (Array.isArray(P.log) ? P.log.slice().reverse() : []);
+  function profile() {
+    const st = Object.assign({ battles: 0, wins: 0, three: 0, played: {} }, P.stats), fav = Object.entries(st.played).sort((a, b) => b[1] - a[1])[0];
+    const r = P.trophyRecord;
+    return { name: P.name, level: level(), trophies: P.trophies, best: P.best, king: P.king, arena: arena(), record: r,
+      winRate: r.w + r.l ? r.w / (r.w + r.l) : null, three: st.three, battles: st.battles, found: P.found.length, all: KC_ALL_CARDS.length,
+      favorite: fav ? fav[0] : null, avatar: P.avatar && P.found.includes(P.avatar) ? P.avatar : null, streak: P.streak || 0 };
+  }
+  function setAvatar(id) { if (id !== null && !P.found.includes(id)) return false; P.avatar = id; save(); return true; }
+  // A deck code: "KC1-" and two letters for each card (its place in the card list, in base 36).
+  const deckCode = (deck = P.deck) => 'KC1-' + deck.map(id => KC_ALL_CARDS.indexOf(id).toString(36).padStart(2, '0')).join('').toUpperCase();
+  function readDeckCode(code) {
+    const m = String(code || '').trim().toUpperCase().match(/^KC1-([0-9A-Z]{16})$/);
+    if (!m) return { error: 'format' };
+    const deck = m[1].match(/../g).map(x => KC_ALL_CARDS[parseInt(x, 36)]);
+    if (deck.some(id => !id) || new Set(deck).size !== 8 || deck.some(id => KC_CARDS[id].hidden)) return { error: 'cards' };
+    return { deck, missing: deck.filter(id => !P.found.includes(id)) };
+  }
+  // A friend code: your name, deck, card levels and King Tower, for a friend to battle a computer player
+  // that plays your deck (there are no online battles yet).
+  const b64 = { enc: str => btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
+    dec: str => decodeURIComponent(escape(atob(str.replace(/-/g, '+').replace(/_/g, '/')))) };
+  function friendCode() {
+    const d = { n: P.name, d: deckCode().slice(4), l: P.deck.map(id => P.cards[id].level), k: P.king, t: P.trophies };
+    try { return 'KCF1-' + b64.enc(JSON.stringify(d)); } catch (e) { return ''; }
+  }
+  function friendFoe(code, rand = Math.random) {
+    const m = String(code || '').trim().match(/^KCF1-([A-Za-z0-9_-]+)$/);
+    if (!m) return { error: 'format' };
+    let d;
+    try { d = JSON.parse(b64.dec(m[1])); } catch (e) { return { error: 'format' }; }
+    const dk = readDeckCode('KC1-' + d.d);
+    if (dk.error || !Array.isArray(d.l) || d.l.length !== 8) return { error: 'format' };
+    const lv = Object.fromEntries(dk.deck.map((id, i) => [id, Math.max(KC_MIN_LEVEL(id), Math.min(MAX_LEVEL, d.l[i] | 0 || 1))]));
+    const Bot = typeof KCBot !== 'undefined' ? KCBot : null;
+    const style = Bot ? Bot.STYLE_IDS.find(id => Bot.STYLES[id].win.some(w => dk.deck.includes(w))) || 'beatdown' : null;
+    const name = String(d.n || 'Friend').slice(0, 16), t = Math.max(0, d.t | 0);
+    return { id: 'friend', kind: 'friend', name, short: name, level: Math.min(...Object.values(lv)), tier: `${t} trophies · friend`, look: foeLook(rand), lines: null,
+      skill: skillFor(Math.max(0.35, curve(FOE_SKILL.curve, t))), towerDamage: 1, deck: dk.deck, cardLevels: lv, trophies: t, kingLevel: Math.max(1, Math.min(MAX_LEVEL, d.k | 0 || 1)),
+      style, mood: 'friendly', clan: 'Friend', stakes: null, yourDeck: P.deck.slice(), yourLevels: cardLevels(), evos: [] };
+  }
+
   /* ---------- the daily challenge ----------
      One mode a day, in turn. Both sides' cards and towers are at the same level (your deck's average),
      so it comes down to play; opponents play as well as those at your trophies. The first `wins` wins a
@@ -1480,6 +1539,7 @@ const KCProgress = (() => {
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
     DECK_SLOTS, useDeckSlot, setWholeDeck, deckWarnings, suggestDeck, practiceFoe,
     CHALLENGES, CHALLENGE_PAY, challenge, challengeLevel, draftPairs, challengeFoe, recordChallenge,
+    LOG_MAX, logBattle, battleLog, profile, setAvatar, deckCode, readDeckCode, friendCode, friendFoe,
     MAGIC, MAGIC_ORDER, MAGIC_RULES, wildActive, magicCount, magicFor, useMagic, grantMagic,
     EVO_ARENA, evoOpen, hasEvo, evoList, evoInfo,
     QUESTS, CROWN_CHEST, STREAK, quests, questAdd, claimQuest, questsReady, crownChest, openCrownChest,
