@@ -47,25 +47,10 @@ const KCMenu = (() => {
     if (foe.kind === 'practice') return { kind: 'practice' };
     if (foe.kind === 'challenge') return G.recordChallenge(winner);
     if (foe.kind === 'friend') return { kind: 'friend' };
-    const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns, foe.trophies, stats) : G.recordTrainer(foe.id, winner);
+    const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns, foe.trophies, stats, !!foe.boss) : G.recordTrainer(foe.id, winner);
     return r;
   }
 
-  // TEMPORARY test button: counts a win against the current opponent without playing the match,
-  // with the same rewards as a real win.
-  function simulateWin() {
-    const foe = nextFoe(), r = recordResult(foe, 0, 3);
-    const bits = [r.unlockedNext ? `${r.unlockedNext.name} unlocked` : '', r.roadOpened ? 'Trophy Road unlocked' : '',
-      r.kind === 'trophy' ? `+${r.delta} trophies` : '', r.chest ? `${r.chest.name} earned` : '', r.slotsFull ? 'chest slots are full' : '',
-      r.levelUp ? `level ${r.levelUp}` : ''].filter(Boolean);
-    if (G.roadOpen()) KCArenas.preload(G.arena().theme);
-    KCSound.play('crown');
-    refresh();
-    toast(`Simulated win vs ${foe.name}${bits.length ? ': ' + bits.join(', ') : ''}`);
-    if (r.chestNow) showChest(r.chestNow.chest, r.chestNow, r.chestNow.name);
-    if (r.roadOpened) milestone({ kind: 'road' });
-    if (r.newArena) milestone({ kind: 'arena', arena: r.newArena });
-  }
 
   /* ---------- small messages ---------- */
   let toastT = 0;
@@ -240,8 +225,9 @@ const KCMenu = (() => {
   function bindSkips() {
     for (const b of $$('#chests .skip-btn:not([data-bound])')) { b.dataset.bound = '1'; b.addEventListener('click', e => { e.stopPropagation(); skipClick(+b.dataset.skip); }); }
   }
-  function skipClick(i) {
-    const cost = G.skipCost(i);
+  async function skipClick(i) {
+    if (paying) return;
+    const now = Date.now(), cost = G.skipCost(i, now);
     if (!cost) return refresh();
     if (P().diamonds < cost) { confirmSkip = -1; toast(`Opening it now takes ${fmt(cost)} diamond${cost === 1 ? '' : 's'}. You have ${fmt(P().diamonds)}.`); return; }
     if (confirmSkip !== i) {
@@ -250,7 +236,8 @@ const KCMenu = (() => {
       KCSound.play('select'); renderChests(); return;
     }
     clearTimeout(confirmSkipT); confirmSkip = -1;
-    const got = G.skipChest(i);
+    if (!(await payFor('skip', cost))) return refresh();
+    const got = G.skipChest(i, now);
     if (got && !got.error) { KCSound.play('buy'); showChest(got.chest, got); }
     refresh();
   }
@@ -770,10 +757,12 @@ const KCMenu = (() => {
     }).join('') : '<p class="dim">Every card you can buy here is at level 15.</p>';
     for (const b of $$('.dshop .buy-btn[data-dsec]')) b.addEventListener('click', e => { e.stopPropagation(); buyDiamondClick(b.dataset.dsec, +b.dataset.di); });
   }
-  function buyDiamondClick(sec, i) {
+  async function buyDiamondClick(sec, i) {
+    if (paying) return;
     const s = G.shop(), o = { deals: s.deals, magic: s.magicItems, cards: s.cardShop }[sec][i];
     if (!o) return;
-    if (P().diamonds < o.price) { KCSound.play('error'); toast(`That costs ${fmt(o.price)} diamond${o.price === 1 ? '' : 's'}. Diamonds will come from the SirSC wallet.`); return; }
+    if (P().diamonds < o.price) { KCSound.play('error'); toast(noGems(o.price)); return; }
+    if (s.dBought[sec + ':' + o.id]) { KCSound.play('error'); toast('You already bought that today. New ones arrive at midnight.'); return; }
     const key = sec + ':' + i;
     if (dConfirm !== key) {   // diamonds take a second click to confirm
       dConfirm = key; clearTimeout(dConfirmT);
@@ -783,6 +772,7 @@ const KCMenu = (() => {
       return;
     }
     clearTimeout(dConfirmT); dConfirm = '';
+    if (!(await payFor(sec === 'deals' ? 'deal' : sec, o.price))) return refresh();
     const r = G.buyDiamond(sec, i);
     if (!r.ok) { KCSound.play('error'); toast(r.error === 'sold' ? 'You already bought that today. New ones arrive at midnight.' : 'That is not available.'); refresh(); return; }
     KCSound.play('buy');
@@ -790,7 +780,8 @@ const KCMenu = (() => {
     showChest(null, r, sec === 'deals' ? o.tag : sec === 'magic' ? 'Magic Shop' : 'Card Shop');
   }
   let emoteConfirm = null, emoteConfirmT = 0;
-  function buyEmoteClick(id, cur) {
+  async function buyEmoteClick(id, cur) {
+    if (paying) return;
     // a diamond takes a second click to confirm, like every diamond purchase
     if (cur === 'diamonds' && P().diamonds >= G.EMOTE_SHOP.diamonds && emoteConfirm !== id) {
       emoteConfirm = id; clearTimeout(emoteConfirmT);
@@ -798,9 +789,15 @@ const KCMenu = (() => {
       renderShop(); return;
     }
     emoteConfirm = null; clearTimeout(emoteConfirmT);
+    if (cur === 'diamonds') {
+      const o = G.emoteOffers().find(x => x.id === id);
+      if (!o || o.owned) return;
+      if (P().diamonds < o.diamonds) { KCSound.play('error'); toast(noGems(o.diamonds)); return; }
+      if (!(await payFor('emote', o.diamonds))) return refresh();
+    }
     const r = G.buyEmote(id, cur);
     if (r.error === 'rubies') { KCSound.play('error'); toast('Not enough rubies. Win battles and open chests to earn more.'); return; }
-    if (r.error === 'diamonds') { KCSound.play('error'); toast('Not enough diamonds. Diamonds will come from the SirSC wallet.'); return; }
+    if (r.error === 'diamonds') { KCSound.play('error'); toast(noGems(G.EMOTE_SHOP.diamonds)); return; }
     if (!r.ok) return;
     KCSound.play('buy'); setTimeout(() => KCSound.play(id.startsWith('card_') ? 'emCard' : 'em_' + id), 250);
     toast(`${KCEmotes.LABEL[id]} is in your emote panel!`);
@@ -1015,9 +1012,16 @@ const KCMenu = (() => {
     closeQuests(); refresh();
     showChest(r.chest, r, 'Crown Chest');
   }
-  function doExchange() {
-    const r = G.exchange($('#exAmount').value);
-    if (!r.ok) { KCSound.play('error'); renderExchange(); return; }
+  async function doExchange() {
+    if (paying) return;
+    paying = true; $('#exGo').disabled = true;
+    const r = await KCBackend.exchange($('#exAmount').value);
+    paying = false;
+    if (!r.ok) {
+      KCSound.play('error');
+      if (r.error === 'offline' || r.error === 'wallet') toast(r.error === 'offline' ? "Can't reach the SirSC wallet right now. Nothing was swapped." : 'The SirSC wallet said no. Nothing was swapped.');
+      renderExchange(); return;
+    }
     KCSound.play('buy'); toast(`Swapped ${fmt(r.coins)} Coins for ${fmt(r.rubies)} Rubies`);
     $('#exAmount').value = ''; refresh();
   }
@@ -1068,13 +1072,14 @@ const KCMenu = (() => {
     refresh();
     showChest('wooden', r, 'Free Wooden Chest');
   }
-  function buyClick(i) {
+  async function buyClick(i) {
+    if (paying) return;
     const o = G.shop().offers[i];
     if (!o) return;
     const gem = o.currency === 'diamonds';
     if ((gem ? P().diamonds : P().rubies) < o.price) {
       KCSound.play('error');
-      toast(gem ? 'Not enough diamonds. Diamonds will come from the SirSC wallet.' : 'Not enough rubies. Win battles and open chests to earn more.');
+      toast(gem ? noGems(o.price) : 'Not enough rubies. Win battles and open chests to earn more.');
       return;
     }
     // diamonds take a second click to confirm
@@ -1088,6 +1093,9 @@ const KCMenu = (() => {
       return;
     }
     clearTimeout(confirmT); confirmOffer = -1;
+    const s = G.shop();
+    if (s.bought[o.id] && !o.repeat) { toast('You already bought that today.'); refresh(); return; }
+    if (gem && !(await payFor('offer', o.price))) return refresh();
     const r = G.buy(i);
     if (!r.ok) { toast(r.error === 'sold' ? 'You already bought that today.' : 'That offer is not available.'); refresh(); return; }
     KCSound.play('buy');
@@ -1096,65 +1104,84 @@ const KCMenu = (() => {
   }
 
 
-  /* ---------- online battles (js/net.js) ---------- */
-  let onlineJoinCode = '';
+  /* ---------- Play a Friend (js/net.js): invite a WardenChat friend, or invite with a room code ---------- */
+  let onlineJoinCode = '', friendList = null;
   function openOnline() {
     $('#onlineModal').hidden = false;
-    KCNet.init().then(() => renderOnline(KCNet.info()));
+    KCNet.init().then(() => { renderOnline(KCNet.info()); loadFriends(); });
     renderOnline(KCNet.info());
   }
   function closeOnline() {
     $('#onlineModal').hidden = true;
     if (KCNet.info().status !== 'playing') KCNet.cancel();
   }
-  const matched = m => { $('#onlineModal').hidden = true; if (opts.onOnline) opts.onOnline(m); };
+  const matched = m => { $('#onlineModal').hidden = true; $('#friendsModal').hidden = true; $('#inviteToast').hidden = true; if (opts.onOnline) opts.onOnline(m); };
+  // the friends list, fetched from the account each time a friends screen opens
+  async function loadFriends() {
+    friendList = await KCNet.friends();
+    renderOnline(KCNet.info()); renderFriends();
+  }
+  const friendRows = (list, live, btnLabel) => list.length ? list.slice().sort((a, b) => (b.online - a.online) || a.name.localeCompare(b.name)).map(f => `<li class="fr-row${f.online ? ' on' : ''}">
+      <span class="fr-pic">${f.avatar ? `<img src="${esc(f.avatar)}" alt="">` : esc(f.name.slice(0, 1).toUpperCase())}</span>
+      <span class="fr-text"><b>${esc(f.name)}</b><small>${f.inGame ? 'Playing Kingdom Clash' : f.online ? 'Online' : 'Offline'}</small></span>
+      <button type="button" class="mini-btn fr-invite" data-friend="${esc(f.id)}"${live ? '' : ' disabled'}>${btnLabel}</button></li>`).join('')
+    : `<li class="fr-empty">No friends yet. ${KCNet.friendRequests() ? 'Add one with their WardenChat name below.' : 'Add them in WardenChat and they show up here.'}</li>`;
   function renderOnline(info) {
     if ($('#onlineModal').hidden) return;
     const box = $('#onlineBody');
     if (!G.onlineOpen()) {
-      box.innerHTML = `<div class="ol-lock"><b>Opens at Stormspire</b><p>Reach Stormspire (${fmt(G.ONLINE_AT)} trophies) to battle other players online.</p></div>`;
+      box.innerHTML = `<div class="ol-lock"><b>Opens at Stormspire</b><p>Reach Stormspire (${fmt(G.ONLINE_AT)} trophies) to battle your friends.</p></div>`;
       return;
     }
-    if (info.kind === 'off') {
+    const live = info.kind !== 'off' && info.kind !== 'none', bst = KCBackend.status();
+    if (!live && bst !== 'off') {
+      // accounts are on: battles with friends need the WardenChat account
+      box.innerHTML = bst === 'signedIn' ? '<div class="ol-wait"><span class="nw-spin" aria-hidden="true"></span><b>Connecting…</b></div>'
+        : `<div class="ol-soon"><b>Battle your friends</b><p>${bst === 'restricted' ? 'Your WardenChat account is restricted, so battles with friends are off for now.' : 'Sign in with your WardenChat account to invite your friends, or to join them with a room code.'}</p>
+          ${bst === 'restricted' ? '' : '<button type="button" class="pill gold" id="olSignIn">Sign in</button>'}</div>
+          <p class="dim ol-note">Battles with friends use your deck, card levels, King Tower and evolutions. No trophies are won or lost.</p>`;
+      const b = $('#olSignIn');
+      if (b) b.addEventListener('click', () => { closeOnline(); openSignIn(); });
+      return;
+    }
+    const friendsPart = !info.friends
+      ? '<p class="dim">Your friends come from your WardenChat account. Once you are signed in, they show up here.</p>'
+      : friendList === null ? '<p class="dim">Loading your friends…</p>'
+        : `<ul class="fr-list">${friendRows(friendList, live, 'Invite')}</ul>`;
+    if (!live) {
       // live play isn't switched on yet: show what's coming
-      box.innerHTML = `<div class="ol-soon"><span class="tag-lock">Coming soon</span><b>Online battles are coming soon</b>
-        <p>Battle other players with your own deck, card levels, King Tower and evolutions.</p></div>
+      box.innerHTML = `<div class="ol-soon"><span class="tag-lock">Coming soon</span><b>Battles with friends are coming soon</b>
+        <p>Battle your friends with your own deck, card levels, King Tower and evolutions.</p></div>
         <div class="ol-opts is-soon" aria-disabled="true">
-          <div class="ol-opt"><b>Quick match</b><p>Battle the next player who's looking.</p><button type="button" class="big-btn ol-go" disabled><span>Find a battle</span></button></div>
-          <div class="ol-opt"><b>Friendly battle</b><p>Make a room and share its code, or type a friend's code.</p>
+          <div class="ol-opt"><b>Invite a friend</b><p>Pick a friend from your WardenChat friends.</p>${friendsPart}</div>
+          <div class="ol-opt"><b>Invite with a code</b><p>Make a room and share its code, or type a friend's code.</p>
             <button type="button" class="pill gold" disabled>Make a room</button>
             <div class="ol-join"><input maxlength="5" placeholder="Code" disabled aria-label="Room code"><button type="button" class="pill" disabled>Join</button></div>
           </div>
         </div>
-        <p class="dim ol-note">No trophies will be won or lost in online battles.</p>`;
+        <p class="dim ol-note">No trophies are won or lost in battles with friends.</p>`;
       return;
     }
-    if (info.kind === 'none') { box.innerHTML = '<div class="ol-lock"><b>Not available here</b><p>This browser can\'t connect to other players.</p></div>'; return; }
-    const where = info.kind === 'room'
-      ? `<p class="ol-where"><b>${fmt(info.online)}</b> other player${info.online === 1 ? '' : 's'} here now${info.seeking ? ` · ${fmt(info.seeking)} looking for a battle` : ''}.</p>`
-      : '<p class="ol-where">Not on claude.ai, so only other tabs of this browser can be reached here.</p>';
-    if (info.status === 'seeking') {
-      box.innerHTML = `${where}<div class="ol-wait"><span class="nw-spin" aria-hidden="true"></span><b>Looking for an opponent…</b><p>You'll be matched with the next player who looks for a battle.</p></div>
-        <button type="button" class="pill" id="olCancel">Stop looking</button>`;
-    } else if (info.status === 'hosting') {
-      box.innerHTML = `${where}<div class="ol-wait"><small>Your room code</small><b class="ol-code">${esc(info.code.toUpperCase())}</b><p>Tell your friend this code. The battle starts as soon as they join.</p></div>
-        <button type="button" class="pill" id="olCancel">Cancel</button>`;
+    if (info.status === 'hosting') {
+      box.innerHTML = info.invitee
+        ? `<div class="ol-wait"><span class="nw-spin" aria-hidden="true"></span><b>Waiting for ${esc(info.invitee.name)}…</b><p>Your invite is on its way. The battle starts as soon as they accept. Room code: <b class="ol-code-sm">${esc(info.code.toUpperCase())}</b></p></div>
+          <button type="button" class="pill" id="olCancel">Cancel</button>`
+        : `<div class="ol-wait"><small>Your room code</small><b class="ol-code">${esc(info.code.toUpperCase())}</b><p>Tell your friend this code. The battle starts as soon as they join.</p></div>
+          <button type="button" class="pill" id="olCancel">Cancel</button>`;
     } else if (info.status === 'joining') {
-      box.innerHTML = `${where}<div class="ol-wait"><span class="nw-spin" aria-hidden="true"></span><b>Joining room ${esc(info.code.toUpperCase())}…</b><p>Waiting for its host. Check the code if this takes long.</p></div>
+      box.innerHTML = `<div class="ol-wait"><span class="nw-spin" aria-hidden="true"></span><b>Joining room ${esc(info.code.toUpperCase())}…</b><p>Waiting for your friend. Check the code if this takes long.</p></div>
         <button type="button" class="pill" id="olCancel">Cancel</button>`;
     } else if (info.status === 'playing') {
       box.innerHTML = '<div class="ol-wait"><b>Starting…</b></div>';
     } else {
-      box.innerHTML = `${where}
-        <div class="ol-opts">
-          <div class="ol-opt"><b>Quick match</b><p>Battle the next player who's looking.</p><button type="button" class="big-btn ol-go" id="olQuick"><span>Find a battle</span></button></div>
-          <div class="ol-opt"><b>Friendly battle</b><p>Make a room and share its code, or type a friend's code.</p>
+      box.innerHTML = `<div class="ol-opts">
+          <div class="ol-opt"><b>Invite a friend</b><p>Pick a friend from your WardenChat friends.</p>${friendsPart}</div>
+          <div class="ol-opt"><b>Invite with a code</b><p>Make a room and share its code, or type a friend's code.</p>
             <button type="button" class="pill gold" id="olCreate">Make a room</button>
             <form class="ol-join" id="olJoin"><input id="olCode" maxlength="5" placeholder="Code" autocomplete="off" spellcheck="false" aria-label="Room code" value="${esc(onlineJoinCode)}"><button type="submit" class="pill">Join</button></form>
           </div>
         </div>
-        <p class="dim ol-note">Online battles use your deck, card levels, King Tower and evolutions. No trophies are won or lost.</p>`;
-      $('#olQuick').addEventListener('click', () => KCNet.quickMatch(matched));
+        <p class="dim ol-note">Battles with friends use your deck, card levels, King Tower and evolutions. No trophies are won or lost.</p>`;
       $('#olCreate').addEventListener('click', () => KCNet.createRoom(matched));
       $('#olCode').addEventListener('input', e => { onlineJoinCode = e.target.value; });
       $('#olJoin').addEventListener('submit', async e => {
@@ -1165,6 +1192,136 @@ const KCMenu = (() => {
     }
     const c = $('#olCancel');
     if (c) c.addEventListener('click', () => KCNet.cancel());
+  }
+  async function inviteClick(id) {
+    const f = (friendList || []).find(x => x.id === id);
+    if (!f) return;
+    $('#friendsModal').hidden = true;
+    $('#onlineModal').hidden = false;
+    const r = await KCNet.inviteFriend(f, matched);
+    if (!r.ok) { KCSound.play('error'); toast(r.error === 'invite' ? `The invite to ${f.name} didn't go through. Try again.` : 'Battles with friends are not available right now.'); }
+    KCSound.play('select');
+    renderOnline(KCNet.info());
+  }
+
+  /* ---------- Friends: the WardenChat friends list ---------- */
+  function openFriends() {
+    $('#friendsModal').hidden = false; $('#friendsDot').hidden = true;
+    renderFriends();
+    KCNet.init().then(loadFriends);
+  }
+  function closeFriends() { $('#friendsModal').hidden = true; }
+  function renderFriends() {
+    if ($('#friendsModal').hidden) return;
+    const info = KCNet.info(), live = info.kind !== 'off' && info.kind !== 'none' && G.onlineOpen(), bst = KCBackend.status();
+    const note = !G.onlineOpen() ? `Battles with friends open at Stormspire (${fmt(G.ONLINE_AT)} trophies).` : !live ? 'Battles with friends are coming soon.' : 'Invite a friend to a battle: nothing is won or lost.';
+    if (!info.friends) {
+      $('#friendsBody').innerHTML = bst === 'off' || bst === 'restricted'
+        ? `<div class="fr-signin"><b>Your WardenChat friends</b><p>${bst === 'restricted' ? 'Your WardenChat account is restricted, so friends are off for now.' : 'Your friends come from your WardenChat account. Once you are signed in they show up here, with who is online, and you can invite them to a battle.'}</p></div>`
+        : `<div class="fr-signin"><b>Your WardenChat friends</b><p>Sign in with your WardenChat account to see your friends and who is online, add friends, and invite them to a battle.</p>
+          <button type="button" class="pill gold" id="frSignIn">Sign in</button></div>`;
+      const b = $('#frSignIn');
+      if (b) b.addEventListener('click', () => { closeFriends(); openSignIn(); });
+      return;
+    }
+    if (friendList === null) { $('#friendsBody').innerHTML = '<p class="dim">Loading your friends…</p>'; return; }
+    const req = KCNet.friendRequests();
+    const reqs = req && req.incoming.length ? `<div class="fr-reqs"><b>Friend requests</b><ul class="fr-list">${req.incoming.map(r => `<li class="fr-row">
+        <span class="fr-pic">${esc(r.name.slice(0, 1).toUpperCase())}</span><span class="fr-text"><b>${esc(r.name)}</b><small>Wants to be your friend</small></span>
+        <button type="button" class="mini-btn fr-yes" data-req="${esc(r.id)}">Accept</button><button type="button" class="pill fr-no" data-req="${esc(r.id)}">Decline</button></li>`).join('')}</ul></div>` : '';
+    const add = req ? `<form class="fr-add" id="frAdd"><input id="frAddName" maxlength="24" placeholder="Their WardenChat name" autocomplete="off" spellcheck="false" autocapitalize="off" aria-label="Add a friend by their WardenChat name"><button type="submit" class="mini-btn">Add friend</button></form>
+      <p class="fr-msg" id="frMsg" role="status">${esc(friendMsg)}</p>${req.outgoing.length ? `<p class="dim fr-sent">Waiting for: ${req.outgoing.map(r => esc(r.name)).join(', ')}</p>` : ''}` : '';
+    $('#friendsBody').innerHTML = `<p class="q-sub">${note}</p>${reqs}<ul class="fr-list">${friendRows(friendList, live, 'Battle')}</ul>${add}`;
+    const f = $('#frAdd');
+    if (f) f.addEventListener('submit', addFriendSubmit);
+  }
+  let friendMsg = '', friendReqs = 0;
+  const FRIEND_ERRORS = { user_not_found: 'No WardenChat account has that name.', self: "That's you!", already_friends: "You're already friends.",
+    already_requested: 'Your friend request is already on its way.', too_many: 'You have too many friends or requests for now.', rate_limited: 'Too many requests. Wait a minute and try again.',
+    request_not_found: 'That request is gone.', offline: "Can't reach WardenChat right now." };
+  async function addFriendSubmit(e) {
+    e.preventDefault();
+    const name = $('#frAddName').value.trim();
+    if (!name) return;
+    const r = await KCNet.addFriend(name);
+    friendMsg = r.error ? (FRIEND_ERRORS[r.error] || "That didn't work. Try again.") : r.status === 'accepted' ? `You and ${name} are friends now!` : `Friend request sent to ${name}.`;
+    KCSound.play(r.error ? 'error' : 'select');
+    await loadFriends();
+  }
+  async function answerRequest(id, yes) {
+    const r = await KCNet.answerFriend(id, yes);
+    friendMsg = r.error ? (FRIEND_ERRORS[r.error] || "That didn't work. Try again.") : yes ? 'Friend added!' : '';
+    if (!r.error && yes) KCSound.play('buy');
+    await loadFriends();
+  }
+
+  /* ---------- the WardenChat account: signing in (js/account.js, through js/backend.js) ---------- */
+  let signMode = 'in', signBusy = false;
+  function openSignIn() {
+    if (!KCBackend.connected()) { toast('WardenChat accounts are coming soon.'); return; }
+    if (KCBackend.account()) return;
+    signMode = 'in'; $('#signErr').textContent = '';
+    $('#signModal').hidden = false; renderSignIn(); $('#signName').focus();
+  }
+  function closeSignIn() { $('#signModal').hidden = true; $('#signPass').value = ''; $('#signErr').textContent = ''; }
+  function renderSignIn() {
+    if ($('#signModal').hidden) return;
+    const bst = KCBackend.status(), R = KCBackend.restriction(), create = signMode === 'create';
+    if (bst === 'signedIn') { closeSignIn(); return; }
+    $('#signTitle').textContent = create ? 'Create a WardenChat account' : 'Sign in with WardenChat';
+    $('#signGo').textContent = signBusy ? 'One moment…' : create ? 'Create account' : 'Sign in';
+    $('#signGo').disabled = signBusy;
+    $('#signSwap').textContent = create ? 'I already have an account' : 'New here? Create an account';
+    $('#signPass').setAttribute('autocomplete', create ? 'new-password' : 'current-password');
+    $('#signNote').innerHTML = create
+      ? `This makes a WardenChat account: the same name and password work on <a href="${esc(KCBackend.chatUrl)}" target="_blank" rel="noopener">Warden Chat</a> and its games.`
+      : `Your progress is saved to your account, your WardenChat friends show up here, and your SirSC diamonds and coins come with it. <a href="${esc(KCBackend.chatUrl)}" target="_blank" rel="noopener">Forgot your password?</a>`;
+    const box = $('#signRestricted');
+    box.hidden = bst !== 'restricted';
+    if (bst === 'restricted') box.textContent = `This account is ${R && R.status === 'banned' ? 'banned' : 'suspended'} on Warden Chat${R && R.reason ? `: ${R.reason}` : '.'}`;
+  }
+  const SIGN_ERRORS = { bad_credentials: "That name and password don't match a WardenChat account.", username_taken: 'That name is taken. Try another one.',
+    weak_password: 'Pick a longer password.', rate_limited: 'Too many tries. Wait a minute and try again.', signup_rejected: "WardenChat didn't accept that name. Try another one.",
+    offline: "Can't reach WardenChat. Check your connection.", confirm_enabled: 'The account was made, but it needs confirming on Warden Chat first.', server_error: 'WardenChat is having trouble. Try again soon.' };
+  async function signSubmit(e) {
+    e.preventDefault();
+    if (signBusy) return;
+    const R = KCBackend.rules, name = $('#signName').value.trim(), pass = $('#signPass').value, create = signMode === 'create';
+    const err = t => { $('#signErr').textContent = t; KCSound.play('error'); };
+    if (name.length < R.nameMin || name.length > R.nameMax || !R.nameRe.test(name)) return err(`Names are ${R.nameMin} to ${R.nameMax} letters, numbers, dots, dashes or underscores.`);
+    if (create ? pass.length < R.passwordMin : !pass) return err(create ? `Passwords are at least ${R.passwordMin} characters.` : 'Type your password.');
+    signBusy = true; $('#signErr').textContent = ''; renderSignIn();
+    try {
+      await KCBackend.login(name, pass, create);
+      signBusy = false; closeSignIn();
+      KCSound.play('buy');
+      const a = KCBackend.account();
+      toast(a ? `Signed in as ${a.name}` : 'Signed in');
+    } catch (x) { signBusy = false; renderSignIn(); err(SIGN_ERRORS[x && x.code] || 'Something went wrong. Try again.'); }
+  }
+  /* Diamonds through the SirSC wallet: the server takes them first (js/backend.js); nothing is bought
+     when it says no. Returns true when the purchase can go ahead. */
+  let paying = false;
+  async function payFor(kind, diamonds) {
+    paying = true;
+    const r = await KCBackend.pay(kind, diamonds);
+    paying = false;
+    if (r.ok) return true;
+    KCSound.play('error');
+    toast(r.error === 'diamonds' ? 'Not enough diamonds in your SirSC wallet. Nothing was spent.' : r.error === 'offline' ? "Can't reach the SirSC wallet right now. Nothing was spent."
+      : 'The SirSC wallet said no. Nothing was spent.');
+    return false;
+  }
+  const noGems = n => `That costs ${fmt(n)} diamond${n === 1 ? '' : 's'}. ` + (KCBackend.wallet() ? `You have ${fmt(P().diamonds)}; diamonds come from your SirSC wallet on Warden Chat.`
+    : KCBackend.connected() ? 'Sign in with your WardenChat account to use your SirSC diamonds.' : 'Diamonds will come from the SirSC wallet.');
+  // a friend's invite: a little card at the top with Battle and Not now
+  let pendingInvite = null;
+  function showInvite(inv) {
+    pendingInvite = inv;
+    $('#inviteText').textContent = `${(inv.from && inv.from.name) || 'A friend'} invites you to a battle`;
+    $('#inviteToast').hidden = false;
+    if ($('#friendsModal').hidden) $('#friendsDot').hidden = false;
+    KCSound.play('emPhrase');
   }
 
   /* ---------- the Diamond Pass ---------- */
@@ -1203,14 +1360,17 @@ const KCMenu = (() => {
       <b>Diamond Pass</b><small class="of-note">This week: the ${esc(KC_EVOS[fe].name)} at tier 1 and ${G.PASS.tiers.length - 1} more rewards</small>
       <button type="button" class="of-see">See rewards</button>${btn}</div>`;
   }
-  function buyPassClick() {
-    if (P().diamonds < G.PASS.price) { KCSound.play('error'); toast('Not enough diamonds. Diamonds will come from the SirSC wallet.'); return; }
+  async function buyPassClick() {
+    if (paying) return;
+    if (G.passPremium()) return;
+    if (P().diamonds < G.PASS.price) { KCSound.play('error'); toast(noGems(G.PASS.price)); return; }
     if (!passConfirm) {
       passConfirm = true; clearTimeout(passConfirmT);
       passConfirmT = setTimeout(() => { passConfirm = false; renderShop(); }, 4000);
       renderShop(); return;
     }
     passConfirm = false; clearTimeout(passConfirmT);
+    if (!(await payFor('pass', G.PASS.price))) return refresh();
     const r = G.buyPass();
     if (!r.ok) { KCSound.play('error'); return; }
     KCSound.play('buy');
@@ -1243,7 +1403,11 @@ const KCMenu = (() => {
             : st === 'premium' ? '<span class="pm-lock" title="Needs the Diamond Pass" aria-label="Needs the Diamond Pass"></span>' : '';
         return `<div class="pm-cell ${track} ${st}">${R.art}<span class="pm-label">${esc(R.label)}</span>${act}</div>`;
       };
-      return `<li class="pm-tier${i < tier ? ' reached' : ''}${i === tier ? ' here' : ''}"><span class="pm-num">${i + 1}</span>${cell('free')}${cell('paid')}</li>`;
+      // the circle fills as the tier's crowns are earned: full once reached, part way for the tier you're on
+      const prog = i < tier ? 1 : i === tier && open ? G.passInto() / per : 0, pct = Math.round(prog * 1000) / 10;
+      const ring = `<svg class="pm-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="bg" cx="22" cy="22" r="19"/>${pct > 0 ? `<circle class="fg" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="${pct} 100"/>` : ''}</svg>`;
+      const label = i < tier ? `Tier ${i + 1}: reached` : i === tier && open ? `Tier ${i + 1}: ${G.passInto()} of ${per} crowns` : `Tier ${i + 1}`;
+      return `<li class="pm-tier${i < tier ? ' reached' : ''}${i === tier ? ' here' : ''}"><span class="pm-num" title="${label}" aria-label="${label}">${ring}<b>${i + 1}</b></span>${cell('free')}${cell('paid')}</li>`;
     }).join('');
     for (const b of $$('#passTiers .pm-claim')) b.addEventListener('click', () => claimPassClick(+b.dataset.tier, b.dataset.track));
     const buy = $('#pmBuy');
@@ -1785,8 +1949,14 @@ const KCMenu = (() => {
     passPlaque();
     renderDaily();
     hintsRender();
-    $('#onlineBtn').classList.toggle('locked', !G.onlineOpen() || !KCNet.LIVE);
-    $('#onlineBtn').title = KCNet.LIVE ? 'Battle other players online' : 'Online battles are coming soon';
+    const canFriend = KCNet.isLive() || KCBackend.connected();
+    $('#onlineBtn').classList.toggle('locked', !G.onlineOpen() || !canFriend);
+    $('#onlineBtn').title = canFriend ? 'Battle a friend: invite one from your friends, or with a room code' : 'Battles with friends are coming soon';
+    // the WardenChat account (js/account.js, through js/backend.js)
+    const acct = KCBackend.account(), bst = KCBackend.status();
+    $('#acctText').textContent = bst === 'off' ? 'WardenChat account: coming soon' : acct ? `Signed in as ${acct.name}` : bst === 'restricted' ? 'WardenChat account: restricted' : 'WardenChat account: not signed in';
+    $('#acctBtn').textContent = acct || bst === 'restricted' ? 'Sign out' : 'Sign in';
+    $('#acctBtn').disabled = bst === 'off';
     $('#onlineBtn').hidden = !G.roadOpen();
     $('#practiceBtn').hidden = !G.roadOpen();
     if (subNow === 'magic') renderMagic(); else $('#magicTag').textContent = String(G.MAGIC_ORDER.reduce((a, id) => a + (id.startsWith('wild_') ? 0 : G.magicCount(id)), 0) || '');
@@ -1864,9 +2034,6 @@ const KCMenu = (() => {
     if (G.roadOpen()) KCArenas.preload(G.arena().theme);
     for (const b of $$('[data-tab]')) b.addEventListener('click', () => tab(b.dataset.tab));
     $('#battleBtn').addEventListener('click', () => opts.onBattle && opts.onBattle(nextFoe()));
-    $('#simWinLobby').addEventListener('click', simulateWin); // TEMPORARY
-    $('#testRich').addEventListener('click', () => { G.grantTest(); KCSound.play('buy'); refresh(); toast('Test: you now have 1,000,000 rubies, 1,000,000 wallet coins and 1,000,000 diamonds'); }); // TEMPORARY
-    $('#testOffers').addEventListener('click', () => { G.refreshShop(); confirmOffer = -1; KCSound.play('select'); refresh(); toast('Test: new offers made from your cards as they are now'); }); // TEMPORARY
     $('#oppChange').addEventListener('click', e => { e.stopPropagation(); toggle('#oppPanel', '#oppChange'); });
     $('#settingsBtn').addEventListener('click', e => {
       e.stopPropagation();
@@ -1890,7 +2057,6 @@ const KCMenu = (() => {
     });
     $('#modalX').addEventListener('click', closeCard);
     for (const b of $$('.subtab')) b.addEventListener('click', () => sub(b.dataset.sub));
-    $('#testMagic').addEventListener('click', () => { G.grantMagic(); KCSound.play('buy'); refresh(); toast('Test: added wild cards, books and Hammers of Books'); }); // TEMPORARY
     $('#cardModal').addEventListener('click', e => { if (e.target.id === 'cardModal') closeCard(); });
     $('#mUpgrade').addEventListener('click', upgradeCard);
     $('#passPlaque').addEventListener('click', () => { if (G.passOpen()) openPass(); else { KCSound.play('error'); toast('The Diamond Pass opens in Sunstone Arena (600 trophies).'); } });
@@ -1916,6 +2082,42 @@ const KCMenu = (() => {
     $('#cp').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && G.roadOpen()) { e.preventDefault(); cpGo(); } });
     $('#exX').addEventListener('click', closeExchange);
     $('#questBtn').addEventListener('click', openQuests);
+    $('#friendsBtn').addEventListener('click', e => { e.stopPropagation(); closePops(); openFriends(); });
+    $('#acctBtn').addEventListener('click', () => {
+      if (KCBackend.account() || KCBackend.status() === 'restricted') { KCBackend.signOut().then(() => toast('Signed out. Your progress stays saved in your account.'), err => console.error(err)); }
+      else { closePops(); openSignIn(); }
+    });
+    KCBackend.onChange(() => {
+      refresh(); renderSignIn();
+      if (!$('#friendsModal').hidden) { friendList = null; renderFriends(); KCNet.init().then(loadFriends); }
+      if (!$('#onlineModal').hidden) { renderOnline(KCNet.info()); KCNet.init().then(() => renderOnline(KCNet.info())); }
+    });
+    window.addEventListener('kc-friend-requests', e => { friendReqs = (e.detail && e.detail.count) | 0; if ($('#friendsModal').hidden) $('#friendsDot').hidden = !friendReqs && !pendingInvite; });
+    $('#signForm').addEventListener('submit', signSubmit);
+    $('#signX').addEventListener('click', closeSignIn);
+    $('#signModal').addEventListener('click', e => { if (e.target.id === 'signModal') closeSignIn(); });
+    $('#signSwap').addEventListener('click', () => { signMode = signMode === 'create' ? 'in' : 'create'; $('#signErr').textContent = ''; renderSignIn(); $('#signName').focus(); });
+    $('#friendsX').addEventListener('click', closeFriends);
+    $('#friendsModal').addEventListener('click', e => {
+      if (e.target.id === 'friendsModal') { closeFriends(); return; }
+      const b = e.target.closest('.fr-invite');
+      if (b && !b.disabled) inviteClick(b.dataset.friend);
+      const y = e.target.closest('.fr-yes, .fr-no');
+      if (y) answerRequest(y.dataset.req, y.classList.contains('fr-yes'));
+    });
+    $('#onlineBody').addEventListener('click', e => { const b = e.target.closest('.fr-invite'); if (b && !b.disabled) inviteClick(b.dataset.friend); });
+    KCNet.onInvite(showInvite);
+    $('#inviteYes').addEventListener('click', async () => {
+      const inv = pendingInvite; pendingInvite = null; $('#inviteToast').hidden = true;
+      if (!inv) return;
+      if (!G.onlineOpen()) { toast(`Battles with friends open at Stormspire (${fmt(G.ONLINE_AT)} trophies).`); return; }
+      $('#onlineModal').hidden = false;
+      KCNet.acceptInvite(inv);
+      const r = await KCNet.joinRoom(inv.code, matched);
+      if (!r.ok) toast(r.error === 'unavailable' ? 'Battles with friends are not switched on yet.' : 'That invite has expired.');
+      renderOnline(KCNet.info());
+    });
+    $('#inviteNo').addEventListener('click', () => { const inv = pendingInvite; pendingInvite = null; $('#inviteToast').hidden = true; KCNet.declineInvite(inv); });
     if (wideLobby.addEventListener) wideLobby.addEventListener('change', placeDaily);
     $('#profX').addEventListener('click', closeProfile);
     $('#profPic').addEventListener('click', avatarPicker);
@@ -1990,8 +2192,8 @@ const KCMenu = (() => {
         else if (e.key === ' ' || e.key === 'Enter') { chestTap(); e.preventDefault(); }
         return;
       }
-      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); closeExchange(); closeQuests(); closeChallenge(); closeProfile(); if (!$('#onlineModal').hidden) closeOnline(); return; }
-      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#exModal').hidden || !$('#onlineModal').hidden || !$('#questModal').hidden || !$('#chModal').hidden || !$('#profModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); closeExchange(); closeQuests(); closeChallenge(); closeProfile(); closeFriends(); closeSignIn(); if (!$('#onlineModal').hidden) closeOnline(); return; }
+      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#exModal').hidden || !$('#onlineModal').hidden || !$('#questModal').hidden || !$('#chModal').hidden || !$('#profModal').hidden || !$('#friendsModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
       const n = '12345'.indexOf(e.key);
       if (n >= 0) { tab(TABS[n]); e.preventDefault(); }
       else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(nextFoe()); e.preventDefault(); }
@@ -2017,7 +2219,7 @@ const KCMenu = (() => {
   }
 
   return {
-    init, refresh, recordResult, nextFoe, cardImg, tab, showChest, chestSvg, openQuests, milestone,
+    init, refresh, recordResult, nextFoe, cardImg, tab, showChest, chestSvg, openQuests, milestone, toast, openSignIn,
     practiceAgain: T => G.practiceFoe(T && T.tryCard ? T.tryCard.card : null), openChallenge, openProfile,
     get name() { return P() ? P().name : 'Player'; },
     show() { refresh(); requestAnimationFrame(placeGlow); },

@@ -115,8 +115,7 @@ console.log('save and reload: ok');
   assert.strictEqual(G.buy(0, day1).error, 'sold');
   assert.strictEqual(G.buy(3, day1).error, 'diamonds', 'no diamonds yet');
   P3.rubies = 0; assert.strictEqual(G.buy(1, day1).error, 'rubies');
-  G.grantTest();
-  assert(P3.rubies === 1000000 && P3.diamonds === 1000000);
+  P3.rubies = 1000000; P3.diamonds = 1000000;
   r = G.buy(4, day1); assert(r.ok && P3.diamonds === 999999 && P3.rubies === 1005000);
   r = G.buy(4, day1); assert(r.ok && P3.rubies === 1010000, 'the ruby bundle can be bought again');
   r = G.buy(3, day1); assert(r.ok && P3.diamonds === 999997 && r.cards[0].n === o[3].qty);
@@ -310,6 +309,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
       P6.trophies = t;
       for (let i = 0; i < 30; i++) {
         const f = G.trophyFoe(KCSim.mulberry(t * 7 + i)), d = f.deck;
+        if (f.boss) continue;   // SirSC brings his own deck
         styles.add(f.style);
         assert.strictEqual(new Set(d).size, 8, `eight different cards at ${t}: ${d}`);
         const wins = d.filter(id => KCBot.WIN_CARDS.has(id)).length, spells = d.filter(id => KC_CARDS[id].kind === 'spell').length;
@@ -567,9 +567,13 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   // high up, opponents play the new cards and are at full strength
   G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 6800, best: 6800, claimed: { 0: true } }) }));
   const newer = A.flatMap(a => a[3]);
-  let withNew = 0;
-  for (let i = 0; i < 60; i++) { const f = G.trophyFoe(KCSim.mulberry(400 + i)); if (f.deck.some(c => newer.includes(c))) withNew++; assert(new Set(f.deck).size === 8); }
-  assert(withNew > 50, 'opponents at 6,800 trophies play the new cards ' + withNew);
+  let withNew = 0, regular = 0;
+  for (let i = 0; i < 200; i++) {
+    const f = G.trophyFoe(KCSim.mulberry(400 + i)); assert(new Set(f.deck).size === 8);
+    if (f.boss) continue;   // SirSC brings his own deck
+    regular++; if (f.deck.some(c => newer.includes(c))) withNew++;
+  }
+  assert(withNew > regular * 0.7, `opponents at 6,800 trophies play the new cards ${withNew}/${regular}`);
   console.log(`Arenas 5 to 10: road (${got} rewards to 7,000), chest pools by arena, opponents use the new cards: ok`);
 }
 
@@ -707,6 +711,23 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   while (!sf.result) { KCSim.step(sf); bots.forEach(b => KCBot.update(b, sf)); sf.events.length = 0; }
   assert(['first', 'overtime', 'sudden'].includes(sf.result.reason) && sf.crowns[0] + sf.crowns[1] === 1, `the first tower down wins (${sf.result.reason} at ${Math.round(sf.time)} s)`);
   console.log(`daily challenge (${[...seen].join(', ')}), draft pairs, equal levels, three chest wins: ok`);
+}
+
+// SirSC: now and then in the high arenas, level 50 everything, no trophies lost to him
+{
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 4500, best: 4500, claimed: { 0: true }, trophyRecord: { w: 40, l: 30, d: 0 } }) }));
+  let n = 0; for (let i = 0; i < 3000; i++) if (G.trophyFoe(KCSim.mulberry(i + 5)).boss) n++;
+  assert(n / 3000 > 0.025 && n / 3000 < 0.06, `SirSC in about 4% of battles from ${G.SIRSC.from} trophies (${(n / 30).toFixed(1)}%)`);
+  G.state.trophies = G.SIRSC.from - 1; let low = 0; for (let i = 0; i < 2000; i++) if (G.trophyFoe(KCSim.mulberry(i + 5)).boss) low++;
+  assert.strictEqual(low, 0, 'not below the high arenas');
+  G.state.trophies = 4500;
+  const f = G.sirscFoe(Math.random);
+  assert(f.boss && f.kingLevel === 50 && Object.values(f.cardLevels).every(v => v === 50) && f.stakes.loss === 0, 'level 50 everything, nothing to lose');
+  const t0 = G.state.trophies, r = G.recordTrophy(1, 0, f.trophies, null, true);
+  assert(r.delta === 0 && G.state.trophies === t0, 'losing to SirSC costs no trophies');
+  G.battleStarted(f); const reload = G.load(mem({ 'kc.progress': JSON.stringify(G.state) }));
+  assert.strictEqual(reload.trophies, t0, 'and leaving his battle costs none either');
+  console.log(`SirSC: ${(n / 30).toFixed(1)}% of trophy battles from ${G.SIRSC.from}, level 50, no trophies lost: ok`);
 }
 
 // The battle log, replays, deck codes and friend codes

@@ -3,10 +3,14 @@
 
     python3 build-artifact.py OUT.html               (for publishing as a claude.ai Artifact)
     python3 build-artifact.py OUT.html --standalone  (a complete page to download and open anywhere)
+    python3 build-artifact.py OUT.html --standalone --accounts-demo  (with a pretend Warden Chat back end)
 
 The Artifact host wraps the page in its own <html>/<head>/<body>, so the default bundle leaves those
 out: the <title>, the Google Fonts link, the CSS inlined into <style>, the body's markup, then every
 script inlined in the order index.html loads them. With --standalone it is a complete page instead.
+With --accounts-demo the pretend Warden Chat back end (js/account-mock.js) goes in right after
+js/account.js, so sign-in, cloud saves, friends, invites and the SirSC wallet can be tried without the
+real one (accounts: demo, pal and sam, password kingdom12345). Never publish a demo build.
 """
 import base64
 import pathlib
@@ -16,7 +20,7 @@ import sys
 HERE = pathlib.Path(__file__).resolve().parent
 
 
-def main(out, standalone=False):
+def main(out, standalone=False, demo=False):
     html = (HERE / 'index.html').read_text(encoding='utf-8')
     title = re.search(r'<title>.*?</title>', html, re.S).group(0)
     metas = ''.join(m.group(0) + '\n' for m in re.finditer(r'<meta name="claude:[^>]+>', html))
@@ -25,6 +29,8 @@ def main(out, standalone=False):
                     for href in re.findall(r'<link rel="stylesheet" href="(css/[^"]+)">', html))
     body = re.search(r'<body>(.*)</body>', html, re.S).group(1)
     scripts = re.findall(r'<script src="([^"]+)"></script>', body)
+    if demo:
+        scripts.insert(scripts.index('js/account.js') + 1, 'js/account-mock.js')
     body = re.sub(r'\s*<script src="[^"]+"></script>', '', body).strip()
     js = '\n'.join((HERE / src).read_text(encoding='utf-8') for src in scripts)
     # Images the scripts load (the scenery backgrounds) are baked in as data URIs.
@@ -45,7 +51,7 @@ def main(out, standalone=False):
 
 
 if __name__ == '__main__':
-    args = [a for a in sys.argv[1:] if a != '--standalone']
+    args = [a for a in sys.argv[1:] if a not in ('--standalone', '--accounts-demo')]
     if len(args) != 1:
         sys.exit(__doc__)
-    main(args[0], standalone='--standalone' in sys.argv)
+    main(args[0], standalone='--standalone' in sys.argv, demo='--accounts-demo' in sys.argv)

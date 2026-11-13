@@ -1,17 +1,17 @@
-/* Kingdom Clash: online battles (opened at Stormspire, Arena 4).
+/* Kingdom Clash: Play a Friend, battles against a friend (opened at Stormspire, Arena 4).
 
-   The connection: on claude.ai the page uses the `room` capability, which reaches the other people
-   who have this game open RIGHT NOW (nothing is stored; messages can drop). Anywhere else it falls
-   back to a BroadcastChannel, which reaches other tabs of the same browser only (handy for trying it
-   out, and what the tests use). Both look the same to the rest of the game: a lobby everyone shares,
-   and named rooms (one per battle).
+   The connection: once a player is signed in with their WardenChat account, js/account.js gives a
+   transport over Supabase Realtime (a private channel per room, kc-<code>). With LIVE on and no backend,
+   claude.ai's `room` capability, or else a BroadcastChannel that reaches other tabs of the same browser
+   only (handy for trying it out, the demo build and the tests). All of them look the same to the rest
+   of the game: a lobby, and named rooms (one per battle).
 
-   Finding an opponent:
-   - Quick match: you mark yourself as looking in the lobby's presence; the two who have been looking
-     longest pair up, and the one with the lower peer label hosts and invites the other to a fresh
-     room.
-   - Friendly battle: one player makes a room and reads its five-letter code to a friend, who types it
-     in.
+   Finding your friend (there is no matchmaking with strangers):
+   - Invite a friend: friends come from the player's WardenChat account (the backend connects them with
+     connectFriends, below). Inviting one makes a room and sends them its code through the account;
+     they get an invite in the game and accepting joins the room.
+   - Invite with a code: one player makes a room and reads its five-letter code to a friend, who types
+     it in.
    In the room each player shows their setup (name, deck, card levels, King Tower level, evolutions) in
    presence; the host starts the battle with a seed and both setups (mp.start). From then on the battle
    itself runs in js/game.js: both players run the same simulation and swap only their card plays
@@ -22,11 +22,10 @@
 'use strict';
 
 const KCNet = (() => {
-  // LIVE PLAY IS OFF for now: only the front end is built. The screens show "coming soon" and nothing
-  // connects. When the multiplayer backend exists, connect it here (a transport with the same calls as
-  // the lobby below: emit, on, presence, peers, onPeers, join) and set LIVE to true.
+  // LIVE stays off: battles with friends switch on when the backend gives a transport (a signed-in
+  // WardenChat account, js/backend.js); until then the screens say "coming soon" and nothing connects.
   const LIVE = false;
-  const TOPICS = ['mp.invite', 'mp.start', 'mp.step', 'mp.emote', 'mp.bye'];
+  const TOPICS = ['mp.start', 'mp.step', 'mp.emote', 'mp.bye'];
   const CODE_CHARS = 'abcdefghjkmnpqrstuvwxyz23456789';
   let lobby = null, kind = 'none', initP = null;
   const S = { status: 'idle', room: null, role: null, code: '', since: 0, onMatch: null, onChange: null, unsub: [], startTimer: 0, matched: false };
@@ -84,19 +83,17 @@ const KCNet = (() => {
   function init() {
     if (initP) return initP;
     initP = (async () => {
-      if (!LIVE) { kind = 'off'; changed(); return kind; }
+      // the backend's own lobby (js/backend.js) when it is connected, which also switches battles on
+      const backend = typeof KCBackend !== 'undefined' ? KCBackend.transport() : null;
+      if (!LIVE && !backend) { kind = 'off'; changed(); return kind; }
       let room = null;
-      try { room = window.claude && window.claude.use ? await window.claude.use('room') : null; } catch (e) { room = null; }
-      if (room) { lobby = room; kind = 'room'; }
-      else { lobby = localTransport(); kind = lobby ? 'local' : 'none'; }
-      if (lobby) {
-        lobby.on('mp.invite', msg => {
-          const d = msg.data || {};
-          if (S.status !== 'seeking' || msg.isMe || d.to !== myPeer(lobby) || !validCode(d.code)) return;
-          enterRoom(d.code, 'guest');
-        });
-        lobby.onPeers(() => { if (S.status === 'seeking') tryPair(); changed(); });
+      if (backend) { lobby = backend; kind = 'backend'; }
+      else {
+        try { room = window.claude && window.claude.use ? await window.claude.use('room') : null; } catch (e) { room = null; }
+        if (room) { lobby = room; kind = 'room'; }
+        else { lobby = localTransport(); kind = lobby ? 'local' : 'none'; }
       }
+      if (lobby) lobby.onPeers(() => changed());
       changed();
       return kind;
     })();
@@ -106,11 +103,61 @@ const KCNet = (() => {
   const validCode = c => typeof c === 'string' && /^[a-z0-9]{5}$/.test(c);
   const newCode = () => Array.from({ length: 5 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join('');
   function changed() { if (S.onChange) S.onChange(info()); }
-  // How many others have the game open (and are looking for a match).
+  // Where things stand: the connection, the room, and whether the WardenChat friends list is connected.
   function info() {
     const ps = lobby ? lobby.peers() : [];
-    const others = ps.filter(p => !p.isMe), seeking = others.filter(p => p.presence && p.presence.kc && p.presence.kc.seek);
-    return { kind, status: S.status, code: S.code, role: S.role, online: others.length, seeking: seeking.length };
+    return { kind, status: S.status, code: S.code, role: S.role, online: ps.filter(p => !p.isMe).length, friends: !!friendsP, invitee: S.invitee || null };
+  }
+
+  /* ---------- WardenChat friends ----------
+     The game keeps no friends list of its own: friends are the player's WardenChat friends. The backend
+     connects them by calling KCNet.connectFriends(provider) once the player is signed in, where
+       provider.list()                 -> Promise of [{ id, name, online, inGame, avatar? }]
+       provider.invite(friendId, code) -> Promise (send a battle invite: the room code to join)
+       provider.onInvite(fn)           -> an unsubscribe function; calls fn({ id, from: { id, name }, code })
+                                          when a friend invites you
+       provider.decline(inviteId)      -> Promise (optional: tell the inviter you said no)
+     Until it is connected, the Friends screen says friends come with the WardenChat account. */
+  let friendsP = null, friendsOff = null;
+  function connectFriends(provider) {
+    if (friendsOff) { try { friendsOff(); } catch (e) { /* gone */ } friendsOff = null; }
+    friendsP = provider || null;
+    if (friendsP && friendsP.onInvite) friendsOff = friendsP.onInvite(inv => { if (inv && validCode(inv.code) && S.onInvite) S.onInvite(inv); });
+    changed();
+  }
+  async function friends() {
+    if (!friendsP) return null;
+    try { const list = await friendsP.list(); return Array.isArray(list) ? list.filter(f => f && f.id).map(f => ({ id: String(f.id), name: String(f.name || 'Friend').slice(0, 24), online: !!f.online, inGame: !!f.inGame, avatar: f.avatar || null })) : []; }
+    catch (e) { return []; }
+  }
+  // Invite a friend: a room of your own, its code sent to them through the account.
+  async function inviteFriend(friend, onMatch) {
+    if (!friendsP) return { error: 'friends' };
+    const r = await createRoom(onMatch);
+    if (!r.ok) return r;
+    S.invitee = { id: friend.id, name: friend.name };
+    try { await friendsP.invite(friend.id, r.code); } catch (e) { await cancel(); return { error: 'invite' }; }
+    changed();
+    return r;
+  }
+  function onInvite(fn) { S.onInvite = fn; }
+  async function declineInvite(inv) { if (friendsP && friendsP.decline && inv && inv.id) try { await friendsP.decline(inv.id); } catch (e) { /* gone */ } }
+  // accepting tells the inviter's account (the room itself is joined with joinRoom)
+  async function acceptInvite(inv) { if (friendsP && friendsP.accept && inv && inv.id) try { await friendsP.accept(inv.id); } catch (e) { /* gone */ } }
+  // friend requests, when the account has them: { incoming: [{ id, name }], outgoing: [...] }
+  function friendRequests() {
+    if (!friendsP || !friendsP.requests) return null;
+    try { const r = friendsP.requests() || {}; const clean = a => (Array.isArray(a) ? a.filter(x => x && x.id).map(x => ({ id: String(x.id), name: String(x.name || 'Player').slice(0, 24) })) : []); return { incoming: clean(r.incoming), outgoing: clean(r.outgoing) }; }
+    catch (e) { return null; }
+  }
+  // send a friend request by WardenChat username; resolves to { status } or { error: code }
+  async function addFriend(name) {
+    if (!friendsP || !friendsP.add) return { error: 'friends' };
+    try { return Object.assign({ ok: true }, await friendsP.add(name)); } catch (e) { return { error: String((e && e.code) || 'error').replace(/^(kc|br)_/, '') }; }
+  }
+  async function answerFriend(id, accept) {
+    if (!friendsP || !friendsP.respond) return { error: 'friends' };
+    try { await friendsP.respond(id, accept); return { ok: true }; } catch (e) { return { error: String((e && e.code) || 'error').replace(/^(kc|br)_/, '') }; }
   }
 
   /* ---------- your setup, and checking someone else's ---------- */
@@ -131,31 +178,6 @@ const KCNet = (() => {
       deck, levels, king: int(x.king, 1, 15, 1), evos, trophies: int(x.trophies, 0, 99999, 0), theme };
   }
 
-  /* ---------- matchmaking ---------- */
-  function tryPair() {
-    const ps = lobby.peers(), me = myPeer(lobby);
-    const seekers = ps.filter(p => p.presence && p.presence.kc && p.presence.kc.seek)
-      .sort((a, b) => (a.presence.kc.since || 0) - (b.presence.kc.since || 0) || (a.peer < b.peer ? -1 : 1));
-    if (seekers.length < 2 || !me) return;
-    const pair = seekers.slice(0, 2);
-    if (!pair.some(p => p.peer === me)) return;
-    const other = pair.find(p => p.peer !== me);
-    if (me < other.peer) {
-      // this side hosts: a new room, and an invitation (sent a few times in case one drops)
-      const code = newCode();
-      for (const ms of [0, 400, 1200]) setTimeout(() => { if (S.code === code) lobby.emit('mp.invite', { to: other.peer, code }).catch(() => {}); }, ms);
-      enterRoom(code, 'host');
-    }
-  }
-  async function quickMatch(onMatch) {
-    await init();
-    if (!lobby) return { error: 'unavailable' };
-    await cancel();
-    S.onMatch = onMatch; S.status = 'seeking'; S.since = Date.now();
-    await lobby.presence({ kc: { seek: true, since: S.since, trophies: KCProgress.state.trophies | 0 } }).catch(() => {});
-    changed(); tryPair();
-    return { ok: true };
-  }
   async function createRoom(onMatch) {
     await init();
     if (!lobby) return { error: 'unavailable' };
@@ -177,7 +199,6 @@ const KCNet = (() => {
   }
   async function enterRoom(code, role) {
     S.status = role === 'host' ? 'hosting' : 'joining'; S.code = code; S.role = role; S.matched = false;
-    if (lobby) lobby.presence({ kc: { seek: false } }).catch(() => {});
     let room;
     try { room = await lobby.join('kc-' + code); } catch (e) { S.status = 'idle'; S.code = ''; changed(); return; }
     if (S.code !== code) { room.leave(); return; }
@@ -212,17 +233,22 @@ const KCNet = (() => {
     }
     changed();
   }
-  // Stop looking, and leave any room (telling the other player).
+  // Leave any room (telling the other player).
   async function cancel() {
     clearInterval(S.startTimer);
     for (const u of S.unsub) try { u(); } catch (e) { /* gone */ }
     S.unsub = [];
     if (S.room) { const r = S.room; S.room = null; try { await r.emit('mp.bye', {}); } catch (e) { /* gone */ } r.leave().catch(() => {}); }
-    if (lobby && S.status === 'seeking') lobby.presence({ kc: { seek: false } }).catch(() => {});
-    Object.assign(S, { status: 'idle', code: '', role: null, matched: false });
+    Object.assign(S, { status: 'idle', code: '', role: null, matched: false, invitee: null });
     changed();
   }
   function onChange(fn) { S.onChange = fn; changed(); }
 
-  return { LIVE, TOPICS, init, info, quickMatch, createRoom, joinRoom, cancel, onChange, checkSetup, mySetup, get kind() { return kind; } };
+  // battles with friends are on: LIVE, or a backend lobby connected
+  const isLive = () => LIVE || !!(typeof KCBackend !== 'undefined' && KCBackend.transport());
+  // start over (when the backend connects after the game has started)
+  function reinit() { initP = null; lobby = null; kind = 'none'; }
+  return { LIVE, isLive, reinit, TOPICS, init, info, createRoom, joinRoom, cancel, onChange, checkSetup, mySetup, connectFriends, friends, inviteFriend, onInvite, declineInvite,
+    acceptInvite, friendRequests, addFriend, answerFriend, localTransport,
+    get kind() { return kind; } };
 })();

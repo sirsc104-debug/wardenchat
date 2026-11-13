@@ -353,7 +353,6 @@ kbd { font-family: var(--body); background: #3a2a6a; border: 2px solid var(--out
 .sub-tag:empty { display: none; }
 .sub-cards { display: flex; flex-direction: column; gap: 34px; }
 .magic-plaque { display: flex; flex-direction: column; gap: 12px; }
-.sim-win.test-inline.magic-test { position: absolute; top: 8px; right: 12px; bottom: auto; width: auto; padding: 2px 10px 3px; font-size: 12px; }
 .magic-wrap { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; margin-top: 6px; }
 .magic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; align-content: start; }
 .mi { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px 8px; border-radius: 14px; border: 3px solid var(--outline);
@@ -630,9 +629,8 @@ button.slot:hover { transform: translateY(-3px); }
 .shop-tab { max-width: 1240px; margin: 0 auto; padding-top: 12px; display: flex; flex-direction: column; gap: 22px; }
 .shop-plaque { padding-top: 36px; padding-bottom: 12px; }
 .chest-plaque { padding-top: 26px; padding-bottom: 12px; }
-/* the clock (and the test button) sit in the plaque's top-right corner */
+/* the clock sits in the plaque's top-right corner */
 .shop-head { position: absolute; top: 6px; right: 12px; display: flex; align-items: center; gap: 10px; }
-.shop-head .sim-win.test-inline { padding: 2px 10px 3px; font-size: 12px; }
 .shop-timer { font-weight: 900; color: var(--muted); white-space: nowrap; }
 .shop-timer b { color: #fff; font-variant-numeric: tabular-nums; }
 .offers { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
@@ -690,11 +688,6 @@ button.slot:hover { transform: translateY(-3px); }
 @media (max-width: 1000px) { .offers { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 24px; } .shop-chests { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 18px; } }
 @media (max-width: 560px) { .offers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-/* TEMPORARY test buttons beside the Battle button */
-.test-tools { position: absolute; left: calc(100% + 14px); top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; }
-.test-tools .sim-win, .sim-win.test-inline { position: static; padding: 6px 12px 7px; font-size: 13px; white-space: nowrap; }
-@media (max-width: 560px) { .shop-head { position: static; justify-content: center; margin-bottom: 10px; } .shop-chests { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 760px) { .test-tools { position: static; transform: none; flex-direction: row; justify-content: center; flex-wrap: wrap; margin-top: 8px; } }
 
 /* the Trophy Road */
 .road-view { display: flex; flex-direction: column; gap: 14px; height: 100%; min-height: 0; max-width: 1200px; margin: 0 auto; }
@@ -996,13 +989,6 @@ button.slot:hover { transform: translateY(-3px); }
   z-index: 3;
 }
 .mini-timer { display: none; }
-/* TEMPORARY test button */
-.sim-win {
-  position: absolute; z-index: 3; right: 2.4%; bottom: 1.4%; display: flex; flex-direction: column; align-items: center; line-height: 1.1;
-  padding: 4px 10px 5px; border-radius: 10px; border: 2px dashed #ffe27a; background: rgba(30, 20, 60, 0.85); color: #fff; font-weight: 900; font-size: 12px;
-}
-.sim-win small { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #ffe27a; }
-.sim-win:hover { background: rgba(60, 40, 110, 0.95); }
 
 .ebar {
   position: relative;
@@ -1689,7 +1675,6 @@ button.slot:hover { transform: translateY(-3px); }
 #battle.phone .x2 { font-size: 16px; }
 #battle.phone .mini-timer { display: block; position: absolute; top: 2.4%; right: 4%; font-size: 16px; text-align: right; line-height: 1; pointer-events: none; }
 #battle.phone .leave-btn, #battle.narrow .leave-btn { top: calc(2.4% + 58px); }
-#battle.phone .sim-win { padding: 2px 8px 3px; font-size: 11px; }
 #battle.phone .emote-btn { width: 40px; height: 34px; }
 #battle.phone .ep-phrase { font-size: 11px; padding: 7px 2px; }
 
@@ -2265,6 +2250,80 @@ button.slot:hover { transform: translateY(-3px); }
 .daily-plaque .daily-modes { order: 5; }
 @media (max-width: 760px) { .rs-offers { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; } .rs-art { width: 52px; height: 62px; } .rs-offer { padding: 6px 4px; } .rs-offer .buy-btn { font-size: 14px; } }
 
+/* Diamond Pass tiers: the circle is a ring that fills as you earn the tier's crowns (full when reached) */
+.pm-num { position: relative; width: 44px; height: 44px; border: 0; border-radius: 0; background: none; box-shadow: none !important; }
+.pm-num b { position: relative; font-weight: 400; }
+.pm-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.pm-ring .bg { fill: #2a2050; stroke: #140f2c; stroke-width: 5; }
+.pm-ring .fg { fill: none; stroke: #ffd34d; stroke-width: 5; stroke-linecap: round; transition: stroke-dasharray 0.6s ease-out; }
+.pm-tier.reached .pm-ring .bg { fill: #3fa6e0; }
+.pm-tier.reached .pm-num { color: var(--outline); }
+.pm-tier.here .pm-ring .bg { fill: #3a2d72; }
+@media (max-width: 760px) { .pm-num { width: 34px; height: 34px; } }
+.pm-tier.reached .pm-num, .pm-tier.here .pm-num { background: none; }
+@media (max-width: 760px) { .pm-cell { position: relative; } .pm-cell .pm-lock { position: absolute; top: 6px; right: 6px; margin: 0; transform: scale(0.8); } }
+
+/* Friends (the WardenChat friends list) and invites */
+.friends-btn { position: relative; }
+.friends-btn svg { width: 24px; height: 24px; }
+.fr-dot { position: absolute; top: -3px; right: -3px; width: 13px; height: 13px; border-radius: 50%; background: #ff4757; border: 2px solid var(--outline); }
+.friends-card { width: min(480px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; }
+.friends-card .modal-x { top: 8px; right: 8px; }
+.fr-signin { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 12px; background: rgba(0, 0, 0, 0.25); }
+.fr-signin p { margin: 0; color: #d9cfee; font-size: 14px; line-height: 1.4; }
+.fr-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 320px; overflow-y: auto; }
+.fr-row { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 10px; background: rgba(0, 0, 0, 0.25); }
+.fr-pic { position: relative; width: 36px; height: 36px; flex: none; border-radius: 50%; border: 2px solid var(--outline); background: #4b3f86; display: grid; place-items: center; font-weight: 900; overflow: hidden; }
+.fr-pic img { width: 100%; height: 100%; object-fit: cover; }
+.fr-row.on .fr-pic { box-shadow: 0 0 0 2px #45d07a; }
+.fr-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.fr-text b { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-text small { font-size: 11px; color: #cfc4ea; }
+.fr-row.on .fr-text small { color: #7dffae; }
+.fr-empty { color: #cfc4ea; font-size: 13px; padding: 6px 2px; }
+.ol-code-sm { letter-spacing: 0.12em; color: #ffe066; }
+.invite-toast { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 45; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px;
+  background: linear-gradient(#4b3f86, #30285e); border: 3px solid var(--outline); box-shadow: 0 6px 0 rgba(0, 0, 0, 0.35); color: #fff; font-weight: 800; max-width: calc(100vw - 32px); animation: coachIn 0.3s ease-out; }
+.invite-toast span { flex: 1; min-width: 0; }
+
+/* SirSC on the VS screen: the red side turns gold */
+.intro.boss { background: linear-gradient(100deg, rgba(26, 75, 168, 0.95) 0 49.6%, rgba(40, 28, 10, 0.97) 50.4% 100%); }
+.intro.boss .foe b { color: #ffd34d; text-shadow: 0 0 18px rgba(255, 200, 60, 0.7), 0 3px 0 var(--outline); }
+.intro.boss .foe canvas { border-color: #ffd34d; box-shadow: 0 0 24px rgba(255, 210, 80, 0.8); }
+.fr-invite[disabled] { background: #4a4466; color: #a9a2c4; box-shadow: none; cursor: default; }
+
+/* the WardenChat account row in Settings */
+.acct-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; padding-top: 8px; border-top: 1px solid rgba(255, 255, 255, 0.12); font-size: 13px; font-weight: 800; color: #d9cfee; }
+.acct-row .mini-btn[disabled] { background: #4a4466; color: #a9a2c4; box-shadow: none; cursor: default; }
+
+/* signing in with the WardenChat account */
+.sign-card { width: min(400px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; }
+.sign-card .modal-x { top: 8px; right: 8px; }
+.sign-form { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.sign-form label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 800; color: #e6dcff; }
+.sign-form input { font: inherit; font-size: 16px; font-weight: 700; padding: 9px 11px; border-radius: 10px; border: 2px solid var(--outline); background: #f7f2ff; color: #1c1530; }
+.sign-form input:focus-visible { outline: 3px solid #ffd34d; outline-offset: 1px; }
+.sign-form .pill { align-self: stretch; font-size: 16px; padding: 10px; }
+.sign-form .pill[disabled] { opacity: 0.7; cursor: default; }
+.sign-err { min-height: 1.2em; margin: 0; color: #ff9aa5; font-size: 13px; font-weight: 800; }
+.sign-err:empty { min-height: 0; }
+.sign-restricted { margin: 6px 0 0; padding: 8px 10px; border-radius: 10px; background: rgba(255, 71, 87, 0.2); color: #ffd0d5; font-size: 13px; font-weight: 800; }
+.link-btn { display: block; margin: 10px auto 0; padding: 4px 6px; border: 0; background: none; color: #ffd34d; font: inherit; font-size: 14px; font-weight: 800; text-decoration: underline; cursor: pointer; }
+.sign-note { margin: 8px 0 0; font-size: 12px; line-height: 1.45; text-align: center; }
+.sign-note a { color: #9fd8ff; }
+/* the Friends window: requests and adding a friend */
+.fr-reqs { margin-top: 6px; }
+.fr-reqs > b { font-size: 13px; color: #ffd34d; }
+.fr-reqs .fr-row { gap: 6px; }
+.fr-reqs .pill { padding: 6px 10px; font-size: 12px; }
+.fr-add { display: flex; gap: 8px; margin-top: 10px; }
+.fr-add input { flex: 1; min-width: 0; font: inherit; font-size: 15px; font-weight: 700; padding: 7px 10px; border-radius: 10px; border: 2px solid var(--outline); background: #f7f2ff; color: #1c1530; }
+.fr-msg { min-height: 1.1em; margin: 6px 0 0; font-size: 13px; font-weight: 800; color: #9fe6b8; }
+.fr-msg:empty { min-height: 0; margin: 0; }
+.fr-sent { margin: 4px 0 0; font-size: 12px; }
+#frSignIn { margin-top: 6px; align-self: flex-start; }
+#olSignIn { display: block; margin: 10px auto 0; }
+
 </style>
 <div id="app">
   <div class="rotate-hint" aria-live="polite"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="14" y="4" width="20" height="40" rx="4" fill="none" stroke="#ffe27a" stroke-width="4"/><circle cx="24" cy="38" r="2" fill="#ffe27a"/></svg>Turn your phone upright to play</div>
@@ -2289,12 +2348,14 @@ button.slot:hover { transform: translateY(-3px); }
           <button class="res-chip" type="button" data-tab="shop" title="Diamonds: open the Shop"><span class="gem-i" aria-hidden="true"></span><b id="gemVal">0</b><span class="plus" aria-hidden="true">+</span><span class="sr">Diamonds</span></button>
         </div>
         <button class="icon-btn" id="soundBtn" type="button" aria-label="Sound on" title="Sound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path id="soundWaves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg></button>
+        <button class="icon-btn friends-btn" id="friendsBtn" type="button" aria-label="Friends" title="Your WardenChat friends"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4" fill="currentColor"/><path d="M2.5 19.5c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6z" fill="currentColor"/><circle cx="17" cy="9" r="2.6" fill="currentColor" opacity=".75"/><path d="M14.6 13.9c.7-.3 1.5-.4 2.4-.4 2.8 0 5 1.9 5 5h-5.2" fill="currentColor" opacity=".75"/></svg><i class="fr-dot" id="friendsDot" hidden></i></button>
         <button class="icon-btn" id="settingsBtn" type="button" aria-label="Settings" aria-expanded="false" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm8.4 5.1l1.6 1.2-2 3.4-1.9-.7a7.6 7.6 0 0 1-2 1.2L15.8 21h-4l-.3-2.3a7.6 7.6 0 0 1-2-1.2l-1.9.7-2-3.4 1.6-1.2a7.4 7.4 0 0 1 0-2.4L5.6 9.6l2-3.4 1.9.7a7.6 7.6 0 0 1 2-1.2L11.8 3h4l.3 2.7a7.6 7.6 0 0 1 2 1.2l1.9-.7 2 3.4-1.6 1.2a7.4 7.4 0 0 1 0 2.4z" fill="currentColor"/></svg></button>
         <div class="settings" id="settings" hidden>
           <h3>Settings</h3>
           <form class="name-form" id="nameForm"><label for="nameInput">Your name</label><div><input id="nameInput" maxlength="16" autocomplete="off"><button class="mini-btn" type="submit">Save</button></div></form>
           <label class="switch"><input type="checkbox" id="soundToggle"><span>Sound effects</span></label>
           <label class="switch"><input type="checkbox" id="musicToggle"><span>Music</span></label>
+          <div class="acct-row"><span id="acctText">WardenChat account</span><button class="mini-btn" id="acctBtn" type="button">Sign in</button></div>
           <p class="keys"><kbd>1</kbd>&ndash;<kbd>5</kbd> switch tabs &middot; <kbd>Enter</kbd> battle &middot; <kbd>Esc</kbd> close</p>
         </div>
       </header>
@@ -2332,18 +2393,13 @@ button.slot:hover { transform: translateY(-3px); }
             </div>
             <div class="battle-wrap">
               <button class="battle-btn" id="battleBtn" type="button"><span>Battle</span><small id="battleSub">vs Trainer Owen</small></button>
-              <!-- TEMPORARY test buttons (lobby): remove with the other "TEMPORARY" blocks -->
-              <div class="test-tools">
-                <button class="sim-win" id="simWinLobby" type="button" title="Test button: counts a win against the current opponent without playing"><small>Test</small>Simulate Win</button>
-                <button class="sim-win" id="testRich" type="button" title="Test button: sets your rubies, wallet coins and diamonds to 1,000,000"><small>Test</small>1,000,000 rubies, coins &amp; diamonds</button>
-              </div>
             </div>
             <div class="daily" id="daily" hidden>
               <button type="button" class="daily-btn" id="questBtn" aria-haspopup="dialog"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="9" y="5" width="22" height="30" rx="4" fill="#f3e6c4" stroke="#1c1530" stroke-width="2.6"/><path d="M14 13h12M14 19h12M14 25h8" stroke="#8a6a3c" stroke-width="2.6" stroke-linecap="round"/><circle cx="30" cy="30" r="7" fill="#2fb36b" stroke="#1c1530" stroke-width="2.4"/><path d="M26.8 30l2.2 2.2 4-4.4" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="db-text"><b>Daily Quests</b><small id="questSum">0 / 3 done</small></span><i class="db-dot" id="questDot" hidden></i></button>
               <button type="button" class="daily-btn challenge-btn" id="challengeBtn"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="#ff7a3d" stroke="#1c1530" stroke-width="2.6"/><path d="M22 7l-9 15h7l-3 11 10-16h-7z" fill="#ffe066" stroke="#1c1530" stroke-width="2.2" stroke-linejoin="round"/></svg><span class="db-text"><b id="challengeName">Daily Challenge</b><small id="challengeSum">3 chest wins left today</small></span><i class="db-dot" id="challengeDot" hidden></i></button>
               <div class="daily-modes">
                 <button class="online-btn practice-btn" id="practiceBtn" type="button" title="A practice battle: no trophies, nothing won or lost" hidden>Practice</button>
-                <button class="online-btn" id="onlineBtn" type="button" title="Battle other players online"><span class="ob-dot" aria-hidden="true"></span>Online</button>
+                <button class="online-btn" id="onlineBtn" type="button" title="Battle a friend: invite one from your friends, or with a room code"><span class="ob-dot" aria-hidden="true"></span>Play a Friend</button>
               </div>
               <button type="button" class="daily-btn" id="crownBtn" aria-haspopup="dialog"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 31l-2-18 9 7 7-12 7 12 9-7-2 18z" fill="#ffcd33" stroke="#1c1530" stroke-width="2.6" stroke-linejoin="round"/><rect x="6" y="30" width="28" height="5" rx="2" fill="#e8a91f" stroke="#1c1530" stroke-width="2.4"/></svg><span class="db-text"><b>Crown Chest</b><small id="crownSum">0 / 10 crowns</small><span class="db-bar"><i id="crownFill"></i></span></span><i class="db-dot" id="crownDot" hidden></i></button>
             </div>
@@ -2390,8 +2446,6 @@ button.slot:hover { transform: translateY(-3px); }
           </div>
           <div class="plaque magic-plaque" id="subMagic" hidden>
             <div class="ribbon"><span>Magic Items</span></div>
-            <!-- TEMPORARY test button -->
-            <button class="sim-win test-inline magic-test" id="testMagic" type="button" title="Test button: adds wild cards, books and hammers"><small>Test</small>Give magic items</button>
             <div class="magic-wrap">
               <div class="magic-grid" id="magicGrid"></div>
               <div class="magic-pick" id="magicPick"></div>
@@ -2429,8 +2483,6 @@ button.slot:hover { transform: translateY(-3px); }
             <div class="ribbon"><span>Daily Offers</span></div>
             <div class="shop-head">
               <span class="shop-timer">New offers in <b id="shopTimer">0:00</b></span>
-              <!-- TEMPORARY test button -->
-              <button class="sim-win test-inline" id="testOffers" type="button" title="Test button: makes a fresh set of offers now"><small>Test</small>New offers</button>
             </div>
             <div class="offers" id="shopOffers"></div>
           </div>
@@ -2496,13 +2548,43 @@ button.slot:hover { transform: translateY(-3px); }
       </div>
     </div>
 
-    <!-- online battles: quick match, or a friendly battle by room code -->
+    <!-- Play a Friend: invite a WardenChat friend, or invite with a room code -->
     <div class="modal" id="onlineModal" hidden>
       <div class="online-card plaque" role="dialog" aria-modal="true" aria-labelledby="onlineTitle">
         <button class="modal-x" id="onlineX" type="button" aria-label="Close">&#x2715;</button>
-        <div class="ribbon"><span id="onlineTitle">Online Battle</span></div>
+        <div class="ribbon"><span id="onlineTitle">Play a Friend</span></div>
         <div id="onlineBody"></div>
       </div>
+    </div>
+
+    <!-- Friends: the player's WardenChat friends (connected by the backend), and battle invites -->
+    <div class="modal" id="friendsModal" hidden>
+      <div class="quest-card plaque friends-card" role="dialog" aria-modal="true" aria-labelledby="friendsTitle">
+        <button class="modal-x" id="friendsX" type="button" aria-label="Close">&#x2715;</button>
+        <h3 id="friendsTitle">Friends</h3>
+        <div id="friendsBody"></div>
+      </div>
+    </div>
+    <!-- signing in with the WardenChat account (js/account.js) -->
+    <div class="modal" id="signModal" hidden>
+      <div class="quest-card plaque sign-card" role="dialog" aria-modal="true" aria-labelledby="signTitle">
+        <button class="modal-x" id="signX" type="button" aria-label="Close">&#x2715;</button>
+        <h3 id="signTitle">Sign in with WardenChat</h3>
+        <p class="sign-restricted" id="signRestricted" hidden></p>
+        <form class="sign-form" id="signForm" autocomplete="on">
+          <label>WardenChat name<input id="signName" name="username" autocomplete="username" maxlength="24" spellcheck="false" autocapitalize="off"></label>
+          <label>Password<input id="signPass" name="password" type="password" autocomplete="current-password" maxlength="72"></label>
+          <p class="sign-err" id="signErr" role="alert"></p>
+          <button class="pill gold" id="signGo" type="submit">Sign in</button>
+        </form>
+        <button type="button" class="link-btn" id="signSwap">New here? Create an account</button>
+        <p class="dim sign-note" id="signNote"></p>
+      </div>
+    </div>
+    <!-- a friend's battle invite -->
+    <div class="invite-toast" id="inviteToast" hidden role="alertdialog" aria-live="assertive" aria-labelledby="inviteText">
+      <span id="inviteText">A friend invites you to battle</span>
+      <button type="button" class="mini-btn" id="inviteYes">Battle</button><button type="button" class="pill" id="inviteNo">Not now</button>
     </div>
 
     <!-- the King Tower: its level, what the next one needs, and the upgrade -->
@@ -2658,8 +2740,6 @@ button.slot:hover { transform: translateY(-3px); }
         <div class="lead-bar" id="leadBar" hidden></div>
         <button class="leave-btn" id="leaveBtn" type="button" title="Surrender this battle" aria-label="Surrender"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M7 4h11l-3 4 3 4H7z" fill="currentColor"/></svg><span>Surrender?</span></button>
         <div class="net-wait" id="netWait" hidden><span class="nw-spin" aria-hidden="true"></span>Waiting for your opponent…</div>
-        <!-- TEMPORARY test button: remove this line and the "TEMPORARY" blocks in js/game.js, js/sim.js and css/style.css -->
-        <button class="sim-win" id="simWinBtn" type="button" title="Test button: ends this match as a win"><small>Test</small>Simulate Win</button>
       </main>
 
       <div class="col col-energy">
@@ -2707,6 +2787,128 @@ button.slot:hover { transform: translateY(-3px); }
   </section>
 </div>
 <script>
+/* Kingdom Clash: where the backend plugs in. The game runs on its own without it: progress is saved in
+   this browser (localStorage), and the WardenChat account, cloud saves, friends, battles with friends and
+   the SirSC wallet show as "coming soon". js/account.js connects all of them to Warden Chat's Supabase
+   project (the contract is BACKEND_HANDOFF.md) with one call, once the backend answers:
+
+     KCBackend.connect({
+       status()            -> 'signedOut' | 'signedIn' | 'restricted'
+       account()           -> { id, name } of the signed-in WardenChat user, or null
+       restriction()       -> { status, reason, until } when an admin suspended or banned the account
+       login(name, password, create) -> Promise (sign in, or create an account; rejects with { code })
+       signOut()           -> Promise
+       save(progress)      -> Promise (store this copy of the player's progress in their account)
+       friends             -> the provider for KCNet.connectFriends (js/net.js), or null when signed out
+       transport           -> a lobby for battles with friends (js/net.js: emit, on, presence, peers,
+                              onPeers, join), or null when signed out
+       wallet              -> the SirSC wallet, or null when signed out:
+                                spend(kind, diamonds, ref) -> Promise of { me } (the server takes the diamonds)
+                                exchange(coins)            -> Promise of { coins, rubies, me }
+       rules, chatUrl      -> Warden Chat's name and password rules, and its address
+     })
+
+   and then KCBackend.changed() whenever the account signs in or out (the lobby redraws), and
+   KCBackend.restore(data) to load a progress object from the cloud into the game (checked and upgraded
+   like any save, then shown). The game calls KCBackend.saved(progress) after every change (sent on to
+   save() two seconds after the last one), and KCBackend.pay / KCBackend.exchange before anything that
+   costs diamonds or coins. */
+'use strict';
+
+const KCBackend = (() => {
+  let impl = null, timer = 0, pending = null;
+  const listeners = [];
+  function connect(x) {
+    impl = x || null;
+    changed();
+  }
+  // accounts are switched on (the backend answered), whether or not anyone is signed in
+  const connected = () => !!impl;
+  const status = () => (impl ? impl.status() : 'off');
+  function account() { try { return impl && impl.account ? impl.account() : null; } catch (e) { return null; } }
+  const restriction = () => (impl && impl.restriction ? impl.restriction() : null);
+  async function login(name, password, create) {
+    if (!impl) throw Object.assign(new Error('off'), { code: 'off' });
+    await impl.login(name, password, !!create);
+    changed();
+  }
+  async function signOut() { if (impl && impl.signOut) await impl.signOut(); changed(); }
+  // the account signed in or out: battles with friends start over with the new account
+  function changed() {
+    if (typeof KCNet !== 'undefined') {
+      KCNet.cancel().catch(() => {});
+      KCNet.connectFriends(friends());
+      KCNet.reinit();
+    }
+    for (const fn of listeners.slice()) try { fn(); } catch (e) { console.error(e); }
+  }
+  // every save of the game's progress: a copy goes to the account, two seconds after the last change
+  function saved(progress) {
+    if (!impl || !impl.save || !account()) return;
+    pending = progress;
+    clearTimeout(timer);
+    timer = setTimeout(flush, 2000);
+  }
+  function flush() {
+    clearTimeout(timer);
+    if (!pending || !impl || !impl.save) return;
+    const copy = JSON.parse(JSON.stringify(pending)); pending = null;
+    Promise.resolve(impl.save(copy)).catch(e => console.error('cloud save', e));
+  }
+  // a save from the account: into this browser's storage, loaded (checked and upgraded), then shown
+  function restore(data) {
+    if (!data || typeof data !== 'object') return false;
+    try { localStorage.setItem('kc.progress', JSON.stringify(data)); } catch (e) { return false; }
+    pending = null; clearTimeout(timer);
+    if (typeof KCProgress !== 'undefined') KCProgress.load();
+    if (typeof KCMenu !== 'undefined' && KCMenu.refresh) KCMenu.refresh();
+    return true;
+  }
+  const transport = () => (impl && account() && impl.transport) || null;
+  const friends = () => (impl && account() && impl.friends) || null;
+  const wallet = () => (impl && account() && impl.wallet) || null;
+  /* Diamonds for something: with the SirSC wallet connected the server takes them first (kind: 'pass',
+     'skip', 'offer', 'deal', 'magic', 'cards' or 'emote'); then the purchase itself runs here and takes
+     them off the balance shown, which lands on what the server says is left. Without the wallet the
+     diamonds are this device's, as before. Resolves to { ok } or { error }. */
+  async function pay(kind, diamonds, ref) {
+    const W = wallet();
+    if (!W || !(diamonds > 0)) return { ok: true, local: !W };
+    try {
+      const r = await W.spend(kind, diamonds, ref || newRef());
+      const P = KCProgress.state;
+      P.diamonds = Math.max(0, (r && r.me ? r.me.diamonds | 0 : P.diamonds - diamonds)) + diamonds;
+      return { ok: true };
+    } catch (e) {
+      return { error: e && e.code === 'kc_not_enough_diamonds' ? 'diamonds' : e && e.offline ? 'offline' : 'wallet', code: e && e.code };
+    }
+  }
+  /* Coins to Rubies: with the wallet connected the server takes the coins (and checks the daily limit);
+     the Rubies are then added here. Without it, the coins on this device, as before. */
+  async function exchange(coins) {
+    const W = wallet();
+    if (!W) return KCProgress.exchange(coins);
+    const n = Math.floor(+coins);
+    const x = KCProgress.exchangeInfo();
+    if (!Number.isFinite(n) || n <= 0) return { error: 'amount' };
+    if (n > x.left) return { error: 'cap', left: x.left };
+    if (n > x.coins) return { error: 'coins', have: x.coins };
+    try {
+      const r = await W.exchange(n);
+      return KCProgress.exchangePaid(n, r.rubies, r.me ? r.me.coins | 0 : null);
+    } catch (e) {
+      return { error: e && e.code === 'kc_exchange_cap' ? 'cap' : e && e.code === 'kc_not_enough_coins' ? 'coins' : e && e.offline ? 'offline' : 'wallet', code: e && e.code };
+    }
+  }
+  const newRef = () => 'kc-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+  return {
+    connect, connected, status, account, restriction, login, signOut, changed, saved, flush, restore, transport, friends, wallet, pay, exchange,
+    get rules() { return (impl && impl.rules) || { nameMin: 3, nameMax: 24, nameRe: /^[a-zA-Z0-9_.-]+$/, passwordMin: 10 }; },
+    get chatUrl() { return (impl && impl.chatUrl) || 'https://chat.sirsc104.com/'; },
+    onChange(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
+  };
+})();
+
 /* Kingdom Clash: the cards. Stats are level 1; every level adds 8% to HP and damage (level 15 is
    about 2.9x level 1). Kinds: troop, spell and building (a building stays where it is placed, attacks
    what comes in range and loses health over its lifetime). Distances are in arena tiles, speeds in tiles per second, times in seconds. */
@@ -4787,9 +4989,9 @@ const KCSim = (() => {
   return {
     W, H, MID, RIVER_TOP, RIVER_BOT, BRIDGES, BRIDGE_HALF, DT, REGULAR, OVERTIME, MAX_ENERGY, TOWERS, SUDDEN, lowestTower,
     create, step, play, canDeploy, tower, laneOf, own, mulberry, levelMult, evoCharge, formation, costOf, resolve,
-    // Ends a match on the spot: the Simulate Win test button (TEMPORARY), and an online battle whose
-    // opponent left ('left') or fell out of step ('desync').
-    forceEnd: (s, winner, reason) => finish(s, winner, reason || 'test'),
+    // Ends a match on the spot: a surrender, a replay of a battle that ended early, and an online battle
+    // whose opponent left ('left') or fell out of step ('desync').
+    forceEnd: (s, winner, reason) => finish(s, winner, reason || 'surrender'),
   };
 })();
 
@@ -4814,8 +5016,9 @@ const KCSim = (() => {
    - The Shop: five offers a day built from the cards you have found and their levels, for rubies
      or diamonds (1 diamond = 5,000 rubies). Each offer lists exactly what it gives.
 
-   Rubies and diamonds are kept on this device for now. When the SirSC wallet is connected they move
-   to it, and prices and purchases must then be decided by the server.
+   Rubies are the game's own and stay in this save. Diamonds, wallet Coins and membership belong to the
+   SirSC wallet: once a player signs in (js/account.js) they show what the server says, and the server
+   takes the diamonds or coins before a purchase here goes through (KCBackend.pay, KCBackend.exchange).
    Everything is saved in localStorage under kc.progress; older saves are upgraded in place. */
 'use strict';
 
@@ -4946,7 +5149,7 @@ const KCProgress = (() => {
     { id: 'sunstone', number: 3, name: 'Sunstone Arena', min: 600, theme: 'sunstone', cards: ['sandstorm', 'ramcart', 'mole', 'camel', 'scarabshrine', 'dunemortar'],
       blurb: 'A sun-baked desert fortress of sandstone walls and an oasis channel. Evolutions and the Diamond Pass open here.' },
     { id: 'stormspire', number: 4, name: 'Stormspire', min: 900, theme: 'stormspire', cards: ['bees', 'owl', 'thundercloud', 'griffin', 'judgment', 'cyclone', 'conductor'],
-      blurb: 'A fortress on a mountain peak above the clouds, crackling with storms. Online battles are coming here.' },
+      blurb: 'A fortress on a mountain peak above the clouds, crackling with storms. Play a Friend opens here.' },
     { id: 'frostfang', number: 5, name: 'Frostfang Keep', min: 2000, theme: 'frostfang', cards: ['frostsprite', 'icegiant', 'wintersage', 'flashfreeze', 'glacierslam', 'cage'],
       blurb: 'A frozen mountain fortress of ice and snow. Its cards freeze, slow and hold the line.' },
     { id: 'blackwater', number: 6, name: 'Blackwater Harbor', min: 2600, theme: 'blackwater', cards: ['dockraiders', 'barrel', 'harpoon', 'broadside', 'powderkeg', 'barracks'],
@@ -5099,7 +5302,7 @@ const KCProgress = (() => {
   // Which chests each arena can give: a tier starts at the arena number listed (so Arena 1 gives only
   // wooden and silver, Arena 2 adds gold, and so on). Anything above the player's arena is given as the
   // highest tier they have reached instead. allUnlocked turns the gate off: every tier everywhere.
-  // TEMPORARY: allUnlocked is on until more arenas exist; set it to false to switch the gate on.
+  // allUnlocked is on (the gate is off): set it to false to switch the gate on.
   const CHEST_RULES = { allUnlocked: true, arena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 5 } };
   // The order chests are won in, repeating (before the arena gate is applied).
   const CYCLE = ['wooden', 'wooden', 'silver', 'wooden', 'silver', 'wooden', 'wooden', 'gold', 'wooden', 'silver',
@@ -5211,10 +5414,11 @@ const KCProgress = (() => {
   // the guided first battle has been played (or skipped)
   function finishTutorial() { P.tutorial = true; save(); }
   function battleStarted(foe) {
-    P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, trophies: foe.trophies, at: Date.now() } : null;
+    P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, trophies: foe.trophies, boss: !!foe.boss, at: Date.now() } : null;
     save();
   }
-  const save = () => store.set(P);
+  // saved in this browser, and (once the backend is connected, js/backend.js) to the player's account
+  const save = () => { store.set(P); if (typeof KCBackend !== 'undefined') KCBackend.saved(P); };
 
   /* ---------- account ---------- */
   const level = () => 1 + Math.floor(P.xp / XP_PER_LEVEL);
@@ -5346,7 +5550,22 @@ const KCProgress = (() => {
     fireballValue: lerp(8, 5, d), defend: lerp(0.4, 1, d), gap: [lerp(2.6, 0.5, d), lerp(4.2, 1.1, d)],
   });
   // The opponent for the next trophy battle: card levels follow their trophies, skill follows P.diff.
+  /* SirSC: in the high arenas a trophy battle is now and then against SirSC himself, with every card and
+     his King Tower at level 50 and the best play there is. Nobody beats him, so losing to him costs no
+     trophies (a win, if it ever happens, pays like any other). */
+  const SIRSC = { from: 4100, chance: 0.04, level: 50,
+    deck: ['dreadknight', 'phoenix', 'meteor', 'titan', 'griffin', 'guardian', 'collapse', 'archers'] };
+  function sirscFoe(rand) {
+    const t = P.trophies, foeT = t + 500, lv = Object.fromEntries(SIRSC.deck.map(id => [id, SIRSC.level]));
+    return { id: 'sirsc', kind: 'trophy', boss: true, name: 'SirSC', short: 'SirSC', level: SIRSC.level, tier: `Level ${SIRSC.level} · never beaten`,
+      look: { bg: ['#ffe27a', '#b8860b'], hair: 'beard', hat: '#1c1530', hairCol: '#1e1e26', band: '#ffcd33', shirt: '#1c1530', skin: '#efc19c', extra: 'armor', mouth: 'smirk' },
+      lines: null, skill: skillFor(1), towerDamage: 1, deck: SIRSC.deck.slice(), cardLevels: lv, trophies: foeT, kingLevel: SIRSC.level,
+      style: 'control', styleName: 'Champion', clan: 'WardenChat', mood: 'cocky', stakes: { win: stakes(t, foeT).win, loss: 0 }, breather: false, first: false, skillLevel: 1,
+      evos: SIRSC.deck.filter(id => KC_EVOS[id]) };
+  }
   function trophyFoe(rand = Math.random) {
+    const t0 = P.trophies;
+    if (t0 >= SIRSC.from && rand() < SIRSC.chance) return sirscFoe(rand);
     const t = P.trophies, rec = P.trophyRecord, first = rec.w + rec.l + rec.d < FIRST_STEPS && t < 100;
     const off = matchOffset(), breather = off <= MATCH.lost2;
     const foeT = Math.max(0, t + off + Math.round((rand() - 0.5) * MATCH.spread));
@@ -5384,11 +5603,14 @@ const KCProgress = (() => {
   }
   // foeTrophies: the opponent's trophies (from the battle that was started if not given)
   // stats: what you did in the battle ({ cards, spells, troops }) for the daily quests
-  function recordTrophy(winner, crowns, foeTrophies, stats) {
+  // boss: the battle was against SirSC (no trophies lost)
+  function recordTrophy(winner, crowns, foeTrophies, stats, boss) {
     if (foeTrophies === undefined) foeTrophies = P.live && P.live.trophies !== undefined ? P.live.trophies : Math.max(0, P.trophies + MATCH.offset);
+    if (boss === undefined) boss = !!(P.live && P.live.boss);
     P.live = null;
     const r = P.trophyRecord, before = P.trophies, beforeArena = arena().id, st = stakes(P.trophies, foeTrophies);
     if (winner === 0) { r.w++; P.trophies += st.win; P.streak = Math.max(1, (P.streak || 0) + 1); }
+    else if (winner === 1 && boss) r.l++;
     else if (winner === 1) { r.l++; P.trophies = Math.max(arenaFloor(), P.trophies - st.loss); P.streak = Math.min(-1, (P.streak || 0) - 1); }
     else { r.d++; P.streak = 0; }
     P.best = Math.max(P.best, P.trophies);
@@ -5425,7 +5647,7 @@ const KCProgress = (() => {
     const pass = passAdd(crowns || 0);
     save();
     const nextRoad = ROAD.find(m => m.at > P.trophies && !P.claimed[m.at]) || null, prevRoad = ROAD.filter(m => m.at <= P.trophies).pop() || ROAD[0];
-    return { kind: 'trophy', delta: P.trophies - before, before, trophies: P.trophies, chest, slotsFull, xp, levelUp, newArena, newRewards: claimable().length, pass, gold,
+    return { kind: 'trophy', boss, delta: P.trophies - before, before, trophies: P.trophies, chest, slotsFull, xp, levelUp, newArena, newRewards: claimable().length, pass, gold,
       goldLeft: Math.max(0, ECONOMY.winGold.dailyCap - P.winDay.n), streak: P.streak, streakBonus: winner === 0 && P.streak >= STREAK.from && gold > 0,
       quests: roadOpen() ? quests(now) : [], finished, crown: cc, crownReady, nextRoad, prevRoad };
   }
@@ -5799,9 +6021,9 @@ const KCProgress = (() => {
     save();
     return { ok: true, chest: type, price, rubies: c.rubies, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
   }
-  // Wallet Coins to Rubies, one way, up to a daily cap by the highest arena reached. TEMPORARY: the wallet
-  // balance is kept on this device; once the SirSC wallet is connected the server must take the coins and
-  // enforce the cap, and the game never pays coins out.
+  // Wallet Coins to Rubies, one way, up to a daily cap by the highest arena reached. BACKEND: the wallet
+  // balance is kept on this device for now; once the SirSC wallet is connected the server must take the
+  // coins and enforce the cap, and the game never pays coins out (see BACKEND_HANDOFF.md).
   function exchangeCap() {
     const X = ECONOMY.exchange, top = Math.max(...Object.keys(X.cap).map(Number)), n = bestArena();
     if (n < top) return X.cap[n] || X.cap[1];
@@ -5824,6 +6046,26 @@ const KCProgress = (() => {
     P.walletDay = { day: dayKey(now), n: x.used + n };
     save();
     return { ok: true, coins: n, rubies: n * x.rate };
+  }
+  // The SirSC wallet took the coins (js/backend.js, KCBackend.exchange): add the Rubies and count them
+  // toward today's limit. coinsLeft: the wallet's balance now, as the server says.
+  function exchangePaid(n, rubies, coinsLeft, now = Date.now()) {
+    n = Math.max(0, Math.floor(+n) || 0); rubies = Math.max(0, Math.floor(+rubies) || 0);
+    const used = P.walletDay.day === dayKey(now) ? P.walletDay.n : 0;
+    P.rubies += rubies;
+    P.walletDay = { day: dayKey(now), n: used + n };
+    P.wallet = coinsLeft === null || coinsLeft === undefined ? Math.max(0, P.wallet - n) : Math.max(0, coinsLeft | 0);
+    save();
+    return { ok: true, coins: n, rubies };
+  }
+  // The SirSC wallet's balances, as the server last said (diamonds, coins and membership live there once
+  // the wallet is connected; the game only shows them). null: signed out, so nothing to spend here.
+  function setWallet(me) {
+    const d = me ? Math.max(0, me.diamonds | 0) : 0, c = me ? Math.max(0, me.coins | 0) : 0, m = !!(me && me.member);
+    if (P.diamonds === d && P.wallet === c && !!P.member === m) return false;
+    P.diamonds = d; P.wallet = c; P.member = m;
+    save();
+    return true;
   }
   // One free Wooden Chest a day (local days, like the offers).
   const freeChestReady = (now = Date.now()) => P.freeChestDay !== dayKey(now);
@@ -5893,8 +6135,6 @@ const KCProgress = (() => {
     return { ok: true, id, price, currency: wallet };
   }
 
-  // TEMPORARY: the test button's 1,000,000 rubies and diamonds.
-  function grantTest() { P.rubies = 1000000; P.diamonds = 1000000; P.wallet = 1000000; save(); }
 
 
   /* ---------- magic items ----------
@@ -5999,12 +6239,6 @@ const KCProgress = (() => {
     save();
     return { ok: true, item, card: id, gives: r.gives };
   }
-  // TEMPORARY: the test button fills the Magic Items tab.
-  function grantMagic() {
-    const add = { wild_common: 300, wild_rare: 60, wild_epic: 10, wild_legendary: 2, book_common: 3, book_rare: 3, book_epic: 1, book_legendary: 1, book_books: 2, hammer_books: 3 };
-    for (const [k, v] of Object.entries(add)) P.magic[k] = magicCount(k) + v;
-    save();
-  }
 
   /* ---------- the King Tower ----------
      Its level (1 to 15) sets the health and damage of all three of your towers in battle (8% a level,
@@ -6102,7 +6336,7 @@ const KCProgress = (() => {
     return P.passRolled;
   }
   const passOpen = () => P.best >= EVO_ARENA;
-  // Online battles open when you first reach Stormspire (Arena 4).
+  // Play a Friend (battles with friends) opens when you first reach Stormspire (Arena 4).
   const ONLINE_AT = 900;
   const onlineOpen = () => P.best >= ONLINE_AT;
   const passPremium = () => { passRoll(); return !!(P.pass.premium || P.member); };
@@ -6276,7 +6510,7 @@ const KCProgress = (() => {
     return { deck, missing: deck.filter(id => !P.found.includes(id)) };
   }
   // A friend code: your name, deck, card levels and King Tower, for a friend to battle a computer player
-  // that plays your deck (there are no online battles yet).
+  // that plays your deck (a ghost battle; live battles with friends are Play a Friend).
   const b64 = { enc: str => btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
     dec: str => decodeURIComponent(escape(atob(str.replace(/-/g, '+').replace(/_/g, '/')))) };
   function friendCode() {
@@ -6377,18 +6611,18 @@ const KCProgress = (() => {
 
   return {
     MAX_LEVEL, XP_PER_LEVEL, TROPHIES, MATCH, FOE_SKILL, FIRST_STEPS, stakes, nextStakes, ARENAS, ROAD, skillFor, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
-    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, chestShopOpen, chestBuyLeft, foeKing, buyDiamond, magicUsable,
+    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, exchangePaid, setWallet, chestShopOpen, chestBuyLeft, foeKing, buyDiamond, magicUsable,
     load, save, battleStarted, finishTutorial, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,
-    trophyFoe, foeUpgrades, spreadLevels, recordTrophy,
+    trophyFoe, foeUpgrades, spreadLevels, recordTrophy, SIRSC, sirscFoe,
     roll, chestState, unlockingSlot, startUnlock, openChest,
-    SHOP, shop, shopEnds, refreshShop, buy, buyChest, grantTest,
+    SHOP, shop, shopEnds, refreshShop, buy, buyChest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
     DECK_SLOTS, useDeckSlot, setWholeDeck, deckWarnings, suggestDeck, practiceFoe,
     CHALLENGES, CHALLENGE_PAY, challenge, challengeLevel, draftPairs, challengeFoe, recordChallenge,
     LOG_MAX, logBattle, battleLog, profile, setAvatar, deckCode, readDeckCode, friendCode, friendFoe,
-    MAGIC, MAGIC_ORDER, MAGIC_RULES, wildActive, magicCount, magicFor, useMagic, grantMagic,
+    MAGIC, MAGIC_ORDER, MAGIC_RULES, wildActive, magicCount, magicFor, useMagic,
     EVO_ARENA, evoOpen, hasEvo, evoList, evoInfo,
     QUESTS, CROWN_CHEST, STREAK, quests, questAdd, claimQuest, questsReady, crownChest, openCrownChest,
     kingInfo, upgradeKing, ONLINE_AT, onlineOpen, EMOTES, EMOTE_SHOP, emoteOffers, buyEmote, chestPool,
@@ -12110,20 +12344,20 @@ const KCUpgradeFX = (() => {
   return { play, close, get open() { return !!S; } };
 })();
 
-/* Kingdom Clash: online battles (opened at Stormspire, Arena 4).
+/* Kingdom Clash: Play a Friend, battles against a friend (opened at Stormspire, Arena 4).
 
-   The connection: on claude.ai the page uses the `room` capability, which reaches the other people
-   who have this game open RIGHT NOW (nothing is stored; messages can drop). Anywhere else it falls
-   back to a BroadcastChannel, which reaches other tabs of the same browser only (handy for trying it
-   out, and what the tests use). Both look the same to the rest of the game: a lobby everyone shares,
-   and named rooms (one per battle).
+   The connection: once a player is signed in with their WardenChat account, js/account.js gives a
+   transport over Supabase Realtime (a private channel per room, kc-<code>). With LIVE on and no backend,
+   claude.ai's `room` capability, or else a BroadcastChannel that reaches other tabs of the same browser
+   only (handy for trying it out, the demo build and the tests). All of them look the same to the rest
+   of the game: a lobby, and named rooms (one per battle).
 
-   Finding an opponent:
-   - Quick match: you mark yourself as looking in the lobby's presence; the two who have been looking
-     longest pair up, and the one with the lower peer label hosts and invites the other to a fresh
-     room.
-   - Friendly battle: one player makes a room and reads its five-letter code to a friend, who types it
-     in.
+   Finding your friend (there is no matchmaking with strangers):
+   - Invite a friend: friends come from the player's WardenChat account (the backend connects them with
+     connectFriends, below). Inviting one makes a room and sends them its code through the account;
+     they get an invite in the game and accepting joins the room.
+   - Invite with a code: one player makes a room and reads its five-letter code to a friend, who types
+     it in.
    In the room each player shows their setup (name, deck, card levels, King Tower level, evolutions) in
    presence; the host starts the battle with a seed and both setups (mp.start). From then on the battle
    itself runs in js/game.js: both players run the same simulation and swap only their card plays
@@ -12134,11 +12368,10 @@ const KCUpgradeFX = (() => {
 'use strict';
 
 const KCNet = (() => {
-  // LIVE PLAY IS OFF for now: only the front end is built. The screens show "coming soon" and nothing
-  // connects. When the multiplayer backend exists, connect it here (a transport with the same calls as
-  // the lobby below: emit, on, presence, peers, onPeers, join) and set LIVE to true.
+  // LIVE stays off: battles with friends switch on when the backend gives a transport (a signed-in
+  // WardenChat account, js/backend.js); until then the screens say "coming soon" and nothing connects.
   const LIVE = false;
-  const TOPICS = ['mp.invite', 'mp.start', 'mp.step', 'mp.emote', 'mp.bye'];
+  const TOPICS = ['mp.start', 'mp.step', 'mp.emote', 'mp.bye'];
   const CODE_CHARS = 'abcdefghjkmnpqrstuvwxyz23456789';
   let lobby = null, kind = 'none', initP = null;
   const S = { status: 'idle', room: null, role: null, code: '', since: 0, onMatch: null, onChange: null, unsub: [], startTimer: 0, matched: false };
@@ -12196,19 +12429,17 @@ const KCNet = (() => {
   function init() {
     if (initP) return initP;
     initP = (async () => {
-      if (!LIVE) { kind = 'off'; changed(); return kind; }
+      // the backend's own lobby (js/backend.js) when it is connected, which also switches battles on
+      const backend = typeof KCBackend !== 'undefined' ? KCBackend.transport() : null;
+      if (!LIVE && !backend) { kind = 'off'; changed(); return kind; }
       let room = null;
-      try { room = window.claude && window.claude.use ? await window.claude.use('room') : null; } catch (e) { room = null; }
-      if (room) { lobby = room; kind = 'room'; }
-      else { lobby = localTransport(); kind = lobby ? 'local' : 'none'; }
-      if (lobby) {
-        lobby.on('mp.invite', msg => {
-          const d = msg.data || {};
-          if (S.status !== 'seeking' || msg.isMe || d.to !== myPeer(lobby) || !validCode(d.code)) return;
-          enterRoom(d.code, 'guest');
-        });
-        lobby.onPeers(() => { if (S.status === 'seeking') tryPair(); changed(); });
+      if (backend) { lobby = backend; kind = 'backend'; }
+      else {
+        try { room = window.claude && window.claude.use ? await window.claude.use('room') : null; } catch (e) { room = null; }
+        if (room) { lobby = room; kind = 'room'; }
+        else { lobby = localTransport(); kind = lobby ? 'local' : 'none'; }
       }
+      if (lobby) lobby.onPeers(() => changed());
       changed();
       return kind;
     })();
@@ -12218,11 +12449,61 @@ const KCNet = (() => {
   const validCode = c => typeof c === 'string' && /^[a-z0-9]{5}$/.test(c);
   const newCode = () => Array.from({ length: 5 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join('');
   function changed() { if (S.onChange) S.onChange(info()); }
-  // How many others have the game open (and are looking for a match).
+  // Where things stand: the connection, the room, and whether the WardenChat friends list is connected.
   function info() {
     const ps = lobby ? lobby.peers() : [];
-    const others = ps.filter(p => !p.isMe), seeking = others.filter(p => p.presence && p.presence.kc && p.presence.kc.seek);
-    return { kind, status: S.status, code: S.code, role: S.role, online: others.length, seeking: seeking.length };
+    return { kind, status: S.status, code: S.code, role: S.role, online: ps.filter(p => !p.isMe).length, friends: !!friendsP, invitee: S.invitee || null };
+  }
+
+  /* ---------- WardenChat friends ----------
+     The game keeps no friends list of its own: friends are the player's WardenChat friends. The backend
+     connects them by calling KCNet.connectFriends(provider) once the player is signed in, where
+       provider.list()                 -> Promise of [{ id, name, online, inGame, avatar? }]
+       provider.invite(friendId, code) -> Promise (send a battle invite: the room code to join)
+       provider.onInvite(fn)           -> an unsubscribe function; calls fn({ id, from: { id, name }, code })
+                                          when a friend invites you
+       provider.decline(inviteId)      -> Promise (optional: tell the inviter you said no)
+     Until it is connected, the Friends screen says friends come with the WardenChat account. */
+  let friendsP = null, friendsOff = null;
+  function connectFriends(provider) {
+    if (friendsOff) { try { friendsOff(); } catch (e) { /* gone */ } friendsOff = null; }
+    friendsP = provider || null;
+    if (friendsP && friendsP.onInvite) friendsOff = friendsP.onInvite(inv => { if (inv && validCode(inv.code) && S.onInvite) S.onInvite(inv); });
+    changed();
+  }
+  async function friends() {
+    if (!friendsP) return null;
+    try { const list = await friendsP.list(); return Array.isArray(list) ? list.filter(f => f && f.id).map(f => ({ id: String(f.id), name: String(f.name || 'Friend').slice(0, 24), online: !!f.online, inGame: !!f.inGame, avatar: f.avatar || null })) : []; }
+    catch (e) { return []; }
+  }
+  // Invite a friend: a room of your own, its code sent to them through the account.
+  async function inviteFriend(friend, onMatch) {
+    if (!friendsP) return { error: 'friends' };
+    const r = await createRoom(onMatch);
+    if (!r.ok) return r;
+    S.invitee = { id: friend.id, name: friend.name };
+    try { await friendsP.invite(friend.id, r.code); } catch (e) { await cancel(); return { error: 'invite' }; }
+    changed();
+    return r;
+  }
+  function onInvite(fn) { S.onInvite = fn; }
+  async function declineInvite(inv) { if (friendsP && friendsP.decline && inv && inv.id) try { await friendsP.decline(inv.id); } catch (e) { /* gone */ } }
+  // accepting tells the inviter's account (the room itself is joined with joinRoom)
+  async function acceptInvite(inv) { if (friendsP && friendsP.accept && inv && inv.id) try { await friendsP.accept(inv.id); } catch (e) { /* gone */ } }
+  // friend requests, when the account has them: { incoming: [{ id, name }], outgoing: [...] }
+  function friendRequests() {
+    if (!friendsP || !friendsP.requests) return null;
+    try { const r = friendsP.requests() || {}; const clean = a => (Array.isArray(a) ? a.filter(x => x && x.id).map(x => ({ id: String(x.id), name: String(x.name || 'Player').slice(0, 24) })) : []); return { incoming: clean(r.incoming), outgoing: clean(r.outgoing) }; }
+    catch (e) { return null; }
+  }
+  // send a friend request by WardenChat username; resolves to { status } or { error: code }
+  async function addFriend(name) {
+    if (!friendsP || !friendsP.add) return { error: 'friends' };
+    try { return Object.assign({ ok: true }, await friendsP.add(name)); } catch (e) { return { error: String((e && e.code) || 'error').replace(/^(kc|br)_/, '') }; }
+  }
+  async function answerFriend(id, accept) {
+    if (!friendsP || !friendsP.respond) return { error: 'friends' };
+    try { await friendsP.respond(id, accept); return { ok: true }; } catch (e) { return { error: String((e && e.code) || 'error').replace(/^(kc|br)_/, '') }; }
   }
 
   /* ---------- your setup, and checking someone else's ---------- */
@@ -12243,31 +12524,6 @@ const KCNet = (() => {
       deck, levels, king: int(x.king, 1, 15, 1), evos, trophies: int(x.trophies, 0, 99999, 0), theme };
   }
 
-  /* ---------- matchmaking ---------- */
-  function tryPair() {
-    const ps = lobby.peers(), me = myPeer(lobby);
-    const seekers = ps.filter(p => p.presence && p.presence.kc && p.presence.kc.seek)
-      .sort((a, b) => (a.presence.kc.since || 0) - (b.presence.kc.since || 0) || (a.peer < b.peer ? -1 : 1));
-    if (seekers.length < 2 || !me) return;
-    const pair = seekers.slice(0, 2);
-    if (!pair.some(p => p.peer === me)) return;
-    const other = pair.find(p => p.peer !== me);
-    if (me < other.peer) {
-      // this side hosts: a new room, and an invitation (sent a few times in case one drops)
-      const code = newCode();
-      for (const ms of [0, 400, 1200]) setTimeout(() => { if (S.code === code) lobby.emit('mp.invite', { to: other.peer, code }).catch(() => {}); }, ms);
-      enterRoom(code, 'host');
-    }
-  }
-  async function quickMatch(onMatch) {
-    await init();
-    if (!lobby) return { error: 'unavailable' };
-    await cancel();
-    S.onMatch = onMatch; S.status = 'seeking'; S.since = Date.now();
-    await lobby.presence({ kc: { seek: true, since: S.since, trophies: KCProgress.state.trophies | 0 } }).catch(() => {});
-    changed(); tryPair();
-    return { ok: true };
-  }
   async function createRoom(onMatch) {
     await init();
     if (!lobby) return { error: 'unavailable' };
@@ -12289,7 +12545,6 @@ const KCNet = (() => {
   }
   async function enterRoom(code, role) {
     S.status = role === 'host' ? 'hosting' : 'joining'; S.code = code; S.role = role; S.matched = false;
-    if (lobby) lobby.presence({ kc: { seek: false } }).catch(() => {});
     let room;
     try { room = await lobby.join('kc-' + code); } catch (e) { S.status = 'idle'; S.code = ''; changed(); return; }
     if (S.code !== code) { room.leave(); return; }
@@ -12324,19 +12579,24 @@ const KCNet = (() => {
     }
     changed();
   }
-  // Stop looking, and leave any room (telling the other player).
+  // Leave any room (telling the other player).
   async function cancel() {
     clearInterval(S.startTimer);
     for (const u of S.unsub) try { u(); } catch (e) { /* gone */ }
     S.unsub = [];
     if (S.room) { const r = S.room; S.room = null; try { await r.emit('mp.bye', {}); } catch (e) { /* gone */ } r.leave().catch(() => {}); }
-    if (lobby && S.status === 'seeking') lobby.presence({ kc: { seek: false } }).catch(() => {});
-    Object.assign(S, { status: 'idle', code: '', role: null, matched: false });
+    Object.assign(S, { status: 'idle', code: '', role: null, matched: false, invitee: null });
     changed();
   }
   function onChange(fn) { S.onChange = fn; changed(); }
 
-  return { LIVE, TOPICS, init, info, quickMatch, createRoom, joinRoom, cancel, onChange, checkSetup, mySetup, get kind() { return kind; } };
+  // battles with friends are on: LIVE, or a backend lobby connected
+  const isLive = () => LIVE || !!(typeof KCBackend !== 'undefined' && KCBackend.transport());
+  // start over (when the backend connects after the game has started)
+  function reinit() { initP = null; lobby = null; kind = 'none'; }
+  return { LIVE, isLive, reinit, TOPICS, init, info, createRoom, joinRoom, cancel, onChange, checkSetup, mySetup, connectFriends, friends, inviteFriend, onInvite, declineInvite,
+    acceptInvite, friendRequests, addFriend, answerFriend, localTransport,
+    get kind() { return kind; } };
 })();
 
 /* Kingdom Clash: the lobby. A top bar (name, level and experience, rubies and diamonds, sound,
@@ -12388,25 +12648,10 @@ const KCMenu = (() => {
     if (foe.kind === 'practice') return { kind: 'practice' };
     if (foe.kind === 'challenge') return G.recordChallenge(winner);
     if (foe.kind === 'friend') return { kind: 'friend' };
-    const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns, foe.trophies, stats) : G.recordTrainer(foe.id, winner);
+    const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns, foe.trophies, stats, !!foe.boss) : G.recordTrainer(foe.id, winner);
     return r;
   }
 
-  // TEMPORARY test button: counts a win against the current opponent without playing the match,
-  // with the same rewards as a real win.
-  function simulateWin() {
-    const foe = nextFoe(), r = recordResult(foe, 0, 3);
-    const bits = [r.unlockedNext ? `${r.unlockedNext.name} unlocked` : '', r.roadOpened ? 'Trophy Road unlocked' : '',
-      r.kind === 'trophy' ? `+${r.delta} trophies` : '', r.chest ? `${r.chest.name} earned` : '', r.slotsFull ? 'chest slots are full' : '',
-      r.levelUp ? `level ${r.levelUp}` : ''].filter(Boolean);
-    if (G.roadOpen()) KCArenas.preload(G.arena().theme);
-    KCSound.play('crown');
-    refresh();
-    toast(`Simulated win vs ${foe.name}${bits.length ? ': ' + bits.join(', ') : ''}`);
-    if (r.chestNow) showChest(r.chestNow.chest, r.chestNow, r.chestNow.name);
-    if (r.roadOpened) milestone({ kind: 'road' });
-    if (r.newArena) milestone({ kind: 'arena', arena: r.newArena });
-  }
 
   /* ---------- small messages ---------- */
   let toastT = 0;
@@ -12581,8 +12826,9 @@ const KCMenu = (() => {
   function bindSkips() {
     for (const b of $$('#chests .skip-btn:not([data-bound])')) { b.dataset.bound = '1'; b.addEventListener('click', e => { e.stopPropagation(); skipClick(+b.dataset.skip); }); }
   }
-  function skipClick(i) {
-    const cost = G.skipCost(i);
+  async function skipClick(i) {
+    if (paying) return;
+    const now = Date.now(), cost = G.skipCost(i, now);
     if (!cost) return refresh();
     if (P().diamonds < cost) { confirmSkip = -1; toast(`Opening it now takes ${fmt(cost)} diamond${cost === 1 ? '' : 's'}. You have ${fmt(P().diamonds)}.`); return; }
     if (confirmSkip !== i) {
@@ -12591,7 +12837,8 @@ const KCMenu = (() => {
       KCSound.play('select'); renderChests(); return;
     }
     clearTimeout(confirmSkipT); confirmSkip = -1;
-    const got = G.skipChest(i);
+    if (!(await payFor('skip', cost))) return refresh();
+    const got = G.skipChest(i, now);
     if (got && !got.error) { KCSound.play('buy'); showChest(got.chest, got); }
     refresh();
   }
@@ -13111,10 +13358,12 @@ const KCMenu = (() => {
     }).join('') : '<p class="dim">Every card you can buy here is at level 15.</p>';
     for (const b of $$('.dshop .buy-btn[data-dsec]')) b.addEventListener('click', e => { e.stopPropagation(); buyDiamondClick(b.dataset.dsec, +b.dataset.di); });
   }
-  function buyDiamondClick(sec, i) {
+  async function buyDiamondClick(sec, i) {
+    if (paying) return;
     const s = G.shop(), o = { deals: s.deals, magic: s.magicItems, cards: s.cardShop }[sec][i];
     if (!o) return;
-    if (P().diamonds < o.price) { KCSound.play('error'); toast(`That costs ${fmt(o.price)} diamond${o.price === 1 ? '' : 's'}. Diamonds will come from the SirSC wallet.`); return; }
+    if (P().diamonds < o.price) { KCSound.play('error'); toast(noGems(o.price)); return; }
+    if (s.dBought[sec + ':' + o.id]) { KCSound.play('error'); toast('You already bought that today. New ones arrive at midnight.'); return; }
     const key = sec + ':' + i;
     if (dConfirm !== key) {   // diamonds take a second click to confirm
       dConfirm = key; clearTimeout(dConfirmT);
@@ -13124,6 +13373,7 @@ const KCMenu = (() => {
       return;
     }
     clearTimeout(dConfirmT); dConfirm = '';
+    if (!(await payFor(sec === 'deals' ? 'deal' : sec, o.price))) return refresh();
     const r = G.buyDiamond(sec, i);
     if (!r.ok) { KCSound.play('error'); toast(r.error === 'sold' ? 'You already bought that today. New ones arrive at midnight.' : 'That is not available.'); refresh(); return; }
     KCSound.play('buy');
@@ -13131,7 +13381,8 @@ const KCMenu = (() => {
     showChest(null, r, sec === 'deals' ? o.tag : sec === 'magic' ? 'Magic Shop' : 'Card Shop');
   }
   let emoteConfirm = null, emoteConfirmT = 0;
-  function buyEmoteClick(id, cur) {
+  async function buyEmoteClick(id, cur) {
+    if (paying) return;
     // a diamond takes a second click to confirm, like every diamond purchase
     if (cur === 'diamonds' && P().diamonds >= G.EMOTE_SHOP.diamonds && emoteConfirm !== id) {
       emoteConfirm = id; clearTimeout(emoteConfirmT);
@@ -13139,9 +13390,15 @@ const KCMenu = (() => {
       renderShop(); return;
     }
     emoteConfirm = null; clearTimeout(emoteConfirmT);
+    if (cur === 'diamonds') {
+      const o = G.emoteOffers().find(x => x.id === id);
+      if (!o || o.owned) return;
+      if (P().diamonds < o.diamonds) { KCSound.play('error'); toast(noGems(o.diamonds)); return; }
+      if (!(await payFor('emote', o.diamonds))) return refresh();
+    }
     const r = G.buyEmote(id, cur);
     if (r.error === 'rubies') { KCSound.play('error'); toast('Not enough rubies. Win battles and open chests to earn more.'); return; }
-    if (r.error === 'diamonds') { KCSound.play('error'); toast('Not enough diamonds. Diamonds will come from the SirSC wallet.'); return; }
+    if (r.error === 'diamonds') { KCSound.play('error'); toast(noGems(G.EMOTE_SHOP.diamonds)); return; }
     if (!r.ok) return;
     KCSound.play('buy'); setTimeout(() => KCSound.play(id.startsWith('card_') ? 'emCard' : 'em_' + id), 250);
     toast(`${KCEmotes.LABEL[id]} is in your emote panel!`);
@@ -13356,9 +13613,16 @@ const KCMenu = (() => {
     closeQuests(); refresh();
     showChest(r.chest, r, 'Crown Chest');
   }
-  function doExchange() {
-    const r = G.exchange($('#exAmount').value);
-    if (!r.ok) { KCSound.play('error'); renderExchange(); return; }
+  async function doExchange() {
+    if (paying) return;
+    paying = true; $('#exGo').disabled = true;
+    const r = await KCBackend.exchange($('#exAmount').value);
+    paying = false;
+    if (!r.ok) {
+      KCSound.play('error');
+      if (r.error === 'offline' || r.error === 'wallet') toast(r.error === 'offline' ? "Can't reach the SirSC wallet right now. Nothing was swapped." : 'The SirSC wallet said no. Nothing was swapped.');
+      renderExchange(); return;
+    }
     KCSound.play('buy'); toast(`Swapped ${fmt(r.coins)} Coins for ${fmt(r.rubies)} Rubies`);
     $('#exAmount').value = ''; refresh();
   }
@@ -13409,13 +13673,14 @@ const KCMenu = (() => {
     refresh();
     showChest('wooden', r, 'Free Wooden Chest');
   }
-  function buyClick(i) {
+  async function buyClick(i) {
+    if (paying) return;
     const o = G.shop().offers[i];
     if (!o) return;
     const gem = o.currency === 'diamonds';
     if ((gem ? P().diamonds : P().rubies) < o.price) {
       KCSound.play('error');
-      toast(gem ? 'Not enough diamonds. Diamonds will come from the SirSC wallet.' : 'Not enough rubies. Win battles and open chests to earn more.');
+      toast(gem ? noGems(o.price) : 'Not enough rubies. Win battles and open chests to earn more.');
       return;
     }
     // diamonds take a second click to confirm
@@ -13429,6 +13694,9 @@ const KCMenu = (() => {
       return;
     }
     clearTimeout(confirmT); confirmOffer = -1;
+    const s = G.shop();
+    if (s.bought[o.id] && !o.repeat) { toast('You already bought that today.'); refresh(); return; }
+    if (gem && !(await payFor('offer', o.price))) return refresh();
     const r = G.buy(i);
     if (!r.ok) { toast(r.error === 'sold' ? 'You already bought that today.' : 'That offer is not available.'); refresh(); return; }
     KCSound.play('buy');
@@ -13437,65 +13705,84 @@ const KCMenu = (() => {
   }
 
 
-  /* ---------- online battles (js/net.js) ---------- */
-  let onlineJoinCode = '';
+  /* ---------- Play a Friend (js/net.js): invite a WardenChat friend, or invite with a room code ---------- */
+  let onlineJoinCode = '', friendList = null;
   function openOnline() {
     $('#onlineModal').hidden = false;
-    KCNet.init().then(() => renderOnline(KCNet.info()));
+    KCNet.init().then(() => { renderOnline(KCNet.info()); loadFriends(); });
     renderOnline(KCNet.info());
   }
   function closeOnline() {
     $('#onlineModal').hidden = true;
     if (KCNet.info().status !== 'playing') KCNet.cancel();
   }
-  const matched = m => { $('#onlineModal').hidden = true; if (opts.onOnline) opts.onOnline(m); };
+  const matched = m => { $('#onlineModal').hidden = true; $('#friendsModal').hidden = true; $('#inviteToast').hidden = true; if (opts.onOnline) opts.onOnline(m); };
+  // the friends list, fetched from the account each time a friends screen opens
+  async function loadFriends() {
+    friendList = await KCNet.friends();
+    renderOnline(KCNet.info()); renderFriends();
+  }
+  const friendRows = (list, live, btnLabel) => list.length ? list.slice().sort((a, b) => (b.online - a.online) || a.name.localeCompare(b.name)).map(f => `<li class="fr-row${f.online ? ' on' : ''}">
+      <span class="fr-pic">${f.avatar ? `<img src="${esc(f.avatar)}" alt="">` : esc(f.name.slice(0, 1).toUpperCase())}</span>
+      <span class="fr-text"><b>${esc(f.name)}</b><small>${f.inGame ? 'Playing Kingdom Clash' : f.online ? 'Online' : 'Offline'}</small></span>
+      <button type="button" class="mini-btn fr-invite" data-friend="${esc(f.id)}"${live ? '' : ' disabled'}>${btnLabel}</button></li>`).join('')
+    : `<li class="fr-empty">No friends yet. ${KCNet.friendRequests() ? 'Add one with their WardenChat name below.' : 'Add them in WardenChat and they show up here.'}</li>`;
   function renderOnline(info) {
     if ($('#onlineModal').hidden) return;
     const box = $('#onlineBody');
     if (!G.onlineOpen()) {
-      box.innerHTML = `<div class="ol-lock"><b>Opens at Stormspire</b><p>Reach Stormspire (${fmt(G.ONLINE_AT)} trophies) to battle other players online.</p></div>`;
+      box.innerHTML = `<div class="ol-lock"><b>Opens at Stormspire</b><p>Reach Stormspire (${fmt(G.ONLINE_AT)} trophies) to battle your friends.</p></div>`;
       return;
     }
-    if (info.kind === 'off') {
+    const live = info.kind !== 'off' && info.kind !== 'none', bst = KCBackend.status();
+    if (!live && bst !== 'off') {
+      // accounts are on: battles with friends need the WardenChat account
+      box.innerHTML = bst === 'signedIn' ? '<div class="ol-wait"><span class="nw-spin" aria-hidden="true"></span><b>Connecting…</b></div>'
+        : `<div class="ol-soon"><b>Battle your friends</b><p>${bst === 'restricted' ? 'Your WardenChat account is restricted, so battles with friends are off for now.' : 'Sign in with your WardenChat account to invite your friends, or to join them with a room code.'}</p>
+          ${bst === 'restricted' ? '' : '<button type="button" class="pill gold" id="olSignIn">Sign in</button>'}</div>
+          <p class="dim ol-note">Battles with friends use your deck, card levels, King Tower and evolutions. No trophies are won or lost.</p>`;
+      const b = $('#olSignIn');
+      if (b) b.addEventListener('click', () => { closeOnline(); openSignIn(); });
+      return;
+    }
+    const friendsPart = !info.friends
+      ? '<p class="dim">Your friends come from your WardenChat account. Once you are signed in, they show up here.</p>'
+      : friendList === null ? '<p class="dim">Loading your friends…</p>'
+        : `<ul class="fr-list">${friendRows(friendList, live, 'Invite')}</ul>`;
+    if (!live) {
       // live play isn't switched on yet: show what's coming
-      box.innerHTML = `<div class="ol-soon"><span class="tag-lock">Coming soon</span><b>Online battles are coming soon</b>
-        <p>Battle other players with your own deck, card levels, King Tower and evolutions.</p></div>
+      box.innerHTML = `<div class="ol-soon"><span class="tag-lock">Coming soon</span><b>Battles with friends are coming soon</b>
+        <p>Battle your friends with your own deck, card levels, King Tower and evolutions.</p></div>
         <div class="ol-opts is-soon" aria-disabled="true">
-          <div class="ol-opt"><b>Quick match</b><p>Battle the next player who's looking.</p><button type="button" class="big-btn ol-go" disabled><span>Find a battle</span></button></div>
-          <div class="ol-opt"><b>Friendly battle</b><p>Make a room and share its code, or type a friend's code.</p>
+          <div class="ol-opt"><b>Invite a friend</b><p>Pick a friend from your WardenChat friends.</p>${friendsPart}</div>
+          <div class="ol-opt"><b>Invite with a code</b><p>Make a room and share its code, or type a friend's code.</p>
             <button type="button" class="pill gold" disabled>Make a room</button>
             <div class="ol-join"><input maxlength="5" placeholder="Code" disabled aria-label="Room code"><button type="button" class="pill" disabled>Join</button></div>
           </div>
         </div>
-        <p class="dim ol-note">No trophies will be won or lost in online battles.</p>`;
+        <p class="dim ol-note">No trophies are won or lost in battles with friends.</p>`;
       return;
     }
-    if (info.kind === 'none') { box.innerHTML = '<div class="ol-lock"><b>Not available here</b><p>This browser can\'t connect to other players.</p></div>'; return; }
-    const where = info.kind === 'room'
-      ? `<p class="ol-where"><b>${fmt(info.online)}</b> other player${info.online === 1 ? '' : 's'} here now${info.seeking ? ` · ${fmt(info.seeking)} looking for a battle` : ''}.</p>`
-      : '<p class="ol-where">Not on claude.ai, so only other tabs of this browser can be reached here.</p>';
-    if (info.status === 'seeking') {
-      box.innerHTML = `${where}<div class="ol-wait"><span class="nw-spin" aria-hidden="true"></span><b>Looking for an opponent…</b><p>You'll be matched with the next player who looks for a battle.</p></div>
-        <button type="button" class="pill" id="olCancel">Stop looking</button>`;
-    } else if (info.status === 'hosting') {
-      box.innerHTML = `${where}<div class="ol-wait"><small>Your room code</small><b class="ol-code">${esc(info.code.toUpperCase())}</b><p>Tell your friend this code. The battle starts as soon as they join.</p></div>
-        <button type="button" class="pill" id="olCancel">Cancel</button>`;
+    if (info.status === 'hosting') {
+      box.innerHTML = info.invitee
+        ? `<div class="ol-wait"><span class="nw-spin" aria-hidden="true"></span><b>Waiting for ${esc(info.invitee.name)}…</b><p>Your invite is on its way. The battle starts as soon as they accept. Room code: <b class="ol-code-sm">${esc(info.code.toUpperCase())}</b></p></div>
+          <button type="button" class="pill" id="olCancel">Cancel</button>`
+        : `<div class="ol-wait"><small>Your room code</small><b class="ol-code">${esc(info.code.toUpperCase())}</b><p>Tell your friend this code. The battle starts as soon as they join.</p></div>
+          <button type="button" class="pill" id="olCancel">Cancel</button>`;
     } else if (info.status === 'joining') {
-      box.innerHTML = `${where}<div class="ol-wait"><span class="nw-spin" aria-hidden="true"></span><b>Joining room ${esc(info.code.toUpperCase())}…</b><p>Waiting for its host. Check the code if this takes long.</p></div>
+      box.innerHTML = `<div class="ol-wait"><span class="nw-spin" aria-hidden="true"></span><b>Joining room ${esc(info.code.toUpperCase())}…</b><p>Waiting for your friend. Check the code if this takes long.</p></div>
         <button type="button" class="pill" id="olCancel">Cancel</button>`;
     } else if (info.status === 'playing') {
       box.innerHTML = '<div class="ol-wait"><b>Starting…</b></div>';
     } else {
-      box.innerHTML = `${where}
-        <div class="ol-opts">
-          <div class="ol-opt"><b>Quick match</b><p>Battle the next player who's looking.</p><button type="button" class="big-btn ol-go" id="olQuick"><span>Find a battle</span></button></div>
-          <div class="ol-opt"><b>Friendly battle</b><p>Make a room and share its code, or type a friend's code.</p>
+      box.innerHTML = `<div class="ol-opts">
+          <div class="ol-opt"><b>Invite a friend</b><p>Pick a friend from your WardenChat friends.</p>${friendsPart}</div>
+          <div class="ol-opt"><b>Invite with a code</b><p>Make a room and share its code, or type a friend's code.</p>
             <button type="button" class="pill gold" id="olCreate">Make a room</button>
             <form class="ol-join" id="olJoin"><input id="olCode" maxlength="5" placeholder="Code" autocomplete="off" spellcheck="false" aria-label="Room code" value="${esc(onlineJoinCode)}"><button type="submit" class="pill">Join</button></form>
           </div>
         </div>
-        <p class="dim ol-note">Online battles use your deck, card levels, King Tower and evolutions. No trophies are won or lost.</p>`;
-      $('#olQuick').addEventListener('click', () => KCNet.quickMatch(matched));
+        <p class="dim ol-note">Battles with friends use your deck, card levels, King Tower and evolutions. No trophies are won or lost.</p>`;
       $('#olCreate').addEventListener('click', () => KCNet.createRoom(matched));
       $('#olCode').addEventListener('input', e => { onlineJoinCode = e.target.value; });
       $('#olJoin').addEventListener('submit', async e => {
@@ -13506,6 +13793,136 @@ const KCMenu = (() => {
     }
     const c = $('#olCancel');
     if (c) c.addEventListener('click', () => KCNet.cancel());
+  }
+  async function inviteClick(id) {
+    const f = (friendList || []).find(x => x.id === id);
+    if (!f) return;
+    $('#friendsModal').hidden = true;
+    $('#onlineModal').hidden = false;
+    const r = await KCNet.inviteFriend(f, matched);
+    if (!r.ok) { KCSound.play('error'); toast(r.error === 'invite' ? `The invite to ${f.name} didn't go through. Try again.` : 'Battles with friends are not available right now.'); }
+    KCSound.play('select');
+    renderOnline(KCNet.info());
+  }
+
+  /* ---------- Friends: the WardenChat friends list ---------- */
+  function openFriends() {
+    $('#friendsModal').hidden = false; $('#friendsDot').hidden = true;
+    renderFriends();
+    KCNet.init().then(loadFriends);
+  }
+  function closeFriends() { $('#friendsModal').hidden = true; }
+  function renderFriends() {
+    if ($('#friendsModal').hidden) return;
+    const info = KCNet.info(), live = info.kind !== 'off' && info.kind !== 'none' && G.onlineOpen(), bst = KCBackend.status();
+    const note = !G.onlineOpen() ? `Battles with friends open at Stormspire (${fmt(G.ONLINE_AT)} trophies).` : !live ? 'Battles with friends are coming soon.' : 'Invite a friend to a battle: nothing is won or lost.';
+    if (!info.friends) {
+      $('#friendsBody').innerHTML = bst === 'off' || bst === 'restricted'
+        ? `<div class="fr-signin"><b>Your WardenChat friends</b><p>${bst === 'restricted' ? 'Your WardenChat account is restricted, so friends are off for now.' : 'Your friends come from your WardenChat account. Once you are signed in they show up here, with who is online, and you can invite them to a battle.'}</p></div>`
+        : `<div class="fr-signin"><b>Your WardenChat friends</b><p>Sign in with your WardenChat account to see your friends and who is online, add friends, and invite them to a battle.</p>
+          <button type="button" class="pill gold" id="frSignIn">Sign in</button></div>`;
+      const b = $('#frSignIn');
+      if (b) b.addEventListener('click', () => { closeFriends(); openSignIn(); });
+      return;
+    }
+    if (friendList === null) { $('#friendsBody').innerHTML = '<p class="dim">Loading your friends…</p>'; return; }
+    const req = KCNet.friendRequests();
+    const reqs = req && req.incoming.length ? `<div class="fr-reqs"><b>Friend requests</b><ul class="fr-list">${req.incoming.map(r => `<li class="fr-row">
+        <span class="fr-pic">${esc(r.name.slice(0, 1).toUpperCase())}</span><span class="fr-text"><b>${esc(r.name)}</b><small>Wants to be your friend</small></span>
+        <button type="button" class="mini-btn fr-yes" data-req="${esc(r.id)}">Accept</button><button type="button" class="pill fr-no" data-req="${esc(r.id)}">Decline</button></li>`).join('')}</ul></div>` : '';
+    const add = req ? `<form class="fr-add" id="frAdd"><input id="frAddName" maxlength="24" placeholder="Their WardenChat name" autocomplete="off" spellcheck="false" autocapitalize="off" aria-label="Add a friend by their WardenChat name"><button type="submit" class="mini-btn">Add friend</button></form>
+      <p class="fr-msg" id="frMsg" role="status">${esc(friendMsg)}</p>${req.outgoing.length ? `<p class="dim fr-sent">Waiting for: ${req.outgoing.map(r => esc(r.name)).join(', ')}</p>` : ''}` : '';
+    $('#friendsBody').innerHTML = `<p class="q-sub">${note}</p>${reqs}<ul class="fr-list">${friendRows(friendList, live, 'Battle')}</ul>${add}`;
+    const f = $('#frAdd');
+    if (f) f.addEventListener('submit', addFriendSubmit);
+  }
+  let friendMsg = '', friendReqs = 0;
+  const FRIEND_ERRORS = { user_not_found: 'No WardenChat account has that name.', self: "That's you!", already_friends: "You're already friends.",
+    already_requested: 'Your friend request is already on its way.', too_many: 'You have too many friends or requests for now.', rate_limited: 'Too many requests. Wait a minute and try again.',
+    request_not_found: 'That request is gone.', offline: "Can't reach WardenChat right now." };
+  async function addFriendSubmit(e) {
+    e.preventDefault();
+    const name = $('#frAddName').value.trim();
+    if (!name) return;
+    const r = await KCNet.addFriend(name);
+    friendMsg = r.error ? (FRIEND_ERRORS[r.error] || "That didn't work. Try again.") : r.status === 'accepted' ? `You and ${name} are friends now!` : `Friend request sent to ${name}.`;
+    KCSound.play(r.error ? 'error' : 'select');
+    await loadFriends();
+  }
+  async function answerRequest(id, yes) {
+    const r = await KCNet.answerFriend(id, yes);
+    friendMsg = r.error ? (FRIEND_ERRORS[r.error] || "That didn't work. Try again.") : yes ? 'Friend added!' : '';
+    if (!r.error && yes) KCSound.play('buy');
+    await loadFriends();
+  }
+
+  /* ---------- the WardenChat account: signing in (js/account.js, through js/backend.js) ---------- */
+  let signMode = 'in', signBusy = false;
+  function openSignIn() {
+    if (!KCBackend.connected()) { toast('WardenChat accounts are coming soon.'); return; }
+    if (KCBackend.account()) return;
+    signMode = 'in'; $('#signErr').textContent = '';
+    $('#signModal').hidden = false; renderSignIn(); $('#signName').focus();
+  }
+  function closeSignIn() { $('#signModal').hidden = true; $('#signPass').value = ''; $('#signErr').textContent = ''; }
+  function renderSignIn() {
+    if ($('#signModal').hidden) return;
+    const bst = KCBackend.status(), R = KCBackend.restriction(), create = signMode === 'create';
+    if (bst === 'signedIn') { closeSignIn(); return; }
+    $('#signTitle').textContent = create ? 'Create a WardenChat account' : 'Sign in with WardenChat';
+    $('#signGo').textContent = signBusy ? 'One moment…' : create ? 'Create account' : 'Sign in';
+    $('#signGo').disabled = signBusy;
+    $('#signSwap').textContent = create ? 'I already have an account' : 'New here? Create an account';
+    $('#signPass').setAttribute('autocomplete', create ? 'new-password' : 'current-password');
+    $('#signNote').innerHTML = create
+      ? `This makes a WardenChat account: the same name and password work on <a href="${esc(KCBackend.chatUrl)}" target="_blank" rel="noopener">Warden Chat</a> and its games.`
+      : `Your progress is saved to your account, your WardenChat friends show up here, and your SirSC diamonds and coins come with it. <a href="${esc(KCBackend.chatUrl)}" target="_blank" rel="noopener">Forgot your password?</a>`;
+    const box = $('#signRestricted');
+    box.hidden = bst !== 'restricted';
+    if (bst === 'restricted') box.textContent = `This account is ${R && R.status === 'banned' ? 'banned' : 'suspended'} on Warden Chat${R && R.reason ? `: ${R.reason}` : '.'}`;
+  }
+  const SIGN_ERRORS = { bad_credentials: "That name and password don't match a WardenChat account.", username_taken: 'That name is taken. Try another one.',
+    weak_password: 'Pick a longer password.', rate_limited: 'Too many tries. Wait a minute and try again.', signup_rejected: "WardenChat didn't accept that name. Try another one.",
+    offline: "Can't reach WardenChat. Check your connection.", confirm_enabled: 'The account was made, but it needs confirming on Warden Chat first.', server_error: 'WardenChat is having trouble. Try again soon.' };
+  async function signSubmit(e) {
+    e.preventDefault();
+    if (signBusy) return;
+    const R = KCBackend.rules, name = $('#signName').value.trim(), pass = $('#signPass').value, create = signMode === 'create';
+    const err = t => { $('#signErr').textContent = t; KCSound.play('error'); };
+    if (name.length < R.nameMin || name.length > R.nameMax || !R.nameRe.test(name)) return err(`Names are ${R.nameMin} to ${R.nameMax} letters, numbers, dots, dashes or underscores.`);
+    if (create ? pass.length < R.passwordMin : !pass) return err(create ? `Passwords are at least ${R.passwordMin} characters.` : 'Type your password.');
+    signBusy = true; $('#signErr').textContent = ''; renderSignIn();
+    try {
+      await KCBackend.login(name, pass, create);
+      signBusy = false; closeSignIn();
+      KCSound.play('buy');
+      const a = KCBackend.account();
+      toast(a ? `Signed in as ${a.name}` : 'Signed in');
+    } catch (x) { signBusy = false; renderSignIn(); err(SIGN_ERRORS[x && x.code] || 'Something went wrong. Try again.'); }
+  }
+  /* Diamonds through the SirSC wallet: the server takes them first (js/backend.js); nothing is bought
+     when it says no. Returns true when the purchase can go ahead. */
+  let paying = false;
+  async function payFor(kind, diamonds) {
+    paying = true;
+    const r = await KCBackend.pay(kind, diamonds);
+    paying = false;
+    if (r.ok) return true;
+    KCSound.play('error');
+    toast(r.error === 'diamonds' ? 'Not enough diamonds in your SirSC wallet. Nothing was spent.' : r.error === 'offline' ? "Can't reach the SirSC wallet right now. Nothing was spent."
+      : 'The SirSC wallet said no. Nothing was spent.');
+    return false;
+  }
+  const noGems = n => `That costs ${fmt(n)} diamond${n === 1 ? '' : 's'}. ` + (KCBackend.wallet() ? `You have ${fmt(P().diamonds)}; diamonds come from your SirSC wallet on Warden Chat.`
+    : KCBackend.connected() ? 'Sign in with your WardenChat account to use your SirSC diamonds.' : 'Diamonds will come from the SirSC wallet.');
+  // a friend's invite: a little card at the top with Battle and Not now
+  let pendingInvite = null;
+  function showInvite(inv) {
+    pendingInvite = inv;
+    $('#inviteText').textContent = `${(inv.from && inv.from.name) || 'A friend'} invites you to a battle`;
+    $('#inviteToast').hidden = false;
+    if ($('#friendsModal').hidden) $('#friendsDot').hidden = false;
+    KCSound.play('emPhrase');
   }
 
   /* ---------- the Diamond Pass ---------- */
@@ -13544,14 +13961,17 @@ const KCMenu = (() => {
       <b>Diamond Pass</b><small class="of-note">This week: the ${esc(KC_EVOS[fe].name)} at tier 1 and ${G.PASS.tiers.length - 1} more rewards</small>
       <button type="button" class="of-see">See rewards</button>${btn}</div>`;
   }
-  function buyPassClick() {
-    if (P().diamonds < G.PASS.price) { KCSound.play('error'); toast('Not enough diamonds. Diamonds will come from the SirSC wallet.'); return; }
+  async function buyPassClick() {
+    if (paying) return;
+    if (G.passPremium()) return;
+    if (P().diamonds < G.PASS.price) { KCSound.play('error'); toast(noGems(G.PASS.price)); return; }
     if (!passConfirm) {
       passConfirm = true; clearTimeout(passConfirmT);
       passConfirmT = setTimeout(() => { passConfirm = false; renderShop(); }, 4000);
       renderShop(); return;
     }
     passConfirm = false; clearTimeout(passConfirmT);
+    if (!(await payFor('pass', G.PASS.price))) return refresh();
     const r = G.buyPass();
     if (!r.ok) { KCSound.play('error'); return; }
     KCSound.play('buy');
@@ -13584,7 +14004,11 @@ const KCMenu = (() => {
             : st === 'premium' ? '<span class="pm-lock" title="Needs the Diamond Pass" aria-label="Needs the Diamond Pass"></span>' : '';
         return `<div class="pm-cell ${track} ${st}">${R.art}<span class="pm-label">${esc(R.label)}</span>${act}</div>`;
       };
-      return `<li class="pm-tier${i < tier ? ' reached' : ''}${i === tier ? ' here' : ''}"><span class="pm-num">${i + 1}</span>${cell('free')}${cell('paid')}</li>`;
+      // the circle fills as the tier's crowns are earned: full once reached, part way for the tier you're on
+      const prog = i < tier ? 1 : i === tier && open ? G.passInto() / per : 0, pct = Math.round(prog * 1000) / 10;
+      const ring = `<svg class="pm-ring" viewBox="0 0 44 44" aria-hidden="true"><circle class="bg" cx="22" cy="22" r="19"/>${pct > 0 ? `<circle class="fg" cx="22" cy="22" r="19" pathLength="100" stroke-dasharray="${pct} 100"/>` : ''}</svg>`;
+      const label = i < tier ? `Tier ${i + 1}: reached` : i === tier && open ? `Tier ${i + 1}: ${G.passInto()} of ${per} crowns` : `Tier ${i + 1}`;
+      return `<li class="pm-tier${i < tier ? ' reached' : ''}${i === tier ? ' here' : ''}"><span class="pm-num" title="${label}" aria-label="${label}">${ring}<b>${i + 1}</b></span>${cell('free')}${cell('paid')}</li>`;
     }).join('');
     for (const b of $$('#passTiers .pm-claim')) b.addEventListener('click', () => claimPassClick(+b.dataset.tier, b.dataset.track));
     const buy = $('#pmBuy');
@@ -14126,8 +14550,14 @@ const KCMenu = (() => {
     passPlaque();
     renderDaily();
     hintsRender();
-    $('#onlineBtn').classList.toggle('locked', !G.onlineOpen() || !KCNet.LIVE);
-    $('#onlineBtn').title = KCNet.LIVE ? 'Battle other players online' : 'Online battles are coming soon';
+    const canFriend = KCNet.isLive() || KCBackend.connected();
+    $('#onlineBtn').classList.toggle('locked', !G.onlineOpen() || !canFriend);
+    $('#onlineBtn').title = canFriend ? 'Battle a friend: invite one from your friends, or with a room code' : 'Battles with friends are coming soon';
+    // the WardenChat account (js/account.js, through js/backend.js)
+    const acct = KCBackend.account(), bst = KCBackend.status();
+    $('#acctText').textContent = bst === 'off' ? 'WardenChat account: coming soon' : acct ? `Signed in as ${acct.name}` : bst === 'restricted' ? 'WardenChat account: restricted' : 'WardenChat account: not signed in';
+    $('#acctBtn').textContent = acct || bst === 'restricted' ? 'Sign out' : 'Sign in';
+    $('#acctBtn').disabled = bst === 'off';
     $('#onlineBtn').hidden = !G.roadOpen();
     $('#practiceBtn').hidden = !G.roadOpen();
     if (subNow === 'magic') renderMagic(); else $('#magicTag').textContent = String(G.MAGIC_ORDER.reduce((a, id) => a + (id.startsWith('wild_') ? 0 : G.magicCount(id)), 0) || '');
@@ -14205,9 +14635,6 @@ const KCMenu = (() => {
     if (G.roadOpen()) KCArenas.preload(G.arena().theme);
     for (const b of $$('[data-tab]')) b.addEventListener('click', () => tab(b.dataset.tab));
     $('#battleBtn').addEventListener('click', () => opts.onBattle && opts.onBattle(nextFoe()));
-    $('#simWinLobby').addEventListener('click', simulateWin); // TEMPORARY
-    $('#testRich').addEventListener('click', () => { G.grantTest(); KCSound.play('buy'); refresh(); toast('Test: you now have 1,000,000 rubies, 1,000,000 wallet coins and 1,000,000 diamonds'); }); // TEMPORARY
-    $('#testOffers').addEventListener('click', () => { G.refreshShop(); confirmOffer = -1; KCSound.play('select'); refresh(); toast('Test: new offers made from your cards as they are now'); }); // TEMPORARY
     $('#oppChange').addEventListener('click', e => { e.stopPropagation(); toggle('#oppPanel', '#oppChange'); });
     $('#settingsBtn').addEventListener('click', e => {
       e.stopPropagation();
@@ -14231,7 +14658,6 @@ const KCMenu = (() => {
     });
     $('#modalX').addEventListener('click', closeCard);
     for (const b of $$('.subtab')) b.addEventListener('click', () => sub(b.dataset.sub));
-    $('#testMagic').addEventListener('click', () => { G.grantMagic(); KCSound.play('buy'); refresh(); toast('Test: added wild cards, books and Hammers of Books'); }); // TEMPORARY
     $('#cardModal').addEventListener('click', e => { if (e.target.id === 'cardModal') closeCard(); });
     $('#mUpgrade').addEventListener('click', upgradeCard);
     $('#passPlaque').addEventListener('click', () => { if (G.passOpen()) openPass(); else { KCSound.play('error'); toast('The Diamond Pass opens in Sunstone Arena (600 trophies).'); } });
@@ -14257,6 +14683,42 @@ const KCMenu = (() => {
     $('#cp').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && G.roadOpen()) { e.preventDefault(); cpGo(); } });
     $('#exX').addEventListener('click', closeExchange);
     $('#questBtn').addEventListener('click', openQuests);
+    $('#friendsBtn').addEventListener('click', e => { e.stopPropagation(); closePops(); openFriends(); });
+    $('#acctBtn').addEventListener('click', () => {
+      if (KCBackend.account() || KCBackend.status() === 'restricted') { KCBackend.signOut().then(() => toast('Signed out. Your progress stays saved in your account.'), err => console.error(err)); }
+      else { closePops(); openSignIn(); }
+    });
+    KCBackend.onChange(() => {
+      refresh(); renderSignIn();
+      if (!$('#friendsModal').hidden) { friendList = null; renderFriends(); KCNet.init().then(loadFriends); }
+      if (!$('#onlineModal').hidden) { renderOnline(KCNet.info()); KCNet.init().then(() => renderOnline(KCNet.info())); }
+    });
+    window.addEventListener('kc-friend-requests', e => { friendReqs = (e.detail && e.detail.count) | 0; if ($('#friendsModal').hidden) $('#friendsDot').hidden = !friendReqs && !pendingInvite; });
+    $('#signForm').addEventListener('submit', signSubmit);
+    $('#signX').addEventListener('click', closeSignIn);
+    $('#signModal').addEventListener('click', e => { if (e.target.id === 'signModal') closeSignIn(); });
+    $('#signSwap').addEventListener('click', () => { signMode = signMode === 'create' ? 'in' : 'create'; $('#signErr').textContent = ''; renderSignIn(); $('#signName').focus(); });
+    $('#friendsX').addEventListener('click', closeFriends);
+    $('#friendsModal').addEventListener('click', e => {
+      if (e.target.id === 'friendsModal') { closeFriends(); return; }
+      const b = e.target.closest('.fr-invite');
+      if (b && !b.disabled) inviteClick(b.dataset.friend);
+      const y = e.target.closest('.fr-yes, .fr-no');
+      if (y) answerRequest(y.dataset.req, y.classList.contains('fr-yes'));
+    });
+    $('#onlineBody').addEventListener('click', e => { const b = e.target.closest('.fr-invite'); if (b && !b.disabled) inviteClick(b.dataset.friend); });
+    KCNet.onInvite(showInvite);
+    $('#inviteYes').addEventListener('click', async () => {
+      const inv = pendingInvite; pendingInvite = null; $('#inviteToast').hidden = true;
+      if (!inv) return;
+      if (!G.onlineOpen()) { toast(`Battles with friends open at Stormspire (${fmt(G.ONLINE_AT)} trophies).`); return; }
+      $('#onlineModal').hidden = false;
+      KCNet.acceptInvite(inv);
+      const r = await KCNet.joinRoom(inv.code, matched);
+      if (!r.ok) toast(r.error === 'unavailable' ? 'Battles with friends are not switched on yet.' : 'That invite has expired.');
+      renderOnline(KCNet.info());
+    });
+    $('#inviteNo').addEventListener('click', () => { const inv = pendingInvite; pendingInvite = null; $('#inviteToast').hidden = true; KCNet.declineInvite(inv); });
     if (wideLobby.addEventListener) wideLobby.addEventListener('change', placeDaily);
     $('#profX').addEventListener('click', closeProfile);
     $('#profPic').addEventListener('click', avatarPicker);
@@ -14331,8 +14793,8 @@ const KCMenu = (() => {
         else if (e.key === ' ' || e.key === 'Enter') { chestTap(); e.preventDefault(); }
         return;
       }
-      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); closeExchange(); closeQuests(); closeChallenge(); closeProfile(); if (!$('#onlineModal').hidden) closeOnline(); return; }
-      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#exModal').hidden || !$('#onlineModal').hidden || !$('#questModal').hidden || !$('#chModal').hidden || !$('#profModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); closeExchange(); closeQuests(); closeChallenge(); closeProfile(); closeFriends(); closeSignIn(); if (!$('#onlineModal').hidden) closeOnline(); return; }
+      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#exModal').hidden || !$('#onlineModal').hidden || !$('#questModal').hidden || !$('#chModal').hidden || !$('#profModal').hidden || !$('#friendsModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
       const n = '12345'.indexOf(e.key);
       if (n >= 0) { tab(TABS[n]); e.preventDefault(); }
       else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(nextFoe()); e.preventDefault(); }
@@ -14358,7 +14820,7 @@ const KCMenu = (() => {
   }
 
   return {
-    init, refresh, recordResult, nextFoe, cardImg, tab, showChest, chestSvg, openQuests, milestone,
+    init, refresh, recordResult, nextFoe, cardImg, tab, showChest, chestSvg, openQuests, milestone, toast, openSignIn,
     practiceAgain: T => G.practiceFoe(T && T.tryCard ? T.tryCard.card : null), openChallenge, openProfile,
     get name() { return P() ? P().name : 'Player'; },
     show() { refresh(); requestAnimationFrame(placeGlow); },
@@ -14797,14 +15259,14 @@ const KCEmotes = (() => {
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
       ['#introFoeClan', T.clan || ''], ['#introYouTier', trophy ? `${KCProgress.state.trophies} trophies` : 'Training'],
-      ['#introStakes', challenge ? `Daily Challenge · ${T.challenge.name}` : practice ? (T.tryCard && T.tryCard.out ? `Practice · trying ${KC_CARDS[T.tryCard.card].name}` : 'Practice · nothing at stake') : trophy && T.stakes ? `Win +${T.stakes.win} · Loss −${T.stakes.loss}` : '']]) $(sel).textContent = text;
+      ['#introStakes', T.boss ? 'SirSC · no trophies lost' : challenge ? `Daily Challenge · ${T.challenge.name}` : practice ? (T.tryCard && T.tryCard.out ? `Practice · trying ${KC_CARDS[T.tryCard.card].name}` : 'Practice · nothing at stake') : trophy && T.stakes ? `Win +${T.stakes.win} · Loss −${T.stakes.loss}` : '']]) $(sel).textContent = text;
     introYou();
     veil(T.name, where);
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {},
       falls: {}, slowmo: 0, flash: 0, fireworks: 0 });
     for (const el of document.querySelectorAll('.fly-crown')) el.remove();
-    $('#simWinBtn').hidden = false; $('#netWait').hidden = true;
+    $('#netWait').hidden = true;
     $('#leaveBtn').hidden = false; $('#leaveBtn').classList.remove('ask'); $('#replayBar').hidden = true;
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
@@ -14814,6 +15276,7 @@ const KCEmotes = (() => {
     // a trophy battle first looks for an opponent for a moment
     G.phase = 'intro'; G.intro = trophy && !practice ? 2.7 : 1.7; G.finding = trophy && !practice;
     $('#intro').classList.toggle('finding', G.finding);
+    $('#intro').classList.toggle('boss', !!T.boss);
     $('#intro').hidden = false;
   }
   // Under the VS screen the battle is already laid out: until it starts, the opponent's name reads
@@ -14854,7 +15317,8 @@ const KCEmotes = (() => {
       KCProgress.battleStarted(G.trainer);
       if (G.trainer.kind === 'trophy' || G.trainer.kind === 'practice') KCEmotes.foeGreet();
     }
-    banner('FIGHT!');
+    if (G.trainer && G.trainer.boss) { banner('SirSC appears!', 'Level 50 everything. Losing to him costs no trophies.'); KCSound.play('thunderclap'); G.shake = Math.max(G.shake, 0.5); }
+    else banner('FIGHT!');
     KCSound.play('fight');
     setTimeout(() => speak('start'), 900);
   }
@@ -15564,7 +16028,7 @@ const KCEmotes = (() => {
     for (const el of document.querySelectorAll('.fly-crown')) el.remove();
     $('#intro').classList.remove('finding');
     $('#leaveBtn').hidden = false; $('#leaveBtn').classList.remove('ask');
-    $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true; $('#simWinBtn').hidden = true; $('#netWait').hidden = true;
+    $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true; $('#netWait').hidden = true;
     KCScenery.reset();
     KCEmotes.reset();
     show('battle');
@@ -15822,7 +16286,7 @@ const KCEmotes = (() => {
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {}, views: {},
       falls: {}, slowmo: 0, flash: 0, fireworks: 0, finding: false });
     for (const el of document.querySelectorAll('.fly-crown')) el.parentNode.removeChild(el);
-    $('#simWinBtn').hidden = true; $('#netWait').hidden = true; $('#leaveBtn').hidden = true;
+    $('#netWait').hidden = true; $('#leaveBtn').hidden = true;
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true; $('#coach').hidden = true;
     $('#replayBar').hidden = false; $('#replaySpeed').textContent = '1×';
     $('#intro').classList.remove('finding');
@@ -15892,10 +16356,11 @@ const KCEmotes = (() => {
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
     if (res.kind === 'online') { un.hidden = false; un.textContent = 'Online battle · no trophies won or lost'; }
     if (res.kind === 'practice') { un.hidden = false; un.textContent = 'Practice battle · nothing won or lost'; }
+    if (res.boss && res.delta === 0 && w === 1) { un.hidden = false; un.textContent = 'Nobody beats SirSC. No trophies lost.'; }
     if (res.kind === 'friend') { un.hidden = false; un.textContent = `Friend challenge against ${G.trainer.name}'s deck · nothing won or lost`; }
     if (res.kind === 'challenge') { un.hidden = false; un.textContent = `Daily Challenge · ${res.name} · ${res.left ? `${res.left} chest win${res.left === 1 ? '' : 's'} left today` : 'all of today\'s chests won'}`; }
     $('#againBtn').hidden = res.kind === 'online';
-    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', sudden: w === 0 ? 'Sudden death: their tower crumbled first.' : 'Sudden death: your tower crumbled first.', first: 'Sudden Death challenge: the first tower down wins.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).', surrender: 'You surrendered.' }[r.reason];
+    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', sudden: w === 0 ? 'Sudden death: their tower crumbled first.' : 'Sudden death: your tower crumbled first.', first: 'Sudden Death challenge: the first tower down wins.', draw: 'Every tower ended with the same health.', surrender: 'You surrendered.' }[r.reason];
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
     $('#resSmall').textContent = res.kind === 'online' ? `${why} ${m}:${sec} played, ${s.played[0]} cards from you.` : `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
     $('#result').hidden = false;
@@ -16993,13 +17458,6 @@ const KCEmotes = (() => {
       else S.forceEnd(G.s, 1, 'surrender');
       handleEvents();
     });
-    // TEMPORARY test button: ends the match as a win, with the same rewards as a real one.
-    $('#simWinBtn').addEventListener('click', () => {
-      if (G.phase !== 'play' || !G.s || G.s.result) return;
-      if (G.online) return;
-      S.forceEnd(G.s, 0);
-      handleEvents();
-    });
     let rt = 0;
     window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (!$('#battle').hidden) layout(); }, 120); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!$('#battle').hidden) layout(); });
@@ -17009,6 +17467,422 @@ const KCEmotes = (() => {
   if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(boot);
   else if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
+})();
+
+/* Kingdom Clash: the WardenChat account, the front-end half. Players sign in with their Warden Chat
+   account (chat.sirsc104.com), as in Apples to Oranges and Wildcard Chess, and the game talks straight
+   to Warden Chat's Supabase project:
+     - Supabase Auth to sign in or create an account (<username>@warden.invalid, as Warden Chat does);
+     - the kc_* database functions for the cloud save, friends, presence and battle invites;
+     - the SirSC wallet's sirsc_me / sirsc_member_claim, and kc_spend / kc_exchange, for diamonds, coins
+       and membership (the server decides every balance; the game shows what it says);
+     - Supabase Realtime (private channels kc-<code>) for battles with friends.
+   The back-end half is BACKEND_HANDOFF.md. Until kc_ping answers, accounts stay switched off and the
+   game works exactly as before, saving on this device only. The demo build swaps in a pretend back end
+   (js/account-mock.js). All of it reaches the game through js/backend.js (KCBackend.connect). */
+'use strict';
+
+const KCAccount = (() => {
+  const CFG = {
+    enabled: true,
+    // Warden Chat's project URL and publishable key are public by design (Warden Chat ships the same values
+    // to every browser); every access decision is made by row level security in the database.
+    supabaseUrl: 'https://djmyvnaragfwoaljzexn.supabase.co',
+    anonKey: 'sb_publishable_cKmFKnmgDTlUNm9hGui2mQ_j_rs0oni',
+    identityDomain: 'warden.invalid',
+    chatUrl: 'https://chat.sirsc104.com/',
+    // supabase-js, loaded only when a battle with a friend starts (Supabase Realtime)
+    supabaseJs: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js',
+    realtime: 'supabase',   // 'local': the demo's stand-in, other tabs of this browser
+    sessionStore: 'local',  // 'session': one session per tab (the demo, so two tabs can be two players)
+    pollSeconds: 8,
+  };
+  const GAME = 'kc';
+  const SESSION_KEY = 'kc.session', LINK_KEY = 'kc.cloud';
+  const RULES = { nameMin: 3, nameMax: 24, nameRe: /^[a-zA-Z0-9_.-]+$/, passwordMin: 10 };
+  const st = { status: 'checking', user: null, restriction: null };
+  const listeners = new Set();
+  const emit = () => listeners.forEach(fn => { try { fn(st); } catch (e) { console.error(e); } });
+  const store = () => { try { return CFG.sessionStore === 'session' ? sessionStorage : localStorage; } catch (e) { return null; } };
+  const load = (k, s) => { try { return JSON.parse((s || localStorage).getItem(k) || 'null'); } catch (e) { return null; } };
+  const keepIn = (k, v, s) => { try { if (v == null) (s || localStorage).removeItem(k); else (s || localStorage).setItem(k, JSON.stringify(v)); } catch (e) { /* storage blocked */ } };
+  const now = () => Date.now() / 1000;
+
+  /* ---------- talking to Supabase ----------
+     A transport takes (method, url, headers, body) and resolves to { status, data }; it rejects only when
+     the server can't be reached. The demo swaps in a pretend Supabase (js/account-mock.js). */
+  function httpTransport(method, url, headers, body) {
+    const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = ctl && setTimeout(() => ctl.abort(), 15000);
+    return fetch(url, { method, headers, body: body === undefined ? undefined : JSON.stringify(body), signal: ctl && ctl.signal, cache: 'no-store', credentials: 'omit' })
+      .then(res => res.text().then(t => { let data = null; try { data = t ? JSON.parse(t) : null; } catch (e) { data = { message: t }; } return { status: res.status, data }; }))
+      .finally(() => timer && clearTimeout(timer));
+  }
+  let transport = httpTransport;
+  class ApiError extends Error {
+    constructor(code, status) { super(code); this.code = code; this.status = status || 0; this.offline = code === 'offline'; }
+  }
+  function errorCode(r, kind) {
+    const d = r.data || {}, msg = String(d.msg || d.message || d.error_description || d.error || ''), code = String(d.error_code || d.code || d.error || '');
+    if (r.status === 429 || /rate limit/i.test(msg)) return 'rate_limited';
+    if (kind === 'rpc') {
+      const own = /^(kc|sirsc|br)_[a-z_]+$/.test(msg) ? msg : '';
+      if (/^(kc|sirsc|br)_not_signed_in$/.test(own)) return 'unauthorized';
+      if (own) return own;
+      if (code === 'PGRST202' || r.status === 404) return 'not_deployed';
+      if (r.status === 401 || /JWT/i.test(msg)) return 'unauthorized';
+    }
+    if (code === 'invalid_credentials' || code === 'invalid_grant' || /invalid login credentials/i.test(msg)) return 'bad_credentials';
+    if (code === 'user_already_exists' || /already registered|already exists|duplicate key/i.test(msg)) return 'username_taken';
+    if (code === 'weak_password' || (/password/i.test(msg) && /weak|short|at least/i.test(msg))) return 'weak_password';
+    if (code === 'refresh_token_not_found' || code === 'session_not_found' || /refresh token/i.test(msg)) return 'unauthorized';
+    if (/database error saving new user/i.test(msg)) return 'signup_rejected';
+    if (r.status >= 500) return 'server_error';
+    return 'error';
+  }
+  function call(method, path, body, tok) {
+    const headers = { apikey: CFG.anonKey, Accept: 'application/json' };
+    if (tok) headers.Authorization = 'Bearer ' + tok;
+    if (body !== undefined) headers['Content-Type'] = 'application/json';
+    return transport(method, CFG.supabaseUrl + path, headers, body).then(r => r, () => { throw new ApiError('offline'); });
+  }
+  const identity = name => `${String(name).trim().toLowerCase()}@${CFG.identityDomain}`;
+
+  let sess = null, epoch = 0, refreshing = null;
+  function keep(r) {
+    const u = r.user || (sess && sess.user) || {}, meta = u.user_metadata || {};
+    sess = { access_token: r.access_token, refresh_token: r.refresh_token, expires_at: r.expires_at || Math.floor(now() + (r.expires_in || 3600)),
+      user: { id: u.id, username: meta.username || u.username || String(u.email || '').split('@')[0] } };
+    keepIn(SESSION_KEY, sess, store());
+    return sess.user;
+  }
+  function auth(grant, body) {
+    if (grant === 'password') epoch++;
+    const at = epoch;
+    return call('POST', '/auth/v1/token?grant_type=' + grant, body).then(r => {
+      if (at !== epoch) throw new ApiError('session_changed');
+      if (r.status === 200 && r.data && r.data.access_token) return keep(r.data);
+      throw new ApiError(errorCode(r, 'auth'), r.status);
+    });
+  }
+  function refresh() {
+    if (!sess) return Promise.reject(new ApiError('unauthorized'));
+    if (!refreshing) refreshing = auth('refresh_token', { refresh_token: sess.refresh_token }).finally(() => { refreshing = null; });
+    return refreshing;
+  }
+  function token(force) {
+    if (!sess) return Promise.reject(new ApiError('unauthorized'));
+    return force || sess.expires_at - 90 < now() ? refresh().then(() => sess.access_token) : Promise.resolve(sess.access_token);
+  }
+  function rpc(fn, params, anon) {
+    const at = epoch;
+    const go = force => (anon ? Promise.resolve(null) : token(force)).then(t => call('POST', '/rest/v1/rpc/' + fn, params || {}, t)).then(r => {
+      if (r.status >= 200 && r.status < 300) return r.data;
+      const code = errorCode(r, 'rpc');
+      if (code === 'unauthorized' && !anon && !force) return go(true);
+      throw new ApiError(code, r.status);
+    });
+    return go(false).catch(e => {
+      if (e.code === 'unauthorized' && !anon && at === epoch) return refused().then(() => { throw e; });
+      throw e;
+    });
+  }
+  // A refused call: banned or suspended on Warden Chat, or just signed out somewhere else?
+  function refused() {
+    if (!sess) return Promise.resolve();
+    return call('POST', '/rest/v1/rpc/my_account_state', {}, sess.access_token).then(r => {
+      if (r.status === 200 && r.data && r.data.active === false) {
+        st.status = 'restricted';
+        st.restriction = { status: r.data.status || 'suspended', reason: r.data.reason || '', until: r.data.restrictedUntil || null };
+        emit();
+      } else signedOut();
+    }, () => {});
+  }
+  function signedIn(user) { st.status = 'signedIn'; st.user = user; st.restriction = null; emit(); return user; }
+  function signedOut() { epoch++; sess = null; keepIn(SESSION_KEY, null, store()); Object.assign(st, { status: 'signedOut', user: null, restriction: null }); emit(); }
+
+  function init() {
+    sess = load(SESSION_KEY, store());
+    if (!CFG.enabled || !CFG.supabaseUrl) { st.status = 'unavailable'; emit(); return Promise.resolve(st); }
+    return rpc('kc_ping', {}, true).then(() => {
+      if (!sess) { st.status = 'signedOut'; emit(); return; }
+      return token().then(() => signedIn(sess.user), e => { if (e.offline) throw e; signedOut(); });
+    }).catch(e => {
+      if (sess && e.offline) signedIn(sess.user);
+      else if (st.status === 'checking') { st.status = 'unavailable'; emit(); }
+    }).then(() => st);
+  }
+  if (typeof window !== 'undefined') window.addEventListener('online', () => { if (st.status === 'unavailable') { st.status = 'checking'; init(); } });
+
+  const account = {
+    RULES, ApiError,
+    get status() { return st.status; }, get user() { return st.user; }, get restriction() { return st.restriction; },
+    on(fn) { listeners.add(fn); return () => listeners.delete(fn); },
+    init, rpc: (fn, p) => rpc(fn, p), token: () => token(),
+    signIn: (username, password) => auth('password', { email: identity(username), password }).then(signedIn),
+    signUp(username, password) {
+      const at = ++epoch;
+      return call('POST', '/auth/v1/signup', { email: identity(username), password, data: { username: String(username).trim() } }).then(r => {
+        if (at !== epoch) throw new ApiError('session_changed');
+        if (r.status >= 200 && r.status < 300 && r.data && r.data.access_token) return signedIn(keep(r.data));
+        if (r.status >= 200 && r.status < 300) throw new ApiError('confirm_enabled', r.status);
+        throw new ApiError(errorCode(r, 'auth'), r.status);
+      });
+    },
+    signOut() {
+      const t = sess && sess.access_token;
+      const done = () => signedOut();
+      return (t ? call('POST', '/auth/v1/logout?scope=local', {}, t) : Promise.resolve()).then(done, done);
+    },
+  };
+
+  /* ---------- the battle screen is up (nothing is swapped under a running battle) ---------- */
+  const inBattle = () => { const b = typeof document !== 'undefined' && document.getElementById('battle'); return !!(b && !b.hidden); };
+  const whenIdle = fn => new Promise(res => { const go = () => { if (inBattle()) setTimeout(go, 1500); else { fn(); res(); } }; go(); });
+  const toast = msg => { if (typeof KCMenu !== 'undefined' && KCMenu.toast) KCMenu.toast(msg); };
+  const me = () => (st.status === 'signedIn' ? st.user : null);
+
+  /* ---------- the cloud save ----------
+     The save is the game's own progress object (kc.progress), less what stays on each device: the battle
+     log (replays), a battle in progress, and the wallet's balances (the wallet keeps those). One row per
+     player, with a revision number: a save based on an old revision is refused, so two devices can't
+     overwrite each other without one of them seeing the other's progress first. Which copy wins is
+     decided here: the one with more progress (experience, then best trophies, then card levels, then
+     copies, then Rubies). The server keeps the copies it replaces (BACKEND_HANDOFF.md), and a copy this
+     device gives up is kept in kc.progress.backup, so nothing is ever lost. A device that held another
+     account's progress keeps it for them (kc.progress.of.<id>) and gets it back when they sign in. */
+  const LOCAL_ONLY = ['log', 'live', 'abandoned', 'passRolled', 'diamonds', 'wallet', 'member'];
+  const MAX_DOC = 120000;
+  function docOf(p) {
+    const d = {};
+    for (const k of Object.keys(p || {})) if (!LOCAL_ONLY.includes(k)) d[k] = p[k];
+    d.kcSchema = 1;
+    return JSON.parse(JSON.stringify(d));
+  }
+  function score(p) {
+    const cards = p && p.cards && typeof p.cards === 'object' ? Object.values(p.cards) : [];
+    return [p.xp | 0, p.best | 0, cards.reduce((a, c) => a + ((c && c.level) | 0), 0), cards.reduce((a, c) => a + ((c && c.count) | 0), 0), p.rubies | 0];
+  }
+  const cmp = (a, b) => { const x = score(a || {}), y = score(b || {}); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] - y[i]; return 0; };
+  const fresh = p => !p || ((p.xp | 0) === 0 && (p.trophies | 0) === 0 && !(p.beaten && Object.keys(p.beaten).length));
+  let ready = false, lastPushed = '', chain = Promise.resolve(), pulls = 0;
+  const link = () => load(LINK_KEY);
+  const setLink = (user, rev) => keepIn(LINK_KEY, { user, rev: rev | 0 });
+  function restoreDoc(doc, log) {
+    const data = Object.assign({}, doc || {});
+    delete data.kcSchema;
+    const P = KCProgress.state;
+    if (Array.isArray(log)) data.log = log;
+    // the wallet's balances stay as the wallet says
+    data.diamonds = P.diamonds; data.wallet = P.wallet; data.member = P.member;
+    KCBackend.restore(data);
+    lastPushed = JSON.stringify(docOf(KCProgress.state));
+  }
+  async function pull() {
+    const u = me();
+    if (!u) return;
+    ready = false;
+    try {
+      const r = await rpc('kc_get_progress');
+      if (me() !== u) return;
+      const cloud = r && r.doc && typeof r.doc === 'object' ? r.doc : null, rev = r ? r.rev | 0 : 0, L = link(), P = KCProgress.state;
+      if (L && L.user && L.user !== u.id) {
+        // another account's progress is on this device: kept for them, and this account's comes in
+        if (!fresh(P)) keepIn('kc.progress.of.' + L.user, P);
+        const mine = load('kc.progress.of.' + u.id);
+        await whenIdle(() => restoreDoc(cloud || mine || {}, mine && mine.log));
+        keepIn('kc.progress.of.' + u.id, null);
+        setLink(u.id, cloud ? rev : 0);
+        if (cloud) toast(`Welcome back, ${u.username}! Your progress is loaded.`);
+      } else if (!cloud) {
+        setLink(u.id, 0);   // a first save for this account: this device's progress goes up
+      } else if (L && L.user === u.id && L.rev === rev) {
+        // nothing new in the account; whatever changed here since goes up
+      } else if (fresh(P) || cmp(cloud, P) >= 0) {
+        const same = L && L.user === u.id;
+        if (!fresh(P) && !same) keepIn('kc.progress.backup', P);
+        await whenIdle(() => restoreDoc(cloud, same || !L ? P.log : null));
+        setLink(u.id, rev);
+        if (!fresh(P)) toast(same ? 'Loaded your progress from your other device.' : 'Your WardenChat account had more progress: it is loaded.');
+      } else {
+        setLink(u.id, rev);   // this device has more progress: it goes up (the account keeps the copy it replaces)
+      }
+      ready = true;
+      await push();
+    } catch (e) { if (!e.offline) console.error('cloud save', e); } finally { ready = true; }
+  }
+  // send this device's progress up (one at a time)
+  function push() {
+    chain = chain.then(async () => {
+      const u = me(), L = link();
+      if (!u || !ready || !L || L.user !== u.id) return;
+      const doc = docOf(KCProgress.state), body = JSON.stringify(doc);
+      if (body === lastPushed) return;
+      if (body.length > MAX_DOC) { console.warn('cloud save: too big', body.length); return; }
+      const r = await rpc('kc_save_progress', { doc, base_rev: L.rev | 0 });
+      if (me() !== u) return;
+      if (r && r.ok) { setLink(u.id, r.rev); lastPushed = body; pulls = 0; return; }
+      // another device saved first: look again, and the copy with more progress wins
+      if (r && r.conflict && pulls++ < 3) setTimeout(pull, 0);
+    }).catch(e => { if (!e.offline) console.error('cloud save', e); });
+    return chain;
+  }
+
+  /* ---------- the SirSC wallet ---------- */
+  let wal = null, walletLoad = null;
+  function loadWallet() {
+    if (!me()) return Promise.resolve(null);
+    if (walletLoad) return walletLoad;
+    walletLoad = rpc('sirsc_me', { game: GAME }).then(m => {
+      if (m && m.member) return rpc('sirsc_member_claim', { game: GAME }).then(c => (c && c.me) || m, () => m);
+      return m;
+    }).then(m => {
+      if (m && typeof m === 'object' && 'diamonds' in m && me()) { wal = m; if (KCProgress.setWallet(m) && typeof KCMenu !== 'undefined') KCMenu.refresh(); }
+      return wal;
+    }).catch(() => wal).finally(() => { walletLoad = null; });
+    return walletLoad;
+  }
+  const wallet = {
+    spend: (kind, diamonds, ref) => rpc('kc_spend', { kind, diamonds: diamonds | 0, ref: String(ref) }).then(r => { if (r && r.me) wal = r.me; return r; }),
+    exchange: coins => rpc('kc_exchange', { coins: coins | 0 }).then(r => { if (r && r.me) wal = r.me; return r; }),
+    get me() { return wal; },
+  };
+
+  /* ---------- friends, presence and battle invites ----------
+     Friends are the player's Warden Chat friends (kc_friends). Every few seconds the game says it is open
+     (in the lobby or in a battle) and picks up invites (kc_poll); friends see who is online. */
+  let lists = { friends: [], incoming: [], outgoing: [] }, inviteFn = null, pollT = 0, polls = 0;
+  const seen = new Set();
+  const friends = {
+    async list() {
+      const r = await rpc('kc_friends');
+      lists = { friends: (r && r.friends) || [], incoming: (r && r.incoming) || [], outgoing: (r && r.outgoing) || [] };
+      signal(lists.incoming.length);
+      return lists.friends.map(f => ({ id: f.user_id, name: f.username, online: !!f.online, inGame: !!f.in_game }));
+    },
+    requests: () => ({ incoming: lists.incoming.map(x => ({ id: x.request_id, name: x.username })), outgoing: lists.outgoing.map(x => ({ id: x.request_id, name: x.username })) }),
+    add: username => rpc('kc_friend_request', { target_username: String(username).trim() }),
+    respond: (id, accept) => rpc('kc_friend_respond', { request_id: id, accept: !!accept }),
+    invite: (friendId, code) => rpc('kc_invite', { friend_id: friendId, code }),
+    onInvite(fn) { inviteFn = fn; return () => { if (inviteFn === fn) inviteFn = null; }; },
+    accept: id => rpc('kc_invite_respond', { invite_id: id, accept: true }),
+    decline: id => rpc('kc_invite_respond', { invite_id: id, accept: false }),
+  };
+  function signal(n) { if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('kc-friend-requests', { detail: { count: n | 0 } })); }
+  async function poll() {
+    clearTimeout(pollT);
+    if (!me()) return;
+    try {
+      const r = await rpc('kc_poll', { status: inBattle() ? 'battle' : 'lobby' });
+      for (const inv of (r && r.invites) || []) {
+        if (!inv || seen.has(inv.invite_id)) continue;
+        seen.add(inv.invite_id);
+        if (inviteFn) inviteFn({ id: inv.invite_id, from: { id: inv.from && inv.from.user_id, name: (inv.from && inv.from.username) || 'A friend' }, code: inv.code });
+      }
+      if (r && typeof r.requests === 'number') signal(r.requests);
+      if (++polls % 8 === 0) loadWallet();   // diamonds bought on Warden Chat show up here
+    } catch (e) { /* offline for a moment */ }
+    if (me()) pollT = setTimeout(poll, (document.hidden ? 30 : CFG.pollSeconds) * 1000);
+  }
+  if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (!document.hidden && me()) { poll(); loadWallet(); } });
+
+  /* ---------- battles with friends: Supabase Realtime ----------
+     A room is a private Realtime channel, kc-<code>: presence for the two players' setups, broadcast for
+     the battle's messages (js/net.js, js/game.js). The server only has to let signed-in players use those
+     channels (BACKEND_HANDOFF.md). */
+  let sbLoad = null, sbClient = null, localLobby = null;
+  function loadSupabase() {
+    if (window.supabase && window.supabase.createClient) return Promise.resolve(window.supabase);
+    if (!sbLoad) sbLoad = new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = CFG.supabaseJs; s.async = true; s.crossOrigin = 'anonymous';
+      s.onload = () => (window.supabase && window.supabase.createClient ? res(window.supabase) : rej(new Error('supabase-js')));
+      s.onerror = () => { sbLoad = null; rej(new Error('supabase-js')); };
+      document.head.appendChild(s);
+    });
+    return sbLoad;
+  }
+  async function realtimeJoin(name) {
+    const lib = await loadSupabase();
+    if (!sbClient) sbClient = lib.createClient(CFG.supabaseUrl, CFG.anonKey, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
+    const sb = sbClient;
+    sb.realtime.setAuth(await token());
+    const self = ((me() && me().id) || 'p') + '.' + Math.random().toString(36).slice(2, 8);
+    const ch = sb.channel(name, { config: { private: true, broadcast: { self: false, ack: false }, presence: { key: self } } });
+    const handlers = {}, peerFns = [];
+    let mine = {}, last = [{ peer: self, isMe: true, sameTab: true, presence: {} }], left = false;
+    const snap = () => {
+      const state = ch.presenceState() || {}, out = [];
+      for (const [key, metas] of Object.entries(state)) { const m = Array.isArray(metas) ? metas[metas.length - 1] : null; out.push({ peer: key, isMe: key === self, sameTab: key === self, presence: (m && m.p) || {} }); }
+      if (!out.some(p => p.isMe)) out.unshift({ peer: self, isMe: true, sameTab: true, presence: mine });
+      return out;
+    };
+    const deliver = (topic, msg) => { for (const f of (handlers[topic] || []).slice()) try { f(msg); } catch (e) { console.error(e); } };
+    for (const t of KCNet.TOPICS) ch.on('broadcast', { event: t }, m => { const p = (m && m.payload) || {}; if (typeof p.f === 'string') deliver(t, { peer: p.f, isMe: p.f === self, sameTab: false, topic: t, data: p.d }); });
+    ch.on('presence', { event: 'sync' }, () => { last = snap(); for (const f of peerFns.slice()) try { f({ peers: last }); } catch (e) { console.error(e); } });
+    await new Promise((res, rej) => {
+      const t = setTimeout(() => rej(new Error('timeout')), 15000);
+      ch.subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') { clearTimeout(t); res(); }
+        else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') { clearTimeout(t); rej(err || new Error(status)); }
+      });
+    }).catch(e => { sb.removeChannel(ch).catch(() => {}); throw e; });
+    return {
+      name, kind: 'backend',
+      emit(topic, data) { return left ? Promise.resolve() : ch.send({ type: 'broadcast', event: topic, payload: { f: self, d: data } }).then(() => {}); },
+      on(topic, fn) { (handlers[topic] = handlers[topic] || []).push(fn); return () => { handlers[topic] = (handlers[topic] || []).filter(f => f !== fn); }; },
+      presence(patch) { mine = Object.assign({}, mine, patch); for (const k of Object.keys(mine)) if (mine[k] === null) delete mine[k]; return ch.track({ p: mine }).then(() => {}); },
+      peers: () => last,
+      onPeers(fn) { peerFns.push(fn); setTimeout(() => fn({ peers: last }), 0); return () => { const i = peerFns.indexOf(fn); if (i >= 0) peerFns.splice(i, 1); }; },
+      connected: () => !left,
+      leave() { left = true; return sb.removeChannel(ch).then(() => {}, () => {}); },
+    };
+  }
+  // the lobby KCNet sees: rooms only (friends come from the account, not from who is in a lobby)
+  const lobby = {
+    peers: () => [], onPeers: () => () => {}, presence: () => Promise.resolve(), emit: () => Promise.resolve(), on: () => () => {},
+    join(name) {
+      if (CFG.realtime === 'local') { localLobby = localLobby || KCNet.localTransport(); return localLobby.join(name); }
+      return realtimeJoin(name);
+    },
+  };
+
+  /* ---------- connecting it all to the game (js/backend.js) ---------- */
+  const impl = {
+    status: () => st.status,
+    account: () => (st.status === 'signedIn' && st.user ? { id: st.user.id, name: st.user.username } : null),
+    restriction: () => st.restriction,
+    login: (name, password, create) => (create ? account.signUp(name, password) : account.signIn(name, password)),
+    signOut: () => { KCBackend.flush(); return push().then(() => account.signOut()); },
+    save: () => push(),
+    friends, transport: lobby, wallet, rules: RULES, get chatUrl() { return CFG.chatUrl; },
+  };
+  let lastKey = '';
+  account.on(s => {
+    if (s.status === 'checking' || s.status === 'unavailable') return;
+    const key = s.status + ':' + (s.user ? s.user.id : '');
+    if (key === lastKey) return;
+    lastKey = key;
+    if (!KCBackend.connected()) KCBackend.connect(impl); else KCBackend.changed();
+    if (s.status === 'signedIn') { pull(); loadWallet(); seen.clear(); poll(); }
+    else {
+      clearTimeout(pollT); wal = null; ready = false; lists = { friends: [], incoming: [], outgoing: [] }; signal(0);
+      // signed out: the wallet's diamonds and coins are the account's, not this device's
+      if (KCProgress.setWallet(null) && typeof KCMenu !== 'undefined') KCMenu.refresh();
+    }
+  });
+  let started = false;
+  function start() { if (started) return; started = true; init(); }
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(start, 0));
+    else setTimeout(start, 0);
+  }
+
+  return Object.assign(account, {
+    CFG, GAME, start, pull, push, loadWallet, docOf, cmp,
+    configure(patch) { Object.assign(CFG, patch || {}); },
+    useTransport(fn) { transport = fn; },
+  });
 })();
 
 </script>

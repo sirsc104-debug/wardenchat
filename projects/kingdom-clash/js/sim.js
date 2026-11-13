@@ -1454,8 +1454,8 @@ const KCSim = (() => {
   return {
     W, H, MID, RIVER_TOP, RIVER_BOT, BRIDGES, BRIDGE_HALF, DT, REGULAR, OVERTIME, MAX_ENERGY, TOWERS, SUDDEN, lowestTower,
     create, step, play, canDeploy, tower, laneOf, own, mulberry, levelMult, evoCharge, formation, costOf, resolve,
-    // Ends a match on the spot: the Simulate Win test button (TEMPORARY), and an online battle whose
-    // opponent left ('left') or fell out of step ('desync').
-    forceEnd: (s, winner, reason) => finish(s, winner, reason || 'test'),
+    // Ends a match on the spot: a surrender, a replay of a battle that ended early, and an online battle
+    // whose opponent left ('left') or fell out of step ('desync').
+    forceEnd: (s, winner, reason) => finish(s, winner, reason || 'surrender'),
   };
 })();

@@ -19,8 +19,9 @@
    - The Shop: five offers a day built from the cards you have found and their levels, for rubies
      or diamonds (1 diamond = 5,000 rubies). Each offer lists exactly what it gives.
 
-   Rubies and diamonds are kept on this device for now. When the SirSC wallet is connected they move
-   to it, and prices and purchases must then be decided by the server.
+   Rubies are the game's own and stay in this save. Diamonds, wallet Coins and membership belong to the
+   SirSC wallet: once a player signs in (js/account.js) they show what the server says, and the server
+   takes the diamonds or coins before a purchase here goes through (KCBackend.pay, KCBackend.exchange).
    Everything is saved in localStorage under kc.progress; older saves are upgraded in place. */
 'use strict';
 
@@ -151,7 +152,7 @@ const KCProgress = (() => {
     { id: 'sunstone', number: 3, name: 'Sunstone Arena', min: 600, theme: 'sunstone', cards: ['sandstorm', 'ramcart', 'mole', 'camel', 'scarabshrine', 'dunemortar'],
       blurb: 'A sun-baked desert fortress of sandstone walls and an oasis channel. Evolutions and the Diamond Pass open here.' },
     { id: 'stormspire', number: 4, name: 'Stormspire', min: 900, theme: 'stormspire', cards: ['bees', 'owl', 'thundercloud', 'griffin', 'judgment', 'cyclone', 'conductor'],
-      blurb: 'A fortress on a mountain peak above the clouds, crackling with storms. Online battles are coming here.' },
+      blurb: 'A fortress on a mountain peak above the clouds, crackling with storms. Play a Friend opens here.' },
     { id: 'frostfang', number: 5, name: 'Frostfang Keep', min: 2000, theme: 'frostfang', cards: ['frostsprite', 'icegiant', 'wintersage', 'flashfreeze', 'glacierslam', 'cage'],
       blurb: 'A frozen mountain fortress of ice and snow. Its cards freeze, slow and hold the line.' },
     { id: 'blackwater', number: 6, name: 'Blackwater Harbor', min: 2600, theme: 'blackwater', cards: ['dockraiders', 'barrel', 'harpoon', 'broadside', 'powderkeg', 'barracks'],
@@ -304,7 +305,7 @@ const KCProgress = (() => {
   // Which chests each arena can give: a tier starts at the arena number listed (so Arena 1 gives only
   // wooden and silver, Arena 2 adds gold, and so on). Anything above the player's arena is given as the
   // highest tier they have reached instead. allUnlocked turns the gate off: every tier everywhere.
-  // TEMPORARY: allUnlocked is on until more arenas exist; set it to false to switch the gate on.
+  // allUnlocked is on (the gate is off): set it to false to switch the gate on.
   const CHEST_RULES = { allUnlocked: true, arena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 5 } };
   // The order chests are won in, repeating (before the arena gate is applied).
   const CYCLE = ['wooden', 'wooden', 'silver', 'wooden', 'silver', 'wooden', 'wooden', 'gold', 'wooden', 'silver',
@@ -416,10 +417,11 @@ const KCProgress = (() => {
   // the guided first battle has been played (or skipped)
   function finishTutorial() { P.tutorial = true; save(); }
   function battleStarted(foe) {
-    P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, trophies: foe.trophies, at: Date.now() } : null;
+    P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, trophies: foe.trophies, boss: !!foe.boss, at: Date.now() } : null;
     save();
   }
-  const save = () => store.set(P);
+  // saved in this browser, and (once the backend is connected, js/backend.js) to the player's account
+  const save = () => { store.set(P); if (typeof KCBackend !== 'undefined') KCBackend.saved(P); };
 
   /* ---------- account ---------- */
   const level = () => 1 + Math.floor(P.xp / XP_PER_LEVEL);
@@ -551,7 +553,22 @@ const KCProgress = (() => {
     fireballValue: lerp(8, 5, d), defend: lerp(0.4, 1, d), gap: [lerp(2.6, 0.5, d), lerp(4.2, 1.1, d)],
   });
   // The opponent for the next trophy battle: card levels follow their trophies, skill follows P.diff.
+  /* SirSC: in the high arenas a trophy battle is now and then against SirSC himself, with every card and
+     his King Tower at level 50 and the best play there is. Nobody beats him, so losing to him costs no
+     trophies (a win, if it ever happens, pays like any other). */
+  const SIRSC = { from: 4100, chance: 0.04, level: 50,
+    deck: ['dreadknight', 'phoenix', 'meteor', 'titan', 'griffin', 'guardian', 'collapse', 'archers'] };
+  function sirscFoe(rand) {
+    const t = P.trophies, foeT = t + 500, lv = Object.fromEntries(SIRSC.deck.map(id => [id, SIRSC.level]));
+    return { id: 'sirsc', kind: 'trophy', boss: true, name: 'SirSC', short: 'SirSC', level: SIRSC.level, tier: `Level ${SIRSC.level} · never beaten`,
+      look: { bg: ['#ffe27a', '#b8860b'], hair: 'beard', hat: '#1c1530', hairCol: '#1e1e26', band: '#ffcd33', shirt: '#1c1530', skin: '#efc19c', extra: 'armor', mouth: 'smirk' },
+      lines: null, skill: skillFor(1), towerDamage: 1, deck: SIRSC.deck.slice(), cardLevels: lv, trophies: foeT, kingLevel: SIRSC.level,
+      style: 'control', styleName: 'Champion', clan: 'WardenChat', mood: 'cocky', stakes: { win: stakes(t, foeT).win, loss: 0 }, breather: false, first: false, skillLevel: 1,
+      evos: SIRSC.deck.filter(id => KC_EVOS[id]) };
+  }
   function trophyFoe(rand = Math.random) {
+    const t0 = P.trophies;
+    if (t0 >= SIRSC.from && rand() < SIRSC.chance) return sirscFoe(rand);
     const t = P.trophies, rec = P.trophyRecord, first = rec.w + rec.l + rec.d < FIRST_STEPS && t < 100;
     const off = matchOffset(), breather = off <= MATCH.lost2;
     const foeT = Math.max(0, t + off + Math.round((rand() - 0.5) * MATCH.spread));
@@ -589,11 +606,14 @@ const KCProgress = (() => {
   }
   // foeTrophies: the opponent's trophies (from the battle that was started if not given)
   // stats: what you did in the battle ({ cards, spells, troops }) for the daily quests
-  function recordTrophy(winner, crowns, foeTrophies, stats) {
+  // boss: the battle was against SirSC (no trophies lost)
+  function recordTrophy(winner, crowns, foeTrophies, stats, boss) {
     if (foeTrophies === undefined) foeTrophies = P.live && P.live.trophies !== undefined ? P.live.trophies : Math.max(0, P.trophies + MATCH.offset);
+    if (boss === undefined) boss = !!(P.live && P.live.boss);
     P.live = null;
     const r = P.trophyRecord, before = P.trophies, beforeArena = arena().id, st = stakes(P.trophies, foeTrophies);
     if (winner === 0) { r.w++; P.trophies += st.win; P.streak = Math.max(1, (P.streak || 0) + 1); }
+    else if (winner === 1 && boss) r.l++;
     else if (winner === 1) { r.l++; P.trophies = Math.max(arenaFloor(), P.trophies - st.loss); P.streak = Math.min(-1, (P.streak || 0) - 1); }
     else { r.d++; P.streak = 0; }
     P.best = Math.max(P.best, P.trophies);
@@ -630,7 +650,7 @@ const KCProgress = (() => {
     const pass = passAdd(crowns || 0);
     save();
     const nextRoad = ROAD.find(m => m.at > P.trophies && !P.claimed[m.at]) || null, prevRoad = ROAD.filter(m => m.at <= P.trophies).pop() || ROAD[0];
-    return { kind: 'trophy', delta: P.trophies - before, before, trophies: P.trophies, chest, slotsFull, xp, levelUp, newArena, newRewards: claimable().length, pass, gold,
+    return { kind: 'trophy', boss, delta: P.trophies - before, before, trophies: P.trophies, chest, slotsFull, xp, levelUp, newArena, newRewards: claimable().length, pass, gold,
       goldLeft: Math.max(0, ECONOMY.winGold.dailyCap - P.winDay.n), streak: P.streak, streakBonus: winner === 0 && P.streak >= STREAK.from && gold > 0,
       quests: roadOpen() ? quests(now) : [], finished, crown: cc, crownReady, nextRoad, prevRoad };
   }
@@ -1004,9 +1024,9 @@ const KCProgress = (() => {
     save();
     return { ok: true, chest: type, price, rubies: c.rubies, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
   }
-  // Wallet Coins to Rubies, one way, up to a daily cap by the highest arena reached. TEMPORARY: the wallet
-  // balance is kept on this device; once the SirSC wallet is connected the server must take the coins and
-  // enforce the cap, and the game never pays coins out.
+  // Wallet Coins to Rubies, one way, up to a daily cap by the highest arena reached. BACKEND: the wallet
+  // balance is kept on this device for now; once the SirSC wallet is connected the server must take the
+  // coins and enforce the cap, and the game never pays coins out (see BACKEND_HANDOFF.md).
   function exchangeCap() {
     const X = ECONOMY.exchange, top = Math.max(...Object.keys(X.cap).map(Number)), n = bestArena();
     if (n < top) return X.cap[n] || X.cap[1];
@@ -1029,6 +1049,26 @@ const KCProgress = (() => {
     P.walletDay = { day: dayKey(now), n: x.used + n };
     save();
     return { ok: true, coins: n, rubies: n * x.rate };
+  }
+  // The SirSC wallet took the coins (js/backend.js, KCBackend.exchange): add the Rubies and count them
+  // toward today's limit. coinsLeft: the wallet's balance now, as the server says.
+  function exchangePaid(n, rubies, coinsLeft, now = Date.now()) {
+    n = Math.max(0, Math.floor(+n) || 0); rubies = Math.max(0, Math.floor(+rubies) || 0);
+    const used = P.walletDay.day === dayKey(now) ? P.walletDay.n : 0;
+    P.rubies += rubies;
+    P.walletDay = { day: dayKey(now), n: used + n };
+    P.wallet = coinsLeft === null || coinsLeft === undefined ? Math.max(0, P.wallet - n) : Math.max(0, coinsLeft | 0);
+    save();
+    return { ok: true, coins: n, rubies };
+  }
+  // The SirSC wallet's balances, as the server last said (diamonds, coins and membership live there once
+  // the wallet is connected; the game only shows them). null: signed out, so nothing to spend here.
+  function setWallet(me) {
+    const d = me ? Math.max(0, me.diamonds | 0) : 0, c = me ? Math.max(0, me.coins | 0) : 0, m = !!(me && me.member);
+    if (P.diamonds === d && P.wallet === c && !!P.member === m) return false;
+    P.diamonds = d; P.wallet = c; P.member = m;
+    save();
+    return true;
   }
   // One free Wooden Chest a day (local days, like the offers).
   const freeChestReady = (now = Date.now()) => P.freeChestDay !== dayKey(now);
@@ -1098,8 +1138,6 @@ const KCProgress = (() => {
     return { ok: true, id, price, currency: wallet };
   }
 
-  // TEMPORARY: the test button's 1,000,000 rubies and diamonds.
-  function grantTest() { P.rubies = 1000000; P.diamonds = 1000000; P.wallet = 1000000; save(); }
 
 
   /* ---------- magic items ----------
@@ -1204,12 +1242,6 @@ const KCProgress = (() => {
     save();
     return { ok: true, item, card: id, gives: r.gives };
   }
-  // TEMPORARY: the test button fills the Magic Items tab.
-  function grantMagic() {
-    const add = { wild_common: 300, wild_rare: 60, wild_epic: 10, wild_legendary: 2, book_common: 3, book_rare: 3, book_epic: 1, book_legendary: 1, book_books: 2, hammer_books: 3 };
-    for (const [k, v] of Object.entries(add)) P.magic[k] = magicCount(k) + v;
-    save();
-  }
 
   /* ---------- the King Tower ----------
      Its level (1 to 15) sets the health and damage of all three of your towers in battle (8% a level,
@@ -1307,7 +1339,7 @@ const KCProgress = (() => {
     return P.passRolled;
   }
   const passOpen = () => P.best >= EVO_ARENA;
-  // Online battles open when you first reach Stormspire (Arena 4).
+  // Play a Friend (battles with friends) opens when you first reach Stormspire (Arena 4).
   const ONLINE_AT = 900;
   const onlineOpen = () => P.best >= ONLINE_AT;
   const passPremium = () => { passRoll(); return !!(P.pass.premium || P.member); };
@@ -1481,7 +1513,7 @@ const KCProgress = (() => {
     return { deck, missing: deck.filter(id => !P.found.includes(id)) };
   }
   // A friend code: your name, deck, card levels and King Tower, for a friend to battle a computer player
-  // that plays your deck (there are no online battles yet).
+  // that plays your deck (a ghost battle; live battles with friends are Play a Friend).
   const b64 = { enc: str => btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
     dec: str => decodeURIComponent(escape(atob(str.replace(/-/g, '+').replace(/_/g, '/')))) };
   function friendCode() {
@@ -1582,18 +1614,18 @@ const KCProgress = (() => {
 
   return {
     MAX_LEVEL, XP_PER_LEVEL, TROPHIES, MATCH, FOE_SKILL, FIRST_STEPS, stakes, nextStakes, ARENAS, ROAD, skillFor, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
-    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, chestShopOpen, chestBuyLeft, foeKing, buyDiamond, magicUsable,
+    chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, exchangePaid, setWallet, chestShopOpen, chestBuyLeft, foeKing, buyDiamond, magicUsable,
     load, save, battleStarted, finishTutorial, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,
-    trophyFoe, foeUpgrades, spreadLevels, recordTrophy,
+    trophyFoe, foeUpgrades, spreadLevels, recordTrophy, SIRSC, sirscFoe,
     roll, chestState, unlockingSlot, startUnlock, openChest,
-    SHOP, shop, shopEnds, refreshShop, buy, buyChest, grantTest,
+    SHOP, shop, shopEnds, refreshShop, buy, buyChest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
     DECK_SLOTS, useDeckSlot, setWholeDeck, deckWarnings, suggestDeck, practiceFoe,
     CHALLENGES, CHALLENGE_PAY, challenge, challengeLevel, draftPairs, challengeFoe, recordChallenge,
     LOG_MAX, logBattle, battleLog, profile, setAvatar, deckCode, readDeckCode, friendCode, friendFoe,
-    MAGIC, MAGIC_ORDER, MAGIC_RULES, wildActive, magicCount, magicFor, useMagic, grantMagic,
+    MAGIC, MAGIC_ORDER, MAGIC_RULES, wildActive, magicCount, magicFor, useMagic,
     EVO_ARENA, evoOpen, hasEvo, evoList, evoInfo,
     QUESTS, CROWN_CHEST, STREAK, quests, questAdd, claimQuest, questsReady, crownChest, openCrownChest,
     kingInfo, upgradeKing, ONLINE_AT, onlineOpen, EMOTES, EMOTE_SHOP, emoteOffers, buyEmote, chestPool,

@@ -73,14 +73,14 @@
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
       ['#introFoeClan', T.clan || ''], ['#introYouTier', trophy ? `${KCProgress.state.trophies} trophies` : 'Training'],
-      ['#introStakes', challenge ? `Daily Challenge · ${T.challenge.name}` : practice ? (T.tryCard && T.tryCard.out ? `Practice · trying ${KC_CARDS[T.tryCard.card].name}` : 'Practice · nothing at stake') : trophy && T.stakes ? `Win +${T.stakes.win} · Loss −${T.stakes.loss}` : '']]) $(sel).textContent = text;
+      ['#introStakes', T.boss ? 'SirSC · no trophies lost' : challenge ? `Daily Challenge · ${T.challenge.name}` : practice ? (T.tryCard && T.tryCard.out ? `Practice · trying ${KC_CARDS[T.tryCard.card].name}` : 'Practice · nothing at stake') : trophy && T.stakes ? `Win +${T.stakes.win} · Loss −${T.stakes.loss}` : '']]) $(sel).textContent = text;
     introYou();
     veil(T.name, where);
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {},
       falls: {}, slowmo: 0, flash: 0, fireworks: 0 });
     for (const el of document.querySelectorAll('.fly-crown')) el.remove();
-    $('#simWinBtn').hidden = false; $('#netWait').hidden = true;
+    $('#netWait').hidden = true;
     $('#leaveBtn').hidden = false; $('#leaveBtn').classList.remove('ask'); $('#replayBar').hidden = true;
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
@@ -90,6 +90,7 @@
     // a trophy battle first looks for an opponent for a moment
     G.phase = 'intro'; G.intro = trophy && !practice ? 2.7 : 1.7; G.finding = trophy && !practice;
     $('#intro').classList.toggle('finding', G.finding);
+    $('#intro').classList.toggle('boss', !!T.boss);
     $('#intro').hidden = false;
   }
   // Under the VS screen the battle is already laid out: until it starts, the opponent's name reads
@@ -130,7 +131,8 @@
       KCProgress.battleStarted(G.trainer);
       if (G.trainer.kind === 'trophy' || G.trainer.kind === 'practice') KCEmotes.foeGreet();
     }
-    banner('FIGHT!');
+    if (G.trainer && G.trainer.boss) { banner('SirSC appears!', 'Level 50 everything. Losing to him costs no trophies.'); KCSound.play('thunderclap'); G.shake = Math.max(G.shake, 0.5); }
+    else banner('FIGHT!');
     KCSound.play('fight');
     setTimeout(() => speak('start'), 900);
   }
@@ -840,7 +842,7 @@
     for (const el of document.querySelectorAll('.fly-crown')) el.remove();
     $('#intro').classList.remove('finding');
     $('#leaveBtn').hidden = false; $('#leaveBtn').classList.remove('ask');
-    $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true; $('#simWinBtn').hidden = true; $('#netWait').hidden = true;
+    $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true; $('#netWait').hidden = true;
     KCScenery.reset();
     KCEmotes.reset();
     show('battle');
@@ -1098,7 +1100,7 @@
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {}, views: {},
       falls: {}, slowmo: 0, flash: 0, fireworks: 0, finding: false });
     for (const el of document.querySelectorAll('.fly-crown')) el.parentNode.removeChild(el);
-    $('#simWinBtn').hidden = true; $('#netWait').hidden = true; $('#leaveBtn').hidden = true;
+    $('#netWait').hidden = true; $('#leaveBtn').hidden = true;
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true; $('#coach').hidden = true;
     $('#replayBar').hidden = false; $('#replaySpeed').textContent = '1×';
     $('#intro').classList.remove('finding');
@@ -1168,10 +1170,11 @@
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
     if (res.kind === 'online') { un.hidden = false; un.textContent = 'Online battle · no trophies won or lost'; }
     if (res.kind === 'practice') { un.hidden = false; un.textContent = 'Practice battle · nothing won or lost'; }
+    if (res.boss && res.delta === 0 && w === 1) { un.hidden = false; un.textContent = 'Nobody beats SirSC. No trophies lost.'; }
     if (res.kind === 'friend') { un.hidden = false; un.textContent = `Friend challenge against ${G.trainer.name}'s deck · nothing won or lost`; }
     if (res.kind === 'challenge') { un.hidden = false; un.textContent = `Daily Challenge · ${res.name} · ${res.left ? `${res.left} chest win${res.left === 1 ? '' : 's'} left today` : 'all of today\'s chests won'}`; }
     $('#againBtn').hidden = res.kind === 'online';
-    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', sudden: w === 0 ? 'Sudden death: their tower crumbled first.' : 'Sudden death: your tower crumbled first.', first: 'Sudden Death challenge: the first tower down wins.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).', surrender: 'You surrendered.' }[r.reason];
+    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', sudden: w === 0 ? 'Sudden death: their tower crumbled first.' : 'Sudden death: your tower crumbled first.', first: 'Sudden Death challenge: the first tower down wins.', draw: 'Every tower ended with the same health.', surrender: 'You surrendered.' }[r.reason];
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
     $('#resSmall').textContent = res.kind === 'online' ? `${why} ${m}:${sec} played, ${s.played[0]} cards from you.` : `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
     $('#result').hidden = false;
@@ -2267,13 +2270,6 @@
       b.classList.remove('ask'); clearTimeout(leaveT);
       if (G.online) { try { Promise.resolve(G.online.room.emit('mp.bye', {})).catch(() => {}); } catch (e) { /* gone */ } S.forceEnd(G.sim, 1 - G.online.team, 'surrender'); G.s = viewOf(G.sim); }
       else S.forceEnd(G.s, 1, 'surrender');
-      handleEvents();
-    });
-    // TEMPORARY test button: ends the match as a win, with the same rewards as a real one.
-    $('#simWinBtn').addEventListener('click', () => {
-      if (G.phase !== 'play' || !G.s || G.s.result) return;
-      if (G.online) return;
-      S.forceEnd(G.s, 0);
       handleEvents();
     });
     let rt = 0;
