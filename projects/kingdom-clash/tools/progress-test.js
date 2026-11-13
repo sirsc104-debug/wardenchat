@@ -738,6 +738,23 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   console.log(`battle log (${G.LOG_MAX}), replays match the battle, deck codes (${code}), friend codes, avatar: ok`);
 }
 
+// The Diamond Pass is weekly: a new season every Monday, last week's reached rewards added, then tier 0
+{
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 1500, best: 1500, claimed: { 0: true }, rubies: 0 }) }));
+  const PP = G.state, now = Date.now(), wk = 7 * 864e5;
+  assert.strictEqual(PP.pass.season, G.seasonOf(now), 'this week\'s season');
+  assert(G.seasonEnds(now) > now && G.seasonEnds(now) - now <= wk && new Date(G.seasonEnds(now)).getDay() === 1, 'it ends next Monday');
+  assert.strictEqual(G.seasonOf(now + wk), G.seasonOf(now) + 1, 'one season a week');
+  PP.pass.points = 3 * G.PASS.crownsPerTier + 2; PP.pass.premium = true;
+  G.claimPass(0, 'free');
+  const r0 = PP.rubies, got = G.passRoll(now + wk);
+  assert(got && got.rubies + got.items.length + got.cards.length > 0, 'unclaimed rewards are added at the new season');
+  assert(PP.rubies > r0 || got.items.length, 'and paid out');
+  assert.strictEqual(PP.pass.points, 0); assert.strictEqual(PP.pass.premium, false, 'the Diamond Pass track is bought each week');
+  assert.strictEqual(G.passRoll(now + wk), null, 'only once a week');
+  console.log(`weekly Diamond Pass (season ${G.seasonOf(now)}, featured ${G.featuredEvo()}): ok`);
+}
+
 // 9. Matchmaking: the win rate of a steady player who keeps their cards level with their trophies, and
 //    of one who never upgrades.
 const N = +process.argv[2] || 120;

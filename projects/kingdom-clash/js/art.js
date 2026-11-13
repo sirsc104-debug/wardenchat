@@ -779,23 +779,67 @@ const KCArt = (() => {
     },
   };
 
+
+  // A recurve bow held toward `ang` (radians on screen: 0 is right, -PI/2 is up), round an archer's chest
+  // at the origin: limbs of dark laminated wood with a light core and gold-capped tips that curl back, a
+  // wrapped leather grip with a gold band, the string drawn back by `draw` (0 to 1) with a fletched arrow
+  // on it, and the archer's arms and hands. opts: sleeve and skin colours, fletch (the arrow's feathers),
+  // reach (how far out the grip is, in tiles) and len (each limb's length).
+  function aimedBow(c, k, ang, draw, opts) {
+    opts = opts || {};
+    const q = v => v * k, w = Math.max(1, k * 0.07);
+    const gx = q(opts.reach || 0.36), L = q(opts.len || 0.5), d = Math.max(0, Math.min(1, draw || 0));
+    const nock = gx - q(0.12) - q(0.2) * d, bend = q(0.1) - q(0.04) * d;
+    c.save(); c.rotate(ang);
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    const stroke = (path, col, width) => { c.beginPath(); path(); c.strokeStyle = col; c.lineWidth = width; c.stroke(); };
+    // the arms, from the shoulders to the grip and to the string
+    for (const [sy, tx] of [[q(0.13), gx], [-q(0.13), nock]]) {
+      stroke(() => { c.moveTo(0, sy); c.quadraticCurveTo(tx * 0.5, sy * 0.6, tx, 0); }, OUT, q(0.17));
+      stroke(() => { c.moveTo(0, sy); c.quadraticCurveTo(tx * 0.5, sy * 0.6, tx, 0); }, opts.sleeve || '#5d7a4a', q(0.11));
+    }
+    // the limbs (tips curl back), the string, the arrow
+    const tipX = gx - q(0.05) - q(0.04) * d, tipY = L;
+    const limb = s => { c.moveTo(gx, s * q(0.06)); c.quadraticCurveTo(gx + bend, s * L * 0.55, tipX, s * tipY); c.quadraticCurveTo(tipX - q(0.03), s * (tipY + q(0.06)), tipX + q(0.05), s * (tipY + q(0.1))); };
+    const str = () => { c.moveTo(tipX + q(0.02), -tipY - q(0.04)); c.lineTo(nock, 0); c.lineTo(tipX + q(0.02), tipY + q(0.04)); };
+    stroke(str, OUT, Math.max(1.6, q(0.05)));
+    stroke(str, '#f4efe2', Math.max(1, q(0.022)));
+    for (const s of [-1, 1]) {
+      stroke(() => limb(s), OUT, q(0.15));
+      stroke(() => limb(s), '#7a4220', q(0.1));
+      stroke(() => { c.moveTo(gx + q(0.01), s * q(0.08)); c.quadraticCurveTo(gx + bend - q(0.01), s * L * 0.55, tipX - q(0.01), s * (tipY - q(0.02))); }, '#d9a066', q(0.035));
+      // gold tip caps
+      c.beginPath(); c.arc(tipX + q(0.05), s * (tipY + q(0.1)), q(0.05), 0, Math.PI * 2); c.fillStyle = '#ffcf3f'; c.fill(); c.strokeStyle = OUT; c.lineWidth = w * 0.7; c.stroke();
+    }
+    // the grip: wrapped leather and a gold band
+    c.beginPath(); c.roundRect ? c.roundRect(gx - q(0.06), -q(0.11), q(0.12), q(0.22), q(0.04)) : c.rect(gx - q(0.06), -q(0.11), q(0.12), q(0.22));
+    c.fillStyle = '#5a3418'; c.fill(); c.strokeStyle = OUT; c.lineWidth = w * 0.8; c.stroke();
+    for (const y of [-0.06, 0, 0.06]) stroke(() => { c.moveTo(gx - q(0.05), q(y)); c.lineTo(gx + q(0.05), q(y + 0.02)); }, '#8a5a34', Math.max(1, q(0.02)));
+    stroke(() => { c.moveTo(gx - q(0.06), -q(0.11)); c.lineTo(gx + q(0.06), -q(0.11)); }, '#ffcf3f', Math.max(1, q(0.03)));
+    if (opts.arrow !== false) {
+      const head = gx + q(0.36);
+      stroke(() => { c.moveTo(nock - q(0.02), 0); c.lineTo(head - q(0.04), 0); }, OUT, Math.max(1.6, q(0.06)));
+      stroke(() => { c.moveTo(nock - q(0.02), 0); c.lineTo(head - q(0.04), 0); }, '#e8d3a8', Math.max(1, q(0.03)));
+      c.beginPath(); c.moveTo(head + q(0.06), 0); c.lineTo(head - q(0.06), -q(0.06)); c.lineTo(head - q(0.03), 0); c.lineTo(head - q(0.06), q(0.06)); c.closePath();
+      c.fillStyle = '#dfe5ec'; c.fill(); c.strokeStyle = OUT; c.lineWidth = w * 0.7; c.stroke();
+      for (const s of [-1, 1]) { c.beginPath(); c.moveTo(nock + q(0.1), 0); c.lineTo(nock - q(0.02), s * q(0.07)); c.lineTo(nock - q(0.04), 0); c.closePath(); c.fillStyle = opts.fletch || '#dc3640'; c.fill(); c.strokeStyle = OUT; c.lineWidth = w * 0.6; c.stroke(); }
+    }
+    // the hands
+    for (const x of [gx, nock]) { c.beginPath(); c.arc(x, 0, q(0.07), 0, Math.PI * 2); c.fillStyle = opts.skin || C.skin; c.fill(); c.strokeStyle = OUT; c.lineWidth = w * 0.8; c.stroke(); }
+    c.restore();
+  }
+  // where an archer aims with nothing to shoot at: ahead of it, a little to the side
+  const restAim = front => (front ? 0.55 : -Math.PI / 2 + 0.55);
+  // a bow aimed up the screen is held out in front of an archer we see from behind: drawn before the body
+  const bowBehind = ang => Math.sin(ang) < -0.35;
+
   // The upper half of an archer (hood, cloak, bow), shared by the Archers card and the Archer Towers.
-  // Its origin is the waist.
-  function archerUpper(c, q, T, front, face, draw, sc) {
+  // Its origin is the waist. aim: where it aims (radians on screen), or undefined to rest.
+  // later: leave a bow held out in front undrawn and return it, to draw over the tower's battlements
+  function archerUpper(c, q, T, front, face, draw, sc, aim, later) {
     c.save(); c.scale(sc, sc);
-    const bow = () => {
-      c.save(); c.scale(face, 1);
-      rope(c, () => { c.beginPath(); c.arc(q(0.3), q(-0.62), q(0.42), -1.15, 1.15); }, '#9a5d2a', q(0.07));
-      const ex = q(0.3) + Math.cos(1.15) * q(0.42), ey = Math.sin(1.15) * q(0.42), pull = q(0.06 + draw * 0.14);
-      c.beginPath(); c.moveTo(ex, q(-0.62) - ey); c.lineTo(q(0.3) + q(0.42) * Math.cos(1.15) - pull, q(-0.62)); c.lineTo(ex, q(-0.62) + ey);
-      c.strokeStyle = '#f3f0e6'; c.lineWidth = Math.max(1, q(0.025)); c.stroke();
-      if (front) {
-        rope(c, () => { c.beginPath(); c.moveTo(q(0.42) - pull, q(-0.62)); c.lineTo(q(0.95), q(-0.62)); }, '#8a5a2e', q(0.035));
-        poly(c, [q(1.04), q(-0.62), q(0.92), q(-0.69), q(0.92), q(-0.55)]); paint(c, '#dfe5ec', LW * 0.8);
-        circ(c, q(0.72), q(-0.62), q(0.08)); paint(c, C.skin, LW * 0.8);
-      }
-      c.restore();
-    };
+    const ang = aim === undefined ? restAim(front) : aim, behind = bowBehind(ang);
+    const bow = () => { c.save(); c.translate(0, q(-0.6)); aimedBow(c, q(1), ang, draw, { sleeve: T.main, reach: later ? 0.42 : 0.34, len: later ? 0.56 : 0.46, fletch: T.main }); c.restore(); };
     const quiver = (x, rot) => {
       c.save(); c.translate(q(x), q(-0.62)); c.rotate(rot);
       for (const [fx, fy] of [[-0.05, -0.42], [0.04, -0.46], [0.12, -0.4]]) { poly(c, [q(fx), q(fy), q(fx + 0.06), q(fy - 0.12), q(fx + 0.12), q(fy)]); paint(c, '#f3f0e6', LW * 0.6); }
@@ -803,7 +847,7 @@ const KCArt = (() => {
       c.restore();
     };
     if (front) quiver(-0.3, -0.45);
-    else bow();
+    if (behind) bow();
     sh(c, () => poly(c, [q(-0.34), 0, q(0.34), 0, q(0.26), q(-0.62), q(-0.26), q(-0.62)]), T.main, T.sh, q(0.06));
     sh(c, () => rr(c, q(-0.31), q(-0.18), q(0.62), q(0.08), q(0.03)), C.gold, null, 0);
     if (!front) quiver(-0.12, -0.3);
@@ -812,11 +856,12 @@ const KCArt = (() => {
       sh(c, () => ell(c, q(0.02) * face, q(-0.82), q(0.24), q(0.21)), C.skin, C.skinSh, q(0.04));
       rope(c, () => { c.beginPath(); c.arc(q(0.02) * face, q(-0.82), q(0.26), Math.PI * 1.1, Math.PI * 1.9); }, C.gold, q(0.06));
       dot(c, q(-0.08) + q(0.03) * face, q(-0.82), q(0.04)); dot(c, q(0.08) + q(0.03) * face, q(-0.82), q(0.04));
-      bow();
     } else {
       rope(c, () => { c.beginPath(); c.arc(0, q(-0.88), q(0.31), Math.PI * 0.22, Math.PI * 0.78); }, C.gold, q(0.06));
     }
+    if (!behind && !later) bow();
     c.restore();
+    return !behind && later ? bow : null;
   }
 
   // The Cannon: a wooden platform with an iron barrel that turns to aim (o.angle, in screen space).
@@ -926,9 +971,11 @@ const KCArt = (() => {
     towerBase(c, k, g);
     if (front) towerBanner(c, k, g, T);
     c.save(); c.translate(0, q(g.fig + 0.12));
-    archerUpper(c, q, T, front, o.face || 1, o.atk || 0, 1.02);
+    const bow = archerUpper(c, q, T, front, o.face || 1, o.atk || 0, 1.02, o.aim, true);
     c.restore();
     towerTop(c, k, g);
+    // the archer leans out over the battlements to shoot
+    if (bow) { c.save(); c.translate(0, q(g.fig + 0.12)); c.scale(1.02, 1.02); bow(); c.restore(); }
   }
   function kingTower(c, k, o) {
     LW = Math.max(1, k * 0.075);
@@ -1260,6 +1307,6 @@ const KCArt = (() => {
 
   // for js/art2.js: the shared helpers, the colours, and a way to add troops, buildings and card pictures
   const add = (troops, buildings, portraits) => { Object.assign(TROOPS, troops || {}); Object.assign(BUILDINGS, buildings || {}); Object.assign(PORTRAITS, portraits || {}); };
-  return { OUT, TEAM, THEMES, C, cannon, building, spearsArt, sandstormArt, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer,
+  return { OUT, TEAM, THEMES, C, cannon, building, spearsArt, sandstormArt, troop, archerTower, kingTower, rubble, arena, portrait, fireballArt, crownIcon, owen, trainer, aimedBow, restAim, bowBehind,
     rr, circ, ell, line, paint, poly, sh, rope, dot, eye, add, lw: () => LW, setLw: v => { LW = v; } };
 })();

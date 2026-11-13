@@ -201,20 +201,16 @@ const KCArt3 = (() => {
     // Archers: hooded archers with a team cloak, a longbow and a quiver of fletched arrows
     archers(c, k, o) {
       const q = v => v * k, T = TEAM[o.team], front = o.view === 'front', draw = o.atk || 0;
+      // the recurve bow turns to aim at what it shoots (o.aim), held out ahead with nothing to shoot
+      const ang = o.aim === undefined ? A.restAim(front) : o.aim, behind = A.bowBehind(ang);
+      const bow = () => { c.save(); c.translate(0, q(-0.74)); A.aimedBow(c, k, ang, draw, { sleeve: '#5d7a4a', skin: SKIN[0], fletch: T.main }); c.restore(); };
       legs(c, q, o, 0.1, 0.32, 0.12, LEATHER, ['#4a5a3a', '#36432a']);
       if (front) { sh(c, () => rr(c, q(-0.32), q(-0.98), q(0.18), q(0.46), q(0.06)), LEATHER[0], LEATHER[1], q(0.03)); for (const x of [-0.29, -0.24, -0.19]) line(c, q(x), q(-0.98), q(x), q(-1.08), '#dc3640', q(0.05)); }
+      else { sh(c, () => rr(c, q(0.06), q(-1.02), q(0.18), q(0.46), q(0.06)), LEATHER[0], LEATHER[1], q(0.03)); for (const x of [0.1, 0.15, 0.2]) line(c, q(x), q(-1.02), q(x), q(-1.12), '#f1ead8', q(0.05)); }
+      if (behind) bow();
       sh(c, () => poly(c, [q(-0.34), q(-0.3), q(0.34), q(-0.3), q(0.26), q(-0.92), q(-0.26), q(-0.92)]), T.main, T.sh, q(0.06));
       torso(c, q, T, -0.86, -0.34, 0.24, { col: '#5d7a4a', sh: '#465d38', trim: false });
-      // the longbow, drawn back while shooting
-      c.save(); c.translate(q(front ? 0.36 : -0.36), q(-0.7));
-      c.beginPath(); c.arc(front ? -q(0.1) : q(0.1), 0, q(0.46), front ? -1.15 : Math.PI - 1.15 + 0.0, front ? 1.15 : Math.PI + 1.15);
-      c.lineWidth = q(0.11); c.strokeStyle = OUT; c.lineCap = 'round'; c.stroke(); c.lineWidth = q(0.07); c.strokeStyle = '#a8733e'; c.stroke();
-      const bx = front ? -q(0.1) : q(0.1), tip = a => [bx + Math.cos(a) * q(0.46), Math.sin(a) * q(0.46)];
-      const [ax, ay] = tip(front ? -1.15 : Math.PI - 1.15), [cx, cy] = tip(front ? 1.15 : Math.PI + 1.15), pull = (front ? -1 : 1) * draw * q(0.2);
-      line(c, ax, ay, bx + pull - (front ? q(0.28) : -q(0.28)), 0, '#f1ead8', Math.max(1, q(0.025)));
-      line(c, bx + pull - (front ? q(0.28) : -q(0.28)), 0, cx, cy, '#f1ead8', Math.max(1, q(0.025)));
-      c.restore();
-      arm(c, q(0.16), q(-0.8), q(front ? 0.3 : -0.3), q(-0.7), q(0.1), '#5d7a4a');
+      if (!behind) bow();
       head(c, q, -1.12, 0.28, o, { iris: '#3a7a3a' });
       // the hood
       sh(c, () => { c.beginPath(); c.arc(0, q(-1.15), q(0.33), Math.PI * 1.0, 0); c.lineTo(q(0.3), q(-1.0)); c.quadraticCurveTo(q(0.16), q(-1.32), 0, q(-1.32)); c.quadraticCurveTo(q(-0.16), q(-1.32), q(-0.3), q(-1.0)); c.closePath(); }, T.main, T.sh, q(0.05));

@@ -1197,9 +1197,10 @@ const KCMenu = (() => {
     const owned = G.passPremium(), poor = P().diamonds < G.PASS.price;
     const btn = owned ? '<button class="buy-btn" type="button" disabled>Active</button>'
       : `<button class="buy-btn gem${poor ? ' poor' : ''}${passConfirm ? ' confirm' : ''}" type="button" data-pass="1" aria-label="${passConfirm ? 'Confirm: buy' : 'Buy'} the Diamond Pass for ${G.PASS.price} diamonds">${passConfirm ? 'Confirm ' : ''}<i class="gem-i" aria-hidden="true"></i>${fmt(G.PASS.price)}</button>`;
-    return `<div class="offer diamonds pass-offer${owned ? ' sold' : ''}"><span class="of-tag">Season ${G.PASS.season}</span>
-      <div class="of-art pass-art"><img src="${cardImg('snowman', true)}" alt=""></div>
-      <b>Diamond Pass</b><small class="of-note">Snowman Evolution at tier 1 and ${G.PASS.tiers.length} more rewards</small>
+    const fe = G.featuredEvo();
+    return `<div class="offer diamonds pass-offer${owned ? ' sold' : ''}"><span class="of-tag">Season ${G.PASS.season} · ends in ${dur(Math.round((G.seasonEnds() - Date.now()) / 1000))}</span>
+      <div class="of-art pass-art"><img src="${cardImg(fe, true)}" alt=""></div>
+      <b>Diamond Pass</b><small class="of-note">This week: the ${esc(KC_EVOS[fe].name)} at tier 1 and ${G.PASS.tiers.length - 1} more rewards</small>
       <button type="button" class="of-see">See rewards</button>${btn}</div>`;
   }
   function buyPassClick() {
@@ -1228,10 +1229,11 @@ const KCMenu = (() => {
   function closePass() { $('#passModal').hidden = true; }
   function renderPass() {
     const open = G.passOpen(), prem = G.passPremium(), tier = G.passTier(), per = G.PASS.crownsPerTier;
-    $('#passTitle').textContent = `Diamond Pass · Season ${G.PASS.season}`;
+    const left = Math.max(0, G.seasonEnds() - Date.now()), dd = Math.floor(left / 864e5), hh = Math.floor((left % 864e5) / 3600e3);
+    $('#passTitle').textContent = `Diamond Pass · Season ${G.PASS.season} · new season in ${dd ? dd + 'd ' : ''}${hh}h`;
     $('#passHead').innerHTML = `<div class="pm-prog"><span class="pass-tier"><b>${tier}</b></span><div class="pass-track"><i style="width:${(tier >= G.PASS.tiers.length ? 100 : G.passInto() / per * 100).toFixed(1)}%"></i></div>
         <small>${!open ? 'Opens in Sunstone Arena' : tier >= G.PASS.tiers.length ? 'Every tier reached!' : `${G.passInto()} / ${per} crowns to tier ${tier + 1}`}</small></div>
-      <p class="dim">Every crown you take in a trophy battle moves you up. The free track is for everyone; the Diamond Pass track is for pass holders and members.</p>
+      <p class="dim">Every crown you take in a trophy battle moves you up. The free track is for everyone; the Diamond Pass track is for pass holders and members. A new season starts every Monday: rewards you reached but didn't claim are added for you, and the pass starts again (the Diamond Pass track is bought for each week).</p>
       ${prem ? '<span class="pm-owned">Diamond Pass active</span>' : open ? `<button type="button" class="buy-btn gem pm-buy" id="pmBuy"><i class="gem-i" aria-hidden="true"></i>${fmt(G.PASS.price)} · Get the Diamond Pass</button>` : ''}`;
     $('#passTiers').innerHTML = G.PASS.tiers.map((T, i) => {
       const cell = track => {
@@ -2004,6 +2006,13 @@ const KCMenu = (() => {
     // a trophy battle that was left unfinished last time counted as a loss
     const ab = P().abandoned;
     if (ab) { P().abandoned = null; setTimeout(() => toast(`Your battle against ${ab.name} was left before it ended, so it counted as a loss (${ab.delta} trophies).`), 600); }
+    // a new Diamond Pass season: what was reached last week and not claimed has been added
+    const pr = P().passRolled;
+    if (pr) {
+      P().passRolled = null;
+      setTimeout(() => showChest(null, { rubies: pr.rubies, cards: pr.cards, items: pr.items }, `Last week's Diamond Pass rewards`), ab ? 4200 : 700);
+      if (pr.evos.length) setTimeout(() => toast(`Unlocked from last week's pass: ${pr.evos.map(id => KC_EVOS[id].name).join(', ')}`), 900);
+    }
   }
 
   return {

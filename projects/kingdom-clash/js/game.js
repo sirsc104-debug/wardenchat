@@ -1408,7 +1408,9 @@
       const target = e.target && G.s.ents.find(u => u.id === e.target);
       const face = target ? (target.x >= e.x ? 1 : -1) : (e.team === 0 ? 1 : -1);
       c.save(); c.translate(x, y);
-      const o = { team: e.team, face, active: e.active, t, view: e.team === 0 ? 'back' : 'front', atk: Math.max(0, e.cd / e.hit - 0.6) * 2.5, hurt: 1 - e.hp / e.maxHp };
+      const o = { team: e.team, face, active: e.active, t, view: e.team === 0 ? 'back' : 'front', atk: Math.max(0, e.cd / e.hit - 0.6) * 2.5, hurt: 1 - e.hp / e.maxHp,
+        // the archer on top aims at what the tower shoots (from about where it stands, above the tower)
+        aim: target ? Math.atan2(target.y - (e.y - 2.4), target.x - e.x) : undefined };
       const draw = () => (e.sub === 'king' ? A.kingTower : A.archerTower)(c, k, o);
       const fall = G.falls[e.id];
       if (e.dead && fall !== undefined && fall < 0.9) {
@@ -1480,6 +1482,8 @@
       c.globalAlpha *= 0.55;
     }
     const o = { team: e.team, t: t + e.id * 0.37, walk: e.moving, atk: Math.max(0, e.atk / 0.28), face: e.face, id: e.id, view: facingOf(e), evo: e.evo };
+    // archers aim their bows at their target
+    if (e.card === 'archers' && e.target && !e.moving) { const tg = G.s.ents.find(u => u.id === e.target); if (tg) o.aim = Math.atan2(tg.y - e.y, tg.x - e.x); }
     if (e.ram) o.power = Math.max(0, Math.min(1, (e.speed - e.baseSpeed) / (e.maxSpeed - e.baseSpeed)));
     if (e.rider) o.ratk = Math.max(0, e.rider.atk / 0.4);
     if (e.chargeHit) o.charged = e.run >= e.chargeHit;

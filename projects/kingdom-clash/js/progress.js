@@ -391,6 +391,8 @@ const KCProgress = (() => {
     P.king = Math.max(1, Math.min(MAX_LEVEL, P.king | 0 || 1));
     P.emotes = Array.isArray(P.emotes) ? P.emotes.filter(id => EMOTES.some(e => e.id === id)) : [];
     P.pass = Object.assign({ season: 1, points: 0, premium: false, free: {}, paid: {} }, P.pass);
+    P.passRolled = null;
+    if (P.best >= EVO_ARENA || P.pass.season !== 1) passRoll();
     P.found = KC_ALL_CARDS.filter(id => P.found.includes(id));
     const okDeck = d => Array.isArray(d) && d.length === 8 && new Set(d).size === 8 && d.every(id => P.found.includes(id));
     if (!okDeck(P.deck)) P.deck = KC_STARTER_DECK.slice();
@@ -1236,15 +1238,19 @@ const KCProgress = (() => {
   }
 
   /* ---------- the Diamond Pass ----------
-     A season pass, open from Sunstone Arena (Arena 3). Every crown you win in a trophy battle is a pass
+     A season pass, open from Sunstone Arena (Arena 3). A season is a week, Monday to Monday (local time):
+     when a new week starts, rewards you reached but didn't claim are added for you, and the pass starts
+     again from tier 0 (the Diamond Pass track is bought for the week; members always have it). The
+     Diamond Pass reward at tier 1 is the week's featured evolution, a different one each week. Every crown you win in a trophy battle is a pass
      point; each tier takes crownsPerTier of them. Every tier has a free reward, and a Diamond Pass
      reward for players who bought this season's pass in the Shop (members get it as part of their
      membership). The free path gives 2 Evolution Shards in all; the Diamond Pass gives the Snowman
      Evolution at tier 1. Rewards are fixed and shown in full before buying. */
   const PASS = {
-    name: 'Diamond Pass', season: 1, price: 10, crownsPerTier: 8,
+    name: 'Diamond Pass', price: 10, crownsPerTier: 8,
+    get season() { return P && P.pass ? P.pass.season : seasonOf(); },
     tiers: [
-      { free: { kind: 'rubies', n: 375 }, paid: { kind: 'evo', card: 'snowman' } },
+      { free: { kind: 'rubies', n: 375 }, get paid() { return { kind: 'evo', card: featuredEvo() }; } },
       { free: { kind: 'item', item: 'wild_common', n: 20 }, paid: { kind: 'chest', chest: 'gold' } },
       { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'rubies', n: 1125 } },
       { free: { kind: 'rubies', n: 525 }, paid: { kind: 'item', item: 'wild_rare', n: 6 } },
@@ -1261,16 +1267,49 @@ const KCProgress = (() => {
       { free: { kind: 'chest', chest: 'gold' }, paid: { kind: 'chest', chest: 'legendary' } },
     ],
   };
+  // Seasons are numbered from the week of Monday 5 January 2026 (season 1).
+  const SEASON_EPOCH = Date.UTC(2026, 0, 5) / 864e5;
+  function seasonOf(now = Date.now()) { const d = new Date(now); return Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 864e5 - SEASON_EPOCH) / 7) + 1; }
+  // when this season ends: next Monday at midnight
+  function seasonEnds(now = Date.now()) { const d = new Date(now); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + 7 - ((d.getDay() + 6) % 7)); return d.getTime(); }
+  const featuredEvo = (season = PASS.season) => { const ids = Object.keys(KC_EVOS); return ids[((season - 1) % ids.length + ids.length) % ids.length]; };
+  // A new week: claim what was reached, then start the pass again. Returns what was added, if anything.
+  function passRoll(now = Date.now()) {
+    const season = seasonOf(now);
+    if (!P.pass || P.pass.season === season) return null;
+    const old = P.pass, got = { rubies: 0, cards: [], items: [], evos: [], chests: 0 };
+    let any = false;
+    if (passOpen()) {
+      const tierReached = Math.min(PASS.tiers.length, Math.floor(old.points / PASS.crownsPerTier)), prem = !!(old.premium || P.member);
+      for (let i = 0; i < tierReached; i++) for (const track of ['free', 'paid']) {
+        if (old[track][i] || (track === 'paid' && !prem)) continue;
+        // last week's tier 1 evolution is the one featured that week
+        const R = i === 0 && track === 'paid' ? { kind: 'evo', card: featuredEvo(old.season) } : PASS.tiers[i][track];
+        const out = grantPass(R);
+        any = true;
+        got.rubies += out.rubies || 0; got.cards.push(...(out.cards || [])); got.items.push(...(out.items || []));
+        if (out.evo) got.evos.push(out.evo);
+        if (R.kind === 'chest') got.chests++;
+      }
+    }
+    // a pass bought before passes were weekly lasts through the first weekly season
+    const carry = old.premium && !old.weekly;
+    P.pass = { season, points: 0, premium: carry, free: {}, paid: {}, weekly: true };
+    P.passRolled = any ? got : null;
+    save();
+    return P.passRolled;
+  }
   const passOpen = () => P.best >= EVO_ARENA;
   // Online battles open when you first reach Stormspire (Arena 4).
   const ONLINE_AT = 900;
   const onlineOpen = () => P.best >= ONLINE_AT;
-  const passPremium = () => !!(P.pass.premium || P.member);
+  const passPremium = () => { passRoll(); return !!(P.pass.premium || P.member); };
   const passMax = () => PASS.tiers.length * PASS.crownsPerTier;
   // tiers reached (0 to the number of tiers), and the points toward the next one
-  const passTier = () => Math.min(PASS.tiers.length, Math.floor(P.pass.points / PASS.crownsPerTier));
+  const passTier = () => { passRoll(); return Math.min(PASS.tiers.length, Math.floor(P.pass.points / PASS.crownsPerTier)); };
   const passInto = () => (passTier() >= PASS.tiers.length ? PASS.crownsPerTier : P.pass.points % PASS.crownsPerTier);
   function passAdd(crowns) {
+    passRoll();
     if (!passOpen() || crowns <= 0) return null;
     const before = passTier();
     P.pass.points = Math.min(passMax(), P.pass.points + crowns);
@@ -1278,6 +1317,7 @@ const KCProgress = (() => {
   }
   // 'claimed' | 'ready' | 'locked' (tier not reached) | 'premium' (reached, but needs the Diamond Pass)
   function passState(i, track) {
+    passRoll();
     if (P.pass[track][i]) return 'claimed';
     if (!passOpen() || i >= passTier()) return 'locked';
     if (track === 'paid' && !passPremium()) return 'premium';
@@ -1289,6 +1329,12 @@ const KCProgress = (() => {
     if (passState(i, track) !== 'ready') return null;
     const R = PASS.tiers[i][track];
     P.pass[track][i] = true;
+    const out = grantPass(R);
+    save();
+    return out;
+  }
+  // what a pass reward gives, in the same shape as a chest (rubies, cards, items)
+  function grantPass(R) {
     let out = { reward: R, rubies: 0, cards: [], items: [] };
     if (R.kind === 'rubies') { P.rubies += R.n; out.rubies = R.n; }
     else if (R.kind === 'item') { P.magic[R.item] = magicCount(R.item) + R.n; out.items = [{ id: R.item, n: R.n }]; }
@@ -1301,10 +1347,10 @@ const KCProgress = (() => {
       if (hasEvo(R.card)) { const n = KC_EVOS[R.card].shards; P.magic.shards = magicCount('shards') + n; out.items = [{ id: 'shards', n }]; }
       else { P.evos.push(R.card); out.evo = R.card; }
     }
-    save();
     return out;
   }
   function buyPass() {
+    passRoll();
     if (!passOpen()) return { error: 'locked' };
     if (passPremium()) return { error: 'owned' };
     if (P.diamonds < PASS.price) return { error: 'diamonds' };
@@ -1544,6 +1590,6 @@ const KCProgress = (() => {
     EVO_ARENA, evoOpen, hasEvo, evoList, evoInfo,
     QUESTS, CROWN_CHEST, STREAK, quests, questAdd, claimQuest, questsReady, crownChest, openCrownChest,
     kingInfo, upgradeKing, ONLINE_AT, onlineOpen, EMOTES, EMOTE_SHOP, emoteOffers, buyEmote, chestPool,
-    PASS, passOpen, passPremium, passTier, passInto, passMax, passState, passClaimable, claimPass, buyPass,
+    PASS, passOpen, passPremium, passTier, passInto, passMax, passState, passClaimable, claimPass, buyPass, passRoll, seasonOf, seasonEnds, featuredEvo,
   };
 })();
