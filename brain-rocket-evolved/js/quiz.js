@@ -201,15 +201,6 @@ const Quiz = (function () {
     return null;
   }
 
-  /* Every answer for the reveal list, rarest first, with the names the player could have typed. */
-  function answers(c) {
-    c = built(c);
-    const alts = new Map();
-    for (const h of c.index.values()) if (h.v.raw !== h.ent.name) (alts.get(h.ent) || alts.set(h.ent, []).get(h.ent)).push(h.v.raw);
-    return c.entities.map(e => ({ name: e.name, tier: e.tier, alt: alts.get(e) || [] }))
-      .sort((a, b) => b.tier - a.tier || a.name.localeCompare(b.name));
-  }
-  const tierCounts = c => built(c).entities.reduce((n, e) => (n[e.tier]++, n), [0, 0, 0, 0, 0, 0]);
   const examples = (c, tier, n = 3) => built(c).entities.filter(e => e.tier === tier).slice(0, n).map(e => e.name);
 
   // ---- Seeded randomness and the daily schedule ---------------------------
@@ -262,5 +253,5 @@ const Quiz = (function () {
     };
   }
 
-  return { TIERS, MISS, PER_PROMPT, DAILY, norm, keyOf, ready, get, built, find, answers, tierCounts, examples, daily, endless, rng };
+  return { TIERS, MISS, PER_PROMPT, DAILY, norm, keyOf, ready, get, built, find, examples, daily, endless, rng };
 })();

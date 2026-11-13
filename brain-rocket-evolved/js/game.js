@@ -364,7 +364,7 @@
     updateHud();
   }
 
-  // The Daily's reveal: what you got, the Supernova, what most people say, and every answer.
+  // The Daily's reveal: what you got, the Supernova and what most people say.
   function reveal(ent, tier, typed) {
     const c = G.cat;
     $('card').classList.add('locked');
@@ -464,18 +464,16 @@
       const c = Quiz.get(pk.cat || (daily ? Quiz.daily(r.day)[k].id : ''));
       if (!c) continue;
       const pts = pk.tier >= 0 ? (pk.pts != null ? pk.pts : T[pk.tier].pts) : 0;
-      const b = document.createElement('button');
-      b.type = 'button'; b.className = 'round-row';
+      const b = document.createElement('div');
+      b.className = 'round-row';
       b.innerHTML = `<span class="rr-e">${emojiOf(pk)}</span><span class="rr-q">${c.q.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')}</span>` +
         `<span class="rr-a ${pk.tier >= 0 ? 'tier-' + pk.tier : 'tier-x'}">${pk.tier >= 0 ? esc(pk.name) : '—'}</span><span class="rr-p">${fmt(pts)}</span>`;
-      b.title = 'See every answer';
-      b.addEventListener('click', () => { Sound.click(); answerBrowser(c, pk.name); });
       rows.appendChild(b);
     }
     let note = '';
-    if (r.mode === 'daily') note = `🔥 ${streak().count}-day streak · next launch in ${hms(msToNextDay())} · tap a prompt to see every answer`;
-    else if (r.mode === 'archive') note = 'Archive launches don\'t count toward your streak. Tap a prompt to see every answer.';
-    else note = (r.best ? `🏆 A new ${m.name} best! ` : `${m.name} best: ${fmt((bests()[r.diff] || { score: 0 }).score)}. `) + (r.picks.length > 10 ? 'Your last 10 questions:' : 'Tap a question to see every answer.');
+    if (r.mode === 'daily') note = `🔥 ${streak().count}-day streak · next launch in ${hms(msToNextDay())}`;
+    else if (r.mode === 'archive') note = 'Archive launches don\'t count toward your streak.';
+    else note = (r.best ? `🏆 A new ${m.name} best! ` : `${m.name} best: ${fmt((bests()[r.diff] || { score: 0 }).score)}. `) + (r.picks.length > 10 ? 'Your last 10 questions:' : '');
     $('overNote').textContent = note;
     show('btnShare', daily);
     paintMisses();
@@ -534,7 +532,7 @@
     document.querySelectorAll('[data-misses]').forEach(el => { el.textContent = n ? `📝 Didn't count (${n})` : ''; el.classList.toggle('hidden', !n); });
   }
 
-  // ---- Sheets: every answer, the archive, how to play ---------------------------------------
+  // ---- Sheets: the archive, how to play ---------------------------------------------------
   let sheetBack = null;
   function sheet(title, html, focusSel) {
     $('sheetTitle').innerHTML = title;
@@ -549,37 +547,6 @@
   function closeSheet() {
     show('sheet', false);
     if (sheetBack && sheetBack.focus) sheetBack.focus({ preventScroll: true });
-  }
-  function answerBrowser(c, mine) {
-    const all = Quiz.answers(c), counts = Quiz.tierCounts(c);
-    sheet(c.q.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'), `
-      <div class="ab-tools">
-        <input class="ab-search" type="search" placeholder="Search ${fmt(all.length)} answers…" aria-label="Search answers" spellcheck="false" autocomplete="off">
-        <div class="ab-tiers">
-          <button type="button" class="ab-tier on" data-t="all">All ${fmt(all.length)}</button>
-          ${[5, 4, 3, 2, 1, 0].filter(t => counts[t]).map(t => `<button type="button" class="ab-tier tier-${t}" data-t="${t}">${T[t].emoji} ${T[t].name} ${fmt(counts[t])}</button>`).join('')}
-        </div>
-      </div>
-      <div class="ab-list"></div><div class="ab-more"></div>`, '.ab-search');
-    const body = $('sheetBody'), list = body.querySelector('.ab-list'), more = body.querySelector('.ab-more'), box = body.querySelector('.ab-search');
-    let tier = 'all';
-    const LIMIT = 600;
-    function render() {
-      const q = Quiz.norm(box.value);
-      const rows = all.filter(a => (tier === 'all' || a.tier === +tier) && (!q || Quiz.norm(a.name).includes(q) || a.alt.some(x => Quiz.norm(x).includes(q))));
-      list.innerHTML = rows.slice(0, LIMIT).map(a => {
-        const alt = a.alt.filter(x => Quiz.keyOf(x) !== Quiz.keyOf(a.name)).slice(0, 3);
-        return `<div class="ab-item${a.name === mine ? ' mine' : ''}"><span class="tier-${a.tier}">${T[a.tier].emoji}</span> ${esc(a.name)}${alt.length ? `<small>also ${alt.map(esc).join(', ')}</small>` : ''}</div>`;
-      }).join('');
-      more.textContent = rows.length > LIMIT ? `Showing ${LIMIT} of ${fmt(rows.length)}. Search to narrow it down.` : rows.length ? '' : 'Nothing matches that.';
-    }
-    box.addEventListener('input', render);
-    body.querySelectorAll('.ab-tier').forEach(b => b.addEventListener('click', () => {
-      tier = b.dataset.t;
-      body.querySelectorAll('.ab-tier').forEach(x => x.classList.toggle('on', x === b));
-      render();
-    }));
-    render();
   }
   function archiveSheet() {
     const today = dayNumber(), mine = days(), arch = archive();
@@ -602,7 +569,7 @@
       <div class="how-tiers">${T.map((t, i) => `<span class="ht-e">${t.emoji}</span><span class="tier-${i}">${t.name} · ${fmt(t.pts)} (Endless ${CLASSIC_PTS[i]})</span><span>${esc(t.blurb)}</span>`).join('')}</div>
       <p><b>🌅 Daily Launch</b> (one difficulty): 10 prompts a day, the same for everyone, new at midnight. 25 seconds and one answer each:
       an answer that isn't on the list doesn't use up your shot, and the first real answer locks in. 50,000 points reaches the Edge of the Universe.
-      One go a day, and leaving part-way still counts. After each prompt you can see every answer that would have counted.</p>
+      One go a day, and leaving part-way still counts.</p>
       <p><b>∞ Endless</b> plays by Brain Rocket's classic rules: Owen (30s, 5 fuel cells, 5 skips, hints), Medium (20s, ×1.5), Hard (12s, ×2) and
       Ultra Hard (12s, ×2.5, and you fall while you think). Answer in the first quarter of the timer for ×2, the first half for ×1.5. Each answer
       in a row adds ×0.25, up to ×5, and a Supernova is a deepest cut (×1.5). Wrong guesses are free; running out of time burns a fuel cell.</p>
@@ -617,7 +584,7 @@
       how: `<div><b>🎯 One shot.</b> 25 seconds and one answer. Answers that aren't on the list don't use it up.</div>
         <div><b>🌟 Be rare.</b> A Launch Pad answer is 500 points; the one Supernova is 5,000.</div>
         <div><b>🌍 Same for everyone.</b> New prompts at midnight. 50,000 reaches the Edge of the Universe.</div>
-        <div><b>👀 No secrets after.</b> See every answer that counted, searchable, once you've played.</div>`
+        <div><b>⟲ Missed a day?</b> Play any past launch from the Archive.</div>`
     },
     endless: {
       tagline: 'Brain Rocket\'s classic rules with the new questions. Be quick, keep a streak, and don\'t run out of fuel.',
@@ -695,7 +662,6 @@
   // ---- Wiring ---------------------------------------------------------------------------------
   $('answerForm').addEventListener('submit', submit);
   $('rvNext').addEventListener('click', next);
-  $('rvAll').addEventListener('click', () => { Sound.click(); answerBrowser(G.cat, G.picks.length && G.picks[G.picks.length - 1].name); });
   $('skipBtn').addEventListener('click', () => { if (G.state === 'question' && G.skips > 0) timeout(true); });
   $('hintBtn').addEventListener('click', hint);
   $('btnQuit').addEventListener('click', () => { if (G.state === 'question' || G.state === 'reveal') finish(); });
@@ -730,7 +696,7 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !$('sheet').classList.contains('hidden')) { e.preventDefault(); closeSheet(); return; }
     if (!$('sheet').classList.contains('hidden')) return;
-    if (e.key === 'Enter' && G.state === 'reveal' && !classic() && document.activeElement !== $('rvAll')) { e.preventDefault(); next(); }
+    if (e.key === 'Enter' && G.state === 'reveal' && !classic()) { e.preventDefault(); next(); }
   });
   // Typing anywhere during a prompt goes to the answer box.
   document.addEventListener('keydown', e => {

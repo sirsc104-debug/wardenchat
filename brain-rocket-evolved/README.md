@@ -21,8 +21,6 @@ category, and the rarer your answer, the further your rocket flies. What changed
 - **Answers that didn't count are kept** (in the browser), and "📝 Didn't count" on the home screen
   and the results lists them with a Copy button, so they can be sent in and added to
   `tools/categories.py` (as `add` answers or `nick` names).
-- **Every answer is shown** after each prompt, and on the results. You can search them and filter
-  them by tier.
 - **New art and music.** The rocket is the same, but everything around it is new: a dusk spaceport
   with a striped setting sun and a glowing grid, then flat "poster" planets with hard shadows, on a
   route of 16 stops to the Edge of the Universe. The music is a synthwave loop.
@@ -35,8 +33,9 @@ browser, or serve the folder with `python3 -m http.server`.
 - **🌅 Daily Launch.** 10 prompts a day, the same for everyone, with a fresh set at midnight in the
   player's own time zone. Launch #1 is November 13, 2026 (`EPOCH` in `js/game.js`). One go a day:
   leaving part-way still counts, with the rest as misses. 50,000 points (5,000 a prompt) reaches the
-  Edge of the Universe. The results show a share grid (📋 Share copies it, or opens the phone's
-  share sheet), every prompt with your answer, and a day streak.
+  Edge of the Universe. After each prompt you see your tier, the prompt's Supernova and the most
+  common answers. The results show a share grid (📋 Share copies it, or opens the phone's share
+  sheet), every prompt with your answer, and a day streak.
   - The order works through every category before any comes back. The categories are sorted by
     id, shuffled once per cycle, and each day takes the next ten (`Quiz.daily` in `js/quiz.js`).
     Adding or removing a category changes future days (and past ones in the archive).
@@ -93,7 +92,7 @@ No AI is used anywhere: not to build the lists, and not while playing.
 - `js/scene.js`: the world and the rocket (the rocket, flame, smoke and crash are Brain Rocket's).
 - `js/audio.js`: Brain Rocket's sound effects with the Evolved music.
 - `js/badwords.js`: Brain Rocket's rude-word check, unchanged.
-- `js/game.js`: screens, the Daily Launch, Endless, the archive, the answer browser, saving.
+- `js/game.js`: screens, the Daily Launch, Endless, the archive, saving.
 - `tools/build_page.py`: builds one self-contained HTML file (for an artifact link, or
   `--google-sites` for Google Sites' Embed box).
 
