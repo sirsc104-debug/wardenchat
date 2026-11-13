@@ -153,6 +153,12 @@ def build(cat, report=False):
         ks = {key(x) for x in e['names']}
         if ks & junk: e['tier'] = 1; found_junk |= ks & junk
         if gem_key and gem_key in ks: gem = e
+    # a pick can also be part of a longer name ("Machu Picchu" -> "Historic Sanctuary of Machu Picchu")
+    for j in junk - found_junk:
+        e = next((e for e in ents if any(len(j) >= 4 and j in key(x) for x in e['names'])), None)
+        if e: e['tier'] = 1; found_junk.add(j)
+    if gem_key and not gem:
+        gem = next((e for e in ents if any(len(gem_key) >= 4 and gem_key in key(x) for x in e['names'])), None)
     missing = junk - found_junk
     if gem_key and not gem: missing.add(cat['gem'])
     if not gem:

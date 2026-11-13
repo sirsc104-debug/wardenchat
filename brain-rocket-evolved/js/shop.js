@@ -139,14 +139,16 @@ const Shop = (() => {
     const g = $('shopGrid');
     if (tab === 'member') { g.innerHTML = memberHTML(); return; }
     if (tab === 'diamonds') { g.innerHTML = diamondsHTML(); return; }
+    const wide = tab === 'scene';
+    g.classList.toggle('wide', wide);
     g.innerHTML = items(tab).map(item => {
       const { c } = stateOf(item);
       return `<div class="item ${preview === item ? 'pv' : ''}" data-preview="${item}" tabindex="0" role="button" aria-label="Preview ${esc(c.name)}">
-        <canvas class="item-art" width="96" height="120" data-art="${item}"></canvas>
+        <canvas class="item-art" width="${wide ? 192 : 96}" height="${wide ? 108 : 120}" data-art="${item}"></canvas>
         <div class="item-txt"><div class="item-name">${esc(c.name)}</div><div class="item-desc">${esc(c.desc)}</div></div>
         <div class="item-buy">${buyHTML(item)}</div></div>`;
     }).join('');
-    for (const cv of g.querySelectorAll('canvas[data-art]')) Scene.preview(cv, lookWith(cv.dataset.art), 1.2);
+    for (const cv of g.querySelectorAll('canvas[data-art]')) (wide ? Scene.previewScene : Scene.preview)(cv, lookWith(cv.dataset.art), 1.2);
   }
   function memberHTML() {
     const until = Wallet.memberUntil ? new Date(Wallet.memberUntil).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
@@ -158,7 +160,7 @@ const Shop = (() => {
         <li><b>5 💎 every month</b>, added the first time you play that month</li>
         <li><b>The SirSC Diamond</b> by your name</li>
         <li><b>This month's members' rocket</b>, yours forever: ${month.map(c => esc(lookOf(c.item_id).name)).join(', ') || 'coming soon'}</li>
-        <li><b>The SirSC Diamond rocket</b>, <b>Diamond Fire</b> and <b>Diamond Shards</b> while you're a member</li>
+        <li><b>The SirSC Diamond rocket</b>, <b>Diamond Fire</b>, <b>Diamond Shards</b> and the <b>Crystal Caverns</b> scene while you're a member</li>
       </ul>
       ${Wallet.member ? '' : '<p class="mc-how">To join, pay SirSC $3 for each month and ask them to add it to your Warden Chat account.</p>'}
       ${demo() && Account.status === 'signedIn' && !Wallet.member ? '<button type="button" class="go-btn small" data-shop="demo-member">Demo: try a month of membership</button>' : ''}
@@ -184,7 +186,8 @@ const Shop = (() => {
   }
   function loop(t) {
     if (!open) return;
-    Scene.preview($('shopCanvas'), lookWith(preview), t / 1000);
+    const c = preview && lookOf(preview);
+    (c && c.kind === 'scene' ? Scene.previewScene : Scene.preview)($('shopCanvas'), lookWith(preview), t / 1000);
     raf = requestAnimationFrame(loop);
   }
   function show() {

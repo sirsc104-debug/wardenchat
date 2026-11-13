@@ -639,7 +639,9 @@ EVO.cat({ ...{"id": "dogs", "name": "Dog breeds", "icon": "🐕", "q": "Name a *
 EVO.cat({ ...{"id": "cats", "name": "Cats", "icon": "🐈", "q": "Name a **type of cat**: a breed, a coat pattern or a wild cat.", "strip": ["cat", "cats", "breed", "kitty", "kitten"], "level": 2}, list: `
 0|Siamese|Siamese cat
 0|Persian|Persian cat
+0|Lion|African lion|Asiatic lion|Panthera leo|q140
 1|Maine Coon|American longhair|Maine coon cat|Coon cat
+0|Tiger|P. tigris|Panthera tigris|tigers|tigress
 0|Black cat
 0|Calico|Calico cat
 0|Ginger|Ginger cat|Orange cat|Orange tabby|Marmalade|Ginger tom|Red tabby
@@ -648,12 +650,25 @@ EVO.cat({ ...{"id": "cats", "name": "Cats", "icon": "🐈", "q": "Name a **type 
 2|Bengal|Bengal cat
 1|Sphynx|Sphynx cat|Canadian Hairless|Canadian Sphynx|Hairless Cat|Bald cat|Bald|Skinless|Skinless cat|Naked cat|Hairless
 2|Ragdoll|Ragdoll cat
+2|Leopard|Panthera pardus|panther|Leopard cat|Prionailurus bengalensis
+2|Cheetah|African cheetah|geopard|white cheetah|woolly cheetah|Felis lanea|Acinonyx jubatus
+2|Snow leopard|ounce|Uncia uncia|P. uncia|Panthera uncia
+2|Jaguar|panter|Panthera onca
+2|Cougar|puma|Felis concolor|mountain lion|catamount|Puma concolor
+2|Eurasian lynx|Lynx lynx
 2|Abyssinian|Abyssinian cat
+2|Caracal|Caracal caracal|desert lynx|Lynx caracal|Persian lynx
+2|European wildcat|Felis silvestris|wild cat|wildcats
+2|Serval|Leptailurus serval
 2|Manx|Manx cat
 2|British Shorthair
 2|Norwegian Forest Cat|NFC|Wegie|Norwegian Forest
 2|Russian Blue|Angel ruso
+2|Jungle|Jungle cat|Felis chaus|reed cat|swamp cat
+2|Ocelot|ocelots|dwarf leopard|Leopardus pardalis
+2|Pallas's|Pallas's cat|manul|Pallas' cat
 2|Birman|Birman cat|Sacred Cat of Burma
+2|Bobcat|Felis rufus|Lynx rufus|red lynx
 2|Burmese|Burmese cat
 2|Scottish Fold
 2|Siberian|Siberian cat|Siberian forest cat
@@ -661,23 +676,50 @@ EVO.cat({ ...{"id": "cats", "name": "Cats", "icon": "🐈", "q": "Name a **type 
 2|Grey cat|Gray cat|Blue cat
 2|Tortoiseshell|Tortie|Tortoiseshell cat|Torty
 2|White cat
+2|Sand|Sand cat|Felis margarita|sand dune cat
+2|Clouded leopard|mainland clouded leopard|Neofelis nebulosa
+2|Iberian lynx|Lynx pardinus|Pardel lynx
 2|Savannah|Savannah cat
+2|Canada lynx|Canadian lynx|Felis lynx|Felis lynx canadensis|Lynx canadensis
+2|African golden|African golden cat|Profelis aurata
+2|Fishing|Fishing cat|Prionailurus viverrinus
+2|Jaguarundi|Herpailurus yagouaroundi
 2|Devon Rex
 2|American Shorthair
 2|Cornish Rex
 2|Himalayan|Himalayan cat
-2|Exotic Shorthair
-2|Turkish Angora|Turkish Angora cats
-2|Chartreux
-2|Korat
-2|Bombay|Bombay cat
-2|Egyptian Mau
-2|Ocicat
-2|American Curl|American Curl Longhair
-2|Balinese|Balinese cat
+3|Black-footed|Black-footed cat|Felis nigripes|small-spotted cat
+3|Asian golden|Asian golden cat|Pardofelis temminckii|Asiatic golden cat
+3|Marbled|Marbled cat|Pardofelis marmorata
+3|Oncilla|tiger cat|Leopardus tigrinus|northern tiger cat|savanna tiger cat|savannah tiger-cat
+3|Exotic Shorthair
+3|Margay|Leopardus wiedii
+3|Chinese mountain|Chinese mountain cat|Felis bieti|Chinese desert cat|pale desert cat
+3|Kodkod|guigna|Leopardus guigna
+3|Turkish Angora|Turkish Angora cats
+3|Rusty-spotted|Rusty-spotted cat|Prionailurus rubiginosus
+3|Geoffroy's|Geoffroy's cat|Geoffroyis cat|Leopardus geoffroyi
+3|Andean mountain|Andean mountain cat|Leopardus jacobita|Andean cat|Oreailurus jacobita
+3|Tilcayo
+3|Pampas|Pampas cat|Leopardus colocola|Colocolo|Chilean Pampa Cat
+3|Flat-headed|Flat-headed cat|Prionailurus planiceps
+3|Sunda clouded leopard|Diard’s clouded leopard|Neofelis diardi
+3|Tigon|Panthera tigris × Panthera leo|tiglon
+3|African wildcat|Felis lybica
+3|American lion|American cave lion|North American lion|P. atrox|Panthera atrox
+3|Chartreux
+3|Korat
+3|Bombay|Bombay cat
+3|Egyptian Mau
+3|Ocicat
+3|Bay|Bay cat|Catopuma badia
+3|American Curl|American Curl Longhair
+3|Balinese|Balinese cat
 3|Turkish Van|swimming cat|Turkish cat|Turkish Vankedisi
+3|Leopardus pajeros|Pampas cat
 3|Somali|Somali cat
 3|Japanese Bobtail
+3|Pantanal|Pantanal cat|Leopardus braccatus
 3|European Shorthair|Celtic|pelo corto celta
 3|Cymric|Cymric cat
 3|Munchkin|Munchkin cat|Kangaroo cat|Sausage cat
@@ -686,6 +728,7 @@ EVO.cat({ ...{"id": "cats", "name": "Cats", "icon": "🐈", "q": "Name a **type 
 3|Snowshoe|Snowshoe cat
 3|Peterbald
 3|Singapura|Singapura cat
+3|Panthera spelaea|Cave Lion|Eurasian Cave Lion|European Cave Lion
 3|Donskoy|Donskoy cat|Don Hairless|Don Sphynx|Russian Hairless
 3|Barn cat
 3|Bicolor|Bicolour|Bicolor cat|Piebald
@@ -697,36 +740,45 @@ EVO.cat({ ...{"id": "cats", "name": "Cats", "icon": "🐈", "q": "Name a **type 
 3|Scottish Straight
 3|Spotted tabby
 3|Tricolor|Tricolour
+3|Panthera gombaszogensis|European jaguar|Eurasian jaguar|P. gombaszoegensis|Panthera gombaszoegensis
 5|Selkirk Rex
-3|Burmilla
-3|Kurilian Bobtail|Kurile Island Bobtail|Kurilian Bobtail cat
-3|American Bobtail
-3|Havana Brown|Swiss Mountain Cats
-3|Pixie-bob
-3|British Longhair|Highlander|Britannica|Highland Straight
-3|Chausie
-3|Toyger
-3|LaPerm
-3|American Wirehair
-3|Ragamuffin|Ragamuffin cat
-3|Sokoke|African Shorthair|Sokoke Forest Cat
-3|Thai|Thai cat|Applehead|Classical Siamese|Old-Style Siamese|Old-style Siamese cat|Traditional Siamese|Wichianmat|Wichien Maat
-3|German Rex
-3|Nebelung
-3|Aegean|Aegean cat
-3|Asian|Asian cat|Malayan
+4|Burmilla
+4|Kurilian Bobtail|Kurile Island Bobtail|Kurilian Bobtail cat
+4|American Bobtail
+4|Havana Brown|Swiss Mountain Cats
+4|Pixie-bob
+4|Leopardus guttulus|southern tiger cat|southern tigrina|Atlantic forest tiger cat|southern oncilla
+4|British Longhair|Highlander|Britannica|Highland Straight
+4|Chausie
+4|Toyger
+4|LaPerm
+4|Panthera fossilis|Panthera leo fossilis|Panthera spelaea fossilis
+4|American Wirehair
+4|Ragamuffin|Ragamuffin cat
+4|Sokoke|African Shorthair|Sokoke Forest Cat
+4|Thai|Thai cat|Applehead|Classical Siamese|Old-Style Siamese|Old-style Siamese cat|Traditional Siamese|Wichianmat|Wichien Maat
+4|German Rex
+4|Acinonyx pardinensis|Giant cheetah
+4|Nebelung
+4|Aegean|Aegean cat
+4|Asian|Asian cat|Malayan
 4|Australian Mist|Aussie cat|Spotted Mist
 4|Brazilian Shorthair
+4|Lynx issiodorensis
 4|Serengeti|Serengeti cat
 4|Oriental Longhair|Javanese|Mandarin|JAV|OLH|British angora|Javanese cat|Oriental Longhair cat
+4|Pardofelis badia|bay cat|Bornean bay cat|Bornean cat|Bornean marbled cat
 4|Khao Manee|Diamond Eye
 4|California Spangled|California Spangled Cat
 4|Javanese|Javanese cat
+4|Panthera palaeosinensis
 4|Lykoi|Lykoi Cat|werewolf cat|wolf cat
 4|Ojos Azules|Ojos Azules cat
 4|Arabian Mau
 4|Dragon Li|Li Mao|Li Hua|China Li Hua|Chinese Li Hua|Li Hua Mao|Li Hua Mau
 4|Neva Masquerade|Neva Masquerade cat
+4|Puma pardoides|Owen's panther|Panthera schaubi|Viretailurus schaubi
+4|Sunda leopard|Sunda leopard cat|Prionailurus javanensis
 4|Tiffanie|Asian longhair|Asian semi-longhair|Burmilla longhair
 4|Colorpoint Shorthair
 4|Ukrainian Levkoy
@@ -760,11 +812,16 @@ EVO.cat({ ...{"id": "cats", "name": "Cats", "icon": "🐈", "q": "Name a **type 
 4|Van pattern
 4|Bambino|Bambino cat|Bambino Sphynx|Mèo Bambino
 4|Domestic short-haired|Domestic short-haired cat|house cat|alley cat|domestic shorthair|house cat, shorthair
+4|Felis lunensis
+4|Panthera zdanskyi
+4|Pumapard|Puma concolor × Panthera pardus|Puma concolor x Panthera pardus
 4|Chantilly-Tiffany|Chantilly|Foreign Longhair|Chantilly cat
+4|Panthera youngi
 4|Domestic long-haired|Domestic long-haired cat|domestic longhair|house cat, longhair
 4|Minskin
 4|Minuet|Minuet cat|Napoleon
 4|Aphrodite's Giant|Aphrodite|Aphrodite's Giant cat|Aphrodite Giant
+4|Caraval|cara-serval|Caracal caracal × Leptailurus serval
 4|Raas|Raas cat|Busok|Madura cat
 4|Mekong Bobtail
 4|Moggy|DLH|DSH|DMH|Domestic Shorthair|Domestic Longhair|Domestic Mediumhair|moggie
@@ -13432,9 +13489,10 @@ EVO.cat({ ...{"id": "greekgods", "name": "Greek gods", "icon": "⚡", "q": "Name
 0|Aphrodite|Cytherea|Erycina
 0|Apollo|Apeilōn|Apellōn|Aploun|Apollōn|Phoebus
 0|Poseidon|Posidon
+0|Hermes
 0|Ares
 0|Hades|Pluton|Plouton
-0|Artemis
+2|Artemis
 2|Hera
 2|Dionysus
 2|Demeter|Deo
@@ -60118,704 +60176,13476 @@ EVO.cat({ ...{"id": "carmodels", "name": "Car models", "icon": "🚙", "q": "Nam
 4|Škoda Citigo
 ` });
 EVO.cat({ ...{"id": "birds", "name": "Birds", "icon": "🐦", "q": "Name a **species of bird** (its common name).", "strip": ["bird"], "level": 2}, list: `
-0|Chicken
-0|Crow
-0|Duck
-0|Eagle
-0|Flamingo
-0|Goose
-0|Ostrich
-0|Owl
-0|Parrot
-0|Peacock
-0|Penguin
-0|Pigeon
-0|Robin
-0|Seagull|Gull
-0|Swan
-0|Turkey
-2|Albatross
-2|Blackbird
-2|Blue Jay
-2|Bluebird
-2|Budgie|Parakeet|Budgerigar
-2|Canary
-2|Cardinal
-2|Cockatoo
-2|Condor
-2|Crane
-2|Dodo
-2|Dove
-2|Emu
-2|Falcon
-2|Finch
-2|Hawk
-2|Heron
-2|Hummingbird
-2|Kingfisher
-2|Kiwi
-2|Kookaburra
-2|Macaw
-2|Magpie
-2|Pelican
-2|Puffin
-2|Raven
-2|Sparrow
-2|Starling
-2|Stork
-2|Swallow
-2|Toucan
-2|Vulture
-2|Woodpecker
-2|Wren
-3|Bald Eagle
-3|Barn Owl
-3|Bird of Paradise
-3|Blue Tit|Tit|Titmouse
-3|Booby
-3|Bullfinch
-3|Buzzard
-3|Cassowary
-3|Chaffinch
-3|Chickadee
-3|Cockatiel
-3|Coot
-3|Cormorant
-3|Cuckoo
-3|Curlew
-3|Egret
-3|Frigatebird
-3|Gannet
-3|Golden Eagle
-3|Goldfinch
-3|Goshawk
-3|Grackle
-3|Grebe
-3|Grouse
-3|Harrier
-3|Hornbill
-3|Ibis
-3|Jackdaw
-3|Kestrel
-3|Kite
-3|Lapwing
-3|Loon
-3|Lovebird
-3|Lyrebird
-3|Mallard
-3|Martin
-3|Mockingbird
-3|Moorhen
-3|Myna|Mynah
-3|Nightingale
-3|Nightjar
-3|Nuthatch
-3|Oriole
-3|Osprey
-3|Partridge
-3|Peregrine Falcon|Peregrine
-3|Pheasant
-3|Plover
-3|Quail
-3|Quetzal
-3|Rhea
-3|Roadrunner
-3|Rook
-3|Sandpiper
-3|Secretary Bird
-1|Shoebill
-3|Skylark|Lark
-3|Snipe
-3|Snowy Owl
-3|Sparrowhawk
-3|Spoonbill
-3|Swift
-3|Tern
-3|Thrush
-3|Warbler
-3|Weaver Bird|Weaver
-3|Woodcock
-4|American wigeon
-4|Aracari
-4|Avocet
-4|Bartlett's tinamou
-4|Baudo guan
-4|Bearded guan
-4|Bee-eater
-4|Bellbird
-4|Bittern
-4|Black-bellied whistling-duck
-4|Blue-winged teal
-4|Bowerbird
-4|Brazilian teal
-4|Bufflehead
-4|Bunting
-4|Cinereous tinamou
-4|Comb duck
-4|Crested guan
-4|Crossbill
-4|Curve-billed tinamou
-4|Dipper
-4|Dunlin
-4|Eider
-4|Frogmouth|Tawny Frogmouth
-4|Fulmar
-4|Godwit
-4|Gray tinamou
-4|Great Auk
-4|Great tinamou
-4|Green-winged teal
-4|Guillemot
-4|Hamerkop
-4|Highland tinamou
-5|Hoatzin
-4|Honeyeater
-4|Hoopoe
-4|Horned screamer
-4|Jacana
-1|Kakapo
-4|Kea
-4|Kittiwake
-4|Linnet
-4|Little tinamou
-4|Marabou Stork|Marabou
-4|Masked duck
-4|Merganser
-4|Moa
-4|Motmot
-4|Nocturnal curassow
-4|Northern shoveler
-4|Oilbird
-4|Orinoco goose
-4|Pale-browed tinamou
-4|Passenger Pigeon
-4|Petrel
-4|Pintail
-4|Pipit
-4|Potoo
-4|Razorbill
-4|Ring-necked duck
-4|Ruddy duck
-4|Rufous-headed chachalaca
-4|Shearwater
-4|Shoveler
-4|Shrike
-4|Siskin
-4|Skua
-4|Southern pochard
-4|Spix's guan
-4|Sunbird
-4|Takahe
-4|Tanager
-4|Tataupa tinamou
-4|Toucanet
-4|Treecreeper
-4|Trogon
-4|Tui
-4|Turnstone
-4|Umbrellabird
-4|Undulated tinamou
-4|Wagtail
-4|Wattled guan
-4|Waxwing
-4|White-cheeked pintail
-4|White-throated tinamou
-4|Wigeon
-4|Yellow-billed pintail
-4|Yellowhammer
-4|Andean guan
-4|Andean teal
-4|Andean tinamou
-4|Berlepsch's tinamou
-4|Black tinamou
-4|Blue-throated piping-guan
-4|Bristlehead
-4|Brown tinamou
-4|Cinnamon teal
-4|Crab Plover
-4|Cuckoo Roller
-4|Fulvous whistling-duck
-4|Hypocolius
-4|Ibisbill
-4|Jacamar
-4|Kagu
-4|Lesser scaup
-4|Limpkin
-4|Mesite
-4|Muscovy duck
-4|Northern pintail
-4|Palmchat
-4|Picathartes|Rockfowl
-4|Plains Wanderer
-4|Puffbird
-4|Seedsnipe
-4|Seriema
-4|Sheathbill
-4|Sickle-winged guan
-4|Speckled chachalaca
-4|Sunbittern
-4|Sungrebe
-4|Tawny-breasted tinamou
-4|Tinamou
-4|Torrent duck
-4|Variegated tinamou
-4|Wallcreeper
+0|Common ostrich|Struthio camelus|African ostrich|ostrich
+0|Carrion crow|crow|black crow|Corvus corone|corbie|corone, Corvus
+0|American robin|robin|robin redbreast|Turdus migratorius
+0|Common raven|Northern Raven|corax raven|raven|Corvus corax|western raven
+0|Eurasian magpie|common magpie|Pica pica|magpie
+0|Common blackbird|Blackbird|Eurasian Blackbird|Turdus merula
+0|Dodo|dodo bird
+0|Common starling|starling|Sturnus vulgaris
+0|Barn swallow|swallow|Hirundo rustica
+0|Emu
+0|Budgerigar|budgie|Melopsittacus undulatus|Parakeet
+0|Eurasian wren|Troglodytes troglodytes|Wren
+0|Mallard|wild duck|Anas platyrhynchos|mallard duck
+0|Atlantic puffin|common puffin|Fratercula arctica|puffin
+2|Common quail|quail|Coturnix coturnix|European quail
+2|Blue jay|jaybird|Cyanocitta cristata
+2|Common cuckoo|cuckoo|Cuculus canorus
+2|House sparrow|Passer domesticus
+2|Atlantic canary|Island canary|Serinus canaria|canary
+2|Golden eagle|Aquila chrysaetos
+2|Peregrine falcon|peregrine|Sapsan|Songolmae|Falco (Hierofalco) peregrinus|Falco peregrinus
+2|Great cormorant|Cormorant|Black Cormorant|Black Shag|Great Black Cormorant|Large Cormorant|Phalacrocorax carbo
+2|Common hoopoe|Eurasian Hoopoe|hoopoe|Upupa epops
+2|Eurasian sparrowhawk|Accipiter nisus|sparrow hawk
+2|Osprey|fish hawk|Pandion haliaetus|river hawk|sea hawk|Western Osprey
+2|European goldfinch|goldfinch|Carduelis carduelis|Eurasian goldfinch
+2|Eurasian coot|Common Coot|Coot|Fulica atra
+2|Western barn owl|barn owl|common barn owl|Strix alba|Tyto alba|white houlet
+2|Northern lapwing|Lapwing|Green Plover|Peewit|Vanellus vanellus
+2|Rook|Corvus frugilegus
+2|Common nightingale|nightingale|Luscinia megarhynchos
+2|Eurasian bullfinch|Bullfinch|Pope|Common bullfinch|Pyrrhula pyrrhula
+2|Common moorhen|Gallinula chloropus|Moorhen|Waterhen
+2|Eurasian blue tit|blue tit|Cyanistes caeruleus|Parus caeruleus|European blue tit|Common blue tit|Tit|Titmouse
+2|European robin|robin|redbreast|Erithacus rubecula|robin redbreast
+2|Common pheasant|Pheasant|Phasianus colchicus|ring-necked pheasant
+2|Eurasian chaffinch|Chaffinch|Common Chaffinch|Fringilla coelebs
+2|Eurasian skylark|Skylark|Alauda arvensis|Lark
+2|Rock dove|Columba livia|common pigeon|rock pigeon|Rock Pigeon or Feral Pigeon|Blue rock pigeon
+2|Eurasian golden oriole|Oriolus oriolus
+2|Bald eagle|American bald eagle|American eagle|Haliaeetus leucocephalus
+2|White wagtail|Motacilla alba
+2|Snowy owl|white owl|Arctic owl|Bubo scandiacus|Nyctea scandiaca|polar owl
+2|Eurasian jay|European Jay|Garrulus glandarius|Jay
+2|Great tit|Parus major
+2|Grey heron|Ardea cinerea|Gray Heron
+2|Eurasian woodcock|Woodcock|Scolopax rusticola
+2|Western jackdaw|Coloeus monedula
+2|Eurasian eagle-owl|Bubo bubo
+2|White stork|Ciconia ciconia|European white stork
+2|Secretarybird|Sagittarius serpentarius
+2|Common kestrel|Windhover|Eurasian Kestrel|European Kestrel|Falco tinnunculus|Old World Kestrel
+2|Greylag goose|Greylag|Anser anser|Greylag Geese
+2|Common crane|Eurasian Crane|Grus grus
+2|Eurasian goshawk|Astur gentilis
+2|Black kite|Milvus migrans
+2|Eurasian tree sparrow|Tree Sparrow|German sparrow|Passer montanus
+2|Indian peafowl|Indian peacock|Pavo cristatus
+2|Black grouse|grouse|Lyrurus tetrix|Tetrao tetrix
+1|Shoebill|Balaeniceps rex|shoe-billed stork|whalehead
+2|Common kingfisher|Alcedo atthis
+2|Hooded crow|hoodie|Royston Crow|Corvus cornix|grey crow|Coatham Crow|Scremerston Crow
+2|Common buzzard|Buteo buteo|Eurasian Buzzard
+2|Little grebe|Tachybaptus ruficollis
+2|Black stork|Ciconia nigra
+2|Mute swan|Cygnus olor
+2|Western capercaillie|cock-of-the-woods|Capercaillie|Capercailzie|Eurasian capercaillie|heather cock|Tetrao urogallus|wood grouse
+2|European nightjar|Nightjar|Noctua caprimulgus|Caprimulgus europaeus
+2|Bearded vulture|Lammergeyer|Gypaetus barbatus|Lammergeier
+2|Great crested grebe|gaunt|Podiceps cristatus|tippet grebe
+2|White-tailed eagle|Erne|Ern|Falco albicilla|Sea eagle|Haliaeetus albicilla|White-tailed sea-eagle
+2|Little owl|Athene noctua
+2|Eurasian teal|teal|Anas crecca|common teal
+2|Egyptian vulture|Neophron percnopterus
+2|Great egret|Ardea alba|Egretta alba|Great White Egret
+2|Grey partridge|Perdix perdix
+2|Black-crowned night heron|Nycticorax nycticorax|black-capped night heron|night heron
+2|Common swift|Apus apus
+2|Common wood pigeon|wood pigeon
+2|Ruddy shelduck|Brahminy Duck|Brahminy Shelduck|Tadorna ferruginea
+2|Western yellow wagtail|Motacilla flava|Yellow wagtail
+2|Eurasian bittern|Bittern|Botaurus stellaris|Great Bittern
+2|Gadwall|Anas strepera|Mareca strepera
+2|Western cattle egret|Ardea ibis
+2|Common myna|myna|Acridotheres tristis|house myna|Indian myna|Indian mynah|mynah|talking myna
+2|Eurasian collared dove|Collared Dove|Streptopelia decaocto|Turkish Dove
+2|Eurasian griffon vulture|Griffon Vulture|Eurasian griffon|Gyps fulvus
+2|European bee-eater|Bee eater|Merops apiaster
+2|Little egret|Egretta garzetta
+2|Whooper swan|Cygnus cygnus|common swan
+2|Eurasian hobby|hobby|Falco subbuteo
+2|Great white pelican|Pelecanus onocrotalus
+2|Purple heron|Ardea purpurea
+2|Corn crake|Crex crex
+2|Eurasian wigeon|Eurasian Widgeon|Mareca penelope
+2|Cockatiel|cockateel|cockatoo parrot|Nymphicus hollandicus
+2|European turtle dove|turtle dove|Streptopelia turtur
+2|Garganey|Anas querquedula|Spatula querquedula
+2|Greater flamingo|Phoenicopterus roseus
+2|Northern shoveler|shoveler|Spatula clypeata
+2|Sand martin|Bank Swallow|Riparia riparia
+2|Common redshank|redshank|Tringa totanus
+2|Common snipe|Gallinago gallinago
+2|Great spotted woodpecker|GSW|Picoides major|Dendrocopos major
+2|Long-eared owl|Asio otus|cat owl|lesser horned owl|northern long-eared owl
+2|Yellowhammer|scribble-lark
+2|African sacred ibis|ibis|Sacred ibis|Threskiornis aethiopicus
+2|Cinereous vulture|black vulture|monk vulture
+2|Common shelduck|Tadorna tadorna
+2|Glossy ibis|Plegadis falcinellus
+1|Kākāpō|night parrot|owl parrot|Strigops habroptila|Strigops habroptilus
+2|Andean condor|organ bird|Vultur gryphus
+2|Black-headed gull|Chroicocephalus ridibundus
+2|Black-winged stilt|Himantopus himantopus|South African stilt
+2|Common linnet|Carduelis cannabina|Linaria cannabina
+2|Common sandpiper|Actitis hypoleucos
+2|Hen harrier|Circus cyaneus
+2|Merlin|Falco columbarius
+2|Red kite|Common kite|Milvus milvus
+2|Tufted duck|Aythya fuligula
+2|Northern gannet|Gannet|Morus bassanus
+2|Northern pintail|Anas acuta
+2|Black swan|Cygnus atratus
+2|Black woodpecker|Dryocopus martius
+2|Common pochard|Aythya ferina
+2|Eurasian siskin|Spinus spinus
+2|Eurasian spoonbill|Platalea leucorodia
+2|Red junglefowl|Gallus gallus
+2|Emperor penguin|Aptenodytes forsteri
+2|Eurasian curlew|Numenius arquata|whaup
+2|Mandarin duck|Aix galericulata
+2|Ruff|Philomachus pugnax|Calidris pugnax
+2|Short-toed snake eagle|Circaetus gallicus|Culebrera europea|Short-toed Eagle
+2|Steppe eagle|Aquila nipalensis
+2|Tawny owl|brown owl|Strix aluco
+2|Western marsh harrier|Marsh Harrier|Circus aeruginosus
+2|Canada goose|Branta canadensis|Greater Canada Goose|Lesser Canada Goose|Canadian Geese
+2|Short-eared owl|Asio flammeus
+2|Eurasian wryneck|Wryneck|Jynx torquilla|Northern wryneck
+2|European greenfinch|Chloris chloris|Greenfinch|Common greenfinch
+2|European herring gull|Herring Gull|Larus argentatus
+2|Hawfinch|Coccothraustes coccothraustes
+2|Pied avocet|Avocet|Recurvirostra avosetta
+2|Song thrush|Turdus philomelos
+2|Western house martin|Common House Martin|Delichon urbica|Delichon urbicum|House Martin|Northern House Martin
+2|Bluethroat|Luscinia svecica
+2|Common redstart|Phoenicurus phoenicurus|Redstart
+2|Crested lark|Galerida cristata
+2|Eurasian green woodpecker|European Green Woodpecker|Green Woodpecker|Picus viridis
+2|Fieldfare|Turdus pilaris
+2|Little bustard|Tetrax tetrax
+2|Little ringed plover|Charadrius dubius|Thinornis dubius
+2|Black-throated loon|Arctic loon|black-throated diver|Gavia arctica
+2|Bohemian waxwing|Waxwing|Bombycilla garrulus
+2|Eastern imperial eagle|Aquila heliaca|Imperial eagle
+2|Eurasian nuthatch|Sitta europaea|Wood nuthatch
+2|Eurasian oystercatcher|Common Pied Oystercatcher|Haematopus ostralegus|Oystercatcher|Palaearctic Oystercatcher|sea pie
+2|European honey buzzard|honey buzzard|Pernis apivorus
+2|Great bustard|Otis tarda
+2|Northern nutcracker|Nucifraga caryocatactes|Spotted Nutcracker
+2|White-throated dipper|Cinclus cinclus|Dipper|European dipper
+2|Bar-headed goose|Anser indicus
+2|Black-necked grebe|Eared grebe|Podiceps nigricollis
+2|Common greenshank|Tringa (Glottis) nebularia|Tringa nebularia
+2|Common gull|Larus canus
+2|Common tern|Sterna hirundo
+2|European roller|Coracias garrulus
+2|Gyrfalcon|Falco rusticolus|gerfalcon
+2|Long-tailed duck|Clangula hyemalis
+2|Long-tailed tit|Aegithalos caudatus|Long-tailed bushtit
+2|Taiga bean goose|Anser fabalis
+2|Black redstart|Phoenicurus ochruros
+2|Black-tailed godwit|Limosa limosa
+2|Eurasian scops owl|Common scops-owl|Otus scops|Scops owl
+2|Eurasian stone-curlew|Burhinus oedicnemus|Stone curlew
+2|Jack snipe|Lymnocryptes minimus
+2|Mistle thrush|Turdus viscivorus
+2|Northern wheatear|Oenanthe oenanthe|wheatear
+2|Red-footed falcon|Falco vespertinus
+2|Red-throated loon|Red-throated Diver|Gavia stellata
+2|Rosy starling|Pastor roseus
+2|Water rail|Brown-cheeked rail|Rallus aquaticus
+2|Booted eagle|Aquila pennata|Hieraaetus pennatus
+2|Dalmatian pelican|Pelecanus crispus
+2|Eurasian whimbrel|Numenius phaeopus|Jack Curlew|Whimbrel
+2|Goldcrest|Regulus regulus
+2|Greater white-fronted goose|white-fronted goose|Anser albifrons
+2|Green sandpiper|Tringa ochropus
+2|Hazel grouse|Bonasa bonasia|Tetrastes bonasia
+5|Hoatzin|Opisthocomus hoazin
+2|Lesser kestrel|Falco naumanni
+2|Arctic tern|Sterna paradisaea
+2|Common goldeneye|Goldeneye|Bucephala clangula
+2|Eurasian blackcap|Sylvia atricapilla|Blackcap
+2|Lesser black-backed gull|Larus fuscus
+2|Red crossbill|Common Crossbill|Loxia curvirostra
+2|Red-breasted merganser|Mergus serrator
+2|Saker falcon|Falco cherrug
+2|Spotted crake|Porzana porzana
+2|Stock dove|Columba oenas|Stock Pigeon
+2|Bar-tailed godwit|Limosa lapponica|New Zealand Bird of the Year 2015
+2|Caspian tern|Hydroprogne caspia
+2|Common merganser|American merganser|Goosander|Mergus merganser
+2|Dunnock|hedge accentor|Prunella modularis
+2|Ferruginous duck|Aythya nyroca|Ferruginous Pochard
+2|Horned grebe|Podiceps auritus
+2|King penguin|Aptenodytes patagonicus
+2|Little bittern|Botaurus minutus
+2|Red-necked grebe|Podiceps grisegena
+2|Sanderling|Calidris alba
+2|Wild turkey|Meleagris gallopavo
+2|Citrine wagtail|Motacilla citreola
+2|Coal tit|Periparus ater
+2|Common chiffchaff|Chiffchaff
+2|Demoiselle crane|Anthropoides virgo
+2|Garden warbler|Sylvia borin
+2|Greater spotted eagle|Aquila clanga|Clanga clanga|Spotted eagle
+2|Pallid harrier|Circus macrourus
+2|Ruddy turnstone|Arenaria interpres|Bishop plover|Turnstone
+2|Snow bunting|Plectrophenax nivalis
+2|Snow goose|Anser caerulescens
+2|Wood sandpiper|Tringa (Rhyacophilus) glareola|Tringa glareola
+2|Brambling|Fringilla montifringilla|cock'o north|mountain finch
+2|Greater scaup|Aythya marila|Scaup
+2|Grey plover|Pluvialis squatarola
+2|Grey wagtail|Motacilla cinerea
+2|Helmeted guinea fowl|Numida meleagris
+2|Little tern|Sternula albifrons
+2|Philippine eagle|Great Philippine eagle|Monkey-eating eagle|Pithecophaga jefferyi
+2|Spotted flycatcher|Muscicapa striata
+2|Blue-and-yellow macaw|Ara ararauna|blue yellow macaw|yellow and blue macaw|yellow blue macaw
+2|Common ringed plover|Ringed Plover|Charadrius hiaticula
+2|Dunlin|Calidris alpina
+2|Harpy eagle|American Harpy Eagle|Harpia harpyja
+2|Lesser spotted woodpecker|Dryobates minor|Dendrocopos minor|Picoides minor
+2|Montagu's harrier|Circus pygargus
+2|Red knot|knot|Calidris canutus|huahou|lesser knot
+2|Adélie penguin|Catarrhactes adeliæ|Eudyptes adeliae|Pygoscelis adeliae|Pygoscelis brevirostris
+2|Baillon's crake|Porzana pusilla|Zapornia pusilla
+2|Common loon|Gavia immer|Great Northern Diver|Canadian Loon
+2|Little stint|Calidris minuta|Erolia minuta
+2|Ring ouzel|Turdus torquatus
+2|Rose-ringed parakeet|Psittacula krameri|Ring-necked Parakeet
+2|Rough-legged buzzard|Buteo lagopus|Rough-legged Hawk
+2|Tree pipit|Anthus trivialis
+2|Woodlark|Lullula arborea
+2|Alpine chough|Pyrrhocorax graculus|Yellow-billed chough
+2|Barnacle goose|Branta leucopsis
+2|Blue rock thrush|Monticola solitarius
+2|Boreal owl|Aegolius funereus|Tengmalm's Owl
+2|Common reed bunting|Reed Bunting|Emberiza schoeniclus
+2|Common rosefinch|Carpodacus erythrinus|Scarlet rosefinch
+2|Crested tit|European Crested Tit|Lophophanes cristatus
+2|Grey parrot|African gray parrot|African grey parrot|Psittacus erithacus
+2|Kentish plover|Anarhynchus alexandrinus|Charadrius alexandrinus
+2|Lesser spotted eagle|Clanga pomarina
+2|Red-backed shrike|Lanius collurio
+2|Red-crested pochard|Netta rufina
+2|Spotted redshank|Tringa erythropus
+2|Temminck's stint|Calidris temminckii
+2|Willow ptarmigan|Willow Grouse|Lagopus lagopus
+2|Alpine swift|Tachymarptis melba
+2|Black-legged kittiwake|Kittiwake|Rissa tridactyla
+2|Common eider|Eider|Somateria mollissima
+2|Curlew sandpiper|Calidris ferruginea
+2|European golden plover|Golden Plover|Eurasian Golden Plover|Pluvialis apricaria
+2|Great auk|Pinguinus impennis
+2|Great grey shrike|Lanius excubitor|butcherbird|mattages|mattagese|mattagess|mattagesse|killer magpie|murdering pie|greater butcher-bird
+2|Great reed warbler|Acrocephalus arundinaceus
+2|Grey-headed woodpecker|Picus canus
+2|Marsh sandpiper|Tringa (Rhyacophilus) stagnatilis|Tringa stagnatilis
+2|Northern hawk-owl|Hawk Owl|Surnia ulula
+2|Razorbill|Alca torda
+2|Red-billed chough|Chough|Cornish Chough|Pyrrhocorax pyrrhocorax|Red Crow
+2|Red-breasted flycatcher|Ficedula parva
+2|Rock ptarmigan|ptarmigan|Lagopus muta
+2|Squacco heron|Ardeola ralloides
+2|Bearded reedling|Bearded Reeding|Bearded parrotbill|Bearded Tit|Panurus biarmicus
+2|Black-headed bunting|Emberiza melanocephala
+2|Corn bunting|Emberiza calandra
+2|Eurasian pygmy owl|Eurasian Pygmy Owlet|Glaucidium passerinum
+2|King vulture|King Condor|Sarcoramphus papa
+2|Ortolan bunting|Emberiza hortulana
+2|Passenger pigeon|wild pigeon|Ectopistes migratorius
+2|Siberian crane|Leucogeranus leucogeranus
+2|Smew|Mergus albellus|Mergellus albellus
+2|Thrush nightingale|Luscinia luscinia
+2|Tundra swan|Cygnus columbianus|Whistling Swan|Bewick's Swan
+2|White-winged tern|Chlidonias leucopterus|white-winged black tern
+2|Willow warbler|Phylloscopus trochilus
+2|American flamingo|greater flamingo|Caribbean flamingo|Phoenicopterus ruber|Cuban flamingo
+2|Bonelli's eagle|Aquila fasciata|Hieraaetus fasciatus
+2|Egyptian goose|Alopochen aegyptiaca
+2|Gull-billed tern|Sterna nilotica|Gelochelidon nilotica
+2|Long-legged buzzard|Buteo rufinus
+2|Redwing|Turdus iliacus
+2|Velvet scoter|Melanitta fusca
+2|Western swamphen|Porphyrio porphyrio
+2|Whiskered tern|Chlidonias hybrida|Chlidonias hybridus
+2|Broad-billed sandpiper|Calidris falcinellus|Limicola falcinellus
+2|Common reed warbler|Eurasian Reed Warbler|Reed Warbler
+2|Lesser white-fronted goose|Anser erythropus
+2|Meadow pipit|Anthus pratensis
+2|Terek sandpiper|Xenus cinereus
+2|Common scoter|Melanitta nigra
+2|Eurasian crag martin|crag martin|Ptyonoprogne rupestris
+2|Great black-backed gull|Larus marinus
+2|Great snipe|Gallinago media
+2|Marabou stork|Ciconia crumenifera|Leptoptilos crumenifer|Leptoptilos crumeniferus|Marabou
+2|Marsh tit|Poecile palustris
+2|Ural owl|Strix uralensis
+2|Whinchat|Saxicola rubetra
+2|African penguin|jackass penguin|South African penguin|black-footed penguin|Cape penguin
+2|California condor|Gymnogyps californianus
+2|Common firecrest|Regulus ignicapilla|Firecrest
+2|Common whitethroat|Curruca communis
+2|Eurasian treecreeper|Certhia familiaris
+2|European pied flycatcher|Ficedula hypoleuca|Pied flycatcher
+2|Kea|Nestor notabilis
+2|Parasitic jaeger|Arctic Skua|Stercorarius parasiticus
+2|Red-breasted goose|Branta ruficollis
+2|Red-necked phalarope|Phalaropus lobatus
+2|Scarlet macaw|Ara macao
+2|Sedge warbler|Acrocephalus schoenobaenus
+2|Shikra|Accipiter badius|little banded goshawk
+2|Spot-billed pelican|Pelecanus philippensis
+2|Black tern|Chlidonias niger
+2|Eurasian dotterel|Dotterel|Charadrius morinellus|Eudromias morinellus
+2|Eurasian three-toed woodpecker|Three-toed Woodpecker|Picoides tridactylus
+2|Lesser whitethroat|Curruca curruca
+2|Tawny pipit|Anthus campestris
+2|Black crowned crane|Balearica pavonina
+2|Brant|ensis|passeriformes|critically endangered & possibly extinct|enziz|esis|possibly extinct genus
+2|Brown pelican|Pelecanus occidentalis
+2|Chukar partridge|Alectoris chukar|Caccabis chukar|chukar|chukor partridge
+2|Common redpoll|Redpoll|Carduelis flammea|Acanthis flammea|Mealy Redpoll
+2|Gentoo penguin|Johnny penguin|Pygoscelis papua
+2|Great grey owl|Strix nebulosa
+2|Green peafowl|Pavo muticus|Peacock green
+2|Horned lark|Shore Lark
+2|Little crake|Porzana parva|Zapornia parva
+2|Little gull|Hydrocoloeus minutus|Larus minutus
+2|Little penguin|blue fairy penguin|blue penguin|Eudyptula minor|fairy penguin|korora|korora penguin|little blue penguin
+2|Mediterranean gull|Larus melanocephalus|Ichthyaetus melanocephalus
+2|Pygmy cormorant|Microcarbo pygmaeus|Microcarbo pygmeus|Phalacrocorax pygmaeus
+2|Spotted dove|Eastern Spotted Dove|Spilopelia chinensis
+2|White-backed woodpecker|Aksırtlı ağaçkakan|Dendrocopos leucotos|Dendrocopos leucotos lilfordi|Lilford’s woodpecker
+2|White-headed duck|Oxyura leucocephala
+2|Caspian gull|Larus cachinnans
+2|Common grasshopper warbler|Grasshopper Warbler|Locustella naevia
+2|Common murre|Guillemot|Common Guillemot|Uria aalge
+2|Eurasian penduline tit|Remiz pendulinus
+2|European serin|Serinus serinus
+2|Glaucous gull|Larus hyperboreus
+2|Great skua|Catharacta skua|Stercorarius skua
+2|Grey crowned crane|Mahem|Balearica regulorum|East African Crowned Crane|Crested Crane|Uganda Crested Crane
+2|Pacific golden plover|Pluvialis fulva
+2|Pallas's fish eagle|Haliaeetus leucoryphus
+2|Red phalarope|Grey Phalarope|Phalaropus fulicarius
+2|Red-crowned crane|Grus japonensis|Japanese crane|Manchurian crane
+2|Red-throated pipit|Anthus cervinus
+2|Sandwich tern|Thalasseus sandvicensis
+2|Asian openbill|Asian Open-bill Stork|Anastomus oscitans
+2|Bee hummingbird|Mellisuga helenae|Helena hummingbird|zunzuncito
+2|Black vulture|American black vulture|Coragyps atratus
+2|Common rock thrush|Monticola saxatilis|Rufous-tailed rock-thrush
+2|Golden pheasant|Chinese pheasant|Chrysolophus pictus
+2|Greater rhea|common rhea|grey rhea|Rhea americana
+2|Icterine warbler|Hippolais icterina
+2|Indian roller|Coracias benghalensis
+2|Isabelline wheatear|Oenanthe isabellina
+2|Lapland longspur|Calcarius lapponicus|Lapland bunting
+2|Lesser grey shrike|Lanius minor|butcherbird
+2|Pomarine jaeger|Pomarine Skua|Stercorarius pomarinus
+2|Wood warbler|Phylloscopus sibilatrix
+2|Yellow-billed loon|Yellow-billed Diver|White-billed Diver
+2|Asian woolly-necked stork|Ciconia episcopus
+2|Black-winged kite|Elanus caeruleus
+2|Congo peafowl|African peafowl|Afropavo congensis|mbulu
+2|Crested serpent eagle|Spilornis cheela
+2|European shag|Gulosus aristotelis
+2|European storm petrel|British storm petrel|Hydrobates pelagicus|Storm petrel
+2|Galapagos penguin|Spheniscus mendiculus
+2|Great hornbill|Buceros bicornis
+2|Greenish warbler|Phylloscopus trochiloides
+2|Hamerkop|hammerhead|anvilhead|hammerhead stork|hammerkop|hammerkopf|Scopus umbretta|tufted umber|umber bird|umbrette
+2|House crow|Corvus splendens
+2|Humboldt penguin|Humboldt's penguin|Spheniscus humboldti
+2|Keel-billed toucan|Ramphastos sulfuratus
+2|Lesser flamingo|Phoeniconaias minor
+2|Magpie goose|Anseranas semipalmata
+2|Nicobar pigeon|Caloenas nicobarica
+2|Northern fulmar|Fulmar|Fulmarus glacialis
+2|Oriental magpie-robin|Copsychus saularis
+2|Pied kingfisher|Ceryle rudis
+2|Pink-footed goose|Anser brachyrhynchus
+2|Resplendent quetzal|Pharomachrus mocinno
+2|Sarus crane|Antigone antigone
+2|Siberian jay|Perisoreus infaustus
+2|Spanish sparrow|Passer hispaniolensis
+2|Sulphur-crested cockatoo|Cacatua galerita
+2|Twite|heather lintie|Linaria flavirostris
+2|Water pipit|Anthus spinoletta
+2|African houbara|Chlamydotis undulata|Houbara bustard
+2|Aquatic warbler|Acrocephalus paludicola
+2|Baikal teal|Sibirionetta formosa
+2|Black drongo|Dicrurus macrocercus
+2|Black-necked swan|Cygnus melancoryphus
+2|Blue-footed booby|Sula nebouxii
+2|Chinstrap penguin|Aptenodytes antarctica|Bearded penguin|Pygoscelis antarctica|Pygoscelis antarcticus|Ringed penguin|Stonecracker penguin
+2|Collared flycatcher|Ficedula albicollis
+2|Common hill myna|Gracula religiosa
+2|Eastern red-rumped swallow|Cecropis daurica
+2|Himalayan vulture|Gyps himalayensis|Himalayan griffon vulture
+2|King quail|Synoicus chinensis|Asian Blue Quail|Blue-breasted Quail
+2|Long-tailed jaeger|Long-tailed Skua|Stercorarius longicaudus
+2|Magellanic penguin|Spheniscus magellanicus
+2|Marsh warbler|Acrocephalus palustris
+2|Northern bald ibis|Geronticus eremita|hermit ibis|waldrapp|waldrapp ibis
+2|Pallas's gull|Ichthyaetus ichthyaetus
+2|Red-and-green macaw|green-winged macaw
+2|Swan goose|Anser cygnoides
+2|Tawny eagle|Aquila rapax
+2|Yellow-browed warbler|Phylloscopus inornatus
+2|Yellow-eyed penguin|Bird of the Year 2020|hoiho|Megadyptes antipodes
+2|Alpine accentor|Prunella collaris
+2|Barred warbler|Curruca nisoria
+2|Brahminy kite|Haliastur indus|red-backed sea-eagle
+2|Calandra lark|Melanocorypha calandra
+2|Hyacinth macaw|Anodorhynchus hyacinthinus
+2|Jabiru|Jabiru mycteria
+2|Levant sparrowhawk|Accipiter brevipes
+2|Little bunting|Emberiza pusilla
+2|Northern cardinal|Cardinalis cardinalis
+2|Oilbird|Steatornis caripensis
+2|Red-wattled lapwing|Red-wattled Plover|Vanellus indicus
+2|Rock bunting|Emberiza cia
+2|Rock sparrow|Petronia petronia
+2|Southern cassowary|Australian cassowary|double-wattled cassowary|two-wattled cassowary
+2|Steller's sea eagle|Haliaeetus pelagicus
+2|Toco toucan|Ramphastos toco
+2|Yellow-breasted bunting|Emberiza aureola
+2|African fish eagle|African sea eagle|Haliaeetus vocifer|Icthyophaga vocifer
+2|Asian koel|Common koel|Eudynamys scolopaceus
+2|Collared pratincole|Glareola pratincola
+2|Greater sand plover|Anarhynchus leschenaultii|Charadrius leschenaultii
+2|Harlequin duck|Histrionicus histrionicus
+2|Laughing dove|Spilopelia senegalensis
+2|Lesser whistling duck|Dendrocygna javanica
+2|Marbled duck|Marbled Teal|Marmaronetta angustirostris
+2|Pallas's sandgrouse|Syrrhaptes paradoxus
+2|Rhinoceros hornbill|Buceros rhinoceros
+2|Rustic bunting|Emberiza rustica
+2|Saddle-billed stork|Ephippiorhynchus senegalensis
+2|Scarlet ibis|Eudocimus ruber
+2|White-winged snowfinch|Montifringilla nivalis
+2|Willow tit|Poecile montanus
+2|Wood duck|Aix sponsa
+2|Woodchat shrike|Lanius senator
+2|Muscovy duck|Cairina moschata
+2|African openbill|Anastomus lamelligerus
+2|Black-necked crane|Grus nigricollis|Tibetan crane
+2|Blyth's reed warbler|Acrocephalus dumetorum
+2|Brown booby|ngangalalaw|Sula leucogaster
+2|Chilean flamingo|Phoenicopterus chilensis
+2|Greater short-toed lark|Calandrella brachydactyla|Short-toed lark
+2|Haast's eagle|Harpagornis moorei|Pouākai|Fuller's eagle
+2|Japanese quail|Coturnix japonica
+2|King eider|Somateria spectabilis
+2|Lanner falcon|Falco biarmicus
+2|Masked booby|Sula dactylatra
+2|Palm cockatoo|Probosciger aterrimus|goliath cockatoo|great black cockatoo
+2|Pine grosbeak|Pinicola enucleator
+2|Rosy-faced lovebird|Agapornis roseicollis
+2|Savi's warbler|Locustella luscinioides
+2|Sociable lapwing|Vanellus gregarius
+2|Striated heron|Green-backed heron|Butorides striata|Mangrove heron
+2|Turkey vulture|Catharista atrata|Cathartes aura|gallinazo|turkey buzzard
+2|White-rumped vulture|Asian white-backed vulture|Gyps bengalensis
+2|Zitting cisticola|Cisticola juncidis
+2|Australian pelican|Pelecanus conspicillatus|Pelecanus conspillicatus
+2|Black-headed ibis|Threskiornis melanocephalus
+2|Black-winged pratincole|Glareola nordmanni
+2|Brown shrike|Lanius cristatus
+2|Burrowing owl|Athene cunicularia
+2|Cinnamon bittern|Ixobrychus cinnamomeus
+2|Desert wheatear|Oenanthe deserti
+2|Indian pond heron|Ardeola grayii
+2|Knob-billed duck|Sarkidiornis melanotos
+2|Little auk|Alle alle|dovekie
+2|Middle spotted woodpecker|Dendrocoptes medius|Dendrocopos medius
+2|Pheasant-tailed jacana|Hydrophasianus chirurgus
+2|Red-footed booby|Sula sula
+2|River warbler|Locustella fluviatilis
+2|Roseate spoonbill|Platalea ajaja
+2|Roseate tern|Sterna dougallii
+2|Slender-billed curlew|Numenius tenuirostris
+2|Slender-billed gull|Larus genei|Chroicocephalus genei
+2|Snowy albatross|Wandering Albatross|Diomedea exulans
+2|Two-barred crossbill|White-winged Crossbill|Loxia leucoptera
+2|White-bellied sea eagle|Haliaeetus (Pontoaetus) leucogaster|Haliaeetus leucogaster|White-breasted Fish Eagle|White-breasted Sea Eagle
+2|Yellow-billed stork|Mycteria ibis
+2|Wallcreeper|Tichodroma muraria
+2|Alexandrine parakeet|Alexandrian parrot|Psittacula eupatria
+2|Black francolin|Francolinus francolinus
+2|Black-necked stork|jabiru|Ephippiorhynchus asiaticus
+2|Galah|Eolophus roseicapilla|Eolophus roseicapillus|pink and grey cockatoo|rose-breasted cockatoo
+2|Goliath heron|Ardea goliath
+2|Greater adjutant|Adjutant|Leptoptilos dubius
+2|Grey junglefowl|Gallus sonneratii|Sonnerat's Junglefowl
+2|Indian vulture|Gyps indicus|Long-billed Vulture
+2|Martial eagle|Polemaetus bellicosus
+2|Oriental turtle dove|Streptopelia orientalis
+2|Painted stork|Mycteria leucocephala
+2|Pectoral sandpiper|Calidris melanotos
+2|Pink-backed pelican|Pelecanus rufenscens|Pelecanus rufescens
+2|Sabine's gull|Xema sabini
+2|Spur-winged goose|Plectropterus gambensis
+2|Steller's eider|Polysticta stelleri
+2|White-breasted waterhen|Amaurornis phoenicurus
+2|Yellow-legged gull|Larus michahellis
+2|Andean flamingo|Phoenicoparrus andinus
+2|Asian green bee-eater|Little green bee-eater
+2|Black bittern|Ixobrychus flavicollis
+2|Eleonora's falcon|Eleonorais falcon|Falco eleonorae
+2|Kākā|Nestor meridionalis|New Zealand Kaka
+2|Manx shearwater|Puffinus puffinus
+2|Oriental darter|Anhinga melanogaster
+2|Pallas's leaf warbler|Pallas's warbler|Phylloscopus proregulus
+2|Purple sandpiper|Calidris maritima
+2|Red-flanked bluetail|orange-flanked bush-robin|Tarsiger cyanurus
+2|Red-headed vulture|Sarcogyps calvus
+2|Sandhill crane|Grus canadensis
+2|Scaly-breasted munia|Lonchura punctulata|Lonchura (Lonchura) punctulata|nutmeg mannikin
+2|Siberian sand plover|Lesser Sand Plover|Anarhynchus mongolus|Charadrius mongolus|Mongolian sand plover
+2|Takahē|Porphyrio hochstetteri|South Island takahē|takahea
+2|Western reef heron|Egretta gularis|western reef-egret
+2|White cockatoo|Cacatua alba
+2|White-throated kingfisher|Halcyon smyrnensis|White-breasted kingfisher
+2|Abdim's stork|Ciconia abdimii|white-bellied stork
+2|American kestrel|American sparrowhawk|Falco sparverius|Sparrow hawk
+2|Azure tit|Cyanistes cyanus
+2|Azure-winged magpie|Cyanopica cyanus
+2|Black eagle|Ictinaetus malaiensis|Ictinaetus malayensis
+2|Blue-cheeked bee-eater|Merops persicus
+2|Blue-winged teal|Spatula discors
+2|Boat-billed heron|Cochlearius cochlearius
+2|Booted warbler|Iduna caligata
+2|Cetti's warbler|Cettia cetti
+2|Cirl bunting|Emberiza cirlus
+2|Crested honey buzzard|Oriental honey-buzzard|Pernis ptilorhynchus|Pernis ptilorhyncus
+2|Great horned owl|Bubo virginianus|Tiger Owl
+2|Himalayan monal|Lophophorus impejanus
+2|Iceland gull|Larus glaucoides
+2|Ivory gull|Pagophila eburnea
+2|Laughing kookaburra|Dacelo novaeguineae
+2|Macaroni penguin|Eudyptes chrysolophus
+2|Pallid swift|Apus pallidus
+2|Pied crow|Corvus albus
+2|Pied wheatear|Oenanthe pleschanka
+2|Ring-necked duck|Aythya collaris
+2|Ruddy duck|Oxyura jamaicensis
+2|Rufous treepie|Dendrocitta vagabunda
+2|Rüppell's vulture|Gyps rueppelli|Gyps rueppellii|Rueppell’s griffon|Ruppell's griffon
+2|Somali ostrich|Struthio molybdophanes
+2|Western black-eared wheatear|Oenanthe hispanica
+2|African jacana|Actophilornis africanus
+2|Agami heron|Agamia agami
+2|American golden plover|Pluvialis dominica
+2|American white pelican|Pelecanus erythrorhynchos|Pelecanus erythrorhynchus
+2|American wigeon|Mareca americana
+2|Bali starling|Bali Myna|Bali mynah|Leucopsar rothschildi|Rothschild's mynah|Jalak Bali
+2|Black guillemot|Cepphus grylle
+2|Black-naped oriole|Oriolus chinensis
+2|Blue crane|Anthropoides paradiseus|paradise crane|Stanley crane
+2|Blue-throated macaw|Ara glaucogularis
+2|Cream-coloured courser|Cursorius cursor
+2|Emperor goose|Anser canagicus
+2|European stonechat|Common stonechat|Saxicola rubicola
+2|Great blue heron|blue heron|Canadian heron|Canadian blue heron
+2|Jacobin cuckoo|Black and white cuckoo|Clamator jacobinus|Oxylophus jacobinus
+2|Large-billed crow|Corvus macrorhynchos
+2|Lesser adjutant|Lesser Adjutant Stork|Leptoptilos javanicus
+2|Medium egret|Ardea intermedia
+2|Pacific loon|Pacific Diver|Gavia pacifica
+2|Pacific reef heron|Egretta sacra|Pacific reef-egret
+2|Paddyfield warbler|Acrocephalus agricola
+2|Red avadavat|Amandava amandava|strawberry finch
+2|Red-naped ibis|Pseudibis papillosa
+2|Red-vented bulbul|Pycnonotus cafer
+2|Richard's pipit|Anthus richardi
+2|Royal penguin|Eudyptes schlegeli
+2|Scopoli's shearwater|Calonectris diomedea
+2|Short-toed treecreeper|Certhia brachydactyla
+2|Siberian rubythroat|Calliope calliope
+2|Sooty tern|Sterna fuscata|Onychoprion fuscatus
+2|Spotted owlet|Athene brama
+2|Sri Lankan junglefowl|Sri Lanka Junglefowl|Gallus lafayettii
+2|White-backed vulture|Gyps africanus
+2|White-faced whistling duck|Dendrocygna viduata
+2|White-throated needletail|Hirundapus caudacutus|Needle-tailed Swift|White-throated spinetailed swift
+2|Yellow bittern|Botaurus sinensis|Ixobrychus sinensis
+2|American bittern|Botaurus lentiginosus
+2|Arctic warbler|Phylloscopus (Acanthopneuste) borealis|Phylloscopus borealis
+2|Common emerald dove|Asian emerald dove|Chalcophaps indica|Grey-capped Emerald Dove
+2|European rock pipit|Anthus petrosus|Eurasian Rock Pipit|Rock Pipit
+2|Great frigatebird|Fregata minor
+2|Great spotted cuckoo|Clamator glandarius
+2|Greater coucal|Centropus sinensis|Common crow-pheasant|crow pheasant
+2|Green junglefowl|Gallus varius
+2|James's flamingo|Phoenicoparrus jamesi|Puna flamingo
+2|Java sparrow|Padda oryzivora
+2|Leach's storm petrel|Leach's Petrel|Oceanodroma leucorhoa
+2|Little cormorant|Phalacrocorax niger|Microcarbo niger
+2|Long-billed dowitcher|Limnodromus scolopaceus
+2|Red-whiskered bulbul|Pycnonotus jocosus
+2|Ring-billed gull|Gaviota de Delaware|Larus delawarensis
+2|Rock partridge|Alectoris graeca
+2|Ross's gull|Rhodostethia rosea
+2|Rufous-tailed scrub robin|Cercotrichas galactotes|Rufous Scrub Robin
+2|South polar skua
+2|Syrian woodpecker|Dendrocopos syriacus|Picoides syriacus
+2|Trumpeter swan|Cygnus buccinator
+2|Western rock nuthatch|Sitta neumayer
+2|Western rockhopper penguin|Southern Rockhopper Penguin|Eudyptes chrysocome
+2|White-tailed lapwing|Vanellus leucurus
+2|Abyssinian ground hornbill|Bucorvus abyssinicus
+2|African crake|Crex egregia|Porzana egregia
+2|American crow|common American crow|common crow|Corvus brachyrhynchos
+2|American white ibis|Eudocimus albus|White Ibis
+2|Bateleur|Bateleur Eagle|Terathopius ecaudatus
+2|Black-bellied sandgrouse
+2|Black-faced spoonbill|Platalea minor
+2|Brolga|Grus rubicunda
+2|Cape Barren goose|Cereopsis novaehollandiae
+2|Chinese pond heron|Ardeola bacchus
+2|Common buttonquail|Little button-quail|Turnix sylvatica|Turnix sylvaticus
+2|Coscoroba swan|Coscoroba coscoroba
+2|Darwin's rhea|Lesser Rhea|Rhea pennata
+2|Fiordland penguin|Eudyptes pachyrhynchus|Fiordland crested penguin|Tawaki
+2|Gouldian finch|Chloebia gouldiae
+2|Great argus|Argusianus argus
+2|Indian cormorant|Phalacrocorax fuscicollis
+2|Indian grey hornbill|Ocyceros birostris|Tockus birostris
+2|Indian spot-billed duck|Anas poecilorhyncha
+2|Isabelline shrike|Lanius isabellinus|Rufous-tailed shrike
+2|Little swift|Apus affinis
+2|Long-tailed shrike|Lanius schach
+2|Long-toed stint|Calidris subminuta|Erolia subminuta
+2|Mourning dove|American mourning dove|Carolina pigeon|rain dove
+2|Moustached warbler|Acrocephalus melanopogon
+2|Nene|Branta sandvicensis|Hawaiian goose
+2|Pine bunting|Emberiza leucocephalos
+2|Red-billed quelea|Quelea quelea|red-billed dioch|red-billed weaver
+2|Salmon-crested cockatoo|Cacatua moluccensis|Moluccan cockatoo
+2|Spanish imperial eagle|Aquila adalberti
+2|Victoria crowned pigeon|Goura victoria
+2|White-winged duck|Asarcornis scutulata
+2|Whooping crane|Grus americana
+2|Wilson's storm petrel|Wilson's Petrel|Oceanites oceanicus|Wilsonis storm-petrel
+2|Wood stork|Mycteria americana
+2|Yellow-crested cockatoo|Cacatua sulphurea
+2|Abbott's booby|Papasula abbotti
+2|Amur falcon|Falco amurensis
+2|Anhinga|Anhinga anhinga
+2|Australasian gannet|Morus serrator
+2|Black-browed albatross|Thalassarche melanophrys|Black-browed Mollymawk|Thalassarche melanophris
+2|Blood pheasant|Ithaginis cruentus
+2|Bridled tern|Sterna anaethetus|Onychoprion anaethetus
+2|Bronze-winged jacana|Metopidius indicus
+2|Brown fish owl|Ketupa zeylonensis
+2|Brown noddy|Anous stolidus|common noddy
+2|Buff-breasted sandpiper|Calidris subruficollis
+2|Bufflehead|Bucephala albeola
+2|Caspian plover|Anarhynchus asiaticus|Charadrius asiaticus|Eupoda asiatica
+2|Cotton pygmy goose|Nettapus (Cheniscus) coromandelianus|Nettapus coromandelianus
+2|Dusky warbler|Phylloscopus fuscatus
+2|Fischer's lovebird|Agapornis fischeri
+2|Freckled duck|Stictonetta naevosa
+2|Gang-gang cockatoo|Callocephalon fimbriatum
+2|Great Indian bustard|Ardeotis nigriceps
+2|Great knot|Calidris tenuirostris
+2|Greater crested tern|Great Crested Tern|Thalasseus bergii
+2|Greater painted-snipe|Painted-snipe|Rostratula benghalensis|Rostrulata benghalensis
+2|Green imperial pigeon|Ducula aenea
+2|Green pheasant|Phasianus versicolor
+2|Hooded merganser|Mergus cucullatus|Lophodytes cucullatus
+2|Indian paradise flycatcher|Terpsiphone paradisi
+2|Lady Amherst's pheasant|Chrysolophus amherstiae
+2|Lesser yellowlegs|Tringa flavipes
+2|Magnificent frigatebird|Fregata magnificens|frigate petrel
+2|Military macaw|Ara militaris|soldier macaw
+2|Olive-backed pipit|Anthus hodgsoni|Indian pipit
+2|Oriental stork|Oriental White Stork|Kounotori|Boyce's Stork|Ciconia boyciana|Konotori
+2|Parrot crossbill|Loxia pytyopsittacus
+2|Radde's warbler|Phylloscopus schwarzi
+2|Red-breasted toucan|Green-billed Toucan|Ramphastos dicolorus
+2|Red-tailed hawk|Buteo jamaicensis|chickenhawk
+2|Red-tailed tropicbird|Phaethon rubricauda
+2|Ross's goose|Chen rossii|Anser rossii
+2|Rufous-necked hornbill|Aceros nipalensis
+2|Snowy egret|Egretta thula
+2|Sooty shearwater|Ardenna grisea
+2|Southern brown kiwi|Apteryx australis|common kiwi|tokoeka
+2|Thick-billed murre|Brünnich's Guillemot|Uria lomvia
+2|Trumpeter finch|Bucanetes githagineus|Rhodopechys githaginea
+2|Watercock|Gallicrex cinerea
+2|White-backed duck|Thalassornis leuconotus
+2|White-rumped shama|Copsychus malabaricus
+2|Wilson's phalarope|Phalaropus tricolor
+2|Yellow-footed green pigeon|Treron phoenicopterus
+2|African darter|Anhinga rufa
+2|American black duck|Anas rubripes|black duck
+2|Arctic redpoll|Acanthis hornemanni|Carduelis hornemanni|hoary redpoll
+2|Australian magpie|Gymnorhina tibicen
+2|Baer's pochard|Aythya baeri
+2|Black-headed heron|Ardea melanocephala
+2|Black-hooded oriole|Oriolus xanthornus
+2|Blue-tailed bee-eater|Merops philippinus
+2|Cackling goose|Branta hutchinsii
+2|Caucasian grouse|Tetrao mlokosiewiczi|Caucasian black grouse|Lyrurus mlokosiewiczi|Tetrao miokosiewiczi
+2|Crested caracara|C. plancus|Caracara plancus|common caracara
+2|Forest wagtail|Dendronanthus indicus
+2|Great-billed heron|Ardea sumatrana
+2|Hill pigeon|Columba rupestris|eastern rock dove|Turkestan hill dove
+2|Hooded crane|Grus monacha
+2|Indian pitta|Pitta brachyura
+2|Kererū|wood pigeon|Hemiphaga novaeseelandiae|kererū pigeon|kūkū|kūkupa|New Zealand Pigeon
+2|Lappet-faced vulture|Torgos tracheliotos
+2|Laughing gull|Larus atricilla|Leucophaeus atricilla
+2|Lesser crested tern|Thalasseus bengalensis
+2|Malayan night heron|Gorsachius melanolophus
+2|Moluccan eclectus|Eclectus roratus
+2|Northern cassowary|Casuarius unappendiculatus|golden-necked cassowary|one-wattled cassowary|single-wattled cassowary
+2|Northern flicker|Colaptes auratus
+2|Ocellated turkey|Meleagris ocellata
+2|Pin-tailed sandgrouse|Pterocles alchata
+2|Pink cockatoo|Cacatua leadbeateri|Leadbeater's cockatoo|Major Mitchell's cockatoo
+2|Pink-headed duck|Rhodonessa caryophyllacae|Rhodonessa caryophyllacea
+2|Red collared dove|Red Turtle Dove|Streptopelia tranquebarica
+2|Red-necked stint|Calidris ruficollis
+2|Red-vented cockatoo|Cacatua haematuropygia|Philippine cockatoo
+2|Sharp-tailed sandpiper|Calidris acuminata
+2|Snares penguin|Eudyptes robustus|Snares crested penguin|Snares Islands Penguin
+2|Snow pigeon|Columba leuconota
+2|Southern royal albatross|Royal Albatross|Diomedea epomophora
+2|Spix's macaw|Cyanopsitta spixii|Guacamayo azul pequeño|guacamayo de Spix|guacamayo de Spixis
+2|Spotted sandpiper|Actitis macularius
+2|Wedge-tailed eagle|Aquila audax
+2|White-naped crane|Antigone vipio
+2|White-rumped munia|Lonchura striata
+2|White-rumped sandpiper|Calidris fuscicollis
+2|Yellow-collared lovebird|Agapornis personatus|masked lovebird
+2|African spoonbill|Platalea alba
+2|American coot|Fulica americana
+2|Anna's hummingbird|Calypte anna
+2|Belted kingfisher|Megaceryle alcyon
+2|Blue duck|Hymenolaimus malacorhynchos
+2|Blue-winged goose|Cyanochen cyanoptera
+2|Chinese whistling thrush|Blue Whistling Thrush|Himalayan blue whistling thrush|Myophonus caeruleus
+2|Coconut lorikeet|green-naped lorikeet|Trichoglossus haematodus
+2|Collared kingfisher|Todiramphus chloris
+2|Common iora|Aegithina tiphia
+2|Crested ibis|Asian crested ibis|Nipponia nippon
+2|Dwarf cassowary|Casuarius bennetti
+2|Elf owl|Micrathene whitneyi
+2|Great spotted kiwi|Apteryx haastii
+2|Grey-necked bunting|Emberiza buchanani
+2|Hawaiian crow|Corvus hawaiiensis
+2|Hooded vulture|Necrosyrtes monachus
+2|Killdeer
+2|Lesser frigatebird|Fregata ariel
+2|Masked shrike|Lanius nubicus
+2|Milky stork|Mycteria cinerea
+2|Pacific black duck|Grey duck|Anas superciliosa|Black duck
+2|Pacific swift|Apus pacificus|Fork-tailed swift
+2|Palm-nut vulture|Gypohierax angolensis
+2|Pintado petrel|Cape Petrel|Daption capense
+2|Plumed whistling duck|Dendrocygna eytoni
+2|Red-billed tropicbird|Phaethon aethereus
+2|Red-breasted parakeet|Psittacula alexandri
+2|Red-fronted macaw|Ara rubrogenys
+2|Red-throated thrush|Turdus ruficollis
+2|River tern|Sterna aurantia
+2|Royal spoonbill|Black-billed Spoonbill|Platalea regia
+2|Rufous-bellied eagle|Rufous-bellied Hawk-Eagle|Chestnut-bellied Hawk-eagle|Lophotriorchis kienerii
+2|Senegal parrot|Poicephalus senegalus
+2|Short-tailed albatross|Phoebastria albatrus|Steller's albatross
+2|Siberian accentor|Prunella montanella
+2|Snow partridge|Lerwa lerwa
+2|Southern ground hornbill|Bucorvus leadbeateri
+2|Spoon-billed sandpiper|Calidris pygmaea
+2|Tricolored heron|Egretta tricolor|tricoloured heron
+2|Village weaver|Ploceus cucullatus
+2|Violet-backed starling|amethyst starling|Cinnyricinclus leucogaster|plum-coloured starling
+2|Wattled jacana|Jacana jacana
+2|Waved albatross|Phoebastria irrorata
+2|Weka|Gallirallus australis
+2|White-tailed tropicbird|Phaethon lepturus
+2|Crab-plover|Dromas ardeola
+2|Andean cock-of-the-rock|Rupicola peruviana|Rupicola peruvianus
+2|Audouin's gull|Ichthyaetus audouinii
+2|Australian white ibis|Threskiornis moluccus|Threskiornis molucca|Bin chicken
+2|Baird's sandpiper|Calidris bairdii
+2|Barrow's goldeneye|Bucephala islandica
+2|Black heron|Egretta ardesiaca
+2|Black-bellied whistling duck|Dendrocygna autumnalis
+2|Black-naped tern|Sterna sumatrana
+2|Blue-eared kingfisher|Alcedo meninting
+2|Brown skua|Antarctic skua|Hākoakoa|Southern Great Skua|Southern skua|Stercorarius antarcticus|Subantarctic Skua
+2|Brown-headed gull|Chroicocephalus brunnicephalus|Larus brunnicephalus
+2|Carolina parakeet|Conuropsis carolinensis
+2|Chestnut-fronted macaw|Ara severus
+2|Clark's nutcracker|Nucifraga columbiana
+2|Common tailorbird|Orthotomus sutorius
+2|Daurian jackdaw|Corvus dauuricus
+2|Eastern subalpine warbler|Curruca cantillans|Subalpine Warbler
+2|Erect-crested penguin|Eudyptes sclateri
+2|Eyebrowed thrush|Turdus obscurus
+2|Falcated duck|falcated teal|Mareca falcata
+2|Franklin's gull|Larus pipixcan|Leucophaeus pipixcan
+2|Greater bird-of-paradise|Paradisaea apoda
+2|Greater roadrunner|Geococcyx californianus
+2|Greater yellowlegs|Tringa melanoleuca
+2|Hadada ibis|Bostrychia hagedash|Hadeda ibis
+2|Hume's leaf warbler|Phylloscopus humei
+2|Ivory-billed woodpecker|Campephilus principalis
+2|Javan pond heron|Ardeola speciosa
+2|Little spotted kiwi
+2|Maleo|Macrocephalon maleo
+2|Monk parakeet|Myiopsitta monachus|Mylopsitta monachus
+2|Namaqua dove|Oena capensis
+2|Nilgiri wood pigeon|Columba elphinstonii
+2|Northern mockingbird|Mimus polyglottos
+2|Oriental pratincole|Eastern collared pratincole|Glareola maldivarum
+2|Pheasant pigeon|Otidiphaps nobilis
+2|Pied-billed grebe|Podilymbus podiceps
+2|Pileated woodpecker|Dryocopus pileatus
+2|Purple sunbird|Nectarinia asiatica
+2|Red-headed bunting|Emberiza bruniceps|Granativora bruniceps
+2|Red-legged partridge|Alectoris rufa
+2|Red-tailed black cockatoo|Banks' black cockatoo|Banksian black cockatoo|Calyptorhynchus banksii|forest red-tailed black cockatoo|south-eastern red-tailed black cockatoo
+2|Sardinian warbler|Curruca melanocephala
+2|Scaly thrush|Zoothera dauma
+2|Silver pheasant|Lophura nycthemera
+2|Sombre tit|Poecile lugubris
+2|Southern giant hummingbird|Patagona gigas|Giant Hummingbird
+2|Southern giant petrel
+2|Speckled pigeon|Columba guinea
+2|Sunda zebra finch|Taeniopygia guttata|Timor Zebra Finch
+2|Thick-billed raven|Corvus crassirostris
+2|West Indian whistling duck|Dendrocygna arborea
+2|White-bellied heron|Ardea insignis|Great white-bellied heron|Imperial heron
+2|White-crowned hornbill|Berenicornis comatus
+2|White-headed vulture|Trigonoceps occipitalis
+2|White-tailed ptarmigan|Lagopus leucura
+2|Fulvous whistling duck|Dendrocygna bicolor|Fulvous tree duck
+2|Asian desert warbler|Curruca nana
+2|Asian houbara|Macqueen's Bustard
+2|Atlantic white tern|White Tern|Angel tern|Common white tern|Fairy tern|Gygis alba|kakaia|manu-o-Kū|White noddy
+2|Barbary partridge|Alectoris barbara
+2|Baya weaver|Ploceus philippinus
+2|Black baza|Aviceda leuphotes
+2|Black-backed dwarf kingfisher|Ceyx erithaca|oriental dwarf kingfisher|three-toed kingfisher
+2|Black-capped kingfisher|Halcyon pileata
+2|Black-cheeked lovebird|Agapornis nigrigenis
+2|Black-footed albatross|Diomedea nigripes|Phoebastria nigripes
+2|Black-rumped flameback|Black-rumped Flameblack|Dinopium benghalense|Lesser golden-backed woodpecker|Lesser goldenback
+2|Black-throated thrush|Turdus atrogularis
+2|Blakiston's fish owl|Bubo blakistoni|Ketupa blakistoni
+2|Blue-eyed cockatoo|Cacatua ophthalmica
+2|Brown wood owl|Strix leptogrammica
+2|Cape vulture|Gyps coprotheres
+2|Carnaby's black cockatoo|Zanda latirostris
+2|Changeable hawk-eagle|Nisaetus cirrhatus|Spizaetus cirrhatus
+2|Cocoi heron|Ardea cocoi
+2|Cretzschmar's bunting|Emberiza caesia
+2|Double-crested cormorant|Nannopterum auritum
+2|Eastern olivaceous warbler|Iduna pallida
+2|Egyptian plover|Pluvianus aegyptius
+2|Great green macaw|Ara ambiguus|Buffon’s macaw
+2|Green heron|Butorides virescens
+2|Grey hypocolius|Hypocolius ampelinus
+2|Grey peacock-pheasant|Polyplectron bicalcaratum
+2|Harris's hawk|Parabuteo unicinctus|desert hawk
+2|Helmeted hornbill|Rhinoplax vigil
+2|Indian white-eye|Oriental white-eye|Zosterops palpebrosus
+2|Kori bustard|Ardeotis kori
+2|Laysan albatross|Phoebastria immutabilis
+2|Light-mantled albatross|Phoebetria palpebrata
+2|Lilac-breasted roller|Coracias caudatus
+2|Little corella|Cacatua sanguinea
+2|Long-tailed broadbill|Psarisomus dalhousiae
+2|Maguari stork|Ciconia maguari
+2|Mediterranean short-toed lark|Alaudala rufescens|Lesser Short-toed Lark
+2|Melodious warbler|Hippolais polyglotta
+2|Mountain hawk-eagle|Hodgson's hawk eagle|Nisaetus nipalensis|Spizaetus nipalensis
+2|New Caledonian crow|C. moneduloides|Corvus moneduloides
+2|Orange-breasted green pigeon|Treron bicincta|Treron bicinctus
+2|Oriental skylark
+2|Pied harrier|Circus melanoleucos
+2|Plum-headed parakeet|Psittacula cyanocephala
+2|Raggiana bird-of-paradise|Paradisaea raggiana
+2|Rainbow bee-eater|Merops ornatus
+2|Red bird-of-paradise|Paradisaea rubra
+2|Red-billed blue magpie|Urocissa erythroryncha|Urocissa erythrorhyncha
+2|Red-necked falcon|Falco chicquera|Red-headed falcon
+2|Red-winged blackbird|Agelaius phoeniceus
+2|Shy albatross|Thalassarche cauta
+2|Silver gull|Chroicocephalus novaehollandiae|Larus novaehollandiae
+2|Snow petrel|Pagodroma nivea
+2|Solomons corella|Solomons Cockatoo|Cacatua ducorpsii
+2|Spotless starling|Sturnus unicolor
+2|Storm's stork|Ciconia stormi|Stormis stork
+2|Sudan golden sparrow|Golden Song Sparrow|Passer luteus
+2|Sun conure|Aratinga solstitialis|Sun Parakeet
+2|Surf scoter|Melanitta perspicillata
+2|Taiwan blue magpie|Urocissa caerulea
+2|Upland goose|Chloephaga picta|Magellan Goose
+2|Vulturine guinea fowl|Acryllium vulturinum
+2|Western grebe|Aechmophorus occidentalis
+2|Whistling heron|Syrigma sibilatrix
+2|White-throated robin|Irania gutturalis
+2|Yellow-billed magpie|Pica nuttallii
+2|Abyssinian roller|Coracias abyssinicus
+2|African green pigeon|Treron calvus
+2|African pygmy goose|Nettapus auritus
+2|Alaotra grebe|Tachybaptus rufolavatus
+2|American goldfinch|Spinus tristis
+2|Australian brushturkey|Alectura lathami
+2|Australian raven|Corvus coronoides
+2|Barbary falcon|Falco pelegrinoides
+2|Barred buttonquail|Turnix suscitator
+2|Barred owl|Strix varia
+2|Bengal florican|Houbaropsis bengalensis
+2|Black lory|Chalcopsitta atra
+2|Black skimmer|Rynchops niger|Rynchops nigra
+2|Black-shouldered kite|Elanus axillaris
+2|Black-throated accentor|Prunella atrogularis
+2|Blue petrel|Halobaena caerulea
+2|Bonaparte's gull|Chroicocephalus philadelphia
+2|Brahminy starling|Sturnia pagodarum
+2|California gull|Larus californicus
+2|Canada jay|Gray jay|Grey jay|Perisoreus canadensis|Whiskey jack
+2|Canvasback|Aythya valisineria
+2|Cedar waxwing|Bombycilla cedrorum
+2|Cheer pheasant|Catreus wallichii
+2|Crimson rosella|Platycercus adelaidae|Platycercus elegans
+2|Cuban macaw|Ara tricolor
+2|Dusky eagle-owl|Bubo coromandus
+2|Giant ibis|Pseudibis gigantea|Thaumatibis gigantea
+2|Golden parakeet|Golden conure|Guaruba guarouba
+2|Great shearwater|Ardenna gravis
+2|Grey-headed albatross|grey-headed mollymawk|Thalassarche chrysostoma
+2|Grey-headed chickadee|Siberian Tit|gray-headed chickadee|Poecile cincta|Poecile cinctus
+2|Grey-headed fish eagle|Ichthyophaga ichthyaetus|Haliaeetus ichthyaetus
+2|Grey-headed lapwing|Vanellus cinereus
+2|Horned screamer|Anhima cornuta|kamichi
+2|Humblot's heron|Ardea humbloti|Madagascar heron
+2|Inca tern|Larosterna inca
+2|Indian eagle-owl|Bubo bengalensis
+2|Indian pied myna|Gracupica contra|Indian pied starling|Asian pied myna
+2|Kelp gull|Dominican gull|karoro|Larus dominicanus
+2|Lear's macaw|Anodorhynchus leari|Indigo Macaw
+2|Lesser cuckoo|Cuculus poliocephalus
+2|Nankeen night heron|Nycticorax caledonicus|Rufous Night Heron
+2|Naumann's thrush|Turdus naumanni
+2|Oriental dollarbird|Eurystomus orientalis
+2|Rain quail|Coturnix coromandelica
+2|Red-headed woodpecker|Melanerpes erythrocephalus
+2|Redhead|Aythya americana|red-headed duck
+2|Rodrigues solitaire|Pezophaps solitaria|Rodriguez solitaire
+2|Rufous hornbill|Buceros hydrocorax
+2|Rufous hornero|Furnarius rufus
+2|Short-tailed shearwater|Ardenna tenuirostris|moonbird|muttonbird|slender-billed shearwater|yolla
+2|Siberian stonechat|Saxicola maurus
+2|Southern yellow-billed hornbill|Tockus leucomelas
+2|Stilt sandpiper|Micropalama himantopus|Calidris himantopus|Micropalama himatopus
+2|Superb lyrebird|Menura novaehollandiae|Menura superba
+2|Tricoloured munia|Lonchura malacca|Black-headed Munia|Tricolored Munia
+2|Tufted puffin|Fratercula cirrhata
+2|Tūī|parson bird|Prosthemadera novaeseelandiae
+2|Verreaux's eagle|Aquila verreauxii|Verreauxis eagle
+2|Von Schrenck's bittern|Botaurus eurhythmus|Ixobrychus eurhythmus
+2|Yellow-eyed pigeon|Columba eversmanni|Pale-backed Pigeon
+2|Yellow-tailed black cockatoo|Calyptorhynchus funereus|Zanda funerea
+2|Zebra dove|Geopelia striata
+2|Acorn woodpecker|Melanerpes formicivorus
+2|African stonechat|Saxicola torquatus
+2|American avocet|Recurvirostra americana
+2|Arabian bustard|Ardeotis arabs
+2|Asian dowitcher|Limnodromus semipalmatus
+2|Asian fairy-bluebird|Irena puella
+2|Australasian bittern|Botaurus poiciloptilus
+2|Bank myna|Acridotheres ginginianus
+2|Bat hawk|Macheiramphus alcinus
+2|Besra|Accipiter virgatus
+2|Bimaculated lark|Melanocorypha bimaculata
+2|Black lark|Melanocorypha yeltonensis|Melanocorypha yeltoniensis
+2|Black stilt|Himantopus novaezelandiae|New Zealand black stilt
+2|Black-billed magpie|Pica hudsonia
+2|Bobolink|Dolichonyx oryzivorus
+2|Brown boobook|Ninox scutulata
+2|Brown dipper|Cinclus pallasii
+2|Buffy fish owl|Ketupa ketupu|Malay fish owl
+2|Bulwer's petrel|Bulweria bulwerii
+2|Channel-billed toucan|Ramphastos vitellinus
+2|Chestnut munia|Lonchura atricapilla|Southern Black-headed Munia
+2|Chestnut-headed bee-eater|Bay-headed Bee-eater|Merops leschenaulti
+2|Collared falconet|Microhierax caerulescens
+2|Common green magpie|Cissa chinensis
+2|Crested kingfisher|Megaceryle lugubris
+2|Crested myna|Acridotheres cristatellus|crested mynah
+2|Crested partridge|crested wood partridge|green wood partridge|green wood quail|red-crowned wood partridge|Rollulus rouloul|roul-roul
+2|Eastern bluebird|Sialia sialis
+2|Eastern rosella|Platycercus (Violania) eximius|Platycercus eximius
+2|Edible-nest swiftlet|Aerodramus fuciphagus|white-nest swiftlet
+2|Golden-fronted leafbird|Chloropsis aurifrons
+2|Great blue turaco|Corythaeola cristata
+2|Greater racket-tailed drongo|Dicrurus paradiseus
+2|Greater sage-grouse|Sage Grouse|Sagehen|Centrocercus urophasianus
+2|Green-winged teal|Anas carolinensis
+2|Grey francolin|Francolinus pondicerianus|Indian grey francolin
+2|Grey-headed lovebird|Agapornis canus
+2|Horned puffin|Fratercula corniculata
+2|Hudsonian godwit|Limosa haemastica
+2|Imperial woodpecker|Campephilus imperialis
+2|Indian scops owl|Otus bakkamoena
+2|Indian silverbill|Euodice malabarica
+2|Jerdon's baza|Aviceda jerdoni
+2|Lilian's lovebird|Agapornis lilianae|Lilianis lovebird
+2|Little blue heron|Egretta caerulea
+2|Long-crested eagle|Lophaetus occipitalis|Spizaetus occipitalis
+2|Madagascar ibis|Lophotibis cristata|Madagascar crested ibis
+2|Mountain bluebird|Sialia currucoides
+2|Mountain imperial pigeon|Ducula badia|Maroon-backed Imperial pigeon
+2|New Zealand falcon|Falco novaeseelandiae
+2|Northern rockhopper penguin|Eudyptes moseleyi|Moseley's Rockhopper Penguin
+2|Oriental pied hornbill|Anthracoceros albirostris
+2|Pechora pipit|Anthus gustavi
+2|Peruvian booby|Sula variegata
+2|Pesquet's parrot|Psittrichas fulgidus
+2|Pied bush chat|Saxicola caprata
+2|Pin-tailed snipe|Pintail Snipe|Gallinago stenura
+2|Pink-necked green pigeon
+2|Puerto Rican amazon|Amazona vittata
+2|Red-fronted serin|Serinus pusillus
+2|Red-necked nightjar|Caprimulgus ruficollis
+3|Red-shouldered macaw|Diopsittaca nobilis
+3|Ringed teal|Callonetta leucophrys
+3|Ruby-throated hummingbird|Archilochus colubris
+3|Ruddy kingfisher|Halcyon coromanda
+3|Rufous woodpecker|Micropternus brachyurus
+3|Russet sparrow|Passer cinnamomeus
+3|Sapayoa|Sapayoa aenigma
+3|Saxaul sparrow|Passer ammodendri
+3|Sind sparrow|jungle sparrow|Passer pyrrhonotus|rufous-backed sparrow|Sind jungle sparrow
+3|Slaty-breasted rail|Gallirallus striatus|Lewinia striata|Slaty-breasted Banded Rail
+3|Sociable weaver|Philetairus socius
+3|Spur-winged lapwing|Vanellus spinosus
+3|Steller's jay|Cyanocitta stelleri|Steller's Jay bird
+3|Straw-necked ibis|Threskiornis spinicollis
+3|Superb fairywren|Malurus cyaneus|superb blue wren
+3|Swallow-tailed kite|Elanoides forficatus|Swallow hawk
+3|Sword-billed hummingbird
+3|Western Bonelli's warbler|Phylloscopus bonelli
+3|Western Orphean warbler|Curruca hortensis
+3|Western crowned pigeon|Goura cristata
+3|Western hooded pitta|Hooded Pitta
+3|White-faced ibis|Plegadis chihi
+3|Wilson's bird-of-paradise
+3|Yellow-billed pintail|Anas georgica
+3|Zigzag heron|Zebrilus undulatus
+3|Cuckoo-roller|Leptosomus discolor
+3|Kagu|Rhynochetos jubatus|kagou
+3|African skimmer|Rynchops flavirostris
+3|American herring gull|Larus smithsonianus
+3|Andean goose|Chloephaga melanoptera
+3|Antarctic petrel
+3|Ashy drongo|Dicrurus leucophaeus
+3|Asian barred owlet|Glaucidium cuculoides
+3|Balearic shearwater|Puffinus mauretanicus
+3|Black wheatear|Oenanthe leucura
+3|Black-faced ibis|Theristcus melanopis|Theristicus melanopis
+3|Black-naped monarch|Hypothymis azurea
+3|Black-tailed gull|Larus crassirostris
+3|Blue bird-of-paradise|Paradisaea rudolphi
+3|Blue-bearded bee-eater|Nyctyornis athertoni
+3|Blyth's kingfisher|Alcedo hercules
+3|Blyth's pipit|Anthus godlewskii
+3|Brazilian teal|Amazonetta brasiliensis
+3|Brown-headed cowbird|Molothrus ater|brown-headed buffalo bird
+3|Brown-necked raven|Corvus ruficollis
+3|Burrowing parrot|Burrowing parakeet|Cyanoliseus patagonus
+3|Cape gannet|Morus capensis
+3|Chestnut-tailed starling|Ashy-headed starling|Sturnia malabarica|Sturnus malabaricus
+3|Chinese egret|Egretta eulophotes
+3|Christmas frigatebird|Christmas Island Frigatebrid|Fregata andrewsi
+3|Comb-crested jacana|Irediparra gallinacea
+3|Coppersmith barbet|Psilopogon haemacephalus
+3|Crested pigeon|Ocyphaps lophotes
+3|Crimson sunbird|Aethopyga siparaja
+3|Crowned eagle|African Crowned Eagle|Crowned hawk-eagle|Stephanoaetus coronatus
+3|Dark-eyed junco|Junco hyemalis
+3|Dead Sea sparrow|Passer moabiticus
+3|Egyptian nightjar|Caprimulgus aegyptius
+3|Eskimo curlew|Esquimaux curlew|northern curlew|Numenius borealis
+3|Glaucous-winged gull|Larus glaucescens
+3|Glossy black cockatoo|Calyptorhynchus lathami
+3|Gray catbird|Dumetella carolinensis|Grey Catbird
+3|Great tinamou|Tinamus major
+3|Greater prairie-chicken|Tympanuchus cupido
+3|Güldenstädt's redstart|Phoenicurus erythrogaster|Phoenicurus erythrogastrus|White-winged Redstart
+3|Hildebrandt's starling|Drudwen Hildebrandt|Lamprotornis hildebrandti|Spreo hildebrandti
+3|Himalayan cuckoo|Cuculus saturatus
+3|Himalayan quail|Ophrysia superciliosa
+3|Imperial amazon|Amazona imperialis|Imperial Parrot|Sisserou
+3|Indian spotted eagle|Clanga hastata
+3|Italian sparrow|Cisalpine sparrow|Passer italiae
+3|Least sandpiper|Calidris minutilla
+3|Malabar grey hornbill|Ocyceros griseus|Tockus griseus
+3|Malabar pied hornbill|Indian Pied Hornbill|Anthracoceros coronatus
+3|Mangrove warbler|Golden Warbler|Setophaga petechia
+3|Marmora's warbler|Curruca sarda
+3|North Island brown kiwi|Apteryx mantelli
+3|Oriental scops owl|Otus sunia
+3|Pale rockfinch|Carpospiza brachydactyla
+3|Pel's fishing owl|Scotopelia peli|Pelis fishing-owl
+3|Pharaoh eagle-owl|Bubo ascalaphus
+3|Piapiac|Ptilostomus afer
+3|Pied heron|Egretta picata
+3|Puna ibis|Plegadis ridgwayi
+3|Red-billed teal|Anas erythrorhyncha
+3|Red-legged seriema|Cariama cristata
+3|Reed cormorant|Phalacrocorax africanus|Microcarbo africanus
+3|Rifleman|Acanthisitta chloris
+3|Royal tern|Sterna maxima|Thalasseus maximus
+3|Satyr tragopan|crimson horned pheasant|Tragopan satyra
+3|See-see partridge|Ammoperdix griseogularis
+3|Semipalmated sandpiper|Calidris pusilla
+3|Silver-breasted broadbill|Serilophus lunatus
+3|Solitary tinamou|Tinamus solitarius
+3|Spectacled warbler|Curruca conspicillata
+3|Spotted eagle-owl|Bubo africanus
+3|Sri Lanka blue magpie|Sri Lanka magpie|Urocissa ornata
+3|Superb starling|Lamprotornis superbus
+3|Swallow-tailed gull|Creagrus furcatus
+3|Tanimbar corella|Cacatua goffiniana|Goffin’s cockatoo
+3|Tooth-billed pigeon|Didunculus strigirostris
+3|Velvet-fronted nuthatch|Sitta frontalis
+3|Verditer flycatcher|Eumyias thalassinus|Indian verditer flycatcher
+3|Western sandpiper|Calidris mauri|Erolia mauri
+3|White-bellied woodpecker|Dryocopus javensis
+3|White-faced heron|blue heron|Egretta novaehollandiae
+3|White-winged lark|Alauda leucoptera|Melanocorypha leucoptera
+3|Yellow-bellied sapsucker|Sphyrapicus varius
+3|Yellow-headed caracara|M. chimachima|Milvago chimachima|Milvago chimnachima
+3|Ibisbill|Ibidorhyncha struthersii
+3|Limpkin|Aramus guarauna
+3|African collared dove|Streptopelia roseogrisea
+3|African grey hornbill|Lophoceros nasutus
+3|Alagoas curassow|Mitu mitu
+3|Aleutian tern|Sterna aleutica|Onychoprion aleuticus
+3|Andean gull|Chroicocephalus serranus
+3|Antarctic tern|Sterna vittata
+3|Armenian gull|Larus armenicus
+3|Asian emerald cuckoo|Chrysococcyx maculatus
+3|Atlantic yellow-nosed albatross|Thalassarche chlororhynchos
+3|Australian wood duck|Chenonetta jubata|Maned Duck
+3|Baltimore oriole|Icterus galbula
+3|Band-rumped storm petrel|Oceanodroma castro|Madeira storm-petrel|Madeiran Petrel
+3|Banded stilt|Cladorhynchus leucocephalus
+3|Black hornbill|Anthracoceros malayanus
+3|Black-and-red broadbill|Cymbirhynchus macrorhynchos
+3|Black-collared lovebird|Agapornis swindernianus
+3|Black-headed duck|Heteronetta atricapilla
+3|Blossom-headed parakeet|Psittacula roseata
+3|Blue-headed parrot|Pionus menstruus
+3|Brazilian merganser|Mergus octosetaceus
+3|Brown-throated martin|brown-throated sand martin|Riparia paludicola
+3|Cape teal|Anas capensis
+3|Chimney swift|Chaetura pelagica
+3|Common flameback|Common Flamebacked Woodpecker|common goldenback|Dinopium javanense
+3|Common hawk-cuckoo|Hierococcyx varius
+3|Crested auklet|Aethia cristatella
+3|Crested duck|Lophonetta specularioides
+3|Crested goshawk|Accipiter trivirgatus|Lophospiza trivirgata
+3|Crested jayshrike|Platylophus galericulatus|Crested jay
+3|Cuban amazon|Amazona leucocephala
+3|Desert finch|Lichtenstein’s desert finch|Rhodopechys obsolete|Rhodospiza obsoleta
+3|Diamond dove|Geopelia cuneata
+3|Far Eastern curlew|Eastern Curlew|Numenius madagascariensis
+3|Flightless cormorant|Galapagos cormorant|Nannopterum harrisi
+3|Great grebe|Podiceps major
+3|Greater honeyguide|Indicator indicator
+3|Greater yellownape|Greater Yellownape Woodpecker|Picus flavinucha
+3|Green broadbill|Calyptomena viridis
+3|Guinea turaco|Tauraco persa
+3|Huia|Heteralocha acutirostris
+3|Iberian grey shrike|Lanius meridionalis|Southern Grey Shrike
+3|Inca jay|Cyanocorax yncas
+3|Indian cuckoo|Cuculus micropterus
+3|Japanese cormorant|Phalacrocorax capillatus
+3|Japanese night heron|Gorsachius goisagi
+3|Japanese sparrowhawk|Accipiter gularis
+3|Javan hawk-eagle|Nisaetus bartelsi
+3|Jungle myna|Acridotheres fuscus
+3|Kalij pheasant|Lophura leucomelanos|White-crested Kalij pheasant
+3|Laggar falcon|Falco jugger
+3|Lesser fish eagle|Ichthyophaga humilis|Icthyophaga humilis
+3|Lesser florican|Sypheotides indica|Sypheotides indicus
+3|Lesser yellow-headed vulture|Cathartes burrovianus|savannah vulture
+3|Little green pigeon|Treron olax
+3|Long-billed corella|Cacatua (Licmetis) tenuirostris|Cacatua tenuirostris|Long-billed Cockatoo
+3|Long-billed plover|Charadrius placidus
+3|Madagascar fish eagle|Haliaeetus vociferoides
+3|Malayan black magpie|black magpie|Platysmurus leucopterus
+3|Masked finfoot|Heliopais personatus
+3|Mauritius kestrel|Falco punctatus
+3|Olive-tree warbler|Hippolais olivetorum
+3|Orinoco goose|Neochen jubata|Neochen jubatus
+3|Pacific gull|Larus pacificus
+3|Pallid scops owl|Otus brucei
+3|Philippine duck|Anas luzonica
+3|Pink pigeon|Columba mayeri|Nesoenas mayeri
+3|Pinnated bittern|Botaurus pinnatus
+3|Pinyon jay|blue crow|Gymnorhinus cyanocephalus|Maximilian's jay
+3|Plush-crested jay|Cyanocorax chrysops
+3|Ratchet-tailed treepie|Temnurus temnurus
+3|Red-bearded bee-eater|Nyctyornis amicta|Nyctyornis amictus
+3|Red-bellied macaw|Orthopsittaca manilatus
+3|Red-billed oxpecker|Buphagus erythrorhynchus|Buphagus erythrorynchus
+3|Red-crested turaco|Tauraco erythrolophus
+3|Rosy-billed pochard|Netta peposaca
+3|Ruddy-breasted crake|Porzana fusca|Zapornia fusca
+3|Ruffed grouse
+3|Réunion ibis|Reunion Sacred Ibis|Threskiornis solitarius
+3|Sargasso shearwater|Audubon's Shearwater|Audubonis shearwater|Puffinus lherminieri
+3|Silvereye|Zosterops lateralis|wax-eye
+3|Silvery grebe|Podiceps occipitalis
+3|Slender-billed vulture|Gyps tenuirostris
+3|Small pratincole|Glareola lactea
+3|Snail kite|Rostrhamus sociabilis
+3|Solitary snipe|Gallinago solitaria
+3|Sooty gull|Larus hemprichii|Ichthyaetus hemprichii|Larus hemprichi
+3|Southern bald ibis|Geronticus calvus
+3|Southern screamer|Chauna torquata|crested screamer
+3|Speckled mousebird|Colius striatus
+3|Spectacled eider|Somateria fischeri
+3|Spotted whistling duck|Dendrocygna guttata
+3|Spruce grouse|Canachites canadensis|Falcipennis canadensis
+3|Stitchbird|Notiomystis cincta
+3|Stork-billed kingfisher|Pelargopsis capensis
+3|Swamp harrier|Circus approximans|Circus gouldi|kahu
+3|Thick-billed green pigeon|Treron curvirostra
+3|Tiger shrike|Lanius tigrinus
+3|Upland sandpiper|Bartramia longicauda
+3|Vernal hanging parrot|Loriculus vernalis
+3|Verreaux's eagle-owl|Bubo lacteus|giant eagle owl|milky eagle owl
+3|Wattled crane|Bugeranus carunculatus|Grus carunculata
+3|White bellbird|Procnias alba|Procnias albus
+3|White-cheeked pintail|Anas bahamensis
+3|White-necked heron|Ardea pacifica
+3|White-necked raven|Corvus albicollis
+3|White-rumped swift|Apus caffer
+3|Yellow-billed blue magpie|Gold-billed Magpie|Urocissa flavirostris
+3|Yellow-billed cuckoo|Coccyzus americanus
+3|Yellow-billed duck|Anas undulata
+3|Yellow-billed spoonbill|Platalea flavipes
+3|Yellow-faced parrot|Alipiopsitta xanthops|Yellow-faced Amazon
+3|Lesser scaup|Aythya affinis
+3|African harrier-hawk|Polyboroides typus
+3|African olive pigeon|Columba arquatrix
+3|American dipper|Cinclus mexicanus|water ouzel
+3|American woodcock|potato|ditch chicken|Scolopax minor|timberdoodle
+3|Ashy wood pigeon|Columba pulchricollis
+3|Australasian grebe|Australasian little grebe|Tachybaptus novaehollandiae
+3|Australian bustard|Ardeotis australis
+3|Australian shelduck|chestnut-breasted shelduck|mountain duck|Tadorna (Casarca) tadornoides|Tadorna tadornoides
+3|Black noddy|Anous minutus
+3|Black-billed capercaillie|Tetrao urogalloides
+3|Black-faced bunting|Emberiza spodocephala
+3|Black-winged lovebird|Agapornis taranta
+3|Blue-and-white flycatcher|Cyanoptila cyanomelana
+3|Blue-bellied roller|Coracias cyanogaster
+3|Blue-crowned parakeet|Thectocercus acuticaudatus
+3|Blue-faced honeyeater|Bananabird|Entomyzon cyanotis
+3|Blue-headed macaw|Primolius couloni
+3|Blue-throated barbet|Psilopogon asiaticus
+3|Blue-winged macaw|Illiger’s macaw|Primolius maracana
+3|Blue-winged pitta|Pitta moluccensis
+3|Bolle's pigeon|Columba bollii|Dark-tailed laurel pigeon
+3|Brown falcon|Brown Hawk|Falco (Ieracidea) berigora|Falco berigora
+3|Brown snake eagle|Circaetus cinereus
+3|Brown-headed barbet|Psilopogon zeylanicus
+3|Buff-necked ibis|Theristicus caudatus
+3|Bulwer's pheasant|Bulweris pheasant|Lophura bulweri
+3|Capped heron|Pilherodias pileatus|Pilherodius pileatus
+3|Chiloé wigeon|Mareca sibilatrix
+3|Chinese sparrowhawk|Accipiter soloensis
+3|Cinereous bunting|Emberiza cineracea
+3|Clark's grebe|Aechmophorus clarkii
+3|Common bulbul|Pycnonotus barbatus
+3|Common waxbill|Estrilda astrild
+3|Corsican nuthatch|Sitta whiteheadi
+3|Crested eagle|Morphnus guianensis
+3|Dartford warbler|Curruca undata
+3|Desert sparrow|Passer simplex
+3|Dusky broadbill|Corydon sumatranus
+3|Dusky lory|Pseudeos fuscata|white-rumped lory|dusky-orange lory
+3|Dusky thrush|Turdus eunomus
+3|Dwarf bittern|Ixobrychus sturmii
+3|Eastern rock nuthatch|Sitta tephronota
+3|Ethiopian bushcrow|Stresemann's Bushcrow|Zavattariornis stresemanni
+3|Fish crow|Corvus ossifragus
+3|Forster's tern|Sterna forsteri
+3|Fulvous-breasted woodpecker|Dendrocopos macei|Picoides macei|Streak-bellied woodpecker
+3|Gabar goshawk|Micronisus gabar
+3|Glaucous macaw|Anodorhynchus glaucus
+3|Great rosefinch|Caucasian Great Rosefinch|Spotted Great Rosefinch|Carpodacus rubicilla
+3|Great stone-curlew|Great Thick-knee|Esacus recurvirostris
+3|Greater hoopoe-lark|Alaemon alaudipes
+3|Greater yellow-headed vulture|Cathartes melambrotus|forest vulture
+3|Green ibis|Mesembrinibis cayennensis
+3|Grey-winged trumpeter|Psophia crepitans
+3|Guira cuckoo|Guira guira
+3|Halmahera paradise-crow|Paradise crow|Lycocorax pyrrhopterus
+3|Hardhead|Australian white-eyed duck|Aythya australis
+3|Harlequin quail|Coturnix delegorguei
+3|Hawaiian duck|Anas wyvilliana|Koloa duck|koloa maoli
+3|Helmet vanga|Euryceros prevostii
+3|Hooded pitohui|Pitohui dichrous
+3|Inaccessible Island rail|Laterallus rogersi
+3|Indian skimmer|Rynchops albicollis
+3|Junin grebe|Podiceps taczanowskii
+3|King bird-of-paradise|Cicinnurus regius
+3|King of Saxony bird-of-paradise|Pteridophora alberti
+3|Labrador duck|Camptorhynchus labradorius|Pied Duck
+3|Lanceolated warbler|Locustella lanceolata
+3|Laurel pigeon|Columba junoniae
+3|Lava gull|Dusky gull|Leucophaeus fuliginosus
+3|Least bittern|Botaurus exilis|Ixobrychus exilis
+3|Lesser coucal|Centropus bengalensis
+3|Lesser roadrunner|Geococcyx velox
+3|Lesser yellownape|Lesser Yellownape Woodpecker|Picus chlorolophus
+3|Little bee-eater|Merops pusillus
+3|Little curlew|Little whimbrel|Numenius minutus
+3|Malagasy pond heron|Ardeola idae|Madagascar pond heron
+3|Marsh owl|Asio capensis
+3|Mrs. Hume's pheasant|Hume's Pheasant|Humeis pheasant|Syrmaticus humaie|Syrmaticus humiae
+3|Nazca booby|Sula granti
+3|Neotropic cormorant|Nannopterum brasilianum|Olivaceous cormorant
+3|New Zealand bellbird|Makomako|Mocker|Anthornis melanura|bellbird|Korimako|Moki-mok|Moko-moko
+3|New Zealand quail|Coturnix novaezelandiae
+3|Nordmann's greenshank|Nordmannis greenshank|Tringa guttifer
+3|Okarito kiwi|Apteryx rowi|Okarito brown kiwi
+3|Olive ibis|Bostrychia olivacea
+3|Omani owl|Hume's Owl|Strix butleri
+3|Oriental bay owl|Phodilus badius
+3|Palawan peacock-pheasant|Polyplectron emphanum|Polyplectron napoleonis
+3|Pallas's rosefinch|Carpodacus roseus
+3|Paradise shelduck|Paradise duck|Tadorna variegata
+3|Paradise tanager|Tangara chilensis|Tangara chiliensis
+3|Pelagic cormorant|Phalacrocorax pelagicus|Urile pelagicus
+3|Peruvian pelican|Pelecanus thagus
+3|Red lory|Eos bornea
+3|Red-faced cormorant|Phalacrocorax urile
+3|Red-headed finch|Amadina erythrocephala|red-headed weaver
+3|Red-headed trogon|Harpactes erythrocephalus
+3|Red-knobbed coot|Fulica cristata
+3|Red-legged kittiwake|Rissa brevirostris
+3|Red-rumped parrot|Psephotus haematonotus
+3|Reddish egret|Egretta rufescens
+3|Reeves's pheasant|Syrmaticus reevesii
+3|Rhinoceros auklet|Cerorhinca monocerata
+3|Rufescent tiger heron|Tigrisoma lineatum
+3|Satin bowerbird|Ptilonorhynchus violaceus
+3|Scissor-tailed kite|Chelictinia riocourii|fork-tailed kite
+3|Senegal coucal|Centropus senegalensis
+3|Seychelles blue pigeon|Alectroenas pulcherrimus
+3|Siberian grouse|Falcipennis falcipennis
+3|Siberian thrush|Turdus sibiricus|Zoothera sibirica|Geokichla sibirica
+3|Silvery-cheeked hornbill|Bycanistes brevis
+3|Slaty-backed gull|Larus schistisagus
+3|Sooty albatross|dark-mantled sooty albatross|Dusky Albatross|Phoebetria fusca
+3|Southern lapwing|Vanellus chilensis|Vanellus chiliensis
+3|Southern pochard|Netta erythrophthalma
+3|Spectacled cormorant|Pallas's cormorant|Phalacrocorax perspicillatus
+3|Spotted owl|Strix occidentalis
+3|Streaked shearwater|Calonectris leucomelas
+3|Swinhoe's pheasant|Lophura swinhoii|Swinhoeis pheasant
+3|Temminck's tragopan|Temminckis tragopan|Tragopan temminckii
+3|Upland buzzard|Buteo hemilasius
+3|Venezuelan troupial|Icterus icterus
+3|Wandering whistling duck|Dendrocygna arcuata
+3|Wedge-tailed shearwater|Ardenna pacifica
+3|Western corella|Cacatua pastinator
+3|Western gull|Larus occidentalis
+3|White-bellied green pigeon|Treron sieboldii
+3|White-cheeked tern|Sterna repressa
+3|White-collared pigeon|Columba albitorques
+3|White-eyed gull|Larus leucophthalmus|Ichthyaetus leucophthalmus
+3|White-fronted bee-eater|Merops bullockoides
+3|White-tufted grebe|Rollandia rolland
+3|Wire-tailed swallow|Hirundo smithii
+3|Wonga pigeon|Leucosarcia melanoleuca
+3|Wood thrush|Hylocichla mustelina
+3|Yellow-crowned night heron|Nyctanassa violacea
+3|African emerald cuckoo|Chrysococcyx cupreus|emerald cuckoo|emerald foliotocole
+3|African finfoot|Podica senegalensis
+3|African grass owl|Tyto capensis
+3|African hawk-eagle|Aquila spilogaster
+3|American oystercatcher|Haematopus palliatus
+3|American pipit|Anthus rubescens|Buff-bellied Pipit
+3|American purple gallinule|Purple Gallinule|Fulica martinica|Porphyrio martinica
+3|Ancient murrelet|Synthliboramphus antiquus
+3|Ascension frigatebird|Fregata aquila
+3|Ashy-headed goose|Chloephaga poliocephala
+3|Asian brown flycatcher|Muscicapa dauurica
+3|Australian masked owl|Tyto novaehollandiae
+3|Australian ringneck|Barnardius zonarius
+3|Banded broadbill|Javan Broadbill|Eurylaimus javanicus
+3|Bare-faced ibis|Phimosus infuscatus
+3|Bay-backed shrike|Lanius vittatus
+3|Black-bellied tern|Sterna acuticauda|Sterna melanogaster
+3|Black-capped donacobius|Black-capped mocking thrush|Donacobius atricapilla
+3|Black-headed jay|Garrulus lanceolatus
+3|Blue-billed curassow|blue-knobbed curassow|Crax alberti
+3|Blue-gray tanager|Blue-grey Tanager|Thraupis episcopus
+3|Blue-throated bee-eater|Merops viridis
+3|Bristle-thighed curlew|Numenius tahitiensis
+3|Bronzed drongo|Dicrurus aeneus
+3|Brown lory|Chalcopsitta duivenbodei
+3|Brown-eared bulbul|Hypsipetes amaurotis
+3|Buller's albatross|Thalassarche bulleri
+3|Bushy-crested hornbill|Anorrhinus galeritus
+3|Cape sparrow|Mossie|Passer melanurus
+3|Caucasian snowcock|Tetraogallus caucasicus
+3|Chatham albatross|Thalassarche eremita
+3|Chestnut-breasted malkoha|Chestnut-breasted malcoha|Phaenicophaeus curvirostris|Rhamphococcyx curvirostris|Zanclostomus curvirostris
+3|Chestnut-winged cuckoo|Clamator coromandus
+3|Chinese crested tern|Sterna bernsteini|Thalasseus bernsteini
+3|Cloven-feathered dove|Drepanoptila holosericea
+3|Common potoo|Nyctibius griseus|poor-me-one|kakuy|urutau
+3|Cooper's hawk|Accipiter cooperii
+3|Crested bunting|Emberiza lathami
+3|Cuban trogon|Priotelus temnurus
+3|Desert lark|Ammomanes deserti
+3|Double-eyed fig parrot|Cyclopsitta diophthalma|Opopsitta diophthalma
+3|Eastern screech owl|Megascops asio|Otus asio
+3|Eastern yellow-billed hornbill|Tockus flavirostris
+3|Elegant crested tinamou|Eudromia elegans
+3|Elliot's pheasant|Elliotis pheasant|Syrmaticus ellioti
+3|Galápagos dove|Zenaida galapagoensis
+3|Giant kingfisher|Megaceryle maxima
+3|Glossy swiftlet|White-bellied swiftlet|Collocalia esculenta
+3|Golden-crowned kinglet|Regulus satrapa
+3|Great curassow|Crax rubra
+3|Great kiskadee|Pitangus sulphuratus
+3|Grey treepie|Dendrocitta formosae
+3|Grey-faced buzzard|Butastur indicus
+3|Grey-headed gull|Chroicocephalus cirrocephalus|gray-hooded gull
+3|Hermit thrush|Catharus guttatus
+3|Himalayan snowcock|Tetraogallus himalayensis
+3|Hooded grebe|Podiceps gallardoi
+3|Kauaʻi ʻōʻō|Moho braccatus
+3|Knobbed hornbill|rhyticeros cassidix|Sulawesi wrinkled hornbill
+3|Koklass pheasant|Pucrasia macrolopha
+3|Large-billed tern|Phaetusa simplex
+3|Lesser bird-of-paradise|Paradisaea minor
+3|Lidth's jay|Amami jay|Garrulus lidthi
+3|Little tinamou|Crypturellus soui
+3|Malleefowl|Leipoa ocellata
+3|Marbled godwit|Limosa fedoa
+3|Masked lapwing|Vanellus (Lobipluvia) miles|Vanellus miles
+3|Metallic pigeon|Columba vitiensis
+3|Morepork|Tasmanian spotted owl|Ninox novaeseelandiae
+3|Mottled wood owl|Strix ocellata
+3|New Zealand scaup|Aythya novaeseelandiae|Black teal
+3|Night parrot|Pezoporus occidentalis|Geopsittacus occidentalis|Night Parakeet|Spinifex Parrot
+3|Norfolk kākā|Nestor productus
+3|Northern bobwhite|Bobwhite Quail|Colinus virginianus
+3|Northern red-billed hornbill|Tockus erythrorhynchus
+3|Orange minivet|Scarlet minivet|Pericrocotus flammeus
+3|Orange-bellied parrot|Neophema chrysogaster|Neophema (Neonanodes) chrysogaster
+3|Orange-headed thrush|Geokichla citrina
+3|Papuan eagle|Harpyopsis novaeguineae|New Guinea harpy eagle
+3|Pearl kite|Gampsonyx swainsonii
+3|Plaintive cuckoo|Cacomantis merulinus
+3|Plumbeous ibis|Theristicus caerulescens
+3|Pygmy falcon|African pygmy falcon|P. semitorquatus|Polihierax semitorquatus
+3|Radjah shelduck|Radjah radjah|Raja Shelduck|Tadorna radjah
+3|Rail-babbler|Eupetes macrocerus|Malaysian rail-babbler
+3|Red-and-yellow barbet|Trachyphonus erythrocephalus
+3|Red-billed firefinch|Lagonosticta senegala
+3|Red-billed leiothrix|Leiothrix lutea|Pekin nightingale|Pekin robin
+3|Red-breasted nuthatch|Sitta canadensis
+3|Red-cheeked cordon-bleu|Uraeginthus bengalus
+3|Red-eyed vireo|Vireo olivaceus
+3|Red-fan parrot|Deroptyus accipitrinus
+3|Red-headed lovebird|Red-faced lovebird|Agapornis pullarius
+3|Red-spectacled amazon|Red-spectacled Parrot|Amazona pretrei
+3|Red-throated wryneck|African wryneck|Jynx ruficollis|rufous-necked wryneck
+3|Red-winged tinamou|Rhynchotus rufescens
+3|Ribbon-tailed astrapia|Astrapia mayeri
+3|Ross's turaco|Lady Ross’s turaco|Musophaga rossae|Tauraco rossae
+3|Rufous hummingbird|Selasphorus rufus
+3|Rüppell's warbler|Curruca ruppeli
+3|Saint Vincent amazon|Amazona guildingii|St Vincent Amazon
+3|Sceloglaux albifacies|Laughing owl
+3|Semicollared flycatcher|Ficedula semitorquata
+3|Senegal thick-knee|Burhinus senegalensis
+3|Sharp-tailed ibis|Cercibis oxycerca
+3|Siberian blue robin|Larvivora cyane
+3|Siberian long-tailed rosefinch|Long-tailed Rosefinch
+3|Sombre pigeon|Cryptophaps poecilorrhoa
+3|Song sparrow|Melospiza melodia
+3|South African shelduck|Tadorna cana
+3|Southern fulmar
+3|Spectacled owl|Pulsatrix perspicillata
+3|Splendid fairywren|Malurus splendens
+3|Spot-bellied eagle-owl|Bubo nipalensis
+3|Spot-breasted ibis|Bostrychia rara
+3|Sri Lanka grey hornbill|Ocyceros gingalensis|Tockus gingalensis
+3|Streaked weaver|Ploceus manyar
+3|Swinhoe's snipe|Gallinago megala
+3|Tree swallow|Tachycineta bicolor
+3|Turkestan ground jay|Pander's Ground Jay|Podoces panderi
+3|Violet turaco|Tauraco violaceus|Musophaga violacea
+3|Vogelkop lophorina|Superb Bird-of-paradise|Lophorina superba|greater lophorina|greater superb bird-of-paradise
+3|Water thick-knee|Burhinus vermiculatus
+3|White-crowned sparrow|Zonotrichia leucophrys
+3|White-faced storm petrel|Pelagodroma marina|White-faced Petrel
+3|White-headed pigeon|Columba leucomela
+3|White-shouldered ibis|Pseudibis davisoni
+3|White-throated toucan|Ramphastos tucanus
+3|Willie wagtail|Rhipidura (Sauloprocta) leucophrys|Rhipidura leucophrys
+3|Wreathed hornbill|Rhyticeros undulates|Rhyticeros undulatus
+3|Wrybill|Anarhynchus frontalis
+3|Yellow-crowned woodpecker|Leiopicus mahrattensis
+3|Yellow-throated sparrow|Gymnoris xanthocollis
+3|Sunbittern|Eurypyga helias|little peacock|peacock bittern
+3|African black duck|Anas sparsa
+3|African pitta|Pitta angolensis|Angola pitta
+3|Algerian nuthatch|Sitta ledanti
+3|Amazon kingfisher|Chloroceryle amazona
+3|Amazonian motmot|Blue-crowned Motmot|Momotus momota
+3|Amsterdam albatross|Diomedea amsterdamensis
+3|Asian house martin|Delichon dasypus
+3|Asian palm swift|Cypsiurus balasiensis
+3|Auckland teal|Auckland Island Teal|Anas aucklandica|New Zealand teal
+3|Australian king parrot|Alisterus scapularis
+3|Bananaquit|Coereba flaveola
+3|Bare-throated tiger heron|Tigrisoma mexicanum
+3|Bat falcon|Falco rufigularis
+3|Baudin's black cockatoo|Zanda baudinii
+3|Bicolored hawk|Bicoloured Hawk|Accipiter bicolor
+3|Black wood pigeon|Black pigeon|Columba janthina|Japanese Wood Pigeon
+3|Black-and-yellow broadbill|Eurylaimus ochromalus
+3|Black-casqued hornbill|Black-casqued Wattled Hornbill|Ceratogymna atrata
+3|Black-chested snake eagle|black-breasted snake eagle|Circaetus pectoralis
+3|Black-rumped waxbill|Estrilda troglodytes
+3|Blue pitta|Hydrornis cyaneus
+3|Blue-fronted amazon|Blue-fronted Parrot|Amazona aestiva
+3|Blue-headed quail-dove|Starnoenas cyanocephala
+3|Blue-naped mousebird|Urocolius macrourus
+3|Bonin wood pigeon|Columba versicolor
+3|Bornean bristlehead|Pityriasis gymnocephala
+3|Campbell teal|Anas nesiotis|Campbell Island teal
+3|Chestnut sparrow|Emin Bey's sparrow|Passer eminibey
+3|Chihuahuan raven|Corvus cryptoleucus
+3|Chinese francolin|Francolinus pintadeanus
+3|Chinese hwamei|Garrulax canorus|Hwamei
+3|Citril finch|Carduelis citrinella|Serinus citrinella
+3|Cliff swallow|American Cliff Swallow|Petrochelidon pyrrhonota
+3|Common bronzewing|Phaps (Phaps) chalcoptera|Phaps chalcoptera
+3|Common grackle|Quiscalus quiscula
+3|Copper pheasant|yamadori|Soemmerring's Pheasant|Syrmaticus soemmerringii
+3|Curl-crested manucode|Manucodia comrii
+3|Cut-throat finch|Amadina fasciata
+3|Dark chanting goshawk|Melierax metabates
+3|Double-barred finch|Taeniopygia bichenovii
+3|Edwards's pheasant|Edwardsis pheasant|Lophura edwardsi
+3|Elegant tern|Sterna elegans|Thalasseus elegans
+3|Evening grosbeak|Hesperiphona vespertina
+3|Fairy pitta|Pitta nympha
+3|Fiji goshawk|Accipiter rufitorques
+3|Forest raven|Corvus tasmanicus
+3|Galapagos hawk|Buteo galapagoensis
+3|Giant coot|Fulica gigantea
+3|Golden-collared macaw|Primolius auricollis|Yellow-collared Macaw
+3|Goldie's bird-of-paradise|Paradisaea decora
+3|Great eared nightjar|Lyncornis macrotis
+3|Greater kestrel|Falco rupicoloides
+3|Green aracari|Pteroglossus viridis
+3|Green-cheeked parakeet|green-cheeked conure|Pyrrhura molinae
+3|Grey-capped pygmy woodpecker|Grey-capped Woodpecker|Picoides canicapillus|Dendrocopos canicapillus|Yungipicus canicapillus
+3|Grey-headed bullfinch|Pyrrhula erythaca
+3|Grey-headed kingfisher|Halcyon leucocephala
+3|Grey-headed swamphen|Porphyrio poliocephalus
+3|Guianan cock-of-the-rock|Rupicola rupicola
+3|Heart-spotted woodpecker|Hemicircus canente
+3|Helmeted curassow|morthern-helmeted curassow|Northern helmeted curassow|Pauxi pauxi
+3|Himalayan bulbul|Pycnonotus leucogenys
+3|Horned guan|Oreophasis derbianus
+3|Imperial shag|Leucocarbo atriceps
+3|Indian courser|Cursorius coromandelicus
+3|Indigo bunting|Passerina cyanea
+3|Jambu fruit dove|Ptilinopus jambu|Ramphiculus jambu
+3|Knysna turaco|Tauraco corythaix
+3|Krüper's nuthatch|Sitta krueperi|Krueper's nuthatch
+3|Lake duck|Oxyura vittata
+3|Large hawk-cuckoo|Hierococcyx sparverioides
+3|Large rock martin|Rock Martin|Ptyonoprogne fuligula
+3|Laughing falcon|Herpetotheres cachinnans
+3|Lavender waxbill|Glaucestrilda caerulescens
+3|Least auklet|Aethia pusilla
+3|Lesser prairie-chicken|Tympanuchus pallidicinctus
+3|Light-vented bulbul|Pycnonotus sinensis
+3|Little black cormorant|Phalacrocorax sulcirostris
+3|Little pied cormorant|Microcarbo melanoleucos|Phalacrocorax melanoleucos
+3|Little raven|Corvus mellori
+3|Little shearwater|Puffinus assimilis
+3|Long-tailed koel|Long-tailed Cuckoo|Urodynamis taitensis
+3|Luzon bleeding-heart|Gallicolumba luzonica
+3|Magellanic plover|Pluvianellus socialis
+3|Magellanic woodpecker|Campephilus magellanicus
+3|Masked duck|Nomonyx dominicus|Oxyura dominica
+3|Meller's duck|Anas melleri
+3|New Zealand dotterel|New Zealand Plover|Anarhynchus obscurus|Charadrius obscurus|Pluvialis obscura
+3|Northern grey-headed sparrow|Passer griseus
+3|Northern house wren|House Wren|Troglodytes aedon
+3|Northern jacana
+3|Northern screamer|Chauna chavaria
+3|Oriental hobby|Falco severus
+3|Ovenbird|Seiurus aurocapillus|Seiurus aurocapilla
+3|Pallas's grasshopper warbler|Helopsaltes certhiola
+3|Papuan hawk-owl|Uroglaux dimorpha
+3|Philippine pitta|Red-bellied Pitta|Erythropitta erythrogaster
+3|Pigeon guillemot|Cepphus columba
+3|Pin-tailed green pigeon|Treron apicauda
+3|Pin-tailed whydah|Vidua macroura
+3|Plain chachalaca|Ortalis vetula
+3|Plain-backed sparrow|Passer flaveolus|Pegu sparrow
+3|Purple-rumped sunbird|Leptocoma zeylonica
+3|Radde's accentor|Prunella ocularis
+3|Rainbow pitta|Pitta iris
+3|Red shoveler|Spatula platalea
+3|Red-bellied woodpecker|Melanerpes carolinus
+3|Red-billed streamertail|Trochilus polytmus
+3|Red-tailed amazon|Amazona brasiliensis
+3|Relict gull|Ichthyaetus relictus
+3|Roadside hawk|Rupornis magnirostris|Buteo magnirostris
+3|Ruby-topaz hummingbird|Chrysolampis mosquitus
+3|Ruddy-headed goose|Chloephaga rubidiceps
+3|Rufous-bellied heron|Ardeola rufiventris
+3|Rufous-bellied woodpecker|Picoides hyperythrus|Dendrocopos hyperythrus
+3|Rufous-throated dipper|Cinclus schulzii
+3|Semipalmated plover|Charadrius semipalmatus
+3|Short-billed dowitcher|Limnodromus griseus
+3|Sirkeer malkoha|Taccocua leschenaultii
+3|Slaty-headed parakeet|Psittacula himalayana
+3|Slaty-legged crake|Rallina eurizonoides
+3|Small minivet|Pericrocotus cinnamomeus
+3|Snowy sheathbill|Chionis albus|Chionis alba
+3|Solitary sandpiper|Tringa solitaria
+3|Sooty-headed bulbul|Pycnonotus aurigaster
+3|Speckled wood pigeon|Columba hodgsonii
+3|Spotted nothura|Nothura maculosa
+3|Spotted sandgrouse|Pterocles senegallus
+3|Spotted wood owl|Strix seloputo
+3|Standardwing bird-of-paradise|Semioptera wallacii|Wallace’s standardwing
+3|Stephanie's astrapia|Princess Stephanie's Astrapia|Astrapia stephaniae
+3|Streaked scrub warbler|Levant scrub warbler|Scotocerca inquieta
+3|Stripe-backed bittern|Ixobrychus involucris
+3|Swamp francolin|Francolinus gularis
+3|Tasmanian nativehen|Tribonyx mortierii
+3|Tataupa tinamou|Crypturellus tataupa
+3|Topknot pigeon|Lopholaimus antarcticus
+3|Torresian crow|Corvus orru
+3|Trumpet manucode|Phonygammus keraudrenii
+3|Tundra bean goose|Anser serrirostris
+3|Twelve-wired bird-of-paradise|Seleucidis melanoleucus
+3|Wahlberg's eagle|Hieraaetus wahlbergi
+3|Walden's hornbill|Rhabdotorrhinus waldeni
+3|Wattled ibis|Bostrychia carunculata
+3|Western parotia|Parotia sefilata|western
+3|Western tragopan|Tragopan melanocephalus
+3|White woodpecker|Melanerpes candidus
+3|White-backed night heron|Gorsachius leuconotus
+3|White-bellied treepie|Dendrocitta leucogastra
+3|White-breasted nuthatch|Sitta carolinensis
+3|White-browed wagtail|Motacilla maderaspatensis
+3|White-crested tiger heron|Tigriornis leucolopha|Tigriornis leucolophus
+3|White-tailed kite|Elanus leucurus
+3|White-throated sparrow|Zonotrichia albicollis
+3|White-throated tinamou|Tinamus guttatus
+3|White-winged woodpecker|Dendrocopos leucopterus|Picoides leucopterus
+3|Woodland kingfisher|Halcyon senegalensis
+3|Yelkouan shearwater|Puffinus yelkouan
+3|Yellow-billed oxpecker|Buphagus africanus
+3|Yellow-crowned amazon|Amazona ochrocephala
+3|Yellow-wattled lapwing|Vanellus malabaricus
+3|Cinnamon teal|Spatula cyanoptera
+3|Torrent duck|Merganetta armata
+3|African cuckoo|Cuculus gularis
+3|African goshawk|Accipiter tachiro
+3|African hobby|Falco cuvierii
+3|African oystercatcher|African black oystercatcher|Haematopus moquini
+3|African pied wagtail|Motacilla aguimp
+3|Allen's gallinule|Porphyrio alleni
+3|Antarctic prion|Pachyptila desolata
+3|Asian glossy starling|Aplonis panayensis
+3|Atitlán grebe|Podilymbus gigas
+3|Australasian shoveler|Spatula rhynchotis
+3|Bare-faced curassow|Crax fasciolata
+3|Barred cuckoo-dove|Macropygia unchall
+3|Beach stone-curlew|Australian stone-curlew|Beach Thick-knee|Esacus magnirostris
+3|Belcher's gull|Larus belcheri
+3|Black caracara|Daptrius ater
+3|Black scoter|American scoter|Melanitta americana
+3|Black turnstone|Arenaria melanocephala
+3|Black-and-white warbler|Mniotilta varia
+3|Black-and-white-casqued hornbill|Bycanistes subcylindricus
+3|Black-chested buzzard-eagle|Geranoaetus melanoleucus
+3|Black-chinned hummingbird|Archilochus alexandri
+3|Black-headed parrot|Pionites melanocephala|Pionites melanocephalus
+3|Black-necked aracari|Pteroglossus aracari
+3|Black-nest swiftlet|Aerodramus maximus
+3|Blacksmith lapwing|Blacksmith Plover|Vanellus armatus
+3|Blue lorikeet|blue lory|Vini peruviana
+3|Blue nuthatch|Sitta azurea
+3|Blue-billed duck|Oxyura australis
+3|Blue-billed teal|Hottentot teal|Spatula hottentota
+3|Blue-capped ifrit|Ifrita kowaldi
+3|Blue-crowned hanging parrot|Loriculus galgulus
+3|Blyth's hornbill|Rhyticeros plicatus
+3|Blyth's tragopan|Blythis tragopan
+3|Bornean crested fireback|Crested Fireback|Lophura ignita
+3|Bourke's parrot|Neophema bourkii|Neopsephotus bourkii
+3|Brown bullfinch|Pyrrhula nipalensis
+3|Brown goshawk|Accipiter fasciatus
+3|Brown teal|Anas chlorotis
+3|Brown-throated sunbird|Anthreptes malacensis
+3|Buff-banded rail|Gallirallus philippensis|Hypotaenidia philippensis
+3|California quail|Lophortyx californica|California valley quail|Californian quail|Callipepla californica|valley quail
+3|Calliope hummingbird|Selasphorus calliope
+3|Cape crow|black crow|Corvus capensis
+3|Cape eagle-owl|Bubo capensis
+3|Cape sugarbird|Promerops cafer
+3|Caspian snowcock|Tetraogallus caspius
+3|Chestnut-bellied sandgrouse|Pterocles exustus
+3|Chestnut-eared aracari|Pteroglossus castanotis
+3|Chilean skua|Stercorarius chilensis
+3|Chinese bamboo partridge|Bambusicola thoracica|Bambusicola thoracicus
+3|Chinese monal|Lophophorus lhuysii
+3|Chinese nuthatch|Sitta villosa|snowy-browed nuthatch
+3|Cinnamon-chested bee-eater|Merops oreobates
+3|Colombian grebe|Podiceps andinus
+3|Common nighthawk|bullbat|Chordeiles minor
+3|Common poorwill|Phalaenoptilus nuttallii
+3|Common yellowthroat|Geothlypis trichas
+3|Congo pied hornbill|African Pied Hornbill|Lophoceros fasciatus
+3|Crimson-winged finch|Eurasian Crimson-winged Finch|Rhodopechys sanguinea|Rhodopechys sanguineus
+3|Cuban tody|Todius multicolor|Todus multicolor
+3|Curl-crested aracari|Pteroglossus beauharnaesii
+3|Daurian redstart|Phoenicurus auroreus
+3|Dickcissel|Spiza americana
+3|Diederik cuckoo|Diederic Cuckoo|Chrysococcyx caprius
+3|Dolphin gull|Leucophaeus scoresbii|Magellan gull
+3|Double-banded plover|Anarhynchus bicinctus|Charadrius bicinctus
+3|Dupont's lark|Chersophilus duponti
+3|Dusky grouse|Dendragapus obscurus
+3|Eared dove|Zenaida auriculata
+3|Eastern kingbird|Tyrannus tyrannus
+3|Eaton's pintail|Anas eatoni|Kerguelen pintail
+3|Eversmann's redstart|Phoenicurus erythronotus|Rufous-backed Redstart
+3|Fan-tailed raven|Corvus rhipidurus
+3|Fiji parrotfinch|Erythrura pealii
+3|Flesh-footed shearwater
+3|Florida scrub jay|Aphelocoma coerulescens
+3|Forest owlet|Athene blewitti
+3|Garden sunbird|Cinnyris jugularis
+3|Giant scops owl|Otus gurneyi
+3|Great sparrow|Passer motitensis
+3|Great-tailed grackle|Quiscalus mexicanus
+3|Green-backed tit|Parus monticolus
+3|Green-billed malkoha|Greater green-billed malcoha|Phaenicophaeus tristis|Rhopodytes tristis
+3|Green-headed tanager|Tangara seledon
+3|Grey tinamou|Tinamus tao
+3|Grey-tailed tattler|Tringa (Heteroscelus) brevipes|Tringa brevipes
+3|Gunnison sage-grouse|Gunnison Grouse|Centrocercus minimus
+3|Hairy woodpecker|Picoides villosus|Leuconotopicus villosus
+3|Hartlaub's duck|Pteronetta hartlaubi|Pteronetta hartlaubii
+3|Hoary-headed grebe|Poliocephalus poliocephalus
+3|Indian nuthatch|Sitta castanea
+3|Jamaican tody|Todus todus
+3|Japanese wagtail|Motacilla grandis
+3|Javan lapwing|Javanese wattled lapwing|Vanellus macropterus|Vanellus macroterus
+3|Javan leafbird
+3|Jungle babbler|Argya striata
+3|Jungle bush quail|Perdicula asiatica
+3|Kerguelen petrel|Aphrodroma brevirostris
+3|Large green pigeon|Treron capellei
+3|Large-tailed nightjar|Caprimulgus macrurus
+3|Laysan duck|Anas laysanensis
+3|Least tern|Sternula antillarum|Sterna antillarum
+3|Lemon dove|Columba larvata|Aplopelia larvata
+3|Lesser jacana|Microparra capensis|it's the smallest pieces in the jacanidae famillies
+3|Loggerhead shrike|Lanius ludovicianus|butcherbird|migrant shrike
+3|Maccoa duck|Oxyura maccoa
+3|Magnificent bird-of-paradise|Cicinnurus magnificus
+3|Magnificent riflebird|Ptiloris magnificus|Ptiloris (Craspedophora) magnificus
+3|Malagasy turtle dove|Nesoenas picturatus
+3|Marbled murrelet|Brachyramphus marmoratus
+3|Mauritius fody|Foudia rubra
+3|Menetries's warbler|Curruca mystacea
+3|Meyer's parrot|Poicephalus meyeri
+3|Mikado pheasant|Syrmaticus mikado
+3|Musk duck|Biziura lobata
+3|Namaqua sandgrouse|Pterocles namaqua
+3|Nanday parakeet|Aratinga nenday|Nandayus nenday|Nanday conure
+3|New Zealand dabchick|New Zealand Grebe|Poliocephalus rufopectus
+3|New Zealand pipit|Anthus novaeseelandiae
+3|Noisy miner|Manorina melanocephala|Manorina (Myzantha) melanocephala
+3|Northern carmine bee-eater|Merops nubicus
+3|Olive bee-eater|Madagascan bee-eater|Merops superciliosus
+3|Olive warbler|Peucedramus taeniatus
+3|Orange-breasted trogon|Harpactes oreskios
+3|Orange-winged amazon|Amazona amazonica
+3|Oriental cuckoo|Cuculus optatus
+3|Pacific baza|Aviceda subcristata
+3|Paddyfield pipit|Anthus rufulus
+3|Palawan hornbill|Anthracoceros marchei
+3|Pale chanting goshawk|Melierax canorus
+3|Pale-billed flowerpecker|Dicaeum erythrorhynchos
+3|Pale-headed rosella|Platycercus (Violania) adscitus|Platycercus adscitus
+3|Pied imperial pigeon|Ducula (Myristicivora) bicolor|Ducula bicolor
+3|Pink-eared duck|Malacorhynchus membranaceus
+3|Prairie falcon|Falco mexicanus
+3|Prothonotary warbler|Protonotaria citrea
+3|Przevalski's finch|Pink-tailed Rosefinch|Urocynchramus pylzowi
+3|Purple roller|Coracias naevia|Coracias naevius
+3|Purple-crested turaco|Gallirex porphyreolophus|Musopgaga porphyreolopha|Tauraco porphyreolophus|Violet-crested turaco
+3|Racket-tailed roller|Coracias spatulatus|Racquet-tailed roller
+3|Racket-tailed treepie|Crypsirina temia
+3|Red rail|Aphanapteryx bonasia|Mauritius rail
+3|Red-faced mousebird|Urocolius indicus
+3|Red-lored amazon|Amazona autumnalis|Yellow-cheeked Amazon|Yellow-cheeked Parrot
+3|Red-throated caracara|Ibycter americanus
+3|Regent parrot|Polytelis anthopeplus
+3|Rock sandpiper|Calidris ptilocnemis|Erolia ptilocnemis
+3|Rose-breasted grosbeak|Pheucticus ludovicianus
+3|Ruby-cheeked sunbird|Chalcoparia singalensis
+3|Ruby-crowned kinglet|Corthylio calendula|Regulus calendula
+3|Rufous-bellied thrush|Turdus rufiventris
+3|Rufous-collared sparrow|Zonotrichia capensis|Zonotrichia capenensis
+3|Sacred kingfisher|Todiramphus sanctus
+3|Scaly-sided merganser|Mergus squamatus
+3|Scarlet-backed flowerpecker|Dicaeum cruentatum
+3|Scheepmaker's crowned pigeon|Southern Crowned Pigeon
+3|Scissor-tailed flycatcher|Tyrannus forficatus
+3|Sharp-tailed grouse|Tympanuchus phasianellus
+3|Sharpbill|Oxyruncus cristatus
+3|Slaty egret|Egretta vinaceigula
+3|Smooth-billed ani|Crotophaga ani
+3|South Island oystercatcher|Haematopus finschi
+3|Sparkling violetear|Colibri coruscans
+3|Speckled piculet|Picumnus innominatus
+3|Spectacled guillemot|Cepphus carbo
+3|Spotted elachura|Elachura formosa|Spotted Wren Babbler
+3|Spotted thick-knee|Burhinus capensis|Cape thick-knee
+3|Straw-headed bulbul|Pycnonotus zeylanicus
+3|Sultan tit|Melanochlora sultanea
+3|Surfbird|Aphriza virgata|Calidris virgata
+3|Swift parrot|Lathamus discolor
+3|Swinhoe's storm petrel|Hydrobates monorhis|Swinhoe's Petrel
+3|Sykes's warbler|Iduna rama
+3|Tawny fish owl|Ketupa flavipes
+3|Tawny frogmouth|Podargus strigoides|Frogmouth
+3|Tenerife blue chaffinch|Fringilla teydea
+3|Thekla's lark|Galerida theklae
+3|Three-wattled bellbird|Procnias tricarunculata|Procnias tricarunculatus
+3|Tibetan snowcock|Tetraogallus tibetanus
+3|Tickell's brown hornbill|Austen's Brwon Hornbill|Anorrhinus tickelli|Ptilolaemus tickelli|Tickell's hornbill
+3|Titicaca grebe|Rollandia microptera|Rollandia micropterum|Short-winged grebe|Titicaca flightless grebe
+3|Trocaz pigeon|Columba trocaz
+3|Turquoise parrot|Neophema pulchella
+3|Turquoise-browed motmot|Eumomota superciliosa
+3|Undulated tinamou|Crypturellus undulatus
+3|Wedge-tailed green pigeon|Treron sphenurus
+3|Western long-tailed hornbill|White-crested Hornbill|Horizocerus albocristatus
+3|Whiskered auklet|Aethia pygmaea
+3|White-backed mousebird|Colius colius
+3|White-capped dipper|Cinclus leucocephalus
+3|White-crested turaco|Tauraco leucolophus
+3|White-crowned wheatear|Oenanthe leucopyga|White-crowned black wheatear
+3|White-eared night heron
+3|White-eyed buzzard|Butastur teesa
+3|White-fronted amazon|White-fronted Parrot|Amazona albifrons
+3|White-fronted tern|Sterna striata
+3|White-headed mousebird|Colius leucocephalus
+3|White-throated bee-eater|Merops albicollis
+3|White-winged fairywren|Malurus (Musciparus) leucopterus|Malurus leucopterus
+3|Wilson's snipe|Gallinago delicata
+3|Wrinkled hornbill|Rhabdotorrhinus corrugatus
+3|Yellow-browed bunting|Emberiza chrysophrys
+3|Yellow-headed amazon|Amazona oratrix|Yellow-headed Parrot
+3|Yellow-streaked lory|Yellowish-streaked Lory|Chalcopsitta sintillata|Chalcopsitta scintillata|Yellowish-streaked loly
+3|Afep pigeon|Columba unicincta
+3|African broadbill|Smithornis capensis
+3|African cuckoo-hawk|African baza|Aviceda cuculoides
+3|African firefinch|Lagonosticta rubricata
+3|African rail|Rallus caerulescens
+3|Albert's lyrebird|Menura (Harriwhitea) alberti|Menura alberti
+3|Amazonian umbrellabird|Cephalopterus ornatus
+3|American redstart|Setophaga ruticilla
+3|American tree sparrow|Spizella arborea|Spizelloides arborea
+3|Andaman cuckoo-dove|Macropygia rufipennis
+3|Andaman wood pigeon|Columba palumboides
+3|Andean avocet|Recurvirostra andina
+3|Arabian partridge|Alectoris melanocephala
+3|Ashy minivet|Pericrocotus divaricatus
+3|Asian rosy finch|Leucosticte arctoa
+3|Australasian darter|Anhinga novaehollandiae|Australian darter
+3|Australian hobby|Falco (Falco) longipennis|Falco longipennis|Little Falcon
+3|Australian pied cormorant|Karuhiruhi|Large pied cormorant|Phalacrocorax varius|Pied Cormorant|Pied Shag
+3|Azure-breasted pitta|Pitta steerii
+3|Bare-throated bellbird|Procnias nudicollis
+3|Barred parakeet|Bolborhynchus lineola
+3|Bay woodpecker|Blythipicus pyrrhotis
+3|Beautiful nuthatch|Sitta formosa
+3|Bernier's teal|Anas bernieri|Madagascar teal
+3|Black bulbul|Asian black bulbul|Hypsipetes leucocephalus
+3|Black cuckoo|Cuculus clamosus
+3|Black jacobin|Florisuga fusca
+3|Black partridge|Black wood partridge|Melanoperdix nigra
+3|Black-bellied bustard|Lissotis melanogaster|Black-bellied Korhaan
+3|Black-bellied storm petrel|Fregetta tropica
+3|Black-billed amazon|Amazona agilis
+3|Black-breasted buzzard|Hamirostra melanosternon
+3|Black-capped chickadee|Poecile atricapillus
+3|Black-collared hawk|Busarellus nigricollis
+3|Black-faced cormorant|Phalacrocorax (Anacarbo) fuscescens|Phalacrocorax fuscescens
+3|Black-fronted piping guan|Pipile jacutinga
+3|Black-headed lapwing|Vanellus tectus
+3|Black-headed woodpecker|Picus erythropygius
+3|Black-legged seriema|Chunga burmeisteri
+3|Black-throated magpie-jay|Cyanocorax colliei
+3|Blackpoll warbler|Setophaga striata
+3|Blue waxbill|Uraeginthus angolensis
+3|Blue-breasted kingfisher|Halcyon malimbica
+3|Blue-rumped parrot|Psittinus cyanurus
+3|Blyth's hawk-eagle|Nisaetus alboniger|Spizaetus alboniger
+3|Brandt's cormorant|Phalacrocorax penicillatus|Urile penicillatus
+3|Brewer's blackbird|Euphagus cyanocephalus
+3|Broad-billed prion|Pachyptila vittata
+3|Brown mesite|Mesitornis unicolor
+3|Brown quail|Synoicus ypsilophorus
+3|Brown-hooded gull|Brown-headed gull|Chroicocephalus maculipennis
+3|Brown-hooded kingfisher|Halcyon albiventris
+3|Brush bronzewing|Phaps elegans
+3|Bull-headed shrike|Lanius bucephalus
+3|Bush stone-curlew|Burhinus grallarius
+3|Cabot's tragopan|Cabotis tragopan|Tragopan caboti
+3|Cactus wren|Campylorhynchus brunneicapillus
+3|Cape cormorant|Cape shag|Phalacrocorax capensis
+3|Cape weaver|Ploceus capensis
+3|Cardinal lory|Chalcopsitta cardinalis
+3|Chestnut bunting|Emberiza rutila
+3|Chestnut teal|Anas castanea
+3|Chinese grey shrike|Lanius sphenocercus
+3|Clamorous reed warbler|Acrocephalus stentoreus
+3|Collared aracari|Pteroglossus torquatus
+3|Collared owlet|Glaucidium brodiei
+3|Collared sparrowhawk|Accipiter (Paraspizias) cirrocephalus|Accipiter cirrocephalus|Australian collared sparrow hawk
+3|Common ground dove|Columbina passerina
+3|Costa's hummingbird|Calypte costae|Calypte Costa Rica ke
+3|Crimson topaz|Topaza pella
+3|Crowned cormorant|Microcarbo coronatus|Phalacrocorax coronatus
+3|Cuban crow|Corvus nasicus
+3|Darjeeling woodpecker|Picoides darjellensis|Dendrocopos darjellensis
+3|Downy woodpecker|Dryobates pubescens
+3|Elegant parrot|Neophema (Neonanodes) elegans|Neophema elegans
+3|Elegant pitta|Pitta elegans
+3|Emerald-spotted wood dove|Turtur chalcospilos
+3|Falkland steamer duck|Tachyeres brachypterus
+3|Fasciated tiger heron|Tigrisoma fasciatum
+3|Ferruginous partridge|Caloperdix oculea|Caloperdix oculeus
+3|Festive amazon|Amazona festiva
+3|Forest bittern|Zonerodius heliosylus
+3|Fork-tailed drongo|common drongo|Dicrurus adsimilis|Savanna drongo
+3|Gila woodpecker|Melanerpes uropygialis
+3|Golden-crested myna|Ampeliceps coronatus
+3|Golden-plumed parakeet|Golden-plumed Conure|Leptopsittaca branickii|Leptosittaca branickii
+3|Golden-shouldered parrot|Psephotellus chrysopterygius
+3|Gray-headed kite|Leptodon cayanensis
+3|Great slaty woodpecker|Mulleripicus pulverulentus
+3|Green wood hoopoe|Phoeniculus purpureus|Red billed wood hoopoe
+3|Grey go-away-bird|Crinifer concolor|Corythaixoides concolor
+3|Grey teal|Anas gracilis|gray teal
+3|Grey-breasted mountain toucan|Andigena hypoglauca
+3|Ground woodpecker|Geocolaptes olivaceus
+3|Guanay cormorant|Leucocarbo bougainvilliorum
+3|Gurney's pitta|Hydrornis gurneyi
+3|Hartlaub's turaco|Tauraco hartlaubi
+3|Horned sungem|Heliactin bilophus
+3|House finch|Haemorhous mexicanus|Carpodacus mexicanus|Mexican house finch|Mexican rosefinch
+3|Indian golden oriole|Oriolus kundoo
+3|Indian nightjar|Caprimulgus asiaticus|ice-bird
+3|Indochinese green magpie|Cissa hypoleuca
+3|Invisible rail|Drummer Rail|Habroptila wallacii|Rallus wallaci|Wallace's rail
+3|Jackson's hornbill|Tockus jacksoni
+3|Javan banded pitta|Hydrornis guajanus
+3|Javan green magpie|Cissa thalassina
+3|Javan kingfisher|blue-bellied kingfisher|halcyon cyanoventris|java kingfisher
+3|Jungle owlet|Glaucidium radiatum
+3|Kittlitz's plover|Anarhynchus pecuarius|Charadrius pecuarius
+3|Klaas's cuckoo|Chrysococcyx klaas|Klaas' Cuckoo
+3|Lawes's parotia|Parotia lawesii|Six-wired bird of paradise
+3|Least grebe|Tachybaptus dominicus
+3|Lewis's woodpecker|Melanerpes lewis
+3|Lichtenstein's sandgrouse|Lichtensteinis sandgrouse|Pterocles lichtensteinii
+3|Lineated barbet|Psilopogon lineatus|Psilpogon lineatus
+3|Little crow|Corvus bennetti
+3|Little sparrowhawk|Accipiter minullus
+3|Little spiderhunter|Arachnothera longirostra
+3|Lizard buzzard|Kaupifalco monogrammicus
+3|Long-tailed ground dove|Uropelia campestris
+3|Long-tailed honey buzzard|Henicopernis longicauda
+3|Madagascar serpent eagle|Eutriorchis astur
+3|Malagasy kestrel|Falco newtoni
+3|Malayan peacock-pheasant|Malaysian peacock-pheasant|Polyplectron malacense
+3|Mariana fruit dove|Marianas fruit dove|Ptilinopus rosecapilla|Ptilinopus roseicapilla
+3|Mexican violetear|Colibri thalassinus|Green Violetear
+3|Mindanao lorikeet|Trichoglossus johnstoniae
+3|Mongolian finch|Bucanetes mongolicus|Mongolian trumpeter finch|Rhodopechys mongolica
+3|Mountain scops owl|Otus spilocephalus
+3|Moussier's redstart|Phoenicurus moussieri
+3|New Zealand bittern|Botaurus novaezelandiae|Ixobrychus novaezelandiae
+3|New Zealand rock wren|Rock wren|Xenicus gilviventris
+3|Noisy pitta|Pitta versicolor
+3|Northern rosella|Platycercus (Violania) venustus|Platycercus venustus
+3|Olrog's gull|Larus atlanticus|Olrogis gull
+3|Orange-breasted sunbird|Anthobaphes violacea|Necterinia violacea
+3|Orange-cheeked waxbill|Estrilda melpoda
+3|Orange-footed scrubfowl|Megapodius reinwardt
+3|Ornate hawk-eagle|Spizaetus ornatus
+3|Ornate lorikeet|Trichoglossus ornatus
+3|Painted bunting|Passerina ciris|Pope
+3|Pale-capped pigeon|Columba punicea
+3|Pallas's reed bunting|Emberiza pallasi|Pallas's Bunting
+3|Papuan mountain pigeon|Bare-eyed mountain pigeon|Gymnophaps albertisii
+3|Paradise parrot|Psephotellus pulcherrimus
+3|Parakeet auklet|Aethia psittacula
+3|Philippine eagle-owl|Bubo philippensis
+3|Pink-headed fruit dove|Pink-necked fruit dove|Ptilinopus porphyrea|Ptilinopus porphyreus
+3|Piping plover|Charadrius melodus
+3|Princess parrot|Polytelis alexandrae
+3|Puna tinamou|Tinamotis pentlandii
+3|Purple martin|Progne subis|purple swallow
+3|Purple-winged roller|celebes roller|coracias temminckii|sulawesi roller|temminck's roller.
+3|Raso lark|Alauda razae
+3|Red fody|Foudia madagascariensis
+3|Red siskin|Carduelis cucullata|Cardenatilo de Venezuela, Cardenalito; Rosaito
+3|Red-bellied parrot|Poicephalus rufiventris
+3|Red-billed curassow|Red-knobbed Curassow|Crax blumenbachii
+3|Red-browed amazon|Amazona rhodocorytha
+3|Red-crowned amazon|Red-crowned Parrot|Amazona viridigenalis
+3|Red-eyed dove|Streptopelia semitorquata
+3|Red-legged cormorant|Poikilocarbo gaimardi
+3|Red-legged crake|Rallina fasciata
+3|Red-necked amazon|Amazona arausiaca
+3|Red-necked avocet|Recurvirostra novaehollandiae
+3|Red-shouldered hawk|Buteo lineatus
+3|Red-throated bee-eater|Merops bulocki
+3|Red-throated parrotfinch|Erythrura psittacea
+3|River lapwing|Vanellus duvaucelii
+3|Rose-crowned fruit dove|Ptilinopus regina
+3|Rufous-vented chachalaca|Ortalis ruficauda
+3|Rüppell's parrot|Poicephalus rueppellii
+3|Saffron toucanet|Pteroglossus bailloni
+3|Saint Helena hoopoe|St. Helena Hoopoe|giant hoopoe|Upupa antaios
+3|Salvin's albatross|Thalassarche salvini
+3|Saunders's gull|Chroicocephalus saundersi|Saundersilarus saundersi|Larus saundersi
+3|Saw-billed hermit|Ramphodon naevius
+3|Seychelles kestrel|Falco araeus
+3|Shore plover|Charadrius novaeseelandiae
+3|Siamese fireback|Diard's Fireback|Lophura diardi
+3|Sickle-billed vanga|Falculea palliata
+3|Sinaloa crow|Corvus sinaloae
+3|Snoring rail|Aramidopsis plateni|Platen’s rail|Rallus plateni
+3|Socorro dove|Grayson's dove|Zenaida graysoni
+3|Sooty falcon|Falco concolor
+3|South American tern|Sterna hirundinacea
+3|Southern masked weaver|Ploceus velatus
+3|Southern red bishop|Euplectes orix
+3|Spot-billed toucanet|Selenidera maculirostris
+3|Spot-tailed sparrowhawk|accipiter trinotatus|spot-tailed goshawk
+3|Spotted shag|Phalacrocorax punctatus|Stictocarbo punctatus
+3|Streak-throated woodpecker|Picus xanthopygaeus
+3|Striated caracara|Phalcoboenus australis
+3|Striolated bunting|Emberiza striolata|House bunting
+3|Stygian owl|Asio stygius
+3|Sula lorikeet|Citrine Lorikeet|Trichoglossus flavoviridis
+3|Sulu hornbill|Anthracoceros montani
+3|Sunda crow|Slender-billed Crow|Corvus enca
+3|Swainson's hawk|Buteo swainsoni
+3|Swainson's thrush|Catharus ustulatus
+3|Swallow-tailed bee-eater|Merops hirundineus
+3|São Tomé ibis|Bostrychia bocagei|Bostrychia olivacea bocagei|Dwarf olive ibis
+3|Temminck's lark|Eremophila bilopha
+3|Thicket tinamou|Crypturellus cinnamomeus
+3|Tickell's thrush|Turdus unicolor
+3|Trumpeter hornbill|Bycanistes bucinator
+3|Upcher's warbler|Hippolais languida
+3|Variable oystercatcher|Haematopus unicolor|Tōrea pango
+3|Varied tit|Sittiparus varius
+3|Vietnamese crested argus|Crested argus|Rheinardia ocellata|Rheinartia ocellata
+3|Violet-necked lory|Eos squamata
+3|Visayan hornbill|Penelopides panini|Tarictic Hornbill|Visayan tarictic
+3|Von der Decken's hornbill
+3|Wallace's hawk-eagle|Spizaetus nanus|Nisaetus nanus
+3|Wandering tattler|Tringa (Heteroscelus) incana|Tringa incana
+3|White hawk|Pseudastur albicollis
+3|White-bellied nothura|Nothura boraquira
+3|White-browed crake|Poliolimnas cinereus|Amaurornis cinerea|Porzana cinerea
+3|White-browed tit-warbler|Leptopoecile sophiae
+3|White-capped bunting|Emberiza stewarti
+3|White-cheeked starling|Spodiopsar cineraceus
+3|White-cheeked turaco|Menelikornis leucotis|Tauraco leucotis
+3|White-fronted falconet|Microhierax latifrons
+3|White-fronted scops owl|Otus sagittatus
+3|White-necked rockfowl|Bare-headed rockfowl|Picathartes gymnocephalus|white-necked picathartes
+3|White-shouldered starling|Chinese starling|Sturnia sinensis|Sturnus sinensis
+3|White-throated fantail|Rhipidura albicollis
+3|White-tipped sicklebill|Eutoxeres aquila
+3|White-winged scoter|Melanitta deglandi
+3|Whitehead's broadbill|Calyptomena whiteheadi
+3|Wood snipe|Gallinago nemoricola
+3|Yellow-billed shrike|Corvinella corvina
+3|Yellow-billed teal|Anas flavirostris
+3|Yellow-eared parrot|Ognorhynchus icterotis
+3|Yellow-rumped warbler|Myrtle Warbler|Setophaga coronata
+3|Yellow-shouldered amazon|Amazona barbadensis|Yellow-shouldered parrot
+3|Yellow-vented bulbul|Pycnonotus goiavier
+3|ʻIʻiwi|Drepanis coccinea
+3|Palmchat|Dulus dominicus
+3|Plains-wanderer|Pedionomus torquatus
+3|African blue tit|Cyanistes teneriffae|Tenerife blue tit
+3|African pygmy kingfisher|Ispidina picta
+3|African silverbill|Euodice cantans
+3|African wood owl|Strix woodfordii
+3|Allen's hummingbird|Selasphorus sasin
+3|Altai accentor|Prunella himalayana
+3|Altai snowcock|Tetraogallus altaicus
+3|Andaman serpent eagle|Spilornis elgini
+3|Andean flicker|Colaptes rupicola
+3|Andean lapwing|Vanellus resplendens
+3|Apostlebird|Struthidea cinerea
+3|Ashy bulbul|Hemixos flavala
+3|Ashy-crowned sparrow-lark|Eremopterix griseus
+3|Azure jay|Cyanocorax coeruleus
+3|Banded bay cuckoo|Cacomantis sonneratii
+3|Banggai crow|Corvus unicolor
+3|Bare-legged owl|Margarobyas lawrencii
+3|Barred eagle-owl|Malay Eagle-owl|Bubo sumatranus
+3|Bermuda petrel|Cahow|Pterodroma cahow
+3|Black coucal|Centropus grillii
+3|Black currawong|Strepera (Strepera) fuliginosa|Strepera fuliginosa
+3|Black oystercatcher|Haematopus bachmani
+3|Black robin|Chatham Island black robin|Chatham Island robin|Petroica traversi
+3|Black sicklebill|Epimachus fastuosus|Epimachus fastosus
+3|Black sparrowhawk|Accipiter melanoleucus|Black goshawk
+3|Black-backed woodpecker|Picoides arcticus
+3|Black-billed gull|Chroicocephalus bulleri
+3|Black-billed sicklebill|Drepanornis albertisi
+3|Black-breasted weaver|Ploceus benghalensis
+3|Black-browed reed warbler|Acrocephalus bistrigiceps
+3|Black-throated munia|Lonchura kelaarti
+3|Blue coua|Coua caerulea
+3|Blue noddy|Procelsterna cerulea
+3|Blue-banded pitta|Pitta arquata|Erythropitta arquata|Pitta arcuata
+3|Blue-cheeked amazon|Amazona dufresniana|blue-cheeked parrot|Dufresne's amazon
+3|Blue-eyed ground dove|Columbina cyanopis
+3|Blue-headed pitta|Hydrornis baudii|Pitta baudi
+3|Blue-naped pitta|Hydrornis nipalensis|Pitta nipalensis
+3|Blue-winged parakeet|Malabar parakeet|Psittacula columboides
+3|Bogotá rail|Rallus semiplumbeus
+3|Bounty shag|Phalacrocorax ranfurlyi|Leucocarbo ranfurlyi
+3|Brazilian tinamou|Crypturellus strigulosus
+3|Bronzy hermit|Glaucis aeneus
+3|Brown accentor|Prunella fulvescens
+3|Brown sicklebill|Epimachus meyeri
+3|Brown-headed parrot|Poicephalus cryptoxanthus
+3|Brown-winged kingfisher|Pelargopsis amauroptera
+3|Bushwren|mātuhituhi|Xenicus longipes
+3|Böhm's bee-eater|Merops boehmi
+3|California scrub jay|Aphelocoma californica
+3|Cape shoveler|Spatula smithii
+3|Carola's parotia|Parotia carolae|Queen Carola's Parotia
+3|Chaco owl|Strix chacoensis
+3|Channel-billed cuckoo|Scythrops novaehollandiae
+3|Chattering lory|Lorius garrulus
+3|Chestnut-breasted mannikin|Lonchura castaneothorax
+3|Chestnut-tipped toucanet|Aulacorhynchus derbianus
+3|Choco toucan|Ramphastos brevis
+3|Choiseul pigeon|Microgoura meeki
+3|Cinereous tinamou|Crypturellus cinereus
+3|Cinnamon-headed green pigeon|Treron fulvicollis
+3|Collared lory|Vini solitaria
+3|Crested guinea fowl|Guttera pucherani
+3|Crested quetzal|Pharomachrus antisianus
+3|Crimson-rumped toucanet|Aulacorhynchus haematopygus
+3|Crow-billed drongo|Crow-biled Drongo|Dicrurus annectans|Dicrurus annectens
+3|Crowned hornbill|Lophoceros alboterminatus
+3|Cuban green woodpecker|Xiphidiopicus percussus
+3|Darwin's nothura|Nothura darwinii
+3|Delalande's coua|Snail-eating Coua|Coua delalandei
+3|Dwarf tinamou|least tinamou|Taoniscus nanus
+3|Eastern grass owl|Australasian Grass Owl|Tyto longimembris
+3|Eastern marsh harrier|Circus spilonotus
+3|Eastern spinebill|Acanthorhynchus tenuirostris
+3|Edwards's fig parrot|Psittaculirostris edwardsii
+3|Elegant imperial pigeon|blue-tailed Imperial-pigeon|Ducula concinna
+3|Emerald-chinned hummingbird|Abeillia abeillei
+3|Emperor bird-of-paradise|Paradisaea guilielmi
+3|Fearful owl|Nesasio solomonensis
+3|Finsch's wheatear|Oenanthe finschii
+3|Fischer's turaco|Fischeris turaco|Tauraco fischeri
+3|Fox kestrel|Falco alopex
+3|Frances's sparrowhawk|Accipiter francesiae|Accipiter francesii
+3|Fuegian steamer duck|Tachyeres pteneres
+3|Giant pitta|Pitta caerulea|Hydrornis caeruleus
+3|Golden-fronted woodpecker|Melanerpes aurifrons
+3|Graceful pitta|Pitta venusta|Erythropitta venusta
+3|Gray-cheeked thrush|Catharus minimus|Grey-cheeked Thrush
+3|Great bowerbird|Chlamydera nuchalis
+3|Great-winged petrel|Pterodroma macroptera
+3|Green kingfisher
+3|Green pygmy goose|Nettapus (Cheniscus) pulchellus|Nettapus pulchellus
+3|Green-backed twinspot|Mandingoa nitidula|Green Twinspot
+3|Grenada dove|Leptotila wellsi
+3|Grey goshawk|Accipiter novaehollandiae
+3|Grey-backed shrike|Lanius tephronotus
+3|Grey-cowled wood rail|Aramides cajaneus|Grey-necked Wood Rail
+3|Grey-crested tit|Lophophanes dichrous
+3|Grey-legged tinamou|Crypturellus duidae
+3|Guianan toucanet|Selenidera piperivora|Guyana toucanet
+3|Hartlaub's bustard|Lissotis hartlaubii
+3|Heermann's gull|Larus heermanni
+3|Himalayan woodpecker|Dendrocopos himalayensis|Picoides himalayensis
+3|Hooded treepie|Crypsirina cucullata
+3|Hook-billed kite|Chondrohierax uncinatus
+3|Horned curassow|Pauxi unicornis|southern helmeted curassow
+3|Horsfield's bush lark|Mirafra javanica
+3|Hume's short-toed lark|Calandrella acutirostris
+3|Iago sparrow|Passer iagoensis
+3|Iberian chiffchaff|Phylloscopus ibericus
+3|Indian robin|Copsychus fulicatus
+3|Japanese bush warbler|Horornis diphone
+3|Japanese green woodpecker|Picus awokera
+3|Japanese waxwing|Bombycilla japonica
+3|Javan blue-banded kingfisher|Blue-banded Kingfisher|Alcedo euryzona
+3|Jerdon's courser|Rhinoptilus bitorquatus
+3|Jouanin's petrel|Bulweria fallax
+3|Jungle nightjar|Caprimulgus indicus
+3|Kelp goose|Chloephaga hybrida
+3|Kerguelen tern|Sterna virgata
+3|Lesser noddy|Anous tenuirostris
+3|Levaillant's woodpecker|Picus vaillantii
+3|Lilac-crowned amazon|Amazona finschi
+3|Little cuckoo-dove|Macropygia ruficeps
+3|Little eagle|Hieraaetus (Hieraaetus) morphnoides|Hieraaetus morphnoides
+3|Long-billed curlew|Numenius americanus
+3|Long-billed partridge|Rhizothera longirostris
+3|Long-tailed glossy starling|Lamprotornis caudatus
+3|Long-tailed paradise whydah|Vidua paradisaea
+3|Long-tailed parakeet|Psittacula longicauda
+3|Long-tailed widowbird|Euplectes progne|Kaffir finch
+3|Lyall's wren|Stephens Island Wren|Xenicus lyalli
+3|Madagascar jacana|Actophilornis albinucha
+3|Madagascar plover|Anarhynchus thoracicus|Charadrius thoracicus
+3|Madagascar pochard|Aythya innotata|Madagascan pochard
+3|Magpie shrike|Urolestes melanoleucus
+3|Magpie-lark|Grallina cyanoleuca
+3|Malagasy sacred ibis|Threskiornis bernieri
+3|Mangrove pitta|Pitta megarhyncha
+3|Mariana crow|aga|Corvus kubaryi
+3|Maroon woodpecker|Blythipicus rubiginosus
+3|Maroon-bellied parakeet|Pyrrhura frontalis
+3|Marvelous spatuletail|Loddigesia mirabilis|Marvellous Spatuletail juju
+3|Mascarene parrot|Mascarinus mascarin|Mascarinus mascarinus
+3|Mauritius blue pigeon|Alectroenas nitidissimus
+3|Meadow bunting|Emberiza cioides
+3|Mindanao hornbill|Penelopides affinis
+3|Moluccan king parrot|Alisterus amboinensis
+3|Moluccan megapode|Moluccan Scrubfowl|Eulipoa wallacei
+3|Monteiro's hornbill|Tockus monteiri
+3|Mottled duck|Anas fulvigula
+3|Mountain parakeet|Psilopsiagon aurifrons
+3|Musk lorikeet|Glossopsitta concinna
+3|Nankeen kestrel|Falco (Tinnunculus) cenchroides|Falco cenchroides
+3|Nocturnal curassow|Nothocrax urumutum
+3|Northern black korhaan|White-quilled Korhaan|Afrotis afraoides
+3|Northern emerald toucanet|Emerald Toucanet|Aulacorhynchus prasinus
+3|Northern saw-whet owl|Aegolius acadicus
+3|Orange-bellied leafbird|Chloropsis hardwickii
+3|Oriental plover|Anarhynchus veredus|Charadrius (Eupoda) veredus|Charadrius veredus
+3|Ovambo sparrowhawk|Accipiter ovampensis|Ovampo sparrowhawk
+3|Pacific imperial pigeon|Ducula pacifica
+3|Pale-billed hornbill|Lophoceros pallidirostris
+3|Palestine sunbird|Cinnyris osea|Northern Orange-tufted sunbird
+3|Patagonian tinamou|Tinamotis ingoufi
+3|Pied falconet|Microhierax melanoleucos|Microhierax melanoleucus
+3|Pied goshawk|Accipiter albogularis
+3|Pink-throated twinspot|Hypargos margaritatus
+3|Piping crow|Corvus typicus
+3|Plain swift|Apus unicolor
+3|Puerto Rican tanager|Nesospingus speculiferus
+3|Purple-bearded bee-eater|celebes bee-eater|Meropogon forsteni
+3|Red-and-blue lory|Eos histrio
+3|Red-backed mousebird|Colius castanotus
+3|Red-billed malkoha|Phaenicophaeus javanicus|Zanclostomus javanicus
+3|Red-crested cardinal|Paroaria coronata
+3|Red-throated twinspot|Hypargos niveoguttatus
+3|Reddish hermit|Phaethornis ruber
+3|Ringed kingfisher|Megaceryle torquata
+3|Rosy bee-eater|Merops malimbicus
+3|Rouget's rail|Rougetis rail|Rougetius rougetii
+3|Ruddy cuckoo-dove|Macropygia emiliana
+3|Rufous piculet|Sasia abnormis
+3|Rufous-tailed jacamar|Galbula ruficauda
+3|Rufous-tailed lark|Ammomanes phoenicura
+3|Rusty tinamou|Crypturellus brevirostris
+3|Rusty-naped pitta|Hydrornis oatesi
+3|Saffron finch|Sicalis flaveola
+3|Saint Helena plover|St. Helena Plover|Anarhynchus sanctaehelenae|Charadrius sanctaehelenae
+3|Saint Lucia amazon|Amazona versicolor|Saint Lucia parrot
+3|Savannah sparrow|Passerculus sandwichensis
+4|Scaly-bellied woodpecker|Picus squamatus
+4|Scarlet finch|Carpodacus sipahi|Haematospiza sipahi
+4|Scarlet tanager|Piranga olivacea
+4|Schalow's turaco|Tauraco schalowi
+4|Sharp-shinned hawk|Accipiter striatus
+4|Shiny cowbird|Molothrus bonariensis
+4|Short-tailed paradigalla|Paradigalla brevicauda
+4|Silver teal|Spatula versicolor
+4|Silver-eared mesia|Leiothrix argentauris
+4|Silvery pigeon|Columba argentina
+4|Slaty-breasted tinamou|Crypturellus boucardi
+4|Small-billed tinamou|Crypturellus parvirostris
+4|Snowy-crowned tern|Sterna trudeaui
+4|Soft-plumaged petrel|Pterodroma mollis
+4|Somali pigeon|Columba oliviae|Somali Pigeon Bird|Somali stock dove
+4|South Georgia pipit|Anthus antarcticus
+4|Southern black korhaan|Afrotis afra
+4|Spectacled tern|Sterna lunata|Onychoprion lunatus
+4|Spix's guan|Penelope jacquacu
+4|Sri Lanka green pigeon|Pompadour Green Pigeon|Treron pompadora
+4|Streaked spiderhunter|Arachnothera magna
+4|Striated grassbird|Megalurus palustris
+4|Stripe-breasted woodpecker|Dendrocopos atratus|Picoides atratus
+4|Stubble quail|Coturnix pectoralis
+4|Sulawesi pygmy woodpecker|Yungipicus temminckii
+4|Superb fruit dove|Ptilinopus superbus
+4|Swallow-tailed hummingbird|Eupetomena macroura
+4|Tahiti swallow|Hirundo tahitica
+4|Tamaulipas crow|Corvus imparatus
+4|Thick-billed flowerpecker|Dicaeum agile
+4|Thick-billed ground pigeon|Trugon terrestris
+4|Thick-billed parrot|Rhynchopsitta pachyrhyncha
+4|Tiny hawk|Microspizias superciliosus|Accipiter superciliosus|Falco superciliosus|Hieraspiza superciliosa
+4|Tristan albatross|Diomedea dabbenena
+4|Tucumán amazon|Amazona tucumana
+4|Velvet asity|Philepitta castanea
+4|Violet-eared waxbill|Granatina granatina
+4|Wattled broadbill|Sarcophanops steerii|Eurylaimus steerii
+4|Western banded snake eagle|Circaetus cinerascens
+4|Western bluebird|Sialia mexicana
+4|Western meadowlark
+4|Whiskered pitta|Pitta kochi|Erythropitta kochi
+4|Whistling kite|Haliastur sphenurus
+4|White-breasted guinea fowl|Agelastes meleagrides
+4|White-capped redstart|Phoenicurus leucocephalus
+4|White-collared kite|Leptodon forbesi
+4|White-winged dove|Zenaida asiatica
+4|White-winged guan|Penelope albipennis
+4|Willet|Catoptrophorus semipalmatus|Tringa semipalmata
+4|Woodpecker finch|Camarhynchus pallidus
+4|Wrenthrush|Zeledonia coronata
+4|Yellow-bellied sunbird-asity|Neodrepanis hypoxantha|Yellow-bellied asity
+4|Yellow-eared toucanet|Selenidera spectabilis
+4|Yellow-headed blackbird|Xanthocephalus xanthocephalus
+4|Yellow-legged buttonquail|Turnix tanki
+4|Yellow-naped amazon|Amazona auropalliata
+4|Yellow-throated bunting|Emberiza elegans
+4|Yellow-vented green pigeon|Treron seimundi
+4|Yucatan jay|Cyanocorax yucatanicus
+4|Abyssinian owl|Asio abyssinicus
+4|African palm swift|Cypsiurus parvus
+4|African paradise flycatcher|Terpsiphone viridis
+4|African scops owl|Otus senegalensis
+4|American bushtit|bushtit|Psaltriparus minimus
+4|Andaman crake|Rallina canningi
+4|Andaman drongo|Dicrurus andamanensis
+4|Angola lark|Mirafra angolensis
+4|Antillean crested hummingbird|Orthorhyncus cristatus
+4|Arfak astrapia|Astrapia nigra
+4|Auckland Island merganser|Auckland merganser|Mergus australis
+4|Austral parakeet|Enicognathus ferrugineus
+4|Azores bullfinch|Pyrrhula murina|Pyrrhula pyrrhula murina|São Miguel bullfinch
+4|Banded kingfisher|Lacedo pulchella
+4|Barred tinamou|Crypturellus casiquiare
+4|Bartlett's tinamou|Crypturellus bartletti
+4|Black falcon|Falco (Hierofalco) subniger|Falco subniger
+4|Black hawk-eagle|Spizaetus tyrannus
+4|Black-billed cuckoo|Coccyzus erythropthalmus
+4|Black-billed mountain toucan|Andigena nigrirostris
+4|Black-billed turaco|Tauraco schuetti|Tauraco schuettii
+4|Black-capped bulbul|Rubigula melanictera
+4|Black-capped lory|Lorius lory
+4|Black-headed oriole|Oriolus larvatus
+4|Black-headed waxbill|Estrilda atricapilla
+4|Black-mantled goshawk|Accipiter melanochlamys
+4|Black-necked stilt|Himantopus mexicanus
+4|Black-tailed trogon|Trogon melanurus
+4|Black-thighed falconet|Microhierax fringillarius
+4|Black-throated bushtit|Aegithalos concinnus|Black-throated tit
+4|Black-winged lory|Eos cyanogenia
+4|Black-winged petrel|Pterodroma (Cookilaria) nigripennis|Pterodroma nigripennis
+4|Blackish oystercatcher|Haematopus ater
+4|Blue manakin|Chiroxiphia caudata
+4|Blue-bellied parrot|Triclaria malachitacea
+4|Blue-breasted bee-eater|Merops variegatus
+4|Blue-crowned lorikeet|Vini australis
+4|Blue-crowned trogon|Trogon curucui
+4|Blue-faced parrotfinch|Erythrura trichroa|Erythrura (Acalanthe) trichroa
+4|Blue-fronted redstart|Phoenicurus frontalis
+4|Blue-naped parrot|Tanygnathus lucionensis
+4|Blue-spotted wood dove|Turtur afer|Turtur aferer
+4|Blue-streaked lory|Eos reticulata|Trichoglossus reticulatus
+4|Blue-winged minla|Actinodura cyanouroptera
+4|Blue-winged parrot|Neophema chrysostoma|Blue-banded Grass-parakeet|Blue-banded Parakeet|Neophema (Neonanodes) chrysostoma
+4|Bronze-winged duck|Speculanas specularis|Anas specularis
+4|Bronze-winged parrot|Pionus chalcopterus
+4|Brown crake|Amaurornis akool|Zapornia akool
+4|Brown eared pheasant|Crossoptilon mantchuricum
+4|Brown thrasher|Toxostoma rufum
+4|Brown-backed needletail|Brown Needletail|Brown spinetailed swift|Hirundapus giganteus
+4|Campo flicker|Colaptes campestris
+4|Capuchinbird|Perissocephalus tricolor
+4|Caracara cheriway|northern crested caracara|Caracara plancus cheriway|C. p. cheriway|C. plancus cheriway
+4|Cardinal quelea|Quelea cardinalis
+4|Cardinal woodpecker|Dendropicos fuscescens
+4|Cassin's auklet|Ptychoramphus aleuticus
+4|Cerulean kingfisher|alcedo coerulescens|small blue kingfisher
+4|Chaco eagle|Buteogallus coronatus|Crowned Eagle|Crowned Solitary Eagle|Spizaetus coronatus
+4|Chestnut woodpecker|Celeus elegans
+4|Chestnut-eared bunting|Emberiza fucata
+4|Chilean tinamou|Nothoprocta perdicaria
+4|Chinese grouse|Tetrastes sewerzowi
+4|Chipping sparrow|Spizella passerina
+4|Chocolate-backed kingfisher|Halcyon badia
+4|Clay-colored thrush|Turdus grayi
+4|Common babbler|Argya caudata
+4|Common diving petrel|Pelecanoides urinatrix
+4|Common sunbird-asity|Neodrepanis coruscans|sunbird asity
+4|Crane hawk|Geranospiza caerulescens
+4|Cream-colored woodpecker|Celeus flavus
+4|Crested drongo|Dicrurus forficatus
+4|Crested francolin|Dendroperdix sephaena
+4|Crested guan|Penelope purpurascens
+4|Crested shelduck|Tadorna cristata
+4|Crimson finch|Neochmia phaeton
+4|Crimson-bellied parakeet|Pyrrhura perlata
+4|Crimson-headed partridge|Haematortyx sanguiniceps
+4|Crimson-rumped waxbill|Estrilda rhodopyga|rosy-rumped waxbill
+4|Crimson-winged woodpecker|Picus puniceus
+4|Crinkle-collared manucode|Manucodia chalybatus
+4|Crowned sandgrouse|Pterocles coronatus
+4|Cuban emerald|Chlorostilbon ricordii
+4|Cuban parakeet|Psittacara euops
+4|Curl-crested jay|Curl-crested Jaya|Cyanocorax cristatellus
+4|Cyprus warbler|Curruca melanothorax
+4|Dark-necked tailorbird|Orthotomus atrogularis
+4|Dark-rumped rosefinch|Carpodacus edwardsii
+4|Dark-sided flycatcher|Muscicapa sibirica
+4|Daurian starling|Agropsar sturninus|Sturnus sturninus
+4|Dusky munia|Lonchura fuscans
+4|Dwarf jay|Cyanolyca nana|Cyanolyca nanus
+4|Eastern Bonelli's warbler|Phylloscopus orientalis
+4|Eastern chanting goshawk|Melierax poliopterus
+4|Eastern phoebe|Sayornis phoebe
+4|Ethiopian swallow|Hirundo aethiopica
+4|Fairy prion|Pachyptila turtur
+4|Ferruginous hawk|Buteo regalis
+4|Fiery topaz|Topaza pyra
+4|Fiery-billed aracari|Pteroglossus frantzii
+4|Fiery-throated hummingbird|Panterpe insignis
+4|Fiji petrel|Pseudobulweria macgillivrayi
+4|Fire-breasted flowerpecker|Dicaeum ignipectus
+4|Flores crow|Corvus florensis
+4|Forest kingfisher|Todiramphus macleayii|Todiramphus (Lazulena) macleayii
+4|Fox sparrow|Red Fox Sparrow|Passerella iliaca
+4|Giant nuthatch
+4|Giant wood rail|Aramides ypecaha
+4|Golden-capped parakeet|Aratinga auricapilla|Aratinga auricapillus|Golden-capped conure
+4|Golden-collared toucanet|Selenidera reinwardtii
+4|Golden-tailed woodpecker|Campethera abingoni
+4|Grauer's broadbill|African green broadbill|Pseudocalyptomena graueri
+4|Great Nicobar serpent eagle|Spilornis klossi
+4|Great myna|Acridotheres grandis
+4|Green hermit|Phaethornis guy
+4|Green parakeet|Psittacara holochlorus
+4|Green-rumped parrotlet|Forpus passerinus
+4|Grey gull|Gray Gull|Larus modestus|Leucophaeus modestus
+4|Grey-backed fiscal|Lanius excubitoroides
+4|Grey-backed storm petrel|Garrodia nereis
+4|Grey-bellied hawk|Accipiter poliogaster
+4|Grey-cheeked green pigeon|Treron griseicauda
+4|Grey-headed parakeet|Psittacula finschii
+4|Grey-winged blackbird|Gray-winged Blackbird|Turdus boulboul
+4|Ground parrot|Eastern Ground Parrot|Pezoporus wallicus
+4|Guadalupe caracara|Caracara lutosa
+4|Guaiabero|Bolbopsittacus lunulatus
+4|Guam rail|Hypotaenidia owstoni|Rallus owstoni|Gallirallus owstoni
+4|Hair-crested drongo|Dicrurus hottentottus
+4|Hemprich's hornbill|Lophoceros hemprichii
+4|Himalayan flameback|Himalayan Flamebacked Woodpecker|Dinopium shorii
+4|Hylocitrea|Hylocitrea bonensis|olive-flanked whistler|yellow-flanked whistler
+4|Inca dove|Columbina inca|Mexican dove|Scardafella inca
+4|Indian blue robin|Larvivora brunnea
+4|Iranian ground jay|Pleske's Ground Jay|Podoces pleskei
+4|Ivory-breasted pitta|Pitta maxima
+4|Jamaican crow|Corvus jamaicensis
+4|Jandaya parakeet|Aratinga jandaya
+4|Japanese murrelet|Crested murrelet|Synthliboramphus wumizusume
+4|Javan plover|Anarhynchus javanicus|Charadrius javanicus
+4|Kashmir nuthatch|Sitta cashmirensis
+4|Kenya sparrow|Passer rufocinctus
+4|Laced woodpecker|Picus vittatus
+4|Large fig parrot|Psittaculirostris desmarestii|Cyclopsitta desmarestii
+4|Latham's snipe|Capella hardwickii|Gallinago hardwickii
+4|Lesser nothura|Nothura minor
+4|Lesser racket-tailed drongo|Dicrurus remifer
+4|Letter-winged kite|Elanus scriptus
+4|Little kingfisher|Ceyx pusillus
+4|Long-whiskered owlet|Xenoglaux loweryi
+4|Lord Howe woodhen|Hypotaenidia sylvestris|Gallirallus sylvestris|Lord Howe Island woodhen|Lord Howe wood rail|Rallus sylvestris
+4|Madagascar blue pigeon|Alectroenas madagascariensis
+4|Madagascar buzzard|Buteo brachypterus
+4|Madagascar cuckoo|Cuculus rochii
+4|Madagascar cuckoo-hawk|Aviceda madagascariensis
+4|Madagascar grebe|Tachybaptus pelzelnii
+4|Madagascar green pigeon|Madagascan Green Pigeon|Treron australis
+4|Madagascar harrier-hawk|Polyboroides radiatus
+4|Madagascar sparrowhawk|Accipiter madagascariensis
+4|Madagascar wagtail|Motacilla flaviventris
+4|Magellanic oystercatcher|Haematopus leucopodus
+4|Magnolia warbler|Setophaga magnolia
+4|Malabar trogon|Harpactes fasciatus
+4|Malagasy kingfisher|Corythornis vintsioides
+4|Malaysian plover|Anarhynchus peronii|Charadrius peronii
+4|Many-banded aracari|Pteroglossus pluricinctus
+4|Many-coloured fruit dove|Ptilinopus perousii
+4|Maroon oriole|Oriolus traillii
+4|Marsh wren|Cistothorus palustris
+4|Mealy amazon|Southern Mealy Amazon|Amazona farinosa
+4|Mistletoebird|Dicaeum (Dicaeum) hirundinaceum|Dicaeum hirundinaceum
+4|Mongolian ground jay|Podoces hendersoni
+4|Mountain plover|Anarhynchus montanus|Charadrius montanus
+4|Mountain serpent eagle|Spilornis kinabaluensis
+4|Mountain wagtail|Motacilla clara
+4|Mourning collared dove
+4|Narcissus flycatcher|Ficedula narcissina
+4|Narina trogon|Apaloderma narina
+4|New Zealand fantail|Rhipidura fuliginosa
+4|New Zealand king shag|King shag|Leucocarbo carunculatus|Phalacrocorax carunculatus|Rough-faced Shag
+4|Newton's parakeet|Rodrigues parakeet
+4|Northern red bishop|Euplectes franciscanus
+4|Northern white-faced owl|African Great-horned Owl|Ptilopsis leucotis
+4|Olive-headed lorikeet|Trichoglossus euteles
+4|Orange dove|Orange Fruit Dove|Ptilinopus victor
+4|Orange-breasted waxbill|Zebra waxbill
+4|Orange-fronted kakariki|Orange-fronted parakeet|Cyanoramphus malherbi|Malherbe's Parakeet
+4|Oriental greenfinch|Grey-capped Greenfinch|Chloris sinica
+4|Pacific parrotlet|Forpus coelestis
+4|Painted bush quail|Perdicula erythrorhyncha
+4|Palau fruit dove|Ptilinopus pelewensis
+4|Pallid cuckoo|Cacomantis pallidus
+4|Papuan frogmouth|Podargus papuensis
+4|Papuan paradise kingfisher|Common Paradise Kingfisher|Tanysiptera galatea
+4|Parrot-billed sparrow|Passer gongonensis
+4|Philippine cuckoo-dove|Macropygia tenuirostris
+4|Philippine hanging parrot|Loriculus philippensis
+4|Pied currawong|Strepera graculina
+4|Pied oystercatcher|Haematopus longirostris
+4|Pin-tailed parrotfinch|Erythrura prasina
+4|Pink robin|Petroica (Erythrodryas) rodinogaster|Petroica rodinogaster
+4|Plain mountain finch|Leucosticte nemoricola
+4|Plate-billed mountain toucan|Andigena laminirostris
+4|Plushcap|Catamblyrhynchus diadema
+4|Powerful owl|Ninox (Rhabdoglaux) strenua|Ninox strenua
+4|Puna teal|Spatula puna
+4|Purple-throated carib|Eulampis jugularis
+4|Quebracho crested tinamou|Eudromia formosa
+4|Razor-billed curassow|Mitu tuberosum
+4|Red wattlebird|Anthochaera carunculata
+4|Red-billed buffalo weaver|Bubalornis niger
+4|Red-capped parrot|Purpureicephalus spurius
+4|Red-crested cotinga|Ampelion rubrocristatus
+4|Red-crowned kakariki|Red-crowned Parakeet|Cyanoramphus novaezelandiae|Red-fronted parakeet
+4|Red-fronted parrot|Poicephalus gulielmi
+4|Red-headed bullfinch|Pyrrhula erythrocephala
+4|Red-legged tinamou|Crypturellus erythropus
+4|Red-winged parrot|Aprosmictus erythropterus
+4|Rock pratincole|Glareola nuchalis
+4|Rock shag|Leucocarbo magellanicus
+4|Rosy thrush-tanager|Rhodinocichla rosea
+4|Ruddy ground dove|Columbina talpacoti
+4|Rufous motmot|Baryphthengus martii
+4|Rufous-bellied niltava|Niltava sundara
+4|Rufous-breasted sparrowhawk|Accipiter rufiventris
+4|Rufous-legged owl|concon|Strix rufipes
+4|Ryukyu wood pigeon|Columba jouyi|Ryukyu pigeon
+4|Sanford's sea eagle|Haliaeetus sanfordi|Sanford's fish eagle|Solomon eagle
+4|Saunders's tern|Black-shafted tern|Sterna saundersii|Sternula saundersi
+4|Savanna hawk|Buteogallus meridionalis|Heterospizias meridionalis
+4|Savanna nightjar|Caprimulgus affinis
+4|Scaly-breasted lorikeet|Trichoglossus chlorolepidotus
+4|Scarlet-chested parrot|Neophema splendida
+4|Sclater's monal|Lophophorus sclateri|Sclateris monal
+4|Screaming piha|Lipaugus vociferans
+4|Seven-colored tanager|Seven-coloured Tanager|Tangara fastuosa
+4|Seychelles parakeet|Psittacula wardi
+4|Shining-blue kingfisher|Alcedo quadribrachys
+4|Silver-throated tanager|Tangara icterocephala
+4|Sinai rosefinch|Carpodacus synoicus|Pale Rosefinch
+4|Sind woodpecker|Dendrocopos assimilis|Picoides assimilis
+4|Slender-billed prion|Pachyptila belcheri|thin-billed prion
+4|Socotra cormorant|Phalacrocorax nigrogularis
+4|Somali bee-eater|Merops revoilii
+4|Somali sparrow|Passer castanopterus
+4|Sooty oystercatcher|Haematopus fuliginosus
+4|Sora|Porzana carolina
+4|Spectacled finch|Callacanthis burtoni
+4|Splendid astrapia|Astrapia splendidissima
+4|Spot-winged falconet|Spizapteryx circumcinctus|Spiziapteryx circumcincta
+4|Sri Lanka wood pigeon|Columba torringtoniae|Lady Torrington's pigeon
+4|Standard-winged nightjar|Caprimulgus longipennis
+4|Striated bulbul|Pycnonotus striatus
+4|Striped cuckoo|Tapera naevia
+4|Sulawesi serpent eagle|Spilornis rufipectus
+4|Sumatran green pigeon|Treron oxyura|Treron oxyurus|Yellow-bellied pin-tailed green pigeon
+4|Sumba hornbill|Everett's hornbill|Rhyticeros everetti
+4|Sunda pygmy woodpecker|Dendrocopos moluccensis|Yungipicus moluccensis
+4|Superb parrot|Polytelis swainsonii
+4|Swainson's sparrow|Passer swainsonii
+4|Swallow tanager|Tersina viridis
+4|São Tomé oriole|Oriolus crassirostris
+4|Tepui tinamou|Crypturellus ptaritepui
+4|Thick-billed lark|Ramphocoris clotbey|Rhamphocoris clotbey
+4|Thick-billed weaver|Amblyospiza albifrons
+4|Tibetan partridge|Perdix hodgsoniae
+4|Tibetan sandgrouse|Syrrhaptes tibetanus
+4|Tickell's blue flycatcher|Cyornis tickelliae|Tickell's niltava
+4|Timor green pigeon|Treron psittacea|Treron psittaceus
+4|Torresian imperial pigeon|Ducula (Myristicivora) spilorrhoa|Ducula spilorrhoa
+4|Trinidad piping guan|Pipile pipile
+4|Tristram's starling|Onychognathus tristramii
+4|Tufted titmouse|Parus bicolor|Baeolophus bicolor
+4|Two-banded plover|Anarhynchus falklandicus|Charadrius falklandicus
+4|Variegated fairywren|Lambert's wren|Malurus (Leggeornis) lamberti|Malurus lamberti
+4|Vermilion cardinal|Cardinalis phoeniceus|Pyrrhuloxia phoeniceus
+4|Victoria's riflebird|Ptiloris victoriae|Duwuduwu
+4|Vinaceous-breasted amazon|Amazona vinacea|vinaceous amazon
+4|Violet-headed hummingbird|Klais guimeti
+4|Visayan broadbill|Sarcophanops samarensis
+4|Warbling white-eye|Japanese white-eye|Mountain white-eye|Zosterops japonica|Zosterops japonicus
+4|Ward's trogon|Harpactes wardi
+4|Wattled guan|Aburria aburri
+4|Western olivaceous warbler|Iduna opaca
+4|Western plantain-eater|Crinifer piscator
+4|Whiskered treeswift|Hemiprocne comata
+4|White swamphen|Lord Howe Swamphen|Porphyrio (Notornis) albus|Porphyrio albus|White gallinule
+4|White-bellied drongo|Dicrurus caerulescens
+4|White-bellied imperial pigeon|Ducula forsteni
+4|White-bellied parrot|Pionites leucogaster
+4|White-billed crow|Corvus woodfordi
+4|White-browed fantail|Rhipidura aureola
+4|White-browed piculet|Sasia ochracea
+4|White-chinned petrel|Procellaria (Procellaria) aequinoctialis|Procellaria aequinoctialis
+4|White-crowned lapwing|Vanellus albiceps
+4|White-headed munia|Lonchura maja
+4|White-naped pigeon|Columba albinucha
+4|White-necked jacobin|Florisuga mellivora
+4|White-winged grosbeak|Mycerobas carnipes
+4|Wompoo fruit dove|Ptilinopus magnificus
+4|Writhed hornbill|Rhabdotorrhinus leucocephalus|Aceros leucocephalus
+4|Yellow-billed amazon|Amazona collaria
+4|Yellow-browed tit|Sylviparus modestus
+4|Yellow-casqued hornbill|Yellow-casqued Wattled Hornbill|Ceratogymna elata
+4|Yellow-faced myna|Mino dumontii
+4|Yellow-fronted canary|Crithagra mozambica
+4|Yellow-rumped cacique|Cacicus cela
+4|Yellow-vented flowerpecker|Dicaeum chrysorrheum
+4|Yellowhead|Mohoua ochrocephala|Mohua
+4|Zenaida dove|Zenaida aurita
+4|African barred owlet|Glaucidium capense
+4|African golden oriole|Oriolus auratus
+4|African grey woodpecker|Grey Woodpecker|Dendropicos goertae
+4|African river martin|Pseudochelidon eurystomina
+4|African thrush|Turdus pelios
+4|African wattled lapwing|Vanellus senegallus
+4|Amami woodcock|Ryukyu woodcock|Scolopax mira
+4|American black swift|Cypseloides niger|Nephocetes niger
+4|Andaman scops owl|Otus balli
+4|Aplomado falcon|Falco femoralis
+4|Arabian waxbill|Estrilda rufibarba
+4|Araripe manakin|Antilophia bokermanni
+4|Ashy prinia|Prinia socialis
+4|Ashy woodswallow|Artamus fuscus
+4|Ashy-faced owl|Tyto glaucops
+4|Asian stubtail|Urosphena squameiceps
+4|Auckland shag|Leucocarbo colensoi|Phalacrocorax colensoi
+4|Austen's brown hornbill|Anorrhinus austeni
+4|Australian pratincole|Stiltia isabella|Glareola isabella
+4|Ayres's hawk-eagle|Ayresis hawk-eagle|Hieraaetus ayresii
+4|Azure kingfisher|Ceyx azureus
+4|Banded woodpecker|Chrysophlegma miniaceum
+4|Bar-bellied pitta|Pitta elliotii|Hydrornis elliotii
+4|Bar-tailed lark|Ammomanes cinctura|Ammomanes cinturus
+4|Bar-tailed treecreeper|Certhia himalayana
+4|Barau's petrel|Barauis petrel|Pterodroma baraui
+4|Bare-faced ground dove|Metriopelia ceciliae
+4|Bearded bellbird|Procnias averano
+4|Black bee-eater|Merops gularis
+4|Black curassow|Crax alector
+4|Black paradise flycatcher|Japanese Paradise Flycatcher|Terpsiphone atrocaudata
+4|Black-and-white hawk-eagle|Spizaetus melanoleucus|Spizastur melanoleucus
+4|Black-billed wood dove|Turtur abyssinicus
+4|Black-breasted thrush|Turdus dissimilis
+4|Black-capped tinamou|Crypturellus atrocapillus
+4|Black-collared starling|Gracupica nigricollis
+4|Black-crowned sparrow-lark|Eremopterix nigriceps
+4|Black-crowned tchagra|Tchagra senegalus
+4|Black-faced cuckooshrike|Coracina (Coracina) novaehollandiae|Coracina novaehollandiae
+4|Black-faced pitta|Pitta anerythra
+4|Black-faced waxbill|Brunhilda erythronotos|Estrilda erythronotos
+4|Black-fronted dotterel|Elseyornis melanops
+4|Black-headed weaver|Ploceus melanocephalus
+4|Black-throated mango|Anthracothorax nigricollis
+4|Black-throated sunbird|Aethopyga saturata
+4|Black-winged ground dove|Metriopelia melanoptera
+4|Black-winged lapwing|Black-winged Plover|Vanellus melanopterus
+4|Blanford's rosefinch|Agraphospiza rubescens|Carpodacus rubescens
+4|Blue eared pheasant|Crossoptilon auritum
+4|Blue ground dove|Claravis pretiosa
+4|Blue-capped cordon-bleu|Uraeginthus cyanocephalus
+4|Blue-capped rock thrush|Monticola cinclorhyncha
+4|Blue-eared lory|Eos semilarvata
+4|Blue-gray gnatcatcher|Blue-grey Gnatcatcher|Polioptila caerulea
+4|Blue-headed bee-eater|Merops muelleri
+4|Blue-naped chlorophonia|Chlorophonia cyanea
+4|Blue-winged kookaburra|Dacelo leachii
+4|Bonin white-eye|Apalopteron
+4|Bornean peacock-pheasant|Polyplectron schleiermacheri
+4|Bradfield's hornbill|Lophoceros bradfieldi
+4|Brassy-breasted tanager|Tangara desmaresti
+4|Brazilian ruby|Clytolaema rubricauda
+4|Broad-billed hummingbird|Cynanthus latirostris
+4|Broad-billed roller|Eurystomus glaucurus
+4|Broad-tipped hermit|Anopetia gounellei|Phaethornis gounellei
+4|Brown creeper|Certhia americana
+4|Brown violetear|Colibri delphinae
+4|Brown-backed parrotlet|Black-eared parrotlet|Touit melanonotus|Touit melanota
+4|Brown-headed crow|Corvus fuscicapillus
+4|Brown-headed nuthatch|Sitta pusilla
+4|Brown-headed thrush|brown thrush|Turdus chrysolaus
+4|Bruce's green pigeon|Treron waalia
+4|Brushland tinamou|Nothoprocta cinerascens
+4|Burchell's sandgrouse|Pterocles burchelli
+4|Burmese shrike|Lanius collurioides|Lanius colluroides
+4|Buru mountain pigeon|Gymnophaps mada
+4|Caatinga parakeet|Eupsittula cactorum
+4|Cape May warbler|Setophaga tigrina
+4|Cape parrot|Poicephalus robustus
+4|Cape starling|Lamprotornis nitens
+4|Cape wagtail|Motacilla capensis
+4|Caribbean dove|Leptotila jamaicensis
+4|Cattle tyrant|Machetornis rixosa
+4|Cauca guan|Penelope perspicax
+4|Chaco chachalaca|Ortalis canicollis
+4|Chatham Islands oystercatcher|Chatham Oystercatcher|Chatham Island oystercatcher|Haematopus chathamensis
+4|Chestnut-cheeked starling|Agropsar philippensis|Sturnus philippensis
+4|Chestnut-crested cotinga|Ampelion rufaxilla
+4|Chimango caracara|Milvago chimango|it's an eagle
+4|Chinese thrush|Turdus mupinensis
+4|Choco tinamou|Crypturellus kerriae
+4|Chubut steamer duck|Tachyeres leucocephalus|White-headed steamerduck
+4|Cinereous harrier|Circus cinereus
+4|Collared crow|Corvus torquatus|torquatus, corvus
+4|Collared grosbeak|Allied grosbeak|Mycerobas affinis
+4|Collared plover|Anarhynchus collaris|Charadrius collaris
+4|Collared treepie|Dendrocitta frontalis
+4|Common black hawk|Buteogallus anthracinus
+4|Coppery-chested jacamar|Galbula pastazae
+4|Coral-billed ground cuckoo|Carpococcyx renauldi
+4|Crescent honeyeater|Certhia australasiana|Certhia pyrrhoptera|Meliphaga inornata|Melithreptus melanoleucus|Phylidonyris (Phylidonyris) pyrrhopterus|Phylidonyris pyrrhoptera|Phylidonyris pyrrhopterus
+4|Crested coua|Coua cristata
+4|Crested oropendola|Psarocolius decumanus
+4|Crested owl|Lophostrix cristata
+4|Crested treeswift|Hemiprocne coronata
+4|Crimson-browed finch|Crimson-browed Rosefinch
+4|Croaking ground dove|Columbina cruziana
+4|Curve-billed tinamou|Nothoprocta curvirostris
+4|Denham's bustard|Neotis denhami|Stanley bustard|Stanley's bustard
+4|Dunn's lark|Eremalauda dunni
+4|Dusky lark|Pinarocorys nigricans
+4|Eared pitta|Hydrornis phayrei|Phayre’s pitta
+4|Eastern bronze-naped pigeon|Columba delegorguei
+4|Eastern crowned warbler|Phylloscopus coronatus
+4|Eastern towhee|Rufous-sided Towhee
+4|Eastern yellow robin|Eopsaltria australis
+4|Española cactus finch|Large Cactus Finch|Geospiza conirostris|Geospiza conirostrisytris
+4|Fairy tern|Sternula nereis|Sterne nereis
+4|Fan-tailed cuckoo|Cacomantis flabelliformis|Cacomantis (Vidgenia) flabelliformis
+4|Finn's weaver|Ploceus megarhynchus|Yellow weaver
+4|Fire-tailed sunbird|Aethopyga ignicauda
+4|Fire-tufted barbet|Psilopogon pyrolophus
+4|Flavescent bulbul|Pycnonotus flavescens
+4|Flores green pigeon|Treron floris
+4|Flying steamer duck|Tachyeres patachonicus
+4|Garnet pitta|Pitta granatina|Erythropitta granatina
+4|Golden tanager|Tangara arthus
+4|Golden white-eye|Cleptornis marchei
+4|Golden-headed quetzal|Pharomachrus auriceps
+4|Goliath imperial pigeon|Ducula goliath
+4|Grandala|Grandala coelicolor
+4|Grasshopper buzzard|Butastur rufipennis
+4|Gray's lark|Ammomanopsis grayi
+4|Great barbet|Psilopogon virens
+4|Great cuckoo-dove|Reinwardt's long-tailed pigeon|Reinwardtoena reinwardti|Reinwardtoena reinwardtii|Reinwardtoena reinwardtsi
+4|Great jacamar|Jacamerops aureus
+4|Greater ani|Crotophaga major
+4|Greater green leafbird|Chloropsis sonnerati
+4|Greater vasa parrot|Coracopsis vasa
+4|Green avadavat|Amandava formosa|Green Munia
+4|Green catbird|Ailuroedus crassirostris
+4|Green rosella|Platycercus (Platycercus) caledonicus|Platycercus caledonicus
+4|Green warbler|green leaf warbler|green willow warbler|Phylloscopus nitidus
+4|Green-backed trogon|Trogon viridis
+4|Green-breasted pitta|Pitta reichenowi
+4|Green-crowned plovercrest|Stephanoxis lalandi
+4|Green-headed oriole|Oriolus chlorocephalus
+4|Green-tailed sunbird|Aethopyga nipalensis
+4|Green-throated carib|Eulampis holosericeus|Sericotes holosericeus
+4|Grey crow|Corvus tristis
+4|Grey imperial pigeon|Ducula pickeringii
+4|Grey waxbill|Glaucestrilda perreini
+4|Grey-fronted dove|Leptotila rufaxilla
+4|Grey-headed bulbul|Brachypodius priocephalus
+4|Grey-headed canary-flycatcher|Culicicapa ceylonensis
+4|Grey-hooded parakeet|Psilopsiagon aymara|Sierra parakeet
+4|Grey-rumped treeswift|Hemiprocne longipennis
+4|Ground tit|Pseudopodoces humilis
+4|Guam kingfisher|Micronesian kingfisher|Todiramphus cinnamominus
+4|Guianan trogon|Trogon violaceus
+4|Gundlach's hawk|Accipiter gundlachi
+4|Half-collared kingfisher|Alcedo semitorquata
+4|Hartlaub's gull|Chroicocephalus hartlaubii|king gull
+4|Henst's goshawk|Accipiter henstii|Henstis goshawk
+4|Highland guan|Penelopina nigra
+4|Himalayan black-lored tit|Black-lored Tit|Machlolophus xanthogenys
+4|Himalayan swiftlet|Aerodramus brevirostris
+4|Horned coot|Fulica cornuta
+4|Horned parakeet|Eunymphicus cornutus
+4|Horsfield's bronze cuckoo|Chalcites basalis
+4|Hose's broadbill|Calyptomena hosii
+4|House bunting|Emberiza sahari
+4|House swift|Apus nipalensis
+4|Iberian magpie|Cyanopica cooki
+4|Indian spotted creeper|Salpornis spilonota
+4|Island bronze-naped pigeon|Columba malherbii
+4|Japanese robin|Larvivora akahige
+4|Japanese thrush|Turdus cardis
+4|Javan munia|Lonchura leucogastroides
+4|Jobi manucode|Manucodia jobiensis
+4|Kermadec petrel|Pterodroma (Hallstroma) neglecta|Pterodroma neglecta
+4|Kioea|Chaetoptila angustipluma
+4|Kurdish wheatear|Oenanthe xanthoprymna
+4|Large ground finch|Geospiza magnirostris
+4|Lesser green leafbird|Chloropsis cyanopogon
+4|Lettered aracari|Pteroglossus inscriptus
+4|Lincoln's sparrow|Melospiza lincolnii
+4|Livingstone's turaco|Tauraco livingstonii
+4|Long-billed pipit
+4|Long-tailed ground roller|Uratelornis chimaera
+4|Long-tailed minivet|Pericrocotus ethologus
+4|Lord Derby's parakeet|Derbyan parakeet|Psittacula derbiana
+4|Luzon hornbill|Penelopides manillae
+4|Madagascar owl|Asio madagascariensis
+4|Madagascar partridge|Margaroperdix madagarensis
+4|Madagascar pygmy kingfisher|Corythornis madagascariensis
+4|Madeira firecrest|Regulus madeirensis
+4|Magpie tanager|Cissopis leveriana|Cissopis leverianus
+4|Malachite kingfisher|Alcedo cristata
+4|Manipur bush quail|Perdicula manipurensis
+4|Many-colored rush tyrant|Many-coloured Rush Tyrant|Tachuris rubrigastra
+4|Maranon pigeon|Patagioenas oenops|Peruvian pigeon|Salvin's pigeon
+4|Mascarene martin|Phedina borbonica
+4|Masked trogon|Trogon personatus
+4|Mitred parakeet|Psittacara mitratus|mitred conure
+4|Moluccan goshawk|Accipiter henicogrammus|halmaheran goshawk
+4|Moluccan hanging parrot|Loriculus amabilis
+4|Mountain bamboo partridge|Bambusicola fytchii
+4|Mountain chiffchaff|eastern chiffchaff|Phylloscopus sindianus
+4|Mountain pygmy owl|Glaucidium gnoma
+4|Mountain velvetbreast|Lafresnaya lafresnayi
+4|Mrs. Gould's sunbird|Aethopyga gouldiae
+4|Negros fruit dove|Ptilinopus arcanus
+4|Nicobar megapode|Megapodius nicobariensis
+4|Nicobar sparrowhawk|Accipiter butleri
+4|Northern giant petrel|Macronectes halli
+4|Northern parula|Setophaga americana
+4|Northwestern crow|Corvus brachyrhynchos caurinus
+4|Nuthatch vanga|Hypositta corallirostris
+4|Oasis hummingbird|Rhodopis vesper|Rhodopsis vesper
+4|Orange bullfinch|Pyrrhula aurantiaca
+4|Orange-fronted fruit dove|Ptilinopus aurantifrons|Ptilinopus aurantiifrons
+4|Ornate tinamou|Nothoprocta ornata
+4|Painted francolin|Francolinus pictus
+4|Palau scops owl|Palau Owl|Otus podarginus|Pyrroglaux podargina|Pyrroglaux podarginus
+4|Pale-browed tinamou|Crypturellus transfasciatus
+4|Paradise riflebird|Ptiloris paradiseus|Ptiloris (Ptiloris) paradiseus
+4|Peaceful dove|Geopelia placida
+4|Peach-fronted parakeet|Eupsittula aurea
+4|Pearl-spotted owlet|Glaucidium perlatum
+4|Peruvian sheartail|Thaumastura cora
+4|Peruvian thick-knee|Burhinus superciliaris|Hesperoburhinus superciliaris
+4|Philby's partridge|Alectoris philbyi
+4|Philippine falconet|M. erythrogenys|Microhierax erythrogenys
+4|Philippine frogmouth|Batrachostomus septimus
+4|Philippine hawk-eagle|Nisaetus philippensis|Spizaetus philippensis
+4|Picui ground dove|Columbina picui
+4|Pied triller|Lalage nigra
+4|Piping hornbill|Bycanistes fistulator
+4|Plain prinia|Prinia inornata
+4|Plain-pouched hornbill|Rhyticeros subruficollis
+4|Planalto hermit|Phaethornis pretrei
+4|Plumbeous water redstart|Phoenicurus fuliginosus
+4|Purple-naped lory|Lorius domicella
+4|Purple-tailed imperial pigeon|Ducula rufigaster
+4|Purplish jay|Cyanocorax cyanomelas
+4|Purplish-backed jay|Cyanocorax beecheii
+4|Pygmy nuthatch|Sitta pygmaea
+4|Raffles's malkoha|Rhinortha chlorophaea
+4|Red grouse|Lagopus scotica
+4|Red owl|Madagascar red owl|Tyto soumagnei
+4|Red spurfowl|Galloperdix spadicea
+4|Red-bellied fruit dove|Grey's fruit dove|Ptilinopus greyi|Ptilinopus greyii
+4|Red-billed dwarf hornbill|Lophoceros camurus
+4|Red-capped plover|Anarhynchus ruficapillus|Charadrius (Charadrius) ruficapillus|Charadrius ruficapillus
+4|Red-capped robin|Petroica goodenovii
+4|Red-chested cuckoo|Cuculus solitarius
+4|Red-chested swallow|Hirundo lucida
+4|Red-fronted rosefinch|Carpodacus puniceus
+4|Red-headed quelea|Quelea erythrops
+4|Red-necked spurfowl|Pternistis afer
+4|Red-necked tanager|Tangara cyanocephala
+4|Red-rumped wheatear|Oenanthe moesta
+4|Red-tailed comet|Sappho sparganurus
+4|Red-thighed sparrowhawk|Accipiter erythropus
+4|Red-throated piping guan|Pipile cujubi
+4|Red-winged fairywren|Malurus (Leggeornis) elegans|Malurus elegans
+4|Rock parrot|Neophema petrophila|Neophema (Neonanodes) petrophila
+4|Rock wren|Salpinctes obsoletus|Salpintes obsoletus
+4|Rosy minivet|Pericrocotus roseus
+4|Ruddy quail-dove|Geotrygon montana
+4|Rufous-breasted hermit|Glaucis hirsutus
+4|Rufous-collared kingfisher|Actenoides concretus|Chestnut-collared kingfisher
+4|Rufous-naped tit|Periparus rufonuchalis
+4|Rüppell's korhaan|Eupodotis rueppellii
+4|Salvadori's pheasant|Lophura inornata|Salvadoriis pheasant
+4|Salvadori's teal|Salvadorina waigiuensis
+4|Scaled dove|Columbina squammata|Scardafella squammata
+4|Scaly-breasted hummingbird|Phaeochroa cuvierii
+4|Screaming cowbird|Molothrus rufoaxillaris
+4|Senegal lapwing|Vanellus lugubris
+4|Shining bronze cuckoo|Chalcites lucidus|Shining cuckoo
+4|Sichuan jay|Perisoreus internigrans
+4|Slender-billed parakeet|Enicognathus leptorhynchus
+4|Sokoke scops owl|Otus ireneae
+4|South American painted-snipe|Nycticryphes semicollaris
+4|South Island robin|New Zealand robin|Petroica australis
+4|Southern banded snake eagle|Circaetus fasciolatus
+4|Southern carmine bee-eater|Merops nubicoides
+4|Southern fiscal|Common Fiscal|Lanius collaris
+4|Southern grey-headed sparrow|Passer diffusus
+4|Southern white-crowned shrike|Eurocephalus anguitimens
+4|Southern white-faced owl|Ptilopsis granti
+4|Spotless crake|Zapornia tabuensis
+4|Spotted bowerbird|Chlamydera maculata
+4|Spotted harrier|Circus assimilis
+4|Spotted kestrel|Falco moluccensis
+4|Sri Lanka frogmouth|Batrachostomus moniliger|Ceylon frogmouth|Sri Lankan frogmouth
+4|Stripe-throated bulbul|Pycnonotus finlaysoni
+4|Striped kingfisher|Halcyon chelicuti
+4|Striped owl|Asio clamator
+4|Sulawesi goshawk|Accipiter griseiceps
+4|Sulawesi hornbill|Rhabdotorrhinus exarhatus|sulawesi dwarf hornbill|sulawesi tarictic hornbill|temminck's hornbill
+4|Sumatran treepie|Dendrocitta occipitalis
+4|Sumba green pigeon|Sumba Islands green pigeon|Treron teysmanni|Treron teysmannii
+4|Superb pitta|Pitta superba
+4|Surucua trogon|Trogon surrucura
+4|Syrian serin|Serinus syriacus
+4|Taczanowski's tinamou|Nothoprocta taczanowskii|Nothoprocta tacznowskii
+4|Taiwan green pigeon|Whistling Green Pigeon|Treron formosae
+4|Tasman Sea island thrush|Turdus poliocephalus|Island Thrush
+4|Thick-billed warbler|Arundinax aedon
+4|Three-banded plover|Charadrius tricollaris
+4|Tomtit|Australasian robin|New Zealand tomtit|Petroica macrocephala
+4|Tongan megapode|Megapodius pritchardii|Polynesian megapode
+4|Tooth-billed hummingbird|Androdon aequatorialis
+4|Toucan barbet|Semnornis ramphastinus
+4|Tristram's bunting|Emberiza tristrami
+4|Tufted jay|Cyanocorax dickeyi
+4|Ultramarine lorikeet|Vini ultramarina
+4|Variable wheatear|Oenanthe picata
+4|Vinous-breasted sparrowhawk|Accipiter rhodogaster
+4|Vinous-throated parrotbill|Suthora webbiana
+4|Violet sabrewing|Campylopterus hemileucurus
+4|Wattled starling|Creatophora cinerea
+4|Welcome swallow|Hirundo neoxena
+4|Western dwarf hornbill|Black Dwarf Hornbill|Horizocerus hartlaubi|Tockus hartlaubi
+4|Western rosella|Platycercus icterotis|Platycercus (Violania) icterotis
+4|White eared pheasant|Crossoptilon crossoptilon
+4|White-bellied bustard|Eupodotis senegalensis|Hite-bellied bustard
+4|White-bellied go-away-bird|Criniferoides leucogaster|Crinifer leucogaster|Corythaixoides leucogaster
+4|White-bellied munia|Lonchura leucogastra
+4|White-bellied storm petrel|Fregetta grallaria
+4|White-booted racket-tail|Ocreatus underwoodii
+4|White-breasted woodswallow|Artamus leucorynchus
+4|White-browed nuthatch|Sitta victoriae
+4|White-cheeked nuthatch|Sitta leucopsis
+4|White-crowned pigeon|Columba leucocephala|Patagioenas leucocephala
+4|White-headed buffalo weaver|Dinemellia dinemelli
+4|White-naped woodpecker|Chrysocolaptes festivus
+4|White-tailed hawk|Buteo albicaudatus|Geranoaetus albicaudatus
+4|White-tailed nuthatch|Sitta himalayensis
+4|White-throated bush chat|Hodgson's bushchat|Saxicola insignis
+4|White-throated hummingbird|Leucochloris albicollis
+4|White-winged magpie|Urocissa whiteheadi
+4|Whitehead's trogon|Harpactes whiteheadi
+4|Wilson's plover|Anarhynchus wilsonia|Charadrius wilsonia
+4|Xinjiang ground jay|Podoces biddulphi
+4|Yellow-bellied warbler|Abroscopus superciliaris
+4|Yellow-billed cardinal|Paroaria capitata
+4|Yellow-billed malkoha|Zanclostomus calyorhynchus|Rhamphococcyx calyorhynchus
+4|Yellow-billed tern|Sterna superciliaris|Sternula superciliaris
+4|Yellow-billed turaco|Tauraco macrorhynchus
+4|Yellow-breasted chat|Icteria virens
+4|Yellow-crowned kakariki|Yellow-crowned Parakeet|Cyanoramphus auriceps
+4|Yellow-faced honeyeater|Caligavis chrysops
+4|Yellow-footed gull|Larus livens
+4|Yellow-fronted parrot|Poicephalus flavifrons
+4|Yellow-fronted tinkerbird|Pogoniulus chrysoconus
+4|Yellow-knobbed curassow|Crax daubentoni
+4|Yellow-legged tinamou|Crypturellus noctivagus
+4|Yellow-rumped flycatcher|Ficedula zanthopygia
+4|Abyssinian woodpecker|Dendropicos abyssinicus
+4|Adamawa turtle dove|Streptopelia hypopyrrha
+4|African marsh harrier|Circus ranivorus
+4|American pygmy kingfisher|Chloroceryle aenea
+4|Amethyst woodstar|Calliphlox amethystina
+4|Andaman coucal|Centropus andamanensis
+4|Angola swallow|Hirundo angolensis
+4|Antillean piculet|Nesoctites micromegas
+4|Antipodes kakariki|Antipodes parakeet|Antipodes Island parakeet|Cyanoramphus unicolor
+4|Arabian golden sparrow|Passer euchlorus
+4|Asian golden weaver|Ploceus hypoxanthus
+4|Asian red-eyed bulbul|Pycnonotus brunneus
+4|Atlantic petrel|Pterodroma incerta
+4|Augur buzzard|Buteo augur
+4|Austral thrush|Turdus falcklandii
+4|Australian logrunner|Orthonyx temminckii
+4|Australian owlet-nightjar|Aegotheles cristatus
+4|Australian rufous fantail|Rhipidura rufifrons|Rhipidura (Howeavis) rufifrons|Rufous Fantail
+4|Aztec thrush|Ridgwayia pinicola
+4|Azure-hooded jay|Cyanolyca cucullata
+4|Bachman's warbler|Vermivora bachmanii
+4|Band-tailed barbthroat|Threnetes ruckeri
+4|Bank cormorant|Phalacrocorax neglectus
+4|Bar-throated minla|Minla strigula|chestnut-tailed minla
+4|Bare-eyed pigeon|Patagioenas corensis
+4|Bare-necked fruitcrow|Gymnoderus foetidus
+4|Barred antshrike|Thamnophilus doliatus
+4|Barred forest falcon|Micrastur ruficollis
+4|Barred honey buzzard|Pernis celebensis|sulawesi Honey-buzzard
+4|Bearded barbet|Lybius dubius
+4|Beautiful firetail|Stagonopleura bella
+4|Beautiful fruit dove|crimson-capped fruit dove|Ptilinopus pulchellus|rose-fronted pigeon
+4|Bennett's woodpecker|Campethera bennettii
+4|Bewick's wren|Thryomanes bewickii
+4|Bishop's ʻōʻō|Moho bishopi
+4|Black crake|Zapornia flavirostra
+4|Black guan|Chamaepetes unicolor
+4|Black guinea fowl|Agelastes niger|Phasidus niger
+4|Black imperial pigeon|Ducula melanochroa
+4|Black oriole|Oriolus hosii
+4|Black siskin|Spinus atratus
+4|Black-and-chestnut eagle|Spizaetus isidori
+4|Black-chested jay|Cyanocorax affinis
+4|Black-chinned fruit dove|Ptilinopus leclancheri
+4|Black-crested titmouse|Baeolophus atricristatus|Mexican titmouse
+4|Black-crowned pitta|Black-headed pitta|Erythropitta ussheri|Pitta ussheri
+4|Black-faced coucal|Centropus melanops
+4|Black-faced munia|Lonchura molucca
+4|Black-faced sandgrouse|Pterocles decoratus
+4|Black-faced sheathbill|Chionis minor
+4|Black-fronted nunbird|Monasa nigrifrons
+4|Black-fronted tern|Sterna albostriata|Chlidonias albostriatus
+4|Black-headed bee-eater|Merops breweri
+4|Black-headed grosbeak|Pheucticus melanocephalus
+4|Black-headed trogon|Trogon melanocephalus
+4|Black-lored parrot|Tanygnathus gramineus
+4|Black-throated blue warbler|Setophaga caerulescens
+4|Black-throated jay|Cyanolyca pumilo
+4|Black-winged oriole|Oriolus nigripennis
+4|Blanford's snowfinch|Pyrgilauda blanfordi
+4|Blond-crested woodpecker|Celeus flavescens
+4|Blue grosbeak|Passerina caerulea
+4|Blue korhaan|Eupodotis caerulescens
+4|Blue-capped redstart|Phoenicurus caeruleocephala|Phoenicurus caeruleocephalus|Phoenicurus coeruleocephala
+4|Blue-faced malkoha|Rhopodytes viridirostris|Phaenicophaeus viridirostris|small green-billed malkoha
+4|Blue-fronted fig parrot|Orange-breasted fig parrot|Cyclopsitta gulielmitertii|Opopsitta gulielmitertii
+4|Blue-fronted lancebill|Doryfera johannae
+4|Blue-headed wood dove|Turtur brehmeri
+4|Blue-mantled thornbill|Chalcostigma stanleyi
+4|Botha's lark|Spizocorys fringillaris
+4|Brandt's mountain finch|Leucosticte brandti
+4|Broad-billed parrot|Lophopsittacus mauritianus
+4|Bronzed cowbird|Molothrus aeneus
+4|Brown-cheeked hornbill|Bycanistes cylindricus
+4|Buff-spotted flameback|Chrysocolaptes lucidus
+4|Bugun liocichla|Liocichla bugunorum
+4|Buller's shearwater|Ardenna bulleri
+4|Buru racket-tail|Prioniturus mada
+4|Campbell albatross|Thalassarche impavida
+4|Canada warbler|Cardellina canadensis
+4|Canary Islands oystercatcher|Haematopus meadewaldoi
+4|Cape penduline tit|Anthoscopus minutus|Southern Penduline-tit
+4|Cape rockjumper|Chaetops frenatus
+4|Carolina wren|Thryothorus ludovicianus
+4|Carunculated caracara|Daptrius carunculatus
+4|Cassin's finch|Carpodacus cassinii|Haemorhous cassinii
+4|Cassin's hawk-eagle|Spizaetus africanus|Aquila africana
+4|Cayenne jay|Cyanocorax cayanus
+4|Chestnut rail|Eulabeornis castaneoventris
+4|Chestnut thrush
+4|Chestnut-banded plover|Anarhynchus pallidus|Charadrius pallidus
+4|Chestnut-breasted coronet|Boissonneaua matthewsii
+4|Chestnut-breasted partridge|Chestnut-breasted Hill Partridge|Arborophila mandelli|Arborophila mandellii
+4|Chestnut-capped puffbird|Bucco macrodactylus
+4|Chestnut-flanked sparrowhawk|Accipiter castanilius|Chestnut-bellied sparrow hawk
+4|Chinese grosbeak|Black-tailed hawfinch|Eophona migratoria
+4|Chocó trogon|Trogon comptus
+4|Chopi blackbird|Gnorimopsar chopi
+4|Cinnamon ground dove|Gallicolumba rufigula|red-throated ground dove
+4|Cinnamon woodpecker|Celeus loricatus
+4|Claret-breasted fruit dove|Ptilinopus viridis
+4|Cocos finch|Cocos Island Finch|Pinaroloxias inornata
+4|Collared imperial pigeon|Ducula mullerii
+4|Collared scops owl|Otus lettia
+4|Collared trogon|Trogon collaris
+4|Common scimitarbill|Rhinopomastus cyanomelas
+4|Comoro blue pigeon|Comoros Blue Pigeon|Alectroenas sganzini
+4|Connecticut warbler|Oporornis agilis
+4|Cream-vented bulbul|Pycnonotus simplex
+4|Crimson fruitcrow|Haematoderus militaris
+4|Crimson-collared tanager|Ramphocelus sanguinolentus
+4|Cuban pygmy owl|Glaucidium siju
+4|Cuckoo-finch|Anomalospiza imberbis
+4|Damara tern|Sternula balaenarum|Sterna balaenarum
+4|Dark-breasted rosefinch
+4|Dark-winged trumpeter|Psophia viridis
+4|Daurian partridge|Perdix dauurica
+4|Diademed sandpiper-plover|Diademed Plover|Phegornis mitchellii
+4|Double-banded sandgrouse|Pterocles bicinctus
+4|Double-toothed barbet|Lybius bidentatus|Pogonorhynchus bidentatus
+4|Drongo fantail|Pygmy Drongo|Chaetorhynchus papuensis
+4|Dusky moorhen|Gallinula tenebrosa
+4|Dusky parrot|Pionus fuscus
+4|Dusky-headed parakeet|Aratinga weddellii
+4|Dusky-throated hermit|Phaethornis squalidus
+4|Eastern meadowlark|Sturnella magna
+4|Ecuadorian ground dove|Columbina buckleyi
+4|Emerald starling|Lamprotornis iris
+4|Emerald tanager|Tangara florida
+4|Esmeraldas woodstar|Chaetocercus berlepschi|Acestrura berlepschi|colibrí de Berlepsch|colibrí de esmeraldas|estrellita Esmeraldeña
+4|Ferruginous pygmy owl|Glaucidium brasilianum
+4|Fiery-tailed awlbill|Avocettula recurvirostris|Anthracothorax recurvirostris
+4|Fire-capped tit|Cephalopyrus flammiceps
+4|Flame robin|Petroica (Littlera) phoenicea|Petroica phoenicea
+4|Flame-faced tanager|Tangara parzudakii
+4|Flamecrest|Regulus goodfellowi
+4|Fork-tailed storm petrel|Oceanodroma furcata
+4|Fulvous owl|Strix fulvescens
+4|Giant antshrike|Batara cinerea
+4|Giant cowbird|Molothrus oryzivorus|Scaphidura oryzivora
+4|Gilt-edged tanager|Tangara cyanoventris
+4|Glossy-mantled manucode|Manucodia ater
+4|Golden bowerbird|Prionodura newtoniana
+4|Golden-backed weaver|Ploceus jacksoni
+4|Golden-breasted starling|Lamprotornis regius
+4|Golden-headed cisticola|Cisticola exilis
+4|Golden-headed manakin|Ceratopipra erythrocephala
+4|Golden-naped finch|Gold-naped Finch|Gold-headed finch|Pyrrhoplectes epauletta|Pyrrhoplectes epaulette
+4|Golden-tailed sapphire|Chrysuronia oenone
+4|Golden-throated barbet|Megalaima franklinii|Psilopogon franklinii
+4|Grass-green tanager|Chlorornis riefferii
+4|Great black hawk|Buteogallus urubitinga|Urubitinga urubitinga
+4|Great iora|Aegithina lafresnayei
+4|Great potoo|Nyctibius grandis
+4|Green honeycreeper|Chlorophanes spiza
+4|Green-and-rufous kingfisher|Chloroceryle inda
+4|Green-backed kingfisher|Actenoides monachus|Blue-headed Kingfisher
+4|Green-winged pytilia|Pytilia melba
+4|Grey bunting|Emberiza variabilis
+4|Grey falcon|Falco (Hierofalco) hypoleucos|Falco hypoleucos
+4|Grey pratincole|Glareola cinerea
+4|Grey-backed thrush|Turdus hortulorum
+4|Grey-headed imperial pigeon|Ducula radiata
+4|Grey-necked rockfowl|Picathartes oreas
+4|Groundscraper thrush
+4|Guadalupe storm petrel|Oceanodroma macrodactyla
+4|Gurney's eagle|Aquila gurneyi
+4|Hawaiʻi ʻōʻō|Moho nobilis
+4|Highland tinamou|Nothocercus bonapartei
+4|Himalayan rubythroat|White-tailed Rubythroat|Calliope pectoralis
+4|Hispaniolan amazon|Amazona ventralis
+4|Hispaniolan parakeet|Psittacara chloropterus
+4|Hooded parrot|Psephotellus dissimilis
+4|Hooded tinamou|Nothocercus nigrocapillus
+4|Hooded wheatear|Oenanthe monacha
+4|Indian stone-curlew|Burhinus indicus
+4|Ivory-billed aracari|Pteroglossus azara|Pteroglossus flavirostris
+4|Jackal buzzard|Buteo rufofuscus
+4|Jamaican owl|Pseudoscops grammicus
+4|Japanese accentor|Prunella rubida
+4|Japanese grosbeak|Eophona personata
+4|Javan owlet|glaucidium castanopterum
+4|Javan trogon|Apalharpactes reinwardtii
+4|Kawall's amazon|Amazona kawalli
+4|Kittlitz's murrelet|Brachyramphus brevirostris|Kittlitzis murrelet
+4|Kozlov's accentor|Mongolian Accentor|Prunella koslowi
+4|Kuhl's lorikeet|Kuhl's lory|kura|Rimatara lorikeet|Rimitara lorikeet|Vini kuhlii
+4|Kurrichane thrush|Turdus libonyana|Turdus libonyanus
+4|Lanceolated monklet|Micromonacha lanceolata
+4|Large frogmouth|Batrachostomus auritus
+4|Large niltava|Niltava grandis
+4|Lark bunting|Calamospiza melanocorys
+4|Lesser ground cuckoo|Morococcyx erythropygus
+4|Lesser honeyguide|Indicator minor
+4|Lesser moorhen|Paragallinula angulata
+4|Lesser striped swallow|Cecropis abyssinica
+4|Lined forest falcon|Micrastur gilvicollis
+4|Little forktail|Enicurus scouleri
+4|Long-billed murrelet|Brachyramphus perdix
+4|Long-winged harrier|Short-winged Harrier|Circus buffoni
+4|Mackinnon's shrike|Lanius mackinnoni
+4|Madagascar hoopoe|Madagascan Hoopoe|Upupa marginata
+4|Madagascar lark|Eremopterix hova
+4|Madagascar mannikin|Lepidopygia nana
+4|Madagascar pratincole|Glareola ocularis
+4|Madagascar scops owl|Rainforest Scops Owl|Otus rutilus
+4|Maned owl|Jubula lettii
+4|Mangrove kingfisher|Halcyon senegaloides
+4|Mangrove rail|Rallus longirostris
+4|Marbled frogmouth|Podargus ocellatus
+4|Maroon-fronted parrot|Rhynchopsitta terrisi
+4|Mascarene paradise flycatcher|Terpsiphone bourbonnensis
+4|Masked shining parrot|Prosopeia personata
+4|Medium ground finch|Geospiza fortis
+4|Metallic starling|Aplonis metallica|shining starling
+4|Meyer's goshawk|Accipiter meyerianus
+4|Mottled owl|Strix virgata
+4|Mountain caracara|P. megalopterus|Phalcoboenus megalopterus|Corequenque
+4|Moustached puffbird|Malacoptila mystacalis
+4|Mugimaki flycatcher|Ficedula mugimaki
+4|Mulga parrot|Psephotellus varius
+4|Narcondam hornbill|Rhyticeros narcondami
+4|New Caledonian lorikeet|Charmosyna diadema
+4|New Caledonian owlet-nightjar|Aegotheles savesi
+4|New Guinea bronzewing|Henicophaps albifrons
+4|Noisy friarbird|Philemon (Tropidorhynchus) corniculatus|Philemon corniculatus
+4|Norfolk parakeet|Cyanoramphus cookii|Norfolk Island parakeet
+4|Nubian bustard|Neotis nuba
+4|Nuku Hiva imperial pigeon|Marquesan Imperial Pigeon|Ducula galeata|upe
+4|Okinawa woodpecker|Dendrocopos noguchii
+4|Orange-breasted falcon|Falco deiroleucus
+4|Orange-cheeked parrot|Pionopsitta barrabandi|Pyrilia barrabandi
+4|Painted honeyeater|Grantiella picta
+4|Pale-headed woodpecker|Gecinulus grantia
+4|Paradise jacamar|Galbula dea
+4|Pavonine quetzal|Pharomachrus pavoninus
+4|Philippine megapode|Megapodius cumingii
+4|Philippine pygmy woodpecker|Dendrocopos maculatus|Yungipicus maculatus
+4|Philippine trogon|Harpactes ardens
+4|Pine siskin|Spinus pinus
+4|Pink-spotted fruit dove|Ptilinopus perlatus
+4|Plain leaf warbler|Phylloscopus neglectus
+4|Plain-breasted ground dove|Columbina minuta
+4|Plum-faced lorikeet|Oreopsittacus arfaki
+4|Plumbeous kite|Ictinia plumbea
+4|Pohnpei lorikeet|Trichoglossus rubiginosus
+4|Przevalski's partridge|Rusty-necklaced Partridge|Alectoris magna
+4|Puerto Rican tody|Todus mexicanus
+4|Puff-throated babbler|Pellorneum ruficeps
+4|Puff-throated bulbul|Alophoixus pallidus|Olivaceous bearded bulbul
+4|Purple finch|Haemorhous purpureus
+4|Purple grenadier|Granatina ianthinogaster
+4|Purple-crowned fairywren|M. coronatus|Malurus coronatus
+4|Pyrrhuloxia|Desert cardinal|Cardinalis sinuatus|Pyrrhuloxia sinuatus
+4|Rainbow lorikeet|Trichoglossus moluccanus
+4|Rajah scops owl|Otus brookii
+4|Red-backed fairywren|Malurus (Musciparus) melanocephalus|Malurus melanocephalus
+4|Red-billed scythebill|Campylorhamphus trochilirostris
+4|Red-billed starling|Spodiopsar sericeus
+4|Red-browed finch|Neochmia temporalis|Red-browed Firetail|Red-browed waxbill
+4|Red-crested korhaan|Lophotis ruficrista|Red-crested bustard
+4|Red-faced guan|Penelope dabbenei
+4|Red-headed weaver|Anaplectes rubriceps
+4|Red-legged honeycreeper|Cyanerpes cyaneus|dácnis-meleiro-de-patas-vermelhas|saíra beija flor
+4|Red-mantled rosefinch|Carpodacus rhodochlamys
+4|Red-moustached fruit dove|Ptilinopus mercerii|Ptilinopus mercierii
+4|Red-ruffed fruitcrow|Pyroderus scutatus
+4|Red-rumped woodpecker|Veniliornis kirkii
+4|Red-stained woodpecker|Veniliornis affinis
+4|Red-tailed minla|Minla ignotincta
+4|Red-winged starling|Onychognathus morio
+4|Restless flycatcher|Myiagra (Seisura) inquieta|Myiagra inquieta
+4|Rodrigues fody|Foudia flavicans
+4|Rusty-barred owl|Strix hylophila
+4|Salvadori's fig parrot|Salvadoriis fig-parrot|Psittaculirostris salvadorii
+4|Scaled pigeon|Patagioenas speciosa
+4|Scaly-headed parrot|Pionus maximiliani
+4|Scarlet-breasted fruit dove|Ptilinopus bernsteinii
+4|Scarlet-chested sunbird|Nectarinia senegalensis|Chalcomitra senegalensis
+4|Scarlet-rumped trogon|Harpactes duvaucelii
+4|Schlegel's asity|Philepitta schlegeli
+4|Shining sunbeam|Aglaeactis cupripennis
+4|Short-billed minivet|Pericrocotus brevirostris
+4|Short-tailed parrot|Graydidascalus brachyurus
+4|Short-tailed woodstar|Myrmia micrura
+4|Slaty-breasted wood rail|Aramides saracura
+4|Slender-tailed woodstar|Microstilbon burmeisteri
+4|Small ground finch|Geospiza fuliginosa
+4|Socotra sparrow|Passer insularis
+4|South Island kōkako|Kokako|Callaeas cinereus
+4|Souza's shrike|Lanius souzae
+4|Spangled cotinga|Cotinga cayana
+4|Speckled hummingbird|Adelomyia melanogenys
+4|Spinifex pigeon|Geophaps (Lophophaps) plumifera|Geophaps plumifera|Petrophassa ferruginea|Red-plumed pigeon
+4|Spot-breasted cuckoo-dove|Mackinlay's Cuckoo-Dove|Macropygia mackinlayi
+4|Spot-winged grosbeak|Mycerobas melanozanthos|Spotted-winged grosbeak
+4|Sri Lanka hanging parrot|Loriculus beryllinus
+4|Stephen's lorikeet|Stephenis lorikeet|Vini stepheni
+4|Stewart Island shag|Otago Shag|Leucocarbo chalconotus
+4|Subdesert mesite|Bensch’s monia|Monias benschi|Monias benschii
+4|Sulawesi ground dove|Gallicolumba tristigmata
+4|Sulawesi hawk-eagle|Nisaetus lanceolatus|Celebes hawk-eagle|Spizaetus lanceolatus
+4|Sulu bleeding-heart|Gallicolumba menagei
+4|Summer tanager|Piranga rubra
+4|Sunda collared dove|Island Collared Dove|Streptopelia bitorquata
+4|Swinhoe's rail|Coturnicops exquisitus
+4|São Tomé olive pigeon|Columba thomensis|Maroon pigeon
+4|Tawny-bellied hermit|Phaethornis syrmatophorus
+4|Temminck's courser|Cursorius temminckii
+4|Timor imperial pigeon|Ducula cineracea
+4|Tooth-billed bowerbird|Scenopoeetes dentirostris|Scenopooetes dentirostris|tooth-billed catbird
+4|Tricolored blackbird|Agelaius tricolor|tricoloured blackbird
+4|Turquoise tanager|Tangara mexicana
+4|Unicolored jay|Aphelocoma unicolor
+4|Varied lorikeet|Trichoglossus versicolor|Psitteuteles versicolor
+4|Verdin|Auriparus flaviceps
+4|Violaceous euphonia|Euphonia violacea
+4|Violaceous jay|Cyanocorax violaceus
+4|Violet cuckoo|Chrysococcyx xanthorhynchus
+4|Virginia rail|Rallus limicola
+4|Wallace's fruit dove|Ptilinopus wallacii|Wallaceis fruit dove
+4|Wattled curassow|Crax globulosa
+4|Wattled ploughbill|Eulacestoma nigropectus
+4|West Indian woodpecker|Melanerpes superciliaris
+4|West Papuan lorikeet|Papuan Lorikeet|Charmosyna papou
+4|Western screech owl|Megascops kennicottii|Otus kennicotti
+4|White's thrush|Zoothera aurea
+4|White-barred piculet|Picumnus cirratus
+4|White-bearded antshrike|Biatas nigropectus
+4|White-breasted mesite|Mesitornis variegata|Mesitornis variegatus
+4|White-browed coucal|Centropus superciliosus
+4|White-cheeked barbet|Psilopogon viridis
+4|White-crested laughingthrush|Garrulax leucolophus
+4|White-crowned parrot|Pionus senilis
+4|White-eared barbet|Smilorhis leucotis|Stactolaema leucotis
+4|White-eyed parakeet|Psittacara leucophthalmus
+4|White-eyed river martin|Pseudochelidon sirintarae
+4|White-faced cuckoo-dove|White-faced Dove|Turacoena manadensis
+4|White-headed fruit dove|Ptilinopus eugeniae
+4|White-headed woodpecker|Leuconotopicus albolarvatus
+4|White-necked crow|Corvus leucognaphalus
+4|White-necked thrush|Turdus albicollis
+4|White-spectacled bulbul|Pycnonotus xanthopygos
+4|White-throated magpie-jay|Cyanocorax formosus
+4|White-throated swift|Aeronautes saxatalis
+4|White-tipped dove|Leptotila verreauxi
+4|White-tipped plantcutter|Phytotoma rutila
+4|Wire-crested thorntail|Discosura popelairii
+4|Yellow cardinal|Gubernatrix cristata
+4|Yellow wattlebird|Anthochaera paradoxa|Long wattlebird|Tasmanian wattlebird
+4|Yellow-billed jacamar|Galbula albirostris
+4|Yellow-breasted crake|Porzana flaviventer
+4|Yellow-cheeked tit|Machlolophus spilonotus
+4|Yellow-eyed babbler|Chrysomma sinense
+4|Yellow-faced parrotlet|Forpus xanthops
+4|Yellow-fronted woodpecker|Melanerpes flavifrons
+4|Yellow-shouldered blackbird|Agelaius xanthomus
+4|Yellow-sided flowerpecker|Dicaeum aureolimbatum
+4|Yellow-throated bulbul|Pycnonotus xantholaemus
+4|Yellow-throated honeyeater|Nesoptilotis flavicollis
+4|Yellow-throated sandgrouse|Pterocles gutturalis
+4|Yucatan amazon|Amazona xantholora|Yucatan Parrot
+4|Zino's petrel|Pterodroma madeira
+4|Abyssinian crimsonwing|Cryptospiza salvadorii
+4|African black swift|Apus barbatus
+4|African piculet|Sasia africana
+4|African red-eyed bulbul|Pycnonotus nigricans
+4|African yellow warbler|Iduna natalensis|Chloropeta natalensis|Dark-capped Yellow Warbler|Yellow Flycatcher-Warbler
+4|Altamira oriole|Icterus gularis
+4|Amazonian black-throated trogon|Black-throated Trogon|Trogon rufus
+4|Amazonian pygmy owl|Glaucidium hardyi
+4|Amboyna cuckoo-dove|Macropygia amboinensis
+4|Andaman treepie|Dendrocitta bayleii|Dendrocitta bayleyi
+4|Andaman woodpecker|Dryocopus hodgei
+4|Andean coot|Fulica ardesiaca
+4|Austral blackbird|Curaeus curaeus
+4|Australian crake|Porzana fluminea
+4|Azure gallinule|Porphyrio flavirostris
+4|Azure-rumped parrot|Tanygnathus sumatranus
+4|Azure-shouldered tanager|Thraupis cyanoptera
+4|Bahama woodstar|Calliphlox evelynae|Philodice evelynae
+4|Band-tailed guan|Penelope argyrotis
+4|Band-tailed pigeon|Patagioenas fasciata
+4|Banded lapwing|Vanellus tricolor
+4|Bannerman's turaco|Bannermanis turaco|Tauraco bannermani
+4|Bar-breasted piculet|Picumnus aurifrons
+4|Barking imperial pigeon|Ducula latrans
+4|Barking owl|Ninox (Hieracoglaux) connivens|Ninox connivens
+4|Barred rail|Gallirallus torquatus|Hypotaenidia torquata|Rallus torquatus
+4|Basra reed warbler|Acrocephalus griseldis
+4|Beautiful jay|Cyanolyca pulchra
+4|Berthelot's pipit|Anthus berthelotii
+4|Beryl-spangled tanager|Tangara nigroviridis
+4|Black flowerpiercer|Diglossa humeralis
+4|Black harrier|Circus maurus
+4|Black petrel|Black Fulmar|Parkinson's petrel|Procellaria parkinsoni
+4|Black saw-wing|Psalidoprocne pristoptera
+4|Black scrub robin|Cercotrichas podobe
+4|Black-and-white mannikin|Spermestes bicolor
+4|Black-bellied thorntail|Discosura langsdorffi|Popelairia langsdorffi
+4|Black-browed babbler|Malacocincla perspicillata
+4|Black-capped parakeet|Pyrrhura rupicola
+4|Black-capped petrel|Pterodroma hasitata
+4|Black-capped vireo|Vireo atricapilla|Vireo atricapillus
+4|Black-collared barbet|Lybius torquatus
+4|Black-crowned waxbill|Estrilda nonnula
+4|Black-eared cuckoo|Chrysococcyx osculans|Misocalius osculans
+4|Black-faced hawk|Leucopternis melanops
+4|Black-headed greenfinch|Chloris ambigua
+4|Black-naped fruit dove|Ptilinopus melanospila|Ptilinopus melanospilus
+4|Black-necked weaver|Ploceus nigricollis
+4|Black-tailed crake|Zapornia bicolor
+4|Black-winged myna|Black-winged Starling|Acridotheres melanopterus|Sturnus melanopterus
+4|Black-winged snowfinch|Montifringilla adamsi
+4|Blackburnian warbler|Setophaga fusca
+4|Blue cotinga|Cotinga nattererii
+4|Blue malkoha|Yellowbill|Ceuthmochares aereus
+4|Blue quail|Synoicus adansonii
+4|Blue-and-white swallow|Pygochelidon cyanoleuca
+4|Blue-black grassquit|Volatinia jacarina
+4|Blue-capped fruit dove|Ptilinopus monacha
+4|Blue-headed vireo|Vireo solitarius
+4|Blue-necked jacamar|Galbula cyanicollis
+4|Blue-rumped pitta|Hydrornis soror
+4|Blue-throated motmot|Aspatha gularis
+4|Blue-winged racket-tail|Prioniturus verticalis
+4|Bluish-fronted jacamar|Galbula cyanescens
+4|Blunt-winged warbler|Acrocephalus concinens
+4|Boat-billed flycatcher|Megarynchus pitangua
+4|Bonin grosbeak|Carpodacus ferreorostris|Bonin Islands grosbeak
+4|Bonin petrel|Pterodroma hypoleuca
+4|Bougainville crow
+4|Brazilian tanager|Ramphocelus bresilia|Ramphocelus bresilius
+4|Brehm's tiger parrot|Psittacella brehmii
+4|Bristled grassbird|Schoenicola striatus
+4|Broad-billed tody|Todus subulatus
+4|Broad-billed warbler|Tickellia hodgsoni
+4|Broad-tailed hummingbird|Selasphorus platycercus
+4|Broad-winged hawk|Buteo platypterus
+4|Bronze sunbird|Bronzy Sunbird|Nectarinia kilimensis|Necterinia kilimensis
+4|Bronze-tailed comet|Polyonymus caroli
+4|Brown firefinch|Lagonosticta nitidula
+4|Brown inca|Coeligena wilsoni
+4|Brown jacamar|Brachygalba lugubris
+4|Brown jay|Cyanocorax morio
+4|Brown parrotbill|Paradoxornis unicolor
+4|Brown-throated parakeet|Eupsittula pertinax
+4|Brubru|Nilaus afer
+4|Buff-fronted owl|Aegolius harrisii
+4|Buff-tailed sicklebill|Eutoxeres condamini
+4|Buff-throated monal-partridge|Buff-throated Partridge|Tetraophasis szechenyii
+4|Bullock's oriole|Icterus bullockii
+4|Bumblebee hummingbird|Atthis heloisa
+4|Burchell's courser|Cursorius rufus
+4|Burchell's starling|Lamprotornis australis
+4|Burmese bush lark|Mirafra microptera
+4|Bushy-crested jay|Cyanocorax melanocyaneus
+4|Cambodian tailorbird|Orthotomus chaktomuk
+4|Cameroon olive pigeon|Cameroun olive pigeon|Columba sjostedti
+4|Campbell shag|Leucocarbo campbelli
+4|Cerulean flycatcher|Caerulean Paradise-flycatcher|Cerulean Paradise Flycatcher|Eutrichomyias rowleyi|Rowley's flycatcher
+4|Cerulean warbler|Setophaga cerulea
+4|Chaco nothura|Nothura chacoensis
+4|Chestnut-bellied guan|Penelope ochrogaster
+4|Chestnut-bellied rock thrush|Monticola rufiventris
+4|Chestnut-breasted cuckoo|Cacomantis (Vidgenia) castaneiventris|Cacomantis castaneiventris
+4|Chestnut-breasted nigrita|Nigrita bicolor
+4|Chestnut-collared swift|Streptoprocne rutila
+4|Chilean flicker|Colaptes pitius
+4|Chiriqui quail-dove|Zentrygon chiriquensis
+4|Christmas shearwater|Puffinus nativitatis
+4|Cinderella waxbill|Glaucestrilda thomensis
+4|Cinnamon-bellied imperial pigeon|Ducula basilica
+4|Citreoline trogon|Trogon citreolus
+4|Cobalt-rumped parrotlet|Blue-winged Parrotlet|Blue-winged Forpus|Forpus xanthopterygius
+4|Cocoa thrush|Lesser Antillean thrush|Turdus fumigatus|Turdus personus
+4|Coleto|Sarcops calvus
+4|Comb duck|Sarkidiornis sylvicola
+4|Common squirrel cuckoo|Squirrel Cuckoo|Piaya cayana
+4|Comoro olive pigeon|Comoros Olive Pigeon|Columba pollenii
+4|Cook's petrel|Pterodroma cookii
+4|Coppery-tailed coucal|Centropus cupreicaudus
+4|Coquerel's coua|Coua coquereli
+4|Crested satinbird|Cnemophilus macgregorii
+4|Crestless fireback|Lophura erythrophthalma|Malay Crestless Fireback
+4|Crimson-naped woodpecker|Dryobates cathpharius|Crimson-breasted Woodpecker
+4|Cyprus wheatear|Oenanthe cypriaca
+4|Diamond firetail|Stagonopleura guttata
+4|Diard's trogon|Harpactes diardii
+4|Dimorphic egret|Egretta dimorpha
+4|Double-banded courser|Rhinoptilus africanus|Smutsornis africanus
+4|Double-striped thick-knee|Burhinus bistriatus|Double-striped stone-curlew|Hesperoburhinus bistriatus|two-striped thickknee
+4|Double-toothed kite|Harpagus bidentatus
+4|Dusky crag martin|Ptyonoprogne concolor
+4|Dusky megapode|Dusky Scrubfowl|Megapodius freycinet
+4|Dusky pigeon|Patagioenas goodsoni
+4|Dusky turtle dove|Streptopelia lugens
+4|Dusky woodswallow|Artamus cyanopterus
+4|Dusky-billed parrotlet|Forpus modestus
+4|Dusky-legged guan|Penelope obscura
+4|Dwarf fruit dove|Ptilinopus naina|Ptilinopus nainus
+4|Dwarf sparrowhawk|Accipiter nanus|Small sparrowhawk
+4|Eared quetzal|Euptilotis neoxenus
+4|Eastern shriketit|Crested Shrike-tit|Falcunculus frontatus
+4|Eastern whip-poor-will|Antrostomus vociferus
+4|Eastern whipbird|Psophodes olivaceus
+4|Eastern yellow wagtail|Motacilla tschutschensis
+4|Elegant trogon|Trogon elegans
+4|Elfin woods warbler|Setophaga angelae
+4|Emin's shrike|Lanius gubernator
+4|Española mockingbird|Mimus macdonaldi|Hood Mockingbird
+4|Fawn-breasted bowerbird|Chlamydera cerviniventris
+4|Fawn-breasted waxbill|Estrilda paludicola
+4|Flammulated owl|Psiloscops flammeolus
+4|Flock bronzewing|harlequin pigeon|Phaps (Histriophaps) histrionica|Phaps histrionica
+4|Fraser's eagle-owl|Bubo poensis|Fraseris eagle-owl
+4|Frilled coquette|Lophornis magnificus
+4|Fulvous babbler|Argya fulva|Turdoides fulva
+4|Giant coua|Coua gigas
+4|Giant swiftlet|Hydrochous gigas
+4|Godlewski's bunting|Emberiza godlewskii
+4|Golden dove|golden fruit dove|Ptilinopus luteovirens
+4|Golden myna|Mino anais
+4|Golden-collared woodpecker|Veniliornis cassini
+4|Golden-rumped flowerpecker|Dicaeum annae
+4|Golden-winged warbler|Vermivora chrysoptera
+4|Goldie's lorikeet|Glossoptilus goldiei
+4|Gough finch|Gough Bunting|Rowettia goughensis
+4|Great dusky swift|Cypseloides senex
+4|Great parrotbill|Paradoxornis aemodium
+4|Great sapphirewing|Pterophanes cyanopterus
+4|Great thrush|Turdus fuscater
+4|Greater blue-eared starling|Lamprotornis chalybaeus
+4|Greater sooty owl|Tyto tenebricosa
+4|Green cochoa|Cochoa viridis
+4|Green mango|Anthracothorax viridis
+4|Green oriole|Oriolus (Mimeta) flavocinctus|Oriolus flavocinctus
+4|Green-and-gold tanager|Tangara schrankii
+4|Green-backed firecrown|Sephanoides sephaniodes|Sephanoides sephanoides
+4|Green-backed honeybird|Prodotiscus zambesiae
+4|Green-bearded helmetcrest|Oxypogon guerinii
+4|Green-tailed towhee|Pipilo chlorurus
+4|Green-throated mango|Anthracothorax viridigula
+4|Grey butcherbird|Cracticus torquatus
+4|Grey kestrel|Falco ardosiaceus
+4|Grey-banded mannikin|Lonchura vana|Grey-banded Munia
+4|Grey-cheeked parakeet|Brotogeris pyrrhoptera
+4|Grey-chinned minivet|Pericrocotus solaris
+4|Grey-green fruit dove|Ptilinopus purpuratus
+4|Grey-headed broadbill|Smithornis sharpei
+4|Grey-headed fruit dove|Ptilinopus hyogaster|Ptilinopus hyogastrus
+4|Grey-headed silverbill|Spermestes griseicapilla
+4|Grey-sided thrush|Turdus feae
+4|Groove-billed ani|Crotophaga sulcirostris
+4|Groove-billed toucanet|Aulacorhynchus sulcatus
+4|Grosbeak starling|Scissirostrum dubium
+4|Gurney's sugarbird|Promerops gurneyi
+4|Hawaii mamo|Drepanis pacifica
+4|Hawaiian coot|Fulica alai
+4|Hawaiian hawk|Buteo solitarius
+4|Henderson crake|Zapornia atra
+4|Henderson fruit dove|Scarlet-capped Fruit Dove|Ptilinopus insularis
+4|Himalayan beautiful rosefinch|Carpodacus pulcherrimus
+4|Himalayan cutia|Cutia nipalensis
+4|Hispaniolan mango|Anthracothorax dominicus|Hispaniola Mango
+4|Hispaniolan woodpecker|Melanerpes striatus
+4|Hodgson's redstart|Phoenicurus hodgsoni
+4|Hoffmann's woodpecker|Hoffman’s woodpecker|Melanerpes hoffmanni|Melanerpes hoffmannii
+4|Hooded mountain toucan|Andigena cucullata
+4|Hooded warbler|Setophaga citrina
+4|Hook-billed hermit|Glaucis dohrnii
+4|Hook-billed vanga|Vanga curvirostris
+4|Imitator goshawk|Accipiter imitator
+4|Indian grassbird|Graminicola bengalensis
+4|Indian yellow-nosed albatross|Yellow-nosed albatross|Thalassarche carteri
+4|Iris lorikeet|Trichoglossus iris|Psitteuteles iris
+4|Jankowski's bunting|Emberiza jankowskii|Rufous-backed bunting
+4|Javan oriole|Black-and-crimson Oriole|Oriolus cruentus
+4|Jerdon's bush chat|Saxicola jerdoni
+4|Jerdon's nightjar|Caprimulgus atripennis
+4|Josephine's lorikeet|Charmosyna josefinae
+4|Karoo korhaan|Eupodotis vigorsii
+4|Kashmir flycatcher|Ficedula subrubra
+4|Large grey babbler|Argya malcolmi
+4|Lava heron|Butorides sundevalli
+4|Lawrence's goldfinch|Spinus lawrencei
+4|Layard's parakeet|Emerald-collared parakeet|Psittacula calthrapae|Psittacula calthropae
+4|Laysan rail|Laysan crake|Porzana palmeri|Zapornia palmeri
+4|Lesser goldfinch|Spinus psaltria
+4|Lesser shortwing|Brachypteryx leucophris
+4|Lesser sooty owl|Tyto multipunctata
+4|Lilac-tailed parrotlet|Touit batavica|Touit batavicus
+4|Little hermit|Phaethornis longuemareus
+4|Little wattlebird|Anthochaera chrysoptera
+4|Little wood rail|Aramides mangle
+4|Long-billed crow|Corvus validus
+4|Long-tailed hawk|Urotriorchis macrourus
+4|Long-tailed hermit|Phaethornis superciliosus
+4|Long-tailed sylph|Aglaiocercus kingii
+4|Long-tailed thrush|Zoothera dixoni
+4|Long-toed lapwing|Vanellus crassirostris
+4|Long-wattled umbrellabird|Cephalopterus penduliger
+4|Lucifer sheartail|Calothorax lucifer|Lucifer hummingbird
+4|Ludwig's bustard|Neotis ludwigii
+4|Madagascar buttonquail|Turnix nigricollis
+4|Madagascar nightjar|Caprimulgus madagascariensis
+4|Madagascar rail|Rallus madagascariensis
+4|Makatea fruit dove|Ptilinopus chalcurus
+4|Malabar lark|Galerida malabarica
+4|Malagasy coucal|Centropus toulou
+4|Malayan honeyguide|Malaysian Honeyguide|Indicator archipelagicus
+4|Mangrove swallow|Tachycineta albilinea
+4|Marail guan|Penelope marail
+4|Maroon shining parrot|Prosopeia tabuensis
+4|Maroon-backed accentor|Prunella immaculata
+4|Mauritius olive white-eye|Zosterops chloronothos
+4|Mayotte drongo|Dicrurus waldenii
+4|McKay's bunting|Plectrophenax hyperboreus
+4|Mexican parrotlet|Forpus cyanopygius
+4|Micronesian megapode|Megapodius laperouse|Micronesian scrubfowl
+4|Mindoro hornbill|Penelopides mindorensis
+4|Mississippi kite|Ictinia mississippiensis
+4|Moluccan scops owl|O. magicus|Otus magicus
+4|Mottled berryhunter|Mottled Whistler|Rhagologus leucostigma
+4|Mountain chickadee|Parus gambelli|Poecile gambeli
+4|Mountain firetail|Oreostruthus fuliginosus
+4|Narrow-billed tody|Todius angustirostris|Todus angustirostris
+4|Nepal house martin|Delichon nipalense|Delichon nipalensis
+4|New Britain bronzewing|Henicophaps foersteri
+4|New Britain goshawk|Accipiter princeps
+4|New Holland honeyeater|Phylidonyris (Meliornis) novaehollandiae|Phylidonyris novaehollandiae
+4|Nilgiri flowerpecker|Plain Flowerpecker|Dicaeum concolor
+4|Northern royal albatross|Diomedea sanfordi
+4|Northern white-crowned shrike|Eurocephalus rueppelli|Eurocephalus ruppelli|Ruppell's white-crowned shrike
+4|Nubian nightjar|Caprimulgus nubicus
+4|Nubian woodpecker|Campethera nubica
+4|Oceanodroma matsudairae|Matsudaira's Storm Petrel|Hydrobates matsudairae
+4|Ochraceous bulbul|Alophoixus ochraceus|Ochraceous bearded bulbul
+4|Ochre-marked parakeet|Blue-chested parakeet|Pyrrhura cruentata
+4|Ochre-rumped bunting|Emberiza yessoensis
+4|Olivaceous thornbill|Chalcostigma olivaceum
+4|Olive sunbird|Cyanomitra olivacea
+4|Olive thrush|Turdus olivaceus
+4|Olive woodpecker|Dendropicos griseocephalus
+4|Olive-backed quail-dove|Leptotrygon veraguensis
+4|Olive-winged bulbul|Pycnonotus plumosus
+4|Orange-backed woodpecker|Reinwardtipicus validus
+4|Orange-bellied flowerpecker|Dicaeum trigonostigma
+4|Orange-bellied fruit dove|Ptilinopus iozonus
+4|Orange-chinned parakeet|Brotogeris jugularis
+4|Orange-spotted bulbul|Pycnonotus bimaculatus
+4|Oriental reed warbler|Acrocephalus orientalis
+4|Ornate fruit dove|Ptilinopus ornatus|western ornate fruit-dove
+4|Painted finch|Emblema pictum
+4|Painted sandgrouse|Pterocles indicus
+4|Pale crag martin|Ptyonoprogne obsoleta
+4|Pale mountain pigeon|Gymnophaps solomonensis
+4|Pale thrush|Turdus pallidus
+4|Pale-winged trumpeter|Psophia leucoptera
+4|Papuan king parrot|Alisterus chloropterus
+4|Pavonine cuckoo|Dromococcyx pavoninus
+4|Pemba green pigeon|Treron pembaensis
+4|Pennant-winged nightjar|Caprimulgus vexillarius
+4|Peruvian tern|Sterna lorata|Sternula lorata
+4|Pheasant coucal|Centropus phasianinus
+4|Pheasant cuckoo|Dromococcyx phasianellus
+4|Philippine dwarf kingfisher|Ceyx melanurus
+4|Philippine serpent eagle|Spilornis holospilus
+4|Pictorella mannikin|Heteromunia pectoralis|Pictorella Finch
+4|Pied butcherbird|Cracticus nigrogularis
+4|Pied plover|Cayenne plover|Hoploxypterus cayanus|Vanellus cayanus
+4|Pileated parrot|Pionopsitta pileata
+4|Pink-billed lark|Spizocorys conirostris
+4|Pink-headed imperial pigeon|Ducula rosacea
+4|Pitt shag|Phalacrocorax featherstoni|Pitt Island shag
+4|Pitta-like ground roller|Atelornis pittoides
+4|Plain parakeet|Brotogeris tirica
+4|Plumbeous hawk|Cryptoleucopteryx plumbea
+4|Pompadour cotinga|Xipholena punicea
+4|Poʻouli|Melamprosops phaeosoma|Poiouli
+4|Purple cochoa|Cochoa purpurea
+4|Purple-collared woodstar|Myrtis fanny
+4|Purple-naped spiderhunter|Kurochkinegramma hypogrammicum
+4|Purple-throated fruitcrow|Querula purpurata
+4|Purus jacamar|Galbalcyrhynchus purusianus
+4|Père David's snowfinch|Pyrgilauda davidiana
+4|Pīpipi|Mohoua novaeseelandiae|New Zealand creeper
+4|Red goshawk|Erythrotriorchis radiatus
+4|Red-and-white crake|Laterallus leucopyrrhus|Rallus leucopyrrhus
+4|Red-billed parrot|Pionus sordidus
+4|Red-capped coua|Coua ruficeps
+4|Red-capped lark|Calandrella cinerea
+4|Red-cheeked parrot|Geoffroyus geoffroyi
+4|Red-cockaded woodpecker|Leuconotopicus borealis|Dendrocopos borealis|Dendrocopos borealis borealis|Dendrocopos borealis hylonomus|Dryobates borealis|Picoides borealis|Picoides borealis hylonomus|Picus borealis
+4|Red-collared lorikeet|Trichoglossus rubritorquis
+4|Red-eared firetail|Stagonopleura oculata|Red-eared firetail finch
+4|Red-faced malkoha|Phaenicophaeaus pyrrhocephalus|Phaenicophaeus pyrrhocephalus|Red-faced malcoha
+4|Red-gartered coot|Fulica armillata
+4|Red-headed bluebill|Spermophaga ruficapilla
+4|Red-masked parakeet|Psittacara erythrogenys|red-masked conure
+4|Regent bowerbird|Sericulus chrysocephalus
+4|Robin accentor|Prunella rubeculoides
+4|Robust woodpecker|Campephilus robustus
+4|Rock bush quail|Perdicula argoondah
+4|Rufous-crested coquette|Lophornis delattrei
+4|Rufous-faced warbler|Abroscopus albogularis
+4|Rufous-necked sparrowhawk|Accipiter erythrauchen
+4|Rufous-sided broadbill|Smithornis rufolateralis
+4|Rufous-tailed plantcutter|Phytotoma rara
+4|Rufous-tailed weaver|Histurgops ruficauda
+4|Rufous-throated partridge|Rufous-throated Hill Partridge|Arborophila rufogularis
+4|Rufous-vented tit|Periparus rubidiventris
+4|Rufous-winged buzzard|Butastur liventer
+4|Rusty-flanked treecreeper|Certhia nipalensis
+4|Ryukyu robin|Larvivora komadori
+4|Saffron-cowled blackbird|Xanthopsar flavus
+4|Saffron-crowned tanager|Tangara xanthocephala
+4|Salvin's curassow|Mitu salvini
+4|Samar hornbill|Penelopides samarensis
+4|San Blas jay|Cyanocorax sanblasianus
+4|Sand partridge|Ammoperdix heyi
+4|Savile's bustard|Lophotis savilei
+4|Scale-throated hermit|Phaethornis euronyme|Phaethornis eurynome
+4|Scaled fruiteater|Ampelioides tschudii
+4|Scaly-breasted kingfisher|Actenoides princeps
+4|Scaly-naped amazon|Amazona mercenaria|Amazona mercenarius
+4|Scaly-naped pigeon|Patagioenas squamosa
+4|Scarlet flycatcher|Pyrocephalus rubinus
+4|Scarlet-fronted parakeet|Aratinga wagleri
+4|Scarlet-shouldered parrotlet|Touit huetii
+4|Schneider's pitta|Hydrornis schneideri
+4|Scintillant hummingbird|Selasphorus scintilla
+4|Scottish crossbill|Loxia scotica
+4|Semicollared hawk|Accipiter collaris
+4|Seychelles magpie-robin|Copsychus sechellarum
+4|Short-clawed lark|Certhilauda chuana
+4|Silverbird|Empidornis semipartitus
+4|Silvery-throated jay|Cyanolyca argentigula
+4|Slate-colored hawk|Slate-coloured Hawk|Buteogallus schistaceus
+4|Slender-billed oriole|Oriolus tenuirostris
+4|Solitary eagle|Montane Solitary Eagle|Buteogallus solitarius
+4|Sooty barbthroat|Threnetes niger
+4|South Island saddleback|Philesturnus carunculatus|tieke|saddleback
+4|Southern black tit|Melaniparus niger
+4|Southern red-billed hornbill|Tockus rufirostris
+4|Spangle-cheeked tanager|Tangara dowii
+4|Spangled kookaburra|Dacelo tyro
+4|Spectacled imperial pigeon|Ducula perspicillata|white-eyed imperial pigeon
+4|Spectacled parrotlet|Forpus conspicillatus
+4|Spectacled spiderhunter|Arachnothera flavigaster
+4|Spike-heeled lark|Chersomanes albofasciata
+4|Spot-breasted lapwing|Vanellus melanocephalus
+4|Spotted imperial pigeon|Ducula carola
+4|Spotted rail|Rallus maculatus|Pardirallus maculatus
+4|Square-tailed drongo-cuckoo|Drongo Cuckoo|Asian Drongo-Cuckoo|Surniculus lugubris
+4|Square-tailed kite|Lophoictinia isura
+4|Star finch|Emblema ruficauda
+4|Stone partridge|Ptilopachus petrosus
+4|Straight-billed hermit|Phaethornis bourcieri
+4|Streak-breasted woodpecker|Picus viridanus
+4|Sulawesi cuckoo|Cuculus crassirostris|sulawesi hawk-cuckoo
+4|Sulawesi drongo|Dicrurus montanus
+4|Sulawesi dwarf kingfisher|Celebes Dwarf Kingfisher|Celebes Pygmy Kingfisher|Ceyx fallax|Sulawesi Forest Kingfisher|Sulawesi kingfisher|Sulawesi Kingisher|Sulawesi Pygmy Kingfisher
+4|Sulawesi masked owl|Tyto rosenbergii|Tyto rosenbergi
+4|Sunda teal|Anas gibberifrons
+4|Swahili sparrow|Passer suahelicus
+4|Swee waxbill|Coccopygia melanotis
+4|Sykes's lark|Galerida deva
+4|Sykes's nightjar|Caprimulgus mahrattensis|Sykesis nightjar
+4|São Tomé green pigeon|Treron sanctithomae
+4|Tahiti rail|Tahitian Red-billed Rail|Hypotaenidia pacifica|Gallirallus pacificus|Pacific red-billed rail
+4|Taita falcon|Falco fasciinucha
+4|Taita fiscal|Lanius dorsalis|Taita fiscal shrike
+4|Taiwan partridge|Taiwan Hill Partridge|Arborophila crudigularis
+4|Taiwan vivid niltava|Niltava vivida|Vivid Niltava
+4|Tambourine dove|Turtur tympanistria
+4|Tanna fruit dove|Ptilinopus tannensis
+4|Tawny-shouldered blackbird|Agelaius humeralis
+4|Tawny-tufted toucanet|Selenidera nattereri
+4|Thayer's gull|Larus thayeri
+4|Thick-billed euphonia|Euphonia laniirostris
+4|Tibetan bunting|Emberiza koslowi
+4|Tricolored parrotfinch|Erythrura tricolor
+4|Tristram's warbler|Curruca deserticola
+4|Tropical kingbird|Tyrannus melancholicus
+4|Turquoise jay|Cyanolyca turcosa
+4|Uniform crake|Amaurolimnas concolor
+4|Vanuatu megapode|Megapodius layardi
+4|Variable antshrike|Thamnophilus caerulescens
+4|Varied thrush|Ixoreus naevius
+4|Veery|Catharus fuscescens
+4|Verreaux's coua|Coua verreauxi
+4|Vinaceous rosefinch|Carpodacus vinaceus
+4|Violet-tailed sylph|Aglaiocercus coelestis
+4|Vogelkop bowerbird|Amblyornis inornata
+4|Wahnes's parotia|Parotia wahnesi
+4|Wake Island rail|Hypotaenidia wakensis|Gallirallus wakensis
+4|West Peruvian dove|Zenaida meloda
+4|Western spinebill|Acanthorhynchus superciliosus
+4|Westland petrel|Procellaria westlandica|Westland Black Petrel
+4|White-backed thrush|Kessler's Thrush|Turdus kessleri
+4|White-bellied erpornis|Erpornis zantholeuca|White-bellied tree babbler
+4|White-bellied goshawk|Accipiter haplochrous
+4|White-bellied redstart|Luscinia phaenicuroides
+4|White-bellied woodstar|Chaetocercus mulsant
+4|White-billed buffalo weaver|Bubalornis albirostris
+4|White-browed guan|Penelope jacucaca
+4|White-capped fruit dove|Ptilinopus dupetithouarsii
+4|White-cheeked bullfinch|Pyrrhula leucogenis
+4|White-collared blackbird
+4|White-crested guan|Penelope pileata
+4|White-eared bulbul|Pycnonotus leucotis
+4|White-eared catbird|Ailuroedus buccoides
+4|White-fronted plover|Anarhynchus marginatus|Charadrius marginatus
+4|White-fronted woodpecker|Melanerpes cactorum
+4|White-necked coucal|Centropus ateralbus
+4|White-necked petrel|Pterodroma (Aestrelata) cervicalis|Pterodroma cervicalis
+4|White-rumped kingfisher|Glittering Kingfisher|Caridonax fulgidus
+4|White-rumped snowfinch|Onychostruthus taczanowskii
+4|White-spotted woodpecker|Veniliornis spilogaster
+4|White-tailed jay|Cyanocorax mystacalis
+4|White-thighed hornbill|Bycanistes albotibialis
+4|White-throated rock thrush|Monticola gularis
+4|White-vented violetear|Colibri serrirostris
+4|White-whiskered hermit|Phaethornis yaruqui
+4|White-winged warbler|Hispaniolan Highland-tanager|Xenoligea montana
+4|Whitehead's spiderhunter|Arachnothera juliae
+4|Wilson's warbler|Cardellina pusilla
+4|Yellow bunting|Emberiza sulphurata
+4|Yellow canary|Crithagra flaviventris
+4|Yellow-bellied fantail|Citrine Canary Flycatcher|Chelidorhynx hypoxanthus|Chelidorhynx hypoxantha|Rhipidura hypoxantha|Yellow-bellied Fairy-Fantail
+4|Yellow-bellied flowerpecker|Dicaeum melanoxanthum
+4|Yellow-bibbed fruit dove|Ptilinopus solomonensis
+4|Yellow-bibbed lory|Lorius chlorocercus
+4|Yellow-billed babbler|Argya affinis
+4|Yellow-billed kingfisher|Syma torotoro
+4|Yellow-billed kite|Milvus aegyptius
+4|Yellow-breasted flowerpecker|Prionochilus maculatus
+4|Yellow-breasted fruit dove|Ptilinopus occipitalis
+4|Yellow-crowned gonolek|Laniarius barbarus
+4|Yellow-throated bush sparrow|Gymnoris superciliaris|yellow-throated petronia
+4|Yellow-throated toucan|Black-mandibled Toucan|Ramphastos ambiguus
+4|Yellow-throated vireo|Vireo flavifrons
+4|Zapata rail|Cyanolimnas cerverai|Mustelirallus cerverai
+4|Zapata wren|Ferminia cerverai
+4|Zebra woodpecker|Buff-rumped Woodpecker|Meiglyptes tristis|White-rumped woodpecker
+4|Zoe's imperial pigeon|Ducula zoeae
+4|ʻAkohekohe|Palmeria dolei
+4|Brown tinamou|Crypturellus obsoletus
+4|Sungrebe|Heliornis fulica
+4|Acacia pied barbet|Tricholaema leucomelas
+4|African dwarf kingfisher|Ispidina lecontei
+4|African pipit|Anthus cinnamomeus|Grassveld Pipit
+4|African reed warbler|Acrocephalus baeticatus
+4|African rock pipit|Anthus crenatus
+4|Aldabra drongo|Dicrurus aldabranus
+4|Altamira yellowthroat|Geothlypis flavovelata
+4|Andaman boobook|Andaman Hawk-Owl|Ninox affinis
+4|Andean duck|Oxyura ferruginea
+4|Andean hillstar|Oreotrochilus estella
+4|Andean pygmy owl|Glaucidium jardinii
+4|Apolinar's wren|Apolinaris wren|Cistothorus apolinari
+4|Arabian warbler|Curruca leucomelaena
+4|Arabian woodpecker|Dendrocoptes dorae
+4|Archer's lark|Heteromirafra archeri
+4|Arrowhead piculet|Picumnus minutissimus
+4|Asian short-toed lark
+4|Australasian figbird|Sphecotheres vieilloti|Green figbird|Yellow figbird
+4|Australian boobook|Ninox boobook|Southern Boobook
+4|Baglafecht weaver|Ploceus baglafecht
+4|Baird's trogon|Trogon bairdii
+4|Bald parrot|Pyrilia aurantiocephala
+4|Balicassiao|Dicrurus balicassius
+4|Banded ground cuckoo|Neomorphus radiolosus
+4|Banded quail|Philortyx fasciatus
+4|Bar-bellied woodpecker|Veniliornis nigriceps
+4|Bar-shouldered dove|Geopelia humeralis
+4|Bar-tailed trogon|Apaloderma vittatum
+4|Bare-faced bulbul|Nok hualon
+4|Bare-faced go-away-bird|Corythaixoides personatus|Crinifer personatus
+4|Bay coucal|Centropus celebensis
+4|Bay-headed tanager|Tangara gyrola
+4|Bearded guan|Penelope barbata
+4|Bearded mountaineer|Oreonympha nobilis
+4|Bell's vireo|Vireo bellii
+4|Bicolored wren|Campylorhynchus griseus
+4|Black butcherbird|Melloria quoyi
+4|Black cuckoo-dove|Black Dove|Turacoena modesta
+4|Black honeyeater|Certhionyx niger|Sugomel niger
+4|Black inca|Coeligena prunellei
+4|Black storm petrel|Oceanodroma melania
+4|Black sunbird|Leptocoma sericea|Necterinia sericea
+4|Black-and-buff woodpecker|Meiglyptes jugularis
+4|Black-and-white owl|Strix nigrolineata
+4|Black-backed bittern|Botaurus dubius
+4|Black-backed butcherbird|Cracticus mentalis
+4|Black-backed thornbill|Ramphomicron dorsale
+4|Black-bellied hummingbird|Eupherusa nigriventris
+4|Black-billed coucal|Bernstein's coucal|Centropus bernsteini|Lesser Black Coucal
+4|Black-breasted buttonquail|Turnix (Austroturnix) melanogaster|Turnix melanogaster
+4|Black-breasted puffbird|Notharchus pectoralis
+4|Black-breasted puffleg|Eriocnemis nigrivestis
+4|Black-cheeked woodpecker|Melanerpes pucherani
+4|Black-chinned siskin|Spinus barbatus
+4|Black-collared jay|Cyanolyca armillata
+4|Black-crested coquette|Lophornis helenae|Paphosia helenae
+4|Black-eared fairy|Heliothryx auritus
+4|Black-faced woodswallow|Artamus cinereus
+4|Black-goggled tanager|Trichothraupis melanops
+4|Black-headed canary|Serinus alario
+4|Black-hooded antshrike|Thamnophilus bridgesi
+4|Black-hooded coucal|Centropus steerii|Steere's coucal
+4|Black-necked woodpecker|Colaptes atricollis
+4|Black-tailed nativehen|Tribonyx ventralis
+4|Black-tailed trainbearer|Lesbia victoriae
+4|Black-throated canary|Crithagra atrogularis
+4|Black-throated coucal|Centropus leucogaster|Smaller black-throated coucal
+4|Black-throated green warbler|Setophaga virens
+4|Black-throated sparrow|Amphispiza bilineata
+4|Blackish cinclodes|Cinclodes antarcticus|Tussac-bird|Tussoc-bird
+4|Blood-colored woodpecker|Blood-coloured Woodpecker|Veniliornis sanguineus
+4|Blue dacnis|Dacnis cayana
+4|Blue-and-white kingfisher|Moluccan kingfisher|Todiramphus diops
+4|Blue-and-yellow tanager|Rauenia bonariensis|Blue-yellow Tanager|Pipraeidea bonariensis|Thraupis bonariensis
+4|Blue-banded toucanet|Aulacorhynchus coeruleicinctis
+4|Blue-breasted fairywren|Malurus (Leggeornis) pulcherrimus|Malurus pulcherrimus
+4|Blue-fronted lorikeet|Charmosyna toxopei
+4|Blue-necked tanager|Stilpnia cyanicollis|Tangara cyanicollis
+4|Blue-tufted starthroat|Heliomaster furcifer
+4|Boreal chickadee|Poecile hudsonicus
+4|Bornean ground cuckoo|Carpococcyx radiceus|Malay Ground-cuckoo
+4|Bradfield's swift|Apus bradfieldi
+4|Bridled quail-dove|Geotrygon mystacea
+4|Bridled titmouse|Baeolophus wollweberi
+4|Bronze ground dove|Pampusana beccarii|Western Bronze Ground-dove|Gallicolumba beccarii
+4|Bronze mannikin|Spermestes cucullata
+4|Bronze-winged courser|Rhinoptilus chalcopterus
+4|Bronzy jacamar|Galbula leucogastra
+4|Brown twinspot|Clytospiza monteiri
+4|Brown-backed flowerpecker|Dicaeum everetti
+4|Brown-cheeked fulvetta|Alcippe poioicephala|quaker babbler
+4|Brown-chested lapwing|Vanellus superciliosus
+4|Brown-headed paradise kingfisher|Tanysiptera danae
+4|Buff-breasted wheatear|Oenanthe bottae
+4|Buff-fronted quail-dove|Zentrygon costaricensis
+4|Buff-necked woodpecker|Meiglyptes tukki
+4|Buff-streaked chat|Campicoloides bifasciatus
+4|Buff-tailed coronet|Boissonneaua flavescens
+4|Buffy hummingbird|Leucippus fallax
+4|Burmese myna|Vinous-breasted Starling|Acridotheres burmannicus
+4|Buru flowerpecker|Flame-breasted Flowerpecker|Dicaeum erythrothorax
+4|Buzzing flowerpecker|Dicaeum hypoleucum
+4|Caica parrot|Pionopsitta caica|Pyrilia caica
+4|Calayan rail|Aptenorallus calayanensis|Gallirallus calayanensis
+4|Canivet's emerald|Chlorostilbon canivetii
+4|Canyon wren|Catherpes mexicanus
+4|Cape Verde petrel|Fea's Petrel|Feais petrel|Pterodroma feae
+4|Cape Verde shearwater|Calonectris edwardsii
+4|Cape bulbul|Pycnonotus capensis
+4|Cape canary|Serinus canicollis
+4|Capped wheatear|Oenanthe pileata
+4|Cardinal myzomela|Myzomela cardinalis
+4|Chalk-browed mockingbird|Mimus saturninus
+4|Chaplin's barbet|Lybius chaplini|Zambian barbet
+4|Chatham Islands petrel|Chatham Petrel|Pterodroma axillaris
+4|Checkered woodpecker|Picoides mixtus|Veniliornis mixtus
+4|Chestnut-backed antshrike|Thamnophilus palliatus
+4|Chestnut-bellied starling|Lamprotornis pulcher|Spreo pulcher
+4|Chestnut-breasted chlorophonia|Chlorophonia pyrrhophrys
+4|Chestnut-capped babbler|Timalia pileata
+4|Chestnut-capped flycatcher|Erythrocercus mccallii
+4|Chestnut-colored woodpecker|Chestnut-coloured Woodpecker|Celeus castaneus
+4|Chestnut-necklaced partridge|Tropicoperdix charltonii
+4|Chestnut-throated monal-partridge|Chestnut-throated Partridge|Tetraophasis obscurus
+4|Chestnut-vented nuthatch
+4|Chestnut-winged chachalaca|Ortalis garrula
+4|Chilean pigeon|Patagioenas araucana
+4|Chilean seaside cinclodes|Cinclodes nigrofumosus
+4|Chilean woodstar|Eulidia yarrellii
+4|Chowchilla|Orthonyx spaldingi|Orthonyx spaldingii|Spalding’s logrunner
+4|Christmas boobook|Christmas hawk-owl|Ninox natalis
+4|Cinnamon ibon|Hypocryptadius cinnamomeus
+4|Cinnamon-breasted bunting|Cinnamon-breasted Rock-Bunting|Emberiza tahapisi
+4|Cliff flycatcher|Hirundinea ferruginea
+4|Club-winged manakin|Machaeropterus deliciosus
+4|Coastal miner|Geositta peruviana
+4|Cobalt-winged parakeet|Brotogeris cyanoptera
+4|Cocos tyrannulet|Cocos Flycatcher|Nesotriccus ridgwayi
+4|Collared puffbird|Bucco capensis
+4|Colombian mountain grackle|Macroagelaius subalaris|Mountain grackle
+4|Coroneted fruit dove|Ptilinopus coronulatus
+4|Cream-backed woodpecker|Campephilus leucopogon
+4|Crested bobwhite|Colinus cristatus
+4|Crestless curassow|Lesser razor-billed curassow|Mitu tomentosum
+4|Crimson-backed sunbird|Leptocoma minima|Necterinia minima
+4|Crimson-breasted finch|Rhodospingus cruentus
+4|Crimson-breasted shrike|Crimson-breasted gonolek|Laniarius atrococcineus
+4|Crimson-crested woodpecker|Campephilus melanoleucos
+4|Crowned lapwing|kiewiet|Vanellus coronatus
+4|Dark-backed imperial pigeon|Ducula lacernulata
+4|Dark-backed wood quail|Odontophorus melanonotus
+4|Dark-sided thrush|Zoothera marginata
+4|Dark-throated oriole|Oriolus xanthonotus
+4|Diademed tanager|Stephanophorus diadematus
+4|Dickinson's kestrel|Dickinsonis kestrel|Falco dickinsoni
+4|Duchess lorikeet|Charmosyna margarethae
+4|Dulit frogmouth|Batrachostomus harterti
+4|East Brazilian pygmy owl|Glaucidium minutissimum
+4|Eastern plantain-eater|Crinifer zonurus|Eastern grey plantain-eater
+4|Eastern spot-billed duck|Anas zonorhyncha|Chinese Spot-billed Duck
+4|Echo parakeet|Mauritius parakeet|Psittacula eques|Reunion Parakeet
+4|El Oro parakeet|Pyrrhura orcesi
+4|Elegant quail|Callipepla douglasii
+4|Empress brilliant|Heliodoxa imperatrix
+4|Fairy lorikeet|Charmosyna pulchella
+4|Fasciated wren|Campylorhynchus fasciatus
+4|Fawn-breasted tanager|Pipraeida melanonota|Pipraeidea melanonota
+4|Fawn-coloured lark|Calendulauda africanoides
+4|Fernandina's flicker|Colaptes fernandinae|Fernandinais flicker
+4|Ferruginous flycatcher|Muscicapa ferruginea
+4|Fine-spotted woodpecker|Campethera punctuligera
+4|Fire-tailed myzornis|Myzornis pyrrhoura
+4|Flame-fronted barbet|Psilopogon armillaris
+4|Flame-winged parakeet|Pyrrhura calliptera
+4|Flappet lark|Mirafra rufocinnamomea
+4|Fluttering shearwater|Puffinus gavia
+4|Forest wood hoopoe|Phoeniculus castaneiceps
+4|Fork-tailed flycatcher|Tyrannus savana
+4|Fuscous flycatcher|Cnemotriccus fuscatus
+4|Gabon coucal|Centropus anselli
+4|Gabon woodpecker|Dendropicos gabonensis
+4|Galapagos crake|Galapagos rail|Laterallus spilonota|Laterallus spilonotus
+4|Germain's peacock-pheasant|Germainis peacock-pheasant|Polyplectron germaini
+4|Giant snipe|Gallinago undulata
+4|Giant sunbird|Dreptes thomensis|Nectarinia thomensis|Saõ Tomé Giant sunbird
+4|Glittering-bellied emerald|Chlorostilbon lucidus
+4|Glossy-black thrush|Turdus serranus
+4|Golden bush robin|Tarsiger chrysaeus
+4|Golden nightjar|Caprimulgus eximius
+4|Golden pipit|Tmetothylacus tenellus
+4|Golden-bellied starfrontlet|Coeligena bonapartei
+4|Golden-breasted fulvetta|Lioparus chrysotis
+4|Golden-cheeked woodpecker|Melanerpes chrysogenys|Melanerpes chysogenys
+4|Golden-chevroned tanager|Thraupis ornata
+4|Golden-eared tanager|Tangara chrysotis
+4|Golden-fronted bowerbird|Amblyornis flavifrons
+4|Golden-green woodpecker|Piculus chrysochloros
+4|Golden-naped woodpecker|Melanerpes chrysauchen
+4|Golden-spangled piculet|Picumnus exilis
+4|Golden-winged cacique|Cacicus chrysopterus
+4|Golden-winged sunbird|Drepanorhynchus reichenowi|Nectarinia reichenowi|Necterinia reichenowi
+4|Goliath coucal|Centropus goliath
+4|Gould's jewelfront|Heliodoxa aurescens|Polyplancta aurescens
+4|Graceful prinia|Prinia gracilis
+4|Grass wren|Cistothorus platensis
+4|Gray-lined hawk|Buteo nitidus|Grey-lined Hawk
+4|Great antshrike|Taraba major
+4|Great-billed hermit|Phaethornis malaris
+4|Great-billed mannikin|Lonchura grandis
+4|Green iora|Aegithina viridissima
+4|Green racket-tail|Green Racquet-tail|Prioniturus luconensis
+4|Green thorntail|Discosura conversii|Popelairia conversii
+4|Green-breasted mango|Anthracothorax prevostii
+4|Green-chinned euphonia|Euphonia chalybea
+4|Green-crowned brilliant|Heliodoxa jacula
+4|Green-fronted lancebill|Doryfera ludovicae
+4|Green-tailed jacamar|Galbula galbula
+4|Green-tailed warbler|Microligea palustris
+4|Greenish puffleg|Haplophaedia aureliae
+4|Grey bush chat|Saxicola ferrea|Saxicola ferreus
+4|Grey currawong|Strepera (Neostrepera) versicolor|Strepera versicolor
+4|Grey penduline tit|Anthoscopus caroli
+4|Grey petrel|Procellaria (Adamastor) cinerea|Procellaria cinerea
+4|Grey tit|Melaniparus afer
+4|Grey warbler|Gerygone igata|Grey Gerygone
+4|Grey-bellied cuckoo|Cacomantis passerinus
+4|Grey-breasted partridge|Arborophila orientalis|White-faced partridge
+4|Grey-chinned hermit|Phaethornis griseogularis
+4|Grey-eyed bulbul|Iole propinqua
+4|Grey-headed nigrita|Nigrita canicapillus|Grey-crowned negro finch|Nigrita canicapilla
+4|Grey-headed tanager|Eucometis penicillata
+4|Grey-sided flowerpecker|Dicaeum celebicum
+4|Grey-streaked flycatcher|Muscicapa griseisticta
+4|Grey-throated rail|Canirallus oculeus
+4|Grey-winged francolin|Greywing francolin|Scleroptila afra
+4|Greyish piculet|Picumnus granadensis
+4|Guadalupe murrelet|Xantus’s murrelet|Synthliboramphus hypoleucus|Xantus' murrelet
+4|Guadeloupe woodpecker|Melanerpes herminieri
+4|Guianan puffbird|Notharchus macrorhynchos
+4|Guianan red cotinga|Phoenicercus carnifex|Phoenicircus carnifex
+4|Heuglin's bustard|Neotis heuglinii
+4|Hill partridge|Common Hill Partridge|Arborophila torqueola
+4|Himalayan white-browed rosefinch|Carpodacus thura|White-browed rosefinch
+4|Hispaniolan palm crow|Corvus palmarum
+4|Hodgson's frogmouth|Batrachostomus hodgsoni
+4|Holub's golden weaver|Ploceus xanthops
+4|Honduran emerald|Amazilia luciae
+4|Hooded grosbeak|Hesperiphona abeillei|Guiraca Abeillei
+4|Hooded mountain tanager|Buthraupis montana
+4|Hook-billed kingfisher|Melidora macrorrhina
+4|Hoopoe starling|Bourbon crested starling|Fregilupus varius|Réunion starling
+4|Huayco tinamou|Rhynchotus maculicollis
+4|Huon astrapia|Astrapia rothschildi
+4|Inland dotterel|Peltohyas australis|Charadrius australis
+4|Isabela oriole|Oriolus isabellae
+4|Izu thrush|Turdus celaenops
+4|Jamaican mango|Anthracothorax mango
+4|Jamaican woodpecker|Melanerpes radiolatus
+4|Javan flowerpecker|Blood-breasted Flowerpecker|Dicaeum sanguinolentum
+4|Javan forktail|White-crowned Forktail|Enicurus leschenaulti
+4|Javan frogmouth|Batrachostomus javensis
+4|Javan myna|Acridotheres javanicus
+4|Javan scops owl|Otus angelinae
+4|Javan woodcock|Dusky woodcock|Rufous woodcock|Scolopax saturata
+4|Jerdon's babbler|Chrysomma altirostre|Moupinia altirostris
+4|Jonquil parrot|Aprosmictus jonquillaceus|Olive-shouldered parrot
+4|Juan Fernández firecrown|Sephanoides fernandensis|Juan Fern·ndez firecrown
+4|Juan Fernández petrel|Juan Fern·ndez petrel|Pterodroma externa
+4|King rail|Rallus elegans
+4|Kinglet calyptura|Calyptura cristata
+4|Kirtland's warbler|Dendroica kirtlandii|Jack Pine Warbler|Setophaga kirtlandii
+4|Lafresnaye's piculet|Picumnus lafresnayi
+4|Large-billed reed warbler|Acrocephalus orinus
+4|Lattice-tailed trogon|Trogon clathratus
+4|Lesser hoopoe-lark|Alaemon hamertoni
+4|Lesser nighthawk|Chordeiles acutipennis
+4|Lesser vasa parrot|Black parrot|Coracopsis nigra
+4|Lewin's rail|Rallus pectoralis|Lewinia pectoralis|Slate-breasted rail
+4|Linchi swiftlet|Cave swiftlet|Collocalia linchi
+4|Lineated woodpecker|Dryocopus lineatus
+4|Little bronze cuckoo|Chrysococcyx minutillus
+4|Little chachalaca|Ortalis motmot
+4|Little lorikeet|Glossopsitta pusilla
+4|Little pied flycatcher|Ficedula westermanni
+4|Little woodpecker|Veniliornis passerinus
+4|Long-billed hermit|Phaethornis longirostris
+4|Long-tailed finch|Poephila acuticauda
+4|Long-tailed fiscal|Lanius cabanisi
+4|Long-tailed manakin|Chiroxiphia linearis
+4|Long-tailed meadowlark|Sturnella loyca
+4|Lovely fairywren|Malurus (Leggeornis) amabilis|Malurus amabilis
+4|Lyre-tailed nightjar|Uropsalis lyra
+4|Madagascar blue vanga|Blue Vanga|Cyanolanius madagascarinus
+4|Magpie mannikin|Spermestes fringilloides|magpie munia
+4|Malachite sunbird|Nectarinia famosa|Necterinia famosa
+4|Malagasy bulbul|Hypsipetes madagascariensis
+4|Malagasy paradise flycatcher|Terpsiphone mutata
+4|Mangrove finch|Camarhynchus heliobates
+4|Mangrove vireo|Vireo pallens
+4|Many-spotted hummingbird|Taphrospilus hypostictus
+4|Maroon-tailed parakeet|Pyrrhura melanura
+4|Masked crimson tanager|Ramphocelus nigrogularis
+4|Medium tree finch|Camarhynchus pauper
+4|Meek's pygmy parrot|Micropsitta meeki
+4|Mekong wagtail|Motacilla samveasnae
+4|Melanesian megapode|Megapodius eremita
+4|Melodious blackbird|Dives dives
+4|Meves's starling|Lamprotornis mevesii
+4|Middendorff's grasshopper warbler|Helopsaltes ochotensis
+4|Mindanao bleeding-heart|Bartlett's bleeding heart|Gallicolumba crinigera
+4|Mindoro imperial pigeon|Ducula mindorensis
+4|Minute hermit|Phaethornis idaliae
+4|Mongolian lark|Melanocorypha mongolica
+4|Monotonous lark|Mirafra passerina
+4|Montane racket-tail|Prioniturus montanus
+4|Montserrat oriole|Icterus oberi
+4|Moreno's ground dove|Metriopelia morenoi
+4|Mottled petrel|Pterodroma inexpectata
+4|Mountain avocetbill|Opisthoprora euryptera
+4|Mountain bulbul|Hypsipetes mcclellandii|Ixos mcclellandii|Mountain streaked bulbul
+4|Mountain cacique|Cacicus chrysonotus
+4|Mountain peacock-pheasant|Polyplectron inopinatum
+4|Mountain quail|Oreortyx picta|Oreortyx pictus
+4|Mountain tailorbird|Phyllergates cucullatus|Phyllergates cuculatus
+4|Mountain trogon|Trogon mexicanus
+4|Mourning babbler|Pellorneum malaccense|Short-tailed babbler
+4|Moustached kingfisher|Actenoides bougainvillei
+4|Moustached treeswift|Hemiprocne mystacea
+4|Nauru reed warbler|Acrocephalus rehsei
+4|Negros bleeding-heart pigeon|Negros Bleeding-heart|Gallicolumba keayi
+4|New Britain sparrowhawk|Accipiter brachyurus
+4|New Zealand fernbird|Poodytes punctatus
+4|Niam-Niam parrot|Poicephalus crassus
+4|Nicobar parakeet|Psittacula caniceps
+4|Noisy scrubbird|Atrichornis clamosus
+4|Oak titmouse|Baeolophus inornatus|Plain titmouse
+4|Olive-backed woodpecker|Dinopium rafflesii
+4|Olive-spotted hummingbird|Leucippus chlorocercus
+4|Opal-crowned tanager|Tangara callophrys
+4|Orange-crowned warbler|Leiothlypis celata
+4|Orange-eared tanager|Chlorochrysa calliparaea
+4|Orange-fronted hanging parrot|Loriculus aurantiifrons
+4|Oriole blackbird|Gymnomystax mexicanus
+4|Oʻahu ʻōʻō|Moho apicalis
+4|Painted tiger parrot|Psittacella picta
+4|Pale-breasted thrush|Turdus leucomelas
+4|Pale-crested woodpecker|Celeus lugubris
+4|Pale-vented pigeon|Patagioenas cayennensis|Rufous pigeon
+4|Palm lorikeet|Charmosyna palmarum
+4|Pauraque|Hydropsalis albicolis|Hydropsalis albicollis|Nyctidromus albicollis
+4|Peacock coquette|Lophornis pavoninus
+4|Philippine coucal|Centropus viridis
+4|Picazuro pigeon|Patagioenas picazuro
+4|Pied stilt|Himantopus leucocephalus|white-headed stilt
+4|Pied thrush|Geokichla wardii
+4|Pink-billed cnemoscopus|Grey-hooded Bush Tanager|Cnemoscopus rubrirostris
+4|Pink-billed parrotfinch|Erythrura kleinschmidti
+4|Pink-footed shearwater|Ardenna creatopus
+4|Pinon's imperial pigeon|Ducula pinon
+4|Plain-breasted piculet|Picumnus castelnau
+4|Plain-flanked rail|Rallus wetmorei
+4|Plum-crowned parrot|Speckle-faced Parrot|Pionus tumultuosus
+4|Plumbeous pigeon|Columba plumbea|Patagioenas plumbea
+4|Polynesian ground dove|Alopecoenas erythropterus
+4|Polynesian imperial pigeon|Ducula aurorae
+4|Polynesian starling|Aplonis tabuensis
+4|Powerful woodpecker|Campephilus pollens
+4|Prairie warbler|Setophaga discolor
+4|Providence petrel|Pterodroma solandri
+4|Puerto Rican woodpecker|Melanerpes portoricensis
+4|Puna plover|Anarhynchus alticola|Charadrius alticola
+4|Purple-bibbed whitetip|Urosticte benjamini
+4|Purple-breasted cotinga|Cotinga cotinga|purple-breasted chatterer
+4|Purple-throated euphonia|Euphonia chlorotica
+4|Purple-winged ground dove|Paraclaravis geoffroyi
+4|Purplish jacamar|Galbula chalcothorax
+4|Pycroft's petrel
+4|Père David's tit|Poecile davidi|Rusty-breasted Tit
+4|Racket-tipped thorntail|Discosura longicaudus|Racket-tailed Coquette|Racquet-tailed coquette
+4|Rapa fruit dove|Ptilinopus huttoni
+4|Red warbler|Cardellina rubra
+4|Red-bellied grackle|Hypopyrrhus pyrohypogaster
+4|Red-billed pigeon|Patagioenas flavirostris
+4|Red-breasted sapsucker|Sphyrapicus ruber
+4|Red-chested goshawk|Accipiter toussenelii
+4|Red-crowned woodpecker|Melanerpes rubricapillus
+4|Red-eared fruit dove|Ptilinopus fischeri
+4|Red-fronted coot|Fulica rufifrons
+4|Red-headed parrotfinch|Erythrura cyaneovirens
+4|Red-kneed dotterel|Erythrogonys cinctus
+4|Red-naped fruit dove|Ptilinopus dohertyi
+4|Red-rumped cacique|Cacicus haemorrhous
+4|Red-shouldered blackbird|Agelaius assimilis
+4|Reddish scops owl|Otus rufescens
+4|Ring-tailed pigeon|Jamaican band-tailed pigeon|Patagioenas caribaea
+4|Ringed woodpecker|Celeus torquatus
+4|Rock firefinch|Lagonosticta sanguinodorsalis
+4|Rodrigues rail|Erythromachus leguati
+4|Rose robin|Petroica (Erythrodryas) rosea|Petroica rosea|rose breasted robin|rose breasted wood robin
+4|Rose-collared piha|Lipaugus streptophorus
+4|Ruddy pigeon|Patagioenas subvinacea
+4|Rufous owl|Ninox (Rhabdoglaux) rufa|Ninox rufa
+4|Rufous piha|Lipaugus unirufus
+4|Rufous-bellied chachalaca|Ortalis wagleri
+4|Rufous-bellied kookaburra|Dacelo gaudichaud|Gaudichaud’s kookaburra
+4|Rufous-bellied seedsnipe|Attagis gayi
+4|Rufous-browed peppershrike|Cyclarhis gujanensis
+4|Rufous-chested dotterel|Rufous-chested Plover|Charadrius modestus|Zonibyx modestus
+4|Rufous-gaped hillstar|Urochroa bougueri|White-tailed Hillstar
+4|Rufous-headed chachalaca|Ortalis erythroptera
+4|Rufous-naped lark|Mirafra africana
+4|Rufous-necked snowfinch|Pyrgilauda ruficollis
+4|Rufous-necked wood rail|Aramides axillaris
+4|Rufous-sided crake|Rallus melanophaius|Laterallus melanophaius
+4|Rufous-tailed robin|Larvivora sibilans|Swinhoe's robin
+4|Rufous-thighed kite|Harpagus diodon
+4|Ruspoli's turaco|Menelikornis ruspolii|Prince Ruspoli's turaco|Prince Ruspoliis turaco|Tauraco ruspolii
+4|Russet-crowned motmot|Momotus mexicanus
+4|Rusty-fronted barwing|Actinodura egertoni
+4|Rusty-margined guan|Penelope superciliaris
+4|Rwenzori turaco|Ruwenzorornis johnstoni|Ruwenzori turaco
+4|Réunion harrier|Circus maillardi
+4|Rück's blue flycatcher|Cyornis ruckii|Rueck's niltava
+4|Sahel bush sparrow|Gymnoris dentata
+4|Samoan moorhen|Samoan Wood Rail|Gallinula pacifica|Pareudiastes pacificus
+4|Sandy scops owl|Otus icterorhynchus
+4|Sayaca tanager|Thraupis sayaca
+4|Scaled quail|cottontop|Blue quail|Callipepla squamata
+4|Scaly-feathered weaver|Sporopipes squamifrons
+4|Scarlet-headed blackbird|Amblyramphus holosericeus
+4|Scarlet-headed flowerpecker|Dicaeum trochileum
+4|Scissor-tailed hummingbird|Hylonympha macrocerca
+4|Scrub euphonia|Euphonia affinis
+4|Seychelles fody|Foudia sechellarum
+4|Seychelles paradise flycatcher|Terpsiphone corvina
+4|Sharp-beaked ground finch|Geospiza difficilis
+4|Shelley's francolin|Francolinus shelleyi|Scleroptila shelleyi
+4|Short-billed pigeon|Patagioenas nigrirostris
+4|Short-legged ground roller|Brachypteracias leptosomus
+4|Short-tailed hawk|Buteo brachyurus
+4|Short-toed coucal|Centropus rectunguis
+4|Shovel-billed kookaburra|Clytoceyx rex
+4|Sikkim treecreeper|Brown-throated Treecreeper|Certhia discolor
+4|Silver-backed needletail|Hirundapus cochinchinensis
+4|Silver-beaked tanager|Ramphocelus carbo
+4|Slate-throated whitestart|Myioborus miniatus|Slate-throated Redstart
+4|Slaty flowerpiercer|Diglossa plumbea
+4|Slaty-tailed trogon|Trogon massena
+4|Slender-billed kite|Helicolestes hamatus|Rostrhamus hamatus
+4|Small niltava|Niltava macgrigoriae
+4|Snow Mountain quail|Synoicus monorthonyx
+4|Snowy cotinga|Carpodectes nitidus
+4|Somali bunting|Somali Golden-breasted Bunting|Emberiza poliopleura
+4|Somali fiscal|Lanius somalicus
+4|Somali lark|Mirafra somalica
+4|Sombre kingfisher|Todiramphus funebris
+4|Sooty thrush|Turdus nigrescens
+4|Spangled drongo|Dicrurus bracteatus
+4|Speckled tanager|Tangara guttata
+4|Spiny babbler|Turdoides nipalensis
+4|Spot-winged rosefinch|Carpodacus rhodopeplus|Carpodacus rodopeplus
+4|Spot-winged wood quail|Odontophorus capueira
+4|Spotted pardalote|Pardalotus punctatus
+4|Spotted wood kingfisher|Actenoides lindsayi
+4|Square-tailed drongo|Dicrurus ludwigii
+4|Sri Lanka bay owl|Phodilus assimilis
+4|Sri Lanka hill myna|Gracula ptilogenys|Sri Lanka myna
+4|Stephan's emerald dove|Chalcophaps stephani|Stephan's Dove
+4|Streak-throated swallow|Indian cliff swallow|Petrochelidon fluvicola
+4|Streaked rosefinch|Carpodacus rubicilloides
+4|Striated pardalote|Pardalotus (Pardalotinus) striatus|Pardalotus striatus|Pardalotus substriatus
+4|Striped crake|Aenigmatolimnas marginalis|Amaurornis marginalis|Porzana marginalis
+4|Sula megapode|Megapodius bernsteinii|Sula Scrubfowl
+4|Sulphur-bellied warbler|Phylloscopus griseolus
+4|Sulphur-billed nuthatch|Sitta oenochlamys
+4|Sumatran ground cuckoo|Carpococcyx viridis
+4|Sumatran peacock-pheasant|Bronze-tailed Peacock-Pheasant|Polyplectron chalcurum
+4|Sunda coucal|Centropus nigrorufus|Javan Coucal
+4|Sunda scops owl|Otus lempiji
+4|Superciliaried hemispingus|Thlypopsis superciliaris
+4|Swallow-winged puffbird|Chelidoptera tenebrosa
+4|São Tomé fiscal|Lanius newtoni
+4|Tahiti sandpiper|Prosobonia leucoptera
+4|Taiga flycatcher|Ficedula albicilla
+4|Thick-billed vireo|Vireo crassirostris
+4|Three-toed jacamar|Jacamaralcyon tridactyla
+4|Tibetan rosefinch|Carpodacus roborowskii
+4|Timor cuckoo-dove|Bar-necked Cuckoo-Dove|Macropygia magna
+4|Transvolcanic jay|Aphelocoma ultramarina
+4|Trindade petrel|Pterodroma arminjoniana
+4|Tropical mockingbird|Mimus gilvus
+4|Tropical screech owl|Megascops choliba|Otus choliba
+4|Unspotted saw-whet owl|Aegolius ridgwayi
+4|Vaux's swift|Chaetura vauxi
+4|Vega gull|Larus vegae
+4|Vegetarian finch|Platyspiza crassirostris
+4|Velvet-purple coronet|Boissonneaua jardini
+4|Vervain hummingbird|Mellisuga minima
+4|Village indigobird|steelblue widowfinch|Vidua chalybeata
+4|Vinaceous dove|Streptopelia vinacea
+4|Violet-chested hummingbird|Sternoclyta cyanopectus
+4|Warbling masked flowerpiercer|Masked Flowerpiercer|Diglossa cyanea
+4|Warbling vireo|Vireo gilvus
+4|Western bowerbird|Chlamydera guttata
+4|Western kingbird|Tyrannus verticalis
+4|Western red-legged thrush|Turdus plumbeus
+4|Whiskered screech owl|Megascops trichopsis|Otus trichopsis
+4|White-bearded hermit|Phaethornis hispidus
+4|White-bellied chachalaca|Ortalis leucogastra
+4|White-bellied kingfisher|Corythornis leucogaster
+4|White-bellied minivet|Pericrocotus erythropygius
+4|White-breasted ground dove|Alopecoenas jobiensis
+4|White-breasted nigrita|Nigrita fusconotus
+4|White-browed bulbul|Pycnonotus luteolus
+4|White-browed owl|Athene superciliaris|White-browed Hawk-Owl
+4|White-browed tit|Poecile superciliosus
+4|White-capped tanager|Sericossypha albocristata
+4|White-cheeked cotinga|Zaratornis stresemanni
+4|White-cheeked partridge|White-cheeked Hill Partridge|Arborophila atrogularis
+4|White-chinned jacamar|Galbula tombacea
+4|White-crested helmetshrike|Long-crested helmet shrike|Prionops plumata|Prionops plumatus
+4|White-eared bronze cuckoo|Chrysococcyx meyerii
+4|White-eared jacamar|Galbalcyrhynchus leucotis
+4|White-eared puffbird|Nystalus chacuru
+4|White-eyed vireo|Vireo griseus
+4|White-headed petrel|Pterodroma lessonii
+4|White-headed wood hoopoe|Phoeniculus bollei
+4|White-naped jay|Cyanocorax cyanopogon
+4|White-naped xenopsaris|reed becard|white-naped becard|Xenopsaris albinucha
+4|White-necked hawk|Buteogallus lacernulatus
+4|White-plumed antbird|Pithys albifrons
+4|White-rumped falcon|Neohierax insignis
+4|White-tailed swallow|Hirundo megaensis
+4|White-throated crake|Laterallus albigularis
+4|White-throated jay|Cyanolyca mirabilis
+4|White-throated quail-dove|Zentrygon frenata
+4|White-throated rail|Dryolimnas cuvieri
+4|White-throated swallow|Hirundo albigularis
+4|White-winged coot|Fulica leucoptera
+4|Whitehead|Mohoua albicilla|New Zealand whitehead
+4|Williamson's sapsucker|Sphyrapicus thyroideus
+4|Yellow tit|Machlolophus holsti
+4|Yellow-bellied dacnis|Dacnis flaviventer
+4|Yellow-bellied prinia|Prinia flaviventris
+4|Yellow-billed lorikeet|Neopsittacus musschenbroekii
+4|Yellow-billed nuthatch|Sitta solangiae
+4|Yellow-browed tyrant|Satrapa icterophrys
+4|Yellow-browed woodpecker|Piculus aurulentus
+4|Yellow-chevroned parakeet|Brotogeris chiriri
+4|Yellow-eared bulbul|Pycnonotus penicillatus
+4|Yellow-eared woodpecker|Veniliornis maculifrons
+4|Yellow-eyed junco|Junco phaeonotus
+4|Yellow-faced siskin|Carduelis yarrellii|Esporagra yarrellii
+4|Yellow-hooded blackbird|Chrysomus icterocephalus
+4|Yellow-legged pigeon|Columba pallidiceps
+4|Yellow-shouldered grosbeak|Parkerthraustes humeralis
+4|Yellow-spotted barbet|Buccanodon duchaillui
+4|Yellow-tufted woodpecker|Melanerpes cruentatus
+4|Yellow-vented woodpecker|Veniliornis dignus
+4|Yellow-winged blackbird|Agelasticus thilius
+4|Yellow-winged pytilia|Pytilia hypogrammica
+4|Yemen thrush|Turdus menachensis
+4|Yunnan nuthatch
+4|Zapata sparrow|Cuban sparrow|Torreornis inexpectata
+4|Zone-tailed hawk|Buteo albonotatus
+4|Andean tinamou|Nothoprocta pentlandii
+4|Variegated tinamou|Crypturellus variegatus
+4|Abbott's babbler|Malacocincla abbotti
+4|Abyssinian ground thrush|Geokichla piaggiae
+4|Abyssinian scimitarbill|Rhinopomastus minor
+4|African blue flycatcher|Elminia longicauda
+4|African snipe|Gallinago nigripennis
+4|Alpine thrush|Plain-backed Thrush|Zoothera mollissima
+4|Amazilia hummingbird|Amazilia amazilia
+4|Amethyst brown dove|Greater brown fruit dove|Phapipteron amethystina|Phapitreron amethystinus
+4|Anchieta's barbet|Stactolaema anchietae
+4|Andean siskin|Spinus spinescens
+4|Ashy woodpecker|Mulleripicus fulvus
+4|Atoll fruit dove|Ptilinopus coralensis
+4|Austral rail|Rallus antarcticus
+4|Australasian swamphen|New Zealand Swamphen|Porphyrio melanotus|Pūkeko
+4|Australian golden whistler|Pachycephala pectoralis
+4|Azure-naped jay|Cyanocorax heilprini
+4|Bahama yellowthroat|Geothlypis rostrata
+4|Band-bellied crake|Zapornia paykullii
+4|Band-bellied owl|Pulsatrix melanota
+4|Banded fruit dove|Black-breasted fruit dove|Ptilinopus cincta|Ptilinopus cinctus
+4|Banded martin|Neophedina cincta
+4|Bar-backed partridge|Bar-backed Hill Partridge|Arborophila brunneopectus|brown-breasted hill-partridge
+4|Bare-eyed thrush|Turdus tephronotus
+4|Bare-shanked screech owl|Megascops clarkii|Otus clarkii
+4|Barred dove|Geopelia maugei
+4|Barred hawk|Morphnarchus princeps
+4|Bay-breasted warbler|Setophaga castanea
+4|Beaudouin's snake eagle|Circaetus beaudouini
+4|Beck's petrel|Pseudobulweria becki|Pterodroma becki|Solomon Islands petrel
+4|Bengal bush lark|Mirafra assamica|Plocealauda assamica
+4|Black mannikin|Lonchura stygia
+4|Black metaltail|Metallura phoebe
+4|Black nunbird|Monasa atra
+4|Black rail|Laterallus jamaicensis
+4|Black thrush|Turdus infuscatus
+4|Black-and-gold tanager|Bangsia melanochlamys
+4|Black-and-white antbird|Myrmochanes hemileucus
+4|Black-and-white shrike-flycatcher|Bias musicus
+4|Black-and-yellow grosbeak|Mycerobas icterioides
+4|Black-backed forktail|Enicurus immaculatus
+4|Black-backed grosbeak|Pheucticus aureoventris
+4|Black-banded crake|Anurolimnas fasciatus|Laterallus fasciatus|Porzana fasciata|Rufirallus fasciatus
+4|Black-banded owl|Strix huhula
+4|Black-bellied cuckoo|Piaya melanogaster
+4|Black-bellied malkoha|Phaenicophaeus diardi
+4|Black-billed peppershrike|Cyclarhis nigrirostris
+4|Black-billed thrush|Turdus ignobilis
+4|Black-billed wood hoopoe|Phoeniculus somaliensis
+4|Black-bodied woodpecker|Dryocopus schulzii
+4|Black-breasted mannikin|Lonchura teerinki
+4|Black-crested bulbul|Rubigula flaviventris
+4|Black-eared oriole|Oriolus bouroensis
+4|Black-faced firefinch|Lagonosticta larvata
+4|Black-faced warbler|Abroscopus schisticeps|Seicercus schisticeps
+4|Black-fronted flowerpecker|Dicaeum igniferum
+4|Black-headed berryeater|Carpornis melanocephala
+4|Black-headed siskin|Spinus notatus
+4|Black-hooded sunbeam|Aglaeactis pamela
+4|Black-masked finch|Coryphaspiza melanotis
+4|Black-necked red cotinga|Phoenicercus nigricollis|Phoenicircus nigricollis
+4|Black-spotted barbet|Capito niger
+4|Black-tailed tityra|Tityra cayana
+4|Black-throated finch|Poephila cincta
+4|Black-throated parrotbill|Suthora nipalensis
+4|Black-whiskered vireo|Vireo altiloquus
+4|Black-winged cuckooshrike|Lalage melaschistos
+4|Black-winged parrot|Hapalopsittaca melanotis
+4|Blackish rail|Rallus nigricans|Pardirallus nigricans
+4|Blackstart|Oenanthe melanura
+4|Blackthroat|Calliope obscura
+4|Blaze-winged parakeet|Pyrrhura devillei
+4|Blue bunting|Cyanocompsa parellina
+4|Blue swallow|Hirundo atrocaerulea
+4|Blue-and-black tanager|Tangara vassorii
+4|Blue-backed manakin|Chiroxiphia pareola
+4|Blue-backed tanager|Cyanicterus cyanicterus
+4|Blue-browed tanager|Tangara cyanotis
+4|Blue-capped manakin|Blue-crowned Manakin|Lepidothrix coronata|Pipra coronata
+4|Blue-capped tanager|Sporathraupis cyanocephala
+4|Blue-chinned sapphire|Chlorestes notata
+4|Blue-crowned chlorophonia|Chlorophonia occipitalis
+4|Blue-crowned racket-tail|Prioniturus discurus
+4|Blue-fronted robin|Cinclidium frontale
+4|Blue-headed coucal|Centropus monachus
+4|Blue-tailed emerald|Chlorostilbon mellisugus
+4|Blue-tailed hummingbird|Amazilia cyanura
+4|Blue-throated mountaingem|Lampornis clemenciae|blue-throated hummingbird
+4|Blue-whiskered tanager|Tangara johannae
+4|Blue-winged warbler|Vermivora cyanoptera
+4|Boat-tailed grackle|Quiscalus major
+4|Bornean brown barbet|Caloramphus fuliginosus|Brown Barbet|Calorhamphus fuliginosus
+4|Bornean treepie|Dendrocitta cinerascens
+4|Bristle-nosed barbet|Gymnobucco peli
+4|Broad-tailed grassbird|Schoenicola platyurus
+4|Bronze-tailed thornbill|Chalcostigma heteropogon
+4|Brown oriole|Oriolus szalayi
+4|Brown prinia|Prinia polychroa
+4|Brown wood rail|Aramides wolfi
+4|Brown-backed honeybird|Prodotiscus regulus
+4|Brown-backed woodpecker|Dendropicos obsoletus
+4|Brown-banded puffbird|Notharchus ordii
+4|Brown-breasted barbet|Lybius melanopterus
+4|Brown-breasted bulbul|Pycnonotus xanthorrhous
+4|Brown-breasted flycatcher|Muscicapa muttui
+4|Brown-capped pygmy woodpecker|Yungipicus nanus
+4|Brown-capped vireo|Vireo leucophrys
+4|Brown-cheeked bulbul|Grey-cheeked Bulbul|Alophoixus bres|Grey-cheeked bearded bulbul
+4|Brown-cheeked rail|Rallus indicus
+4|Brown-hooded parrot|Pionopsitta haematotis|Pyrilia haematotis
+4|Brown-rumped bunting|Emberiza affinis
+4|Buff-breasted paradise kingfisher|Tanysiptera (Uralcyon) sylvia|Tanysiptera sylvia
+4|Buff-faced pygmy parrot|Micropsitta pusio
+4|Buff-headed coucal|Centropus milo
+4|Burnished-buff tanager|Tangara cayana
+4|Bush blackcap|Sylvia nigricapillus
+4|Cabanis's bunting|Emberiza cabanisi
+4|Canary Islands chiffchaff|Phylloscopus canariensis
+4|Cape Verde swift|Alexander's swift|Apus alexandri
+4|Cape batis|Batis capensis
+4|Cape bunting|Emberiza capensis
+4|Cape clapper lark|Mirafra apiata
+4|Cape spurfowl|Pternistis capensis
+4|Capped conebill|Conirostrum albifrons
+4|Carolina chickadee|Poecile carolinensis
+4|Chatham Islands kakariki|Chatham Parakeet|Chatham Islands parakeet|Cyanoramphus forbesi
+4|Chatham Islands rail|Gallirallus modestus|Cabalus modestus|Chatham Rail
+4|Chattering kingfisher|Todiramphus tutus
+4|Chestnut forest rail|Rallicula rubra|New Guinea chestnut rail
+4|Chestnut piculet|Picumnus cinnamomeus|Picumnus cinnamoneus
+4|Chestnut wood quail|Odontophorus hyperythrus
+4|Chestnut-backed chickadee|Poecile rufescens
+4|Chestnut-backed thrush|Geokichla dohertyi
+4|Chestnut-bellied euphonia|Euphonia pectoralis
+4|Chestnut-bellied nuthatch|Sitta cinnamoventris
+4|Chestnut-bellied partridge|Arborophila javanica
+4|Chestnut-bellied seed finch|Sporophila angolensis
+4|Chestnut-capped blackbird|Chrysomus ruficapillus
+4|Chestnut-flanked white-eye|Zosterops erythropleura|Zosterops erythropleurus
+4|Chestnut-headed sparrow-lark|Eremopterix signatus
+4|Chestnut-sided warbler|Setophaga pensylvanica
+4|Chiguanco thrush|Turdus chiguanco
+4|Chinese penduline tit|Remiz consobrinus
+4|Chiribiquete emerald|Chlorostilbon olivaresi
+4|Cinereous conebill|Conirostrum cinereum
+4|Cinnamon-bellied flowerpiercer|Diglossa baritula
+4|Collared forest falcon|Micrastur semitorquatus
+4|Collared myna|Acridotheres albocinctus
+4|Collared nightjar|Gactornis enarratus
+4|Colorful puffleg|Eriocnemis mirabilis|Colourful puffleg
+4|Common woodshrike|Tephrodornis pondicerianus
+4|Congo serpent eagle|Circaetus spectabilis
+4|Coppery emerald|Chlorostilbon russatus
+4|Coppery metaltail|Metallura theresiae
+4|Correndera pipit
+4|Corsican finch|Carduelis corsicana|Corsican citril finch
+4|Craveri's murrelet|Synthliboramphus craveri
+4|Creamy-bellied thrush|Turdus amaurochalinus
+4|Crescent-chested puffbird|Malacoptila striata
+4|Crested barbet|Trachyphonus vaillantii
+4|Crested gallito|Rhinocrypta lanceolata
+4|Crested hornero|Furnarius cristatus
+4|Crested quail-dove|Geotrygon versicolor
+4|Crimson seedcracker|Pyrenestes sanguineus
+4|Crimson shining parrot|Prosopeia splendens
+4|Crimson-bellied woodpecker|Campephilus haematogaster
+4|Crimson-breasted flowerpecker|Prionochilus percussus
+4|Crimson-crowned flowerpecker|Dicaeum nehrkorni
+4|Crimson-crowned fruit dove|Ptilinopus porphyraceus
+4|Crimson-fronted barbet|Crimson-throated barbet|Megalaima rubricapillus
+4|Cuban blackbird|Ptiloxena atroviolacea
+4|Cuban bullfinch|Melopyrrha nigra
+4|Cuban vireo|Vireo gundlachi|Vireo gundlachii
+4|Dark-billed cuckoo|Coccyzus melacoryphus
+4|Dark-rumped swift|Apus acuticauda
+4|Dieffenbach's rail|Chatham Islands buff-banded rail|Hypotaenidia dieffenbachii|Gallirallus dieffenbachii
+4|Doria's hawk|Doria's Goshawk|Megatriorchis doriae
+4|Dot-fronted woodpecker|Veniliornis frontalis
+4|Double-spurred spurfowl|Pternistis bicalcaratus|double-spurred francolin
+4|Drab water tyrant|Drab chat tyrant|Ochthoeca littoralis|Ochthornis littoralis
+4|Drakensberg siskin|Crithagra symonsi
+4|Dune lark|Calendulauda erythrochlamys
+4|Dusky twinspot|Euschistospiza cinereovinacea
+4|Dwarf honeyguide|Indicator pumilio
+4|Eastern Orphean warbler|Curruca crassirostris
+4|Eastern crested berrypecker|Crested Berrypecker|Paramythia montium
+4|Eastern golden weaver|Ploceus subaureus
+4|Eastern olivaceous flatbill|Olivaceous Flatbill|Rhynchocyclus olivaceus
+4|Eastern striolated puffbird|Striolated Puffbird|Nystalus striolatus
+4|Ecuadorian cacique|Cacicus sclateri
+4|Ecuadorian hillstar|Oreotrochilus chimborazo
+4|Ecuadorian piculet|Picumnus sclateri
+4|Elegant euphonia|Blue-hooded Euphonia|Euphonia elegantissima
+4|Elegant tit|Pardaliparus elegans
+4|Elliot's storm petrel|Oceanites gracilis|White-vented storm-petrel
+4|Ethiopian oriole|Oriolus monacha
+4|Ethiopian siskin|Serinus nigriceps
+4|Eupsittula canicularis|Orange-fronted Parakeet|Aratinga canicularis
+4|Fawn-breasted brilliant|Heliodoxa rubinoides
+4|Festive coquette|Lophornis chalybeus
+4|Fiji woodswallow|Artamus mentalis
+4|Finsch's imperial pigeon|Ducula finschii|Finschis imperial-pigeon
+4|Finsch's parakeet|Psittacara finschi
+4|Five-colored munia|Lonchura quinticolor|Five-coloured Munia
+4|Flame-throated sunangel|Heliangelus micraster
+4|Flores scops owl|otus alfredi
+4|Forbes's plover|Charadrius forbesi|Thinornis forbesi
+4|Forest fody|Foudia omissa
+4|Fork-tailed sunbird|Aethopyga christinae
+4|Fork-tailed woodnymph|Thalurania furcata
+4|Forty-spotted pardalote|Pardalotus quadragintus
+4|Four-banded sandgrouse|Pterocles quadricinctus
+4|Fuertes's parrot|Hapalopsittaca fuertesi|indigo-winged parrot
+4|Fulmar prion|Pachyptila crassirostris
+4|Fynbos buttonquail|Black-rumped Buttonquail|Hottentot button-quail|Turnix hottentotta|Turnix hottentottus
+4|Galápagos mockingbird|Mimus parvulus
+4|Galápagos petrel|Pterodroma phaeopygia
+4|Gambel's quail|Callipepla gambelii
+4|Garnet-throated hummingbird|Lamprolaima rhami
+4|Geelvink pygmy parrot|Micropsitta geelvinkiana
+4|Geoffroy's daggerbill|Schistes geoffroyi|Wedge-billed Hummingbird
+4|Gibberbird|Ashbyia lovensis
+4|Glaucous tanager|Thraupis glaucocoipa|Thraupis glaucocolpa
+4|Glossy flowerpiercer|Diglossa lafresnayii
+4|Golden masked owl|Tyto aurantia
+4|Golden vireo|Vireo hypochryseus
+4|Golden-bellied gerygone|Gerygone sulphurea
+4|Golden-cheeked warbler|Setophaga chrysoparia
+4|Golden-collared honeycreeper|Iridophanes pulcherrimus
+4|Golden-crowned warbler|Basileuterus culicivorus
+4|Golden-eyed flowerpiercer|Deep-blue Flowerpiercer|Diglossa glauca
+4|Golden-hooded tanager|Tangara larvata
+4|Golden-mantled racket-tail|Prioniturus platurus
+4|Golden-naped tanager|Tangara ruficervix
+4|Golden-olive woodpecker|Colaptes rubiginosus|Piculus rubiginosus
+4|Golden-rumped euphonia|Euphonia cyanocephala
+4|Golden-winged parakeet|Brotogeris chrysoptera
+4|Gorgeted wood quail|Odontophorus strophium
+4|Gould's petrel|Pterodroma (Cookilaria) leucoptera|Pterodroma leucoptera
+4|Gould's toucanet|Selenidera gouldii
+4|Grasshopper sparrow|Ammodramus savannarum
+4|Great hanging parrot|Loriculus stigmatus
+4|Great lizard cuckoo|Coccyzus merlini|Saurothera merlini
+4|Great-billed kingfisher|black-billed kingfisher|pelargopsis melanorhyncha
+4|Great-billed parrot|Tanygnathus megalorynchos
+4|Greater striped swallow|Cecropis cucullata
+4|Green figbird|Timor Figbird|Sphecotheres viridis
+4|Green warbler-finch|Certhidea olivacea|Warbler finch
+4|Green-barred woodpecker|Colaptes melanochloros
+4|Green-billed coucal|Centropus chlororhynchos
+4|Green-legged partridge|Green-legged hill-partridge|Scaly-breasted partridge|Tropicoperdix chloropus
+4|Green-tailed emerald|Chlorostilbon alice
+4|Green-tailed goldenthroat|Polytmus theresiae
+4|Green-tailed trainbearer|Lesbia nuna
+4|Grey noddy|Anous albivitta|Grey Ternlet|Procelsterna albivitta
+4|Grey-bellied comet|Taphrolesbia griseiventris
+4|Grey-breasted crake|Laterallus exilis
+4|Grey-breasted prinia|Prinia hodgsonii
+4|Grey-breasted sabrewing|Campylopterus largipennis
+4|Grey-breasted seedsnipe|Thinocorus orbignyianus
+4|Grey-breasted woodpecker|Melanerpes hypopolius
+4|Grey-capped social weaver|Pseudonigrita arnaudi
+4|Grey-cheeked nunlet|Nonnula frontalis
+4|Grey-chested dove|Leptotila cassinii
+4|Grey-collared oriole|Oriolus forsteni
+4|Grey-crowned mannikin|Lonchura nevermanni
+4|Grey-headed chachalaca|Ortalis cinereiceps
+4|Grey-headed dove|Leptotila plumbeiceps
+4|Grey-headed goshawk|Accipiter poliocephalus
+4|Grey-headed mannikin|Lonchura caniceps
+4|Grey-rumped swallow|Pseudhirundo griseopyga
+4|Grey-winged cotinga|gray-winged cotinga|Tijuca condita
+4|Greyish eagle-owl|Bubo cinerascens
+4|Hall's babbler|Pomatostomus halli
+4|Hartlaub's spurfowl|Francolinus hartlaubi
+4|Helmeted friarbird|Philemon buceroides
+4|Helmeted manakin|Antilophia galeata
+4|Helmeted myna|Basilornis galeatus
+4|Hermit warbler|Setophaga occidentalis
+4|Hispaniolan trogon|Priotelus roseigaster|Temnotrogon roseigaster
+4|Hooded mannikin|Lonchura spectabilis
+4|Hooded siskin|Spinus magellanicus
+4|Hutton's vireo|Vireo huttoni
+4|Iberian green woodpecker|Iberian Woodpecker|Picus sharpei|Picus viridis sharpei
+4|Indian bush lark|Mirafra erythroptera
+4|Indian scimitar babbler|Pomatorhinus horsfieldii
+4|Indian swiftlet|Aerodramus unicolor
+4|Indigo flowerpiercer|Diglossa indigotica
+4|Indochinese bush lark|Mirafra erythrocephala
+4|Iraq babbler|Argya altirostris
+4|Isabelline bush-hen|Amaurornis isabellina|Amaurornis isabellinus|Sulawesi water hen
+4|Island scrub jay|Aphelocoma insularis
+4|Itombwe owl|Congo bay owl|Phodilus prigoginei
+4|Jackson's widowbird|Euplectes jacksoni|Jacksonis widowbird
+4|Jamaican lizard cuckoo|Saurothera vetula|Coccyzus vetula
+4|Jamaican poorwill|Siphonorhis americana
+4|Jamaican vireo|Vireo modestus
+4|Jameson's firefinch|Lagonosticta rhodopareia
+4|Japanese pygmy woodpecker|Yungipicus kizuki
+4|Japanese tit|Parus minor
+4|Javan shortwing|Brachypteryx montana|White-browed Shortwing
+4|Kangaroo Island emu|Dromaius baudinianus|Dwarf Emu
+4|Key West quail-dove|Geotrygon chrysia
+4|Koepcke's hermit|Phaethornis koepckeae
+4|Kosrae starling|Aplonis corvina
+4|Kāmaʻo|Myadestes myadestinus
+4|Ladder-backed woodpecker|Dryobates scalaris
+4|Lafresnaye's vanga|Xenipirostris xenopirostris|Xenopirostris xenopirostris
+4|Large tree finch|Feos|Shell|Camarhynchus psittacula
+4|Large woodshrike|Tephrodornis gularis
+4|Lark-like bunting|Emberiza impetuani
+4|Laysan finch|Telespiza cantans
+4|Lazuli bunting|Passerina amoena
+4|Least seedsnipe|Thinocorus rumicivorus
+4|Legge's flowerpecker|Dicaeum vincens|White-throated flowerpecker
+4|Lemon-bellied flyrobin|Microeca flavigaster
+4|Lemon-throated barbet|Eubucco richardsoni
+4|Lesser masked weaver|Ploceus intermedius
+4|Letitia's thorntail|Discosura letitiae|Popelairia letitiae
+4|Little spotted woodpecker|Green-backed Woodpecker|Campethera cailliautii
+4|Little thornbird|Phacellodomus sibilatrix
+4|Littoral rock thrush|Madagascar robin chat|Monticola imerina
+4|Long-billed spiderhunter|Arachnothera robusta
+4|Long-billed thrush|Zoothera monticola
+4|Long-tailed paradigalla|Paradigalla carunculata
+4|Long-tailed potoo|Nyctibius aethereus
+4|Loria's satinbird|Cnemophilus loriae|Loria’s bird of paradise
+4|Lovely cotinga|Cotinga amabilis
+4|MacGregor's bowerbird|Amblyornis macgregoriae
+4|Madagascar forest rail|Madagascar Wood Rail|Canirallus kioloides
+4|Madagascar magpie-robin|Copsychus albospecularis|Madagascan magpie-robin
+4|Madagascar swamp warbler|Acrocephalus newtoni
+4|Madanga|Madanga rufocollis
+4|Magellanic horned owl|Lesser Horned Owl|Bubo magellanicus
+4|Magenta petrel|Chatham Island tāiko|Pterodroma magentae
+4|Mallee emu-wren|Stipiturus mallee
+4|Mangrove cuckoo|Coccyzus minor
+4|Mangrove robin|Peneoenanthe pulverulenta
+4|Manu parrotlet|Nannopsittaca dachilleae
+4|Maroon-chested ground dove|Claravis mondetoura|Paraclaravis mondetoura
+4|Marquesan kingfisher|Halcyon godeffroyi|Marquesas kingfisher|Todiramphus godeffroyi
+4|Marsh grassbird|Helopsaltes pryeri
+4|Marshall's iora|Aegithina nigrolutea
+4|Mascarene petrel|Mascarene black petrel|Pseudobulweria aterrima|Pterodroma aterrima
+4|Mascarene teal|Mauritian Duck|Anas theodori
+4|Masked bowerbird|Sericulus aureus
+4|Masked woodswallow|Artamus personatus
+4|Mauritius bulbul|Hypsipetes olivaceus|Mauritius black bulbul
+4|Mauritius scops owl|Mauritius Owl|Mascarenotus sauzieri
+4|Mauritius sheldgoose|Mauritian shelduck|Alopochen mauritiana|Alopochen mauritianus
+4|Metallic-green tanager|Tangara labradorides
+4|Mexican chickadee|Poecile sclateri
+4|Micronesian starling|Aplonis opaca
+4|Midget flowerpecker|Dicaeum aeneum
+4|Mindoro bleeding-heart|Gallicolumba platenae
+4|Mocking cliff chat|Thamnolaea cinnamomeiventris
+4|Modest tiger parrot|Psittacella modesta
+4|Moluccan dwarf kingfisher|Ceyx lepidus
+4|Montane nightjar|Caprimulgus poliocephalus
+4|Mottled swift|Tachymarptis aequatorialis
+4|Mountain pipit|Anthus hoeschi
+4|Mountain shrike|Lanius validirostris
+4|Mourning wheatear|Oenanthe lugens
+4|Mouse-coloured tapaculo|Scytalopus speluncae
+4|Musician wren|Cyphorhinus arada
+4|Nashville warbler|Leiothlypis ruficapilla
+4|Needle-billed hermit|Phaethornis philippii
+4|New Caledonian rail|Cabalus lafresnayanus|Gallirallus lafresnayanus|New Caledonian wood rail|Rallus lafresnayanus
+4|New Guinea flightless rail|Amaurornis ineptus|Megacrex inepta
+4|Nicobar scops owl|Otus alius
+4|Nile Valley sunbird|Hedydipna metallica
+4|Nilgiri pipit
+4|Nkulengu rail|Himantornis haematopus
+4|Noble snipe|Gallinago nobilis
+4|Norfolk robin|Petroica (Petroica) multicolor|Petroica multicolor
+4|North Island giant moa|Dinornis novaezealandiae|Dinornis struthoides|Dinornis dromioides|Dinornis gracilis|Dinornis giganteus|Dinornis ingens|Dinornis excelsus|Dinornis firmus|Dinornis gazella|Dinornis gigas|Dinornis hercules|Dinornis novaezelandiae|Dinornis struthioides|Palapteryx ingens
+4|Northern masked weaver|Ploceus taeniopterus
+4|Northern waterthrush|Parkesia noveboracensis
+4|Ocellated poorwill|Caprimulgus ocellatus
+4|Ochre-collared piculet|Picumnus temminckii
+4|Ochre-crowned brownlet|Ochre-crowned greenlet
+4|Olivaceous piculet|Picumnus olivaceus
+4|Olive-backed euphonia|Euphonia gouldi
+4|Olive-backed flowerpecker|Prionochilus olivaceus
+4|Olive-backed oriole|Oriolus (Mimeta) sagittatus|Oriolus sagittatus
+4|Olive-backed tailorbird|Orthotomus sepium
+4|Olive-green tanager|Orthogonys chloricterus
+4|Olive-sided flycatcher|Contopus cooperi
+4|Olive-throated parakeet|Aratinga nana|Aztec Parakeet|Eupsittula nana
+4|Opal-rumped tanager|Tangara velia
+4|Orange weaver|Ploceus aurantius
+4|Orange-crowned fairywren|Clytomyias insignis|Rufous wren warbler
+4|Orange-throated sunangel|Heliangelus mavors
+4|Orange-winged pytilia|Pytilia afra
+4|Orchard oriole|Icterus spurius
+4|Oriental magpie|Asian magpie|Korean magpie|Pica serica
+4|Orinoco piculet|Picumnus pumilus
+4|Pacific screech owl|Megascops cooperi|Otus cooperii
+4|Painted buttonquail|Turnix (Austroturnix) varius|Turnix varia|Turnix varius
+4|Painted spurfowl|Galloperdix lunulata
+4|Palawan flowerpecker|Prionochilus plateni
+4|Pale blue flycatcher|Cyornis unicolor
+4|Pale-bellied myna|Acridotheres cinereus
+4|Pale-billed sicklebill|Drepanornis bruijnii
+4|Pale-billed woodpecker|Campephilus guatemalensis
+4|Pale-headed munia|Lonchura pallida
+4|Pallid dove|Leptotila pallida
+4|Patagonian tyrant|Colorhamphus parvirostris|Patagonian chat tyrant
+4|Pearly-eyed thrasher|Margarops fuscatus
+4|Pectoral sparrow|Arremon taciturnus
+4|Phainopepla nitens
+4|Philadelphia vireo|Vireo philadelphicus
+4|Philippine bush-hen|Plain Bush-hen|Amaurornis olivacea
+4|Philippine fairy-bluebird|Irena cyanogastra|Black-mantled fairy bluebird
+4|Philippine scops owl|Otus megalotis
+4|Pied cuckoo-dove|Reinwardtoena browni
+4|Pied starling|Lamprotornis bicolor|Spreo bicolor
+4|Pied-winged swallow|Hirundo leucosoma
+4|Pin-tailed manakin|Ilicura militaris|Illicura militaris
+4|Pink-bellied imperial pigeon|Ducula poliocephala
+4|Pink-browed rosefinch|Carpodacus rhodochrous|Carpodacus rodochroa
+4|Piratic flycatcher|Legatus leucophaius
+4|Plain pigeon|Patagioenas inornata
+4|Plain-colored tanager|plain-coloured tanager|Tangara inornata
+4|Plum-throated cotinga|Cotinga maynana
+4|Plumbeous rail|Pardirallus sanguinolentus
+4|Plumbeous warbler|Setophaga plumbea
+4|Plumed guinea fowl|Guttera plumifera
+4|Polynesian wattled honeyeater|Carunculated honeyeater|Foulehaio carunculatus|eastern wattled honeyeater
+4|Purple-backed thornbill|Ramphomicron microrhynchum
+4|Purple-bellied lory|Lorius hypoinochrous
+4|Purple-crowned lorikeet|Glossopsitta porphyrocephala
+4|Purple-throated cotinga|Porphyrolaema porphyrolaema
+4|Purple-throated woodstar|Calliphlox mitchellii|Philodice mitchellii
+4|Purplish-backed quail-dove|Zentrygon lawrencii
+4|Pygmy antwren|Myrmotherula brachyura
+4|Pygmy cupwing|Pygmy Wren Babbler|Pnoepyga pusilla
+4|Quail-plover|Ortyxelos meiffrenii
+4|Raiatea kakariki|Society Parakeet|Cyanoramphus ulietanus|Raiatea parakeet
+4|Rainbow-bearded thornbill|Chalcostigma herrani
+4|Red pileated finch|Coryphospingus cucullatus
+4|Red-breasted coua|Coua serriana
+4|Red-breasted meadowlark|Red-breasted Blackbird|Sturnella militaris
+4|Red-breasted pygmy parrot|Micropsitta bruijnii|Micropsitta brujnii
+4|Red-browed pardalote|Pardalotus (Pardalotinus) rubricatus|Pardalotus rubricatus
+4|Red-capped cardinal|Paroaria gularis
+4|Red-faced crimsonwing|Cryptospiza reichenovii
+4|Red-faced liocichla|Liocichla phoenicea
+4|Red-headed barbet|Eubucco bourcierii
+4|Red-naped sapsucker|Sphyrapicus nuchalis
+4|Red-naped trogon|Harpactes kasumba
+4|Red-necked aracari|Pteroglossus bitorquatus
+4|Red-necked crake|Rallina tricolor
+4|Red-necked woodpecker|Campephilus rubricollis
+4|Red-tailed shrike|Rufous-tailed Shrike|Lanius phoenicuroides|Turkestan shrike
+4|Red-winged pytilia|Pytilia phoenicoptera
+4|Ridgway's hawk|Buteo ridgwayi|Ridgwayis hawk
+4|Ring-necked dove|Streptopelia capicola
+4|Rivoli's hummingbird|Eugenes fulgens|Magnificent Hummingbird
+4|Rough-crested malkoha|Dasylophus superciliosus
+4|Rudd's lark|Heteromirafra ruddi
+4|Rufescent imperial pigeon|Ducula chalconota|Shining Imperial-pigeon
+4|Rufous coucal|Centropus unirufus
+4|Rufous crab hawk|Buteogallus aequinoctialis
+4|Rufous fishing owl|Scotopelia ussheri
+4|Rufous gnateater|Conopophaga lineata
+4|Rufous nightjar|Antrostomus rufus
+4|Rufous sabrewing|Campylopterus rufus
+4|Rufous scrubbird|Atrichornis rufescens
+4|Rufous-backed sibia|Leioptila annectens
+4|Rufous-bellied euphonia|Euphonia rufiventris
+4|Rufous-breasted accentor|Prunella strophiata
+4|Rufous-breasted piculet|Picumnus rufiventris
+4|Rufous-brown solitaire|Cichlopsis leucogenys|Myadestes leucogenys
+4|Rufous-capped motmot|Baryphthengus ruficapillus
+4|Rufous-collared thrush|Turdus rufitorques
+4|Rufous-fronted bushtit|Black-browed Bushtit|Aegithalos iouschistos
+4|Rufous-headed robin|Larvivora ruficeps
+4|Rufous-headed woodpecker|Celeus spectabilis
+4|Rufous-necked puffbird|Malacoptila rufa
+4|Rufous-tailed hummingbird|Amazilia tzacatl
+4|Rufous-throated bronze cuckoo|Chrysococcyx ruficollis
+4|Rufous-winged tanager|Tangara lavinia
+4|Running coua|Coua cursor
+4|Rusty blackbird|Euphagus carolinus
+4|Rusty-belted tapaculo|Liosceles thoracicus
+4|Rusty-breasted nunlet|Nonnula rubecula
+4|Rusty-tailed flycatcher|Ficedula ruficauda
+4|Ryūkyū scops owl|Elegant Scops Owl|Otus elegans
+4|Réunion bulbul|Hypsipetes borbonicus
+4|Rüppell's starling|Lamprotornis purpuroptera|Lamprotornis purpuropterus
+4|Sage thrasher|Oreoscoptes montanus
+4|Sahul brush cuckoo|Cacomantis variolosus|Brush Cuckoo|Cacomantis (Cacomantis) variolosus
+4|Salvin's prion|Pachyptila salvini
+4|San Andres vireo|Vireo caribaeus
+4|Sand lark|Alaudala raytal|Indian sand lark
+4|Santa Marta sabrewing|Campylopterus phainopeplus
+4|Santa Marta woodstar|Chaetocercus astreans|Colombian woodstar
+4|Sapphire-rumped parrotlet|Touit purpuratus
+4|Sapphire-spangled emerald|Amazilia lactea
+4|Scaled metaltail|Metallura aeneocauda
+4|Scaly-breasted woodpecker|Celeus grammicus
+4|Scaly-throated honeyguide|Indicator variegatus
+4|Scarce swift|Schoutedenapus myioptilus|Schoutedenapus myoptilus
+4|Scarlet-tufted sunbird|Nectarinia johnstoni
+4|Seaside sparrow|Ammodramus maritimus|Ammospiza maritima
+4|Semiplumbeous hawk|Leucopternis semiplumbeus
+4|Shaft-tailed whydah|Vidua regia
+4|Shelley's oliveback|Nesocharis shelleyi
+4|Shelley's starling|Lamprotornis shelleyi|Spreo shelleyi
+4|Shining drongo|Dicrurus atripennis
+4|Shining honeycreeper|Cyanerpes lucidus
+4|Short-billed pipit|Anthus furcatus
+4|Shy ground dove|Alopecoenas stairi
+4|Silver oriole|Oriolus mellianus
+4|Silver-capped fruit dove|Ptilinopus richardsii
+4|Singing bush lark|Mirafra cantillans
+4|Slaty bunting
+4|Slaty-backed forktail|Enicurus schistaceus
+4|Slaty-mantled goshawk|Accipiter luteoschistaceus
+4|Small tree finch|Camarhynchus parvulus
+4|Socotra bunting|Emberiza socotrana
+4|Solitary cacique|Cacicus solitarius
+4|Somali crow|Corvus edithae
+4|Sooty grouse|Dendragapus fuliginosus
+4|Southern brown-throated weaver|Ploceus xanthopterus
+4|Southern emu-wren|Stipiturus malachurus
+4|Spangled coquette|Lophornis stictolophus
+4|Speckled rail|Speckled Crake|Coturnicops notatus|Darwin’s rail
+4|Speckled tinkerbird|Pogoniulus scolopaceus
+4|Spectacled thrush|Turdus nudigenis
+4|Spectacled whitestart|Myioborus melanocephalus
+4|Spice imperial pigeon|Ducula myristicivora
+4|Spiny-cheeked honeyeater|Acanthagenys rufogularis
+4|Spot-backed antshrike|Hypoedaleus guttatus
+4|Spot-backed puffbird|Nystalus maculates|Nystalus maculatus
+4|Spot-breasted oriole|Icterus pectoralis
+4|Spot-breasted woodpecker|Colaptes punctigula
+4|Spot-winged pigeon|Columba maculosa|Patagioenas maculosa|Spotted pigeon
+4|Spotted forktail|Enicurus maculatus
+4|Spotted green pigeon|Caloenas maculata|Liverpool pigeon
+4|Spotted piculet|Picumnus pygmaeus
+4|Spotted puffbird|Bucco tamatia
+4|Squatter pigeon|Geophaps scripta
+4|Streak-headed mannikin|Mayrimunia tristissima
+4|Streaked laughingthrush|Trochalopteron lineatum
+4|Streaky-breasted spiderhunter|Arachnothera affinis
+4|Striated yuhina|Staphida castaniceps
+4|Striped honeyeater|Plectorhyncha lanceolata
+4|Striped pipit
+4|Striped woodpecker|Picoides lignarius|Veniliornis lignarius
+4|Sulawesi lilac kingfisher|Cittura cyanotis|Lilac-cheeked kingfisher
+4|Sulawesi scops owl|Otus manadensis
+4|Sulawesi thrush|Turdus turdoides|Cataponera turdoides
+4|Sunda pied fantail|Malaysian pied fantail|Rhipidura javanica
+4|Sunda thrush|Zoothera andromedae
+4|Swainson's spurfowl|Francolinus swainsonii|Perdix Swainsonii|Pternistis swainsonii
+4|Swainson's warbler|Limnothlypis swainsonii
+4|Swallow-tailed cotinga|Phibalura flavirostris
+4|Swynnerton's robin|Swynnerton's forest robin|Swynnertonia swynnertoni
+4|Tahiti monarch|Pomarea nigra
+4|Tahiti petrel|Pseudobulweria rostrata
+4|Taiwan barwing|Actinodura morrisoniana|Formosan barwing
+4|Tanzanian red-billed hornbill|Tockus ruahae
+4|Taveta weaver|Ploceus castaneiceps
+4|Tawny-bellied screech owl|Megascops watsonii|Otus watsonii
+4|Tawny-breasted parrotfinch|Erythrura hyperythra
+4|Thick-billed spiderhunter|Arachnothera crassirostris
+4|Thorn-tailed rayadito|Aphrastura spinicauda
+4|Three-banded courser|Rhinoptilus cinctus
+4|Tibetan lark|Melanocorypha maxima
+4|Tibetan serin|Tibetan Siskin|Spinus thibetanus
+4|Timneh parrot|Psittacus timneh
+4|Timor oriole|Olive-brown Oriole|Oriolus melanotis
+4|Timor sparrow|Padda fuscata
+4|Tolima dove|Leptotila conoveri
+4|Tristan thrush|Turdus eremita|starchy
+4|Tristram's storm petrel|Oceanodroma tristrami|Oceanodroma tristrani
+4|Tropical parula|Setophaga pitiayumi
+4|Tufted coquette|Lophornis ornatus
+4|Ultramarine grosbeak|Cyanoloxia brissonii
+4|Unicolored antwren|Myrmotherula unicolor
+4|Uniform swiftlet|Aerodramus vanikorensis|Lowland swiflet
+4|Vanuatu imperial pigeon|Ducula bakeri
+4|Variable hawk|Geranoaetus polyosoma|Red-backed hawk
+4|Varzea piculet|Picumnus varzeae
+4|Veraguan mango|Anthracothorax veraguensis
+4|Vermiculated fishing owl|Scotopelia bouvieri
+4|Vermilion tanager|Calochaetes coccineus
+4|Violet wood hoopoe|Phoeniculus damarensis
+4|Violet-bellied hummingbird|Juliamyia julie
+4|Violet-capped hummingbird|Goldmania violiceps
+4|Violet-capped woodnymph|Thalurania glaucopis
+4|Violet-throated metaltail|Metallura baroni
+4|Waved woodpecker|Celeus undatus
+4|West Mexican chachalaca|Ortalis poliocephala
+4|Western bluebill|Spermophaga haematina
+4|Western bronze-naped pigeon|Columba iriditorques
+4|Western crowned warbler|Phylloscopus occipitalis
+4|Western oriole|Oriolus brachyrhynchus|Oriolus brachyrynchus|Western black-headed oriole
+4|Western tanager|Piranga ludoviciana
+4|Western wood pewee|Contopus sordidulus
+4|Whistling long-tailed woodcreeper|Long-tailed Woodcreeper|Deconychura longicauda
+4|White-backed swallow|Cheramoeca leucosterna
+4|White-bellied cinclodes|Cinclodes palliatus
+4|White-bellied piculet|Picumnus spilogaster
+4|White-bibbed fruit dove|Ptilinopus rivoli
+4|White-breasted parakeet|Pyrrhura albipectus|White-necked parakeet
+4|White-browed conebill|Conirostrum ferrugineiventre
+4|White-browed fulvetta|Fulvetta vinipectus
+4|White-browed hawk|Leucopternis kuhli
+4|White-browed meadowlark|White-browed Blackbird|Sturnella superciliaris|Leistes superciliaris
+4|White-capped munia|Lonchura ferruginosa
+4|White-cheeked antbird|Gymnopithys leucaspis
+4|White-chested puffbird|Malacoptila fusca
+4|White-chinned sapphire|Hylocharis cyanus|Hylocharis cyaneus
+4|White-collared jay|Cyanolyca viridicyanus
+4|White-collared oliveback|Nesocharis ansorgei
+4|White-collared swift|Streptoprocne zonaris
+4|White-eared brown dove|Lesser brown fruit dove|Phapipteron leucotis|Phapitreron leucotis
+4|White-eared parakeet|Maroon-faced parakeet|Pyrrhura leucotis
+4|White-edged oriole|Icterus graceannae
+4|White-flanked antwren|Myrmotherula axillaris
+4|White-gorgeted flycatcher|Anthipes monileger
+4|White-headed marsh tyrant|Arundinicola leucocephala
+4|White-headed vanga|Artamella viridis
+4|White-mantled barbet|Capito hypoleucus
+4|White-naped yuhina|Yuhina bakeri
+4|White-necklaced partridge|White-necklaced Hill Partridge|Arborophila gingica
+4|White-rumped hawk|Parabuteo leucorrhous
+4|White-rumped spinetail|white-rumped needletail|Zoonavena sylvatica
+4|White-rumped tanager|Cypsnagra hirundinacea
+4|White-sided flowerpiercer|Diglossa albilatera
+4|White-sided hillstar|Oreotrochilus leucopleurus
+4|White-starred robin|Pogonocichla stellata
+4|White-tailed starfrontlet|Coeligena phalerata
+4|White-throated bulbul|Alophoixus flaveolus|Ashy-fronted bearded bulbul
+4|White-throated hawk|Buteo albigula
+4|White-throated redstart|Phoenicurus schisticeps
+4|White-throated woodpecker|Piculus leucolaemus
+4|White-tipped quetzal|Pharomachrus fulgidus
+4|White-winged chough|Corcorax melanorhamphos
+4|White-winged parakeet|Brotogeris versicolurus
+4|Worm-eating warbler|Helmitheros vermivorum
+4|Wrentit|Chamaea fasciata
+4|Yellow rail|Coturnicops noveboracensis|Laterallus notatus
+4|Yellow tyrannulet|Capsiempis flaveola|Phylloscartes flaveolus
+4|Yellow-bellied seedeater|Sporophila nigricollis
+4|Yellow-bellied tit|Pardaliparus venustulus
+4|Yellow-billed cacique|Amblycercus holosericeus
+4|Yellow-billed giant honeyeater|Yodeling Honeyeater|Gymnomyza viridis
+4|Yellow-breasted greenfinch|Chloris spinoides
+4|Yellow-breasted racket-tail|Prioniturus flavicans|Yellowish-breasted racquet-tail
+4|Yellow-browed toucanet|Aulacorhynchus huallagae
+4|Yellow-capped pygmy parrot|Micropsitta keiensis|Micropsitta kelensis
+4|Yellow-crested woodpecker|Dendropicos xantholophus
+4|Yellow-crowned bishop|Euplectes afer
+4|Yellow-crowned tyrannulet|Tyrannulus elatus
+4|Yellow-crowned whitestart|Myioborus flavivertex
+4|Yellow-faced grassquit|Tiaris olivacea|Tiaris olivaceus
+4|Yellow-green vireo|Vireo flavoviridis
+4|Yellow-rumped honeyguide|Indicator xanthonotus
+4|Yellow-rumped tinkerbird|Pogoniulus bilineatus
+4|Yellow-tailed oriole|Icterus mesomelas
+4|Yellow-throated cuckoo|Chrysococcyx flavigularis
+4|Yellow-throated euphonia|Euphonia hirundinacea
+4|Yellow-throated hanging parrot|Loriculus pusillus
+4|Yellow-throated leafbird|Chloropsis palawanensis
+4|Yellow-throated miner|Manorina flavigula|Manorina (Myzantha) flavigula
+4|Yellow-winged tanager|Thraupis abbas
+4|Yellowish pipit
+4|Yemen warbler|Curruca buryi
+4|Yucatan vireo|Vireo magister
+4|Yungas pygmy owl|Glaucidium bolivianum
+4|Berlepsch's tinamou|Crypturellus berlepschi
+4|Black tinamou|Tinamus osgoodi
+4|Andean guan|Penelope montagnii
+4|Tawny-breasted tinamou|Nothocercus julius
+4|Blue-throated piping guan|Pipile cumanensis
+4|Speckled chachalaca|Ortalis guttata
+4|Sickle-winged guan|Chamaepetes goudotii
 ` });
 EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a **species of mammal** (its common name).", "level": 2}, list: `
-0|Giant panda|Ailuropoda melanoleuca
-0|Gorilla
-0|Nile hippopotamus|Hippopotamus amphibius|Common Hippopotamus|Hippo|Hippopotamus
-0|Rat|Rattus
-0|Yak|Bos mutus|Wild Yak
-0|brown bear|Ursus arctos|Grizzly Bear
-0|cheetah|Acinonyx jubatus
-0|chimpanzee|Pan troglodytes|Common Chimpanzee|Robust Chimpanzee
-0|giraffe|Giraffa
-0|grey wolf|Canis lupus|wolf|timber wolf
-0|koala|Phascolarctos cinereus
-0|leopard|Panthera pardus
-0|lion|Panthera leo|African Lion
-0|moose|Alces alces|Elk|North American Elk
-0|polar bear|Ursus maritimus
-0|tiger|Panthera tigris
-2|Arctic fox|Vulpes lagopus
-2|Asian elephant|Elephas maximus|Indian Elephant
-2|Baboon|Papio
-2|Bison
-2|European hedgehog|Erinaceus europaeus|Western European Hedgehog
-2|Hook-lipped Rhinoceros|Diceros bicornis|Hooked-lipped Rhinoceros|Black rhinoceros
-2|Red Panda|Ailurus fulgens
-2|Tasmanian devil|Sarcophilus harrisii
-2|White rhinoceros|Ceratotherium simum|Square-lipped Rhinoceros|Southern White Rhinoceros
-2|Wild Boar|Sus scrofa|wild boar, eurasian wild boar|Eurasian Wild Pig|European Wild Pig
-2|aardvark|Orycteropus afer|Antbear
-2|alpaca|Vicugna pacos
-2|beaver|Castor
-2|beluga whale|Delphinapterus leucas|White Whale
-2|blue whale|Balaenoptera musculus|Sulphur-bottom Whale|Sibbold’s Rorqual|Pygmy Blue Whale
-2|capybara|Hydrochoerus hydrochaeris
-2|cougar|Puma concolor|deer tiger|mountain lion|puma
-2|coyote|Canis latrans|American jackal|brush wolf|prairie wolf
-2|elephant seal|Mirounga
-2|guinea pig|Cavia porcellus|Domesticated Guinea Pig
-2|hare|Lepus
-2|honey badger|Mellivora capensis|Rattel|Ratel
-2|house mouse|Mus musculus
-2|humpback whale|Megaptera novaeangliae
-2|jaguar|Panthera onca
-2|killer whale|Orcinus orca|Orca
-2|llama|Lama glama
-2|meerkat|Suricata suricatta
-2|narwhal|Monodon monoceros|Unicorn Whale
-2|orangutan|Pongo
-2|pig|Sus
-2|platypus|Ornithorhynchus anatinus
-2|raccoon|Procyon lotor|raccoon, northern raccoon|Northern Raccoon
-2|red fox|Vulpes vulpes
-2|rhesus macaque|Macaca mulatta|Rhesus Monkey
-2|sea otter|Enhydra lutris
-2|snow leopard|Panthera uncia
-2|sperm whale|Physeter macrocephalus
-2|walrus|Odobenus rosmarus
-2|weasel|Mustela
-2|wildebeest|Connochaetes
-3|African buffalo|Syncerus caffer
-3|African bush elephant|Loxodonta africana
-3|African wild dog|Lycaon pictus|African Hunting Dog|Cape Hunting Dog
-3|American bison|Bison bison
-3|American black bear|Ursus americanus
-3|Bactrian camel|Camelus bactrianus
-3|Bonobo|Pan paniscus
-3|Common Fallow-deer|Dama dama|European Fallow Deer|fallow deer
-3|Dromedary|Camelus dromedarius|One-humped Camel
-3|Eurasian Red Squirrel|Sciurus vulgaris|Red Squirrel
-3|Eurasian badger|Meles meles|European badger
-3|Eurasian lynx|Lynx lynx
-3|Eurasian otter|Lutra lutra|common otter|European otter|European river otter
-3|European Mole|Talpa europaea
-3|European pine marten|Martes martes|Pine Marten
-3|European wildcat|Felis silvestris|wild cat
-3|Fennec|Vulpes zerda|Fennec fox
-3|Homo
-3|Indian rhinoceros|Rhinoceros unicornis|Indian One-horned Rhinoceros|Great Indian Rhinoceros
-3|Least Weasel|Mustela nivalis|weasel, least weasel
-3|Malayan Bear|Helarctos malayanus|Malayan sun bear|Sun bear
-3|Mammuthus
-3|Marmot|Marmota
-3|Neanderthal|Homo neanderthalensis
-3|Okapi|Okapia johnstoni
-3|Poponejo|Oryctolagus cuniculus|European Rabbit
-3|Stoat|Mustela erminea
-3|Thylacine|Thylacinus cynocephalus|Tasmanian wolf|Tasmanian tiger
-3|bobcat|Lynx rufus|bay lynx
-3|brown rat|Rattus norvegicus|common rat|Norway rat
-3|caracal|Caracal caracal|Desert Lynx|Asian Caracal
-3|clouded leopard|Neofelis nebulosa
-3|coypu, nutria|Myocastor coypus|Coypu|Nutria
-3|dugong|Dugong dugon|Sea Cow
-3|golden jackal|Canis aureus|Asiatic Jackal|Common Jackal
-3|impala|Aepyceros melampus|Common Impala|Black-faced Impala
-3|macaques|Macaca
-3|mule|Equus asinus × Equus caballus
-3|musk ox|Ovibos moschatus
-3|muskrat|Ondatra zibethicus|Common Muskrat
-3|northern giraffe|Giraffa camelopardalis
-3|ocelot|Leopardus pardalis
-3|red deer|Cervus elaphus|West European red deer|western red deer
-3|roe deer|Capreolus capreolus
-3|springbok|Antidorcas marsupialis|Springbuck|Cape Springbok
-3|tapir|Tapirus
-3|water buffalo|Bubalus bubalis|Asian buffalo|Asian Water Buffalo|Carabao
-3|wolverine|Gulo gulo
-5|African elephant|Loxodonta
-4|American mink|Neogale vison
-4|Asiatic Black Bear|Ursus thibetanus
-4|Australopithecus
-4|Brown Hare|Lepus europaeus
-4|Canada lynx|Lynx canadensis|Canadian lynx|American lynx
-4|Caveman|Homo erectus
-4|Crocuta crocuta
-4|European Bison|Bison bonasus|Wisent
-4|European polecat|Mustela putorius|Western Polecat|western polecat, polecat
-4|Homo habilis
-4|Iberian lynx|Lynx pardinus
-4|Javan rhinoceros|Rhinoceros sondaicus|Lesser One-horned Rhinoceros|Javan One-horned Rhinoceros
-4|Pallas's cat|Otocolobus manul|manul
-4|Saiga|Saiga tatarica|Western Saiga Antelope|Western Saiga|Saiga Antelope
-4|True foxes|Vulpes
-4|Wapiti|Cervus canadensis
-4|aurochs|Bos primigenius
-4|big cats|Panthera
-4|chamois|Rupicapra rupicapra|Northern Chamois|Balkan Chamois
-4|marten|Martes
-4|raccoon dog|Nyctereutes procyonoides
-4|serval|Leptailurus serval
-4|vicuña|Vicugna vicugna|Vicugna
-4|African golden cat|Profelis aurata
-4|Blackbuck|Antilope cervicapra
-4|Capra
-4|Equus
-4|Eurasian Beaver|Castor fiber
-4|Felis
-4|Gaur|Bos gaurus|Indian Bison
-4|Gazella
-4|Jungle cat|Felis chaus|Swamp Cat|Reed Cat
-4|Leopard Cat|Prionailurus bengalensis
-4|Mus
-4|Ovis
-4|Pan
-4|Rangifer tarandus
-4|Sable|Martes zibellina
-4|Trichechus
-4|Wild Goat|Capra aegagrus
-4|beech marten|Martes foina|stone marten, beech marten|Stone Marten
-4|dhole|Cuon alpinus|Asiatic Wild Dog|Red Dog|Indian Wild Dog
-4|guanaco|Lama guanicoe
-4|sand cat|Felis margarita|Sand Dune Cat
+0|Lion|African lion|Asiatic lion|Panthera leo|q140
+0|Tiger|tigers|tigress|P. tigris|Panthera tigris
+0|Wolf|grey wolf|gray wolf|gray wolves|grey wolves|timber wolf|timber wolves|Canis lupus
+0|Leopard|panther|Panthera pardus
+0|Polar bear|Ursus maritimus|ice bear|white bear
+0|Cheetah|Felis lanea|Acinonyx jubatus|African cheetah|geopard|white cheetah|woolly cheetah
+0|Hippopotamus|Nile hippopotamus|hippo|river hippopotamus|common hippopotamus|Hippopotamus amphibius
+0|Giant panda|panda|giant panda bear|Ailuropoda melanoleuca|panda bear
+0|Brown bear|grizzly bear|Ursus arctos
+0|Moose|elk|Eurasian elk|Alces alces|moofe deer
+0|Koala|coala|koala bear|koolah|Phascolarctos cinereus
+0|Chimpanzee|chimp|common chimpanzee|Pan troglodytes|robust chimpanzee
+0|Brown rat|rat|wharf rat|Hanover rat|Norway rat|Norwegian rat|Parisian rat|Rattus norvegicus|sewer rat|street rat|water rat|Rattus|common rat
+0|Wild boar|Eurasian wild boar|Eurasian wild pig|European wild boar|European wild pig|wild pig|wild swine|boar|pig|Sus scrofa|wild boar, eurasian wild boar|Sus
+2|Red fox|fox|Vulpes vulpes|Eurasian fox|European fox
+2|Yak|Bos grunniens|domestic yak
+2|Snow leopard|ounce|Uncia uncia|P. uncia|Panthera uncia
+2|Jaguar|panter|Panthera onca
+2|Cougar|mountain lion|catamount|Puma concolor|puma|Felis concolor|deer tiger
+2|Least weasel|Mustela nivalis|weasel|dwarf weasel|snow weasel|weasel, least weasel|Mustela
+2|House mouse|mouse|mice|Mus musculus
+2|Platypus|duck-billed platypus|duckbill platypus|duckbill|duckmole|watermole|Ornithorhynchus anatinus
+2|Walrus|Odobenus rosmarus
+2|Orca|Orcinus orca|killer whale|dwarf killer whale|Orca gladiator|orca whale
+2|Red panda|fire fox|Himalayan raccoon|lesser panda|red cat-bear|Ailurus fulgens
+2|Blue whale|Balaenoptera musculus|Sibbold’s Rorqual,|Sulphur-bottom whale|Pygmy Blue Whale
+2|Raccoon|common raccoon|racoon|trash panda|North American raccoon|northern raccoon|Procyon lotor|raccoon, northern raccoon
+2|Coyote|American jackal|brush wolf|Canis latrans|prairie wolf
+2|Guinea pig|Cavia porcellus|domestic cavy|domestic guinea pig|domesticated guinea pig
+2|Aardvark|Orycteropus afer|Antbear
+2|Arctic fox|polar fox|Alopex|snow fox|Alopex lagopus|Canis lagopus|blue fox|Vulpes lagopus
+2|Capybara|greater capybara|Hydrochoerus hydrochaeris|true capybara
+2|Llama|Lama glama|Domestic llama|Domesticated llama
+2|Vicugna pacos|alpaca
+2|American bison|bison|plains bison|American buffalo|Bison bison|plains buffalo|prairie bison|prairie buffalo
+2|Sperm whale|cachalot|spermaceti whale|Physeter macrocephalus
+2|Asian elephant|Asiatic elephant|Elephas maximus|Indian Elephant
+2|Honey badger|Mellivora capensis|ratel|Rattel
+2|Meerkat|mierkat|Suricata suricatta|suricate
+2|Tasmanian devil|ďábel medvědovitý|S. harrisii|Sarcophilus harrisii|T-devil
+2|Narwhal|narwhale|Monodon monoceros|Unicorn Whale
+2|Humpback whale|Megaptera novaeangliae
+2|White rhinoceros|Ceratotherium simus|Diceros simum|Diceros simus|square-lipped rhinoceros|square-mouthed rhinoceros|white rhino|white rhinocerus|Ceratotherium simum|Southern White Rhinoceros
+2|Northern giraffe|Giraffa camelopardalis|Giraffa camelopardalis sensu lato|Giraffa camelopardalis sensu stricto|Giraffa camelopardalis super-complex|three-horned giraffe
+2|Beluga whale|Delphinapterus leucas|melonhead|sea canary|white wahle|white whale|beluga
+2|Black rhinoceros|Diceros bicornis|African black rhinoceros|black rhino|hook-lipped rhinoceros|long-lipped rhinoceros|prehensile-lipped rhino|prehensile-lipped rhinoceros|Hooked-lipped Rhinoceros
+2|European hedgehog|common hedgehog|Erinaceus europaeus|Western European hedgehog
+2|Water buffalo|Asian buffalo|Asiatic buffalo|Bubalus bubalis|domestic Asian water buffalo|Asian Water Buffalo|Carabao
+2|Sea otter|Enhydra lutris
+2|Rhesus macaque|M. mulatta|Macaca mulatta|rhesus monkey|rhesus
+2|European badger|Eurasian badger|Meles meles
+2|Eurasian otter|Lutra lutra|common otter|Eurasian river otter|European otter|Old World otter|European river otter
+2|Neanderthal|Neanderthals|Homo neanderthalensis
+2|Eurasian lynx|Lynx lynx
+2|Mule|Equus asinus × Equus caballus
+2|Red squirrel|Eurasian Red Squirrel|Sciurus vulgaris
+2|Red deer|Cervus elaphus|West European red deer|western red deer
+2|Stoat|Mustela erminea|ermine|ermelin|ermilin|short-tailed stoat|short-tailed weasel
+2|Caracal|Caracal caracal|desert lynx|Lynx caracal|Persian lynx|Asian Caracal
+2|Roe deer|Capreolus capreolus|western roe deer
+2|African buffalo|Syncerus caffer
+2|North American beaver|Canadian beaver|beaver|American beaver|Castor
+2|Wolverine|glutton|beaver eater|carcajou|Gulo gulo|quickhatch|skunk bear|wolverene
+2|European wildcat|wild cat|wildcats|Felis silvestris
+2|Dromedary|Camelus dromedarius|Arabian camel|dromedary camel|hajeen|hygeen|mehari|One-humped Camel
+2|Golden jackal|C. aureus|Canis aureus|common jackal|Asiatic Jackal
+2|European rabbit|Poponejo|domestic rabbit|coney|Oryctolagus cuniculus|wild rabbit
+2|American black bear|black bear|Ursus americanus
+2|Bactrian camel|Camelus bactrianus
+2|Bonobo|dwarf chimpanzee|gracile chimpanzee|Pan paniscus|pygmy chimpanzee
+2|Okapi|Okapia johnstoni|Congolese giraffe|forest giraffe|zebra giraffe
+2|European pine marten|Martes martes|Pine Marten
+2|Thylacine|Tasmanian tiger|Tasmanian wolf|Tassie tiger|Thylacinus cynocephalus
+2|Impala|Aepyceros melampus|rooibok|Common Impala|Black-faced Impala
+2|African wild dog|African painted dog|Lycaon pictus|hyena dog|painted dog|African Hunting Dog|Cape Hunting Dog
+2|Ocelot|ocelots|dwarf leopard|Leopardus pardalis
+2|African bush elephant|African elephant|Loxodonta africana|Loxodonta
+2|Fennec fox|Vulpes zerda|fennec|Fennecus zerda
+2|Muskrat|beaver-rat|musquash|Ondatra zibethicus|swamp rat|Common Muskrat
+2|Bobcat|Felis rufus|Lynx rufus|red lynx|bay lynx
+2|European fallow deer|Dama dama|fallow deer|Common Fallow-deer
+2|Muskox|Ovibos moschatus|musk oxen
+2|Clouded leopard|mainland clouded leopard|Neofelis nebulosa
+2|Dugong|Dugong dugon|Sea Cow
+2|Homo erectus|Caveman
+2|Serval|Leptailurus serval
+2|Sun bear|Helarctos malayanus|Malayan sun bear|Malaysian sun bear|Malayan Bear
+2|Reindeer|Rangifer tarandus|caribou
+2|European mole|mole|common mole|Talpa europaea
+2|Indian rhinoceros|great Indian rhinoceros|greater one-horned rhinoceros|Indian one-horned rhinoceros|Indian rhino|one-horned rhino|Rhinoceros unicornis
+2|European bison|Bison bonasus|wisent
+2|Nutria|Myocastor coypus|coypu|coypu, nutria
+2|Springbok|Antidorcas marsupialis|Springbuck|Cape Springbok
+2|Asian black bear|Ursus thibetanus|Asiatic black bear|Selenarctos thibetanus
+2|Pallas's cat|manul|Pallas' cat|Otocolobus manul
+2|European hare|Lepus europaeus|Brown Hare
+2|Homo habilis|H. habilis
+2|Chamois|Alpine chamois|northern chamois|Rupicapra rupicapra|Balkan Chamois
+2|European polecat|Mustela putorius|black polecat|forest polecat|Western Polecat|western polecat, polecat
+2|Common raccoon dog|Nyctereutes procyonoides|tanuki|mangut|raccoon dog
+2|Elk|Cervus canadensis|North American elk|wapiti|American elk|C. canadensis
+2|Iberian lynx|Lynx pardinus|Pardel lynx
+2|Aurochs|aurochsen|Bos primigenius
+2|Homo sapiens|man|men|humans|human being|human|human beings
+2|Saiga antelope|Saiga|Colus|Saiga tatarica|Western Saiga Antelope|Western Saiga
+2|Spotted hyena|Crocuta crocuta|laughing hyena|spotted hyaena
+2|Vicuña|Lama vicugna|Vicugna vicugna|Vicugna
+2|Canada lynx|Canadian lynx|Felis lynx|Felis lynx canadensis|Lynx canadensis|American lynx
+2|Wild yak|Bos mutus
+2|American mink|Mustela vison|Neogale vision|Neovison vison|Neogale vison
+2|Fishing cat|Prionailurus viverrinus
+2|Javan rhinoceros|Javan rhino|lesser one-horned rhinoceros|Rhinoceros sondaicus|Sunda rhinoceros|Javan One-horned Rhinoceros
+2|European mink|Mustela lutreola
+2|Jaguarundi|Herpailurus yagouaroundi
+2|Mountain hare|Irish hare|Lepus timidus|tundra hare|white hare|alpine hare|blue hare|snow hare|variable hare
+2|Sika deer|Cervus nippon|Japanese deer|spotted deer
+2|Striped hyena|Hyaena hyaena|striped hyaena
+2|Jungle cat|Felis chaus|reed cat|swamp cat
+2|Alpine ibex|Capra ibex|steinbock
+2|Common bottlenose dolphin|bottlenose dolphin|Atlantic bottlenose dolphin|Bottle-Nosed Dolphin
+2|Common eland|Taurotragus oryx
+2|Harbor seal|Phoca vitulina|common seal|Harbour Seal
+2|Sumatran rhinoceros|Asiatic two-horned rhinoceros|Dicerorhinus sumatrensis|Didermocerus sumatrensis|hairy rhino|hairy rhinoceros|Sumatran rhino|Two-horned Asiatic rhinoceros
+2|Aardwolf|civet hyena|maanhaar-jackal|Proteles cristata|Proteles cristatus|termite-eating hyena
+5|Aye-aye|Daubentonia madagascariensis
+2|Onager|Asian wild ass|Asiatic wild ass|Equus hemionus|Gobi kulan|hemione|Mongolian kulan|Persian onager|Syrian onager
+2|Ring-tailed lemur|Lemur catta
+2|Sloth bear|Melursus ursinus
+2|Spectacled bear|Tremarctos ornatus|oso andino|oso andino de cara corta|oso de anteojos
+2|Dhole|red dog|red wild dog|Asian wild dog|Asiatic wild dog|Cuon alpinus|Indian Wild Dog
+2|African forest elephant|Loxodonta cyclotis|Forest elephant
+2|Argali|Ovis ammon
+2|Fin whale|razorback|Balaenoptera physalus|common rorqual|finback whale|herring whale
+2|Black rat|Rattus rattus|black ship rat|house rat|roof rat|ship rat
+2|Black-footed cat|Felis nigripes|small-spotted cat
+2|European edible dormouse|edible dormouse|Glis glis
+2|Homo heidelbergensis|H. heidelbergensis
+2|Sable|Martes zibellina
+2|Binturong|Bearcat|Arctictis binturong
+2|Corsac fox|Vulpes corsac
+2|Fossa|Cryptoprocta ferox
+2|Nilgai|Boselaphus tragocamelus|Antilope tragocamelus|Antilope picta|Antilope albipes|Antilope leucopus|Blue bull|Boselaphus albipes|Boselaphus picta|Cemas picta|Cemas tragocamelus|Damalis picta|Damalis risia|Nilgai antelope|Nilghai|Nylghai|Nylghau|Portax risia|Portax tragelaphus|Tragelaphus hippelaphus
+2|Sand cat|Felis margarita|sand dune cat
+2|Asian golden cat|Pardofelis temminckii|Asiatic golden cat
+2|Asian palm civet|Paradoxurus hermaphroditus|palm civet|musang|toddy cat
+2|Bengal fox|Indian Fox|Vulpes bengalensis|Black tailed fox
+2|Bowhead whale|Arctic whale|Balaena mysticetus|Greenland right whale
+2|Common warthog|African warthog|Phacochoerus africanus|wart hog
+2|Ferret|Mustela putorius furo|ferrets
+2|Markhor|Markor|Capra falconeri|Maarkhor
+2|Plains zebra|Equus quagga|common zebra
+2|Eurasian beaver|Castor fiber|European beaver
+2|Guanaco|Lama guanicoe
+2|Leopard cat|Prionailurus bengalensis
+2|Addax|Addax nasomaculatus
+2|Barbary macaque|Macaca sylvanus|magot|Barbary ape|Barbary monkey|rock ape|rock monkey
+2|Chital|Axis axis|cheetal|Axis deer
+2|Mandrill|Mandrillus sphinx
+2|Proboscis monkey|Nasalis larvatus|kahau|kahau nosatý|long-nosed monkey
+2|Beech marten|stone marten|house marten|Martes foina|white breasted marten|stone marten, beech marten
+2|Baiji|Chinese river dolphin|Lipotes vexillifer|pai-chi|Whitefin dolphin|Yangtze dolphin|Yangtze river dolphin
+2|Banteng|Bos javanicus|Tembadau
+2|Denisovan
+2|Ganges river dolphin|Platanista gangetica|South Asian river dolphin
+2|Homo ergaster
+2|Homo floresiensis|Flores Man
+2|Marbled cat|Pardofelis marmorata
+2|Pygmy hippopotamus|Choeropsis liberiensis
+2|Quokka|Setonix brachyurus
+2|Sambar deer|sambar|Cervus unicolor|Rusa unicolor
+2|Grey seal|Atlantic seal|gray seal|Halichoerus grypus|horsehead seal
+2|Pronghorn|American antelope|Antilocapra americana|prairie antelope|pronghorn antelope|speed goat
+2|Wild horse|Eurasian wild horse|tarpan
+2|African civet|civet|Civettictis civetta
+2|Arctic hare|Lepus arcticus
+2|Common dolphin|Short-beaked Common Dolphin|Delphinus delphis
+2|Leopard seal|Hydrurga leptonyx|sea leopard
+2|Oncilla|savanna tiger cat|savannah tiger-cat|tiger cat|Leopardus tigrinus|northern tiger cat
+2|Woolly rhinoceros|woolly rhino
+2|Giant anteater|M. jubata|Myrmecophaga tridactyla
+2|Gray whale|Agaphelus glaucus|Balaena gibbosa|Eschrichtius glaucus|devil fish|Atlantic gray whale|California gray whale|Eschrichtius gibbosus|Eschrichtius robustus|Gray back whale|grey whale|Pacific gray whale|Rhachianectes glaucus
+2|Grévy's zebra|Equus grevyi|imperial zebra
+2|Hamadryas baboon|Papio hamadryas
+2|Japanese macaque|Macaca fuscata|snow monkey
+2|Maned wolf|Chrysocyon brachyurus
+2|Margay|Leopardus wiedii
+2|Mediterranean monk seal|Monachus monachus
+2|Mountain goat|Oreamnos americanus
+2|Takin|Budorcas taxicolor
+2|Woolly mammoth|Mammuthus primigenius
+2|Gaur|Bos gaurus|Indian bison
+2|Bat-eared fox|Otocyon megalotis|big-eared fox|black-eared fox
+2|Chinese mountain cat|Felis bieti|Chinese desert cat|pale desert cat
+2|Greater kudu
+2|Hazel dormouse|Muscardinus avellanarius|Common dormouse
+2|Kodkod|guigna|Leopardus guigna
+2|Mountain zebra|Hartmann's mountain zebra|Cape mountain zebra|Equus zebra
+2|Sei whale|Balaenoptera borealis
+2|Brown hyena|Brown Hyaena|P. brunnea|Parahyaena brunnea|strandwolf
+2|Cave bear|Ursus spelaeus
+2|Harbour porpoise|Phocoena phocoena|Harbor porpoise
+2|Olive baboon|Papio anubis
+2|Siamang|Hylobates syndactylus|Symphalangus syndactylus
+2|Waterbuck|Kobus ellipsiprymnus
+2|African golden cat|Profelis aurata
+2|Blackbuck|Antilope cervicapra|Indian antelope
+2|Wild goat|Capra aegagrus
+2|Amazon river dolphin|boto|Inia geoffrensis|pink river dolphin
+2|Bearded seal|Erignathus barbatus
+2|Bongo|Tragelaphus eurycerus
+2|Common minke whale|minke whale|Balaenoptera acutorostrata
+2|Ethiopian wolf|Canis simensis|kuberow|Simian jackal|Simien fox|Red jackal
+2|Gemsbok|gemsbuck|Oryx gazella|South African oryx
+2|Gerenuk|Litocranius walleri
+2|Hartebeest|Alcelaphus caama|Bubale|Alcelaphus buselaphus|kaama
+2|Kinkajou|Night ape
+2|Virginia opossum|Didelphis virginiana|opossum|possum|North American opossum|Virginian opossum
+2|White-tailed deer|Odocoileus virginianus|whitetail|Dama virginiana|Odocoileus spelaeus|white tail deer|Virginia deer
+2|Wood mouse|Apodemus sylvaticus
+2|African wild ass|Equus africanus|Atlas wild ass|Nubian wild ass|Somali wild ass
+2|Bush dog|Speothos venaticus
+2|Rusty-spotted cat|Prionailurus rubiginosus
+2|Siberian flying squirrel|Pteromys volans
+2|Western gorilla|Gorilla gorilla
+2|Bornean orangutan|Pongo pygmaeus
+2|European hamster|Cricetus cricetus
+2|European water vole|Arvicola amphibius
+2|Gelada|Theropithecus gelada
+2|Geoffroy's cat|Geoffroyis cat|Leopardus geoffroyi
+2|Gray fox|Grey fox|Tree fox|Urocyon cinereoargenteus
+2|Indri|Indri indri
+2|Irrawaddy dolphin|Orcaella brevirostris
+2|Marbled polecat|European marbled polecat|Vormela peregusna
+2|Olinguito|B. neblina|Bassaricyon neblina
+2|Oribi|Ourebia ourebi
+2|Risso's dolphin|Grampus griseus
+2|Siberian weasel|Mustela sibirica|kolonok
+2|American badger|Taxidea taxus
+2|Andean mountain cat|Leopardus jacobita|Andean cat|Oreailurus jacobita
+2|Barasingha|Rucervus duvaucelii
+2|Blue wildebeest|Connochaetes taurinus|white-bearded wildebeest
+2|Cape fox|Vulpes chama
+2|Eastern gray squirrel|Grey squirrel|Sciurus carolinensis
+2|Goitered gazelle|Gazella subgutturosa|black-tailed gazelle|Persian gazelle
+2|Malayan tapir|Asian tapir|Indian tapir|Malay tapir|Tapirus indicus
+2|Numbat|Myrmecobius fasciatus|noombat|walpurti
+2|Ringed seal|Pusa hispida
+2|Sable antelope|Hippotragus niger
+2|Saola|Pseudoryx nghetinhensis
+2|Sitatunga|marshbuck|Tragelaphus spekii
+2|Steller's sea cow|Hydrodamalis gigas
+2|Tilcayo
+2|Arabian oryx|Oryx leucoryx
+2|Asian small-clawed otter|oriental small-clawed otter|Asian short-clawed otter
+2|Baikal seal|Nerpa|Lake baikal seal|Phoca sibirica|Pusa sibirica
+2|Barbary sheep|Ammotragus lervia
+2|Eurasian harvest mouse|harvest mouse|Micromys minutus
+2|Giant otter|giant river otter|Pteronura brasiliensis
+2|Homo naledi|H. naledi
+2|Macaca fascicularis|crab-eating macaque|Cynomolgus irus|cynomolgus monkey|long-tailed macaque|Macaca irus
+2|Pampas cat|Leopardus colocola|Colocolo|Chilean Pampa Cat
+2|Short-beaked echidna
+2|Tibetan fox|Tibetan sand fox|Vulpes ferrilata
+2|Australopithecus afarensis|Australopithecus afarensis cumio|A. afarensis
+2|Bank vole|Clethrionomys glareolus|Myodes glareolus
+2|Blanford's fox|Vulpes cana
+2|Common vole|Microtus arvalis
+3|Culpeo|Lycalopex culpaeus
+3|Dire wolf|Aenocyon dirus
+3|Homo antecessor
+3|Kob|Ngabi
+3|Siberian musk deer|Moschus moschiferus
+3|Snowshoe hare|Lepus americanus|snowshoe rabbit|varying hare
+3|Southern red muntjac|Indian muntjac|Muntiacus muntjak
+3|Tamaraw|Bubalus mindorensis|Mindoro dwarf buffalo
+3|Tibetan antelope|Pantholops hodgsonii|chiru
+3|Water deer|Chinese water deer|Hydropotes inermis|vampire deer
+3|Alpine marmot|Marmota marmota
+3|Brown long-eared bat|Plecotus auritus
+3|Common pipistrelle|Pipistrellus pipistrellus
+3|Crab-eating fox|Cerdocyon thous|common fox|forest fox|wood fox
+3|Egyptian mongoose|ichneumon|Herpestes ichneumon
+3|Etruscan shrew|Savi’s pygmy shrew|Suncus etruscus
+3|Falkland Islands wolf|warrah|Dusicyon australis|Falkland Island wolf|Falkland Islands fox|Falkland Island fox
+3|Fisher|Pekania pennanti|fisher cat|Martes pennanti
+3|Flat-headed cat|Prionailurus planiceps
+3|Four-horned antelope|Tetracerus quadricornis|Chousingha
+3|Harp seal|Pagophilus groenlandica|Pagophilus groenlandicus
+3|Père David's deer|Elaphurus davidianus|elaphure|milu
+3|Roan antelope|Hippotragus equinus
+3|Rock hyrax|Procavia capensis|Cape hyrax|dassie|rock rabbit
+3|Siberian chipmunk|Tamias sibiricus
+3|Southern elephant seal|Mirounga leonina
+3|West Indian manatee|manatee|American manatee|Antillean manatee|Caribbean manatee|Trichechus manatus
+3|African palm civet|Nandinia binotata
+3|Bryde's whale|Balaenoptera brydei
+3|Cape hare|Lepus capensis|desert hare|brown hare
+3|Drill|Mandrillus leucophaeus
+3|Golden hamster|Mesocricetus auratus|hamster|Golden Syrian hamster|pet hamster|Syrian hamster
+3|Himalayan goral|Naemorhedus goral
+3|Indian hog deer|Axis porcinus|Hog Deer
+3|Irish elk|Megaloceros giganteus|Irish deer|Giant deer
+3|North Atlantic right whale|Eubalaena glacialis
+3|Rüppell's fox|Rüppel's fox|Vulpes rueppellii
+3|Scimitar oryx|Oryx dammah|Sahara oryx|scimitar-horned oryx
+3|Striped dolphin|Stenella coeruleoalba
+3|Sumatran orangutan|Pongo abelii
+3|Yellow baboon|Papio cynocephalus
+3|Yellow-throated marten|Martes flavigula
+3|Chinese pangolin|Manis pentadactyla|short-tailed Pangolin
+3|False killer whale|Phocaena crassidens|Pseudorca crassidens
+3|Greater horseshoe bat|Rhinolophus ferrumequinum
+3|Indian pangolin|Manis crassicaudata|thick-tailed pangolin
+3|Lar gibbon|H. lar|Hylobates lar|White-handed gibbon
+3|Lechwe|Kobus leche|southern lechwe|red lechwe
+3|Northern elephant seal|Mirounga angustirostris
+3|Nyala|inyala|Nyala angasii|Tragelaphus angasii|lowland nyala
+3|Smooth-coated otter|Lutrogale perspicillata
+3|Southern right whale|Eubalaena australis
+3|Sunda clouded leopard|Diard’s clouded leopard|Neofelis diardi
+3|Sunda pangolin|Malayan pangolin|Manis javanica
+3|Thomson's gazelle|Eudorcas thomsonii|Thomson gazelle|tommie
+3|Tigon|Panthera tigris × Panthera leo|tiglon
+3|Yellow-necked mouse|Apodemus flavicollis
+3|American marten|American sable|Pacific marten|pine marten|Hudson Bay sable|Martes americana|American pine marten
+3|Australopithecus africanus|A. africanus
+3|Baird's tapir|Central American tapir|Tapirus bairdii
+3|Bharal|blue sheep|Pseudois nayaur
+3|Bighorn sheep|Ovis canadensis
+3|Crested porcupine|African crested porcupine|Hystrix cristata|North African crested porcupine
+3|Eurasian pygmy shrew|Pygmy shrew|Sorex minutus
+3|Garden dormouse|Eliomys quercinus
+3|Indian grey mongoose|Herpestes edwardsii|great ichneumon
+3|Kit fox|Vulpes macrotis
+3|Mountain tapir|Andean tapir|Tapirus pinchaque|woolly tapir
+3|Nubian ibex|Capra nubiana
+3|Polynesian rat|Rattus exulans|Pacific rat
+3|Serotine bat|big brown bat|common serotine bat|Eptesicus serotinus|silky bat
+3|Siberian ibex|Capra sibirica
+3|Siberian roe deer|Capreolus pygargus
+3|Small Indian civet|Viverricula indica|Lesser Oriental Civet|Oriental civet
+3|South American coati|coatimundi|Nasua nasua|coatimundi's
+3|South American tapir|Amazonian tapir|Brazilian tapir|lowland tapir|maned tapir|Tapirus terrestris
+3|African wildcat|Felis lybica
+3|Cuvier's beaked whale|goose-beaked whale|Ziphius cavirostris
+3|Eastern grey kangaroo|forester kangaroo|great grey kangaroo|Macropus giganteus
+3|Eurasian water shrew|water shrew|Neomys fodiens
+3|Groundhog|Marmota monax|gopher|woodchuck|whistlepig
+3|Himalayan tahr|Hemitragus jemlahicus|Shapi
+3|Hooded seal|Cystophora cristata
+3|Kiang|Equus kiang
+3|Kitti's hog-nosed bat|bumblebee bat|Craseonycteris thonglongyai|hog-nosed Bat
+3|Large Indian civet|Civet cat|Viverra zibetha zibetha|Viverra zibetha
+3|Lion-tailed macaque|Macaca silenus|wanderoo
+3|Masked palm civet|Paguma larvata
+3|Mountain weasel|Altai weasel|Mustela altaica|pale weasel|solongoi
+3|Naked mole-rat|desert mole rat|Heterocephalus glaber|sand puppy
+3|Natterer's bat|Myotis nattereri|Natterer's myotis
+3|Pampas fox|Lycalopex gymnocercus
+3|Western pygmy marmoset|Pygmy marmoset|Callithrix pygmaea|dwarf marmoset
+3|Amazonian manatee|Trichechus inunguis
+3|American lion|American cave lion|North American lion|P. atrox|Panthera atrox
+3|Black-tailed jackrabbit|Lepus californicus|American desert hare
+3|Celebes crested macaque|Macaca nigra|crested black macaque
+3|Crabeater seal|Lobodon carcinophaga|Lobodon carcinophagus
+3|Dibatag|Ammodorcas clarkei|Clarke's gazelle
+3|Hawaiian monk seal|Monachus schauinslandi
+3|Hoary fox|Lycalopex vetulus
+3|Indian crested porcupine|Hystrix indica|Indian porcupine
+3|Island fox|Urocyon littoralis
+3|Klipspringer|Oreotragus oreotragus
+3|Marsh deer|Blastocerus dichotomus
+3|Mule deer|Odocoileus hemionus
+3|Pygmy right whale|Caperea marginata
+3|Russian desman|Desmana moschata
+3|Short-eared dog|Atelocynus microtis|Small-eared zorro
+3|Steppe polecat|Mustela eversmanii
+3|Swift fox|Vulpes velox
+3|Tufted deer|elaphode|Elaphodus cephalophus
+3|Whiskered bat|Myotis mystacinus|whiskered myotis
+3|White-beaked dolphin|Lagenorhynchus albirostris
+3|Arctocephalus pusillus|Brown Fur Seal|Australian fur seal|Cape fur seal|South African fur seal
+3|Black wildebeest|Connochaetes gnou|white-tailed gnu
+3|Black-footed ferret|American polecat|Mustela nigripes|prairie dog hunter
+3|Bobak marmot|Marmota bobak|steppe marmot
+3|California sea lion|Zalophus californianus
+3|Caspian seal|Pusa caspica
+3|Chinkara|Gazella bennettii|Indian gazelle
+3|Common noctule|Noctule bat|Nyctalus noctula
+3|Common patas monkey|patas monkey|Erythrocebus patas|hussar monkey|wadi monkey
+3|Common shrew|Sorex araneus
+3|Common wombat|bare-nosed wombat|Bass Strait wombat|coarse-haired wombat|Flinders Island wombat|forest wombat|Tasmanian wombat|Vombatus ursinus
+3|Darwin's fox|Lycalopex fulvipes
+3|Daubenton's bat|Daubenton's myotis|Myotis daubentonii
+3|Eastern gorilla|Gorilla beringei
+3|Eld's deer|Rucervus eldii|brow-antlered deer|thamin
+3|Forest dormouse|Dryomys nitedula
+3|Greater hog badger|Hog badger|Arctonyx collaris
+3|Homo rudolfensis|H. rudolfensis
+3|Indian giant squirrel|Ratufa indica
+3|Kouprey|Bos sauveli
+3|Lesser horseshoe bat|Rhinolophus hipposideros
+3|Long-finned pilot whale|Blackfish|Globicephala melas|Northern Pilot Whale
+3|Northern bat|Eptesicus nilssonii
+3|Pale fox|Vulpes pallida
+3|Sowerby's beaked whale|Mesoplodon bidens
+3|Striped skunk|M. mephitis|Mephitis mephitis
+3|Vaquita|Desert porpoise|Gulf of California porpoise|Gulf porpoise|Phocoena sinus|Vaquita porpoise
+3|Western barbastelle|Barbastelle|Barbastella barbastellus|Barbastelle bat
+3|Wild water buffalo|Asian buffalo|Asiatic buffalo|Bubalus arnee
+3|Winter white dwarf hamster|Phodopus sungorus|dwarf hamster|Dzungarian hamster|winter white hamster
+3|African manatee|Trichechus senegalensis|West African manatee
+3|Banded mongoose
+3|Common genet|Genetta genetta
+3|Dorcas gazelle|Gazella dorcas
+3|European ground squirrel|Suslik|Sisel|European souslik|Souslic|Souslik|Spermophilus citellus|Zizel
+3|Giant eland|Lord Derby eland
+3|Golden lion tamarin|golden marmoset|Leontopithecus rosalia
+3|Hispid hare|Assam rabbit|bristly rabbit|Caprolagus hispidus
+3|Iberian ibex|Capra pyrenaica|kozorožec iberský|Spanish ibex
+3|Lowland anoa|Bubalus depressicornis
+3|Mantled guereza|Colobus guereza|Guereza
+3|Mountain beaver|Aplodontia rufa
+3|Nine-banded armadillo|Dasypus novemcinctus
+3|North Pacific right whale|Eubalaena japonica
+3|Northern bottlenose whale|Hyperoodon ampullatus
+3|Persian fallow deer|Dama mesopotamica
+3|Puku|Kobus vardonii
+3|Pygmy hog|Porcula salvania
+3|Sechuran fox|Lycalopex sechurae|Sechura fox
+3|South American gray fox|Chilla|Lycalopex griseus|South American grey fox
+3|Southern white-breasted hedgehog|Erinaceus concolor
+3|Spinner dolphin|Stenella longirostris
+3|Striped field mouse|Apodemus agrarius
+3|Tayra|Eira barbara
+3|Weddell seal|Leptonychotes weddellii
+3|White-nosed coati|coatimundi|coati
+3|Antarctic fur seal|Arctocephalus gazella
+3|Common duiker|Sylvicapra grimmia
+3|Hairy-nosed otter|Lutra sumatrana
+3|Hector's dolphin|Cephalorhynchus hectori
+3|Hirola|Beatragus hunteri|Hunter's antelope|Hunter's hartebeest
+3|Lesser kudu|Tragelaphus imberbis
+3|North American river otter|Lontra canadensis|Lutra canadensis|North American otter|northern river otter|river otter
+3|Northern white-breasted hedgehog|Erinaceus roumanicus
+3|Philippine flying lemur|Cynocephalus volans
+3|South American sea lion|Otaria dentro|Otaria flavescens
+3|Steller sea lion|Steller's sea lion|Eumatopias jubatus|Eumetopias jubatus|Lyon marine
+3|Sugar glider|Petaurus breviceps
+3|Tapanuli orangutan|Pongo tapanuliensis
+3|Atlantic white-sided dolphin|Lagenorhynchus acutus
+3|Bay cat|Catopuma badia
+3|Commerson's dolphin|Cephalorhynchus commersonii
+3|Common degu|Octodon degus|degu|brush-tailed rat
+3|Common silky anteater|Silky anteater|Cyclopes Badajatus Camachus|Cyclopes didactylus|Pygmy anteater
+3|Giant armadillo|Priodontes giganteus|Priodontes maximus
+3|Giant forest hog|Hylochoerus meinertzhageni|Forest hog
+3|Grant's gazelle|Nanger granti
+3|Japanese serow|Antilope crispa|Capricornis crispus|Naemorhedus crispus
+3|Javan mongoose|Herpestes javanicus|Small Asian mongoose|Small Indian Mongoose
+3|Mongolian gazelle|Procapra gutturosa
+3|Northern fur seal|Callorhinus ursinus
+3|Pampas deer|Ozotoceros bezoarticus
+3|Pantropical spotted dolphin|Stenella attenuata
+3|Pygmy killer whale|Feresa attenuata
+3|Sahelanthropus tchadensis
+3|Short-tailed field vole|field vole|Microtus agrestis
+3|Urial|Ovis vignei
+3|Western long-beaked echidna|New Guinea long-nosed echidna|Long-nosed spiny anteater|Western long-nosed echidna
+3|Australopithecus anamensis
+3|Australopithecus sediba
+3|Black-and-white ruffed lemur|Varecia variegata variegata|Varecia variegata
+3|Bontebok|Damaliscus pygargus
+3|Brown-throated sloth|brown-throated three-toed sloth|Bradypus variegatus
+3|Colombian white-faced capuchin|White-headed capuchin|Cebus capucinus|White-faced capuchin|White-throated capuchin
+3|Cotton-top tamarin|cotton-headed tamarin|Saguinus oedipus
+3|Dmanisi hominins|Homo georgicus|Homo erectus georgicus
+3|Fraser's dolphin|Lagenodelphis hosei
+3|Geoffroy's spider monkey|Ateles geoffroyi|black-handed spider monkey|Central American spider monkey
+3|Granada hare|Lepus granatensis|Iberian hare
+3|Greater mouse-eared bat|Myotis myotis
+3|Ground pangolin|Smutsia temminckii|Cape pangolin|South African pangolin|steppe pangolin|Temminck’s ground pangolin|Manis temminckii|Phatages hedenborgii|Phataginus temminckii
+3|Harnessed bushbuck|Tragelaphus scriptus
+3|Indo-Pacific finless porpoise|finless porpoise|Neophocaena phocaenoides
+3|Javan rusa|Cervus timorensis|Rusa timorensis|Sunda sambar
+3|Lesser noctule|Leisler's bat|Nyctalus leisleri
+3|Marine otter|Lontra felina
+3|Norway lemming|Lemmus lemmus|Lemmus norvegicus|Myodes lemmus, Linn.
+3|Orrorin tugenensis|O. tugenensis
+3|Parti-coloured bat|Vespertilio murinus
+3|Philippine tarsier|Carlito syrichta
+3|Red river hog|Bush pig|Potamochoerus porcus
+3|Rough-toothed dolphin|Steno bredanensis
+3|Spotted seal|Phoca largha
+3|Steenbok|Raphicerus campestris|steinbok|steinbuck
+3|West Caucasian tur|Capra caucasica
+3|African clawless otter|Aonyx capensis
+3|Alaskan hare|tundra hare|Lepus othus
+3|Blue duiker|Philantomba monticola
+3|Brandt's bat|Myotis brandtii|Brandt's myotis
+3|Caribbean monk seal|Monachus tropicalis
+3|Caucasian squirrel|Persian squirrel|Sciurus anomalus
+3|Common vampire bat|vampire bat|Desmodus rotundus
+3|Crab-eating mongoose|Herpestes urva
+3|Damaliscus lunatus|Common tsessebe|Topi|sassabi
+3|Grey long-eared bat|Plecotus austriacus
+3|La Plata dolphin|Franciscana|Pontoporia blainvillei
+3|Lesula|Cercopithecus lomamiensis
+3|Long-eared hedgehog|Hemiechinus auritus
+3|Malagasy civet|Fossa fossana|Striped civet
+3|Mustela frenata|long-tailed weasel|Neogale frenata|bridled weasel
+3|Neotropical otter|Lontra longicaudis
+3|New Zealand sea lion|Hooker’s sea lion|Phocarctos hookeri
+3|Omura's whale|Balaenoptera omurai
+3|Patagonian mara|Dolichotis patagonum|Patagonian cavy
+3|Pink fairy armadillo|Chlamyphorus truncatus|Lesser fairy armadillo|pichiciego
+3|Ringtail|Bassariscus astutus|cacomistle|ring-tailed cat
+3|Royal antelope|Neotragus pygmaeus
+3|Southern flying squirrel|Glaucomys volans|assapan
+3|Southern pig-tailed macaque|Macaca nemestrina|Sunda pig-tailed macaque
+3|Stump-tailed macaque|bear macaque|Macaca arctoides|stumptail macaque
+3|Sunda flying lemur|Galeopterus variegatus|Malayan colugo
+3|Sunda slow loris|greater slow loris
+3|Tucuxi|Sotalia fluviatilis|Tucuxi dolphin
+3|Tundra vole|Microtus oeconomus
+3|Ural field mouse|Apodemus uralensis
+3|Walia ibex|Capra walie
+3|Yellow mongoose|Cynictis penicillata
+3|Amami rabbit|Pentalagus furnessi
+3|Antelope jackrabbit|Lepus alleni|Allen's hare|Allen's jackrabbit|antelope hare
+3|Assam macaque|Macaca assamensis
+3|Australopithecus garhi|A. garhi
+3|Beira|Dorcatragus megalotis
+3|Chacma baboon|Papio ursinus|Cape baboon
+3|Crab-eating raccoon|Procyon cancrivorus
+3|Dall sheep|Dall's sheep|Ovis dalli|Thinhorn sheep
+3|East Caucasian tur|Capra cylindricornis|Eastern tur
+3|Emperor tamarin|Saguinus imperator
+3|European free-tailed bat|Tadarida teniotis|bulldog bat|mastiff bat
+3|Gayal|Bos frontalis|Mithun|Ghayal
+3|Giant pangolin|Smutsia gigantea|Giant ground pangolin|Manis gigantea|Pholidotus africanus|Manis wagneri|Phataginus gigantea|Manis gigantean
+3|Greater bilby|Macrotis lagotis
+3|Greater noctule bat|Giant noctule|Nyctalus lasiopterus
+3|Grivet|Chlorocebus aethiops|grivet monkey
+3|Guinea baboon|Papio papio
+3|Himalayan marmot|Marmota himalayana
+3|Homo rhodesiensis|H. rhodesiensis
+3|Java mouse-deer|Javan mouse-deer|Tragulus javanicus
+3|Leopardus pajeros|Pampas cat
+3|Lesser white-toothed shrew|Crocidura suaveolens
+3|Mainland serow|Sumatran serow|Capricornis sumatraensis
+3|Mountain nyala|Tragelaphus buxtoni
+3|Nilgiri marten|Martes gwatkinsii
+3|North American porcupine|common porcupine|Erethizon dorsata|Erethizon dorsatum
+3|Paranthropus robustus|Australopithecus robustus|P. robustus
+3|Pecari tajacu|collared peccary|baquiro|javelina|Mexican hog|musk hog|quenk|saino
+3|Pygmy rabbit|Brachylagus idahoensis
+3|Pygmy sperm whale|Kogia breviceps
+3|Pyrenean desman|Galemys pyrenaicus
+3|Reeves's muntjac|Reeve's muntjac
+3|Roborovski dwarf hamster|Roborovski hamster|Desert Hamster|Phodopus roborovskii
+3|Ross seal|Ommatophoca rossii
+3|Short-finned pilot whale|Globicephala macrorhynchus
+3|Southern tamandua|yellow tamandua|Collared anteater|Tamandua tetradactyla
+3|Star-nosed mole|Condylura cristata|Putisina
+3|Sumatran striped rabbit|Nesolagus netscheri|Sumatran rabbit|Sumatra short-eared rabbit
+3|Thorold's deer|Przewalskium albirostris|Cervus albirostris
+3|Volcano rabbit|Conejo de los volcanes|Romerolagus diazi|Tepolito|Teporingo|Zacatuche
+3|Water opossum|Chironectes minimus|yapok
+3|West African potto|Bosman's potto|Perodicticus potto
+3|Asian house shrew|grey musk shrew|house shrew|Suncus murinus
+3|Australian sea lion|Neophoca cinerea
+3|Australopithecus bahrelghazali|A. bahrelghazali
+3|Black giant squirrel|Ratufa bicolor
+3|Blainville's beaked whale|Mesoplodon densirostris
+3|Corsican hare|Apennine hare|Italian hare|Lepus corsicanus
+3|Dama gazelle|Gazella dama|addra gazelle|mhorr gazelle|Nanger dama
+3|Desert warthog|Phacochoerus aethiopicus
+3|Dwarf sperm whale|Kogia sima
+3|East African oryx|Beisa oryx|Oryx beisa
+3|Eastern cottontail|Sylvilagus floridanus
+3|Eastern quoll|Dasyurus viverrinus|eastern native cat
+3|Golden snub-nosed monkey|Rhinopithecus roxellana
+4|Grey rhebok|common rhebok|Pelea capreolus|rhebok|vaal rhebok
+4|Guianan squirrel monkey|Saimiri sciureus|Common squirrel monkey|South American squirrel monkey
+4|Hairy-fronted muntjac|Black muntjac|Muntiacus crinifrons
+4|Heaviside's dolphin|Haviside's dolphin|Cephalorhynchus heavisidii
+4|Indo-Pacific bottlenose dolphin|Indian Ocean bottlenose dolphin|Tursiops aduncus
+4|Indo-Pacific humpback dolphin|Chinese white dolphin|Indo-Pacific humpbacked dolphin|Sousa chinensis chinensis|Sousa chinensis
+4|Japanese squirrel|Sciurus lis
+4|Melon-headed whale|electra dolphin|little killer whale|many-toothed blackfish|Peponocephala electra
+4|Mountain gazelle|Gazella gazella
+4|Northern birch mouse|northern Birch Mice|Sicista betulina
+4|Northern hairy-nosed wombat|Lasiorhinus krefftii
+4|Paranthropus boisei
+4|Pyrenean chamois|Rupicapra pyrenaica
+4|Ribbon seal|Histriophoca fasciata
+4|Riverine rabbit|Bunolagus monticularis
+4|Savi's pipistrelle|Hypsugo savii
+4|South American fur seal|Arctocephalus australis|Arctophoca australis
+4|Speckled ground squirrel|Spermophilus suslicus
+4|Striped polecat|African polecat|African skunk|Cape polecat|Ictonyx striatus|striped muishond|striped weasel|zoril|zorilla|Zorilla striatus|zorille
+4|Tiger quoll|Dasyurus maculatus|spotted quoll|spotted-tail dasyure|spotted-tailed quoll|tiger cat
+4|Tolai hare|Lepus tolai
+4|Western grey kangaroo|black-faced kangaroo|Macropus fuliginosus|mallee kangaroo|sooty kangaroo|western gray kangaroo|western grey giant kangaroo
+4|White-tailed jackrabbit|Lepus townsendii|prairie hare|white jack
+4|Amur hedgehog|Erinaceus amurensis
+4|Antarctic minke whale|Balaenoptera bonaerensis
+4|Bald uakari|Cacajao calvus|Bald-headed uakari
+4|Banded linsang|Prionodon linsang
+4|Bechstein's bat|Bechstein's myotis|Myotis bechsteinii
+4|Black lemur|Eulemur macaco|common black lemur
+4|Bornean bearded pig|Bearded pig
+4|Brown palm civet|Paradoxurus jerdoni
+4|Bushpig|Potamochoerus larvatus
+4|Collared mangabey|white-collared mangabey|Cercocebus torquatus|red-capped mangabey|red-crowned mangabey
+4|Colombian red howler|Venezuelan red howler|Alouatta seniculus|Colombian red howler monkey|Red howler Monkey
+4|Diademed sifaka|Propithecus diadema
+4|Dusky dolphin|Lagenorhynchus obscurus
+4|Eastern chipmunk|Tamias striatus
+4|Egyptian fruit bat|Rousettus aegyptiacus
+4|Gee's golden langur|Golden langur|Trachypithecus geei
+4|Geoffroy's bat|Geoffroy's myotis|Myotis emarginatus
+4|Giant golden-crowned flying fox|Acerodon jubatus|Golden-capped fruit bat
+4|Hispaniolan solenodon|Solenodon paradoxus
+4|Horsfield's tarsier
+4|Japanese marten|Martes melampus
+4|Large flying fox|Pteropus vampyrus
+4|Long-tailed chinchilla|Chinchilla lanigera|Chilean chinchila|Coastal chinchila|Common chinchila|Lesser chinchila
+4|Malabar large-spotted civet|Malabar civet|Viverra civettina
+4|Malayan porcupine|H. brachyura|Himalayan Crestless Porcupine|Hystrix (Acanthion) brachyura|Hystrix brachyura
+4|Marsh mongoose|Atilax paludinosus
+4|Mongolian gerbil
+4|Nathusius's pipistrelle|Pipistrellus nathusii
+4|Otter civet|Cynogale bennettii
+4|Pale-throated sloth|Pale-throated Three-toed Sloth|Bradypus tridactylus
+4|Paranthropus aethiopicus|P. aethiopicus
+4|Pygmy three-toed sloth|Bradypus pygmaeus
+4|Red-faced spider monkey|Ateles paniscus|Black spider monkey|Coaita
+4|Silvery gibbon|H. moloch|Hylobates moloch|Javan gibbon
+4|Spotted-necked otter|Hydrictis maculicollis|speckle-throated otter
+4|Subantarctic fur seal|Arctocephalus tropicalis
+4|Swamp wallaby|Wallabia bicolor
+4|Tarbagan marmot|Marmota sibirica
+4|Tehuantepec jackrabbit|Lepus flavigularis
+4|Toque macaque|Macaco sinica
+4|Tufted capuchin|Sapajus apella
+4|Yellow-backed duiker|Cephalophus silvicultor
+4|Arctocephalus forsteri|Fur seal|New Zealand fur seal|Antipodean fur seal|Australasian fur seal|long-nosed fur seal|South Australian fur seal
+4|Atlantic spotted dolphin|Stenella frontalis
+4|Banded palm civet|Banded civet|Hemigalus derbyanus
+4|Bawean deer|Axis kuhlii
+4|Black-tailed prairie dog|Cynomys ludovicianus
+4|Blue monkey|Cercopithecus mitis
+4|Bohor reedbuck|Redunca redunca
+4|Broom hare|Lepus castroviejoi
+4|Buru babirusa|Babyrousa babyrussa|hairy babirusa
+4|Cape grysbok|Raphicerus melanotis
+4|Chacoan peccary|Catagonus wagneri
+4|Chilean dolphin|Cephalorhynchus eutropia
+4|Chinese ferret-badger|Melogale moschata
+4|Common bent-wing bat|Miniopterus schreibersii|Schreibers' bat|Schreibers' long-fingered bat
+4|Common brushtail possum|Trichosurus vulpecula|common brush-tailed possum|common brushtail|silver-gray possum|silver-grey possum
+4|Common marmoset|Callithrix jacchus
+4|Common opossum|Didelphis marsupialis
+4|Common spotted cuscus|Spilocuscus maculatus
+4|Diana monkey|Cercopithecus diana|Diana guenon
+4|Goa|Procapra picticaudata|Tibetan gazelle
+4|Goeldi's marmoset|Callimico goeldii|Goeldi's monkey
+4|Greater white-toothed shrew|Crocidura russula
+4|Honey possum|noolbenger|Tarsipes rostratus
+4|Hourglass dolphin|Lagenorhynchus cruciger
+4|Indian hare|Lepus nigricollis|black-naped hare
+4|Long-tailed goral|Naemorhedus caudatus
+4|Mediterranean horseshoe bat|Rhinolophus euryale
+4|Moonrat|Echinosorex gymnura
+4|Pacific white-sided dolphin|Lagenorhynchus obliquidens
+4|Plains viscacha|Lagostomus maximus
+4|Pond bat|Myotis dasycneme
+4|Red brocket|Mazama americana
+4|Red goral|Naemorhedus baileyi
+4|Red ruffed lemur|Varecia rubra|Varecia variegata rubra
+4|Six-banded armadillo|Euphractus sexcinctus
+4|Small-toothed palm civet|Arctogalidia trivirgata
+4|Snow sheep|Ovis nivicola
+4|Southern pudu|Chilean pudu
+4|Southern river otter|Lontra provocax
+4|Suni|Neotragus moschatus|zunnie
+4|Tailless tenrec|Common tenrec|Tenrec ecaudatus
+4|Tibetan macaque|Macaca thibetana
+4|Water chevrotain|fanged deer|Hyemoschus aquaticus
+4|White-lipped peccary|Tayassu pecari
+4|Wild Bactrian camel|Camelus ferus|snow-camel
+4|Woolly hare|Lepus oiostolus
+4|Yellow-bellied marmot|groundhog|Marmota flaviventris|rock chuck
+4|African striped weasel|Poecilogale albinucha
+4|Allen's swamp monkey|Allenopithecus nigroviridis
+4|Barbary ground squirrel|Atlantoxerus getulus
+4|Brown greater galago|large-eared greater galago|Otolemur crassicaudatus|Thick-tailed greater galago
+4|Cacomistle|Bassariscus sumichrasti
+4|Calamian deer|Axis calamianensis
+4|Cape genet|Genetta tigrina|South African Large-spotted GenetGenetta tigrina|Large Spotted Genet
+4|Cape porcupine|Hystrix africaeaustralis
+4|Cape scrub hare|Lepus saxatilis|Scrub hare
+4|Columbian mammoth|Mammuthus columbi
+4|Common dwarf mongoose|dwarf mongoose|Helogale parvula
+4|Common slender mongoose|Slender mongoose|Galerella sanguinea
+4|European snow vole|Chionomys nivalis
+4|Formosan rock macaque|Macaca cyclopis|Taiwan rock macaque
+4|Galápagos fur seal|Arctocephalus galapagoensis
+4|Golden bamboo lemur|Hapalemur aureus
+4|Goodfellow's tree-kangaroo|Dendrolagus goodfellowi|ornate tree-kangaroo
+4|Gray marmot|Marmota baibacina
+4|Greater bamboo lemur|Prolemur simus
+4|Hammer-headed bat|Hypsignathus monstrosus
+4|Hoffmann's two-toed sloth
+4|Indian flying fox|Pteropus medius
+4|Japanese badger|Meles anakuma
+4|Japanese hare|Lepus brachyurus
+4|Kirk's dik-dik|Madoqua kirkii
+4|Kuhl's pipistrelle|Pipistrellus kuhlii
+4|Large-spotted civet|Viverra megaspila
+4|Lesser mouse-eared bat|Myotis blythii|Lesser mouse-eared myotis
+4|Linnaeus's two-toed sloth|Choloepus didactylus|Southern two-toed sloth
+4|Long-tailed marmot|Marmota caudata
+4|Malayan civet|Malay civet|Viverra tangalunga
+4|Pacarana|Dinomys branickii
+4|Pantanal cat|Leopardus braccatus
+4|Pichi|Zaedyus pichiy
+4|Red forest duiker|Cephalophus natalensis|Natal duiker
+4|Red slender loris|Slender loris|Loris tardigradus
+4|Senegal bushbaby|Galago senegalensis|Northern lesser galago
+4|Short-tailed mongoose
+4|Soprano pipistrelle|Pipistrellus pygmaeus
+4|Southern marsupial mole|Notoryctes typhlops|Central Desert marsupial mole
+4|Southern muriqui|Brachyteles arachnoides
+4|Spade-toothed whale|Mesoplodon traversii
+4|Spotted linsang|Prionodon pardicolor
+4|Verreaux's sifaka|Propithecus verreauxi
+4|White-sided jackrabbit|Lepus callotis|Mexican hare
+4|Yellow-bellied weasel|Mustela kathiah
+4|African pygmy mouse|Mus minutoides
+4|African savanna hare|Lepus microtis|Lepus victoriae
+4|Agile wallaby|grass wallaby|jungle wallaby|Notamacropus agilis|river wallaby|sandy wallaby
+4|Arabian tahr|Arabitragus jayakari
+4|Banded hare-wallaby|Lagostrophus fasciatus
+4|Big hairy armadillo|Chaetophractus villosus|Large hairy armadillo
+4|Black howler|Black howler monkey|Alouatta caraya|black-and-gold howler|Black-and-gold Howler Monkey
+4|Bluebuck|Hippotragus leucophaeus|blue antelope
+4|Bonnet macaque|Macaca radiata
+4|Brazilian three-banded armadillo|Tolypeutes tricinctus
+4|Burmeister's porpoise|Phocoena spinipinnis
+4|Campbell's dwarf hamster|dwarf hamster|Campbell's hamster|Phodopus campbelli
+4|Ceprano Man|Homo cepranensis|Argil|Ceprano Calvarium
+4|Clymene dolphin|Stenella clymene
+4|Cuvier's gazelle|Gazella cuvieri
+4|De Brazza's monkey|Cercopithecus neglectus
+4|Desert dormouse|Selevinia betpakdalaensis
+4|Feathertail glider|Acrobates pygmaeus|feather-tailed glider|narrow-toed feather-tailed glider|pygmy gliding possum
+4|Gambian pouched rat|Northern Giant Pouched Rat|Cricetomys gambianus
+4|Gervais's beaked whale|Gervais' beaked whale|Mesoplodon europaeus
+4|Ginkgo-toothed beaked whale|Mesoplodon ginkgodens
+4|Greater cane rat|Thryonomys swinderianus
+4|Greater grison|Galictis vittata
+4|Greater mouse-deer|Tragulus napu
+4|Iberian water shrew|Mediterranean Water Shrew|Mediterranean shrew|Neomys anomalus
+4|Japanese dormouse|Glirulus japonicus
+4|Japanese sea lion|Zalophus japonicus
+4|Juan Fernández fur seal|Arctocephalus philippii
+4|Lesser mouse-deer|Tragulus kanchil
+4|Long-tailed pangolin|Phataginus tetradactyla|black-bellied pangolin|ipi|African black-bellied pangolin
+4|Mohol bushbaby|Galago moholi|Southern lesser galago
+4|Mountain anoa|Bubalus quarlesi
+4|Mountain reedbuck|Redunca fulvorufula
+4|Müller's gibbon|Müller's Bornean gibbon|Bornean gibbon|H. muelleri|Hylobates muelleri|southern grey gibbon
+4|Nile lechwe|Kobus megaceros|Mrs Gray's lechwe|wasserbock
+4|Northern maned sloth|maned sloth|Bradypus torquatus|Maned three-toed sloth
+4|Northern pig-tailed macaque|Macaca leonina|Northern pigtail macaque
+4|Pagai Island macaque|Mentawai macaque|Macaca pagensis
+4|Peale's dolphin|Lagenorhynchus australis
+4|Pileated gibbon|H. pileatus|Hylobates pileatus
+4|Red-fronted gazelle|Eudorcas rufifrons
+4|Rhim gazelle|Gazella leptoceros|Loder's gazelle|Slender-horned gazelle
+4|Schomburgk's deer|Rucervus schomburgki
+4|Sharpe's grysbok|Raphicerus sharpei
+4|Southern monito del monte|Chilean opossum|colocolo opossum|Dromiciops gliroides|monito del monte
+4|Southern reedbuck|Redunca arundinum
+4|Southern three-banded armadillo|Tolypeutes matacus
+4|Spectacled porpoise|Phocoena dioptrica
+4|Taruca|Hippocamelus antisensis
+4|White-bellied pangolin|Phataginus tricuspis|African tree pangolin|common African pangolin|three-cusped pangolin
+4|Agile gibbon|black-handed gibbon|H. agilis|Hylobates agilis
+4|Alaska marmot|Marmota broweri
+4|Asian badger|Meles leucurus
+4|Back-striped weasel|Mustela strigidorsa
+4|Bicolored shrew|Crocidura leucodon
+4|Black crested gibbon|N. concolor|Nomascus concolor
+4|Black-headed spider monkey|Ateles fusciceps|Brown-headed spider monkey
+4|Brown spider monkey|Ateles hybridus|Variegated spider monkey
+4|Burmese hare|Lepus peguensis
+4|Canis adustus
+4|Common brown lemur|Eulemur fulvus|brown lemur
+4|Cozumel raccoon|Pygmy raccoon
+4|Dall's porpoise|Phocoenoides dalli
+4|Desert hare|Lepus tibetanus
+4|Desmarest's hutia|Capromys pilorides
+4|Eastern falanouc|Falanouc|Eupleres goudotii
+4|European pine vole|Microtus subterraneus
+4|Fea's muntjac|Fea’s barking deer|Muntiacus feae
+4|Fox squirrel|Bryant's fox squirrel|Eastern fox squirrel|Sciurus niger
+4|Galápagos sea lion|Zalophus wollebaeki
+4|Giant otter shrew|Potamogale velox
+4|Golden-handed tamarin|Red-handed tamarin|Saguinus midas
+4|Golden-headed lion tamarin|gold and black lion tamarin|Leontopithecus chrysomelas
+4|Gray's beaked whale|Mesoplodon grayi
+4|Guadalupe fur seal|Arctocephalus townsendi
+4|Homo luzonensis|Callao Man|H. luzonensis
+4|Hose's palm civet|Diplogale hosei|Hose's civet
+4|Indus river dolphin|Platanista minor
+4|Korean hare|Lepus coreanus
+4|Kowari|Dasyuroides byrnei
+4|Laotian rock rat|Kha-nyou|Laonastes aenigmamus
+4|Lumholtz's tree-kangaroo|Dendrolagus lumholtzi
+4|Manchurian hare|Lepus mandshuricus
+4|Mehely's horseshoe bat|Rhinolophus mehelyi
+4|Mona monkey|Cercopithecus mona
+4|Mongoose lemur|Eulemur mongoz
+4|Musky rat-kangaroo|Hypsiprymnodon moschatus
+4|North African hedgehog|Algerian hedgehog|Atelerix algirus
+4|Northern olingo|bushy-tailed olingo|Bassaricyon gabbii|olingo
+4|Northern plains gray langur|Semnopithecus entellus|gray langur|Bengal hanuman langur|Bengal sacred langur|common langur|grey langur|Hanuman langur|northern plains grey langur|sacred langur
+4|Northern tamandua|Tamandua mexicana
+4|Pen-tailed treeshrew|Ptilocercus lowii
+4|Pied tamarin|Brazilian bare-faced tamarin|Saguinus bicolor
+4|Red-shanked douc|Pygathrix nemaeus
+4|Soemmerring's gazelle|Abyssinian mohr|Nanger soemmerringii
+4|South Andean deer|Huemul|Hippocamelus bisulcus
+4|Southern bottlenose whale|Hyperoodon planifrons
+4|Southern hairy-nosed wombat|Lasiorhinus latifrons
+4|Spectral bat|Vampyrum spectrum|Great false vampire bat
+4|Steppe bison|Bison priscus
+4|Sulawesi palm civet|Macrogalidia musschenbroekii
+4|Taiwan serow|Capricornis swinhoei
+4|Three-striped night monkey|Humboldt's Night Monkey|Aotus trivirgatus|Northern night monkey|Northern owl monkey
+4|White-faced saki|Pithecia pithecia|Golden-faced saki|Guianan saki
+4|Zaglossus attenboroughi|Attenborough's echidna|Attenborough's long-beaked echidna|Attenborough's long-nosed echidna|cyclops long-beaked echidna|cyclops long-nosed echidna|Sir David's long-beaked echidna|Sir David's long-nosed echidna
+4|Zebra duiker|Cephalophula zebra
+4|Abyssinian genet|Genetta abyssinica
+4|Andrews' beaked whale|Mesoplodon bowdoini
+4|Atlantic humpback dolphin|Sousa teuszii|Atlantic humpbacked dolphin
+4|Bay duiker|Cephalophus dorsalis
+4|Bengal slow loris|Northern slow loris|Nycticebus bengalensis
+4|Bennett's tree-kangaroo|Dendrolagus bennettianus
+4|Black-shouldered opossum|Caluromysiops irrupta|Caluromysiops irruptus|white-eared opossum
+4|Brush-tailed rock-wallaby|Petrogale penicillata
+4|Cairo spiny mouse|Acomys cahirinus|Greater Wilfred’s Mouse|Northeast african spiny mouse
+4|Cape ground squirrel|Geosciurus inauris
+4|Chinese goral|Naemorhedus griseus
+4|Chinese hare|Lepus sinensis
+4|Common treeshrew|Tupaia glis
+4|Common woolly monkey|Lagothrix lagothricha
+4|Desert hedgehog|Paraechinus aethiopicus
+4|Eastern lesser bamboo lemur|Hapalemur griseus|Beanamalao bamboo lemur|eastern Gray Bamboo lemur|Gilbert's Bamboo lemur|Gilbert's gentle lemur|gray bamboo lemur|gray gentle lemur|Ranomafana bamboo lemur|Ranomafana gentle lemur
+4|Eastern long-beaked echidna|Zaglossus bartoni|Barton's long-beaked echidna
+4|Four-toed hedgehog|african pygmy hedgehog|Atelerix albiventris
+4|Gray mouse lemur|Grey mouse-lemur|Microcebus murinus
+4|Grey dwarf hamster|Gray dwarf hamster|Cricetulus migratorius
+4|Homo gautengensis
+4|Indian brown mongoose|Herpestes fuscus
+4|Indonesian mountain weasel|Mustela lutreolina
+4|Javan warty pig|Javan Pig|Sus elsafrida|Warty Pig
+4|Laxmann's shrew|Sorex caecutiens
+4|Leadbeater's possum|fairy possum|Gymnobelideus leadbeateri
+4|Lesser grison|Galictis cuja
+4|Long-beaked common dolphin|Delphinus capensis
+4|Madras treeshrew|Anathana ellioti
+4|Matschie's tree-kangaroo|Dendrolagus matschiei|Huon tree kangaroo
+4|Nilgiri tahr|Nilgiritragus hylocrius
+4|Northern flying squirrel|Glaucomys sabrinus|Carolina flying squirrel
+4|Olive colobus
+4|Owston's palm civet|Chrotogale owstoni|Owston’s civet
+4|Pig-tailed langur|Simias concolor|simakobu monkey
+4|Prevost's squirrel|Callosciurus prevostii
+4|Przewalski's gazelle|Procapra przewalskii
+4|Pygmy beaked whale|Mesoplodon peruvianus
+4|Red-tailed monkey|black-cheeked white-nosed monkey|Cercopithecus ascanius|red-tailed guenon|redtail monkey|Schmidt's guenon
+4|Ring-tailed vontsira|Ring-tailed mongoose|Galidia elegans|Malagasy ring-tailed mongoose
+4|Rufous hare-wallaby|Lagorchestes hirsutus
+4|Sea mink|Neovison macrodon
+4|Short-tailed chinchilla|Chinchilla chinchilla
+4|Silvery marmoset|Mico argentatus
+4|South African springhare|Pedetes capensis
+4|Stejneger's beaked whale|Mesoplodon stejnegeri
+4|Stripe-necked mongoose|Herpestes vitticollis
+4|True's beaked whale|Mesoplodon mirus
+4|Ursine tree-kangaroo|Black tree kangaroo|Dendrolagus ursinus
+4|Vervet monkey|Chlorocebus pygerythrus|vervet
+4|Visayan spotted deer|Cervus alfredi|Rusa alfredi|Philippine Spotted Deer
+4|Western tree hyrax|Dendrohyrax dorsalis
+4|White-bellied spider monkey|Ateles belzebuth|Marimonda|White-fronted spider monkey
+4|White-tailed mongoose|Ichneumia albicauda
+4|Yucatán black howler|Alouatta pigra|Black howler monkey|Guatemalan black howler
+4|Abyssinian hare
+4|American red squirrel|Tamiasciurus hudsonicus
+4|Angola colobus|Colobus angolensis
+4|Arabian gazelle|Gazella arabica
+4|Arctic ground squirrel|Urocitellus parryii
+4|Arnoux's beaked whale|Berardius arnuxii
+4|Australian snubfin dolphin|Orcaella heinsohni
+4|Black and rufous sengi|black and rufous elephant shrew|Rhynchocyon petersi
+4|Burmese ferret-badger|Melogale personata
+4|Canis mesomelas
+4|Common kusimanse|Crossarchus obscurus|long-nosed kusimanse
+4|Crowned lemur|Eulemur coronatus
+4|Dassie rat|Petromus typicus
+4|Dingiso|bondegezou|Dendrolagus mbaiso
+4|Eastern hare-wallaby|Lagorchestes leporides
+4|Eastern spotted skunk|Spilogale putorius
+4|Ethiopian highland hare|Starck's hare|Lepus starcki
+4|Eurasian least shrew|Sorex minutissimus
+4|Fat-tailed dwarf lemur|Cheirogaleus medius|lesser dwarf lemur|spiny forest dwarf lemur|western fat-tailed dwarf lemur
+4|Grizzled tree-kangaroo|Dendrolagus inustus
+4|Himalayan serow|Capricornis sumatraensis thar
+4|Honduran white bat|Ectophylla alba
+4|Hubbs' beaked whale|Mesoplodon carlhubbsi
+4|Humboldt's hog-nosed skunk|Conepatus humboldtii
+4|Japanese dwarf flying squirrel|Pteromys momonga
+4|Kenyanthropus platyops
+4|Kipunji|Rungwecebus kipunji
+4|Kloss's gibbon|Bilou|H. klossii|Hylobates klossii|Mentawai gibbon
+4|Lesser bilby|lesser rabbit-eared bandicoot|Macrotis leucura|yallara
+4|Lichtenstein's hartebeest|Alcelaphus lichtensteinii
+4|Linnaeus's mouse opossum
+4|Malayan weasel|Mustela nudipes
+4|Maned rat|Lophiomys imhausi
+4|Masai giraffe|Giraffa tippelskirchi|East African giraffe
+4|Mouflon|Ovis gmelini
+4|Neotropical pygmy squirrel|Sciurillus pusillus
+4|Northern right whale dolphin|Lissodelphis borealis
+4|Northern white-cheeked gibbon|N. leucogenys|Nomascus leucogenys
+4|Olympic marmot|Marmota olympus
+4|Patagonian weasel|Lyncodon patagonicus
+4|Philippine pangolin|Manis culionensis|Palawan pangolin
+4|Pygmy slow loris|Xanthonycticebus pygmaeus
+4|Rakali|Common water rat|Hydromys chrysogaster
+4|Red giant flying squirrel|Petaurista petaurista
+4|Red serow|Capricornis rubidus
+4|Red-flanked duiker|Cephalophus rufilatus
+4|Red-legged pademelon|Thylogale stigmatica
+4|Screaming hairy armadillo|Chaetophractus vellerosus
+4|Shepherd's beaked whale|Tasmacetus shepherdi
+4|Southern right whale dolphin|Lissodelphis peronii
+4|Strap-toothed whale|Layard's beaked whale|Mesoplodon layardii
+4|Striped hog-nosed skunk|Conepatus semistriatus
+4|Sunda stink badger|Mydaus javanensis
+4|Western spotted skunk|Spilogale gracilis
+4|White-bellied musk deer|Himalayan musk deer|Moschus leucogaster
+4|Yarkand hare|Lepus yarkandensis
+4|Yunnan hare|Lepus comus
+4|Zanzibar red colobus|Piliocolobus kirkii
+4|Abert's squirrel|Sciurus aberti|tassel-eared squirrel
+4|Alpine musk deer|Moschus chrysogaster
+4|Angolan talapoin|Miopithecus talapoin
+4|Arabian barbastelle|Asian Barbastelle|Barbastella leucomelas
+4|Arunachal macaque|Macaca munzala
+4|Asiatic brush-tailed porcupine|Atherurus macrourus
+4|Black duiker|Cephalophus niger
+4|Black lion tamarin|Leontopithecus chrysopygus
+4|Black musk deer|Moschus fuscus
+4|Black-footed mongoose|Bdeogale nigripes
+4|Brazilian porcupine|Coendou prehensilis
+4|Bridled nail-tail wallaby|Onychogalea fraenata
+4|Brown-tailed mongoose|Salanoia concolor
+4|Brush rabbit|Sylvilagus bachmani
+4|Bunyoro rabbit|Poelagus marjorita
+4|Bushy-tailed mongoose|Bdeogale crassicauda
+4|Bushy-tailed opossum|Glironia venusta
+4|Cape gray mongoose|Cape grey mongoose|Galerella pulverulenta
+4|Capped langur|Trachypithecus pileatus
+4|Chacoan naked-tailed armadillo|Cabassous chacoensis
+4|Common gundi|Ctenodactylus gundi
+4|Doria's tree-kangaroo|Dendrolagus dorianus
+4|Eastern woolly lemur|Avahi laniger|Eastern Avahi|Gmelin's Woolly Lemur
+4|Fat-tailed gerbil|Pachyuromys duprasi
+4|François' langur|Francois’s langur|Trachypithecus francoisi
+4|Giant muntjac|large-antlered muntjac|Muntiacus vuquangensis
+4|Golden-rumped sengi|Golden-rumped elephant shrew|Rhynchocyon chrysopygus
+4|Greater bulldog bat|Noctilio leporinus
+4|Grey red-backed vole|Craseomys rufocanus
+4|Grey-cheeked mangabey|gray-cheeked mangabey|grey-cheeked crested mangabey|Lophocebus albigena
+4|Günther's dik-dik|Madoqua guentheri
+4|Hainan hare|Lepus hainanus
+4|Hairy-eared dwarf lemur|Allocebus trichotis
+4|Hector's beaked whale|Mesoplodon hectori
+4|Indian gerbil|Tatera indica
+4|Japanese weasel|Mustela itatsi
+4|Javan ferret-badger|Melogale orientalis
+4|Jentink's duiker|Cephalophus jentinki
+4|King colobus|Colobus polykomos
+4|L'Hoest's monkey|Allochrocebus lhoesti
+4|Madame Berthe's mouse lemur|Microcebus berthae
+4|Mantled howler|Alouatta palliata|Mantled howler monkey
+4|Mentawai langur|Presbytis potenziani
+4|Menzbier's marmot|Marmota menzbieri
+4|Molina's hog-nosed skunk|Conepatus chinga
+4|Mountain pygmy possum|Broom's pygmy-possum|burramys|Burramys parvus
+4|Narrow-striped mongoose|Malagasy narrow-striped mongoose|Mungotictis decemlineata
+4|Northern muriqui|Brachyteles hypoxanthus
+4|Northern treeshrew|Tupaia belangeri
+4|Palawan stink badger|Mydaus marchei
+4|Panthera spelaea|Cave Lion|Eurasian Cave Lion|European Cave Lion
+4|Phayre's leaf monkey|Phayre’s langur|Trachypithecus phayrei
+4|Philippine deer|Philippine brown deer|Rusa marianna
+4|Pousargues's mongoose|Dologale dybowskii
+4|Red lemur|Eulemur rufus|Red-fronted brown lemur
+4|Red-bellied lemur|Eulemur rubriventer
+4|Red-rumped agouti|Dasyprocta leporina
+4|Reticulated giraffe|Giraffa reticulata|Somali giraffe
+4|Roloway monkey|Cercopithecus roloway
+4|Ruddy mongoose|Herpestes smithii
+4|Silky sifaka|Propithecus candidus
+4|Small five-toed jerboa|Allactaga elater
+4|Southern greater glider|Petauroides volans|greater glider
+4|Southern pig-footed bandicoot|Chaeropus ecaudatus|pig-footed bandicoot
+4|Southern tree hyrax|Dendrohyrax arboreus
+4|Spectral tarsier|Tarsius spectrum|Tarsius tarsier
+4|Speke's gazelle|Gazella spekei
+4|Striped possum|Dactylopsila trivirgata
+4|Superagüi lion tamarin|Black-faced lion tamarin|Leontopithecus caissara
+4|Swamp rabbit|Sylvilagus aquaticus
+4|Tonkin snub-nosed monkey|Rhinopithecus avunculus|Dollman's snub-nosed monkey
+4|Toolache wallaby|Notamacropus greyi
+4|Vancouver Island marmot|Marmota vancouverensis
+4|Western hoolock gibbon|Hoolock hoolock|H. hoolock|hoolock gibbon|western hoolock
+4|Western quoll|Chuditch|Dasyurus geoffroii
+4|Western red colobus|Piliocolobus badius
+4|Yellow-cheeked gibbon|buffed-cheeked gibbon|Gabriella's crested gibbon|golden-cheeked crested gibbon|golden-cheeked gibbon|N. gabriellae|Nomascus gabriellae|red-cheeked gibbon|yellow-cheeked crested gibbon
+4|Yellow-spotted rock hyrax|Bush hyrax|Heterohyrax brucei
+4|Afghan pika|Ochotona rufescens
+4|American pika|Ochotona princeps
+4|Angolan genet|Genetta angolensis
+4|Aquatic genet|Genetta piscivora
+4|Ardipithecus ramidus|A. ramidus
+4|Baird's beaked whale|Berardius bairdii
+4|Black jackrabbit|Lepus insularis
+4|Black wallaroo|Osphranter bernardus
+4|Black-capped marmot|Marmota camtschatica
+4|Black-fronted duiker|Cephalophus nigrifrons
+4|Bornean ferret badger|Kinabalu ferret-badger|Melogale everetti
+4|Brandt's hedgehog|Paraechinus hypomelas
+4|Brazilian guinea pig|Cavia aperea
+4|Capricornis milneedwardsii|Chinese serow
+4|Chacoan mara|Dolichotis salinicola
+4|Collared brown lemur|Eulemur collaris|Eulemur fulvus collaris|red-collared brown lemur|red-collared lemur
+4|Collared mongoose|Herpestes semitorquatus
+4|Common tapeti|Tapeti|Sylvilagus brasiliensis
+4|Crested mona monkey|Cercopithecus pogonias|Crowned guenon
+4|Dusky leaf monkey|Trachypithecus obscurus
+4|Dwarf musk deer|Chinese forest musk deer|Moschus berezovskii
+4|East Javan langur|Javan lutung|Javan langur|Trachypithecus auratus
+4|Eastern broad-toothed field mouse|Broad-toothed field mouse|Apodemus mystacinus
+4|Eastern lowland olingo|Allen's olingo|Bassaricyon alleni
+4|Ethiopian dwarf mongoose|Helogale hirtula|Desert Dwarf Mongoose|Somali dwarf mongoose
+4|Golden-crowned sifaka|Propithecus tattersalli
+4|Great jerboa|Allactaga major
+4|Greater short-nosed fruit bat|Cynopterus sphinx
+4|Green monkey|Chlorocebus sabaeus
+4|Grey-faced sengi|grey-faced elephant-shrew|Rhynchocyon udzungwensis
+4|Guiana dolphin|Sotalia guianensis
+4|Hoary marmot|Marmota caligata
+4|Hooded skunk|M. macroura|Mephitis macroura
+4|Indian palm squirrel|Funambulus palmarum
+4|Johnston's genet|Genetta johnstoni
+4|Karoo round-eared sengi|short-eared elephant shrew|Karoo round-eared elephant shrew|round-eared elephant shrew|round-eared sengi
+4|Ladak pika|Ochotona ladacensis
+4|Leaf muntjac|Muntiacus putaoensis
+4|Lesser Egyptian jerboa
+4|Lesser bamboo rat|Cannomys badius
+4|Libyan jird|Meriones libycus
+4|Livingstone's fruit bat|Pteropus livingstonii|Livingstone’s flying fox
+4|Long-eared jerboa|Euchoreutes naso
+4|Long-fingered bat|Myotis capaccinii
+4|Long-tailed porcupine|Trichys fasciculata
+4|Lowland paca|paca|Cuniculus paca|spotted paca
+4|Maxwell's duiker|Philantomba maxwellii
+4|Mexican free-tailed bat|Brazilian Free-tailed Bat|Tadarida brasiliensis
+4|Moor macaque|Celebes macaque|Macaca maura
+4|North Sulawesi babirusa|Babyrousa celebensis|Sulawesi babirusa
+4|Northern naked-tailed armadillo|Cabassous centralis
+4|Northern pika|Ochotona hyperborea
+4|Pallas's squirrel|Callosciurus erythraeus
+4|Panthera gombaszogensis|European jaguar|Eurasian jaguar|P. gombaszoegensis|Panthera gombaszoegensis
+4|Philippine porcupine|Durian pig|Hystrix pumila|Palawan porcupine
+4|Plateau pika|Ochotona curzoniae
+4|Pygmy brocket|Mazama nana
+4|Pygmy mouse lemur|Microcebus myoxinus
+4|Ricefield rat|Rattus argentiventer
+4|Rufous rat-kangaroo|Aepyprymnus rufescens
+4|Rusty-spotted genet|Genetta maculata
+4|Saimaa ringed seal
+4|Salt's dik-dik|Madoqua saltiana
+4|Steppe lemming|Lagurus lagurus
+4|Summit rat|Rattus baluensis
+4|Sunda porcupine|Hystrix javanica
+4|Tropical bottlenose whale|Indopacetus pacificus
+4|Turkish hamster|Mesocricetus brandti
+4|West Siberian lemming|Siberian brown lemming|Lemmus sibiricus
+4|Western brush wallaby|Notamacropus irma|Halmaturus irma|black-gloved wallaby|Macropus irma|western bush wallaby
+4|White-eared opossum|Didelphis albiventris|Didelphis Uruguayensis
+4|Wood lemming|Myopus schisticolor
+4|Abbott's duiker|Cephalophus spadix
+4|Aders's duiker|Leucocephalophus adersi
+4|Alpine shrew|Sorex alpinus
+4|Annamite striped rabbit|Nesolagus timminsi
+4|Bare-tailed woolly opossum|Caluromys philander
+4|Big-eared opossum|Sarue|Didelphis aurita
+4|Black colobus|Colobus satanas
+4|Black-and-white snub-nosed monkey|Rhinopithecus bieti|Black snub-nosed monkey|Yunnan snub-nosed monkey
+4|Black-capped squirrel monkey|Bolivian squirrel monkey|Peruvian squirrel monkey|Saimiri boliviensis
+4|Blasius's horseshoe bat|Rhinolophus blasii
+4|Blue-eyed black lemur|Eulemur flavifrons|Sclater's lemur
+4|Bramble Cay melomys|Melomys rubicola
+4|Broad-striped Malagasy mongoose|Galidictis fasciata
+4|Brown-eared woolly opossum|Caluromys lanatus
+4|Buffy-headed marmoset|Callithrix flaviceps
+4|Calabar angwantibo|Arctocebus calabarensis|Golden potto
+4|Campbell's mona monkey|Campbell's guenon|Campbell's monkey|Cercopithecus campbelli
+4|Central African oyan|Poiana richardsonii|African linsang
+4|Chinese striped hamster|Cricetulus barabensis
+4|Desert cottontail|Sylvilagus audubonii|Audubon's cottontail|desert cottontail rabbit
+4|Desert long-eared bat|Otonycteris hemprichii|Hemprich’s long-eared bat
+4|Dusky pademelon|Thylogale brunii
+4|Eastern barred bandicoot|Perameles gunnii
+4|Eastern mole|Scalopus aquaticus
+4|Egyptian weasel|Mustela subpalmata|Mustela nivalis subpalmata
+4|Ethiopian hare|Lepus fagani
+4|Fat-tailed dunnart|Sminthopsis crassicaudata
+4|Gambian mongoose|Mungos gambianus
+4|Golden-backed uakari|Black-headed uakari|Cacajao melanocephalus|Golden-backed black uakari
+4|Greater fairy armadillo|Calyptophractus retusus
+4|Greater spot-nosed monkey|Cercopithecus nictitans|Greater spot-nosed guenon
+4|Hairy-footed flying squirrel|Belomys pearsonii
+4|Javan slow loris|Nycticebus javanicus
+4|Kashmir musk deer|Moschus cupreus
+4|Lesser bandicoot rat|Bandicota bengalensis
+4|Lesser blind mole-rat|Lesser mole rat|Nannospalax leucodon|Spalax leucodon
+4|Lesser short-nosed fruit bat|Cynopterus brachyotis
+4|Little brown bat|Myotis lucifugus|little brown myotis
+4|Little red brocket|Mazama rufina
+4|Mariana fruit bat|Pteropus mariannus|Marianas flying fox
+4|Mazama chunyi|Chunyi|Dwarf brocket
+4|Mazama gouazoubira|Gray brocket|Grey brocket
+4|Mexican prairie dog|Cynomys mexicanus
+4|Microtus levis|Southern vole
+4|Moustached guenon|Cercopithecus cephus
+4|Northern palm squirrel|Funambulus pennantii|Five-striped palm squirrel
+4|Northern quoll|Dasyurus hallucatus
+4|Northern red-backed vole|Myodes rutilus|red vole
+4|Painted bat|Kerivoula picta
+4|Particolored flying squirrel|Hylopetes alboniger
+4|Red gazelle|Eudorcas rufina
+4|Romanian hamster|Mesocricetus newtoni
+4|Social vole|Microtus socialis
+4|Sooty mangabey|Cercocebus atys
+4|Southern African hedgehog|Atelerix frontalis
+4|Southern naked-tailed armadillo|Cabassous unicinctus
+4|Southern spotted skunk|Spilogale angustifrons
+4|Steppe mouse|Mus spicilegus
+4|Straw-coloured fruit bat|Eidolon helvum
+4|Sulawesi bear cuscus|Ailurops ursinus|bear cuscus
+4|Tana River mangabey|Cercocebus galeritus
+4|Tonkean macaque|Macaca tonkeana
+4|Ursine colobus|Colobus vellerosus|Geoffroy’s black-and-white colobus
+4|Visayan warty pig
+4|White-footed mouse|Peromyscus leucopus
+4|White-headed marmoset|Callithrix geoffroyi|Geoffrey's marmoset|Geoffroy's marmoset|sagüi|saguim|tufted-ear marmoset
+4|White-lipped tamarin|Saguinus labiatus
+4|Yellow ground squirrel|Spermophilus fulvus
+4|Agile mangabey|Cercocebus agilis
+4|Alexander's kusimanse|Crossarchus alexandri
+4|American hog-nosed skunk|Conepatus leuconotus|common hog-nosed skunk
+4|Andean hairy armadillo|Chaetophractus nationi
+4|Angolan kusimanse|Crossarchus ansorgei
+4|Azara's agouti|Dasyprocta azarae
+4|Black agouti|Dasyprocta fuliginosa
+4|Black bearded saki|Chiropotes satanas
+4|Black flying squirrel|Aeromys tephromelas
+4|Black-backed jackal|Lupulella mesomelas
+4|Black-tufted marmoset|Callithrix penicillata
+4|Booted macaque|Macaca ochreata
+4|Brown howler|Alouatta guariba|Brown howling monkey
+4|Celebes warty pig|Sulawesi warty pig
+4|Central American agouti|Dasyprocta punctata
+4|Chequered sengi|checkered elephant shrew|checkered sengi|Rhynchocyon cirnei
+4|Coquerel's sifaka|Propithecus coquereli
+4|Douglas squirrel|Tamiasciurus douglasii
+4|Feather-tailed possum|Distoechurus pennatus|feathertail possum
+4|Finlayson's squirrel|Callosciurus finlaysonii|ghost squirrel|Makati squirrel|Manila squirrel|Manilan squirrel|variable squirrel|white squirrel
+4|Four-toed sengi|Petrodromus tetradactylus|Four-toed elephant shrew
+4|Gabon talapoin|Miopithecus ogouensis
+4|Geoffroy's tamarin|Saguinus geoffroyi
+4|Golden palm civet|Paradoxurus zeylonensis
+4|Golden-bellied mangabey|Cercocebus chrysogaster
+4|Golden-mantled ground squirrel|Callospermophilus lateralis
+4|Golden-mantled tree-kangaroo|Dendrolagus pulcherrimus
+4|Gongshan muntjac|Muntiacus gongshanensis
+4|Gorontalo macaque|Macaca nigrescens|Macaca nigriscens
+4|Gray short-tailed opossum|Monodelphis domestica
+4|Greater bandicoot rat|Bandicota indica
+4|Greater hedgehog tenrec|Setifer setosus|large Madagascar hedgehog|sokina
+4|Greater long-nosed armadillo|Dasypus kappleri
+4|Greater naked-tailed armadillo|Cabassous tatouay
+4|Grizzled giant squirrel|Ratufa macroura
+4|Ground cuscus|Phalanger gymnotis
+4|Hainan black crested gibbon|Hainan gibbon|N. hainanus|Nomascus hainanus
+4|Hamlyn's monkey|Cercopithecus hamlyni|Owl-faced guenon
+4|Hausa genet|Haussa genet|Genetta thierryi
+4|Heck's macaque|Macaca hecki
+4|Horsfield's treeshrew|Tupaia javanica|Javan Tree Shrew
+4|Indian bush rat|Golunda ellioti
+4|Indian giant flying squirrel|Petaurista philippensis
+4|Jackson's mongoose|Bdeogale jacksoni
+4|Kashmir flying squirrel|Eoglaucomys fimbriatus
+4|Korean field mouse|Apodemus peninsulae
+4|Lac Alaotra bamboo lemur|Hapalemur alaotrensis|Alaotran gentle lemur
+4|Large Japanese field mouse|Apodemus speciosus
+4|Large-eared pika|Ochotona macrotis
+4|Lesser capybara|Hydrochoerus isthmius
+4|Liberian mongoose|Liberiictis kuhni
+4|Marsh rabbit|Sylvilagus palustris
+4|Meller's mongoose|Rhynchogale melleri
+4|Mountain cottontail|Sylvilagus nuttallii
+4|Moustached tamarin|Saguinus mystax
+4|Namdapha flying squirrel|Biswamoyopterus biswasi
+4|New Guinean quoll|Dasyurus albopunctatus|New Guinea quoll
+4|Palawan bearded pig
+4|Pardine genet|Genetta pardina
+4|Perrier's sifaka|Propithecus perrieri
+4|Peruvian spider monkey|Ateles chamek|Black-faced black spider monkey|Black-faced spider monkey
+4|Peters's duiker|Cephalophus callipygus|Peter’s duiker
+4|Plantain squirrel|banana squirrel|Callosciurus notatus|tricoloured squirrel|coconut squirrel
+4|Raffles' banded langur|banded surili|banded langur|Presbytis femoralis
+4|Rodrigues flying fox
+4|Saharan striped polecat|Ictonyx libyca|Libyan striped weasel|North African Striped Weasel|Saharan striped weasel
+4|Seven-banded armadillo|Dasypus septemcinctus|Seven-banded, long-nosed armadillo
+4|Side-striped jackal|Lupulella adusta
+4|Silver dik-dik|Madoqua piacentinii|Piacentini's dikdik
+4|Silvery lutung|Trachypithecus cristatus|Mono de hoja plateada
+4|Somali sengi|Somali elephant shrew|Elephantulus revoili
+4|Southern long-nosed armadillo|Dasypus hybridus
+4|Steppe pika|Ochotona pusilla
+4|Sumatran porcupine|Hystrix sumatrae
+4|Taiga shrew|Sorex isodon
+4|Taiwan field mouse|Apodemus semotus
+4|Tasmanian pademelon|Thylogale billardierii|red-bellied pademelon|rufous-bellied pademelon
+4|Thylacoleo carnifex|marsupial lion
+4|Togian babirusa|Babyrousa togeanensis
+4|Turkestan red pika|Ochotona rutila
+4|Western gray squirrel|Sciurus griseus
+4|Western woolly flying squirrel|Woolly flying squirrel|Eupetaurus cinereus
+4|White-cheeked spider monkey|Ateles marginatus|White-whiskered spider monkey
+4|White-footed tamarin|Saguinus leucopus|Silvery-brown bare-face tamarin
+4|Wroughton's free-tailed bat|Otomops wroughtoni
+4|Yellow-footed rock-wallaby|Petrogale xanthopus|ring-tailed wallaby
 ` });
 EVO.cat({ ...{"id": "frogs", "name": "Frogs", "icon": "🐸", "q": "Name a **species of frog or toad**.", "strip": ["frog", "toad"], "level": 3}, list: `
-0|American Bullfrog|Rana catesbeiana
-0|Cane toad|Rhinella marina|Agua Toad|Giant Marine Toad
-0|Common frog|Rana temporaria|European Common Frog
-0|Goliath frog|Conraua goliath|Giant Slippery Frog
-0|common toad|Bufo bufo
-0|golden poison frog|Phyllobates terribilis
-0|red-eyed tree frog|Agalychnis callidryas|Red-eyed Leaf frog
-2|American toad|Anaxyrus americanus
-2|Australian green tree frog|Ranoidea caerulea
-2|Common Clawed Frog|Xenopus laevis|African Clawed Toad|Clawed Toad|African Clawed Frog
-2|Darwin's frog|Rhinoderma darwinii
-2|Green frog|Lithobates clamitans
-2|Northern Leopard Frog|Lithobates pipiens
-2|South American horned frogs|Ceratophrys|Pacman frogs|Common Horned Frogs
-2|Surinam toad|Pipa pipa|Suriname toad
-2|Wood Frog|Lithobates sylvaticus
-2|blue poison dart frog|Dendrobates azureus
-2|common tree frog|Hyla arborea|European Tree Frog
-2|fire-bellied toad|Bombina|Firebelly Toads
-2|golden toad|Incilius periglenes|Orange Toad|Monte Verde Toad|Monte Verde Golden Toad
-2|midwife toad|Alytes obstetricans|Common Midwife Toad
-2|natterjack toad|Epidalea calamita
-2|strawberry poison-dart frog|Oophaga pumilio|Flaming Poison-arrow Frog|Strawberry Poison Frog
-3|Abah River Flying Frog|Rhacophorus nigropalmatus|Wallace's Flying Frog
-3|African dwarf frog|Hymenochirus
-3|Amazon Milk Frog|Trachycephalus resinifictrix
-3|American green tree frog|Hyla cinerea|Carolina Tree Frog
-3|Argentine horned frog|Ceratophrys ornata|Argentina Horned Frog|Bell's Ceratophrys|Ornate horned frog
-3|Bufo
-3|Bull Frog|Hoplobatrachus tigerinus|Indian Bullfrog|Tiger Frog
-3|Chorus Frogs|Pseudacris
-3|Colorado River Toad|Incilius alvarius|Colorado River Toad Sonoran Desert Toad
-3|Common Spadefoot|Pelobates fuscus|common spadefoot toad
-3|Cuban tree frog|Osteopilus septentrionalis
-3|European fire-bellied toad|Bombina bombina
-3|European green toad|Bufo viridis
-3|Gastric-brooding frog|Rheobatrachus
-3|Giant Bullfrog|Pyxicephalus adspersus|African Bullfrog
-3|Gray treefrog|Hyla versicolor
-3|Hairy Frog|Trichobatrachus robustus
-3|Panamanian golden frog|Atelopus zeteki|Golden arrow poison frog
-5|Purple Frog|Nasikabatrachus sahyadrensis
-3|Titicaca Water Frog|Telmatobius culeus|Crawford's water frog|White water frog
-3|Tomato frog|Dyscophus antongilii
-3|corroboree frog|Pseudophryne corroboree
-3|edible frog|Pelophylax esculentus
-3|golden mantella|Mantella aurantiaca|Orange Mantella|Malagasy Golden Mantella|Madagascan Golden Frog
-3|green and black poison dart frog|Dendrobates auratus|Golden Poison-arrow Frog|Green Poison Frog|Green Poison-arrow Frog
-3|marsh frog|Pelophylax ridibundus|Eurasian Marsh Frog
-3|mossy frog|Theloderma corticale|Tonkin bug-eyed frog
-3|oriental fire-bellied toad|Bombina orientalis|Oriental Firebelly Toad|Oriental Bell Toad
-3|western toad|Anaxyrus boreas|Boreal toad
-3|yellow-bellied toad|Bombina variegata
-4|Agile frog|Rana dalmatina
-4|Alytes
-4|Asian common toad|Duttaphrynus melanostictus|Asian black-spined toad|Asian toad|black-spectacled toad
-4|Atelopus
-4|Australiasian treefrogs|Litoria
-4|Banded Bullfrog|Kaloula pulchra|Piebald Digging Frog|Painted Bullfrog|Ox Frog
-4|Beelzebufo
-4|Bornean flat-headed frog|Barbourula kalimantanensis
-4|Chilean Toad|Calyptocephalella gayi|Helmeted Water Toad|Gay’s Frog
-4|Common Clawed Frogs|Xenopus
-4|Common Rain Frog|Breviceps adspersus
-4|Crab-eating Frog|Fejervarya cancrivora|Asian Brackish Frog|Mangrove Frog|Rice Field Frog
-4|Dendrobates
-4|Eleutherodactylus
-4|Giant leaf frog|Phyllomedusa bicolor
-4|Green Frogs; Water Frogs|Pelophylax
-4|Hamilton's frog|Leiopelma hamiltoni|Stephens Island Frog
-4|Hyla
-4|Iberian Spadefoot Toad|Pelobates cultripes|Western Spadefoot|Western spadefoot toad
-4|Israel Painted Frog|Latonia nigriventer|Hula Painted Frog
-4|Japanese Tree Frog|Hyla japonica
-4|Leaf Frogs|Phyllomedusa
-4|Leptodactylus
-4|Lithobates
-4|Long-nosed Horned Frog|Megophrys nasuta|Borneon Horned Frog|Horned Toad|Large Horned Frog
-4|Majorcan midwife toad|Alytes muletensis|Mallorcan Midwife Toad
-4|Mantella
-4|Marsupial Frogs|Gastrotheca
-4|Mediterranean Tree Frog|Hyla meridionalis|Stripeless Tree Frog
-4|Mexican burrowing toad|Rhinophrynus dorsalis|Burrowing Toad|Rhinophryne|Middle American Burrowing Toad
-4|Northern Red-legged Frog|Rana aurora
-4|Paedophryne amauensis
-4|Painted Frog|Discoglossus pictus
-4|Parsley frog|Pelodytes
-4|Phyllobates
-4|Pipa
-4|Pool frog|Pelophylax lessonae
-4|Pumpkin Toadlet|Brachycephalus ephippium|Spix's Saddleback Toad
-4|Rabb's fringe-limbed treefrog|Ecnomiohyla rabborum
-4|Ranitomeya
-4|Surinam horned frog|Ceratophrys cornuta|Amazonian Horned Frog
-4|Variable Harlequin Frog|Atelopus varius|Clown Frog
-4|White-lipped tree frog|Litoria infrafrenata|Australian Giant Treefrog
-4|Wyoming toad|Anaxyrus baxteri|Baxter's Toad|Wyoming Toad; Baxter's Toad
-4|blue-webbed flying frog|Rhacophorus reinwardtii|Green Flying Frog|Reinwardt's Tree Frog|Black-webbed Treefrog
-4|dyeing dart frog|Dendrobates tinctorius|Dyeing Poison-arrow Frog|Dyeing poison frog
-4|green and golden bell frog|Litoria aurea|Golden Bell Frog|Green and Golden Swamp Frog
-4|moor frog|Rana arvalis|Altai Brown Frog (Altai Mountains Populations)
-4|tailed frog|Ascaphus
-4|yellow-banded poison dart frog|Dendrobates leucomelas|Yellow-headed Poison Frog
-4|Acris
-4|African red toad|Schismaderma carens|African Split-skin Toad
-4|Afrixalus
-4|Agalychnis
-4|Amolops
-4|Ansonia
-4|Arthroleptis
-4|Asiatic Grass Frog|Rana chensinensis|Chinese Brown Frog
-4|Asiatic toad|Bufo gargarizans|Zhoushan Toad|Miyako Toad|Chusan Island Toad
-4|Betic midwife toad|Alytes dickhilleni
-4|Boulenger's Asian tree toad|Pedostibes hosii
-4|Brachycephalus
-4|Breviceps
-4|Buergeria
-4|Caucasian parsley frog|Pelodytes caucasicus
-4|Common green frog|Hylarana erythraea|Green Paddy Frog|Leaf Frog
-4|Common parsley frog|Pelodytes punctatus
-4|Cowan's mantella|Mantella cowanii|Black Golden Frog|Cowan's Golden Frog
-4|Darwin's Frogs|Rhinoderma
-4|Duttaphrynus
-4|Dyscophus
-4|Greek Stream Frog|Rana graeca|Balkan Stream Frog
-4|Green mantella|Mantella viridis|Green Golden Frog|Lime Mantella
-4|Iberian Frog|Rana iberica
-4|Iberian midwife toad|Alytes cisternasii
-4|Iberian painted frog|Discoglossus galganoi|West Iberian Painted Frog
-4|Indirana
-4|Italian Tree Frog|Hyla intermedia
-4|Japanese brown frog|Rana japonica
-4|Leaf-frogs; Tree Frogs|Leptopelis
-4|Lemon-yellow tree frog|Hyla savignyi|Savigny's Treefrog
-4|Leptobrachium
-4|Levant water frog|Pelophylax bedriagae|Levant Green Frog|Levantine Frog
-4|Long-legged Wood Frog|Rana macrocnemis|Caucasian Brown Frog|Transcaucasian Frog|Iranian Long-legged Wood Frog
-4|Madagascan mantella|Mantella madagascariensis|Malagasy Mantella|Painted Mantella|Madagascar Golden Frog
-4|Paedophryne
-4|Painted Frogs|Discoglossus
-4|Perez's Frog|Pelophylax perezi
-4|Phyllomedusa sauvagii
-4|Poison Frogs|Oophaga
-4|Polypedates
-4|Pseudis paradoxa
-4|Rhacophorus
-4|Sardinian tree frog|Hyla sarda|Tyrrhenian Tree Frog
-4|Shovelnose frog|Hemisus
-4|Syrian Spadefoot Toad|Pelobates syriacus|Syrian Spadefoot|Eastern Spadefoot
-4|Telmatobius
+0|Common|Common toad|toad|Bufo bufo|European toad|Common frog|European brown frog|European common brown frog|European common frog|European grass frog|European Holarctic true frog|European pond frog|grass frog|Rana temporaria
+0|Cane|Cane toad|Bufo marinus|Giant toad|giant neotropical toad|marine toad|King toad|Rhinella marina|Agua Toad|Giant Marine Toad
+0|American bullfrog|Rana catesbeiana|bullfrog|Lithobates catesbeianus|Tiger Frog
+0|Goliath|Goliath frog|Conraua goliath|Giant Slippery Frog
+0|Agalychnis callidryas|red-eyed tree frog|Red-eyed Leaf frog
+0|Golden poison|Golden poison frog|Phyllobates terribilis
+0|Edible|Edible frog|common water frog|green frog|Pelophylax esculentus|Pelophylax kl. esculentus|water frog
+0|Golden|Golden toad|Bufo periglenes|Incilius periglenes|Monte Verde golden toad|Alajuela toad|Monte Verde toad|orange toad
+0|Natterjack|Natterjack toad|Epidalea calamita
+0|Australian green tree|Australian green tree frog|green tree frog|White's tree frog|Ranoidea caerulea
+0|African clawed|African clawed frog|Xenopus laevis|African claw-toed frog|African clawed toad|platanna|plattie|xenopus|South African clawed frog|Common Clawed Frog|Clawed Toad|Common Clawed Frogs
+0|Common Surinam|Common Surinam toad|Surinam toad|Pipa pipa|Suriname toad
+0|Darwin's|Darwin's frog|Rhinoderma darwinii
+0|Strawberry poison dart|Strawberry poison dart frog|Flaming poison-arrow frog|Oophaga pumilio|Strawberry poison frog
+2|Common midwife|Common midwife toad|Alytes obstetricans|midwife toad
+2|Marsh|Marsh frog|Pelophylax ridibundus|Eurasian Marsh Frog
+2|Blue poison dart|Blue poison dart frog|blue poison arrow frog|Dendrobates azureus|okopipi
+2|Wood|Wood frog|Lithobates sylvaticus
+2|European green|European green toad|Bufo viridis
+2|Northern leopard|Northern leopard frog|Lithobates pipiens
+2|American|American toad|Anaxyrus americanus
+2|European fire-bellied|European fire-bellied toad|Bombina bombina
+2|European tree|European tree frog|Hyla arborea|Common Tree Frog
+2|Yellow-bellied|Yellow-bellied toad|Bombina variegata
+2|Pelobates fuscus|common spadefoot|common spadefoot toad
+2|Moor|Moor frog|Rana arvalis|swamp frog|Altai Brown Frog (Altai Mountains Populations)
+5|Purple|Purple frog|Nasikabatrachus sahayadrensis|Nasikabatrachus sahyadrensis
+2|Paedophryne amauensis
+2|Green and black poison dart|Green and black poison dart frog|Dart poison frog|Dendrobates auratus|Green and black dart-poison frog|Green and black poison arrow frog|Green and black poison frog|Green poison-arrow frog|Golden Poison-arrow Frog
+2|African bullfrog|Pyxicephalus adspersus|Giant Bullfrog|Highveld Bullfrog|South African burrowing frog
+2|American green tree|American green tree frog|Dryophytes cinereus|Hyla cinerea|Carolina Tree Frog
+2|Hairy|Hairy frog|Horror frog|Trichobatrachus robustus|Wolverine frog
+2|Dyscophus antongilii|Tomato frog
+2|Agile|Agile frog|Rana dalmatina
+2|Panamanian golden|Panamanian golden frog|Atelopus zeteki|Golden arrow poison frog|Panama golden poison dart frog|Zetek's golden frog
+2|Pool|Pool frog|Pelophylax lessonae
+2|Argentine horned|Argentine horned frog|Ceratophrys ornata|Ornate horned frog|Argentina Horned Frog|Bell's Ceratophrys
+2|Golden mantella|Golden frog|Mantella aurantiaca|Orange Mantella|Malagasy Golden Mantella|Madagascan Golden Frog
+2|Gray treefrog|Hyla versicolor
+2|Wallace's flying|Wallace's flying frog|Rhacophorus nigropalmatus|Abah River Flying Frog
+2|Colorado River|Colorado River toad|Incilius alvarius|Sonoran Desert toad|Colorado River Toad Sonoran Desert Toad
+2|Duttaphrynus melanostictus|Asian common toad|black-spectacled toad|Common Indian Toad|Asian black-spined toad
+2|Hoplobatrachus tigerinus|Indian Bull Frog
+2|Mexican burrowing|Mexican burrowing toad|burrowing toad|cone-nosed frog|Middle American burrowing toad|Rhinophrynus dorsalis|Rhinophryne
+2|Oriental fire-bellied|Oriental fire-bellied toad|Bombina orientalis|Oriental Firebelly Toad|Oriental Bell Toad
+2|Southern corroboree|Southern corroboree frog|corroboree frog|píčaaa|Pseudophryne corroboree
+2|Telmatobius culeus|Rana acuática de Crawford|rana acuática del Titicaca|rana de aguas blancas|rana del lago Titicaca|Rana escrotal|Rana escrotal del Titicaca|Titicaca Water Frog|Crawford's water frog|White water frog
+2|Dyeing poison dart|Dyeing poison dart frog|dyeing dart frog|Dendrobates tinctorius|tinc|cobalt poison frog|dyeing poison frog|Suriname cobalt poison frog|Dyeing Poison-arrow Frog
+2|Mission golden-eyed tree|Mission golden-eyed tree frog|Amazon Milk Frog|Blue milk frog|Kunawalu casque-headed frog|Trachycephalus resinifictrix|Milk frog
+2|Theloderma corticale|mossy frog|Tonkin bug-eyed frog|Vietnamese mossy frog
+2|Western|Western toad|boreal toad|Anaxyrus boreas
+2|Common tree|Common tree frog|Polypedates leucomystax
+2|Hula painted|Hula painted frog|Latonia nigriventer|Israel painted frog
+2|Yellow-banded poison dart|Yellow-banded poison dart frog|bumblebee poison frog|Dendrobates leucomelas|yellow-headed poison dart frog|Yellow-headed Poison Frog
+2|Chlorohyla chloris|Litoria chloris
+2|Banded bullfrog|Kaloula pulchra|Painted Kaloula|Piebald Digging Frog|Painted Bullfrog|Ox Frog
+2|Green and golden bell|Green and golden bell frog|green and golden swamp frog|green bell frog|Litoria aurea|Ranoida aurea|Golden Bell Frog
+2|Cuban tree|Cuban tree frog|Osteopilus septentrionalis
+2|Bornean flat-headed|Bornean flat-headed frog|Barbourula kalimantanensis
+2|Crab-eating|Crab-eating frog|Fejervarya cancrivora|Asian Brackish Frog|Mangrove Frog|Rice Field Frog
+2|Japanese tree|Japanese tree frog|Dryophytes japonicus|Hyla japonica
+2|Majorcan midwife|Majorcan midwife toad|Alytes muletensis|Mallorcan midwife toad
+2|Calyptocephalella|Calyptocephalella gayi|Calyptocephallela gayi|Helmeted water toad|Chilean Toad|Gay’s Frog
+2|Discoglossus pictus|Painted Frog
+2|Long-nosed horned|Long-nosed horned frog|Megophrys nasuta|Borneon Horned Frog|Horned Toad|Large Horned Frog
+2|Surinam horned|Surinam horned frog|Ceratophrys cornuta|Amazonian Horned Frog
+2|Isthmohyla calypsa|Common tree frog
+2|Atelopus varius|Veragoa stubfoot toad|Variable Harlequin Frog|Clown Frog
+2|Phyllomedusa bicolor|Giant leaf frog
+2|White-lipped tree|White-lipped tree frog|Giant Tree Frog|Litoria infrafrenata|Australian Giant Treefrog
+2|Pelobates syriacus|Syrian Spadefoot Toad|Syrian Spadefoot
+2|Ecnomiohyla rabborum|Rabb's fringe-limbed treefrog
+2|Lithobates clamitans|Green frog
+2|Mediterranean tree|Mediterranean tree frog|Hyla meridionalis|Stripeless Tree Frog
+2|Northern red-legged|Northern red-legged frog|Rana aurora
+2|Pelobates cultripes|Western spadefoot toad|Iberian spadefoot toad|Western Spadefoot
+2|Breviceps adspersus|Common Rain Frog|Bushveld Rain Frog
+2|Hamilton's|Hamilton's frog|Leiopelma hamiltoni|Stephens Island Frog
+2|Leptodactylus fallax|Mountain chicken|Dominican white-lipped frog
+2|Pumpkin toadlet|Brachycephalus ephippium|Spix's Saddleback Toad
+2|Rhacophorus reinwardtii|Reinwardts flying frog|blue-webbed flying frog|Green Flying Frog|Reinwardt's Tree Frog|Black-webbed Treefrog
+2|Greek stream|Greek stream frog|Rana graeca|Balkan Stream Frog
+2|Alsodes barrioi|Cabreria spiny-chested frog
+2|Anthony's poison arrow|Anthony's poison arrow frog|Epipedobates anthonyi
+2|Blue-legged mantella|Mantella expectata
+2|Caucasian|Caucasian toad|Bufo verrucosissimus
+2|Central Asiatic|Central Asiatic frog|Asian frog|Rana asiatica
+2|Corsican painted|Corsican painted frog|Discoglossus montalentii
+2|Desert rain|Desert rain frog|Breviceps macrops
+2|Dryophytes gratiosus|Hyla gratiosa|Giant tree frog|barking tree frog|Florida hyla|Florida tree frog|Georgia tree frog
+2|Hochstetter's|Hochstetter's frog|Leiopelma hochstetteri
+2|Myobatrachus gouldi|Myobatrachus gouldii
+2|Pacific tree|Pacific tree frog|northern Pacific chorus frog|northern Pacific tree frog|Pseudacris regilla
+2|Phantasmal poison|Phantasmal poison frog|Epipedobates tricolor
+2|Rana amurensis|Siberian Tree Frog|Amur brown frog
+2|Scaphiophryne gottlebei|Painted burrowing frog
+2|Smoky jungle|Smoky jungle frog|Leptodactylus pentadactylus|South American Bullfrog
+2|Southern brown tree|Southern brown tree frog|Brown tree frog|Ewing's tree frog|Litoria ewingii|whistling tree frog
+2|Triprion spinosus|Spiny-headed tree frog|Anotheca spinosa
+2|Wyoming|Wyoming toad|Anaxyrus baxteri|Baxter's Toad|Wyoming Toad; Baxter's Toad
+2|Hyla savignyi|Lemon-yellow tree frog|Middle East tree frog|Savigny's tree frog
+2|Italian tree|Italian tree frog|Hyla intermedia
+2|Pseudis paradoxa|Jackie|Jacky|paradox frog|Paradoxical frog|Paradoxical swimming frog|proteus frog|swimming frog
+2|Alytes maurus|Moroccan midwife toad
+2|Ansonia latidisca
+2|Bicolored|Bicolored frog|Clinotarsus curtipes
+2|Blue-sided leaf|Blue-sided leaf frog|Agalychnis annae|blue-sided tree frog|orange-eyed leaf frog|Phyllomedusa annae
+2|Boophis bottae
+2|Bruno's casque-headed|Bruno's casque-headed frog|Aparasphenodon brunoi|Nyctimantis brunoi
+2|Cape rain|Cape rain frog|Breviceps gibbosus|Giant rain frog
+2|Climbing mantella|Mantella laevigata
+2|Common coquí|Eleutherodactylus coqui
+2|Dybowski's|Dybowski's frog|Rana dybowskii
+2|Dyscophus guineti|false tomato frog|Sambava tomato frog
+2|Iberian parsley|Iberian parsley frog|Pelodytes ibericus
+2|Italian agile|Italian agile frog|Rana latastei
+2|Japanese common|Japanese common toad|Bufo japonicus
+2|Lepidobatrachus laevis|Wednesday frog
+2|Leptopelis vermiculatus|Big-eyed Tree Frog|Amani forest tree frog|vermiculated tree frog
+2|Magnificent tree|Magnificent tree frog|Splendid tree frog|Litoria splendida
+2|Mantella baroni|Baron's mantella|Madagascar poison frog|variegated golden frog
+2|Natal ghost|Natal ghost frog|Hadromophryne natalensis
+2|Oregon spotted|Oregon spotted frog|Rana pretiosa
+2|Sclerophrys gutturalis|Guttural toad|African common toad
+2|Spencer's river tree|Spencer's river tree frog|Litoria spenceri|Ranoidea spenceri|Spotted tree frog
+2|Spring peeper|Pseudacris crucifer
+2|Tukeit Hill|Tukeit Hill frog|Allophryne ruthveni
+2|Tusked|Tusked frog|Adelotus brevis
+2|Western clawed|Western clawed frog|Silurana tropicalis|Xenopus tropicalis
+2|Iberian|Iberian frog|Rana iberica
+2|Phyllomedusa sauvagii
+2|Asiatic|Asiatic toad|Bufo gargarizans|Zhoushan Toad|Miyako Toad|Chusan Island Toad
+2|Common parsley|Common parsley frog|Pelodytes punctatus
+2|Iberian midwife|Iberian midwife toad|Alytes cisternasii
+2|Levant water|Levant water frog|Pelophylax bedriagae|Levant Green Frog|Levantine Frog
+2|Rentapia hosii|Pedostibes hosii|Boulenger's Asian tree toad|common tree toad
+2|Sardinian tree|Sardinian tree frog|Hyla sarda|Tyrrhenian Tree Frog
+2|Adelphobates galactonotus
+2|African giant|African giant toad|Sclerophrys superciliaris
+2|Agalychnis lemur|lemur frog|lemur leaf frog
+2|Allobates femoralis|brilliant-thighed poison arrow frog|brilliant-thighed poison frog
+2|Amargosa|Amargosa toad|Anaxyrus nelsoni|Bufo nelsoni
+2|Apennine yellow-bellied|Apennine yellow-bellied toad|Neotomys ebriosus|Appenine yellow-bellied toad|Bombina pachypus
+2|Barbourula busuangensis|Philippine Discoglossid Frog|Philippine flat-headed frog
+2|Black-eared mantella|Mantella milotympanum
+2|Cope's gray treefrog|Central Texas tree frog|Cope's chameleon tree frog|Dryophytes chrysoscelis|Hyla chrysoscelis|southern gray tree frog|western common tree frog
+2|Couch's spadefoot|Couch's spadefoot toad|Scaphiopus couchii
+2|Cranwell's horned|Cranwell's horned frog|Ceratophrys cranwelli
+2|Epirus water|Epirus water frog|Pelophylax epeiroticus
+2|Gastrotheca guentheri|Marsupial frog|detente marsupial frog|Gunther's marsupial frog|lower-toothed marsupial frog
+2|Grey foam-nest tree|Grey foam-nest tree frog|Chiromantis xerampelina|Southern Foam Nest Frog
+2|Hallowell's tree|Hallowell's tree frog|Hyla hallowellii
+2|Horned marsupial|Horned marsupial frog|Gastrotheca cornuta
+2|Kajika|Kajika frog|Buergeria buergeri
+2|Karpathos|Karpathos frog|Pelophylax cerigensis
+2|Lehmann's poison|Lehmann's poison frog|Oophaga lehmanni|red-banded poison frog
+2|Mannophryne trinitatis|Yellow-throated Frog
+2|Mascarene grass|Mascarene grass frog|Mascarene Ridged Frog|Ptychadena mascareniensis
+2|Microhyla ornata|ornamented pygmy frog|Ornate Narrow-mouthed Frog
+2|Mongolian|Mongolian toad|Pseudepidalea raddei|Strauchbufo raddei
+2|Motorbike|Motorbike frog|Litoria moorei|Ranoidea moorei
+2|Pine woods tree|Pine woods tree frog|Dryophytes femoralis|Hyla femoralis
+2|Pyrenean|Pyrenean frog|Rana pyrenaica
+2|Rheobatrachus silus|Southern gastric-brooding frog
+2|Ryukyu Kajika Frog|Buergeria japonica|Ryukyu Kajika
+2|Scinax ruber
+2|Southern|Southern toad|Anaxyrus terrestris|Bufo terrestris
+2|Southern cricket|Southern cricket frog|Acris gryllus
+2|Tyrrhenian painted|Tyrrhenian painted frog|Discoglossus sardus
+2|Túngara|Túngara frog|Engystomops pustulosus
+2|Veined tree|Veined tree frog|Trachycephalus typhonius|Amazon milk frog|common tree frog|Laurenti's brown treefrog|pepper tree frog
+2|Yellow mantella|Mantella crocea
+2|Yosemite|Yosemite toad|Anaxyrus canorus
+2|Betic midwife|Betic midwife toad|Alytes dickhilleni
+2|Agalychnis dacnicolor|Mexican leaf frog|Mexican giant tree frog
+2|Aglyptodactylus madagascariensis
+2|Aglyptodactylus securifer
+2|Alsodes nodosus|Sapo arriero
+2|Arabian|Arabian toad|Sclerophrys arabica
+2|Archey's|Archey's frog|Leiopelma archeyi
+2|Arum|Arum frog|Hyperolius horstockii|Arum lily frog|Horstock’s reed frog|Yellow-striped Reed Frog
+2|Atelopus ignescens|Black Andean toad
+2|Atelopus nahumae|Stubfoot toad
+2|Banded rubber|Banded rubber frog|Phrynomantis bifasciatus
+2|Bernhard's mantella|Mantella bernhardi
+2|Blacksmith tree|Blacksmith tree frog
+2|Boophis brachychir
+2|Boophis jaegeri|Bright-eyed frog
+2|Boophis madagascariensis
+2|Boophis williamsi|Williams bright-eyed frog
+2|Brown mantella|Mantella betsileo
+2|Bufotes oblongus|Central Asian toad|Eastern Persian toad
+2|California red-legged|California red-legged frog|Rana draytonii
+2|Chinese edible|Chinese edible frog|Hoplobatrachus rugulosus
+2|Chiricahua leopard|Chiricahua leopard frog|Lithobates chiricahuensis
+2|Common Chinese tree|Common Chinese tree frog|Hyla chinensis
+2|Concave-eared torrent|Concave-eared torrent frog|Odorrana tormota
+2|Cornufer guentheri|Ceratobatrachus guentheri
+2|Dendropsophus leucophyllatus|Ber|Beireis tree frog|white-leaf tree frog
+2|Discoglossus scovazzi|Discoglosse Peint
+2|Dryophytes eximius|Hyla eximia|Mountain tree frog|Madrean tree frog
+2|Emerald-eyed tree|Emerald-eyed tree frog|Hypsiboas crepitans|Boana crepitans
+2|Fejervarya limnocharis
+2|Firouzophrynus stomaticus|Bufo stomaticus
+2|Four-digit|Four-digit toad|Didynamipus sjostedti
+2|Green bright-eyed|Green bright-eyed frog|Boophis viridis
+2|Harlequin poison|Harlequin poison frog|Oophaga histrionica
+2|Heterixalus alboguttatus
+2|Hokkaidō|Hokkaidō frog|Rana pirica|Ezo Brown Frog
+2|Hyla annectans|Assam tree frog|Jerdon's tree frog|Indian Hylid Frog
+2|Hylambates maculatus|Red-legged kassina|Kassina maculata
+2|Insuetophrynus|Insuetophrynus acarpicus|Barrio's frog
+2|Italian pool|Italian pool frog|Pelophylax bergeri
+2|Japanese wrinkled|Japanese wrinkled frog|Glandirana rugosa
+2|Javelin|Javelin frog|Litoria microbelos
+2|Kassina senegalensis|Senegal running frog|Bubbling kassina|Senegal kassina
+2|Kihansi spray|Kihansi spray toad|Nectophrynoides asperginis
+2|Kurixalus eiffingeri|big-thumbed tree frog|Eiffinger's tree frog|K. eiffingeri
+2|Malabar gliding|Malabar gliding frog|Rhacophorus malabaricus
+2|Melanobatrachus indicus|Black Microhylid Frog|Malabar black narrow-mouthed frog|Orange Black Tubercled Indian Microhylid
+2|Morelet's tree|Morelet's tree frog|Agalychnis moreletii
+2|New Granada cross-banded tree|New Granada cross-banded tree frog|Smilisca phaeota|Central American smilisca|Tarraco tree frog
+2|Northern cricket|Northern cricket frog|Acris crepitans
+2|Nyctixalus pictus|Theloderma pictum
+2|Phyllobates bicolor|black-legged dart frog|bicolored dart frog|black-legged poison frog|neari
+2|Pine Barrens tree|Pine Barrens tree frog|Dryophytes andersonii|Hyla andersonii
+2|Polypedates cruciger|Sri Lanka whipping frog
+2|Pseudobufo subasper
+2|Rana pseudodalmatina
+2|Sahara|Sahara frog|Moroccan Green Frog|North African Green Frog|North African Water Frog|Pelophylax saharicus
+2|Sclerophrys regularis
+2|Shensi tree|Shensi tree frog|Hyla tsinlingensis|Tsinling tree toad
+2|Water-holding|Water-holding frog|Litoria platycephala|Eastern water-holding frog|Flat-headed frog|Ranoidea platycephala
+2|Western spotted|Western spotted frog|Heleioporus albopunctatus
+2|White-lipped bright-eyed|White-lipped bright-eyed frog|Boophis albilabris|Bright-eyed frog
+2|African red|African red toad|African split-skin toad|Schismaderma carens|Strawberry toad
+2|Caucasian parsley|Caucasian parsley frog|Pelodytes caucasicus
+2|Cowan's mantella|Mantella cowanii|Black Golden Frog|Cowan's Golden Frog
+2|Green mantella|Mantella viridis|Green Golden Frog|Lime Mantella
+2|Iberian painted|Iberian painted frog|Discoglossus galganoi|West Iberian Painted Frog
+2|Long-legged wood|Long-legged wood frog|Rana macrocnemis|Caucasian Brown Frog|Transcaucasian Frog|Iranian Long-legged Wood Frog
+2|Madagascan mantella|Mantella madagascariensis|Malagasy Painted Mantella|Malagasy Mantella|Painted Mantella|Madagascar Golden Frog
+2|Perez's|Perez's frog|Pelophylax perezi
+2|Rana chensinensis|Asiatic Grass Frog|Chinese brown frog
+2|Adenomus kandianus|Kandyan Dwarf toad
+2|Adenomus kelaartii|Kelaart’s dwarf toad
+2|African tree|African tree toad|Nectophryne afra
+2|Agalychnis saltator
+2|Albanian water|Albanian water frog|Pelophylax shqipericus
+2|Allobates zaparo|sanguine poison frog|sanguine poison-arrow frog|Zaparo's poison frog
+2|Alsodes montanus
+2|Amazonian poison|Amazonian poison frog|Reticulated poison frog|Ranitomeya ventrimaculata
+2|Angola river|Angola river frog|Amietia angolensis|Common river frog
+2|Aplastodiscus leucopygius
+2|Atelognathus nitoi|Challhuaco frog
+2|Atelognathus reverberii|Laguna Raimunda frog
+2|Atelopus limosus|harlequin frog|limosa harlequin frog
+2|Bird-voiced tree|Bird-voiced tree frog|Dryophytes avivoca|Hyla avivoca
+2|Blommersia blommersae
+2|Blyth's river|Blyth's river frog|Limnonectes blythii
+2|Bokermann's casque-headed|Bokermann's casque-headed frog|Aparasphenodon bokermanni|Nyctimantis bokermanni
+2|Bombina maxima|Large-webbed Bell Toad
+2|Boophis andohahela
+2|Boophis andreonei|Bright-eyed frog
+2|Boophis anjanaharibeensis
+2|Boophis ankaratra|Ankaratra skeleton frog
+2|Boophis goudotii
+2|Boophis guibei
+2|Boophis lichenoides|Boophis lichenoidis
+2|Boophis occidentalis|Bright-eyed frog
+2|Boophis periegetes
+2|Boophis pyrrhus|Red bright-eyed frog
+2|Boophis rappiodes
+2|Boophis rhodoscelis|Bright-eyed frog
+2|Brown banana|Brown banana frog|Afrixalus dorsalis
+2|Bufo eichwaldi
+2|California tree|California tree frog|Pseudacris cadaverina
+2|Cascades|Cascades frog|Rana cascadae
+2|Chile Darwin's|Chile Darwin's frog|Rhinoderma rufum
+2|Chinese flying|Chinese flying frog|Blanford's Whipping Frog|Zhangixalus dennysi|Chinese gliding frog
+2|Crucifix|Crucifix toad|crucifix frog|Catholic frog|holy cross frog|holy cross toad|Notaden bennettii
+2|Cruziohyla calcarifer|Splendid leaf frog
+2|Dahl's aquatic|Dahl's aquatic frog|Litoria dahlii|Ranoidea dahlii
+2|Dryadobates olfersioides|Allobates olfersioides|Colostethus olfersioides
+2|Dryophytes immaculatus|Hyla immaculata|Chinese immaculate tree frog|north China tree toad|spotless tree frog
+2|Dyscophus insularis
+2|Espadarana prosoblepon
+2|Euphlyctis cyanophlyctis|Common Skittering Frog
+2|Foothill yellow-legged|Foothill yellow-legged frog|Rana boylii
+2|Gardiner's Seychelles|Gardiner's Seychelles frog|Sechellophryne gardineri
+2|Golfodulcean poison|Golfodulcean poison frog|Golfo Dulce Poison-Dart Frog|Phyllobates vittatus
+2|Growling grass|Growling grass frog|Litoria raniformis|Green and gold frog|Raniodea raniformis|Southern bell frog
+2|Horst's tree|Horst's tree frog|Litoria amboinensis
+2|Hyalinobatrachium fleischmanni|Fleischmann's Glass Frog
+2|Hyla molleri|Iberian tree frog|Moller's tree frog
+2|Hyla orientalis|Caucasian tree frog|eastern tree frog|oriental tree frog|Shelkovnikov's tree frog
+2|Hyperolius argus|Argus reed frog
+2|Italian stream|Italian stream frog|Rana italica
+2|Korean brown|Korean brown frog|Rana coreana
+2|Lichuan bell|Lichuan bell toad|Bombina lichuanensis
+2|Marañón poison|Marañón poison frog|Excidobates mysteriosus|MaraOUn poison frog
+2|Marbled reed|Marbled reed frog|Hyperolius marmoratus|Painted reed frog
+2|Micro|Micro frog|Cape Flats Frog|Microbatrachella capensis
+2|Mozambique rain|Mozambique rain frog|Breviceps mossambicus
+2|Nasutixalus jerdonii|Frankixalus jerdonii|Philautus jerdonii|Polypedates jerdonii
+2|Nyctimantis siemersi|Argenteohyla siemersi|Red spotted Argentina frog
+2|Pelophylax nigromaculatus|Dark-spotted frog|Black-spotted pond frog
+2|Phrynobatrachus acridoides
+2|Phrynoidis asper|Bufo asper|Phrynoidis aspera
+2|Phyllobates aurotaenia|Kokoe poison dart frog
+2|Plains leopard|Plains leopard frog|Lithobates blairi|Blair's leopard frog
+2|Platypelis grandis|Cophyla grandis
+2|Polypedates otilophus|bony-headed Rhacophorus|file-eared tree frog
+2|Pouched|Pouched frog|Assa darlingtoni
+2|Ranitomeya amazonica
+2|Rhombophryne coudreaui|Burrowing frog
+2|Rio Grande leopard|Rio Grande leopard frog|Rana berlandieri|Lithobates berlandieri
+2|Scotobleps gabonicus
+2|Sehuencas water|Sehuencas water frog|Telmatobius yuracare
+2|Spanish painted|Spanish painted frog|Discoglossus jeanneae
+2|Triprion petasatus|Yucatan casque-headed tree frog|Yucatan shovel-headed tree frog
+2|Walker's tree|Walker's tree frog|Hyla walkeri|Dryophytes walkeri
+2|Wandolleck's white-lipped tree|Wandolleck's white-lipped tree frog|Litoria albolabris
+2|Yellow-spotted bell|Yellow-spotted bell frog|Litoria castanea
+2|Yellow-striped poison|Yellow-striped poison frog|Dendrobates truncatus
+2|Zhangixalus arboreus|Rhacophorus arboreus
+2|Zhangixalus arvalis
+2|Common green|Common green frog|Hylarana erythraea|Green Paddy Frog|Leaf Frog
+2|Japanese brown|Japanese brown frog|Rana japonica
+2|Aglyptodactylus laticeps|Madagascar jumping frog
+2|Alsodes pehuenche
+2|Alsodes valdiviensis|Pelada Mountain spiny chest frog
+2|Alsodes vanzolinii
+2|Alsodes verrucosus|olive spiny-chest frog
+2|Ameerega bilinguis|Ecuador poison frog|Ecuadorean poison frog
+2|Ameerega trivittata|Ameerega trivittatus|orange-striped poison frog|three-striped arrow frog|three-striped arrow poison frog
+2|Angiana tree|Angiana tree frog|Litoria angiana
+2|Annam tree|Annam tree frog|Hyla simplex
+2|Anomaloglossus beebei|Hyloxalus beebei|Beebe's rocket frog|Golden rocket frog
+2|Antilles coquí|Coqui Antillano|Eleutherodactylus johnstonei|Lesser Antillean whistling frog
+2|Aplastodiscus albosignatus|Bocaina tree frog|Lutz's tree frog
+2|Armoured|Armoured frog|Armoured mistfrog|Litoria lorica|Ranoidea lorica
+2|Asterophrys turpicola
+2|Atelopus certus|Toad Mountain harlequin frog
+2|Atelopus longirostris|Longnose stubfoot toad
+2|Atelopus spumarius|Pebas stubfoot toad
+2|Balkan|Balkan frog|Pelophylax kurtmuelleri|Balkan water frog|Greek marsh frog
+2|Beautiful mantella|Mantella pulchra
+2|Blaira rubigina|Ghatophryne rubigina|Red Stream Toad
+2|Blommersia grandisonae
+2|Bocourt's tree|Bocourt's tree frog|Hyla bocourti|Dryophytes bocourti
+2|Boehmantis|Boehmantis microtympanum
+2|Bokermannohyla hylax|Atlantic forest tree frog
+2|Bombay night|Bombay night frog|Nyctibatrachus humayuni|Abdulali's night frog|Abdulali's wrinkled frog|Humayun's wrinkled frog
+2|Boophis doulioti
+2|Boophis elenae
+2|Boophis feonnyala
+2|Boophis luteus
+2|Boophis marojezensis
+2|Boophis reticulatus
+2|Boophis rufioculis
+2|Boophis tasymena
+2|Boophis tephraeomystax
+2|Brazil-nut poison|Brazil-nut poison frog|Adelphobates castaneoticus
+2|Brazilian horned|Brazilian horned frog|Ceratophrys aurita
+2|Bryophryne cophites|Phrynopus cophites|Cusco Andes frog
+2|Buergeria robusta|Robust Kajika Frog
+2|Bufo bankorensis
+2|Bumpy rocket|Bumpy rocket frog|Litoria inermis
+2|Callimedusa tomopterna|Phyllomedusa tomopterna|Tiger-striped leaf frog|Tiger-striped monkey frog
+2|Canyon tree|Canyon tree frog|Hyla arenicolor|Arizona tree frog|Cope's hyla|Dryophytes arenicolor|sonoran tree toad
+2|Cape Melville tree|Cape Melville tree frog|Litoria andiirrmalin
+2|Cape platanna|Cape clawed toad|Xenopus gilli
+2|Cave-dwelling|Cave-dwelling frog|Ranoidea cavernicola
+2|Cayenne slender-legged tree|Cayenne slender-legged tree frog|Osteocephalus leprieurii
+2|Chaco tree|Chaco tree frog|Hypsiboas raniceps|Boana raniceps|Roeschmann's tree frog
+2|Chacophrys pierottii
+2|Colombian four-eyed|Colombian four-eyed frog|Pleurodema brachyops|stout four-eyed frog
+2|Common Mexican tree|Common Mexican tree frog|Smilisca baudinii
+2|Common reed|Common reed frog|Hyperolius viridiflavus
+2|Common sand|Common sand frog|Cryptic Sand Frog|Tomopterna cryptotis|Tremolo Sand Frog
+2|Common squeaker|Arthroleptis stenodactylus|Shovel-footed squeaker
+2|Costa Rica brook|Costa Rica brook frog|Duellmanohyla uranochroa
+2|Crawfish|Crawfish frog|Lithobates areolatus
+2|Cretan|Cretan frog|Pelophylax cretensis
+2|Crowned bullfrog|Hoplobatrachus occipitalis
+2|Cruziohyla craspedopus|fringed leaf frog
+2|Dendropsophus microcephalus|Yellow tree frog|Small-headed tree frog|Underwood's yellow tree frog
+2|Dendropsophus minutus|Lesser Tree Frog|Guianan dwarf tree frog
+2|Dermatonotus muelleri
+2|Dryophytes arboricola|Arboreal tree frog|Hyla arboricola
+2|Eastern dwarf tree|Eastern dwarf tree frog|Litoria fallax
+2|Edible bullfrog|Pyxicephalus edulis|lesser bullfrog|Peter's bullfrog|pixie frog
+2|Elegant stubfoot|Elegant stubfoot toad|Atelopus elegans
+2|Ericabatrachus baleensis|Bale Mountains frog
+2|Eupsophus calcaratus
+2|Eupsophus emiliopugini|Emilio's ground frog
+2|Gastrophryne carolinensis|Eastern narrowmouth toad
+2|Gastrotheca griswoldi
+2|Gastrotheca ovifera|Pouched frog|Giant marsupial frog
+2|Ghatixalus variabilis|Green tree frog
+2|Giant banjo|Giant banjo frog|Limnodynastes interioris
+2|Glyphoglossus molossus
+2|Golden coquí|Eleutherodactylus jasperi
+2|Granular poison|Granular poison frog|Oophaga granulifera
+2|Gray's stream|Gray's stream frog|Strongylopus grayii
+2|Great barred|Great barred frog|Mixophyes fasciolatus
+2|Green-eyed treefrog|Fringed tree frog|Litoria genimaculata|Ranoidea genimaculata
+2|Greenhouse|Greenhouse frog|Eleutherodactylus planirostris
+2|Guibemantis punctatus
+2|Haraldmeier's mantella|Mantella haraldmeieri
+2|Heterixalus madagascariensis
+2|Heterixalus rutenbergi
+2|Hyalinobatrachium pellucidum|Hyalinobatrachium lemur|Centrolenella pellucida
+2|Hyalinobatrachium valerioi
+2|Hyla sanchiangensis|San Chiang tree frog|Sanchiang tree toad
+2|Hyla zhaopingensis|Zhaoping tree frog|Zhaoping tree toad
+2|Hymenochirus boettgeri
+2|Indirana beddomii|Beddome's Leaping Frog
+2|Ishikawa's|Ishikawa's frog|Odorrana ishikawae
+2|Itapotihyla langsdorffii
+2|Japanese stream|Japanese stream toad|Bufo torrenticola
+2|Lake Oku clawed|Lake Oku clawed frog|Savannah clawed frog|Xenopus longipes
+2|Leptodactylus bolivianus|sapo-rana boliviano
+2|Leptodactylus latrans|Argus frog|butter frog|lesser foam frog|South American spotted grass frog
+2|Lesueur's|Lesueur's frog|Litoria lesueuri|Ranoidea lesueurii|stony creek frog
+2|Lovely poison|Lovely poison frog|Phyllobates lugubris
+2|Lowland leopard|Lowland leopard frog|Lithobates yavapaiensis
+2|Manú poison|Manú poison frog|Ameerega macero
+2|Map tree|Map tree frog|Hypsiboas geographicus|Boana geographica
+2|Marbled snout-burrower|Hemisus marmoratus
+2|Merlin's dwarf gray|Merlin's dwarf gray frog|Pseudhymenochirus merlini
+2|Microhyla sholigari|Sholigari Narrow-mouthed Frog
+2|Montane brown|Montane brown frog|Rana ornativentris
+2|Mountain rain|Mountain rain frog|Breviceps montanus
+2|Mountain yellow-legged|Mountain yellow-legged frog|Rana muscosa
+2|Multi-coloured tree|Multi-coloured tree frog|Litoria multicolor
+2|Müller's platanna|Müller's clawed frog|Xenopus muelleri
+2|Natal dwarf puddle|Natal dwarf puddle frog|Phrynobatrachus natalensis
+2|New England tree|New England tree frog|Ranoidea subglandulosa|Glandular frog|Litoria subglandulosa
+2|Occidozyga lima|Green puddle frog
+2|Odorrana livida
+2|Oreophrynella nigra|Venezuela pebble toad
+2|Oreophrynella quelchii|Roraima bush toad
+2|Osteocephalus oophagus
+2|Phyllomedusa boliviana|red-rimmed leaf frog
+2|Pickerel|Pickerel frog|Lithobates palustris
+2|Pickersgill's reed|Pickersgill's reed frog|Avoca Reed Frog|Hyperolius pickersgilli
+2|Pig|Pig frog|Lithobates grylio
+2|Platymantis taylori
+2|Platymantis vitiensis|Cornufer vitiensis|Fiji tree frog|Levuka wrinkled ground frog
+2|Polypedates megacephalus|Brown tree frog
+2|Proceratophrys boiei
+2|Proceratophrys brauni|horn toad
+2|Pseudepidalea latastii|Bufotes latastii|Baltistan toad|Ladakh toad|vertebral-banded toad
+2|Pseudophilautus wynaadensis|Philautus wynaadensis|Wynaad Bush Frog
+2|Red-headed poison|Red-headed poison frog|Ranitomeya fantastica
+2|Rhacophorus calcadensis|Kalakkad tree frog
+2|Scaphiophryne marmorata|Green burrowing frog
+2|Scinax alter
+2|Scinax nasicus
+2|Seoul|Seoul frog|Pelophylax chosenicus
+2|Smooth-sided|Smooth-sided toad|Rhaebo guttatus
+2|Spinomantis peraccae
+2|Spinomantis phantasticus
+2|Taipei tree|Taipei tree frog|Zhangixalus taipeianus
+2|Telmatobufo bullocki
+2|White-edged tree|White-edged tree frog|Boana albomarginata|Hypsiboas albomarginatus|White-banded tree frog
+2|White-lined leaf|White-lined leaf frog|Phyllomedusa vaillantii|white-lined monkey frog
+2|Wright's mountain tree|Wright's mountain tree frog|Dryophytes wrightorum|Arizona tree frog|Baird's Mexican hyla|Mountain tree frog|Sonora tree frog|Sonoran tree toad|Wright's tree frog
+2|Xenohyla truncata|Izecksohn's Brazilian tree frog
+2|Zhangixalus moltrechti|Rhacophorus moltrechti
+2|Adelophryne gutturosa
+2|Adelophryne maranguapensis
+2|Adelphobates quinquevittatus
+2|Adenomera andreae|lowland tropical bullfrog
+2|Adenomera araucaria
+2|Afrixalus fornasini|Greater leaf-folding frog|Fornasini's spiny reed frog
+2|Afrixalus quadrivittatus
+2|Allobates brunneus|Chupada rocket frog
+2|Alsodes igneus
+2|Amami tip-nosed|Amami tip-nosed frog|Odorrana amamiensis
+2|Amolops mantzorum
+2|Amolops wuyiensis
+2|Anodonthyla boulengerii
+2|Ansonia hanitschi|Kadamaian stream toad
+2|Ansonia inthanon
+2|Ansonia leptopus
+2|Aplastodiscus arildae|Teresopolis tree frog
+2|Aplastodiscus cochranae
+2|Aplastodiscus ibirapitanga
+2|Aplastodiscus perviridis
+2|Aplastodiscus sibilatus
+2|Aplastodiscus weygoldti|Weygoldt's treefrog
+2|Arfak Mountain tree|Arfak Mountain tree frog|Litoria chloronota
+2|Atelopus balios|Rio Pescado stubfoot toad
+2|Atelopus franciscus|Central coast stubfoot toad
+2|Balearic green|Balearic green toad|Bufotes balearicus
+2|Batrachyla taeniata|Banded wood frog
+2|Beduka koynayensis|Xanthophryne koynayensis|Bufo koynayensis|Chrome-yellow Toad|Humbali Village Toad|Koyna toad
+2|Bilbo's rain|Bilbo's rain frog|Breviceps bagginsi
+2|Blomberg's|Blomberg's toad|Rhaebo blombergi
+2|Blommersia domerguei
+2|Blommersia wittei
+2|Blue-spotted Mexican tree|Blue-spotted Mexican tree frog|Smilisca cyanosticta
+2|Boettger's dainty|Boettger's dainty frog|Boettgera's Dainty Frog|Cacosternum boettgeri|Common Caco
+2|Bokermannohyla ahenea
+2|Bokermannohyla alvarengai|Alvarenga's tree frog|Santa Barbara tree frog
+2|Bokermannohyla circumdata|Espirito Santo tree frog|thigh-barred tree frog
+2|Bokermannohyla ibitiguara|Fazenda Salto tree frog
+2|Bokermannohyla langei|Boana langei|Hyla langei|Marumbi tree frog
+2|Bokermannohyla lucianae
+2|Bokermannohyla nanuzae|Jaboticatubas tree frog
+2|Bokermannohyla saxicola|Hyla saxicola|ledge tree frog
+2|Boophis boehmei
+2|Boophis laurenti
+2|Boophis opisthodon
+2|Boophis septentrionalis|Bright-eyed frog
+2|Brachytarsophrys carinense
+2|Brachytarsophrys intermedius|Brachytarsophrys intermedia
+2|Bridled|Bridled frog|Litoria nigrofrenata
+2|Bufoides meghalayanus|Mawblang Toad
+2|Bufotes luristanicus
+2|Bush squeaker|Arthroleptis wahlbergii
+2|Buzzing tree|Buzzing tree frog|Litoria electrica
+2|Centrolene antioquiensis|Centrolene antioquiense|Giant glass frog
+2|Centrolene ballux|Burrowes’ giant glass frog
+2|Centrolene buckleyi|Buckley's giant glass frog
+2|Chaperina|Chaperina fusca
+2|Chlorohyla auae|Litoria auae|Ranoidea auae
+2|Chlorohyla kumae|Litoria kumae|Ranoidea kumae
+2|Cochranella euknemos
+2|Colostethus inguinalis
+2|Colostethus pratti
+2|Cooloola sedge|Cooloola sedge frog|Litoria cooloolensis
+2|Cuban small-eared|Cuban small-eared toad|Bufo empusus|Peltophryne empusa
+2|Daruma pond|Daruma pond frog|Pelophylax porosus
+2|Dendropsophus columbianus|Boettger's Colombian tree frog
+2|Dendropsophus ebraccatus|Hourglass tree frog
+2|Dendropsophus sarayacuensis
+2|Desert spadefoot|Desert spadefoot toad|Notaden nichollsi
+2|Desert tree|Desert tree frog|Litoria rubella
+2|Euphlyctis hexadactylus
+2|Eupsophus migueli|Miguel's ground frog
+2|Eupsophus roseus|rosy ground frog
+2|Everett's tree|Everett's tree frog|L. everetti|Litoria everetti
+2|Fanged river|Fanged river frog|Limnonectes macrodon
+2|Faro Island tree|Faro Island tree frog|Litoria lutea
+2|Flat-headed|Flat-headed frog|Limnodynastes depressus
+2|Fraser's platanna|Fraser's clawed frog|Xenopus fraseri
+2|Gastrophryne olivacea|Great Plains Narrowmouth Toad
+2|Gastrotheca marsupiata
+2|Geelvink pygmy tree|Geelvink pygmy tree frog|Litoria pygmaea
+2|Gephyromantis blanci|Mantidactylus blanci
+2|Gephyromantis corvus|Madagascan frog|Mantidactylus corvus
+2|Gephyromantis enki|Mantidactylus enki
+2|Gephyromantis granulatus|Mantidactylus granulatus
+2|Gephyromantis horridus|Boettgers grainy frog|Mantidactylus horridus
+2|Gephyromantis leucocephalus|Mantidactylus leucocephalus
+2|Gephyromantis leucomaculatus|Mantidactylus leucomaculatus
+2|Gephyromantis luteus|Mantidactylus luteus
+2|Gephyromantis moseri|Mantidactylus moseri
+2|Gephyromantis plicifer|Mantidactylus plicifer
+2|Gephyromantis pseudoasper|Mantidactylus pseudoasper
+2|Gephyromantis redimitus|Mantidactylus redimitus
+2|Gephyromantis salegy|Mantidactylus salegy|Salegy forest frog
+2|Gephyromantis sculpturatus|Mantidactylus sculpturatus
+2|Gephyromantis silvanus|Madagascar frog|Mantidactylus silvanus
+2|Gephyromantis tschenki|Mantidactylus tschenki
+2|Golden banana|Golden banana frog|Afrixalus aureus
+2|Great Basin spadefoot|Spea intermontana
+2|Great Plains|Great Plains toad|Anaxyrus cognatus|plains toad|Say's toad|Texas toad|western plains toad
+2|Guajira stubfoot|Guajira stubfoot toad|Carrikeri harlequin frog|Atelopus carrikeri
+2|Guibé's mantella|Mantella nigricans
+2|Hamptophryne boliviana|Bolivian bleating frog|Amazon sheep frog
+2|Harlequin tree|Harlequin tree frog|Rhacophorus pardalis|Panther flying tree frog
+2|Hemiphractus fasciatus|banded horned tree frog|banded casque-headed frog
+2|Hole-in-the-head|Hole-in-the-head frog|Huia cavitympanum
+2|Hylodes sazimai|Hylodes sazima
+2|Ikakogi tayrona|Magdalena giant glass frog
+2|Javan torrent|Javan torrent frog|Huia masonii
+2|Jervis Bay tree|Jervis Bay tree frog|Litoria jervisiensis
+2|Kaloula baleata
+2|Kempholey night|Kempholey night frog|Nyctibatrachus kempholeyensis
+2|Knocking sand|Knocking sand frog|Sandveld Pyxie|Tomopterna krugerensis
+2|Korean water|Korean water toad|Bufo stejnegeri|Korean toad|water toad
+2|Kuhl's creek|Kuhl's creek frog|Limnonectes kuhlii
+2|Kurixalus idiootocus|temple tree frog
+2|Kurixalus naso|Annandale's high-altitude tree frog|long-snouted tree frog|Proboscis frilled tree frog|uphill tree frog
+2|La Loma tree|La Loma tree frog|Hyloscirtus colymba
+2|Laliostoma labrosum
+2|Leaf green tree|Leaf green tree frog|Litoria phyllochroa|Ranoidea phyllochroa
+2|Leptobrachium boringii
+2|Leptodactylus albilabris|Caribbean white-lipped frog
+2|Leptodactylus bufonius
+2|Leptodactylus fuscus
+2|Leptodactylus mystacinus|white-lipped frog|moustached frog
+2|Limnodynastes dumerilii|pobblebonk|eastern banjo frog|southern banjo frog
+2|Limnomedusa macroglossa|rapids frog
+2|Limnonectes doriae
+2|Litoria jungguy|Jungguy frog|Ranoidea jungguy
+2|Mahogany tree|Mahogany tree frog|Tlalocohyla loquax
+2|Malabar tree|Malabar tree toad|Pedostibes tuberculosus|Warty Asian tree toad
+2|Maldonada redbelly|Maldonada redbelly toad|Melanophryniscus moreirae
+2|Manaus slender-legged tree|Manaus slender-legged tree frog|Osteocephalus taurinus
+2|Mantidactylus grandidieri
+2|Maud Island|Maud Island frog|Leiopelma pakeka
+2|Melanophryniscus atroluteus
+2|Melanophryniscus dorsalis|Red-belly toad
+2|Microhyla pulchra
+2|Mimic poison|Mimic poison frog|Ranitomeya imitator
+2|Mindanao horned|Mindanao horned frog|Megophrys stejnegeri
+2|Minervarya pierrei|Fejervarya pierrei|Pierre's Cricket Frog
+2|Minervarya sahyadris|Small Cricket Frog
+2|Moaif tree|Moaif tree frog|Litoria mystax
+2|Monte Iberia eleuth|Robber frog|Eleutherodactylus iberia
+2|Mountain mist|Mountain mist frog|Litoria nyakalensis|Nyakala frog|Ranoidea nyakalensis
+2|Natalobatrachus bonebergi|Natal diving frog|Boneberg's frog
+2|Northern dwarf tree|Northern dwarf tree frog|Litoria bicolor
+2|Nyctibates|Nyctibates corrugatus
+2|Nyctibatrachus beddomii|Tirunvelveli’s hill frog
+2|Nyctibatrachus deccanensis
+2|Nyctibatrachus major|Boulenger’s narrow-eyed frog
+2|Nyctimantis rugiceps|brown-eyed tree frog
+2|Odorrana swinhoana|Rana taiwaniana
+2|Ornate burrowing|Ornate burrowing frog|Platyplectrum ornatum
+2|Osteocephalus buckleyi
+2|Painted chorus|Painted chorus frog|Microhyla butleri
+2|Panama cross-banded tree|Panama cross-banded tree frog|Smilisca sila
+2|Pelobates varaldii|Varaldi's spadefoot toad
+2|Pelophylax terentievi
+2|Phrynobatrachus calcaratus
+2|Phrynomantis microps|West African Rubber Frog|Phrynomerus microps
+2|Phyllomedusa distincta|Sao Paulo leaf frog
+2|Physalaemus kroyeri|Kroyer's dwarf frog
+2|Plains spadefoot|Plains spadefoot toad|central plains spadefoot|central plains spadefoot toad|Cope's spea|spadefoot of the western plains|Spea bombifrons
+2|Platypelis tsaratananaensis|Cophyla tsaratananaensis
+2|Pleasing poison|Pleasing poison frog|Ameerega bassleri
+2|Polka-dot tree|Polka-dot tree frog|Hypsiboas punctatus
+2|Polypedates macrotis|Bongao tree frog
+2|Proceratophrys avelinoi|Avelino's smooth horned frog|cow frog
+2|Pseudis bolbodactyla
+2|Pseudophilautus asankai|Asanka's shrub frog
+2|Puerto Rican crested|Puerto Rican crested toad|Peltophryne lemur
+2|Quasipaa spinosa
+2|Rana longicrus|Brown frog|long-legged brown frog
+2|Rana sauteri|Brown frog
+2|Raorchestes beddomii|Beddome's Bush Frog
+2|Raorchestes parvulus
+2|Raorchestes travancoricus|Philautus travancoricus|Travancore bush frog
+2|Raorchestes tuberohumerus|Philautus tuberohumerus|Kudremukh bush frog
+2|Rhacophorus bipunctatus|Twin-spotted Tree Frog
+2|Rhacophorus lateralis|Tree frog|Small Tree Frog
+2|Rhyaconastes wilcoxii|Litoria wilcoxii|Kinghorn tree frog|Ranoidea wilcoxii|Wilcox's frog
+2|Rockhole|Rockhole frog|Litoria meiriana
+2|Rockstone poison dart|Rockstone poison dart frog|Dendrobates nubeculosus|rockstone poison frog
+2|Romer's tree|Romer's tree frog|Liuixalus romeri|Romerus romeri
+2|Rusty tree|Rusty tree frog|Boana boans
+2|Sabang tree|Sabang tree frog|Litoria sanguinolenta|Nyctimystes sanguinolenta
+2|Scaphiophryne spinosa
+2|Scaphiopus holbrookii|eastern spadefoot
+2|Scinax boesemani|Boesman's snouted tree frog
+2|Scinax eurydice
+2|Scinax funereus
+2|Scinax perereca
+2|Scinax staufferi|Middle American snouted tree frog|Stauffer's longnosed tree frog|Stauffer's snouted tree frog
+2|Scinax x-signatus|Hyla x-signata
+2|Slender tree|Slender tree frog|Litoria adelaidensis
+2|Southern highland tree|Southern highland tree frog|Hyla euphorbiacea|Dryophytes euphorbiaceus
+2|Southern leopard|Southern leopard frog|Lithobates sphenocephalus
+2|Sphaenorhynchus lacteus
+2|Sphaenorhynchus planicola
+2|Sphaenorhynchus surdus|Cochran's lime tree frog
+2|Sphenophryne thomsoni|Genyophryne thomsoni
+2|Spinomantis aglavei
+2|Spinomantis bertini|Mantidactylus bertini
+2|Spinomantis fimbriatus
+2|Splendid poison|Splendid poison frog|Oophaga speciosa|splendid poison arrow frog
+2|Spotted snout-burrower|Hemisus guttatus
+2|Starry night|Starry night toad|Atelopus arsyecue
+2|Stefania evansi|Evan's Stefania|Greote Creek tree frog
+2|Striped rocket|Striped rocket frog|Litoria nasuta
+2|Sulawesian|Sulawesian toad|Ingerophrynus celebensis
+2|Surinam golden-eyed tree|Surinam golden-eyed tree frog|Trachycephalus coriaceus
+2|Sylvirana guentheri|Guenther's frog
+2|Tago's brown|Tago's brown frog|Rana tagoi
+2|Telmatobius macrostomus|Lake Junin frog|Batrachophrynus macrostomus
+2|Texas|Texas toad|Anaxyrus speciosus
+2|Three-coloured harlequin|Three-coloured harlequin toad|Atelopus tricolor
+2|Trachycephalus mesophaeus
+2|Tyler's tree|Tyler's tree frog|Litoria tyleri
+2|Vegas Valley leopard|Vegas Valley leopard frog|Lithobates fisheri
+2|Veragua cross-banded tree|Veragua cross-banded tree frog|Smilisca sordida
+2|Vicente's poison|Vicente's poison frog|Oophaga vicentei
+2|Volcano clawed|Volcano clawed frog|Xenopus amieti
+2|Wallum sedge|Wallum sedge frog|Litoria olongburensis
+2|Wendessi tree|Wendessi tree frog|Litoria longicrus
+2|Western chorus|Western chorus frog|Pseudacris triseriata
+2|"Centrolene" quindianum|Glass frog
+2|"Centrolene" robledoi
+2|Adelophryne pachydactyla
+2|Adenomera diptyx
+2|Adenomera hylaedactyla
+2|Adenomera lutzi|Lutz's thin-toed frog|Lutz's tropical bullfrog
+2|African green|African green toad|Bufotes boulengeri
+2|Afrixalus delicatus|Pickersgill's Banana Frog|Delicate Spiny Reed Frog
+2|Ailao|Ailao toad|Bufo ailaoanus
+2|Allobates bromelicola|coastal rocket frog
+2|Allobates caeruleodactylus
+2|Allobates chalcopis|Colostethus chalcopis|Martinique volcano frog|ravine rocket frog
+2|Allobates conspicuus|Manu rocket frog
+2|Allobates insperatus
+2|Allobates myersi|Myers' poison frog
+2|Allobates talamancae|striped rocket frog|Talamanca rocket frog
+2|Allopaa hazarensis|Paa hazarensis
+2|Alsodes australis
+2|Alsodes gargola
+2|Alsodes monticola|island spiny-chest frog
+2|Amazophrynella bokermanni
+2|Ameerega hahneli|Yurimaguas poison frog
+2|Amnihyla macki|Litoria macki|Ranoidea macki
+2|Amnihyla spinifera|Litoria spinifera|Ranoidea spinifera|spiny tree frog
+2|Amolops ricketti
+2|Anaxyrus debilis|Green toad
+2|Anchieta's ridged|Anchieta's ridged frog|Ptychadena anchietae
+2|Andean poison|Andean poison frog|Andinobates opisthomelas
+2|Andinobates virolinensis|Ranitomeya virolinensis
+2|Andre's clawed|Andre's clawed frog|Xenopus andrei
+2|Anomaloglossus baeobatrachus|Colostethus baeobatrachus
+2|Anomaloglossus roraima
+2|Anomaloglossus rufulus|Sira poison frog|Chimantá poison frog|Tepui poison frog
+2|Anomaloglossus stepheni
+2|Anomaloglossus triunfo
+2|Anomaloglossus wothuja|Colostethus wothuja
+2|Ansonia albomaculata
+2|Ansonia kraensis
+2|Ansonia longidigita|Long-fingered slender toad
+2|Ansonia spinulifer|Spiny slender toad
+2|Aplastodiscus albofrenatus
+2|Aplastodiscus ehrhardti|Ehrhardt's snouted tree frog|Santa Catarina tree frog
+2|Aplastodiscus eugenioi
+2|Aplastodiscus musicus|Boana musica|Musical tree frog
+2|Arfakiana tree|Arfakiana tree frog|Litoria arfakiana
+2|Aru tree|Aru tree frog|Litoria aruensis
+2|Asterophrys leucopus
+2|Atelognathus patagonicus|Patagonia frog
+2|Atelognathus solitarius|Las Bayas frog
+2|Atelopus andinus
+2|Atelopus angelito
+2|Atelopus arthuri
+2|Atelopus bomolochos|Azuay stubfoot toad
+2|Atelopus boulengeri
+2|Atelopus galactogaster
+2|Atelopus glyphus|Pirre Mountain frog
+2|Atelopus laetissimus|Harlequin frog
+2|Atelopus mindoensis|Mindo stubfoot toad
+2|Atelopus mucubajiensis|Mucubaji stubfoot toad
+2|Atelopus oxyrhynchus|Red-nosed stub-footed toad
+2|Atelopus spurrelli|Harlequin frog
+2|Atelopus subornatus
+2|Atelopus tamaense|Tamá harlequin frog
+2|Australian lace-lid|Litoria dayi|Nyctimystes dayi|Ranoidea dayi
+2|Austrochaperina pluvialis
+2|Bale Mountains tree|Bale Mountains tree frog|Balebreviceps hillmani|Ethiopian short-headed frog
+2|Barabuna tree|Barabuna tree frog|Litoria contrastens
+2|Barycholos ternetzi
+2|Beck's tree|Beck's tree frog|Litoria becki
+2|Black|Black toad|Anaxyrus exsul
+2|Black-dotted tree|Black-dotted tree frog|Litoria nigropunctata
+2|Black-spotted casque-headed tree|Black-spotted casque-headed tree frog|Trachycephalus nigromaculatus
+2|Blaira ornata|Ghatophryne ornata|Black torrent toad|Ornate Stream Toad
+2|Bleeding|Bleeding toad|Leptophryne cruentata
+2|Blommersia kely
+2|Blommersia sarotra
+2|Blue Mountains tree|Blue Mountains tree frog|Litoria citropa
+2|Blue-bellied poison|Blue-bellied poison frog|Andinobates minutus
+2|Bokermannohyla izecksohni|Tree frog|Bokermannohyla izeckshoni
+2|Bokermannohyla luctuosa|reservoir tree frog
+2|Bokermannohyla martinsi|Martin's tree frog
+2|Bokermannohyla pseudopseudis|veadeiros tree frog|veadeiros waterfall frog
+2|Bokermannohyla vulcaniae
+2|Boophis albipunctatus
+2|Boophis blommersae|Bright-eyed frog
+2|Boophis burgeri
+2|Boophis englaenderi
+2|Boophis erythrodactylus
+2|Boophis haematopus|Bright-eyed frog
+2|Boophis idae
+2|Boophis liami
+2|Boophis lilianae
+2|Boophis majori|Bright-eyed frog
+2|Boophis mandraka
+2|Boophis microtympanum
+2|Boophis pauliani
+2|Boophis picturatus
+2|Boophis sambirano
+2|Boophis sibilans
+2|Boreal digging|Boreal digging frog|Kaloula borealis
+2|Brachytarsophrys feae
+2|Buergeria oxycephala|Hainan stream tree frog
+2|Bufotes pewzowi
+2|Bufotes surdus
+2|Bulmer's tree|Bulmer's tree frog|Ranoidea bulmeri|Litoria bulmeri
+2|Cameroon clawed|Cameroon clawed frog|Silurana epitropicalis
+2|Canadian|Canadian toad|Anaxyrus hemiophrys
+2|Cape caco|Cacosternum capense
+2|Cape mountain|Cape mountain toad|Capensibufo rosei|Rose’s mountain toad
+2|Cardioglossa cyaneospila
+2|Cardioglossa leucomystax
+2|Cayenne stubfoot|Cayenne stubfoot toad|Atélope Jaunâtre|Atelopus flavescens
+2|Centrolene paezorum
+2|Chaochiao|Chaochiao frog|Rana chaochiaoensis
+2|Chevron-spotted brown|Chevron-spotted brown frog|Rana chevronta
+2|Chiasmocleis albopunctata|white-spotted humming frog
+2|Chiasmocleis ventrimaculata|dotted humming frog
+2|Chirixalus doriae|Chiromantis doriae
+2|Clinotarsus alticola|High-altitude Frog|Point-nosed frog
+2|Columbia spotted|Columbia spotted frog|Rana luteiventris
+2|Copan brook|Copan brook frog|Duellmanohyla soralia
+2|Cope's brown treefrog|Ecnomiohyla miliaria|Fringe-limbed treefrog
+2|Cophyla occultans
+2|Cornufer vitianus|Fiji ground frog|Viti wrinkled ground frog
+2|Corythomantis greeningi|Greeningss tree frog
+2|Cryptobatrachus boulengeri|Boulenger's backpack frog
+2|Ctenophryne geayi|Sapito Apuntado De Geay|brown egg frog
+2|Daly Waters|Daly Waters frog|Litoria maculosa|Cyclorana maculosa|Olive water-holding frog|Ranoidea maculosa
+2|Darlington's Madang tree|Darlington's Madang tree frog|Litoria darlingtoni
+2|Dattatreya night|Dattatreya night frog|Nyctibatrachus dattatreyaensis
+2|Davies' tree|Davies' tree frog|Ranoidea daviesae|Litoria daviesae
+2|Dendropsophus acreanus
+2|Dendropsophus bipunctatus|Two-spotted tree frog
+2|Dendropsophus branneri
+2|Dendropsophus cruzi
+2|Dendropsophus decipiens|Brazilian coastal tree frog
+2|Dendropsophus elegans|Elegant forest tree frog
+2|Dendropsophus microps|Nova Friburgo tree frog
+2|Dendropsophus nanus|dwarf tree frog
+2|Dendropsophus phlebodes|San Carlos tree frog
+2|Dendropsophus rubicundulus|Lagoa Santa tree frog
+2|Dendropsophus seniculus|Corcovado tree frog
+2|Desert froglet|Crinia deserticola
+2|Dhofar|Dhofar toad|Duttaphrynus dhufarensis|Bufo dhufarensis
+2|Du Toit's torrent|Du Toit's torrent frog|Arthroleptides dutoiti
+2|Duttaphrynus beddomii|Beddome’s toad
+2|Duttaphrynus himalayanus|Himalayan Toad
+2|Duttaphrynus microtympanum|Small-eared toad
+2|Duttaphrynus parietalis|Ridged Toad
+2|Efogi tree|Efogi tree frog|Litoria prora
+2|Elachistocleis bicolor|Two-colored oval frog
+2|Elachistocleis ovalis|Sapito Apuntado Bicolor
+2|Eleutherodactylus cubanus|Cuban robber frog
+2|Eleutherodactylus martinicensis
+2|Eungella tinker|Eungella tinker frog|Liem’s tinker frog|Taudactylus liemi
+2|Euphlyctis ehrenbergii
+2|Eupsophus insularis|Mocha Island ground frog
+2|Fairy tree|Fairy tree frog|Charadrahyla chaneque
+2|Firouzophrynus olivaceus|Duttaphrynus olivaceus|Duttaphrynus olivaceous
+2|Flat caco|Flat Dainty frog|Cacosternum platys|Smooth Dainty Frog
+2|Flectonotus pygmaeus|Ranita Marsupial Pigmea
+2|Fletcher's|Fletcher's frog|Lechriodus fletcheri
+2|Fritziana ohausi
+2|Frostius pernambucensis
+2|Garman New Guinea tree|Garman New Guinea tree frog|Litoria jeudii
+2|Gastrotheca argenteovirens|Popayan marsupial frog
+2|Gastrotheca dunni|Dunn's marsupial frog
+2|Gastrotheca excubitor|Abra Acanacu marsupial frog
+2|Gephyromantis asper|Mantidactylus asper
+2|Gephyromantis boulengeri|Mantidactylus boulengeri
+2|Gephyromantis cornutus|Mantidactylus cornutus
+2|Gephyromantis decaryi|Mantidactylus decaryi
+2|Gephyromantis klemmeri|Mantidactylus klemmeri
+2|Gephyromantis malagasius|Mantidactylus malagasius
+2|Gephyromantis rivicola|Madagascar frog
+2|Gephyromantis spiniferus
+2|Gephyromantis webbi|Mantidactylus webbi|Webb’s Madagascar frog
+2|Gephyromantis zavona|Mantidactylus zavona
+2|Giant wrinkled|Giant wrinkled frog|Nyctibatrachus karnatakaensis|Wrinkled frog
+2|Gopher|Gopher frog|Lithobates capito
+2|Guibemantis liber
+2|Gulf Coast|Gulf Coast toad|Incilius valliceps
+2|Hemiphractus bubalus|crested casque-headed frog|Ecuador horned tree frog
+2|Herveo plump|Herveo plump toad|Osornophryne percrassa
+2|Heterixalus betsileo
+2|Heterixalus boettgeri
+2|Heterixalus luteostriatus
+2|Heterixalus punctatus
+2|Highland tree|Highland tree frog|Litoria wollastoni
+2|Hispaniolan common tree|Hispaniolan common tree frog|Osteopilus dominicensis
+2|Hoplobatrachus crassus|Jerdon's bullfrog|south Indian bullfrog
+2|Horned forest|Horned forest frog|Platymantis cornutus|Horned wrinkled ground frog
+2|Hose's|Hose's frog|Odorrana hosii
+2|Huanren|Huanren frog|Rana huanrenensis|Rana huanrensis
+2|Hyla heinzsteinitzi
+2|Hylarana taipehensis|Taipei frog|Taiwanese frog
+2|Hylorina sylvatica|Sapo Arboreo|Emerald forest frog
+2|Hyloxalus alessandroi|Allobates alessandroi|Montane rocket frog
+2|Hyperolius castaneus|Montane reed frog
+2|Hyperolius kivuensis
+2|Indian burrowing|Indian burrowing frog|Magadha burrowing frog|Sphaerotheca breviceps
+2|Indian flying|Indian flying frog|Pterorana khare
+2|Indirana brachytarsus|Short-legged frog
+2|Indirana semipalmata
+2|Ingerophrynus parvus
+2|Isthmohyla rivularis|Cinchona Plantation tree frog
+2|Jordan's casque-headed tree|Jordan's casque-headed tree frog|Trachycephalus jordani
+2|Kalakad wrinkled|Kalakad wrinkled frog|Nyctibatrachus vasanthi
+2|Karoo|Karoo toad|Vandijkophrynus gariepensis
+2|Kassam tree|Kassam tree frog|Litoria multiplica
+2|Kinabalu horned|Kinabalu horned frog|Megophrys baluensis
+2|Lankanectes corrugatus|Corrugated water frog
+2|Lepidobatrachus llanensis
+2|Leptobrachella liui|Leptolalax liui
+2|Leptobrachium hasseltii
+2|Leptobrachium hendricksoni
+2|Leptodactylus colombiensis
+2|Leptodactylus fragilis
+2|Leptodactylus gracilis|Dumeril's striped frog
+2|Leptodactylus labyrinthicus|pepper foam frog|labyrith frog
+2|Leptodactylus melanonotus|black-backed frog|Mexican river frog
+2|Leptodactylus petersii
+2|Leptodactylus troglodytes|Sibilator Frog|Hole-dwelling Thin-toed Frog|Pernambuco White-lipped Frog
+2|Leptopelis aubryi
+2|Leptopelis flavomaculatus
+2|Leptopelis parkeri|Parker’s forest tree frog
+2|Long-snouted|Long-snouted frog|Litoria longirostris
+2|Loveridge's|Loveridge's frog|Philoria loveridgei
+2|Lowland burrowing tree|Lowland burrowing tree frog|Smilisca fodiens
+2|Malayan flying|Malayan flying frog|Rhacophorus prominanus|Johore Flying Frog
+2|Mantidactylus aerumnalis
+2|Mantidactylus alutus
+2|Mantidactylus betsileanus
+2|Mantidactylus biporus
+2|Mantidactylus curtus
+2|Mantidactylus guttulatus
+2|Mantidactylus lugubris
+2|Mantidactylus opiparis
+2|Masked|Masked frog|Litoria personata
+2|Melanophryniscus stelzneri
+2|Micrixalus elegans|Elegant Dancing Frog
+2|Micrixalus gadgili|Gadgil's Dancing Frog|Gadgil's torrent frog|Gadgil's Tropical Frog|Sabarigiri Torrent Frog
+2|Micrixalus kottigeharensis|Kottigehar Dancing Frog|Narain's Torrent Frog
+2|Micrixalus phyllophilus|Pink-thighed Dancing Frog
+2|Micrixalus thampii|Thampi's torrent frog
+2|Microhyla achatina
+2|Mindoro tree|Mindoro tree frog|Philautus schmackeri
+2|Minervarya kirtisinghei|Fejervarya kirtisinghei|Kirtisinghe's frog
+2|Nanorana conaensis
+2|Nasutibatrachus mucro|Litoria mucro
+2|Natal forest tree|Natal forest tree frog|Leptopelis natalensis
+2|Natal sand|Natal sand frog|Tomopterna natalensis
+2|Noblella peruviana
+2|Nodugl tree|Nodugl tree frog|Litoria micromembrana
+2|Northern|Northern frog|Ingerana borealis
+2|Northern New Guinea tree|Northern New Guinea tree frog|Litoria graminea|Nyctimystes graminea|Nyctimystes gramineus
+2|Northern sheep|Northern sheep frog|Sheep frog|Hypopachus variolosus
+2|Nyctibatrachus aliciae|Cream spotted frog
+2|Nyctibatrachus minor|Small wrinkled frog
+2|Oak|Oak toad|Anaxyrus quercicus|Bufo quercicus
+2|Odontophrynus cultripes|Rio Grande Escuerzo
+2|Odorrana supranarina
+2|Odorrana utsunomiyaorum
+2|Ololygon ariadne|Scinax ariadne
+2|Oophaga sylvatica|Kiki poison dart frog|Little devil poison frog
+2|Oreophrynella macconnelli
+2|Osteocephalus planiceps
+2|Palawan horned|Palawan horned frog|Megophrys ligayae
+2|Pale|Pale frog|Litoria pallida
+2|Papuahyla rubrops|Litoria rubrops
+2|Parker's tree|Parker's tree toad|Laurentophryne parkeri
+2|Pelophryne lighti
+2|Peru marsupial|Peru marsupial frog|Gastrotheca peruana
+2|Peters' platanna|Xenopus petersii
+2|Philautus bunitus|Green bush frog
+2|Phrynobatrachus dispar
+2|Phrynobatrachus mababiensis
+2|Phrynobatrachus parvulus
+2|Phrynobatrachus perpalmatus
+2|Phrynomedusa marginata
+2|Phyllomedusa burmeisteri|Burmeister's frog|common walking leaf frog
+2|Phyllomedusa tarsius|Tarsier leaf frog
+2|Phyllomedusa trinitatis|Trinidad leaf frog|Trinidad leaf-nesting frog|Trinidadian leaf frog
+2|Physalaemus biligonigerus|weeping frog
+2|Physalaemus olfersii|Atlantic forest dwarf frog
+2|Physalaemus spiniger|Physalaemus spinigerus
+2|Pithecopus palliatus|Phyllomedusa palliata
+2|Platymantis cagayanensis
+2|Platypelis tetra|Cophyla tetra
+2|Plectrohyla exquisita|Spikethumb frog
+2|Plectrohyla guatemalensis|Guatemalan spikethumb frog
+2|Plectrohyla sagorum|Plectrohyla sbasajbs|Spikethumb frog
+2|Plethodontohyla alluaudi
+2|Plethodontohyla inguinalis
+2|Pleurodema thaul|Sapito De Cuatro Ojos|Chile four-eyed frog
+2|Polypedates colletti|black-spotted tree frog|Collett's tree frog|Collett's whipping frog
+2|Polypedates pseudocruciger|False Hour-glass Tree Frog
+2|Pristimantis achatinus
+2|Proceratophrys bigibbosa|Peters' smooth horned frog
+2|Proceratophrys cururu|toad-like ground frog
+2|Pseudis cardosoi
+2|Pseudis minuta|Lesser swimming frog
+2|Pseudophilautus cuspis|sharp-snouted shrub frog
+2|Pseudophilautus femoralis|green bush frog|leaf-nesting shrub frog|plain green bush frog|round-snout pygmy tree frog|soutwestern bubble-nest frog
+2|Pseudophilautus frankenbergi|Frankenberg's shrub frog
+2|Pseudophilautus macropus|Bigfoot shrub frog
+2|Pseudophilautus mooreorum
+2|Pseudophilautus nasutus|Sharp-nosed bush frog|Snouted bubble-nest frog
+2|Pseudophilautus reticulatus|Philautus reticulatus|Bubble-nest frog
+2|Pseudophilautus schmarda|Schmarda's shrub frog|Sri Lanka bug-eyed frog
+2|Pseudophilautus silus|pug-nosed shrub frog
+2|Ptychadena oxyrhynchus|Sharp-nosed Grass Frog|Sharp-nosed Ridged Frog
+2|Purcell's ghost|Purcell's ghost frog|Heleophryne purcelli
+2|Quacking|Quacking frog|Crinia georgiana|red-thighed froglet
+2|Rabor's forest|Rabor's forest frog|Platymantis rabori|Rabori's forest frog
+2|Raorchestes anili|Anil's Bush Frog
+2|Raorchestes bombayensis|Maharashtra Bush Frog
+2|Raorchestes chalazodes|Philautus chalazodes|Chalazodes bubble-nest frog|Chalazodes Bush Frog
+2|Raorchestes charius|Seshachar’s Bush Frog
+2|Raorchestes dubois|Kodaikanal Bush Frog
+2|Raorchestes flaviventris|Yellow-bellied Bush Frog
+2|Raorchestes glandulosus|Glandular Bush Frog
+2|Raorchestes griet|Griet's Bush Frog
+2|Raorchestes luteolus|Philautus luteolus|Blue-eyed Yellow Bush Frog
+2|Raorchestes ponmudi|Large Ponmudi Bush Frog
+2|Raorchestes signatus|Cross-backed Bush Frog
+2|Raorchestes tinniens|Nilgiri Bush Frog
+2|Red-crowned toadlet|Pseudophryne australis
+2|Red-spotted|Red-spotted toad|Anaxyrus punctatus
+2|Rhacophorus pseudomalabaricus|False Malabar Gliding Frog|Parachuting frog
+2|Rhacophorus rhodopus|Red-webbed Treefrog
+2|Rhinella achalensis|Chaunus achalensis
+2|Rio Chipillico|Rio Chipillico frog|Rana bwana
+2|Rio golden-eyed tree|Rio golden-eyed tree frog|Trachycephalus imitatrix
+2|Robust bleating tree|Robust bleating tree frog|Bleating tree frog|Litoria dentata
+2|Rose's ghost|Rose's ghost frog|Heleophryne rosei|Table Mountain ghost frog
+2|Rufous-eyed brook|Rufous-eyed brook frog|Duellmanohyla rufioculis
+2|Sachatamia albomaculata
+2|Samlakki tree|Samlakki tree frog|Litoria capitula
+2|Sandyrana dux|Litoria dux|Nyctimystes dux
+2|Sarcohyla ameibothalame|Plectrohyla ameibothalame|Mixteca Alta tree frog
+2|Sarcohyla mykter|Keel-snouted tree frog|Keelsnout tree frog
+2|Scaphiophryne brevis
+2|Scinax acuminatus
+2|Scinax altae
+2|Scinax crospedospilus|Campo Belo snouted tree frog
+2|Scinax cruentomma|Scinax cruentommus
+2|Scinax cuspidatus
+2|Scinax fuscomarginatus
+2|Scinax fuscovarius|snouted tree frog
+2|Scinax garbei
+2|Scinax granulatus|Argentine snouted tree frog
+2|Scinax hayii
+2|Scinax nebulosus|Blue-headed snouted tree frog|Spix's snouted tree frog
+2|Scinax rostratus
+2|Scinax similis
+2|Scinax squalirostris
+2|Sclerophrys blanfordii|Blanford's toad|Amietophrynus blanfordii
+2|Sclerophrys poweri|Amietophrynus poweri
+2|Sicilian green|Sicilian green toad|Bufotes siculus
+2|Sierra Nevada yellow-legged|Sierra Nevada yellow-legged frog|Rana sierrae
+2|Sira poison dart|Sira poison dart frog|bamboo poison frog|Biolat poison frog|Pasco poison frog|Sira poison frog
+2|Snow Mountains tree|Snow Mountains tree frog|Litoria napaea|Ranoidea napaea
+2|Southern New Guinea tree|Southern New Guinea tree frog|Litoria impura|Ranoidea impura
+2|Sphaenorhynchus carneus
+2|Sphaenorhynchus pauloalvini|Gabohyla pauloalvini|Paolo's lime tree frog
+2|Sphaenorhynchus prasinus
+2|Spicicalyx myola|Litoria myola|Kuranda tree frog|Myola tree frog|Ranoidea myola
+2|Striped burrowing|Striped burrowing frog|Cyclorana alboguttata
+2|Striped marsh|Striped marsh frog|Limnodynastes peronii
+2|Stuttering|Stuttering frog|Mixophyes balbus
+2|Suweon tree|Suweon tree frog|Dryophytes suweonensis|Hyla suweonensis|Suwon tree frog
+2|Sylvirana cubitalis|Hylarana cubitalis|Siam frog|Siamese frog
+2|Taruga eques|Gunther's whipping frog|montane hourglass tree frog|spurred tree frog
+2|Teretistes havina|Litoria havina
+2|Tornier's|Tornier's frog|Litoria tornieri
+2|Trachycephalus venezolanus|Aparasphenodon venezolanus
+2|Tradouw's mountain|Tradouw's mountain toad|Capensibufo tradouwi
+2|Usina tree|Usina tree frog|Hypsiboas lundii|Boana lundii|Lund's tree frog
+2|Vera's treefrog|Litoria verae
+2|Wakea madinika
+2|Walkerana phrynoderma|Indirana phrynoderma|Toad-skinned frog|Warty-skinned Leaping Frog
+2|Waterfall|Waterfall frog|Litoria nannotis|Ranoidea nannotis|Torrent tree frog
+2|Watjulum|Watjulum frog|Litoria watjulumensis
+2|Western Highland treefrog|Litoria iris
+2|White-spotted tree|White-spotted tree frog|Hypsiboas albopunctatus|Boana albopunctata|fasciated frog|spotted tree frog|yellow-spotted tree frog
+2|Wolterstorffina parvipalmata|Cameroon Wolterstorff toad
+2|Woodhouse's|Woodhouse's toad|Anaxyrus woodhousii
+2|Xenohyla eugenioi
+2|Xenophrys longipes|Megophrys longipes
+2|Yule Island tree|Yule Island tree frog|Litoria congenita
+2|Zachaenus parvulus|Cycloramphus parvulus
+2|Zhangixalus achantharrhena|Rhacophorus achantharrhena
+2|Zhangixalus aurantiventris|Rhacophorus aurantiventris|Orange-belly tree frog
+2|Zhangixalus owstoni|Rhacophorus owstoni
+2|Zhangixalus prasinatus|Rhacophorus prasinatus|emerald green tree frog|tributary tree frog
+2|Zhangixalus smaragdinus|Rhacophorus maximus|Giant Gliding Frog
+2|Adelophryne baturitensis
+2|Adenomera bokermanni|Bokermann's potter frog|Bokermann's tropical bullfrog
+2|Adenomera heyeri|Heyer's tropical bullfrog
+2|Adenomera martinezi
+2|African foam-nest tree|African foam-nest tree frog|Chiromantis rufescens
+2|Afrixalus clarkei|Clarke’s banana frog
+2|Afrixalus stuhlmanni
+2|Agalychnis buckleyi|warty leaf frog
+2|Allobates caribe|Caribbean nurse frog
+2|Allobates crombiei
+2|Allobates fuscellus
+2|Allobates gasconi
+2|Allobates goianus|Cerrado rocket frog|Goias rocket frog
+2|Allobates humilis|Bocono rocket frog
+3|Allobates marchesianus|dull rocket frog
+3|Allobates masniger
+3|Allobates nidicola
+3|Allobates niputidea
+3|Allobates pittieri|Pittier's Little Frog
+3|Allobates sumtuosus
+3|Alsodes hugoi
+3|Alsodes kaweshkari
+3|Alsodes tumultuosus
+3|Alsodes vittatus|Malleco spiny-chest frog
+3|Amazon River|Amazon River frog|Lithobates palmipes|Rana palmipes
+3|Amietia vandijki|Afrana vandijki
+3|Amnihyla brongersmai|Litoria brongersmai|Brongersma's tree frog|Ranoidea brongersmai
+3|Amnihyla megalops|Litoria megalops
+3|Amnihyla pratti|Litoria pratti|Pratt's tree frog|Ranoidea pratti
+3|Amolops bellulus
+3|Amolops chunganensis
+3|Amolops formosus|Beautiful Torrent Frog
+3|Amolops larutensis
+3|Amolops loloensis|Rufous-spotted torrent frog
+3|Amolops torrentis|Little torrent frog
+3|Amolops tuberodepressus
+3|Andean marsupial tree|Andean marsupial tree frog|Gastrotheca riobambae|Riobamba marsupial frog
+3|Andinobates claudiae|Ranitomeya claudiae
+3|Andinobates dorisswansonae
+3|Anodonthyla montana|Mountain climbing frog
+3|Anodonthyla nigrigularis|Climbing frog
+3|Anodonthyla rouxae|Madagascar climbing frog
+3|Anomaloglossus breweri|Colostethus breweri
+3|Anomaloglossus degranvillei|Degranville's rocket frog
+3|Anomaloglossus kaiei|Kaie rock frog
+3|Anomaloglossus parkerae|Colostethus parkerae
+3|Anomaloglossus tepuyensis|Colostethus tepuyensis
+3|Ansonia fuliginea
+3|Ansonia guibei|Mesilau stream toad
+3|Ansonia minuta
+3|Ansonia siamensis
+3|Anstisia alba|Geocrinia alba|White-bellied frog
+3|Aplastodiscus cavicola|Cruz's treefrog
+3|Aplastodiscus flumineus|Brazilian river tree frog
+3|Aromobates nocturnus|Skunk Frog
+3|Arthroleptis adelphus
+3|Arthroleptis adolfifriederici
+3|Arthroleptis francei
+3|Arthroleptis poecilonotus
+3|Arthroleptis variabilis
+3|Arthroleptis xenochirus|Plain Squeaker
+3|Astylosternus montanus
+3|Astylosternus ranoides
+3|Atelopus chiriquiensis|Chiriqui harlequin frog
+3|Atelopus coynei
+3|Atelopus cruciger|Rancho Grande Harlequin Frog
+3|Atelopus eusebianus
+3|Atelopus exiguus|Harlequin frog
+3|Atelopus lozanoi
+3|Atelopus minutulus
+3|Atelopus monohernandezii
+3|Atelopus muisca
+3|Atelopus nanay
+3|Atelopus nepiozomus
+3|Atelopus nicefori
+3|Atelopus palmatus
+3|Atelopus patazensis
+3|Atelopus pulcher|Harlequin frog
+3|Atelopus seminiferus|Upper Amazon stubfoot toad
+3|Atelopus vogli
+3|Atelopus walkeri
+3|Austrochaperina macrorhyncha
+3|Bahia heart-tongued|Bahia heart-tongued frog|Phyllodytes melanomystax
+3|Barygenys atra
+3|Barygenys maculata
+3|Barygenys parvula
+3|Basin tree|Basin tree frog|Hypsiboas lanciformis|Boana lanciformis|Rocket tree frog
+3|Batrachyla fitzroya
+3|Baw Baw|Baw Baw frog|Philoria frosti
+3|Bloody Bay poison|Bloody Bay poison frog|Bloody Bay fragrant frog|Mannophryne olmonae
+3|Boana atlantica|Hypsiboas atlanticus
+3|Boana cipoensis|Hypsiboas cipoensis
+3|Boana claresignata|Bokermannohyla claresignata|Rio tree frog, Boana claresignata
+3|Boana clepsydra|Bokermannohyla clepsydra|São Paulo tree frog
+3|Boana cordobae|Hypsiboas cordobae
+3|Boana ericae|Hypsiboas ericae
+3|Boana guentheri|Hypsiboas guentheri|Gunther's Brazilian tree frog
+3|Boana semilineata|Hypsiboas semilineatus
+3|Bokermannohyla astartea|paranapiacaba tree frog
+3|Bokermannohyla caramaschii
+3|Bokermannohyla carvalhoi|Carvalho's tree frog
+3|Bokermannohyla diamantina
+3|Bokermannohyla gouveai|Itatiaia tree frog
+3|Bokermannohyla ibitipoca|Ibitipoca tree frog
+3|Bokermannohyla itapoty
+3|Bokermannohyla oxente
+3|Bokermannohyla ravida
+3|Bokermannohyla sazimai|Zagaia tree frog
+3|Bony-headed|Bony-headed toad|Ingerophrynus galeatus
+3|Boophis miniatus
+3|Boophis solomaso
+3|Boophis vittatus
+3|Boophis xerophilus
+3|Boreal chorus|Boreal chorus frog|Pseudacris maculata
+3|Brachytarsophrys chuannanensis
+3|Breviceps fuscus|black rain frog
+3|Breviceps poweri|Power's Rain Frog
+3|Brimley's chorus|Brimley's chorus frog|Pseudacris brimleyi
+3|Bufo cryptotympanicus
+3|Cainarachi poison|Cainarachi poison frog|Ameerega cainarachi
+3|Callimedusa atelopoides|Phyllomedusa atelopoides|Terrestrial monkey frog|Toady leaf frog
+3|Callulops comptus
+3|Callulops robustus
+3|Cameroon forest tree|Cameroon forest tree frog|Leptopelis brevirostris
+3|Canal Zone tree|Canal Zone tree frog|Hypsiboas rufitelus
+3|Cape river|Cape river frog|Amietia fuscigula
+3|Cardioglossa gracilis
+3|Cardioglossa oreas|Mount Okou long-fingered frog
+3|Carpenter|Carpenter frog|Lithobates virgatipes
+3|Ceiba stream|Ceiba stream frog|Ptychohyla spinipollex
+3|Centrolene altitudinalis|Centrolene altitudinale
+3|Centrolene hesperia|Centrolene hesperium
+3|Centrolene huilensis|Centrolene huilense
+3|Centrolene lynchi|Lynch's giant glass frog
+3|Centrolene sanchezi
+3|Centrolene savagei|Cochranella savagei|Savage's cochran frog
+3|Chirixalus dudhwaensis|Chiromantis dudhwaensis|Dudhwa Bush Frog
+3|Chirixalus simus|Chiromantis simus|Assam asian frog|Assam tree frog
+3|Chlorohyla elkeae|Litoria elkeae|Ranoidea elkeae
+3|Colostethus agilis
+3|Colostethus panamansis|Colostethus panamensis|Common rocket frog
+3|Common eastern froglet|Crinia signifera
+3|Common puddle|Common puddle frog|Occidozyga laevis|O. laevis
+3|Conraua derooi|Togo slippery frog
+3|Coorg night|Coorg night frog|Nyctibatrachus sanctipalustris|Nyctibatrachus sancitpalustris
+3|Copan stream|Copan stream frog|Ptychohyla hypomykter
+3|Cope's eastern Paraguay tree|Cope's eastern Paraguay tree frog|Hypsiboas polytaenius|Boana polytaenia
+3|Cophyla berara|Microhylid frog
+3|Copland's rock|Copland's rock frog|Litoria coplandi
+3|Cornufer papuensis|Papua wrinkled ground frog
+3|Cornufer pelewensis
+3|Craugastor fitzingeri|Fitzinger's robber frog
+3|Craugastor gollmeri|evergreen robber frog
+3|Craugastor polyptychus
+3|Craugastor rugosus
+3|Craugastor rugulosus
+3|Craugastor stejnegerianus
+3|Cream-backed poison|Cream-backed poison frog|Hyloxalus subpunctatus
+3|Crested|Crested toad|Ingerophrynus biporcatus
+3|Cross|Cross toad|Leptophryne borbonica
+3|Crossodactylus gaudichaudii|Brazilian spinythumb frog|Gaudichaud's frog|Muller's spinythumb frog,
+3|Crossodactylus trachystomus|Bokermann's spinythumb frog|Bokermann's stream froglet|Minas Gerais spinythumb frog
+3|Cuban spotted|Cuban spotted toad|Peltophryne taladai
+3|Dainty green tree|Dainty green tree frog|Graceful tree frog|Litoria gracilenta|Ranoidea gracilenta
+3|Delalande's sand|Delalande's sand frog|Cape Sand Frog|Striped Pyxie|Tomopterna delalandii
+3|Dendrophryniscus berthalutzae
+3|Dendrophryniscus brevipollicatus
+3|Dendrophryniscus leucomystax
+3|Dendropsophus anceps|Estrella tree frog
+3|Dendropsophus berthalutzae|Bertha's tree frog
+3|Dendropsophus bifurcus|Upper Amazon tree frog
+3|Dendropsophus bogerti
+3|Dendropsophus brevifrons|Crump tree frog
+3|Dendropsophus elianeae
+3|Dendropsophus giesleri
+3|Dendropsophus jimi
+3|Dendropsophus joannae
+3|Dendropsophus koechlini|Koechlin's tree frog
+3|Dendropsophus padreluna
+3|Dendropsophus parviceps
+3|Dendropsophus rhodopeplus|red-skirted tree frog
+3|Dendropsophus robertmertensi|Merten's yellow tree frog
+3|Dendropsophus sanborni|Sanborn's tree frog
+3|Dendropsophus soaresi|Picos tree frog
+3|Dendropsophus triangulum|triangle tree frog
+3|Dendropsophus walfordi|Walfords Yellow Tree Frog
+3|Dendropsophus werneri|Bailey's tree frog
+3|Dendy's toadlet|Pseudophryne dendyi
+3|Diasporus diastema|Common tink frog
+3|Doichang|Doichang frog|Nanorana aenea
+3|Duttaphrynus brevirostris
+3|Eastern ghost|Eastern ghost frog|Heleophryne orientalis
+3|Eastern leopard|Eastern leopard toad|Leopard Toad|Sclerophrys pardalis
+3|Eastern mountains tree|Eastern mountains tree frog|Ranoidea dorsivena|Litoria dorsivena
+3|Eastern smooth|Eastern smooth frog|Geocrinia victoriana|Victorian smooth froglet
+3|Ecnomiohyla fimbrimembra|Fringe-limbed treefrog|Heredia tree frog
+3|Ecuador slender-legged tree|Ecuador slender-legged tree frog|Osteocephalus verruciger
+3|Edalorhina perezi|eyelashed forest frog|Perez' snouted frog|Perez's Foam-nest Frog
+3|Eleutherodactylus glandulifer|La Hotte glanded frog
+3|Eleutherodactylus ricordii|Ricordi's robber frog
+3|Engystomops coloradorum|Colorado bully foam frog|Colorado dwarf frog
+3|Engystomops montubio|Montubio bully foam frog
+3|Engystomops petersi|Peters’ dwarf frog|Peters' bully foam frog
+3|Eupsophus contulmoensis|Contulmo ground frog
+3|Eupsophus nahuelbutensis|Nahuelbuta ground frog
+3|Eupsophus vertebralis|Valdivia ground frog
+3|Excidobates captivus|Rio Santiago poison frog
+3|Exedrobatrachus biakensis|Litoria biakensis
+3|Exerodonta catracha|Zacate Blanco treefrog
+3|Exochohyla chrisdahli|Litoria chrisdahli
+3|Exochohyla humboldtorum|Litoria humboldtorum
+3|Feihyla palpebralis
+3|Fejervarya moodiei
+3|Fine-lined tree|Fine-lined tree frog|Hypsiboas leptolineatus|Boana leptolineata
+3|Flea-frog|Brachycephalus hermogenesi
+3|Forest rain|Forest rain frog|Breviceps sylvestris
+3|Forrer's grass|Forrer's grass frog|Lithobates forreri
+3|Frilled tree|Frilled tree frog|Kurixalus appendiculatus|Philippine flying frog|southeast Asian tree frog
+3|Fringed tree|Fringed tree frog|green-eyed frog|Litoria eucnemis|Lönnberg's tree frog|Ranoidea eucnemis
+3|Fry's|Fry's frog|Austrochaperina fryi
+3|Fungoid|Fungoid frog|Hydrophylax malabaricus
+3|Gastrotheca albolineata
+3|Gastrotheca litonedis|Busa marsupial frog|Azuay marsupial frog
+3|Gastrotheca monticola
+3|Gephyromantis ambohitra|Madagascar frog|Mantidactylus ambohitra|Montagne d'Ambre Madagascar Frog
+3|Gephyromantis eiselti|Mantidactylus eiselti
+3|Gephyromantis schilfi|Madagascar frog|Mantidactylus schilfi
+3|Gephyromantis striatus|Madagascar frog|Mantidactylus striatus
+3|Gephyromantis tandroka|Madagascar frog|Mantidactylus tandroka
+3|Gephyromantis ventrimaculatus
+3|Giant barred|Giant barred frog|Mixophyes iteratus
+3|Giant burrowing|Giant burrowing frog|Heleioporus australiacus
+3|Gliding tree|Gliding tree frog|Agalychnis spurrelli
+3|Gracixalus medogensis|Medog bubble-nest frog|Medog small treefrog
+3|Guanujo stubfoot|Guanujo stubfoot toad|Puca Sapo|Atelopus guanujo
+3|Guerreran leopard|Guerreran leopard frog|Lithobates omiltemanus
+3|Guibemantis albolineatus
+3|Guibemantis bicalcaratus
+3|Guibemantis depressiceps
+3|Guibemantis flavobrunneus
+3|Guibemantis kathrinae
+3|Guibemantis pulcher
+3|Gunther's banded tree|Gunther's banded tree frog|Hypsiboas fasciatus|Boana fasciata
+3|Haddadus binotatus
+3|Haswell's|Haswell's frog|Paracrinia haswelli
+3|Hazel's forest|Hazel's forest frog|Platymantis hazelae|Hazel's wrinkled ground frog
+3|Hemiphractus proboscideus|long-snouted casque-headed frog|Sumaco horned tree frog
+3|Heterixalus variabilis
+3|Hewitt's ghost|Hewitt's ghost frog|Heleophryne hewitti
+3|Holdridge's|Holdridge's toad|Incilius holdridgei
+3|Hong Kong cascade|Hong Kong cascade frog|Amolops hongkongensis
+3|Hooting|Hooting frog|Heleioporus barycragus|Western marsh frog
+3|Houston|Houston toad|Anaxyrus houstonensis
+3|Humerana lateralis|Pelophylax lateralis|Kokarit Pond Frog
+3|Hyalinobatrachium dianae
+3|Hyalinobatrachium ruedai
+3|Hylarana tytleri
+3|Hylodes asper|Brazilian torrent frog|warty tree toad
+3|Hylodes heyeri
+3|Hylodes meridionalis|Rio Grande tree toad
+3|Hylodes nasus|Santa Catarina tree toad
+3|Hylodes phyllodes|Boraceia tree toad
+3|Hylomantis aspera
+3|Hylomantis granulosa
+3|Hyloxalus picachos|Colostethus picacho|Allobates picachos
+3|Hyperolius acutirostris
+3|Hyperolius cinnamomeoventris
+3|Hyperolius concolor
+3|Hyperolius nimbae|Reed frog
+3|Hyperolius puncticulatus|Spotted reed frog
+3|Hyperolius pusillus|Water lily frog
+3|Indirana gundia
+3|Indirana leithii|Leith's leaping frog|Matheran Leaping Frog
+3|Indosylvirana aurantiaca
+3|Inelegant|Inelegant frog|Cophixalus infacetus
+3|Ingerophrynus quadriporcatus|Four-ridged toad|Greater Malacca toad|Long-glanded toad
+3|Isthmohyla debilis|Isla Bonita tree frog
+3|Isthmohyla tica|Starrett’s tree frog
+3|Jobi tree|Jobi tree frog|Litoria obtusirostris
+3|Johns' groove-toed|Johns' groove-toed frog|Rana johnsi
+3|Kalinga narrowmouth|Kalinga narrowmouth toad|Kaloula kalingensis
+3|Kallistobatrachus majikthise|Litoria majikthise
+3|Kallistobatrachus ollauro|Litoria ollauro
+3|Koh Chang|Koh Chang frog|Limnonectes kohchangae
+3|Krefft's warty|Krefft's warty frog|Callulina kreffti
+3|Kurixalus odontotarsus|serrate-legged small tree frog|serrated frilled tree frog
+3|Legler's stream|Legler's stream frog|Ptychohyla legleri
+3|Leopard tree|Leopard tree frog|Hypsiboas pardalis|Boana pardalis
+3|Leptobrachella arayai|Leptolalax arayai|Kinabalu slender litter frog
+3|Leptobrachella bourreti|Leptolalax bourreti
+3|Leptobrachium abbotti
+3|Leptobrachium chapaense
+3|Leptobrachium gunungense|Asian litter frog
+3|Leptodactylus didymus
+3|Leptodactylus furnarius|Campo Grande frog|Cerrado cane frog|potter foam frog
+3|Leptodactylus jolyi|Joly's foam frog|Joly's frog
+3|Leptodactylus knudseni|Knudsen's frog|Knudsen's thin-toed frog
+3|Leptodactylus labrosus|Pimocha white-lipped frog|thick-lipped thin-toed frog
+3|Leptodactylus latinasus|Urnero
+3|Leptodactylus marmoratus|Adenomera marmorata|marbled tropical bullfrog
+3|Leptodactylus mystaceus
+3|Leptodactylus natalensis
+3|Leptodactylus notoaktites|Iporanga white-lipped frog
+3|Leptodactylus plaumanni|Nova Teutonia white-lipped frog|gray-striped frog
+3|Leptodactylus podicipinus
+3|Leptodactylus pustulatus|Ceara white-lipped frog
+3|Leptodactylus rhodomystax
+3|Leptodactylus riveroi
+3|Leptodactylus spixi|Spix's white-lipped frog
+3|Leptodactylus syphax|basin white-lipped frog|whistling foam frog
+3|Leptomantis angulirostris|Rhacophorus angulirostris|Masked tree frog
+3|Leptopelis calcaratus
+3|Lightfoot's moss|Lightfoot's moss frog|Arthroleptella lightfooti|Cape Peninsula Moss Frog|Lightfoota's Moss Frog|Peninsula Moss Frog
+3|Limnonectes acanthi
+3|Limnonectes dammermani
+3|Limnonectes fujianensis
+3|Limnonectes hascheanus
+3|Limnonectes kadarsani
+3|Limnonectes namiyei|Namiye's frog|Namie's frog
+3|Limnonectes paramacrodon|Lesser swamp frog
+3|Lithodytes lineatus|Sapito Listado
+3|Little grass|Little grass frog|Pseudacris ocularis
+3|Little horned|Little horned toad|Megophrys minor
+3|Littlejohn's tree|Littlejohn's tree frog|Litoria littlejohni
+3|Long-snout torrent|Long-snout torrent frog|Odorrana nasica
+3|Long-toed tree|Long-toed tree frog|Leptopelis xenodactylus
+3|Los Bracitos tree|Los Bracitos tree frog|Hypsiboas heilprini|Boana heilprini|Hispaniolan gree tree frog
+3|Lutz's poison|Lutz's poison frog|Ameerega flavopicta
+3|Lysapsus limellum|Uruguay harlequin frog
+3|Madecassophryne|Madecassophryne truebae
+3|Magnificent brood|Magnificent brood frog|Pseudophryne covacevichae
+3|Mangshan horned|Mangshan horned toad|Megophrys mangshanensis
+3|Mannophryne lamarcai|Socopo collared frog
+3|Mannophryne yustizi|Yacambu poison frog
+3|Mantella ebenaui
+3|Mantidactylus albofrenatus
+3|Mantidactylus argenteus
+3|Mantidactylus brevipalmatus
+3|Mantidactylus charlotteae
+3|Mantidactylus femoralis
+3|Mantidactylus majori
+3|Mantidactylus melanopleura
+3|Mantidactylus mocquardi
+3|Mantidactylus pauliani|Madagascar frog
+3|Many-banded tree|Many-banded tree frog|Hypsiboas multifasciatus|Boana multifasciata
+3|Marbled sand|Marbled sand frog|Marmorate Pyxie|Russet-backed Sand Frog|Tomopterna marmorata
+3|Marsabit clawed|Marsabit clawed frog|Xenopus borealis
+3|Megophrys montana|Asian horned frog|Asian Spadefoot Toad|Javan Horned Frog
+3|Melanophryniscus cambaraensis|Brazilian red-belly toad
+3|Melanophryniscus devincenzii|Rivera red-belly toad
+3|Melanophryniscus montevidensis|Montevideo red-belly toad
+3|Melanophryniscus simplex
+3|Micrixalus nudis|Naked Dancing Frog|Pillai’s tropical frog
+3|Microhyla berdmorei|Berdmore's Narrow-mouthed Frog
+3|Microhyla borneensis
+3|Microhyla heymonsi
+3|Mimic toadlet|Uperoleia mimula
+3|Montane toadlet|Uperoleia altissima
+3|Mount Tucuche tree|Mount Tucuche tree frog|Flectonotus fitzgeraldi
+3|Mundo Novo tree|Mundo Novo tree frog|Hypsiboas marginatus|Boana marginata
+3|Namaqua caco|Cacosternum namaquense
+3|Namaqua rain|Namaqua rain frog|Breviceps namaquensis
+3|Nannophrys marmorata|Kirthisinghe’s rock frog
+3|Nanorana feae
+3|Nanorana medogensis|Paa medogensis
+3|Nanorana pleskei|Plateau frog
+3|Nanorana polunini
+3|Nasutibatrachus pronimius|Litoria pronimia|Peppered pinocchio tree frog
+3|Nectophrynoides tornieri
+3|New River tree|New River tree frog|Trachycephalus hadroceps
+3|Nicaragua cross-banded tree|Nicaragua cross-banded tree frog|Smilisca puma|Cross-banded tree-frog
+3|Northern corroboree|Northern corroboree frog|Pseudophryne pengilleyi
+3|Northern spadefoot|Northern spadefoot toad|Notaden melanoscaphus
+3|Nyctibatrachus minimus|Miniature Night Frog
+3|Nymphargus anomalus
+3|Odontobatrachus natator
+3|Odontophrynus alipioi|Macrogenioglottus alipioi|Bahia forest frog
+3|Odontophrynus americanus|American ground frog
+3|Odontophrynus carvalhoi
+3|Odorrana chapaensis
+3|Odorrana chloronota|Green Cascade Frog
+3|Odorrana grahami
+3|Odorrana schmackeri
+3|Ololygon albicans|Scinax albicans
+3|Ololygon angrensis|Scinax angrensis
+3|Ololygon arduoa|Scinax arduous
+3|Ololygon argyreornata|Scinax argyreornatus
+3|Ololygon cardosoi|Scinax cardosoi
+3|Ololygon catharinae|Scinax catharinae
+3|Ololygon littoralis|Scinax littoralis
+3|Oreophryne crucifer
+3|Oreophryne monticola
+3|Ornate chorus|Ornate chorus frog|Pseudacris ornata
+3|Ornate tree|Ornate tree frog|Hypsiboas ornatissimus|Boana ornatissima
+3|Oruge tree|Oruge tree frog|Litoria modica
+3|Osteocephalus cabrerai
+3|Otophryne pyburni
+3|Otton|Otton frog|Babina subaspera
+3|Painted tree|Painted tree frog|Tlalocohyla picta
+3|Palm forest tree|Palm forest tree frog|Leptopelis palmatus
+3|Palmated chorus|Palmated chorus frog|Microhyla palmipes
+3|Palmer's tree|Palmer's tree frog|Hyloscirtus palmeri
+3|Papuahyla bibonius|Litoria bibonius
+3|Paradoxophyla palmata
+3|Paratelmatobius poecilogaster|San Andre rapids frog
+3|Pelobatrachus edwardinae|Borneophrys edwardinae
+3|Pelophryne brevipes
+3|Pelophryne misera|Black flathead toad
+3|Pelophylax fukienensis
+3|Pelophylax kl. grafi|hybrid of Pelophylax|Graf's hybrid frog|Pelophylax grafi
+3|Peru poison|Peru poison frog|Ameerega petersi
+3|Petropedetes cameronensis
+3|Phasmahyla cochranae
+3|Philautus abditus|Buon Luoi shrub frog
+3|Philautus acutirostris|Philippine bubble-nest frog|pointed-snouted tree frog
+3|Philautus everetti|Mossy flying frog
+3|Philautus petersi|Peter's bush frog|Peters' bubble-nest frog
+3|Philautus tectus|Gunung mulu bubble-nest frog
+3|Phrynobatrachus cricogaster|Nkongsamba river frog
+3|Phrynomedusa appendiculata|Santa Catarina leaf frog
+3|Phyllodytes wuchereri
+3|Phyllomedusa camba|black-eyed monkey frog
+3|Phyllomedusa iheringii|southern walking leaf frog
+3|Phyllomedusa tetraploidea|hidden walking leaf frog
+3|Phyllomedusa venusta|lovely leaf frog
+3|Physalaemus albonotatus|Menwig frog
+3|Physalaemus atlanticus
+3|Physalaemus barrioi
+3|Physalaemus caete
+3|Physalaemus centralis|central dwarf frog
+3|Physalaemus cicada|Maracas dwarf frog
+3|Physalaemus crombiei
+3|Physalaemus cuvieri|Barker frog|Cuvier's foam froglet
+3|Physalaemus ephippifer
+3|Physalaemus gracilis|graceful dwarf frog
+3|Physalaemus henselii
+3|Physalaemus lisei|Braun's dwarf frog
+3|Physalaemus maculiventris|Mantagnes dwarf frog
+3|Physalaemus moreirae|Sorocaba dwarf frog
+3|Physalaemus nanus
+3|Physalaemus riograndensis|Rio Grande dwarf frog
+3|Phytotriades auratus
+3|Plaintive rain|Plaintive rain frog|Breviceps verrucosus
+3|Platymantis corrugatus
+3|Platymantis dorsalis|Dumeril's wrinkled ground frog|Common forest frog
+3|Platymantis guentheri|Geunther's Triangle Frog, Gunther's wrinkled ground frog
+3|Platymantis insulatus|Gigantes forest frog|Gigantes limestone frog|Gigantes wrinkled ground frog|Island forest frog|South Gigante Island frog
+3|Platymantis isarog|Isarog forest frog
+3|Platypelis mavomavo|Cophyla mavomavo
+3|Platypelis milloti|Cophyla milloti
+3|Platypelis tuberifera|Cophyla tuberifera
+3|Platyplectrum melanopyga|Lechriodus melanopyga
+3|Plectrohyla acanthodes|thorny spikethumb frog
+3|Plectrohyla avia|Greater spikethumb frog
+3|Plectrohyla dasypus|Spikethumb frog
+3|Plectrohyla pokomchi|Rio Sananja spikethrumb frog
+3|Plectrohyla psiloderma
+3|Plectrohyla quecchi|Las Palmas spikethumb frog
+3|Plectrohyla teuchestes|Alta Verapaz spikethumb frog
+3|Plethodontohyla notosticta
+3|Pleurodema bibroni|Four-eyed frog
+3|Polillo forest|Polillo forest frog|Platymantis polillensis
+3|Polypedates maculatus|Common Indian Tree Frog
+3|Polypedates mutus|Burmese whipping frog|northern tree frog
+3|Powdered glass|Powdered glass frog|Teratohyla pulverata
+3|Poynton's caco|Cacosternum poyntoni
+3|Pristimantis acerus|Papallacta robber frog
+3|Pristimantis acuminatus|Eleutherodactylus acuminatus
+3|Pristimantis bogotensis
+3|Proceratophrys appendiculata
+3|Proceratophrys laticeps
+3|Proceratophrys melanopogon
+3|Proceratophrys moratoi
+3|Proceratophrys palustris|plateau smooth horned frog
+3|Proceratophrys schirchi
+3|Pseudepidalea brongersmai|Barbarophryne brongersmai|Brongersma's toad
+3|Pseudis fusca
+3|Pseudopaludicola mystacalis
+3|Pseudopaludicola saltica
+3|Pseudopaludicola ternetzi
+3|Pseudophilautus abundus|Labungama Shrub Frog
+3|Pseudophilautus adspersus|Sri Lanka bubble-nest frog
+3|Pseudophilautus alto|Horton Plains shrub frog
+3|Pseudophilautus auratus
+3|Pseudophilautus hoffmanni
+3|Pseudophilautus hypomelas
+3|Pseudophilautus microtympanum|Gunther's bubble-nest frog|small-eared shrub frog
+3|Pseudophilautus ocularis
+3|Pseudophilautus oxyrhynchus
+3|Pseudophilautus poppiae
+3|Pseudophilautus rus|Kandyan shrub frog
+3|Pseudophilautus sarasinorum|Muller's shrub frog
+3|Pseudophilautus semiruber
+3|Pseudophilautus stellatus|Philautus stellatus
+3|Pseudophilautus stuarti|Stuart's shrub frog
+3|Pseudophilautus variabilis|variable bubble-nest frog|variable bush frog
+3|Ptychadena pumilio
+3|Ptychohyla salvadorensis|Guerreran stream frog
+3|Pygmy forest|Pygmy forest frog|Platymantis pygmaeus
+3|Quasipaa exilispinosa|Paa exilispinosa
+3|Quasipaa verrucospinosa
+3|Ranitomeya benedicta|Blessed poison frog
+3|Ranitomeya vanzolinii|Brazilian poison frog|spotted poison frog|Vanzolini's Poison Frog
+3|Raorchestes bobingeri|Philautus bobingeri|Bob Inger's bush frog
+3|Raorchestes graminirupes|Ponmudi Bush Frog
+3|Raorchestes nerostagona|Water Drop Frog
+3|Raorchestes sanctisilvaticus|Philautus sanctisilvaticus|Sacred Grove Bush Frog
+3|Raorchestes shillongensis|Shillong Bush Frog
+3|Rhacophorus georgii|Tuwa flying frog
+3|Rhacophorus kio
+3|Rhacophorus margaritifer
+3|Rhacophorus orlovi
+3|Rhacophorus translineatus
+3|Rhaebo olallai
+3|Rheobates palmatus|palm rocket frog
+3|Rhinella abei|Chaunus abei
+3|Rhinella achavali|Chaunus achavali
+3|Rhinella arenarum|Chaunus arenarum
+3|Rhinella arunco|Chaunus arunco
+3|Rhinella granulosa|Chaunus granulosus
+3|Rhinella icterica|Chaunus ictericus
+3|Rhinella ornata
+3|Rhinella proboscidea
+3|Rhinella rubescens
+3|Rock skipper|Staurois latopalmatus
+3|Rohanixalus hansenae|Feihyla hansenae
+3|Rohanixalus shyamrupus|Chirixalus shyamrupus|Chiromantis shyamrupus
+3|Rohanixalus vittatus|Feihyla vittata|Two-striped Pigmy Tree Frog
+3|Rosenberg's tree|Rosenberg's tree frog|Hypsiboas rosenbergi|Boana rosenbergi|Rosenberg's frog|Rosenberg's gladiator tree frog
+3|Rossell Island tree|Rossell Island tree frog|Litoria louisiadensis|Roussell Island tree frog
+3|Royal ghost|Royal ghost frog|Heleophryne regis
+3|Ryukyu tip-nosed|Ryukyu tip-nosed frog|Odorrana narina
+3|Sachatamia ilex
+3|Sarcohyla celata|Oaxaca tree frog
+3|Sarcohyla cembra|Southern Sierra Madre tree frog
+3|Sarcohyla pentheter|Plectrohyla pentheter|mourning tree frog
+3|Sarcohyla sabrina|Sierra Juarez tree frog
+3|Savage's brook|Savage's brook frog|Duellmanohyla lythrodes
+3|Scaphiophryne calcarata
+3|Schmidt's mountain brook|Schmidt's mountain brook frog|Duellmanohyla schmidtorum
+3|Scinax auratus
+3|Scinax blairi
+3|Scinax boulengeri
+3|Scinax castroviejoi
+3|Scinax curicica|Lanceback Treefrog
+3|Scinax lindsayi
+3|Scinax proboscideus
+3|Scutiger sikimmensis
+3|Scutiger tuberculatus|Round-tubercled cat-eyed toad
+3|Sierra Juarez brook|Sierra Juarez brook frog|Duellmanohyla ignicolor
+3|Silverstoneia flotator|Rainforest rocket frog
+3|Southern chorus|Southern chorus frog|Pseudacris nigrita
+3|Spea hammondii
+3|Speckled tree|Speckled tree frog|Hypsiboas semiguttatus|Boana semiguttata
+3|Sphaenorhynchus bromelicola
+3|Sphaenorhynchus dorisae|Doris's lime tree frog
+3|Sphaenorhynchus orophilus
+3|Sphaenorhynchus palustris
+3|Sphaerotheca dobsonii|Sphaerotheca dobsoni|Dobson's Burrowing Frog
+3|Spicicalyx exophthalmia|Litoria exophthalmia|Ranoidea exophthalmia|Big-eyed tree frog
+3|Spinomantis brunae
+3|Spot-legged poison|Spot-legged poison frog|Ameerega picta
+3|Spotted grass|Spotted grass frog|Limnodynastes tasmaniensis
+3|Spotted-thighed tree|Spotted-thighed tree frog|Litoria cyclorhyncha
+3|Staurois natator
+3|Staurois tuberilinguis|Green-spotted rock frog
+3|Stefania breweri|Brewer's Carrying Frog
+3|Stefania scalae|Rana Stefania De La Escalera
+3|Stefania tamacuarina|Rana Stefania De Tapirapeco
+3|Stonemason's toadlet|Uperoleia lithomoda
+3|Stream brown|Stream brown frog|Rana sakuraii
+3|Striped caco|Cacosternum striatum
+3|Striped tree|Striped tree frog|Hypsiboas caingua|Boana caingua
+3|Strongylopus fasciatus|Striped stream frog
+3|Sylvirana nigrovittata|Hylarana nigrovittata|Rana nigrovittata
+3|Tandy's sand|Tandy's sand frog|Tomopterna tandyi
+3|Taruga longinasus|Polypedates longinasus|long-snouted tree frog|southern whipping frog|sharp-snout saddled tree frog
+3|Telmatobius atahualpai|Amazonas water frog
+3|Telmatobufo venustus|Chile mountains false toad
+3|Theloderma gordoni
+3|Theloderma horridum
+3|Theloderma laeve|smooth bug-eyed frog
+3|Theloderma leporosum|Theloderma leprosum
+3|Theloderma moloch|Nyctixalus moloch
+3|Thoropa miliaris
+3|Transverse volcanic leopard|Transverse volcanic leopard frog|Lithobates neovolcanicus
+3|Trauna River tree|Trauna River tree frog|Litoria oenicolen
+3|Troschel's tree|Troschel's tree frog|Hypsiboas calcaratus|Blue-flanked tree frog|Convict tree frog
+3|Uluguru forest tree|Uluguru forest tree frog|Leptopelis uluguruensis
+3|Umar treefrog|Litoria umarensis
+3|Uperodon globulosus|Indian balloon frog
+3|Uperodon systoma|Balloon Frog|Marbled Balloon Frog
+3|Uperodon taprobanicus|Indian painted frog|Painted Baloon Frog|Sri Lankan Bullfrog|Sri Lankan Kaloula
+3|Viridihyla wapogaensis|Litoria wapogaensis
+3|Vitreorana eurygnatha
+3|Wallum froglet|Crinia tinnula
+3|Werneria submontana
+3|West Sepik tree|West Sepik tree frog|Litoria leucova
+3|Western Andes|Western Andes toad|Rhaebo atelopoides
+3|Western Nimba|Western Nimba toad|Nimbaphrynoides occidentalis|Mt. Nimba viviparous toad
+3|Whistling tree|Whistling tree frog|Litoria verreauxii|Verreaux's tree frog
+3|Whitebelly tree|Whitebelly tree frog|Hyla alboguttata|Osteocephalus alboguttatus
+3|Windward ditch|Windward ditch frog|Leptodactylus validus
+3|Wolterstorffina mirei|Mount Okou Wolterstorff Toad|swamp forest tree toad
+3|Yellow heart-tongued|Yellow heart-tongued frog|Phyllodytes luteolus
+3|Zhang's horned|Zhang's horned toad|Megophrys zhangi
+3|Zhangixalus dorsoviridis|Rhacophorus dorsoviridis|green-back tree frog
+3|Zhangixalus suffry|Rhacophorus suffry
+3|Zimmerman's poison|Zimmerman's poison frog|Splash-back poison frog|Ranitomeya variabilis|Zimmermann’s poison frog
+3|"Centrolene" azulae
+3|Acanthixalus sonjae|African wart frog
+3|Acanthixalus spinosus
+3|Adelastes hylonomos|Adelastes hylonomus|Neblina Frog|Sapito Escondido
+3|Adelophryne adiastola
+3|Adenomera thomei
+3|Afrixalus uluguruensis|Uluguru banana frog
+3|Alcalus mariae
+3|Allobates granti|black-flanked poison frog
+3|Allobates juanii|Colostethus juanii
+3|Allobates kingsburyi|Colostethus kingsburyi
+3|Allobates mcdiarmidi|McDiarmid's rocket frog
+3|Allobates melanolaemus
+3|Allobates ornatus|Colostethus ornatus
+3|Allobates ranoides|Colostethus ranoides|Llanos rocket frog
+3|Allobates sanmartini|San Martin rocket frog
+3|Allobates subfolionidificans
+3|Allobates trilineatus|Three-striped poison frog
+3|Allobates vanzolinius
+3|Allobates wayuu
+3|Amapa tree|Amapa tree frog|Hypsiboas dentei|Boana dentei
+3|Amatola|Amatola toad|Vandijkophrynus amatolicus
+3|Ameerega braccata
+3|Ameerega pulchripecta|beautiful-breasted poison arrow frog|beautiful-breasted poison frog|blue-breasted poison frog|Silverstone's poison frog
+3|Amietia chapini|Amietia amieti
+3|Amietia delalandii|Amietia dracomontana
+3|Amietophrynus cristiglans
+3|Amolops archotaphus|Doi Inthanon rock frog
+3|Amolops assamensis|Assam Stream Frog
+3|Amolops cremnobatus
+3|Amolops granulosus
+3|Amolops hainanensis|Hainan torrent frog
+3|Amolops jinjiangensis|Cascade frog
+3|Amolops kaulbacki
+3|Amolops lifanensis|Lifan torrent frog
+3|Amolops medogensis
+3|Amolops panhai
+3|Amolops spinapectoralis
+3|Amolops viridimaculatus
+3|Anaxyrus fowleri|Bufo fowleri
+3|Anchieta's tree|Anchieta's tree frog|Leptopelis anchietae
+3|Andinobates abditus|Ranitomeya abdita|Collins's poison frog
+3|Andinobates altobueyensis|Ranitomeya altobueyensis
+3|Andinobates tolimensis
+3|Anomaloglossus ayarzaguenai|Colostethus ayarzaguenai
+3|Anomaloglossus tamacuarensis
+3|Ansonia glandulosa
+3|Ansonia mcgregori
+3|Ansonia muelleri|Muller's toad
+3|Ansonia platysoma|Luidan stream toad
+3|Ansonia tiomanica|Pulo Tioman stream toad
+3|Ansonia torrentis
+3|Anstisia rosea|Geocrinia rosea
+3|Anstisia vitellina|Geocrinia vitellina|Orange-bellied frog
+3|Aphantophryne nana|Camiguin narrow-mouthed frog|Oreophryne nana
+3|Aplastodiscus callipygius
+3|Arizona|Arizona toad|Anaxyrus microscaphus
+3|Arlequinus krebsi
+3|Aromobates capurinensis|Colostethus capurinensis|Capurí rocket frog|Sierra Nevada rocket frog
+3|Aromobates duranti|Durant's rocket frog
+3|Aromobates leopardalis|Colostethus leopardalis|leopard rocket frog|Mucubají Skunk Frog
+3|Aromobates mayorgai|Mayorga rocket frog
+3|Aromobates meridensis|Nephelobates meridensis|Merida rocket frog
+3|Aromobates molinarii
+3|Aromobates orostoma|Nephelobates orostoma
+3|Aromobates saltuensis|forest rocket frog|salty rocket frog
+3|Arroyo|Arroyo toad|Anaxyrus californicus
+3|Arthroleptis carquejai
+3|Arthroleptis reichei
+3|Astylosternus batesi
+3|Astylosternus fallax
+3|Astylosternus laurenti|Laurent’s night frog
+3|Astylosternus occidentalis
+3|Astylosternus perreti
+3|Astylosternus rheophilus
+3|Atelognathus ceii
+3|Atelognathus praebasalticus
+3|Atelopus carbonerensis|Venezuelan Yellow Frog
+3|Atelopus chocoensis|Harlequin frog
+3|Atelopus dimorphus
+3|Atelopus erythropus|Harlequin frog
+3|Atelopus eusebiodiazi
+3|Atelopus farci|forest stubfoot toad
+3|Atelopus guitarraensis
+3|Atelopus halihelos
+3|Atelopus longibrachius
+3|Atelopus mandingues
+3|Atelopus pedimarmoratus
+3|Atelopus petriruizi
+3|Atelopus pictiventris
+3|Atelopus quimbaya
+3|Atelopus reticulatus
+3|Atelopus sanjosei
+3|Atelopus sernai
+3|Atelopus simulatus|True toad
+3|Atelopus siranus
+3|Atelopus sonsonensis|Harlequin frog
+3|Aubria masako
+3|Aubria subsigillata
+3|Austrochaperina blumi
+3|Austrochaperina kosarek
+3|Austrochaperina palmipes
+3|Ayarzaguena's tree|Ayarzaguena's tree frog|Tepuihyla edelcae|white-lipped tree frog
+3|Bainskloof moss|Bainskloof moss frog|Arthroleptella bicolor|Bainskloof Chirping Frog
+3|Baliem River Valley tree|Baliem River Valley tree frog|Litoria umbonata
+3|Banded stream|Banded stream frog|Strongylopus bonaespei
+3|Barro Branco tree|Barro Branco tree frog|Hypsiboas secedens|Boana secedens
+3|Barygenys cheesmanae
+3|Barygenys exsul
+3|Barygenys flavigularis
+3|Barygenys nana
+3|Batrachyla antartandica
+3|Batrachyla leptopus|Gray wood frog
+3|Batrachyla nibaldoi|Nibaldo's wood frog
+3|Bibron's toadlet|Pseudophryne bibronii
+3|Bilingual|Bilingual frog|Crinia bilingua
+3|Black Mountain boulder|Black Mountain boulder frog|Cophixalus saxatilis
+3|Black-spotted sticky|Black-spotted sticky frog|Kalophrynus pleurostigma
+3|Blacksoil toadlet|Uperoleia trachyderma
+3|Blanchard's cricket|Blanchard's cricket frog|Acris blanchardi|Acris crepitans blanchardi
+3|Boana buriti|Hypsiboas buriti
+3|Boana exastis|Hypsiboas exastis
+3|Boana freicanecae|Frei Caneca Tree Frog|Hypsiboas freicanecae
+3|Boana goiana|Hypsiboas goianus
+3|Boana joaquini|Hypsiboas joaquini
+3|Boana pombali|Hypsiboas pombali
+3|Bokermann's casque-headed tree|Bokermann's casque-headed tree frog|Trachycephalus atlas
+3|Bokermannohyla feioi
+3|Boophis axelmeyeri|Bright-eyed frog
+3|Boophis schuboeae
+3|Boophis tampoka
+3|Booroolong|Booroolong frog|Litoria booroolongensis
+3|Bouchia clawed|Bouchia clawed frog|Xenopus pygmaeus
+3|Boulenophrys brachykolos|Short-legged horned toad|Megophrys brachykolos
+3|Boulenophrys huangshanensis|Megophrys huangshanensis
+3|Brachycephalus brunneus
+3|Brachycephalus izecksohni
+3|Brachycephalus nodoterga
+3|Brachycephalus vertebralis
+3|Brazilian gold|Brazilian gold frog|Brachycephalus didactylus
+3|Brazilian heart-tongued|Brazilian heart-tongued frog|Phyllodytes kautskyi
+3|Brazilian slender-legged tree|Brazilian slender-legged tree frog|Osteocephalus subtilis
+3|Breviceps acutirostris|Strawberry Rain Frog|Cape Short-headed Frog
+3|Broad-palmed|Broad-palmed frog|Litoria latopalmata
+3|Bronze caco|Cacosternum nanum
+3|Bufo aspinius
+3|Bufo pageoti
+3|Cagua tree|Cagua tree frog|Hypsiboas alemani|Boana alemani
+3|Callimedusa baltea|Phyllomedusa baltea|purple-sided leaf frog
+3|Callimedusa duellmani|Phyllomedusa duellmani|purple and orange leaf frog
+3|Callixalus pictus
+3|Callulops boettgeri
+3|Callulops doriae
+3|Callulops dubius
+3|Callulops fuscus
+3|Callulops humicola
+3|Callulops kopsteini
+3|Callulops personatus
+3|Callulops stictogaster
+3|Carchi Andes|Carchi Andes toad|Rhaebo colomai
+3|Cardioglossa alsco|Long-fingered frog
+3|Cardioglossa elegans
+3|Cardioglossa escalerae
+3|Carvalho's Surinam|Carvalho's Surinam toad|Pipa carvalhoi
+3|Cauca poison|Cauca poison frog|Andinobates bombetes
+3|Centralian tree|Centralian tree frog|Ranoidea gilleni|Litoria gilleni
+3|Centrolene acanthidiocephalum
+3|Centrolene bacata|Centrolene bacatum
+3|Centrolene geckoidea|Centrolene geckoideum|Glass frog
+3|Centrolene gemmata|Centrolene gemmatum
+3|Centrolene hybrida
+3|Centrolene lemniscata|Centrolene lemniscatum
+3|Centrolene muelleri
+3|Centrolene notosticta|Centrolene notostictum|cordillera giant glass frog
+3|Centrolene peristicta|Centrolene peristictum|Glass frog
+3|Centrolene pipilata|Centrolene pipilatum|Amazon giant glass frog
+3|Centrolene scirtetes|Tandayapa Giant Glass Frog
+3|Chamula mountain brook|Chamula mountain brook frog|Duellmanohyla chamulae
+3|Charta tree|Charta tree frog|Hyloscirtus denticulentus
+3|Charuplaya tree|Charuplaya tree frog|Hypsiboas callipleura|Boana callipleura
+3|Chiasmocleis anatipes|Santa Cecilia humming frog
+3|Chiasmocleis bassleri
+3|Chiasmocleis cordeiroi
+3|Chiasmocleis crucis
+3|Chiasmocleis hudsoni|Hudson's humming frog
+3|Chiasmocleis leucosticta
+3|Chiasmocleis schubarti
+3|Chiasmocleis shudikarensis
+3|Chirixalus nongkhorensis|Chiromantis nongkhorensis
+3|Chiromantis petersii
+3|Choerophryne brunhildae|Albericus brunhildae
+3|Choerophryne laurini
+3|Choerophryne proboscidea
+3|Choerophryne variegata
+3|Cloud forest stream|Cloud forest stream frog|Ptychohyla euthysanota
+3|Cochranella granulosa
+3|Cochranella nola
+3|Conraua alleni|Allen’s slippery frog
+3|Conraua crassipes
+3|Convex-tailed horned|Convex-tailed horned toad|Megophrys caudoprocta
+3|Cophixalus ateles
+3|Cophixalus cheesmanae
+3|Cophixalus verrucosus
+3|Cophixalus zweifeli
+3|Copiula derongo
+3|Copiula tyleri
+3|Cordillera central tree|Cordillera central tree frog|Hyloscirtus larinopygion
+3|Cornufer macrops
+3|Cornufer malukuna
+3|Cornufer solomonis|Solomon wrinkled ground frog
+3|Cornufer weberi
+3|Craugastor bransfordii
+3|Craugastor crassidigitus
+3|Craugastor escoces
+3|Craugastor megacephalus
+3|Craugastor mimus
+3|Craugastor noblei
+3|Craugastor talamancae
+3|Crossodactylus schmidti
+3|Cycloramphus boraceiensis
+3|Cycloramphus brasiliensis
+3|Cycloramphus eleutherodactylus
+3|Cycloramphus lutzorum
+3|Dasypops schirchi
+3|De Villiers' moss|De Villiers' moss frog|Arthroleptella villiersi
+3|De Witte's clawed|De Witte's clawed frog|Xenopus wittei
+3|Demerara Falls tree|Demerara Falls tree frog|Rough-skinned green rree frog|Boana cinerascens|Hypsiboas cinerascens
+3|Dendropsophus anataliasiasi|Goias tree frog
+3|Dendropsophus garagoensis|Garagoa tree frog
+3|Dendropsophus gaucheri
+3|Dendropsophus haddadi
+3|Dendropsophus haraldschultzi
+3|Dendropsophus leali|yellow-toed tree frog
+3|Dendropsophus limai|Sao Vicente tree frog
+3|Dendropsophus luteoocellatus|El Mene tree frog
+3|Dendropsophus marmoratus|Marbled toad|Marbled tree frog
+3|Dendropsophus mathiassoni|Mathiasson's tree frog
+3|Dendropsophus melanargyreus|Interior tree frog
+3|Dendropsophus minusculus|pallid dwarf tree frog|Rivero's tiny tree frog
+3|Dendropsophus novaisi|Bokermann's tree frog
+3|Dendropsophus oliveirai|Xeric tree frog
+3|Dendropsophus pauiniensis|Pauini tree frog
+3|Dendropsophus rossalleni|Ross Allen's tree frog
+3|Dendropsophus schubarti|Schubert's Rondonia tree frog
+3|Dendropsophus stingi|Kaplan's Garagoa tree frog
+3|Dendropsophus studerae
+3|Diasporus gularis|Eleutherodactylus gularis
+3|Diasporus vocator|Eleutherodactylus vocator
+3|Drewes' moss|Drewes' moss frog|Arthroleptella drewesii
+3|Duttaphrynus crocus
+3|Duttaphrynus kotagamai
+3|Duttaphrynus noellerti|Noellert’s toad
+3|Duttaphrynus scaber|Schneider's Toad
+3|Duttaphrynus valhallae
+3|Dwarf Mexican tree|Dwarf Mexican tree frog|Tlalocohyla smithii
+3|Dwarf rocket|Dwarf rocket frog|Litoria dorsalis
+3|Dwarf squeaker|Arthroleptis xenodactyloides
+3|Eastern golden|Eastern golden frog|Pelophylax plancyi
+3|Ecnomiohyla minera|Guatemala tree frog
+3|Ecnomiohyla phantasmagoria
+3|Ecnomiohyla salvaje|Copan treefrog
+3|Ecnomiohyla thysanota|Cerro Mali tree frog
+3|Elachistocleis erythrogaster
+3|Eleutherodactylus albipes|Cuban dwarf robber frog
+3|Eleutherodactylus amadeus|Mozart's frog
+3|Eleutherodactylus atkinsi
+3|Eleutherodactylus cuneatus
+3|Eleutherodactylus dimidiatus
+3|Eleutherodactylus etheridgei|Etheridge's robber frog
+3|Eleutherodactylus flavescens|Yellow split-toed eleuth
+3|Eleutherodactylus gundlachi|Gundlach's robber frog
+3|Eleutherodactylus simulans|Robber frog
+3|Eleutherodactylus turquinensis|Turquino robber frog
+3|Eleutherodactylus varleyi
+3|Eleutherodactylus weinlandi
+3|Eneida's coquí|Eleutherodactylus eneidae
+3|Epipedobates espinosai
+3|Eritrea clawed|Eritrea clawed frog|Xenopus clivii
+3|Ethiopian banana|Ethiopian banana frog|Afrixalus enseticola
+3|Euparkerella brasiliensis
+3|Euparkerella robusta
+3|Exerodonta abdivita|Río Aloapan tree frog
+3|Exerodonta smaragdina
+3|Fat toadlet|Uperoleia crassa
+3|Fejervarya vittigera
+3|Fleay's barred|Fleay's barred frog|Mixophyes fleayi
+3|Flood plain toadlet|Uperoleia inundata
+3|Forest night|Forest night frog|Nyctibatrachus sylvaticus
+3|Freycinet's|Freycinet's frog|Litoria freycineti|Wallum rocketfrog
+3|Gastrotheca abdita|Cordillera Colan marsupial frog
+3|Gastrotheca atympana
+3|Gastrotheca gracilis|Marsupial frog
+3|Gastrotheca longipes|long-footed marsupial frog|Pastaza marsupial frog
+3|Gastrotheca orophylax|Guardian marsupial frog
+3|Geocrinia laevis
+3|Gephyromantis thelenae|Mantidactylus thelenae
+3|Giant Philippine|Giant Philippine frog|Limnonectes magnus
+3|Giant river|Giant river frog|Limnonectes leporinus
+3|Glyphoglossus guttulatus
+3|Grant's big-eyed tree|Grant's big-eyed tree frog|Litoria granti|Nyctimystes granti
+3|Guibemantis tornieri
+3|Guinea snout-burrower|Hemisus guineensis|Guinea shovelnose frog
+3|Günther's toadlet|Pseudophryne guentheri
+3|Heleioporus inornatus|Plain Frog
+3|Helena's marsupial|Helena's marsupial frog|Rana Marsupial Del Tama|Gastrotheca helenae
+3|Hemiphractus johnsoni|Sumaco horned tree frog|Johnson's horned tree frog
+3|Heterixalus andrakata
+3|Heterixalus carbonei
+3|Highland|Highland frog|Rana maculata|Lithobates maculatus
+3|Hildebrandtia macrotympanum
+3|Hispaniolan giant tree|Hispaniolan giant tree frog|Osteopilus vastus
+3|Hogsback|Hogsback frog|Anhydrophryne rattrayi|Hogsback Chirping Frog|Rattray's frog
+3|Holoaden bradei|Itatiaia highland frog
+3|Holst's|Holst's frog|Rana holsti
+3|Honduran brook|Honduran brook frog|Duellmanohyla salvavida
+3|Humerana humeralis|Rana humeralis|Bhamo Frog
+3|Hurter's spadefoot|Hurter's spadefoot toad|Scaphiopus hurterii
+3|Hyalinobatrachium chirripoi
+3|Hyalinobatrachium colymbiphyllum
+3|Hyalinobatrachium yaku|H. yaku
+3|Hyalotos singadanae|Litoria singadanae
+3|Hydrolaetare schmidti|Hydrolaetare De Schmidt|Schmidt's forest frog
+3|Hylarana latouchii|Broad-folded frog|Kuatun frog|LaTouche's frog
+3|Hylarana macrodactyla|Guangdong frog|Guangdong grass frog
+3|Hylodes mertensi|Merten's tree toad
+3|Hylodes ornatus|ornate tree toad
+3|Hylodes otavioi|Otavio tree toad|Otavio's stream frog
+3|Hylodes regius|royal tree toad
+3|Hyloscirtus albopunctulatus|white-speckled tree frog
+3|Hyloxalus abditaurantius|Bello rocket frog
+3|Hyloxalus anthracinus|South American rocket frog
+3|Hyloxalus cepedai|Allobates cepedai
+3|Hyloxalus nexipus|limon rocket frog|Los Tayos rocket frog
+3|Hyperolius hypsiphonus|Alexteroon hypsiphonus
+3|Hyperolius ocellatus
+3|Hyperolius riggenbachi|Riggenbach’s reed frog
+3|Hyperolius sankuruensis
+3|Hyperolius semidiscus
+3|Hyperolius tuberilinguis|Tinker Reed Frog
+3|Hypopachus barberi
+3|Imienpo Station|Imienpo Station frog|Glandirana emeljanovi
+3|Incilius signifer
+3|Ingerophrynus divergens
+3|Ischnocnema verrucosa
+3|Isthmohyla pictipes
+3|Italian edible|Italian edible frog|Pelophylax hispanicus
+3|Jamaican laughing|Jamaican laughing frog|brown tree frog|Osteopilus brunneus|Osteopilus ocellatus|Savanna-la-Mar tree frog
+3|Jamaican snoring|Jamaican snoring frog|Osteopilus crucialis
+3|Johnston's river|Johnston's river frog|Amietia johnstoni
+3|Julianus pinimus|Scinax pinima
+3|Julianus uruguayus|Scinax uruguayus
+3|Kaloula rugifera|Sichuan Digging Frog
+3|Karoo dainty|Karoo dainty frog|Cacosternum karooicum|Karoo Caco
+3|Kivu clawed|Kivu clawed frog|Xenopus vestitus
+3|Kuatun horned|Kuatun horned toad|Megophrys kuatunensis
+3|Kurixalus banaensis|bana bubble-nest frog
+3|Lago de las Minas|Lago de las Minas frog|Lithobates chichicuahutla
+3|Landdros moss|Landdros moss frog|Arthroleptella landdrosia|Landdroskop Chirping frog
+3|Largen's clawed|Largen's clawed frog|Xenopus largeni
+3|Lepidobatrachus asper|Escuerzo
+3|Leptobatrachus flavescens|Litoria flavescens
+3|Leptobrachella gracilis|Leptolalax gracilis|Slender litter frog
+3|Leptobrachella kajangensis|Leptolalax kajangensis
+3|Leptobrachella nahangensis|Leptolalax nahangensis
+3|Leptobrachella natunae
+3|Leptobrachella pelodytoides|Leptolalax pelodytoides
+3|Leptobrachella serasanae
+3|Leptobrachella sungi|Leptolalax sungi
+3|Leptobrachella ventripunctata|Leptolalax ventripunctatus
+3|Leptobrachium ailaonicum
+3|Leptobrachium buchardi
+3|Leptobrachium hainanense|Hainan pseudomoustache toad|Leptobrachium hainanensis
+3|Leptobrachium montanum
+3|Leptodactylus caatingae
+3|Leptodactylus elenae|marbled white-lipped frog
+3|Leptodactylus hylodes
+3|Leptodactylus longirostris
+3|Leptodactylus marambaiae|Marambaia white-lipped frog
+3|Leptodactylus myersi|Myers' thin-toed frog
+3|Leptodactylus stenodema|Popoco thin-toed frog|San Jose white-lipped frog
+3|Leptodactylus wagneri
+3|Leptomantis harrissoni|Rhacophorus harrissoni|Brown tree frog
+3|Leptopelis kivuensis|Kivu tree frog
+3|Leptopelis viridis
+3|Leucostethus alacris|Colostethus alacris
+3|Leucostethus argyrogaster|Colostethus argyrogaster
+3|Leucostethus brachistriatus|Colostethus brachistriatus|Stripe-throated rocket frog
+3|Leucostethus dysprosium|Colostethus dysprosium
+3|Leucostethus fraterdanieli|Colostethus fraterdanieli
+3|Limnonectes dabanus
+3|Limnonectes gyldenstolpei
+3|Limnonectes macrognathus
+3|Lined tree|Lined tree frog|Litoria quadrilineata
+3|Lithobates heckscheri
+3|Lithobates vibicarius|Green-eyed frog
+3|Littlejohn's toadlet|Uperoleia littlejohni
+3|Liuixalus ocellatus|ocellated bubble-nest frog|ocellated small tree frog|Romerus ocellatus
+3|Liurana alpina|Ingerana alpina
+3|Liurana medogensis
+3|Liurana xizangensis|Ingerana xizangensis
+3|Luzon fanged|Luzon fanged frog|Limnonectes macrocephalus
+3|Luzon narrow-mouthed|Luzon narrow-mouthed frog|Kaloula rigida
+3|Lynchius flavomaculatus|Yellow-spotted Andes Frog
+3|Lynchius parkeri|Parker’s Andes frog
+3|Lysapsus caraya|Mato Verde harlequin frog
+3|Malesian|Malesian frog|Limnonectes malesianus|Peat swamp frog
+3|Mannophryne caquetio|Churuguara Collared Frog
+3|Mannophryne collaris|Collared poison frog
+3|Mannophryne cordilleriana
+3|Mannophryne herminae|Hermina's poison frog
+3|Mannophryne larandina|Lara Andean collared frog
+3|Mannophryne neblina|Aragua poison frog
+3|Mannophryne oblitterata|St. Teresa poison frog
+3|Mannophryne riveroi|Riveros poison frog
+3|Mantidactylus ambohimitombi
+3|Mantidactylus ambreensis
+3|Mantidactylus ulcerosus
+3|Mantidactylus zipperi
+3|Marbled|Marbled frog|Limnodynastes convexiusculus
+3|Marbled poison|Marbled poison frog|Epipedobates boulengeri
+3|Marbled rubber|Marbled rubber frog|Phrynomantis annectens
+3|Marojejy mantella|Mantella manery
+3|Mazumbai warty|Mazumbai warty frog|Callulina kisiwamsitu
+3|Melanophryniscus klappenbachi
+3|Menemsorae tree|Menemsorae tree frog|Litoria timida
+3|Meristogenys amoropalamus
+3|Meristogenys orphnocnemis
+3|Metaphrynella sundana
+3|Micrixalus fuscus
+3|Micrixalus saxicola|Black Torrent Frog|Jerdon’s olive-brown frog|Malabar Tropical Frog|Small Stream Frog|Wayanad Dancing Frog
+3|Micrixalus silvaticus
+3|Microhyla fissipes
+3|Microhyla picta
+3|Micryletta menglienica|Kalophrynus menglienicus
+3|Minervarya charlesdarwini|Ingerana charlesdarwini|Charles Darwin's frog|Rana charlesdarwini
+3|Minervarya greenii|Fejervarya greenii|Sri Lanka paddy field frog
+3|Minervarya keralensis|Dubois' Hill Frog
+3|Mink|Mink frog|Lithobates septentrionalis
+3|Minyobates steyermarki|Demonic poison frog
+3|Moaning|Moaning frog|Heleioporus eyrei
+3|Mole toadlet|Uperoleia talpa
+3|Monte Duida tree|Monte Duida tree frog|Tepuihyla aecii
+3|Montezuma leopard|Montezuma leopard frog|Rana montezumae|Lithobates montezumae
+3|Moss froglet|Crinia nimbus
+3|Mountain|Mountain frog|Philoria kundagungan|Red and yellow mountain frog|Mountain toad|Incilius cavifrons
+3|Nannophrys ceylonensis|Ceylon streamlined frog
+3|Nannophrys guentheri
+3|Nanohyla annamensis|Microhyla annamensis
+3|Nanohyla petrigena|Microhyla petrigena
+3|Nanorana arnoldi
+3|Nanorana blanfordii|Paa blanfordii
+3|Nanorana liebigii|Liebig's Frog
+3|Nanorana quadranus
+3|Nanorana rostandi|Paa rostandi
+3|Nanorana vicina|Murree Frog
+3|Narrow-lined tree|Narrow-lined tree frog|Isthmohyla angustilineata
+3|Natal banana|Natal banana frog|Afrixalus spinifrons
+3|Nectophrynoides viviparus|Morogoro tree toad
+3|New Mexico spadefoot|New Mexico spadefoot toad|southern spadefoot|Spea multiplicata
+3|Noblella bagrecito|Psychrophrynella bagrecito
+3|Noblella ritarasquinae|Phyllonastes ritarasquinae
+3|Northern Territory|Northern Territory frog|Austrochaperina adelphe
+3|Northern toadlet|Uperoleia borealis
+3|Nyctimystes avocalis|loud big-eyed tree frog|Litoria avocalis
+3|Nyctimystes semipalmatus|Litoria semipalmata|Kokoda big-eyed tree frog|Nyctimystes semipalmata
+3|Nyctixalus margaritifer|Java Indonesian tree frog|pearly tree frog
+3|Occidozyga magnapustulosa|Occidozyga magnapustulosus
+3|Occidozyga semipalmata
+3|Odontophrynus cordobae
+3|Odorrana absita
+3|Odorrana aureola|Huia aureola
+3|Ololygon agilis|Scinax agilis
+3|Ololygon alcatraz
+3|Ololygon aromothyella|Scinax aromothyella
+3|Ololygon berthae|Scinax berthae
+3|Ololygon carnevallii|Scinax carnevallii
+3|Ololygon centralis|Scinax centralis
+3|Ololygon hiemalis|Scinax hiemalis
+3|Ololygon jureia|Scinax jureia
+3|Ololygon longilinea|Scinax longilineus
+3|Ololygon machadoi|Scinax machadoi
+3|Ololygon perpusilla|Scinax perpusillus
+3|Ololygon rizibilis|Scinax rizibilis
+3|Ololygon strigilata|Scinax strigilatus
+3|Ololygon trapicheiroi|Scinax trapicheiroi
+3|Ololygon v-signata|Scinax v-signatus
+3|Omei horned|Omei horned toad|Megophrys omeimontis
+3|Ophryophryne microstoma
+3|Orange-crowned toadlet|Pseudophryne occidentalis
+3|Oreobates quixensis
+3|Oreolalax chuanbeiensis
+3|Oreolalax multipunctatus
+3|Oreolalax omeimontis|Omei toothed toad
+3|Oreolalax puxiongensis
+3|Oreophryne albopunctata
+3|Oreophryne celebensis
+3|Oreophryne variabilis
+3|Orixalus carinensis|Gracixalus carinensis|Burmese bubble-nest frog|Karin hills bush frog
+3|Osteocephalus deridens
+3|Osteocephalus mutabor
+3|Osteocephalus yasuni
+3|Pacific horned|Pacific horned frog|Ceratophrys stolzmanni
+3|Paedophryne swiftorum
+3|Palawan toadlet|Pelophryne albotaeniata
+3|Papurana florensis|Flores frog
+3|Paratelmatobius gaigeae
+3|Paratelmatobius lutzii|Lutz's rapids frog
+3|Pearson's green tree|Pearson's green tree frog|Litoria pearsoniana|Ranoidea pearsoniana
+3|Peltophryne peltocephala
+3|Peppered tree|Peppered tree frog|Litoria piperata|Ranoidea piperata
+3|Peralta|Peralta frog|Rana taylori|Lithobates taylori
+3|Peron's tree|Peron's tree frog|Litoria peronii
+3|Petropedetes johnstoni
+3|Petropedetes newtonii
+3|Phasmahyla guttata|spotted leaf frog
+3|Philautus aurifasciatus|gold-striped tree frog|Java bubble-nest frog
+3|Philautus dubius|Darjeeling bubble-nest frog|Darjeeling shrub frog
+3|Philautus garo|Garo hills bubble-nest frog
+3|Philautus hosii|Borneo bubble-nest frog
+3|Philippine narrowmouth|Philippine narrowmouth toad|Kaloula conjuncta
+3|Phrynobatrachus acutirostris
+3|Phrynobatrachus bequaerti
+3|Phrynobatrachus plicatus
+3|Phrynopus juninensis
+3|Phrynopus kauneorum
+3|Phyllodytes edelmoi
+3|Phyllomedusa bahiana
+3|Phyllomedusa coelestis|starry leaf frog
+3|Phyllonastes heyeri|Noblella heyeri
+3|Phyllonastes myrmecoides|Noblella myrmecoides
+3|Physalaemus albifrons|Bahia dwarf frog
+3|Physalaemus erikae
+3|Physalaemus fernandezae|whistling dwarf frog
+3|Physalaemus marmoratus
+3|Physalaemus nattereri|Cuyaba dwarf frog
+3|Physalaemus rupestris
+3|Pithecopus centralis|Phyllomedusa centralis|Mato Grasso leaf frog
+3|Pithecopus hypochondrialis
+3|Platymantis lawtoni
+3|Platymantis luzonensis
+3|Platyplectrum aganoposis|Lechriodus aganoposis
+3|Plectrohyla hartwegi|Hartweg’s spikethumb frog
+3|Plectrohyla hazelae|Sarcohyla hazelae|Hazel's tree frog
+3|Plectrohyla ixil|Ixil spikethumb frog
+3|Plectrohyla lacertosa|Pop-eyed spikethumb frog
+3|Plectrohyla matudai|Matuda's spike-thumbed frog
+3|Plethodontohyla mihanika
+3|Pleurodema bufoninum|Large four-eyed frog|Gray Four-eyed Frog
+3|Pleurodema diplolister|Peters' four-eyed frog
+3|Pleurodema guayapae
+3|Pleurodema marmoratum|Marbled four-eyed frog
+3|Polypedates hecticus|Samatra flying frog
+3|Polypedates insularis|Nicobar tree frog|Nicobarese tree frog
+3|Polypedates taeniatus|Bengal whipping frog
+3|Polypedates zed|Narayanghat Whipping Frog|Nepalese tree frog
+3|Porthole tree|Porthole tree frog|Charadrahyla taeniopus
+3|Poyntonophrynus fenoulheti
+3|Prince Charles stream tree|Prince Charles stream tree frog|Hyloscirtus princecharlesi
+3|Pristimantis altamazonicus
+3|Pristimantis anolirex
+3|Pristimantis bacchus
+3|Pristimantis cruentus|Eleutherodactylus cruentus
+3|Pristimantis elegans
+3|Pristimantis fenestratus
+3|Pristimantis gaigei|Eleutherodactylus gaigeae
+3|Proceratophrys cristiceps|Muller's smooth horned frog
+3|Prosalirus|Prosalirus bitis
+3|Pseudis tocantins
+3|Pseudopaludicola boliviana|Bolivian swamp frog
+3|Pseudopaludicola canga
+3|Pseudopaludicola pusilla|Ranita Enana|Colombian swamp frog
+3|Pseudophilautus cavirostris|TIbetan bubble-nest frog|Tubercle shrub frog
+3|Pseudophilautus decoris|elegant shrub frog
+3|Pseudophilautus dimbullae
+3|Pseudophilautus eximius
+3|Pseudophilautus fergusonianus|Ferguson's shrub frog
+3|Pseudophilautus hoipolloi|Anthropenic shrub frog
+3|Pseudophilautus lunatus|Afro-Asian tree frog
+3|Pseudophilautus nanus|Philautus nanus
+3|Pseudophilautus popularis|common shrub frog
+3|Pseudophilautus silvaticus|forest shrub frog
+3|Pseudophilautus sordidus|grubby shrub frog
+3|Pseudophilautus stictomerus|orange-canthal shrub frog
+3|Pseudophilautus temporalis
+3|Pseudophilautus viridis|Raorchestes viridis
+3|Pseudophilautus zorro|Gannoruwa shrub frog
+3|Ptychadena arnei
+3|Ptychohyla zophodes
+3|Quasipaa fasciculispina|Spiny-breasted giant frog
+3|Quasipaa yei
+3|Rana culaiensis|Culai brown frog
+3|Rana hanluica
+3|Rana omeimontis
+3|Rana tavasensis
+3|Rana zhengi
+3|Ranitomeya summersi|Summers’ poison frog
+3|Raorchestes andersoni|Theloderma andersoni|Anderson's bubble-nest frog
+3|Raorchestes menglaensis|Mengla bush frog|Zhishihe's bubble-nest frog
+3|Raorchestes ochlandrae|Ochlandrae Reed Bush Frog|Philautus ochlandrae
+3|Raorchestes resplendens|Resplendent Shrub Frog
+3|Red-backed poison|Red-backed poison frog|Ranitomeya reticulata
+3|Red-backed toadlet|Pseudophryne coriacea
+3|Red-eyed coquí|Eleutherodactylus antillensis
+3|Revealed|Revealed frog|Litoria revelata
+3|Rhacophorus annamensis|Annam flying frog
+3|Rhacophorus calcaneus|Vietnam flying frog
+3|Rhacophorus edentulus|Celebes flying frog
+3|Rhacophorus nigropunctatus
+3|Rhaebo haematiticus
+3|Rheobatrachus vitellinus
+3|Rhinella acrolopha
+3|Rhinella atacamensis|Chaunus atacamensis
+3|Rhinella crucifer
+3|Rhinella diptycha|Cope's toad|cururu toad|rococo toad|Schneider's toad
+3|Rhinella jimi|Chaunus jimi
+3|Rhombophryne serratopalpebrosa|Digging frog
+3|Rio Carauta stubfoot|Rio Carauta stubfoot toad|Atelopus carauta
+3|Robust|Robust frog|Austrochaperina robusta|Robust Whistling Frog
+3|Rohanixalus punctatus|Chiromantis punctatus|Black-spotted bubble-nest frog
+3|Roth's tree|Roth's tree frog|Litoria rothii
+3|Round-tongued floating|Round-tongued floating frog|Occidozyga martensii
+3|Rulyrana susatamai
+3|Sabana Surinam|Sabana Surinam toad|Pipa pequena|Pipa parva
+3|Salmon-striped|Salmon-striped frog|Limnodynastes salmini|Steindachneras Frog
+3|Salta tree|Salta tree frog|Hypsiboas marianitae|Boana marianitae
+3|Sandhill|Sandhill frog|Arenophryne rotunda
+3|Sarcohyla arborescandens|lesser Bromeliad tree frog
+3|Sarcohyla calvicollina|Cerro Pelón tree frog
+3|Sarcohyla charadricola|Puebla tree frog
+3|Sarcohyla chryses|golden tree frog
+3|Sarcohyla crassa|aquatic tree frog|Bogert's aquatic tree frog
+3|Sarcohyla cyanomma|blue-eyed aaquatic tree frog
+3|Sarcohyla labedactyla|grasping tree frog
+3|Sarcohyla psarosema|speckled tree frog
+3|Sarcohyla robertsorum|Robert's tree frog
+3|Sarcohyla siopela|mute tree frog|Voiceless tree frog
+3|Schultze's stream|Schultze's stream frog|Ptychohyla leonhardschultzei
+3|Scinax caldarum
+3|Scinax constrictus
+3|Scinax duartei|Duarte's snouted tree frog|lanceback tree frog
+3|Scinax elaeochroa|Scinax elaeochraoa|Scinax elaeochrous
+3|Scinax exiguus
+3|Scinax maracaya|Alpinopolis snouted tree frog
+3|Scinax pachycrus
+3|Scinax pedromedinae
+3|Scinax quinquefasciatus|Fowler's snouted tree frog
+3|Sclerophrys danielae|Amietophrynus danielae
+3|Sclerophrys kisoloensis
+3|Sclerophrys tihamica
+3|Scutiger bhutanensis
+3|Seep|Seep frog|Occidozyga baluensis
+3|Seychelles|Seychelles frog|Sooglossus sechellensis
+3|Seychelles treefrog|Seychelle Islands Tree Frog|Tachycnemis seychellensis
+3|Siamese cascade|Siamese cascade frog|Huia melasma
+3|Silver marsupial|Silver marsupial frog|Gastrotheca plumbea
+3|Small disked|Small disked frog|Limnonectes leytensis
+3|Sonoran green|Sonoran green toad|Anaxyrus retiformis
+3|Southern leaf green tree|Southern leaf green tree frog|Litoria nudidigita|Narrow fringed tree frog|Ranoidea nudidigita
+3|Southern torrent|Southern torrent frog|Petropedetes yakusini|Arthroleptides yakusini|Rocky river frog
+3|Southwestern|Southwestern toad|Anaxyrus mexicanus
+3|Spelaeophryne|Spelaeophryne methneri
+3|Sphaenorhynchus caramaschii|lime tree frog
+3|Sphaerotheca leucorhynchus
+3|Sphaerotheca rolandae
+3|Sphagnum|Sphagnum frog|Philoria sphagnicola|Philoria sphagnicolus
+3|Spinomantis elegans
+3|Spinomantis guibei
+3|Spinomantis massi|Madagascar frog
+3|Spiny|Spiny toad|Bufo spinosus
+3|Spiny-fingered horned|Spiny-fingered horned toad|Megophrys spinata
+3|Stefania ackawaio
+3|Stefania ayangannae
+3|Stefania coxi
+3|Stefania ginesi|Rana Stefania Del Hermano Gines|Tepuis tree frog
+3|Stefania goini|Rana Stefania Del Duida|Vegas Falls tree frog
+3|Stefania marahuaquensis|Rana Stefania Del Marahuaka
+3|Stefania oculosa|Rana Stefania De Ojos Grandes
+3|Stefania percristata|Rana Stefania De Jaua
+3|Stefania riae|Rana Stefania Del Sarisarinama|Sarisariñama carrying frog|Stefania tree frog
+3|Stefania riveroi|Rana Stefania De Rivero
+3|Stefania roraimae|Roraima Stefania|Roraima tree frog
+3|Stefania satelles|Rana Stefania Del Aprada-tepuy
+3|Stefania schuberti|Rana Stefania Del Auyan-tepui
+3|Stefania woodleyi|Woodley's Stefania|Woodley's tree frog
+3|Stereocyclops incrassatus
+3|Strecker's chorus|Strecker's chorus frog|Pseudacris streckeri
+3|Sumatran puddle|Sumatran puddle frog|Occidozyga sumatrana
+3|Superb banjo|Superb banjo frog|Northern Banjo Frog|Limnodynastes terraereginae
+3|Tarahumara|Tarahumara frog|Lithobates tarahumarae
+3|Taruga fastigo
+3|Telmatobius marmoratus|Marbled water frog|Protero spiny-chest frog
+3|Telmatobius simonsi|Sucre water frog
+3|Tepuihyla exophthalma
+3|Tepuihyla rodriguezi|Kaieteur Tepui tree frog|Rodriguez's Amazon tree frog|Senaris' tree frog
+3|Tepuihyla talbergae
+3|Tepuihyla tuberculosa|Ecnomiohyla tuberculosa
+3|Teratohyla midas
+3|Teratohyla spinosa
+3|Theloderma asperum|Hill garden bug-eyed tree frog
+3|Theloderma rhododiscus|Chinese bubble-nest frog|Chinese bug-eyed frog|red-disked small tree frog
+3|Theloderma stellatum|Chantaburi warted treefrog
+3|Thoropa megatympanum
+3|Tlaloc's leopard|Tlaloc's leopard frog|Lithobates tlaloci
+3|Trachycephalus dibernardoi
+3|Trachycephalus lepidus
+3|Treasury Island tree|Treasury Island tree frog|Litoria thesaurensis
+3|Tsingymantis antitra
+3|Tsushima brown|Tsushima brown frog|Rana tsushimensis|Tsushima leopard frog
+3|Uperodon palmatus|Ramanella palmata
+3|Uperodon variegatus|Variegated Balloon Frog
+3|Upland burrowing tree|Upland burrowing tree frog|Smilisca dentata
+3|Upper Orinoco tree|Upper Orinoco tree frog|Hypsiboas wavrini|Boana wavrini
+3|Venezuelan horned|Venezuelan horned frog|Ceratophrys calcarata
+3|Victoria night|Victoria night frog|Astylosternus diadematus
+3|Vieraella|Vieraella herbstii
+3|Vitreorana uranoscopa
+3|Wahai tree|Wahai tree frog|Litoria vagabunda
+3|Walkerana diplosticta|Indirana diplosticta|Günther’s frog
+3|Weale's running|Weale's running frog|Rattling Frog|Semnodactylus wealii
+3|Werneria preussi
+3|Wheatbelt|Wheatbelt frog|Kunapalari frog|Neobatrachus kunapalari
+3|White-black tree|White-black tree frog|Hypsiboas alboniger|Boana alboniger|Boana allbonigra|Boana riojana|Carrizo's tree frog|Paku Khara tree frog
+3|White-footed|White-footed frog|Neobatrachus albipes
+3|Wijayarana modiglianii|Huia modiglianii
+3|Wissel Lakes tree|Wissel Lakes tree frog|Litoria wisselensis
+3|Woodworker|Woodworker frog|Limnodynastes lignarius
+3|Woodworth's|Woodworth's frog|L. woodworthi|Limnonectes woodworthi
+3|Wrinkled toadlet|Uperoleia rugosa
+3|Wushan horned|Wushan horned toad|Boulenophrys wushanensis|Megophrys wushanensis
+3|Xenophrys aceras|Megophrys aceras
+3|Xenopus boumbaensis|Mawa clawed frog
+3|Xenopus victorianus
+3|Yellow-bellied poison|Yellow-bellied poison frog|Andinobates fulguritus
+3|Yunganastes ashkapara|Eleutherodactylus ashkapara|Cochamba robber frog
+3|Yunganastes bisignatus
+3|Yungas tree|Yungas tree frog|Hypsiboas balzani|Boana balzani
+3|Zachaenus carvalhoi|Carvalho's Bug-eyed Frog
+3|Zhangixalus chenfui|Rhacophorus chenfui
+3|Zhangixalus hungfuensis|Rhacophorus hungfuensis|Hungfu whipping frog
+3|Zhangixalus puerensis|Rhacophorus puerensis|Puer treefrog
+3|Zhangixalus yaoshanensis|Rhacophorus yaoshanensis
+3|Zhenhai brown|Zhenhai brown frog|Rana zhenhaiensis
+3|"Centrolene" guanacarum
+3|"Centrolene" medemi
+3|"Centrolene" petrophilum
+3|"Colostethus" ruthveni|Santa Marta poison arrow frog
+3|Adelophryne patamona
+3|Adenomus dasi|True toad
+3|Afrixalus equatorialis|Congo Banana Frog
+3|Afrixalus laevis
+3|Afrixalus lindholmi
+3|Afrixalus morerei|Banana frog
+3|Afrixalus osorioi
+3|Afrixalus paradorsalis
+3|Afrixalus wittei
+3|Agalychnis hulli
+3|Alagoas heart-tongued|Alagoas heart-tongued frog|Phyllodytes acuminatus
+3|Alcalus baluensis
+3|Alexandria toadlet|Uperoleia orientalis
+3|Alhandra heart-tongued|Alhandra heart-tongued frog|Phyllodytes brevirostris
+3|Allobates fratisenescus|Mera rocket frog
+3|Allobates mandelorum|Mount Turumiquire rocket frog
+3|Allobates undulatus
+3|Alsodes norae
+3|Ameerega boliviana|Bolivian poison frog|Bolivian poison-arrow frog
+3|Ameerega ingeri|Brother Niceforo's poison frog|Niceforo's poison frog
+3|Ameerega parvula
+3|Amietia desaegeri
+3|Amietia ruwenzorica|Afrana ruwenzorica
+3|Amietia vertebralis|Aquatic River Frog|Umbraculate Frog|Water Rana
+3|Amietia wittei
+3|Amnihyla scabra|Litoria scabra
+3|Amnihyla spartacus|Litoria spartacus
+4|Amnirana lepus|Hylarana lepus
+4|Amnirana parkeriana
+4|Amolops aniqiaoensis|Aniqiao torrent frog
+4|Amolops gerbillus
+4|Amolops kangtingensis|Kangting sucker frog
+4|Amolops longimanus
+4|Amolops marmoratus
+4|Amolops monticola
+4|Anaxyrus compactilis
+4|Andes giant glass|Andes giant glass frog|Espadarana andina
+4|Anhydrophryne ngongoniensis|Mistbelt Moss Frog|Mistbelt Chirping Frog|Natal bandit frog|Ngongoni Moss Frog
+4|Anodonthyla hutchisoni
+4|Anomaloglossus guanayensis|Colostethus guanayensis
+4|Anomaloglossus murisipanensis|Colostethus murisipanensis
+4|Anomaloglossus parimae|Colostethus parimae
+4|Anomaloglossus praderioi
+4|Anomaloglossus shrevei|Colostethus shrevei|Shreve's rocket frog
+4|Ansonia endauensis
+4|Ansonia jeetsukumarani
+4|Ansonia malayana
+4|Ansonia penangensis|Penang stream toad
+4|Anstisia lutea|Geocrinia lutea
+4|Aphantophryne minuta
+4|Aphantophryne pansa
+4|Aphantophryne sabini
+4|Appalachian mountain chorus|Appalachian mountain chorus frog|Mountain Chorus Frog|Pseudacris brachyphona
+4|Arcovomer passarellii
+4|Aromobates haydeeae|El Vivero rocket frog
+4|Aromobates serranus|Nephelobates serranus|Pefaur's rocket frog|sierra rocket frog
+4|Arthroleptella subvoce
+4|Arthroleptis affinis
+4|Arthroleptis aureoli
+4|Arthroleptis bivittatus
+4|Arthroleptis brevipes
+4|Arthroleptis hematogaster
+4|Arthroleptis phrynoides
+4|Arthroleptis taeniatus
+4|Arthroleptis tuberosus
+4|Arthroleptis zimmeri
+4|Asterophrys slateri|Metamagnusia slateri
+4|Astylosternus nganhanus
+4|Astylosternus schioetzi
+4|Atelognathus salai
+4|Atelopus barbotini
+4|Atelopus chrysocorallus
+4|Atelopus ebenoides|Huila stubfoot toad
+4|Atelopus epikeisthos
+4|Atelopus famelicus
+4|Atelopus lynchi|Lynch's stubfoot toad
+4|Atelopus mittermeieri
+4|Atelopus pachydermus|Schmidt's stubfoot toad
+4|Atelopus peruensis|Peru stubfoot toad
+4|Atelopus petersi
+4|Atelopus planispina|Napo stubfoot toad
+4|Atelopus senex|Pass stubfoot toad
+4|Atlantihyla panchoi|Ptychohyla panchoi
+4|Atopophrynus syntomopus|Sonson frog
+4|Austrochaperina adamantina
+4|Austrochaperina aquilonia
+4|Austrochaperina archboldi
+4|Austrochaperina basipalmata
+4|Austrochaperina brevipes
+4|Austrochaperina hooglandi
+4|Austrochaperina mehelyi
+4|Austrochaperina novaebritanniae|Narrow-mouthed toad
+4|Austrochaperina parkeri
+4|Austrochaperina polysticta
+4|Austrochaperina septentrionalis
+4|Austrochaperina yelaensis
+4|Banahao forest|Banahao forest frog|Platymantis banahao
+4|Banded banana|Banded banana frog|Afrixalus fulvovittatus
+4|Barbour's tree|Barbour's tree frog|Leptopelis barbouri|Barbour’s forest tree frog
+4|Barycholos pulcher
+4|Bates's tree|Bates's tree toad|Bates' tree toad|Nectophryne batesii
+4|Blommersia angolafa
+4|Blue-spotted tree|Blue-spotted tree frog|Rhacophorus cyanopunctatus|blue-spotted bush frog
+4|Boana beckeri|Hypsiboas beckeri
+4|Boana latistriata|Hypsiboas latistriatus
+4|Boana leucocheila|Hypsiboas leucocheilus|Boana leucocheilus
+4|Boana phaeopleura|Hypsiboas phaeopleura
+4|Boana platanera|banana tree dwelling frog
+4|Boana rhythmica|Hypsiboas rhythmicus
+4|Boana riojana|Hypsiboas riojanus
+4|Boana stenocephala|Hypsiboas stenocephalus
+4|Bocage's tree|Bocage's tree frog|Leptopelis bocagii
+4|Boettger's horned|Boettger's horned toad|Megophrys boettgeri
+4|Boulenophrys daweimontis|Mount Dawei horned toad|Boulenophrys daweimontis; Megophrys daweimontis
+4|Boulenophrys shuichengensis|Megophrys shuichengensis
+4|Brachycephalus pernix|Shield toad
+4|Bromeliad tree|Bromeliad tree frog|Bromeliohyla bromeliacia|Rana arboricula de bromelia
+4|Bronze coquí|Eleutherodactylus richmondi|Richmond's coqui|Richmond’s robber frog
+4|Brown River tree|Brown River tree frog|Litoria vocivincens
+4|Bufo tuberculatus
+4|Bufotes pseudoraddei
+4|Calabresi's bullfrog|Pyxicephalus obbianus
+4|Callimedusa ecuatoriana|Phyllomedusa ecuatoriana|Agua Rica leaf frog
+4|Callimedusa perinesos|Phyllomedusa perinesos|orange-spotted leaf frog
+4|Callulops glandulosus
+4|Callulops marmoratus
+4|Callulops sagittatus
+4|Callulops wilhelmanus
+4|Campo Grande tree|Campo Grande tree frog|Hypsiboas cymbalum|Boana cymbalum
+4|Cardioglossa gratiosa
+4|Cardioglossa melanogaster
+4|Cardioglossa nigromaculata
+4|Cardioglossa pulchra|Black long-fingered frog
+4|Cardioglossa schioetzi|Acha Tugi long-fingered frog
+4|Cardioglossa trifasciata
+4|Cardioglossa venusta|Highland long-fingered frog
+4|Centrolene daidalea|Centrolene daidaleum
+4|Centrolene heloderma|Pichincha giant glass frog
+4|Centrolene solitaria
+4|Charadrahyla juanitae|Exerodonta juanitae|Juanita's earless treefrog
+4|Charadrahyla nephila|Oaxacan cloud forest tree frog
+4|Chattering rock|Chattering rock frog|Litoria staccato
+4|Chiasmocleis alagoana|Chiasmocleis alagoanus
+4|Chiasmocleis antenori
+4|Chiasmocleis atlantica
+4|Chiasmocleis capixaba
+4|Chiasmocleis carvalhoi
+4|Chiasmocleis centralis
+4|Chiasmocleis mehelyi
+4|Chinamococh stream|Chinamococh stream frog|Ptychohyla sanctaecrucis|Quilticohyla sanctaecrucis
+4|Chirixalus cherrapunjiae|Chiromantis cherrapunjiae
+4|Chiromantis kelleri
+4|Choerophryne allisoni
+4|Choerophryne darlingtoni|Albericus darlingtoni
+4|Choerophryne fafniri
+4|Choerophryne gudrunae
+4|Choerophryne gunnari|Albericus gunnari
+4|Choerophryne rhenaurum|Albericus rhenaurum
+4|Choerophryne rostellifer
+4|Choerophryne siegfriedi
+4|Choerophryne swanhildae
+4|Choerophryne tubercula
+4|Choerophryne valkuriarum
+4|Cochranella mache|Mache glass frog
+4|Cochranella resplendens
+4|Colostethus mertensi
+4|Common mist|Common mist frog|Ranoidea rheocola|Litoria rheocola
+4|Confusing poison|Confusing poison frog|Ameerega maculata
+4|Conraua beccarii
+4|Conraua robusta|Cameroon slippery frog
+4|Continental Divide tree|Continental Divide tree frog|Isthmohyla graceae
+4|Cophixalus biroi
+4|Cophixalus parkeri
+4|Cophixalus pipilans
+4|Cophixalus riparius
+4|Cophixalus shellyi
+4|Cophixalus tetzlaffi
+4|Cophyla phyllodactyla
+4|Copiula guttata
+4|Copiula rivularis
+4|Copper-backed brood|Copper-backed brood frog|Pseudophryne raveni
+4|Cornufer acrochordus
+4|Cornufer aculeodactylus
+4|Cornufer akarithymus
+4|Cornufer batantae
+4|Cornufer bimaculatus
+4|Cornufer boulengeri
+4|Cornufer browni
+4|Cornufer bufoniformis|Treasury Island Webbed Frog|Warty Webbed Frog
+4|Cornufer cheesmanae
+4|Cornufer cryptotis
+4|Cornufer elegans
+4|Cornufer gigas
+4|Cornufer gilliardi
+4|Cornufer guppyi
+4|Cornufer macrosceles
+4|Cornufer magnus
+4|Cornufer mediodiscus|Batrachylodes mediodiscus
+4|Cornufer mimicus
+4|Cornufer minutus
+4|Cornufer montanus|Batrachylodes montanus
+4|Cornufer myersi
+4|Cornufer neckeri
+4|Cornufer nexipus
+4|Cornufer opisthodon|Faro webbed frog
+4|Cornufer parkeri
+4|Cornufer punctatus|dotted wrinkled ground frog
+4|Cornufer schmidti
+4|Cornufer trossulus|Batrachylodes trossulus
+4|Cornufer vertebralis
+4|Cornufer vogti
+4|Cornufer wolfi|Batrachylodes wolfi
+4|Corrugated|Corrugated frog|Limnonectes laticeps
+4|Craugastor andi
+4|Craugastor emleni|Robber frog
+4|Craugastor gulosus
+4|Craugastor laticeps
+4|Craugastor longirostris
+4|Craugastor obesus
+4|Craugastor pozo
+4|Craugastor punctariolus|Bob’s robber frog
+4|Craugastor pygmaeus|Pygmy robber frog
+4|Craugastor raniformis
+4|Craugastor ranoides|Robber frog
+4|Craugastor rhodopis|Polymorphic robber frog
+4|Craugastor rostralis
+4|Craugastor rupinius
+4|Craugastor sabrinus|Robber frog
+4|Craugastor saltuarius
+4|Craugastor stadelmani
+4|Craugastor stuarti|Robber frog
+4|Craugastor tabasarae|Robber frog
+4|Craugastor tarahumaraensis
+4|Craugastor taurus|Golfito robber frog
+4|Craugastor trachydermus
+4|Craugastor underwoodi
+4|Craugastor vocalis
+4|Craugastor xucanebi
+4|Craugastor yucatanensis
+4|Crossodactylodes bokermanni|Bokermann's bromeliad frog
+4|Crossodactylodes izecksohni|Izecksohn's bromeliad frog
+4|Crossodactylodes pintoi
+4|Crossodactylus caramaschii
+4|Crossodactylus dantei|Murici spinythumb frog
+4|Crossodactylus dispar|Rio spinythumb frog
+4|Crossodactylus grandis|Bahia spinythumb frog
+4|Crossodactylus lutzorum|Lutz's spinythumb frog
+4|Cryptobatrachus fuhrmanni|Fuhrmann's backpack frog
+4|Cuban pine|Cuban pine toad|Peltophryne cataulaciceps
+4|Cycloramphus asper
+4|Cycloramphus bolitoglossus
+4|Cycloramphus duseni|Ypiranga button frog
+4|Cycloramphus fuliginosus|Cycloramphus fulginosus
+4|Cycloramphus mirandaribeiroi
+4|Cycloramphus ohausi|Wandolleck's button frog
+4|Cycloramphus semipalmatus
+4|Cycloramphus stejnegeri|Stejneger's button frog
+4|Cyclorana longipes|Ranoidea longipes|Litoria longipes
+4|Dendrophryniscus carvalhoi|Carvalho's tree toad
+4|Dendrophryniscus stawiarskyi
+4|Dendropsophus amicorum|Socopo tree frog
+4|Dendropsophus aperomeus
+4|Dendropsophus araguaya
+4|Dendropsophus bokermanni|Bokermann's Tarauaca tree frog
+4|Dendropsophus cachimbo
+4|Dendropsophus carnifex|executioner clown frog|executioner tree frog|hangman swamp frog
+4|Dendropsophus cerradensis
+4|Dendropsophus delarivai
+4|Dendropsophus dutrai
+4|Dendropsophus grandisonae|Mazaruni tree frog
+4|Dendropsophus gryllatus|Pacific lowland treefrog
+4|Dendropsophus meridianus
+4|Dendropsophus minimus|Taperinha tree frog
+4|Dendropsophus miyatai|Hosteria La Selva tree frog
+4|Dendropsophus nahdereri|Estrada Saraiva tree frog
+4|Dendropsophus pelidna|Betania tree frog
+4|Dendropsophus praestans|San Agustin tree frog|San Augustin tree frog
+4|Dendropsophus pseudomeridianus
+4|Dendropsophus rhea
+4|Dendropsophus riveroi|Rivero's Amazon tree frog
+4|Dendropsophus ruschii|Rusch's tree frog
+4|Dendropsophus sartori|Taylor's yellow tree frog
+4|Dendropsophus subocularis|Rio Tuquesa tree frog
+4|Dendropsophus timbeba|Cardoso's tree frog|Cuzco Reserve tree frog
+4|Dendropsophus tintinnabulum|Rio Uapes tree frog
+4|Dendropsophus tritaeniatus|Three-banded tree frog
+4|Dendropsophus virolinensis
+4|Dendropsophus xapuriensis|Xapuri tree frog
+4|Dendropsophus yaracuyanus|Sierra de Aroa tree frog
+4|Derby toadlet|Uperoleia aspera
+4|Diasporus anthrax|Eleutherodactylus anthrax
+4|Dryaderces pearsoni
+4|Dusky toadlet|Uperoleia fusca
+4|Duttaphrynus atukoralei
+4|Duttaphrynus silentvalleyensis
+4|Dwarf coquí|Dull robber frog|Eleutherodactylus unicolor
+4|Eastern Mindanao|Eastern Mindanao frog|Limnonectes diuatus
+4|Eastern sign-bearing froglet|Crinia parinsignifera
+4|Ecnomiohyla echinata|Oaxacan fringe-limbed tree frog
+4|Ecnomiohyla valancifer|San Martin fringe-limbed tree frog|Linchenose fringe-limbed tree frog
+4|Ectopoglossus atopoglossus|Anomaloglossus atopoglossus
+4|Edalorhina nasuta|common snouted frog
+4|Elachistocleis panamensis
+4|Elachistocleis piauiensis
+4|Elachistocleis surinamensis|Sapito Apuntado De Surinam
+4|Eleutherodactylus auriculatus
+4|Eleutherodactylus blairhedgesi
+4|Eleutherodactylus cavernicola
+4|Eleutherodactylus cystignathoides
+4|Eleutherodactylus dilatus
+4|Eleutherodactylus fuscus|Brown robber frog
+4|Eleutherodactylus gossei
+4|Eleutherodactylus guanahacabibes|Guanahacabibes robber frog
+4|Eleutherodactylus principalis|Robber frog
+4|Eleutherodactylus semipalmatus
+4|Eleutherodactylus zeus|Zeus' robber frog
+4|Emei music|Emei music frog|Babina daunchina
+4|Engystomops guayaco|Physalaemus guayaco|Guayaco bully foam frog
+4|Engystomops pustulatus
+4|Engystomops randi|Rand's bully foam frog|Rand's dwarf frog
+4|Epipedobates machalilla
+4|Espadarana audax|Centrolene audax|Centrolene fernandoi|Centrolenella audax|daring glassfrog|Espadarana fernandoi|Fernando's giant glass frog|Napo giant glass frog
+4|Euparkerella cochranae
+4|Euparkerella tridactyla
+4|Exerodonta bivocata|Chiapan highlands tree frog
+4|Exerodonta chimalapa|Chimalapa tree frog
+4|Exerodonta melanomma|Black-eyed tree frog|Blackeye tree frog
+4|Exerodonta perkinsi
+4|Exerodonta sumichrasti|Smichrast's tree frog
+4|Exerodonta xera|Puebla tree frog
+4|Exochohyla hilli|Litoria hilli
+4|False western froglet|Crinia pseudinsignifera
+4|Feihyla kajau|Dring's flying frog
+4|Fejervarya iskandari
+4|Fejervarya multistriata
+4|Fejervarya pulla
+4|Fejervarya verruculosa
+4|Florida bog|Florida bog frog|Lithobates okaloosae
+4|Gastrophryne elegans
+4|Gastrotheca andaquiensis|Andes marsupial frog|Andaqui marsupial frog
+4|Gastrotheca angustifrons|Marsupial frog|Pacific marsupial frog|thin-snouted marsupial frog
+4|Gastrotheca antomia|Marsupial frog
+4|Gastrotheca bufona|Antioquia marsupial frog
+4|Gastrotheca christiani|Christian's marsupial frog
+4|Gastrotheca chrysosticta|Salta marsupial frog|Baritú’s Marsupial Frog
+4|Gastrotheca dendronastes|Arboreal marsupial frog|Rio Calima marsupial frog
+4|Gastrotheca espeletia|North shore marsupial frog
+4|Gastrotheca fissipes|Igaracu marsupial frog
+4|Gastrotheca galeata|helmeted marsupial frog
+4|Gastrotheca lateonota|El Tambo marsupial frog
+4|Gastrotheca lauzuricae|La Siberia marsupial frog
+4|Gastrotheca microdiscus
+4|Gastrotheca ochoai|Chilca marsupial frog
+4|Gastrotheca ossilaginis
+4|Gastrotheca pacchamama|Ayacucho  marsupial frog
+4|Gastrotheca phalarosa
+4|Gastrotheca piperata
+4|Gastrotheca pseustes|San Lucas marsupial frog|liar marsupial frog
+4|Gastrotheca psychrophila|Ridge marsupial frog|cold marsupial frog
+4|Gastrotheca pulchra
+4|Gastrotheca rebeccae|Rebecca's marsupial frog
+4|Gastrotheca splendens|Schmidt’s marsupial frog
+4|Gastrotheca stictopleura
+4|Gastrotheca testudinea|Espada's marsupial frog|tortoise marsupial frog
+4|Gastrotheca trachyceps|Cerro Munchique marsupial frog
+4|Gastrotheca weinlandii|Weinland's marsupial frog
+4|Gastrotheca zeugocystis
+4|Geminis' dart|Geminis' dart frog|Andinobates geminisae
+4|Geobatrachus walkeri|Walker’s sierra frog
+4|Gephyromantis runewsweeki
+4|Glandirana tientaiensis|Rana tientaiensis
+4|Glandular toadlet|Uperoleia glandulosa
+4|Glyphoglossus brooksii|Calluella brooksii
+4|Glyphoglossus yunnanensis
+4|Godman's tree|Godman's tree frog|Tlalocohyla godmani
+4|Gold-spotted marsupial|Gold-spotted marsupial frog|Gastrotheca aureomaculata
+4|Golden puddle|Golden puddle frog|Phrynobatrachus auritus
+4|Goldfield's bull|Goldfield's bull frog|Neobatrachus wilsmorei
+4|Gracixalus gracilipes|Philautus gracilipes
+4|Great piebald horned|Great piebald horned toad|Megophrys giganticus
+4|Green and red venter harlequin|Green and red venter harlequin toad|Atelopus pinangoi
+4|Guerreran stream|Guerreran stream frog|Ptychohyla erythromma|Quilticohyla erythromma
+4|Haddadus plicifer
+4|Hamptophryne alios
+4|Hemiphractus helioi|cusco triangular-headed frog|Helio's horned tree frog
+4|Hemiphractus scutatus|helmeted casque-headed frog|Spix's horned tree frog
+4|Heterixalus tricolor
+4|Hidden-ear|Hidden-ear frog|Cyclorana cryptotis
+4|Hispaniolan yellow tree|Hispaniolan yellow tree frog|Osteopilus pulchrilineatus
+4|Holoaden luederwaldti
+4|Hoogmoed's tree|Hoogmoed's tree frog|Hypsiboas roraima
+4|Hosmer's|Hosmer's frog|Cophixalus hosmeri
+4|Humerana miopus|Rana miopus
+4|Humerana oatesii|Rana oatesii
+4|Humming|Humming frog|Neobatrachus pelobatoides
+4|Hyalinobatrachium aureoguttatum|Atrato Glass Frog|Sun Glassfrog
+4|Hyalinobatrachium cappellei|Hyalinobatrachium crurifasciatum
+4|Hyalinobatrachium iaspidiense
+4|Hyalinobatrachium taylori
+4|Hyalinobatrachium vireovittatum
+4|Hydrolaetare dantasi|Feijo white-lipped frog
+4|Hylambates leonardi|Phlyctimantis leonardi
+4|Hylarana glandulosa|Pulchrana glandulosa
+4|Hylodes amnicola
+4|Hylodes babax|Caparao Mountains tree toad
+4|Hylodes charadranaetes|Rio tree toad
+4|Hylodes dactylocinus
+4|Hylodes glaber|Itatiaia tree toad
+4|Hylodes lateristrigatus|Baumann's tree toad
+4|Hylodes magalhaesi|Sao Paulo tree toad
+4|Hylodes perplicatus|Humboldt's tree toad
+4|Hylodes uai
+4|Hylodes vanzolinii|Vanzolinii's tree toad
+4|Hylophorbus rufescens
+4|Hyloscirtus alytolylax|Tandapi tree frog
+4|Hyloscirtus armatus|armed tree frog
+4|Hyloscirtus bogotensis|Bogota tree frog
+4|Hyloscirtus tapichalaca|Tapichalaca tree frog
+4|Hyloxalus bocagei|Colostethus bocagei|Bocage's rocket frog
+4|Hyloxalus borjai|Colostethus borjai
+4|Hyloxalus breviquartus|Colostethus breviquartus|Urrao rocket frog
+4|Hyloxalus cevallosi|Palanda rocket frog
+4|Hyloxalus elachyhistus|Loja rocket frog
+4|Hymenochirus feae
+4|Hyperolius benguellensis
+4|Hyperolius endjami
+4|Hyperolius fusciventris
+4|Hyperolius guttulatus
+4|Hyperolius marginatus
+4|Hyperolius microps|Hyperolius acuticeps
+4|Hyperolius minutissimus|Tiny reed frog
+4|Hyperolius mitchelli|Mitchell's Reed Frog
+4|Hyperolius molleri
+4|Hyperolius nasutus|Long Reed Frog|Longnose Reed Frog
+4|Hyperolius parallelus|Angolan Reed Frog
+4|Hyperolius picturatus
+4|Hyperolius pictus
+4|Hyperolius platyceps
+4|Hyperolius swynnertoni|Swynnerton's Reed Frog
+4|Hyperolius thomensis|Sao Tome giant treefrog
+4|Hyperolius tuberculatus
+4|Hypopachus ustus
+4|Imbabura tree|Imbabura tree frog|Hypsiboas picturatus|Boana picturata
+4|Incilius aucoinae|Cranopsis aucoinae
+4|Incilius campbelli
+4|Incilius canaliferus
+4|Incilius coccifer|southern round-gland toad
+4|Incilius coniferus|Green climbing toad
+4|Incilius epioticus
+4|Incilius nebulifer|nebuliferous toad
+4|Incilius pisinnus
+4|Incilius porteri
+4|Incilius tutelarius|Chimalapa toad
+4|Ingerana reticulata
+4|Ingerana tenasserimensis
+4|Ingerophrynus gollum
+4|Inyangani river|Inyangani river frog|Amietia inyangae
+4|Ischnocnema hoehnei
+4|Ischnocnema juipoca
+4|Ischnocnema manezinho
+4|Island leopard|Island leopard frog|Lithobates miadis
+4|Isthmohyla infucata
+4|Isthmohyla lancasteri|Lancaster's tree frog
+4|Isthmohyla pseudopuma|Gunther's Costa Rican  tree frog|Meadow treefrog
+4|Jabiru toadlet|Uperoleia arenicola
+4|Jade tree|Jade tree frog|Rhacophorus dulitensis|Zhangixalus dulitensis
+4|Jahn's tree|Jahn's tree frog|Hyloscirtus jahni
+4|Kalophrynus bunguranus
+4|Kalophrynus heterochirus
+4|Kalophrynus interlineatus
+4|Kalophrynus intermedius
+4|Kalophrynus palmatissimus|Lowland grainy frog
+4|Kalophrynus punctatus
+4|Kalophrynus robinsoni
+4|Kassina jozani
+4|Kassina maculosa
+4|Kassina somalica
+4|Kassinula wittei
+4|Katanga caco|Cacosternum leleupi
+4|Knysna banana|Knysna banana frog|Afrixalus knysnae
+4|Kobayashi's horned|Kobayashi's horned frog|Megophrys kobayashii
+4|Kroombit tinker|Kroombit tinker frog|Taudactylus pleione
+4|Kurixalus bisacculus|Loei flying frog|Taylor’s Rough-armed Treefrog
+4|Kurixalus verrucosus|Rhacophorus verrucosus
+4|La Planada poison|La Planada poison frog|Ameerega andina
+4|Lanzarana largeni
+4|Large toadlet|Pseudophryne major
+4|Leptobrachella baluensis|Kinabalu dwarf litter frog
+4|Leptobrachella brevicrus
+4|Leptobrachella heteropus|Leptolalax heteropus
+4|Leptobrachella maura|Leptolalax maurus
+4|Leptobrachella mjobergi
+4|Leptobrachella palmata
+4|Leptobrachella parva
+4|Leptobrachella picta|Leptolalax pictus|Painted slender litter frog
+4|Leptobrachella pluvialis|Leptolalax pluvialis
+4|Leptobrachella tuberosa|Leptolalax tuberosus
+4|Leptobrachium banae
+4|Leptobrachium huashen
+4|Leptobrachium leishanense|Leishan moustache toad
+4|Leptobrachium nigrops|Black-Eyed Litter Frog
+4|Leptobrachium pullum
+4|Leptobrachium xanthospilum
+4|Leptodactylus camaquara
+4|Leptodactylus cunicularius|rabbit foam frog|Sazima's white-lipped frog|rabbit burrow frog
+4|Leptodactylus diedrus
+4|Leptodactylus flavopictus|yellow painted frog
+4|Leptodactylus griseigularis
+4|Leptodactylus laticeps
+4|Leptodactylus leptodactyloides
+4|Leptodactylus magistris
+4|Leptodactylus pascoensis
+4|Leptodactylus poecilochilus|turbo white-lipped frog
+4|Leptodactylus rhodonotus
+4|Leptodactylus rugosus|Guyana white-lipped frog|rugose thin-toed frog
+4|Leptodactylus sabanensis|Gran Sabana thin-toed frog
+4|Leptodactylus silvanimbus
+4|Leptodactylus tapiti|Goiás white-lipped frog
+4|Leptodactylus vastus
+4|Leptodactylus ventrimaculatus
+4|Leptodactylus viridis|Jim's white-lipped frog
+4|Leptomantis rufipes|Rhacophorus rufipes|Malaysian flying frog
+4|Leptopelis argenteus
+4|Leptopelis boulengeri
+4|Leptopelis gramineus
+4|Leptopelis macrotis|Big-eyed forest treefrog
+4|Leptopelis millsoni
+4|Leyte tree|Leyte tree frog|Philautus leitensis
+4|Limnodynastes dorsalis|pobblebonk|western banjo frog
+4|Limnonectes arathooni
+4|Limnonectes asperatus
+4|Limnonectes fragilis|Fragile large-headed frog
+4|Limnonectes ingeri
+4|Limnonectes kenepaiensis
+4|Limnonectes khasianus
+4|Limnonectes larvaepartus
+4|Limnonectes limborgi
+4|Limnonectes liui
+4|Limnonectes micrixalus
+4|Limnonectes microdiscus
+4|Limnonectes modestus
+4|Limnonectes nitidus|Tanah Rata wart frog
+4|Limnonectes palavanensis
+4|Little Mexican|Little Mexican toad|Anaxyrus kelloggi
+4|Long-thumbed|Long-thumbed frog|barking marsh frog|Limnodynastes fletcheri
+4|Lynchius nebulanastes|Phrynopus nebulanastes
+4|Main's|Main's frog|Cyclorana maini
+4|Malcolm's Ethiopian|Malcolm's Ethiopian toad|Altiphrynoides malcolmi|Malcolm’s Ethiopia toad
+4|Mannophryne leonardoi
+4|Mannophryne trujillensis
+4|Mannophryne venezuelensis
+4|Mantidactylus cowanii
+4|Mantidactylus madecassus|Andringitra Madagascar frog
+4|Mantidactylus tricinctus
+4|Mantidactylus zolitschka
+4|Mantophryne lateralis
+4|Mantophryne louisiadensis
+4|Maracas heart-tongued|Maracas heart-tongued frog|Phyllodytes tuberculosus
+4|Martin's toadlet|Uperoleia martini
+4|Megophrys glandulosa|Glandular horned toad
+4|Megophrys parallela
+4|Melanophryniscus admirabilis
+4|Melanophryniscus cupreuscapularis
+4|Melanophryniscus fulvoguttatus
+4|Melanophryniscus krauczuki
+4|Melanophryniscus macrogranulosus|Torres red-belly toad
+4|Melanophryniscus pachyrhynus
+4|Melanophryniscus rubriventris|Yungas Redbelly Toad
+4|Melanophryniscus sanmartini
+4|Melanophryniscus spectabilis
+4|Meristogenys kinabaluensis|Montane torrent frog
+4|Mertensophryne usambarae
+4|Metacrinia nichollsi|Forest toadlet|Nicholls toadlet
+4|Micrixalus narainensis|Narain’s Stream Frog
+4|Microhyla fusca
+4|Microhyla karunaratnei|Karunaratne's narrow-mouthed frog
+4|Microhyla maculifera
+4|Microhyla rubra
+4|Microhyla zeylanica
+4|Microkayla adenopleura|Psychrophrynella adenopleura
+4|Microkayla iatamasi|Psychrophrynella iatamasi|Andes frog
+4|Microkayla kempffi|Psychrophrynella kempffi
+4|Microkayla pinguis|Psychrophrynella pinguis
+4|Microkayla wettsteini|Phrynopus wettsteini|Psychrophrynella wettsteini
+4|Micryletta erythropoda
+4|Micryletta inornata
+4|Micryletta steinegeri
+4|Minervarya brevipalmata|Fejervarya brevipalmata
+4|Minervarya rufescens|Fejervarya rufescens|Reddish Burrowing Frog
+4|Mississippi gopher|Mississippi gopher frog|Dusky gopher frog|Lithobates sevosus
+4|Mixophyes hihihorlo
+4|Mixtured pygmy|Mixtured pygmy frog|Microhyla mixtura
+4|Mjoberg's toadlet|Uperoleia mjobergii
+4|Moore's|Moore's frog|Rana johni
+4|Morona-Santiago tree|Morona-Santiago tree frog|Hyloscirtus pacha
+4|Mottled tree|Mottled tree frog|Philautus poecilius
+4|Mount Data forest|Mount Data forest frog|Platymantis subterrestris
+4|Mount Glorious day|Mount Glorious day frog|Mount Glorious torrent frog|Taudactylus diurnus
+4|Mozambique forest tree|Mozambique forest tree frog|Leptopelis mossambicus|Brown-backed Tree Frog|Mozambique Tree Frog
+4|Mozambique ridged|Mozambique ridged frog|Broad-banded Grass Frog,|Ptychadena mossambica
+4|Nannophryne apolobambica|Bufo apolobambicus
+4|Nanohyla annectens|Microhyla annectens|Larut Hills Rice Frog
+4|Nanohyla perparva|Microhyla perparva
+4|Nanorana annandalii|Paa annandalii
+4|Nanorana ercepeae
+4|Nanorana maculosa|Paa maculosa
+4|Nanorana minica|Paa minica
+4|Nanorana parkeri
+4|Nanorana rarica|Paa rarica
+4|Nanorana taihangnica
+4|Nanorana unculuanus|Chaparana unculuanus
+4|Nanorana ventripunctata
+4|Nanorana yunnanensis
+4|Naomi's forest|Naomi's forest frog|Platymantis naomii
+4|Nectophrynoides minutus
+4|Negros forest|Negros forest frog|Platymantis negrosensis
+4|Niceforo's marsupial|Niceforo's marsupial frog|Gastrotheca nicefori
+4|Niceforonia adenobrachia
+4|Niceforonia dolops|Eleutherodactylus dolops|Hypodactylus dolops
+4|Niceforonia elassodiscus|Eleutherodactylus elassodiscus|Cuyuja robber frog|Hypodactylus elassodiscus
+4|Niceforonia fallaciosa|Hypodactylus fallaciosus
+4|Niceforonia lucida|Hypodactylus lucida|Cannatella's Andes frog
+4|Niceforonia nana
+4|Niceforonia peraccai|Hypodactylus peraccai
+4|Noblella carrascoicola
+4|Noblella pygmaea
+4|Northern barred|Northern barred frog|Mixophyes schevilli
+4|Northern burrowing|Northern burrowing frog|Neobatrachus aquilonius
+4|Northern tinker|Northern tinker frog|Taudactylus rheophilus
+4|Nothophryne broadleyi
+4|Nyctibatrachus petraeus
+4|Nyctimystes montanus|Litoria montana|Hyla montana|Mountain big-eyed tree frog|Nyctimyces montana
+4|Nyctimystes trachydermis|Litoria trachydermis|Morobe big-eyed tree frog
+4|Nymphargus balionotus|Cochranella balionota|Glass frog|Mindo Cochran frog
+4|Odontophrynus lavillai|Escuericito
+4|Odorrana andersonii
+4|Odorrana anlungensis
+4|Odorrana hainanensis|True frog
+4|Odorrana wuchuanensis
+4|Ololygon atrata|Scinax atratus
+4|Ololygon brieni|Scinax brieni
+4|Ololygon canastrensis|Scinax canastrensis
+4|Ololygon flavoguttata|Scinax flavoguttatus
+4|Ololygon heyeri|Scinax heyeri
+4|Ololygon humilis|Scinax humilis
+4|Ololygon kautskyi|Scinax kautskyi
+4|Ololygon littorea|Scinax littoreus
+4|Ololygon luizotavioi|Scinax luizotavioi
+4|Ololygon melloi|Scinax melloi
+4|Ololygon obtriangulata|Scinax obtriangulatus
+4|Ololygon ranki|Scinax ranki
+4|Ombrana sikimensis|Chaparana sikimensis
+4|Ophryophryne hansi
+4|Ophryophryne pachyproctus
+4|Orange-thighed|Orange-thighed frog|Litoria xanthomera|Ranoidea xanthomera
+4|Oreobates cruralis|Eleutherodactylus cruralis
+4|Oreobates ibischi|Eleutherodactylus ibischi
+4|Oreobates sanderi
+4|Oreolalax granulosus
+4|Oreolalax jingdongensis
+4|Oreolalax liangbeiensis
+4|Oreolalax lichuanensis
+4|Oreolalax major|Large toothed toad
+4|Oreolalax nanjiangensis
+4|Oreolalax pingii
+4|Oreolalax popei
+4|Oreolalax rhodostigmatus
+4|Oreolalax rugosus
+4|Oreolalax schmidti
+4|Oreolalax weigoldi
+4|Oreolalax xiangchengensis
+4|Oreophryne anthonyi
+4|Oreophryne asplenicola
+4|Oreophryne atrigularis
+4|Oreophryne biroi
+4|Oreophryne brevicrus
+4|Oreophryne clamata
+4|Oreophryne flava
+4|Oreophryne idenburgensis
+4|Oreophryne kapisa
+4|Oreophryne loriae
+4|Oreophryne minuta
+4|Oreophryne pseudasplenicola
+4|Oreophryne sibilans
+4|Oreophryne unicolor
+4|Oreophrynella cryptica
+4|Orixalus ananjevae|Chirixalus ananjevae|Kurixalus ananjevae
+4|Osornophryne antisana|Napo plump toad
+4|Osornophryne bufoniformis
+4|Osteocephalus fuscifacies
+4|Osteocephalus helenae
+4|Osteocephalus heyeri
+4|Osteocephalus leoniae
+4|Painted narrowmouth|Painted narrowmouth toad|Kaloula picta
+4|Palmar tree|Palmar tree frog|Hypsiboas pellucens|Boana pellucens|Palm tree frog
+4|Panay forest|Panay forest frog|Platymantis panayensis
+4|Papurana celebensis|Hylarana celebensis|Celebes frog
+4|Papurana elberti|lesser Sundas frog
+4|Papurana jimiensis|Jimi River frog
+4|Paratelmatobius cardosoi
+4|Paratelmatobius mantiqueira
+4|Patzcuaro|Patzcuaro frog|Lithobates dunni
+4|Pedostibes rugosus|Marbled tree toad
+4|Pelophryne api|Api dwarf toad
+4|Pelophryne guentheri
+4|Pelophryne signata|Saint Andrew's cross toadlet
+4|Pelophylax caralitanus
+4|Petropedetes palmipes|Efulen water frog
+4|Petropedetes parkeri
+4|Phasmahyla exilis|Mottled leaf frog
+4|Phasmahyla jandaia|Sazima's leaf frog
+4|Phasmahyla spectabilis
+4|Phasmahyla timbo
+4|Philautus acutus|Raspy bush frog|Sharp bubble-nest frog
+4|Philautus amoenus|Kamboranga bubble-nest frog|Kamboranga Bush Frog
+4|Philautus aurantium|Bubble-nest frog
+4|Philautus cardamonus
+4|Philautus cinerascens|Mon tree frog
+4|Philautus cornutus|Horned bubble-nest frog
+4|Philautus disgregus|Malaysian bubble-nest frog|Disparate bubble-nest frog
+4|Philautus erythrophthalmus
+4|Philautus gunungensis
+4|Philautus ingeri|Inger's bubble-nest frog
+4|Philautus jacobsoni|Jacobson's bubble-nest frog|Jacobson's tree frog
+4|Philautus kempii|Kemp's bush frog|Kemp's horned toad|Kemp's shrub frog|Kemp's spadefoot toad|upper Rotung bush frog
+4|Philautus kerangae|Kerangas bubble-nest frog
+4|Philautus longicrus|Palawan bubble-nest frog
+4|Philautus maosonensis|Mao-Son bubble-nest frog|Maoson bush frog
+4|Philautus microdiscus|Kobo bubble-nest frog|Kobo shrub frog
+4|Philautus mjobergi|Murud bubble-nest frog
+4|Philautus namdaphaensis
+4|Philautus pallidipes|palefooted tree frog|Pangerango bubble-nest frog
+4|Philautus refugii|Lanjak bush frog
+4|Philautus saueri|Sauer's bush frog
+4|Philautus surdus|Common Forest Tree Frog|Davao bubble-nest frog|Luzon bubble-nest frog|Williams' bubble-nest frog
+4|Philautus surrufus|Malindang tree frog|molted tree frog
+4|Philautus tytthus|triangle bubble-nest frog
+4|Philautus umbra|Pinnacle bubble-nest frog
+4|Philautus vermiculatus|Perak bubble-nest frog|vermiculate bush frog|vermiculated bush frog
+4|Philautus worcesteri|Mindanao bubble-nest frog
+4|Phrynobatrachus albomarginatus
+4|Phrynobatrachus alleni|Allen's river frog
+4|Phrynobatrachus annulatus|Ringed river frog
+4|Phrynobatrachus asper
+4|Phrynobatrachus batesii
+4|Phrynobatrachus brevipalmatus
+4|Phrynobatrachus ghanensis|Ghana river frog
+4|Phrynobatrachus giorgii
+4|Phrynobatrachus gutturosus
+4|Phrynobatrachus minutus
+4|Phrynobatrachus tokba
+4|Phrynobatrachus ukingensis
+4|Phrynomedusa bokermanni|Bokermann's leaf frog
+4|Phrynomedusa fimbriata|spiny-knee leaf frog
+4|Phrynomedusa vanzolinii|Vanzolini's leaf frog
+4|Phyllodytes gyrinaethes
+4|Phyllodytes maculosus
+4|Phyllodytes punctatus
+4|Phyllonastes lochites|Noblella lochites
+4|Phyllonastes lynchi|Noblella lynchi
+4|Physalaemus aguirrei
+4|Physalaemus bokermanni
+4|Physalaemus cuqui
+4|Physalaemus deimaticus|frightening foam froglet|Jaboticatubas dwarf frog
+4|Physalaemus erythros
+4|Physalaemus evangelistai|Evangelista's dwarf frog|Evangelista's foam froglet
+4|Physalaemus jordanensis
+4|Physalaemus maximus
+4|Physalaemus obtectus|Linhares dwarf frog
+4|Physalaemus santafecinus|Helvetia dwarf frog|Santa Fe dwarf frog
+4|Physalaemus signifer|Girard's dwarf frog|Otavio's robber frog
+4|Physalaemus soaresi|Santa Cruz dwarf frog
+4|Phyzelaphryne miriamae
+4|Pine|Pine toad|Incilius occidentalis
+4|Pine forest stream|Pine forest stream frog|Ptychohyla macrotympanum
+4|Pithecopus ayeaye|reticulate leaf frog
+4|Plains brown tree|Plains brown tree frog|Litoria paraewingi
+4|Platymantis indeprensus
+4|Platymantis mimulus
+4|Platymantis montanus
+4|Platymantis pseudodorsalis
+4|Platymantis spelaeus|Negros cave frog
+4|Platypelis cowanii|Cophyla cowanii
+4|Platypelis pollicaris|Cophyla pollicaris
+4|Platyplectrum platyceps|Lechriodus platyceps
+4|Plectrohyla chrysopleura
+4|Plectrohyla ephemera
+4|Plectrohyla glandulosa|forest spikethumb frog
+4|Plectrohyla pycnochila|thick-lipped spikethumb frog|thicklip spikethumb frog
+4|Plectrohyla tecunumani|cave spikethumb frog
+4|Plethodontohyla bipunctata
+4|Plethodontohyla ocellata
+4|Plethodontohyla tuberata|Interior digging frog
+4|Pleurodema borellii
+4|Pleurodema cinereum|Juliaca four-eyed frog
+4|Pleurodema kriegi
+4|Pleurodema nebulosum|Mendoza four-eyed frog
+4|Pleurodema somuncurense|Somuncura frog|El Rincon stream frog|Valcheta frog
+4|Pleurodema tucumanum
+4|Polkadot poison|Polkadot poison frog|Oophaga arborea
+4|Poyntonia paludicola
+4|Poyntonophrynus vertebralis|Bufo vertebralis
+4|Pristimantis aaptus
+4|Pristimantis acatallelus
+4|Pristimantis actinolaimus|Eleutherodactylus actinolaimus
+4|Pristimantis actites|Eleutherodactylus actites
+4|Pristimantis aemulatus
+4|Pristimantis affinis|Eleutherodactylus affinis
+4|Pristimantis alalocophus|Eleutherodactylus alalocophus
+4|Pristimantis albericoi
+4|Pristimantis appendiculatus
+4|Pristimantis bicolor
+4|Pristimantis bipunctatus
+4|Pristimantis buccinator
+4|Pristimantis buckleyi
+4|Pristimantis caprifer
+4|Pristimantis caryophyllaceus
+4|Pristimantis cerasinus
+4|Pristimantis chiastonotus
+4|Pristimantis chloronotus
+4|Pristimantis crucifer|Porvenir robber frog
+4|Pristimantis curtipes
+4|Pristimantis danae
+4|Pristimantis eriphus
+4|Pristimantis gretathunbergae|Greta Thunberg's rainfrog
+4|Pristimantis gutturalis
+4|Pristimantis inguinalis
+4|Pristimantis inusitatus
+4|Pristimantis katoptroides
+4|Pristimantis ockendeni
+4|Pristimantis olivaceus
+4|Pristimantis orcesi
+4|Pristimantis palmeri
+4|Pristimantis scolodiscus
+4|Pristimantis sobetes|Sobetes robber frog
+4|Pristimantis susaguae
+4|Pristimantis taeniatus|Banded rain frog
+4|Pristimantis terraebolivaris
+4|Pristimantis toftae
+4|Pristimantis unistrigatus|Striped Robber Frog|Eleutherodactylus unistrigatus
+4|Pristimantis viejas
+4|Pristimantis vilarsi
+4|Probreviceps macrodactylus|Usambara big-fingered frog
+4|Probreviceps uluguruensis|Uluguru forest frog
+4|Proceratophrys concavitympanum
+4|Proceratophrys goyana|Goias smooth horned frog
+4|Proceratophrys moehringi
+4|Proceratophrys phyllostomus|Proceratophrys phyllostoma
+4|Proceratophrys salvatori|Odontophrynus salvatori
+4|Proceratophrys subguttata
+4|Pseudacris fouquettei
+4|Pseudis platensis
+4|Pseudopaludicola ceratophyes|Pseudopaludicola ceratophryes|Leticia swamp frog
+4|Pseudopaludicola falcipes|Hensel's swamp frog
+4|Pseudopaludicola mineira|Minas swamp froglet
+4|Pseudophilautus amboli|Amboli Bush Frog
+4|Pseudophilautus caeruleus
+4|Pseudophilautus extirpo
+4|Pseudophilautus folicola|leaf-dwelling shrub frog
+4|Pseudophilautus fulvus|knuckles shrub frog
+4|Pseudophilautus halyi
+4|Pseudophilautus leucorhinus|Marten's bush frog|pointed-nose bush frog|white-nosed bush frog|whitenose bubble-nest frog
+4|Pseudophilautus malcolmsmithi
+4|Pseudophilautus mittermeieri|Mittermeier's shrub frog
+4|Pseudophilautus nemus
+4|Pseudophilautus pleurotaenia|side-striped shrub frog
+4|Pseudophilautus procax
+4|Pseudophilautus regius|Polonnaruwa shrub frog
+4|Pseudophilautus rugatus
+4|Pseudophilautus simba
+4|Pseudophilautus steineri|Steiner's shrub frog
+4|Pseudophilautus zal
+4|Pseudophilautus zimmeri
+4|Ptychadena erlangeri
+4|Ptychadena ingeri
+4|Ptychadena keilingi
+4|Ptychadena nana
+4|Ptychadena neumanni
+4|Ptychadena newtoni
+4|Ptychadena porosissima|Grassland Ridged Frog|Striped Grass Frog
+4|Ptychadena stenocephala
+4|Ptychadena superciliaris
+4|Ptychadena taenioscelis|Dwarf Grass Frog|Spotted-throated Ridged Frog
+4|Ptychohyla dendrophasma
+4|Puerto Rican rock|Puerto Rican rock frog|Eleutherodactylus cooki|Cook’s robber frog|demon of Puerto Rico
+4|Puerto Rican wetland|Puerto Rican wetland frog|Eleutherodactylus juanariveroi
+4|Pugh's|Pugh's frog|Philoria pughi|Baw baw frog
+4|Quasipaa boulengeri
+4|Quasipaa jiulongensis
+4|Quasipaa shini
+4|Quilticohyla acrochorda|Ptychohyla acrochorda|Quiltichrohyla acrochorda|warty mountain stream frog
+4|Rana multidenticulata
+4|Ranitomeya flavovittata
+4|Raorchestes chlorosomma|Green eyed bushfrog
+4|Raorchestes gryllus
+4|Raorchestes munnarensis|Munnar bush frog|Philautus munnarensis|Philautus sp. nov. 'Munnar'|Pseudophilautus munnarensis
+4|Rattling froglet|Crinia glauerti|clinking froglet|Glauert's froglet
+4|Red tree|Red tree frog|Leptopelis rufus
+4|Relict leopard|Relict leopard frog|Lithobates onca
+4|Remote froglet|Crinia remota
+4|Rhacophorus baluensis
+4|Rhacophorus barisani
+4|Rhacophorus hoanglienensis
+4|Rhacophorus monticola|Loka flying frog
+4|Rhacophorus poecilonotus|Sumatra flying frog
+4|Rhacophorus tuberculatus
+4|Rhacophorus verrucopus|Beibeng flying frog|serrate-toed tree frog
+4|Rheobates pseudopalmatus
+4|Rheohyla|Rheohyla miotympanum|Ecnomiohyla miotympanum|small-eared hyla|small-eared tree frog
+4|Rhinella acutirostris
+4|Rhinella dorbignyi|Dorbigny's Toad|Bella Vista Toad
+4|Rhinella fernandezae
+4|Rhinella macrorhina
+4|Rhinella nicefori
+4|Rhinella poeppigii
+4|Rhinella pombali
+4|Rhinella scitula
+4|Rhombophryne coronata|Digging frog
+4|Rhombophryne laevipes
+4|Rhombophryne minuta
+4|Richmond|Richmond frog|Philoria richmondensis|Richmond’s frog
+4|Rio Chingual Valley tree|Rio Chingual Valley tree frog|Hyloscirtus pantostictus
+4|Romerus hainanus|Liuixalus hainanus|Hainan small tree frog
+4|Rose's rain|Rose's rain frog|Breviceps rosei|Rose's Blaasop|Rose's short-headed frog|sand rain frog
+4|Ruiz's marsupial|Ruiz's marsupial frog|Gastrotheca ruizi
+4|Russell's toadlet|Uperoleia russelli
+4|Sachatamia punctulata
+4|Sand|Sand frog|Heleioporus psammophilus|Sand toad|Cape Sand Toad|Vandijkophrynus angusticeps
+4|Sandyrana hunti|Litoria hunti|Nyctimystes hunti
+4|Sarcohyla miahuatlanensis|Sierra Miahuatlan spikethumb tree frog
+4|Savannah forest tree|Savannah forest tree frog|Leptopelis bufonides
+4|Scanty|Scanty frog|Cophixalus exiguus
+4|Scaphiophryne madagascariensis|Green rain frog
+4|Scarlet harlequin|Scarlet harlequin toad|Atelopus sorianoi|Cloud forest stubfoot toad
+4|Scarthyla goinorum|Madre de Dios tree frog|Tarauaca snouted tree frog
+4|Scarthyla vigilans|Hyla vigilans|Maracaibo Basin tree frog
+4|Schilluk ridged|Schilluk ridged frog|Ptychadena schillukorum
+4|Scinax baumgardneri
+4|Scinax chiquitanus
+4|Scinax danae|Bolivar snouted tree frog
+4|Scinax ictericus
+4|Scinax jolyi
+4|Scinax kennedyi|Kennedy's snouted tree frog
+4|Scinax oreites
+4|Scinax sugillatus
+4|Scinax wandae
+4|Sclerophrys langanoensis
+4|Sclerophrys lemairii
+4|Sclerophrys perreti
+4|Sclerophrys reesi
+4|Scutiger boulengeri
+4|Scutiger chintingensis
+4|Scutiger glandulatus
+4|Scutiger jiulongensis
+4|Scutiger liupanensis
+4|Scutiger maculatus
+4|Scutiger mammatus
+4|Scutiger muliensis
+4|Scutiger nepalensis
+4|Scutiger ningshanensis
+4|Scutiger pingwuensis
+4|Serranobatrachus sanctaemartae|Pristimantis sanctaemartae
+4|Shaping horned|Shaping horned toad|Megophrys shapingensis
+4|Shoemaker|Shoemaker frog|Neobatrachus sutor
+4|Short-nosed green|Short-nosed green frog|Eleutherodactylus brevirostris
+4|Sierra Madre|Sierra Madre frog|Lithobates sierramadrensis
+4|Sky-blue poison|Sky-blue poison frog|Hyloxalus azureiventris
+4|Slender|Slender frog|Austrochaperina gracilipes
+4|Sloane's froglet|Crinia sloanei
+4|Small toadlet|Uperoleia minima
+4|Small western froglet|Crinia subinsignifera
+4|Smallskin tree|Smallskin tree frog|Hypsiboas microderma|Boana microderma
+4|Smith's wrinkled|Smith's wrinkled frog|Alcalus tasanae
+4|Smooth toadlet|Uperoleia laevigata
+4|South American common|South American common toad|Rhinella margaritifera
+4|Spencer's burrowing|Spencer's burrowing frog|Platyplectrum spenceri
+4|Sphaenorhynchus platycephalus
+4|Sphenophryne cornuta
+4|Sphenophryne schlaginhaufeni|Liophryne schlaginhaufeni
+4|Spine-fingered tree|Spine-fingered tree frog|Charadrahyla trux|Spinefinger tree frog
+4|Spinomantis microtis|Guibe's bright-eyed frog
+4|Spotted chorus|Spotted chorus frog|Pseudacris clarkii
+4|Squelching froglet|Sign-bearing froglet|Crinia insignifera
+4|Strabomantis anomalus
+4|Strabomantis biporcatus
+4|Strabomantis bufoniformis|Rusty robber frog
+4|Strabomantis cerastes|Eleutherodactylus cerastes
+4|Strabomantis cornutus|Rio Suno robber frog
+4|Stumpffia helenae|Narrow-mouthed frog
+4|Stumpffia pygmaea|Rhombophryne pygmaea
+4|Sulawesian puddle|Sulawesian puddle frog|Occidozyga celebensis
+4|Sumaterana crassiovis
+4|Sumatran torrent|Sumatran torrent frog|Huia sumatrana
+4|Synapturanus mirandaribeiroi|Synapturan De Miranda-ribeiro
+4|Syncope jimi|Chiasmocleis jimi
+4|Tai forest tree|Tai forest tree frog|Leptopelis occidentalis
+4|Tanami toadlet|Uperoleia micromeles
+4|Tasmanian froglet|Crinia tasmaniensis
+4|Telmatobius arequipensis|chili water frog
+4|Telmatobius brachydactylus|Amable Maria frog|Junín Riparian Frog
+4|Telmatobius carrillae|Telmatobius carillae|Ancash water frog
+4|Telmatobius ceiorum|Catamarca water frog
+4|Telmatobius contrerasi|Contreras' water frog
+4|Telmatobius gigas|Water frog
+4|Telmatobius halli|Hall's water frog
+4|Telmatobius hypselocephalus
+4|Telmatobius intermedius
+4|Telmatobius jelskii|Acancocha water frog
+4|Telmatobius latirostris|Cajamarca water frog
+4|Telmatobius mayoloi
+4|Telmatobius oxycephalus|red-headed water frog
+4|Telmatobius pinguiculus
+4|Telmatobius platycephalus|flat-headed water frog
+4|Telmatobius stephani|Stephan's water frog
+4|Telmatobufo australis
+4|Tepuihyla luteolabris
+4|Theloderma bicolor|Chapa bug-eyed frog
+4|Theloderma petilum|Slender bug-eyed frog|Slender warted tree frog
+4|Thomasset's Seychelles|Thomasset's Seychelles frog|Sooglossus thomasseti|Thomasset’s frog
+4|Tibetan|Tibetan toad|Bufo tibetanus
+4|Tonkin Asian|Tonkin Asian frog|Quasipaa delacouri
+4|Truebella tothastes
+4|Tyler's toadlet|Uperoleia tyleri
+4|Uganda clawed|Uganda clawed frog|Xenopus ruwenzoriensis
+4|Uperodon obscurus|Ramanella obscura|Sri Lanka dot frog
+4|Upland chorus|Upland chorus frog|Pseudacris feriarum
+4|Vaillant's|Vaillant's frog|Lithobates vaillanti
+4|Variegated tree|Variegated tree frog|Megastomatohyla mixomaculata|vareigated tree frog
+4|Vitreorana helenae
+4|Vitreorana parvula
+4|Walker's marsupial|Walker's marsupial frog|Rana Marsupial Cornuda|Gastrotheca walkeri|Marsupial frog
+4|Wawu horned|Wawu horned toad|Megophrys wawuensis
+4|Web-footed coquí|Eleutherodactylus karlschmidti
+4|Werneria bambutensis
+4|Werneria iboundji
+4|Western tree|Western tree frog|Polypedates occidentalis|Charpa tree frog|Nagercoil whipping frog|Western Ghats Tree frog
+4|Whistling rain|Whistling rain frog|Breviceps sopranus
+4|Williamson's marsupial|Williamson's marsupial frog|Rana Marsupial De Williams|Gastrotheca williamsoni
+4|Wolterstorffina chirioi|Mount Oku forest tree toad
+4|Xenophrys major|Megophrys major
+4|Xenopus itombwensis|Itombwe Massif clawed frog
+4|Xenorhina bidens|Xenobatrachus bidens
+4|Xenorhina fuscigula
+4|Xenorhina mehelyi|Xenobatrachus mehelyi
+4|Xenorhina oxycephala
+4|Yellow-striped pygmy eleuth|Robber frog|Eleutherodactylus limbatus
+4|Yunganastes fraudator
+4|Zhangixalus duboisi
+4|Zhangixalus hui
+4|Zhangixalus omeimontis
+4|"Prostherapis" dunni|Colostethus dunni
+4|Adenomera ajurauna
+4|Adenomera coca
+4|Afrixalus lacteus
+4|Afrixalus leucostictus
+4|Afrixalus orophilus|Two-lined leaf-gluing frog
+4|Afrixalus schneideri
+4|Afrixalus upembae
+4|Afrixalus vibekensis
+4|Afrixalus weidholzi
+4|Agalychnis danieli|antioquia leaf frog
+4|Agalychnis medinae|Hylomantis medinae|Rancho Grande leaf frog
+4|Agalychnis psilopygion
+4|Allobates peruvianus|Hyloxalus peruvianus|Peru rocket frog
+4|Alsodes coppingeri
+4|Ameerega altamazonica|Tarapoto Poison Frog
+4|Ameerega pongoensis
+4|Ameerega yungicola
+4|Amnihyla fuscula|Litoria fuscula|Ranoidea fuscula
+4|Amnihyla rara|Litoria rara|Ranoidea rara
+4|Amnirana amnicola
+4|Amnirana asperrima
+4|Amnirana darlingi
+4|Amnirana galamensis
+4|Amolops iriodes
+4|Amolops liangshanensis
+4|Amolops mengyangensis
+4|Amolops vitreus
+4|Andinobates daleswansoni
+4|Andinobates viridis|green poison frog
+4|Anodonthyla moramora
+4|Ansorge's ridged|Ansorge's ridged frog|Ptychadena ansorgii
+4|Aphantophryne parkeri|Oreophryne parkeri
+4|Aromobates alboguttatus|Whitebelly rocket frog
+4|Arrabal's Suriname|Arrabal's Suriname toad|Pipa arrabali
+4|Arthroleptis crusculum|Guinea screeching frog
+4|Arthroleptis lameerei
+4|Arthroleptis loveridgei
+4|Arthroleptis mossoensis
+4|Arthroleptis nlonakoensis
+4|Arthroleptis pyrrhoscelis
+4|Arthroleptis schubotzi|Burundi screeching frog
+4|Arthroleptis spinalis
+4|Arthroleptis sylvaticus|Arthroleptis sylvatica
+4|Arthroleptis vercammeni
+4|Arthroleptis xenodactylus|eastern squeaker|Amani screeching frog
+4|Asterophrys eurydactyla|Pseudocallulops eurydactylus
+4|Atelopus onorei|Onore’s harlequin frog
+4|Atelopus pyrodactylus
+4|Bamileke plateau|Bamileke plateau frog|Amnirana longipes
+4|Baoruco burrowing|Baoruco burrowing frog|Eleutherodactylus hypostenor
+4|Benitez's tree|Benitez's tree frog|Hypsiboas benitezi|Boana benitezi|Boana pulidoi
+4|Bischoff's tree|Bischoff's tree frog|Hypsiboas bischoffi|Boana bischoffi
+4|Boana jimenezi|Hypsiboas jimenezi|Jimenez' tree frog
+4|Boana palaestes|Hypsiboas palaestes
+4|Bombina microdeladigitora|Small-webbed Bell Toad
+4|Boophis baetkei
+4|Boophis ulftunni|Bright-eyed frog
+4|Boulenophrys binchuanensis|Megophrys binchuanensis
+4|Breviceps fichus
+4|Broadley's ridged|Broadley's ridged frog|Ptychadena broadleyi
+4|Bufo stuarti|Duttaphrynus stuarti|Stuart's Toad
+4|Buzzing|Buzzing frog|Cophixalus bombiens
+4|Caatinga horned|Caatinga horned frog|Ceratophrys joazeirensis
+4|Cannatella's plump|Cannatella's plump toad|Osornophryne talipes
+4|Cape York|Cape York frog|Cophixalus peninsularis
+4|Cauca tree|Cauca tree frog|Hyloscirtus caucanus
+4|Cave squeaker|Arthroleptis troglodytes
+4|Celsiella vozmedianoi
+4|Centrolene condor
+4|Centrolene venezuelensis|Centrolene venezuelense
+4|Ceuthomantis cavernibardus
+4|Chalcorana raniceps|Hylarana raniceps|Hydrophylax raniceps
+4|Chaltenobatrachus grandisonae|Puerto Eden frog
+4|Charazani tree|Charazani tree frog|Hyloscirtus charazani
+4|Chiasmocleis gnoma
+4|Chimanimani stream|Chimanimani stream frog|Strongylopus rhodesianus
+4|Choerophryne exclamitans
+4|Choerophryne longirostris
+4|Choerophryne sanguinopicta|Albericus sanguinopictus
+4|Cloud forest tree|Cloud forest tree frog|Megastomatohyla nubicola
+4|Cochranella litoralis
+4|Colostethus imbricolus
+4|Colostethus jacobuspetersi|Quito rocket frog
+4|Cophixalus balbus
+4|Cophixalus bewaniensis
+4|Cophixalus cryptotympanum
+4|Cophixalus daymani
+4|Cophixalus kaindiensis
+4|Cophixalus montanus
+4|Cophixalus nubicola|Michael rainforest frog
+4|Cophixalus pulchellus
+4|Cophixalus sphagnicola
+4|Cophixalus tagulensis
+4|Cophixalus verecundus
+4|Copiula alpestris
+4|Copiula exspectata
+4|Copiula fistulans
+4|Copiula major
+4|Copiula minor
+4|Copiula obsti
+4|Copiula oxyrhina|pointed Mehely frog
+4|Copiula pipiens
+4|Cornufer mamusiorum
+4|Craugastor adamastus
+4|Craugastor angelicus
+4|Craugastor aphanus
+4|Craugastor augusti|barking frog
+4|Craugastor berkenbuschii|Robber frog
+4|Craugastor bocourti
+4|Craugastor campbelli
+4|Craugastor catalinae
+4|Craugastor charadra|Robber frog
+4|Craugastor daryi
+4|Craugastor fleischmanni
+4|Craugastor hobartsmithi
+4|Craugastor inachus
+4|Craugastor melanostictus
+4|Craugastor myllomyllon
+4|Craugastor nefrens
+4|Craugastor persimilis
+4|Craugastor phasma
+4|Craugastor rayo
+4|Craugastor rhyacobatrachus
+4|Craugastor rivulus
+4|Craugastor sandersoni|Robber frog
+4|Cricket coquí|Cricket robber frog|Eleutherodactylus gryllus
+4|Crossodactylus aeneus
+4|Crossodactylus bokermanni
+4|Cryptothylax greshoffii
+4|Cryptothylax minutus
+4|Ctenophryne minor
+4|Cuban high-crested|Cuban high-crested toad|Peltophryne gundlachi
+4|Cuban long-nosed|Cuban long-nosed toad|Peltophryne longinasus
+4|Cycloramphus acangatan
+4|Cycloramphus bandeirensis
+4|Cycloramphus carvalhoi|Cycloramphus heyeri|Carvalho's Button Frog
+4|Cycloramphus catarinensis
+4|Cycloramphus cedrensis
+4|Cycloramphus diringshofeni
+4|Cycloramphus dubius
+4|Cycloramphus granulosus
+4|Cycloramphus izecksohni
+4|Cycloramphus juimirim
+4|Cycloramphus migueli
+4|Cycloramphus rhyakonastes
+4|Cycloramphus valae
+4|Decorated running|Decorated running frog|Kassina decorata
+4|Dendropsophus battersbyi|Battersby's tree frog
+4|Dendropsophus coffeus|Dendropsophus coffea
+4|Dendropsophus juliani
+4|Dendropsophus meridensis|Merida tree frog
+4|Diasporus tigrillo
+4|Dischidodactylus colonnelloi
+4|Dischidodactylus duidensis
+4|Douglas'|Douglas' toad|Pseudophryne douglasi
+4|Eastern crested|Eastern crested toad|Peltophryne fracta
+4|Ectopoglossus lacrimosus|Anomaloglossus lacrimosus|Colostethus lacrimosus
+4|Ecuadorian horned|Ecuadorian horned frog|Ceratophrys testudo
+4|El Pepino tree|El Pepino tree frog|Hyloscirtus torrenticola
+4|Elachistocleis skotogaster
+4|Elegant|Elegant frog|Beautiful nursery-frog|Cophixalus concinnus
+4|Eleutherodactylus abbotti
+4|Eleutherodactylus amplinympha|Rainfrog
+4|Eleutherodactylus auriculatoides
+4|Eleutherodactylus barlagnei
+4|Eleutherodactylus bartonsmithi|Barton's robber frog
+4|Eleutherodactylus bresslerae|Rio Yumuri robber frog
+4|Eleutherodactylus caribe
+4|Eleutherodactylus casparii|Robber frog
+4|Eleutherodactylus corona|Hispaniola crowned frog
+4|Eleutherodactylus cundalli|Cundall's robber frog
+4|Eleutherodactylus darlingtoni
+4|Eleutherodactylus dolomedes|Ventriloqual frog
+4|Eleutherodactylus emiliae|Emilia's robber frog
+4|Eleutherodactylus eunaster|La Hotte whistling frog
+4|Eleutherodactylus glamyrus|Robber frog
+4|Eleutherodactylus glanduliferoides
+4|Eleutherodactylus glaucoreius
+4|Eleutherodactylus goini
+4|Eleutherodactylus grabhami
+4|Eleutherodactylus grahami
+4|Eleutherodactylus grandis|Eleutherodactylus girandus
+4|Eleutherodactylus greyi|Grey's robber frog
+4|Eleutherodactylus griphus
+4|Eleutherodactylus guantanamera
+4|Eleutherodactylus intermedius|Pico turquino robber frog
+4|Eleutherodactylus ionthus|Robber frog
+4|Eleutherodactylus junori
+4|Eleutherodactylus minutus
+4|Eleutherodactylus orientalis|Robber frog
+4|Eleutherodactylus pipilans
+4|Eleutherodactylus portoricensis|Upland Coqui|Puerto Rican robber frog
+4|Eleutherodactylus sisyphodemus
+4|Eleutherodactylus thorectes|Macaya breast-spot frog
+4|Eleutherodactylus warreni
+4|Eleutherodactylus wetmorei
+4|Eleutherodactylus zugi|Zug's robber frog
+4|Eungella torrent|Eungella torrent frog|Taudactylus eungellensis
+4|Eupsophus septentrionalis
+4|False green robber|False green robber frog|Eleutherodactylus chlorophenax
+4|Fejervarya altilabris
+4|Fejervarya sakishimensis
+4|Fejervarya schlueteri
+4|Gastrotheca fulvorufa
+4|Geocrinia leai
+4|Giant Visayan|Giant Visayan frog|Limnonectes visayanus
+4|Glandirana minima|Fujian frog
+4|Glyphoglossus flavus|Calluella flava
+4|Glyphoglossus minutus
+4|Glyphoglossus smithi|Calluella smithi
+4|Glyphoglossus volzi|Calluella volzi
+4|Gorzula's Amazon tree|Gorzula's Amazon tree frog|Tepuihyla rimarum
+4|Gracixalus quangi
+4|Gracixalus quyeti|Quyet's bush frog
+4|Gracixalus supercornutus
+4|Grass coquí|Eleutherodactylus brittoni
+4|Greater bromeliad tree|Greater bromeliad tree frog|Bromeliohyla dendroscarta
+4|Green bromeliad|Green bromeliad frog|Osteopilus wilderi
+4|Guacamayo plump|Guacamayo plump toad|Osornophryne guacamayo
+4|Guatemala plateau|Guatemala plateau frog|Lithobates macroglossa
+4|Guibemantis timidus
+4|Hedrick's coquí|Eleutherodactylus hedricki|Hedrick’s robber frog
+4|Hewitt's moss|Hewitt's moss frog|Anhydrophryne hewitti|Natal Chirping Frog|Natal Moss Frog
+4|Hildebrandtia ornatissima
+4|Hobbs' tree|Hobbs' tree frog|Hypsiboas hobbsi|Boana hobbsi
+4|Hutchins' tree|Hutchins' tree frog|Hypsiboas hutchinsi|Boana hutchinsi
+4|Hyalinobatrachium orientale|Eastern glass frog
+4|Hyalotos richardsi|Litoria richardsi
+4|Hydrophylax bahuvistara|Wide-spread Fungoid Frog
+4|Hylarana chitwanensis|Chitwan frog
+4|Hylarana leptoglossa|Hydrophylax leptoglossa
+4|Hylarana nicobariensis|Amnirana nicobariensis
+4|Hylodes pipilans
+4|Hylophorbus infulatus
+4|Hylophorbus nigrinus
+4|Hylophorbus picoides
+4|Hylophorbus richardsi
+4|Hylophorbus sextus
+4|Hylophorbus tetraphonus
+4|Hylophorbus wondiwoi
+4|Hyloscirtus estevesi
+4|Hyloxalus awa|Colostethus awa
+4|Hyloxalus betancuri
+4|Hyloxalus chlorocraspedus
+4|Hyloxalus chocoensis
+4|Hyloxalus delatorreae
+4|Hyloxalus edwardsi
+4|Hyloxalus exasperatus|Colostethus exasperatus|Yapitya rocket frog
+4|Hyloxalus excisus
+4|Hyloxalus faciopunctulatus|Puerto Narino Rocket Frog
+4|Hyloxalus fallax|Cotopaxi rocket frog
+4|Hyloxalus fascianigrus
+4|Hyloxalus idiomelus|Colostethus idiomelas|Rivero's rocket frog
+4|Hyloxalus pulchellus|Espada's rocket frog|Faldas rocket frog|Rio Cosanga rocket frog
+4|Hymenochirus boulengeri
+4|Hymenochirus curtipes
+4|Hyperolius camerunensis
+4|Hyperolius dintelmanni|Reed frog
+4|Hyperolius fasciatus
+4|Hyperolius jynx|Alexteroon jynx
+4|Hyperolius koehleri
+4|Hyperolius lamottei
+4|Hyperolius langi
+4|Hyperolius leucotaenius
+4|Hyperolius mosaicus
+4|Hyperolius obstetricans|Alexteroon obstetricans
+4|Hyperolius parkeri
+4|Hyperolius phantasticus
+4|Hyperolius protchei
+4|Hyperolius pyrrhodictyon
+4|Hyperolius quinquevittatus
+4|Hyperolius rubrovermiculatus|Reed frog
+4|Hyperolius spinigularis
+4|Hyperolius sylvaticus|Bobiri reed frog
+4|Hyperolius tanneri|Reed frog
+4|Hyperolius zonatus
+4|Hypopachus pictiventris
+4|Incilius bocourti
+4|Incilius cristatus
+4|Incilius fastidiosus
+4|Incilius luetkenii
+4|Incilius marmoreus
+4|Incilius melanochlorus
+4|Incilius perplexus|Confusing toad
+4|Incilius spiculatus
+4|Indirana chiravasi|Amboli Leaping Frog
+4|Indirana longicrus
+4|Ingerophrynus macrotis
+4|Inyanga|Inyanga toad|Vandijkophrynus inyangae
+4|Ischnocnema erythromera
+4|Ischnocnema guentheri
+4|Ischnocnema henselii
+4|Ischnocnema holti
+4|Ischnocnema izecksohni
+4|Ischnocnema parva
+4|Isthmohyla picadoi|Volcan Barba treefrog
+4|Isthmohyla xanthosticta|South fork treefrog
+4|Isthmohyla zeteki|Zetek’s treefrog
+4|Ivory Coast Frog|Amnirana occidentalis|Ivory Coast
+4|Jeweled|Jeweled toad|Incilius gemmifer
+4|Jondachi tree|Jondachi tree frog|Hyloscirtus staufferorum
+4|Kalophrynus baluensis
+4|Kalophrynus eok
+4|Kalophrynus minusculus
+4|Kalophrynus nubicola
+4|Kalophrynus subterrestris
+4|Kaloula assamensis|Assam Kaloula
+4|Kaloula mediolineata
+4|Kaloula verrucosa|Verrucous Digging Frog
+4|Kassina kuvangensis
+4|Khaki bromeliad|Khaki bromeliad frog|Eleutherodactylus fowleri
+4|Knife-footed|Knife-footed frog|Cyclorana cultripes|desert collared-frog|olive water-holding frog|Ranoidea cultripes
+4|Kurixalus baliogaster
+4|La Brea poison|La Brea poison frog|Oophaga occultator
+4|La Escalera tree|La Escalera tree frog|Hypsiboas sibleszi|Boana sibleszi
+4|La Hotte bush|La Hotte bush frog|Eleutherodactylus bakeri|La Hotte landfrog
+4|La Selle red-legged|La Selle red-legged frog|Eleutherodactylus furcyensis
+4|Lema tree|Lema tree frog|Hypsiboas lemai|Boana lemai
+4|Leptobrachella dringi|Leptolalax dringi
+4|Leptobrachella hamidi|Leptolalax hamidi|Asian toad
+4|Leptobrachium liui|Vibrissaphora liui
+4|Leptobrachium smithi|Smith's Litter Frog
+4|Leptodactylodon albiventris|Whitebelly egg frog
+4|Leptodactylodon axillaris
+4|Leptodactylodon blanci
+4|Leptodactylodon ornatus|Ornate egg frog
+4|Leptodactylodon ovatus
+4|Leptodactylodon perreti
+4|Leptodactylodon ventrimarmoratus
+4|Leptodactylus cupreus
+4|Leptodactylus discodactylus|Vanzolinius discodactylus
+4|Leptodactylus lithonaetes
+4|Leptodactylus macrosternum|Miranda's white-lipped frog|Cei's white-lipped frog
+4|Leptodactylus nesiotus
+4|Leptodactylus rhodostima
+4|Leptodactylus savagei|Savage's thin-toed frog
+4|Leptomantis bimaculatus|Rhacophorus bimaculatus
+4|Leptomantis fasciatus|Rhacophorus fasciatus|banded flying frog|banded tree frog
+4|Leptomantis gauni|Rhacophorus gauni|Inger's flying frog|short-nosed tree frog
+4|Leptopelis christyi
+4|Leptopelis modestus
+4|Leptopelis parbocagii
+4|Leptopelis vannutellii|Dime forest tree frog
+4|Leptopelis zebra
+4|Limnonectes finchi
+4|Limnonectes ghoshi|Euphlyctis ghoshi
+4|Limnonectes grunniens
+4|Limnonectes heinrichi
+4|Limnonectes ibanorum
+4|Limnonectes khammonensis
+4|Limnonectes mawlyndipi
+4|Limnonectes microtympanum
+4|Limnonectes plicatellus
+4|Limnonectes rhacoda|Limnonectes rhacodus
+4|Limnonectes shompenorum
+4|Limnonectes tweediei
+4|Linda's tree|Linda's tree frog|Hyloscirtus lindae
+4|Lithobates megapoda
+4|Loveridge's tree|Loveridge's tree frog|Myersiohyla loveridgei
+4|Lower Andes tree|Lower Andes tree frog|Hypsiboas melanopleura
+4|Lynch's Colombian tree|Lynch's Colombian tree frog|Hyloscirtus lynchi
+4|Lysapsus bolivianus
+4|Mantidactylus bellyi
+4|Mantidactylus bourgati
+4|Maya Mountains|Maya Mountains frog|Rana juliani|Lithobates juliani
+4|McDonald's|McDonald's frog|Cophixalus mcdonaldi
+4|Megaelosia goeldii|Megaelosia
+4|Melanophryniscus alipioi
+4|Melanophryniscus tumifrons
+4|Melodius coquí|Eleutherodactylus wightmanae|Wightman’s robber frog
+4|Merida Andes tree|Merida Andes tree frog|Hyloscirtus platydactylus
+4|Meristogenys jerboa|Western torrent frog
+4|Meristogenys macrophthalmus
+4|Meristogenys phaeomerus
+4|Meristogenys poecilus
+4|Meristogenys whiteheadi
+4|Mertensophryne howelli
+4|Mertensophryne micranotis
+4|Mexican cascades|Mexican cascades frog|Rana pustulosa|Lithobates pustulosus
+4|Micrixalus swamianus
+4|Microhyla chakrapanii
+4|Minervarya teraiensis|Fejervarya teraiensis|Terai Cricket Frog
+4|Mini mum
+4|Mini scule
+4|Mount Nimba screeching|Mount Nimba screeching frog|Arthroleptis nimbaensis
+4|Mountain caco|Cacosternum parvum
+4|Mountain-top nursery|Mountain-top nursery frog|Cophixalus monticola
+4|Musole Forest tree|Musole Forest tree frog|Leptopelis brevipes
+4|Myers' Surinam|Myers' Surinam toad|Pipa myersi
+4|Myersiohyla aromatica
+4|Myersiohyla inparquesi
+4|Myersiohyla liliae|Hypsiboas liliae
+4|Namaqua stream|Namaqua stream frog|Strongylopus springbokensis
+4|Nanohyla marmorata|Microhyla marmorata
+4|Nanohyla nanapollexa|Microhyla nanapollexa
+4|Nanorana mokokchungensis|Paa mokokchungensis
+4|Nasikabatrachus bhupathi|Nasikabatrachus bhupathy
+4|Nasutibatrachus mareku|Litoria mareku
+4|Nectophrynoides cryptus
+4|Nectophrynoides frontierei
+4|Nectophrynoides laevis|smooth forest toad
+4|Nectophrynoides vestergaardi|African viviparous toad
+4|Neglected|Neglected frog|Cophixalus neglectus
+4|Nesorohyla|Myersiohyla kanaima
+4|New Holland|New Holland frog|Cyclorana novaehollandiae
+4|Niceforonia aderca|Eleutherodactylus adercus|Hypodactylus adercus
+4|Niceforonia araiodactyla|Eleutherodactylus araiodactylus|Hypodactylus araiodactylus
+4|Nidirana chapaensis|Babina chapaensis
+4|Nidirana lini|Rana lini|Babina lini
+4|Nidirana pleuraden|Babina pleuraden
+4|Nigeria banana|Nigeria banana frog|Afrixalus nigeriensis
+4|Noblella usurpator|Psychrophrynella usurpator
+4|Nyctimystes cheesmani|Litoria cheesmani|Nyctimystes montana|Cheesman's big-eyed tree frog|Nyctimystes cheesmanae
+4|Nyctimystes disruptus|Litoria disrupta|Madang big-eyed tree frog
+4|Nyctimystes fluviatilis|Litoria fluviatilis
+4|Nyctimystes foricula|Litoria foricula|Kaironk big-eyed tree frog
+4|Nyctimystes humeralis|Litoria humeralis|Green big-eyed tree frog
+4|Nyctimystes kubori|Litoria kubori|Sandy big-eyed tree frog
+4|Nyctimystes narinosus|Litoria narinosa|Common big-eyed tree frog|Nyctimystes narinosa
+4|Nyctimystes obsoletus|Litoria obsoleta|Simbang big-eyed tre frog
+4|Nyctimystes perimetri|Litoria perimetri|Archipelago big-eyed tree frog
+4|Nyctimystes pulcher|Litoria pulchra|Hyla pulchra|Nyctimystes pulchra|spurred big-eyed tree frog
+4|Nyctimystes zweifeli|Litoria zweifeli|Zweifel's big-eyed tree frog
+4|Nymphargus cochranae
+4|Nymphargus mariae|Centrolene mariae|Maria's Giant Glass Frog
+4|Nymphargus rosada|Cochran frog
+4|Oaxacan yellow tree|Oaxacan yellow tree frog|Megastomatohyla pellita
+4|Occidozyga floresiana
+4|Occidozyga vittata|Occidozyga vittatus
+4|Odontophrynus achalensis|Cordoba escuerzo
+4|Odontophrynus barrioi
+4|Odontophrynus maisuma
+4|Odontophrynus occidentalis
+4|Odorrana banaorum
+4|Odorrana bolavensis
+4|Odorrana exiliversabilis
+4|Odorrana jingdongensis
+4|Odorrana junlianensis
+4|Odorrana leporipes
+4|Odorrana tiannanensis
+4|Olive snout-burrower|Hemisus olivaceus
+4|Ololygon peixotoi|Scinax peixotoi
+4|Ophryophryne gerti
+4|Oreobates choristolemma
+4|Oreobates crepitans
+4|Oreobates discoidalis|Eleutherodactylus discoidalis
+4|Oreobates heterodactylus
+4|Oreobates lundbergi
+4|Oreobates madidi|Eleutherodactylus madidi
+4|Oreobates pereger
+4|Oreobates sanctaecrucis
+4|Oreobates saxatilis
+4|Oreobates zongoensis
+4|Oreophryne alticola
+4|Oreophryne anulata
+4|Oreophryne brachypus
+4|Oreophryne brevirostris
+4|Oreophryne frontifasciata
+4|Oreophryne geislerorum
+4|Oreophryne habbemensis
+4|Oreophryne hypsiops
+4|Oreophryne inornata
+4|Oreophryne insulana
+4|Oreophryne jeffersoniana
+4|Oreophryne kampeni
+4|Oreophryne moluccensis
+4|Oreophryne notata
+4|Oreophryne rookmaakeri
+4|Oreophryne terrestris
+4|Oreophryne waira
+4|Oreophryne wapoga
+4|Oreophryne wolterstorffi
+4|Oreophryne zimmeri
+4|Oreophrynella weiassipuensis
+4|Osgood's Ethiopian|Osgood's Ethiopian toad|Altiphrynoides osgoodi
+4|Osornophryne sumacoensis
+4|Oxapampa poison|Oxapampa poison frog|Ameerega planipaleae
+4|Painted burrowing|Painted burrowing frog|Neobatrachus pictus
+4|Palenque poison|Palenque poison frog|Ameerega erythromos
+4|Papallacta tree|Papallacta tree frog|Hyloscirtus psarolaimus
+4|Papurana arfaki|Arfak Mountains frog
+4|Papurana attigua|Hylarana attigua|Similar frog
+4|Papurana aurata
+4|Papurana moluccana
+4|Papurana waliesa
+4|Paradoxophyla tiarano
+4|Parhoplophryne usambarica
+4|Paruwrobates whymperi|Colostethus whymperi|Hyloxalus whymperi
+4|Pelophryne rhopophilia
+4|Pelophylax hubeiensis
+4|Pelophylax tenggerensis
+4|Peltophryne guentheri
+4|Perret's snout-burrower|Hemisus perreti
+4|Petropedetes perreti|Perret’s water frog
+4|Philautus kempiae|Kemp's bush frog|Tura bubble-nest frog|Tura shrub frog
+4|Philautus similipalensis
+4|Philautus similis
+4|Philippine|Philippine toad|Ingerophrynus philippinicus
+4|Philippine small-disked|Philippine small-disked frog|Limnonectes parvus
+4|Phlyctimantis boulengeri
+4|Phlyctimantis verrucosus
+4|Phrynella pulchra
+4|Phrynobatrachus africanus
+4|Phrynobatrachus bullans
+4|Phrynobatrachus congicus
+4|Phrynobatrachus cornutus
+4|Phrynobatrachus cryptotis
+4|Phrynobatrachus dalcqi
+4|Phrynobatrachus dendrobates
+4|Phrynobatrachus elberti
+4|Phrynobatrachus francisci
+4|Phrynobatrachus fraterculus
+4|Phrynobatrachus gastoni
+4|Phrynobatrachus graueri
+4|Phrynobatrachus guineensis
+4|Phrynobatrachus hylaios
+4|Phrynobatrachus inexpectatus
+4|Phrynobatrachus irangi
+4|Phrynobatrachus keniensis
+4|Phrynobatrachus kinangopensis
+4|Phrynobatrachus krefftii|Krefft's puddle frog
+4|Phrynobatrachus manengoubensis
+4|Phrynobatrachus nanus
+4|Phrynobatrachus ogoensis
+4|Phrynobatrachus pakenhami
+4|Phrynobatrachus parkeri
+4|Phrynobatrachus phyllophilus|Tai river frog
+4|Phrynobatrachus pygmaeus
+4|Phrynobatrachus rouxi
+4|Phrynobatrachus rungwensis
+4|Phrynobatrachus scapularis|Arthroleptis scapularis
+4|Phrynobatrachus steindachneri
+4|Phrynobatrachus sternfeldi
+4|Phrynobatrachus stewartae
+4|Phrynobatrachus sulfureogularis
+4|Phrynobatrachus taiensis
+4|Phrynobatrachus uzungwensis|Puddle frog
+4|Phrynobatrachus versicolor
+4|Phrynobatrachus villiersi|Yapo river frog
+4|Phrynobatrachus vogti
+4|Phrynobatrachus werneri
+4|Phrynoidis juxtasper
+4|Phrynopus barthlenae
+4|Phrynopus dagmarae
+4|Phrynopus heimorum
+4|Phrynopus horstpauli
+4|Phrynopus montium
+4|Phrynopus peruanus
+4|Phrynopus thompsoni
+4|Phyllomedusa neildi
+4|Physalaemus camacan
+4|Physalaemus fischeri|Heatwole's dwarf frog|Fischer's dwarf frog
+4|Pilalo tree|Pilalo tree frog|Hyloscirtus ptychodactylus
+4|Pipa aspera
+4|Pipa snethlageae
+4|Pithecopus megacephalus|Phyllomedusa megacephala|Large-headed leaf frog
+4|Plateau brown|Plateau brown frog|Rana kukunoris
+4|Platymantis sierramadrensis
+4|Platypelis barbouri
+4|Plectrohyla insolita|Isthmohyla insolita
+4|Plethodontohyla brevipes|Betsileo digging frog
+4|Poyntonophrynus dombensis
+4|Pristimantis acutirostris|Eleutherodactylus acutirostris
+4|Pristimantis altae
+4|Pristimantis anemerus
+4|Pristimantis angustilineatus
+4|Pristimantis apiculatus
+4|Pristimantis ardalonychus
+4|Pristimantis atratus|Santiago robber frog
+4|Pristimantis aurantiguttatus
+4|Pristimantis avicuporum
+4|Pristimantis balionotus|Crest robber frog
+4|Pristimantis bellona|Murri robber frog
+4|Pristimantis bernali|Argelia robber frog
+4|Pristimantis bicumulus|Caracas robber frog
+4|Pristimantis boulengeri|Boulenger's robber frog
+4|Pristimantis brevifrons
+4|Pristimantis briceni
+4|Pristimantis bromeliaceus|Bromeliad robber frog
+4|Pristimantis cacao|Cacao robber frog
+4|Pristimantis calcaratus|San Antonio robber frog
+4|Pristimantis calcarulatus
+4|Pristimantis carranguerorum
+4|Pristimantis carvalhoi
+4|Pristimantis celator
+4|Pristimantis chalceus
+4|Pristimantis charlottevillensis
+4|Pristimantis conspicillatus
+4|Pristimantis crenunguis|Spring robber frog
+4|Pristimantis dorsopictus
+4|Pristimantis fallax
+4|Pristimantis lacrimosus
+4|Pristimantis luscombei
+4|Pristimantis lymani
+4|Pristimantis marmoratus|Ranita Selvatica Marmorea
+4|Pristimantis martiae
+4|Pristimantis medemi
+4|Pristimantis melanogaster
+4|Pristimantis museosus
+4|Pristimantis paisa
+4|Pristimantis parectatus
+4|Pristimantis paulodutrai
+4|Pristimantis peraticus
+4|Pristimantis permixtus
+4|Pristimantis peruvianus
+4|Pristimantis pycnodermis
+4|Pristimantis ridens|Pygmy rain frog
+4|Pristimantis riveroi
+4|Pristimantis scopaeus
+4|Pristimantis simonsii|Paramo Andes frog
+4|Pristimantis simoterus
+4|Pristimantis subsigillatus
+4|Pristimantis taciturnus
+4|Pristimantis uranobates
+4|Pristimantis variabilis
+4|Pristimantis viridis
+4|Pristimantis w-nigrum|Cualita
+4|Pristimantis xylochobates|Eleutherodactylus xylochobates
+4|Pristimantis zeuctotylus
+4|Pristimantis zimmermanae
+4|Pristimantis zophus
+4|Probreviceps rhodesianus|Highland Forest Rain  Frog
+4|Probreviceps rungwensis|Rungwe big-fingered frog
+4|Pseudopaludicola llanera|Lynch's swamp frog
+4|Pseudopaludicola riopiedadensis
+4|Pseudophilautus hallidayi|Philautus hallidayi
+4|Pseudophilautus limbus
+4|Ptychadena bibroni
+4|Ptychadena christyi|Rana christyi
+4|Ptychadena chrysogaster
+4|Ptychadena cooperi
+4|Ptychadena filwoha
+4|Ptychadena gansi
+4|Ptychadena grandisonae
+4|Ptychadena guibei
+4|Ptychadena harenna
+4|Ptychadena longirostris
+4|Ptychadena mahnerti
+4|Ptychadena mapacha
+4|Ptychadena obscura
+4|Ptychadena perplicata
+4|Ptychadena perreti
+4|Ptychadena pujoli
+4|Ptychadena retropunctata
+4|Ptychadena straeleni|Rana straeleni
+4|Ptychadena submascareniensis
+4|Ptychadena subpunctata
+4|Ptychadena tellinii
+4|Ptychadena tournieri
+4|Ptychadena trinodis
+4|Ptychadena upembae
+4|Ptychadena uzungwensis|Udzungwa Grass Frog|Udzungwa Ridged Frog
+4|Ptychadena wadei
+4|Puebla|Puebla frog|Lithobates pueblae
+4|Pulchrana picturata
+4|Pulchrana signata|Striped Stream Frog
+4|Qosqophryne gymnotis|Bryophryne gymnotis
+4|Raorchestes akroparallagi|Variable Bush Frog
+4|Raorchestes coonoorensis|Coonoor Bush Frog
+4|Raorchestes sushili
+4|Rhacophorus bifasciatus
+4|Rhacophorus catamitus
+4|Rhacophorus exechopygus
+4|Rhacophorus helenae|Helen's flying tree frog
+4|Rhacophorus modestus|Boulenger's flying frog
+4|Rhacophorus schlegelii
+4|Rhacophorus turpes|Htingnan whipping frog
+4|Rhaebo caeruleostictus
+4|Rhaebo glaberrimus|Bufo glaberrimus
+4|Rhinella bergi
+4|Rhinella ceratophrys
+4|Rhinella cerradensis
+4|Rhinella festae
+4|Rhinella fissipes|Carabaya toad
+4|Rhinella inca|Chaunus inca
+4|Rhinella justinianoi|Chaunus justinianoi|El Chape toad
+4|Rhinella lindae
+4|Rhinella multiverrucosa
+4|Rhinella ocellata
+4|Rhinella pygmaea
+4|Rhinella roqueana
+4|Rhinella rumbolli
+4|Rhinella spinulosa
+4|Rhombophryne guentherpetersi
+4|Rio Luisito tree|Rio Luisito tree frog|Hyloscirtus piceigularis
+4|Robinson's tree|Robinson's tree frog|Rhacophorus robinsonii
+4|Roque tree|Roque tree frog|Hyloscirtus phyllognathus
+4|Rough ridged|Rough ridged frog|Ptychadena bunoderma
+4|Rough sand|Rough sand frog|Tomopterna tuberculosa
+4|Rough-skinned horned|Rough-skinned horned toad|Megophrys palpebralespinosa
+4|Rueppel's big-eyed tree|Rueppel's big-eyed tree frog|Litoria rueppelli|Nyctimystes rueppelli|Ranoidea rueppelli
+4|Rulyrana adiazeta
+4|Samkos bush|Samkos bush frog|Chiromantis samkosensis
+4|Sandyrana purpureolata|Nyctimystes purpureolatus|Litoria purpureolata
+4|Sandyrana sauroni|Litoria sauroni|Dryopsophus sauroni|Nyctimystes sauroni|Ranoidea sauroni
+4|Sanguirana luzonensis|Hydrophylax luzonensis
+4|Sanguirana mearnsi|Sanguirana albotuberculata
+4|Sanguirana sanguinea
+4|Sanguirana tipanan
+4|Sardinata tree|Sardinata tree frog|Hyloscirtus callipeza
+4|Scinax cabralensis
+4|Scinax camposseabrai
+4|Scinax karenanneae
+4|Scinax parkeri
+4|Scinax trilineatus
+4|Sclerophrys dodsoni
+4|Scutiger adungensis
+4|Scutiger brevipes
+4|Scutiger gongshanensis
+4|Scutiger nyingchiensis
+4|Scythrophrys sawayae
+4|Serranobatrachus carmelitae|Pristimantis carmelitae
+4|Seychelles palm|Seychelles palm frog|Sechellophryne pipilodryas
+4|Sharp snouted day|Sharp snouted day frog|Taudactylus acutirostris
+4|Sichuan|Sichuan frog|Rana shuchinae
+4|Silverstone's poison|Silverstone's poison frog|Ameerega silverstonei
+4|Silverstoneia erasmios
+4|Simmons's tree|Simmons's tree frog|Hyloscirtus simmonsi|Simmons' treefrog
+4|Small|Small frog|bleating water-holding frog|Cyclorana manya|Litoria manya|Ranoidea manya
+4|Small-headed toadlet|Uperoleia capitulata
+4|Smooth-backed|Smooth-backed frog|Rana psilonota|Lithobates psilonota
+4|Smooth-skinned forest|Smooth-skinned forest frog|Platymantis levigatus
+4|Southern toadlet|Pseudophryne semimarmorata
+4|Sphenophryne allisoni|Liophryne allisoni
+4|Sphenophryne brevicrus|Oxydactyla brevicrus
+4|Sphenophryne coggeri|Oxydactyla coggeri
+4|Sphenophryne crassa|Oxydactyla crassa
+4|Sphenophryne dentata|Liophryne dentata
+4|Sphenophryne rhododactyla|Liophryne rhododactyla
+4|Sphenophryne rubra|Liophryne rubra
+4|Sphenophryne similis|Liophryne similis
+4|Sphenophryne stenodactyla|Oxydactyla stenodactyla
+4|Spinomantis tavaratra
+4|Spiny tree|Spiny tree frog|Nyctixalus spinosus|Spiny Indonesian tree frog
+4|Spotted rubber|Spotted rubber frog|Phrynomantis affinis
+4|Stereocyclops parkeri
+4|Strabomantis cadenai
+4|Strabomantis helonotus
+4|Strongylopus merumontanus
+4|Stumpffia gimmeli|Rhombophryne gimmeli
+4|Stumpffia psologlossa
+4|Stumpffia tetradactyla|Rhombophryne tetradactyla
+4|Sudell's|Sudell's frog|Neobatrachus sudellae|Neobatrachus sudelli
+4|Sumatra|Sumatra toad|Duttaphrynus sumatranus
+4|Sylvirana maosonensis|Hylarana maosonensis|Mao-son frog
+4|Sylvirana spinulosa|Hylarana spinulosa|Fine-spined frog|Spiny frog
+4|Synapturanus salseri
+4|Syncope tridactyla|Chiasmocleis tridactyla
+4|Tabor tree|Tabor tree frog|Hyloscirtus lascinius
+4|Tachiramantis prolixodiscus
+4|Tachiramantis tayrona|Pristimantis tayrona
+4|Tapping nursery|Tapping nursery frog|Cophixalus aenigma
+4|Tawny|Tawny frog|Neobatrachus fulvus
+4|Telmatobius atacamensis|Salta water frog
+4|Telmatobius bolivianus|Water frog
+4|Telmatobius brevipes|Huahachuco water frog
+4|Telmatobius brevirostris
+4|Telmatobius chusmisensis
+4|Telmatobius cirrhacelis|Loja water frog
+4|Telmatobius colanensis
+4|Telmatobius dankoi
+4|Telmatobius degener
+4|Telmatobius edaphonastes
+4|Telmatobius fronteriensis
+4|Telmatobius hauthali
+4|Telmatobius hockingi
+4|Telmatobius huayra|Water frog
+4|Telmatobius ignavus|Piura water frog
+4|Telmatobius laticeps|Tucuman water frog
+4|Telmatobius necopinus|Wiens' water frog
+4|Telmatobius niger|black Kayla frog|Black water frog
+4|Telmatobius pefauri
+4|Telmatobius peruvianus|Water frog|Peru water frog
+4|Telmatobius philippii
+4|Telmatobius pisanoi|Argentine water frog
+4|Telmatobius rimac|rimac water frog
+4|Telmatobius schreiteri|La Rioja water frog
+4|Telmatobius scrocchii
+4|Telmatobius sibiricus|Southern frog
+4|Telmatobius thompsoni
+4|Telmatobius truebae|Trueb’s water frog
+4|Telmatobius vellardi|Vellard's water frog
+4|Telmatobius verrucosus|Chaco water frog
+4|Teratohyla adenocheira
+4|Theloderma kwangsiense
+4|Theloderma nagalandense|Nagaland tree frog
+4|Theloderma phrynoderma|Burmese bug-eyed frog
+4|Theloderma truongsonense
+4|Thoropa lutzi
+4|Thoropa petropolitana
+4|Thoropa saxatilis
+4|Tomopterna luganga
+4|Tonkin|Tonkin frog|Odorrana bacboensis
+4|Truebella skoptes
+4|Uperodon nagaoi|Nagao's globular frog|Nagao's pug-snout frog
+4|Usambara torrent|Usambara torrent frog|Arthroleptides martiensseni
+4|Valle tree|Valle tree frog|Hypsiboas rubracylus|Boana rubracyla
+4|Virgin Islands coquí|Eleutherodactylus schwartzi
+4|Viridihyla christianbergmanni|Litoria christianbergmanni
+4|Vitreorana antisthenesi
+4|Vitreorana castroviejoi
+4|Vitreorana gorzulae
+4|Warszewitsch's|Warszewitsch's frog|Rana warszewitschii|Lithobates warszewitschii
+4|Weigel's|Weigel's toad|Notaden weigeli
+4|Weining|Weining frog|Pseudorana weiningensis
+4|Werner's|Werner's toad|Sapo Narigudo|Rhaebo nasicus
+4|Werneria mertensiana|Mertens’ smalltongue toad
+4|Werneria tandyi
+4|Western Andes tree|Western Andes tree frog|Hyloscirtus sarampiona
+4|Western giant|Western giant toad|Peltophryne fustiger
+4|Xenophrys lekaguli|Megophrys lekaguli
+4|Xenorhina adisca
+4|Xenorhina anorbis|Xenobatrachus anorbis
+4|Xenorhina arboricola
+4|Xenorhina arfakiana|Xenobatrachus arfakianus
+4|Xenorhina bouwensi
+4|Xenorhina eiponis
+4|Xenorhina gigantea|Xenobatrachus giganteus
+4|Xenorhina huon|Xenobatrachus huon
+4|Xenorhina macrops|Xenobatrachus macrops
+4|Xenorhina minima
+4|Xenorhina multisica|Xenobatrachus multisica
+4|Xenorhina obesa
+4|Xenorhina ocellata|Xenobatrachus ocellatus
+4|Xenorhina ophiodon|Xenobatrachus ophiodon
+4|Xenorhina parkerorum
+4|Xenorhina rostrata|Xenobatrachus rostratus
+4|Xenorhina scheepstrai|Xenobatrachus scheepstrai
+4|Xenorhina schiefenhoeveli|Xenobatrachus schiefenhoeveli
+4|Xenorhina similis
+4|Xenorhina subcrocea
+4|Xenorhina tumulus
+4|Xenorhina zweifeli|Xenobatrachus zweifeli
+4|Yellow bromeliad|Yellow bromeliad frog|Osteopilus marianae
+4|Yellow mottled coqui|Eleutherodactylus lentus|Virgin Islands robber frog
+4|Yellowbelly voiceless tree|Yellowbelly voiceless tree frog|Charadrahyla altipotens|Yellow-bellied voiceless tree frog
+4|Yunganastes mercedesae
+4|Yunganastes pluvicanorus
+4|Zakerana syhadrensis|Fejervarya syhadrensis|Sahyadri Cricket Frog
+4|Zhangixalus feae
+4|Zhangixalus jarujini|Rhacophorus jarujini
+4|Zhangixalus minimus|minimal tree frog
+4|Zhangixalus yinggelingensis|Yinggelin tree frog
+4|Zweifel's|Zweifel's frog|Lithobates zweifeli
+4|"Cochranella" duidaeana
+4|"Cochranella" euhystrix
+4|"Cochranella" geijskesi
+4|"Cochranella" ramirezi
+4|"Cochranella" riveroi
+4|"Cochranella" xanthocheridia
+4|"Colostethus" poecilonotus|Amazonas rocket frog
+4|"Hyla" nicefori
+4|Afrixalus dorsimaculatus
+4|Allobates algorei|Spotted nurse frog
+4|Allobates paleovarzensis|Amazonian nurse frog
+4|Almirante Trail|Almirante Trail toad|Incilius peripatetes
+4|Ameerega rubriventris|Rana venenosa
+4|Ameerega simulans
+4|Amnihyla rivicola|Litoria rivicola
+4|Amnirana lemairei
+4|Amolops chakrataensis
+4|Amolops daorum
+4|Amolops himalayanus
+4|Amolops jaunsari|Jaunsar Torrent Frog
+4|Angola forest tree|Angola forest tree frog|Leptopelis cynnamomeus
+4|Anodonthyla vallani
+4|Anomaloglossus moffetti|Sarisariñama Rocket Frog
+4|Ansonia latirostra
+4|Arthroleptella rugosa|Rough Moss Frog
+4|Arthroleptis tanneri|Tanzania screeching frog
+4|Atherton Tablelands whirring tree|Atherton Tablelands whirring tree frog|Litoria corbeni
+4|Baja California chorus|Baja California chorus frog|Pseudacris hypochondriaca
+4|Baoruco hammer|Baoruco hammer frog|Robber frog|Eleutherodactylus armstrongi
+4|Barahona rock|Barahona rock frog|Eleutherodactylus alcoae
+4|Bicol narrowmouth|Bicol narrowmouth toad|Kaloula kokacii
+4|Boana curupi|Hypsiboas curupi
+4|Boana pugnax|Hypsiboas pugnax
+4|Boana stellae|Hypsiboas stellae
+4|Boophis ankarafensis
+4|Boophis entingae
+4|Boulenophrys parva|Megophrys parva
+4|Brachycephalus alipioi
+4|Brachycephalus ferruginus
+4|Brachycephalus pombali
+4|Bromeliohyla melacaena|Isthmohyla melacaena
+4|Carbine barred|Carbine barred frog|Mixophyes carbinensis
+4|Carrizo's tree|Carrizo's tree frog|Hypsiboas varelae
+4|Chalcorana chalconota|brown stream frog|Schlegel's frog
+4|Chimerella mariaelenae|Centrolene mariaelenae|Glass frog
+4|Chirinda|Chirinda toad|Mertensophryne anotis
+4|Cochranella croceopodes
+4|Colostethus furviventris
+4|Colostethus latinasus|Truando rocket frog
+4|Colostethus lynchi
+4|Colostethus thorntoni
+4|Colostethus ucumari
+4|Common forest tree|Common forest tree frog|Leptopelis notatus
+4|Congolius|Hyperolius robustus|Gembe reed frog
+4|Cophixalus ornatus
+4|Cornufer adiastolus
+4|Cornufer admiraltiensis
+4|Cornufer latro
+4|Cornufer nakanaiorum
+4|Cornufer parilis|Platymantis parilis
+4|Cornufer sulcatus
+4|Cornufer wuenscheorum
+4|Craugastor alfredi|Alfred's rainfrog
+4|Craugastor amniscola
+4|Craugastor anciano
+4|Craugastor aurilegulus
+4|Craugastor azueroensis
+4|Craugastor batrachylus
+4|Craugastor brocchi
+4|Craugastor chac
+4|Craugastor chrysozetetes
+4|Craugastor coffeus
+4|Craugastor cruzi
+4|Craugastor cuaquero
+4|Craugastor decoratus
+4|Craugastor emcelae|Rio Claro robber frog
+4|Craugastor epochthidius
+4|Craugastor fecundus
+4|Craugastor glaucus
+4|Craugastor greggi
+4|Craugastor guerreroensis
+4|Craugastor jota
+4|Craugastor laevissimus|Robber frog
+4|Craugastor lauraster|Robber frog
+4|Craugastor lineatus
+4|Craugastor loki
+4|Craugastor matudai
+4|Craugastor megalotympanum
+4|Craugastor merendonensis
+4|Craugastor mexicanus
+4|Craugastor milesi
+4|Craugastor monnichorum|Robber frog
+4|Craugastor montanus|Craugastor sartori
+4|Craugastor occidentalis
+4|Craugastor olanchano
+4|Craugastor omoaensis
+4|Craugastor opimus
+4|Craugastor palenque
+4|Craugastor pechorum
+4|Craugastor pelorus
+4|Craugastor podiciferus|Robber frog
+4|Craugastor polymniae
+4|Craugastor psephosypharus
+4|Craugastor silvicola
+4|Craugastor spatulatus
+4|Craugastor taylori
+4|Craugastor uno
+4|Craugastor vulcani|Robber frog
+4|Crossodactylus cyclospinus
+4|Cryptobatrachus ruthveni
+4|Cyclorana vagitus|Litoria vagitus|Cyclorana vagita|Crying water-holding frog|Ranoidea vagitus|Wailing frog
+4|Dendropsophus reichlei
+4|Diasporus hylaeformis
+4|Diasporus tinker|Eleutherodactylus tinker
+4|Elachistocleis pearsei
+4|Eleutherodactylus acmonis|El Yunque robber frog
+4|Eleutherodactylus adelus|Robber frog
+4|Eleutherodactylus alticola
+4|Eleutherodactylus andrewsi
+4|Eleutherodactylus angustidigitorum|Patzcuaro stream frog
+4|Eleutherodactylus apostates|apostates robber frog|La Hotte big-legged landfrog
+4|Eleutherodactylus counouspeus
+4|Eleutherodactylus eileenae
+4|Eleutherodactylus glaphycompus|Ball bearing landfrog
+4|Eleutherodactylus guttilatus
+4|Eleutherodactylus haitianus
+4|Eleutherodactylus inoptatus
+4|Eleutherodactylus leberi|Leber's robber frog
+4|Eleutherodactylus leprus|Leprus chirping frog
+4|Eleutherodactylus longipes
+4|Eleutherodactylus luteolus|Robber frog
+4|Eleutherodactylus maestrensis
+4|Eleutherodactylus marnockii
+4|Eleutherodactylus montanus
+4|Eleutherodactylus orcutti
+4|Eleutherodactylus oxyrhyncus
+4|Eleutherodactylus pinarensis|Pinos robber frog
+4|Eleutherodactylus probolaeus
+4|Eleutherodactylus riparius
+4|Eleutherodactylus ruthae
+4|Eleutherodactylus sciagraphus
+4|Eleutherodactylus symingtoni|Symington's robber frog
+4|Eleutherodactylus tetajulia
+4|Eleutherodactylus thomasi|Thomas' robber frog
+4|Eleutherodactylus toa|Yarey robber frog
+4|Eleutherodactylus tonyi
+4|Eleutherodactylus ventrilineatus|Macaya dusky frog
+4|Eleutherodactylus verruculatus|Rana-chirrionera Menor
+4|Emerald poison|Emerald poison frog|Ameerega smaragdina
+4|Epipedobates narinensis
+4|Ethiopian snout-burrower|Hemisus microscaphus
+4|Fejervarya orissaensis
+4|Fejervarya triora
+4|Firouzophrynus hololius|Duttaphrynus hololius|Malabar Toad
+4|Fuelleborn's stream|Fuelleborn's stream frog|Strongylopus fuelleborni
+4|Gastrophrynoides borneensis
+4|Gastrotheca carinaceps
+4|Gastrotheca ernestoi
+4|Gastrotheca flamma
+4|Ghatixalus asterops|Ghat tree frog|Star-eyed Tree Frog|Starry-eyed Ghat tree frog
+4|Gracixalus lumarius|thorny bush frog|thorny tree frog
+4|Gunther's robber|Gunther's robber frog|Craugastor omiltemanus
+4|Half-stripe bromeliad|Half-stripe bromeliad frog|Eleutherodactylus heminota
+4|Hemisus barotseensis
+4|Hispaniolan yellow-mottled|Hispaniolan yellow-mottled frog|Eleutherodactylus pictissimus
+4|Howard Springs toadlet|Uperoleia daviesae|Darwin sandsheet frog|Davies's toadlet|Howard River toadlet
+4|Hyalinobatrachium bergeri
+4|Hyalinobatrachium duranti
+4|Hyalinobatrachium esmeralda
+4|Hyalinobatrachium fragile|Glass frog
+4|Hyalinobatrachium guairarepanense|Hyalinobatrachium guairarepanensis
+4|Hyalinobatrachium ibama
+4|Hyalinobatrachium mondolfii
+4|Hyalinobatrachium munozorum
+4|Hyalinobatrachium pallidum
+4|Hyalinobatrachium talamancae
+4|Hylambates keithae|Phlyctimantis keithae|Keith’s striped frog
+4|Hylarana garoensis
+4|Hylarana montivaga|Chantaburi Stream frog|Langbian Plateau frog
+4|Hylarana persimilis|Sumatra frog
+4|Hylarana similis|Pulchrana similis
+4|Hylodes cardosoi
+4|Hylodes fredi
+4|Hyloscirtus chlorosteus|Hyla chlorostea|Parjacti tree frog
+4|Hyloxalus aeruginosus
+4|Hyloxalus eleutherodactylus
+4|Hyloxalus fuliginosus|Quijos rocket frog
+4|Hyloxalus infraguttatus
+4|Hyloxalus insulatus
+4|Hyloxalus lehmanni|Colostethus lehmanni|Lehmann's rocket frog
+4|Hyloxalus leucophaeus
+4|Hyloxalus littoralis|Lima rocket frog
+4|Hyloxalus maquipucuna
+4|Hyloxalus marmoreoventris|Rio Negro rocket frog
+4|Hyloxalus mittermeieri
+4|Hyloxalus mystax|Colostethus mystax|Cloud forest rocket frog
+4|Hyloxalus parcus|Gualaceo rocket frog
+4|Hyloxalus patitae
+4|Hyloxalus peculiaris|funny rocket frog
+4|Hyloxalus pinguis|Malvasa rocket frog
+4|Hyloxalus pulcherrimus
+4|Hyloxalus pumilus|San Vicente rocket frog
+4|Hyloxalus ramosi|Ramos' rocket frog
+4|Hyloxalus ruizi|Ruiz's rocket frog
+4|Hyloxalus saltuarius
+4|Hyloxalus sauli|Colostethus sauli|Santa Cecilia rocket frog
+4|Hyloxalus shuar|Colostethus shuar|Santiago rocket frog
+4|Hyloxalus sordidatus
+4|Hyloxalus spilotogaster
+4|Hyloxalus sylvaticus|Forest rocket frog
+4|Hyloxalus toachi|Colostethus toachi
+4|Hyloxalus utcubambensis
+4|Hyloxalus vergeli|Colostethus vergeli|Hellmich’s rocket frog
+4|Hyperolius acuticephalus
+4|Hyperolius ademetzi
+4|Hyperolius adspersus
+4|Hyperolius albofrenatus
+4|Hyperolius atrigularis
+4|Hyperolius balfouri
+4|Hyperolius baumanni
+4|Hyperolius bicolor
+4|Hyperolius bobirensis|Bobiri reed frog
+4|Hyperolius bocagei|Hyperolius seabrai
+4|Hyperolius bolifambae
+4|Hyperolius bopeleti
+4|Hyperolius brachiofasciatus
+4|Hyperolius chlorosteus|Sierra Leone reed frog
+4|Hyperolius chrysogaster
+4|Hyperolius cinereus
+4|Hyperolius cystocandicans
+4|Hyperolius diaphanus
+4|Hyperolius discodactylus|Albertine Rift reed frog
+4|Hyperolius ferreirai
+4|Hyperolius ferrugineus
+4|Hyperolius frontalis|White-snouted reed frog
+4|Hyperolius fuscigula
+4|Hyperolius ghesquieri
+4|Hyperolius glandicolor
+4|Hyperolius gularis
+4|Hyperolius houyi
+4|Hyperolius hutsebauti
+4|Hyperolius igbettensis
+4|Hyperolius inornatus
+4|Hyperolius kachalolae
+4|Hyperolius kibarae
+4|Hyperolius kihangensis|African reed frog
+4|Hyperolius kuligae
+4|Hyperolius lateralis
+4|Hyperolius laticeps
+4|Hyperolius laurenti|Schiotz’s reed frog
+4|Hyperolius leleupi
+4|Hyperolius lucani
+4|Hyperolius maestus
+4|Hyperolius major
+4|Hyperolius mariae
+4|Hyperolius montanus
+4|Hyperolius nienokouensis|Reed frog
+4|Hyperolius nitidulus
+4|Hyperolius obscurus
+4|Hyperolius occidentalis
+4|Hyperolius pardalis
+4|Hyperolius polli
+4|Hyperolius polystictus
+4|Hyperolius pseudargus
+4|Hyperolius punctulatus
+4|Hyperolius pustulifer
+4|Hyperolius quadratomaculatus
+4|Hyperolius rhizophilus
+4|Hyperolius rhodesianus
+4|Hyperolius schoutedeni
+4|Hyperolius sheldricki
+4|Hyperolius soror
+4|Hyperolius steindachneri
+4|Hyperolius stenodactylus
+4|Hyperolius thoracotuberculatus
+4|Hyperolius tornieri
+4|Hyperolius torrentis|Ukami reed frog
+4|Hyperolius vilhenai
+4|Hyperolius viridigulosus|Stream reed frog
+4|Hyperolius viridis|Reed frog
+4|Hyperolius wermuthi
+4|Hyperolius xenorhinus
+4|Hypsiboas andinus
+4|Hypsiboas pulidoi
+4|Illinois chorus|Illinois chorus frog|Pseudacris illinoensis
+4|Incilius leucomyos|True toad
+4|Incilius mazatlanensis
+4|Indirana tenuilingua
+4|Ingerophrynus claviger
+4|Ingerophrynus kumquat|True toad
+4|Ischnocnema gehrti
+4|Ischnocnema lactea
+4|Ischnocnema nasuta
+4|Ischnocnema nigriventris
+4|Ischnocnema octavioi
+4|Ischnocnema oea
+4|Ischnocnema paranaensis
+4|Ischnocnema randorum
+4|Ischnocnema sambaqui
+4|Ischnocnema spanios
+4|Ischnocnema venancioi
+4|Kaloula walteri
+4|Kassina arboricola|Ivory Coast running frog
+4|Kassina cassinoides
+4|Kassina cochranae
+4|Kassina fusca
+4|Kassina lamottei|Rainforest running frog
+4|Kassina maculifer
+4|Kassina mertensi
+4|Kassina schioetzi
+4|Kurixalus berylliniris
+4|Large-spined bell|Large-spined bell toad|Bombina fortinuptialis
+4|Leptobrachella lateralis|Leptolalax lateralis|Nagaland Asian toad
+4|Leptobrachium bompu|Bompu Litter Frog
+4|Leptobrachium ngoclinhense
+4|Leptobrachium promustache
+4|Leptodactylodon bicolor|Mountain egg frog
+4|Leptodactylodon boulengeri|Boulenger’s egg frog
+4|Leptodactylodon bueanus
+4|Leptodactylodon erythrogaster
+4|Leptodactylodon mertensi|Mertens’ egg frog
+4|Leptodactylodon polyacanthus
+4|Leptodactylodon stevarti
+4|Leptodactylodon wildi
+4|Leptodactylus hallowelli
+4|Leptodactylus lauramiriamae
+4|Leptodactylus paraensis|Pará thin-toed frog
+4|Leptodactylus peritoaktites|coastal dweller thin-toed frog
+4|Leptodactylus rhodomerus|rose thigh thin-toed frog
+4|Leptodactylus turimiquensis|calf frog
+4|Leptomantis gadingensis|Rhacophorus gadingensis|Gading tree frog|Gunung Gading tree frog
+4|Leptopelis bequaerti
+4|Leptopelis concolor
+4|Leptopelis crystallinoron|Hyperolid tree frog
+4|Leptopelis fiziensis|Tree frog
+4|Leptopelis jordani
+4|Leptopelis karissimbensis
+4|Leptopelis marginatus
+4|Leptopelis nordequatorialis
+4|Leptopelis oryi
+4|Leptopelis parvus
+4|Leptopelis ragazzii|Shoa forest tree frog
+4|Leptopelis susanae|Susana’s forest tree frog
+4|Leptopelis yaldeni
+4|Leucostethus fugax|Colostethus fugax
+4|Leucostethus ramirezi|Colostethus ramirezi
+4|Leucostethus yaguara|Colostethus yaguara
+4|Limnonectes bannaensis
+4|Mantidactylus delormei
+4|Mantidactylus noralottae
+4|Marbled toadlet|Uperoleia marmorata
+4|Masiliwa snout-burrower|Hemisus brachydactylus
+4|Mertensophryne lindneri
+4|Mertensophryne lonnbergi
+4|Mertensophryne loveridgei
+4|Mertensophryne melanopleura
+4|Mertensophryne mocquardi
+4|Mertensophryne nyikae
+4|Mertensophryne schmidti
+4|Mertensophryne taitana
+4|Mertensophryne uzunguensis|Uzungwe toad
+4|Metaphrynella pollicaris
+4|Micrixalus adonis|Beautiful Dancing Frog
+4|Microhyla superciliaris
+4|Microkayla boettgeri|Psychrophrynella boettgeri
+4|Mimic tree|Mimic tree frog|Hyla imitator
+4|Minervarya andamanensis|Fejervarya andamanensis|chestnut-brown frog
+4|Minervarya nicobariensis|Fejervarya nicobariensis
+4|Minervarya nilagirica|Fejervarya mudduraja|Muddu Raja Cricket Frog
+4|Minervarya parambikulamana|Fejervarya parambikulamana
+4|Mixe tree|Mixe tree frog|Megastomatohyla mixe
+4|Mona coqui|Eleutherodactylus monensis
+4|Mottled barred|Mottled barred frog|Mixophyes coggeri
+4|Mérida cable car|Mérida cable car frog|Pristimantis telefericus
+4|Nankiang horned|Nankiang horned toad
+4|Nannophryne cophotis|Chaunus cophotis|Paramo toad
+4|Nannophryne corynetes
+4|Nannophryne variegata
+4|Nectophrynoides laticeps
+4|Nectophrynoides poyntoni|African viviparous toad
+4|Nectophrynoides pseudotornieri
+4|Nectophrynoides wendyae|Uzungwe scarp tree toad
+4|Niceforonia babax|Eleutherodactylus babax|Hypodactylus babax
+4|Niceforonia latens|Eleutherodactylus latens|Hypodactylus latens
+4|Niceforonia mantipus|Hypodactylus mantipus
+4|Niceforonia nigrovittata|Eleutherodactylus nigrovittatus|Hypodactylus nigrovittatus
+4|Noblella duellmani|Phyllonastes duellmani
+4|Northwest Mexico leopard|Northwest Mexico leopard frog|Lithobates magnaocularis
+4|Nyctibatrachus anamallaiensis
+4|Nyctimystes daymani|Litoria daymani
+4|Nyctimystes gularis|Litoria gularis|Mondo big-eyed tree frog
+4|Nyctimystes kuduki
+4|Nyctimystes papua|Litoria papua|Papua big-eyed tree frog
+4|Nyctimystes persimilis|Litoria persimilis|Milne big-eyed tree frog
+4|Nymphargus armatus
+4|Nymphargus ocellatus
+4|Nymphargus truebae
+4|Nyonga forest tree|Nyonga forest tree frog|Leptopelis lebeaui
+4|Ocellated forest tree|Ocellated forest tree frog|Leptopelis ocellatus
+4|Odorrana graminea|Large Odorous Frog
+4|Odorrana hejiangensis
+4|Odorrana indeprensa
+4|Odorrana kuangwuensis
+4|Odorrana lungshengensis
+4|Odorrana monjerai
+4|Odorrana morafkai
+4|Odorrana nasuta|True frog
+4|Odorrana sinica
+4|Odorrana trankieni
+4|Odorrana versabilis
+4|Oreobates ayacucho|Phrynopus ayacucho
+4|Oreophryne geminus
+4|Oreophrynella huberi
+4|Oreophrynella vasquezi
+4|Osornophryne puruanta
+4|Otophryne robusta|Sapito Robusto
+4|Otophryne steyermarki|Sapito Robusto De Steyermark
+4|Papurana daemeli
+4|Papurana garritor|Eilogo Estate frog
+4|Papurana grisea|Montean swamp frog|Went Mountains frog
+4|Papurana milneana
+4|Papurana supragrisea
+4|Papurana volkerjane|Hylarana volkerjane|Rana volkerjane
+4|Paracassina kounhiensis
+4|Paracassina obscura
+4|Paradise|Paradise toad|Vandijkophrynus robinsoni
+4|Paramo robber|Paramo robber frog|Pristimantis paramerus
+4|Pelophylax cypriensis
+4|Pelophylax demarchii
+4|Phrynobatrachus anotis
+4|Phrynobatrachus pintoi
+4|Phrynobatrachus sandersoni
+4|Phrynomantis somalicus|Somali Rubber Frog
+4|Phrynopus bracki|Ranita De La Cordillera Yanachaga
+4|Phrynopus bufoides
+4|Phrynopus paucari
+4|Phrynopus pesantesi
+4|Physalaemus angrensis
+4|Physalaemus insperatus
+4|Physalaemus irroratus
+4|Piping peeping|Piping peeping frog|Eleutherodactylus syristes
+4|Pithecopus azureus|Phyllomedusa azurea
+4|Pithecopus rohdei
+4|Platymantis diesmosi
+4|Platymantis paengi
+4|Platypelis alticola
+4|Polypedates impresus|concave-crowned tree frog|Yunnan whipping frog
+4|Poyntonophrynus damaranus|Bufo damaranus|Damaraland Pygmy Toad
+4|Poyntonophrynus grandisonae
+4|Poyntonophrynus hoeschi
+4|Poyntonophrynus kavangensis|Bufo kavangensis
+4|Poyntonophrynus lughensis|Bufo lughensis
+4|Poyntonophrynus parkeri|Bufo parkeri
+4|Pristimantis aniptopalmatus
+4|Pristimantis anotis
+4|Pristimantis atrabracus
+4|Pristimantis avius
+4|Pristimantis baiotis
+4|Pristimantis baryecuus
+4|Pristimantis batrachites
+4|Pristimantis bearsei
+4|Pristimantis boconoensis
+4|Pristimantis cajamarcensis
+4|Pristimantis cantitans
+4|Pristimantis capitonis
+4|Pristimantis ceuthospilus
+4|Pristimantis chrysops
+4|Pristimantis citriogaster
+4|Pristimantis colodactylus|Piura robber frog
+4|Pristimantis colomai
+4|Pristimantis colostichos
+4|Pristimantis condor
+4|Pristimantis corniger
+4|Pristimantis cosnipatae
+4|Pristimantis cremnobates|Rio Reventador robber frog
+4|Pristimantis croceoinguinis
+4|Pristimantis cryophilius
+4|Pristimantis cryptomelas|Cryptic robber frog
+4|Pristimantis cuneirostris
+4|Pristimantis degener
+4|Pristimantis deinops
+4|Pristimantis delius
+4|Pristimantis devillei|DeVille's robber frog
+4|Pristimantis diadematus
+4|Pristimantis diaphonus
+4|Pristimantis diogenes
+4|Pristimantis dissimulatus
+4|Pristimantis duende
+4|Pristimantis dundeei
+4|Pristimantis epacrus
+4|Pristimantis eremitus
+4|Pristimantis ernesti
+4|Pristimantis esmeraldas
+4|Pristimantis eugeniae
+4|Pristimantis euphronides
+4|Pristimantis eurydactylus
+4|Pristimantis exoristus
+4|Pristimantis festae
+4|Pristimantis fetosus
+4|Pristimantis floridus
+4|Pristimantis frater
+4|Pristimantis galdi
+4|Pristimantis ganonotus
+4|Pristimantis gentryi
+4|Pristimantis gladiator
+4|Pristimantis glandulosus|Ecuador robber frog
+4|Pristimantis gracilis
+4|Pristimantis grandiceps
+4|Pristimantis hamiotae
+4|Pristimantis hectus
+4|Pristimantis hernandezi|Hernandez's robber frog
+4|Pristimantis huicundo
+4|Pristimantis hybotragus
+4|Pristimantis ignicolor|Fire robber frog
+4|Pristimantis illotus
+4|Pristimantis imitatrix
+4|Pristimantis incanus|Rio Azuela robber frog
+4|Pristimantis incertus
+4|Pristimantis incomptus
+4|Pristimantis infraguttatus
+4|Pristimantis jamescameroni
+4|Pristimantis juanchoi
+4|Pristimantis jubatus
+4|Pristimantis kareliae
+4|Pristimantis kelephus|Eleutherodactylus kelephas
+4|Pristimantis lanthanites
+4|Pristimantis leptolophus
+4|Pristimantis lirellus
+4|Pristimantis luteolateralis
+4|Pristimantis malkini
+4|Pristimantis marahuaka
+4|Pristimantis memorans
+4|Pristimantis metabates
+4|Pristimantis muricatus
+4|Pristimantis mutabilis
+4|Pristimantis nervicus
+4|Pristimantis nigrogriseus
+4|Pristimantis nyctophylax
+4|Pristimantis ocellatus
+4|Pristimantis ornatissimus
+4|Pristimantis ortizi
+4|Pristimantis pedimontanus
+4|Pristimantis petersi
+4|Pristimantis phoxocephalus|Cotopaxi rain frog|Cotopaxi robber frog
+4|Pristimantis pinguis
+4|Pristimantis pirrensis
+4|Pristimantis platydactylus
+4|Pristimantis polemistes
+4|Pristimantis quantus
+4|Pristimantis rhabdocnemus
+4|Pristimantis schultei
+4|Pristimantis scitulus
+4|Pristimantis scoloblepharus|Los Patos robber frog
+4|Pristimantis serendipitus
+4|Pristimantis shrevei
+4|Pristimantis signifer
+4|Pristimantis silverstonei
+4|Pristimantis simonbolivari
+4|Pristimantis simoteriscus
+4|Pristimantis siopelus
+4|Pristimantis skydmainos
+4|Pristimantis spilogaster|Gambita robber frog
+4|Pristimantis spinosus
+4|Pristimantis stenodiscus
+4|Pristimantis sternothylax
+4|Pristimantis stictogaster
+4|Pristimantis sulculus
+4|Pristimantis supernatis
+4|Pristimantis tamsitti
+4|Pristimantis tenebrionis|Hotel robber frog
+4|Pristimantis thectopternus
+4|Pristimantis thymalopsoides|Greater Pilalo robber frog
+4|Pristimantis thymelensis
+4|Pristimantis torrenticola
+4|Pristimantis trachyblepharis
+4|Pristimantis truebae
+4|Pristimantis tubernasus
+4|Pristimantis turpinorum
+4|Pristimantis uisae
+4|Pristimantis veletis
+4|Pristimantis ventrimarmoratus
+4|Pristimantis verecundus
+4|Pristimantis versicolor
+4|Pristimantis vertebralis
+4|Pristimantis vicarius
+4|Pristimantis vidua|Mountain crest robber frog
+4|Pristimantis viridicans|Cerro Munchique robber frog
+4|Pristimantis walkeri
+4|Pristimantis wiensi
+4|Pristimantis xeniolum
+4|Pristimantis xestus
+4|Pristimantis yustizi
+4|Proceratophrys paviotii
+4|Proceratophrys renalis
+4|Pseudophilautus maia
+4|Pseudophilautus papillosus
+4|Pseudophilautus pardus
+4|Pulchrana banjarana|Hylarana banjarana
+4|Pulchrana debussyi
+4|Pulchrana laterimaculata
+4|Pulchrana mangyanum
+4|Pulchrana moellendorffi
+4|Rana kunyuensis
+4|Rana sangzhiensis|Pseudorana sangzhiensis
+4|Ranitomeya uakarii|red Uakari poison frog
+4|Raorchestes chotta|Small Bush Frog
+4|Raorchestes chromasynchysi|Confusing green bushfrog
+4|Raorchestes crustai|Bark Bush Frog
+4|Raorchestes jayarami|Jayaram's Bush Frog
+4|Raorchestes johnceei|Johnceei's Bush Frog
+4|Raorchestes kaikatti|Kaikatti bushfrog
+4|Raorchestes marki|Mark's Bush Frog
+4|Raorchestes ravii|Ravi's Bush Frog
+4|Raorchestes terebrans
+4|Raorchestes uthamani|Uthaman's Reed Bush Frog
+4|Rattling|Rattling frog|Cophixalus crepitans
+4|Rhacophorus laoshan|Laoshan tree frog
+4|Rhaebo hypomelas
+4|Rhinella amabilis
+4|Rhinella amboroensis
+4|Rhinella arborescandens
+4|Rhinella castaneotica
+4|Rhinella chavin
+4|Rhinella dapsilis
+4|Rhinella gallardoi
+4|Rhinella gnustae|Chaunus gnustae
+4|Rhinella henseli|Chaunus henseli
+4|Rhinella limensis
+4|Rhinella nesiotes
+4|Rhinella quechua
+4|Rhinella rostrata
+4|Rhinella rubropunctata
+4|Rhinella ruizi
+4|Rhinella sternosignata
+4|Rhinella tenrec
+4|Rhinella truebae
+4|Rhinella vellardi
+4|Rhombophryne testudo|Nosy Be burrowing frog
+4|Rulyrana flavopunctata
+4|Rulyrana saxiscandens
+4|Rulyrana spiculata
+4|Sachatamia orejuela
+4|Scaphiophryne boribory|Burrowing frog
+4|Serranobatrachus cristinae|Pristimantis cristinae
+4|Serranobatrachus delicatus|Pristimantis delicatus
+4|Showy leopard|Showy leopard frog|Lithobates spectabilis
+4|Silverstoneia nubicola|Boquete rocket frog
+4|Small-headed|Small-headed frog|Occidozyga diminutiva
+4|South Island telegraph|South Island telegraph frog|Eleutherodactylus audanti
+4|Spinular night|Spinular night frog|Nyctibatrachus acanthodermis
+4|Spiny giant|Spiny giant frog|Eleutherodactylus nortoni|Spiny green frog
+4|Strabomantis anatipes|Anatipes robber frog
+4|Strabomantis cheiroplethus
+4|Strabomantis ingeri|Inger's robber frog
+4|Strabomantis ruizi|Eleutherodactylus ruizi|Ruiz's robber frog
+4|Strabomantis sulcatus|Eleutherodactylus sulcatus
+4|Strabomantis zygodactylus|Craugastor zygodactylus
+4|Streambank froglet|Crinia riparia
+4|Strongylopus kilimanjaro
+4|Strongylopus kitumbeine
+4|Stumpffia grandis|Rhombophryne grandis
+4|Stumpffia roseifemoralis|Rhombophryne roseifemoralis
+4|Stumpffia tridactyla|Rhombophryne tridactyla
+4|Synapturanus rabus
+4|Tachiramantis cuentasi|Pristimantis cuentasi
+4|Tachiramantis lentiginosus
+4|Telmatobius espadai|Water frog
+4|Telmatobius hintoni|Water frog
+4|Telmatobius punctatus
+4|Telmatobius sanborni|Water frog
+4|Telmatobius timens|Water frog
+4|Telmatobius vilamensis
+4|Telmatobius zapahuirensis
+4|Tepui tree|Tepui tree frog|Hypsiboas tepuianus|Boana tepuiana
+4|Theloderma albopunctatum|Dotted bubble-nest frog
+4|Theloderma licin|Smooth-skinned warted tree frog|White-backed bug-eyed frog
+4|Theloderma ryabovi
+4|Tomopterna ahli|Tomopterna damarensis
+4|Trachycephalus mambaiensis
+4|Uperodon montanus|Ramanella montana
+4|Uperodon mormoratus|Indian Dot Frog|Sahyadri Marbled Balloon Frog
+4|Urrao Cochran|Urrao Cochran frog|Cochranella megistra|Cochranella megista
+4|Victoria ridged|Victoria ridged frog|Ptychadena aequiplicata
+4|Wager's stream|Wager's stream frog|Strongylopus wageri
+4|Walkerana leptodactyla|Indirana leptodactyla|Thin-limbed frog
+4|Warren's tree|Warren's tree frog|Tepuihyla warreni
+4|Whistling coquí|Cochran's treefrog|Eleutherodactylus cochranae
+4|Wuliangshan horned|Wuliangshan horned toad|Xenophrys wuliangshanensis
+4|Xenophrys robusta|Megophrys robusta
+4|Xenophrys serchhipii|Megophrys serchhipii
+4|Zaire forest tree|Zaire forest tree frog|Leptopelis fenestratus
+4|Zakerana nilagirica|Fejervarya nilagirica|Nilgiri frog
+4|Zhangixalus dugritei|Polypedates dugritei|Rhacophorus dugritei
+4|Abavorana luctuosa
+4|Amazophrynella minuta
+4|Ameerega boehmei|Boehmei's Poison Arrow Frog
+4|Amietophrynus chudeaui
+4|Amnirana fonensis
+4|Anodonthyla jeanbai
+4|Anodonthyla pollicaris
+4|Anodonthyla theoi
+4|Arthroleptis nikeae|Nike’s squeaker
+4|Astrobatrachus|Astrobatrachus kurichiyana|starry dwarf frog
+4|Atelognathus jeinimenensis
+4|Blythophryne beryet
+4|Boana caipora|Hypsiboas caipora
+4|Boophis andrangoloaka
+4|Boophis boppa
+4|Brachycephalus pulex|Brazilian flea toad|Serra Bonita flea toad
+4|Bufo kabischi
+4|Bufo minshanicus
+4|Bufo wolongensis
+4|Callulina dawida
+4|Cardioglossa annulata
+4|Ceuthomantis aracamuni
+4|Ceuthomantis duellmani
+4|Chalcorana scutigera|Hylarana scutigera
+4|Chlorohyla robinsonae|Litoria robinsonae|Ranoidea robinsonae
+4|Choerophryne burtoni
+4|Cochranella erminea|Rulyrana erminea
+4|Cophixalus humicola
+4|Cophixalus timidus
+4|Cophixalus variabilis
+4|Cornufer bufonulus
+4|Cornufer desticans|Platymantis desticans
+4|Cryptobatrachus conditus
+4|Cryptobatrachus pedroruizi
+4|Cycloramphus faustoi
+4|De Witte's snout-burrower|Hemisus wittei
+4|Diasporus quidditus
+4|Eleutherodactylus dennisi
+4|Eleutherodactylus interorbitalis|Rana-chirriadora Anteojuda
+4|Eleutherodactylus jamaicensis
+4|Eleutherodactylus jaumei
+4|Eleutherodactylus klinikowskii|Klinikowski's robber frog
+4|Eleutherodactylus lamprotes
+4|Eleutherodactylus lucioi
+4|Eleutherodactylus mariposa|Lily robber frog
+4|Eleutherodactylus maurus|Rana-fisgona Café
+4|Eleutherodactylus melacara|Estrada's robber frog
+4|Eleutherodactylus michaelschmidi|Robber frog
+4|Eleutherodactylus modestus|Blunt-toed chirping frog
+4|Eleutherodactylus nitidus
+4|Eleutherodactylus nivicolimae|Rana-chirriadora Del Nevado De Colima
+4|Eleutherodactylus nubicola
+4|Eleutherodactylus pallidus|Rana-chirriadora Pálida
+4|Eleutherodactylus pantoni
+4|Eleutherodactylus parabates
+4|Eleutherodactylus parapelates|Casillon robber frog|Macaya burrowing frog
+4|Eleutherodactylus patriciae|High mountain eleuth
+4|Eleutherodactylus paulsoni
+4|Eleutherodactylus pentasyringos
+4|Eleutherodactylus pezopetrus|Miranda robber frog
+4|Eleutherodactylus pinchoni
+4|Eleutherodactylus pituinus
+4|Eleutherodactylus poolei
+4|Eleutherodactylus rhodesi
+4|Eleutherodactylus rivularis
+4|Eleutherodactylus ronaldi
+4|Eleutherodactylus rubrimaculatus
+4|Eleutherodactylus rufescens|Rana-fisgona Roja
+4|Eleutherodactylus rufifemoralis
+4|Eleutherodactylus saxatilis
+4|Eleutherodactylus schmidti
+4|Eleutherodactylus teretistes|Rana-ladrona Silbadora
+4|Eleutherodactylus verrucipes|Rana-chirrionera Orejona|Big-eared chirping frog
+4|Engystomops freibergi
+4|Feihyla inexpectata|Chiromantis inexpectatus|Bornean jelly-nest frog|Bornean opposite-fingered frog
+4|Fejervarya kawamurai
+4|Fritziana fissilis
+4|Fritziana goeldii
+4|Glandirana susurra|Sado frog|Sado Wrinkled Frog
+4|Gracixalus jinxiuensis|Orixalus jinxiuensis
+4|Haddadus aramunha
+4|Hoplophryne rogersi|Usambara Blue-bellied Frog
+4|Hydrolaetare caparu|Caparu forest frog
+4|Hydrophylax gracilis
+4|Hyla perrini|Perrin's tree frog|Po's tree frog
+4|Hylarana margariana|Irawaddy frog
+4|Hylodes perere
+4|Hylophorbus rainerguentheri
+4|Hyloxalus maculosus|spotted rocket frog
+4|Hyloxalus vertebralis|Colostethus vertebralis|Boulenger's rocket frog
+4|Hyperolius poweri|Powers reed frog
+4|Hyperolius reesi
+4|Incilius ibarrai|Southern round-gland toad
+4|Incilius macrocristatus
+4|Incilius tacanensis|Volcan tacana toad
+4|Ischnocnema bolbodactyla
+4|Ischnocnema epipeda
+4|Ischnocnema gualteri
+4|Ischnocnema pusilla
+4|Jingdong horned|Jingdong horned toad|Xenophrys jingdongensis|Boulenophrys jingdongensis|Megophrys jingdongensis
+4|Kachin torrent|Kachin torrent frog|Amolops afghanus|Polypedates afghana|Staurois afghanus
+4|Kani bushfrog|Pseudophilautus kani|Kani brown-eared shrub frog
+4|Kurixalus wangi
+4|La Selle dusky|La Selle dusky frog|Eleutherodactylus jugans
+4|Lancini's robber|Lancini's robber frog|Pristimantis lancinii
+4|Lemos-Espinal's leopard|Lemos-Espinal's leopard frog|Rana lemosespinali|Lithobates lemosespinali
+4|Leptobrachella sola|Leptolalax solus
+4|Lesser banana|Lesser banana frog|Afrixalus brachycnemis
+4|Limnonectes megastomias
+4|Limnonectes timorensis
+4|Lithobates brownorum
+4|Locust coquí|Eleutherodactylus locustus|Interior robber frog
+4|Meowing night|Meowing night frog|Nyctibatrachus poocha
+4|Micrixalus mallani
+4|Micrixalus nelliyampathi
+4|Microhyla nilphamariensis
+4|Microhyla pulverata
+4|Minervarya kudremukhensis|Zakerana kudremukhensis|Fejervarya kudremukhensis
+4|Minervarya mysorensis|Fejervarya mysorensis
+4|Minervarya sauriceps|Fejervarya sauriceps|Lizard-headed Cricket Frog
+4|Mouhot's litter|Mouhot's litter frog|Leptobrachium mouhoti
+4|Mountain stream tree|Mountain stream tree frog|Litoria barringtonensis|Ranoidea barringtonensis
+4|Nannophrys naeyakai
+4|Nectophrynoides paulae
+4|Niceforonia columbiana
+4|Nymphargus bejaranoi
+4|Nymphargus cariticommatus
+4|Nymphargus chami
+4|Nymphargus chancas
+4|Nymphargus cristinae
+4|Nymphargus garciae
+4|Nymphargus griffithsi
+4|Nymphargus ignotus
+4|Nymphargus luminosus
+4|Nymphargus luteopunctatus
+4|Nymphargus megacheirus|Santa Rosa cochran frog
+4|Nymphargus nephelophila
+4|Nymphargus oreonympha
+4|Nymphargus phenax
+4|Nymphargus pluvialis|Barrett's Glass Frog
+4|Nymphargus posadae|Cochran frog
+4|Nymphargus prasinus
+4|Nymphargus ruizi
+4|Nymphargus siren
+4|Nymphargus spilotus
+4|Odorrana khalam
+4|Odorrana margaretae
+4|Odorrana orba
+4|Odorrana splendida
+4|Ololygon faivovichi|Scinax faivovichi
+4|Oreophrynella dendronastes
+4|Osteocephalus carri
+4|Pelophryne linanitensis
+4|Pelophryne murudensis
+4|Peltophryne fluviatica
+4|Phrynobatrachus intermedius
+4|Phrynobatrachus latifrons
+4|Phrynobatrachus leveleve
+4|Phrynobatrachus liberiensis
+4|Phrynopus auriculatus
+4|Phrynopus kotosh
+4|Phrynopus miroslawae
+4|Phrynopus oblivius
+4|Phrynopus tribulosus
+4|Phyllonastes coloma|Noblella coloma
+4|Pithecopus nordestinus
+4|Pithecopus oreades
+4|Polypedates braueri|Java tree frog|Taiwan whipping frog|upland tree frog
+4|Polypedates chlorophthalmus
+4|Pristimantis cabrerai|Valle robber frog
+4|Pristimantis duellmani
+4|Pristimantis erythropleura
+4|Pristimantis factiosus
+4|Pristimantis ginesi
+4|Pristimantis helvolus
+4|Pristimantis ixalus
+4|Pristimantis jaimei
+4|Pristimantis johannesdei
+4|Pristimantis jorgevelosai
+4|Pristimantis labiosus
+4|Pristimantis lasalleorum
+4|Pristimantis laticlavius
+4|Pristimantis latidiscus
+4|Pristimantis lemur
+4|Pristimantis leoni
+4|Pristimantis leucopus
+4|Pristimantis librarius
+4|Pristimantis lichenoides
+4|Pristimantis lindae
+4|Pristimantis lividus
+4|Pristimantis llojsintuta
+4|Pristimantis loustes|Maldonado robber frog
+4|Pristimantis lutitus
+4|Pristimantis lynchi
+4|Pristimantis lythrodes
+4|Pristimantis maculosus|Spotted robber frog
+4|Pristimantis mars
+4|Pristimantis melanoproctus
+4|Pristimantis mendax
+4|Pristimantis merostictus|Bogotacito robber frog
+4|Pristimantis miyatai
+4|Pristimantis mnionaetes
+4|Pristimantis modipeplus
+4|Pristimantis molybrignus
+4|Pristimantis mondolfii
+4|Pristimantis moro
+4|Pristimantis muscosus
+4|Pristimantis myersi
+4|Pristimantis myops
+4|Pristimantis nephophilus
+4|Pristimantis nicefori
+4|Pristimantis obmutescens
+4|Pristimantis ocreatus
+4|Pristimantis orestes
+4|Pristimantis orpacobates
+4|Pristimantis orphnolaimus
+4|Pristimantis pardalis|Leopard robber frog
+4|Pristimantis parvillus
+4|Pristimantis pastazensis
+4|Pristimantis pataikos
+4|Pristimantis paululus
+4|Pristimantis pecki
+4|Pristimantis penelopus
+4|Pristimantis percnopterus
+4|Pristimantis percultus|Zamora robber frog
+4|Pristimantis petrobardus
+4|Pristimantis phalarus
+4|Pristimantis philipi
+4|Pristimantis phragmipleuron
+4|Pristimantis piceus
+4|Pristimantis platychilus
+4|Pristimantis pleurostriatus
+4|Pristimantis polychrus
+4|Pristimantis prolatus|Hidden robber frog
+4|Pristimantis proserpens
+4|Pristimantis pruinatus
+4|Pristimantis pseudoacuminatus
+4|Pristimantis pteridophilus
+4|Pristimantis ptochus
+4|Pristimantis pugnax
+4|Pristimantis pulvinatus
+4|Pristimantis pyrrhomerus
+4|Pristimantis quaquaversus
+4|Pristimantis quinquagesimus
+4|Pristimantis racemus
+4|Pristimantis reclusas|Pristimantis reclusus
+4|Pristimantis renjiforum
+4|Pristimantis repens
+4|Pristimantis restrepoi
+4|Pristimantis reticulatus
+4|Pristimantis rhabdolaemus
+4|Pristimantis rhodoplichus|Canchaque robber frog
+4|Pristimantis rhodostichus
+4|Pristimantis riveti
+4|Pristimantis rosadoi
+4|Pristimantis roseus
+4|Pristimantis rozei
+4|Pristimantis rubicundus|Trench robber frog
+4|Pristimantis ruedai
+4|Pristimantis rufioculis
+4|Pristimantis ruidus
+4|Pristimantis salaputium
+4|Pristimantis samaipatae
+4|Pristimantis sanguineus
+4|Pristimantis satagius
+4|Pristimantis savagei
+4|Pristimantis suetus
+4|Pristimantis tribulosus
+4|Pristimantis turumiquirensis
+4|Pristimantis vanadise
+4|Pristimantis yaviensis
+4|Pseudacris kalmi
+4|Pseudacris sierra|Sierran tree frog
+4|Pseudophilautus tanu|Sri Lanka petite shrub-frog
+4|Rana holtzi
+4|Rana jiemuxiensis
+4|Ranitomeya rubrocephala
+4|Raorchestes agasthyaensis|Agasthyamala Bush Frog
+4|Raorchestes honnametti|Honnametti bush frog
+4|Raorchestes kadalarensis
+4|Raorchestes kakachi|Kakachi shrub frog
+4|Raorchestes longchuanensis
+4|Raorchestes manohari
+4|Raucous|Raucous toad|Sclerophrys capensis
+4|Rhacophorus marmoridorsum
+4|Rhinella chrysophora
+4|Rhinella cristinae
+4|Rhinella iserni
+4|Rhinella schneideri|Rococo toad
+4|Rhinella sclerocephala
+4|Rhinella stanlaii
+4|Rhinella veraguensis
+4|Ridged tree|Ridged tree frog|Dryophytes plicatus
+4|Ryukyu brown|Ryukyu brown frog|Rana kobai|Amami Brown Frog
+4|Scaphiophryne menabensis
+4|Scinax dolloi
+4|Sclerophrys garmani|Amietophrynus garmani
+4|Serranobatrachus insignitus|Pristimantis insignitus|Ground robber frog
+4|Serranobatrachus megalops|Pristimantis megalops
+4|Serranobatrachus ruthveni|Pristimantis ruthveni
+4|Southern pastel|Southern pastel frog|Eleutherodactylus leoncei|Hispaniolan robber frog
+4|Squirrel tree|Squirrel tree frog|Dryophytes squirellus|Southern tree frog|Oak tree frog|Southern tree toad
+4|Strabomantis laticorpus
+4|Strabomantis necerus|Mindo robber frog
+4|Strabomantis necopinus|Rana Cabezona
+4|Subdesert|Subdesert toad
+4|Tapir Valley tree|Tapir Valley tree frog|Tlalocohyla celeste
+4|Tasmanian tree|Tasmanian tree frog|Litoria burrowsae
+4|Tiny toadlet|Uperoleia micra
+4|Tomopterna milletihorsini
+4|Uluguru blue-bellied|Uluguru blue-bellied frog|Hoplophryne uluguruensis
+4|Uperodon triangularis
+4|Vampyrius|Rhacophorus vampyrus|vampire flying frog|vampire tree frog|Vampyrius vampyrus
+4|Vitreorana oyampiensis|Cochranella oyampiensis
+4|Xenophrys auralensis
+4|Zakerana murthii|Fejervarya murthii
+4|"Bufo" scorteccii
+4|Adelophryne mucronatus
+4|Adenomera nana|Adenomera nanus|Santa Catarina tropical bullfrog
+4|Afrixalus crotalus
+4|Afrixalus sylvaticus|Forest banana frog
+4|Alcalus sariba|Saribau eastern frog
+4|Alfaro's tree|Alfaro's tree frog|Hypsiboas alfaroi
+4|Alsodes cantillanensis|Cantillana spiny-chest frog
+4|Alsodes neuquensis
+4|Ameerega shihuemoy
+4|Amietia hymenopus
+4|Amnirana albolabris|white-lipped frog
+4|Amolops nepalicus
+4|Anomaloglossus apiau
+4|Anomaloglossus surinamensis|Suriname rock frog
+4|Aplastodiscus lutzorum
+4|Arenophryne xiphorhyncha|Southern Sandhill Frog
+4|Arthroleptis anotis
+4|Asterophrys pullifer|Callulops pullifer|Pseudocallulops pullifer
+4|Atelognathus grandisonae|Puerto Eden frog
+4|Atelopus orcesi
+4|Boana almendarizae|Hypsiboas almendarizae|Almendariz's Tree Frog
+4|Bokermannohyla capra
+4|Boophis arcanus
+4|Boophis calcaratus|Bright-eyed frog
+4|Boophis fayi
+4|Boophis haingana
+4|Boophis popi
+4|Brachycephalus pitanga
+4|Buergeria otai
+4|Callulina hanseni
+4|Callulina kanga
+4|Callulina laphami
+4|Callulina meteora
+4|Callulina shengena
+4|Callulina stanleyi
+4|Cardioglossa occidentalis
+4|Chalcorana mocquardi|Hylarana mocquardi
+4|Chalcorana parvaccola|North Sumatra white-lipped frog
+4|Choerophryne amomani
+4|Choerophryne arndtorum
+4|Choerophryne microps
+4|Choerophryne nigrescens
+4|Cochranella tangarana|Rulyrana tangarana
+4|Diasporus citrinobapheus
+4|Eleutherodactylus diplasius
+4|Eleutherodactylus notidodes
+4|Eleutherodactylus paralius
+4|Eleutherodactylus varians
+4|Euphlyctis aloysii
+4|Eupsophus altor|Oncol's ground frog
+4|Franky's narrow-mouthed|Franky's narrow-mouthed frog|Mysticellus franki
+4|Gastrotheca antoniiochoai
+4|Gastrotheca recava
+4|Green-thighed|Green-thighed frog|Nyctimystes brevipalmatus
+4|Hyalinobatrachium eccentricum
+4|Hyla felixarabica|Arabian tree frog
+4|Hyla molitor
+4|Hypsiboas hypselops
+4|Incilius chompipe
+4|Indosylvirana indica|Indian Golden-backed Frog
+4|Indosylvirana sreeni|Sreeni’s Golden-backed Frog
+4|Kala forest tree|Kala forest tree frog|Leptopelis omissus
+4|Kaloula latidisca
+4|Kimberley rockhole|Kimberley rockhole frog|Litoria aurifera
+4|Kurixalus hainanus|Hainan small tree frog|Hainan frilled tree frog
+4|Leptobrachella applebyi|Leptolalax applebyi
+4|Leptobrachium leucops
+4|Leptopelis mackayi
+4|Leptopelis spiritusnoctis
+4|Limnonectes poilani
+4|Lysapsus laevis
+4|Mannophryne speeri
+4|Melanophryniscus xanthostomus
+4|Micrixalus niluvasei
+4|Micrixalus specca
+4|Minervarya asmati|Fejervarya asmati
+4|Mini ature
+4|Nanorana bourreti
+4|Nimbaphrynoides liberiensis
+4|Noblella chirihampatu|Psychrophrynella chirihampatu
+4|Noblella madreselva
+4|Nyctibatrachus danieli
+4|Nyctibatrachus grandis
+4|Nyctibatrachus jog|Jog night frog
+4|Nyctimantis arapapa|Aparasphenodon arapapa
+4|Nyctimantis pomba|Aparasphenodon pomba
+4|Nyctimystes oktediensis|Litoria oktediensis
+4|Nyctimystes tyleri|Litoria michaeltyleri|Tyler's big-eyed tree frog
+4|Ophryophryne synoria
+4|Phrynobatrachus jimzimkusi
+4|Phrynopus nicoleae
+4|Phrynopus tautzorum
+4|Pink-sided tree|Pink-sided tree frog|Agalychnis litodryas
+4|Pinocchio|Pinocchio frog|Litoria pinocchio|northern Pinocchio treefrog|Rana pinocho
+4|Platymantis biak
+4|Pristimantis adnus
+4|Proceratophrys belzebul
+4|Pseudophilautus puranappu
+4|Rana brama|Fejervarya brama
+4|Rana ulma|Ryukyu Brown Frog
+4|Raorchestes annandalii|Raorchestes anandalii
+4|Raorchestes ghatei|Ghate's Bush Frog
+4|Scinax iquitorum
+4|Scinax juncae
+4|Scinax manriquei
+4|Sphaenorhynchus mirim
+4|Synapturanus danta|chocolate frog|tapir frog
+4|Telmatobius ventriflavum
+4|Thoropa taophora
+4|Triprion spatulatus|Mexican shovel-headed tree frog|Shovelhead tree frog
+4|Uperodon anamalaiensis
+4|VUB night|VUB night frog|Nyctibatrachus vrijeuni
+4|Vitreorana ritae
+4|Western leopard|Western leopard toad|Amietophrynus pantherinus|Leopard Toad|Sclerophrys pantherina
+4|Xanthophryne tigerina|Amboli toad|Konkan Tiger Toad
+4|Xenophrys zunhebotoensis
 ` });
 EVO.cat({ ...{"id": "butterflies", "name": "Butterflies", "icon": "🦋", "q": "Name a **butterfly or moth** (species).", "strip": ["butterfly", "moth"], "level": 3}, list: `
-0|Painted Lady|Vanessa cardui
-0|Red Admiral|Vanessa atalanta
-0|Small Tortoiseshell|Aglais urticae
-0|comma|Polygonia c-album|anglewing
-0|common blue|Polyommatus icarus
-0|common brimstone|Gonepteryx rhamni
-0|common yellow swallowtail|Papilio machaon|swallowtail|Old World swallowtail
-0|large white|Pieris brassicae|large cabbage white|cabbage moth|cabbage butterfly
-1|monarch butterfly|Danaus plexippus|common tiger wanderer|monarch
-0|peacock|Aglais io|Peacock butterfly
-0|purple emperor|Apatura iris
-0|small white|Pieris rapae
+0|Pieris brassicae|Cabbage butterfly|Cabbage white|Large cabbage white|Large white
+0|Vanessa atalanta|red admiral|red admirable
+0|Papilio machaon|Swallowtail|Old World swallowtail|common yellow swallowtail
+1|Monarch|Monarch butterfly|Danaus plexippus|milkweed|wanderer|black veined brown|common tiger|common tiger wanderer
+0|Aglais io|European peacock butterfly|Inachis io|Peacock butterfly|Vanessa io|peacock
+0|Small tortoiseshell|Aglais urticae
+0|Pieris rapae|cabbage butterfly|cabbage white|cabbage white butterfly|small cabbage white|small white
+0|Vanessa cardui|Painted Lady|Cynthia cardui|Pyrameis cardui
+0|Gonepteryx rhamni|Brimstone|common brimstone
+0|Common blue|Polyommatus icarus
+0|Apatura iris|Purple Emperor
+0|Polygonia c-album|Comma|anglewing
+0|Apollo|Parnassius apollo|Apollo butterfly|Mountain Apollo
+0|Anthocharis cardamines|Orange tip
+2|Bombyx mori|mulberry silkworm|silk moth|silkworm|Chinese silkworm|domestic silk moth|domestic silkworm|domestic silkworm moth|domesticated silk moth|domesticated silkworm
+2|Nymphalis antiopa|Mourning Cloak|mourning cloak butterfly|camberwell beauty
+2|Green-veined white|Pieris napi
+2|Lycaena phlaeas|Small copper butterfly|American copper|small copper|common copper
+2|Silver-washed fritillary|Argynnis paphia
+2|Large blue|Phengaris arion|Large blue butterfly|Maculinea arion
+2|Meadow brown|Maniola jurtina
+2|Holly blue|Celastrina argiolus
+2|Melanargia galathea|marbled white
+2|Green hairstreak|Callophrys rubi
+2|Speckled wood|Pararge aegeria
+2|Queen Alexandra's birdwing|Ornithoptera alexandrae
+2|Colias croceus|Clouded yellow|common clouded yellow
+2|Large tortoiseshell|Nymphalis polychloros
+2|Ringlet|Aphantopus hyperantus
+2|Limenitis camilla|White Admiral
 2|Adonis blue|Lysandra bellargus
-2|American copper|Lycaena phlaeas|small copper|common copper
-2|Gatekeeper|Pyronia tithonus
-2|Green Hairstreak|Callophrys rubi
-2|Morpho
-2|Mountain Apollo|Parnassius apollo|Apollo Butterfly|Apollo
-2|Queen Alexandra’s birdwing|Ornithoptera alexandrae
-2|Speckled Wood|Pararge aegeria
-2|camberwell beauty|Nymphalis antiopa|mourning cloak
-2|clouded yellow|Colias croceus|common clouded yellow
-2|green-veined white|Pieris napi
-2|holly blue|Celastrina argiolus
-2|large blue|Phengaris arion
-2|large tortoiseshell|Nymphalis polychloros
-2|marbled white|Melanargia galathea
-2|meadow brown|Maniola jurtina
-2|orange tip|Anthocharis cardamines
-2|ringlet|Aphantopus hyperantus
-2|silver-washed fritillary|Argynnis paphia
-2|white admiral|Limenitis camilla
-3|Black Hairstreak|Satyrium pruni
-3|Black-veined White|Aporia crataegi
-3|Brimstones|Gonepteryx
-3|Chequered Skipper|Carterocephalus palaemon
-3|Heath Fritillary|Melitaea athalia
-3|Julia butterfly|Dryas iulia|Julia Heliconian
-3|Lulworth Skipper|Thymelicus acteon
-3|Map|Araschnia levana|map butterfly
-3|Papilio
-3|Pieris
-3|Plain tiger|Danaus chrysippus
-3|Purple Hairstreak|Favonius quercus
-3|Queen of Spain Fritillary|Issoria lathonia
-3|Scarce Swallowtail|Iphiclides podalirius|sail swallowtail|pear-tree swallowtail
-3|Small Heath|Coenonympha pamphilus
-3|Tortoiseshells|Aglais
-3|White-letter Hairstreak|Satyrium w-album
-3|brown argus|Aricia agestis
-3|brown hairstreak|Thecla betulae
-3|dingy skipper|Erynnis tages
-3|duke of burgundy fritillary|Hamearis lucina
-3|essex skipper|Thymelicus lineola
-3|glanville fritellary|Melitaea cinxia
-3|grayling|Hipparchia semele
-3|grizzled skipper|Pyrgus malvae
-3|large copper|Lycaena dispar
-3|long-tailed blue|Lampides boeticus
-3|marsh fritillary|Euphydryas aurinia
-3|pearl-bordered fritillary|Boloria euphrosyne
-3|silver-spotted skipper|Hesperia comma
-3|small blue|Cupido minimus
-3|small pearl-bordered fritillary|Boloria selene
-3|small skipper|Thymelicus sylvestris
-3|wall brown|Lasiommata megera
-3|wood white|Leptidea sinapis
-5|Blue pansy|Junonia orithya
-4|Citrus swallowtail|Papilio demodocus
-4|Clouded apollo|Parnassius mnemosyne
-4|Colias
-4|Common Jezebel|Delias eucharis
-4|Danaus
-4|Dusky Large Blue|Phengaris nausithous
-4|Emperors|Apatura
-4|Greta oto
-4|Ladies and Red Admiral|Vanessa
-4|Large Chequered Skipper|Heteropterus morpheus
-4|Large wall brown|Lasiommata maera
-4|Lesser Marbled Fritillary|Brenthis ino
-4|Lime butterfly|Papilio demoleus
-4|Papilio polytes
-4|Parnassius
-4|Peacock Pansy|Junonia almana
-4|Poplar Admiral|Limenitis populi
-4|Scarce Fritillary|Euphydryas maturna
-4|Scarce copper|Lycaena virgaureae
-4|Speyeria aglaja
-4|arran brown|Erebia ligea
-4|bath white|Pontia daplidice
-4|bergers clouded yellow|Colias alfacariensis
-4|false heath fritillary|Melitaea diamina
-4|lesser purple emperor|Apatura ilia
-4|mallow skipper|Carcharodus alceae
-4|pale cloudedyyellow|Colias hyale
-4|pearly heath|Coenonympha arcania
-4|purple-edged copper|Lycaena hippothoe
-4|purple-shot Copper|Lycaena alciphron
-4|short-tailed blue|Cupido argiades
-4|sooty copper|Lycaena tityrus
-4|southern white admiral|Limenitis reducta
-4|spotted fritillary|Melitaea didyma|Red-Band Fritillary
-4|violet fritillary|Boloria dia
-4|woodland brown|Lopinga achine
-4|Agriades optilete
-4|Argynnis pandora
-4|Atrophaneura
-4|Brenthis daphne
-4|Cacyreus marshalli
-4|Charaxes jasius
-4|Chazara briseis
-4|Coenonympha glycerion
-4|Colias myrmidone
-4|Corsican Swallowtail|Papilio hospiton
-4|Cyaniris semiargus
-4|Eumedonia eumedon
-4|Fabriciana niobe
-4|Graphium sarpedon
-4|Green-underside Blue|Glaucopsyche alexis
-4|Hyponephele lycaon
-4|Kallima inachus
-4|Lasiommata petropolitana
-4|Leptotes pirithous
-4|Libythea celtis
-4|Lycaena helle
-4|Lysandra coridon
-4|Melitaea phoebe
-4|Nymphalis xanthomelas
-4|Ochlodes sylvanus
-4|Pallas's Sailer|Neptis sappho
-4|Papilio alexanor
-4|Parnassius phoebus
-4|Phengaris alcon
-4|Plebejus argus
-4|Plebejus idas
-4|Polyommatus
-4|Polyommatus amandus
-4|Polyommatus dorylas
-4|Provencal Short-tailed Blue|Cupido alcetas
-4|Pyrgus serratulae
-4|Sasakia charonda
-4|Satyrium acaciae
-4|Scolitantides orion
-4|Short-horned Baronia|Baronia brevicornis
-4|Zerynthia
-4|Zerynthia polyxena
-4|Zerynthia rumina
-4|ilex hairstreak|Satyrium ilicis
-4|moorland clouded yellow|Colias palaeno
-4|oberthürs grizzled skipper|Pyrgus armoricanus
+2|Aporia crataegi|Black-veined White
+2|Scarce swallowtail|Iphiclides podalirius|Pear-tree Swallowtail|Sail Swallowtail
+2|Gatekeeper|Pyronia tithonus|Hedge Brown
+2|Acherontia atropos|African Death Head's Hawkmoth|Deaths Head Hawkmoth|Greater Death's Head Hawkmoth
+2|Lampides boeticus|Long-tailed blue|Pea Blue
+2|Hummingbird hawk-moth|Macroglossum stellatarum|Hummingbird moth
+2|Lymantria dispar|European Gypsy Moth|Gypsy Moth|Lymantria (Porthetria) dispar|Spongy moth
+2|Carterocephalus palaemon|Chequered Skipper
+2|Small heath|Coenonympha pamphilus|Small heath butterfly
+2|Marsh fritillary|Euphydryas aurinia
+2|Queen of Spain fritillary|Issoria lathonia
+2|Large copper|Lycaena dispar|Large copper butterfly
+2|Leptidea sinapis|Wood white butterfly|wood white
+5|Attacus atlas|Atlas Moth
+2|Danaus chrysippus|África cracks|plain tiger
+2|Hamearis lucina|Duke of Burgundy|duke of burgundy fritillary
+2|Brown hairstreak|Thecla betulae
+2|Heath fritillary|Melitaea athalia
+2|Hesperia comma|silver-spotted skipper
+2|Lasiommata megera|wall brown
+2|Map|Araschnia levana|Map butterfly
+2|Small pearl-bordered fritillary|Boloria selene|Boloria (Clossiana) selene|silver-bordered fritillary
+2|Glanville fritillary|Melitaea cinxia|glanville fritellary
+2|Pyrgus malvae|Grizzled Skipper
+2|Peppered|Peppered moth|Biston betularia
+2|Dingy skipper|Erynnis tages
+2|Pearl-bordered fritillary|Boloria euphrosyne
+2|Six-spot burnet|six-spot burnet moth|Zygaena (Zygaena) filipendulae|Zygaena filipendulae
+2|Essex skipper|Thymelicus lineola
+2|Purple hairstreak|Favonius quercus
+2|Small blue|Cupido minimus
+2|Daphnis nerii|Oleander hawk-moth
+2|Lackey|Lackey moth|Malacosoma neustria
+2|Saturnia pyri|giant emperor moth|giant peacock moth|great peacock moth|Viennese emperor
+2|Grayling|Hipparchia semele
+2|Small skipper|Thymelicus sylvestris
+2|Apatura ilia|Lesser Purple Emperor|Lesser purple emperor butterfly
+2|Codling|Codling moth|Cydia pomonella
+2|Agrius convolvuli|Convolvulus Hawk-moth
+2|Deilephila elpenor|Elephant Hawk-moth
+2|Garden tiger|Garden tiger moth|Arctia caja
+2|Saturnia pavonia|Emperor moth|small emperor moth
+2|Tineola bisselliella|clothes moth|common clothes moth|webbing clothes moth
+2|Helicoverpa armigera|Corn earworm|Cotton bollworm|African bollworm|Heliothis obsoleta|Old World bollworm|Scarce bordered straw
+2|Neopalpa donaldtrumpi|N. donaldtrumpi
+2|Scarce copper|Lycaena virgaureae
+2|Silver Y|Autographa gamma|Phytometra gamma
+2|White-letter hairstreak|Satyrium w-album
+2|Clouded Apollo|Parnassius mnemosyne
+2|Cossus cossus
+2|Dark green fritillary|Speyeria aglaja
+2|Aricia agestis|Brown Argus
+2|Brenthis ino|Lesser Marbled Fritillary
+2|Cinnabar|Cinnabar moth|Tyria jacobaeae
+2|Euplagia quadripunctaria|Jersey tiger
+2|Fall webworm|Hyphantria cunea
+2|Melitaea didyma|red-band fritillary|Spotted Fritillary
+2|Pontia daplidice|Bath White
+2|Dryas iulia|Julia, or Flambeau|Julia butterfly|Julia Heliconian
+2|Black arches|Lymantria|Lymantria monacha|Nun moth
+2|Brown-tail|Brown-tail moth|Euproctis chrysorrhoea
+2|Cabbage|Cabbage moth|Barathra brassicae|Mamestra brassicae
+2|Calliteara pudibunda|Pale Tussock
+2|Diamondback|Diamondback moth|Plutella xylostella
+2|Gonepteryx cleopatra|Cleopatra|Cleopatra butterfly
+2|Lasiommata maera|Large wall brown
+2|Luna|Luna moth|Actias luna
+2|Lycaena tityrus|sooty copper
+2|Short-tailed blue|Cupido argiades
+2|Sphinx ligustri|Privet Hawk Moth
+2|Black hairstreak|Satyrium pruni
+2|Lulworth skipper|Thymelicus acteon
+2|Cerura vinula|puss moth
+2|Coenonympha arcania|pearly heath
+2|Colias hyale|pale cloudedyyellow
+2|European corn borer|Ostrinia nubilalis
+2|Galleria mellonella|wax moth
+2|Greta oto|glasswing butterfly
+2|Orgyia antiqua|Orgyia|Rusty Tussock Moth|Vapourer
+2|Turnip|Turnip moth|Agrotis segetum
+2|Aglia tau|Tau emperor
+2|Boloria dia|violet fritillary
+2|Carcharodus alceae|mallow skipper
+2|Lopinga achine|woodland brown
+2|Purple-edged copper|Lycaena hippothoe
+2|Samia cynthia|ailanthus silkmoth
+2|Zeuzera pyrina|leopard moth|wood leopard moth
+2|Glaucopsyche alexis|Green-underside Blue
+2|Abraxas grossulariata|The Magpie
+2|Colias alfacariensis|Colias sareptensis|bergers clouded yellow
+2|Papilio demoleus|Lime butterfly|Papilio (Princeps) demoleus
+2|Smerinthus ocellatus|Videsvärmare
+2|Willowherb hawkmoth|Proserpinus proserpina|Proserpinus proserpinus
+2|Catocala fraxini|Blue Underwing|Clifden Nonpareil
+2|Dendrolimus pini
+2|Dusky large blue|Phengaris nausithous
+2|Erebia ligea|arran brown
+2|Hyles euphorbiae
+2|Indianmeal|Indianmeal moth|Plodia interpunctella|zavíječ paprikový
+2|Melitaea diamina|false heath fritillary
+2|Mimas tiliae
+2|Pine processionary|Thaumetopoea wilkinsoni|Thaumetopoea pityocampa
+2|Poplar admiral|Limenitis populi
+2|Poplar hawkmoth|Laothoe populi
+2|Purple-shot copper|Lycaena alciphron
+2|Winter|Winter moth|Operophtera brumata
+2|Argynnis pandora
+2|Arctia villica|Epicallia villica
+2|Beet armyworm|asparagus fern caterpillar|Spodoptera exigua
+2|Cydalima perspectalis|Box Tree Moth
+2|Gonimbrasia belina|Gonimbrasia (Gonimbrasia) belina|Mopane worm
+2|Phragmatobia fuliginosa
+2|Scarlet tiger|Scarlet tiger moth|Callimorpha dominula
+2|Utetheisa pulchella|Crimson speckled footman|Deiopeia pulchella
+2|Phengaris alcon|Maculinea alcon|Algon blue
+2|Silver-studded blue|Plebejus argus
+2|Zerynthia polyxena
+2|Buff-tip|Phalera bucephala
+2|Euthrix potatoria
+2|Graellsia isabellae|Spanish moon moth
+2|Hemaris fuciformis
+2|Horse-chestnut leaf miner|Cameraria ohridella
+2|Hyles gallii|Bedstraw Hawkmoth
+2|Junonia almana|Peacock pansy
+2|Large chequered skipper|Heteropterus morpheus
+2|Large yellow underwing|Noctua pronuba|Phalaena pronuba
+2|Manduca sexta|Carolina Sphinx|goliath worm|tobacco hornworm
+2|Oak eggar|Lasiocampa quercus
+2|Oak processionary|Thaumetopoea processionea
+2|Scarce fritillary|Euphydryas maturna
+2|Sphinx pinastri
+2|Niobe fritillary|Fabriciana niobe
+2|Acronicta rumicis
+2|Agrotis ipsilon|Dark Sword-grass|black cutworm
+2|Angoumois grain|Angoumois grain moth|Sitotroga cerealella
+2|Deilephila porcellus
+2|Ghost|Ghost moth|Hepialus humuli
+2|Heart and dart|Agrotis exclamationis
+2|Leucoma salicis|Satin Moth|White Satin Moth
+2|Limenitis reducta|southern white admiral
+2|Lobster|Lobster moth|Stauropus|Stauropus fagi
+2|Macrothylacia rubi|fox moth
+2|Mottled umber|Erannis defoliaria
+2|Nemapogon granella
+2|Papilio demodocus|Citrus swallowtail
+2|Tortrix viridana
+2|Cyaniris semiargus|Mazarine Blue
+2|Polyommatus amandus|Amanda's blue
+2|Satyrium ilicis|ilex hairstreak
+2|Brenthis daphne|Marbled Fritillary
+2|Chalkhill blue|Lysandra coridon
+2|Large skipper|Ochlodes sylvanus
+2|Plebejus idas|Northern blue butterfly
+2|Common Mormon|Papilio polytes
+2|Delias eucharis|Common Jezebel
+2|Fall armyworm|Spodoptera frugiperda|Fall Armyworm Moth
+2|Hemaris tityus|Hemaris|Narrow-bordered bee hawk-moth
+2|Hippotion celerio|Silver-striped Hawkmoth|Vine hawkmoth
+2|Hornet|Hornet moth|Sesia apiformis|Hornet Clearwing Moth
+2|Hyles livornica|Striped hawkmoth
+2|Lasiocampa trifolii
+2|Nine-spotted|Nine-spotted moth|Amata phegea
+2|Tinea pellionella|case-bearing clothes moth
+2|Leptotes pirithous|Common Zebra Blue|Syntarucus pirithous
+2|Catopsilia pomona|Common Emigrant|Papilio pomona
+2|Chrysiridia rhipheus|Madagascan Sunset Moth
+2|Diachrysia chrysitis
+2|Diacrisia sannio
+2|Dryocampa rubicunda|Rosy Maple Moth
+2|Graphium agamemnon|green triangle|green-spotted triangle|tailed green jay|Tailed jay
+2|Junonia orithya|blue pansy
+2|Large emerald|Geometra papilionaria
+2|Leptosia nina|Psyche
+2|Lithosia quadra
+2|Marumba quercus
+2|Morpho menelaus|Menelaus blue morpho
+2|Papilio xuthus|Asian Swallowtail
+2|Red underwing|Catocala nupta
+2|Thysania agrippina|white witch|ghost moth, great gray witch, great owlet moth
+2|Charaxes jasius
+2|Coenonympha glycerion|Chestnut heath
+2|Melitaea phoebe|Knapweed Fritillary
+2|Papilio alexanor
+2|Archon apollinus|False Apollo
+2|Boloria aquilonaris
+2|Bordered white|Bupalus piniaria|Pine Looper
+2|Coenonympha hero
+2|Colias erate|Eastern Pale Clouded Yellow
+2|Colias phicomone|Mountain clouded yellow
+2|Eriogaster lanestris
+2|Eurema hecabe|Common Grass Yellow
+2|Gastropacha quercifolia|Gastropacha (Gastropacha) quercifolia
+2|Giant leopard|Giant leopard moth|giant leopard caterpillar|Hypercompe scribonia
+2|Grey dagger|Acronicta psi
+2|Hipparchia fagi
+2|Hipparchia statilinus|tree grayling
+2|Hyles lineata|striped hawkmoth|white-lined sphinx|white-lined sphinx moth
+2|Large grizzled skipper|Pyrgus alveus
+2|Mediterranean flour|Mediterranean flour moth|flour moth|mealmoth|mill moth|Ephestia kuehniella
+2|Melitaea trivia
+2|Northern brown argus|Aricia artaxerxes
+2|Papilio paris|Papilio (Achillides) paris|Paris Peacock
+2|Papilio ulysses|Papilio (Princeps) ulysses
+2|Satyrium spini
+2|Scarce large blue|Phengaris teleius
+2|Spilosoma lubricipeda|white ermine
+2|Xanthopan morganii|Xanthopan morgani
+2|Actias selene|Indian moon moth
+2|Angle shades|Phlogophora meticulosa
+2|Anthocharis euphenoides
+2|Arctia matronula|Pericallia matronula
+2|Bhutanitis lidderdalii|Bhutan Glory
+2|Bird-cherry ermine|Yponomeuta evonymella
+2|Boloria eunomia
+2|Burnet companion|Burnet Companion Moth|Euclidia glyphica
+2|Catocala elocata
+2|Catocala promissa|Light crimson underwing moth
+2|Erebia euryale
+2|Euchloe ausonia|Eastern Dappled White
+2|Junonia coenia
+2|Lesser wax|Lesser wax moth|Achroia grisella
+2|Lobesia botrana|European Grapevine Moth
+2|Malacosoma castrense|Malacosoma castrensis
+2|Minois dryas
+2|Neptis rivularis
+2|Papilio clytia|Common Mime
+2|Papilio helenus|Red Helen|Red Helen Swallowtail
+2|Papilio homerus|Homerus swallowtail
+2|Papilio memnon|Papilio (Princeps) memnon|Great mormon
+2|Papilio palinurus
+2|Papilio polyxenes|Black Swallowtail
+2|Parasemia plantaginis|wood tiger
+2|Pieris mannii
+2|Pine beauty|Panolis flammea
+2|Plebejus argyrognomon
+2|Polyommatus damon
+2|Pontia edusa
+2|Pseudophilotes baton
+2|Setaceous Hebrew character|Xestia c-nigrum
+2|Small mountain ringlet|Erebia epiphron
+2|Spialia sertorius
+2|Sycamore|Acronicta aceris
+2|Colias palaeno|moorland clouded yellow
+2|Eumedonia eumedon
+2|Graphium sarpedon|Common bluebottle|Graphium (Graphium) sarpedon
+2|Kallima inachus|Dead Leaf|Orange Oakleaf
+2|Libythea celtis
+2|Scolitantides orion
+2|Baronia brevicornis|Short-horned Baronia
+2|Colias myrmidone
+2|Geranium bronze|Cacyreus marshalli
+2|Lycaena helle|violet copper
+2|Nymphalis xanthomelas|Large Tortoiseshell
+2|Sasakia charonda|Great purple emperor
+2|Agriades glandon|Arctic blue|glandon blue|high mountain blue|primrose blue
+2|Agrius cingulata|Pink-spotted hawkmoth|Agrius cingulatus
+2|Antheraea yamamai|Antheraea (Antheraea) yamamai
+2|Bhutanitis ludlowi|Ludlow's Bhutan Glory|Ludlow's Bhutan Swallowtail|Mystical Bhutan Glory
+2|Canary Islands large white|Pieris cheiranthi
+2|Catocala sponsa|Dark crimson underwing moth
+2|Catopsilia pyranthe|Papilio pyranthe
+2|Colobura dirce|Mosaic
+2|Danaus genutia|Common Tiger|Striped Tiger
+2|Diacrisia purpurata|Rhyparia purpurata
+2|Diaphora mendica
+2|Erebia medusa
+2|Eupoecilia ambiguella
+2|Garden carpet|Xanthorhoe fluctuata
+2|Graphium doson|Common Jay
+2|Grapholita molesta|Cydia molesta|Grapholita (Aspila) molesta
+2|Herald|Scoliopteryx libatrix
+2|Hyles hippophaes|Sea Buckthorn Hawkmoth
+2|Hypolimnas misippus|Danaid Eggfly|Diadem butterfly
+2|Idea leuconoe
+2|Miltochrista miniata|Rosy Footman
+2|Notodonta dromedarius
+2|Papilio antimachus|African giant swallowtail|Papilio (Druryia) antimachus
+2|Papilio bianor|Chinese Peacock|Common Peocock
+2|Papilio glaucus|Eastern tiger swallowtail|Papilio (Pterourus) glaucus
+2|Peach blossom|Thyatira batis
+2|Polyommatus daphnis
+2|Pseudophilotes vicrama|Eastern Baton Blue|Lycaena vicrama|Philotes vicrama|Polyommatus vicrama
+2|Pyralis farinalis|Meal moth|flour moth
+2|Scotch argus|Erebia aethiops
+2|Shark|Cucullia umbratica
+2|Tuta absoluta
+2|Twin-spot fritillary|Brenthis hecate
+2|Zygaena carniolica|Zygaena (Agrumenia) carniolica
+2|Agriades optilete
+2|Cupido alcetas|Provencal Short-tailed Blue
+2|Hyponephele lycaon
+2|Lasiommata petropolitana
+2|Neptis sappho|Common Glider|Pallas's Sailer
+2|Oberthür's grizzled skipper|Pyrgus armoricanus
+2|Olive skipper|Pyrgus serratulae
+2|Zerynthia rumina
+3|Acherontia lachesis|Deaths head hawkmoth|Greater Death’s Head Hawkmoth
+3|Allancastria cerisyi|Zerynthia cerisy
+3|American lady|Vanessa virginiensis|American Painted Lady
+3|Anania hortulata
+3|Antheraea pernyi|Antheraea (Antheraea) pernyi|Oak Tasar Silk Moth
+3|Argynnis laodice
+3|Atolmis rubricollis
+3|Automeris io|Io moth|Peacock moth
+3|Battus polydamas|Polydamas Swallowtail
+3|Boloria pales|Boloria (Boloria) pales
+3|Brimstone|Brimstone moth|Opisthograptis luteolata
+3|Brintesia circe
+3|Cilix glaucata
+3|Clouded border|Lomaspilis marginata
+3|Coenonympha oedippus|False ringlet
+3|Coenonympha tullia|common ringlet|large heath
+3|Comet|Comet moth|Argema mittrei
+3|Common carpet|Epirrhoe alternata
+3|Common footman|Manulea lurideola|Eilema lurideola
+3|Copper underwing|Amphipyra pyramidea
+3|Coscinocera hercules
+3|Cybosia mesomella
+3|Cydia nigricana
+3|Diloba caeruleocephala
+3|Drepana falcataria
+3|Dryadula phaetusa|Banded Longwing
+3|Ematurga atomaria
+3|Ephestia elutella|cacao moth|tobacco moth|warehouse moth
+3|Gluphisia crenata
+3|Grapholita funebrana
+3|Helicoverpa zea|corn earworm|cotton bollworm|tomato fruitworm
+3|High brown fritillary|Fabriciana adippe
+3|Laothoe amurensis
+3|Manulea complana|Eilema complana|Scarce Footman
+3|Muschampia floccifera
+3|Mythimna unipuncta|armyworm|common armyworm|rice armyworm|true armyworm moth|white-speck moth
+3|Nymphalis vaualbum|compton tortoiseshell|false comma|Nymphalis l-album
+3|Orange swift|Triodia sylvina
+3|Osiris blue|Cupido osiris
+3|Papilio maackii
+3|Papilio polymnestor|Blue Mormon
+3|Papilio protenor|Spangle
+3|Papilio zelicaon|Anise Swallowtail
+3|Paranthrene tabaniformis|dusky clearwing
+3|Polyommatus thersites|Chapman's Blue
+3|Sooty orange tip|Zegris eupheme
+3|Synanthedon tipuliformis
+3|Teinopalpus imperialis|Kaiser-i-Hind
+3|Trichiura crataegi
+3|Wittia sororcula|Eilema sororcula
+3|Yponomeuta malinellus
+3|Yponomeuta padella
+3|Zygaena lonicerae|Zygaena (Zygaena) lonicerae
+3|Zygaena trifolii
+3|Chazara briseis
+3|Papilio hospiton|Corsican Swallowtail
+3|Parnassius phoebus|Phoebus Apollo|Parnassius (Parnassius) phoebus
+3|Polyommatus dorylas|Turquoise Blue
+3|Satyrium acaciae
+3|Abraxas sylvata|Clouded Magpie
+3|Acherontia styx|Death’s-head hawkmoth|Lesser Death's Head Hawkmoth
+3|Adscita statices
+3|Alpine grizzled skipper|Pyrgus andromedae
+3|Angerona prunaria
+3|Apatura metis|Freyer's purple emperor butterfly
+3|Archips rosana
+3|Battus philenor
+3|Bhutanitis thaidina|Tibetan Glory
+3|Biston strataria|oak beauty
+3|Brahmaea europaea|Acanthobrahmaea europaea
+3|Cabbage looper|Trichoplusia ni
+3|Carterocephalus silvicola|northern chequered skipper
+3|Cethosia biblis|Red Lacewing
+3|Coscinia cribraria|Speckled Footman Moth
+3|Drepana curvatula|Dusky Hook-tip
+3|Dysgonia algira
+3|Erebia pandrose
+3|Eriogaster catax
+3|Furcula furcula
+3|Hebomoia glaucippe|Great Orange tip
+3|Iolana iolas|Iolas Blue
+3|Junonia lemonias|Lemon Pansy
+3|Lamproptera meges|green dragontail
+3|Latticed heath|Chiasmia clathrata
+3|Leptidea reali
+3|Lesser yellow underwing|Noctua comes
+3|Megalopyge opercularis|puss moth|opossum bug|puss caterpillar|Trump caterpillar|Trumpapillar
+3|Miller|Acronicta leporina
+3|Morpho peleides
+3|Muschampia lavatherae
+3|Noctua fimbriata
+3|Odezia atrata|Chimney Sweeper
+3|Oeneis jutta|jutta arctic
+3|Papilio cresphontes|giant swallowtail
+3|Papilio rutulus|western tiger swallowtail
+3|Papilio thoas|King Page Swallowtail
+3|Pieris ergane
+3|Plusia festucae
+3|Poecilocampa populi
+3|Polyommatus eros|Eros Blue
+3|Pterophorus pentadactyla
+3|Pyrrharctia isabella|Isabella Tiger Moth
+3|Riband wave|Idaea aversata
+3|Safflower skipper|Pyrgus carthami
+3|Satellite|Eupsilia transversa
+3|Staurophora celsia
+3|Swallow-tailed|Swallow-tailed moth|Ourapteryx sambucaria
+3|Tomares ballus
+3|Trogonoptera brookiana|Rajah Brooke’s birdwing
+3|Tyta|Tyta luctuosa|Four-spotted moth
+3|Vanessa indica|Indian Red Admiral
+3|Viceroy|Limenitis archippus|Viceroy butterfly
+3|Yellow-tail|Euproctis similis
+3|Zygaena ephialtes|Zygaena (Zygaena) ephialtes
+3|Achlya flavicornis
+3|Acronicta alni
+3|Acronicta auricoma
+3|Actias artemis
+3|Alucita hexadactyla
+3|Appias albina
+3|Appias nero|Orange albatross
+3|Arctornis l-nigrum|black V moth
+3|Argent and sable|Argent and sable moth|Rheumaptera hastata
+3|Ariadne ariadne|Angled Castor
+3|Belenois aurota|Caper white
+3|Boloria freija|Boloria (Clossiana) freija|Freija fritillary
+3|Bright-line brown-eye|Lacanobia oleracea
+3|Buff ermine|Spilosoma lutea
+3|Cactoblastis cactorum|Cactus Moth
+3|Catocala electa
+3|Catocala fulminea
+3|Cerura erminea
+3|Colias aurorina|Greek clouded butterfly
+3|Collita griseola|Dingy Footman|Eilema griseola
+3|Creatonotos gangis
+3|Delias belladonna|Hill Jezebel
+3|Dot|Dot moth|Melanchra persicariae
+3|Double-striped pug|Gymnoscelis rufifasciata
+3|Elymnias hypermnestra|Common Palmfly
+3|Eupackardia calleta
+3|Euphydryas cynthia
+3|Euploea core|Common Crow
+3|Eurema blanda|Three-Spot Grass Yellow
+3|Eurema brigitta|Small Grass Yellow
+3|Feathered thorn|Colotois pennaria
+3|Furcula bicuspis
+3|Gold swift|Phymatopus hecta
+3|Gracillaria syringella
+3|Green longhorn|Adela reaumurella
+3|Heliconius charithonia|Zebra Longwing
+3|Heliconius erato|Common Longwing
+3|Hydraecia micacea|Rosy Rustic
+3|Hypena proboscidalis
+3|Hypolimnas bolina|Great Eggfly
+3|Junonia hierta|Yellow Pansy
+3|Kaniska canace|Blue Admiral
+3|Lamproptera curius|White Dragontail
+3|Leptidea morsei
+3|Longhorn|Longhorn moth|Nemophora degeerella
+3|Loxostege sticticalis
+3|Luehdorfia japonica|Japanese luehdorfia
+3|Macdunnoughia confusa|Macdunnoughia (Macdunnoughia) confusa
+3|Melanargia russiae|Melanargia (Melanargia) russiae
+3|Mellicta aurelia|Melitaea aurelia
+3|Morpho rhetenor|Morpho (Cypritis) rhetenor|Rhetenor blue morpho|Sickle-winged Morpho
+3|Nudaria mundana
+3|Opodiphthera eucalypti
+3|Pachliopta jophon|Atrophaneura jophon
+3|Papilio buddha|Malabar Banded Peacock
+3|Papilio chikae
+3|Parthenos sylvia
+3|Paysandisia archon
+3|Pelosia muscerda|dotted footman
+3|Phyllocnistis citrella|CLM|Citrus Leafminer
+3|Pontia callidice|Lofty Bath White
+3|Poplar kitten|Furcula bifida
+3|Sabra harpagula
+3|Satyrus actaea|Black Satyr
+3|Scalloped oak|Crocallis elinguaria
+3|Sericinus montela
+3|Setina irrorella|Dew Moth
+3|Small lappet|Small lappet moth|Phyllodesma ilicifolia
+3|Spilosoma urticae
+3|Troides aeacus|golden birdwing
+3|Troides helena|Common birdwing
+3|Troides minos|Sahyadri Birdwing|Southern Birdwing
+3|Willow beauty|Boarmia rhomboidaria|Peribatodes rhomboidaria
+3|Xylena exsoleta|Sword-grass moth
+3|Zygaena loti|Zygaena (Zygaena) loti
+3|Zygaena viciae|Zygaena (Agrumenia) viciae|Zygaena (Zygaena) viciae
+3|Abrostola triplasia
+3|Aglais milberti|Nymphalis milberti
+3|Alsophila aescularia|March Moth
+3|Amorpha juglandis
+3|Anartia amathea|Coolie
+3|Anartia jatrophae|white Peacock
+3|Anthocharis gruneri
+3|Anthocharis sara|Sara orangetip
+3|Apamea sordens|Rustic Shoulder-knot
+3|Apoda limacodes
+3|Arctia aulica|Hyphoraia aulica
+3|Arctia festiva
+3|Australian painted lady|Vanessa kershawi
+3|Blood-vein|Timandra comae
+3|Boloria napaea
+3|Boloria thore
+3|Boloria titania
+3|Brindled beauty|Lycia hirtaria
+3|Calyptra thalictri|vampire moth
+3|Campaea margaritata|Campaea margaritaria
+3|Cerapteryx graminis|Antler Moth
+3|Cethosia cyane|Leopard Lacewing
+3|Coenonympha dorus
+3|Colias chrysotheme
+3|Colias nastes|Labrador sulphur
+3|Common Quaker|Orthosia cerasi
+3|Common wave|Cabera exanthemata
+3|Coxcomb prominent|Ptilodon capucina
+3|Cryphia algae
+3|Cucullia argentea
+3|Curetis acuta|angled sunbeam
+3|Currant pug|Eupithecia assimilata
+3|Delias aganippe|Red-spotted jezebel|Spotted jezebel
+3|Delias hyparete|Painted Jezebel
+3|Delias nigrina|Black Jezebel
+3|Delias pasithoe|Red Base Jezebel
+3|Diaethria clymena|88 butterfly|Widespread Eighty-eight
+3|Dun-bar|Cosmia trapezina
+3|Eilema caniola|Hoary Footman
+3|Essex emerald|Thetidia (Antonechloris) smaragdaria|Thetidia smaragdaria
+3|Euthalia aconthea|Baron|Common Baron
+3|Falcaria lacertinaria
+3|Graphium antiphates|Five-bar swordtail
+3|Green pug|Pasiphila rectangulata
+3|Heliconius melpomene|Postman|Common Postman|Postman Butterfly
+3|Heliothis viriplaca|marbled clover
+3|Hyalophora cecropia
+3|Hypermnestra helios
+3|Hyponephele lupina
+3|Junonia atlites|Grey Pansy
+3|Laelia coenosa
+3|Leek|Leek moth|Acrolepiopsis assectella
+3|Lexias pardalis
+3|Lime-speck pug|Eupithecia centaureata
+3|Long-tailed skipper|Urbanus proteus
+3|Manduca quinquemaculata|five-spotted hawk moth|tomato hornworm
+3|Melanargia lachesis|Melanargia (Melanargia) lachesis
+3|Melitaea parthenoides|Mellicta parthenoides
+3|Mimathyma ambica|Apatura ambica|Indian Purple Emperor
+3|Moma alpium|Scarce merveille du jour moth
+3|Mormo maura
+3|Mouse|Mouse moth|Amphipyra tragopoginis
+3|New Zealand red admiral|Vanessa gonerilla|Red admiral
+3|Notodonta ziczac
+3|Ornithoptera goliath
+3|Pachliopta pandiyana|Atrophaneura pandiyana|Malabar Rose
+3|Papilio aegeus|Papilio (Princeps) aegeus
+3|Papilio alcmenor|Redbreast
+3|Papilio blumei|Peacock Swallowtail
+3|Papilio castor|Common Raven
+3|Papilio krishna|Krishna Peacock
+3|Papilio troilus
+3|Parantica sita|Chestnut Tiger|Mountain Tiger
+3|Patania ruralis
+3|Peridea anceps
+3|Pheosia gnoma
+3|Phigalia pilosaria
+3|Philaethria dido|Dido Longwing
+3|Phoebis philea|orange-barred sulphur
+3|Phthorimaea operculella|Potato tuberworm
+3|Pieris bryoniae|Hübner's Green-veined White
+3|Pieris canidia|Indian cabbage white
+3|Polyploca ridens
+3|Pseudoips prasinana
+3|Pseudosphinx tetrio
+3|Pterostoma palpina
+3|Ptilophora plumigera
+3|Rivula sericealis
+3|Saturnia spini
+3|Satyrus ferula|Great sooty satyr
+3|Scotopteryx chenopodiata
+3|Sephisa chandra
+3|Silky ringlet|Erebia gorge
+3|Siproeta stelenes|malachite
+3|Sparganothis pilleriana
+3|Thaumetopoea pinivora
+3|Theretra alecto|Levant Hawkmoth
+3|Tirumala limniace|Blue Tiger
+3|Tirumala septentrionis|Dark Blue Tiger
+3|Trachea atriplicis|Orache Moth
+3|Vanessa vulcania
+3|Water ringlet|Erebia pronoe
+3|Xerces blue|Glaucopsyche xerces
+3|Acontia lucida
+3|African armyworm|Spodoptera exempta
+3|Anarsia lineatella|peach twig borer
+3|Anteos clorinde
+3|Anthocharis damone
+3|Apamea anceps|Apamea (Apamea) anceps
+3|Apamea monoglypha|Dark Arches|Apamea (Apamea) monoglypha
+3|Appias libythea|Western Striped Albatross
+3|Argema mimosae
+3|Argynnis hyperbius
+3|Aricia cramera
+3|Ascalapha odorata|Black Witch Moth
+3|Bhutanitis mansfieldi
+3|Bogong|Bogong moth|Agrotis infusa
+3|Boloria frigga|Boloria (Clossiana) frigga|Frigga fritillary
+3|Bombyx mandarina
+3|Brithys crini|Lily borer
+3|Buff arches|Habrosyne pyritoides
+3|Caligula japonica
+3|Caloptilia azaleella
+3|Carpet|Carpet moth|Trichophaga tapetzella
+3|Catocala pacta
+3|Catocala puerpera
+3|Cepora nerissa|Common Gull
+3|Chloroclysta siterata|red-green carpet
+3|Chrysodeixis chalcites|Chrysodeixis
+3|Colias hecla
+3|Colias philodice
+3|Colotis danae|Scarlet tip
+3|Common emerald|Hemithea aestivaria
+3|Craniophora ligustri
+3|Cucullia lactucae
+3|Cydia splendana
+3|Dark dagger|Acronicta tridens
+3|Delias ennia
+3|Delias mysis|Red-banded Jezebel
+3|Dioryctria abietella
+3|Dryandra|Dryandra moth|Carthaea saturnioides|Carthaeidae
+3|Dysauxes ancilla|Dysauxes
+3|Elophila nymphaeata|Elophila
+3|Emmelina monodactyla
+3|Engrailed|Ectropis crepuscularia
+3|Etiella zinckenella
+3|Euchloe simplonia
+3|Eupithecia innotata
+3|Eurema andersonii|Anderson's Grass Yellow|One-spot Grass Yellow
+3|Eurema laeta|Spotless Grass Yellow
+3|Euschemon|Euschemon rafflesia
+3|Flame shoulder|Ochropleura plecta
+3|Garden dart|Euxoa nigricans
+3|Grammodes stolida
+3|Graphium nomius|Spot Swordtail
+3|Hamanumida daedalus|Guineafowl
+3|Hebrew character|Orthosia gothica
+3|Heliconius doris|The Doris
+3|Hemaris thysbe|Hummingbird moth|Hummingbird clearwing
+3|Hipparchia hermione
+3|Hypena rostralis|Buttoned snout moth
+3|Hypomecis roboraria|Boarmia roboraria
+3|Juniper carpet|Thera juniperata
+3|Juniper pug|Eupithecia pusillata
+3|Katha depressa|Katha deplana|Eilema depressa
+3|Laeosopis roboris
+3|Laspeyria flexula
+3|Luehdorfia chinensis
+3|Luehdorfia puziloi
+3|Manduca jasminearum
+3|Manduca rustica|rustic sphinx moth
+3|Melanargia occitanica|Melanargia (Argeformia) occitanica
+3|Mythimna impura|Smoky Wainscot
+3|Mythimna l-album
+3|Northern grizzled skipper|Pyrgus centaureae
+3|Notodonta torva
+3|Ochropacha|Ochropacha duplaris
+3|Odonestis pruni
+3|Operophtera fagata
+3|Pachliopta hector|Atrophaneura hector|Crimson Rose Swallowtail
+3|Papilio agestor|Tawny Mime
+3|Papilio crino|Common Banded Peacock
+3|Papilio eurymedon|pale swallowtail
+3|Papilio multicaudata|Papilio multicaudatus|two-tailed swallowtail
+3|Papilio nephelus|Yellow Helen
+3|Papilio phorbanta|Papillon la Pature
+3|Parantica aglea|Glassy Tiger
+3|Parectopa robiniella
+3|Pennisetia hylaeiformis
+3|Pheosia tremula
+3|Phyllonorycter corylifoliella
+3|Phyllonorycter platani
+3|Pieris virginiensis|West Virginia white
+3|Polygonia c-aureum
+3|Polygonia egea
+3|Pseudochazara cingovskii|Macedonian grayling
+3|Pseudopanthera macularia
+3|Pseudozizeeria maha|Pale Grass Blue
+3|Psyche casta
+3|Pyrgus sidae|Yellow-banded Skipper
+3|Queen|queen butterfly|Danaus gilippus
+4|Rhyacionia buoliana
+4|Ripart's anomalous blue|Polyommatus ripartii
+4|Rosy grizzled skipper|Pyrgus onopordi
+4|Rothschild's birdwing|Ornithoptera rothschildi|Ornithoptera (Schoenbergia) rothschildi
+4|Satyrium esculi
+4|Schrankia costaestrigalis
+4|Scopula immutata
+4|Scopula ornata|Lace Border
+4|Siona lineata|Black-veined moth
+4|Small fan-footed wave|Idaea biselata
+4|Spodoptera littoralis
+4|Sunset morpho|Morpho hecuba
+4|Thalera fimbrialis|Sussex emerald moth
+4|Thyris fenestrella
+4|Treble-bar|Aplocera plagiata
+4|Trogonoptera trojana|Troides trojana
+4|V-pug|Chloroclystis v-ata
+4|Xanthia togata
+4|Ypthima baldus|Common Five-ring
+4|Zizeeria knysna
+4|Zygaena purpuralis
+4|Acasis viretata|Yellow-barred Brindle
+4|Acraea terpsicore|Tawny Coster
+4|Aedia funesta
+4|Aglais ichnusa
+4|Aglaope infausta
+4|Agrotis puta
+4|Anania coronata
+4|Anteos maerula
+4|Anthocharis belia|Moroccan orange tip
+4|Anthocharis cethura
+4|Apamea zeta
+4|Appias indra|Plain puffin
+4|Appias lyncida|Appias (Appias) lyncida
+4|Appias paulina
+4|Archiearis parthenias
+4|Archips podana|Archips podanus
+4|Archips xylosteana|Archips xylosteanus
+4|Archonias brassolis|False Doris
+4|Argyresthia conjugella|apple fruit moth
+4|Argyresthia pruniella
+4|Ascia monuste
+4|Asterocampa celtis|hackberry emperor
+4|Atrophaneura semperi
+4|Autographa jota
+4|Autographa pulchrina
+4|Axylia putris|Flame
+4|Baltimore checkerspot|Euphydryas phaeton
+4|Bedellia somnulentella|convolvulus leafminer
+4|Bena bicolorana
+4|Bright eyed ringlet|Erebia oeme
+4|Brindled pug|Eupithecia abbreviata
+4|Callophrys avis
+4|Camptogramma bilineata
+4|Castalius rosimon|Common Pierrot
+4|Catopsilia florella
+4|Ceramica pisi
+4|Cerastis rubricosa
+4|Charaxes brutus
+4|Choreutis nemorana
+4|Cidaria fulvata
+4|Clostera pigra
+4|Cocytius antaeus
+4|Cocytius lucifer|Amphonyx lucifer
+4|Colias caucasica
+4|Colias tyche
+4|Colocasia coryli
+4|Common pug|Eupithecia vulgata
+4|Common white wave|Cabera pusaria
+4|Conistra vaccinii
+4|Crambus perlella
+4|Cyclophora pendularia|Dingy mocha moth
+4|Cyclophora porata|false mocha
+4|Cyclophora punctaria
+4|Cydia amplana
+4|Cynaeda dentalis
+4|Delias descombesi
+4|Doleschallia bisaltide|Autumn Leaf
+4|Dotted border|Agriopis marginaria
+4|Dypterygia scabriuscula|Bird’s Wing
+4|Eacles imperialis|Imperial Moth
+4|Emmelia trabealis|Spotted sulphur
+4|Ennomos autumnaria|Ennomos autumnarius|Large Thorn
+4|Eupithecia denotata
+4|Eupithecia venosata|netted pug
+4|Gandaca harina|Tree Yellow
+4|Gastropacha populifolia|Gastropacha (Stenophylloides) populifolia
+4|Glaucopsyche melanops
+4|Gynaephora groenlandica
+4|Gynaephora selenitica|Gynaephora
+4|Hadena compta
+4|Harpyia milhauseri
+4|Heliconius hecale|Polymorphic Longwing
+4|Hemeroplanes triptolemus
+4|Hestina assimilis
+4|Hipparchia fidia|Hipparchiafubcc bb|striped grayling
+4|Hyles vespertilio
+4|Idaea emarginata
+4|Ixias pyrene
+4|Lebadea martha|Knight
+4|Lemonia taraxaci|Autumn silkworm moth
+4|Leptidea amurensis
+4|Lomographa bimaculata
+4|Loxura atymnus|Yamfly
+4|Luthrodes pandava|Chilades pandava
+4|Lygephila pastinum|Blackneck Moth
+4|Lyonetia clerkella|apple leaf miner
+4|Macaria alternata|Sharp-angled Peacock
+4|Macaria liturata
+4|Macaria notata|Peacock Moth
+4|Macrosaccus robiniella|Phyllonorycter robiniella
+4|Madeiran large white|Pieris wollastoni
+4|Marbled minor|Oligia strigilis
+4|Mechanitis polymnia|Common Tiger
+4|Megacorma obliqua|Black-belted Hawkmoth
+4|Melanargia ines|Melanargia (Argeformia) ines
+4|Melanitis leda|Common Evening Brown
+4|Mesapamea secalis
+4|Micropterix calthella
+4|Moduza procris|Commander
+4|Morpho hercules
+4|Mottled beauty|Alcis repandata
+4|Mullein|Mullein moth|Shargacucullia verbasci
+4|Muschampia proto|sage skipper
+4|Mythimna pallens|Common Wainscot
+4|Nutmeg|Anarta trifolii|Discestra trifolii
+4|Odontosia carmelita
+4|Ornithoptera aesacus|Obi Island Birdwing|Ornithoptera (Ornithoptera) aesacus
+4|Ornithoptera croesus|Wallace's golden birdwing|Wallace’s golden birdwing butterfly
+4|Ornithoptera paradisea
+4|Ornithoptera tithonus|Tithonus Birdwing
+4|Orsotriaena|Orsotriaena medus|Medus Brown
+4|Pachliopta aristolochiae|Common rose swallowtail
+4|Pachycnemia hippocastanaria
+4|Palpita vitrealis|Margaronia unionalis
+4|Papilio anchisiades|Ruby-spotted Swallowtail
+4|Papilio arcturus|Blue Peacock
+4|Papilio canadensis|Canadian tiger swallowtail
+4|Papilio lorquinianus
+4|Papilio macilentus
+4|Papilio morondavana
+4|Papilio nireus|Narrow-banded Green Swallowtail
+4|Papilio peranthus|Swift Peacock Swallowtail|Papilio (Achillides) peranthus
+4|Papilio pericles
+4|Papilio saharae
+4|Papilio zalmoxis
+4|Paratrea|Paratrea plebeja
+4|Parnassius apollonius|Parnassius (Parnassius) apollonius
+4|Parnassius bremeri|Parnassius (Parnassius) bremeri
+4|Parnassius nordmanni|Parnassius (Driopa) nordmanni
+4|Parnassius smintheus|Rocky Mountain parnassian
+4|Parnassius stubbendorfi|Parnassius stubbendorfii
+4|Pelurga comitata|Dark Spinach
+4|Perisomena caecigena
+4|Perizoma albulata
+4|Petrophora chlorosata
+4|Phalanta phalantha|Common Leopard
+4|Phoebis sennae|Cloudless Sulphur
+4|Phragmataecia castaneae
+4|Phyllonorycter blancardella
+4|Phyllonorycter issikii
+4|Phyllonorycter populifoliella
+4|Polygonia interrogationis
+4|Polyommatus admetus
+4|Pyrgus malvoides
+4|Pyronia bathseba
+4|Pyronia cecilia
+4|Rhodometra sacraria|Vestal
+4|Rothschildia jacobaeae
+4|Saddleback caterpillar|Acharia stimulea|saddleback caterpillar moth
+4|Sandy grizzled skipper|Pyrgus cinarae
+4|Scirpophaga incertulas|Yellow Stem Borer
+4|Scopula decorata
+4|Small dusty wave|Idaea seriata
+4|Sphinx chersis
+4|Spilonota ocellana
+4|Synanthedon myopaeformis
+4|Tagiades tethys|Daimio tethys|White-banded Flat
+4|Tanaecia lepidea|Grey Count
+4|Tawny speckled pug|Eupithecia icterata
+4|Trabala vishnou|Rose Myrtle Lappet Moth|Vishnu Lappet Moth
+4|Troides darsius|Ceylon birdwing
+4|Troides magellanus
+4|Udara blackburni|Udara blackburnii
+4|Urania leilus
+4|Urania sloanus
+4|Wormwood pug|Eupithecia absinthiata
+4|Xanthorhoe ferrugata
+4|Yellow-spotted ringlet|Erebia manto
+4|Zerene cesonia|q come
+4|Zizeeria karsandra|Dark Grass Blue
+4|Zizula hylax|Tiny Grass Blue
+4|Zygaena exulans
+4|Zygaena fausta|Zygaena (Agrumenia) fausta
+4|Zygaena minos|Zygaena (Mesembrynus) minos
+4|Zygaena osterodensis
+4|Abrostola tripartita
+4|Actebia praecox
+4|Actinotia polyodon
+4|Acytolepis puspa|Common Hedge Blue
+4|Adhemarius gannascus
+4|Adoxophyes orana|summer fruit tortrix
+4|Aethalura punctulata|Grey Birch
+4|Agapeta hamana
+4|Agriades pyrenaicus|Plebejus (Agriades) pyrenaica|Plebejus pyrenaica
+4|Agriphila tristella
+4|Agrotis clavis|Heart and Club
+4|Agrotis vestigialis
+4|Allancastria caucasica
+4|Allophyes oxyacanthae|Allophyes (Allophyes) oxyacanthae
+4|Almond|Almond moth|Cadra cautella|dried currant moth|fig moth|tropical warehouse moth
+4|Amphimoea walkeri
+4|Amphipyra perflua
+4|Anania verbascalis
+4|Anarta myrtilli
+4|Anthocharis midea
+4|Anthocharis scolymus|yellow tip
+4|Apamea lithoxylaea
+4|Apeira syringaria
+4|Archips crataegana
+4|Archon apollinaris
+4|Arctia flavia
+4|Ardices canescens
+4|Argyrotaenia ljungiana
+4|Arhopala japonica|Amblypodia japonica
+4|Arichanna melanaria
+4|Aricia nicias
+4|Asterocampa clyton|tawny emperor
+4|Asthena albulata
+4|Athyma nefte|Color Sergeant
+4|Athyma perius|Common Sergeant
+4|Badamia exclamationis|Brown Awl
+4|Bembecia ichneumoniformis|Six-belted clearwing
+4|Biblis hyperia|Red Rim
+4|Boloria chariclea
+4|Borbo cinnara|Rice Swift
+4|Brachionycha nubeculosa
+4|Brahmaea wallichii|Brahmaea wallichi|Dark Brahmid Moth|owl moth
+4|Byasa dasarada
+4|Byasa polyeuctes
+4|Calamia tridens
+4|Callambulyx tatarinovii
+4|Calliteara abietis
+4|Calophasia lunula|Toadflax brocade moth
+4|Caradrina morpheus
+4|Catocala adultera
+4|Catocala conversa
+4|Catocala dilecta
+4|Catopsilia scylla|Orange Emigrant
+4|Ceratomia amyntor
+4|Ceratomia catalpae
+4|Charaxes solon|Black Rajah
+4|Chelis maculosa
+4|Cheritra freja|Common imperial
+4|Chlorissa viridata
+4|Choristoneura fumiferana
+4|Cirrochroa thais|Tamil yeoman
+4|Cleora cinctaria
+4|Cloaked pug|Eupithecia abietaria
+4|Clostera curtula|Chocolate-Tip Moth
+4|Cnaemidophorus rhododactyla
+4|Coleophora hemerobiella
+4|Colias alexandra
+4|Colias interior|pink-edged sulphur
+4|Colias marcopolo|Marco Polo's Clouded Yellow
+4|Colorado hairstreak|Colorado Hairstreak Butterfly|Hypaurotis crysalus
+4|Colostygia pectinataria
+4|Colotis evagore|Desert orange tip
+4|Comadia redtenbacheri
+4|Common marbled carpet|Dysstroma truncata|Marbled Carpet
+4|Copiopteryx derceto
+4|Cosmia pyralina
+4|Cosmorhoe ocellata|purple bar
+4|Cosmotriche lobulina
+4|Cream wave|Scopula floslactata
+4|Cucullia absinthii
+4|Cupha erymanthis
+4|Cyclophora albipunctata
+4|Cyclophora linearia
+4|Cyrestis thyodamas|Map Butterfly
+4|Daphnis hypothous|Jade Hawkmoth
+4|Dasypolia templi|Dasypolia (Dasypolia) templi
+4|Delias agostina
+4|Delias nysa|Papilio nysa
+4|Deltote bankiana
+4|Diachrysia zosimi
+4|Dichorragia nesimachus|Constable
+4|Diurnea fagella
+4|Doxocopa laure
+4|Drymonia dodonaea
+4|Drymonia ruficornis|lunar marbled brown
+4|Duponchelia fovealis
+4|Dyspessa ulula
+4|Dysstroma citrata
+4|Earias insulana
+4|Ecliptopera silaceata
+4|Endoxyla cinereus
+4|Enyo bathus
+4|Erebia cassioides
+4|Eremobia ochroleuca
+4|Eriocrania semipurpurella
+4|Estigmene acrea|Salt Marsh Moth
+4|Ethmia bipunctella
+4|Euchloe belemia
+4|Euchloe charlonia
+4|Euchloe crameri
+4|Euchloe tagis
+4|Eueides isabella
+4|Eulithis prunata
+4|Eupithecia cauchiata
+4|Eupithecia dodoneata
+4|Eupithecia fennoscandica
+4|Eupithecia inturbata
+4|Eupithecia linariata
+4|Eupithecia nanata
+4|Eupithecia satyrata
+4|Eupithecia simpliciata
+4|Eupithecia tripunctaria
+4|Euploea mulciber|Striped Blue Crow
+4|Euploea sylvester|Double-branded Crow
+4|Eurema ada
+4|Eurema daira|Curved-bar Grass Yellow
+4|Eurois occulta
+4|Forest tent caterpillar|Forest tent caterpillar moth|Malacosoma disstria
+4|Gegenes nostrodamus|Dingy Swift|Mediterranean Skipper
+4|Golden-rod pug|Eupithecia virgaureata
+4|Gothic|Naenia typica
+4|Grey chi|Antitype chi
+4|Hadena perplexa|Hadena (Anepia) perplexa|tawny shears
+4|Haetera piera|Amber phantom
+4|Herona marathus|Pasha
+4|Heterogenea asella
+4|Hofmannophila|Hofmannophila pseudospretella
+4|Hylaea fasciaria
+4|Hyles nicaea
+4|Iphiclides feisthamelii
+4|Iphiclides podalirinus
+4|Ipimorpha subtusa
+4|Junonia oenone|Dark Blue Pansy
+4|Kricogonia lyside
+4|Lapara bombycoides
+4|Lapara coniferarum
+4|Laysan noctuid|Laysan noctuid moth|Agrotis laysanensis
+4|Lemonia dumi
+4|Leptidea duponcheli
+4|Lesser broad-bordered yellow underwing|Noctua janthina
+4|Leucodonta bicoloria
+4|Lexias dirtea|Dark Archduke
+4|Ligdia adustata|Scorched Carpet
+4|Lithophane furcifera
+4|Lomographa temerata|Clouded Silver
+4|Lycaena thersamon
+4|Macaria signaria
+4|Macrocilix maia
+4|Malaysian moon|Malaysian moon moth|Actias maenas
+4|Manduca muscosa
+4|Map-winged swift|Pharmacis fusconebulosa
+4|Mesoleuca albicillata|Beautiful Carpet
+4|Mesoligia furuncula
+4|Minoa murinata|Drab looper moth
+4|Minucia lunaris
+4|Morpho polyphemus
+4|Mycalesis mineus|Dark-branded Bushbrown
+4|Mythimna albipuncta|Mythimna (Hyphilare) albipuncta
+4|Mythimna conigera
+4|Mythimna ferrago|Clay
+4|Mythimna straminea
+4|Mythimna vitellina
+4|Neococytius|Neococytius cluentius
+4|Neptis hylas|Common Sailer
+4|Noctua interjecta
+4|Noctua orbona|Lunar yellow underwing moth
+4|Notodonta tritophus
+4|Oncocera semirubella
+4|Papilio androgeus
+4|Papilio dardanus
+4|Papilio dravidarum
+4|Papilio epycides|Lesser Mime
+4|Papilio esperanza|Swallowtail
+4|Papilio indra|indra swallowtail
+4|Papilio jordani
+4|Papilio laglaizei|Chilasa (Chilasa) laglaizei
+4|Papilio leucotaenia
+4|Papilio palamedes
+4|Papilio weymeri
+4|Parahypopta caestrum
+4|Parascotia fuliginaria
+4|Parnassius acco|Parnassius (Tadumia) acco
+4|Parnassius acdestis|Parnassius (Koramius) acdestis
+4|Parnassius ariadne|Parnassius (Driopa) ariadne
+4|Parnassius autocrator|Apollo butterfly
+4|Parnassius cephalus|Parnassius
+4|Parnassius charltonius|Parnassius (Kailasius) charltonius|Regal Apollo
+4|Parnassius clodius|clodius parnassian|Parnassius (Driopa) clodius
+4|Parnassius eversmanni|Eversmann's parnassian|Parnassius (Driopa) eversmanni
+4|Parnassius glacialis
+4|Pharmacophagus antenor
+4|Phereoeca uterella
+4|Phyllonorycter messaniella
+4|Pieris krueperi
+4|Pieris oleracea|mustard white
+4|Pink bollworm|Pectinophora gossypiella
+4|Plagodis dolabraria
+4|Polia bombycina|Pale shining brown moth
+4|Polia nebulosa
+4|Polyura athamas|Common Nawab
+4|Poplar grey|Acronicta megacephala
+4|Provençal fritillary|Melitaea deione
+4|Pseudeustrotia candidula
+4|Psilogramma increta|Plain Grey Hawkmoth
+4|Ptycholoma lecheana
+4|Purple thorn|Selenia tetralunaria
+4|Recurvaria nanella
+4|Rethera komarovi
+4|Retinia resinella
+4|Rhodostrophia vibicaria
+4|Sagenosoma|Sagenosoma elsa
+4|Scalloped hazel|Odontopera bidentata
+4|Schinia scutosa|Schinia nuchalis|Protoschinia scutosa
+4|Scopula incanata
+4|Scopula nigropunctata
+4|Selenia dentaria
+4|Sesia bembeciformis
+4|Silver-ground carpet|Xanthorhoe montanata
+4|Sitochroa palealis
+4|Small angle shades|Euplexia lucipara
+4|Spodoptera litura|Cluster caterpillar|Cotton leafworm|Oriental Leafworm Moth|Tobacco cutworm|Tropical armyworm
+4|Square-spot rustic|Xestia xanthographa
+4|Straw underwing|Thalpophila matura
+4|Suastus gremius|Oriental Palm Bob
+4|Talicada nyseus|Red Pierrot
+4|Tanaecia pelea
+4|Tarucus balkanicus|Tarucus balkanica
+4|Tethea or|Tethea (Tethea) or
+4|Tetheella|Tetheella fluctuosa
+4|Thysanoplusia orichalcea|Slender Burnished Brass|Soybean Looper
+4|Trichopteryx carpinata
+4|Troides andromache|Borneo birdwing|Kinabalu Birdwing
+4|Troides criton
+4|Troides cuneifera
+4|Troides haliphron
+4|Troides miranda
+4|Troides vandepolli
+4|Utetheisa ornatrix|ornate moth|rattlebox moth
+4|Vindula arsinoe|Cramer's Cruiser
+4|West Coast lady|Vanessa annabella|West Coast lady butterfly
+4|Western pygmy blue|Lycaena exilis|Brephidium exilis
+4|Xanthia icteritia
+4|Xanthorhoe spadicearia
+4|Xestia baja
+4|Xylocampa areola
+4|Xylophanes chiron
+4|Yellow admiral|Vanessa itea
+4|Zeiraphera griseana
+4|Zygaena laeta
+4|Abisara bifasciata|Double-banded Judy
+4|Abraxas pantaria
+4|Abrostola asclepiadis
+4|Abrota ganga|Sergeant-major
+4|Acasis appensata
+4|Acentria ephemerella
+4|Acleris sparsana
+4|Acleris variegana|Garden Rose Tortrix
+4|Acossus terebra
+4|Actias ningpoana|Chinese Moon Moth|Polilla Luna China
+4|Actinotia radiosa
+4|Adela croesella
+4|Aedia leucomelas
+4|Aegiale hesperiaris|Maguey worm|Tequila Giant-Skipper
+4|Aellopos ceculus
+4|Aellopos fadus
+4|Aellopos titan
+4|Aethiopana|Aethiopana honorius|Acraea Blue
+4|Aglais caschmirensis|Indian Tortoiseshell
+4|Agriades orbitulus
+4|Agriades zullichi
+4|Agrias hewitsonius
+4|Agrias narcissus
+4|Agriopis aurantiaria
+4|Agriphila straminella
+4|Agrochola circellaris|Brick|Sunira circellaris
+4|Agrochola helvola
+4|Agrochola macilenta|Agrochola macilentus|Leptologia macilenta|Yellow-line Quaker
+4|Agrotis ripae
+4|Alcis jubata
+4|Aleimma loeflingiana|Aleimma loeflingianum
+4|Amathusia phidippus|Palm King
+4|Amblyptilia acanthadactyla|Beautiful Plume Moth
+4|Amphion floridensis
+4|Amphipoea oculea
+4|Amphonyx duponchel|Cocytius duponchel
+4|Anania funebris
+4|Anania terrealis
+4|Ancistroides folus|Udaspes folus|Grass Demon
+4|Anisota stigma|Spiny Oakworm Moth
+4|Anticollix sparsata
+4|Antigastra catalaunalis
+4|Apamea crenata|Clouded-bordered Brindle
+4|Apamea ophiogramma|Lateroligia|Lateroligia ophiogramma
+4|Aphomia sociella
+4|Aphrissa statira|Pale Sulphur|statira sulphur
+4|Aplasta ononaria
+4|Apocalypsis velox|Bald Hawkmoth
+4|Aporia hippia
+4|Aporophyla nigra
+4|Appias melania
+4|Archaeoprepona demophon|Demophon Shoemaker
+4|Arhopala abseus|Aberrant Oakblue
+4|Arsenura armida
+4|Ascotis selenaria
+4|Aspitates gilvaria
+4|Aspitates ochrearia
+4|Asteroscopus sphinx
+4|Attacus caesar
+4|Automeris metzli
+4|Automeris zozine
+4|Autumnal|Autumnal moth|Epirrita autumnata
+4|Axiopoena maura
+4|Azanus jesous|African babul blue
+4|Baorisa hieroglyphica|Picasso Moth
+4|Belenois java|Australian Caper White
+4|Blotched emerald|Comibaena bajularia
+4|Boloria improba|dingy fritillary
+4|Boloria polaris
+4|Bordered pug|Eupithecia succenturiata
+4|Brahmaea hearseyi|Pale Brahmid Moth
+4|Bunaea alcinoe
+4|Caligo idomeneus
+4|Callionima nomius
+4|Callistege mi
+4|Callopistria juventina
+4|Callosamia promethea
+4|Caloptilia alchimiella
+4|Caloptilia cuculipennella
+4|Caloptilia stigmatella
+4|Carcina quercana
+4|Catephia alchymista
+4|Catocala coniuncta|Catocala conjuncta
+4|Catocala nymphagoga
+4|Catochrysops panormus|Silver Forget-me-not
+4|Catonephele numilia|Blue-spotted Firewing
+4|Cautethia grotei
+4|Celaena haworthii
+4|Celastrina ladon|spring azure
+4|Celypha striana
+4|Cephonodes hylas|Coffee Bee Hawkmoth|Pellucid Hawkmoth
+4|Cepora perimale|Australian Gull
+4|Cerastis leucographa
+4|Ceratomia undulosa
+4|Charadra deridens
+4|Charanyca trigrammica
+4|Charaxes aristogiton|Scarce Tawny Rajah
+4|Charaxes candiope|Green-veined charaxes
+4|Charissa obscurata
+4|Chersotis cuprea
+4|Chloroclysta miata
+4|Chrysodeixis includens|Soybean Looper Moth
+4|Citheronia regalis
+4|Clostera anachoreta
+4|Clostera anastomosis
+4|Coelonia fulvinotata
+4|Coenonympha corinna
+4|Coenonympha leander
+4|Colias electo|African Clouded Yellow
+4|Colias eurytheme|orange sulphur
+4|Colias wiskotti
+4|Common swift|Common swift moth|Korscheltellus lupulina|Hepialus lupulinus|Pharmacis lupulina
+4|Conistra rubiginosa
+4|Crambus lathoniellus
+4|Crambus pascuella
+4|Crinopteryx|Crinopteryx familiella
+4|Cryphia raptricula|Bryophila (Bryoleuca) raptricula|Bryophila raptricula
+4|Ctenoplusia limbirena
+4|Cucullia chamomillae
+4|Cupido lacturnus
+4|Curetis thetis|Indian Sunbeam
+4|Cyclophora puppillaria
+4|Cyclophora quercimontaria
+4|Cydia strobilella
+4|Cymbalophora pudica
+4|Dahlica triquetrella
+4|Danaus melanippus
+4|Darapsa myron|Virginia creeper sphinx
+4|Deidamia inscriptum
+4|Delias argenthona|Scarlet Jezebel
+4|Delias aruna
+4|Delias berinda|dark Jezebel
+4|Deloneura immaculata
+4|Dendrolimus superans|Sakhalin Silk Moth|Siberian Moth|White-lined Silk Moth
+4|Diachrysia chryson
+4|Diaethria eluina
+4|Diarsia brunnea
+4|Dicycla oo|Heart Moth
+4|Dioryctria sylvestrella
+4|Dismorphia amphione
+4|Diurnea lipsiella
+4|Dolba|Dolba hyloeus
+4|Donacaula forficella
+4|Drepana cultraria|Watsonalla cultraria
+4|Dusky grizzled skipper|Pyrgus cacaliae
+4|Dyseriocrania subpurpurella
+4|Eacles oslari
+4|Earias clorana
+4|Earophila badiata|Anticlea badiata
+4|Eilema uniola
+4|Ennomos alniaria
+4|Enyo lugubris|Mournful Sphinx Moth
+4|Epargyreus clarus|silver-spotted skipper
+4|Epirrhoe galiata
+4|Epirrhoe rivata
+4|Epirrhoe tristata
+4|Erinnyis ello|Ello Sphinx Moth
+4|Erynnis icelus
+4|Euchaetes egle
+4|Euchalcia variabilis
+4|Euchloe lotta|desert marble
+4|Euchloe olympia|Olympia marble
+4|Euchloron megaera
+4|Euchoeca nebulata
+4|Eudonia lacustrata
+4|Eulia ministrana
+4|Eulithis populata|The Northern Spinach
+4|Eumaeus atala
+4|Eumorpha achemon
+4|Eupithecia actaeata
+4|Eupithecia egenaria
+4|Eupithecia gelidata
+4|Eupithecia groenblomi
+4|Eupithecia haworthiata
+4|Eupithecia immundata
+4|Eupithecia indigata
+4|Eupithecia irriguata
+4|Eupithecia lanceata
+4|Eupithecia millefoliata
+4|Eupithecia pimpinellata
+4|Eupithecia plumbeolata
+4|Eupithecia sinuosaria
+4|Eupithecia tantillaria
+4|Eupyrrhoglossum corvus
+4|Eupyrrhoglossum sagra
+4|Euthalia phemius|White-edged Blue Baron
+4|Evergestis forficalis|garden pebble
+4|Fagivorina arenaria
+4|Feniseca tarquinius
+4|Foxglove pug|Eupithecia pulchellata
+4|Freyer's pug|Eupithecia intricata
+4|Freyeria trochylus|Grass jewel
+4|Gnophos furvata
+4|Graphium aristeus|Chain Swordtail
+4|Graphium epaminondas|Andamans swordtail
+4|Graphium macareus|Lesser Zebra
+4|Graphium megarus
+4|Grey pug|Eupithecia subfuscata
+4|Hada plebeja
+4|Hadena confusa
+4|Halysidota tessellaris
+4|Hedya nubiferana
+4|Heliconius ismenius
+4|Hemaris croatica
+4|Hemistola chrysoprasaria|Small emerald
+4|Hippotion rosetta|Swinhoe's Striated Hawkmoth
+4|Hyalophora columbia
+4|Hyblaea puera
+4|Hydriomena furcata
+4|Hyles tithymali|Barbary Spurge Hawk-moth
+4|Hypomecis punctinalis
+4|Hyppa rectilinea
+4|Hypsopygia costalis
+4|Hypsopygia glaucinalis
+4|Idaea deversaria
+4|Idaea dimidiata
+4|Idaea humiliata
+4|Idaea muricata
+4|Idaea ochrata|bright wave
+4|Idaea pallidata
+4|Idaea serpentata
+4|Idalus herois
+4|Incurvaria masculella
+4|Ingrailed clay|Diarsia mendica
+4|Jamides celeno|Common Cerulean
+4|Jodis lactearia
+4|Jodis putata
+4|Junonia evarete
+4|Junonia hedonia
+4|Lacanobia thalassina
+4|Langia zenzeroides|Apple Hawkmoth
+4|Larch pug|Eupithecia lariciata
+4|Larentia clavaria|mallow
+4|Leptosia alcesta|Flip Flop
+4|Lethe europa|Bamboo Treebrown
+4|Lintneria geminus|Sphinx geminus
+4|Liphyra brassolis|Moth Butterfly
+4|Lithostege griseata
+4|Lophocampa caryae|Hickory Tussock moth
+4|Losaria coon|Atrophaneura coon
+4|Lycia lapponaria
+4|Lycia zonaria
+4|Lygephila craccae|Scarce Blackneck
+4|Lysandra albicans
+4|Lythria purpuraria
+4|Macaria wauaria|V-Moth
+4|Manduca brontes
+4|Manduca florestan
+4|Manulea palliatella|Eilema palliatella
+4|Marbled beauty|Bryophila domestica
+4|Marpesia petreus|ruddy daggerwing
+4|Meganola albula
+4|Meganoton analis
+4|Melanargia larissa|Melanargia (Melanargia) larissa
+4|Menophra abruptaria
+4|Micropterix aureatella
+4|Milionia basalis
+4|Mimas christophi
+4|Mint|Mint moth|Pyrausta aurata
+4|Morpho achilles|Achilles Blue Morpho
+4|Morpho didius
+4|Morpho helenor|Common Blue Morpho|Morpho (Morpho) helenor
+4|Moschoneura pinthous
+4|Mottled pug|Eupithecia exiguata
+4|Mycalesis perseus|Common Bushbrown
+4|Myscelia ethusa|blue wing|Mexican bluewing
+4|Nematopogon metaxella
+4|Nemophora metallica
+4|Neophasia menapia|pine white
+4|Neopithecops zalmora|Common Quaker
+4|Neptis columella|Phaedyma columella|Short-banded Sailer
+4|Niditinea fuscella
+4|Noctua janthe
+4|Notocelia cynosbatella
+4|Oeneis norna
+4|Oligia latruncula|Tawny Marbled Minor
+4|Opogona omoscopa
+4|Ornithoptera chimaera|Chimaera birdwing
+4|Ornithoptera meridionalis|Birdwing butterfly|Ornithoptera (Schoenbergia) meridionalis
+4|Ornithoptera priamus
+4|Orthosia cruda
+4|Orthosia incerta|the clouded drab
+4|Pandemis cerasana
+4|Pantoporia hordonia|Common Lascar
+4|Papilio astyalus|Broad-banded Swallowtail|Heraclides astyalus
+4|Papilio brevicauda|short-tailed swallowtail
+4|Papilio constantinus
+4|Papilio garleppi
+4|Papilio grosesmithi
+4|Papilio liomedon
+4|Papilio montrouzieri
+4|Papilio neumoegeni
+4|Papilio noblei|Noble's Helen|Tooth Swallowtail
+4|Papilio rumanzovia|P. rumanzovia
+4|Papilio slateri
+4|Paradarisa consonaria
+4|Parapoynx stratiotata
+4|Parides burchellanus
+4|Parnassius actius|Parnassius (Parnassius) actius
+4|Parnassius arcticus|Parnassius arctica|Parnassius (Sachaia) arctica
+4|Parnassius nomion|Parnassius (Parnassius) nomion
+4|Pechipogo strigilata|Common fan-foot moth
+4|Pelopidas mathias|Lesser millet skipper|Small Branded Swift
+4|Pelosia obtusa
+4|Penthophera morio
+4|Phalanta alcippe
+4|Philotes sonorensis
+4|Phobetron pithecium
+4|Phyllonorycter harrisella
+4|Phyllonorycter quercifoliella
+4|Phyllonorycter sorbi
+4|Phytometra viridaria
+4|Pieris marginalis|margined white
+4|Pieris naganum|Plain Cabbage White
+4|Piniphila bifasciana
+4|Plagodis pulveraria
+4|Platyptilia gonodactyla
+4|Polygonia faunus
+4|Polyommatus escheri
+4|Polypogon tentacularia
+4|Polyura delphis|Charaxes delphis|Jewelled Nawab
+4|Polyura eudamippus|Charaxes eudamippus|Great nawab
+4|Polyura schreiber
+4|Pontia chloridice|Small Bath White
+4|Pontia occidentalis|western white
+4|Potanthus confucius
+4|Protambulyx strigilis
+4|Pseudophilotes panoptes
+4|Psolos fuligo|Dusky Partwing
+4|Ptilodon cucullina
+4|Pyrausta purpuralis
+4|Pyrrhia umbra
+4|Rheumaptera undulata|scallop shell
+4|Rhinopalpa|Rhinopalpa polynice
+4|Rhizedra lutosa
+4|Rusina ferruginea
+4|Sara longwing|Heliconius sara
+4|Scopula immorata
+4|Scopula marginepunctata|Mullein Wave
+4|Senta flammea
+4|Sephisa dichroa
+4|Shargacucullia scrophulariae|Shargacucullia
+4|Sideridis rivularis
+4|Siproeta epaphus|Rusty-tipped Page
+4|Slender pug|Eupithecia tenuiata
+4|Small square-spot|Diarsia rubi
+4|Spatalia argentina
+4|Sphingonaepiopsis gorgoniades
+4|Sphinx canadensis|Canadian sphinx
+4|Sphinx drupiferarum
+4|Sphinx gordius|apple sphinx
+4|Sphinx sequoiae
+4|Sphinx vashti|Vashti sphinx
+4|Spialia orbifer
+4|Spialia phlomidis
+4|Spiris striata
+4|Stegania trimaculata
+4|Sterrhopterix fusca
+4|Svensson's copper underwing|Amphipyra berbera
+4|Synanthedon spheciformis|White-barred Clearwing Moth
+4|Syngrapha interrogationis
+4|Taleporia tubulosa
+4|Tanaecia julii|Common Earl
+4|Taraka hamada
+4|Taxila haquinus|Harlequin
+4|Teinopalpus aureus
+4|Tethea ocularis|Figure of Eighty|Tethea (Tethea) ocularis
+4|Thera obeliscata
+4|Tholera decimalis|Feathered Gothic
+4|Thumatha senex
+4|Thysania zenobia
+4|Tiliacea citrago|Orange Sallow Moth
+4|Troides amphrysus
+4|Troides hypolitus
+4|Troides plato
+4|Troides rhadamantus|Golden Birdwing
+4|Utetheisa lotrix
+4|Vagrans egista|Vagrant
+4|Venusia cambrica
+4|Vindula erota|Cruiser
+4|Xanthia gilvago
+4|Xanthorhoe quadrifasiata
+4|Xestia castanea
+4|Xylena vetusta
+4|Xylophanes tersa
+4|Yponomeuta cagnagella
+4|Zanclognatha tarsipennalis
+4|Zizina otis|Papilio otis|Clover Blue|Bean Blue|Lesser Grass Blue|Lucerne Blue
 ` });
 EVO.cat({ ...{"id": "bones", "name": "Bones", "icon": "🦴", "q": "Name a **bone in the human body**.", "strip": ["bone"], "level": 3}, list: `
 0|Collarbone|Clavicle

@@ -355,6 +355,9 @@ button.acct-in:hover { background: var(--panel-2); }
 .item:hover { background: rgba(255,255,255,0.09); }
 .item.pv { border-color: var(--gold); }
 .item-art { grid-row: span 2; width: 96px; height: 120px; border-radius: 12px; }
+.shop-grid.wide { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+.shop-grid.wide .item { grid-template-columns: 192px 1fr; }
+.shop-grid.wide .item-art { width: 192px; height: 108px; }
 .item-name { font-size: 19px; font-weight: 700; }
 .item-desc { font-size: 14.5px; color: var(--muted); line-height: 1.35; }
 .item-buy { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }

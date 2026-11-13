@@ -3,53 +3,125 @@
  * is 75% of that. The server keeps its own copy of the prices (docs/ECONOMY-BRE.md); this list is
  * what the shop shows until the wallet answers.
  *
- * Three kinds, one equipped of each: rocket (the body), flame (the engine's colours) and trail (what
- * streams out behind). The free defaults (rocket:classic, flame:classic, trail:classic) aren't sold. */
+ * Four kinds, one equipped of each: rocket (the body), flame (the engine), trail (what streams out
+ * behind) and scene (the launch site). The free defaults (rocket:classic, flame:classic,
+ * trail:classic, scene:dusk) aren't sold. */
 'use strict';
 
 const BRE_LOOKS = {
   rocket: {
     classic:  { name: 'Classic', desc: 'The original: white, with red bands.', body: ['#b9c1d4', '#ffffff', '#a7b0c4'], band: '#e8364f', fin: '#e8364f', finDark: '#b8243b', glass: ['#7fd3ff', '#173a8a'] },
-    midnight: { name: 'Midnight', desc: 'Navy and gold, for night launches.', body: ['#1e2550', '#4a5899', '#1a2046'], band: '#ffd84d', fin: '#ffd84d', finDark: '#c9a227', glass: ['#ffe9a8', '#7a5a10'] },
-    sunset:   { name: 'Sunset', desc: 'Peach to pink, with violet bands.', body: ['#ff9a6a', '#ffd3b5', '#ff6f91'], band: '#7a2a8f', fin: '#7a2a8f', finDark: '#4f1a5e', glass: ['#ffe27a', '#ff5fb0'] },
-    mint:     { name: 'Mint', desc: 'Cool mint with teal stripes.', body: ['#9fe8c8', '#e8fff5', '#7fd3b0'], band: '#1f8f8a', fin: '#1f8f8a', finDark: '#136660', glass: ['#c9fff6', '#1f6f9e'] },
-    retro:    { name: 'Retro', desc: 'Cream, teal and orange, straight out of 1962.', body: ['#e8dcc0', '#fff8e8', '#d8c8a8'], band: '#2a9d8f', fin: '#f4a261', finDark: '#c97b3a', glass: ['#a8e6ff', '#2a4f8a'] },
-    gold:     { name: 'Solid Gold', desc: 'Every panel polished gold.', body: ['#b8860b', '#ffe58a', '#a87808'], band: '#fff3c4', fin: '#d4a017', finDark: '#8a6508', glass: ['#fff8dc', '#b8860b'] },
-    chrome:   { name: 'Chrome', desc: 'A mirror finish with a cyan stripe.', body: ['#6b7280', '#f5f7fa', '#5a616e'], band: '#22d3ee', fin: '#9ca3af', finDark: '#4b5563', glass: ['#e0fbff', '#0e7490'], shine: true },
-    galaxy:   { name: 'Galaxy', desc: 'Deep violet, full of stars.', body: ['#2a0f5c', '#6b2fb5', '#1e0a44'], band: '#ff5fb0', fin: '#a04dff', finDark: '#5a1e9e', glass: ['#ffd1f0', '#5a1e9e'], stars: true },
-    diamond:  { name: 'SirSC Diamond', desc: 'Icy facets that catch the light. For SirSC Members.', body: ['#7fd8ff', '#e9fbff', '#3b82f6'], band: '#1e3a8a', fin: '#7fd8ff', finDark: '#3b82f6', glass: ['#ffffff', '#3b82f6'], facets: true },
-    royal:    { name: 'Royal Velvet', desc: 'Purple velvet trimmed with gold. November 2026\'s members\' rocket.', body: ['#4a1a6e', '#8a3fbf', '#3a1258'], band: '#ffd84d', fin: '#ffd84d', finDark: '#b8860b', glass: ['#ffe9a8', '#7a2a8f'] }
+    midnight: { name: 'Midnight', desc: 'Navy with gold pinstripes and a star.', body: ['#1e2550', '#4a5899', '#1a2046'], band: '#ffd84d', fin: '#ffd84d', finDark: '#c9a227', glass: ['#ffe9a8', '#7a5a10'], decal: 'pinstripe' },
+    sunset:   { name: 'Sunset', desc: 'Peach to pink, with a rising sun painted on.', body: ['#ff9a6a', '#ffd3b5', '#ff6f91'], band: '#7a2a8f', fin: '#7a2a8f', finDark: '#4f1a5e', glass: ['#ffe27a', '#ff5fb0'], decal: 'sun' },
+    mint:     { name: 'Mint', desc: 'Cool mint with twin racing stripes.', body: ['#9fe8c8', '#e8fff5', '#7fd3b0'], band: '#1f8f8a', fin: '#1f8f8a', finDark: '#136660', glass: ['#c9fff6', '#1f6f9e'], decal: 'racing' },
+    retro:    { name: 'Retro', desc: 'Cream and teal, a checkered band and a big brass porthole.', body: ['#e8dcc0', '#fff8e8', '#d8c8a8'], band: '#2a9d8f', fin: '#f4a261', finDark: '#c97b3a', glass: ['#a8e6ff', '#2a4f8a'], decal: 'checker' },
+    shark:    { name: 'Shark', desc: 'Grey and white with gills and a mouthful of teeth.', body: ['#5a6878', '#c8d2dc', '#4a5868'], band: '#e8eef4', fin: '#5a6878', finDark: '#3a4654', glass: ['#ffffff', '#1a2a3a'], decal: 'teeth' },
+    gold:     { name: 'Solid Gold', desc: 'Polished gold with engraved swirls that glint.', body: ['#b8860b', '#ffe58a', '#a87808'], band: '#fff3c4', fin: '#d4a017', finDark: '#8a6508', glass: ['#fff8dc', '#b8860b'], decal: 'engrave', sparkle: '#fff3c4', shine: true },
+    lava:     { name: 'Lava', desc: 'Black rock split by glowing cracks of lava.', body: ['#1a1414', '#3a2a26', '#120e0e'], band: '#ff6a1a', fin: '#2a1e1c', finDark: '#120e0e', glass: ['#ffd27a', '#ff3d00'], decal: 'lava', glow: 'rgba(255,106,26,0.6)' },
+    chrome:   { name: 'Chrome', desc: 'A mirror finish with reflections that slide by.', body: ['#6b7280', '#f5f7fa', '#5a616e'], band: '#22d3ee', fin: '#9ca3af', finDark: '#4b5563', glass: ['#e0fbff', '#0e7490'], decal: 'reflect', shine: true },
+    galaxy:   { name: 'Galaxy', desc: 'A swirling nebula full of stars, inside the hull.', body: ['#2a0f5c', '#6b2fb5', '#1e0a44'], band: '#ff5fb0', fin: '#a04dff', finDark: '#5a1e9e', glass: ['#ffd1f0', '#5a1e9e'], decal: 'nebula', stars: true, glow: 'rgba(197,139,255,0.55)' },
+    hologram: { name: 'Hologram', desc: 'A see-through cyan projection that flickers.', body: ['#0e7490', '#5fe8ff', '#0e7490'], band: '#c9fff6', fin: '#22d3ee', finDark: '#0e7490', glass: ['#ffffff', '#22d3ee'], decal: 'holo', glow: 'rgba(95,232,255,0.7)' },
+    diamond:  { name: 'SirSC Diamond', desc: 'Icy facets, a rainbow glint and sparkles. For SirSC Members.', body: ['#7fd8ff', '#e9fbff', '#3b82f6'], band: '#1e3a8a', fin: '#7fd8ff', finDark: '#3b82f6', glass: ['#ffffff', '#3b82f6'], decal: 'facets', sparkle: '#e9fbff', glow: 'rgba(127,216,255,0.6)' },
+    royal:    { name: 'Royal Velvet', desc: 'Purple velvet, gold filigree and a crown. November 2026\'s members\' rocket.', body: ['#4a1a6e', '#8a3fbf', '#3a1258'], band: '#ffd84d', fin: '#ffd84d', finDark: '#b8860b', glass: ['#ffe9a8', '#7a2a8f'], decal: 'crown', sparkle: '#ffd84d' }
   },
   flame: {
-    classic: { name: 'Classic', desc: 'Orange, hotter with a streak.', colors: null },
-    plasma:  { name: 'Plasma', desc: 'Blue-white, all the time.', colors: ['#2f7bff', '#9fe6ff'] },
-    toxic:   { name: 'Toxic', desc: 'A green you shouldn\'t touch.', colors: ['#2fbf4a', '#c8ff7a'] },
-    candy:   { name: 'Candy', desc: 'Pink and sugary.', colors: ['#ff3d9e', '#ffc2e6'] },
-    inferno: { name: 'Inferno', desc: 'Bigger, white-hot and roaring.', colors: ['#ff3d00', '#fff1a8'], big: 1.3 },
-    rainbow: { name: 'Rainbow', desc: 'Every colour, cycling.', colors: 'rainbow' },
-    diamond: { name: 'Diamond Fire', desc: 'Cold blue fire with sparkles. For SirSC Members.', colors: ['#3b82f6', '#e9fbff'], sparkle: true }
+    classic:   { name: 'Classic', desc: 'Orange, hotter with a streak.', colors: null },
+    plasma:    { name: 'Plasma', desc: 'Blue-white, with bright shock rings.', colors: ['#2f7bff', '#9fe6ff'], style: 'shock' },
+    toxic:     { name: 'Toxic', desc: 'Bubbling green you shouldn\'t touch.', colors: ['#2fbf4a', '#c8ff7a'], style: 'bubbly' },
+    candy:     { name: 'Candy', desc: 'Pink and white, swirled like a candy cane.', colors: ['#ff3d9e', '#ffffff'], style: 'swirl' },
+    inferno:   { name: 'Inferno', desc: 'Three roaring jets and a shower of embers.', colors: ['#ff3d00', '#fff1a8'], big: 1.3, style: 'double' },
+    rainbow:   { name: 'Rainbow', desc: 'Every colour, in bands.', colors: 'rainbow', style: 'bands' },
+    ghost:     { name: 'Ghost Fire', desc: 'Pale, see-through wisps that drift.', colors: ['#a8c8ff', '#ffffff'], style: 'ghost' },
+    lightning: { name: 'Lightning', desc: 'Purple fire with bolts crackling round it.', colors: ['#7a3cff', '#e9d8ff'], style: 'lightning' },
+    diamond:   { name: 'Diamond Fire', desc: 'Cold blue fire full of crystals. For SirSC Members.', colors: ['#3b82f6', '#e9fbff'], sparkle: true, style: 'crystal' }
   },
   trail: {
-    classic:  { name: 'Smoke', desc: 'Just the exhaust.', shape: null },
-    stardust: { name: 'Stardust', desc: 'Little stars stream out behind.', shape: 'star', colors: ['#ffd84d', '#ffffff', '#ffe9a8'] },
-    hearts:   { name: 'Hearts', desc: 'A trail of hearts.', shape: 'heart', colors: ['#ff5fb0', '#ff8fc8', '#ff3d6e'] },
-    notes:    { name: 'Music', desc: 'Music notes, in time with the tune.', shape: 'note', colors: ['#5fe8ff', '#c58bff', '#ffffff'] },
-    bubbles:  { name: 'Bubbles', desc: 'Soap bubbles, somehow, in space.', shape: 'bubble', colors: ['#a8e6ff', '#ffd1f0', '#c9fff6'] },
-    coins:    { name: 'Gold Rush', desc: 'A fountain of SirSC coins.', shape: 'coin', colors: ['#ffd84d', '#ffb300'] },
-    shards:   { name: 'Diamond Shards', desc: 'Glittering shards. For SirSC Members.', shape: 'shard', colors: ['#e9fbff', '#7fd8ff', '#3b82f6'] }
+    classic:   { name: 'Smoke', desc: 'Just the exhaust.', shape: null },
+    stardust:  { name: 'Stardust', desc: 'Twinkling stars stream out behind.', shape: 'star', colors: ['#ffd84d', '#ffffff', '#ffe9a8'] },
+    hearts:    { name: 'Hearts', desc: 'Hearts that beat as they float away.', shape: 'heart', colors: ['#ff5fb0', '#ff8fc8', '#ff3d6e'] },
+    notes:     { name: 'Music', desc: 'Music notes that sway in time.', shape: 'note', colors: ['#5fe8ff', '#c58bff', '#ffffff'] },
+    bubbles:   { name: 'Bubbles', desc: 'Wobbly soap bubbles, somehow, in space.', shape: 'bubble', colors: ['#a8e6ff', '#ffd1f0', '#c9fff6'] },
+    pixels:    { name: 'Pixels', desc: 'Chunky 8-bit squares, straight out of an arcade.', shape: 'pixel', colors: ['#ff5fb0', '#5fe8ff', '#ffd84d', '#6ee7a0'] },
+    ribbon:    { name: 'Rainbow Ribbon', desc: 'A glowing rainbow ribbon behind you.', shape: 'ribbon', colors: ['#ffffff'] },
+    coins:     { name: 'Gold Rush', desc: 'A fountain of spinning SirSC coins.', shape: 'coin', colors: ['#ffd84d', '#ffb300'] },
+    fireworks: { name: 'Fireworks', desc: 'Fireworks burst in your wake.', shape: 'firework', colors: ['#ff5fb0', '#ffd84d', '#5fe8ff', '#6ee7a0', '#c58bff'] },
+    shards:    { name: 'Diamond Shards', desc: 'Glittering shards that catch the light. For SirSC Members.', shape: 'shard', colors: ['#e9fbff', '#7fd8ff', '#3b82f6'] }
+  },
+  /* Scenes: the launch site, its sky, sun, mountains, ground, props and weather. Above the clouds every
+   * scene goes on to the same space. */
+  scene: {
+    dusk: { name: 'Dusk Spaceport', desc: 'The striped sunset, violet mountains and the glowing grid.',
+      sky: [[0, '#2a1458', '#ff8a5c'], [100, '#251a6b', '#e2587a'], [220, '#1a1c6e', '#8a3c8f'], [360, '#0d1150', '#3a2470'], [520, '#070a2c', '#141a4a']],
+      sun: { kind: 'striped', colors: ['#ffe66b', '#ff8a4c', '#ff3f8e'], glow: 'rgba(255,150,90,0.55)' },
+      ridges: [['#5b2a7a', '#c48bd8'], ['#3f1d63', null], ['#2a1248', null]], ridge: 'peaks',
+      plain: ['#1b0b36', '#090418'], ground: 'grid', grid: 'rgba(255,90,200,0.42)', horizon: 'rgba(255,120,220,0.9)',
+      sil: ['#1c0b34', '#2a1350', '#120624'], rim: '#ff9a7a', lattice: '#4b2378', props: 'palms', extras: [],
+      clouds: ['rgba(255,150,190,0.55)', 'rgba(255,210,225,0.6)'], smoke: '#ffe2f2', windows: 'rgba(255,233,170,0.75)' },
+    arctic: { name: 'Arctic Base', desc: 'Snowfields, pine forests, falling snow and the northern lights.',
+      sky: [[0, '#1b3a7a', '#bfe9ff'], [100, '#1a3270', '#7fc4f0'], [220, '#132a66', '#4a8fd8'], [360, '#0c1d55', '#24539e'], [520, '#070a2c', '#141a4a']],
+      sun: { kind: 'disc', colors: ['#ffffff', '#e6f8ff', '#a8dcff'], glow: 'rgba(190,235,255,0.55)' },
+      ridges: [['#9fc2e8', '#ffffff'], ['#6f97c8', '#eaf6ff'], ['#4a6fa3', null]], ridge: 'peaks',
+      plain: ['#e8f4ff', '#9cc0e8'], ground: 'snow', grid: 'rgba(120,170,230,0.35)', horizon: 'rgba(255,255,255,0.95)',
+      sil: ['#1b2f5a', '#2a4680', '#10203f'], rim: '#e6f8ff', lattice: '#4a6fa3', props: 'pines', extras: ['aurora', 'snow'],
+      clouds: ['rgba(230,245,255,0.7)', 'rgba(255,255,255,0.8)'], smoke: '#ffffff', windows: 'rgba(255,240,190,0.85)' },
+    desert: { name: 'Red Desert', desc: 'Flat-topped mesas, saguaro cacti and a blazing sun.',
+      sky: [[0, '#ff7a3d', '#ffe3a0'], [100, '#e85a3a', '#ffb36a'], [220, '#9a2a5a', '#e0604a'], [360, '#3a1650', '#8a2a58'], [520, '#120a2c', '#2a1046']],
+      sun: { kind: 'disc', colors: ['#fffbe0', '#ffe066', '#ff9a2b'], glow: 'rgba(255,200,90,0.6)', big: 1.2 },
+      ridges: [['#c85a3a', null], ['#a8402a', null], ['#7a2a1e', null]], ridge: 'mesa',
+      plain: ['#e8a05a', '#9a4a22'], ground: 'sand', grid: 'rgba(120,50,20,0.35)', horizon: 'rgba(255,220,160,0.9)',
+      sil: ['#4a1e14', '#6a2c1c', '#2e120c'], rim: '#ffd27a', lattice: '#8a3a22', props: 'cacti', extras: ['dust'],
+      clouds: ['rgba(255,200,150,0.5)', 'rgba(255,230,200,0.6)'], smoke: '#fff0d8', windows: 'rgba(255,233,170,0.8)' },
+    ocean: { name: 'Sea Platform', desc: 'Launch from a platform at sea, past a lighthouse and the gulls.',
+      sky: [[0, '#3a8fd8', '#ffd9b0'], [100, '#2f7ccc', '#a8d8f0'], [220, '#1f5aa8', '#5fa8e0'], [360, '#0f3a80', '#2a6cb8'], [520, '#070a2c', '#141a4a']],
+      sun: { kind: 'disc', colors: ['#fffbe8', '#ffe9a8', '#ffb36a'], glow: 'rgba(255,230,170,0.55)' },
+      ridges: [['#6aa0c8', null], ['#4a80b0', null], ['#2f6090', null]], ridge: 'islands',
+      plain: ['#1f6fb0', '#0a2f5a'], ground: 'sea', grid: 'rgba(255,255,255,0.35)', horizon: 'rgba(255,255,255,0.8)',
+      sil: ['#163a5a', '#235274', '#0c243c'], rim: '#ffe9a8', lattice: '#3a6a90', props: 'lighthouse', extras: ['gulls'],
+      clouds: ['rgba(255,255,255,0.7)', 'rgba(255,255,255,0.85)'], smoke: '#ffffff', windows: 'rgba(255,240,190,0.85)' },
+    candy: { name: 'Candy Land', desc: 'Candy-cane mountains, lollipop trees and sprinkles everywhere.',
+      sky: [[0, '#ff9ad5', '#fff0b5'], [100, '#f28ad8', '#ffd1e8'], [220, '#b27ae8', '#ffa8d8'], [360, '#6a4ac8', '#b27ae8'], [520, '#1a0f4a', '#3a1a6a']],
+      sun: { kind: 'disc', colors: ['#ffffff', '#fff3a8', '#ffb3d9'], glow: 'rgba(255,220,240,0.6)' },
+      ridges: [['#ffb3d9', '#ffffff'], ['#ff8ac8', '#ffffff'], ['#e85aa8', '#ffd1e8']], ridge: 'candy',
+      plain: ['#ffc2e0', '#e87ab8'], ground: 'sprinkles', grid: 'rgba(255,255,255,0.4)', horizon: 'rgba(255,255,255,0.9)',
+      sil: ['#7a2a6a', '#a8408f', '#5a1a4e'], rim: '#fff3a8', lattice: '#c85aa8', props: 'lollipops', extras: ['sparkle'],
+      clouds: ['rgba(255,255,255,0.85)', 'rgba(255,230,245,0.9)'], smoke: '#ffffff', windows: 'rgba(255,250,200,0.9)' },
+    city: { name: 'Neon City', desc: 'A skyline at night, neon signs and rain on the street.',
+      sky: [[0, '#120a3a', '#4a1a6a'], [100, '#0e0a3a', '#3a1660'], [220, '#0a0a36', '#24125a'], [360, '#070a30', '#160f4a'], [520, '#070a2c', '#141a4a']],
+      sun: { kind: 'moon', colors: ['#fff8e0', '#e8e0c8', '#c8c0a8'], glow: 'rgba(255,250,220,0.35)' },
+      ridges: [['#2a1a58', null], ['#1c1244', null], ['#120c32', null]], ridge: 'skyline',
+      plain: ['#14102a', '#05040e'], ground: 'street', grid: 'rgba(95,232,255,0.55)', horizon: 'rgba(255,95,176,0.9)',
+      sil: ['#0e0a22', '#1a1238', '#08061a'], rim: '#5fe8ff', lattice: '#3a2a6a', props: 'neon', extras: ['rain'],
+      clouds: ['rgba(120,100,180,0.35)', 'rgba(150,130,200,0.4)'], smoke: '#c8c0e8', windows: 'rgba(255,220,140,0.9)', starsLow: true },
+    moonbase: { name: 'Moon Base', desc: 'Launch from the Moon, with the Earth hanging in a black sky.',
+      sky: [[0, '#05050c', '#10101e'], [100, '#05050c', '#0c0c1a'], [220, '#04040a', '#0a0a18'], [360, '#04040a', '#080816'], [520, '#05061c', '#0d1030']],
+      sun: { kind: 'earth' },
+      ridges: [['#76767f', null], ['#5e5e68', null], ['#4a4a54', null]], ridge: 'craters',
+      plain: ['#8a8a92', '#34343c'], ground: 'regolith', grid: 'rgba(255,255,255,0.12)', horizon: 'rgba(210,210,230,0.6)',
+      sil: ['#2a2a34', '#3a3a46', '#1c1c24'], rim: '#cfe3ff', lattice: '#5a5a6a', props: 'domes', extras: [],
+      clouds: null, smoke: '#c8c8d0', windows: 'rgba(255,240,190,0.85)', starsLow: true },
+    crystal: { name: 'Crystal Caverns', desc: 'Glowing crystal spires under a ringed planet. For SirSC Members.',
+      sky: [[0, '#0a1a3a', '#3a2a7a'], [100, '#0c1a44', '#2a2a80'], [220, '#0a1540', '#1f2470'], [360, '#081040', '#141a5a'], [520, '#070a2c', '#141a4a']],
+      sun: { kind: 'ringed', colors: ['#b8f0ff', '#7fd8ff', '#3b82f6'], glow: 'rgba(127,216,255,0.45)' },
+      ridges: [['#2a3f8a', '#7fd8ff'], ['#1f2f6e', null], ['#16225a', null]], ridge: 'peaks',
+      plain: ['#14204a', '#060a1e'], ground: 'grid', grid: 'rgba(127,216,255,0.45)', horizon: 'rgba(190,240,255,0.95)',
+      sil: ['#0e1638', '#18245a', '#080c24'], rim: '#b8f0ff', lattice: '#2a3f8a', props: 'crystals', extras: ['sparkle', 'aurora'],
+      clouds: ['rgba(127,216,255,0.3)', 'rgba(190,240,255,0.4)'], smoke: '#e9fbff', windows: 'rgba(190,240,255,0.9)', starsLow: true }
   }
 };
-const BRE_KINDS = { rocket: 'Rockets', flame: 'Flames', trail: 'Trails' };
-const BRE_DEFAULT = { rocket: 'classic', flame: 'classic', trail: 'classic' };
+const BRE_KINDS = { rocket: 'Rockets', flame: 'Flames', trail: 'Trails', scene: 'Scenes' };
+const BRE_DEFAULT = { rocket: 'classic', flame: 'classic', trail: 'classic', scene: 'dusk' };
 
 const BRE_CATALOG = [
   { item_id: 'rocket:midnight', coins: 15000, diamonds: 4 },
   { item_id: 'rocket:sunset', coins: 15000, diamonds: 4 },
   { item_id: 'rocket:mint', coins: 15000, diamonds: 4 },
   { item_id: 'rocket:retro', coins: 22500, diamonds: 6 },
+  { item_id: 'rocket:shark', coins: 22500, diamonds: 6 },
   { item_id: 'rocket:gold', coins: 30000, diamonds: 8 },
+  { item_id: 'rocket:lava', coins: null, diamonds: 10 },
   { item_id: 'rocket:chrome', coins: null, diamonds: 12 },
   { item_id: 'rocket:galaxy', coins: null, diamonds: 15 },
+  { item_id: 'rocket:hologram', coins: null, diamonds: 18 },
   { item_id: 'rocket:diamond', member_only: true },
   { item_id: 'rocket:royal', member_only: true, claim_from: '2026-11-01T00:00:00Z', claim_until: '2026-12-01T00:00:00Z' },
   { item_id: 'flame:plasma', coins: 7500, diamonds: 2 },
@@ -57,12 +129,24 @@ const BRE_CATALOG = [
   { item_id: 'flame:candy', coins: 15000, diamonds: 4 },
   { item_id: 'flame:inferno', coins: 22500, diamonds: 6 },
   { item_id: 'flame:rainbow', coins: null, diamonds: 10 },
+  { item_id: 'flame:ghost', coins: null, diamonds: 12 },
+  { item_id: 'flame:lightning', coins: null, diamonds: 15 },
   { item_id: 'flame:diamond', member_only: true },
   { item_id: 'trail:stardust', coins: 7500, diamonds: 2 },
   { item_id: 'trail:hearts', coins: 15000, diamonds: 4 },
   { item_id: 'trail:notes', coins: 15000, diamonds: 4 },
   { item_id: 'trail:bubbles', coins: 15000, diamonds: 4 },
+  { item_id: 'trail:pixels', coins: 15000, diamonds: 4 },
+  { item_id: 'trail:ribbon', coins: null, diamonds: 10 },
   { item_id: 'trail:coins', coins: null, diamonds: 12 },
-  { item_id: 'trail:shards', member_only: true }
+  { item_id: 'trail:fireworks', coins: null, diamonds: 14 },
+  { item_id: 'trail:shards', member_only: true },
+  { item_id: 'scene:arctic', coins: 30000, diamonds: 8 },
+  { item_id: 'scene:desert', coins: 30000, diamonds: 8 },
+  { item_id: 'scene:ocean', coins: 37500, diamonds: 10 },
+  { item_id: 'scene:candy', coins: 37500, diamonds: 10 },
+  { item_id: 'scene:city', coins: 45000, diamonds: 12 },
+  { item_id: 'scene:moonbase', coins: null, diamonds: 20 },
+  { item_id: 'scene:crystal', member_only: true }
 ];
 const lookOf = item => { const [kind, id] = String(item).split(':'); const L = BRE_LOOKS[kind] && BRE_LOOKS[kind][id]; return L ? { ...L, kind, id } : null; };

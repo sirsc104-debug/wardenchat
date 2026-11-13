@@ -110,7 +110,8 @@ Both modes write one ledger row (`reward`, game `bre`, coins = what was paid, no
 ## The catalog to seed (game `bre`)
 
 Priced like the other games: 1 💎 = 5,000 coins, and coin prices are 75% of that. Every item has
-`target = ''`. The slot is the part before the colon (`rocket`, `flame`, `trail`), for `sirsc_equip`.
+`target = ''`. The slot is the part before the colon (`rocket`, `flame`, `trail`, `scene`), for
+`sirsc_equip`. Scenes are the launch site and its sky.
 
 | item_id | coins | 💎 | notes |
 |---|---|---|---|
@@ -118,30 +119,45 @@ Priced like the other games: 1 💎 = 5,000 coins, and coin prices are 75% of th
 | rocket:sunset | 15,000 | 4 |  |
 | rocket:mint | 15,000 | 4 |  |
 | rocket:retro | 22,500 | 6 |  |
+| rocket:shark | 22,500 | 6 |  |
 | rocket:gold | 30,000 | 8 |  |
+| rocket:lava | – | 10 | diamonds only |
 | rocket:chrome | – | 12 | diamonds only |
 | rocket:galaxy | – | 15 | diamonds only |
+| rocket:hologram | – | 18 | diamonds only |
 | rocket:diamond | – | – | member_only, no claim window: every member can claim it while a member |
-| rocket:royal | – | – | member_only, claim 2026-11-01T00:00Z to 2026-12-01T00:00Z (November 2026's members' rocket) |
+| rocket:royal | – | – | member_only, claim 2026-11-01T00:00Z to 2026-12-01T00:00Z (that month's members' item) |
 | flame:plasma | 7,500 | 2 |  |
 | flame:toxic | 7,500 | 2 |  |
 | flame:candy | 15,000 | 4 |  |
 | flame:inferno | 22,500 | 6 |  |
 | flame:rainbow | – | 10 | diamonds only |
-| flame:diamond | – | – | member_only, no claim window |
+| flame:ghost | – | 12 | diamonds only |
+| flame:lightning | – | 15 | diamonds only |
+| flame:diamond | – | – | member_only, no claim window: every member can claim it while a member |
 | trail:stardust | 7,500 | 2 |  |
 | trail:hearts | 15,000 | 4 |  |
 | trail:notes | 15,000 | 4 |  |
 | trail:bubbles | 15,000 | 4 |  |
+| trail:pixels | 15,000 | 4 |  |
+| trail:ribbon | – | 10 | diamonds only |
 | trail:coins | – | 12 | diamonds only |
-| trail:shards | – | – | member_only, no claim window |
+| trail:fireworks | – | 14 | diamonds only |
+| trail:shards | – | – | member_only, no claim window: every member can claim it while a member |
+| scene:arctic | 30,000 | 8 |  |
+| scene:desert | 30,000 | 8 |  |
+| scene:ocean | 37,500 | 10 |  |
+| scene:candy | 37,500 | 10 |  |
+| scene:city | 45,000 | 12 |  |
+| scene:moonbase | – | 20 | diamonds only |
+| scene:crystal | – | – | member_only, no claim window: every member can claim it while a member |
 
 `sirsc_member_claim('bre')` gives the member-only rows exactly as it does for `ddr` and `wcc` (window
 items inside their window, no-window items while a member), with `target = ''`. Each month's new
-members' rocket is one more `rocket:<id>` row with that month's window.
+members' item is one more row (a rocket, flame, trail or scene) with that month's window.
 
-The free defaults (`rocket:classic`, `flame:classic`, `trail:classic`) are not catalog rows: everyone
-has them.
+The free defaults (`rocket:classic`, `flame:classic`, `trail:classic`, `scene:dusk`) are not catalog
+rows: everyone has them.
 
 ## Checklist
 

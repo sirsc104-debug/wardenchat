@@ -81,13 +81,14 @@ advantage, with a live preview of the rocket:
 
 | Kind | What it changes | Items (free default first) |
 | --- | --- | --- |
-| 🚀 Rockets | The rocket's body | Classic; Midnight, Sunset, Mint (15,000 🪙 / 4 💎); Retro (22,500 / 6); Solid Gold (30,000 / 8); Chrome (12 💎); Galaxy (15 💎) |
-| 🔥 Flames | The engine's colours | Classic (hotter with a streak); Plasma, Toxic (7,500 / 2); Candy (15,000 / 4); Inferno (22,500 / 6); Rainbow (10 💎) |
-| ✨ Trails | What streams out behind | Smoke; Stardust (7,500 / 2); Hearts, Music, Bubbles (15,000 / 4); Gold Rush (12 💎) |
+| 🚀 Rockets | The rocket, with its own artwork | Classic; Midnight (gold pinstripes), Sunset (a rising sun), Mint (racing stripes) (15,000 🪙 / 4 💎); Retro (checkers and a brass porthole), Shark (gills and teeth) (22,500 / 6); Solid Gold (engraved, glinting) (30,000 / 8); Lava (glowing cracks, 10 💎); Chrome (sliding reflections, 12 💎); Galaxy (a drifting nebula, 15 💎); Hologram (see-through and flickering, 18 💎) |
+| 🔥 Flames | The engine | Classic (hotter with a streak); Plasma (shock rings), Toxic (bubbles) (7,500 / 2); Candy (a candy-cane swirl) (15,000 / 4); Inferno (three jets and embers) (22,500 / 6); Rainbow (colour bands, 10 💎); Ghost Fire (drifting wisps, 12 💎); Lightning (crackling bolts, 15 💎) |
+| ✨ Trails | What streams out behind | Smoke; Stardust (twinkling) (7,500 / 2); Hearts (beating), Music (swaying notes), Bubbles (wobbling), Pixels (8-bit) (15,000 / 4); Rainbow Ribbon (10 💎); Gold Rush (spinning coins, 12 💎); Fireworks (they burst, 14 💎) |
+| 🏞️ Scenes | The launch site, its sky, sun, ground and weather | Dusk Spaceport; Arctic Base (snow, pines, northern lights), Red Desert (mesas, cacti) (30,000 / 8); Sea Platform (lighthouse, gulls), Candy Land (candy-cane mountains, lollipops) (37,500 / 10); Neon City (skyline, neon signs, rain) (45,000 / 12); Moon Base (the Earth in a black sky, 20 💎) |
 
 **Members** get 1.5× coins, 5 💎 a month, the SirSC Diamond by their name, that month's members'
-rocket to keep (November 2026: Royal Velvet), and, while they're members, the SirSC Diamond rocket,
-Diamond Fire and Diamond Shards. The Diamonds tab sends SirSC a "please add my diamonds" request after
+rocket to keep (November 2026: Royal Velvet, with a crown), and, while they're members, the SirSC
+Diamond rocket, Diamond Fire, Diamond Shards and the Crystal Caverns scene. The Diamonds tab sends SirSC a "please add my diamonds" request after
 paying in person, as in the other games. Equipped items are remembered on the device and in the
 wallet, and only count for things the account owns.
 
