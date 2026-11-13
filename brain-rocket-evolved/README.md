@@ -56,6 +56,47 @@ browser, or serve the folder with `python3 -m http.server`.
 
 A timeout scores 0 (⬛). A swear word crashes the rocket and ends the run with 0, as in Brain Rocket.
 
+## Coins, diamonds, membership and the Shop
+
+Evolved uses the **SirSC wallet** that Downhill Death Run and Wildcard Chess use: the same Warden Chat
+accounts, 🪙 coins (earned), 💎 diamonds (paid: 5 💎 for $1, 1 💎 = 5,000 coins) and 👑 SirSC Membership
+($3 a month), through the same `sirsc_*` functions with `game = 'bre'`. **Sign in** (top right of the
+home screen) uses a Warden Chat account, and creating one here creates a Warden Chat account. What
+this game adds on the server is in [`docs/ECONOMY-BRE.md`](docs/ECONOMY-BRE.md), with a ready-to-paste
+Codex prompt in [`docs/CODEX-PROMPT-BRE.md`](docs/CODEX-PROMPT-BRE.md): `bre_ping`, `bre_reward` and the
+`bre` catalog rows. The server works every number out; the game only shows what it says.
+
+**Earning coins**
+
+| | Pays | Limit |
+| --- | --- | --- |
+| 🌅 Daily Launch | 10,000 for finishing + 0.6 per point: 10,000 to **40,000** (a perfect 50,000) | Once per launch |
+| ∞ Endless | 0.4 per point, up to **20,000** a run (a 50,000-point run) | 80,000 a day from Endless, 20 runs an hour |
+
+Members get ×1.5 on both. Archive launches, crashes and Dailies left part-way don't pay. Players who
+aren't signed in see what the run would have paid.
+
+**The Shop** (🛒 SirSC Shop on the home screen, or the account chip) sells cosmetics only, never an
+advantage, with a live preview of the rocket:
+
+| Kind | What it changes | Items (free default first) |
+| --- | --- | --- |
+| 🚀 Rockets | The rocket's body | Classic; Midnight, Sunset, Mint (15,000 🪙 / 4 💎); Retro (22,500 / 6); Solid Gold (30,000 / 8); Chrome (12 💎); Galaxy (15 💎) |
+| 🔥 Flames | The engine's colours | Classic (hotter with a streak); Plasma, Toxic (7,500 / 2); Candy (15,000 / 4); Inferno (22,500 / 6); Rainbow (10 💎) |
+| ✨ Trails | What streams out behind | Smoke; Stardust (7,500 / 2); Hearts, Music, Bubbles (15,000 / 4); Gold Rush (12 💎) |
+
+**Members** get 1.5× coins, 5 💎 a month, the SirSC Diamond by their name, that month's members'
+rocket to keep (November 2026: Royal Velvet), and, while they're members, the SirSC Diamond rocket,
+Diamond Fire and Diamond Shards. The Diamonds tab sends SirSC a "please add my diamonds" request after
+paying in person, as in the other games. Equipped items are remembered on the device and in the
+wallet, and only count for things the account owns.
+
+**Until the server has `bre_ping`**, accounts stay hidden and the game works exactly as before.
+`python3 tools/build_page.py OUT --wallet-demo` adds a pretend back end (`js/wallet-mock.js`,
+labelled "Demo wallet" in the game) so the whole thing can be tried now: any username and password,
+40,000 coins and 10 diamonds to start, and a button to try membership. (Real accounts need the page
+to reach Warden Chat's server, so they work on the game's own site, not inside a claude.ai artifact.)
+
 ## The answer lists
 
 `js/answers.js` is generated: don't edit it by hand. To change a category, edit
@@ -93,8 +134,14 @@ No AI is used anywhere: not to build the lists, and not while playing.
 - `js/audio.js`: Brain Rocket's sound effects with the Evolved music.
 - `js/badwords.js`: Brain Rocket's rude-word check, unchanged.
 - `js/game.js`: screens, the Daily Launch, Endless, the archive, saving.
+- `js/catalog.js`: what the shop sells and how each rocket, flame and trail looks.
+- `js/wallet.js`: Warden Chat sign-in and the SirSC wallet (from Wildcard Chess).
+- `js/shop.js`: what's equipped, the account chip, signing in, the shop, and the coins on the results.
+- `js/wallet-mock.js`: a pretend wallet, only in `--wallet-demo` builds.
+- `docs/ECONOMY-BRE.md`, `docs/CODEX-PROMPT-BRE.md`: the back end for coins and the shop.
 - `tools/build_page.py`: builds one self-contained HTML file (for an artifact link, or
   `--google-sites` for Google Sites' Embed box).
 
-Progress is saved in the browser under `brEvolved.*` keys, separate from Brain Rocket's. There are
-no accounts yet. Syncing through Warden Chat would need its own progress document on the server.
+Progress is saved in the browser under `brEvolved.*` keys, separate from Brain Rocket's. Daily
+streaks and Endless bests stay on the device; the wallet (coins, diamonds, what you own and have
+equipped) is on the server.

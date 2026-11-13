@@ -219,7 +219,7 @@
     const m = MODES[G.diff] || MODES.medium;
     Object.assign(G, {
       mode, day, cats: cats || [], i: 0, score: 0, peak: 0, picks: [], pending: null, state: 'countdown',
-      fuel: m.fuel, skips: m.skips, streak: 0, bestStreak: 0
+      fuel: m.fuel, skips: m.skips, streak: 0, bestStreak: 0, startedAt: Date.now()
     });
     if (mode !== 'endless') G.diff = null;
     $('card').classList.toggle('daily', mode !== 'endless');
@@ -433,6 +433,8 @@
       if (rec.best) { all[G.diff] = { score, answers: G.picks.filter(p => p.tier >= 0).length }; store.set('bests', all); }
     }
     showResults({ mode: G.mode, day: G.day, ...rec });
+    Shop.reward({ mode: G.mode, diff: G.diff, day: G.day, score, crashed: !!crashed, prompts: G.picks.length,
+      answers: G.picks.filter(p => p.tier >= 0).length, durationMs: Date.now() - G.startedAt });
   }
 
   const VERDICTS = [
@@ -447,6 +449,7 @@
 
   function showResults(r) {
     G.state = 'over'; G.result = r;
+    $('rewardBox').innerHTML = '';
     Sound.music('results');
     screen('over');
     const daily = r.mode !== 'endless';
@@ -609,9 +612,10 @@
     document.querySelectorAll('.type-btn').forEach(b => { const on = b.dataset.tab === t; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
     show('paneDaily', t === 'daily'); show('paneEndless', t === 'endless');
     $('tagline').textContent = TABS[t].tagline;
-    $('howBox').innerHTML = TABS[t].how + `<div class="how-links"><button type="button" class="link-btn" data-act="how">How to play</button>${t === 'daily' ? '<button type="button" class="link-btn" data-act="archive">⟲ Archive</button>' : ''}<button type="button" class="link-btn hidden" data-act="misses" data-misses></button></div>`;
+    $('howBox').innerHTML = TABS[t].how + `<div class="how-links"><button type="button" class="link-btn" data-act="how">How to play</button>${t === 'daily' ? '<button type="button" class="link-btn" data-act="archive">⟲ Archive</button>' : ''}<button type="button" class="link-btn hidden" data-shop="open" data-shop-link>🛒 SirSC Shop</button><button type="button" class="link-btn hidden" data-act="misses" data-misses></button></div>`;
     $('howBox').querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => { Sound.click(); ({ how: howSheet, archive: archiveSheet, misses: missSheet })[b.dataset.act](); }));
     paintMisses();
+    Shop.renderChip();
     placeGlider();
   }
 
@@ -701,7 +705,7 @@
   });
   // Typing anywhere during a prompt goes to the answer box.
   document.addEventListener('keydown', e => {
-    if (G.state !== 'question' || !$('sheet').classList.contains('hidden') || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (G.state !== 'question' || !$('sheet').classList.contains('hidden') || !$('signin').classList.contains('hidden') || e.ctrlKey || e.metaKey || e.altKey) return;
     const a = $('answer');
     if (document.activeElement !== a && e.key.length === 1) a.focus({ preventScroll: true });
   }, true);
@@ -747,6 +751,7 @@
   }
 
   Scene.init($('scene'));
+  Shop.init();
   fit();
   showTitle();
   requestAnimationFrame(frame);

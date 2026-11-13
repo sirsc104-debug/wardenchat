@@ -57,6 +57,8 @@ const Scene = (function () {
   const fx = [];      // screen-space: confetti, shooting stars, rings
   const lines = [];   // speed lines
   let onStop = null;
+  // what's equipped (BRE_LOOKS entries from js/catalog.js); null = the classic look
+  const look = { rocket: null, flame: null, trail: null };
 
   // ---- Helpers ----------------------------------------------------------
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
@@ -844,7 +846,18 @@ const Scene = (function () {
 
   // ---- Rocket (Brain Rocket's own) ----------------------------------------
   const FLAMES = [['#ff6a00', '#ffd23f'], ['#ff3d00', '#ffe066'], ['#2f7bff', '#9fe6ff'], ['#b04dff', '#ff9cf5']];
-  const flameSet = () => FLAMES[st.streak >= 8 ? 3 : st.streak >= 5 ? 2 : st.streak >= 3 ? 1 : 0];
+  function flameSet() {
+    const f = look.flame && look.flame.colors;
+    if (f === 'rainbow') { const h = (st.t * 120) % 360; return [hsl(h), hsl(h + 50)]; }
+    if (f) return f;
+    return FLAMES[st.streak >= 8 ? 3 : st.streak >= 5 ? 2 : st.streak >= 3 ? 1 : 0];
+  }
+  // a hex colour for the hue (drawFlame appends alpha digits to it)
+  function hsl(h) {
+    h = ((h % 360) + 360) % 360;
+    const f = n => { const k = (n + h / 30) % 12, c = 0.5 - 0.5 * Math.max(-1, Math.min(k - 3, 9 - k, 1)); return Math.round(255 * (0.55 + 0.45 * c)).toString(16).padStart(2, '0'); };
+    return '#' + f(0) + f(8) + f(4);
+  }
   function rocketPose() {
     let x = RX, y = BASE, tilt = 0;
     if (!st.onPad) {
@@ -900,14 +913,18 @@ const Scene = (function () {
     ctx.translate(pose.x, pose.y - 95);
     ctx.rotate(pose.tilt);
     ctx.translate(0, 95);
-    if (st.thrust > 0.02) {
-      const sput = st.sputter > 0 && Math.random() < 0.5 ? 0.2 : 1;
-      drawFlame((30 + st.thrust * 150) * sput, 15 + st.thrust * 8);
-    }
+    const sput = st.sputter > 0 && Math.random() < 0.5 ? 0.2 : 1;
+    drawShip(st.thrust > 0.02 ? st.thrust * sput : 0, st.dead || st.sputter > 0 || st.crash);
+    ctx.restore();
+  }
+  // The rocket itself, nozzle at (0, 0), pointing up, in the equipped skin.
+  function drawShip(thrust, sad) {
+    const R = look.rocket || BRE_LOOKS.rocket.classic;
+    if (thrust > 0) drawFlame((30 + thrust * 150) * ((look.flame && look.flame.big) || 1), 15 + thrust * 8);
     const fin = (d) => {
-      ctx.fillStyle = '#e8364f';
+      ctx.fillStyle = R.fin;
       ctx.beginPath(); ctx.moveTo(d * 32, -70); ctx.lineTo(d * 66, -12); ctx.lineTo(d * 66, 8); ctx.lineTo(d * 30, -16); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#b8243b';
+      ctx.fillStyle = R.finDark;
       ctx.beginPath(); ctx.moveTo(d * 66, -12); ctx.lineTo(d * 66, 8); ctx.lineTo(d * 56, 2); ctx.closePath(); ctx.fill();
     };
     fin(-1); fin(1);
@@ -924,31 +941,83 @@ const Scene = (function () {
     ctx.lineTo(31, -16);
     ctx.closePath();
     const bg = ctx.createLinearGradient(-35, 0, 35, 0);
-    bg.addColorStop(0, '#b9c1d4'); bg.addColorStop(0.35, '#ffffff'); bg.addColorStop(1, '#a7b0c4');
+    bg.addColorStop(0, R.body[0]); bg.addColorStop(0.35, R.body[1]); bg.addColorStop(1, R.body[2]);
     ctx.fillStyle = bg; ctx.fill();
     ctx.clip();
-    ctx.fillStyle = '#e8364f'; ctx.fillRect(-40, -210, 80, 62);
+    if (R.stars) {
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 22; i++) { const sx = ((i * 37) % 64) - 32, sy = -20 - ((i * 53) % 170); ctx.globalAlpha = 0.4 + 0.6 * Math.abs(Math.sin(st.t * 2 + i)); ctx.fillRect(sx, sy, 1.6, 1.6); }
+      ctx.globalAlpha = 1;
+    }
+    if (R.facets) {
+      ctx.strokeStyle = 'rgba(30,58,138,0.35)'; ctx.lineWidth = 1.2;
+      ctx.beginPath(); for (let i = -3; i <= 3; i++) { ctx.moveTo(i * 12, -20); ctx.lineTo(i * 12 + 18, -200); ctx.moveTo(i * 12, -20); ctx.lineTo(i * 12 - 18, -200); } ctx.stroke();
+    }
+    if (R.shine || R.facets) {
+      const sh = ((st.t * 0.5) % 1.6) - 0.3;
+      const g = ctx.createLinearGradient(-40, -200 + sh * 220, 40, -160 + sh * 220);
+      g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.5, 'rgba(255,255,255,0.55)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = g; ctx.fillRect(-40, -210, 80, 200);
+    }
+    ctx.fillStyle = R.band; ctx.fillRect(-40, -210, 80, 62);
     ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(-20, -210, 10, 62);
-    ctx.fillStyle = '#e8364f'; ctx.fillRect(-40, -46, 80, 10);
+    ctx.fillStyle = R.band; ctx.fillRect(-40, -46, 80, 10);
     ctx.fillStyle = '#2a3350'; ctx.fillRect(-40, -34, 80, 4);
     ctx.restore();
     ctx.fillStyle = '#7b8499'; ctx.beginPath(); ctx.arc(0, -105, 19, 0, TAU); ctx.fill();
     const wg = ctx.createRadialGradient(-5, -110, 2, 0, -105, 15);
-    wg.addColorStop(0, '#7fd3ff'); wg.addColorStop(1, '#173a8a');
+    wg.addColorStop(0, R.glass[0]); wg.addColorStop(1, R.glass[1]);
     ctx.fillStyle = wg; ctx.beginPath(); ctx.arc(0, -105, 14, 0, TAU); ctx.fill();
     ctx.fillStyle = '#ffd7a8'; ctx.beginPath(); ctx.arc(0, -101, 6.5, 0, TAU); ctx.fill();
     ctx.fillStyle = '#222';
     ctx.beginPath(); ctx.arc(-2.3, -102, 1.1, 0, TAU); ctx.arc(2.3, -102, 1.1, 0, TAU); ctx.fill();
     ctx.strokeStyle = '#222'; ctx.lineWidth = 1;
     ctx.beginPath();
-    if (st.dead || st.sputter > 0 || st.crash) ctx.arc(0, -96.5, 2, Math.PI * 1.15, Math.PI * 1.85);
+    if (sad) ctx.arc(0, -96.5, 2, Math.PI * 1.15, Math.PI * 1.85);
     else ctx.arc(0, -100.5, 2.2, 0.15 * Math.PI, 0.85 * Math.PI);
     ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.beginPath(); ctx.ellipse(-6, -112, 4, 2.5, -0.6, 0, TAU); ctx.fill();
-    ctx.fillStyle = '#c62a42'; ctx.fillRect(-4, -60, 8, 66);
+    ctx.fillStyle = R.finDark; ctx.fillRect(-4, -60, 8, 66);
     ctx.fillStyle = 'rgba(80,90,110,0.5)';
     for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc(-22 + i * 11, -24, 1.5, 0, TAU); ctx.fill(); }
+  }
+
+  // ---- Trails: what streams out behind the equipped rocket --------------------
+  function trailGlyph(kind, x, y, size, color, rot) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.fillStyle = color; ctx.strokeStyle = color;
+    const r = size;
+    if (kind === 'star') {
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? r * 0.45 : r; ctx.lineTo(Math.cos(a) * d, Math.sin(a) * d); }
+      ctx.closePath(); ctx.fill();
+    } else if (kind === 'heart') {
+      ctx.beginPath(); ctx.moveTo(0, r * 0.9);
+      ctx.bezierCurveTo(-r * 1.4, -r * 0.1, -r * 0.6, -r * 1.2, 0, -r * 0.35);
+      ctx.bezierCurveTo(r * 0.6, -r * 1.2, r * 1.4, -r * 0.1, 0, r * 0.9); ctx.fill();
+    } else if (kind === 'note') {
+      ctx.beginPath(); ctx.ellipse(0, r * 0.5, r * 0.55, r * 0.4, -0.4, 0, TAU); ctx.fill();
+      ctx.lineWidth = Math.max(1.5, r * 0.18); ctx.beginPath(); ctx.moveTo(r * 0.5, r * 0.4); ctx.lineTo(r * 0.5, -r * 1.1); ctx.lineTo(r * 1.1, -r * 0.7); ctx.stroke();
+    } else if (kind === 'bubble') {
+      ctx.globalAlpha *= 0.8; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.beginPath(); ctx.arc(-r * 0.35, -r * 0.35, r * 0.22, 0, TAU); ctx.fill();
+    } else if (kind === 'coin') {
+      ctx.scale(Math.abs(Math.cos(rot * 3)) * 0.8 + 0.2, 1);
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#b8860b'; ctx.beginPath(); ctx.arc(0, 0, r * 0.65, 0, TAU); ctx.fill();
+      ctx.fillStyle = color; ctx.font = `700 ${r * 1.1}px Fredoka, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('S', 0, r * 0.05);
+    } else if (kind === 'shard') {
+      ctx.beginPath(); ctx.moveTo(0, -r); ctx.lineTo(r * 0.55, 0); ctx.lineTo(0, r * 1.3); ctx.lineTo(-r * 0.55, 0); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.beginPath(); ctx.moveTo(0, -r); ctx.lineTo(r * 0.55, 0); ctx.lineTo(0, 0); ctx.fill();
+    }
     ctx.restore();
+  }
+  function drawTrails() {
+    for (const p of parts) {
+      if (p.k !== 'trail') continue;
+      ctx.globalAlpha = Math.min(1, p.life / p.max * 1.6);
+      trailGlyph(p.kind, p.x, p.y, p.size, p.color, p.rot + p.vr * (p.max - p.life));
+    }
+    ctx.globalAlpha = 1;
   }
 
   // ---- Particles ----------------------------------------------------------
@@ -962,6 +1031,18 @@ const Scene = (function () {
         parts.push({ k: 'flame', x: nz.x + rand(-8, 8), y: nz.y + rand(0, 10), vx: nz.dx * 260 + rand(-40, 40), vy: nz.dy * (220 + st.thrust * 260) + rand(-20, 20), life: rand(0.25, 0.55), max: 0.55, size: rand(8, 16) * (0.7 + st.thrust * 0.5), color: Math.random() < 0.5 ? fs[0] : fs[1] });
         if (st.streak >= 8 && Math.random() < 0.4) parts.push({ k: 'spark', x: nz.x, y: nz.y + 10, vx: rand(-120, 120), vy: rand(150, 380), life: 0.8, max: 0.8, size: 3, color: `hsl(${Math.random() * 360},100%,65%)` });
       }
+    }
+    const tr = look.trail;
+    if (tr && tr.shape && !st.onPad && !st.crash && !st.dead && st.thrust > 0.15) {
+      st.emitT = (st.emitT || 0) + (3 + st.thrust * 14) * dt;
+      while (st.emitT >= 1) {
+        st.emitT--;
+        parts.push({ k: 'trail', kind: tr.shape, x: nz.x + rand(-14, 14), y: nz.y + rand(10, 40), vx: rand(-70, 70), vy: rand(120, 260),
+          life: rand(1.1, 1.8), max: 1.8, size: rand(6, 11), color: tr.colors[Math.floor(Math.random() * tr.colors.length)], rot: rand(-0.5, 0.5), vr: rand(-2, 2) });
+      }
+    }
+    if (look.flame && look.flame.sparkle && st.thrust > 0.15 && Math.random() < dt * 30) {
+      parts.push({ k: 'spark', x: nz.x + rand(-10, 10), y: nz.y + 20, vx: rand(-90, 90), vy: rand(120, 300), life: 0.7, max: 0.7, size: 2.5, color: Math.random() < 0.5 ? '#e9fbff' : '#7fd8ff' });
     }
     if (inAir && (st.thrust > 0.1 || st.ignite > 0)) {
       st.emitS += ((st.onPad ? 0 : st.thrust * 26) + st.ignite * 40) * dt;
@@ -1118,6 +1199,7 @@ const Scene = (function () {
     drawDecor();
     drawGround();
     drawParts('smoke');
+    drawTrails();
     drawLines();
     ctx.save(); ctx.globalCompositeOperation = 'lighter'; drawParts('flame'); ctx.restore();
     drawRocket();
@@ -1183,6 +1265,34 @@ const Scene = (function () {
       for (let i = 0; i < n; i++) { const a = rand(0, TAU), sp = rand(120, 420); parts.push({ k: 'spark', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: rand(0.4, 0.9), max: 0.9, size: rand(2, 4), color }); }
     },
     rocketScreen() { const p = rocketPose(); return { x: p.x, y: p.y - 100 }; },
-    onStop(fn) { onStop = fn; }
+    onStop(fn) { onStop = fn; },
+    // equip: { rocket, flame, trail } as BRE_LOOKS entries (missing or null = classic)
+    setLook(L) { look.rocket = L.rocket || null; look.flame = L.flame || null; look.trail = L.trail || null; },
+    /* The shop's preview: the rocket in a look, flying, on its own small canvas (any size). */
+    preview(canvas, L, t) {
+      const keep = { ctx, rocket: look.rocket, flame: look.flame, trail: look.trail, t: st.t, streak: st.streak };
+      ctx = canvas.getContext('2d');
+      look.rocket = L.rocket || null; look.flame = L.flame || null; look.trail = L.trail || null;
+      st.t = t; st.streak = 0;
+      const w = canvas.width, h = canvas.height, s = h / 430;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      const g = ctx.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, '#120830'); g.addColorStop(1, '#3a1458');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 26; i++) { ctx.globalAlpha = 0.3 + 0.7 * Math.abs(Math.sin(t + i)); ctx.fillRect((i * 97) % w, (i * 53 + t * 40) % h, 1.6, 1.6); }
+      ctx.globalAlpha = 1;
+      ctx.setTransform(s, 0, 0, s, w / 2, h * 0.62 + Math.sin(t * 2) * 4 * s);
+      const tr = look.trail;
+      if (tr && tr.shape) for (let i = 0; i < 9; i++) {
+        const f = ((t * 0.6 + i / 9) % 1);
+        ctx.globalAlpha = 1 - f;
+        trailGlyph(tr.shape, Math.sin(i * 2.3) * 40 * f, 40 + f * 200, 9, tr.colors[i % tr.colors.length], i + t);
+      }
+      ctx.globalAlpha = 1;
+      drawShip(0.7, false);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx = keep.ctx; look.rocket = keep.rocket; look.flame = keep.flame; look.trail = keep.trail; st.t = keep.t; st.streak = keep.streak;
+    }
   };
 })();

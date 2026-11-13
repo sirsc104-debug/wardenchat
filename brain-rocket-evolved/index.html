@@ -653,6 +653,7 @@
         <div class="how" id="howBox"></div>
       </div>
       <a class="promo-warden" href="https://chat.sirsc104.com/" target="_blank" rel="noopener">💬 Warden Chat</a>
+      <div class="acct-chip hidden" id="acctChip"></div>
       <div class="corner-btns">
         <button class="icon-btn" id="btnSound" type="button" title="Sound on/off" aria-label="Sound on/off">🔊</button>
         <button class="icon-btn" id="btnFull" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
@@ -669,6 +670,7 @@
         <div class="over-grid" id="overGrid"></div>
         <div class="over-rounds" id="overRounds"></div>
         <div class="over-note" id="overNote"></div>
+        <div class="reward-box" id="rewardBox"></div>
         <div class="over-btns">
           <button type="button" class="go-btn" id="btnShare">📋 Share</button>
           <button type="button" class="ghost-btn" id="btnAgain">Fly Endless</button>
@@ -685,6 +687,35 @@
         <div class="sheet-body" id="sheetBody"></div>
       </div>
     </div>
+    <!-- Sign in with Warden Chat -->
+    <div id="signin" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="siTitle">
+      <form class="signin-panel" id="signinForm" autocomplete="on">
+        <div class="sheet-head"><h2 id="siTitle">Sign in with Warden Chat</h2><button type="button" class="icon-btn" id="siClose" aria-label="Close">✕</button></div>
+        <p class="si-lead">Use your <b>Warden Chat</b> account to earn 🪙 coins, spend them in the SirSC Shop, and use the coins, 💎 diamonds and 👑 membership you have in SirSC's other games.</p>
+        <label class="si-field">Username <input id="siUser" autocomplete="username" spellcheck="false" autocapitalize="off" maxlength="24"></label>
+        <label class="si-field">Password <input id="siPass" type="password" autocomplete="current-password" maxlength="200"></label>
+        <div class="si-err" id="siErr" aria-live="polite"></div>
+        <div class="si-btns"><button type="submit" class="go-btn small">Sign in</button><button type="button" class="ghost-btn small" id="siCreate">Create a Warden Chat account</button></div>
+        <p class="si-note">Creating an account here creates a Warden Chat account. Change your password or delete your account on <a id="siChat" href="https://chat.sirsc104.com/" target="_blank" rel="noopener">Warden Chat</a>.</p>
+      </form>
+    </div>
+
+    <!-- The SirSC Shop -->
+    <div id="shop" class="screen shop-screen hidden" role="dialog" aria-modal="true" aria-labelledby="shopTitle">
+      <div class="shop-panel">
+        <div class="shop-head"><h2 id="shopTitle">🛒 SirSC Shop</h2><div class="shop-wallet" id="shopWallet"></div><button type="button" class="icon-btn" data-shop="close" aria-label="Close the shop">✕</button></div>
+        <div class="shop-body">
+          <div class="shop-pv"><canvas id="shopCanvas" width="300" height="430" aria-label="Preview of your rocket"></canvas><div class="shop-pv-cap" id="shopPvCap"></div></div>
+          <div class="shop-main">
+            <div class="shop-tabs" role="tablist">
+              <button type="button" data-shoptab="rocket">🚀 Rockets</button><button type="button" data-shoptab="flame">🔥 Flames</button><button type="button" data-shoptab="trail">✨ Trails</button>
+              <button type="button" data-shoptab="member">👑 Membership</button><button type="button" data-shoptab="diamonds">💎 Diamonds</button>
+            </div>
+            <div class="shop-grid" id="shopGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div id="toast" class="toast hidden" role="status"></div>
   </div>
 </div>
@@ -692,9 +723,12 @@
 
 <script src="js/quiz.js"></script>
 <script src="js/answers.js"></script>
+<script src="js/catalog.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/scene.js"></script>
 <script src="js/badwords.js"></script>
+<script src="js/wallet.js"></script>
+<script src="js/shop.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>
