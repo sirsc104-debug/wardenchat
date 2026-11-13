@@ -1180,7 +1180,8 @@ button.slot:hover { transform: translateY(-3px); }
   .nb-ico { width: 28px; height: 28px; }
   .nb-battle .nb-ico { width: 32px; height: 32px; }
   .nb-label, .nb-battle .nb-label, .nb.on .nb-label, .nb-battle.on .nb-label { font-size: 11px; }
-  .nb-tag { display: none; }
+  /* badges stay on phones, small, so a free chest or a reward to claim still shows */
+  .nb-tag { top: -6px; right: -2px; font-size: 9px; padding: 1px 5px; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .deck-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .modal-card { grid-template-columns: minmax(0, 1fr); }
   .m-art { width: 140px; margin: 0 auto; }
@@ -1691,6 +1692,7 @@ button.slot:hover { transform: translateY(-3px); }
 #battle.phone .enum { width: 34px; height: 34px; font-size: 19px; flex: none; order: -1; }
 #battle.phone .x2 { font-size: 16px; }
 #battle.phone .mini-timer { display: block; position: absolute; top: 2.4%; right: 4%; font-size: 16px; text-align: right; line-height: 1; pointer-events: none; }
+#battle.phone .leave-btn, #battle.narrow .leave-btn { top: calc(2.4% + 58px); }
 #battle.phone .sim-win { padding: 2px 8px 3px; font-size: 11px; }
 #battle.phone .emote-btn { width: 40px; height: 34px; }
 #battle.phone .ep-phrase { font-size: 11px; padding: 7px 2px; }
@@ -1940,10 +1942,96 @@ button.slot:hover { transform: translateY(-3px); }
   .res-chip.trophy-chip { padding-right: 6px; }
 }
 
+/* ---------- in battle: the surrender flag, and the clock with the crown score on small screens ---------- */
+.leave-btn { position: absolute; z-index: 5; top: 2.4%; right: 3%; display: flex; align-items: center; gap: 6px; height: 34px; min-width: 34px; padding: 0 7px;
+  border: 3px solid var(--outline); border-radius: 12px; background: rgba(40, 28, 70, 0.78); color: #ffd7dc; cursor: pointer; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4); }
+.leave-btn svg { width: 18px; height: 18px; flex: none; }
+.leave-btn span { display: none; font: 900 13px/1 "Nunito", sans-serif; white-space: nowrap; }
+.leave-btn.ask { background: #c0283a; color: #fff; }
+.leave-btn.ask span { display: inline; }
+.leave-btn:hover { filter: brightness(1.15); }
+.mini-timer.low b { color: #ff6b78; }
+.mini-timer .mt-cr { display: block; margin-top: 4px; font-size: 0.85em; color: #ffe27a; white-space: nowrap; }
+.mini-timer .mt-cr .y { color: #8cc4ff; } .mini-timer .mt-cr .f { color: #ff9ea4; }
+
+/* ---------- phones: the lobby fits, with Battle above the navigation bar ---------- */
+@media (max-width: 760px) {
+  /* top bar in three short rows: you and the two buttons; level and King Tower; the currencies */
+  .topbar { gap: 6px 8px; }
+  .topbar .who { order: 0; flex: 1 1 auto; min-width: 0; }
+  .topbar #soundBtn, .topbar #settingsBtn { order: 1; }
+  .topbar .lvl { order: 2; }
+  .topbar .king-chip { order: 3; }
+  .topbar .res { order: 4; flex: 1 1 100%; display: flex; gap: 6px; flex-wrap: nowrap; }
+  .topbar .res .res-chip { flex: 1 1 0; min-width: 0; padding-left: 6px; padding-right: 6px; }
+  .topbar .res .res-chip b { font-size: 14px; overflow: hidden; text-overflow: ellipsis; }
+  .topbar .res .res-chip .plus { display: none; }
+  /* the arena badge is sized to leave room for the opponent, Battle and the chests */
+  .cp-row .cp { width: min(100%, 640px, calc(30dvh * var(--cpw) / var(--cph))); margin: 0 auto; }
+  .battle-btn { min-height: 66px; }
+  .battle-btn span { font-size: 34px; }
+  /* the card window scrolls inside the screen */
+  .modal { place-items: start center; overflow-y: auto; padding-top: 22px; padding-bottom: 22px; }
+  .modal-card { max-height: none; }
+}
+@media (max-width: 760px) and (max-height: 700px) {
+  .cp-row .cp { width: min(100%, 640px, calc(24dvh * var(--cpw) / var(--cph))); }
+}
+/* a phone held sideways: ask to turn it, as the battle needs the upright layout */
+.rotate-hint { display: none; }
+@media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+  .rotate-hint { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; align-content: center; gap: 12px; padding: 24px; text-align: center;
+    background: rgba(18, 10, 40, 0.96); color: #fff; font: 900 18px/1.3 "Nunito", sans-serif; }
+  .rotate-hint svg { width: 64px; height: 64px; animation: turnPhone 1.8s ease-in-out infinite; }
+}
+@keyframes turnPhone { 0%, 30% { transform: rotate(-90deg); } 60%, 100% { transform: rotate(0deg); } }
+
+/* ---------- overtime and sudden death: who is ahead; a crown flying to the score ---------- */
+.lead-bar { position: absolute; z-index: 4; left: 50%; top: 46.5%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 5px 12px 6px; border-radius: 12px; border: 3px solid var(--outline); background: rgba(24, 16, 46, 0.84); pointer-events: none; min-width: 168px; }
+.lead-bar small { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #e8e4ff; }
+.lead-bar .lb-row { display: flex; align-items: center; gap: 6px; }
+.lead-bar b { font: 400 15px/1 var(--display); }
+.lead-bar b.y, .lead-bar em.y { color: #8cc4ff; } .lead-bar b.f, .lead-bar em.f { color: #ff9ea4; }
+.lead-bar .lb-bar { width: 90px; height: 10px; border-radius: 6px; background: #c0283a; border: 2px solid var(--outline); overflow: hidden; }
+.lead-bar .lb-bar i { display: block; height: 100%; background: #3d7de6; transition: width 0.3s; }
+.lead-bar em { font: 900 12px/1 "Nunito", sans-serif; font-style: normal; color: #ffe27a; }
+.fly-crown { position: fixed; z-index: 60; width: 40px; height: 36px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 70'%3E%3Cpath d='M8 62 L8 22 L30 40 L50 6 L70 40 L92 22 L92 62 Z' fill='%23ffcf3f' stroke='%231c1530' stroke-width='8' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 0 10px rgba(255, 220, 120, 0.9)); animation: crownRise 0.35s ease-out; }
+.fly-crown.foe { filter: drop-shadow(0 0 10px rgba(255, 110, 120, 0.9)) hue-rotate(-30deg); }
+.fly-crown.go { transition: transform 0.75s cubic-bezier(0.5, -0.4, 0.6, 1) 0.35s, opacity 0.2s ease 1s; opacity: 0.2; }
+@keyframes crownRise { from { transform: scale(0.2) translateY(30px); } to { transform: scale(1.3); } }
+.score-row.bump, .mini-timer.bump { animation: scoreBump 0.5s ease-out; }
+@keyframes scoreBump { 0% { transform: scale(1); } 40% { transform: scale(1.18); filter: brightness(1.6); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .fly-crown { display: none; } }
+
+/* VS screen: your King, the opponent's clan, and a moment of looking for an opponent */
+.vs-pic { width: 110px; height: 110px; border-radius: 18px; border: 3px solid var(--outline); background: radial-gradient(circle at 50% 40%, #6fa3ff, #1d4fb0); display: grid; place-items: center; overflow: hidden; }
+.vs-pic svg { width: 92%; height: 92%; }
+.vs-side .vs-clan { color: #ffd9de; font-size: 14px; opacity: 0.9; }
+.vs-side .vs-clan:empty { display: none; }
+.vs-find { display: none; flex-direction: column; align-items: center; gap: 12px; min-height: 110px; justify-content: center; color: #ffe3e6; font-size: 18px; }
+.vs-find i { width: 46px; height: 46px; border-radius: 50%; border: 5px solid rgba(255, 255, 255, 0.25); border-top-color: #fff; animation: vsSpin 0.8s linear infinite; }
+@keyframes vsSpin { to { transform: rotate(360deg); } }
+.intro.finding .vs-find { display: flex; }
+.intro.finding .foe canvas, .intro.finding .foe b, .intro.finding .foe small { display: none; }
+.intro:not(.finding) .foe canvas { animation: vsPop 0.35s ease-out; }
+@keyframes vsPop { from { transform: scale(0.6); opacity: 0; } }
+@media (max-width: 760px) { .vs-pic { width: 76px; height: 76px; } .vs-find { min-height: 76px; font-size: 15px; } }
+@media (prefers-reduced-motion: reduce) { .vs-find i { animation-duration: 2.4s; } }
+
+.vs { position: relative; }
+.vs-stakes { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); white-space: nowrap; font-size: 16px; color: #fff; letter-spacing: 0.02em;
+  background: rgba(20, 14, 40, 0.55); padding: 4px 12px; border-radius: 999px; }
+.vs-stakes:empty { display: none; }
+.intro.finding .vs-stakes { visibility: hidden; }
+
 </style>
 </head>
 <body>
 <div id="app">
+  <div class="rotate-hint" aria-live="polite"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="14" y="4" width="20" height="40" rx="4" fill="none" stroke="#ffe27a" stroke-width="4"/><circle cx="24" cy="38" r="2" fill="#ffe27a"/></svg>Turn your phone upright to play</div>
 
   <!-- HOME: the lobby. Top bar, the tabs, and a bottom navigation bar. -->
   <section class="screen" id="home">
@@ -2245,6 +2333,8 @@ button.slot:hover { transform: translateY(-3px); }
         <div class="countdown" id="countdown" hidden></div>
         <div class="toast" id="toast" hidden></div>
         <div class="mini-timer" id="miniTimer"></div>
+        <div class="lead-bar" id="leadBar" hidden></div>
+        <button class="leave-btn" id="leaveBtn" type="button" title="Surrender this battle" aria-label="Surrender"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M7 4h11l-3 4 3 4H7z" fill="currentColor"/></svg><span>Surrender?</span></button>
         <div class="net-wait" id="netWait" hidden><span class="nw-spin" aria-hidden="true"></span>Waiting for your opponent…</div>
         <!-- TEMPORARY test button: remove this line and the "TEMPORARY" blocks in js/game.js, js/sim.js and css/style.css -->
         <button class="sim-win" id="simWinBtn" type="button" title="Test button: ends this match as a win"><small>Test</small>Simulate Win</button>
@@ -2268,9 +2358,9 @@ button.slot:hover { transform: translateY(-3px); }
     </div>
 
     <div class="intro" id="intro" hidden>
-      <div class="vs-side you"><b id="introYou">You</b><small>Training Grounds</small></div>
-      <div class="vs">VS</div>
-      <div class="vs-side foe"><canvas id="introFoe" width="160" height="160"></canvas><b id="introFoeName">Trainer Owen</b><small id="introFoeTier">Tutorial</small></div>
+      <div class="vs-side you"><div class="vs-pic" id="introYouPic" aria-hidden="true"></div><b id="introYou">You</b><small id="introYouTier">Training</small></div>
+      <div class="vs">VS<small class="vs-stakes" id="introStakes"></small></div>
+      <div class="vs-side foe"><div class="vs-find" aria-live="polite"><i></i><span>Finding an opponent…</span></div><canvas id="introFoe" width="160" height="160"></canvas><b id="introFoeName">Trainer Owen</b><small id="introFoeTier">Tutorial</small><small class="vs-clan" id="introFoeClan"></small></div>
     </div>
 
     <div class="result" id="result" hidden>
@@ -2283,6 +2373,7 @@ button.slot:hover { transform: translateY(-3px); }
         <p class="res-unlock" id="resUnlock" hidden></p>
         <p class="res-small" id="resSmall"></p>
         <div class="res-btns">
+          <button class="big-btn chest-now" id="chestNowBtn" type="button" hidden><span id="chestNowText">Open Silver Chest</span></button>
           <button class="big-btn" id="nextBtn" type="button" hidden><span id="nextBtnText">Battle Trainer Romeo</span></button>
           <button class="big-btn" id="againBtn" type="button"><span>Play Again</span></button>
           <button class="pill" id="homeBtn" type="button">Home</button>
@@ -2916,6 +3007,10 @@ const KCSim = (() => {
   const BRIDGES = [3.5, 14.5], BRIDGE_HALF = 1.0;
   const DT = 1 / 30;
   const REGULAR = 180, OVERTIME = 60, DOUBLE_AT = 60;
+  // Sudden death, when overtime ends level: every tower crumbles by the same share of its health each
+  // second, faster and faster (`base` + `grow` per second elapsed), until one falls. The weakest tower,
+  // by share of health, falls first, so it is the old tiebreak's winner, but the match ends on a tower.
+  const SUDDEN = { base: 0.03, grow: 0.03 };
   const REGEN = 1 / 2.8, MAX_ENERGY = 10, START_ENERGY = 5;
   const POCKET = 11; // how far past the river you may deploy once that lane's tower is down
   const TOWERS = {
@@ -3466,12 +3561,12 @@ const KCSim = (() => {
   }
   function towerDown(s, t) {
     const other = 1 - t.team;
-    s.events.push({ type: 'tower', team: t.team, sub: t.sub, x: t.x, y: t.y });
+    s.events.push({ type: 'tower', team: t.team, sub: t.sub, x: t.x, y: t.y, id: t.id, lane: t.lane });
     if (t.sub === 'king') {
       s.crowns[other] = 3;
       for (const e of s.ents) if (e.kind === 'tower' && e.team === t.team && !e.dead) {
         e.dead = true; e.hp = 0;
-        s.events.push({ type: 'tower', team: e.team, sub: e.sub, x: e.x, y: e.y });
+        s.events.push({ type: 'tower', team: e.team, sub: e.sub, x: e.x, y: e.y, id: e.id, lane: e.lane, chain: true });
       }
       finish(s, other, 'king');
       return;
@@ -3480,6 +3575,32 @@ const KCSim = (() => {
     const k = tower(s, t.team, 'K');
     if (k && !k.dead && !k.active) { k.active = true; s.events.push({ type: 'king', team: t.team }); }
     if (s.phase === 'overtime') finish(s, other, 'overtime');
+    if (s.phase === 'sudden') finish(s, other, 'sudden');
+  }
+  // Sudden death: every standing tower loses the same share of its health; the first to fall loses the
+  // match for its side. Two towers of different sides falling in the same tick: the one further below
+  // zero (by share) falls; exactly level, a draw.
+  function suddenStep(s) {
+    s.suddenT += DT;
+    const rate = (SUDDEN.base + SUDDEN.grow * s.suddenT) * DT;
+    let worst = null, wv = 0, tie = false;
+    for (const e of s.ents) {
+      if (e.kind !== 'tower' || e.dead) continue;
+      e.hp -= e.maxHp * rate;
+      if (e.hp > 0) continue;
+      const v = e.hp / e.maxHp;
+      if (!worst || v < wv - 1e-9) { worst = e; wv = v; tie = false; }
+      else if (Math.abs(v - wv) <= 1e-9 && e.team !== worst.team) tie = true;
+    }
+    if (!worst) return;
+    if (tie) {
+      for (const e of s.ents) if (e.kind === 'tower' && !e.dead && e.hp < 0) e.hp = 0;
+      finish(s, -1, 'draw');
+      return;
+    }
+    for (const e of s.ents) if (e.kind === 'tower' && !e.dead && e.hp <= 0 && e !== worst) e.hp = 1;
+    worst.hp = 0; worst.dead = true;
+    towerDown(s, worst);
   }
   function finish(s, winner, reason) {
     if (s.result) return;
@@ -4242,6 +4363,7 @@ const KCSim = (() => {
     return low === Infinity ? 0 : low;
   }
   function clock(s) {
+    if (s.phase === 'sudden') { suddenStep(s); return; }
     s.timeLeft -= DT;
     if (s.phase === 'regular' && !s.double && s.timeLeft <= DOUBLE_AT) {
       s.double = true;
@@ -4255,16 +4377,16 @@ const KCSim = (() => {
       s.events.push({ type: 'overtime' });
       return;
     }
-    const a = lowestTower(s, 0), b = lowestTower(s, 1);
-    if (Math.abs(a - b) < 1e-6) finish(s, -1, 'draw');
-    else finish(s, a > b ? 0 : 1, 'tiebreak');
+    // overtime is over and the crowns are level: sudden death
+    s.phase = 'sudden'; s.timeLeft = 0; s.suddenT = 0;
+    s.events.push({ type: 'sudden' });
   }
 
   function step(s) {
     if (s.result) return;
     s.tick++;
     s.time += DT;
-    const mult = s.double || s.phase === 'overtime' ? 2 : 1;
+    const mult = s.double || s.phase === 'overtime' || s.phase === 'sudden' ? 2 : 1;
     for (const t of [0, 1]) s.energy[t] = Math.min(MAX_ENERGY, s.energy[t] + REGEN * mult * DT);
     for (const e of s.ents) {
       e.px = e.x; e.py = e.y;
@@ -4284,7 +4406,7 @@ const KCSim = (() => {
   }
 
   return {
-    W, H, MID, RIVER_TOP, RIVER_BOT, BRIDGES, BRIDGE_HALF, DT, REGULAR, OVERTIME, MAX_ENERGY, TOWERS,
+    W, H, MID, RIVER_TOP, RIVER_BOT, BRIDGES, BRIDGE_HALF, DT, REGULAR, OVERTIME, MAX_ENERGY, TOWERS, SUDDEN, lowestTower,
     create, step, play, canDeploy, tower, laneOf, own, mulberry, levelMult, evoCharge, formation, costOf, resolve,
     // Ends a match on the spot: the Simulate Win test button (TEMPORARY), and an online battle whose
     // opponent left ('left') or fell out of step ('desync').
@@ -4323,7 +4445,22 @@ const KCProgress = (() => {
   const MAX_LEVEL = 15;
   const XP_PER_LEVEL = 100;
   const XP = { win: 20, draw: 10, loss: 6, firstWin: 30 };
-  const TROPHIES = { win: 30, loss: 20 };
+  // Trophies for a trophy battle. Against an opponent with as many trophies as you a win is worth 30 and a
+  // loss costs 30; every 10 trophies they have more than you add one to a win and take one off a loss (the
+  // other way round when they have fewer), always between 20 and 40. Opponents are usually found a little
+  // below you (MATCH), so a win pays about 27 and a loss costs about 33: you hold your place winning about
+  // 55% of your battles, and climb as your cards and your play get better. Opponents' cards follow their
+  // trophies (ECONOMY.foeLevels), so cards that fall behind hold you back.
+  const TROPHIES = { win: 30, loss: 30, per: 0.1, min: 20, max: 40 };
+  // How far from your trophies the next opponent is found: `offset` as a rule (give or take `spread / 2`),
+  // further below after two or three losses in a row (a breather), level with you after three wins in a row.
+  const MATCH = { offset: -35, spread: 40, lost2: -65, lost3: -110, won3: -10 };
+  // How well opponents play (0 a beginner, 1 the best) by their trophies, and how much less in a breather.
+  // From about 4,100 trophies every opponent's cards are at level 15 (as yours are by then, about a year
+  // in), and from 4,000 their play gets better, to the best at 7,000.
+  const FOE_SKILL = { curve: [[0, 0.05], [300, 0.25], [900, 0.4], [2000, 0.5], [4000, 0.6], [5500, 0.8], [7000, 1]], breather: 0.15 };
+  // Your first few trophy battles are gentle: beginners with starter decks and level 1 cards.
+  const FIRST_STEPS = 3;
 
   /* ---------- the economy: every number that sets costs and rewards ----------
      Currency: Rubies (P.rubies) are the game's own and never leave it; "gold" below means Rubies. Wallet
@@ -4419,7 +4556,7 @@ const KCProgress = (() => {
     // opponents' card levels by trophies (straight lines between the points), matched to what a player
     // has at those trophies (tools/economy-report.js); rares, epics and legendaries are then raised to
     // where their rarity starts
-    foeLevels: [[0, 1], [50, 1], [300, 4.5], [600, 6.5], [900, 7.5], [1200, 8.5], [1500, 10], [2000, 12], [3000, 13.5], [4000, 14.5], [5000, 15]],
+    foeLevels: [[0, 1], [50, 1], [300, 4.5], [600, 6.5], [900, 7.5], [1200, 8.5], [1500, 10], [2000, 11.6], [2500, 12.4], [3000, 13.6], [3500, 14.4], [4100, 15]],
   };
 
   const ARENAS = [
@@ -4480,25 +4617,25 @@ const KCProgress = (() => {
     { at: 830, kind: 'rubies', amount: 600 },
     { at: 870, kind: 'card', card: 'camel', copies: 1 },
     { at: 900, kind: 'arena', arena: 'stormspire' },
+    // Stormspire's cards spread over the whole arena, so there is a new card every 130 trophies or so
     { at: 930, kind: 'card', card: 'bees', copies: 6 },
-    { at: 970, kind: 'rubies', amount: 900 },
-    { at: 1010, kind: 'card', card: 'owl', copies: 3 },
-    { at: 1050, kind: 'chest', chest: 'platinum' },
-    { at: 1090, kind: 'card', card: 'thundercloud', copies: 1 },
-    { at: 1130, kind: 'rubies', amount: 1200 },
-    { at: 1170, kind: 'card', card: 'griffin', copies: 1 },
-    // the rest of Stormspire
-    { at: 1210, kind: 'card', card: 'judgment', copies: 1 },
-    { at: 1250, kind: 'chest', chest: 'gold' },
-    { at: 1290, kind: 'card', card: 'cyclone', copies: 1 },
-    { at: 1340, kind: 'rubies', amount: 1500 },
-    { at: 1380, kind: 'card', card: 'conductor', copies: 3 },
-    { at: 1430, kind: 'chest', chest: 'platinum' },
-    { at: 1530, kind: 'rubies', amount: 1800 },
-    { at: 1630, kind: 'chest', chest: 'legendary' },
-    { at: 1730, kind: 'rubies', amount: 2200 },
-    { at: 1830, kind: 'chest', chest: 'platinum' },
-    { at: 1920, kind: 'rubies', amount: 2600 },
+    { at: 980, kind: 'rubies', amount: 900 },
+    { at: 1040, kind: 'card', card: 'owl', copies: 3 },
+    { at: 1100, kind: 'chest', chest: 'platinum' },
+    { at: 1160, kind: 'card', card: 'thundercloud', copies: 1 },
+    { at: 1220, kind: 'rubies', amount: 1200 },
+    { at: 1290, kind: 'card', card: 'judgment', copies: 1 },
+    { at: 1350, kind: 'chest', chest: 'gold' },
+    { at: 1420, kind: 'card', card: 'griffin', copies: 1 },
+    { at: 1480, kind: 'rubies', amount: 1500 },
+    { at: 1560, kind: 'card', card: 'cyclone', copies: 1 },
+    { at: 1620, kind: 'chest', chest: 'platinum' },
+    { at: 1700, kind: 'card', card: 'conductor', copies: 3 },
+    { at: 1760, kind: 'rubies', amount: 1800 },
+    { at: 1830, kind: 'chest', chest: 'legendary' },
+    { at: 1880, kind: 'rubies', amount: 2200 },
+    { at: 1930, kind: 'chest', chest: 'platinum' },
+    { at: 1970, kind: 'rubies', amount: 2600 },
     // Arena 5: Frostfang Keep
     { at: 2000, kind: 'arena', arena: 'frostfang' },
     { at: 2060, kind: 'card', card: 'frostsprite', copies: 6 },
@@ -4595,6 +4732,29 @@ const KCProgress = (() => {
   // Trophy opponents look like any other player. They don't talk (no speech bubbles or result lines).
   const FOE_NAMES = ['EmberFox', 'Kestrel', 'MossKnight', 'Juno77', 'BrickTop', 'Lumen', 'NovaRae', 'Quillon', 'RowanK', 'Tidebreaker',
     'Sable', 'PixelPike', 'Hollis', 'Marigold', 'Vexa', 'Orrin22', 'CrimsonOwl', 'Tamsin', 'Bramble', 'Ashgrove', 'Kaito', 'Wren', 'Delphine', 'Grit'];
+  // more names, built from parts: a word and sometimes a number or a second word
+  const FOE_A = ['Iron', 'Ember', 'Frost', 'Storm', 'Moss', 'Quick', 'Night', 'Sun', 'Brave', 'Copper', 'Silver', 'Thorn', 'Wild', 'Red', 'Blue',
+    'Lucky', 'Stone', 'Tide', 'Ash', 'Wolf', 'Owl', 'Fox', 'Bear', 'Pine', 'Cloud', 'Rune', 'Gale', 'Dusk', 'Dawn', 'Ivy'];
+  const FOE_B = ['heart', 'fang', 'blade', 'wing', 'rider', 'smith', 'shield', 'spark', 'claw', 'paw', 'crest', 'song', 'mane', 'brook', 'bolt', 'jaw'];
+  const CLANS = ['Lantern Guild', 'Ironbark', 'Saltwind', 'Ember Court', 'The Moss Ring', 'Copper Crows', 'Hollow Oaks', 'Gale Riders', 'Night Owls',
+    'Sunforge', 'Tidewatch', 'Stonebridge', 'Frostmarch', 'Rook & Rune', 'Brightmoor', 'Thornfield', 'Duskhaven', 'Wolfpine', 'Cloudkeep', 'Ashvale'];
+  function foeName(rand) {
+    const r = rand();
+    if (r < 0.35) return FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
+    const a = FOE_A[Math.floor(rand() * FOE_A.length)], b = FOE_B[Math.floor(rand() * FOE_B.length)];
+    if (a.slice(-1) === b[0]) return a + b.replace(/^./, c => c.toUpperCase());
+    return r < 0.7 ? a + b : r < 0.85 ? a + b + (10 + Math.floor(rand() * 90)) : a + '_' + FOE_B[Math.floor(rand() * FOE_B.length)].replace(/^./, c => c.toUpperCase());
+  }
+  // how chatty an opponent is with emotes
+  const MOODS = [['sporty', 4], ['friendly', 3], ['cocky', 2], ['quiet', 3]];
+  // the cards an opponent with t trophies could have: what the Trophy Road has given by then, plus now and
+  // then a card of their arena a little early (chests give those before the road does)
+  function foePool(t, rand) {
+    const pool = new Set(KC_STARTER_DECK);
+    for (const m of ROAD) if (m.kind === 'card' && KC_CARDS[m.card] && (m.at <= t || (m.at <= t + 160 && rand() < 0.35))) pool.add(m.card);
+    if (t >= 7000) for (const a of ARENAS) for (const id of a.cards) if (KC_CARDS[id]) pool.add(id);
+    return [...pool];
+  }
   const FOE_BG = [['#ffcf6b', '#ea8b2b'], ['#c99bff', '#7440cf'], ['#9fc0e0', '#3c5d8c'], ['#9fe6b8', '#2c8a5a'], ['#ffa3b5', '#c03a5a'], ['#a8e4ff', '#2f7cb8']];
   const FOE_SKIN = ['#f2c4a0', '#d9a27a', '#b87a52', '#8a5636', '#efc19c'];
   const FOE_HAIR = ['#2a1d18', '#6b4426', '#c58a3c', '#1e1e26', '#9a3b2a', '#c9ccd6'];
@@ -4615,7 +4775,7 @@ const KCProgress = (() => {
   const blank = () => ({
     name: 'Player', xp: 0, beaten: {}, records: {}, roadSeen: false, opp: null,
     mode: null, trophies: 0, best: 0, rubies: 0, wallet: 0, walletDay: null, diamonds: 0, shop: null, freeChestDay: null, magic: {}, cards: {}, evos: [], pass: null, member: false, king: 1, emotes: [], found: KC_STARTER_DECK.slice(), deck: KC_STARTER_DECK.slice(),
-    chests: [null, null, null, null], cycle: 0, claimed: {}, diff: 0.35, trophyRecord: { w: 0, l: 0, d: 0 },
+    chests: [null, null, null, null], cycle: 0, claimed: {}, streak: 0, trophyRecord: { w: 0, l: 0, d: 0 },
   });
 
   function load(st) {
@@ -4650,7 +4810,20 @@ const KCProgress = (() => {
     if (!Array.isArray(P.deck) || P.deck.length !== 8 || new Set(P.deck).size !== 8 || P.deck.some(id => !P.found.includes(id))) P.deck = KC_STARTER_DECK.slice();
     while (P.chests.length < 4) P.chests.push(null);
     if (roadOpen() && !P.claimed[0]) P.claimed[0] = true; // the first arena opens with the road
+    // A trophy battle that was left before it ended (the page was reloaded or closed) counts as a loss,
+    // so a loss can't be dodged. `abandoned` tells the lobby to say so once.
+    P.abandoned = null;
+    if (P.live && P.live.kind === 'trophy') {
+      const name = P.live.name, r = recordTrophy(1, 0);
+      P.abandoned = { name, delta: r.delta };
+    }
+    P.live = null;
     return P;
+  }
+  // A trophy battle is starting: if it is never finished, it counts as a loss at the next load.
+  function battleStarted(foe) {
+    P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, trophies: foe.trophies, at: Date.now() } : null;
+    save();
   }
   const save = () => store.set(P);
 
@@ -4687,9 +4860,17 @@ const KCProgress = (() => {
       if (unlockedNext) P.opp = unlockedNext.id;
       if (opened) { P.mode = 'trophy'; P.claimed[0] = true; }
     }
+    // a chest for every win while you are still with the trainers, opened straight away: silver for the
+    // first win over a trainer, wooden for a rematch
+    let chestNow = null;
+    if (winner === 0 && (firstWin || !roadOpen())) {
+      const type = firstWin ? 'silver' : 'wooden', c = roll(type), before = P.found.slice();
+      apply(c);
+      chestNow = { chest: type, name: CHESTS[type].name, rubies: c.rubies, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
+    }
     const levelUp = addXp(xp);
     save();
-    return { kind: 'trainer', xp, firstWin, unlockedNext, roadOpened: opened, levelUp };
+    return { kind: 'trainer', xp, firstWin, unlockedNext, roadOpened: opened, levelUp, chestNow };
   }
 
   /* ---------- arenas and the road ---------- */
@@ -4750,81 +4931,69 @@ const KCProgress = (() => {
     for (let n = 2; n <= MAX_LEVEL; n++) if (levels.filter(v => v >= n).length >= Math.min(n, levels.length)) k = n; else break;
     return k;
   }
+  // a value along a curve of [x, y] points, straight between them
+  const curve = (C, x) => { if (x <= C[0][0]) return C[0][1]; for (let i = 1; i < C.length; i++) if (x < C[i][0]) return C[i - 1][1] + (C[i][1] - C[i - 1][1]) * (x - C[i - 1][0]) / (C[i][0] - C[i - 1][0]); return C[C.length - 1][1]; };
+  // where the next opponent is found, from your wins or losses in a row
+  function matchOffset() {
+    const k = P.streak || 0;
+    return k <= -3 ? MATCH.lost3 : k === -2 ? MATCH.lost2 : k >= 3 ? MATCH.won3 : MATCH.offset;
+  }
+  // what a win and a loss are worth against an opponent with `foe` trophies when you have `me`
+  function stakes(me, foe) {
+    const k = (foe - me) * TROPHIES.per, clamp = v => Math.max(TROPHIES.min, Math.min(TROPHIES.max, Math.round(v)));
+    return { win: clamp(TROPHIES.win + k), loss: clamp(TROPHIES.loss - k) };
+  }
+  // what the next trophy battle is likely to be worth (the opponent isn't found until it starts)
+  const nextStakes = () => stakes(P.trophies, P.trophies + matchOffset());
+  // How well a computer opponent plays, from 0 (a beginner) to 1.
+  const skillFor = d => ({
+    react: [lerp(2.2, 0.6, d), lerp(3.6, 1.2, d)], sloppy: lerp(0.5, 0.12, d), attackAt: lerp(9.8, 8, d), idle: lerp(0.45, 0.08, d),
+    fireballValue: lerp(8, 5, d), defend: lerp(0.4, 1, d), gap: [lerp(2.6, 0.5, d), lerp(4.2, 1.1, d)],
+  });
   // The opponent for the next trophy battle: card levels follow their trophies, skill follows P.diff.
   function trophyFoe(rand = Math.random) {
-    const d = Math.max(0, Math.min(1, P.diff)), t = P.trophies;
-    const skill = {
-      react: [lerp(2.2, 0.6, d), lerp(3.6, 1.2, d)], sloppy: lerp(0.5, 0.12, d), attackAt: lerp(9.8, 8, d), idle: lerp(0.45, 0.08, d),
-      fireballValue: lerp(8, 5, d), defend: lerp(0.4, 1, d), gap: [lerp(2.6, 0.5, d), lerp(4.2, 1.1, d)],
-    };
-    const deck = KC_STARTER_DECK.slice();
-    const swap = (id, p) => {
-      if (rand() > p) return;
-      const i = 1 + Math.floor(rand() * 6); // keep the Rhino (0) and Fireball (7)
-      if (!deck.includes(id)) deck[i] = id;
-    };
-    if (t >= 40) swap('skeletons', 0.6);
-    if (t >= 120) swap('cannon', 0.6);
-    if (t >= 140) swap('magmaquake', 0.35);
-    if (t >= 180) swap('magmaturret', 0.4);
-    if (t >= 230) swap('ashfall', 0.35);
-    // Briar Hollow cards, as they unlock on the road
-    if (t >= 330) swap('spears', 0.5);
-    if (t >= 400) swap('pots', 0.5);
-    if (t >= 480) swap('footmen', 0.5);
-    if (t >= 560) swap('flail', 0.5);
-    if (t >= 420) swap('bramblenest', 0.35);
-    if (t >= 500) swap('briarbind', 0.35);
-    if (t >= 580) swap('thornroller', 0.4);
-    // Sunstone Arena cards
-    if (t >= 630) swap('sandstorm', 0.5);
-    if (t >= 710) swap('ramcart', 0.5);
-    if (t >= 790) swap('mole', 0.5);
-    if (t >= 870) swap('camel', 0.45);
-    if (t >= 690) swap('scarabshrine', 0.35);
-    if (t >= 770) swap('dunemortar', 0.3);
-    // Stormspire cards
-    if (t >= 930) swap('bees', 0.5);
-    if (t >= 1010) swap('owl', 0.5);
-    if (t >= 1090) swap('thundercloud', 0.45);
-    if (t >= 1170) swap('griffin', 0.4);
-    if (t >= 1210) swap('judgment', 0.3);
-    if (t >= 1290) swap('cyclone', 0.35);
-    if (t >= 1380) swap('conductor', 0.4);
-    // Arenas 5 to 10: troops take a middle slot; win conditions can take the Rhino's, spells the Fireball's
-    const swapAt = (id, i, p) => { if (rand() <= p && !deck.includes(id)) deck[i] = id; };
-    const NEWER = [[2060, 'frostsprite', 0.45], [2220, 'icegiant', 0.4, 0], [2380, 'flashfreeze', 0.35, 7], [2540, 'wintersage', 0.45],
-      [2670, 'dockraiders', 0.45], [2850, 'barrel', 0.4, 0], [3030, 'broadside', 0.4], [3210, 'harpoon', 0.45],
-      [3380, 'coil', 0.4], [3580, 'sparkbots', 0.45], [3780, 'titan', 0.4, 0], [3980, 'arccannon', 0.4],
-      [4200, 'gemflash', 0.4, 7], [4420, 'shardguards', 0.45], [4640, 'drill', 0.4, 0], [4860, 'prism', 0.45],
-      [5110, 'sunsprite', 0.35], [5350, 'guardian', 0.4], [5590, 'drake', 0.45], [5830, 'phoenix', 0.45],
-      [6100, 'wraiths', 0.45], [6300, 'meteor', 0.35, 7], [6500, 'abyss', 0.4, 0], [6700, 'dreadknight', 0.45],
-      // the expansion's cards from Arena 5 on
-      [2100, 'glacierslam', 0.35], [2420, 'cage', 0.35], [2720, 'powderkeg', 0.35], [2990, 'barracks', 0.3],
-      [3430, 'overclock', 0.3], [3630, 'foundry', 0.25], [3830, 'smelter', 0.35], [4930, 'prismecho', 0.25],
-      [5170, 'heavensguard', 0.35], [5650, 'reflection', 0.3], [5900, 'ballista', 0.3, 0], [6150, 'soulblight', 0.35], [6450, 'collapse', 0.35, 7]];
-    for (const [at, id, pr, slot] of NEWER) if (t >= at) { if (slot !== undefined) swapAt(id, slot, pr); else swap(id, pr); }
-    const name = FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
-    const foeTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
-    const cardLevels = spreadLevels(foeUpgrades(foeTrophies), deck, rand);
+    const t = P.trophies, rec = P.trophyRecord, first = rec.w + rec.l + rec.d < FIRST_STEPS && t < 100;
+    const off = matchOffset(), breather = off <= MATCH.lost2;
+    const foeT = Math.max(0, t + off + Math.round((rand() - 0.5) * MATCH.spread));
+    const d = first ? 0 : Math.max(0, curve(FOE_SKILL.curve, foeT) - (breather ? FOE_SKILL.breather : 0));
+    const skill = skillFor(d);
+    // a play style, and a deck for it from the cards they could have (bot.js: STYLES, buildDeck)
+    const pool = foePool(foeT, rand);
+    const Bot = typeof KCBot !== 'undefined' ? KCBot : null;
+    let style = null, deck = KC_STARTER_DECK.slice();
+    if (Bot && !first) {
+      const ok = Bot.STYLE_IDS.filter(id => Bot.STYLES[id].win.some(w => pool.includes(w)));
+      const choices = ok.length ? ok : ['beatdown'];
+      style = choices[Math.floor(rand() * choices.length)];
+      deck = Bot.buildDeck(style, pool, rand);
+    }
+    const name = foeName(rand), clan = rand() < 0.65 ? CLANS[Math.floor(rand() * CLANS.length)] : null;
+    let mood = 'sporty', mw = rand() * MOODS.reduce((a, m) => a + m[1], 0);
+    for (const [m, w] of MOODS) { if ((mw -= w) < 0) { mood = m; break; } }
+    const foeTrophies = foeT;
+    const upgrades = spreadLevels(first ? 0 : foeUpgrades(foeTrophies), deck, rand), cardLevels = Object.assign({}, upgrades);
     for (const id of deck) cardLevels[id] = Math.max(KC_MIN_LEVEL(id), cardLevels[id]);
     const lvl = Math.min(...Object.values(cardLevels));
     // their King Tower: the players' rule (level N needs N cards at level N), counting the rest of their
-    // collection as levelled with their deck once all eight are past 8
-    const kingLevel = foeKing(Object.values(cardLevels));
+    // collection as levelled with their deck once all eight are past 8, and only levels they upgraded to
+    // (a rare card starts at level 3, but that doesn't raise a new player's King Tower)
+    const kingLevel = foeKing(Object.values(upgrades));
     return {
       id: 'trophy', kind: 'trophy', name, short: name, level: lvl, tier: `${foeTrophies} trophies`,
-      look: foeLook(rand), lines: null, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: foeTrophies, kingLevel,
+      look: foeLook(rand), lines: null, skill, towerDamage: 1, deck, cardLevels, trophies: foeTrophies, kingLevel,
+      style, styleName: style && Bot ? Bot.STYLES[style].name : null, clan, mood, stakes: stakes(t, foeTrophies), breather, first, skillLevel: d,
       // past 700 trophies about half the opponents with a Snowman have its evolution
       evos: foeTrophies >= 700 && deck.includes('snowman') && rand() < 0.5 ? ['snowman'] : [],
     };
   }
-  function recordTrophy(winner, crowns) {
-    const r = P.trophyRecord, before = P.trophies, beforeArena = arena().id;
-    if (winner === 0) { r.w++; P.trophies += TROPHIES.win; P.diff += 0.05; }
-    else if (winner === 1) { r.l++; P.trophies = Math.max(arenaFloor(), P.trophies - TROPHIES.loss); P.diff -= 0.055; }
-    else r.d++;
-    P.diff = Math.max(0, Math.min(1, P.diff));
+  // foeTrophies: the opponent's trophies (from the battle that was started if not given)
+  function recordTrophy(winner, crowns, foeTrophies) {
+    if (foeTrophies === undefined) foeTrophies = P.live && P.live.trophies !== undefined ? P.live.trophies : Math.max(0, P.trophies + MATCH.offset);
+    P.live = null;
+    const r = P.trophyRecord, before = P.trophies, beforeArena = arena().id, st = stakes(P.trophies, foeTrophies);
+    if (winner === 0) { r.w++; P.trophies += st.win; P.streak = Math.max(1, (P.streak || 0) + 1); }
+    else if (winner === 1) { r.l++; P.trophies = Math.max(arenaFloor(), P.trophies - st.loss); P.streak = Math.min(-1, (P.streak || 0) - 1); }
+    else { r.d++; P.streak = 0; }
     P.best = Math.max(P.best, P.trophies);
     let chest = null, slotsFull = false;
     if (winner === 0) {
@@ -5497,9 +5666,9 @@ const KCProgress = (() => {
   const unlockAt = id => { const m = ROAD.find(r => r.kind === 'card' && r.card === id); return m ? m.at : null; };
 
   return {
-    MAX_LEVEL, XP_PER_LEVEL, TROPHIES, ARENAS, ROAD, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
+    MAX_LEVEL, XP_PER_LEVEL, TROPHIES, MATCH, FOE_SKILL, FIRST_STEPS, stakes, nextStakes, ARENAS, ROAD, skillFor, CHESTS, CYCLE, UPGRADE, TIERS, CHEST_RULES,
     chestAllowed, capChest, chestOdds, chestPrice, freeChestReady, claimFreeChest, ECONOMY, rewardTier, winGold, chestMult, copiesToMax, goldToMax, skipCost, skipChest, exchangeInfo, exchange, chestShopOpen, chestBuyLeft, foeKing, buyDiamond, magicUsable,
-    load, save, get state() { return P; },
+    load, save, battleStarted, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,
     trophyFoe, foeUpgrades, spreadLevels, recordTrophy,
@@ -5533,6 +5702,95 @@ const KCBot = (() => {
     luc: { react: [1.4, 2.5], sloppy: 0.28, attackAt: 9.3, idle: 0.2, fireballValue: 6.5, defend: 0.62, gap: [1.7, 2.9] },
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
+
+  /* ---------- play styles ----------
+     Trophy opponents each have a style: a way of building a deck (its core cards, by preference) and
+     habits in battle. attack: change to the energy it waits for before starting a push; probe: chance to
+     open with a cheap card early; chip: casts spare spells at towers; counter: how often it backs up
+     defenders that survive into a counter-push; switch: how often it changes lanes between attacks;
+     back: starts pushes from behind its King Tower. Every deck then gets the same rules: one or two win
+     conditions, two or three spells, at least three cards that hit air but no more than three flyers,
+     a cheap card, and an average cost between 2.9 and 4.4. */
+  const STYLES = {
+    beatdown: { name: 'Heavy pusher', attack: 0.8, probe: 0, chip: 0, counter: 0.7, switch: 0.15, back: true,
+      win: ['titan', 'rhino', 'thundercloud', 'icegiant', 'smelter', 'camel'],
+      core: ['wintersage', 'drake', 'snowman', 'arccannon', 'guardian', 'pots', 'owl', 'archers', 'phoenix', 'flail', 'sunsprite', 'overclock'] },
+    rush: { name: 'Bridge rusher', attack: -2.2, probe: 0.7, chip: 0.2, counter: 0.6, switch: 0.45,
+      win: ['ramcart', 'camel', 'barrel', 'mole', 'harpoon', 'icegiant'],
+      core: ['wolves', 'bees', 'dockraiders', 'gladiator', 'hawks', 'frostsprite', 'skeletons', 'shardguards', 'powderkeg', 'thornroller', 'bramblenest', 'sparkbots'] },
+    cycle: { name: 'Spell cycler', attack: -1, probe: 0.6, chip: 0.6, counter: 0.5, switch: 0.35,
+      win: ['ramcart', 'mole', 'drill', 'barrel', 'camel'],
+      core: ['gladiator', 'archers', 'wintersage', 'skeletons', 'cannon', 'frostsprite', 'snowman', 'gorilla', 'thornroller', 'gemflash', 'glacierslam', 'soulblight'] },
+    control: { name: 'Counter-puncher', attack: 1.8, probe: 0, chip: 0.3, counter: 0.95, switch: 0.3,
+      win: ['harpoon', 'camel', 'ramcart', 'dreadknight', 'thundercloud'],
+      core: ['gorilla', 'griffin', 'conductor', 'coil', 'flail', 'guardian', 'wintersage', 'prism', 'archers', 'cage', 'heavensguard', 'briarbind'] },
+    air: { name: 'Sky raider', attack: 0.2, probe: 0.3, chip: 0.2, counter: 0.6, switch: 0.3,
+      win: ['thundercloud', 'phoenix', 'griffin'],
+      core: ['owl', 'hawks', 'bees', 'drake', 'gladiator', 'wolves', 'skeletons', 'archers', 'sunsprite', 'frostsprite', 'flail', 'overclock'] },
+    spawner: { name: 'Spawner', attack: 0.6, probe: 0.4, chip: 0.25, counter: 0.6, switch: 0.25, back: true,
+      win: ['smelter', 'abyss', 'rhino', 'thundercloud', 'barracks'],
+      core: ['bramblenest', 'scarabshrine', 'barracks', 'wraiths', 'footmen', 'dockraiders', 'archers', 'bees', 'pots', 'snowman', 'soulblight', 'prismecho'] },
+  };
+  const STYLE_IDS = Object.keys(STYLES);
+  // What a card is, for building decks: a win condition, a spell, something that hits air, cheap, splash.
+  const WIN_CARDS = new Set(['rhino', 'ramcart', 'camel', 'thundercloud', 'titan', 'icegiant', 'smelter', 'mole', 'barrel', 'drill', 'abyss', 'ballista', 'dunemortar', 'harpoon', 'phoenix', 'griffin', 'dreadknight', 'barracks']);
+  const hitsAir = id => { const c = KC_CARDS[id]; return c.kind !== 'spell' && (c.targets === 'both' || c.air) && c.dmg > 0 && !c.hidden; };
+  const isSpell = id => KC_CARDS[id].kind === 'spell' && !KC_CARDS[id].mirror;
+  const damaging = id => isSpell(id) && KC_CARDS[id].dmg > 0;
+  const SPELL_PREF = ['fireball', 'spears', 'thornroller', 'glacierslam', 'gemflash', 'sandstorm', 'magmaquake', 'ashfall', 'judgment', 'meteor', 'flashfreeze', 'soulblight', 'cyclone', 'collapse', 'powderkeg', 'heavensguard'];
+  const AIR_PREF = ['archers', 'hawks', 'owl', 'snowman', 'drake', 'bees', 'wintersage', 'prism', 'sparkbots', 'coil', 'conductor', 'griffin', 'phoenix', 'dockraiders', 'bramblenest', 'frostsprite'];
+  // Build a deck of 8 for a style from the cards this opponent has (`pool`); rand makes each different.
+  function buildDeck(styleId, pool, rand) {
+    const st = STYLES[styleId] || STYLES.beatdown, have = new Set(pool), deck = [];
+    // the list in roughly its order of preference, shuffled a little (more with a bigger spread)
+    const shuffleNear = (list, spread = 3) => list.filter(id => have.has(id)).map((id, i) => [id, i + rand() * spread]).sort((a, b) => a[1] - b[1]).map(x => x[0]);
+    const add = id => { if (id && have.has(id) && !deck.includes(id) && deck.length < 8) deck.push(id); };
+    // one win condition, sometimes two
+    const wins = shuffleNear(st.win);
+    add(wins[0] || shuffleNear([...WIN_CARDS])[0] || 'rhino');
+    if (wins[1] && rand() < 0.35 && !(styleId === 'siege' && deck.includes('ballista') && wins[1] === 'dunemortar')) add(wins[1]);
+    // two spells (three for the cycler), the first a damage spell
+    const spells = shuffleNear(SPELL_PREF, 9).filter(id => !deck.includes(id));
+    const nSp = styleId === 'cycle' ? 3 : rand() < 0.25 ? 3 : 2;
+    const dmgFirst = spells.filter(id => damaging(id) && !KC_CARDS[id].ownSide);
+    add(dmgFirst[0] || 'fireball');
+    for (const id of spells) { if (deck.filter(isSpell).length >= nSp) break; add(id); }
+    const flyers = () => deck.filter(id => KC_CARDS[id].air).length;
+    const okFly = id => !KC_CARDS[id].air || flyers() < 3;
+    // the style's core
+    for (const id of shuffleNear(st.core)) { if (deck.length >= 7) break; if ((!isSpell(id) || deck.filter(isSpell).length < 3) && okFly(id)) add(id); }
+    // at least three that hit air
+    for (const id of shuffleNear(AIR_PREF)) {
+      if (deck.filter(hitsAir).length >= 3) break;
+      if (deck.includes(id) || !okFly(id)) continue;
+      if (deck.length >= 8) { const out = deck.findIndex(x => !hitsAir(x) && !isSpell(x) && !WIN_CARDS.has(x)); if (out < 0) break; deck.splice(out, 1); }
+      add(id);
+    }
+    // a cheap card
+    if (!deck.some(id => KC_CARDS[id].cost <= 2)) {
+      const cheap = shuffleNear(['skeletons', 'wolves', 'bees', 'frostsprite', 'sunsprite', 'gemflash', 'thornroller', 'glacierslam', 'icegiant', 'pots', 'powderkeg']);
+      if (cheap[0]) { if (deck.length >= 8) deck.splice(deck.findIndex(x => !isSpell(x) && !WIN_CARDS.has(x) && !(hitsAir(x) && deck.filter(hitsAir).length <= 3)), 1); add(cheap[0]); }
+    }
+    // fill up from the pool by how well it fits
+    for (const id of shuffleNear(st.core.concat(AIR_PREF, KC_STARTER_DECK, pool))) { if (deck.length >= 8) break; if ((!isSpell(id) || deck.filter(isSpell).length < 3) && okFly(id)) add(id); }
+    for (const id of KC_STARTER_DECK) add(id);
+    // keep the average cost sensible: swap the dearest support card for a cheaper one
+    const avg = () => deck.reduce((a, id) => a + KC_CARDS[id].cost, 0) / deck.length;
+    for (let i = 0; i < 4 && avg() > 4.4; i++) {
+      const dear = deck.filter(id => !WIN_CARDS.has(id) && !isSpell(id)).sort((a, b) => KC_CARDS[b].cost - KC_CARDS[a].cost)[0];
+      const cheaper = dear && shuffleNear(st.core.concat(AIR_PREF, KC_STARTER_DECK)).find(id => !deck.includes(id) && !isSpell(id) && KC_CARDS[id].cost < KC_CARDS[dear].cost - 1 && (!hitsAir(dear) || hitsAir(id) || deck.filter(hitsAir).length > 3) && (!KC_CARDS[id].air || KC_CARDS[dear].air || flyers() < 3));
+      if (!cheaper) break;
+      deck[deck.indexOf(dear)] = cheaper;
+    }
+    // and not too cheap: swap the cheapest support card for a dearer one
+    for (let i = 0; i < 4 && avg() < 2.9; i++) {
+      const low = deck.filter(id => !WIN_CARDS.has(id) && !isSpell(id) && KC_CARDS[id].cost <= 2).sort((a, b) => KC_CARDS[a].cost - KC_CARDS[b].cost)[1];
+      const dearer = low && shuffleNear(st.core.concat(AIR_PREF, KC_STARTER_DECK)).find(id => !deck.includes(id) && !isSpell(id) && KC_CARDS[id].cost >= 3 && KC_CARDS[id].cost <= 4 && (!hitsAir(low) || hitsAir(id) || deck.filter(hitsAir).length > 3) && (!KC_CARDS[id].air || flyers() < 3));
+      if (!dearer) break;
+      deck[deck.indexOf(low)] = dearer;
+    }
+    return deck.slice(0, 8);
+  }
   const ROLE = {
     tank: ['conductor', 'griffin', 'wraiths', 'cage', 'harpoon', 'coil', 'cannon', 'scarabshrine', 'dreadknight', 'footmen', 'gorilla', 'shardguards', 'dockraiders', 'bees', 'skeletons', 'wolves', 'prism', 'broadside', 'sparkbots',
       'gladiator', 'guardian', 'flail', 'archers', 'hawks', 'frostsprite', 'bramblenest', 'magmaturret'],
@@ -5568,7 +5826,10 @@ const KCBot = (() => {
     opts = opts || {};
     // A skill is a name from SKILLS or a settings object of the same shape (the trophy bots build one).
     const skill = typeof opts.skill === 'object' ? opts.skill : SKILLS[opts.skill || 'trainer'];
-    return { team, skill, rand: S.mulberry(opts.seed || 99), plan: null, wait: 2.5, lastAttack: 0, lastPlay: null };
+    const rand = S.mulberry(opts.seed || 99);
+    // the lane it favours when both towers are even (chosen per match, so it isn't always the left)
+    return { team, skill, rand, plan: null, wait: 2.5, lastAttack: 0, lastPlay: null, lane: rand() < 0.5 ? 'L' : 'R',
+      style: STYLES[opts.style] || null, styleId: STYLES[opts.style] ? opts.style : null, probed: false, lastLane: null };
   }
 
   const my = (b, y) => S.own(b.team, y);
@@ -5622,6 +5883,33 @@ const KCBot = (() => {
     const afford = id => S.costOf(s, me, id) <= E + 0.5;
     const lvlOf = id => KCSim.levelMult(s.cardLevels[me] && s.cardLevels[me][id] || s.levels[me] || 1);
 
+    const st = b.style || {}, enemy = 1 - me;
+    const enemyTowers = s.ents.filter(e => e.kind === 'tower' && e.team === enemy && !e.dead);
+    // the state of the match: behind on crowns late on, or in overtime / sudden death with a weaker tower
+    const late = s.phase === 'overtime' || s.phase === 'sudden' || (s.double && s.timeLeft < 45);
+    const behind = s.crowns[me] < s.crowns[enemy] || ((s.phase === 'overtime' || s.phase === 'sudden') && S.lowestTower(s, me) < S.lowestTower(s, enemy));
+    // what a spell does to a tower straight away (zones and storms work over time, so count a third of it)
+    const towerHit = id => { const c = KC_CARDS[id]; return c.dmg * (c.towerPct || 0) * lvlOf(id) * (s.towerDamage ? s.towerDamage[me] : 1) * (id === 'collapse' ? 3 : 1) * (c.zone || c.storm ? 0.33 : 1); };
+    // 0. Any damage spell that would bring down a tower now; in overtime, chip the weakest tower
+    for (const id of hand) {
+      if (!damaging(id) || !afford(id) || KC_CARDS[id].ownSide || !(KC_CARDS[id].towerPct > 0) || KC_CARDS[id].zone || KC_CARDS[id].storm) continue;
+      const td = towerHit(id), low = enemyTowers.filter(t => t.hp <= td).sort((a, c) => a.hp - c.hp)[0];
+      if (low) return { card: id, x: low.x, y: my(b, low.y), exact: true, quick: true };
+    }
+    if (late && behind && E >= 6) {
+      const weakest = enemyTowers.slice().sort((a, c) => a.hp / a.maxHp - c.hp / c.maxHp)[0];
+      const sp = hand.filter(id => damaging(id) && afford(id) && !KC_CARDS[id].ownSide && KC_CARDS[id].towerPct > 0).sort((a, c) => towerHit(c) - towerHit(a))[0];
+      if (weakest && sp && b.rand() < 0.6) return { card: sp, x: weakest.x, y: my(b, weakest.y), exact: true, quick: true };
+    }
+    // an enemy siege building (Dune Mortar, Golden Ballista) is a threat to deal with before it sets up
+    const siege = s.ents.find(e => e.kind === 'building' && e.team === enemy && !e.dead && KC_CARDS[e.card].siege);
+    if (siege) {
+      const sy = my(b, siege.y);
+      const sp = hand.find(id => damaging(id) && afford(id) && !KC_CARDS[id].ownSide && KC_CARDS[id].dmg * lvlOf(id) * (KC_CARDS[id].zone ? (KC_CARDS[id].zone.bldMult || 1) : 1) >= siege.hp * 0.45);
+      if (sp) return { card: sp, x: siege.x, y: sy, exact: true, quick: true };
+      const tr = hand.find(id => afford(id) && KC_CARDS[id].kind === 'troop' && KC_CARDS[id].dmg > 0 && !KC_CARDS[id].air && KC_CARDS[id].cost <= 4);
+      if (tr && sy > 13) return { card: tr, x: siege.x, y: Math.max(17.5, sy + 1), quick: true };
+    }
     // 1. A spell on a big clump, or on troops hitting a tower. Fireball counts everything it hits;
     //    Spears only counts what it would finish off (swarms, flyers, ranged troops).
     for (const [spell, extra, finishOnly] of SPELLS) {
@@ -5700,7 +5988,14 @@ const KCBot = (() => {
           const tx = MELEE[pick] ? lead.x : (lead.x + (lead.x < 9 ? 3.5 : 14.5)) / 2;
           return { card: pick, x: tx, y: Math.min(30.5, ahead), quick: lead.y > 22 };
         }
-        return null;
+        // no troop or building to defend with: a damage spell on the attackers, or, with energy about to
+        // overflow, anything that can be played (a counter-push in the other lane) rather than freezing
+        const zap = hand.find(id => afford(id) && KC_CARDS[id].kind === 'spell' && KC_CARDS[id].dmg > 0 && !KC_CARDS[id].ownSide && !KC_CARDS[id].mirror);
+        if (zap && (lead.y > 21 || E >= 9.5)) return { card: zap, x: lead.x, y: lead.y + (lead.e.moving ? 0.8 : 0), exact: true, quick: true };
+        if (E >= 9.5) {
+          const any = hand.filter(id => afford(id) && !KC_CARDS[id].mirror && (KC_CARDS[id].kind !== 'spell' || KC_CARDS[id].ownSide)).sort((a, c) => KC_CARDS[a].cost - KC_CARDS[c].cost)[0];
+          if (any) return { card: any, x: lead.x < 9 ? 14.5 : 3.5, y: 18.5, attack: true };
+        }
       }
     }
 
@@ -5732,10 +6027,41 @@ const KCBot = (() => {
     if (has('foundry') && afford('foundry') && !foes.some(f => f.y > 13) && E >= 7) return { card: 'foundry', x: b.rand() < 0.5 ? 3.5 : 14.5, y: 28.5 };
     // cheap spawners and traps while it is quiet, to have something ready
     if (!foes.some(f => f.y > 14) && E >= 8) for (const id of ['scarabshrine', 'bramblenest']) if (has(id) && afford(id)) return { card: id, x: b.rand() < 0.5 ? 7.5 : 10.5, y: 24.5 };
-    // 4. Start a push once energy is high enough (a trainer sometimes just waits).
-    if (E >= K.attackAt || (E >= 9.9 && b.rand() > K.idle)) {
+    // an early probe: a cheap card to see what comes back (some styles)
+    if (st.probe && !b.probed && s.time > 3 && s.time < 14 && E >= 5) {
+      b.probed = true;
+      if (b.rand() < st.probe) {
+        const cheap = hand.filter(id => afford(id) && KC_CARDS[id].kind === 'troop' && KC_CARDS[id].cost <= 3 && !NO_DEFEND[id]).sort((a, c) => KC_CARDS[a].cost - KC_CARDS[c].cost)[0];
+        if (cheap) { const lx = b.lane === 'L' ? 3.5 : 14.5; return { card: cheap, x: lx, y: b.styleId === 'rush' ? 18.5 : 26.5, attack: true }; }
+      }
+    }
+    // the spell cycler (and others now and then) chips towers with a spare cheap spell at full energy
+    if (st.chip && E >= 9.2 && b.rand() < st.chip * 0.25) {
+      const weakest = enemyTowers.slice().sort((a, c) => a.hp / a.maxHp - c.hp / c.maxHp)[0];
+      const sp = hand.filter(id => damaging(id) && afford(id) && !KC_CARDS[id].ownSide && KC_CARDS[id].towerPct > 0 && KC_CARDS[id].cost <= 4)[0];
+      if (weakest && sp) return { card: sp, x: weakest.x, y: my(b, weakest.y), exact: true };
+    }
+    // counter-push: defenders that survived are crossing the river; back them up
+    if (st.counter && E >= 4 && s.time - b.lastAttack > 2.5) {
+      const crossing = mine.filter(m => m.y < 18.5 && m.y > 10 && !m.e.clone);
+      const cv = crossing.reduce((a, m) => a + m.v, 0);
+      if (cv >= 2.5 && b.rand() < st.counter * 0.35) {
+        const lead = crossing.reduce((a, m) => (m.y < a.y ? m : a), crossing[0]);
+        const pick = ['wintersage', 'snowman', 'drake', 'owl', 'pots', 'prism', 'archers', 'hawks', 'sparkbots', 'griffin', 'phoenix', 'guardian', 'bees', 'flail', 'gladiator', 'wolves', 'dockraiders', 'footmen', 'gorilla']
+          .find(id => has(id) && afford(id));
+        if (pick) return { card: pick, x: lead.x, y: Math.max(17.5, lead.y + 2.5), attack: true };
+      }
+    }
+    // 4. Start a push once energy is high enough (a trainer sometimes just waits); by style, and sooner
+    //    when behind late in the match
+    const attackAt = late && behind ? Math.min(K.attackAt, 6.5) : Math.max(5, Math.min(10, K.attackAt + (st.attack || 0)));
+    if (E >= attackAt || (E >= 9.9 && b.rand() > K.idle)) {
       const enemy = 1 - me;
-      const weak = ['L', 'R'].map(l => S.tower(s, enemy, l)).filter(t => !t.dead).sort((a, c) => a.hp - c.hp)[0];
+      // the weaker tower; when both are even, the lane this bot favours this match (and now and then the
+      // other one, so the attack isn't always where it was last time)
+      const pref = b.rand() < (st.switch !== undefined ? st.switch : 0.25) ? (b.lane === 'L' ? 'R' : 'L') : b.lane;
+      const weak = ['L', 'R'].map(l => S.tower(s, enemy, l)).filter(t => !t.dead)
+        .sort((a, c) => (a.hp / a.maxHp - c.hp / c.maxHp) || (a.lane === pref ? -1 : 1))[0];
       const lx = weak ? weak.x : (b.rand() < 0.5 ? 3.5 : 14.5);
       // the Mole tunnels to just behind the weakest tower (sometimes before anything else)
       const moleAt = weak && { card: 'mole', x: weak.x + (weak.x < 9 ? -0.5 : 0.5), y: my(b, weak.y) - 2.4, attack: true, exact: true };
@@ -5754,7 +6080,7 @@ const KCBot = (() => {
       if (has('smelter') && afford('smelter')) return { card: 'smelter', x: lx, y: 22.5, attack: true };
       // the Steel Titan walks from behind the King Tower; the Icebound Giant leads at the bridge
       if (has('titan') && afford('titan')) return { card: 'titan', x: lx < 9 ? 6.5 : 11.5, y: 30.5, attack: true };
-      if (has('rhino') && afford('rhino')) return { card: 'rhino', x: lx < 9 ? 5.5 : 12.5, y: 30.5, attack: true };
+      if (has('rhino') && afford('rhino')) return { card: 'rhino', x: lx < 9 ? 5.5 : 12.5, y: st.back || b.rand() < 0.6 ? 30.5 : 19.5, attack: true };
       if (has('icegiant') && afford('icegiant')) return { card: 'icegiant', x: lx, y: 18.5, attack: true };
       // a Camel Jockey from the back, a Ram Cart right at the bridge for a fast hit
       if (has('camel') && afford('camel')) return { card: 'camel', x: lx < 9 ? 4.5 : 13.5, y: 29.5, attack: true };
@@ -5771,7 +6097,7 @@ const KCBot = (() => {
     return null;
   }
 
-  return { create, update };
+  return { create, update, STYLES, STYLE_IDS, buildDeck, hitsAir, WIN_CARDS };
 })();
 
 /* Kingdom Clash: arena art, in one place. Each arena lists its lobby centerpiece, its two battle
@@ -11185,7 +11511,7 @@ const KCMenu = (() => {
   // Called by the game when a match ends; returns what changed, for the result screen.
   // crowns: the crowns you took, which count toward the Diamond Pass in trophy battles.
   function recordResult(foe, winner, crowns) {
-    const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns) : G.recordTrainer(foe.id, winner);
+    const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns, foe.trophies) : G.recordTrainer(foe.id, winner);
     return r;
   }
 
@@ -11200,6 +11526,7 @@ const KCMenu = (() => {
     KCSound.play('crown');
     refresh();
     toast(`Simulated win vs ${foe.name}${bits.length ? ': ' + bits.join(', ') : ''}`);
+    if (r.chestNow) showChest(r.chestNow.chest, r.chestNow, r.chestNow.name);
   }
 
   /* ---------- small messages ---------- */
@@ -12594,7 +12921,8 @@ const KCMenu = (() => {
       const a = G.arena();
       $('#oppLabel').textContent = 'Trophy Battle';
       $('#oppName').textContent = `${a.name}`;
-      $('#oppMeta').textContent = `${fmt(p.trophies)} trophies · win +${G.TROPHIES.win} / loss −${G.TROPHIES.loss}`;
+      const st = G.nextStakes();
+      $('#oppMeta').textContent = `${fmt(p.trophies)} trophies · win about +${st.win} / loss about −${st.loss}`;
       if (pic.dataset.id !== TROPHY_ID) { pic.dataset.id = TROPHY_ID; trophyPic(pic); }
       $('#battleSub').textContent = `Trophy battle · ${a.name}`;
     } else {
@@ -12870,6 +13198,9 @@ const KCMenu = (() => {
     clearInterval(ticker);
     ticker = setInterval(tick, 1000);
     refresh();
+    // a trophy battle that was left unfinished last time counted as a loss
+    const ab = P().abandoned;
+    if (ab) { P().abandoned = null; setTimeout(() => toast(`Your battle against ${ab.name} was left before it ended, so it counted as a loss (${ab.delta} trophies).`), 600); }
   }
 
   return {
@@ -12905,6 +13236,14 @@ const KCEmotes = (() => {
     luck: ['luck', 'thanks'], nice: ['thanks', 'thumbs'], whoa: ['cheeky', 'thanks'], thanks: ['thumbs', 'nice'], gg: ['gg', 'thumbs'], oops: ['laugh', 'cheeky'],
   };
   const CHANCE = { reply: 0.35, tower: 0.4, win: 0.4 };
+  // An opponent's temperament changes how often it emotes, and what it sends. greet: says hello at the
+  // start; reply, tower (took one of yours), win: as CHANCE; hurt: lost a tower; lost: lost the match.
+  const MOODS = {
+    sporty: { greet: 0.3, reply: 0.35, tower: 0.4, win: 0.4, hurt: 0.25, lost: 0.5 },
+    friendly: { greet: 0.7, reply: 0.55, tower: 0.25, win: 0.5, hurt: 0.4, lost: 0.7 },
+    cocky: { greet: 0.2, reply: 0.5, tower: 0.75, win: 0.8, hurt: 0.35, lost: 0.1 },
+    quiet: { greet: 0, reply: 0.1, tower: 0.1, win: 0.15, hurt: 0.05, lost: 0.3 },
+  };
   const pick = a => a[Math.floor(Math.random() * a.length)];
 
   /* ---------- the King's faces, in SVG ---------- */
@@ -13131,8 +13470,9 @@ const KCEmotes = (() => {
     if (open) { renderFaces(); restLook(); }
   }
   // a new battle: clear everything
-  function reset() {
+  function reset(mood) {
     S.token++; S.sent = []; S.restUntil = 0; S.lastReply = 0; S.muted = false; S.page = 0;
+    S.mood = MOODS[mood] ? mood : 'sporty';
     // the opponent has a few of the Shop's emotes too
     S.foeExtra = SHOP_FACES.slice().sort(() => Math.random() - 0.5).slice(0, 4);
     for (const t of S.timers) clearTimeout(t); S.timers = [];
@@ -13187,18 +13527,44 @@ const KCEmotes = (() => {
   function maybeReply(id) {
     const now = Date.now();
     if (now - S.lastReply < 3000 || !opts.foeCanEmote()) return;
-    const chance = id === 'gg' && opts.ended() ? 0.6 : CHANCE.reply;
+    const M = MOODS[S.mood] || MOODS.sporty;
+    const chance = id === 'gg' && opts.ended() ? Math.max(0.3, M.lost) : M.reply;
     if (Math.random() >= chance) return;
     S.lastReply = now;
     foeSoon(pick(REPLY[id] || ['laugh', 'thumbs', 'cheeky', 'wow'].concat(foeHas(['cool', 'smug', 'kiss', 'wave']))), 900, 2200);
   }
   const foeHas = ids => ids.filter(id => (S.foeExtra || []).includes(id));
+  const M = () => MOODS[S.mood] || MOODS.sporty;
+  // The battle starts.
+  function foeGreet() {
+    if (Math.random() >= M().greet) return;
+    foeSoon(S.mood === 'cocky' ? pick(['cheeky', 'think'].concat(foeHas(['smug', 'cool']))) : pick(['luck', 'luck', 'wave', 'thumbs'].filter(id => id !== 'wave' || foeHas(['wave']).length)), 600, 1800);
+  }
   // The opponent just took one of your towers.
-  function foeTookTower() { if (Math.random() < CHANCE.tower) foeSoon(pick(['laugh', 'cheeky', 'thumbs', 'wow'].concat(foeHas(['party', 'cool', 'smug', 'popcorn', 'dizzy']))), 700, 1500); }
+  function foeTookTower() {
+    if (Math.random() >= M().tower) return;
+    const list = S.mood === 'friendly' ? ['thumbs', 'oops', 'wow'] : S.mood === 'cocky' ? ['laugh', 'cheeky', 'laugh'].concat(foeHas(['smug', 'popcorn', 'party'])) : ['laugh', 'cheeky', 'thumbs', 'wow'].concat(foeHas(['party', 'cool', 'smug', 'popcorn', 'dizzy']));
+    foeSoon(pick(list), 700, 1500);
+  }
+  // You just took one of theirs.
+  function foeLostTower() {
+    if (Math.random() >= M().hurt) return;
+    const list = S.mood === 'friendly' ? ['nice', 'whoa', 'wow'] : S.mood === 'cocky' ? ['angry', 'oops', 'think'] : ['cry', 'whoa', 'angry', 'nice'];
+    foeSoon(pick(list.filter(id => isFace(id) || PHRASES[id])), 800, 1700);
+  }
   // The opponent won.
-  function foeWon() { if (Math.random() < CHANCE.win) foeSoon(pick(['laugh', 'thumbs', 'gg', 'cheeky'].concat(foeHas(['trophy', 'party', 'salute', 'clap', 'smug']))), 350, 900); }
+  function foeWon() {
+    if (Math.random() >= M().win) return;
+    const list = S.mood === 'cocky' ? ['laugh', 'cheeky'].concat(foeHas(['trophy', 'smug', 'party'])) : S.mood === 'friendly' ? ['gg', 'gg', 'thanks', 'thumbs'] : ['laugh', 'thumbs', 'gg', 'cheeky'].concat(foeHas(['trophy', 'party', 'salute', 'clap', 'smug']));
+    foeSoon(pick(list), 350, 900);
+  }
+  // The opponent lost.
+  function foeLost() {
+    if (Math.random() >= M().lost) return;
+    foeSoon(S.mood === 'cocky' ? pick(['angry', 'cry']) : pick(['gg', 'gg', 'nice', 'cry'].concat(foeHas(['clap', 'salute']))), 600, 1400);
+  }
 
-  return { mount, reset, send, toggle, foeTookTower, foeWon, face, FACES, SHOP_FACES, LABEL, PHRASES, CHANCE, get muted() { return S.muted; } };
+  return { mount, reset, send, toggle, foeGreet, foeTookTower, foeLostTower, foeWon, foeLost, MOODS, face, FACES, SHOP_FACES, LABEL, PHRASES, CHANCE, get muted() { return S.muted; } };
 })();
 
 /* Kingdom Clash: the screens, the game loop, drawing the battle and reading the player's input.
@@ -13216,6 +13582,9 @@ const KCEmotes = (() => {
     sel: -1, hover: null, drag: false, dragMoved: false, toggle: false,
     fx: [], bg: null, zone: null, zoneKey: '', handKey: '', ui: {}, beamStage: {}, online: null, sim: null,
     intro: 0, ended: 0, shake: 0, lastSec: -1, idleHint: false, trainer: null, res: null,
+    // a tower falling: its collapse (seconds since, by tower id), a moment of slow motion, a white flash,
+    // and fireworks when a King Tower falls
+    falls: {}, slowmo: 0, flash: 0, fireworks: 0,
   };
   let cv, ctx;
   const cardImg = id => KCMenu.cardImg(id);
@@ -13256,24 +13625,42 @@ const KCEmotes = (() => {
       levels: [KCProgress.kingInfo().level, trophy ? T.kingLevel || 1 : 1],
     });
     G.sim = G.s;
-    G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9) });
+    G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9), style: T.style });
     const where = trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
-      ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
+      ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
+      ['#introFoeClan', T.clan || ''], ['#introYouTier', trophy ? `${KCProgress.state.trophies} trophies` : 'Training'],
+      ['#introStakes', trophy && T.stakes ? `Win +${T.stakes.win} · Loss −${T.stakes.loss}` : '']]) $(sel).textContent = text;
+    introYou();
     A.trainer($('#introFoe'), T.look);
-    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {} });
+    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {},
+      falls: {}, slowmo: 0, flash: 0, fireworks: 0 });
+    for (const el of document.querySelectorAll('.fly-crown')) el.remove();
     $('#simWinBtn').hidden = false; $('#netWait').hidden = true;
+    $('#leaveBtn').hidden = false; $('#leaveBtn').classList.remove('ask');
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
-    KCEmotes.reset();
+    KCEmotes.reset(T.mood);
     show('battle');
     layout();
-    G.phase = 'intro'; G.intro = 1.7;
+    // a trophy battle first looks for an opponent for a moment
+    G.phase = 'intro'; G.intro = trophy ? 2.7 : 1.7; G.finding = trophy;
+    $('#intro').classList.toggle('finding', trophy);
     $('#intro').hidden = false;
+  }
+  // your side of the VS screen: your King, in blue
+  function introYou() {
+    const el = $('#introYouPic');
+    if (el) el.innerHTML = KCEmotes.face('thumbs', 0);
   }
   function begin() {
     $('#intro').hidden = true;
     G.phase = 'play';
+    // a trophy battle left before it ends (reload, closed tab) counts as a loss next time the game loads
+    if (!G.online) {
+      KCProgress.battleStarted(G.trainer);
+      if (G.trainer.kind === 'trophy') KCEmotes.foeGreet();
+    }
     banner('FIGHT!');
     KCSound.play('fight');
     setTimeout(() => speak('start'), 900);
@@ -13693,6 +14080,7 @@ const KCEmotes = (() => {
         case 'tower': towerFx(e); break;
         case 'double': banner('×2 Energy!', 'Last minute'); KCSound.play('double'); speak('double'); break;
         case 'overtime': banner('Overtime!', 'Next tower wins'); KCSound.play('double'); speak('overtime'); break;
+        case 'sudden': banner('Sudden Death!', 'Every tower is crumbling: the weakest falls first'); KCSound.play('thunderclap'); G.shake = Math.max(G.shake, 0.4); break;
         case 'end': endBattle(e); break;
       }
     }
@@ -13700,7 +14088,17 @@ const KCEmotes = (() => {
   }
   function towerFx(e) {
     KCSound.play('tower');
-    G.shake = Math.max(G.shake, 0.55);
+    const king = e.sub === 'king';
+    // the collapse, a beat of slow motion (not online, where both screens keep the same clock), a white
+    // flash and a hard shake; the crown flies to the score
+    if (e.id) G.falls[e.id] = 0;
+    if (!e.chain) {
+      if (!G.online) G.slowmo = Math.max(G.slowmo, king ? 0.9 : 0.45);
+      G.flash = Math.max(G.flash, king ? 0.55 : 0.3);
+      G.shake = Math.max(G.shake, king ? 1.0 : 0.8);
+      flyCrown(e);
+      if (king) { G.fireworks = 2.4; setTimeout(() => KCSound.play('crown'), 450); setTimeout(() => KCSound.play('crown'), 800); }
+    }
     KCScenery.cheer(1 - e.team);
     for (let i = 0; i < 26; i++) {
       const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 5;
@@ -13713,13 +14111,33 @@ const KCEmotes = (() => {
     }
     puff(e.x, e.y, 16, '#cfc8dc', 1.6);
     if (e.team === 1) {
-      G.fx.push({ kind: 'crown', x: e.x, y: e.y, life: 1.6, max: 1.6, team: 0 });
       setTimeout(() => KCSound.play('crown'), 250);
-      if (e.sub !== 'king') speak('youTower');
+      if (e.sub !== 'king') { speak('youTower'); if (!G.online && G.trainer.kind === 'trophy') KCEmotes.foeLostTower(); }
     } else {
-      G.fx.push({ kind: 'crown', x: e.x, y: e.y, life: 1.6, max: 1.6, team: 1 });
       if (e.sub !== 'king') { speak('myTower'); if (!G.online) KCEmotes.foeTookTower(); }
     }
+  }
+  // A crown leaves the fallen tower and flies to the score (the side panel, or the clock on small screens),
+  // which bumps as it lands.
+  function flyCrown(e) {
+    const box = $('#arena').getBoundingClientRect(), side = e.team === 1 ? '#crownYou' : '#crownFoe';
+    let to = $(side);
+    if (!to || !to.offsetParent) to = $('#miniTimer');
+    if (!to || !to.offsetParent) return;
+    const tr = to.getBoundingClientRect(), el = document.createElement('i');
+    el.className = 'fly-crown' + (e.team === 1 ? ' you' : ' foe');
+    const x0 = box.left + SX(e.x), y0 = box.top + SY(e.y) - G.k * 2.2;
+    el.style.left = x0 - 20 + 'px'; el.style.top = y0 - 18 + 'px';
+    document.body.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.classList.add('go');
+      el.style.transform = `translate(${tr.left + tr.width / 2 - x0}px, ${tr.top + tr.height / 2 - y0}px) scale(0.6)`;
+    }));
+    setTimeout(() => {
+      el.remove();
+      const row = to.closest('.score-row') || to;
+      row.classList.remove('bump'); void row.offsetWidth; row.classList.add('bump');
+    }, 1150);
   }
   function ring(x, y, team, r) { G.fx.push({ kind: 'ring', x, y, r, team, life: 0.45, max: 0.45 }); }
   function dust(x, y, n) {
@@ -13732,6 +14150,19 @@ const KCEmotes = (() => {
     for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, d = Math.random() * (spread || 0.6); G.fx.push({ kind: 'puff', x: x + Math.cos(a) * d, y: y + Math.sin(a) * d * 0.7, vx: Math.cos(a) * 0.6, vy: Math.sin(a) * 0.4 - 0.4, r: 0.25 + Math.random() * 0.3, col, life: 0.6, max: 0.6 }); }
   }
   function updateFx(dt) {
+    // a King Tower down: fireworks bursting over the arena for a couple of seconds
+    if (G.fireworks > 0) {
+      G.fireworks -= dt;
+      if (Math.random() < dt * 7) {
+        const x = 2 + Math.random() * (S.W - 4), y = 3 + Math.random() * (S.H - 10), cols = ['#ffe27a', '#ff8ad8', '#8cf0ff', '#9be07a', '#ffb052', '#c9a8ff'];
+        const col = cols[Math.floor(Math.random() * cols.length)], n = 18;
+        for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2, v = 3 + Math.random() * 1.5; G.fx.push({ kind: 'dot', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: 0.1, col, life: 0.9, max: 0.9 }); }
+        G.fx.push({ kind: 'flash', x, y, r: 1.4, life: 0.35, max: 0.35 });
+        KCSound.play('pop');
+      }
+    }
+    for (const id in G.falls) G.falls[id] += dt;
+    if (G.flash > 0) G.flash = Math.max(0, G.flash - dt);
     for (const f of G.fx) {
       f.life -= dt;
       if (f.vx !== undefined) { f.x += f.vx * dt; f.y += f.vy * dt; }
@@ -13808,9 +14239,15 @@ const KCEmotes = (() => {
     O.unsub.push(m.room.on('mp.bye', msg => { if (msg.peer === O.peer) O.bye = true; }));
     O.unsub.push(m.room.onPeers(ch => { if ((ch.left || []).some(p => p.peer === O.peer)) O.leftAt = O.leftAt || performance.now(); if ((ch.joined || []).some(p => p.peer === O.peer)) O.leftAt = 0; }));
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', `Online · ${T.tier}`], ['#scoreFoe', T.name], ['#introFoeName', T.name],
-      ['#introFoeTier', `Online battle · King Tower ${foe.king}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
+      ['#introFoeTier', `Online battle · King Tower ${foe.king}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
+      ['#introFoeClan', ''], ['#introYouTier', `${KCProgress.state.trophies} trophies`], ['#introStakes', '']]) $(sel).textContent = text;
+    introYou();
     A.trainer($('#introFoe'), T.look);
-    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {} });
+    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {},
+      views: {}, falls: {}, slowmo: 0, flash: 0, fireworks: 0, finding: false });
+    for (const el of document.querySelectorAll('.fly-crown')) el.remove();
+    $('#intro').classList.remove('finding');
+    $('#leaveBtn').hidden = false; $('#leaveBtn').classList.remove('ask');
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true; $('#simWinBtn').hidden = true; $('#netWait').hidden = true;
     KCScenery.reset();
     KCEmotes.reset();
@@ -13921,13 +14358,13 @@ const KCEmotes = (() => {
   /* ---------- the end ---------- */
   function endBattle(e) {
     G.phase = 'end';
-    G.ended = 1.8;
+    G.ended = e.reason === 'king' || e.reason === 'sudden' ? 2.6 : 1.8;
     if (e.winner >= 0) KCScenery.celebrate(e.winner);
     select(-1);
     G.res = G.online ? { kind: 'online' } : KCMenu.recordResult(G.trainer, e.winner, G.s.crowns[0]);
     if (G.online) endOnline();
     $('#countdown').hidden = true;
-    if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); }
+    if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); if (!G.online && G.trainer.kind === 'trophy') KCEmotes.foeLost(); }
     else if (e.winner === 1) { banner('Defeat'); setTimeout(() => KCSound.play('lose'), 300); if (!G.online) KCEmotes.foeWon(); }
     else banner('Draw');
   }
@@ -13956,16 +14393,28 @@ const KCEmotes = (() => {
       tr.className = 'res-trophy' + (res.delta > 0 ? ' up' : res.delta < 0 ? ' down' : '');
       tr.innerHTML = `<i class="trophy-i" aria-hidden="true"></i><b>${res.delta > 0 ? '+' : ''}${res.delta}</b><small>${res.trophies} trophies</small>`;
     }
+    // a trainer's chest, opened on the spot
+    $('#chestNowBtn').hidden = !res.chestNow;
+    if (res.chestNow) { $('#chestNowText').textContent = `Open ${res.chestNow.name}`; res.chestShown = false; }
     $('#nextBtn').hidden = !res.unlockedNext;
-    $('#againBtn').className = res.unlockedNext ? 'pill' : 'big-btn';
+    $('#nextBtn').className = res.chestNow ? 'pill' : 'big-btn';
+    $('#againBtn').className = res.unlockedNext || res.chestNow ? 'pill' : 'big-btn';
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
     if (res.kind === 'online') { un.hidden = false; un.textContent = 'Online battle · no trophies won or lost'; }
     $('#againBtn').hidden = res.kind === 'online';
-    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).' }[r.reason];
+    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', sudden: w === 0 ? 'Sudden death: their tower crumbled first.' : 'Sudden death: your tower crumbled first.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).', surrender: 'You surrendered.' }[r.reason];
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
     $('#resSmall').textContent = res.kind === 'online' ? `${why} ${m}:${sec} played, ${s.played[0]} cards from you.` : `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
     $('#result').hidden = false;
-    setTimeout(() => (res.unlockedNext ? $('#nextBtn') : $('#againBtn')).focus(), 50);
+    setTimeout(() => (res.chestNow ? $('#chestNowBtn') : res.unlockedNext ? $('#nextBtn') : $('#againBtn')).focus(), 50);
+  }
+  // open the trainer's chest: back to the lobby, where the chest opening plays
+  function openChestNow() {
+    const res = G.res;
+    if (!res || !res.chestNow || res.chestShown) return;
+    res.chestShown = true;
+    goHome();
+    KCMenu.showChest(res.chestNow.chest, res.chestNow, res.chestNow.name);
   }
 
   /* ---------- drawing ---------- */
@@ -13998,6 +14447,14 @@ const KCEmotes = (() => {
     for (const d of ground.concat(air)) bars(c, d);
     drawPending(c, t);
     if (selId && G.hover) ghost(c, selId, t);
+    const W2 = (S.W + 2 * B) * k, H2 = (S.H + 2 * B) * k;
+    if (s.phase === 'sudden' && !s.result) {
+      // sudden death: a red pulse round the edge of the arena
+      const a = 0.35 + 0.2 * Math.sin(t * 9), g = c.createRadialGradient(W2 / 2, H2 / 2, Math.min(W2, H2) * 0.35, W2 / 2, H2 / 2, Math.max(W2, H2) * 0.62);
+      g.addColorStop(0, 'rgba(200,20,40,0)'); g.addColorStop(1, `rgba(200,20,40,${a})`);
+      c.fillStyle = g; c.fillRect(0, 0, W2, H2);
+    }
+    if (G.flash > 0) { c.fillStyle = `rgba(255,250,235,${Math.min(0.75, G.flash * 1.6)})`; c.fillRect(0, 0, W2, H2); }
   }
   // Cinder Keep: the lava breathes, heat shimmers above it, embers rise off it and the corner braziers
   // flicker. All light, and cheap: one pass of a few shapes per frame.
@@ -14159,16 +14616,59 @@ const KCEmotes = (() => {
     c.fillStyle = g; c.beginPath(); c.arc(x, y, Math.max(1, r * 1.1), 0, Math.PI * 2); c.fill();
     c.restore();
   }
+  // A damaged tower: cracks from half health, smoke below a quarter; in sudden death every tower
+  // crumbles, with pebbles falling off it.
+  function towerWear(c, e, k, t) {
+    const hurt = 1 - e.hp / e.maxHp, h = e.sub === 'king' ? 2.4 : 2.0, w = e.half * 0.8;
+    if (hurt > 0.45) {
+      c.strokeStyle = 'rgba(30,18,40,0.75)'; c.lineWidth = Math.max(1.2, k * 0.07); c.lineCap = 'round';
+      const n = hurt > 0.75 ? 4 : 2;
+      for (let i = 0; i < n; i++) {
+        const sx = ((i * 0.37 + e.id * 0.13) % 1 - 0.5) * w * 1.6, sy = -h * (0.35 + 0.15 * (i % 3));
+        c.beginPath(); c.moveTo(sx * k, sy * k);
+        c.lineTo((sx + 0.18) * k, (sy + 0.22) * k); c.lineTo((sx + 0.05) * k, (sy + 0.42) * k); c.lineTo((sx + 0.24) * k, (sy + 0.62) * k);
+        c.stroke();
+      }
+    }
+    const sudden = G.s && G.s.phase === 'sudden';
+    if ((hurt > 0.75 && Math.random() < 0.06) || (sudden && Math.random() < 0.35)) {
+      G.fx.push({ kind: 'puff', x: e.x + (Math.random() - 0.5) * w, y: e.y - h * 0.7, vx: 0, vy: -0.8, r: 0.25, col: sudden ? 'rgba(200,180,190,0.7)' : 'rgba(70,64,80,0.55)', life: 0.9, max: 0.9 });
+      if (sudden) G.fx.push({ kind: 'rock', x: e.x + (Math.random() - 0.5) * w * 2, y: e.y, vx: (Math.random() - 0.5) * 1.5, vy: 0.3, z: h * 3, vz: 0, r: 0.07 + Math.random() * 0.08, life: 0.8, max: 0.8, col: '#b8b2a8' });
+    }
+  }
+  // A hit flash: the sprite drawn a second time on top, added to itself, so it brightens for a moment.
+  // (A canvas filter did this before, but filters are slow: every dropped frame landed on a hit.)
+  function lit(c, flash, f, alpha) {
+    f();
+    if (flash > 0) {
+      const a = c.globalAlpha, op = c.globalCompositeOperation;
+      c.globalCompositeOperation = 'lighter'; c.globalAlpha = a * (alpha || 0.5) * Math.min(1, flash / 0.08);
+      f();
+      c.globalCompositeOperation = op; c.globalAlpha = a;
+    }
+  }
   function drawEnt(c, d, t) {
     const e = d.e, k = G.k, x = SX(d.x), y = SY(d.y);
     if (e.kind === 'tower') {
       const target = e.target && G.s.ents.find(u => u.id === e.target);
       const face = target ? (target.x >= e.x ? 1 : -1) : (e.team === 0 ? 1 : -1);
       c.save(); c.translate(x, y);
-      if (e.dead) A.rubble(c, k, { team: e.team, sub: e.sub });
+      const o = { team: e.team, face, active: e.active, t, view: e.team === 0 ? 'back' : 'front', atk: Math.max(0, e.cd / e.hit - 0.6) * 2.5, hurt: 1 - e.hp / e.maxHp };
+      const draw = () => (e.sub === 'king' ? A.kingTower : A.archerTower)(c, k, o);
+      const fall = G.falls[e.id];
+      if (e.dead && fall !== undefined && fall < 0.9) {
+        // collapsing: the tower shakes and sinks into its own dust, the rubble rising in its place
+        const p = fall / 0.9;
+        c.globalAlpha = Math.min(1, p * 1.6); A.rubble(c, k, { team: e.team, sub: e.sub }); c.globalAlpha = 1;
+        c.save(); c.beginPath(); c.rect(-k * 4, -k * 8, k * 8, k * 8 + e.half * k * 0.5); c.clip();
+        c.translate(Math.sin(fall * 70) * k * 0.12 * (1 - p), p * p * k * 3.4); c.rotate((e.x < 9 ? -1 : 1) * p * 0.12);
+        c.globalAlpha = 1 - p * 0.5; draw();
+        c.restore();
+        if (Math.random() < 0.7) puff(e.x + (Math.random() - 0.5) * e.half * 2, e.y + 0.2, 1, 'rgba(210,200,225,0.8)', 0.4);
+      } else if (e.dead) A.rubble(c, k, { team: e.team, sub: e.sub });
       else {
-        if (e.flash > 0) c.filter = 'brightness(1.5)';
-        (e.sub === 'king' ? A.kingTower : A.archerTower)(c, k, { team: e.team, face, active: e.active, t, view: e.team === 0 ? 'back' : 'front', atk: Math.max(0, e.cd / e.hit - 0.6) * 2.5 });
+        lit(c, e.flash, draw, 0.35);
+        towerWear(c, e, k, t);
       }
       c.restore();
       return;
@@ -14177,8 +14677,8 @@ const KCEmotes = (() => {
     if (e.kind === 'building') {
       c.save(); c.translate(x, y);
       if (e.deploy > 0) { const sc = Math.max(0.3, 1 - Math.max(0, e.deploy - 0.6) * 2); c.globalAlpha = 0.7; c.scale(sc, sc); }
-      if (e.flash > 0) c.filter = 'brightness(1.6)';
-      A.building(c, e.card, k, { team: e.team, angle: Math.atan2(e.aimY, e.aimX), atk: Math.max(0, e.atk / 0.25 + (e.beamOn ? 0.6 : 0)), hidden: e.hidden, rise: e.rise, t: t + e.id * 0.37 });
+      const bo = { team: e.team, angle: Math.atan2(e.aimY, e.aimX), atk: Math.max(0, e.atk / 0.25 + (e.beamOn ? 0.6 : 0)), hidden: e.hidden, rise: e.rise, t: t + e.id * 0.37 };
+      lit(c, e.flash, () => A.building(c, e.card, k, bo), 0.45);
       c.restore();
       if (e.beam && e.beamOn) {
         const tg = G.s.ents.find(u => u.id === e.beamOn);
@@ -14196,7 +14696,8 @@ const KCEmotes = (() => {
     if (e.card === 'mole' && e.deploy > 0) { surfacing(c, e, x, y, t); return; }
     // the Dread Knight mid-leap rises in an arc; a troop on the end of a harpoon rope is off the ground
     const leapF = e.leap ? Math.min(1, e.leap.t / e.leap.dur) : 0;
-    const lift = (liftOf(e) + (e.leap ? Math.sin(leapF * Math.PI) * 2.2 : 0) + (e.pulled ? 0.35 : 0)) * k;
+    const cheer = G.phase === 'end' && G.s.result && G.s.result.winner === e.team ? Math.abs(Math.sin(t * 7 + e.id)) * 0.35 : 0;
+    const lift = (liftOf(e) + (e.leap ? Math.sin(leapF * Math.PI) * 2.2 : 0) + (e.pulled ? 0.35 : 0) + cheer) * k;
     if (!e.air) shadow(c, x, y, e.radius * k * 1.05);
     ropes(c, e, x, y - lift);
     // the Griffin's beam: a crackling line of storm light to its target, thicker as it powers up
@@ -14215,9 +14716,14 @@ const KCEmotes = (() => {
     let sc = 1;
     if (e.deploy > 0) { sc = 1 - Math.max(0, e.deploy - 0.75) * 2; c.globalAlpha = 0.65; }
     if (sc < 1) c.scale(Math.max(0.2, sc), Math.max(0.2, sc));
-    if (e.flash > 0) c.filter = 'brightness(1.8)';
-    // a Prism Echo copy: a shimmering, see-through crystal double
-    if (e.clone) { c.globalAlpha *= 0.72; c.filter = e.flash > 0 ? 'brightness(1.8)' : 'saturate(0.55) brightness(1.3) hue-rotate(165deg)'; }
+    // a Prism Echo copy: a shimmering, see-through crystal double (a cyan glow behind it, the troop drawn
+    // faint, then added over itself so it shines)
+    if (e.clone) {
+      const g = c.createRadialGradient(0, -k * 0.6, 0, 0, -k * 0.6, k * 1.1);
+      g.addColorStop(0, 'rgba(150,240,255,0.45)'); g.addColorStop(1, 'rgba(150,240,255,0)');
+      c.fillStyle = g; c.fillRect(-k * 1.1, -k * 1.7, k * 2.2, k * 2.2);
+      c.globalAlpha *= 0.55;
+    }
     const o = { team: e.team, t: t + e.id * 0.37, walk: e.moving, atk: Math.max(0, e.atk / 0.28), face: e.face, id: e.id, view: facingOf(e), evo: e.evo };
     if (e.ram) o.power = Math.max(0, Math.min(1, (e.speed - e.baseSpeed) / (e.maxSpeed - e.baseSpeed)));
     if (e.rider) o.ratk = Math.max(0, e.rider.atk / 0.4);
@@ -14228,7 +14734,7 @@ const KCEmotes = (() => {
     if (e.hatch !== undefined) o.hatch = 1 - e.hatch / KC_CARDS.phoenix.egg.hatch;
     if (e.beam) o.beam = e.beamOn ? 1 + Math.min(2, Math.floor(e.beamTime / e.beamStage)) : 0;
     if (e.rageEnd > G.s.time) raged(c, e, 0, lift, k, t);
-    A.troop(c, e.card, k, o);
+    lit(c, e.clone ? Math.max(e.flash, 0.08) : e.flash, () => A.troop(c, e.card, k, o), e.clone ? 0.6 : 0.6);
     c.restore();
     frozen(c, e, x, y - lift, e.radius * k * 1.25, t);
     if (e.boundEnd > G.s.time) vines(c, e, x, y, k, t);
@@ -14840,17 +15346,31 @@ const KCEmotes = (() => {
       b.style.setProperty('--p', p.toFixed(3));
     });
     const left = Math.max(0, Math.ceil(s.timeLeft)), tl = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
-    const ot = s.phase === 'overtime';
+    const ot = s.phase === 'overtime' || s.phase === 'sudden';
+    // who is ahead when overtime ends: the side whose weakest tower has the bigger share of its health
+    const lb = $('#leadBar');
+    if (ot && !s.result) {
+      const a = S.lowestTower(s, 0), f = S.lowestTower(s, 1), key = `${Math.round(a * 100)}|${Math.round(f * 100)}|${s.phase}`;
+      if (u.lead !== key) {
+        u.lead = key;
+        const who = a > f + 0.004 ? 'You lead' : f > a + 0.004 ? 'They lead' : 'Level';
+        lb.innerHTML = `<small>${s.phase === 'sudden' ? 'Sudden death' : 'If time runs out'}: weakest tower</small><span class="lb-row"><b class="y">${Math.round(a * 100)}%</b><span class="lb-bar"><i class="y" style="width:${(a / (a + f || 1) * 100).toFixed(1)}%"></i></span><b class="f">${Math.round(f * 100)}%</b></span><em class="${who === 'You lead' ? 'y' : who === 'They lead' ? 'f' : ''}">${who}</em>`;
+      }
+      lb.hidden = false;
+    } else if (!lb.hidden) lb.hidden = true;
     if (u.tl !== tl || u.ot !== ot) {
       u.tl = tl; u.ot = ot;
       $('#timerVal').textContent = tl;
-      $('#timerLabel').textContent = ot ? 'Overtime' : 'Time left';
+      $('#timerLabel').textContent = s.phase === 'sudden' ? 'Sudden death' : ot ? 'Overtime' : 'Time left';
       $('#timer').classList.toggle('ot', ot);
       $('#timer').classList.toggle('low', !ot && left <= 30);
-      $('#miniTimer').innerHTML = `${ot ? 'Overtime' : 'Time'}<br>${tl}`;
+      $('#miniTimer').classList.toggle('low', !ot && left <= 30);
     }
     const cr = s.crowns.join();
     if (u.cr !== cr) { u.cr = cr; $('#crownYou').textContent = s.crowns[0]; $('#crownFoe').textContent = s.crowns[1]; }
+    // on small screens the clock sits on the arena with the crown score under it
+    const mt = `${tl}|${ot}|${cr}|${s.phase}`;
+    if (u.mt !== mt) { u.mt = mt; $('#miniTimer').innerHTML = `${s.phase === 'sudden' ? 'Sudden' : ot ? 'Overtime' : 'Time'}<br><b>${tl}</b><span class="mt-cr" aria-label="Crowns: you ${s.crowns[0]}, opponent ${s.crowns[1]}"><span class="y">${s.crowns[0]}</span> – <span class="f">${s.crowns[1]}</span></span>`; }
     if (G.phase === 'play' && left <= 10 && left > 0 && left !== G.lastSec) {
       G.lastSec = left;
       const cd = $('#countdown');
@@ -14874,11 +15394,15 @@ const KCEmotes = (() => {
     KCScenery.frame(now);
     if (G.phase === 'intro') {
       G.intro -= dt;
+      if (G.finding && G.intro <= 1.7) { G.finding = false; $('#intro').classList.remove('finding'); KCSound.play('select'); }
       if (G.intro <= 0) begin();
     } else if (G.phase === 'play' && G.online) {
       onlineTick(dt, now);
     } else if (G.phase === 'play') {
-      G.acc += dt;
+      // a moment of slow motion as a tower falls
+      const slow = G.slowmo > 0 ? 0.3 : 1;
+      if (G.slowmo > 0) G.slowmo -= dt;
+      G.acc += dt * slow;
       let n = 0;
       while (G.acc >= S.DT && n < 6 && G.phase === 'play') {
         S.step(G.s);
@@ -14892,7 +15416,7 @@ const KCEmotes = (() => {
       G.ended -= dt;
       if (G.ended <= 0 && $('#result').hidden) showResult();
     }
-    updateFx(dt);
+    updateFx(dt * (G.slowmo > 0 ? 0.4 : 1));
     draw(G.phase === 'play' ? Math.min(1, G.acc / S.DT) : 1, now / 1000);
     ui();
   }
@@ -14916,7 +15440,20 @@ const KCEmotes = (() => {
     });
     $('#againBtn').addEventListener('click', () => startBattle(G.trainer.kind === 'trophy' ? KCMenu.nextFoe('trophy') : G.trainer));
     $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext));
-    $('#homeBtn').addEventListener('click', goHome);
+    $('#homeBtn').addEventListener('click', () => { if (G.res && G.res.chestNow && !G.res.chestShown) openChestNow(); else goHome(); });
+    $('#chestNowBtn').addEventListener('click', openChestNow);
+    // Surrender: tap once to ask, again within 3 s to give up the battle (a loss, as if the King fell).
+    // Online it tells the other player, who wins.
+    let leaveT = 0;
+    $('#leaveBtn').addEventListener('click', () => {
+      const b = $('#leaveBtn');
+      if (G.phase !== 'play' || !G.s || G.s.result) return;
+      if (!b.classList.contains('ask')) { b.classList.add('ask'); KCSound.play('select'); clearTimeout(leaveT); leaveT = setTimeout(() => b.classList.remove('ask'), 3000); return; }
+      b.classList.remove('ask'); clearTimeout(leaveT);
+      if (G.online) { try { Promise.resolve(G.online.room.emit('mp.bye', {})).catch(() => {}); } catch (e) { /* gone */ } S.forceEnd(G.sim, 1 - G.online.team, 'surrender'); G.s = viewOf(G.sim); }
+      else S.forceEnd(G.s, 1, 'surrender');
+      handleEvents();
+    });
     // TEMPORARY test button: ends the match as a win, with the same rewards as a real one.
     $('#simWinBtn').addEventListener('click', () => {
       if (G.phase !== 'play' || !G.s || G.s.result) return;
