@@ -18279,6 +18279,785 @@ EVO.cat({ ...{"id": "boardgames", "name": "Board games", "icon": "🎲", "q": "N
 4|Kolowis Awithlaknannai
 4|Omweso
 ` });
+EVO.cat({ ...{"id": "cardgames", "name": "Card games", "icon": "🃏", "q": "Name a **card game**.", "strip": ["game", "card game"], "level": 2}, list: `
+0|Poker
+0|Blackjack|twenty-one
+0|Contract bridge|bridge|bridge game|game of bridge
+0|Klondike|Fascination|Triangle|Patience|Solitaire|Canfield|American Patience|Demon Patience
+0|Texas hold 'em|hold 'em
+0|War
+0|Baccarat|baccara
+0|Rummy
+0|Crazy Eights
+0|Canasta
+0|Whist
+0|Go Fish
+0|Old maid
+0|Magic: The Gathering|Magic|MTG|Magic TCG
+2|Cheat|Professional eater|banana split|I Doubt It|Verish' Ne Verish'|bullshit|BS
+2|Uno
+2|FreeCell
+2|Solitaire|patience|solitaire card game|patience card game
+2|Spades
+2|Skat|Scat
+2|Cribbage|crib
+2|Hearts|Calamity Jane|Slippery Bitch
+2|Collectible card|Collectible card game|trading card game|TCG|customizable card game|CCG|expandable card game
+2|Hanafuda|hwatu
+2|Mau-Mau|Macau
+2|Durak
+2|Pokémon Trading Card Game|Pokemon TCG|Pokémon Trading Card
+2|Seven-card stud|7-card stud|Down-The-River|Seven-Toed Pete
+2|Domino|Sevens|Parliament|Fan Tan
+2|Pinochle
+2|Spider|Roosevelt's Favorite|Roosevelt's Favourite|Spider Solitaire
+2|Kings Corner
+2|Pairs|Memory|Concentration
+2|Black Lady|Black Widow|Black Maria|Black Lady Hearts|American Hearts|Rickety Kate|Slippery Anne
+2|Briscola
+2|Scopa
+2|Euchre
+2|Omaha hold 'em
+2|Five-card draw|Five-card draw poker
+2|Tarot card games|tarot card game|tarot|tarocchi|taroccho|tarock
+2|Yu-Gi-Oh! Trading Card Game|Yu Gi Oh card game|Yu-Gi-Oh! Trading Card
+2|Belote
+2|Piquet
+2|Kemps|Canes
+2|President|Scum|Kings|Landlord|Scumbag|Janitor|Rich Man Poor Man|Arsehole|Kings and Assholes|Warlords and Scumbags
+2|7 Wonders|Seven Wonders
+2|Dominion
+2|Karuta
+2|Tarot of Marseilles
+1|Bezique
+2|French Tarot|tarot|jeu de tarot
+2|Munchkin
+2|Oh hell|wist|ah hell|contract whist|Oh Heck|Up and Down the River
+2|Tressette
+2|Black Peter
+2|Preferans|Russian Preference
+2|Cards Against Humanity|CAH
+2|Deck-building|Deck-building game|deck builder|deck-building card game
+2|Online poker|Internet poker
+2|Splendor
+2|Sette e mezzo|Seven and a Half
+2|Truco
+2|Strip poker
+2|Trick-taking|Trick-taking game|trick-and-meld game
+2|Twenty-one|blackjack
+2|Jass
+2|Écarté
+2|6 nimmt!|Take 5|6 takes|Take 6
+2|Gin rummy|Gin
+2|Hanabi
+2|Pig|Spoons|Donkey|1-2-3 Pass
+2|Pyramid
+2|World of Warcraft Trading Card Game|WoW TCG|World of Warcraft Trading Card
+2|Bohnanza
+2|Five-card stud
+2|Illuminati
+2|Razz
+2|Sixty-six|Paderbörnern|66
+2|Stud poker
+2|Visconti–Sforza Tarot
+2|Chinese poker
+2|Egyptian Ratscrew
+2|Go-Stop
+2|Ombre
+2|Slapjack
+2|Video poker
+2|Snap
+2|Cassino|Casino
+2|Dou dizhu
+2|Mus
+2|Schafkopf
+2|As-Nas
+2|Caribbean stud poker
+2|Harry Potter Trading Card Game|Harry Potter Trading Card
+2|Koi-Koi
+2|Mille Bornes
+2|Three-card monte|monte|find the lady|three-card trick
+2|Doppelkopf
+2|Tute
+2|500 rum|Michigan rummy|Persian rummy|pinochle rummy|rummy 500|500 rummy
+2|Badugi|badougi
+2|Beggar-my-neighbour|Beggar Thy Neighbor
+2|Cardfight!! Vanguard
+2|Digital collectible card|Digital collectible card game|collectible card video game|CCG|OCCG|collectable card video game|DCCG|online collectible card game
+2|Russian bank|Touch|Crapette|Tunj
+2|Shithead|Karma|Danish|Shed|Palace
+2|Big two|Big 2|Choi Dai Di
+2|Daifugō|Tycoon|President|Capitalist|Daihinmin
+2|Fluxx
+2|Kabufuda
+2|Manille
+2|Tichu
+2|Trente et quarante|Rouge-et-Noir
+2|Vampire: The Eternal Struggle
+2|Faro|Pharo
+2|24|24 game
+2|Conquian|Coon Can
+2|Gnav
+2|Happy families
+2|KeyForge
+2|Legends of the Three Kingdoms|Sanguosha|Three Kingdoms Kill
+2|Phase 10
+2|Saboteur
+2|Schnapsen
+2|Speed
+2|The Great Dalmuti
+2|Boston
+2|Burro
+2|Lansquenet
+2|Buraco
+2|Call of Cthulhu: The Card Game|Call of Cthulhu Collectible Card Game
+2|Competitive karuta|kyogi karuta
+2|Duplicate bridge
+2|Eleusis
+2|Future Card Buddyfight
+2|Lost Cities
+2|Quartets|Quartett
+2|Sedma
+2|Skip-Bo
+2|Top Trumps
+2|Weiß Schwarz|AT-X Card Game|Weiss Schwarz
+2|500|Five Hundred
+2|Brag|Three Card Brag
+2|Chinchón
+2|Court piece
+2|Napoleon|Nap
+2|Three Card Poker
+2|Caribbean Stud
+2|Commerce
+2|Cuckoo
+2|Double Solitaire
+2|Forty Thieves
+2|Golf Solitaire
+2|Hand and Foot
+2|Kalabriasz
+2|Lucky Nine
+2|Mendikot
+2|Omaha
+2|Pai Gow Poker
+2|Pounce
+2|Pusoy Dos
+2|Rang
+2|Ronda
+2|Scorpion
+2|Shengji|Tractor
+2|Tysiacha|Thousand
+2|Yukon
+2|Zheng Shangyou
+2|Minchiate
+2|Aluette
+3|Barbu
+3|Bastra|Pastra
+3|Battle Spirits|Battle Spirits Trading Card Game|Battle Spirits TCG
+3|Blind man's bluff|Good For You|Indian head|Indian poker|Oklahoma forehead|squaw poker
+3|Botifarra
+3|Draw poker
+3|Just One
+3|Ligretto
+3|Luck & Logic|Hina Logic~from Luck & Logic~
+3|Macao
+3|Madiao
+3|Mao
+3|Mariáš
+3|Oicho-Kabu
+3|Race for the Galaxy
+3|Red dog|Yablon|Red dog poker
+3|Rubber bridge
+3|Snip-snap-snorum|snip snap snorem
+3|Spellfire
+3|Tarocco Piemontese|Piedmontese tarot|Tarot of Piedmont
+3|Tarocco Siciliano|Sicilian tarot
+3|The Mind
+3|Uta-garuta|hyakunin isshu karuta|karuta
+3|Watten
+3|All fours|seven up
+3|Clock|Clock patience|Clock solitaire
+3|Golf|Dutch|Cambio|Turtle|Pablo|Hara Kiri|Crazy Nines|Polish Poker|Polish Polka
+3|Karnöffel
+3|7 Wonders Duel
+3|Aces Up|Firing Squad
+3|Catan Card Game|Settlers of Catan|Catan Card
+3|Continental Rummy
+3|Cucumber
+3|Doomtrooper
+3|Four color cards
+3|Lorum
+3|Oblique Strategies
+3|Pasur
+3|Russian Schnapsen|Thousand Schnapsen
+3|Spit
+3|Tablanette|Tablanet
+3|Tarocco Bolognese|Bolognese tarot
+3|Thirty-one
+3|Wizard
+3|Yaniv|Dhumbal|Jhyap
+3|Bura|Thirty-One|Trente et Un
+3|Escoba del 15|escoba
+3|Lanterloo|Loo
+3|Pope Joan
+3|2/1 game forcing
+3|A Game of Thrones
+3|Auction bridge
+3|Baśka
+3|Blüchern
+3|Bouillotte
+3|Bräus
+3|Chicago|Short Bridge|Four-deal Bridge
+3|Coinche|belote coinchée|Contree
+3|Disney Lorcana|Lorcana
+3|Flesh and Blood|FAB
+3|Forbidden Island
+3|Forest Shuffle
+3|Illuminati: New World Order
+3|Jaipur
+3|Klaverjas
+3|Nain Jaune
+3|Nerts|Nertz|Racing Demon
+3|Netrunner
+3|Northwestern blot|Northwestern blotting
+3|One-card
+3|Open-face Chinese poker|OFCP
+3|Pan
+3|Poker squares
+3|Polignac
+3|Primero
+3|Rams
+3|Roguelike deck-building|Roguelike deck-building game|deck-building rogue-like|roguelike deck-building video game|roguelike deckbuilder
+3|Sequence
+3|Stýrivolt
+3|Sueca
+3|Sushi Go!
+3|Swiss Tarot|Swiss 1JJ Tarot
+3|The Crew
+3|Triomphe
+3|WIXOSS
+3|Zole
+3|Zwicken
+3|52 pickup|52-card pickup
+3|7th Edition|Seventh Edition
+3|8th Edition|Eighth Edition
+3|Antiquities
+3|Aquarian Age
+3|Arkham Horror: The Card Game
+3|Bella Sara
+3|Blind hookey
+3|Bohemian Schneider
+3|Calabresella
+3|Carioca
+3|Cego|Ceco
+3|Ceki
+3|Chlust
+3|Colour whist
+3|Coucou
+3|Dedicated deck card|Dedicated deck card game
+3|Diamant|Incan Gold
+3|Dune|Dune CCG
+3|Force of Will|Force of Will Trading Card Game|FoW|FoW TCG
+3|Gong Zhu
+3|Huapian|Yanghua|Ang-a-phiau|gung zai zi
+3|King
+3|Knightmare Chess|Nightmare Chess|Tempête sur l'échiquier
+3|Kuhn poker
+3|Königrufen
+3|Köpknack
+3|Legends
+3|Lowball|low poker
+3|Macau|Macao|Macaua|Makaó|Makaua
+3|Machiavelli
+3|Mariage
+3|Mauscheln|Maus|Vierblatt
+3|Monopoly Deal
+3|Monster Collection
+3|ONO 99|Double Play
+3|Once Upon a Time
+3|Panguingue
+3|Paskahousu
+3|Poch
+3|Quadrille
+3|Rat-a-Tat Cat
+3|Run|straight
+3|Russia Without Putin
+3|Scarto
+3|Sergeant major|3-5-8
+3|Silesian lottery
+3|Sim City: The Card Game
+3|Skitgubbe
+3|Sleeping Queens
+3|Starship Catan
+3|Stuss|Jewish Faro
+3|Tam cúc
+3|The Binding of Isaac: Four Souls
+3|The Lord of the Rings Trading Card Game|LOTR TCG|The Lord of the Rings Trading Card
+3|The X-Files Collectible Card Game|The X-Files Collectible Card
+3|Tổ tôm|shrimps' nest
+3|Unlimited|Unlimited Edition
+3|Unmatched
+3|Uno Flip!
+3|Up Front
+3|Visions
+3|Weatherlight
+3|Abyssinia
+3|Ace-To-Six Lowball (Draw)
+3|Aces, Straights and Flushes
+3|Aggravation
+3|All Fives
+3|All for One and One for All
+3|Amerikaner
+3|Andar Bahar
+3|Animals
+3|Archie
+3|Arlington
+3|Asino
+3|Auction
+3|Baccarat à Deux Tableaux
+3|Back Alley
+3|Backstab Fish
+3|Banakil
+3|Baseball
+3|Bastard Brag
+3|Batak
+3|Be-Ranga Double Sar
+3|Bid Euchre
+3|Big A
+3|Big Three
+3|Binglao
+3|Bismarck
+3|Blind Don
+3|Boerenbridge
+3|Boomke Wies
+3|Bridge with Semi-exposed Dummies
+3|Buck Euchre
+3|Buddha's Folly
+3|Burraco
+3|Băo Huáng
+3|Calcutta Horse Race
+3|California Lowball
+3|California Speed
+3|Call Ace Euchre
+3|Call Bridge
+3|Calypso
+3|Canadian Salad
+3|Canastone
+3|Cancellation Hearts
+3|Candyman
+3|Cangkul
+5|Cap-It
+4|Card Bingo
+4|Ciapanò
+4|Concina
+4|Cucu
+4|Differenzler
+4|Gleek
+4|Hartenjagen
+4|Kalooki
+4|Kingen
+4|Klabberjas
+4|Krypkasino
+4|Mercante in Fiera
+4|Pandoeren
+4|Pepper
+4|Pesten
+4|Pinnacola
+4|Pishti
+4|Plump
+4|Pusoy
+4|Railroad Euchre
+4|Ramino
+4|Rikken
+4|Rubamazzo
+4|Ruff and Honours
+4|Scala Quaranta
+4|Schieber
+4|Scopone
+4|Smear
+4|Stoppa
+4|Tresillo
+4|Vri
+4|German whist|Chinese whist|Honeymoon Whist
+4|Julepe
+4|Pitch|Setback
+4|Solo whist
+4|Spite and malice|Cat and Mouse
+4|Switch
+4|Tiến lên|Vietnamese cards
+4|Tri Peaks|Three Peaks|Triple Peaks
+4|Twenty-eight|28
+4|Twenty-five|Five Fingers|Five and Ten|Five Cards|Spoilt Five
+4|Basset
+4|Trappola
+4|Ulti
+4|Bai Cao
+4|Bhabhi
+4|Cinch
+4|Debertz
+4|Do Teen Paanch
+4|Don
+4|Ganjifa
+4|Hoca
+4|Imperial
+4|Jutpatti
+4|Kammaraj
+4|Kozel
+4|Phat
+4|Phom
+4|Piquet au Cent
+4|Pochen
+4|Poque
+4|Post and Pair
+4|Primiera
+4|Sap Xam
+4|Seep|Sweep
+4|Snapszer
+4|Svara
+4|Xi Dach
+4|Zsirozas
+4|Ninety-nine
+4|Tarocchini
+4|.hack//Enemy
+4|1001
+4|304
+4|4th Edition|Fourth edition
+4|5th Edition|Fifth Edition
+4|6th Edition|Sixth Edition|Classic
+4|9th Edition|Ninth Edition
+4|A Game of Thrones: Second Edition|AGoT
+4|Ace–ten|Ace–ten game
+4|Apples to Apples
+4|Balloon Cup
+4|Bassadewitz
+4|Bauernschnapsen
+4|Bavarian Tarock|Bavarian tarot
+4|Beleaguered Castle
+4|Bestia
+4|Binokel
+4|Bourré
+4|Brandeln
+4|Brede Mette
+4|Brelan
+4|Brus
+4|Brusquembille
+4|Bruus
+4|Buta no shippo
+4|Byggkasino
+4|Canfield
+4|Century: Spice Road
+4|Chinese Blackjack|21-point|ban-luck
+4|Cockroach Poker
+4|Contract rummy|12-Step Rummy
+4|Double Exposure Blackjack|Double Exposure|Black Jack Double Exposure|See-Thru 21
+4|Droggn
+4|Drużbart
+4|Elfern
+4|Evolution: The Origin of Species
+4|Expandable card|Expandable card game|Living Card Game|LCG
+4|Ferme
+4|Gaigel
+4|German Solo
+4|Gloom|Cthulhu Gloom
+4|Goulash
+4|Grasobern
+4|Guillotine
+4|Gundam War Collectible Card Game|Gundam War|Gundam War Collectible Card
+4|Hero Realms
+4|Homelands
+4|Horus Heresy
+4|Imperial Settlers
+4|Inazuma Eleven TCG
+4|Independent Chip Model|ICM
+4|Indian Rummy
+4|James Bond|Lemon|Atlantis|Chanhassen
+4|Jo-Jotte
+4|Jucker|Juckerspiel
+4|Kille
+4|Knack
+4|Knektpass
+4|Krypkille
+4|Le her
+4|Legend of the Five Rings|L5R
+4|Lexicon
+4|Limited Edition|Limited
+4|Marafon|Trionfo
+4|Marjapussi
+4|Match Attax
+4|Mistigri
+4|Monte bank
+4|Mulle
+4|Musta Maija
+4|Myths and Legends|Mitos y Leyendas|MyL
+4|Noddy
+4|Norseman's knock
+4|Officers' Skat|two-player Skat
+4|Onze et demie
+4|Pedro|High Five
+4|Perlaggen
+4|Pit
+4|Planechase
+4|Polish bank|Polish Red Dog|Stitch
+4|Préférence
+4|Quadrat
+4|Quinze
+4|Ramsch|Rammeln
+4|Reversis
+4|Riftbound
+4|Ristikontra
+4|Robbers' rummy
+4|Scharwenzel
+4|Shuffle track
+4|Six-plus hold 'em|short-deck hold 'em
+4|Sjavs
+4|Svängknack
+4|Swedish whist
+4|Taki|Super TAKI
+4|Tatteln
+4|Tempeln|Stoß
+4|Tempest
+4|The Dark
+4|The Simpsons Trading Card Game|The Simpsons Trading Card
+4|Thunee
+4|Toepen
+4|Touring|Touring card game
+4|Trex
+4|Troggu
+4|Unglued
+4|Unhinged
+4|Vira
+4|Wallachen
+4|Warhammer: Invasion
+4|Warlords
+4|Waterworks|Waterworks Classic
+4|What Do You Meme?
+4|Zwanzigerrufen
+4|Accordion|Tower of Babel
+4|Authors|The Game of Authors
+4|Bid whist
+4|Brisca
+4|Calculation
+4|Forty-fives|120|Maw|Growl|Auction 120s|Auction Forty-Fives|Forte Fives|Forty-Five|Spoil Five|Strong Fives|45s
+4|Klaberjass|Klob
+4|Knock-out whist
+4|Newmarket|stops|boodle|Newmarket horses|Michigan
+4|Ranter-Go-Round|Chase the ace|Screw Your Neighbor
+4|Sheepshead
+4|Teen patti
+4|Tong-its
+4|Vint|Russian whist
+4|400
+4|Adrenalyn XL
+4|Agnes
+4|Alsós
+4|Amazons
+4|Ani-Mayhem
+4|Anomia
+4|Arcadia
+4|Australian Patience
+4|Babylon 5 Collectible Card Game|Babylon 5 Collectible Card
+4|Baloot
+4|Bank
+4|Banka bäver
+4|Bartok
+4|Bauerchen
+4|Bauernfangen
+4|Bauernheinrich
+4|Bauerntarock
+4|Belle, Flux et Trente-et-Un|Belle, Fluss und Einunddreißig|Best, Flush and Thirty-One
+4|Berserk
+4|Bester Bube|Bester Bauer|Fiefkarten|Lenter
+4|Bettelmann
+4|Bierlachs
+4|Bieten
+4|Bingo|bango
+4|Biriba
+4|Birthday
+4|Black Maria
+4|Blackjack Switch
+4|Blattla
+4|Bloomburrow
+4|Blue Moon
+4|Bohemian Watten
+4|Bolachen
+4|Bonken|bonking
+4|Booleo
+4|Bottle Imp
+4|Bridge whist|straight bridge
+4|Buffy the Vampire Slayer Collectible Card Game|Buffy the Vampire Slayer Collectible Card
+4|Bête|La bête|Homme|Beste|l'Homme|la Beste
+4|Cabo
+4|Car Wars The Card Game|Car Wars The Card
+4|Catch the ten
+4|Chez Geek
+4|Chor voli
+4|Chratze
+4|Chrononauts
+4|Cicera|Cicera bigia|Ciccera biccera
+4|Comet
+4|Counting Patience
+4|Credo
+4|Cuarenta
+4|Cuccù
+4|Cuttle|Combat
+4|Dark Eden
+4|Davoserjazz
+4|Dealer's choice
+4|Dixie
+4|Dragon's Maze
+4|Dreeg
+4|Dreierles
+4|Dreierschnapsen
+4|Dungeons & Dragons: Adventures in the Forgotten Realms
+4|Dupa biskupa
+4|Eight Cards
+4|Einwerfen
+4|Elimination Blackjack
+4|Enflé
+4|Epic Card Game|Epic Card
+4|Eralash
+4|Evolution: Random Mutations
+4|Experiment
+4|Femkort
+4|Femkortskille
+4|Fipsen
+4|From the Vault
+4|Gaps|Montana|Blue Moon|Station|Blanket|Red Moon|Spaces|Montana Aces|Vacancies
+4|Gatecrash
+4|German Schafkopf
+4|German Tarok
+4|Gilet|Gile
+4|Gilten|Giltspiel
+4|Gilé
+4|Goldrausch
+4|Good Thirteen
+4|Gou Ji
+4|Grass
+4|Grosstarock|Großtarock
+4|Guandan
+4|Hahndreier
+4|Heads-up poker
+4|Herring-Bone|Braid
+4|Herzeln
+4|Hoc Mazarin|Hoc
+4|Hope Deferred|Herz zu Herz
+4|Hund
+4|Hungarian Tarokk
+4|Höllfahren
+4|Illustrated Tarock|illustrated tarot
+4|Indian|Indian Poker
+4|Israeli whist
+4|Jaggln
+4|Kaiserspiel
+4|Kaldheim
+4|Kaschlan
+4|Kein Stich
+4|Klammern
+4|Kodilj
+4|Konter a Matt
+4|Kosakeln
+4|Leaf Fight|LEAF FIGHT TCG|LFTCG
+4|Letzter
+4|Little Lots|Eight Packet Patience
+4|Loba
+4|Lupfen
+4|Mag Blast
+4|Malaysian Pontoon|pontoon
+4|Matzlfangen
+4|Maw
+4|Minnesota whist
+4|Modern Masters
+4|Mucken
+4|Mulatschak
+4|My Little Pony Collectible Card Game|My Little Pony Collectible Card
+4|Müller Matz
+4|Neunkart
+4|Neunzehnerrufen
+4|New Phyrexia
+4|Oma Skat
+4|Pandoer
+4|Patruni e sutta
+4|Penneech
+4|Pilotta
+4|Planeshift
+4|Point Tarock
+4|Pok Deng
+4|Pollack
+4|Polskpas
+4|Pontoon|Vingt-Un
+4|Priffe
+4|Quadrette
+4|Queen Nazarene
+4|Quodlibet
+4|Rabouge
+4|Rage
+4|Red and Black
+4|Ristiseiska
+4|Romestecq
+4|Ronfa
+4|Rosbiratschka
+4|Rouge et Noir
+4|Rumpel
+4|Rutersju
+4|Rödskägg
+4|Saunigl
+4|Scherwenzel|Scharwenzel
+4|Schieberamsch
+4|Schlafmütze
+4|Schlauch
+4|Schweinchen
+4|Schwimmen
+4|Scourge
+4|Sedmice
+4|Shanghai rum
+4|Shedding-type games|shedding-type game|outplay game|stop type game
+4|Shelem
+4|Sheriff of Nottingham
+4|Siebenschräm|7 Schräm
+4|Sizette
+4|Skwitz
+4|Skærvindsel
+4|Sleuth
+4|Solo 66
+4|Star Wars Trading Card Game|Star Wars TCG|SWTCG|Star Wars Trading Card
+4|Star Wars: Destiny
+4|Sticheln
+4|Streets of New Capenna
+4|Strohmandeln
+4|Stronghold
+4|Super Fun 21
+4|Super Trunfo
+4|Svoyi Koziri
+4|Taco Cat Goat Cheese Pizza
+4|Tapp|Württemberg tarot
+4|Tapp Tarock|Viennese tarot
+4|Taroc l'Hombre
+4|The king of hearts has five sons
+4|Three thirteen|Pop's Card Game
+4|Tippen|Trekort|Dreiblatt|Labet|Dreekort|Drei Karten|Kleinpréférence
+4|Tonk
+4|Torment
+4|Treppenrommé
+4|Trischaken
+4|Trischettn
+4|Troefcall
+4|Truc
+4|Truc y Flou
+4|Tuppi
+4|Two-ten-jack|2 Ten Jack
+4|Ultimate Werewolf
+4|Veto
+4|Viennese Grosstarock
+4|Vieux garçon|Le Puant
+4|Vogelspiel
+4|Voller Hund
+4|Wendish Schafkopf
+4|Whot!
+4|Windmill|Propeller|Whirligig|Propellor
+4|Wyatt Earp
+4|Zwickern
+4|Zwikken
+4|Troccas
+` });
 EVO.cat({ ...{"id": "fonts", "name": "Fonts", "icon": "🔤", "q": "Name a **typeface** (font).", "strip": ["font", "typeface"], "level": 3}, list: `
 0|Times New Roman|Times|TNR|Times Roman
 0|Helvetica|Neue Haas Grotesk
@@ -18571,6 +19350,1911 @@ EVO.cat({ ...{"id": "fonts", "name": "Fonts", "icon": "🔤", "q": "Name a **typ
 4|Warnock|Warnock Pro
 4|Whitney
 4|Yale
+` });
+EVO.cat({ ...{"id": "cheese", "name": "Cheese", "icon": "🧀", "q": "Name a **cheese**.", "strip": ["cheese"], "level": 1}, list: `
+0|Mozzarella|mozzarella cheese
+0|Parmesan|Parmesan cheese|Parmigiano|Parmigiano Reggiano
+0|Brie|Brie cheese
+0|Cheddar|Cheddar cheese
+0|Camembert
+0|Feta|feta cheese
+0|Ricotta
+0|Emmental|Emmental cheese|Emmentaler
+0|Gorgonzola
+0|Gouda|Gouda cheese
+0|Roquefort|Roquefort cheese
+0|Mascarpone|Mascarpone cream
+0|American|American cheese|processed cheese|processed American cheese|processed cheese food
+0|Gruyère|Greyerzer
+2|Edam|Edam cheese
+2|Paneer
+2|Blue|Blue cheese|bleu cheese|blue-veined cheese
+2|Goat Cheese|Goats Cheese|Chevre
+1|Halloumi
+2|Philadelphia
+2|Swiss|Swiss cheese
+2|Stilton
+2|Cream|Cream cheese
+2|Manchego|Manchego cheese PDO
+2|Provolone
+2|Quark
+2|Pecorino
+2|Tvorog|cottage cheese|tvarog
+2|Burrata
+2|Grana Padano|Grana Padano PDO|Grana Padano cheese
+2|Limburger
+2|Monterey Jack|Jack
+2|Cottage|Cottage cheese
+2|Appenzeller|Appenzeller cheese
+2|Red Leicester|Leicester|Leicestershire cheese
+2|Comté|Comté cheese
+2|Reblochon
+2|Fontina|Fontina PDO
+2|Mimolette|Boule de Lille|vieux Hollande
+2|Danish Blue Cheese|Danish Blue|Danablu
+2|Époisses|Epoisses de Bourgogne
+2|Munster|Munster cheese|Minschterkaas|Munster-géromé
+2|Processed|Processed cheese|cheese food|pasteurized process cheese|process cheese
+2|Asiago|Asiago cheese|Asiago PDO
+2|Jarlsberg|Jarlsberg cheese
+2|Taleggio|Taleggio cheese|Taleggio PDO
+1|Casu martzu|casu marzu
+2|Cantal|Cantal cheese
+2|Kashkaval|kaskavál
+2|Colby|Colby cheese
+2|Tilsit|Tilsit cheese
+2|The Laughing Cow|La Vache qui Rit|Laughing Cow Cheese
+2|Beaufort|Beaufort cheese
+2|Brunost|brown cheese|gjetost|mysost
+2|Caciocavallo
+2|Livarot|Livarot cheese|The Colonel
+2|Maasdam|Maasdam cheese
+2|Pecorino romano|Pecorino Romano PDO
+2|Bryndza|Brynza
+2|Caerphilly|Caerphilly cheese
+2|Cheshire|Cheshire cheese
+2|Havarti
+2|Abondance|Abondance cheese
+2|Bleu d'Auvergne
+2|Cabrales|Cabrales cheese|queso de Cabrales
+2|Neufchâtel|Neufchâtel cheese
+2|Sbrinz
+2|Wensleydale|Wensleydale cheese
+2|Morbier|Morbier cheese
+2|Tête de Moine
+2|Kashk|kurt|aarul|aaruul|aqet|chortan|dried yoghurt|keshk|khuruud|kishik|kishk|qurt
+2|Babybel
+2|Pont-l'Évêque|Pont-l'Évêque cheese
+2|Sulguni
+2|Port Salut
+2|Baby Swiss
+2|Double Gloucester
+2|Labneh
+2|Queso Blanco
+2|Queso Fresco
+2|Saint Agur
+2|Bleu de Gex|Bleu de Septmoncel|Bleu du Haut-Jura|Jura blue cheese|Septmoncel blue cheese
+2|Gloucester|Gloucester cheese|Double Gloucester cheese
+2|Leerdammer
+2|Brocciu
+2|Fourme d'Ambert
+2|Khoa|khoya|mawa
+2|Langres|Langres cheese
+2|Ossau-Iraty
+2|Scamorza
+2|Raclette du Valais|raclette|raclette cheese
+2|Chaource|Chaource cheese
+2|Coulommiers|Coulommiers cheese
+2|Jāņi|Jāņi cheese|caraway cheese
+2|Kefalotyri
+2|Laguiole|Laguiole cheese
+2|Maroilles|Maroilles cheese|Marolles cheese
+2|Obatzda|Obatzter|Obazda
+2|Olomoucké tvarůžky|Olomouc curd cheese|Olomouc cheese
+2|Boursin|Boursin cheese
+2|Pecorino sardo|Pecorino Sardo PDO
+2|Smoked|Smoked cheese|Rauchkäse|uzené sýry
+2|Bleu des Causses
+2|Cambozola
+2|Fourme de Montbrison
+2|Idiazabal|Idiazabal cheese
+2|Kasseri|kaseri
+2|Montasio
+2|String|String cheese|String cheeses
+2|Akkawi
+2|Banon|Banon cheese|Banon à la feuille
+2|Bel Paese
+2|Buffalo mozzarella|Mozzarella di Bufala Campana PDO
+2|Philadelphia Cream Cheese|Philadelphia Cream
+2|Rocamadour|Rocamadour cheese
+2|Roncal|Roncal cheese
+2|Saint-Nectaire
+2|Salers|Salers cheese
+2|Smažený sýr|Czech fried cheese|Slovak fried cheese
+2|São Jorge|São Jorge cheese
+2|Tetilla|Tetilla cheese
+2|Lancashire|Lancashire cheese
+2|Bleu du Vercors-Sassenage|bleu de Sassenage|bleu du Vercors
+2|Brie de Meaux
+2|Brillat-Savarin|Brillat-Savarin cheese
+2|Cancoillotte
+2|Cheese curd|cheese curds
+2|Crottin de Chavignol
+2|Pouligny-Saint-Pierre|Pouligny-Saint-Pierre cheese
+2|Sheep milk|Sheep milk cheese|sheep cheese|sheep's-milk cheese
+2|Tomme de Savoie
+2|Vacherin Mont d'Or
+2|Oaxaca|Oaxaca cheese|hebra cheese|Queso oaxaca
+2|Oscypek|Oštiepok
+2|Bleu de Bresse
+2|Chechil|Armenian string cheese|chechil panir|chechili|kosichka
+2|Danbo
+3|Fresh|Fresh cheese|fresh cheeses
+3|Leyden|Leyden cheese
+3|Moretum
+3|Picodon
+3|Serra da Estrela|Serra da Estrela cheese
+3|Gamalost|gammalost|gammelost
+3|Shropshire Blue
+3|Chhena
+3|Gaperon
+3|Graviera
+3|Harzer
+3|Livno|Livno cheese|Livanjski sir
+3|Nabulsi|Nabulsi cheese
+3|Parenica
+3|Pizza|Pizza cheese
+3|Schabziger|Sap Sago
+3|Stracchino
+3|Torta del Casar
+3|Västerbotten|Västerbotten cheese|Västerbottenost cheese
+3|Ayibe
+3|Baron Bigod
+3|Brimsen
+3|Chanakh
+3|Crottin
+3|Dangke
+3|Dorset Blue Vinny
+3|Flower of Rajya
+3|Gelundener Käse
+3|Gjizë
+3|Herve cheese
+3|Istanbolly
+3|Juustoleipa|Squeaky Cheese
+3|Kalimpong cheese
+3|Kemariya
+3|Kwaito
+3|Lori
+3|Montafoner Sauerkäse
+3|Nguri
+3|Staazer
+3|Steirerkäse
+3|Susu Masam
+3|Tunworth
+3|Urdhë
+3|Warankasi
+3|Yeghegnadzor
+3|Bread|Bread cheese|Leipäjuusto
+3|Telemea
+3|Minas|Minas cheese|Frescal Minas cheese|Minas Gerais cheese
+3|Mizithra
+3|Raschera|Raschera PDO
+3|Selles-sur-Cher|Selles-sur-Cher cheese
+3|Valençay|Valençay cheese
+3|Chhurpi|Durkha
+3|Urda|Urdha
+3|Abbaye de Belloc
+3|Beyaz peynir|Turkish white cheese
+3|Dunlop|Dunlop cheese
+3|Esrom
+3|Herrgårdsost
+3|Pag|Pag cheese
+3|Pélardon
+3|Sainte-Maure de Touraine
+3|Shanklish
+3|Bra|Bra cheese|Bra PDO
+3|Butterkäse
+3|Castelmagno|Castelmagno cheese|Castelmagno PDO
+3|Granular|Granular cheese|pressed cheese
+3|Mahón|Mahón cheese
+3|Manouri
+3|Mont des Cats|Mont des Cats cheese
+3|Tome des Bauges
+3|Tomme|tome
+3|Weisslacker|beer cheese|bierkäse
+3|Whey|Whey cheese
+3|Cornish Yarg|Yarg
+3|Sirene
+3|Afuega'l pitu|Afuega'l pitu cheese
+3|Anari|Anari cheese
+3|Bundz
+3|Cabécou
+3|Carré de l'Est
+3|Castello cheeses|Castello
+3|Grevé
+3|Matar paneer|Mattar paneer|muttar paneer
+3|Mató|brossat|brull
+3|Petit suisse|Jourin
+3|Rumi|Rumi cheese
+3|Saint-Marcellin
+3|Stracciatella|stracciatella di bufala
+3|Toma|Toma cheese
+3|Wagasi|wagashi
+3|Zamorano|Zamorano cheese
+3|Abbaye de Tamié
+3|Acid-set|Acid-set cheese|sour milk cheese
+3|Berner Alpkäse|Berner Hobelkäse
+3|Chevrotin
+3|Circassian|Circassian cheese
+3|Hushållsost
+3|Kefalograviera
+3|Queijo de Azeitão
+3|Queijo de Nisa|Nisa cheese
+3|Queijo do Pico
+3|Sage Derby
+3|Saint Agur Blue
+3|Saint-Paulin|Saint-Paulin cheese
+3|Tulum|Tulum cheese
+3|Washed-rind|Washed-rind cheese|smear-ripened cheese|washed-rind hard cheese|washed-rind soft cheese
+3|Korbáčik|Korbáčiky
+3|Aragatsyan panir
+3|Areesh
+3|Bachensteiner
+3|Bouhezza
+3|Byaslag
+3|Djathë pice
+3|Harbison
+3|Hoop Cheese
+3|Imeruli
+3|Imsil
+3|Kalari
+3|Kanach panir
+3|Le Wavreumont
+3|Liptauer
+3|Lüneberg cheese
+3|Mish
+3|Moosbacher
+3|Qudam
+3|Queso de Bola
+3|Rush Creek Reserve
+3|Tel panir
+3|Teleme
+3|Tyrolean grey
+3|Vasterbottensost
+3|Velveeta
+3|Castelo Branco|Castelo Branco cheese
+3|Chabichou
+3|Chaumes
+3|Cheez Whiz
+3|Domiati
+3|Faisselle
+3|Fromage blanc
+3|Gamonéu|Gamonéu cheese
+3|Grated|Grated cheese|shredded cheese
+3|Ibores|Ibores cheese|Queso Ibores|DOP Queso Ibores
+3|J&L Grubb
+3|Kopanisti|Kopanisti mykonou
+3|Monte Veronese|Monte Veronese PDO
+3|Paneer makhani|Paneer butter masala
+3|Passendale|Passendale cheese
+3|Pasta filata|plastic-curd cheese|plastic-curd cheeses|pulled-curd cheese|pulled-curd cheeses|spun paste cheese|spun paste cheeses|stretched-curd cheese|stretched-curd cheeses
+3|Pecorino siciliano
+3|Piave|Piave cheese|Piave PDO
+3|Président
+3|Rigotte de Condrieu
+4|Samsø|Samsø cheese
+4|Vacherin
+4|Valtellina Casera|Valtellina Casera PDO
+4|Milbenkäse
+4|Colby-Jack|Cojack
+4|Cotija|Cotija cheese
+4|Bergkäse
+4|Bonchester|Bonchester cheese
+4|Brined|Brined cheese|pickled cheese
+4|Brânză de burduf
+4|Etorki
+4|Gołka
+4|Hermelín
+4|L'Etivaz|Étivaz
+4|La Serena|La Serena cheese|DOP Queso de la Serena|La Serena PDO
+4|Pecorino toscano|Pecorino Toscano PDO
+4|Quartirolo lombardo|Quartirolo Lombardo PDO
+4|Ragusano|Ragusano cheese|Ragusano PDO
+4|Redykołka
+4|Serpa|Serpa cheese
+4|Silter|Silter PDO
+4|Tomme des Pyrénées
+4|Vacherin Fribourgeois
+4|Vieux-Boulogne
+4|Vlašić|Vlašić cheese|Travnik cheese
+4|Ädelost
+4|Anthotyros
+4|Arzúa-Ulloa|Arzúa-Ulloa cheese
+4|Brie de Melun
+4|Brussels|Brussels cheese|Brusselse kaas|ettekeis|fromage de Bruxelles
+4|Caboc
+4|Cervelle de canut
+4|Formaggio di fossa
+4|Korycinski
+4|Ladotyri Mytilinis
+4|Lighvan|Lighvan cheese
+4|Majorero|Majorero cheese PDO|Majorero DOP|Queso Majorero DOP
+4|Motal
+4|Năsal|Năsal cheese
+4|Palmero|Palmero cheese|La Palma cheese
+4|Paraguay|Paraguay cheese|kesu Paraguái|Paraguayan cheese|queso Paraguay
+4|Pepper jack|Pepper jack cheese
+4|Picón Bejes-Tresviso
+4|Quesillo
+4|Romano|Romano cheese
+4|Saint Albray
+4|Salva
+4|San Simón da Costa
+5|Stinking Bishop|Stinking Bishop cheese
+4|Tenili
+4|Valdeón|Valdeón cheese|Valdeón cheese PGI|queso Valdeón|Valdeón PGI
+4|Bocconcini
+4|Prästost
+4|Aisy cendré
+4|Cheese spread
+4|Dambalkhacho
+4|Dorset Blue Vinney
+4|Easy Cheese|Easy
+4|Garrotxa|Garrotxa cheese
+4|Grana|Grana Cheese
+4|Hutsul bryndza
+4|Metsovone
+4|Mâconnais|Mâconnais cheese
+4|Oštiepok
+4|Pecorino di Filiano|Pecorino di Filiano PDO
+4|Provoleta
+4|Queijo coalho
+4|Queijo de Cabra Transmontano|Transmontano goat cheese
+4|Queso de mano
+4|Remoudou
+4|Requeijão
+4|Saint-Félicien|Saint-Félicien cheese
+4|Sakura|Sakura cheese
+4|Saloio
+4|Soft|Soft cheese
+4|Spressa delle Giudicarie|Spressa delle Giudicarie PDO
+4|Swaledale|Swaledale cheese
+4|Valle d'Aosta Fromadzo|Valle d'Aosta Fromadzo PDO|Vallée d'Aoste Fromadzo
+4|Vorarlberger Bergkäse|Vorarlberg mountain cheese
+4|Ziger
+4|Pultost
+4|Muenster|Muenster cheese
+4|Bleu Bénédictin
+4|Boerenkaas
+4|Buxton Blue
+4|Cacioricotta
+4|Caciotta
+4|Casciotta d'Urbino|Casciotta d'Urbino PDO
+4|Casín|Casín cheese
+4|Datshi
+4|Egyptian|Egyptian cheese
+4|Formaela
+4|Formai de Mut dell'Alta Valle Brembana|Formai de Mut dell'Alta Valle Brembana PDO
+4|Metton
+4|Norvegia
+4|Olivet cendré
+4|Perail
+4|Queijo de colônia|Colony cheese
+4|Robiola
+4|Rochebaron
+4|Rosa Camuna
+4|Sardo|Sardo o Quesardo
+4|Snøfrisk
+4|Spundekäs
+4|Tupí
+4|Tzfatit|Tzfat cheese|Safad|Zefati
+4|White|White cheese
+4|Xinomyzithra|Xynomizithra
+4|Y Fenni|Y Fenni cheese
+4|Édel de Cléron
+4|Dolcelatte
+4|Kraft Singles
+4|Kesong puti|quesong puti
+4|Pule|Pule cheese|donkey cheese
+4|Abertam|Abertam cheese
+4|Baladi|Baladi cheese
+4|Belper Knolle|Belper ball|Belp Ball
+4|Brousse du Rove
+4|Canastra|Canastra cheese
+4|Chanco|Chanco cheese
+4|Délice de Bourgogne
+4|Hauskyjza|Polish fried cheese
+4|Kars gravyer|Kars gravyer cheese
+4|Lanark Blue
+4|Maytag Blue|Maytag Blue cheese
+4|Mottin charentais
+4|Nieheimer|Nieheimer Käse
+4|Payoyo|Payoyo cheese
+4|Powdered|Powdered cheese|cheese powder
+4|Prescinsêua|Prescinsêua cheese
+4|Pálpusztai|Pálpusztai cheese
+4|Red Windsor
+4|Reggianito
+4|Rubing
+4|Santarém|Santarém cheese
+4|Squacquerone
+4|Stichelton
+4|Svecia
+4|Tomme Vaudoise
+4|Alpujarra|Alpujarra cheese
+4|Ardrahan Farmhouse Cheese|Ardrahan Cheese|Ardrahan Farmhouse
+4|Aura|Aura cheese|Midnight Blue
+4|Bagòss
+4|Balkánský sýr
+4|Bastardo del Grappa
+4|Batzos
+4|Beemster|Beemster cheese
+4|Brös
+4|Cantabrian cream|Cantabrian cream cheese
+4|Cathare
+4|Caș
+4|Charolais
+4|Chavroux
+4|Colonia|Colonia cheese|Queso colonia
+4|Creole cream|Creole cream cheese
+4|Crowdie
+4|Dali ni horbo
+4|Dubliner Cheese|Dubliner
+4|Farmer|Farmer cheese|farmer's cheese
+4|Flor de Guía|Flor de Guía cheese
+4|Friesian Clove
+4|Graskaas
+4|Kanterkaas
+4|Kiri
+4|Le Rustique
+4|Lincolnshire Poacher|Lincolnshire Poacher cheese
+4|Mallorca|Mallorca cheese
+4|Maribo|Maribo cheese
+4|Mihaliç peyniri
+4|Molbo|Molbo cheese
+4|Nøkkelost|Nokkelost
+4|Oka|Oka cheese
+4|Ossetian|Ossetian cheese
+4|Pavin|Pavin cheese
+4|Penteleu
+4|Puzzone di Moena
+4|Queso Chihuahua
+4|Raspadüra
+4|Rigouta
+4|Rokpol
+4|Russian|Russian cheese
+4|Saint-André|Saint-André cheese
+4|Sharr|Šar cheese|Sharri cheese
+4|Bandel|Bandel cheese
+4|Rushan|Rushan cheese
+4|Basa
+4|Belper Hirn
+4|Bleuchâtel
+4|Brousse
+4|Caprino|Caprino cheese
+4|Carré d'Aurillac
+4|Chabis
+4|Cherni Vit|Cherni Vit cheese
+4|Chura kampo
+4|Criollo|Criollo cheese
+4|Derby|Derby cheese
+4|Dolaz|Dolaz cheese
+4|Dovedale|Dovedale cheese
+4|Explorateur
+4|Government|Government cheese
+4|Green|Green cheese
+4|Hutsul sheep bryndzya
+4|Imokilly Regato|Reigeató Uí Mhic Coille
+4|Katiki Domokou
+4|Kraftkar
+4|Maaslander
+4|Maredsous|Maredsous cheese
+4|Morlacco|Morlacco del Grappa
+4|Murcian|Murcian cheese
+4|Murcian wine|Murcian wine cheese|Queso de Murcia al Vino PDO|Murcia al Vino DOP|Queso de Murcia al Vino DOP|queso de vino de Murcia
+4|P'tit Basque
+4|Paipa|Paipa cheese|queso Paipa
+4|Pallone di Gravina
+4|Parrano|Parrano cheese
+4|Pied-De-Vent
+4|Provola silana
+4|Queijo prato|Queijo prata
+4|Reblec
+4|Red Hawk|Red Hawk cheese
+4|Red pecorino
+4|Sarasson
+4|Tintern|Tintern cheese
+4|Tome fraîche|fresh Tomme
+4|Triple cream
+4|Trou du Cru
+4|Turrialba|Turrialba cheese
+4|Tybo|Tybo cheese
+4|Fromage frais
+4|Caravane|Caravane cheese
+4|Brick|Brick cheese
+4|Chura loenpa
+4|Humboldt Fog
+4|Acceglio
+4|Alpkäse
+4|Argentine|Argentine cheese|Cheese in Argentina|Cheeses from Argentina|Cheeses of Argentina
+4|Baguette laonnaise
+4|Beacon Fell Traditional Lancashire Cheese|Beacon Fell Traditional Lancashire
+4|Bela Badia|Schnittkäse Bela Badia PAT|formaggio da taglio Bela Badia
+4|Bleu d'Élizabeth
+4|Brossat
+4|Bucheron
+4|Canadian|Canadian cheese|Cheese in Canada
+4|Casizolu
+4|Cheese in Kenya|Kenyan cheese
+4|Cheeses of Mexico|Mexican cheese|Cheese of Mexico
+4|Chällerhocker
+4|Cooleeney Farmhouse Cheese|Cooleeney Farmhouse
+4|Couronne lochoise
+4|Cremoso|Cremoso cheese
+4|Délice d'Argental
+4|Farmstead|Farmstead cheese|farmhouse cheese
+4|Friulano
+4|Fromager d'Affinois
+4|Fynbo
+4|Hooidammer
+4|Ilchester Cheese Company
+4|Kadai paneer|Karahi paneer
+4|Le Riopelle de l'Isle
+4|Manufacture of cheddar|Manufacture of cheddar cheese|Cheddaring
+4|Mont d'Or
+4|Padraccio|Paddraccio
+4|Palmito|Palmito cheese
+4|Pecorino di Carmasciano|Pecorino di Carmasciano PAT|Carmasciano
+4|Pikauba
+4|Pié d'Angloys
+4|Provatura|provatura romana
+4|Provel|Provel cheese|St. Louis Style Pizza Cheese
+4|Rauchkäse
+4|Reindeer|Reindeer cheese|reindeer milk cheese
+4|Stracciata
+4|Teviotdale|Teviotdale cheese
+4|Tibetan|Tibetan cheese
+4|Tuma
+4|Vezzena
+4|Waterloo|Waterloo cheese
+4|Xynotyro
+4|Șvaițer
+4|Applewood|Applewood cheese
+4|Abkhazian|Abkhazian cheese
+4|Artisan|Artisan cheese
+4|Brouère
+4|Brânză de vaci
+4|Caci figurati|Cacio figurato
+4|Campo de Montalbán
+4|Canestrato
+4|Casàda|Casàda PAT|Colostra
+4|Cazelle de Saint Affrique
+4|Chevington|Chevington cheese
+4|Circassian smoked|Circassian smoked cheese
+4|Coleraine Cheddar
+4|Coquetdale|Coquetdale cheese
+4|Cougar Gold|Cougar Gold cheese
+4|Coutances|Coutances cheese|Le Coutances
+4|Dairylea
+4|Dragon's Breath Blue
+4|Durrus Farmhouse Cheese|Durrus cheese|Durrus Farmhouse
+4|Fine Fettle Yorkshire
+4|Georgian|Georgian cheese
+4|Heidal|Heidal cheese
+4|Hirtenkäse
+4|Homogenized|Homogenized cheese
+4|Hyblean ricotta
+4|Isle of Mull Cheddar
+4|Korall
+4|Le Douanier
+4|Little Derby
+4|Moliterno|pecorino di Moliterno|pecorino Moliterno
+4|Mondseer|Der Mondseer|Mondseer Schachtelkäse
+4|Oltermanni
+4|Pantysgawn
+4|Parlick Fell|Parlick Fell cheese
+4|Provola
+4|Ricotta di fuscella
+4|Ricotta forte
+4|Scharfe Maxx
+4|Serbian cheeses|Serbian cheese
+4|Sottocenere al tartufo
+4|Sussex Slipcote
+4|Swiss-type cheeses|Alpine cheeses
+4|Vlaskaas
+4|Wielkopolski ser smażony|Wielkopolska fried cheese
+` });
+EVO.cat({ ...{"id": "pasta", "name": "Pasta", "icon": "🍝", "q": "Name a **type of pasta**.", "strip": ["pasta"], "level": 1}, list: `
+0|Spaghetti|spaghetti noodle
+0|Macaroni
+0|Ravioli
+0|Lasagna|Lasagne
+0|Penne|mostaccioli
+0|Fusilli|rotini|Twists|Spirals
+0|Gnocchi|Italian dumpling
+0|Samosa|sambosa|sambosak|sambusa|samuza|singada|smoosa|somaas|somasi|somosa|somucha|singhara
+0|Tortellini
+2|Tagliatelle
+2|Vermicelli|fideo|Fideos
+2|Fettuccine|Fettucine
+2|Cannelloni
+2|Egg Noodles
+2|Elbow Macaroni|Elbows
+2|Noodles
+2|Farfalle|bow-tie pasta|butterfly pasta|Bow Ties|Bowtie
+2|Linguine|trenette
+2|Orzo|risoni
+2|Pelmeni
+2|Rigatoni
+2|Pierogi|varenyky|vareniki
+2|Spätzle|Spaetzle
+2|Empanada|pastel|empada
+2|Manti|manta|mantı|mantu|manty
+2|Spring roll|spring rolls
+2|Conchiglie|Shells|Pasta Shells
+2|Dango
+2|Wonton
+2|Baozi|bao|pao
+2|Jiaozi|gaau ji|giyose|guotie|jiǎo|potstickers
+2|Varenyky|pyrohy
+2|Dim sum
+2|Chebureki|chiburekki|ciberek
+2|Bucatini|perciatelli
+2|Fios de ovos|angel hair
+1|Orecchiette
+2|Bigoli
+2|Glass noodles|cellophane noodles|crystal noodles
+2|Egg tart|egg custard tart
+2|Pappardelle
+2|Mandu|dumpling
+2|Pici
+2|Uszka|mini pierogies
+2|Xiaolongbao
+2|Pizzoccheri
+2|Agnolotti|Agnelot|agnolotto
+2|Ziti
+2|Tortelloni
+2|Trofie|Trofiette
+2|Tarhonya|egg barley|egg drops|tarhoňa
+2|Cavatelli
+2|Cha siu bao|char siu bao|roast pork bun
+2|Khuushuur
+2|Lumpia|popiah|baobing|runbing
+2|Maultasche
+2|Shumai|pork dumpling|shao mai|siu mai|siew mai
+2|Capellini
+2|Fregula|fregola
+3|Mafaldine|mafalda|mafalde|reginette
+3|Schlutzkrapfen|cajinci|crafuncins|mezzelune|ravioli tirolesi
+5|Strozzapreti
+3|Tagliolini|taglierini|taglioni|tajarin
+3|Lumache
+3|Ruote|Wheels
+3|Spaghettini
+3|Songpyeon
+3|Alphabet|Alphabet pasta|alfabeto|Alphabetti Spaghetti
+3|Lazanki
+3|Gemelli
+3|Kreplach
+3|Cappelletti
+3|Bánh cuốn|bánh mướt|bánh ướt
+3|Gujhia|gujia|purukiya
+3|Kalduny
+3|Anelli|anelletti
+3|Campanelle|gigli
+3|Garganelli
+3|Radiatori|radiatore
+3|Tortiglioni
+3|Har gow|ha gau|ha gow|ha kau|Hakkao|shrimp bonnet|xiajiao
+3|Pastina
+3|Bah-uân|Ba-wan|Bah-înn|Bah-oân|Jou-yuan|meatball mochi|Rou-Yuan|Bah-huê
+3|Pamonha
+3|Testaroli|testarolo
+3|Ditalini|tubettini
+3|Casoncelli|casonsei|casonziei|ciaroncie
+3|Kenkey
+3|Nikuman|chūka man
+3|Rotelle|wagon wheels
+3|Salteña|Argentina
+3|Siopao|salapao
+3|Acini di pepe
+3|Cavatappi
+3|Paccheri
+3|Corzetti|croxetti
+3|Farfel
+3|Maltagliati
+3|Tortelli
+3|Casarecce
+3|Passatelli
+3|Casunziei|casanzes|casonciei|csanzöi
+3|Crab Rangoon|crab puffs
+3|Lasagnette
+3|Rice noodle roll|steamed rice roll
+3|Shengjian mantou|pan-fried cabbage and pork bun|Shengjianbao
+3|Shrimp toast|prawn toast|sesame prawn toast
+3|Spaghetti alla chitarra|maccheroni alla chitarra|Tonnarelli|Chitarra
+3|Stringozzi|strangozzi|umbricelli
+3|Trenette
+3|Bavette
+3|Filled|Filled pasta|stuffed pasta|pasta with filling
+3|Fusi
+3|Gnudi
+3|Pasta mollicata
+3|Seada|Sebada
+3|Taro dumpling
+3|Busiate|busiati
+3|Eo-mandu|fish dumpling
+3|Fagottini
+3|Sedani
+3|Tangbao|Guantang Baozi|Guantangbao
+4|Tofu skin roll
+4|Anellini
+4|Candele
+4|Cappellacci
+4|Cappelli da chef
+4|Caramelle
+4|Castellane
+4|Conchiglioni
+4|Creste di Gallo
+4|Fazzoletti
+4|Festoni
+4|Fiorentine
+4|Fusilli Lunghi
+4|Fusilli bucati
+4|Lasagnotte
+4|Lumaconi
+4|Maccheroncini di Campofilone
+4|Mandala
+4|Matriciani
+4|Mezzani
+4|Mezze Maniche
+4|Mezzi Rigatoni
+4|Mezzi bombardoni
+4|Nuvole
+4|Pasta al ceppo
+4|Penne ricce
+4|Pipe Rigate
+4|Ravioli del Plin|Plin
+4|Riccioli
+4|Ricciolini
+4|Ricciutelle
+4|Rombi
+4|Rustiche
+4|Sedanini
+4|Spaghettoni
+4|Spiralini
+4|Treccioni
+4|Trenne
+4|Tuffoli
+4|Vesuvio
+4|Ziti Tagliati
+4|Fileja
+4|Agnolini|agnolini Mantovani|agnulì|agnulìn
+4|Crozets de Savoie
+4|Lanterne
+4|Malloreddus|gnocchetti Sardi
+4|Šúľance
+4|Fiori
+4|Manicotti
+4|Stelline|Stars
+4|Boraki|Alboraki|Tatar-boraki
+4|Corunda|Corundas
+4|Culurgiones
+4|Gnocchi alla romana
+4|Gyōza
+4|Mitarashi dango
+4|Sagnarelli|tagliolini|sagne|sagnette
+4|Scialatielli|scialatelli|sciliatielli|scivatieddi
+4|Tortello amaro di Castel Goffredo
+4|Troccoli
+4|Şehriye
+4|Calamarata
+4|Filindeu|God's yarns
+4|Lorighittas
+4|Bakpau
+4|Banana|Banana pasta
+4|Bánh bột lọc
+4|Capunti
+4|Chaoshou
+4|Chichi dango
+4|Empanadilla
+4|Fedelini
+4|Jiucai hezi|garlic chives pocket
+4|Lumpiang keso
+4|Occhi di lupo
+4|Pillus
+4|Pumpkin Tortelli
+4|Raviole du Dauphiné
+4|Sorrentinos
+4|Tripoline
+4|Youmian
+4|Foglie d'ulivo|foglie di ulivo
+4|Anchellini
+4|Boccoli
+4|Cecamariti
+4|Ciriole
+4|Fagioloni
+4|Fainelli
+4|Ferrazzuoli
+4|Gramigna
+4|Lagane
+4|Maccheroncelli
+4|Marille
+4|Mezze penne
+4|Picagge
+4|Picchiarelli
+4|Quadrefiore
+4|Rigatoncini
+4|Sagne 'ncannulate
+4|Schiaffoni
+4|Strapponi
+4|Strascinati
+4|Su Filindeu
+4|Torchio
+4|Trottole
+4|Zitoni
+4|Chicken riggies
+4|Dinamita
+4|Foi thong
+4|Sacchettoni|beggar's purse pasta|sacchetti
+4|Shark fin dumpling|Sharkfin and prawn dumpling in superior soup
+4|Shui jiao
+4|Stroncatura|struncatura
+4|Toasted ravioli|fried ravioli|T-rav
+4|Barbine
+4|Cencioni
+4|Cascatelli
+4|Costrada from Pontedeume|Costrada
+4|Gogges|gogga|goges|goggizes|goglies|stripta makaronia
+4|Kibi dango
+4|Linguettine
+4|Parmitieddi|parmatieddi|palmatielli|parmi
+4|Patacucci
+4|Spoja lorda|Minestra imbottita PAT
+4|Maccheroni alla molinara|alla mugnaia
+4|Swabian spaetzle|Swabian Spätzle
+4|Velveeta Shells & Cheese
+` });
+EVO.cat({ ...{"id": "bread", "name": "Breads", "icon": "🥖", "q": "Name a **type of bread**.", "strip": ["bread", "loaf"], "level": 1}, list: `
+0|Baguette|French bread|French stick
+0|Bagel|bagels|beigel|beigels
+0|Toast|bread toast|toasted bread
+0|Bread roll|Roll
+0|White|White bread
+0|Garlic|Garlic bread|garlic bread roll
+0|Croissant|croissants|butter croissant
+0|Naan|nan|khamiri|naan bread|butter naan|garlic naan
+0|Pretzel|Bretzel|Pretzels
+0|Pita|pitta|pita bread|Syrian bread|Palestinian bread|Greek bread
+0|Tortilla|Wrap
+0|Brown|Brown bread
+0|Flatbread|flatbreads
+0|Rye|Rye bread
+2|Banana|Banana bread
+2|Focaccia|stuffed focaccia
+2|Brioche
+2|Doughnut|doughnuts|donut|donuts|an-donatsu
+2|Ciabatta
+2|Whole wheat|Whole wheat bread|wheat bread|wholemeal bread|Wholemeal
+2|Scone
+2|Chapati|chapatti|chapathi|chappathi|chappati|phulka|roshi|safati|shabaati
+2|Lavash
+2|French toast|fried bread|eggy bread|gypsy toast|omelette bread
+2|Pancake|serguio massa|hotcake|flapjack|griddlecake
+2|Challah|berches|challos|challot|hallah
+2|Breadsticks
+2|Burger Bun
+2|Panettone
+2|Injera|ʾənǧära
+2|Cinnamon roll|cinnamon bun|cinnamon Danish|cinnamon snail|cinnamon swirl
+2|Matzah|matsah|matse|matsot|matza|matzoh|matzot|matzoth|mazzah|maẓẓot|Matzo
+2|Puri|Poori bread|Puri bread|poori
+5|Pumpernickel|pumpernickel bread
+2|Soda|Soda bread
+2|Paratha|farata|forota|palata|parantha|parauntha|parontay|porota|porotha|prontha|parathas|pratha
+2|English muffin
+2|Muffin|Muffins
+2|Papadam|papad|papadum|papar|pappadam|poppadom|poppadum
+2|Sacramental|Sacramental bread|host|communion bread|communion wafer|consecrated host|holy host|hostia|ostia
+2|Baozi|bao|pao|Steamed Bun
+2|Okonomiyaki
+2|Stollen|stol|kerststol|christstollen|paasstol
+2|Breadcrumbs
+2|Roti|rotee|phulka|rotis
+2|Pandoro
+2|Simit|gevrek|sameet|semid|semit|simeet|Turkish bagel
+2|Rusk|rusks
+2|Hot cross bun
+2|Kaiserschmarrn|Kaiserschmarren
+2|Crumpet
+1|Sourdough|sourdough bread
+2|Crispbread|Rye Crispbread
+2|Berliner|Berliner Pfannkuchen
+2|Dorayaki
+2|King cake|bolo-rei|galette des rois|king cakes|king's cake|king's cakes|Portuguese king cake|three kings' cake
+2|Kutia|kutya
+2|Kalakukko
+2|Palatschinke
+2|Lángos|lalanga
+2|Pain au chocolat|chocolate bread|chocolatine|chocolate pastry
+2|Syrniki|Syrnyky
+2|Baba|babka|boba|babka cake|bobka|Easter babka
+2|Potato|Potato bread
+2|Bun
+2|Cornbread
+2|Kifli|cornuri|kifle|kiflice
+2|Unleavened|Unleavened bread
+2|Fougasse
+2|Pupusa
+2|Kulich|kulichi
+2|Pogača|Pagáč|pogačica|pogačice
+2|Qatayef|qatayef dumplings
+2|Semla|Laskiaispulla
+2|Kaiser roll|hard roll|Vienna roll
+2|Buchteln
+2|Lahoh
+2|Bhatura|bhatoora
+2|Oliebol|oley‐cooks|oliebollen|olykoke|olykoek
+2|Pączki
+2|Kulcha
+2|Pão de queijo|cheese bread|cheese bun|cheese roll
+2|Arepa
+2|Bap
+2|Batard
+2|Bloomer
+2|Cob
+2|Crostini
+2|Epi
+2|Ficelle
+2|Fruit Loaf
+2|Gluten Free Bread
+2|Irish Brown Bread
+2|Khachapuri
+2|Kolache
+2|Mantou
+2|Melba Toast
+2|Pretzel Roll
+2|Split Tin
+2|Stottie
+2|Tin Loaf
+2|Zucchini Bread
+2|Biscuit|baking powder biscuit
+2|Piadina romagnola|Piadina
+2|Teacake
+2|Anpan
+2|Frybread
+2|Danish pastry|Danish|wienerbrød
+2|Jian dui|Jin deui|benne ball|sesame seed ball|sesame seed laddu|Zin Deoi
+2|Manakish|man'ousheh|manaeesh|manakeesh|manaqish|mankousheh
+2|Poffertjes|poffertje
+2|Butterbrot
+2|Buñuelo|bolinho|birmuelo|bonuelo
+2|Prosphora|panagia|prosphoron
+2|Xiaolongbao
+2|Murtabak|Mutabak|Saudi Authintic pie
+2|Tandyr nan|lepyoshka|obi non|tandir non|tohax|tonur nan
+2|Vanillekipferl|Hókifli
+2|Bannock
+2|Paska|Pască
+2|Matnakash
+2|Palianytsia|palianitsa|palyanitsa|palyanytsya
+2|Sliced|Sliced bread|pre-sliced bread
+2|Sufganiyah|sufganiyot
+2|Melonpan|melon bread|meronpan
+2|Zopf
+2|Farinata|socca
+2|Ftira
+2|Galette
+2|Korovai|karavai|kravai
+2|Lefse
+2|Msemmen
+2|Qatlama|Kattama|gambir|katlama|katmer
+2|Bublik
+2|Hot dog bun|Frankfurt roll|frankfurter bun|frankfurter roll|hot dog roll
+2|Taboon|Taboon bread|laffa
+2|Vienna|Vienna bread
+2|Cozonac
+2|Babka
+2|Barbari|Barbari bread
+2|Chipa
+2|Sangak
+2|Shoti
+2|South Indian parotta|Parotta|Barotta
+2|Tandoor|Tandoor bread|tandur bread|Tanur bread
+2|Christmas cookie|Christmas cookies
+2|Cronut
+2|Curry|Curry bread
+2|Frittella|Frittelle|Frittole|fritole|fritule
+2|Koliva
+2|Oblea|wafer cookie|galletas suizas|oblaten|oblatne
+2|Pandesal
+2|Qistibi
+2|Rice|Rice bread
+2|Viennoiserie
+2|Multigrain|Multigrain bread|Granary|Seeded
+2|Raisin|Raisin bread
+2|Baghrir|Hatita|Beghrir|Ghrayef
+2|Barmbrack
+3|Bazlama
+3|Christmas wafer
+3|Knish|knishes
+3|Koeksister
+3|Martabak manis|apam balik|Appam Bali|Bali appam|Balinese appam
+3|Ontbijtkoek|peperkoek
+3|Puran poli|Boli|Shenga Holige|Poley|poli|Bobbattlu|Holige|Obbattu|Puran puri
+3|Sopa paraguaya
+3|Tunnbröd
+3|Viaticum|Last Communion
+3|Zhingyalov hats|Jengyal bread|jingalov hats|zhengyalov hac
+3|Bialy
+3|Damper
+3|Japanese milk|Japanese milk bread|Milk bread|Hokkaido milk bread|Shokupan
+3|Monkey|Monkey bread
+3|Aloo paratha|alu paratha
+3|Bara brith|speckled bread
+3|Easter|Easter bread
+3|Kisra|Kissra
+3|Mekitsa
+3|Pan de muerto
+3|Rosette
+3|Sfenj
+3|Sopaipilla|Sopapillas
+3|Taftan
+3|Kolach|kalach|kalács
+3|Sprouted|Sprouted bread|Essene bread|Ezekiel bread
+3|Antidoron|blessed bread|eulogia
+3|Bombolone
+3|Cachapa
+3|Colomba pasquale|Colomba di Pasqua|Easter dove
+3|Fit-fit
+3|Franzbrötchen
+3|Hortobágyi palacsinta
+3|Kerststol|krentenstol
+3|Klenät|fattigmann|kleina|klejner
+3|Kubdari
+3|Makki ki roti|makkī kī roṭṭī
+3|Malawach|Malawah
+3|Pane carasau
+3|Pinca
+3|Pineapple bun|crispy bun
+3|Sel roti|shinghal
+3|Sheermal
+3|Suncake|Taiyang bing|Thài-iông-piáⁿ|thài-iông-piánn
+3|Yufka|yufka bread
+3|Borodinsky|Borodinsky bread
+3|Bungeo-ppang
+3|Chakhchoukha
+3|Cong you bing|scallion pancake|Onion cake
+3|Corn tortilla|tortillas|tortilla de maíz
+3|Dutch baby pancake|Dutch baby
+3|Fried|Fried bread
+3|Graham|Graham bread
+3|Kommissbrot
+3|Malassada|Malasada
+3|Manda roti|Rumali Roti
+3|Markook
+3|Obwarzanek krakowski
+3|Pain aux raisins|French pastry|sweet roll|bread pastry
+3|Serabi|Chwee kueh
+3|Sweet roll|sweet rolls
+3|Vasilopita|Greek king cake
+3|Bambalouni
+3|Bazin|bazeen
+3|Blaa
+3|Blodplättar
+3|Flatbrød|Flatbrod
+3|Folar
+3|Mchadi
+3|Mughlai paratha
+3|Picarones|picarón
+3|Pumpkin|Pumpkin bread
+3|Sepik
+3|Tahini roll|tahini bread roll|tahinli çörek
+3|Pain de campagne|campagne bread|pains de campagne|rustic bread|rustic loaf
+3|Artos
+3|Bhakri
+3|Casatiello
+3|Cornetto
+3|Cougnou
+3|Frankfurter Kranz
+3|Harcha
+3|Limpa|Limpa bread
+3|Marraqueta
+3|Mlinci
+3|Nun's puffs|nun's farts
+3|Pain d'épices|pain d'épice
+3|Pathiri
+3|Siopao|salapao
+3|Tequeño
+3|Tiger|Tiger bread|Dutch Crunch|giraffe bread|Marco Polo bread|tiger roll
+3|Appam
+3|Arboud
+3|Bakarkhani
+3|Batbout
+3|Brötchen
+3|Catalán
+3|Cremona
+3|Dampfnudel
+3|Dosa
+3|Eish Baladi
+3|Filone
+3|Galleta de Campaña
+3|Gibassier
+3|Grissini
+3|Hardbrood
+3|Hardtack
+3|Kamir
+3|Khooba Roti
+3|Khubz
+3|Knäckebröd
+3|Komeko pan
+3|Koulouri
+3|Laugenbrezel
+3|Lepinja
+3|Llonguet
+3|Lompe
+3|Mohnstriezel
+3|Msemen
+3|Pain Poilâne|Poilane
+3|Paximadi
+3|Rohlík
+3|Schwarzbrot
+3|Semmel
+3|Somun
+3|Taftoon
+3|Taralli
+3|Tsoureki
+3|Vollkornbrot
+3|Vánočka
+3|Vörtbröd
+3|Boule
+3|Johnnycake|johnny bread|journey cake|Shawnee cake|Jonnycake
+3|Pain de mie
+3|Chelsea bun
+3|Cruller
+3|Kesra|kessra|Khobz el f'tir
+3|Kinder Happy Hippo
+3|Maltese|Maltese bread
+3|Pan|Pan loaf
+3|Proja|cornbread
+3|Bolani|Perakai|Poraki
+3|Himbasha
+3|Spelt|Spelt bread|Dinkelbread
+3|Broa
+3|Cocktail bun
+3|Easter mona|Mona de Pascua
+3|Garlic knot
+3|Gundel pancake
+3|Ham chim peng|bánh tiêu|haam ji peng|ham ji peng|hum chim peng|hum ji peng
+3|Hujiao bing|bánh tiêu
+3|Indian breads|Indian bread
+3|Laufabrauð
+3|Mahua
+3|Michetta
+3|Panko
+3|Pestiños
+3|Pistolet|piccolo|broodje
+3|Potbrood
+3|Quarkkäulchen
+3|Rosca de reyes|roscón de reyes
+3|Ruisreikäleipä
+3|Rupjmaize
+3|Rúgbrauð|Rugbraud
+3|Shengjian mantou|pan-fried cabbage and pork bun|Shengjianbao
+3|Smultring
+3|St. Martin's croissant|St. Martin's Croissants|Martinshörnchen|Rogal marciński|Rogale świętomarcińskie|Saint Martin Croissants|St. Martin Croissants|St. Martin's Day Croissants
+3|Taguella
+3|Talo
+3|Zeeuwse bolus
+3|Saj|Saj bread
+3|Cottage|Cottage loaf
+3|İçli pide|pide
+3|Bati|Baati
+3|Chouquette
+3|Concha
+3|Coppia ferrarese|Coppia Ferrarese PGI
+3|Cuban|Cuban bread|Pan Cubano
+3|Dawamesc|Dawamesk
+3|Flour tortilla|wheat tortilla
+4|Knieküchle
+4|Kompyang|konpen|kunpen|gng-biâⁿ|guáng-biǎng|guang-bing|gwōngbéng|kuang-ping
+4|Kubaneh
+4|Lotus seed bun
+4|Luchi
+4|Quick|Quick bread|aerated bread
+4|Rousquille|rosquilla
+4|Rugbrød
+4|School|School bread|skolebrød
+4|Suikerbrood
+4|Tonis puri
+4|Totopo
+4|Twist|Twist bread
+4|Zimtstern
+4|Beer|Beer bread
+4|Roti jala
+4|Shaobing|Chinese pancake
+4|Česnica
+4|Bastone
+4|Bing
+4|Bulka
+4|Chałka|Chalka
+4|Coca
+4|Coffin bread
+4|Ensaïmada
+4|Felipe
+4|Fugazza
+4|Hops Bread
+4|Khakhra
+4|Kürtőskalács
+4|Mollete
+4|Pan Gallego
+4|Pan de Cea
+4|Pane Nero di Castelvetrano
+4|Puccia
+4|Regañás
+4|Shrak
+4|Tigella
+4|Torta al Testo
+4|Akki rotti
+4|Almojábana
+4|Açma
+4|Bath bun
+4|Bolillo
+4|Corone|cornet|coronet|korone
+4|Faluche|North Bread|Pain du Nord
+4|Ham and egg bun
+4|Huajuan|Mandarin roll
+4|Jelly doughnut|jam doughnut
+4|Khanom bueang|Thai crepes
+4|Matloue|Matlou|khobz el-dâr|khobz el-kousha|khobz el-tajine|matloua el-kousha|matlouh
+4|Memela
+4|Mola salsa
+4|Mosbolletjies
+4|No-knead|No-knead bread
+4|Pandebono
+4|Pizza di Pasqua
+4|Potato doughnut|potato donut|spudnut
+4|Rosca
+4|Samoon
+4|Sanna
+4|Tangbao|Guantang Baozi|Guantangbao
+4|Tebirkes|Københavnerbirkes|Thebirkes
+4|Thepla
+4|Twisted doughnut
+4|Yakisoba-pan
+4|Bolo do caco
+4|Gnocco fritto|crescentina
+4|Kitcha
+4|Afghan|Afghan bread
+4|Basler Brot|Basler Laibli
+4|Bolo de arroz
+4|Bremer Klaben
+4|Burgo
+4|Candeal|Candeal bread|Pan candeal
+4|Carrot|Carrot bread
+4|Casabe|cazabe|casabe de yuca|cassava bread
+4|Covrigi
+4|Currant bun|krentebol|raisin bun
+4|Daktyla
+4|Dombolo
+4|Finnish|Finnish bread
+4|Funkaso|Fankasau|Pinkaso
+4|Magenbrot
+4|Maritozzo
+4|Nokul
+4|Ogura toast
+4|Ox-tongue pastry|Chinese doughnut|horse-ear pastry
+4|Pane di Altamura|Pane di Altamura PDO
+4|Pinsa
+4|Pulla
+4|Ramazan pidesi|Ramadan pide
+4|Sally Lunn bun|Selemena|Soel leme|Soleilune|Solet Lune
+4|Sgabeo
+4|Soboro-ppang|Korean streusel bread|soboro bread|soboro bun|soboro pastry
+4|Soul cake|soulmass cake
+4|Tapalapa
+4|Farl
+4|Malt|Malt loaf
+4|Laobing
+4|10 won|10 won bread|10 Yen Bread
+4|Balep korkun
+4|Blintz
+4|Boston cream doughnut
+4|Buckwheat pancake|Buchweizenpfannkuchen
+4|Bush|Bush bread
+4|Cemita|Sema|Cema|Semita
+4|Crackling|Crackling bread|cornbread
+4|Cream bun|cream roll
+4|Cream tubes|torpedo dessert
+4|Crempog
+4|Cruffin
+4|Donut hole|doughnut hole|donut hole treat|donut hole treats
+4|Etli ekmek
+4|Fatoot
+4|Festival|festivals|Jamaican festival|Jamaican festivals
+4|Flatkaka
+4|Gebildbrot
+4|Gukhwa-ppang|chrysanthemum bread
+4|Hallulla
+4|Handesh|Sylheti Handesh|Sylheti|Guror Fita|Guror Handesh
+4|Honey toast
+4|Hong Kong cream bun|Hong Kong sweet bun
+4|Jerusalem bagel|ka'ak al-Quds|Bagel Yerushalmi|ka'ek al-Quds
+4|Kaletez
+4|Kandil simidi
+4|Koe'sister
+4|Lagana
+4|Mahdjouba|mahjouba|Mhadjeb
+4|Mischbrot
+4|Nonnevot
+4|Olive|Olive bread|olivenbrot
+4|Pain brié
+4|Pan de yuca
+4|Pane ticinese
+4|Pizza bagel
+4|Pizza dolce di Beridde|diamanti romani|pizza ebraica
+4|Podpłomyk
+4|Qrashel|Krachel|krichlat
+4|Roti gambang
+4|Sabaayad
+4|Sandwich|Sandwich bread
+4|Sausage|Sausage bread
+4|Schenkele
+4|Shuangbaotai
+4|Steamed|Steamed bread
+4|Tabouna|Tabouna bread
+4|Texas toast
+4|Timbits|doughnut hole
+4|Touton
+4|Trivandrum boli|Boli
+4|Vastedda
+4|Åland pancake
+4|Coco|Coco bread
+4|Obwarzanek|precel
+4|Pa de pagès
+4|Amish friendship|Amish friendship bread|Amish cinnamon bread
+4|Barley|Barley bread
+4|Biscocho|biskotso
+4|Borlengo
+4|Boûkète
+4|Bánh rán|bánh cam
+4|Chickpea|Chickpea bread|nohut ekmeği
+4|Colaci
+4|Croffle
+4|Dalieba|lieba
+4|Dutch carnival cake|Tiel carnival cake
+4|Eish merahrah|aish merahrah
+4|Filipinos
+4|Galician|Galician bread|IGP Pan Gallego|Pan galego|PGI Галицький хліб
+4|Hirayachi
+4|Hornazo
+4|Kelane|Kalana|Kelaneh
+4|Kkulppang|honey bread
+4|Krofne
+4|Krotekake
+4|Mealie|Mealie bread
+4|Mochi donut|Pon de Ring|Mochi donuts
+4|Montreal-style bagel
+4|Parva
+4|Peanut butter bun
+4|Peinirli|peynirli pide|cheese pide
+4|Piki
+4|Ping on bun
+4|Sardenaira|piscialandrea|pissadella|pissalandrea|pizza all'Andrea|pizzalandrea
+4|T'anta wawa|Guagua de pan
+4|Tomato omelette
+4|Vakfıkebir|Vakfıkebir bread|Vakfıkebir ekmeği
+4|Bammy|bami
+4|Barm cake|Barm
+4|Ajdov Kruh
+4|Apple|Apple bread
+4|Bakpau
+4|Bamiyeh
+4|Bappir
+4|Bisciola|Bisciola PAT|pan di fich|panettone Valtellinese
+4|Bread dildo
+4|Burebrot
+4|Chalbori-ppang|chalbori bread|glutinous barley bread
+4|Chapssal doughnut|chapssal-doneot|glutinous rice doughnut
+4|Chhilka roti|Chhilka pitha|Chilka roti
+4|Cider doughnut
+4|Cocol
+4|Coconut doughnut
+4|Dal puri|Dal poori
+4|Eish fino
+4|Galette-saucisse
+4|Gobhi paratha|Gobi paratha
+4|Güirila
+4|Honey bun
+4|Jolada rotti|Jawari Roti|Jonna rotte|Jowar roti
+4|Laffa
+4|Maltout|Al-Maltout|maltoot bread
+4|Mandoca
+4|Maple bacon donut
+4|Mexican breads|Mexican bread
+4|Onion roll
+4|Pan de coco
+4|Parbaking|par-baked
+4|Paximathia|Paximadia|Paximadhia
+4|Picatostes|picatoste
+4|Prądnik|Prądnik bread
+4|Pão francês|French roll|French bread
+4|Roti bolen
+4|Rēwena|Rēwena bread
+4|Salt-rising|Salt-rising bread
+4|Sfincia di San Giuseppe|Sfinci di San Giuseppe|Sicilian doughnut|St Joseph doughnut
+4|Shakoy
+4|Sop|blöta
+4|Sour cream doughnut|sour cream donut
+4|Spanish|Spanish bread|Señorita bread
+4|Sticky bun
+4|Tandoori roti
+4|Tattie scone|potato scone
+4|Tortilla de rescoldo
+4|Veneziana
+4|Adobe|Adobe bread|oven bread
+4|Agege|Agege bread
+4|Batter|Batter bread
+4|Boston bun
+4|Braaibroodjie|braai bread|Braaibroodjies
+4|Broa de Avintes
+4|Brown Bobby
+4|Buccellato di Lucca|Buccellato
+4|Cañada|Cañada bread|Pan de cañada
+4|Cheese straw
+4|Cheesymite scroll
+4|Crompouce|tompouce croissant
+4|Doughnut sandwich
+4|Egg-coated|Egg-coated bread|bread in egg|French toast
+4|Everything bagel
+4|Fermentum
+4|Fläskpannkaka
+4|French roll|baguette roll|Felipe bread|French bread roll|Marseille bread|short baguette
+4|Fruit bun
+4|Gebrochts
+4|Horsebread
+4|Houska
+4|Javanese doughnut|donat jawa
+4|Kneippbrød
+4|Krapfen
+4|Libum
+4|Mutschel
+4|Oranais
+4|Pain suisse
+4|Pain à la grecque
+4|Pan brioche
+4|Pan dulce|kashipan|sweet bun
+4|Panigaccio|panigacci, panigazzo, panigazzi
+4|Parker House roll
+4|Pashti
+4|Pilipit
+4|Russian Mennonite zwieback|zwieback|tweebak
+4|Sevillian bollo|Bollo sevillano|Bollo
+4|Staffordshire oatcake|oatcake
+4|Stottie cake
+4|Sweet corn arepa|Arepa de choclo|Arepa de chócolo|Arepa de maíz jojoto|Arepa de maíz tierno|Arepa de maíz verde|Chorreada|Cosposa|Toquera|Toquete|Tortilla de choclo|Tortilla de maíz|Tortilla de tiesto
+4|Tiella
+4|Trenza
+4|Upplandskubb
+4|Veka
+4|Vrtanek|perec
+4|Wagafi|Wagafi bread
+4|Anadama|Anadama bread
+4|Canadian white|Canadian white bread
+4|Guokui
+4|Hard dough|Hard dough bread|hardo bread
+4|Maluj|Malooga
+4|Bolus|baulus
+4|Bursa Cantik Pide|Bursa cantık pide|Busa cantık pidesi
+4|Buttery|Aberdeen Buttery|Aberdeen Rowie|Rowie
+4|Bánh căn
+4|Cachito|Cachitos
+4|Chinese pancake
+4|Cochinito de piloncillo
+4|Couque suisse
+4|Craquelin
+4|Crustless|Crustless bread
+4|Cuccalar
+4|Dutchie
+4|Faraoa 'ipo
+4|Fatira|paṭira
+4|Fukure-Gashi
+4|Georgian|Georgian bread
+4|Ghandi Bread|Ghandi
+4|Gurasa
+4|Hearth|Hearth bread
+4|Hoagie roll|hero roll
+4|Hönökaka
+4|Kaak
+4|Khubz al-ʾAbbas|ِAbbas bread
+4|Kiping
+4|Kolot
+4|Mollete de Antequera|Mollete of Antequera
+4|National Loaf|National
+4|New York–style bagel|New York bagel
+4|Ovelgönne bread roll
+4|Paltbröd
+4|Panfocaccia
+4|Penia
+4|Pihta|pihtha
+4|Ploye
+4|Putok
+4|Pyshka
+4|Ruisleipä
+4|Salt|Salt bread|Shio pan
+4|Samarkand non|Samarkand bread
+4|Skjenning
+4|Slow Bread|Slow
+4|Sorullos
+4|Tahinli pide|tahinli
+4|Telera
+4|U Pan de Natale
+4|Wonder Bread|Wonder
+4|Ṣa
+4|Dhebra
+4|Banana pancakes
+4|Belgian bun
+4|Blueberry pancake
+4|Bulkie roll
+4|Cholermus
+4|Cinnamon toast
+4|Cornell|Cornell bread
+4|Cream Box
+4|Dumb|Dumb bread
+4|Firecake
+4|Grant|Grant loaf
+4|Gyabrag
+4|Herculaneum|Herculaneum loaf
+4|Hoggan|Hogen
+4|Hot and spicy cheese|Hot and spicy cheese bread|Wisconsin Cheesy Bread
+4|Iced bun|suisse
+4|Irish soda|Irish soda bread
+4|K-brot
+4|Katlam
+4|Kletzenbrot|dried fruit bread|Tyrolean Dried Fruit Bread
+4|Kumukunsi
+4|Long John
+4|Marquesote
+4|Milk roll|Blackpool roll
+4|Mjukkaka
+4|Morning roll|Scottish Morning Roll
+4|Munini-imo|potce-imo
+4|Ngome
+4|Nutribun|Nutriban
+4|Pakistani breads|Pakistani bread
+4|Pan bati
+4|Peg|Peg bread
+4|Pershing|Persian doughnut
+4|Pinagong
+4|Plain|Plain loaf|plain bread
+4|Poee|poie
+4|Pone
+4|Pope Ladies
+4|Portrait of Louis XVI|Louis XVI, King of France and Navarre
+4|Regañao
+4|Sanchuisanda
+4|Scali|Scali bread
+4|Tiger tail donut|tiger tail|tiger tail doughnut
+4|Ttongppang
+4|Turkish|Turkish bread|Ekmek
+4|Turkish breads|breads of Turkey
+4|Pão Alentejano|Alentejano bread|Alentejo bread
+` });
+EVO.cat({ ...{"id": "cocktails", "name": "Cocktails", "icon": "🍸", "q": "Name a **cocktail**.", "strip": ["cocktail"], "level": 2}, list: `
+0|Mojito
+0|Sangria
+0|Bloody Mary
+0|Martini
+0|Piña colada
+0|Rum and Coke|Cuba libre
+0|Irish coffee
+0|Margarita
+0|Caipirinha
+0|Gin and tonic|G and T|gin tonic
+0|Daiquiri
+2|Cosmopolitan|cosmo
+2|Pisco sour
+2|Sex on the beach
+2|Spritz|Spritz Veneziano
+2|Long Island iced tea|Long Island Ice Tea
+1|Negroni
+2|Tequila sunrise
+2|White Russian
+2|Bellini
+2|Manhattan|Manhattan cocktail
+2|Mai Tai
+2|Old fashioned|Old fashioned cocktail
+2|Americano
+2|Screwdriver|Screwdriver cocktail
+2|Kalimotxo
+2|Black Russian
+2|Kir
+2|Moscow mule
+2|Singapore sling|gin sling
+2|B-52|Bifi|Bifty
+2|Radler|Shandy Gaff
+2|Espresso martini|Vodka espresso
+2|Kogel mogel
+2|Mimosa
+2|Whiskey sour
+2|Carajillo
+2|Sidecar
+2|Sazerac|drinks|drinl
+2|Mint julep
+2|Shandy|beer drink|shandygaff
+2|Spritzer|Fröccs
+2|Alexander|Princess Mary
+2|French 75|jeuxde
+2|Highball
+2|Hippocras|hippocrass|hipocras|hypocras
+2|Vesper|Vesper Martini
+2|Aigua de València|Agua de Valencia
+2|Long drink
+2|Shot|shooter
+2|Tom Collins
+2|Zombie
+2|Feuerzangenbowle
+2|Gimlet
+2|Grasshopper
+2|Hot toddy|hot whiskey
+2|Kamikaze
+2|Michelada
+2|Rusty nail
+2|Sour
+2|White Lady
+2|Caesar|Red Eye|Bloody Caesar
+2|Godfather
+2|Lemon drop|Lemon Drop Martini
+2|Angel face
+2|Aviation
+2|Blue Lagoon
+2|Lumumba|Lugumba
+2|Boulevardier
+2|Brandy Alexander
+2|Brandy crusta|Crusta
+2|Clover Club|Clover Club cocktail
+2|Harvey Wallbanger
+2|Liqueur coffee|coffee cocktail
+3|May wine|Maitrank|Maibowle|Maiwein|Waldmeisterbowle
+3|Orgasm
+3|Tinto de verano
+3|Vodka martini
+3|Appletini|Apple martini
+3|Between the sheets
+3|Bramble
+3|Dark 'n' stormy
+3|Gin fizz
+3|Horse's neck
+3|Krambambula|Krambambuli
+3|Monkey gland
+3|Planter's punch
+3|Sea breeze
+3|Bacardi|Bacardi cocktail
+3|Black velvet
+3|Casino|Casino cocktail
+3|Hemingway special|Hemingway daiquiri|papa doble
+3|Kir royal
+3|Paloma
+3|Paradise
+3|Porto flip
+3|Rob Roy
+3|Snaps
+3|Whiskey and Coke|Whisky and Coke|Jack and Coke
+3|Bombardino
+3|Fizz
+3|Hugo|hugo drink|Hugo Spritz
+3|John Collins
+3|Jägerbomb
+3|Karsk
+3|Poncha
+3|Porn star martini|Maverick Martini|P*Star|Passion star martini|Pornstar
+3|Stinger
+3|Bee's knees
+3|Blue Hawaiian
+3|Champagne|Champagne cocktail
+3|Flip
+3|Golden dream
+3|Last Word
+3|Layered drink
+3|Rebujito
+3|Rossini
+3|U-boot
+3|Beer|Beer cocktail
+3|Bronx
+3|Canchanchara
+3|Death in the Afternoon|Hemingway|Hemingway Champagne
+3|Derby
+3|Flaming drink|flaming beverage
+3|French martini
+3|Hanky panky|Hanky-Panky cocktail
+3|Hurricane|hurricane cocktail
+3|Jagertee
+3|Martinez|Martinez cocktail
+3|Mary Pickford
+3|Old Cuban
+3|Pink lady
+3|Queen Mary
+3|Tom and Jerry
+3|Vieux Carré
+3|Yellow bird
+3|7 and 7
+3|Black and tan
+3|Caipiroska
+3|Coquito
+5|Corpse reviver
+3|Gibson
+3|Irish car bomb
+3|Jack Rose
+3|New York sour
+3|Paper plane
+3|Prince of Wales
+3|Rose
+3|Russian spring punch
+3|Scotch and soda
+3|Tamagozake
+3|Ti' punch
+3|Tuxedo
+4|Alabama slammer
+4|BLT|BLT cocktail
+4|Batida|Batidas
+4|Bumbo
+4|Chicago|Chicago cocktail
+4|Garibaldi
+4|Gin basil smash|Gin Pesto
+4|Penicillin
+4|Pisco punch
+4|Piscola
+4|Vodka Red Bull|VRB|Speedball|RBV|Red Bull and vodka|Russian Bull|VARB|VKRB|Vod-Bomb|vodka and Red Bull
+4|Wine|Wine cocktail|wine-based cocktail
+4|Zurracapote
+4|Amber moon
+4|Blood and Sand
+4|Boilermaker|a shot and a beer
+4|Brooklyn
+4|Buck's fizz
+4|Colombia
+4|El Presidente
+4|Pink gin
+4|Salty dog
+4|Somaek
+4|Trinidad sour
+4|Vampiro
+4|Yorsh
+4|Adios Motherfucker|AMF
+4|Adonis
+4|Bomb shot|depth charge
+4|Chartreuse swizzle
+4|Hot buttered rum
+4|Jello shot|Gelatin shot|Jelly shot
+4|Matador
+4|Mexikaner
+4|Monaco
+4|Painkiller
+4|Pimm's cup|Pimm’s No. 1 Cup
+4|Rabo de Galo
+4|Remember the Maine
+4|Rickey
+4|Rüdesheimer Kaffee
+4|Sgroppino
+4|Smash
+4|Snakebite
+4|Suffering bastard
+4|Tequila slammer
+4|Torpedo juice
+4|Ve.n.to
+4|Wine cooler
+4|20th century
+4|Aqua Velva
+4|Bacon martini|Bacontini|Bloody Bacon Martini|Pig On The Rocks
+4|Bijou
+4|Borgoña
+4|Buck|mule
+4|BuzzBallz
+4|Café com cheirinho|café com música
+4|Campari Soda
+4|Cape Codder|Cape Cod|vodka cranberry
+4|Cremat
+4|Fernet con coca|Fernet and Coke|Fernando|Fernandito
+4|Flirtini
+4|John Daly
+4|Lemond
+4|Lynchburg lemonade
+4|Macuá
+4|Milk punch
+4|Mizuwari
+4|Old pal
+4|Poktanju
+4|Porchcrawler
+4|Pschitt
+4|Red Russian
+4|Sake bomb|sake bomber
+4|Sherry cobbler
+4|Slippery nipple
+4|Snowball
+4|Tommy's margarita
+4|Torito|Toro
+4|Tschunk
+4|Wściekły pies
+4|Airmail|Airmail Cocktail
+4|Amaretto sour
+4|Aruba Ariba
+4|Baby Guinness
+4|Blue Hawaii
+4|Bobby Burns
+4|Brandy daisy
+4|Bushwacker
+4|Cocktails with cachaça|cocktail with cachaça
+4|Cojito
+4|Don Alfredo
+4|Flaming Doctor Pepper
+4|Frozen
+4|Fuzzy navel
+4|Gin and juice
+4|Gin pahit|bitter gin
+4|Green Swizzle
+4|Greyhound
+4|Gunfire
+4|Hirezake
+4|Illegal
+4|Mickey Slim
+4|Orange Blossom
+4|Picon Punch|Picon
+4|Purple Rain
+4|Queens
+4|Ritz Sidecar
+4|Roffignac|Roffignac cocktail
+4|South Side
+4|Spicy Fifty
+4|Up to date
+4|Ward 8
+4|Well drink|rail drink
+4|Woo woo
+4|Agua de Sevilla
+4|Aperol Spritz
+4|Atomic
+4|Batanga
+4|Bloody Margaret
+4|Blow my skull|Blow my Skull Off
+4|Blueberry tea
+4|Brass Monkey
+4|Chimayó|Chimayó cocktail
+4|Cocksucking Cowboy|Butterball|Buttery Nipple
+4|Cowboy
+4|Diki-diki
+4|Fallen angel
+4|Farnell
+4|Fluffy duck
+4|Gatorwine
+4|Goombay Smash
+4|Hangman's blood
+4|Honey deuce
+4|Hummer
+4|Incredible Hulk|Green Eyed Monster|Hip and Hen
+4|Japanese slipper
+4|Liquid nitrogen|Liquid nitrogen cocktail
+4|Malecon|El Malecon cocktail|Malecon Cocktail
+4|Mate con malicia
+4|Mitch Morgan
+4|Moose milk
+4|Naked and famous
+4|Negus
+4|Nicotini
+4|Old Etonian
+4|Pickleback
+4|Pink Squirrel
+4|Pirlo
+4|Poinsettia
+4|Royal Bermuda Yacht Club
+4|Rum Collins
+4|Saketini
+4|Serena libre
+4|Signature drink|signature cocktail
+4|Stirling Punch
+4|Three wise men
+4|Toronto
+4|Trumptini
+4|Vodka tonic
+4|White Cargo
 ` });
 EVO.cat({ ...{"id": "cereals", "name": "Breakfast cereals", "icon": "🥣", "q": "Name a **breakfast cereal**.", "strip": ["cereal", "kelloggs", "kellogg", "post", "general", "mills", "quaker", "nestle"], "level": 1}, list: `
 0|Frosted Flakes|Frosted Flakes of Corn|Frosties|Sugar Frosted Flakes|Frosted flake
@@ -19284,6 +21968,126 @@ EVO.cat({ ...{"id": "apples", "name": "Apple varieties", "icon": "🍎", "q": "N
 4|Stobo Castle
 4|Tower of Glamis
 4|White Melrose
+` });
+EVO.cat({ ...{"id": "elements", "name": "Elements", "icon": "⚗️", "q": "Name a **chemical element**.", "level": 2}, list: `
+0|Gold|element 79
+0|Iron|element 26
+0|Silver|element 47
+0|Hydrogen|element 1
+0|Oxygen|E948|element 8
+0|Copper|Cu|29Cu|CU-7|element 29|Paragard T 380A|Tatum-T
+0|Carbon|element 6
+0|Aluminium|aluminum|13Al|element 13
+0|Helium|element 2
+0|Nitrogen|element 7
+2|Sulfur|sulphur|brimstone|element 16
+2|Lithium|element 3
+2|Lead|Pb|element 82
+2|Tin|element 50
+2|Sodium|11Na|element 11
+2|Mercury|quicksilver|80Hg|element 80|hydrargyrum
+2|Calcium|Ca|20Ca|element 20
+2|Neon|element 10
+2|Zinc|Zn2+|30Zn|element 30|Zn
+2|Magnesium|12Mg|element 12
+2|Silicon|14Si|element 14
+2|Potassium|element 19|19K
+2|Fluorine|element 9
+2|Phosphorus|15P|element 15
+2|Uranium|element 92
+2|Chlorine|bertholite|₁₇Cl|element 17
+2|Argon|18Ar|element 18
+2|Titanium|22Ti|element 22
+2|Iodine|element 53
+2|Platinum|Pt|78Pt|element 78
+2|Nickel|Ni|element 28|nickel metal
+2|Plutonium|94Pu|element 94
+2|Beryllium|₄Be|element 4|glucineum
+2|Boron|boracium|element 5
+3|Chromium|Cr|24Cr|element 24
+3|Arsenic|As|33As|element 33
+3|Cobalt|Co|element 27
+3|Manganese|Mn|25Mn|element 25
+3|Krypton|36Kr|Kr|element 36
+3|Gallium|Ga|31Ga|element 31
+3|Vanadium|23V|element 23
+3|Barium|Ba|56Ba|element 56
+3|Radium|Ra|88Ra|element 88
+3|Bromine|Br|element 35
+3|Francium|Fr|87Fr|catium|eka-caesium|eka-cesium|element 87
+3|Radon|86Rn|element 86
+3|Selenium|Se|34Se|element 34
+3|Cadmium|48Cd|Cd|element 48
+3|Strontium|Sr|38Sr|element 38
+3|Antimony|51Sb|element 51|Sb
+3|Caesium|cesium|Cs|55Cs|cæsium|element 55
+3|Germanium|32Ge|element 32|Ge
+3|Xenon|54Xe|element 54|Xe
+3|Bismuth|Bi|83Bi|element 83
+3|Tungsten|wolfram|74W|element 74
+3|Iridium|Ir|element 77
+3|Polonium|Po|element 84|84Po
+3|Palladium|46Pd|element 46|Pd
+3|Molybdenum|molybdenum atom|42Mo|element 42|elemental molybdenum|metallic molybdenum
+3|Thorium|Th|90Th|element 90
+3|Zirconium|element 40
+3|Neptunium|93Np|element 93|Np
+1|Einsteinium|Es|99Es|element 99
+3|Americium|Am|element 95
+4|Nobelium|No|102No|element 102|Unb|unnilbium
+4|Scandium|Sc|21Sc|element 21
+4|Rubidium|Rb|37Rb|element 37
+4|Niobium|41Nb|Cb|Columbite|columbium|element 41|Nb
+4|Osmium|Os|76Os|element 76
+4|Hafnium|72Hf|element 72|Hf|celtium
+4|Tantalum|Ta|73Ta|element 73
+4|Tellurium|52Te|element 52|Te
+4|Yttrium|39Y|element 39
+4|Astatine|element 85|At
+4|Technetium|43Tc|eka-manganese|element 43|masurium|panormium|Tc
+4|Indium|In|49In|element 49|Indium element|Indium metal
+4|Rhodium|45Rh|element 45|Rh
+4|Ruthenium|Ru|44Ru|element 44|vestium
+4|Actinium|89Ac|element 89|emanium
+4|Lanthanum|La|57La|element 57|metallic lanthanum
+4|Rhenium|75Re|element 75|nipponium|Re
+4|Thallium|81Tl|element 81
+4|Europium|Eu|63Eu|element 63
+4|Cerium|Ce|58Ce|element 58
+4|Samarium|62Sm|element 62|Sm
+4|Californium|Cf|98Cf|element 98
+4|Gadolinium|Gad|64Gd|element 64|gadolininum|gadolinum|Gd
+4|Oganesson|eka-radon|element 118|ununoctium|Uuo|Og
+4|Promethium|₆₁Pm|element 61
+4|Curium|Cm|element 96
+4|Dysprosium|Dy|element 66
+4|Fermium|100Fm|element 100|Fm
+4|Neodymium|Nd|60Nd|element 60
+4|Berkelium|Bk|97Bk|element 97
+4|Lawrencium|Lr|103Lr|element 103
+4|Mendelevium|Mv|101Md|element 101|unnilunium
+4|Ytterbium|Yb|70Yb|element 70
+4|Copernicium|Cn|element 112|ununbium|ununnunium|Uub
+4|Flerovium|element 114|Fl|ununquadium|Uuq
+4|Tennessine|Ts|Uus|eka-astatine|element 117|ununseptium
+4|Hassium|Uno|element 108|Hs|unniloctium
+4|Rutherfordium|kurchatovium|Ku|element 104|Rf|unnilquadium|Unq
+4|Seaborgium|element 106|Unh|unnilhexium
+4|Dubnium|hahnium|element 105|unnilpentium
+4|Lutetium|Lu|71Lu|cassiopeium|cassiopium|element 71|lutecium
+4|Bohrium|element 107
+4|Meitnerium|Une|element 109|unnilennium
+4|Protactinium|Pa|91Pa|brevium|element 91|protoactinium
+4|Darmstadtium|element 110|ununnilium
+5|Praseodymium|Pr|59Pr|element 59
+4|Roentgenium|Rg|ununnilium|element 111|unununium|Uuu
+4|Terbium|Tb|65Tb|element 65
+4|Erbium|68Er|element 68|Er
+4|Holmium|Ho|element 67
+4|Nihonium|Nh|dvi-indium|eka-thallium|element 113|ununnubium|ununtrium
+4|Moscovium|Uup|Mc|eka-bismuth|element 115|ununpentium
+4|Livermorium|Lv|eka-polonium|element 116|ununhexium|Uuh
+4|Thulium|Tm|69Tm|element 69
 ` });
 EVO.cat({ ...{"id": "constellations", "name": "Constellations", "icon": "✨", "q": "Name a **constellation**.", "strip": ["constellation"], "level": 2}, list: `
 1|Orion|Ori|Orionis
@@ -26374,6 +29178,2838 @@ EVO.cat({ ...{"id": "currencies", "name": "Currencies", "icon": "💱", "q": "Na
 4|Xin dynasty coinage|Wang Mang coinage|Wang Mang money
 4|Yuan of the Red Army Command
 4|Iraimbilanja
+` });
+EVO.cat({ ...{"id": "instruments", "name": "Instruments", "icon": "🎻", "q": "Name a **musical instrument**.", "strip": ["instrument"], "level": 2}, list: `
+0|Piano|pianoforte|spinet|fortepiano|concert grand piano|spinnet
+0|Violin|fiddle
+0|Trumpet|natural trumpet|slide trumpet|B-flat trumpet|B♭ trumpet|Bb trumpet|valve trumpet
+0|Drum kit|drums|traps|drum set|trap set
+0|Recorder|basset recorder|beak flute|block flute|Blockflöte|common flute|English flute|flauto dolce|flutaphone|subcontrabass recorder
+0|Accordion|musette-type
+0|Cello|violoncello
+0|Guitar
+0|Harmonica|harp|harpoon|mouth harp|mouth organ|blues harp|French harp|gob iron|Louisiana saxophone|Mississippi sax|Mississippi saxophone|mouth harmonica|tin sandwich
+0|Viola|violas
+0|Trombone|slide trombone
+0|Oboe|standard oboe
+0|Bass guitar|bass
+0|Electric guitar|e-guitar
+2|Double bass|string bass|bass viol|bass|bull fiddle|contrabass|doghouse bass|jazz bass|stand-up bass|upright bass
+2|Xylophone|song bell|straw fiddle
+2|Tuba|bombarda|cuerno bajo|tuba baja|tuba CC|tuba contrabajo|tuba doble do|tuba en do|tuba en si bemol doble|tuba en Si bemol♭|tuba en si♭|Tuba in FA|Tuba in MIb
+2|Bagpipes|bagpipe|pipes|musette|cornemuse|biniou|set of bagpipes
+2|Alto saxophone|a. sax|a. saxophone|alto sax|E♭ alto sax|E♭ alto saxophone
+2|French horn|horn|corno
+2|Drum|caisse|cassa|tamburo|wankara
+2|Banjo
+2|Ukulele|guitalele|uke|banjolele|taro patch fiddle|taropatch|ukelele|yukelele
+2|Flute|edge-blown aerophones|transverse flute
+2|Tambourine
+2|Cymbal|cymbals
+2|Western concert flute|flute|Boehm flute|C flute|concert flute|orchestral flute
+2|Harpsichord|cembalo|clavecin|clavicembalo
+2|Microphone|dynamic microphone|ribbon microphone|condenser microphone|mic|mike
+2|Bell|bells
+2|Saxophone|sax
+2|Triangle|musical triangle|trigono
+2|Clarinet
+2|Harp|harfa|pillar harp
+2|Mandolin|mandoline|Brazilian bandolim|Brescian mandolin|Cremonese mandolin|flat-backed mandolin|Florentine mandolin|Genoese mandolin|Lombardian mandolin|Milanese mandolin|Tuscan mandolin
+2|Maraca|maracas
+2|Pipe organ
+2|Synthesizer|musical synthesizer|sound synthesiser|sound synthesizer|synth|synthesiser
+2|Bassoon|fagot
+2|Lute|luth
+2|Loudspeaker|speaker
+2|Bongo drum|bongo|bongos
+2|Big Ben|Clock Tower|Elizabeth Tower|Big Ben Tower|Saint Stephen Tower|St Stephen's Tower|Tower of Big Ben
+2|Spinning top|top|top toy|spintop|toy top
+2|Multimedia
+2|String|instrument string|instrument wire|musical string|musical wire|String instrument|stringed instrument|chordophone|string musical instrument|stringed instruments
+2|Timpani|kettledrum|kettledrums|tympani|timpano|timpanum|timpany|timps|tympany
+2|Gong|gongs|bossed|bowl gongs|nipple gongs|suspended gongs|metal gongs
+2|Sitar
+2|Jew's harp|trump|gewgaw|trompe|drimba|Galician harp|genggong|guimbardes|jaw harp|jaw's harp|juice harp|khomus|murchunga|Ozark harp
+2|Musical keyboard|keyboard|music keyboard
+2|Percussion|Percussion instrument|percussions|percussion instruments
+2|Phonograph|gramophone|turntable|record player
+2|Organ
+2|Soprano|soprano lirica
+2|Wind|Wind instrument|wind instruments|wind musical instrument
+2|Piccolo
+2|Lyre
+1|Didgeridoo|didjeridoo|didjeridu|digeridoo|dijiridu
+2|Headphones|headphone|circumaural headphones|on-ear headphones|over-ear headphones|supra-aural headphones
+2|Tenor|tenor voice
+2|Keyboard|Keyboard instrument|clavier
+2|Castanets
+2|Bass|Bass instrument|instrument, bass|instruments, bass|bas|bass voice
+2|Zither|cither|simple chordophone
+2|Brass|Brass instrument|labrosone|lip-reed instrument|wind brass instrument
+2|Tuning fork
+2|Baritone|baryton
+2|Oud|Arab lute|outi
+2|Vuvuzela|lepatata Mambu|stadium horn
+2|Se|guitar|zither|che|25-string zither|Chinese zither|guse|ku se|se zither
+2|Cornet
+1|Theremin|thereminvox|aetherphone|etherphone|termenvox|thereminophone
+2|Woodwind|Woodwind instrument|woodwinds|woodwind instruments
+2|Snare drum|snare|caixa|caja|shallow snare drum|side drum|war snare
+2|Pump organ|reed organ|harmonium
+2|Bass drum|kick drum
+2|Tabla|tablaa
+2|Pan flute|panpipes|lulu|paidi|syrinx|paixiao|p'ai-hsiao|pai-ti|Pan pipe|pan-ti|Pan's pipe|pandi|reeds of Pan|sets of end-blown flutes
+2|Mezzo-soprano|mezzo|mezzo-soprano voice|mezzosoprán
+2|Euphonium|baritone|euphonion|Sommerophone
+2|Flugelhorn|B♭ soprano saxhorn
+2|Vibraphone|Vibes|V-phone|vibraharp
+2|Balalaika|balabayka|balalayka
+2|Contralto
+2|Adobe Illustrator|Illustrator
+2|Whistle
+2|Fidget spinner
+2|Sousaphone
+2|Beatboxing|b-box|beat box|human beat box
+2|Ocarina
+2|Djembe|JEM|djimbe|dyinbe|jembe|jenbe|jimbe
+2|Clavichord
+2|Cor anglais|English horn|tenor oboe
+2|Bowed string|Bowed string instrument|bowed stringed instrument|bowed strings
+2|Gramophone|phonograph|turntable|record player
+5|Hurdy-gurdy|organistrum|vieille|vielle à roue|wheel fiddle|wheel vielle
+2|Idiophone
+2|Glockenspiel|bell lyra|orchestral bells
+2|Bodhrán
+2|Kazoo
+2|Tin whistle|siren|Clarke London Flageolet|English flageolet|feadog|feadog stain|Irish whistle|penny whistle|Scottish penny whistle|tin flageolet
+2|Acoustic guitar|chitara rece
+2|Bağlama|bağlama-saz|saz
+2|Carillon
+2|Dombra|dambora|dambura|dombira|dombyra
+2|Koto
+2|Marimba
+2|Shamisen|shamisens|samisen|samisens|sangen|sangens
+2|Viol|gamba|viola da gamba
+2|Conga|conga drum|tumbadora|Congas
+2|Classical guitar|Spanish guitar|concert guitar|Modern classical guitar|nylon-string guitar
+2|Duduk
+2|Membranophone|membranophones|membrane instruments
+2|Cajón
+2|Erhu|Chinese two-stringed fiddle|urheen
+2|Liberty Bell|Old State House Bell|State House Bell
+2|Pipa|Chinese lute|East Asian necked lute
+2|Bandura
+2|Bouzouki|bouzoukee|buzuci|buzuki|buzuq
+2|Celesta|celeste
+2|Kithara|cithara
+2|Shofar|ram's horn
+2|Siren|fire siren|alarm siren|siren alarm
+2|Melodica|pianica|blow-organ|key-flute|melodion
+2|Aerophone|wind instrument
+2|Barrel organ|crank organ|roller organ
+2|Cimbalom|cymbalom
+2|FL Studio|FruityLoops
+2|Fender Stratocaster|Stratocaster
+2|Tsar Bell
+2|Bandoneon|bandonion
+2|Megaphone|bullhorn|loud hailer
+2|Music box
+2|Music sequencer|sequencer|audio sequencer|Global Master of Data Programming|record sequencer|synthesizer programming
+2|Whistling|whist|puccalo
+2|Contrabassoon|double bassoon
+2|Hydrophone
+2|Mbira|thumb piano|African hand piano|hand piano|kisaanj|likembe|nsansi|sansa|kalendi|Kalimba
+2|Countertenor|angelical|contra tenor|countertenor voice|tenor angelical
+2|Dutar|dotar
+2|Santur|santoor
+2|Veena|vina|beena|bina
+2|15.ai
+2|Aulos
+2|Gusle|lahuta
+2|Sarangi
+2|Shehnai|serunai|sarinai|sarunai|sarune|sarunei|serune
+2|Ship's bell|signal bell|Nautical bell|Nautical signal bell|ship bell
+2|Silbo Gomero|Canary Whistle|el silbo
+2|Alphorn|alpine horn|alpenhorn
+2|Daf|Dafli|def
+2|Hammond organ|Hammond B-3
+2|Qanun|ganoun|kanoon|kânûn
+2|Sampler
+2|Sistrum
+2|Zurna|Curla|sirnay|sırnay|surnai|surnay|syrnay|zamour|zamr|zokra|zorna|zourna|zurla
+2|Chordophone|chordophone Instrument
+2|Darbuka|derbake|darabuke|darabukka|darbouka|darboukka|darbuga|darbukka|derabucca|derbouka|derbuga|derbuka|derbukka|dumbek
+2|Electronic keyboard
+2|Fender Telecaster
+2|Gibson Les Paul|Les Paul Model
+2|Rebab
+2|Sheng|mouth organ|ching|cheng|Chinese mouth organ|Chinese organ|gourd organ|seng
+2|Taiko|Japanese drum|wadaiko
+2|Concertina
+2|Drum machine
+2|Guqin|lyre|kin|kine|Chinese zither|qin|5-string zither|7-string zither|ancient qin|Chinese lyre|Chinese psaltery|qin zither
+2|Mellotron|novatron
+2|Mixing console|audio mixer|Audio mixers|line mixer
+2|Ney
+2|Pickup|Picup
+2|Spinet|spinnet
+2|Uilleann pipes|Irish Bagpipes|Irish organ|uilean pipe|uileann pipe|uilleann pipe|uilliann pipes|union pipe
+2|Vocaloid
+2|Steelpan|steel drum|pan
+2|AirPods
+2|Balafon|bala|balafeu|balafo|balafou|balaphone|balas|balo|balophong
+2|Bansuri|venu|nadi|bansi|bansuri flute|murali|tunava|vamshi
+2|Bugle|field trumpet
+2|Hang|Hand Pan
+2|Plucked string|Plucked string instrument|plucked instruments
+2|Subwoofer
+2|Cowbell|Musical Cowbells|livestock bell|animal bell|sheep bell
+2|Jingle bell|bubieniec|sleigh bell|bubentsy|small bell
+2|Mridangam|mridanga
+2|Player piano|reproducing piano|mechanical piano|piano-player|pianola
+2|Sarod|sarode
+2|Shakuhachi|syakuhati
+2|Agung a tamlang
+2|Ahoko
+2|Array mbira
+2|Babendil
+2|Bungkaka
+2|Cajón de tapeo
+2|Calung
+2|Catá
+2|Chime bar
+2|Chuk
+2|Chácaras
+2|Clapstick
+2|Darkhuang
+2|Erikundi
+2|Biwa
+2|Digital audio workstation|DAW
+2|Electronic musical|Electronic musical instrument|electrophone|analog electronic instruments|analog electronic instruments, modules and components|analog electrophones|electronic instrument
+2|Ratchet|rattle|cog rattle|derkach
+2|Tanpura|taanpura|tamboura|tambura|tanipurani
+2|Tar|taar|Azerbaijani performance art of the tar
+2|Kantele
+2|Cornett|cornetto|zink
+2|GarageBand|GarageBand for iOS and macOS
+2|Geophone
+2|Kamancheh|kamanche|kamānches
+2|Tanbur|tanbour|tembûr|tambur|tanboor|tenbur
+2|Tubular bells|tubular bell|orchestral chimes
+2|Viola d'amore|viole d'amour
+2|Virginals|virginal|spinet virginal
+2|Wind chime|wind-bell
+2|Door knocker|knocker
+2|Dreidel|draydel|dreydl
+2|Guzheng|Chinese zither|zheng
+2|Balaban|narmenay
+2|Bass clarinet
+2|Charango|Ronroco
+2|Claves
+2|Damaru
+2|Dhol
+2|Electric piano|electronic piano
+2|Fujara|Slovak pipe
+2|Helicon
+2|Vihuela
+2|Theorbo|theorbo-lute|theorboed lute|theorbe
+2|Angklung
+2|Alarm|alarm device|alert
+2|Cubase|Steinberg Cubase
+2|Doorbell
+2|Electrophone
+2|Escopetarra
+2|Fortepiano|pianoforte
+2|Naqareh|naker|nagara|naccaire|nagada|naqqāra|nogʻora
+2|Prepared piano
+2|Pungi
+2|Quena|qina
+2|Rhodes piano|Fender Rhodes|Fender Rhodes piano
+2|Tipu's Tiger|Tippoo's Tiger
+2|Vocoder|voice encoder
+2|Fiddle|fiddles|folk violin|fiddle-family
+2|Glass harmonica|bowl organ|glass armonica|glass harmonium|hydrocrystalophone
+2|Kora
+2|Morin khuur|traditional music of the Morin Khuur|hur|khil-khuur|ma tʻou chʻin|matou qin|Mongolian horse-head fiddle
+2|Serpent|schlangenrohr|serpentone
+2|Shawm|schalmei
+2|Bayan|bajan
+2|Celtic harp|celtic harps|clairseach|clarsach|Gaelic harp|Irish harp
+2|Cittern|cithren
+2|Dholak|dholaki|ḍholki|dhulka|ḍōlak
+2|Equalizer
+2|Fender Jaguar|Jaguar
+2|Fender Precision Bass|P Bass|Precision Bass
+2|Flageolet
+2|Gayageum|kayagum|chongak kayagum|gayagŭm|kaya kum|kayago|kayakko|kayako
+2|Güiro|calabazo|Elías del cariul|guayo|ralladera|rascador
+2|Hi-hat|charleston
+2|Hypermedia
+2|Metallophone|metal bar percussion instrument
+2|Oboe d'amore|hautbois d'amour|mezzo-soprano oboe
+2|Octobass
+2|Psaltery|psalterium|sawtry
+2|Stradivarius|Stradivarius violin|Stradivari|Stradivarius instrument
+2|Transposing|Transposing instrument|transposing instruments|transposing musical instrument
+2|Alto flute|bass flute
+2|Bullroarer|rhombus|bull-roarers|thunderstick|turndun|whizzer
+2|Chapman Stick
+2|Drum stick
+2|Electronic drum|digital drum|digital drums|E-Drums|USB digital drums|USB drums
+2|Mandola|octave mandola
+2|Musical saw|singing saw
+2|Pro Tools
+2|Roland TR-808|808 Bass|Roland TR-808 Rhythm Composer
+2|Rubab|rabab|Afghan lute|rabob|robab
+2|Setar|Iranian setar|saitār|sehtār|setā|setór|sihtār
+2|Slit drum|gulgul|slit gong|slit gongs|slit drums in Ambrym Island|Atingting kon
+2|Tom drum|tom-tom drum|tom|toms|tom-tom|tom-toms
+2|Twelve-string guitar|12-string guitar
+2|Bandurria
+2|Fender Jazz Bass
+2|Gibson Flying V|Flying V|White Epiphone "1958" Korina Flying V
+2|Gibson SG|Gibson '61 SG|Gibson '61 SG Standard
+2|Moodswinger
+2|Portuguese guitar
+2|Shankha|Śankh|Dung-Dkar
+2|Standing bell|singing bowl|Himalayan bowl|rin gong|suzu gong|Tibetan bowl|Tibetan singing bowl
+2|Talking drum
+2|Transverse flute|side-blown flute|side-blown flutes|transverse flutes
+2|Vielle
+2|Water organ|hydraula|hydraulic organ|hydraulos|hydraulus
+2|Yangqin|yang ch'in|yang quin
+2|Aeolian harp
+2|Agogô|agogo bell
+2|AirPods Pro|AirPod Pros|AirPods Pro 1st generation|AirPods Pro first generation|AirPods Pros|Apple AirPods Pro
+2|Alto|alt
+2|Baritone horn|baritonhorn|bombardino
+2|Baryton|bariton|barydon|lyra bastarda|paradon|paridon|pariton|viola di bardone|viola di bordone|viola paredon
+2|Davul|daula|daouli|daul|daule|dhol|dohol|ṭabl turkī|tapan|tupan
+2|Dobro
+2|Foghorn|foghorns|fog signal|horn beacon|nautofon
+2|Gadulka|rebec|tsigulka|ganilka|gdulka|gusla|kementše|kopanka
+2|Garmon|garmoshka|hromka|khromka|livenka|vâtka
+2|Helmholtz resonance|Helmholtz resonator
+3|LMMS
+3|Monochord
+3|Post horn|postal horn
+3|Syrinx|syringes|bird syrinx
+3|Tenor saxophone
+3|Zytglogge|Zytglocke
+3|Berimbau|Aunene|Berimbau musical bow|Sekitulege
+3|Gusli
+3|Kaval|Balkan duduk|duduk|Kaval playing|kavalče
+3|Autoharp|chord zither
+3|Cavaquinho|cavakinho
+3|Civil defense siren|air-raid alarm|air-raid siren|civil defense alarm|outdoor warning siren
+3|Divje Babe flute
+3|Dizi|ti tzu|ti-tse|tsi-tzü
+3|Domra
+3|Fingerstyle guitar|fingerpicking
+3|Grand piano
+3|Keytar|Korg RK-100 Keytar
+3|Lithophone
+3|Roland TB-303
+3|Sea organ
+3|Shekere|chekere|Djabara|sekere
+3|Soubrette|character soprano
+3|Suikinkutsu|Japanese water zither
+3|Udu|kim-kim
+3|Wagner tuba|Bayreuth tuba|Wagner horn
+3|Whistled language|whistle speech
+3|Wooden fish|Muyu|Chinese temple block|moktak|mokugyo
+3|Ableton Live|Ableton
+3|Bass-baritone
+3|Carbon microphone
+3|Chalumeau|chalumeaux|mock trumpet|pocket clarinet
+3|Clavinet|Hohner Clavinet
+3|Handbell
+3|Kanjira|kanjeera
+3|Komuz
+3|Logic Pro|Notator Logic
+3|Mellophone
+3|Moog synthesizer
+3|Rainstick|Rain Machine
+3|Red Special|Fireplace|Old Lady
+3|Soprano saxophone
+3|Timbales|paila
+3|Nyckelharpa|keyed fiddle
+3|Rebec|patchi|rebecha|rebeckha
+3|Acoustic bass guitar|bass acoustic guitar|bass guitar, acoustic
+3|Alboka
+3|Baby rattle|toy rattle
+3|Baritone saxophone
+3|Buccina|buccin|bucina
+3|Cabasa|cabaça|cabaza|cabaza afuche
+3|Car alarm
+3|Carnyx|karnyx
+3|Coloratura soprano
+3|Dayereh|dāira|dajre|dajreja|doira|dojra|doyra
+3|Diatonic button accordion|melodeon
+3|Electric bell
+3|Electric violin
+3|Esraj|israj
+3|Fender Jazzmaster|Jazzmaster
+3|Gibson Explorer|Gibson Futura|Gibson x-plorer
+3|Lur|lure|lurr
+3|Olifant|oliphant
+3|Pedal steel guitar|pedal steel
+3|Ravanahatha|ravana hasta veena|ravanastron|ravanhatta|rawanhattha
+3|Saxhorn|saxwey
+3|Semantron|Nakos|Simantra
+3|Shishi-odoshi|deer scare|deer-chaser|The Thing That Goes Doink|TheThingThatGoesDoink
+3|Ophicleide
+3|Suona|laba|sona|haidi|sorna
+3|Ardour
+3|Fender Mustang
+3|Flamenco guitar|picados
+3|Ghatam|ghaṭa|ghaṭah|ghaṭi|kaṭam|ghaṙā
+3|Humbucker|humbucking pickup
+3|Laser harp
+3|Orchestrion
+3|Quray|koeraj|koray|kouraï|kurai|kuray|qurai
+3|Resonator guitar|dobro|resophonic guitar
+3|Roland TR-909
+3|Siku|sikus|antara|sicu|zampolla|zampona
+3|Steel guitar
+3|Steel-string acoustic guitar|country guitar|folk guitar|Western guitar
+3|Tenor horn|Althorn|alto horn|cavalry horn|E-flat horn|E♭ horn|peck horn
+3|Throat microphone
+3|Tweeter|treble speaker
+3|Valiha
+3|Xiao|dongxiao|hsiao|shuzhudi
+3|Ondes Martenot|ondes musicales
+3|Arpeggione|bowed guitar|guitar violoncello
+3|Basset horn
+3|Bendir|allun|bendair
+3|Bicycle bell|bike bell
+3|Cat organ|cat piano|Katzenklavier
+3|Church bell
+3|Effects unit|audio effects unit
+3|Electronic organ
+3|Gibson EDS-1275
+3|Gibson ES-335|ES-335
+3|Gun salute|cannon salute
+3|Heckelphone
+3|Khaen|khene|kaen|khǣn|khen
+3|Kobza
+3|Pandeiro
+3|Pipe|whistle|jombarde|shepherd’s pipe|wooden flute
+3|Stroh violin|Cornet-Violine|horn-violin|one-string fiddle|phonofiddle|Stroviol|trattfiol|vioara cu goarnă|violinophon|violinophone
+3|Talk box
+3|Tres
+3|Tsuzumi
+3|Txalaparta
+3|Woodblock|Chinese block
+3|Acme siren
+3|Axatse
+3|Bamboo slit drum
+3|Bell tree
+3|Bugchu
+3|Cajón de rumba
+3|Ekwe
+3|Gamelan
+3|Xun|ocarina|Chinese ocarina|clay ocarina|earthen ocarina|huene
+3|Hardanger fiddle|Harding fiddle|hardingfele
+3|AirPods Max|Apple AirPods Max
+3|Alto clarinet|E-flat clarinet|E♭ clarinet
+3|Banhu
+3|Digital piano
+3|Dulcian|curtal
+3|Dulcimer
+3|Electric bass|electric bass guitar|electric guitar, bass|bass electric guitar
+3|Fender Jag-Stang
+3|Flexatone
+3|Great Highland bagpipe|Pibroch|Scottish bagpipe
+3|Kangling|bone trumpet|femur trumpet|rkang-gling|thighbone trumpet
+3|Kemenche|kemençe
+3|Kokle|kokles
+3|Masenqo
+3|Minimoog
+3|Musical bow|musical bows
+3|Oboe da caccia|hunting oboe|oboe da silva|oboe de caza
+3|Otamatone|otomatone
+3|Piccolo trumpet
+3|Portative organ|organetto|portatif|portatif organ|portativ|portativ organ|portative
+3|Salvo
+3|Sanxian|san-hsien
+3|Sarrusophone
+3|Semi-acoustic guitar|hollow-body electric
+3|Seven trumpets
+3|Sopranist|male soprano|sopranista
+3|The Beatles Anthology
+3|The Sigismund Bell
+3|Tárogató|taragot|tarakava|torogoată
+3|Wind machine|aeoliphone
+3|Yamaha DX7|DX 7
+3|Zill|finger cymbals|sājāt|zilia|zils
+3|Baritone guitar
+3|Blowing horn|horn|Rog
+3|Bombard
+3|Bombo legüero
+3|Dōtaku
+3|Ektara|gopichant
+3|Gibson Firebird
+3|Hulusi|gourd flute
+3|Jal tarang|jal-yantra|jalatarangam|jalatharangam
+3|Japanese Peace Bell
+3|Karnay|karnā|karnai
+3|Kobyz|qobuz|qobyz
+3|Lyres of Ur
+3|Music tracker
+3|Party horn|blowouts|party blower
+3|Pochette|kit violin|pocket fiddle|sardino
+3|REAPER
+3|Reason|alex|alexfose|fose|jorli|lamemela|Propellerhead Reason|Reason DAW
+3|Sanshin
+3|Sarinda
+3|Soundbar|media bar
+3|Sprechgesang|speak-singing|Sprechstimme
+3|Tamburica|tamboura
+3|Tintinnabulum
+3|Trembita
+3|Tulum
+3|Turntable|gramophone|record player
+3|Violone|double bass viol
+3|Yueqin|moon guitar|gekkin|la-ch‘in|moon lute|moon zither|wolgeum|yüeh-ch‘in|Goe̍h-khîm|Gue̍h-khîm
+3|Đàn bầu|dan bau|đàn độc huyền
+3|Crotales|antique cymbals
+3|Acoustic-electric guitar|electro-acoustic guitar
+3|Alghoza|alghoze|algoja|algoza|algoze|beenon|jodiya pava
+3|Atabaque
+3|Barbiton|barbitos
+3|Baroque guitar
+3|Bonshō|temple bell|tsurigane|ōgane
+3|Cimbasso
+3|Dog whistle|Galton's whistle|silent whistle
+3|Dramatic soprano
+3|Electronic piano
+3|Fife
+3|Glass harp
+3|Hichiriki
+3|Irish flute
+3|Jouhikko
+3|Kinnor
+3|Nadaswaram|Nagaswaram
+3|Nagara|naqara|naghara
+3|Panduri
+3|Positive organ|chair|positiv
+3|Rattle
+3|Ruan
+3|Spoons|musical spoons
+3|Sweep picking|sweeping|sweep
+3|Telharmonium|dynamophone|dinamofono
+3|Temple blocks|temple block|wooden fish|mokugyo|muyu|Chinese block|granite blocks|moktʼak
+3|Trautonium
+3|Turkish bird language|kuş dili
+3|Tutankhamun's trumpets
+3|Utau
+3|Whip|slapstick
+3|Stylophone|Dubreq Stylophone
+3|Washboard|rubboard
+3|Appalachian dulcimer|American dulcimer|Appalachian mountain dulcimer|fretted dulcimer|Kentucky dulcimer|lap dulcimer|mountain dulcimer|plucked dulcimer
+3|Archlute|arciliuto, archiliuto, archlute
+3|Baroque violin
+3|Bass flute
+3|Bianzhong|henshō|biên chung|chime bells|pien-chung|pyeonjong
+3|Broadside
+3|Circuit bending
+3|Conch|conches|conch-shell trumpet|conque|seashell horn|shell trumpet
+3|Condenser microphone|capacitor microphone|electrostatic microphone
+3|Csound
+3|Cuatro
+3|Fairlight CMI|Fairlight Computer Musical Instrument
+3|Frame drum|frame drums
+3|Ghanta|dril-bu|vajra bell
+3|Guan|kuan|bili|guanzi|houguan|kouen|kuan tzu
+3|Haute-contre
+3|In-ear monitor|IEM|in-ear monitor system
+3|Janggu|chang go|changgu|seyo go|sŏlchanggo|yeolje
+3|Jinghu
+3|Menat
+3|Pedal keyboard|pedal|bass pedalboard|organ pedals|pedal clavier|pedalboard|set of pedals|musical pedalboard
+3|Phorminx
+3|Roman tuba
+3|Rosegarden
+3|Rototom
+3|Single-coil guitar pickup|single coil|single coil pickup
+3|Superstrat
+3|Surbahar|bass sitar
+3|Tromba marina|marine trumpet|nun's fiddle|trumpet marine
+3|Wireless microphone|radio microphone
+3|Woofer
+3|Zhaleika|duda|brëlka|bryolka|fletnya|little flute|pishchelka|piszczałka|rozhok|sopel'|zgaleyka|zhaleyka|zhalijka|zhalomeika
+3|Çifteli|Chiftelia|Ciftelia|qifteli|Qiftelia
+3|Crumhorn|cornamuto torto|crumm horn|krummhorn|krummpfeife|kumbhorn|piva torta|piva torto|storto
+3|Crwth|crowd|rote|crotta
+3|A-flat clarinet|A♭ clarinet|piccolo clarinet
+3|Ajaeng
+3|Apple headphones|Apple earbuds|EarPods|Apple EarPods|Apple's earbuds|Earbuds by Apple|Earbuds from Apple
+3|Bass saxophone
+3|Begena|beguena
+3|Boy soprano|treble|child's voice
+3|Calliope|steam organ|steam piano
+3|Cobza|coboz|koboz|kobuz|kobuza
+3|Cornu|cornum
+3|Crash cymbal
+3|Cretan lyra
+3|Cümbüş
+3|Dulzaina|dulciana
+3|E-flat clarinet|E♭ clarinet|D clarinet|high E-flat clarinet|high E♭ clarinet|sopranino clarinet
+3|Ghungroo|ghunghroo|ghunghru|ghunghuru|ghungru|ghungur
+3|Gittern|gitterne
+3|Gudok
+3|Hammered dulcimer|cimbalom
+3|Hunting-horn|french horn|hunter's horn|hunter's signal horn|signal horn
+3|Huqin
+3|Khartal
+3|Langeleik|langleik
+3|Lautenwerck|Claviergamba|Lautenklavier|Lautenwerk|Lyrum Delium|keyboard lute|lute-clavier|lute-harpsichord
+3|Lijerica|lirica
+3|Lyric soprano
+3|Mandocello|liuto cantabile|liuto moderno|mandoloncello
+3|Mid-range speaker|mid-range|squawker
+3|Oxford Electric Bell|Clarendon Kuru Kazık
+3|PC speaker|buzzer|beeper|internal speaker
+3|Piano accordion
+3|Radiogram|console
+3|Regal|regal organ
+3|Rudra veena|bean|been|bīn|rudra vina
+3|Saung|Burma harp|Burmese harp|Myanmar harp|saung-gauk
+3|School bell
+3|Shaker
+3|Shō
+3|Software synthesizer|softsynth|music synthesizer|music synthesizer program
+3|Studio monitor
+3|Surdo
+3|Synclavier
+3|Sámi drum|Saami drum
+3|Tibetan horn|dungchen|dung
+3|Tippe top|tppe top
+3|Tumbi
+3|Turkish crescent|Chinese pavilion|çağana|Chinese crescent|Turkish jingle
+3|Vibraslap
+3|Violin family
+3|Willow flute|pitkähuilu|sälgflöjt|sallow flute|seljefløyte|Folk pipe|natural flute|pikkvile|willow bark flute|overtone flute
+3|Cuíca
+3|Akai MPC|Music Production Center|MIDI Production Center|Music Production Controller
+3|Bass trumpet
+3|Batá drum
+3|Bedug
+3|Claviorgan|claviorganum
+3|Dramyin|dramnyen|dranyen|sgra-snyan|zhamunie
+3|EMS VCS 3
+3|Electret microphone|electret condenser microphone
+3|Euler's Disk
+3|Gaohu|yuehu
+3|Ghaychak|gheychak|ghichak|gidzhak|gijak
+3|Ghijak|ghichak|gidzhak|aijieke|ghijek|jizihake
+3|Guitalele
+3|IPod Hi-Fi|Apple iPod Hi-Fi
+3|Kakaki|malakat
+3|Kanklės
+3|Krar
+3|Lamellophone|lamellaphone|plucked idiophone
+3|Lap steel guitar|Hawaiian guitar
+3|Leslie speaker|Leslie
+3|Lituus
+3|Mingun Bell
+3|Omnichord|Suzuki Omnichord
+3|OpenMPT
+3|Pakhavaj|mridang
+3|Reco-reco|caracaxá|raspador
+3|Santoor
+3|Seven-string guitar
+3|Sorna|zurna|sarnā|sornāy|surna
+3|Square piano
+3|Suling
+3|Swarmandal|Indian harp|surmandal
+3|Thavil|tavil
+3|Timple
+3|Tonkori
+3|Trompo|Reguilete|Madera
+3|TuxGuitar
+3|Xaphoon|bamboo sax
+3|Clarion|bugle
+3|Analog synthesizer|analogue synthesizer
+3|Barbat
+3|Bawu
+3|Bazooka
+3|Bones|rhythm bones
+3|Bulbul tarang
+3|Button accordion|box|button box|button-key accordion|squeezebox
+3|Byzantine lyra|lira
+3|Chenda|cenda|ceṇḍe
+3|Continuum Fingerboard|continuum|Haken continuum
+3|Course
+3|Crotalum|crotala
+3|Daegeum|chŏ|chŏttae|daegum|taegum
+3|Electrodynamic speaker driver|electrodynamic loudspeaker|speaker driver
+3|Fender Mustang Bass
+3|Floor tom|low tom
+3|Fretless bass
+3|Gibson Thunderbird
+3|Gottan
+3|Haegeum|haegum
+3|Horn loudspeaker
+3|Il Cannone Guarnerius
+3|Imzad|amzad|anzad|anzhad|imzhad|inzad|rabāba
+3|Jazz guitar|guitar jazz
+3|Kannel
+3|Kendang|Kendhang
+3|Khol|mrdanga|mridanga
+3|Kokyū|kūchō
+4|Konghou
+4|Korg M1
+4|Krakeb|krakebs|garagab|qraqeb|qarāqib
+4|Lira da braccio|lira da spalla|lira di sette corde|lira moderna
+4|Megpoid|Gumi
+4|Musette de cour|musette|baroque musette|cornemuse
+4|Natural horn|end-blown horns|end-blown labrosones with curved or folded tubes
+4|Novachord
+4|Pedal piano|pédalier|piano-pédalier
+4|Piccolo oboe|oboe musette|piccoloboe|musette|musette pipe
+4|Pitch shifting|pitch shift
+4|Pixel Buds|Google Pixel Buds|Google Earbuds|Pixel Earbuds
+4|Plasma speaker|Ionophone
+4|Pommer|bombard
+4|Prophet-5|Sequential Circuits Prophet-5
+4|Rattleback|ARK|anagyre|Bizzaro Swirl|celt|Celtic stone|rattlerock|rebellious celt|Robinson Reverser|Space Pet|Space Toy|spin bar|wobble stone
+4|Ride cymbal
+4|Riq|tar|duff|daff|doff al-zinjāri|mriqq|rik|rikk|riqq
+4|Roof knocking
+4|Sabar
+4|Saraswati veena|Saraswati vina|Sarasvatī vīṇa
+4|Soprillo|piccolo saxophone|sopranissimo saxophone
+4|Swell box|swell
+4|Tabor|tambourin|tabret|Tambour De Provence
+4|Taishōgoto|Nagoya harp|Tashogoto
+4|Technics SL-1200|Technics SL-1210
+4|Tombak|tonbak|dombak|donbak|zarb
+4|Viola da braccio
+4|Viola organista
+4|Warning shot|aim to miss
+4|Warr Guitar
+4|Welte-Mignon|Mignon|Welte-Mignon reproducing piano
+4|Wurlitzer electronic piano|Wurlitzer Electric Piano|Wurlitzer 112|Wurlitzer 200A|Wurlitzer EP-200A|Wurly
+4|Sackbut|sagbut|shagbut|shakbush
+4|Waterphone|aquaphone|aquasonic waterphone|ocean harp
+4|Marímbula|marimba|marimbol|rhumba box
+4|ARP 2600
+4|Adufe
+4|Ashiko
+4|Baglamas|baglamadaki
+4|Binioù
+4|Bleep censor
+4|Byzaanchy
+4|Citole|cetera|citera|cedra|cetola|cetula|chytara|cistola|cistole|cithar|citola|citula|cuitole|cythera|cythol|cytiole|cytolys|gytolle|sitole|sytholle|sytole|zitol
+4|Clavicytherium|cembalo verticale|clavecin vertical
+4|DJ mixer
+4|Evil laughter|bwuahaha|maniacal laughter|manic laughter|muahaha|mwahaha
+4|Fender Esquire
+4|Folk|Folk instrument|traditional musical instrument|folk music instrument|folk musical instrument
+4|Frying Pan|Rickenbacker Electro A-22|Fry-Pan
+4|Geomungo|hyeongeum|komungo
+4|Humming|hum
+4|Igil|horsehead fiddle
+4|Kacapi
+4|Korg MS-20
+4|Launeddas|Sardinian triple clarinet|Sardinian triple pipe
+4|Linn LM-1
+4|Mark tree|chimes|bar chimes
+4|Mauser MG 213
+4|Native American flute|Indian flute|courting flute|Grandfather's flute|love flute|Native American courting flute|Native American love flute|Native American style flute|North American flute|Plains flute|Plains Indian courting flute
+4|Natural trumpet|natural labrosone
+4|Nose flute
+4|P-90
+4|Paraguayan harp
+4|Piri|hyangp'iri
+4|Pocket trumpet
+4|Polyphon
+4|Psalmodicon|psalmodikon
+4|Qanbūs|gabbus|gambus
+4|ReBirth RB-338
+4|Saron|Javanese saron
+4|Serinette
+4|Simsimiyya|semsemiah|sinsimia|sinsimiyya
+4|Sopranino saxophone|sopranino sax
+4|Steel tongue drum|hank drum|tank drum
+4|Suka|Bilgoraj Suka|Bilgoray Suka
+4|Swedish bagpipes|säckpipa
+4|Tenor drum
+4|Triple harp|Welsh harp
+4|Tsuur
+4|Viola pomposa
+4|Wii Speak
+4|Yatga|Mongolian zither|yataga|yatug|yatuġ-a
+4|Boatswain's call|boatswain's pipe|bosun's whistle
+4|Caxixi
+4|Arghul|argol|arghool|arghoul|argul|arqul|yarghul
+4|Bajo sexto
+4|Bandola
+4|Basset clarinet
+4|Beyblade|BeyWarriors
+4|Bladder fiddle
+4|Bronze drum|gyongdoeng|gyongdoengz|nyen|nyenz|zongdoeng|zongdoengz
+4|Caxirola
+4|Cigar box guitar
+4|Clicker|cricket
+4|Cutaway
+4|Danso|tanso
+4|Diddley bow
+4|Dilli kaval|Tutek
+4|Dong Son drum|Đông Sơn drum
+4|Dotara
+4|Dunun
+4|Electrostatic loudspeaker
+4|English guitar
+4|FastTracker 2
+4|Fender Cyclone
+4|Fender Duo-Sonic
+4|Fender Starcaster
+4|Fender Swinger
+4|Gambang|Javanese gambang
+4|Gangsa
+4|Gibson EB-3
+4|Gibson Moderne|Gibson Modern
+4|Goje
+4|Gunshot|gunshots|gunfire|discharging a gun|firing a gun|gun discharge|gun firing|gun shooting|shooting a gun|shot by gun
+4|Harp guitar
+4|Impulse Tracker
+4|J-Alert
+4|Kabosy
+4|Laúd
+4|Liuqin
+4|MIDI controller
+4|MIDI keyboard|Midiboard
+4|Mandora|calichon|colascione|gallichon|gallichone
+4|Manual|organ manual
+4|Mizhavu
+4|Multi-neck guitar|double neck guitar
+4|Noise-cancelling headphones
+4|Pandura
+4|Pummerin
+4|Pyrophone|explosion organ|fire calliope|fire organ
+4|Rackett|sausage bassoon
+4|Rebana|rammana|Rebana Ubi drum
+4|Red Color|Tzeva Adom
+4|Renoise
+4|Ribbon microphone
+4|Rickenbacker 4001
+4|Roland D-50
+4|Russian guitar|open G tuned seven-string guitar
+4|Salpinx
+4|Shure SM58|SM58
+4|Shvi
+4|Slide whistle|jazz flute|bird warble|lotos flute|lotus flute|piston flute|song whistle|swannee whistle
+4|Svirel
+4|Talharpa|hiiu kannel
+4|Tarka|anata|tarca|tharka|tharqa
+4|Teetotum
+4|Teponaztli|tunkul|quiringua|tepenahuasqui|teponagua|teponahuaztli|teponaxtle|tinco
+4|Theatre organ|cinema organ|theater organ
+4|Toy piano|kinderklavier
+4|Treshchotka
+4|Trikiti|trikitixa
+4|Tubax
+4|Tympanum
+4|Vichitra veena
+4|Yamaha CS-80
+4|Çeng
+4|Đàn môi|dan moi
+4|Đàn tranh|dan tranh
+4|Šargija|sharki
+4|Daxophone
+4|Ngoni|nkoni
+4|Adungu|bow harp
+4|Akan Drum
+4|Angélique|angelica|angel lute
+4|Ardin
+4|Balkan tambura|tambura|Balkan tamburası|Bulgarian tambura|dranka|balkharina|boularina|boulgarya|bugaria|tanbour boulghari|baylama|drunka
+4|Barjansky Stradivarius
+4|Baroque flute|traverso
+4|Baroque trumpet
+4|Basolia|bas|basetlia
+4|Bass trombone
+4|Basso profondo|basso profundo|deep bass|low bass
+4|Bell of King Seongdeok|Bell of Bongdeoksa Temple|Divine Bell of King Seongdeok the Great|Emille Bell|Sacred Bell of King Seongdeok the Great
+4|Bonang|bonang panerus|bonang barung
+4|Bucium
+4|Buzzer|buzz disc|button whirligig|buzz toy|toy buzzer|button-on-a-string
+4|C melody saxophone|C tenor|C-sax
+4|Chang
+4|Chitarra battente
+4|Choghur|chaghyr|chagur|chonguri|chugur|chungur|chunguri
+4|Chuniri|chianuri
+4|Clapper|clappers
+4|Clash cymbals|orchestral cymbals
+4|Clavioline
+4|Contrabass saxophone
+4|Dilruba|dilrupa
+4|Duport Stradivarius
+4|EBow
+4|Epinette des Vosges
+4|Epiphone Casino
+4|Fender Bass VI
+4|Fender Bronco
+4|Flabiol|flaviol
+4|Frankenstein|Frankenstrat
+4|Fūrin|Fuurin
+4|Game call
+4|Gibson ES-150
+4|Gibson ES-175|Gibson ES-175D
+4|Gottuvadyam|gottuvadhyam|chitraveena|mahanataka vina
+4|Great Bell of Dhammazedi
+4|Guacharaca|guacharaquero'
+4|Handpan
+4|Horn|horn family
+4|Hummel|humle|langharpe|noardske balke|noordsche balk|scheitholt
+4|Hydrogen
+4|Ibanez Tube Screamer|Tube Screamer
+4|Idakka|Edakka|eḍakkya|iṭekka
+4|Inanga|ikivuvu|indimbagazo|langa|lulanga|nanga
+4|Irish bouzouki|bouzouki irlandese|irsk bouzouki
+4|Jankó keyboard
+4|Jarana jarocha
+4|Kkwaenggwari|ggaenggwari
+4|Kontra
+4|Langspil
+4|Laser microphone
+4|Lavalier microphone|lav|clip mike
+4|Maria Gloriosa
+4|Messiah Stradivarius|Le Messie
+4|Mexican vihuela
+4|Mizwad|mezoued|mizwid
+4|Modular synthesizer|modular
+4|Moscow Kremlin|Moscow Kremlin Egg|Uspenski Cathedral Egg
+4|Music Man StingRay
+4|Musical clock|flute-clock
+4|Ngoma drums|ngoma|engoma|ingoma|ngoma drum
+4|Northumbrian smallpipes|Northumbrian pipes
+4|Pedal harp|concert harp|double-pedal harp
+4|Petersglocke
+4|Piano wire|Piano wire, music wire
+4|Piezoelectric speaker|piezoelectric loudspeaker
+4|Pinkillu|pinkillo|pinkuyllu|pinqullu
+4|Reactable
+4|Repinique
+4|Roland Juno-106
+4|Saluang
+4|Sasando|sesando
+4|Shinobue
+4|Shure SM57
+4|Sintir|gambri|gembre|gembri|gimbri|guembri|guimbri|gumbri|gunibrī|hajhouj|hajouj|hejhouj|ḥajhūj
+4|Slide trumpet|flat trumpet
+4|Sopila
+4|Steam whistle
+4|Sursingar|surśrngār
+4|Sybyzgy
+4|Tambourine de Bearn|Psalterium
+4|Tamil bell
+4|Taus
+4|Ten-string guitar
+4|Three-hole pipe|flute à trois trous|shepherd's pipe|tabor pipe
+4|Tiple
+4|Trutruca|trutruka
+4|Txistu|chistu
+4|Xalam
+4|Yamaha Tenori-on|Tenori-on
+4|Chimta
+4|21-gun salute
+4|ANS synthesizer
+4|ARP String Ensemble|Solina|ARP Solina String Ensemble|Solina String Ensemble
+4|Air horn|fog signal|tyfon
+4|Altar bell|sacring-bell|sanctus bell|handbell|mass bell|sacryn bell|saints' bell|sance-bell
+4|Analog modeling synthesizer
+4|Anandalahari|gubgubi|khamak
+4|Archtop guitar
+4|Azerbaijani musical instruments|Azerbaijani musical instrument
+4|Bachi
+4|Balangiga bells
+4|Bamboo flute
+4|Bandora|bandore|pandora
+4|Baritenor|low tenor|high baritone
+4|Bass oboe|baritone oboe
+4|Bass pedals
+4|Beigoma
+4|Bell of Chersonesos
+4|Blackie
+4|Boha
+4|Buk|puk
+4|Buzuq|bouzouk|bozuq
+4|Cakewalk Sonar
+4|Cannone da 75/27 modello 11|Gun, Towed, 75 mm, Model 1911|Model 11 Cannon|Model 1911 Cannon
+4|Casio VL-1
+4|Chamberlin
+4|Chapei dang veng|chapey|Chapei|chapei dong veng
+4|Clarinet d'amore|clarinette d'amour|clarinet d'amour
+4|Clavinova
+4|Contrabass clarinet|B-flat contrabass clarinet|B♭ contrabass clarinet|double bass clarinet|pedal clarinet
+4|Cornamuse
+4|Electric upright bass|electric double bass
+4|Electronic wind|Electronic wind instrument|EWI
+4|Erke|coroneta|erque|quepa
+4|Fender Coronado
+4|Fender Musicmaster
+4|Fender Telecaster Bass|Tele Bass
+4|Fluier
+4|Full-range speaker|Fullrange
+4|Gackpoid
+4|Galician gaita|Gaita galega|Gaita gallega
+4|Ghumot
+4|Gibson Marauder
+4|Groovebox|groove machine
+4|Guitar synthesizer
+4|Gyaling|jah-lin|jah-ling|rgya gling
+4|Harpejji
+4|Headless tambourine|Brazilian tambourine|jingle ring
+4|Hne
+4|Jackson Kelly
+4|Jackson Rhoads
+4|Jawbone
+4|Kashaka|Asalato
+4|Kemençe of the Black Sea|kemençe|kemenche|Karadeniz kemençesi|kemenche of the Black Sea|Laz kemençesi|Pontic kemenche|Pontic lyra
+4|Kombu|Kumbu
+4|Lady Blunt Stradivarius
+4|Laouto
+4|LinnDrum
+4|Lirone|lira da gamba
+4|Low whistle
+4|Lucille
+4|Luthéal
+4|Magnetic cartridge|pickup|phono cartridge|phonograph cartridge
+4|Mijwiz|matbudj|mizwidj
+4|Mizmar|mazāmīr|sa’īdī mizmār
+4|Nafir|nefir
+4|Nail violin
+4|Octave effect|octave device|octave divider|octave multiplier|octave pedal|octaver
+4|Octoban
+4|Optigan
+4|Orpharion
+4|Paleolithic flute|bone flute|kapau-yetpë|waxkanii-pootaatiikanushal|yópeque
+4|Pambaram|Gaming top|Bambaram|Bongaralu Aata|Bongaram|Buguri|Lattu
+4|Panharmonicon
+4|Rasgueado
+4|Roland MT-32
+4|Roland SH-101
+4|Sambuca
+4|Sarronca|furruco|ronca|runcho|zambomba
+4|Servais Stradivarius
+4|Silent piano
+4|Sopilka
+4|Splash cymbal
+4|Sympathetic string|resonance string
+4|Taal|manjeera|madjira
+4|Taepyeongso|hojeok|hojok|nallari|saenap|swaenap|tʻaepʻyŏngso
+4|Tanbūra
+4|Tenor guitar|four-string guitar
+4|Thunder sheet|thunder machine
+4|Timbau|Timbal
+4|Torban
+4|Tovshuur|tobshuur|topshur
+4|Traditional Japanese musical instruments|traditional Japanese musical instrument|Japanese musical instrument
+4|Tsampouna|Tsambouna
+4|Unintentional discharge|accidental discharge|discharged unintentionally|negligent discharge|unintentional firing|unintentionally discharged|unintended discharge|accidental shooting|shot accidentally|accidental gunshot|unintentional shooting
+4|Violino piccolo|diskangeige|piccolo violin|quartgeige|terzgeige|treble violin|violino alla francese
+4|Wah-wah pedal|wah pedal
+4|Washtub bass|gutbucket
+4|Whirligig|pin wheel
+4|Yamatogoto|wagon|Azuma-goto|Jamato-Koto|Wa-gong
+4|Ütőgardon|gardon|gardony|tekenyőgardon|ütősgardony|hit-gardon
+4|Đàn nhị|dan nhi
+4|Kalatalo|beater|clapper|Matraca|Kolotushka|Torokhkatalo
+4|Apkhyarta
+4|Aztec death whistle|ehecachichtli
+4|BandLab
+4|Banjo ukulele|banjo uke|banjolele|banjulele|ukulele banjo
+4|Bell of Sangwonsa
+4|Bianqing|pyeongyeong|biên khánh|p'yŏn'gyŏng
+4|Big Muff|Electro-Harmonix Big Muff
+4|Birch trumpet
+4|Bitwig Studio|Bitwig
+4|Bowed clavier|bogenklavier|Geigenwerk|wheel harp
+4|Bridge of Nations Bell
+4|Buisine|anafil|bazuin|busine|buysine|buzine
+4|Cello da spalla|viola da spalla|violoncello da spalla
+4|Chakhe|jakhe|krapeu|takhe
+4|China cymbal
+4|Chocalho|chocolo
+4|Chromatic button accordion|chromatic accordion
+4|Colascione
+4|Doshpuluur|Doshpulduur
+4|Dozaleh|koshnay|ghoshmeh|qoʻshnay|Dozale
+4|Egg shaker|ganzá
+4|Eight-string guitar|8-string|8-string guitar
+4|Electone
+4|Electric cello
+4|Electric organ|electronic organ
+4|Erxian
+4|Eurorack
+4|Fender Bullet
+4|Fender Jaguar Bass
+4|Flûte d'amour|tenor flute
+4|Fou
+4|Free reed aerophone|free reeds
+4|Freedom Bell
+4|Fretless guitar
+4|Gaita asturiana
+4|Ganzá|chocalho|sekseki|siksak
+4|Gehu
+4|Gemshorn|ĉamkorno|corno di camoscio|flûte en corne|gemscorno
+4|Gibson L-5
+4|Goblet drum|darbuka|chalice drum|goblet-shaped drum|darbek
+4|Gralla
+4|Güira|sexoooooo
+4|Heldentenor|dramatic tenor|heavy dramatic tenor|heroic tenor|low tenor
+4|Hornpipe
+4|Hyperbass flute
+4|Höfner 500/1
+4|Indian harmonium
+4|Jackson Soloist
+4|Jetigen|dzhetigan|zhetygen
+4|Karatalas
+4|Kebero
+4|Keyed trumpet
+4|Klopotec|klapotetz
+4|Korean Bell of Friendship|Korean Bell and Belfry of Friendship|Korean Friendship Bell
+4|Kpanlogo|kpanlogo dance
+4|Kèn bầu
+4|Kōauau|kooauau
+4|Laser turntable|optical turntable
+4|Ligature
+4|Loudspeakers in mosques
+4|Luo Tianyi|Luo Thien Yi
+4|Lute guitar|decacorde|German lute
+4|Madhalam
+4|Mandolin-banjo|banjoline
+4|Mohan veena
+4|Music workstation|workstation|audio workstation
+4|Nevel|nebel
+4|Nohkan|nō-flute|nō-kan
+4|PPG Wave
+4|Paixiao
+4|Phin
+4|Piffero|fife|piffaro
+4|Polymoog
+4|Protracker
+4|Rathaus-Glockenspiel
+4|Rauschpfeife|wind-cap instrument
+4|Requinto guitar
+4|Rickenbacker 325
+4|Roland JP-8000
+4|Royal Drummers of Burundi|Drummers from Burundi|The Drummers Of Burundi|The Royal Burundi Drummers
+4|Ryūteki
+4|Salamuri
+4|Samsung Galaxy Buds Live|Buds Live|Galaxy Buds Live
+4|Sapeh|Sape|Sampe|Sampeh|Sampek|Sampeq
+4|Scream Tracker
+4|Shanz|chanza|chanz|chanzy|shaanza
+4|Shruti box|sruti box|surpeti
+4|Smart doorbell|smart video doorbell
+4|Sound module
+4|Sound truck
+4|Spinto
+4|Squeezebox|Harmonia
+4|Suspended cymbal
+4|SynthAxe
+4|Tamborim
+4|Tan-tan
+4|Tbilat|tabla
+4|Timila
+4|Tingsha|Tibetan tingsha
+4|Torupill|kitsepill|kotepill|lootspill
+4|Trinity College harp|Brian Boru's Harp
+4|UPIC|Unité Polyagogique Informatique CEMAMu
+4|Ultimate Soundtracker
+4|Yaybahar
+4|Zabumba
+4|Zhonghu
+4|ARP 2500
+4|ARP Odyssey
+4|Access Virus
+4|Algerian mandole|mandole
+4|Alto trombone|alt trombone|high trombone
+4|Apito|apito de samba|samba whistle
+4|Archicembalo|arcicembalo
+4|Armónico
+4|Arpeggiator
+4|Arturia MicroFreak
+4|Bak|pak
+4|Binzasara|bin-sasara
+4|Blackpool High Tide Organ
+4|Boomwhacker
+4|Boundary microphone|Presseur Zone Microphone|PZM
+4|Buhay|bika|bochka|berebenytsia|buga|bugai|buhai
+4|Bukkehorn|buckhorn|goat’s horn
+4|Cabrette
+4|Calabrian lira
+4|Celebratory gunfire|aerial firing|happy fire
+4|Chajchas
+4|Ching|chheng|chhing
+4|Cimpoi
+4|Componium|combinium
+4|Contact microphone
+4|Contrabass flute
+4|Cura
+4|DJ controller|DJ digital controller
+4|Dabakan|dadaboon|dadabuan|dbakan|debakan
+4|Dacian draco
+4|Davidov Stradivarius|Davidov cello Stradivarius|Cello Davidoff|Cello Davydov|Davidoff cello Stradivarius|Davydov cello Stradivarius
+4|Dhimay|dhimaya|dhime
+4|DigiTech Whammy|Whammy|Whammy pedal
+4|Disklavier
+4|Division bell
+4|Dohol
+4|Dreadnought|D-size guitar
+4|Drums in communication|signal drum
+4|EarPods
+4|Electric|Electric instrument|electric musical instrument
+4|Ensoniq ASR-10
+4|Epigonion
+4|Erkencho
+4|Esophageal speech
+4|Eunuch flute|mirliton|onion flute
+4|Fanfare trumpet
+4|Fangxiang|Chinese chang|fang hsiang
+4|Fender Bass V
+4|Fender Electric XII
+4|Fender Showmaster
+4|Fender Toronado
+4|Five-string violin
+4|Floppotron
+4|FluidSynth
+4|Friction drum|friction membranophone
+4|Frula|jedina|jedinka|jednojka|Serbian flute|sviraja|svirala|svirale|žvegljica
+4|Fue|Japanese flute
+4|Gaita de boto
+4|Gibson EB-0
+4|Gibson Hummingbird|Hummingbird
+4|Gibson Les Paul Junior|Les Paul Junior
+4|Gibson Les Paul Studio
+4|Gogona
+4|Gudi|Jiahu gudi|Jiahu bone flute
+4|Hackbrett
+4|Handchime
+4|Heligonka
+4|Hohner Pianet|Pianet
+4|Huapanguera|guitarra huapanguera|guitarra quinta huapanguera|quinta huapanguera
+4|Huehuetl
+4|IA
+4|Ipu|ipu heke|ipu heke ʻole
+4|Jackson King V
+4|Jing|geum|geumjing
+4|Jug|musical jug
+4|Kayamb|caïamb|chikitsi|kayamba|kayanm|kiyamba|maravanne
+4|Keyed bugle|key bugle|Kent bugle|Royal Kent bugle
+4|Kissar|kisir|gytarah barbaryeh|kissir|kisszár
+4|Komabue
+4|Koncovka
+4|Korg Kronos
+4|Krachappi
+4|Kus|kös
+4|Kuvytsi|Kugikly
+4|Kuzhal
+4|Kwitra
+4|Lali
+4|Limbe
+4|Lowrey organ
+4|Lyricon
+4|Mandobass
+4|Manjira|kartàl, Gini|manjeera|manjeera, taal, jalra, khartàl
+4|Medieval lituus|lituus
+4|Midwinter horn
+4|MilkyTracker
+4|Moko drums|moko
+4|Morsing|morchang|morching|mourching|mukharshanku|murcang
+4|Musical leaf|nplooj|Chojeok|kèn lá|muye
+4|Mvet
+4|Nai|muscal
+4|Ngombi
+4|Nord Electro
+4|Nord Lead
+4|Octave mandolin
+4|Onavillu|ōṇavill|villu|villukottu
+4|Organ of the Basilica of St. Martin
+4|Overtone flute
+4|Pandero
+4|Parai|Thappu
+4|Pellet drum|pellet drums|rattle drums|shaken membranophones
+4|Phandar|Phondar
+4|Photoplayer
+4|Pi
+4|Pibgorn
+4|Pitch pipe|tuning harmonica
+4|Pku
+4|Qoltuq nagara
+4|Ransingha|ramsinga|banke|bānkiā|bargu|nagphani|narsĩgā|narsingha|ransinga|turi
+4|Requinto jarocho
+4|Reyong
+4|Rhythmicon
+4|Roland CR-78|Roland CompuRhythm CR-78
+4|Roland Jupiter-8
+4|Roland MC-303
+4|Sac de gemecs|gaita|botella|buna|coixinera
+4|Saenghwang
+4|Sakara drum
+4|Saw u
+4|Selmer guitar|Maccaferri|Selmer-Maccaferri
+4|Shime-daiko
+4|Sihu
+4|Singing bird box
+4|Sompoton|sumpotan
+4|Steinway D-274|model D|model D 274|Steinway model D|Steinway model D 274
+4|Stoessel lute
+4|Studio Pro|PreSonus Studio One|Studio One
+4|Subcontrabass saxophone
+4|Synthesizer V|SynthV
+4|Tambora
+4|Tangent piano|tangent
+4|Tanggu|tonggu|zhanggu
+4|Telenka|Tilincă|shepherd's flute|Tilinka
+4|Tuba Dei
+4|Turkish ney|ney
+4|Vibrating alert
+4|Wanamaker Organ|Wanamaker Department Store Organ|Wanamaker Grand Court Organ|Wanamaker's Organ
+4|Washint
+4|Water drum|bastél|godo|hadourum
+4|Wind controller|electronic wind instrument|digital wind instrument|wind synthesizer
+4|Xindi
+4|Xylorimba|marimba-xylophone|xylo-marimba
+4|Đàn nguyệt|dan nguyet
+4|Chengila|cennala
+4|3rd bridge
+4|Aburukuwa
+4|Afoxé
+4|Alfaia
+4|Alto recorder|alt block flute|treble recorder
+4|Archéophone
+4|Arpa jarocha
+4|Arpa llanera|llanera harp
+4|Asor
+4|BBC Domesday Project
+4|Bamboo Organ|Las Piñas Bamboo Organ
+4|Bipa
+4|Bobbili veena
+4|Bolon|m’bolon|nbolon
+4|Boyuk nagara
+4|Brudevælte Lurs
+4|Buccin|buccin à tête de serpent
+4|Caisa
+4|CeVIO|CeVIO Creative Studio
+4|Chelys
+4|Chirimia|chirisuya
+4|Clavecin électrique|clavessin électrique|electric harpsichord
+4|Claviharp|harp piano
+4|Contra-alto clarinet|contrabass clarinet|contralto clarinet|E-flat contrabass clarinet|E♭ contrabass clarinet
+4|Cristal Baschet
+4|Csakan|czakan|romantic recorder
+4|Cultrun
+4|Denden-daiko
+4|Dhadd
+4|Dhak
+4|Diple
+4|Dolphin Stradivarius|Delfino Strad|Delfino Stradivarius|Dolphin Strad
+4|Double flute|recorders, beak flutes, duct flutes
+4|Downpicking
+4|Dragon's head and wind chime|Rafter finial in the shape of a dragon’s head and wind chime
+4|Electric sitar
+4|End-blown flute|edge-blown flute|notched flute|rim-blown flute|end-blown flutes
+4|Epiphone Sheraton
+4|Experimental musical|Experimental musical instrument
+4|Fadno|Sami flute
+4|Fairground organ|band organ
+4|Fender Marauder
+4|Fender Telecaster Thinline
+4|Flumpet
+4|Fontomfrom
+4|Gagar
+4|Gibson Byrdland
+4|Gibson J-45
+4|Gibson L6-S
+4|Gibson Les Paul Custom
+4|Gibson Nighthawk
+4|Gibson Stradivarius
+4|Gong ageng
+4|Great Stalacpipe Organ|Luray Caverns organ
+4|Gretsch White Falcon
+4|Guitarra latina
+4|Guitarra morisca
+4|Hand drum
+4|Hasapi
+4|Horagai
+4|Hourglass drum|hourglass drums|hourglass-shaped drums
+4|Hun
+4|Hydraulis of Dion
+4|Hyōshigi
+4|Igba
+4|Jing erhu
+4|Kaoss Pad
+4|Karyenda
+4|Kemane
+4|Kendara
+4|Khanjani|khandjari
+4|Khong wong yai
+4|Klon Centaur
+4|Klong yao|glaw ng yao|khawng yao|xiangjiao gu
+4|Kolintang
+4|Korg MS-10|MS-10
+4|Korg Prophecy
+4|Korg Wavestation
+4|Korg X3
+4|Koza|Duda|volynka
+4|Kumuz
+4|Kundu
+4|Lambeg drum
+4|Lavta|politiko laouto
+4|Leiqin
+4|Lullusglocke
+4|Madal|maadal|magaḥkhĩ
+4|Maghreb rebab|rebáb
+4|Mandore
+4|Martin D-28
+4|Marxophone
+4|Molinukai|Svistulka|clay whistle|molinukas|svilpaunieks
+4|Moraharpa|Mora-Harp
+4|Mouth organ|mouth organs
+4|Moving iron speaker
+4|MusE
+4|Neo-Bechstein
+4|Netherlands Carillon
+4|Nose whistle
+4|Nyatiti
+4|Oberheim OB-Xa
+4|Ondioline
+4|Organ of Poblet
+4|Orphica
+4|Paiban|kuaban
+4|Pantalon|pantaleon
+4|Parkapzuk|tik
+4|Pepa
+4|Phin pia|pin pia
+4|Protos
+4|Putipù|bufù|caccavella|cupellone|cute-cute|pignato|puti-puti
+4|Qinqin
+4|Quarter tone clarinet
+4|Quinton
+4|RCA Mark II Sound Synthesizer
+4|Rabeca|rabeca chuleira
+4|Rawap
+4|Record
+4|Residence organ|Chamber organs
+4|Rhaita|gaita|ghaita|ghayta
+4|Richter-tuned harmonica
+4|Roland Jupiter-4
+4|Roland TR-606|TR-606
+4|Romantic guitar
+4|Rompler
+4|Rysum organ
+4|Salt Lake Tabernacle organ
+4|Sato
+4|Saxotromba
+4|Scheitholt
+4|SeeU|SeU
+4|Singing Ringing Tree
+4|Sizzle cymbal
+4|Slenthem|slentem|gendèr panembung
+4|Soil Stradivarius|Soil|Soil Strad|Soil violin
+4|Sring
+4|Sringa|kombu|sig|blowhorn|kurudutu|ranasringa|tutari
+4|Steirische Harmonika|Styrian harmonica
+4|Stradivarius Palatinos|Stradivarius Palatines
+4|String synthesizer|String ensemble keyboard|string ensemble|string keyboard
+4|Strum|strumming
+4|Sueng
+4|Swallow's nest organ
+4|Talempong
+4|Tamak'
+4|Tambori
+4|Tambourin
+4|Tarawangsa
+4|Tautirut|Eskimo fiddle|tautiruut
+4|Tenor recorder
+4|Tlapitzalli
+4|Tololoche
+4|Train horn|locomotive horn
+4|Trompeta china
+4|Tzouras
+4|Umpan|unpan
+4|Umuduri
+4|Urumi|Urumee
+4|Valve trombone|piston trombone
+4|Vessel flute|vessel flutes
+4|Vox Continental|Vox Jaguar|Vox Organ
+4|Weissenborn
+4|Westone
+4|Whistled language of Aas|Occitan whistled from Aas|Siular d'Aas|Whistle of Aas
+4|Wiener oboe|Akademiemodel Wiener Oboe
+4|Xeremia
+4|Yamaha Pacifica
+4|Yazh
+4|Yehu|jehu
+4|Yokobue
+4|Yu
+4|Zampogna
+4|Zhu|chu
+4|Zukra
+4|Đàn tính|dan tinh
+4|Đàn tỳ bà
+4|Šupelka
+4|Agung
+4|Carillon in Berlin-Tiergarten|Carillon
+` });
+EVO.cat({ ...{"id": "dances", "name": "Dances", "icon": "💃", "q": "Name a **dance** or dance style.", "strip": ["dance"], "level": 2}, list: `
+0|Ballet
+0|Breakdancing|breakdance|Breakin'|breaking|b-boying|b-girling
+0|Salsa|salsa dancing
+0|Disco
+0|Flamenco
+0|Ballroom|Ballroom dance|competitive ballroom dance
+0|Tap|Tap dance|tap dancing
+0|Waltz|english-waltz|slow-waltz|valse
+0|Belly|Belly dance|dog-like dance|oriental dance|Belly Dancing
+0|Polka|barn dance
+0|Hip-hop|Hip-hop dance
+0|Cheerleading|cheer|cheer dance|cheerlead|competitive cheerleading|performance cheer
+0|Foxtrot
+0|Folk|Folk dance|folkloric dance|ethnic dance|traditional dance|сhoreographic folklore
+2|Cha-cha-cha|cha-cha
+2|Tango|flamenco tango|tango flamenco|tango dance
+2|Twist
+2|Capoeira
+2|Modern|Modern dance
+2|Jive
+2|Haka
+2|Bharatanatyam|Bharathanatyam|Bharat Natyam|Bharathanatiyam|Sadir
+2|Lambada|baile prohibido
+2|Ballroom rumba|rhumba|rumba|international rumba
+2|Bollywood
+2|Conga
+2|Dab
+2|Floss
+2|Line Dancing
+1|Macarena
+2|Moonwalk
+2|Square Dancing
+2|Zumba
+2|Polonaise|polacco|polonez
+2|Mazurka|mazurek
+2|Striptease
+2|Minuet|menuet
+2|Contemporary|Contemporary dance
+2|Jazz|Jazz dance
+2|Can-can|French cancan|luana linda
+2|Hula|hula dance
+2|Irish|Irish dance|dance in Ireland|Irish dancing
+2|Swing|swing dance|rock'n' swing dance|swing dances|swing dancing
+2|Pasodoble
+2|Street|Street dance
+2|Lion|Lion dance
+2|Tarantella|tarantula dance|tarantula dances
+2|Mambo
+2|Twerking|Twerk
+2|Gavotte|gavot|gavote|gawot
+2|Kathak|Katthak
+2|Limbo
+2|Rainmaking|rainmaking rites|rain dance
+2|Chicken Dance|Bird Song|Birdie Song|Chicken Song|Chicken
+2|Kathakali
+2|Hopak|Gopak
+2|Pole|Pole dance|aerial dancing|pole dancing
+2|Quadrille
+2|Csárdás|czárdás
+2|Dragon|Dragon dance
+2|Merengue music|merengue
+2|Quickstep
+2|Sirtaki|Zorba
+2|Samba
+2|Odissi|Orissi
+2|Charleston
+2|Viennese waltz
+2|Allemande
+5|Lindy Hop
+2|Dancesport|sport dance
+2|Cumbia
+2|Kalinka
+2|Kuchipudi
+2|Lezginka
+2|Mohiniyattam|Mohiniattam
+2|Hora|horo|khora|oro|khoro
+2|Bourrée|Borreia
+2|Chhau|Chhau dance
+2|Bachata
+2|Jitterbug
+2|Melbourne shuffle|Shuffle
+2|Bolero|bolero español|Spanish bolero
+2|Courante|corant|coranto|corrente
+2|Latin|Latin dance|Latin American dance
+2|Manipuri|Manipuri dance|Jagoi|Manipuri Raas Leela
+2|Muixeranga
+2|Azonto
+2|Cha Cha Slide
+2|Cossack Dance
+2|Cupid Shuffle
+2|Dancehall
+2|Electric Slide
+2|Fan Dance
+2|Fire Dance
+2|Forró
+2|Gangnam Style
+2|Garba
+2|Gumboot Dance
+2|Gwara Gwara
+2|Interpretive Dance
+2|Kizomba
+2|Krumping|Krump
+2|Kuduro
+2|Locking
+2|Maypole Dance
+2|Morris Dancing
+2|Pointe
+2|Powwow|Fancy Dance
+2|Sega
+2|Tutting
+2|Two Step
+2|Whip and Nae Nae|Nae Nae
+2|YMCA
+2|Dabke|dabka|dabkaat|dabkeh|dubki|dabchah|dabche
+2|Fandango|murciana|rodena|rondeña
+2|Contra|Contra dance|contra dances|contra dancing|contredanse
+2|Popping
+2|Galliard|cinque-pas|gagliarda|gaillarde
+2|Indian classical|Indian classical dance|Classical Indian dance|Shastriya Nritya
+2|Kolo|kolo dance
+2|Moshing|slamming|slam dancing
+2|Sardana
+2|Tecktonik|techtonic|tecktonick|tektonik
+2|Butoh|buto
+2|Eurythmy
+2|Pas de deux
+2|Sun Dance|Skaw-tow
+2|Krakowiak|cracovienne|krakauer
+2|Bhangra|bhangra dance
+2|Vogue|voguing
+2|Cham|Cham dance|devil dance
+2|Habanera|contradanza criolla|danza|danza criolla|contradanza|Cuban contradanza
+2|Jig|port|Gigue
+2|La Bamba
+2|Dangdut
+2|Farandole
+2|Ganggangsullae|Ganggangsuwollae|Gwanggwanggwangsuwollae|Gwanggwangsullae|Ogwanggwanggwangsuwollae
+2|International standard waltz|waltz|English waltz|slow waltz
+2|Lap|Lap dance|contact dancing
+2|Ländler
+2|Yakshagana
+2|Chaconne|Ciaccona
+2|Dance in India|Indian dance
+2|Diablada
+2|Kagura
+2|Tandava|Thandava|Thandavas
+2|Candombe
+2|Circle|Circle dance|chain dance|Ball rodó
+2|Frevo
+2|Line|Line dance
+2|Morris|Morris dance
+2|Boogie-woogie
+2|Rock and Roll|acrobatic rock'n'roll|rock'n'roll|acrobatic rock and roll
+2|Air guitar
+2|Classical ballet
+2|Dance in China|Chinese dance
+2|Danza de los Voladores|Dance of the Flyers|Danza del Volador|Palo Volador|Voladores|Voladores de Papantla
+2|Saman
+2|Social|Social dance
+2|Cèilidh
+2|Sword|Sword dance
+2|Tinikling
+2|Giddha|Gidda
+2|Legong
+2|Pogo
+2|Square|Square dance
+2|Azerbaijani dances|Azerbaijani folk dance|Azerbaijani dance
+2|Branle|brawl|brangle|bransle|brawle
+2|Chamamé
+2|Go-go dancing
+2|Kalbelia
+2|Kecak|Kechak|Ketjak
+2|Kozachok|cosaque|kazachok
+2|Lakalaka
+2|Robot|mannequin
+2|Soukous
+2|Oberek|obertas
+2|Passepied
+2|Cakewalk
+2|Hornpipe
+2|Talchum|Korean mask dance
+2|Tricking|Las artes marciales engañan|Martial arts tricking
+2|Bihu|Bihu dance
+2|Cheoyongmu
+2|Dandiya Raas
+2|Mak yong|Mak yung drama|makyung|Mak yong drama
+2|Opéra-ballet
+2|Rueda de Casino|Salsa Rueda
+2|Verbunkos
+2|Zaouli
+2|Acro|Acro dance|acrobatic dance
+2|Chacarera
+2|Saltarello
+2|Schottische|Scottish|Chotis|schottisch
+2|Cotillion
+2|Mexican hat|Mexican hat dance|Jarabe Tapatío|Meksykański taniec kapelusza
+2|Balinese|Balinese dance
+2|Bambuco
+2|Humppa
+2|Pendet|Pendet dance
+2|Seguidilla
+2|Kochari
+2|Kujawiak|odsibka|owczarek|śpiący|gładki|okrągły|kolebany|kouiaviak|ksebka|kujaviak
+2|Rigaudon|rigadon|rigadone|rigadoon|rigodon
+2|Argentine tango|tango argentino
+2|Awa Dance Festival|Awa Odori
+3|Balboa|Bal|Bal swing|original Balboa|Pure-Bal
+3|Cueca
+3|Furlana
+3|Ghoomar
+3|Joropo
+3|Kolomyika|Kolomyjka
+3|Maculelê
+3|Menora
+3|Nijemo kolo|gluvak|gluvanac|gluvo kolo|silent kolo
+3|Sattriya
+3|Sevillanas
+3|Tahtib|fan a'nazaha wa-tahtib
+3|Trepak|tropak
+3|Wheelchair dancesport|para dance sport
+3|Adumu|antigravity dance|Maasai dance
+3|Waacking
+3|African|African dance
+3|Chakkirako
+3|Contact improvisation
+3|Hasapiko|kasap havasi|kasap havası
+3|Huaconada
+3|Khorovod|Horovod
+3|Maxixe|Brazilian tango|Mattchiche
+3|Nihon-buyō|buyō
+3|Piring|Piring dance|Tari Piring
+3|Pungmul|nongak
+3|Qaytarma
+3|Reel|reels
+3|Soleá|Soleares
+3|Ukrainian|Ukrainian dance|dance in Ukraine
+3|Čoček|Köçek|Kuchek|Kyuchek
+3|Ardah|Al-Ardhah|Alardah Alnajdiyah|ardhah|Saudi Ardhah
+3|Ballet blanc
+3|Bergamask
+3|Boogaloo|bugalú|Latin boogaloo|shing-a-ling
+3|Dainichido Bugaku
+3|Danza de tijeras|baile de tijera
+3|Erotic|Erotic dance|erotic dancing|erotic dances
+3|Huayno|huaino
+3|Jhumair|Jhumair dance|jhumar|jhumur
+3|Kalamatianos
+3|Kopačka|kopachka|kopachkata|kopačkata
+3|Luri dances|Lurish dances
+3|Malagueñas
+3|Marinera
+3|Pizzica
+3|Sufi whirling|Sufi dance|Sufi turning
+3|Tanztheater|Dance theater|dance theatre
+3|Taskiwin
+3|Topeng dances|Topeng dance
+3|West Coast Swing
+3|Zamba
+3|Zambra
+3|Abbots Bromley Horn Dance
+3|Acharuli
+3|Affranchi
+3|Agwara
+3|Ai Georgis
+3|Alanta dance
+3|Angaliastos
+3|Animal dance
+3|Antipatitis
+3|Apu Inka
+3|Aragonaise
+3|Arcan
+3|Armenian line dance
+3|Asyik
+3|Awki awki
+3|Baishou Dance
+3|Bajidor Kahot
+3|Baladi
+3|Bandari dance
+3|Barachum
+3|Big Apple
+3|Bon Odori
+3|Bump
+3|Bunny Hug
+3|Bus Stop
+3|Cabbage Patch
+3|Calenda
+3|Danzón
+3|Frug
+3|Funky Chicken
+3|Griddy
+3|Guaguancó
+3|Guedra
+3|Hit Dem Folks
+3|Humpty Dance
+3|Jota
+3|Kartuli
+3|Kid 'n Play
+3|Kumina
+3|Lavani
+3|Loco-Motion
+3|Mashed Potato
+3|Milly Rock
+3|Monkey
+3|Muiñeira
+3|Orange Justice
+3|Palo de Mayo
+3|Pavane
+3|Pony
+3|Punta
+3|Renegade
+3|Roger Rabbit
+3|Salpuri
+3|Sarabande
+3|Shag
+3|Shimmy
+3|Shmoney Dance
+3|Sirba
+3|Son
+3|Stroll
+3|Swim
+3|Tamborito
+3|Turkey Trot
+3|Watusi
+3|Yangge
+3|Harlem shake|The Albee
+3|Arkan
+3|Galop|galopede
+3|Montea|moutia|moutya
+3|Ahidus|Ahidous
+3|Alegrías
+3|Armenian|Armenian dance|dance in Armenia|dance of Armenia
+3|Bugaku
+3|Cachucha
+3|Catalan rumba|rumba|rumba catalana
+3|Cheraw|Cheraw dance
+3|Dollu Kunitha
+3|Expressionist|Expressionist dance|expressionistic dance|expressive dance
+3|Georgian|Georgian dance|Georgian folk dance|Georgian traditional dance
+3|Halling
+3|Iranian|Iranian dance|dance in Iran|dance of Iran|dances in Iran|Persian dance
+3|Letkajenkka|letkajenka|letkis
+3|Linđo|Lindjo
+3|Reog
+3|Russian ballet
+3|Turkish folk|Turkish folk dance|folk dance in Turkey
+3|Yosakoi
+3|Loure
+3|Écossaise
+3|Highland|Highland dance|Scottish highland dance|Highland dancing
+3|Akiu no Taue Odori
+3|Baião|baion
+3|Bhagavata Mela
+3|Bulerías|bulería|flamenco bulería
+3|Character|Character dance
+3|Comédie-ballet|comédie galante|comic ballet|tragédie-ballet|tragicomédie et ballet
+3|Contemporary ballet|modern ballet
+3|Dance of Osman Taka|Vallja Osman Taka
+3|Folk dances of Punjab|Punjabi folk dance|Punjabi dance
+3|Fugdi
+3|Furiant
+3|Gotipua
+3|Hakken
+3|Hudoq
+3|Jaipongan|Jaipong|Tari Jaipong|Tari jaipongan
+3|Japanese traditional|Japanese traditional dance|folk dance of Japan|Japanese folk dance
+3|Kamarinskaya
+3|Kanyarkali
+3|Kuda Lumping|kuda kepang|ebeg|jaran kepang|jaranan|jathilan|sang hyang jaran
+3|Meitei Sankirtana|Manipuri Sankirtana|Sankirtana, ritual singing, drumming and dancing of Manipur
+3|New flamenco|contemporary flamenco|flamenco nuevo|nuevo flamenco
+3|Partner|Partner dance
+3|Renaissance|Renaissance dance
+3|Russian folk|Russian folk dance|Russian traditional dance
+3|Schuhplattler
+3|Velakali
+3|Wayang wong|wayang orang
+3|Yarkhushta
+3|Attan
+3|Basse danse
+3|Estampie
+3|Moresca|danse des bouffons|mauresque|moresque|morisca|Muresca
+3|Abayı
+3|Adana
+3|Agbekor
+3|Agir Karadagi
+3|Akogo
+3|Amaggunju
+3|Angama
+3|Antikristos
+3|Aparima
+3|Arab dance
+3|Baile de la Conquista
+3|Bar
+3|Bardo Chham
+3|Bata
+3|Bergamasca
+3|Carole
+3|Coupé-Décalé
+3|Eskista
+3|Fa'ataupati
+3|Forlana
+3|Hay
+3|Hula Kahiko
+3|Isukuti
+3|Kpanlogo
+3|Liwa
+3|Mapiko
+3|Mapouka
+3|Meke
+3|Ndombolo
+3|Passacaglia
+3|Sasa
+3|Siva
+3|Tau'olunga
+3|Tufo
+3|Yalli
+3|Zaffa
+3|Agbadza|agbadja
+3|Bagurumba
+3|Ballet de cour|court ballet|ballets de cour
+3|Ballroom tango|tango
+3|Bargirl|hostess|B-girl|juicy girl
+3|Bhavai|Bhavai dance
+3|Buchaechum
+3|Caporales
+3|Chari Dance|chari
+3|Chholiya|Chhaliya|Hudke|Hudkeli
+3|Concert|Concert dance|20th century concert dance|performance dance|scenic dance|theatre dance
+3|Gandrung|Gandrung Banyuwangi
+3|Historical|Historical dance|court dance|courtly dance|early dance
+3|Hokey Cokey|Hokey Pokey|Ugly Mug|Hinkumbooby|Looby Looby
+3|Irish stepdance
+3|Jenkka
+3|Jhumar|jhumur|jhumair
+3|Ka Mate|Ka Mate haka
+3|Khorumi
+3|Korean|Korean dance|dance in Korea
+3|Kumi Odori
+3|Kurdish|Kurdish dance
+3|Morenada|danza de los morenos
+3|Nati
+3|Pas de quatre
+3|Plena
+3|Pyrrhichios|Pyrrhic Dance|Pyrrhiche
+3|Romantic ballet
+3|Rumba flamenca|flamenco rumba
+4|Sammi
+4|Siva Tau
+4|Table|Table dance
+4|Tortor
+4|Volta|Lavolta
+4|Yayue|Chinese court music
+4|Halay
+4|Apache|Apache Dance|Apache Turn|Bowery Waltz|La Danse Apache|Tough Dance
+4|Apsara Dance|Apsara
+4|Baris|Baris dance
+4|Barong|Barong dance
+4|Black Bottom
+4|Bulgarian folk|Bulgarian folk dance
+4|Carimbó|rhythm carimbo
+4|Chapelloise|Aleman's Marsj|All-American Promenade
+4|Cibi
+4|Cirebonese mask|Cirebonese mask dance|Cirebon mask dance|Javanese mask dance|tari topeng Cirebon
+4|Country|Country dance|longways dance
+4|Discofox
+4|Domkach
+4|Eisa
+4|Finnish tango
+4|Gambuh
+4|Kachchhi Ghodi|Kachchhi Ghodi dance
+4|Kandyan|Kandyan dance
+4|Kerala Natanam
+4|Kikkli
+4|Kolbastı|Hoptek
+4|Ojapali
+4|Ottan Thullal|Ottamthullal
+4|Passamezzo|Passymeasure
+4|Perini Sivatandavam|Perini Shivatandavam|Perini dance
+4|Polska
+4|Pop Goes the Weasel
+4|Postmodern|Postmodern dance
+4|Queer Tango
+4|Randai|Randai dance|Randai Padang Panjang|Randai Padang Panjang dance|Randai Padang Panjang theatre|Randai theatre
+4|Reggada
+4|Romani|Romani dance|Gypsy dance|Roma dance
+4|Shalakho
+4|Sârbă
+4|Tinku
+4|Tsamiko|tsamikos
+4|Uzundara|Ouzoundara
+4|War|War dance|war dances
+4|Yablochko
+4|Zapateado|Mexican zapateado
+4|Zeybek|zeibek|zeybek dance
+4|Aati kalenja|Ati Kalenja
+4|American Tribal Style Belly Dance|tribal|ATS|tribal style|ATSBD|tribal bellydance|tribal dance|tribal style dance|American Tribal Style Belly
+4|Ballet d'action
+4|Bedhaya
+4|Beguine|biguine
+4|Biyelgee
+4|Choreia
+4|Chozhikali
+4|Condong
+4|Cuban salsa|casino|Cuban style|salsa cubana
+4|Dance in Thailand|Thai dance|dance of Thailand|Thailand's dance
+4|Faroese chain|Faroese chain dance|Faroese dance
+4|Ghumura|Ghumura dance|Ghumra
+4|Huapango
+4|Indlamu|Zulu dance
+4|Intore
+4|Jera
+4|Jerkin'|jerk
+4|Jhijhiya
+4|Kara Jorga|Kara Jorgo|Kara zhorga|Kara zhorgha|Kara zhorgho|Kara zhorgo|Qara zhorgho
+4|Kaze no bon|Owara Kaze no bon
+4|Lazgi|Khorazm dance, Lazgi
+4|Lengger|Ronggeng
+4|Lilin|Lilin dance
+4|Margamkali
+4|Mujra
+4|Neoclassical ballet
+4|One-Step
+4|Parachico|Parachicos
+4|Pastorale héroïque
+4|Payung|Payung dance
+4|Peteneras
+4|Raqs sharqi|classical Arabic dance|classical belly dance|classical oriental dance|Egyptian solo dance|raks sharki|raqs sharki
+4|Sacred|Sacred dance|religious dance
+4|Srimpi
+4|Teškoto|Teshkoto
+4|Thiruvathirakkali
+4|Troika
+4|Zapin|Zapin dance
+4|Zeibekiko
+4|Barn|Barn dance|open air dancing
+4|Tourdion
+4|An dro|en dro
+4|Baroque|Baroque dance
+4|Bedara Vesha
+4|Betawi mask|Betawi mask dance
+4|Bomba
+4|Boston
+4|Brazilian Zouk|Zouk|zouk-lambada
+4|Caci
+4|Carnavalito
+4|Cendrawasih|Cendrawasih dance|burung cendrawasih
+4|Chang|Chang dance
+4|Cordax|kordax
+4|Cumbia villera
+4|Dance improvisation
+4|Dance in Indonesia|Indonesian dance|dance of Indonesia
+4|Danda Nata|danda jatra|danda yatra
+4|Dasakathia|Daskathia
+4|Folk dances of Assam|Assamese folk dance
+4|Free|Free dance
+4|Gair|Gair dance
+4|Gambyong
+4|Grinding|juking|wining|freaking|freak dancing
+4|Hustle
+4|Hyporchema
+4|Java
+4|Jazz-funk|Jazz-funk dance|street jazz
+4|Jewish|Jewish dance
+4|Kapa haka
+4|Kartik Naach|Kartik dance
+4|Kebyar duduk
+4|Kummi
+4|Kuttichathan Theyyam|Shasthappan Theyyam|Kuttichathan
+4|Les Lanciers|The Lancers
+4|Lezim
+4|Mayilattam
+4|Medieval|Medieval dance
+4|Merengue
+4|Mezmar|Mizmar|al-mizmar|almezmar
+4|Moreška
+4|Paparuda|Dodola|Peperuda
+4|Pas de trois
+4|Poco-poco|Ambonese dance|Ambonese folk dance|Ambonese rhythmic dance|Ambonese traditional dance|Poco poco dance
+4|Redowa|rejdovačka|rejdovák
+4|Romvong|Lamvong|Ramwong|Roam vong
+4|Royal Ballet of Cambodia|Khmer classical dance
+4|Sandungueo|perreo
+4|Sanghyang
+4|Scottish country|Scottish country dance
+4|Seungmu
+4|Siguiriyas|siguiriya
+4|Simd
+4|Slow|Slow dance
+4|Syrtos
+4|Sōran Bushi
+4|Thabal chongba
+4|Tippani|Tippani Dance
+4|Traditional dances of Himachal Pradesh
+4|Tsifteteli
+4|Vals|tango vals
+4|Zortziko
+4|Kailao|sipi tau
+4|House|House dance
+4|Adowa|Adowa dance
+4|Tamzara
+4|Ahwash|A7wach|ahouach|ahwach
+4|Azerbaijani ballet
+4|Bagha Nacha|Baagh Naach
+4|Basque|Basque dance|Basque folk dance
+4|Bwola|Bwola Dance|Acholi bwola
+4|Cakalele|Cakalele dance
+4|Calinda|kalenda
+4|Chaiti ghoda|Chaiti Ghoda Nacha|Chaiti Ghoda Nata|Chaiti ghoda dance
+4|Collegiate shag
+4|Conga line
+4|Dance in Sri Lanka|Sri Lankan dance
+4|Deodhani|Deodhani dance
+4|Dhalo
+4|Entrée de ballet
+4|Garrotín
+4|Gending Sriwijaya
+4|Greek dances|Greek dance|dance in Greece
+4|Hambo
+4|Hayachine kagura
+4|Israeli folk|Israeli folk dance
+4|Janger|Janger dance
+4|Jangi
+4|Jongo|Caxambu
+4|Jurit Ampil Kridha Warastra|Jurit Ampil Kridha Warastra Dance
+4|Kamsale
+4|Kangilu|Kangeelu
+4|Khaleegy
+4|Khamba Thoibi Jagoi|Khamba Thoibi Dance|Khampa Thoipi Chatkoi
+4|Khattak|Khattak dance
+4|Larakaraka|Acholi Larakaraka Dance|Larakaraka Dance
+4|Loyalty|Loyalty dance
+4|Lundu|landu|landum|londu|lundum
+4|Mapalé
+4|Maruni
+4|Paydushko horo
+4|Peruvian waltz|vals criollo|valse peruano
+4|Raut Nacha
+4|Rejang|Rejang dance
+4|Saya|saya afroboliviana|Afro-Bolivian saya
+4|Serpentine|Serpentine dance
+4|Shota|Vallja e Shotes
+4|Singo Ulung
+4|Solo|Solo dance
+4|Theeyaattam
+4|Tribal Fusion|Tribal Fusion Belly Dance
+4|Trojak
+4|Ulek mayang|Ulek Mayang dance
+4|Variation
+4|Xote|chóte|chótis|xótis
+4|Clog dancing|clog dance
+4|Peruvian cumbia|cumbia|cumbia peruana
+4|Stepping
+4|Horon|khoron
+4|Yowlah|al-yawlah|Emirati stick dance|yowla
+4|Alkayida|Akayida|Alkaida
+4|Apatampa
+4|Arab folk dances|Arab folk dance|Arabic folk dance
+4|Bacha Nagma
+4|Ball de bastons
+4|Ballu tundu
+4|Barynya
+4|Bhairab Naach|Bhairava dance
+4|Bigwala
+4|Bolojo
+4|Borborbor
+4|Bugg
+4|Byzantine|Byzantine dance
+4|Calabrian tarantella|Sonu a ballu|Tarantella Calabrese
+4|Caloian
+4|Capoeira Angola
+4|Capoeira Regional
+4|Ceremonial|Ceremonial dance|ritual dance
+4|Chennu Nalike
+4|Clogging|clog dance
+4|Contradanza|contradanza criolla|danza|danza criolla|habanera
+4|Dance in Australia|Australian dance
+4|Dappankuthu|dappan koothu|kuthu
+4|Deknni|Dekhṇi
+4|Egg|Egg dance
+4|Ekitaguriro|Ankole Cow Dance|Cow Dance|ekitaguliro|Ekitaguriro dance|Kitaguriro
+4|Electric boogaloo|electric boogie
+4|Electro|Electro dance
+4|Errenzhuan
+4|Folk dances of Jharkhand|Jharkhand folk dance
+4|Gaarudi Gombe
+4|Gato
+4|Group|Group dance
+4|Hully Gully
+4|Janani Jhumar
+4|Juba|Juba dance
+4|Kabasaran
+4|Kapa o Pango
+4|Khanchobany
+4|Klompendansen
+4|Kullawada|cullaguada|kullahuada|kullawa
+4|La Danza
+4|Malapulayattam|Malappulayattam
+4|Melinting|Melinting dance
+4|Mirzayi
+4|Panyembrama
+4|Paraguayan polka|polca paraguaya
+4|Parayan Thullal
+4|Partido alto|partido|samba de partido-alto
+4|Poikkaal Kuthirai Aattam
+4|Pole sports|poling
+4|Polka-mazurka
+4|Pols|Polska|Polsk|Springlek
+4|Ronggeng|Ronggeng dance
+4|Sangini
+4|Singkil|Sayaw sa Kasingkil
+4|Sogdian Whirl|Sogdian Whirl dance
+4|Sokkie|langarm
+4|Taepyeongmu
+4|Tarakama
+4|Vallja e Tropojës|k'cimi dancing of Tropojë
+4|Vira|vira do Minho|vira português
+4|Volkspele
+4|Waka waka|waka thuqhuri|waka thuquri
+4|Wall of Death
+4|Assiko|asiko
+4|Bacchu-ber|BER
+4|Bal-musette|musette|accordion musette
+4|Canary|Canary dance|canarie|canario|Canarios
+4|Tambourin
+4|Baile folklórico|ballet folklórico
+4|Dougie
+4|Lyrical|Lyrical dance
+4|Native American Hoop Dance|hoop dance|Native American Hoop
+4|Pantsula
+4|Abayi
+4|Alboreá
+4|Andhra Natyam
+4|Assyrian folk|Assyrian folk dance|Assyrian dance
+4|Baksa kembang
+4|Bambangan Cakil
+4|Belarusian folk|Belarusian folk dance|Belarusian traditional dance
+4|Breton|Breton dance|dance of Bretagne
+4|Bukcheong sajanoreum|Bukcheong lion play
+4|Byeongsin chum|Byung shin chum
+4|Bélé|bel-air|fine-air
+4|Cachua
+4|Chaap
+4|Céilí|Céilí dance|true éilí dance
+4|Dagbon music and|Dagbon music and dance|Dagbamba music|Dagbani dance|Dagbani music|Dagbon dance|Dagbon music|Dagomba music
+4|Dalkhai
+4|Dance and theatre of Laos
+4|Dance in Cambodia|Cambodian dance
+4|Dance in Zimbabwe|Zimbabwean dance
+4|Dances of Tripura|Tripuri dance|Tripuri dances
+4|Danza de los Viejitos
+4|Deverattam
+4|Dhaanto
+4|Dhamail
+4|Dhemsa
+4|Dhunuchi Nritya|Dhunuchi dance
+4|Dumhal
+4|Folk dance forms of Odisha|Odisha folk dance|folk dance of Odisha
+4|Fusku|single-time swing
+4|Gaga
+4|Gainjeonmokdan
+4|Geommu
+4|Grand pas
+4|Gujō Odori
+4|Hooping|hoop dance|hula hooping
+4|Hutsulka
+4|Innaby
+4|Italian folk|Italian folk dance|folk dance of Italy|Italian folk dancing|Italian traditional dance
+4|Jarana yucateca
+4|Jatjatin Dance|Jatjatin
+4|Joged|Joged dance
+4|Joget|Ronggeng|Tarian Joget
+4|Kancet Papatai
+4|Koli Dance|Koli
+4|Kwassa kwassa|kwasa kwasa
+4|Lavanda Naach
+4|Llamerada
+4|M'alayah
+4|Maach
+4|Madison
+4|Magunatip
+4|Malambo
+4|Marchas Populares|Popular Marches of Lisbon
+4|Mardani Jhumar|Mardana Jhumair
+4|Mayim Mayim
+4|Mazur|wielki
+4|Mbende Jerusarema|Mbende Jerusarema dance|Jerusarema dance|Mbende dance
+4|Metelitsa|metelica|metelytsia|metelytsya|miacielica
+4|Milonga
+4|Mitzvah tantz
+4|Modern Jive
+4|Monferrina
+4|Muziki wa dansi|dansi|Swahili jazz
+4|NFL cheerleading|National Football League Cheerleading
+4|Naleyo|Naleyo dance
+4|Ndazola
+4|Ngajat|Kajat
+4|Nguni stick-fighting
+4|Nritya
+4|Odzemek
+4|Ohafia War Dance|Ohafia War
+4|Oleg|Oleg dance|Oleg Tamulilingan
+4|Orteke
+4|Oyilattam
+4|Pandanggo
+4|Pangalay|Daling-Daling|Mengalai
+4|Paraguayan bottle|Paraguayan bottle dance
+4|Partido de la Gente|Party of the People|Party of the Folk
+4|Pasambahan|Pasambahan dance
+4|Pentozali|Pentozalis
+4|Polish folk dances|Polish folk dance|Polish traditional dance
+4|Pukllay
+4|Puliyattam
+4|Rapper sword|Short Sword dance
+4|Rebita|Massemba
+4|Rodat
+4|Running man
+4|Set dancing|set dance
+4|Sheethankan Thullal
+4|Siddavesa
+4|Sigalegale
+4|Sisingaan
+4|Slip jig|hop jig
+4|Spotting
+4|Step|Step dance
+4|Strathspey
+4|Sumazau|Sazau
+4|Takalo
+4|Tambor de Crioula
+4|Tamure
+4|Tanggai|Tanggai dance
+4|Tello
+4|Tientos
+4|Tsyganochka|Tsyiganochka
+4|Varsovienne
+4|Xaxado
+4|Zwiefacher|Two-Rhythm Dance
+4|Atilogwu|Atilogwu Dance
+4|Albanian war dances|Rugovo
+4|Angelica
+4|Argentine cumbia|bailanta|cumbia argentina
+4|Asma kasma
+4|Bachatango
+4|Ball dels Cossiers|dance of the cossiers
+4|Ballos
+4|Bayalaata|Bayalata|Bayalāṭada
+4|Berd
+4|Blues|Blues dance
+4|Borankana
+4|Brita|Brita dance|Vrita dance
+4|Burmese|Burmese dance|Dance in Burma|Dance of Myanmar|Myanmar dance
+4|Cachaca|kachaka|kchaka|Paraguayan cumbia|cachaca piru
+4|Cariñosa
+4|Carpaea
+4|Chang Lo
+4|Chilena
+4|Chumak
+4|Chunaengjeon|dance of Spring Oriole
+4|Cocolo|cocolo dance drama
+4|Combat Hopak
+4|Competitive|Competitive dance|dance sport
+4|Corridinho
+4|Country Swing
+4|Daggering
+4|Dance in Cameroon|Cameroonian dance
+4|Dance in Israel|Israeli dance
+4|Dance in Kiribati
+4|Dance in the United States|American dance|USA dance
+4|Debaa
+4|Deer|Deer dance
+4|Devil's sword|Devil's sword dance|Oni Kenbai|Onikembai
+4|Dhan Nach|Chalakma|Yalakma|Yalang
+4|Didong
+4|Dihosana
+4|Domni
+4|Dunhuang|Dunhuang dance
+4|Dutch folk|Dutch folk dance
+4|Ecstatic|Ecstatic dance
+4|Ekikibi|Ekikibi dance
+4|Electric-Techno Neon Gods
+4|Engelska|Angloise
+4|Fann at-Tanbura
+4|Father–daughter|Father–daughter dance
+4|Flamenco jazz
+4|Floorwork
+4|Folk dances of Sourashtra|Sourashtra folk dance
+4|Fusion|Fusion dance
+4|Gamelan joged bumbung|joged bumbung
+4|Gankino horo
+4|German Dance|dance in Germany|German
+4|Ghatu|Ghatu dance|Ghatu Nach|Ghatu Nritya
+4|Grizzly Bear|Grizzly Dance
+4|Großvatertanz|Grossvater Tanz
+4|Gussadi|Gussadi dance|Gusadi
+4|Hand jive
+4|Highland Fling
+4|Hoko|Hako
+4|Huteng|Huteng dance
+4|Ikariotikos
+4|Indang|Indang dance|Endang dance
+4|Javanese dances|Javanese dance
+4|Kachāshī
+4|Kambara|Kambara dance
+4|Karsilamas
+4|Khigga
+4|Kolata|hinde
+4|Kromanti|Kromanti dance
+4|Kushan|Kushan dance
+4|Lesnoto
+4|Lipsi
+4|Long sword|Long sword dance
+4|Lungi Panchi Dance|Lungi Panchi
+4|Malwai Giddha
+4|Mappila Theyyam
+4|Marfa
+4|Maskarada|Maskarada of Soule|Xiberoko maskarada|Zuberoako maskarada
+4|Mayilpeeli Thookkam|Arjuna Nritham
+4|Mek Mulung
+4|Merenhouse|electronic merengue|merengue hip-hop|merengue house|merenrap|techno-merengue
+4|Middle Eastern|Middle Eastern dance|oriental dance|dance of the Middle East
+4|Mugo
+4|Nagila
+4|Narrative ballet|story ballet
+4|New Chilean cumbia|new Chilean cumbia rock|nueva cumbia chilena|nueva cumbia rock chilena
+4|Newar|Newar dance|Newa dance
+4|Omal
+4|Otole|Otole dance|Otole Acholi dance|Otole cultural dance
+4|Padhar|Padhar dance
+4|Pottan Theyyam
+4|Prisiadki|prisiadka|squatting|prysiadky|prysidannia|squat dance|vprisiadku
+4|Qhapaq negro
+4|Quebradita|Caballito|Charanga
+4|Raibenshe
+4|Rieldans|Riel
+4|Round|Round dance|round dancing
+4|Sagayan
+4|Samba de Gafieira|gafieira|gafieira samba
+4|Samri
+4|Sanam|sainaimu|senem
+4|Sandiwara
+4|Scottish sword dances|Scottish sword dance
+4|Seann triubhas
+4|Serra
+4|Setapa
+4|Songpasandae-nori
+4|Springar
+4|Syabru|Syabru dance|Syabru Nach|Syabru Nritya
+4|Tamena Ibuga|Basoga harvest dance|Busoga harvest dance|Tamena Ibuga dance
+4|Tipri|Tipri dance
+4|Tresenica
+4|Tsutsube
+4|Yak|Yak dance|Tibetan Yak Dance|Yak Chham
+4|Yingge|Yingge dance
+4|Yosakoi Matsuri|Kōchi Yosakoi Matsuri|Yosakoi Festival
+4|Atsiapat
+4|Bakisimba|Baakisiimba|Bakisimba dance|Muwogola|Nankasa
+4|Bamboula
+4|'ote'a|Tahitian drum dance
+4|Ballo
+4|Moribayassa
+` });
+EVO.cat({ ...{"id": "martialarts", "name": "Martial arts", "icon": "🥋", "q": "Name a **martial art**.", "level": 2}, list: `
+0|Judo
+0|Karate|karate-do
+0|Boxing
+0|Wrestling
+0|Taekwondo|Korean Karate|TKD|TaeKwonDu
+0|Kung fu|Gongfu
+0|Sumo|sumo wrestling
+0|Aikido
+0|Muay Thai|Thai boxing
+0|Jujutsu|Jiu Jitsu|Ju Jitsu
+1|Capoeira
+0|Krav Maga
+0|Fencing
+0|Kickboxing
+2|MMA|Mixed Martial Arts
+2|Self Defence|Self Defense
+2|Kendo
+2|Tai chi|Tai chi chuan|tai ji|taijiquan
+2|Wing Chun|Ving Tsun
+2|Jeet Kune Do
+2|Ninjutsu|ninpō|ninja moves
+2|Sambo
+2|Pankration|pancratium
+2|Chinese martial arts|wushu|kuoshu|kung fu
+2|Wushu|Wusu
+2|Brazilian jiu-jitsu|BJJ|Gracie jiu Jitsu brasileño
+2|Hapkido
+2|Kyokushin|Kyokushin kaikan|Kyokushin karate
+2|Tang Soo Do|Tangsudo
+2|Iaido
+2|Kalaripayattu
+2|Kyūdō|japanese archery
+2|Arnis|escrima|eskrima|kali
+2|Pencak silat|silat|penca silat
+2|Sanda|Sanshou|Chinese boxing|Chinese kickboxing|Wushu Sanda|Wushu Sanshou
+2|Baguazhang
+2|Ssireum|Korean wrestling
+2|Kenpō|kempo
+2|Xingyiquan
+2|Taekkyon|Taekkyeon
+2|Shaolin kung fu
+2|Budō
+2|Kumite|karate sparring
+2|Shorinji Kempo
+2|Glíma
+2|Banshay
+2|Catch Wrestling
+2|Combat Sambo
+2|Freestyle Wrestling
+2|Gatka
+2|Goju-Ryu
+2|Greco-Roman Wrestling
+2|Hung Gar
+2|Kino Mutai
+2|Kushti
+2|Lethwei
+2|Luta Livre
+2|Mardani Khel
+2|Naginata
+2|Pancrase
+2|Pehlwani
+2|Praying Mantis Kung Fu
+2|Savate
+2|Schwingen
+2|Shaolin
+2|Shito-Ryu
+2|Shootfighting
+2|Shooto
+2|Shotokan
+2|Systema
+2|Vale Tudo
+2|Wado-Ryu
+2|Daitō-ryū Aiki-jūjutsu
+2|Jōdō
+2|Kenjutsu
+2|Vovinam|Việt võ đạo
+2|Historical European martial arts|HEMA|Western martial arts
+2|Kobudō|Koryū
+2|Tenshin Shōden Katori Shintō-ryū
+2|Bokator|Kun Lbokator|Lbokator
+2|Bōjutsu
+2|Okinawan kobudō
+5|Bartitsu
+2|Choy Li Fut
+2|Drunken boxing|Zui Quan|Drunken Fist
+2|Sōjutsu
+2|Japanese martial arts|martial arts in Japan
+2|Tricking|Las artes marciales engañan|Martial arts tricking
+2|Muay boran
+2|Silambam
+2|Shōrin-ryū
+2|Yabusame
+2|Krabi–krabong
+3|Bajiquan
+3|Niten Ichi-ryū|School of the Strategy of Two Heavens as One
+3|Gendai budō|Shinbudo
+3|Jūkendō
+3|Kiai
+3|Northern Praying Mantis|Shandong Praying Mantis
+3|Bando
+3|Huiyen Lallong|Thang-Ta
+3|Battōjutsu
+3|Full contact karate
+3|Para judo|visually impaired judo|Paralympic judo
+3|Randori
+3|Yoshinkan
+3|Canne de combat
+3|Jogo do pau|Xogo do pau
+3|Kajukenbo|Kaju
+3|Naginatajutsu|naginatadō
+3|Qwan Ki Do
+3|Bunkai
+3|Changquan|Long Fist
+3|Chen-style tai chi|Chen-style t'ai chi ch'uan
+3|Iwama style|Iwama ryu
+3|Ki Aikido|Shin Shin Toitsu Aikido
+3|Okinawan martial arts|Hand
+3|Fujian White Crane
+3|Kyūjutsu
+3|Neijia
+3|Real Aikido
+3|Taidō
+3|Kun Khmer|Kbach Kun Khmer|Pradal Serey
+3|Hwa Rang Do|Dog ear cutting
+3|Kuk Sool Won
+3|Chin Na|Qin Na
+3|Genseiryū
+3|German school of fencing
+3|Hōzōin-ryū
+3|Nippon Kempo
+3|Para taekwondo
+3|Shoot boxing
+3|Shurikenjutsu
+3|Tameshigiri|test cutting
+3|Yang-style tai chi|Yang-style t'ai chi ch'uan
+3|Yiquan
+3|Kuntao
+3|Backhold
+3|Bokh
+3|Chidaoba
+3|Collar-and-Elbow
+3|Cornish Wrestling
+3|Cumberland Wrestling
+3|Gouren
+3|Gushtigiri
+3|Inbuan
+3|Kokh
+3|Kurash
+3|Lucha Canaria
+3|Mukna
+3|Musti Yuddha
+3|Okichitaw
+3|Tarung Derajat
+3|Tomoi
+3|Vajra-musti
+3|Varzesh-e Bastani
+3|Yagli Gures|Oil Wrestling
+3|Zurkhaneh
+3|Hojōjutsu
+3|Judo at the 2019 Summer Universiade
+3|Korean martial arts
+3|Marine Corps Martial Arts Program
+3|Mizongyi|Dazzling Boxing
+3|Nanquan|Southern Fist
+3|Silat Melayu
+3|Stick-fighting
+3|Subak
+3|Vietnamese martial arts
+3|Yagyū Shinkage-ryū
+3|Abir-Qesheth Hebrew Warrior Arts
+3|Angampora
+3|Chaquan
+3|Hokushin Ittō-ryū
+3|Iaijutsu|iaijitsu
+3|Indian martial arts
+3|Jutsu
+3|Kashima Shin-ryū
+3|Liuhebafa
+3|Muay Lao
+3|Pushing hands
+3|Shuri-te
+3|Shōrei-ryū
+3|Silat|Silek|Pencak|Silat Melayu
+3|Singlestick
+3|ARB (martial art)
+3|Adimurai
+3|Ancient Greek boxing
+3|Armored combat (sport)
+3|Bak Mei
+3|Bare-knuckle boxing
+3|Chen Style
+4|Choy Gar
+4|Cumberland and Westmorland wrestling
+4|Devon wrestling
+4|English Longsword School
+4|Fanziquan
+4|Five Animals
+4|French school of fencing
+4|Fut Gar
+4|Greek wrestling
+4|Hakko-ryu
+4|Historical fencing in Scotland
+4|Hongquan
+4|Isshin-Ryu
+4|Istunka
+4|Italian school of fencing
+4|Jow Ga
+4|Kapap
+4|Kbach Kun Khmer Boran
+4|Koluchstyle
+4|Kyusho jitsu
+4|La Canne
+4|Laamb
+4|Lancashire wrestling
+4|Lau Gar
+4|Li Gar
+4|Lutte Traditionnelle
+4|Malla-yuddha
+4|Mani
+4|Moraingy
+4|Musangwe
+4|Nguni Stick Fighting
+4|Nuba fighting
+4|Quarterstaff
+4|Ranggeln
+4|Ringen
+4|Scottish backhold
+4|Senegalese wrestling
+4|Shin-kicking
+4|Shuai Jiao
+4|Suffrajitsu
+4|Sun Style
+4|Tahtib
+4|Tantojutsu
+4|Tiger Claw
+4|Uechi-Ryu
+4|Unifight
+4|Vajra-mushti
+4|White Crane
+4|Wu Style
+4|Yang Style
+4|Aiki
+4|Bajutsu
+4|Bujutsu
+4|Chun Kuk Do|Chuck Norris System
+4|Dambe
+4|Hybrid martial arts|hybrid martial art|eclectic martial art|freestyle fighting|hybrid fighting system
+4|Juego del palo|Lucha del Garrote
+4|Naha-Te
+4|Piguaquan
+4|Shodokan Aikido|Japan Aikido Association|Shodokan Aikido Federation
+4|Southern Dragon kung fu|Southern Dragon
+4|Varma kalai
+4|Weng Chun
+4|Women's sumo
+4|Wu-style tai chi|Wu-style t'ai chi ch'uan
+4|Yagyū Shingan-ryū
+4|Aki Kiti|Sümi kick fighting
+4|Aquathlon|underwater wrestling
+4|Caci
+4|Eagle Claw
+4|Filipino martial arts
+4|German ju-jutsu
+4|Judo at the 2011 Summer Universiade
+4|Judo at the 2017 Summer Universiade
+4|Judo at the 2021 Summer World University Games|judo at the 2021 Summer Universiade
+4|Lathi khela
+4|Monkey Kung Fu
+4|Musō Jikiden Eishin-ryū
+4|Shinkage-ryū
+4|Shintaido
+4|Suijutsu|Nihon eihō|Suiren|Eihōjutsu|Koshiki eihō|Noshi-oyogi|Shūsuijutsu
+4|Taiho-jutsu
+4|Tennen Rishin-ryū
+4|Yaw-Yan
+4|American Kenpo Karate|American Kenpo
+4|Calinda|kalenda
+4|Central Guoshu Institute|National Martial Arts Academy|National Wushu Academy
+4|Engolo|Zebra dance
+4|Gyokko-ryū
+4|Hankido
+4|Hankumdo
+4|Ittō-ryū
+4|Jidokwan
+4|Judo at the 2013 Summer Universiade
+4|Kage-ryū
+4|Kinomichi
+4|Kitō-ryū
+4|Kumdo
+4|Kyeok Sul Do|Kuk Sul Do
+4|Sin Moo Hapkido
+4|Southern Praying Mantis
+4|Taijijian|tai chi jian|tai chi sword|taiji sword
+4|Wu (Hao)-style tai chi|Wu (Hao)-style t'ai chi ch'uan
+4|Yoseikan budō
+4|Defendu|Close Quarters Combat System
+4|100-man kumite|hyakunin kumite
+4|Budokan karate
+4|Capoeira Angola
+4|Capoeira Regional
+4|Chujō-ryū
+4|Heihuquan
+4|Huka-huka
+4|Jigen-ryū|sudden revelation style
+4|Judo at the 2007 Summer Universiade
+4|Judo at the 2015 Summer Universiade
+4|Kapu Kuialua
+4|Kashima Shintō-ryū
+4|Kosen judo
+4|Motobu-ryū
+4|Northern Shaolin kung fu|Northern Shaolin
+4|Pencak Silat Harimau|Silat Harimau
+4|Sunmudo
+4|Takenouchi-ryū|Hinoshita Torite Kaisan Takenouchi-ryū
+4|Tessenjutsu
+4|Tongbeiquan
+4|Võ thuật Bình Định
+4|Leonese wrestling|Leonese aluche
+4|Pahlevani wrestling|Pahlavani|Iranian wrestling|Koshti Pahlavāni|Pahlavāni wrestling
+4|Dumog
+4|Buza
+4|Combat Hapkido
+4|Five Ancestors
+4|GongKwon Yusul
+4|Indonesian martial arts
+4|Inuoumono
+4|Judo at the 2001 Summer Universiade
+4|Judo at the 2003 Summer Universiade
+4|Judo at the 2009 Summer Universiade
+4|Kombatan
+4|Kong Soo Do
+4|Limalama
+4|Shindō Munen-ryū
+4|Shuri-ryū
+4|Taisha Ryu
+4|Tan Tui
+4|Taoist tai chi
+4|Ziranmen
+4|Bataireacht
+4|Combat Hopak
+4|Defendo
+4|Dog kung fu
+4|Federfechter
+4|Haitō
+4|Judo at the 1967 Summer Universiade
+4|Judo at the 1999 Summer Universiade
+4|Judo at the Summer World University Games|judo at the Summer Universiade
+4|Kamizumo
+4|Kasagake|kasakake
+4|Kobayashi aikido
+4|Kusarigamajutsu
+4|Pekiti-Tirsia Kali
+4|Pongyi thaing
+4|Shinden Fudo-ryū
+4|Shindō jinen-ryū
+4|Shiranui-ryū
+4|Shōrinji-ryū
+4|Side control
+4|Yau Kung Moon
+4|Yongmudo|Yongmoodo
+4|Yoseikan Aikido
+4|Cheibi|Cheibi Gad-Ga|Gad-Ga
+4|Chuojiao
+4|Danmyé
+4|Dhanurveda
+4|Gwonbeop
+4|Hapki yusul
+4|Jieitaikakutōjutsu
+4|Jikishinkage-ryu Naginatajutsu
+4|Judo at the 1985 Summer Universiade
+4|Judo at the 1995 Summer Universiade
+4|Kalaripayattu stick-fighting|Kalarippayattu stick fighting
+4|Kirikaeshi|uchikaeshi
+4|Ludosport
+4|Mok Gar
+4|Branches of Wing Chun
+4|Brazilian martial arts
+4|Butthan
+4|Fu-style baguazhang|Fu Style Wudang Fist
+4|Gulun Kung Fu
+4|Hasegawa Eishin-ryū
+4|Hokutoryu Ju-Jutsu
+4|Kenko Kempo Karate|Kenko Kempo
+4|Leopard kung fu
+4|Meitei martial arts
+4|Rough and tumble fighting|Gouging
+4|Sayoc Kali
+4|Shaolin Kempo Karate|SKK
+4|Sqay
+4|Tang Shou Tao
+4|Yuejiaquan
 ` });
 EVO.cat({ ...{"id": "videogames", "name": "Video games", "icon": "🕹️", "q": "Name a **video game**.", "strip": ["game", "video game"], "level": 1}, list: `
 0|Minecraft
@@ -54480,6 +60116,706 @@ EVO.cat({ ...{"id": "carmodels", "name": "Car models", "icon": "🚙", "q": "Nam
 4|Zeekr 001
 4|Škoda 1000 MB
 4|Škoda Citigo
+` });
+EVO.cat({ ...{"id": "birds", "name": "Birds", "icon": "🐦", "q": "Name a **species of bird** (its common name).", "strip": ["bird"], "level": 2}, list: `
+0|Chicken
+0|Crow
+0|Duck
+0|Eagle
+0|Flamingo
+0|Goose
+0|Ostrich
+0|Owl
+0|Parrot
+0|Peacock
+0|Penguin
+0|Pigeon
+0|Robin
+0|Seagull|Gull
+0|Swan
+0|Turkey
+2|Albatross
+2|Blackbird
+2|Blue Jay
+2|Bluebird
+2|Budgie|Parakeet|Budgerigar
+2|Canary
+2|Cardinal
+2|Cockatoo
+2|Condor
+2|Crane
+2|Dodo
+2|Dove
+2|Emu
+2|Falcon
+2|Finch
+2|Hawk
+2|Heron
+2|Hummingbird
+2|Kingfisher
+2|Kiwi
+2|Kookaburra
+2|Macaw
+2|Magpie
+2|Pelican
+2|Puffin
+2|Raven
+2|Sparrow
+2|Starling
+2|Stork
+2|Swallow
+2|Toucan
+2|Vulture
+2|Woodpecker
+2|Wren
+3|Bald Eagle
+3|Barn Owl
+3|Bird of Paradise
+3|Blue Tit|Tit|Titmouse
+3|Booby
+3|Bullfinch
+3|Buzzard
+3|Cassowary
+3|Chaffinch
+3|Chickadee
+3|Cockatiel
+3|Coot
+3|Cormorant
+3|Cuckoo
+3|Curlew
+3|Egret
+3|Frigatebird
+3|Gannet
+3|Golden Eagle
+3|Goldfinch
+3|Goshawk
+3|Grackle
+3|Grebe
+3|Grouse
+3|Harrier
+3|Hornbill
+3|Ibis
+3|Jackdaw
+3|Kestrel
+3|Kite
+3|Lapwing
+3|Loon
+3|Lovebird
+3|Lyrebird
+3|Mallard
+3|Martin
+3|Mockingbird
+3|Moorhen
+3|Myna|Mynah
+3|Nightingale
+3|Nightjar
+3|Nuthatch
+3|Oriole
+3|Osprey
+3|Partridge
+3|Peregrine Falcon|Peregrine
+3|Pheasant
+3|Plover
+3|Quail
+3|Quetzal
+3|Rhea
+3|Roadrunner
+3|Rook
+3|Sandpiper
+3|Secretary Bird
+1|Shoebill
+3|Skylark|Lark
+3|Snipe
+3|Snowy Owl
+3|Sparrowhawk
+3|Spoonbill
+3|Swift
+3|Tern
+3|Thrush
+3|Warbler
+3|Weaver Bird|Weaver
+3|Woodcock
+4|American wigeon
+4|Aracari
+4|Avocet
+4|Bartlett's tinamou
+4|Baudo guan
+4|Bearded guan
+4|Bee-eater
+4|Bellbird
+4|Bittern
+4|Black-bellied whistling-duck
+4|Blue-winged teal
+4|Bowerbird
+4|Brazilian teal
+4|Bufflehead
+4|Bunting
+4|Cinereous tinamou
+4|Comb duck
+4|Crested guan
+4|Crossbill
+4|Curve-billed tinamou
+4|Dipper
+4|Dunlin
+4|Eider
+4|Frogmouth|Tawny Frogmouth
+4|Fulmar
+4|Godwit
+4|Gray tinamou
+4|Great Auk
+4|Great tinamou
+4|Green-winged teal
+4|Guillemot
+4|Hamerkop
+4|Highland tinamou
+5|Hoatzin
+4|Honeyeater
+4|Hoopoe
+4|Horned screamer
+4|Jacana
+1|Kakapo
+4|Kea
+4|Kittiwake
+4|Linnet
+4|Little tinamou
+4|Marabou Stork|Marabou
+4|Masked duck
+4|Merganser
+4|Moa
+4|Motmot
+4|Nocturnal curassow
+4|Northern shoveler
+4|Oilbird
+4|Orinoco goose
+4|Pale-browed tinamou
+4|Passenger Pigeon
+4|Petrel
+4|Pintail
+4|Pipit
+4|Potoo
+4|Razorbill
+4|Ring-necked duck
+4|Ruddy duck
+4|Rufous-headed chachalaca
+4|Shearwater
+4|Shoveler
+4|Shrike
+4|Siskin
+4|Skua
+4|Southern pochard
+4|Spix's guan
+4|Sunbird
+4|Takahe
+4|Tanager
+4|Tataupa tinamou
+4|Toucanet
+4|Treecreeper
+4|Trogon
+4|Tui
+4|Turnstone
+4|Umbrellabird
+4|Undulated tinamou
+4|Wagtail
+4|Wattled guan
+4|Waxwing
+4|White-cheeked pintail
+4|White-throated tinamou
+4|Wigeon
+4|Yellow-billed pintail
+4|Yellowhammer
+4|Andean guan
+4|Andean teal
+4|Andean tinamou
+4|Berlepsch's tinamou
+4|Black tinamou
+4|Blue-throated piping-guan
+4|Bristlehead
+4|Brown tinamou
+4|Cinnamon teal
+4|Crab Plover
+4|Cuckoo Roller
+4|Fulvous whistling-duck
+4|Hypocolius
+4|Ibisbill
+4|Jacamar
+4|Kagu
+4|Lesser scaup
+4|Limpkin
+4|Mesite
+4|Muscovy duck
+4|Northern pintail
+4|Palmchat
+4|Picathartes|Rockfowl
+4|Plains Wanderer
+4|Puffbird
+4|Seedsnipe
+4|Seriema
+4|Sheathbill
+4|Sickle-winged guan
+4|Speckled chachalaca
+4|Sunbittern
+4|Sungrebe
+4|Tawny-breasted tinamou
+4|Tinamou
+4|Torrent duck
+4|Variegated tinamou
+4|Wallcreeper
+` });
+EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a **species of mammal** (its common name).", "level": 2}, list: `
+0|Giant panda|Ailuropoda melanoleuca
+0|Gorilla
+0|Nile hippopotamus|Hippopotamus amphibius|Common Hippopotamus|Hippo|Hippopotamus
+0|Rat|Rattus
+0|Yak|Bos mutus|Wild Yak
+0|brown bear|Ursus arctos|Grizzly Bear
+0|cheetah|Acinonyx jubatus
+0|chimpanzee|Pan troglodytes|Common Chimpanzee|Robust Chimpanzee
+0|giraffe|Giraffa
+0|grey wolf|Canis lupus|wolf|timber wolf
+0|koala|Phascolarctos cinereus
+0|leopard|Panthera pardus
+0|lion|Panthera leo|African Lion
+0|moose|Alces alces|Elk|North American Elk
+0|polar bear|Ursus maritimus
+0|tiger|Panthera tigris
+2|Arctic fox|Vulpes lagopus
+2|Asian elephant|Elephas maximus|Indian Elephant
+2|Baboon|Papio
+2|Bison
+2|European hedgehog|Erinaceus europaeus|Western European Hedgehog
+2|Hook-lipped Rhinoceros|Diceros bicornis|Hooked-lipped Rhinoceros|Black rhinoceros
+2|Red Panda|Ailurus fulgens
+2|Tasmanian devil|Sarcophilus harrisii
+2|White rhinoceros|Ceratotherium simum|Square-lipped Rhinoceros|Southern White Rhinoceros
+2|Wild Boar|Sus scrofa|wild boar, eurasian wild boar|Eurasian Wild Pig|European Wild Pig
+2|aardvark|Orycteropus afer|Antbear
+2|alpaca|Vicugna pacos
+2|beaver|Castor
+2|beluga whale|Delphinapterus leucas|White Whale
+2|blue whale|Balaenoptera musculus|Sulphur-bottom Whale|Sibbold’s Rorqual|Pygmy Blue Whale
+2|capybara|Hydrochoerus hydrochaeris
+2|cougar|Puma concolor|deer tiger|mountain lion|puma
+2|coyote|Canis latrans|American jackal|brush wolf|prairie wolf
+2|elephant seal|Mirounga
+2|guinea pig|Cavia porcellus|Domesticated Guinea Pig
+2|hare|Lepus
+2|honey badger|Mellivora capensis|Rattel|Ratel
+2|house mouse|Mus musculus
+2|humpback whale|Megaptera novaeangliae
+2|jaguar|Panthera onca
+2|killer whale|Orcinus orca|Orca
+2|llama|Lama glama
+2|meerkat|Suricata suricatta
+2|narwhal|Monodon monoceros|Unicorn Whale
+2|orangutan|Pongo
+2|pig|Sus
+2|platypus|Ornithorhynchus anatinus
+2|raccoon|Procyon lotor|raccoon, northern raccoon|Northern Raccoon
+2|red fox|Vulpes vulpes
+2|rhesus macaque|Macaca mulatta|Rhesus Monkey
+2|sea otter|Enhydra lutris
+2|snow leopard|Panthera uncia
+2|sperm whale|Physeter macrocephalus
+2|walrus|Odobenus rosmarus
+2|weasel|Mustela
+2|wildebeest|Connochaetes
+3|African buffalo|Syncerus caffer
+3|African bush elephant|Loxodonta africana
+3|African wild dog|Lycaon pictus|African Hunting Dog|Cape Hunting Dog
+3|American bison|Bison bison
+3|American black bear|Ursus americanus
+3|Bactrian camel|Camelus bactrianus
+3|Bonobo|Pan paniscus
+3|Common Fallow-deer|Dama dama|European Fallow Deer|fallow deer
+3|Dromedary|Camelus dromedarius|One-humped Camel
+3|Eurasian Red Squirrel|Sciurus vulgaris|Red Squirrel
+3|Eurasian badger|Meles meles|European badger
+3|Eurasian lynx|Lynx lynx
+3|Eurasian otter|Lutra lutra|common otter|European otter|European river otter
+3|European Mole|Talpa europaea
+3|European pine marten|Martes martes|Pine Marten
+3|European wildcat|Felis silvestris|wild cat
+3|Fennec|Vulpes zerda|Fennec fox
+3|Homo
+3|Indian rhinoceros|Rhinoceros unicornis|Indian One-horned Rhinoceros|Great Indian Rhinoceros
+3|Least Weasel|Mustela nivalis|weasel, least weasel
+3|Malayan Bear|Helarctos malayanus|Malayan sun bear|Sun bear
+3|Mammuthus
+3|Marmot|Marmota
+3|Neanderthal|Homo neanderthalensis
+3|Okapi|Okapia johnstoni
+3|Poponejo|Oryctolagus cuniculus|European Rabbit
+3|Stoat|Mustela erminea
+3|Thylacine|Thylacinus cynocephalus|Tasmanian wolf|Tasmanian tiger
+3|bobcat|Lynx rufus|bay lynx
+3|brown rat|Rattus norvegicus|common rat|Norway rat
+3|caracal|Caracal caracal|Desert Lynx|Asian Caracal
+3|clouded leopard|Neofelis nebulosa
+3|coypu, nutria|Myocastor coypus|Coypu|Nutria
+3|dugong|Dugong dugon|Sea Cow
+3|golden jackal|Canis aureus|Asiatic Jackal|Common Jackal
+3|impala|Aepyceros melampus|Common Impala|Black-faced Impala
+3|macaques|Macaca
+3|mule|Equus asinus × Equus caballus
+3|musk ox|Ovibos moschatus
+3|muskrat|Ondatra zibethicus|Common Muskrat
+3|northern giraffe|Giraffa camelopardalis
+3|ocelot|Leopardus pardalis
+3|red deer|Cervus elaphus|West European red deer|western red deer
+3|roe deer|Capreolus capreolus
+3|springbok|Antidorcas marsupialis|Springbuck|Cape Springbok
+3|tapir|Tapirus
+3|water buffalo|Bubalus bubalis|Asian buffalo|Asian Water Buffalo|Carabao
+3|wolverine|Gulo gulo
+5|African elephant|Loxodonta
+4|American mink|Neogale vison
+4|Asiatic Black Bear|Ursus thibetanus
+4|Australopithecus
+4|Brown Hare|Lepus europaeus
+4|Canada lynx|Lynx canadensis|Canadian lynx|American lynx
+4|Caveman|Homo erectus
+4|Crocuta crocuta
+4|European Bison|Bison bonasus|Wisent
+4|European polecat|Mustela putorius|Western Polecat|western polecat, polecat
+4|Homo habilis
+4|Iberian lynx|Lynx pardinus
+4|Javan rhinoceros|Rhinoceros sondaicus|Lesser One-horned Rhinoceros|Javan One-horned Rhinoceros
+4|Pallas's cat|Otocolobus manul|manul
+4|Saiga|Saiga tatarica|Western Saiga Antelope|Western Saiga|Saiga Antelope
+4|True foxes|Vulpes
+4|Wapiti|Cervus canadensis
+4|aurochs|Bos primigenius
+4|big cats|Panthera
+4|chamois|Rupicapra rupicapra|Northern Chamois|Balkan Chamois
+4|marten|Martes
+4|raccoon dog|Nyctereutes procyonoides
+4|serval|Leptailurus serval
+4|vicuña|Vicugna vicugna|Vicugna
+4|African golden cat|Profelis aurata
+4|Blackbuck|Antilope cervicapra
+4|Capra
+4|Equus
+4|Eurasian Beaver|Castor fiber
+4|Felis
+4|Gaur|Bos gaurus|Indian Bison
+4|Gazella
+4|Jungle cat|Felis chaus|Swamp Cat|Reed Cat
+4|Leopard Cat|Prionailurus bengalensis
+4|Mus
+4|Ovis
+4|Pan
+4|Rangifer tarandus
+4|Sable|Martes zibellina
+4|Trichechus
+4|Wild Goat|Capra aegagrus
+4|beech marten|Martes foina|stone marten, beech marten|Stone Marten
+4|dhole|Cuon alpinus|Asiatic Wild Dog|Red Dog|Indian Wild Dog
+4|guanaco|Lama guanicoe
+4|sand cat|Felis margarita|Sand Dune Cat
+` });
+EVO.cat({ ...{"id": "frogs", "name": "Frogs", "icon": "🐸", "q": "Name a **species of frog or toad**.", "strip": ["frog", "toad"], "level": 3}, list: `
+0|American Bullfrog|Rana catesbeiana
+0|Cane toad|Rhinella marina|Agua Toad|Giant Marine Toad
+0|Common frog|Rana temporaria|European Common Frog
+0|Goliath frog|Conraua goliath|Giant Slippery Frog
+0|common toad|Bufo bufo
+0|golden poison frog|Phyllobates terribilis
+0|red-eyed tree frog|Agalychnis callidryas|Red-eyed Leaf frog
+2|American toad|Anaxyrus americanus
+2|Australian green tree frog|Ranoidea caerulea
+2|Common Clawed Frog|Xenopus laevis|African Clawed Toad|Clawed Toad|African Clawed Frog
+2|Darwin's frog|Rhinoderma darwinii
+2|Green frog|Lithobates clamitans
+2|Northern Leopard Frog|Lithobates pipiens
+2|South American horned frogs|Ceratophrys|Pacman frogs|Common Horned Frogs
+2|Surinam toad|Pipa pipa|Suriname toad
+2|Wood Frog|Lithobates sylvaticus
+2|blue poison dart frog|Dendrobates azureus
+2|common tree frog|Hyla arborea|European Tree Frog
+2|fire-bellied toad|Bombina|Firebelly Toads
+2|golden toad|Incilius periglenes|Orange Toad|Monte Verde Toad|Monte Verde Golden Toad
+2|midwife toad|Alytes obstetricans|Common Midwife Toad
+2|natterjack toad|Epidalea calamita
+2|strawberry poison-dart frog|Oophaga pumilio|Flaming Poison-arrow Frog|Strawberry Poison Frog
+3|Abah River Flying Frog|Rhacophorus nigropalmatus|Wallace's Flying Frog
+3|African dwarf frog|Hymenochirus
+3|Amazon Milk Frog|Trachycephalus resinifictrix
+3|American green tree frog|Hyla cinerea|Carolina Tree Frog
+3|Argentine horned frog|Ceratophrys ornata|Argentina Horned Frog|Bell's Ceratophrys|Ornate horned frog
+3|Bufo
+3|Bull Frog|Hoplobatrachus tigerinus|Indian Bullfrog|Tiger Frog
+3|Chorus Frogs|Pseudacris
+3|Colorado River Toad|Incilius alvarius|Colorado River Toad Sonoran Desert Toad
+3|Common Spadefoot|Pelobates fuscus|common spadefoot toad
+3|Cuban tree frog|Osteopilus septentrionalis
+3|European fire-bellied toad|Bombina bombina
+3|European green toad|Bufo viridis
+3|Gastric-brooding frog|Rheobatrachus
+3|Giant Bullfrog|Pyxicephalus adspersus|African Bullfrog
+3|Gray treefrog|Hyla versicolor
+3|Hairy Frog|Trichobatrachus robustus
+3|Panamanian golden frog|Atelopus zeteki|Golden arrow poison frog
+5|Purple Frog|Nasikabatrachus sahyadrensis
+3|Titicaca Water Frog|Telmatobius culeus|Crawford's water frog|White water frog
+3|Tomato frog|Dyscophus antongilii
+3|corroboree frog|Pseudophryne corroboree
+3|edible frog|Pelophylax esculentus
+3|golden mantella|Mantella aurantiaca|Orange Mantella|Malagasy Golden Mantella|Madagascan Golden Frog
+3|green and black poison dart frog|Dendrobates auratus|Golden Poison-arrow Frog|Green Poison Frog|Green Poison-arrow Frog
+3|marsh frog|Pelophylax ridibundus|Eurasian Marsh Frog
+3|mossy frog|Theloderma corticale|Tonkin bug-eyed frog
+3|oriental fire-bellied toad|Bombina orientalis|Oriental Firebelly Toad|Oriental Bell Toad
+3|western toad|Anaxyrus boreas|Boreal toad
+3|yellow-bellied toad|Bombina variegata
+4|Agile frog|Rana dalmatina
+4|Alytes
+4|Asian common toad|Duttaphrynus melanostictus|Asian black-spined toad|Asian toad|black-spectacled toad
+4|Atelopus
+4|Australiasian treefrogs|Litoria
+4|Banded Bullfrog|Kaloula pulchra|Piebald Digging Frog|Painted Bullfrog|Ox Frog
+4|Beelzebufo
+4|Bornean flat-headed frog|Barbourula kalimantanensis
+4|Chilean Toad|Calyptocephalella gayi|Helmeted Water Toad|Gay’s Frog
+4|Common Clawed Frogs|Xenopus
+4|Common Rain Frog|Breviceps adspersus
+4|Crab-eating Frog|Fejervarya cancrivora|Asian Brackish Frog|Mangrove Frog|Rice Field Frog
+4|Dendrobates
+4|Eleutherodactylus
+4|Giant leaf frog|Phyllomedusa bicolor
+4|Green Frogs; Water Frogs|Pelophylax
+4|Hamilton's frog|Leiopelma hamiltoni|Stephens Island Frog
+4|Hyla
+4|Iberian Spadefoot Toad|Pelobates cultripes|Western Spadefoot|Western spadefoot toad
+4|Israel Painted Frog|Latonia nigriventer|Hula Painted Frog
+4|Japanese Tree Frog|Hyla japonica
+4|Leaf Frogs|Phyllomedusa
+4|Leptodactylus
+4|Lithobates
+4|Long-nosed Horned Frog|Megophrys nasuta|Borneon Horned Frog|Horned Toad|Large Horned Frog
+4|Majorcan midwife toad|Alytes muletensis|Mallorcan Midwife Toad
+4|Mantella
+4|Marsupial Frogs|Gastrotheca
+4|Mediterranean Tree Frog|Hyla meridionalis|Stripeless Tree Frog
+4|Mexican burrowing toad|Rhinophrynus dorsalis|Burrowing Toad|Rhinophryne|Middle American Burrowing Toad
+4|Northern Red-legged Frog|Rana aurora
+4|Paedophryne amauensis
+4|Painted Frog|Discoglossus pictus
+4|Parsley frog|Pelodytes
+4|Phyllobates
+4|Pipa
+4|Pool frog|Pelophylax lessonae
+4|Pumpkin Toadlet|Brachycephalus ephippium|Spix's Saddleback Toad
+4|Rabb's fringe-limbed treefrog|Ecnomiohyla rabborum
+4|Ranitomeya
+4|Surinam horned frog|Ceratophrys cornuta|Amazonian Horned Frog
+4|Variable Harlequin Frog|Atelopus varius|Clown Frog
+4|White-lipped tree frog|Litoria infrafrenata|Australian Giant Treefrog
+4|Wyoming toad|Anaxyrus baxteri|Baxter's Toad|Wyoming Toad; Baxter's Toad
+4|blue-webbed flying frog|Rhacophorus reinwardtii|Green Flying Frog|Reinwardt's Tree Frog|Black-webbed Treefrog
+4|dyeing dart frog|Dendrobates tinctorius|Dyeing Poison-arrow Frog|Dyeing poison frog
+4|green and golden bell frog|Litoria aurea|Golden Bell Frog|Green and Golden Swamp Frog
+4|moor frog|Rana arvalis|Altai Brown Frog (Altai Mountains Populations)
+4|tailed frog|Ascaphus
+4|yellow-banded poison dart frog|Dendrobates leucomelas|Yellow-headed Poison Frog
+4|Acris
+4|African red toad|Schismaderma carens|African Split-skin Toad
+4|Afrixalus
+4|Agalychnis
+4|Amolops
+4|Ansonia
+4|Arthroleptis
+4|Asiatic Grass Frog|Rana chensinensis|Chinese Brown Frog
+4|Asiatic toad|Bufo gargarizans|Zhoushan Toad|Miyako Toad|Chusan Island Toad
+4|Betic midwife toad|Alytes dickhilleni
+4|Boulenger's Asian tree toad|Pedostibes hosii
+4|Brachycephalus
+4|Breviceps
+4|Buergeria
+4|Caucasian parsley frog|Pelodytes caucasicus
+4|Common green frog|Hylarana erythraea|Green Paddy Frog|Leaf Frog
+4|Common parsley frog|Pelodytes punctatus
+4|Cowan's mantella|Mantella cowanii|Black Golden Frog|Cowan's Golden Frog
+4|Darwin's Frogs|Rhinoderma
+4|Duttaphrynus
+4|Dyscophus
+4|Greek Stream Frog|Rana graeca|Balkan Stream Frog
+4|Green mantella|Mantella viridis|Green Golden Frog|Lime Mantella
+4|Iberian Frog|Rana iberica
+4|Iberian midwife toad|Alytes cisternasii
+4|Iberian painted frog|Discoglossus galganoi|West Iberian Painted Frog
+4|Indirana
+4|Italian Tree Frog|Hyla intermedia
+4|Japanese brown frog|Rana japonica
+4|Leaf-frogs; Tree Frogs|Leptopelis
+4|Lemon-yellow tree frog|Hyla savignyi|Savigny's Treefrog
+4|Leptobrachium
+4|Levant water frog|Pelophylax bedriagae|Levant Green Frog|Levantine Frog
+4|Long-legged Wood Frog|Rana macrocnemis|Caucasian Brown Frog|Transcaucasian Frog|Iranian Long-legged Wood Frog
+4|Madagascan mantella|Mantella madagascariensis|Malagasy Mantella|Painted Mantella|Madagascar Golden Frog
+4|Paedophryne
+4|Painted Frogs|Discoglossus
+4|Perez's Frog|Pelophylax perezi
+4|Phyllomedusa sauvagii
+4|Poison Frogs|Oophaga
+4|Polypedates
+4|Pseudis paradoxa
+4|Rhacophorus
+4|Sardinian tree frog|Hyla sarda|Tyrrhenian Tree Frog
+4|Shovelnose frog|Hemisus
+4|Syrian Spadefoot Toad|Pelobates syriacus|Syrian Spadefoot|Eastern Spadefoot
+4|Telmatobius
+` });
+EVO.cat({ ...{"id": "butterflies", "name": "Butterflies", "icon": "🦋", "q": "Name a **butterfly or moth** (species).", "strip": ["butterfly", "moth"], "level": 3}, list: `
+0|Painted Lady|Vanessa cardui
+0|Red Admiral|Vanessa atalanta
+0|Small Tortoiseshell|Aglais urticae
+0|comma|Polygonia c-album|anglewing
+0|common blue|Polyommatus icarus
+0|common brimstone|Gonepteryx rhamni
+0|common yellow swallowtail|Papilio machaon|swallowtail|Old World swallowtail
+0|large white|Pieris brassicae|large cabbage white|cabbage moth|cabbage butterfly
+1|monarch butterfly|Danaus plexippus|common tiger wanderer|monarch
+0|peacock|Aglais io|Peacock butterfly
+0|purple emperor|Apatura iris
+0|small white|Pieris rapae
+2|Adonis blue|Lysandra bellargus
+2|American copper|Lycaena phlaeas|small copper|common copper
+2|Gatekeeper|Pyronia tithonus
+2|Green Hairstreak|Callophrys rubi
+2|Morpho
+2|Mountain Apollo|Parnassius apollo|Apollo Butterfly|Apollo
+2|Queen Alexandra’s birdwing|Ornithoptera alexandrae
+2|Speckled Wood|Pararge aegeria
+2|camberwell beauty|Nymphalis antiopa|mourning cloak
+2|clouded yellow|Colias croceus|common clouded yellow
+2|green-veined white|Pieris napi
+2|holly blue|Celastrina argiolus
+2|large blue|Phengaris arion
+2|large tortoiseshell|Nymphalis polychloros
+2|marbled white|Melanargia galathea
+2|meadow brown|Maniola jurtina
+2|orange tip|Anthocharis cardamines
+2|ringlet|Aphantopus hyperantus
+2|silver-washed fritillary|Argynnis paphia
+2|white admiral|Limenitis camilla
+3|Black Hairstreak|Satyrium pruni
+3|Black-veined White|Aporia crataegi
+3|Brimstones|Gonepteryx
+3|Chequered Skipper|Carterocephalus palaemon
+3|Heath Fritillary|Melitaea athalia
+3|Julia butterfly|Dryas iulia|Julia Heliconian
+3|Lulworth Skipper|Thymelicus acteon
+3|Map|Araschnia levana|map butterfly
+3|Papilio
+3|Pieris
+3|Plain tiger|Danaus chrysippus
+3|Purple Hairstreak|Favonius quercus
+3|Queen of Spain Fritillary|Issoria lathonia
+3|Scarce Swallowtail|Iphiclides podalirius|sail swallowtail|pear-tree swallowtail
+3|Small Heath|Coenonympha pamphilus
+3|Tortoiseshells|Aglais
+3|White-letter Hairstreak|Satyrium w-album
+3|brown argus|Aricia agestis
+3|brown hairstreak|Thecla betulae
+3|dingy skipper|Erynnis tages
+3|duke of burgundy fritillary|Hamearis lucina
+3|essex skipper|Thymelicus lineola
+3|glanville fritellary|Melitaea cinxia
+3|grayling|Hipparchia semele
+3|grizzled skipper|Pyrgus malvae
+3|large copper|Lycaena dispar
+3|long-tailed blue|Lampides boeticus
+3|marsh fritillary|Euphydryas aurinia
+3|pearl-bordered fritillary|Boloria euphrosyne
+3|silver-spotted skipper|Hesperia comma
+3|small blue|Cupido minimus
+3|small pearl-bordered fritillary|Boloria selene
+3|small skipper|Thymelicus sylvestris
+3|wall brown|Lasiommata megera
+3|wood white|Leptidea sinapis
+5|Blue pansy|Junonia orithya
+4|Citrus swallowtail|Papilio demodocus
+4|Clouded apollo|Parnassius mnemosyne
+4|Colias
+4|Common Jezebel|Delias eucharis
+4|Danaus
+4|Dusky Large Blue|Phengaris nausithous
+4|Emperors|Apatura
+4|Greta oto
+4|Ladies and Red Admiral|Vanessa
+4|Large Chequered Skipper|Heteropterus morpheus
+4|Large wall brown|Lasiommata maera
+4|Lesser Marbled Fritillary|Brenthis ino
+4|Lime butterfly|Papilio demoleus
+4|Papilio polytes
+4|Parnassius
+4|Peacock Pansy|Junonia almana
+4|Poplar Admiral|Limenitis populi
+4|Scarce Fritillary|Euphydryas maturna
+4|Scarce copper|Lycaena virgaureae
+4|Speyeria aglaja
+4|arran brown|Erebia ligea
+4|bath white|Pontia daplidice
+4|bergers clouded yellow|Colias alfacariensis
+4|false heath fritillary|Melitaea diamina
+4|lesser purple emperor|Apatura ilia
+4|mallow skipper|Carcharodus alceae
+4|pale cloudedyyellow|Colias hyale
+4|pearly heath|Coenonympha arcania
+4|purple-edged copper|Lycaena hippothoe
+4|purple-shot Copper|Lycaena alciphron
+4|short-tailed blue|Cupido argiades
+4|sooty copper|Lycaena tityrus
+4|southern white admiral|Limenitis reducta
+4|spotted fritillary|Melitaea didyma|Red-Band Fritillary
+4|violet fritillary|Boloria dia
+4|woodland brown|Lopinga achine
+4|Agriades optilete
+4|Argynnis pandora
+4|Atrophaneura
+4|Brenthis daphne
+4|Cacyreus marshalli
+4|Charaxes jasius
+4|Chazara briseis
+4|Coenonympha glycerion
+4|Colias myrmidone
+4|Corsican Swallowtail|Papilio hospiton
+4|Cyaniris semiargus
+4|Eumedonia eumedon
+4|Fabriciana niobe
+4|Graphium sarpedon
+4|Green-underside Blue|Glaucopsyche alexis
+4|Hyponephele lycaon
+4|Kallima inachus
+4|Lasiommata petropolitana
+4|Leptotes pirithous
+4|Libythea celtis
+4|Lycaena helle
+4|Lysandra coridon
+4|Melitaea phoebe
+4|Nymphalis xanthomelas
+4|Ochlodes sylvanus
+4|Pallas's Sailer|Neptis sappho
+4|Papilio alexanor
+4|Parnassius phoebus
+4|Phengaris alcon
+4|Plebejus argus
+4|Plebejus idas
+4|Polyommatus
+4|Polyommatus amandus
+4|Polyommatus dorylas
+4|Provencal Short-tailed Blue|Cupido alcetas
+4|Pyrgus serratulae
+4|Sasakia charonda
+4|Satyrium acaciae
+4|Scolitantides orion
+4|Short-horned Baronia|Baronia brevicornis
+4|Zerynthia
+4|Zerynthia polyxena
+4|Zerynthia rumina
+4|ilex hairstreak|Satyrium ilicis
+4|moorland clouded yellow|Colias palaeno
+4|oberthürs grizzled skipper|Pyrgus armoricanus
 ` });
 EVO.cat({ ...{"id": "bones", "name": "Bones", "icon": "🦴", "q": "Name a **bone in the human body**.", "strip": ["bone"], "level": 3}, list: `
 0|Collarbone|Clavicle

@@ -9,8 +9,8 @@ import build_answers as B, wiki
 out, total = [B.HEADER], 0
 for c in B.CATEGORIES:
     srcs = [s for s in c.get('src', []) if os.path.exists(wiki._path(s))]
-    if c.get('src') and not srcs: continue
-    ents, lines = B.build({**c, 'src': srcs})
+    if c.get('src') and not srcs and not c.get('br'): continue
+    ents, lines = B.build({**c, 'src': srcs} if srcs else c)
     if len(ents) < c.get('min', 25): continue
     total += len(ents)
     out.append(B.entry(c, lines))

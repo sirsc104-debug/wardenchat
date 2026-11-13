@@ -70,7 +70,7 @@ def _run(q):
                 print(f'  query service said {e.code}; waiting', flush=True)
                 time.sleep(int(e.headers.get('Retry-After') or 0)); continue
             raise RuntimeError(f'{e.code} {body}')
-        except (urllib.error.URLError, TimeoutError) as e:
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
             print(f'  network: {e}; retrying', flush=True)
     raise RuntimeError('gave up')
 

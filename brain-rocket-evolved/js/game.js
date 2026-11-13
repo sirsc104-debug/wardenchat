@@ -135,27 +135,27 @@
   }
 
   // ---- Altitude, stops and the track ------------------------------------------------------
-  const placeAt = score => { let p = STOPS[0]; for (const m of STOPS) if (score >= m.pts) p = m; return p; };
-  const nextPlace = score => STOPS.find(m => m.pts > score) || null;
+  // Each mode has its own route: the score needed for each stop (ROUTES in js/scene.js).
+  const routeOf = mode => (mode === 'endless' ? ROUTES.classic : ROUTES.daily);
+  const route = () => routeOf(G.mode);
+  const placeAt = (score, r = route()) => { let p = STOPS[0]; STOPS.forEach((m, i) => { if (score >= r[i]) p = m; }); return p; };
+  const nextIndex = (score, r = route()) => r.findIndex(v => v > score);
   // The track spaces the stops evenly (the real gaps grow the further out you go); the rocket moves
   // between two stops in proportion to the points between them.
   function trackFrac(score) {
-    const n = STOPS.length - 1;
-    for (let i = 0; i < n; i++) {
-      const a = STOPS[i], b = STOPS[i + 1];
-      if (score < b.pts) return (i + Math.max(0, score - a.pts) / (b.pts - a.pts)) / n;
-    }
+    const r = route(), n = STOPS.length - 1;
+    for (let i = 0; i < n; i++) if (score < r[i + 1]) return (i + Math.max(0, score - r[i]) / (r[i + 1] - r[i])) / n;
     return 1;
   }
   function buildTrack() {
     const box = $('trackStops'); box.innerHTML = '';
-    for (const m of STOPS) {
-      if (m.pts === 0) continue;
+    STOPS.forEach((m, i) => {
+      if (i === 0) return;
       const d = document.createElement('div');
       d.className = 'track-stop'; d.textContent = m.icon; d.title = m.name;
-      d.style.top = (100 - trackFrac(m.pts) * 100) + '%';
+      d.style.top = (100 - (i / (STOPS.length - 1)) * 100) + '%';
       box.appendChild(d);
-    }
+    });
     updateTrack();
   }
   function updateTrack() {
@@ -164,13 +164,14 @@
     $('trackRocket').style.top = (100 - f * 100) + '%';
     const stops = $('trackStops').children;
     let k = 0;
-    for (const m of STOPS) { if (m.pts === 0) continue; if (stops[k]) stops[k].classList.toggle('reached', G.score >= m.pts); k++; }
+    const r = route();
+    for (let i = 1; i < STOPS.length; i++) { if (stops[k]) stops[k].classList.toggle('reached', G.score >= r[i]); k++; }
   }
   function updateHud() {
     $('hudScore').textContent = fmt(G.score);
-    const p = placeAt(G.score), nx = nextPlace(G.score);
+    const p = placeAt(G.score), ni = nextIndex(G.score), nx = STOPS[ni];
     $('hudPlace').textContent = `${p.icon} ${p.name}`;
-    $('hudNext').textContent = nx ? `Next stop: ${nx.icon} ${nx.name} at ${fmt(nx.pts)}` : 'Beyond everything';
+    $('hudNext').textContent = ni > 0 ? `Next stop: ${nx.icon} ${nx.name} at ${fmt(route()[ni])}` : 'Beyond everything';
     if (classic()) {
       $('roundLabel').textContent = 'Question';
       $('hudRound').textContent = G.i + 1;
@@ -310,7 +311,7 @@
     G.score += pts; G.peak = Math.max(G.peak, G.score);
     G.picks.push({ cat: G.cat.id, tier, name: hit.ent.name, typed, pts });
     saveProgress();
-    Scene.boostTo(Scene.altFor(G.score), Math.min(5, tier + 1));
+    Scene.boostTo(Scene.altFor(G.score, route()), Math.min(5, tier + 1));
     Scene.setStreak(classic() ? G.streak : tier >= 4 ? 8 : tier >= 3 ? 5 : tier >= 2 ? 3 : 0);
     Sound.boost(Math.min(5, tier + 1));
     if (tier === 5) { Scene.confetti(); Sound.best(); }
@@ -454,7 +455,7 @@
     $('overDate').textContent = daily ? dateText(r.day) : `${r.picks.filter(p => p.tier >= 0).length} answers · best streak ${r.bestStreak || 0}`;
     $('overScore').textContent = fmt(r.score);
     $('overMax').textContent = daily ? ' / 50,000' : '';
-    const p = placeAt(r.score);
+    const p = placeAt(r.score, routeOf(r.mode));
     $('overPlace').textContent = r.crashed ? '💥 Crashed: rude words end the run' : `${p.icon} Reached ${p.name}`;
     $('overVerdict').textContent = r.crashed || !daily ? '' : VERDICTS.find(v => r.score >= v[0])[1];
     $('overGrid').textContent = daily ? gridOf(r.picks) : gridOf(r.picks.slice(-20));
@@ -482,7 +483,7 @@
   }
 
   function shareText(r) {
-    const p = placeAt(r.score);
+    const p = placeAt(r.score, ROUTES.daily);
     const site = SITE_URL ? `\n${SITE_URL}` : '';
     return `Brain Rocket – Evolved ${r.mode === 'archive' ? 'Archive ' : ''}#${r.day} 🚀\n${fmt(r.score)} / 50,000 · ${p.icon} ${p.name}\n${gridOf(r.picks)}${site}`;
   }
@@ -639,7 +640,7 @@
     show('dcStreak', s.count > 0);
     const box = $('dcState');
     if (rec && rec.done) {
-      const p = placeAt(rec.score);
+      const p = placeAt(rec.score, ROUTES.daily);
       box.innerHTML = `<div class="dc-done"><div class="dc-score">${fmt(rec.score)} <small>/ 50,000 · ${p.icon} ${esc(p.name)}</small></div>
         <div class="dc-grid">${gridOf(rec.picks)}</div>
         <div class="dc-row"><button type="button" class="go-btn small" id="dcResults">See results</button><span class="dc-next" id="dcNext"></span></div></div>`;
@@ -734,7 +735,7 @@
         // Ultra Hard: the rocket falls while you think, faster the higher you are
         if (M().drift && G.score > 0) {
           G.score = Math.max(0, G.score - (12 + 0.03 * G.score) * dt);
-          Scene.setTarget(Scene.altFor(G.score));
+          Scene.setTarget(Scene.altFor(G.score, route()));
           if ((hudT += dt) > 0.2) { hudT = 0; updateHud(); }
         }
       }

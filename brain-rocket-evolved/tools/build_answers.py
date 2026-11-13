@@ -59,6 +59,9 @@ def clean_alias(a, cat):
 
 
 def build(cat, report=False):
+    # a category whose Wikidata sources couldn't be fetched falls back on Brain Rocket's whole list
+    if cat.get('src') and not any(os.path.exists(wiki._path(s)) for s in cat['src']):
+        cat = {**cat, 'src': [], 'br_match_only': False}
     items = {}
     for src in cat.get('src', []):
         for it in wiki.items(src):

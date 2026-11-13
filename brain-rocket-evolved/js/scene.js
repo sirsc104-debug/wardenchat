@@ -7,26 +7,36 @@
  */
 'use strict';
 
-/* Places the rocket passes. `pts` is the score needed to get there; `alt` is where it sits in the
- * scene. Score maps to altitude in straight lines between these pairs (and on past the last one). */
+/* Places the rocket passes. `alt` is where each sits in the scene; ROUTES (below) gives the score
+ * needed to reach it in each mode. Score maps to altitude in straight lines between the stops (and
+ * on past the last one). */
 const STOPS = [
-  { pts: 0,     alt: 0,    name: 'Launch Pad',           icon: '🏁' },
-  { pts: 1500,  alt: 160,  name: 'Cloud Tops',           icon: '☁️' },
-  { pts: 3000,  alt: 360,  name: 'Kármán Line',          icon: '🌌' },
-  { pts: 5000,  alt: 560,  name: 'Low Orbit',            icon: '🛰️', body: 'station', bx: 1040, r: 110, by: 250 },
-  { pts: 8000,  alt: 900,  name: 'The Moon',             icon: '🌕', body: 'moon', bx: 250, r: 165 },
-  { pts: 12000, alt: 1500, name: 'Mars',                 icon: '🔴', body: 'mars', bx: 290, r: 150 },
-  { pts: 16000, alt: 2100, name: 'Asteroid Belt',        icon: '🪨' },
-  { pts: 20000, alt: 2700, name: 'Jupiter',              icon: '🟠', body: 'jupiter', bx: 210, r: 245 },
-  { pts: 24000, alt: 3300, name: 'Saturn',               icon: '🪐', body: 'saturn', bx: 270, r: 150 },
-  { pts: 28000, alt: 3900, name: 'Uranus',               icon: '🧊', body: 'uranus', bx: 260, r: 120 },
-  { pts: 32000, alt: 4500, name: 'Neptune',              icon: '🔵', body: 'neptune', bx: 270, r: 120 },
-  { pts: 36000, alt: 5100, name: 'Kuiper Belt',          icon: '❄️', body: 'pluto', bx: 300, r: 70 },
-  { pts: 40000, alt: 5700, name: 'Oort Cloud',           icon: '☄️' },
-  { pts: 43500, alt: 6300, name: 'Crab Nebula',          icon: '🌸', body: 'nebula', bx: 360, r: 400 },
-  { pts: 47000, alt: 6900, name: 'Galactic Core',        icon: '✨', body: 'core', bx: 400, r: 360 },
-  { pts: 50000, alt: 7500, name: 'Edge of the Universe', icon: '♾️', body: 'edge', bx: 460, r: 360 }
+  { alt: 0,    name: 'Launch Pad',           icon: '🏁' },
+  { alt: 160,  name: 'Cloud Tops',           icon: '☁️' },
+  { alt: 360,  name: 'Kármán Line',          icon: '🌌' },
+  { alt: 560,  name: 'Low Orbit',            icon: '🛰️', body: 'station', bx: 1040, r: 110, by: 250 },
+  { alt: 900,  name: 'The Moon',             icon: '🌕', body: 'moon', bx: 250, r: 165 },
+  { alt: 1500, name: 'Mars',                 icon: '🔴', body: 'mars', bx: 290, r: 150 },
+  { alt: 2100, name: 'Asteroid Belt',        icon: '🪨' },
+  { alt: 2700, name: 'Jupiter',              icon: '🟠', body: 'jupiter', bx: 210, r: 245 },
+  { alt: 3300, name: 'Saturn',               icon: '🪐', body: 'saturn', bx: 270, r: 150 },
+  { alt: 3900, name: 'Uranus',               icon: '🧊', body: 'uranus', bx: 260, r: 120 },
+  { alt: 4500, name: 'Neptune',              icon: '🔵', body: 'neptune', bx: 270, r: 120 },
+  { alt: 5100, name: 'Kuiper Belt',          icon: '❄️', body: 'pluto', bx: 300, r: 70 },
+  { alt: 5700, name: 'Oort Cloud',           icon: '☄️' },
+  { alt: 6300, name: 'Crab Nebula',          icon: '🌸', body: 'nebula', bx: 360, r: 400 },
+  { alt: 6900, name: 'Galactic Core',        icon: '✨', body: 'core', bx: 400, r: 360 },
+  { alt: 7500, name: 'Edge of the Universe', icon: '♾️', body: 'edge', bx: 460, r: 360 }
 ];
+
+/* The score needed for each stop. The Daily scores 500 to 5,000 an answer and tops out at 50,000;
+ * Endless scores Brain Rocket's classic 10 to 200 (with multipliers), so it uses Brain Rocket's
+ * spacing: about ten good answers reach the Moon. Both start steep so the first answers clear the
+ * clouds and reach space. */
+const ROUTES = {
+  daily:   [0, 400, 1000, 2000, 4000, 7000, 10000, 14000, 18000, 22000, 26000, 30000, 35000, 40000, 45000, 50000],
+  classic: [0, 100, 300, 600, 1200, 2500, 4000, 6000, 8500, 11500, 15000, 19000, 24000, 30000, 38000, 50000]
+};
 
 const Scene = (function () {
   const W = 1600, H = 900;
@@ -1118,13 +1128,12 @@ const Scene = (function () {
 
   // ---- Public API -----------------------------------------------------------
   // score -> altitude, in straight lines between the stops and on past the last one
-  function altFor(score) {
+  function altFor(score, route = ROUTES.daily) {
     for (let i = 1; i < STOPS.length; i++) {
-      const a = STOPS[i - 1], b = STOPS[i];
-      if (score <= b.pts) return a.alt + (b.alt - a.alt) * (score - a.pts) / (b.pts - a.pts);
+      if (score <= route[i]) return STOPS[i - 1].alt + (STOPS[i].alt - STOPS[i - 1].alt) * (score - route[i - 1]) / (route[i] - route[i - 1]);
     }
-    const a = STOPS[STOPS.length - 2], b = STOPS[STOPS.length - 1];
-    return b.alt + (score - b.pts) * (b.alt - a.alt) / (b.pts - a.pts);
+    const n = STOPS.length - 1;
+    return STOPS[n].alt + (score - route[n]) * (STOPS[n].alt - STOPS[n - 1].alt) / (route[n] - route[n - 1]);
   }
   return {
     W, H, RX, BASE, altFor,
