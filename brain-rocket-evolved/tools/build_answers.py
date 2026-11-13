@@ -81,10 +81,12 @@ def build(cat, report=False):
     by_key = {}
     for e in ents:
         for n in e['names']: by_key.setdefault(key(n), e)
+    lost = []
     for tid in cat.get('br', []):
         for a in BR[tid]['answers']:
             names = [a['name']] + a['alt']
             hit = next((by_key[key(n)] for n in names if key(n) in by_key), None)
+            if not hit and cat.get('br_match_only') and a['tier'] <= 2: lost.append(a['name'])
             if hit:
                 hit['br'] = min(hit['br'] or 9, a['tier'])
                 for n in names:
@@ -153,6 +155,7 @@ def build(cat, report=False):
         print('  MOON top:', ', '.join(tiers[3][:8]))
         print('  DEEP sample:', ', '.join(tiers[4][:6]), '…', ', '.join(tiers[4][-4:]))
         if missing: print('  !! not found:', ', '.join(sorted(missing)))
+        if lost: print('  !! well-known Brain Rocket answers left out:', ', '.join(lost[:25]))
     lines = []
     for e in sorted(ents, key=lambda e: -e['fam']):
         seen, names = set(), []

@@ -4,8 +4,10 @@ The sequel to [Brain Rocket](../brain-rocket/). The core is the same: name somet
 category, and the rarer your answer, the further your rocket flies. What changed:
 
 - **One answer per prompt.** You get 25 seconds and one shot. An answer that isn't on the list
-  doesn't use up your shot, so you can try another. A near-miss spelling asks to be confirmed
-  first ("Did you mean Xoloitzcuintle? Press Enter again"). The first real answer locks in.
+  doesn't use up your shot, so you can try another. The first real answer locks in.
+- **Very forgiving spelling.** Up to about a third of a long name can be wrong, and spellings that
+  sound right count too ("chiwawa", "rotwiler", "phillipines"). The game shows what it read your
+  answer as.
 - **Much bigger answer lists.** The lists are built from Wikidata and Wikipedia instead of being
   written by hand, so real niche answers count. Brain Rocket's own lists are merged in, so
   everything that counted there still counts.
@@ -79,8 +81,8 @@ No AI is used anywhere: not to build the lists, and not while playing.
 - `index.html`: the page. The SirSC104 intro block at the top of `<body>` is copied unchanged
   from Brain Rocket: don't edit it.
 - `css/style.css`: the look.
-- `js/quiz.js`: the categories, answer matching (Brain Rocket's: accents, plurals, filler words,
-  answers inside a phrase, small typos), and the daily and Endless order.
+- `js/quiz.js`: the categories, answer matching (Brain Rocket's accents, plurals, filler words and
+  answers inside a phrase, plus generous typo and sound-alike matching), and the daily and Endless order.
 - `js/scene.js`: the world and the rocket (the rocket, flame, smoke and crash are Brain Rocket's).
 - `js/audio.js`: Brain Rocket's sound effects with the Evolved music.
 - `js/badwords.js`: Brain Rocket's rude-word check, unchanged.

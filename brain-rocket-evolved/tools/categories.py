@@ -91,7 +91,7 @@ CATEGORIES = [
     dict(id='ballondor', name="Ballon d'Or", icon='⚽', q="Name a winner of the **Ballon d'Or**.", src=['P166=Q166177 ' + HUMAN],
          junk=['Luka Modrić'], gem='Igor Belanov', pad=0.1, min=30),
     # ---- Gods and stories ----
-    dict(id='greekgods', name='Greek gods', icon='⚡', q='Name a **Greek god or goddess**.', src=['P31=Q22989102'], br=['gods'], br_match_only=True,
+    dict(id='greekgods', name='Greek gods', icon='⚡', q='Name a **Greek god or goddess**.', src=['P31=Q22989102', 'P31=Q113103481'], br=['gods'], br_match_only=True,
          strip=['god', 'goddess'], junk=['Nike', 'Eros'], gem='Hypnos'),
     dict(id='norsegods', name='Norse gods', icon='🔨', q='Name a **Norse god or goddess**.', src=['P31=Q16513881'],
          strip=['god', 'goddess'], junk=['Loki'], gem='Heimdallr', pad=0.08, min=30),

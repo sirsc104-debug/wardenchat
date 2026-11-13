@@ -275,8 +275,6 @@
     const a = $('answer'), text = a.value.trim();
     const fb = $('feedback');
     if (!Quiz.keyOf(text)) { fb.textContent = 'Type an answer first!'; return; }
-    // the second Enter on a "did you mean…" locks the corrected answer in
-    if (G.pending && G.pending.text === text) return lock(G.pending.hit, text);
     const hit = Quiz.find(G.cat, text);
     if (!hit) {
       if (BadWords.test(text)) return crash();
@@ -286,12 +284,6 @@
       fb.innerHTML = classic() ? `<span class="bad">“${esc(text)}” isn't on the list.</span> Try another!`
         : `“${esc(text)}” isn't on the list for this one. Your shot isn't used up, so try another!`;
       a.select();
-      return;
-    }
-    if (hit.fuzzy) {
-      G.pending = { hit, text };
-      Sound.click();
-      fb.innerHTML = `<span class="confirm">Did you mean <b>${esc(hit.ent.name)}</b>?</span> Press Enter again to lock it in, or edit your answer.`;
       return;
     }
     lock(hit, text);
@@ -324,10 +316,10 @@
     popup(`+${fmt(pts)}`, `${t.emoji} ${t.name}`, tier);
     updateHud();
     if (classic()) {
-      $('feedback').innerHTML = `<span class="good">✅ <b class="tier-${tier}">${esc(hit.ent.name)}</b>: ${t.emoji} ${t.name}! +${fmt(pts)}</span>${tags.length ? ' · ' + tags.join(' ') : ''}`;
+      $('feedback').innerHTML = `<span class="good">✅ <b class="tier-${tier}">${esc(hit.ent.name)}</b>: ${t.emoji} ${t.name}! +${fmt(pts)}</span>${tags.length ? ' · ' + tags.join(' ') : ''}${hit.fuzzy ? `<br><span class="fixed">✏️ "${esc(typed)}" read as ${esc(hit.ent.name)}</span>` : ''}`;
       $('answer').disabled = true;
       later(nextClassic, tier === 5 ? 1900 : 1300);
-    } else reveal(hit.ent, tier);
+    } else reveal(hit.ent, tier, hit.fuzzy ? typed : null);
   }
 
   function timeout(skipped) {
@@ -372,7 +364,7 @@
   }
 
   // The Daily's reveal: what you got, the Supernova, what most people say, and every answer.
-  function reveal(ent, tier) {
+  function reveal(ent, tier, typed) {
     const c = G.cat;
     $('card').classList.add('locked');
     $('answer').disabled = true; $('answer').blur();
@@ -380,7 +372,7 @@
     if (ent) {
       const t = T[tier];
       badge.innerHTML = `<span class="rv-emoji">${t.emoji}</span><span class="tier-${tier}">${t.name}</span><span class="rv-pts tier-${tier}">+${fmt(t.pts)}</span>`;
-      $('rvLine').innerHTML = `<b>${esc(ent.name)}</b>: ${esc(t.blurb)}`;
+      $('rvLine').innerHTML = `<b>${esc(ent.name)}</b>: ${esc(t.blurb)}` + (typed ? `<br><span class="fixed">✏️ "${esc(typed)}" read as ${esc(ent.name)}</span>` : '');
     } else {
       badge.innerHTML = `<span class="rv-emoji">${Quiz.MISS.emoji}</span><span class="tier-x">${Quiz.MISS.name}</span><span class="rv-pts tier-x">+0</span>`;
       $('rvLine').textContent = 'Out of time on this one.';
@@ -571,7 +563,7 @@
   function howSheet() {
     sheet('How to play', `
       <p><b>Name something in the category.</b> Each prompt names one: "Name a dog breed." How rare your answer is decides how far you fly.
-      If it's a near miss on the spelling, the game asks you to confirm it first.</p>
+      Spelling doesn't have to be right: close spellings and ones that sound right count, and the game shows what it read your answer as.</p>
       <div class="how-tiers">${T.map((t, i) => `<span class="ht-e">${t.emoji}</span><span class="tier-${i}">${t.name} · ${fmt(t.pts)} (Endless ${CLASSIC_PTS[i]})</span><span>${esc(t.blurb)}</span>`).join('')}</div>
       <p><b>🌅 Daily Launch</b> (one difficulty): 10 prompts a day, the same for everyone, new at midnight. 25 seconds and one answer each:
       an answer that isn't on the list doesn't use up your shot, and the first real answer locks in. 50,000 points reaches the Edge of the Universe.
@@ -666,7 +658,6 @@
 
   // ---- Wiring ---------------------------------------------------------------------------------
   $('answerForm').addEventListener('submit', submit);
-  $('answer').addEventListener('input', () => { if (G.pending && $('answer').value.trim() !== G.pending.text) { G.pending = null; $('feedback').textContent = ''; } });
   $('rvNext').addEventListener('click', next);
   $('rvAll').addEventListener('click', () => { Sound.click(); answerBrowser(G.cat, G.picks.length && G.picks[G.picks.length - 1].name); });
   $('skipBtn').addEventListener('click', () => { if (G.state === 'question' && G.skips > 0) timeout(true); });

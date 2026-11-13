@@ -5,9 +5,9 @@
  *     <tier>|Shown name|alias|alias
  * Tiers: 0 Launch Pad, 1 Space Junk, 2 Orbiter, 3 Moonshot, 4 Deep Space, 5 Supernova (one per category).
  *
- * Matching is Brain Rocket's: accents and "the" ignored, plurals, filler words ("beagle dog"),
- * an answer inside a phrase, and small typos. A typo match is never taken silently: the game asks
- * the player to confirm it first.
+ * Matching starts from Brain Rocket's (accents and "the" ignored, plurals, filler words like
+ * "beagle dog", an answer inside a phrase) and is very forgiving about spelling: up to about a third
+ * of a long name can be wrong, and spellings that sound right count too (chiwawa, rotwiler, daschund).
  */
 'use strict';
 
@@ -91,35 +91,59 @@ const Quiz = (function () {
     return null;
   }
 
+  // A rough "sounds like" spelling, so misspellings by ear still match: ph/f, c/k/ck/q, s/z, x/ks,
+  // y/i, "hu" before a vowel as w (chihuahua ~ chiwawa), silent h, and doubled letters.
+  function sound(k) {
+    return k.replace(/ph/g, 'f').replace(/ck/g, 'k').replace(/c(?=[eiy])/g, 's').replace(/[cq]/g, 'k')
+      .replace(/x/g, 'ks').replace(/z/g, 's').replace(/y/g, 'i').replace(/hu(?=[aeio])/g, 'w').replace(/wh/g, 'w')
+      .replace(/(?!^)h/g, '').replace(/(.)\1+/g, '$1');
+  }
+  // How many letters can be wrong: lenient on purpose (about a third of a long name).
+  const allowance = n => (n < 4 ? 0 : n < 6 ? 1 : n < 9 ? 2 : n < 13 ? 3 : 4);
+
+  function fuzzy(c, text) {
+    const k = keyOf(text);
+    const max = allowance(k.length);
+    if (!max) return null;
+    if (!c.sounds) { c.sounds = new Map(); for (const h of c.index.values()) c.sounds.set(h, sound(h.v.key)); }
+    const sk = sound(k);
+    let best = null, bestD = 99;
+    for (const h of c.index.values()) {
+      const key = h.v.key;
+      if (key.length < 4 || Math.abs(key.length - k.length) > max + 1) continue;
+      const lim = Math.min(max, allowance(key.length) || 1);
+      let d = lev(k, key, lim);
+      const ds = lev(sk, c.sounds.get(h), lim);
+      if (ds < d) d = ds + 0.5;           // a sound-alike counts a little less than a real typo
+      // the closest wins; on a tie, the better-known answer (what people usually mean)
+      if (d <= lim && (d < bestD || (d === bestD && h.ent.tier < best.ent.tier))) { bestD = d; best = h; }
+    }
+    return best && { h: best, d: bestD };
+  }
+
   /* -> { ent, v, fuzzy } or null */
   function find(c, input) {
     c = built(c);
     const n = norm(input);
     if (!n) return null;
-    let hit = exact(c, n);
-    if (hit) return { ...hit, fuzzy: false };
+    // the answer as typed, and without the filler words players add ("beagle dog")
+    const tries = [n];
     if (c.strip.length) {
       const words = n.split(' ').filter(w => !c.strip.includes(w));
-      if (words.length) { hit = exact(c, words.join(' ')); if (hit) return { ...hit, fuzzy: false }; }
+      if (words.length && words.length < n.split(' ').length) tries.push(words.join(' '));
     }
+    for (const t of tries) { const hit = exact(c, t); if (hit) return { ...hit, fuzzy: false }; }
+    // an answer said inside a longer phrase: "a big golden retriever"
     const padded = ` ${n} `;
     let best = null;
     for (const h of c.index.values()) {
       if (h.v.key.length >= 4 && padded.includes(` ${h.v.norm} `) && (!best || h.v.norm.length > best.v.norm.length)) best = h;
     }
     if (best) return { ...best, fuzzy: false };
-    const k = keyOf(n);
-    if (k.length >= 5) {
-      const max = k.length >= 9 ? 2 : 1;
-      let bestD = max + 1;
-      for (const h of c.index.values()) {
-        if (Math.abs(h.v.key.length - k.length) > max) continue;
-        const d = lev(k, h.v.key, max);
-        if (d < bestD) { bestD = d; best = h; }
-      }
-      if (best) return { ...best, fuzzy: true };
-    }
-    return null;
+    // the closest typo match over both versions ("beagel dog" is one letter off "beagle")
+    let pick = null;
+    for (const t of tries) { const f = fuzzy(c, t); if (f && (!pick || f.d < pick.d)) pick = f; }
+    return pick ? { ...pick.h, fuzzy: true } : null;
   }
 
   /* Every answer for the reveal list, rarest first, with the names the player could have typed. */
