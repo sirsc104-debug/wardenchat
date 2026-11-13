@@ -18,6 +18,95 @@ const KCBot = (() => {
     luc: { react: [1.4, 2.5], sloppy: 0.28, attackAt: 9.3, idle: 0.2, fireballValue: 6.5, defend: 0.62, gap: [1.7, 2.9] },
     normal: { react: [0.7, 1.4], sloppy: 0.15, attackAt: 8, idle: 0.1, fireballValue: 5, defend: 1 },
   };
+
+  /* ---------- play styles ----------
+     Trophy opponents each have a style: a way of building a deck (its core cards, by preference) and
+     habits in battle. attack: change to the energy it waits for before starting a push; probe: chance to
+     open with a cheap card early; chip: casts spare spells at towers; counter: how often it backs up
+     defenders that survive into a counter-push; switch: how often it changes lanes between attacks;
+     back: starts pushes from behind its King Tower. Every deck then gets the same rules: one or two win
+     conditions, two or three spells, at least three cards that hit air but no more than three flyers,
+     a cheap card, and an average cost between 2.9 and 4.4. */
+  const STYLES = {
+    beatdown: { name: 'Heavy pusher', attack: 0.8, probe: 0, chip: 0, counter: 0.7, switch: 0.15, back: true,
+      win: ['titan', 'rhino', 'thundercloud', 'icegiant', 'smelter', 'camel'],
+      core: ['wintersage', 'drake', 'snowman', 'arccannon', 'guardian', 'pots', 'owl', 'archers', 'phoenix', 'flail', 'sunsprite', 'overclock'] },
+    rush: { name: 'Bridge rusher', attack: -2.2, probe: 0.7, chip: 0.2, counter: 0.6, switch: 0.45,
+      win: ['ramcart', 'camel', 'barrel', 'mole', 'harpoon', 'icegiant'],
+      core: ['wolves', 'bees', 'dockraiders', 'gladiator', 'hawks', 'frostsprite', 'skeletons', 'shardguards', 'powderkeg', 'thornroller', 'bramblenest', 'sparkbots'] },
+    cycle: { name: 'Spell cycler', attack: -1, probe: 0.6, chip: 0.6, counter: 0.5, switch: 0.35,
+      win: ['ramcart', 'mole', 'drill', 'barrel', 'camel'],
+      core: ['gladiator', 'archers', 'wintersage', 'skeletons', 'cannon', 'frostsprite', 'snowman', 'gorilla', 'thornroller', 'gemflash', 'glacierslam', 'soulblight'] },
+    control: { name: 'Counter-puncher', attack: 1.8, probe: 0, chip: 0.3, counter: 0.95, switch: 0.3,
+      win: ['harpoon', 'camel', 'ramcart', 'dreadknight', 'thundercloud'],
+      core: ['gorilla', 'griffin', 'conductor', 'coil', 'flail', 'guardian', 'wintersage', 'prism', 'archers', 'cage', 'heavensguard', 'briarbind'] },
+    air: { name: 'Sky raider', attack: 0.2, probe: 0.3, chip: 0.2, counter: 0.6, switch: 0.3,
+      win: ['thundercloud', 'phoenix', 'griffin'],
+      core: ['owl', 'hawks', 'bees', 'drake', 'gladiator', 'wolves', 'skeletons', 'archers', 'sunsprite', 'frostsprite', 'flail', 'overclock'] },
+    spawner: { name: 'Spawner', attack: 0.6, probe: 0.4, chip: 0.25, counter: 0.6, switch: 0.25, back: true,
+      win: ['smelter', 'abyss', 'rhino', 'thundercloud', 'barracks'],
+      core: ['bramblenest', 'scarabshrine', 'barracks', 'wraiths', 'footmen', 'dockraiders', 'archers', 'bees', 'pots', 'snowman', 'soulblight', 'prismecho'] },
+  };
+  const STYLE_IDS = Object.keys(STYLES);
+  // What a card is, for building decks: a win condition, a spell, something that hits air, cheap, splash.
+  const WIN_CARDS = new Set(['rhino', 'ramcart', 'camel', 'thundercloud', 'titan', 'icegiant', 'smelter', 'mole', 'barrel', 'drill', 'abyss', 'ballista', 'dunemortar', 'harpoon', 'phoenix', 'griffin', 'dreadknight', 'barracks']);
+  const hitsAir = id => { const c = KC_CARDS[id]; return c.kind !== 'spell' && (c.targets === 'both' || c.air) && c.dmg > 0 && !c.hidden; };
+  const isSpell = id => KC_CARDS[id].kind === 'spell' && !KC_CARDS[id].mirror;
+  const damaging = id => isSpell(id) && KC_CARDS[id].dmg > 0;
+  const SPELL_PREF = ['fireball', 'spears', 'thornroller', 'glacierslam', 'gemflash', 'sandstorm', 'magmaquake', 'ashfall', 'judgment', 'meteor', 'flashfreeze', 'soulblight', 'cyclone', 'collapse', 'powderkeg', 'heavensguard'];
+  const AIR_PREF = ['archers', 'hawks', 'owl', 'snowman', 'drake', 'bees', 'wintersage', 'prism', 'sparkbots', 'coil', 'conductor', 'griffin', 'phoenix', 'dockraiders', 'bramblenest', 'frostsprite'];
+  // Build a deck of 8 for a style from the cards this opponent has (`pool`); rand makes each different.
+  function buildDeck(styleId, pool, rand) {
+    const st = STYLES[styleId] || STYLES.beatdown, have = new Set(pool), deck = [];
+    // the list in roughly its order of preference, shuffled a little (more with a bigger spread)
+    const shuffleNear = (list, spread = 3) => list.filter(id => have.has(id)).map((id, i) => [id, i + rand() * spread]).sort((a, b) => a[1] - b[1]).map(x => x[0]);
+    const add = id => { if (id && have.has(id) && !deck.includes(id) && deck.length < 8) deck.push(id); };
+    // one win condition, sometimes two
+    const wins = shuffleNear(st.win);
+    add(wins[0] || shuffleNear([...WIN_CARDS])[0] || 'rhino');
+    if (wins[1] && rand() < 0.35 && !(styleId === 'siege' && deck.includes('ballista') && wins[1] === 'dunemortar')) add(wins[1]);
+    // two spells (three for the cycler), the first a damage spell
+    const spells = shuffleNear(SPELL_PREF, 9).filter(id => !deck.includes(id));
+    const nSp = styleId === 'cycle' ? 3 : rand() < 0.25 ? 3 : 2;
+    const dmgFirst = spells.filter(id => damaging(id) && !KC_CARDS[id].ownSide);
+    add(dmgFirst[0] || 'fireball');
+    for (const id of spells) { if (deck.filter(isSpell).length >= nSp) break; add(id); }
+    const flyers = () => deck.filter(id => KC_CARDS[id].air).length;
+    const okFly = id => !KC_CARDS[id].air || flyers() < 3;
+    // the style's core
+    for (const id of shuffleNear(st.core)) { if (deck.length >= 7) break; if ((!isSpell(id) || deck.filter(isSpell).length < 3) && okFly(id)) add(id); }
+    // at least three that hit air
+    for (const id of shuffleNear(AIR_PREF)) {
+      if (deck.filter(hitsAir).length >= 3) break;
+      if (deck.includes(id) || !okFly(id)) continue;
+      if (deck.length >= 8) { const out = deck.findIndex(x => !hitsAir(x) && !isSpell(x) && !WIN_CARDS.has(x)); if (out < 0) break; deck.splice(out, 1); }
+      add(id);
+    }
+    // a cheap card
+    if (!deck.some(id => KC_CARDS[id].cost <= 2)) {
+      const cheap = shuffleNear(['skeletons', 'wolves', 'bees', 'frostsprite', 'sunsprite', 'gemflash', 'thornroller', 'glacierslam', 'icegiant', 'pots', 'powderkeg']);
+      if (cheap[0]) { if (deck.length >= 8) deck.splice(deck.findIndex(x => !isSpell(x) && !WIN_CARDS.has(x) && !(hitsAir(x) && deck.filter(hitsAir).length <= 3)), 1); add(cheap[0]); }
+    }
+    // fill up from the pool by how well it fits
+    for (const id of shuffleNear(st.core.concat(AIR_PREF, KC_STARTER_DECK, pool))) { if (deck.length >= 8) break; if ((!isSpell(id) || deck.filter(isSpell).length < 3) && okFly(id)) add(id); }
+    for (const id of KC_STARTER_DECK) add(id);
+    // keep the average cost sensible: swap the dearest support card for a cheaper one
+    const avg = () => deck.reduce((a, id) => a + KC_CARDS[id].cost, 0) / deck.length;
+    for (let i = 0; i < 4 && avg() > 4.4; i++) {
+      const dear = deck.filter(id => !WIN_CARDS.has(id) && !isSpell(id)).sort((a, b) => KC_CARDS[b].cost - KC_CARDS[a].cost)[0];
+      const cheaper = dear && shuffleNear(st.core.concat(AIR_PREF, KC_STARTER_DECK)).find(id => !deck.includes(id) && !isSpell(id) && KC_CARDS[id].cost < KC_CARDS[dear].cost - 1 && (!hitsAir(dear) || hitsAir(id) || deck.filter(hitsAir).length > 3) && (!KC_CARDS[id].air || KC_CARDS[dear].air || flyers() < 3));
+      if (!cheaper) break;
+      deck[deck.indexOf(dear)] = cheaper;
+    }
+    // and not too cheap: swap the cheapest support card for a dearer one
+    for (let i = 0; i < 4 && avg() < 2.9; i++) {
+      const low = deck.filter(id => !WIN_CARDS.has(id) && !isSpell(id) && KC_CARDS[id].cost <= 2).sort((a, b) => KC_CARDS[a].cost - KC_CARDS[b].cost)[1];
+      const dearer = low && shuffleNear(st.core.concat(AIR_PREF, KC_STARTER_DECK)).find(id => !deck.includes(id) && !isSpell(id) && KC_CARDS[id].cost >= 3 && KC_CARDS[id].cost <= 4 && (!hitsAir(low) || hitsAir(id) || deck.filter(hitsAir).length > 3) && (!KC_CARDS[id].air || flyers() < 3));
+      if (!dearer) break;
+      deck[deck.indexOf(low)] = dearer;
+    }
+    return deck.slice(0, 8);
+  }
   const ROLE = {
     tank: ['conductor', 'griffin', 'wraiths', 'cage', 'harpoon', 'coil', 'cannon', 'scarabshrine', 'dreadknight', 'footmen', 'gorilla', 'shardguards', 'dockraiders', 'bees', 'skeletons', 'wolves', 'prism', 'broadside', 'sparkbots',
       'gladiator', 'guardian', 'flail', 'archers', 'hawks', 'frostsprite', 'bramblenest', 'magmaturret'],
@@ -55,7 +144,8 @@ const KCBot = (() => {
     const skill = typeof opts.skill === 'object' ? opts.skill : SKILLS[opts.skill || 'trainer'];
     const rand = S.mulberry(opts.seed || 99);
     // the lane it favours when both towers are even (chosen per match, so it isn't always the left)
-    return { team, skill, rand, plan: null, wait: 2.5, lastAttack: 0, lastPlay: null, lane: rand() < 0.5 ? 'L' : 'R' };
+    return { team, skill, rand, plan: null, wait: 2.5, lastAttack: 0, lastPlay: null, lane: rand() < 0.5 ? 'L' : 'R',
+      style: STYLES[opts.style] || null, styleId: STYLES[opts.style] ? opts.style : null, probed: false, lastLane: null };
   }
 
   const my = (b, y) => S.own(b.team, y);
@@ -109,6 +199,33 @@ const KCBot = (() => {
     const afford = id => S.costOf(s, me, id) <= E + 0.5;
     const lvlOf = id => KCSim.levelMult(s.cardLevels[me] && s.cardLevels[me][id] || s.levels[me] || 1);
 
+    const st = b.style || {}, enemy = 1 - me;
+    const enemyTowers = s.ents.filter(e => e.kind === 'tower' && e.team === enemy && !e.dead);
+    // the state of the match: behind on crowns late on, or in overtime / sudden death with a weaker tower
+    const late = s.phase === 'overtime' || s.phase === 'sudden' || (s.double && s.timeLeft < 45);
+    const behind = s.crowns[me] < s.crowns[enemy] || ((s.phase === 'overtime' || s.phase === 'sudden') && S.lowestTower(s, me) < S.lowestTower(s, enemy));
+    // what a spell does to a tower straight away (zones and storms work over time, so count a third of it)
+    const towerHit = id => { const c = KC_CARDS[id]; return c.dmg * (c.towerPct || 0) * lvlOf(id) * (s.towerDamage ? s.towerDamage[me] : 1) * (id === 'collapse' ? 3 : 1) * (c.zone || c.storm ? 0.33 : 1); };
+    // 0. Any damage spell that would bring down a tower now; in overtime, chip the weakest tower
+    for (const id of hand) {
+      if (!damaging(id) || !afford(id) || KC_CARDS[id].ownSide || !(KC_CARDS[id].towerPct > 0) || KC_CARDS[id].zone || KC_CARDS[id].storm) continue;
+      const td = towerHit(id), low = enemyTowers.filter(t => t.hp <= td).sort((a, c) => a.hp - c.hp)[0];
+      if (low) return { card: id, x: low.x, y: my(b, low.y), exact: true, quick: true };
+    }
+    if (late && behind && E >= 6) {
+      const weakest = enemyTowers.slice().sort((a, c) => a.hp / a.maxHp - c.hp / c.maxHp)[0];
+      const sp = hand.filter(id => damaging(id) && afford(id) && !KC_CARDS[id].ownSide && KC_CARDS[id].towerPct > 0).sort((a, c) => towerHit(c) - towerHit(a))[0];
+      if (weakest && sp && b.rand() < 0.6) return { card: sp, x: weakest.x, y: my(b, weakest.y), exact: true, quick: true };
+    }
+    // an enemy siege building (Dune Mortar, Golden Ballista) is a threat to deal with before it sets up
+    const siege = s.ents.find(e => e.kind === 'building' && e.team === enemy && !e.dead && KC_CARDS[e.card].siege);
+    if (siege) {
+      const sy = my(b, siege.y);
+      const sp = hand.find(id => damaging(id) && afford(id) && !KC_CARDS[id].ownSide && KC_CARDS[id].dmg * lvlOf(id) * (KC_CARDS[id].zone ? (KC_CARDS[id].zone.bldMult || 1) : 1) >= siege.hp * 0.45);
+      if (sp) return { card: sp, x: siege.x, y: sy, exact: true, quick: true };
+      const tr = hand.find(id => afford(id) && KC_CARDS[id].kind === 'troop' && KC_CARDS[id].dmg > 0 && !KC_CARDS[id].air && KC_CARDS[id].cost <= 4);
+      if (tr && sy > 13) return { card: tr, x: siege.x, y: Math.max(17.5, sy + 1), quick: true };
+    }
     // 1. A spell on a big clump, or on troops hitting a tower. Fireball counts everything it hits;
     //    Spears only counts what it would finish off (swarms, flyers, ranged troops).
     for (const [spell, extra, finishOnly] of SPELLS) {
@@ -226,12 +343,39 @@ const KCBot = (() => {
     if (has('foundry') && afford('foundry') && !foes.some(f => f.y > 13) && E >= 7) return { card: 'foundry', x: b.rand() < 0.5 ? 3.5 : 14.5, y: 28.5 };
     // cheap spawners and traps while it is quiet, to have something ready
     if (!foes.some(f => f.y > 14) && E >= 8) for (const id of ['scarabshrine', 'bramblenest']) if (has(id) && afford(id)) return { card: id, x: b.rand() < 0.5 ? 7.5 : 10.5, y: 24.5 };
-    // 4. Start a push once energy is high enough (a trainer sometimes just waits).
-    if (E >= K.attackAt || (E >= 9.9 && b.rand() > K.idle)) {
+    // an early probe: a cheap card to see what comes back (some styles)
+    if (st.probe && !b.probed && s.time > 3 && s.time < 14 && E >= 5) {
+      b.probed = true;
+      if (b.rand() < st.probe) {
+        const cheap = hand.filter(id => afford(id) && KC_CARDS[id].kind === 'troop' && KC_CARDS[id].cost <= 3 && !NO_DEFEND[id]).sort((a, c) => KC_CARDS[a].cost - KC_CARDS[c].cost)[0];
+        if (cheap) { const lx = b.lane === 'L' ? 3.5 : 14.5; return { card: cheap, x: lx, y: b.styleId === 'rush' ? 18.5 : 26.5, attack: true }; }
+      }
+    }
+    // the spell cycler (and others now and then) chips towers with a spare cheap spell at full energy
+    if (st.chip && E >= 9.2 && b.rand() < st.chip * 0.25) {
+      const weakest = enemyTowers.slice().sort((a, c) => a.hp / a.maxHp - c.hp / c.maxHp)[0];
+      const sp = hand.filter(id => damaging(id) && afford(id) && !KC_CARDS[id].ownSide && KC_CARDS[id].towerPct > 0 && KC_CARDS[id].cost <= 4)[0];
+      if (weakest && sp) return { card: sp, x: weakest.x, y: my(b, weakest.y), exact: true };
+    }
+    // counter-push: defenders that survived are crossing the river; back them up
+    if (st.counter && E >= 4 && s.time - b.lastAttack > 2.5) {
+      const crossing = mine.filter(m => m.y < 18.5 && m.y > 10 && !m.e.clone);
+      const cv = crossing.reduce((a, m) => a + m.v, 0);
+      if (cv >= 2.5 && b.rand() < st.counter * 0.35) {
+        const lead = crossing.reduce((a, m) => (m.y < a.y ? m : a), crossing[0]);
+        const pick = ['wintersage', 'snowman', 'drake', 'owl', 'pots', 'prism', 'archers', 'hawks', 'sparkbots', 'griffin', 'phoenix', 'guardian', 'bees', 'flail', 'gladiator', 'wolves', 'dockraiders', 'footmen', 'gorilla']
+          .find(id => has(id) && afford(id));
+        if (pick) return { card: pick, x: lead.x, y: Math.max(17.5, lead.y + 2.5), attack: true };
+      }
+    }
+    // 4. Start a push once energy is high enough (a trainer sometimes just waits); by style, and sooner
+    //    when behind late in the match
+    const attackAt = late && behind ? Math.min(K.attackAt, 6.5) : Math.max(5, Math.min(10, K.attackAt + (st.attack || 0)));
+    if (E >= attackAt || (E >= 9.9 && b.rand() > K.idle)) {
       const enemy = 1 - me;
       // the weaker tower; when both are even, the lane this bot favours this match (and now and then the
       // other one, so the attack isn't always where it was last time)
-      const pref = b.rand() < 0.25 ? (b.lane === 'L' ? 'R' : 'L') : b.lane;
+      const pref = b.rand() < (st.switch !== undefined ? st.switch : 0.25) ? (b.lane === 'L' ? 'R' : 'L') : b.lane;
       const weak = ['L', 'R'].map(l => S.tower(s, enemy, l)).filter(t => !t.dead)
         .sort((a, c) => (a.hp / a.maxHp - c.hp / c.maxHp) || (a.lane === pref ? -1 : 1))[0];
       const lx = weak ? weak.x : (b.rand() < 0.5 ? 3.5 : 14.5);
@@ -252,7 +396,7 @@ const KCBot = (() => {
       if (has('smelter') && afford('smelter')) return { card: 'smelter', x: lx, y: 22.5, attack: true };
       // the Steel Titan walks from behind the King Tower; the Icebound Giant leads at the bridge
       if (has('titan') && afford('titan')) return { card: 'titan', x: lx < 9 ? 6.5 : 11.5, y: 30.5, attack: true };
-      if (has('rhino') && afford('rhino')) return { card: 'rhino', x: lx < 9 ? 5.5 : 12.5, y: 30.5, attack: true };
+      if (has('rhino') && afford('rhino')) return { card: 'rhino', x: lx < 9 ? 5.5 : 12.5, y: st.back || b.rand() < 0.6 ? 30.5 : 19.5, attack: true };
       if (has('icegiant') && afford('icegiant')) return { card: 'icegiant', x: lx, y: 18.5, attack: true };
       // a Camel Jockey from the back, a Ram Cart right at the bridge for a fast hit
       if (has('camel') && afford('camel')) return { card: 'camel', x: lx < 9 ? 4.5 : 13.5, y: 29.5, attack: true };
@@ -269,5 +413,5 @@ const KCBot = (() => {
     return null;
   }
 
-  return { create, update };
+  return { create, update, STYLES, STYLE_IDS, buildDeck, hitsAir, WIN_CARDS };
 })();

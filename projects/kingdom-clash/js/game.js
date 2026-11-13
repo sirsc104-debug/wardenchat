@@ -56,12 +56,12 @@
       levels: [KCProgress.kingInfo().level, trophy ? T.kingLevel || 1 : 1],
     });
     G.sim = G.s;
-    G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9) });
-    // a trophy battle left before it ends (reload, closed tab) counts as a loss next time the game loads
-    KCProgress.battleStarted(T);
+    G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9), style: T.style });
     const where = trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
-      ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
+      ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
+      ['#introFoeClan', T.clan || ''], ['#introYouTier', trophy ? `${KCProgress.state.trophies} trophies` : 'Training']]) $(sel).textContent = text;
+    introYou();
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {},
       falls: {}, slowmo: 0, flash: 0, fireworks: 0 });
@@ -70,15 +70,27 @@
     $('#leaveBtn').hidden = false; $('#leaveBtn').classList.remove('ask');
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
     KCScenery.reset();
-    KCEmotes.reset();
+    KCEmotes.reset(T.mood);
     show('battle');
     layout();
-    G.phase = 'intro'; G.intro = 1.7;
+    // a trophy battle first looks for an opponent for a moment
+    G.phase = 'intro'; G.intro = trophy ? 2.7 : 1.7; G.finding = trophy;
+    $('#intro').classList.toggle('finding', trophy);
     $('#intro').hidden = false;
+  }
+  // your side of the VS screen: your King, in blue
+  function introYou() {
+    const el = $('#introYouPic');
+    if (el) el.innerHTML = KCEmotes.face('thumbs', 0);
   }
   function begin() {
     $('#intro').hidden = true;
     G.phase = 'play';
+    // a trophy battle left before it ends (reload, closed tab) counts as a loss next time the game loads
+    if (!G.online) {
+      KCProgress.battleStarted(G.trainer);
+      if (G.trainer.kind === 'trophy') KCEmotes.foeGreet();
+    }
     banner('FIGHT!');
     KCSound.play('fight');
     setTimeout(() => speak('start'), 900);
@@ -530,7 +542,7 @@
     puff(e.x, e.y, 16, '#cfc8dc', 1.6);
     if (e.team === 1) {
       setTimeout(() => KCSound.play('crown'), 250);
-      if (e.sub !== 'king') speak('youTower');
+      if (e.sub !== 'king') { speak('youTower'); if (!G.online && G.trainer.kind === 'trophy') KCEmotes.foeLostTower(); }
     } else {
       if (e.sub !== 'king') { speak('myTower'); if (!G.online) KCEmotes.foeTookTower(); }
     }
@@ -657,9 +669,15 @@
     O.unsub.push(m.room.on('mp.bye', msg => { if (msg.peer === O.peer) O.bye = true; }));
     O.unsub.push(m.room.onPeers(ch => { if ((ch.left || []).some(p => p.peer === O.peer)) O.leftAt = O.leftAt || performance.now(); if ((ch.joined || []).some(p => p.peer === O.peer)) O.leftAt = 0; }));
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', `Online · ${T.tier}`], ['#scoreFoe', T.name], ['#introFoeName', T.name],
-      ['#introFoeTier', `Online battle · King Tower ${foe.king}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
+      ['#introFoeTier', `Online battle · King Tower ${foe.king}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
+      ['#introFoeClan', ''], ['#introYouTier', `${KCProgress.state.trophies} trophies`]]) $(sel).textContent = text;
+    introYou();
     A.trainer($('#introFoe'), T.look);
-    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {} });
+    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {},
+      views: {}, falls: {}, slowmo: 0, flash: 0, fireworks: 0, finding: false });
+    for (const el of document.querySelectorAll('.fly-crown')) el.remove();
+    $('#intro').classList.remove('finding');
+    $('#leaveBtn').hidden = false; $('#leaveBtn').classList.remove('ask');
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true; $('#simWinBtn').hidden = true; $('#netWait').hidden = true;
     KCScenery.reset();
     KCEmotes.reset();
@@ -776,7 +794,7 @@
     G.res = G.online ? { kind: 'online' } : KCMenu.recordResult(G.trainer, e.winner, G.s.crowns[0]);
     if (G.online) endOnline();
     $('#countdown').hidden = true;
-    if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); }
+    if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); if (!G.online && G.trainer.kind === 'trophy') KCEmotes.foeLost(); }
     else if (e.winner === 1) { banner('Defeat'); setTimeout(() => KCSound.play('lose'), 300); if (!G.online) KCEmotes.foeWon(); }
     else banner('Draw');
   }
@@ -1794,6 +1812,7 @@
     KCScenery.frame(now);
     if (G.phase === 'intro') {
       G.intro -= dt;
+      if (G.finding && G.intro <= 1.7) { G.finding = false; $('#intro').classList.remove('finding'); KCSound.play('select'); }
       if (G.intro <= 0) begin();
     } else if (G.phase === 'play' && G.online) {
       onlineTick(dt, now);

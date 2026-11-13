@@ -24,6 +24,14 @@ const KCEmotes = (() => {
     luck: ['luck', 'thanks'], nice: ['thanks', 'thumbs'], whoa: ['cheeky', 'thanks'], thanks: ['thumbs', 'nice'], gg: ['gg', 'thumbs'], oops: ['laugh', 'cheeky'],
   };
   const CHANCE = { reply: 0.35, tower: 0.4, win: 0.4 };
+  // An opponent's temperament changes how often it emotes, and what it sends. greet: says hello at the
+  // start; reply, tower (took one of yours), win: as CHANCE; hurt: lost a tower; lost: lost the match.
+  const MOODS = {
+    sporty: { greet: 0.3, reply: 0.35, tower: 0.4, win: 0.4, hurt: 0.25, lost: 0.5 },
+    friendly: { greet: 0.7, reply: 0.55, tower: 0.25, win: 0.5, hurt: 0.4, lost: 0.7 },
+    cocky: { greet: 0.2, reply: 0.5, tower: 0.75, win: 0.8, hurt: 0.35, lost: 0.1 },
+    quiet: { greet: 0, reply: 0.1, tower: 0.1, win: 0.15, hurt: 0.05, lost: 0.3 },
+  };
   const pick = a => a[Math.floor(Math.random() * a.length)];
 
   /* ---------- the King's faces, in SVG ---------- */
@@ -250,8 +258,9 @@ const KCEmotes = (() => {
     if (open) { renderFaces(); restLook(); }
   }
   // a new battle: clear everything
-  function reset() {
+  function reset(mood) {
     S.token++; S.sent = []; S.restUntil = 0; S.lastReply = 0; S.muted = false; S.page = 0;
+    S.mood = MOODS[mood] ? mood : 'sporty';
     // the opponent has a few of the Shop's emotes too
     S.foeExtra = SHOP_FACES.slice().sort(() => Math.random() - 0.5).slice(0, 4);
     for (const t of S.timers) clearTimeout(t); S.timers = [];
@@ -306,16 +315,42 @@ const KCEmotes = (() => {
   function maybeReply(id) {
     const now = Date.now();
     if (now - S.lastReply < 3000 || !opts.foeCanEmote()) return;
-    const chance = id === 'gg' && opts.ended() ? 0.6 : CHANCE.reply;
+    const M = MOODS[S.mood] || MOODS.sporty;
+    const chance = id === 'gg' && opts.ended() ? Math.max(0.3, M.lost) : M.reply;
     if (Math.random() >= chance) return;
     S.lastReply = now;
     foeSoon(pick(REPLY[id] || ['laugh', 'thumbs', 'cheeky', 'wow'].concat(foeHas(['cool', 'smug', 'kiss', 'wave']))), 900, 2200);
   }
   const foeHas = ids => ids.filter(id => (S.foeExtra || []).includes(id));
+  const M = () => MOODS[S.mood] || MOODS.sporty;
+  // The battle starts.
+  function foeGreet() {
+    if (Math.random() >= M().greet) return;
+    foeSoon(S.mood === 'cocky' ? pick(['cheeky', 'think'].concat(foeHas(['smug', 'cool']))) : pick(['luck', 'luck', 'wave', 'thumbs'].filter(id => id !== 'wave' || foeHas(['wave']).length)), 600, 1800);
+  }
   // The opponent just took one of your towers.
-  function foeTookTower() { if (Math.random() < CHANCE.tower) foeSoon(pick(['laugh', 'cheeky', 'thumbs', 'wow'].concat(foeHas(['party', 'cool', 'smug', 'popcorn', 'dizzy']))), 700, 1500); }
+  function foeTookTower() {
+    if (Math.random() >= M().tower) return;
+    const list = S.mood === 'friendly' ? ['thumbs', 'oops', 'wow'] : S.mood === 'cocky' ? ['laugh', 'cheeky', 'laugh'].concat(foeHas(['smug', 'popcorn', 'party'])) : ['laugh', 'cheeky', 'thumbs', 'wow'].concat(foeHas(['party', 'cool', 'smug', 'popcorn', 'dizzy']));
+    foeSoon(pick(list), 700, 1500);
+  }
+  // You just took one of theirs.
+  function foeLostTower() {
+    if (Math.random() >= M().hurt) return;
+    const list = S.mood === 'friendly' ? ['nice', 'whoa', 'wow'] : S.mood === 'cocky' ? ['angry', 'oops', 'think'] : ['cry', 'whoa', 'angry', 'nice'];
+    foeSoon(pick(list.filter(id => isFace(id) || PHRASES[id])), 800, 1700);
+  }
   // The opponent won.
-  function foeWon() { if (Math.random() < CHANCE.win) foeSoon(pick(['laugh', 'thumbs', 'gg', 'cheeky'].concat(foeHas(['trophy', 'party', 'salute', 'clap', 'smug']))), 350, 900); }
+  function foeWon() {
+    if (Math.random() >= M().win) return;
+    const list = S.mood === 'cocky' ? ['laugh', 'cheeky'].concat(foeHas(['trophy', 'smug', 'party'])) : S.mood === 'friendly' ? ['gg', 'gg', 'thanks', 'thumbs'] : ['laugh', 'thumbs', 'gg', 'cheeky'].concat(foeHas(['trophy', 'party', 'salute', 'clap', 'smug']));
+    foeSoon(pick(list), 350, 900);
+  }
+  // The opponent lost.
+  function foeLost() {
+    if (Math.random() >= M().lost) return;
+    foeSoon(S.mood === 'cocky' ? pick(['angry', 'cry']) : pick(['gg', 'gg', 'nice', 'cry'].concat(foeHas(['clap', 'salute']))), 600, 1400);
+  }
 
-  return { mount, reset, send, toggle, foeTookTower, foeWon, face, FACES, SHOP_FACES, LABEL, PHRASES, CHANCE, get muted() { return S.muted; } };
+  return { mount, reset, send, toggle, foeGreet, foeTookTower, foeLostTower, foeWon, foeLost, MOODS, face, FACES, SHOP_FACES, LABEL, PHRASES, CHANCE, get muted() { return S.muted; } };
 })();

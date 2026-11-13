@@ -301,6 +301,29 @@ const KCProgress = (() => {
   // Trophy opponents look like any other player. They don't talk (no speech bubbles or result lines).
   const FOE_NAMES = ['EmberFox', 'Kestrel', 'MossKnight', 'Juno77', 'BrickTop', 'Lumen', 'NovaRae', 'Quillon', 'RowanK', 'Tidebreaker',
     'Sable', 'PixelPike', 'Hollis', 'Marigold', 'Vexa', 'Orrin22', 'CrimsonOwl', 'Tamsin', 'Bramble', 'Ashgrove', 'Kaito', 'Wren', 'Delphine', 'Grit'];
+  // more names, built from parts: a word and sometimes a number or a second word
+  const FOE_A = ['Iron', 'Ember', 'Frost', 'Storm', 'Moss', 'Quick', 'Night', 'Sun', 'Brave', 'Copper', 'Silver', 'Thorn', 'Wild', 'Red', 'Blue',
+    'Lucky', 'Stone', 'Tide', 'Ash', 'Wolf', 'Owl', 'Fox', 'Bear', 'Pine', 'Cloud', 'Rune', 'Gale', 'Dusk', 'Dawn', 'Ivy'];
+  const FOE_B = ['heart', 'fang', 'blade', 'wing', 'rider', 'smith', 'shield', 'spark', 'claw', 'paw', 'crest', 'song', 'mane', 'brook', 'bolt', 'jaw'];
+  const CLANS = ['Lantern Guild', 'Ironbark', 'Saltwind', 'Ember Court', 'The Moss Ring', 'Copper Crows', 'Hollow Oaks', 'Gale Riders', 'Night Owls',
+    'Sunforge', 'Tidewatch', 'Stonebridge', 'Frostmarch', 'Rook & Rune', 'Brightmoor', 'Thornfield', 'Duskhaven', 'Wolfpine', 'Cloudkeep', 'Ashvale'];
+  function foeName(rand) {
+    const r = rand();
+    if (r < 0.35) return FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
+    const a = FOE_A[Math.floor(rand() * FOE_A.length)], b = FOE_B[Math.floor(rand() * FOE_B.length)];
+    if (a.slice(-1) === b[0]) return a + b.replace(/^./, c => c.toUpperCase());
+    return r < 0.7 ? a + b : r < 0.85 ? a + b + (10 + Math.floor(rand() * 90)) : a + '_' + FOE_B[Math.floor(rand() * FOE_B.length)].replace(/^./, c => c.toUpperCase());
+  }
+  // how chatty an opponent is with emotes
+  const MOODS = [['sporty', 4], ['friendly', 3], ['cocky', 2], ['quiet', 3]];
+  // the cards an opponent with t trophies could have: what the Trophy Road has given by then, plus now and
+  // then a card of their arena a little early (chests give those before the road does)
+  function foePool(t, rand) {
+    const pool = new Set(KC_STARTER_DECK);
+    for (const m of ROAD) if (m.kind === 'card' && KC_CARDS[m.card] && (m.at <= t || (m.at <= t + 160 && rand() < 0.35))) pool.add(m.card);
+    if (t >= 7000) for (const a of ARENAS) for (const id of a.cards) if (KC_CARDS[id]) pool.add(id);
+    return [...pool];
+  }
   const FOE_BG = [['#ffcf6b', '#ea8b2b'], ['#c99bff', '#7440cf'], ['#9fc0e0', '#3c5d8c'], ['#9fe6b8', '#2c8a5a'], ['#ffa3b5', '#c03a5a'], ['#a8e4ff', '#2f7cb8']];
   const FOE_SKIN = ['#f2c4a0', '#d9a27a', '#b87a52', '#8a5636', '#efc19c'];
   const FOE_HAIR = ['#2a1d18', '#6b4426', '#c58a3c', '#1e1e26', '#9a3b2a', '#c9ccd6'];
@@ -476,55 +499,21 @@ const KCProgress = (() => {
       react: [lerp(2.2, 0.6, d), lerp(3.6, 1.2, d)], sloppy: lerp(0.5, 0.12, d), attackAt: lerp(9.8, 8, d), idle: lerp(0.45, 0.08, d),
       fireballValue: lerp(8, 5, d), defend: lerp(0.4, 1, d), gap: [lerp(2.6, 0.5, d), lerp(4.2, 1.1, d)],
     };
-    const deck = KC_STARTER_DECK.slice();
-    const swap = (id, p) => {
-      if (rand() > p) return;
-      const i = 1 + Math.floor(rand() * 6); // keep the Rhino (0) and Fireball (7)
-      if (!deck.includes(id)) deck[i] = id;
-    };
-    if (t >= 40) swap('skeletons', 0.6);
-    if (t >= 120) swap('cannon', 0.6);
-    if (t >= 140) swap('magmaquake', 0.35);
-    if (t >= 180) swap('magmaturret', 0.4);
-    if (t >= 230) swap('ashfall', 0.35);
-    // Briar Hollow cards, as they unlock on the road
-    if (t >= 330) swap('spears', 0.5);
-    if (t >= 400) swap('pots', 0.5);
-    if (t >= 480) swap('footmen', 0.5);
-    if (t >= 560) swap('flail', 0.5);
-    if (t >= 420) swap('bramblenest', 0.35);
-    if (t >= 500) swap('briarbind', 0.35);
-    if (t >= 580) swap('thornroller', 0.4);
-    // Sunstone Arena cards
-    if (t >= 630) swap('sandstorm', 0.5);
-    if (t >= 710) swap('ramcart', 0.5);
-    if (t >= 790) swap('mole', 0.5);
-    if (t >= 870) swap('camel', 0.45);
-    if (t >= 690) swap('scarabshrine', 0.35);
-    if (t >= 770) swap('dunemortar', 0.3);
-    // Stormspire cards
-    if (t >= 930) swap('bees', 0.5);
-    if (t >= 1010) swap('owl', 0.5);
-    if (t >= 1090) swap('thundercloud', 0.45);
-    if (t >= 1170) swap('griffin', 0.4);
-    if (t >= 1210) swap('judgment', 0.3);
-    if (t >= 1290) swap('cyclone', 0.35);
-    if (t >= 1380) swap('conductor', 0.4);
-    // Arenas 5 to 10: troops take a middle slot; win conditions can take the Rhino's, spells the Fireball's
-    const swapAt = (id, i, p) => { if (rand() <= p && !deck.includes(id)) deck[i] = id; };
-    const NEWER = [[2060, 'frostsprite', 0.45], [2220, 'icegiant', 0.4, 0], [2380, 'flashfreeze', 0.35, 7], [2540, 'wintersage', 0.45],
-      [2670, 'dockraiders', 0.45], [2850, 'barrel', 0.4, 0], [3030, 'broadside', 0.4], [3210, 'harpoon', 0.45],
-      [3380, 'coil', 0.4], [3580, 'sparkbots', 0.45], [3780, 'titan', 0.4, 0], [3980, 'arccannon', 0.4],
-      [4200, 'gemflash', 0.4, 7], [4420, 'shardguards', 0.45], [4640, 'drill', 0.4, 0], [4860, 'prism', 0.45],
-      [5110, 'sunsprite', 0.35], [5350, 'guardian', 0.4], [5590, 'drake', 0.45], [5830, 'phoenix', 0.45],
-      [6100, 'wraiths', 0.45], [6300, 'meteor', 0.35, 7], [6500, 'abyss', 0.4, 0], [6700, 'dreadknight', 0.45],
-      // the expansion's cards from Arena 5 on
-      [2100, 'glacierslam', 0.35], [2420, 'cage', 0.35], [2720, 'powderkeg', 0.35], [2990, 'barracks', 0.3],
-      [3430, 'overclock', 0.3], [3630, 'foundry', 0.25], [3830, 'smelter', 0.35], [4930, 'prismecho', 0.25],
-      [5170, 'heavensguard', 0.35], [5650, 'reflection', 0.3], [5900, 'ballista', 0.3, 0], [6150, 'soulblight', 0.35], [6450, 'collapse', 0.35, 7]];
-    for (const [at, id, pr, slot] of NEWER) if (t >= at) { if (slot !== undefined) swapAt(id, slot, pr); else swap(id, pr); }
-    const name = FOE_NAMES[Math.floor(rand() * FOE_NAMES.length)];
-    const foeTrophies = Math.max(0, t + Math.round((rand() - 0.5) * 30));
+    // a play style, and a deck for it from the cards they could have (bot.js: STYLES, buildDeck)
+    const foeT = Math.max(0, t + Math.round((rand() - 0.5) * 30));
+    const pool = foePool(foeT, rand);
+    const Bot = typeof KCBot !== 'undefined' ? KCBot : null;
+    let style = null, deck = KC_STARTER_DECK.slice();
+    if (Bot) {
+      const ok = Bot.STYLE_IDS.filter(id => Bot.STYLES[id].win.some(w => pool.includes(w)));
+      const choices = ok.length ? ok : ['beatdown'];
+      style = choices[Math.floor(rand() * choices.length)];
+      deck = Bot.buildDeck(style, pool, rand);
+    }
+    const name = foeName(rand), clan = rand() < 0.65 ? CLANS[Math.floor(rand() * CLANS.length)] : null;
+    let mood = 'sporty', mw = rand() * MOODS.reduce((a, m) => a + m[1], 0);
+    for (const [m, w] of MOODS) { if ((mw -= w) < 0) { mood = m; break; } }
+    const foeTrophies = foeT;
     const cardLevels = spreadLevels(foeUpgrades(foeTrophies), deck, rand);
     for (const id of deck) cardLevels[id] = Math.max(KC_MIN_LEVEL(id), cardLevels[id]);
     const lvl = Math.min(...Object.values(cardLevels));
@@ -534,6 +523,7 @@ const KCProgress = (() => {
     return {
       id: 'trophy', kind: 'trophy', name, short: name, level: lvl, tier: `${foeTrophies} trophies`,
       look: foeLook(rand), lines: null, skill, towerDamage: lerp(0.5, 1, d), deck, cardLevels, trophies: foeTrophies, kingLevel,
+      style, styleName: style && Bot ? Bot.STYLES[style].name : null, clan, mood,
       // past 700 trophies about half the opponents with a Snowman have its evolution
       evos: foeTrophies >= 700 && deck.includes('snowman') && rand() < 0.5 ? ['snowman'] : [],
     };

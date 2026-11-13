@@ -291,7 +291,29 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
     assert(sawStorm > 20, 'opponents at 1,200 trophies play Stormspire cards');
     assert(!KC_ALL_CARDS.includes('ramsoldier'), 'the cart soldiers are not a card');
     let sawSun = 0; for (let i = 0; i < 40; i++) if (G.trophyFoe(KCSim.mulberry(i + 31)).deck.some(id => ['sandstorm', 'ramcart', 'mole', 'camel'].includes(id))) sawSun++;
-    assert(sawSun > 20, 'opponents at 900 trophies play Sunstone cards');
+    assert(sawSun > 14, 'opponents at 1,200 trophies still play Sunstone cards');
+    // every opponent's deck follows the deck rules (bot.js buildDeck): eight different cards, one or two
+    // win conditions, two or three spells, three that hit air, no more than three flyers, a cheap card
+    const styles = new Set();
+    for (const t of [0, 300, 900, 1500, 2500, 4000, 6500]) {
+      P6.trophies = t;
+      for (let i = 0; i < 30; i++) {
+        const f = G.trophyFoe(KCSim.mulberry(t * 7 + i)), d = f.deck;
+        styles.add(f.style);
+        assert.strictEqual(new Set(d).size, 8, `eight different cards at ${t}: ${d}`);
+        const wins = d.filter(id => KCBot.WIN_CARDS.has(id)).length, spells = d.filter(id => KC_CARDS[id].kind === 'spell').length;
+        assert(wins >= 1 && wins <= 3, `win conditions at ${t}: ${d}`);
+        assert(spells >= 1 && spells <= 3, `spells at ${t}: ${d}`);
+        assert(d.filter(KCBot.hitsAir).length >= 2, `cards that hit air at ${t}: ${d}`);
+        assert(d.filter(id => KC_CARDS[id].air).length <= 3, `flyers at ${t}: ${d}`);
+        assert(d.some(id => KC_CARDS[id].cost <= 3), `a cheap card at ${t}: ${d}`);
+        assert(f.name && f.mood, 'a name and a temperament');
+        // nothing far beyond the Trophy Road at their trophies
+        for (const id of d) { const m = G.ROAD.find(r => r.card === id); assert(!m || m.at <= f.trophies + 160, `${id} at ${f.trophies}`); }
+      }
+    }
+    assert(styles.size >= 5, `several play styles: ${[...styles]}`);
+    P6.trophies = 1200;
     // the free path's shards: exactly 2; the Diamond Pass's tier 1 is the Snowman Evolution
     const freeShards = G.PASS.tiers.reduce((n, t) => n + (t.free.kind === 'item' && t.free.item === 'shards' ? t.free.n : 0), 0);
     assert.strictEqual(freeShards, 2, 'the free path gives 2 shards');

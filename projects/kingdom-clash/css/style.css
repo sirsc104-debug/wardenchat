@@ -1995,3 +1995,18 @@ button.slot:hover { transform: translateY(-3px); }
 .score-row.bump, .mini-timer.bump { animation: scoreBump 0.5s ease-out; }
 @keyframes scoreBump { 0% { transform: scale(1); } 40% { transform: scale(1.18); filter: brightness(1.6); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .fly-crown { display: none; } }
+
+/* VS screen: your King, the opponent's clan, and a moment of looking for an opponent */
+.vs-pic { width: 110px; height: 110px; border-radius: 18px; border: 3px solid var(--outline); background: radial-gradient(circle at 50% 40%, #6fa3ff, #1d4fb0); display: grid; place-items: center; overflow: hidden; }
+.vs-pic svg { width: 92%; height: 92%; }
+.vs-side .vs-clan { color: #ffd9de; font-size: 14px; opacity: 0.9; }
+.vs-side .vs-clan:empty { display: none; }
+.vs-find { display: none; flex-direction: column; align-items: center; gap: 12px; min-height: 110px; justify-content: center; color: #ffe3e6; font-size: 18px; }
+.vs-find i { width: 46px; height: 46px; border-radius: 50%; border: 5px solid rgba(255, 255, 255, 0.25); border-top-color: #fff; animation: vsSpin 0.8s linear infinite; }
+@keyframes vsSpin { to { transform: rotate(360deg); } }
+.intro.finding .vs-find { display: flex; }
+.intro.finding .foe canvas, .intro.finding .foe b, .intro.finding .foe small { display: none; }
+.intro:not(.finding) .foe canvas { animation: vsPop 0.35s ease-out; }
+@keyframes vsPop { from { transform: scale(0.6); opacity: 0; } }
+@media (max-width: 760px) { .vs-pic { width: 76px; height: 76px; } .vs-find { min-height: 76px; font-size: 15px; } }
+@media (prefers-reduced-motion: reduce) { .vs-find i { animation-duration: 2.4s; } }
