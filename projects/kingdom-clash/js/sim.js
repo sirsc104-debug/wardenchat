@@ -11,6 +11,10 @@ const KCSim = (() => {
   const BRIDGES = [3.5, 14.5], BRIDGE_HALF = 1.0;
   const DT = 1 / 30;
   const REGULAR = 180, OVERTIME = 60, DOUBLE_AT = 60;
+  // Sudden death, when overtime ends level: every tower crumbles by the same share of its health each
+  // second, faster and faster (`base` + `grow` per second elapsed), until one falls. The weakest tower,
+  // by share of health, falls first, so it is the old tiebreak's winner, but the match ends on a tower.
+  const SUDDEN = { base: 0.03, grow: 0.03 };
   const REGEN = 1 / 2.8, MAX_ENERGY = 10, START_ENERGY = 5;
   const POCKET = 11; // how far past the river you may deploy once that lane's tower is down
   const TOWERS = {
@@ -561,12 +565,12 @@ const KCSim = (() => {
   }
   function towerDown(s, t) {
     const other = 1 - t.team;
-    s.events.push({ type: 'tower', team: t.team, sub: t.sub, x: t.x, y: t.y });
+    s.events.push({ type: 'tower', team: t.team, sub: t.sub, x: t.x, y: t.y, id: t.id, lane: t.lane });
     if (t.sub === 'king') {
       s.crowns[other] = 3;
       for (const e of s.ents) if (e.kind === 'tower' && e.team === t.team && !e.dead) {
         e.dead = true; e.hp = 0;
-        s.events.push({ type: 'tower', team: e.team, sub: e.sub, x: e.x, y: e.y });
+        s.events.push({ type: 'tower', team: e.team, sub: e.sub, x: e.x, y: e.y, id: e.id, lane: e.lane, chain: true });
       }
       finish(s, other, 'king');
       return;
@@ -575,6 +579,32 @@ const KCSim = (() => {
     const k = tower(s, t.team, 'K');
     if (k && !k.dead && !k.active) { k.active = true; s.events.push({ type: 'king', team: t.team }); }
     if (s.phase === 'overtime') finish(s, other, 'overtime');
+    if (s.phase === 'sudden') finish(s, other, 'sudden');
+  }
+  // Sudden death: every standing tower loses the same share of its health; the first to fall loses the
+  // match for its side. Two towers of different sides falling in the same tick: the one further below
+  // zero (by share) falls; exactly level, a draw.
+  function suddenStep(s) {
+    s.suddenT += DT;
+    const rate = (SUDDEN.base + SUDDEN.grow * s.suddenT) * DT;
+    let worst = null, wv = 0, tie = false;
+    for (const e of s.ents) {
+      if (e.kind !== 'tower' || e.dead) continue;
+      e.hp -= e.maxHp * rate;
+      if (e.hp > 0) continue;
+      const v = e.hp / e.maxHp;
+      if (!worst || v < wv - 1e-9) { worst = e; wv = v; tie = false; }
+      else if (Math.abs(v - wv) <= 1e-9 && e.team !== worst.team) tie = true;
+    }
+    if (!worst) return;
+    if (tie) {
+      for (const e of s.ents) if (e.kind === 'tower' && !e.dead && e.hp < 0) e.hp = 0;
+      finish(s, -1, 'draw');
+      return;
+    }
+    for (const e of s.ents) if (e.kind === 'tower' && !e.dead && e.hp <= 0 && e !== worst) e.hp = 1;
+    worst.hp = 0; worst.dead = true;
+    towerDown(s, worst);
   }
   function finish(s, winner, reason) {
     if (s.result) return;
@@ -1337,6 +1367,7 @@ const KCSim = (() => {
     return low === Infinity ? 0 : low;
   }
   function clock(s) {
+    if (s.phase === 'sudden') { suddenStep(s); return; }
     s.timeLeft -= DT;
     if (s.phase === 'regular' && !s.double && s.timeLeft <= DOUBLE_AT) {
       s.double = true;
@@ -1350,16 +1381,16 @@ const KCSim = (() => {
       s.events.push({ type: 'overtime' });
       return;
     }
-    const a = lowestTower(s, 0), b = lowestTower(s, 1);
-    if (Math.abs(a - b) < 1e-6) finish(s, -1, 'draw');
-    else finish(s, a > b ? 0 : 1, 'tiebreak');
+    // overtime is over and the crowns are level: sudden death
+    s.phase = 'sudden'; s.timeLeft = 0; s.suddenT = 0;
+    s.events.push({ type: 'sudden' });
   }
 
   function step(s) {
     if (s.result) return;
     s.tick++;
     s.time += DT;
-    const mult = s.double || s.phase === 'overtime' ? 2 : 1;
+    const mult = s.double || s.phase === 'overtime' || s.phase === 'sudden' ? 2 : 1;
     for (const t of [0, 1]) s.energy[t] = Math.min(MAX_ENERGY, s.energy[t] + REGEN * mult * DT);
     for (const e of s.ents) {
       e.px = e.x; e.py = e.y;
@@ -1379,7 +1410,7 @@ const KCSim = (() => {
   }
 
   return {
-    W, H, MID, RIVER_TOP, RIVER_BOT, BRIDGES, BRIDGE_HALF, DT, REGULAR, OVERTIME, MAX_ENERGY, TOWERS,
+    W, H, MID, RIVER_TOP, RIVER_BOT, BRIDGES, BRIDGE_HALF, DT, REGULAR, OVERTIME, MAX_ENERGY, TOWERS, SUDDEN, lowestTower,
     create, step, play, canDeploy, tower, laneOf, own, mulberry, levelMult, evoCharge, formation, costOf, resolve,
     // Ends a match on the spot: the Simulate Win test button (TEMPORARY), and an online battle whose
     // opponent left ('left') or fell out of step ('desync').

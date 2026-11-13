@@ -13,6 +13,9 @@
     sel: -1, hover: null, drag: false, dragMoved: false, toggle: false,
     fx: [], bg: null, zone: null, zoneKey: '', handKey: '', ui: {}, beamStage: {}, online: null, sim: null,
     intro: 0, ended: 0, shake: 0, lastSec: -1, idleHint: false, trainer: null, res: null,
+    // a tower falling: its collapse (seconds since, by tower id), a moment of slow motion, a white flash,
+    // and fireworks when a King Tower falls
+    falls: {}, slowmo: 0, flash: 0, fireworks: 0,
   };
   let cv, ctx;
   const cardImg = id => KCMenu.cardImg(id);
@@ -60,7 +63,9 @@
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name]]) $(sel).textContent = text;
     A.trainer($('#introFoe'), T.look);
-    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {} });
+    Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {},
+      falls: {}, slowmo: 0, flash: 0, fireworks: 0 });
+    for (const el of document.querySelectorAll('.fly-crown')) el.remove();
     $('#simWinBtn').hidden = false; $('#netWait').hidden = true;
     $('#leaveBtn').hidden = false; $('#leaveBtn').classList.remove('ask');
     $('#result').hidden = true; $('#bubble').hidden = true; $('#countdown').hidden = true;
@@ -493,6 +498,7 @@
         case 'tower': towerFx(e); break;
         case 'double': banner('×2 Energy!', 'Last minute'); KCSound.play('double'); speak('double'); break;
         case 'overtime': banner('Overtime!', 'Next tower wins'); KCSound.play('double'); speak('overtime'); break;
+        case 'sudden': banner('Sudden Death!', 'Every tower is crumbling: the weakest falls first'); KCSound.play('thunderclap'); G.shake = Math.max(G.shake, 0.4); break;
         case 'end': endBattle(e); break;
       }
     }
@@ -500,7 +506,17 @@
   }
   function towerFx(e) {
     KCSound.play('tower');
-    G.shake = Math.max(G.shake, 0.55);
+    const king = e.sub === 'king';
+    // the collapse, a beat of slow motion (not online, where both screens keep the same clock), a white
+    // flash and a hard shake; the crown flies to the score
+    if (e.id) G.falls[e.id] = 0;
+    if (!e.chain) {
+      if (!G.online) G.slowmo = Math.max(G.slowmo, king ? 0.9 : 0.45);
+      G.flash = Math.max(G.flash, king ? 0.55 : 0.3);
+      G.shake = Math.max(G.shake, king ? 1.0 : 0.8);
+      flyCrown(e);
+      if (king) { G.fireworks = 2.4; setTimeout(() => KCSound.play('crown'), 450); setTimeout(() => KCSound.play('crown'), 800); }
+    }
     KCScenery.cheer(1 - e.team);
     for (let i = 0; i < 26; i++) {
       const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 5;
@@ -513,13 +529,33 @@
     }
     puff(e.x, e.y, 16, '#cfc8dc', 1.6);
     if (e.team === 1) {
-      G.fx.push({ kind: 'crown', x: e.x, y: e.y, life: 1.6, max: 1.6, team: 0 });
       setTimeout(() => KCSound.play('crown'), 250);
       if (e.sub !== 'king') speak('youTower');
     } else {
-      G.fx.push({ kind: 'crown', x: e.x, y: e.y, life: 1.6, max: 1.6, team: 1 });
       if (e.sub !== 'king') { speak('myTower'); if (!G.online) KCEmotes.foeTookTower(); }
     }
+  }
+  // A crown leaves the fallen tower and flies to the score (the side panel, or the clock on small screens),
+  // which bumps as it lands.
+  function flyCrown(e) {
+    const box = $('#arena').getBoundingClientRect(), side = e.team === 1 ? '#crownYou' : '#crownFoe';
+    let to = $(side);
+    if (!to || !to.offsetParent) to = $('#miniTimer');
+    if (!to || !to.offsetParent) return;
+    const tr = to.getBoundingClientRect(), el = document.createElement('i');
+    el.className = 'fly-crown' + (e.team === 1 ? ' you' : ' foe');
+    const x0 = box.left + SX(e.x), y0 = box.top + SY(e.y) - G.k * 2.2;
+    el.style.left = x0 - 20 + 'px'; el.style.top = y0 - 18 + 'px';
+    document.body.appendChild(el);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.classList.add('go');
+      el.style.transform = `translate(${tr.left + tr.width / 2 - x0}px, ${tr.top + tr.height / 2 - y0}px) scale(0.6)`;
+    }));
+    setTimeout(() => {
+      el.remove();
+      const row = to.closest('.score-row') || to;
+      row.classList.remove('bump'); void row.offsetWidth; row.classList.add('bump');
+    }, 1150);
   }
   function ring(x, y, team, r) { G.fx.push({ kind: 'ring', x, y, r, team, life: 0.45, max: 0.45 }); }
   function dust(x, y, n) {
@@ -532,6 +568,19 @@
     for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, d = Math.random() * (spread || 0.6); G.fx.push({ kind: 'puff', x: x + Math.cos(a) * d, y: y + Math.sin(a) * d * 0.7, vx: Math.cos(a) * 0.6, vy: Math.sin(a) * 0.4 - 0.4, r: 0.25 + Math.random() * 0.3, col, life: 0.6, max: 0.6 }); }
   }
   function updateFx(dt) {
+    // a King Tower down: fireworks bursting over the arena for a couple of seconds
+    if (G.fireworks > 0) {
+      G.fireworks -= dt;
+      if (Math.random() < dt * 7) {
+        const x = 2 + Math.random() * (S.W - 4), y = 3 + Math.random() * (S.H - 10), cols = ['#ffe27a', '#ff8ad8', '#8cf0ff', '#9be07a', '#ffb052', '#c9a8ff'];
+        const col = cols[Math.floor(Math.random() * cols.length)], n = 18;
+        for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2, v = 3 + Math.random() * 1.5; G.fx.push({ kind: 'dot', x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: 0.1, col, life: 0.9, max: 0.9 }); }
+        G.fx.push({ kind: 'flash', x, y, r: 1.4, life: 0.35, max: 0.35 });
+        KCSound.play('pop');
+      }
+    }
+    for (const id in G.falls) G.falls[id] += dt;
+    if (G.flash > 0) G.flash = Math.max(0, G.flash - dt);
     for (const f of G.fx) {
       f.life -= dt;
       if (f.vx !== undefined) { f.x += f.vx * dt; f.y += f.vy * dt; }
@@ -721,7 +770,7 @@
   /* ---------- the end ---------- */
   function endBattle(e) {
     G.phase = 'end';
-    G.ended = 1.8;
+    G.ended = e.reason === 'king' || e.reason === 'sudden' ? 2.6 : 1.8;
     if (e.winner >= 0) KCScenery.celebrate(e.winner);
     select(-1);
     G.res = G.online ? { kind: 'online' } : KCMenu.recordResult(G.trainer, e.winner, G.s.crowns[0]);
@@ -761,7 +810,7 @@
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
     if (res.kind === 'online') { un.hidden = false; un.textContent = 'Online battle · no trophies won or lost'; }
     $('#againBtn').hidden = res.kind === 'online';
-    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).', surrender: 'You surrendered.' }[r.reason];
+    const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', sudden: w === 0 ? 'Sudden death: their tower crumbled first.' : 'Sudden death: your tower crumbled first.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).', surrender: 'You surrendered.' }[r.reason];
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
     $('#resSmall').textContent = res.kind === 'online' ? `${why} ${m}:${sec} played, ${s.played[0]} cards from you.` : `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
     $('#result').hidden = false;
@@ -798,6 +847,14 @@
     for (const d of ground.concat(air)) bars(c, d);
     drawPending(c, t);
     if (selId && G.hover) ghost(c, selId, t);
+    const W2 = (S.W + 2 * B) * k, H2 = (S.H + 2 * B) * k;
+    if (s.phase === 'sudden' && !s.result) {
+      // sudden death: a red pulse round the edge of the arena
+      const a = 0.35 + 0.2 * Math.sin(t * 9), g = c.createRadialGradient(W2 / 2, H2 / 2, Math.min(W2, H2) * 0.35, W2 / 2, H2 / 2, Math.max(W2, H2) * 0.62);
+      g.addColorStop(0, 'rgba(200,20,40,0)'); g.addColorStop(1, `rgba(200,20,40,${a})`);
+      c.fillStyle = g; c.fillRect(0, 0, W2, H2);
+    }
+    if (G.flash > 0) { c.fillStyle = `rgba(255,250,235,${Math.min(0.75, G.flash * 1.6)})`; c.fillRect(0, 0, W2, H2); }
   }
   // Cinder Keep: the lava breathes, heat shimmers above it, embers rise off it and the corner braziers
   // flicker. All light, and cheap: one pass of a few shapes per frame.
@@ -959,6 +1016,26 @@
     c.fillStyle = g; c.beginPath(); c.arc(x, y, Math.max(1, r * 1.1), 0, Math.PI * 2); c.fill();
     c.restore();
   }
+  // A damaged tower: cracks from half health, smoke below a quarter; in sudden death every tower
+  // crumbles, with pebbles falling off it.
+  function towerWear(c, e, k, t) {
+    const hurt = 1 - e.hp / e.maxHp, h = e.sub === 'king' ? 2.4 : 2.0, w = e.half * 0.8;
+    if (hurt > 0.45) {
+      c.strokeStyle = 'rgba(30,18,40,0.75)'; c.lineWidth = Math.max(1.2, k * 0.07); c.lineCap = 'round';
+      const n = hurt > 0.75 ? 4 : 2;
+      for (let i = 0; i < n; i++) {
+        const sx = ((i * 0.37 + e.id * 0.13) % 1 - 0.5) * w * 1.6, sy = -h * (0.35 + 0.15 * (i % 3));
+        c.beginPath(); c.moveTo(sx * k, sy * k);
+        c.lineTo((sx + 0.18) * k, (sy + 0.22) * k); c.lineTo((sx + 0.05) * k, (sy + 0.42) * k); c.lineTo((sx + 0.24) * k, (sy + 0.62) * k);
+        c.stroke();
+      }
+    }
+    const sudden = G.s && G.s.phase === 'sudden';
+    if ((hurt > 0.75 && Math.random() < 0.06) || (sudden && Math.random() < 0.35)) {
+      G.fx.push({ kind: 'puff', x: e.x + (Math.random() - 0.5) * w, y: e.y - h * 0.7, vx: 0, vy: -0.8, r: 0.25, col: sudden ? 'rgba(200,180,190,0.7)' : 'rgba(70,64,80,0.55)', life: 0.9, max: 0.9 });
+      if (sudden) G.fx.push({ kind: 'rock', x: e.x + (Math.random() - 0.5) * w * 2, y: e.y, vx: (Math.random() - 0.5) * 1.5, vy: 0.3, z: h * 3, vz: 0, r: 0.07 + Math.random() * 0.08, life: 0.8, max: 0.8, col: '#b8b2a8' });
+    }
+  }
   // A hit flash: the sprite drawn a second time on top, added to itself, so it brightens for a moment.
   // (A canvas filter did this before, but filters are slow: every dropped frame landed on a hit.)
   function lit(c, flash, f, alpha) {
@@ -976,10 +1053,22 @@
       const target = e.target && G.s.ents.find(u => u.id === e.target);
       const face = target ? (target.x >= e.x ? 1 : -1) : (e.team === 0 ? 1 : -1);
       c.save(); c.translate(x, y);
-      if (e.dead) A.rubble(c, k, { team: e.team, sub: e.sub });
+      const o = { team: e.team, face, active: e.active, t, view: e.team === 0 ? 'back' : 'front', atk: Math.max(0, e.cd / e.hit - 0.6) * 2.5, hurt: 1 - e.hp / e.maxHp };
+      const draw = () => (e.sub === 'king' ? A.kingTower : A.archerTower)(c, k, o);
+      const fall = G.falls[e.id];
+      if (e.dead && fall !== undefined && fall < 0.9) {
+        // collapsing: the tower shakes and sinks into its own dust, the rubble rising in its place
+        const p = fall / 0.9;
+        c.globalAlpha = Math.min(1, p * 1.6); A.rubble(c, k, { team: e.team, sub: e.sub }); c.globalAlpha = 1;
+        c.save(); c.beginPath(); c.rect(-k * 4, -k * 8, k * 8, k * 8 + e.half * k * 0.5); c.clip();
+        c.translate(Math.sin(fall * 70) * k * 0.12 * (1 - p), p * p * k * 3.4); c.rotate((e.x < 9 ? -1 : 1) * p * 0.12);
+        c.globalAlpha = 1 - p * 0.5; draw();
+        c.restore();
+        if (Math.random() < 0.7) puff(e.x + (Math.random() - 0.5) * e.half * 2, e.y + 0.2, 1, 'rgba(210,200,225,0.8)', 0.4);
+      } else if (e.dead) A.rubble(c, k, { team: e.team, sub: e.sub });
       else {
-        const o = { team: e.team, face, active: e.active, t, view: e.team === 0 ? 'back' : 'front', atk: Math.max(0, e.cd / e.hit - 0.6) * 2.5, hurt: 1 - e.hp / e.maxHp };
-        lit(c, e.flash, () => (e.sub === 'king' ? A.kingTower : A.archerTower)(c, k, o), 0.35);
+        lit(c, e.flash, draw, 0.35);
+        towerWear(c, e, k, t);
       }
       c.restore();
       return;
@@ -1007,7 +1096,8 @@
     if (e.card === 'mole' && e.deploy > 0) { surfacing(c, e, x, y, t); return; }
     // the Dread Knight mid-leap rises in an arc; a troop on the end of a harpoon rope is off the ground
     const leapF = e.leap ? Math.min(1, e.leap.t / e.leap.dur) : 0;
-    const lift = (liftOf(e) + (e.leap ? Math.sin(leapF * Math.PI) * 2.2 : 0) + (e.pulled ? 0.35 : 0)) * k;
+    const cheer = G.phase === 'end' && G.s.result && G.s.result.winner === e.team ? Math.abs(Math.sin(t * 7 + e.id)) * 0.35 : 0;
+    const lift = (liftOf(e) + (e.leap ? Math.sin(leapF * Math.PI) * 2.2 : 0) + (e.pulled ? 0.35 : 0) + cheer) * k;
     if (!e.air) shadow(c, x, y, e.radius * k * 1.05);
     ropes(c, e, x, y - lift);
     // the Griffin's beam: a crackling line of storm light to its target, thicker as it powers up
@@ -1656,11 +1746,22 @@
       b.style.setProperty('--p', p.toFixed(3));
     });
     const left = Math.max(0, Math.ceil(s.timeLeft)), tl = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
-    const ot = s.phase === 'overtime';
+    const ot = s.phase === 'overtime' || s.phase === 'sudden';
+    // who is ahead when overtime ends: the side whose weakest tower has the bigger share of its health
+    const lb = $('#leadBar');
+    if (ot && !s.result) {
+      const a = S.lowestTower(s, 0), f = S.lowestTower(s, 1), key = `${Math.round(a * 100)}|${Math.round(f * 100)}|${s.phase}`;
+      if (u.lead !== key) {
+        u.lead = key;
+        const who = a > f + 0.004 ? 'You lead' : f > a + 0.004 ? 'They lead' : 'Level';
+        lb.innerHTML = `<small>${s.phase === 'sudden' ? 'Sudden death' : 'If time runs out'}: weakest tower</small><span class="lb-row"><b class="y">${Math.round(a * 100)}%</b><span class="lb-bar"><i class="y" style="width:${(a / (a + f || 1) * 100).toFixed(1)}%"></i></span><b class="f">${Math.round(f * 100)}%</b></span><em class="${who === 'You lead' ? 'y' : who === 'They lead' ? 'f' : ''}">${who}</em>`;
+      }
+      lb.hidden = false;
+    } else if (!lb.hidden) lb.hidden = true;
     if (u.tl !== tl || u.ot !== ot) {
       u.tl = tl; u.ot = ot;
       $('#timerVal').textContent = tl;
-      $('#timerLabel').textContent = ot ? 'Overtime' : 'Time left';
+      $('#timerLabel').textContent = s.phase === 'sudden' ? 'Sudden death' : ot ? 'Overtime' : 'Time left';
       $('#timer').classList.toggle('ot', ot);
       $('#timer').classList.toggle('low', !ot && left <= 30);
       $('#miniTimer').classList.toggle('low', !ot && left <= 30);
@@ -1668,8 +1769,8 @@
     const cr = s.crowns.join();
     if (u.cr !== cr) { u.cr = cr; $('#crownYou').textContent = s.crowns[0]; $('#crownFoe').textContent = s.crowns[1]; }
     // on small screens the clock sits on the arena with the crown score under it
-    const mt = `${tl}|${ot}|${cr}`;
-    if (u.mt !== mt) { u.mt = mt; $('#miniTimer').innerHTML = `${ot ? 'Overtime' : 'Time'}<br><b>${tl}</b><span class="mt-cr" aria-label="Crowns: you ${s.crowns[0]}, opponent ${s.crowns[1]}"><span class="y">${s.crowns[0]}</span> – <span class="f">${s.crowns[1]}</span></span>`; }
+    const mt = `${tl}|${ot}|${cr}|${s.phase}`;
+    if (u.mt !== mt) { u.mt = mt; $('#miniTimer').innerHTML = `${s.phase === 'sudden' ? 'Sudden' : ot ? 'Overtime' : 'Time'}<br><b>${tl}</b><span class="mt-cr" aria-label="Crowns: you ${s.crowns[0]}, opponent ${s.crowns[1]}"><span class="y">${s.crowns[0]}</span> – <span class="f">${s.crowns[1]}</span></span>`; }
     if (G.phase === 'play' && left <= 10 && left > 0 && left !== G.lastSec) {
       G.lastSec = left;
       const cd = $('#countdown');
@@ -1697,7 +1798,10 @@
     } else if (G.phase === 'play' && G.online) {
       onlineTick(dt, now);
     } else if (G.phase === 'play') {
-      G.acc += dt;
+      // a moment of slow motion as a tower falls
+      const slow = G.slowmo > 0 ? 0.3 : 1;
+      if (G.slowmo > 0) G.slowmo -= dt;
+      G.acc += dt * slow;
       let n = 0;
       while (G.acc >= S.DT && n < 6 && G.phase === 'play') {
         S.step(G.s);
@@ -1711,7 +1815,7 @@
       G.ended -= dt;
       if (G.ended <= 0 && $('#result').hidden) showResult();
     }
-    updateFx(dt);
+    updateFx(dt * (G.slowmo > 0 ? 0.4 : 1));
     draw(G.phase === 'play' ? Math.min(1, G.acc / S.DT) : 1, now / 1000);
     ui();
   }
