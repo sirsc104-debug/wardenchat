@@ -1,3 +1,6 @@
+/* Brain Rocket – Evolved answer lists. Built by tools/build_answers.py from Wikidata and Brain
+ * Rocket's lists; do not edit by hand. One answer per line: tier|shown name|alias|…
+ * Tiers: 0 Launch Pad, 1 Space Junk, 2 Orbiter, 3 Moonshot, 4 Deep Space, 5 Supernova. */
 EVO.cat({ ...{"id": "dogs", "name": "Dog breeds", "icon": "🐕", "q": "Name a **dog breed**.", "strip": ["dog", "breed"], "level": 1}, list: `
 0|German Shepherd|Alsatian|GSD|Alsatian dog|Alsatian wolf dog|German Shepherd Dog|Berger Allemand|Deutscher Schäferhund|Schäferhund|Shepherd
 0|Labrador Retriever|Labrador|Lab
@@ -633,12 +636,17 @@ EVO.cat({ ...{"id": "dogs", "name": "Dog breeds", "icon": "🐕", "q": "Name a *
 4|Poochon
 4|St. Hubert Jura Hound|Bruno Jura hound
 ` });
-EVO.cat({ ...{"id": "cats", "name": "Cat breeds", "icon": "🐈", "q": "Name a **cat breed**.", "strip": ["cat", "breed"], "level": 2}, list: `
+EVO.cat({ ...{"id": "cats", "name": "Cats", "icon": "🐈", "q": "Name a **type of cat**: a breed, a coat pattern or a wild cat.", "strip": ["cat", "cats", "breed", "kitty", "kitten"], "level": 2}, list: `
 0|Siamese|Siamese cat
 0|Persian|Persian cat
-1|Maine Coon|American longhair|Maine coon cat
-0|Bengal|Bengal cat
-1|Sphynx|Sphynx cat|Canadian Hairless|Canadian Sphynx|Hairless Cat
+1|Maine Coon|American longhair|Maine coon cat|Coon cat
+0|Black cat
+0|Calico|Calico cat
+0|Ginger|Ginger cat|Orange cat|Orange tabby|Marmalade|Ginger tom|Red tabby
+2|Tabby|Tabby cat|Tabbies
+2|Tuxedo|Tuxedo cat|Tux
+2|Bengal|Bengal cat
+1|Sphynx|Sphynx cat|Canadian Hairless|Canadian Sphynx|Hairless Cat|Bald cat|Bald|Skinless|Skinless cat|Naked cat|Hairless
 2|Ragdoll|Ragdoll cat
 2|Abyssinian|Abyssinian cat
 2|Manx|Manx cat
@@ -649,6 +657,10 @@ EVO.cat({ ...{"id": "cats", "name": "Cat breeds", "icon": "🐈", "q": "Name a *
 2|Burmese|Burmese cat
 2|Scottish Fold
 2|Siberian|Siberian cat|Siberian forest cat
+2|Feral cat|Feral
+2|Grey cat|Gray cat|Blue cat
+2|Tortoiseshell|Tortie|Tortoiseshell cat|Torty
+2|White cat
 2|Savannah|Savannah cat
 2|Devon Rex
 2|American Shorthair
@@ -663,8 +675,8 @@ EVO.cat({ ...{"id": "cats", "name": "Cat breeds", "icon": "🐈", "q": "Name a *
 2|Ocicat
 2|American Curl|American Curl Longhair
 2|Balinese|Balinese cat
-2|Turkish Van|swimming cat|Turkish cat|Turkish Vankedisi
-2|Somali|Somali cat
+3|Turkish Van|swimming cat|Turkish cat|Turkish Vankedisi
+3|Somali|Somali cat
 3|Japanese Bobtail
 3|European Shorthair|Celtic|pelo corto celta
 3|Cymric|Cymric cat
@@ -675,8 +687,16 @@ EVO.cat({ ...{"id": "cats", "name": "Cat breeds", "icon": "🐈", "q": "Name a *
 3|Peterbald
 3|Singapura|Singapura cat
 3|Donskoy|Donskoy cat|Don Hairless|Don Sphynx|Russian Hairless
+3|Barn cat
+3|Bicolor|Bicolour|Bicolor cat|Piebald
+3|Classic tabby|Blotched tabby
+3|Colorpoint|Colourpoint|Pointed
 3|Exotic Longhair
+3|Mackerel tabby
+3|Polydactyl|Polydactyl cat|Hemingway cat|Mitten cat
 3|Scottish Straight
+3|Spotted tabby
+3|Tricolor|Tricolour
 5|Selkirk Rex
 3|Burmilla
 3|Kurilian Bobtail|Kurile Island Bobtail|Kurilian Bobtail cat
@@ -695,8 +715,8 @@ EVO.cat({ ...{"id": "cats", "name": "Cat breeds", "icon": "🐈", "q": "Name a *
 3|Nebelung
 3|Aegean|Aegean cat
 3|Asian|Asian cat|Malayan
-3|Australian Mist|Aussie cat|Spotted Mist
-3|Brazilian Shorthair
+4|Australian Mist|Aussie cat|Spotted Mist
+4|Brazilian Shorthair
 4|Serengeti|Serengeti cat
 4|Oriental Longhair|Javanese|Mandarin|JAV|OLH|British angora|Javanese cat|Oriental Longhair cat
 4|Khao Manee|Diamond Eye
@@ -712,20 +732,32 @@ EVO.cat({ ...{"id": "cats", "name": "Cat breeds", "icon": "🐈", "q": "Name a *
 4|Ukrainian Levkoy
 4|York Chocolate
 4|Asian Shorthair
+4|Caliby
 4|Ceylon
 4|Cheetoh
+4|Chocolate point
 4|Cyprus Cat
+4|Dilute calico
 4|Dwelf
 4|Elf Cat
+4|Flame point
 4|Genetta
 4|Kinkalow
+4|Lilac point
+4|Lynx point
 4|Mojave Spotted
 4|Oregon Rex
 4|Safari
 4|Sam Sawet
+4|Seal point
+4|Ship's cat
 4|Skookum
+4|Smoke|Smoke cat
 4|Tennessee Rex
+4|Ticked tabby|Agouti
+4|Torbie|Tortoiseshell tabby
 4|Ural Rex
+4|Van pattern
 4|Bambino|Bambino cat|Bambino Sphynx|Mèo Bambino
 4|Domestic short-haired|Domestic short-haired cat|house cat|alley cat|domestic shorthair|house cat, shorthair
 4|Chantilly-Tiffany|Chantilly|Foreign Longhair|Chantilly cat
@@ -6859,6 +6891,168 @@ EVO.cat({ ...{"id": "countries", "name": "Countries", "icon": "🌍", "q": "Name
 4|Saint Lucia|St Lucia|lca|Hewanorra|Iyonola
 4|Federated States of Micronesia|Micronesia|FSM|Fed. Sts. Micronesia|Fed. Sts. of Micronesia|Federated States of Micronesia, FSM
 4|Danish Realm|Kingdom of Denmark|Denmark|Danmarkar Ríki|Danmarkip Naalagaaffik|Danmarks Rige|Kongeriget Danmark|Kongsríki Danmarkar|Kunngeqarfik Danmarki|Realm of Denmark|Danish Commonwealth
+` });
+EVO.cat({ ...{"id": "africa", "name": "Africa", "icon": "🌍", "q": "Name a **country in Africa**.", "level": 2}, list: `
+0|Egypt|Misr|Republic of Egypt|Arab Rep. Egypt|Arab Republic of Egypt|Rep. Egypt
+0|South Africa|R.S.A.|Republic of South Africa|zaf
+0|Nigeria|Federal Republic of Nigeria|Naija
+0|Kenya|Republic of Kenya
+0|Morocco|al-Maġrib|Kingdom of Morocco|Lmaġrib|Maroc|Marocco
+0|Algeria|Djazaïr|Dzayer|People's Democratic Republic of Algeria
+2|Ethiopia|Federal Democratic Republic of Ethiopia
+2|Sudan|al-Sudan|as-Sudan|North Sudan|Republic of Sudan|Republic of the Sudan|Soudan|SUD
+2|Libya|LBA|State of Libya
+2|Tunisia|Republic of Tunisia|Tunisian Republic
+2|Ghana
+2|Somalia|Federal Republic of Somalia
+2|Angola|Ngola|Republic of Angola
+1|Madagascar|Malagascar|Malagaskar|Republic of Madagascar
+2|Tanzania|United Republic of Tanzania|Tanzania, United Republic of|tza|United Republic of Tanganyika and Zanzibar
+2|Zimbabwe|Rhodesia|Southern Rhodesia|Zimbabwe Rhodesia|Republic of Zimbabwe
+2|Cameroon|Republic of Cameroon
+3|Uganda|+256|Ouganda|Pearl of Africa|Republic of Uganda|Ugandah
+3|Senegal|Republic of Senegal
+3|Zambia|Zed|Republic of Zambia
+3|Rwanda|Republic of Rwanda|The Land of a Thousand Hills
+3|Republic of the Congo|Congo|CGO|Congo Republic|Congo-Brazzaville|Rep. Congo|Republic of Congo|Republique du Congo
+3|Democratic Republic of the Congo|DRC|COD|Congo|Dem. Rep. Congo|Dem. Republic of Congo|Dem. Republic of the Congo|Democratic Republic of Congo|DR Congo
+3|Chad|GUM|CHA|Republic of Chad
+3|Namibia|Republic of Namibia
+3|Botswana|Lefatshe la Botswana|Republic of Botswana
+3|Ivory Coast|Cote d'Ivoire|Cote d'lvoire|Cote Ivoire|Republic of Cote d'Ivoire|Republic of Ivory Coast|Republic of the Ivory Coast
+3|Mali|Republic of Mali
+3|Burkina Faso|Republic of Burkina Faso|Republic of Upper Volta
+3|Benin|Republic of Benin
+3|Eritrea|Ertrā|Iritriyā|State of Eritrea
+4|Mauritania|Agawej|Gannaar|Islamic Republic of Mauritania|Mauretania|Moritani|Muritanya|Murutaane
+4|Burundi|Gouvernement du Burundi|Republic of Burundi|Republika y'Uburundi
+4|Mozambique|Moçambique|Republic of Mozambique|República de Moçambique
+4|Niger|Republic Niger|Republic of Niger|Republic of the Niger
+4|Togo|Togolese Republic
+4|Central African Republic|Central Africa
+4|Guinea|GUI|Guinea-Conakry|Republic of Guinea
+4|The Gambia|Islamic Republic of the Gambia|Republic of the Gambia
+1|Djibouti|Jabuuti|Gabuuti|Jībūtī|Republic of Djibouti
+4|Malawi|MAW|Republic of Malawi
+4|Gabon|GAB|Gabonese Republic|Republique Gabonaise
+4|Sierra Leone|Republic of Sierra Leone|SLE
+4|Liberia|Liber|Republic of Liberia
+4|Cape Verde|Cape Verde Islands|Republic of Cabo Verde|Republic of Cape Verde|Cabo Verde
+5|Eswatini|Swaziland|Kingdom of Eswatini|Kingdom of Swaziland|Umbuso weSwatini
+4|Equatorial Guinea|GEQ|Republic of Equatorial Guinea
+4|Mauritius|Maurice|MRI|Moris|Republic of Mauritius
+4|South Sudan|SSD|Southern Sudan|Republic of South Sudan
+4|Lesotho|Kingdom of Lesotho|LES|The Mountain Kingdom
+4|Seychelles|Republic of Seychelles|SEY
+4|Guinea-Bissau|GBS|Republic of Guinea-Bissau
+4|Comoros|al-Ittiḥād al-Qumurī|Juzur al-Qamar|Juzur al-Qumur|Massiwa ya komori|ouvoimoja wakomori|Udzima wa Komori|Union des Comores|Union of the Comoros
+4|São Tomé and Príncipe|Democratic Republic of São Tomé and Príncipe|São Tomé og Príncipe
+` });
+EVO.cat({ ...{"id": "europe", "name": "Europe", "icon": "🇪🇺", "q": "Name a **country in Europe**.", "level": 2}, list: `
+0|France|French Republic
+0|Russia|Russian Federation
+0|Italy|Italian Republic|Republic of Italy
+0|England
+0|Germany|DEU|Federal Republic of Germany|FRG|BRD
+0|Spain|Kingdom of Spain
+2|United Kingdom|Great Britain|the United Kingdom of Great Britain and Northern Ireland|Great Britain and Northern Ireland|UK|Britain
+2|Turkey|Republic of Turkey|Republic of Türkiye|Turkiye
+2|Finland|Finnia|Land of Thousand Lakes|Republic of Finland|Republiken Finland|Suomen tasavalta
+2|Norway|Kingdom of Norway
+2|Poland|Republic of Poland
+2|Ukraine|Ukrainia|Ukr.|Ukraïna
+2|Switzerland|Swiss|Confoederatio Helvetica|Swiss Confederation
+2|Belgium|Kingdom of Belgium
+2|Greece|Hellas|Hellenic Republic|Ellada|Greek Republic|Hellas, Greece
+2|Scotland
+2|Wales
+3|Austria|Republic of Austria
+3|Portugal|POR|Portuguese Republic
+3|Sweden|Kingdom of Sweden|Swedish Kingdom
+3|Iceland|Ysland|Icelandic republic|Isl.|Republic of Iceland
+3|Republic of Ireland|Ireland|Southern Ireland|Irish Republic
+3|Albania|Republic of Albania|People's Republic of Albania|People's Socialist Republic of Albania|Republika Popullore e Shqiperise|Republika Popullore Socialiste e Shqiperise|Shqipërisë
+3|Bulgaria|Republic of Bulgaria|Bulgarian Republic
+3|Belarus|White Russia|Belorussia|Bielaruś|Bielorussia|Byeloruss|Byelorussia|Republic of Belarus|Respublika Belarus'|Respublika Bielaruś|White Ruthenia
+3|Hungary
+3|Croatia|Republic of Croatia|CRO|HRV
+3|Czech Republic|Czechia
+3|Estonia|Estland|Eesti Vabariik|Republic of Estonia
+3|Lithuania|Republic of Lithuania
+3|Serbia|Republic of Serbia
+4|Romania|Roumania|Rumania
+4|Northern Ireland
+4|Bosnia and Herzegovina|B&H|Bosnia and Hercegovina|Bosnia-Herzegovina|Bosnia
+4|Slovakia|SVK|Slovak Republic
+4|Latvia|Latveja|Latvejas Republika|Latvian Republic|Latvija|Latvijas Republika|Leţmо̄|Leţmо̄ Vabāmо̄|Republic of Latvia
+4|Luxembourg|Grand Duchy of Luxembourg
+5|Moldova|Republic of Moldova|Republica Moldova|Moldavia
+4|Slovenia|svn|Slovenija|Republic of Slovenia|slo
+4|Cyprus|Republic of Cyprus|Greek Administration of Southern Cyprus|Greek Cypriot State
+4|Malta|Republic of Malta
+4|Monaco|Fort-Hercule|Mùnegu|Principality and Diocese of Monaco|Principality of Monaco|Principato di Monaco|Principatu de Mu̍negu|Principauté de Monaco
+4|Georgia|Sakartvelo|Republic of Georgia
+4|Kazakhstan|Republic of Kazakhstan|Republic of Qazaqstan|Qazaqstan
+4|Vatican City|Vatican|Holy See|Papal State|Città del Vaticano|State of Vatican City|Stato della Città del Vaticano|Status Civitatis Vaticanae|Vatican City State
+1|Andorra|Principality of Andorra|Principality of the Valleys of Andorra
+4|North Macedonia|Makedonia|MKD|Former Yugoslav Republic of Macedonia|FYR Macedonia|Republic of Macedonia|Republic of North Macedonia|Macedonia
+4|Montenegro|Republic of Montenegro
+1|Liechtenstein|Principality of Liechtenstein
+4|San Marino|Most Serene Republic of San Marino
+4|Kosovo|KOS|Kosova|Republic of Kosovo|RKS|XKX
+4|Kingdom of the Netherlands|Netherlands|Nederlanden|Kingdom of Netherlands|Holland
+4|Danish Realm|Kingdom of Denmark|Denmark|Danmarkar Ríki|Danmarkip Naalagaaffik|Danmarks Rige|Kongeriget Danmark|Kongsríki Danmarkar|Kunngeqarfik Danmarki|Realm of Denmark|Danish Commonwealth
+` });
+EVO.cat({ ...{"id": "asia", "name": "Asia", "icon": "🌏", "q": "Name a **country in Asia**.", "level": 2}, list: `
+0|Russia|Russian Federation
+0|Japan|Land of the Rising Sun|Iapan|Iapon|Land of Rising Sun|Nihon-koku|Nippon-koku|State of Japan
+0|India|Hindustan|Bharata|Tianzhu|Hindoostan|Al Hind|Bharatvarsh|Tenjiku|Bharat Ganarajya|Indostan|Republic of India
+0|China|People's Republic of China|China PR|P.R.C.|PR China|Red China|Communist China
+0|Turkey|Republic of Turkey|Republic of Türkiye|Turkiye
+2|Israel|State of Israel|ISR|Yisrael
+2|Iran|IRI|Islamic Rep. Iran|Islamic Republic of Iran
+2|Vietnam|Socialist Republic of Viet Nam|VNM|SRV|VIE
+2|Indonesia|Republic of Indonesia
+2|Afghanistan|Affghanistan|Affghanisthan|Affghaunistan|Afghania|Afghanisthan|Afghaunistan|Afghaunistaun
+2|Pakistan|Islamic Republic of Pakistan|Republic of Pakistan|Hồi Quốc|Tây Hồi
+2|South Korea|Republic of Korea|Silla|Choson|Korea|Hanguk|Daehan Minguk|Korea Republic|Rep. Korea|S. Korea
+2|Thailand|Thai|Kingdom of Siam|Kingdom of Thailand|Prathet Thai|Ratcha-anachak Thai
+2|Iraq|Republic of Iraq
+2|Saudi Arabia|Kingdom of Saudi Arabia|Saudi
+3|Philippines|Republic of the Philippines|Philippine Islands
+3|Singapore|Garden City|Lion City|Singapore City|Republic of Singapore|S'pore
+3|North Korea|DPR Korea|Democratic People's Republic of Korea|DPRK|N. Korea
+3|Azerbaijan|AZE|Republic of Azerbaijan
+3|Armenia|Hayastan|Hayastani Hanrapetut’yun|Republic of Armenia
+1|Kazakhstan|Republic of Kazakhstan|Republic of Qazaqstan|Qazaqstan
+3|Bangladesh|Country of Bengal|Land of Bengal|People's Republic of Bangladesh
+3|Malaysia|Federation of Malaysia|Malaysia Federation
+3|Syria|Sūriyā|Syrian Arab Republic
+3|Cambodia|Kamboja|Kingdom of Cambodia|Camboya|Campuchia|Kambodzha|Kampuchea
+3|Lebanon|Lebanese Republic|Lubnan|Republic of Lebanon|State of Lebanon
+3|Nepal|Palpa|Balbo|Nekbal|Bal-po'i yul|Bal-yul|Balpo|Balpo-yul|Federal Democratic Republic of Nepal|Naipál|Naipala|Ne-pel|Necbal|Nehpal|Nei-pal|Nekpal|Népaal|Nepall|Nepaul|Nercerri|Ni-po-lo|Ni-po-louo|Niepal|Nipal|Pa-eul-pou|Pa-le-pou|Pa-lo-pou|Pai-pou|Palpou
+3|Mongolia|Mongol State|State of Mongolia
+4|United Arab Emirates|Emirates|the U.A.E.
+4|Myanmar|Republic of the Union of Myanmar|MMR|Union of Burma|Birmania|Burma
+4|Georgia
+4|Laos|Lao PDR|Lao People's Democratic Republic
+4|Taiwan|Free China|Taiwan ROC|Chunghwa Minkuo|Chunghwa Minkwo|The ROC|China, Republic of|Chinese Republic|Chinese Taipei|TWN|Republic of China|Nationalist China
+4|Yemen|Rep. Yemen|Republic of Yemen
+4|Jordan|HKJ|Yarden|Giordania|Hashemite Kingdom of Jordan|Kingdom of Jordan|State of Jordan
+4|Sri Lanka|SRI|Ceylan|Serendib|Taprobane|Democratic Socialist Republic of Sri Lanka|Lanka, Sri|lke
+4|Uzbekistan|Republic of Uzbekistan
+4|Kuwait|State of Kuwait
+4|Oman|Uman|omn|Sultanate of Oman
+4|Qatar|qat|State of Qatar
+4|Kyrgyzstan|Kyrgyz Republic
+4|Tajikistan|Republic of Tajikistan
+4|Bahrain|Bahrein Islands|Dawlat al-Bahrain|Kingdom of Bahrain|Mamlakat al-Baḥrayn
+1|Bhutan|BHU|Kingdom of Bhutan
+4|Turkmenistan|TKM|Turkmenia
+4|Brunei|Nation of Brunei, the Abode of Peace|Negara Brunei Darussalam
+5|Timor-Leste|East Timor|Democratic Republic of Timor-Leste
+4|Maldives|MDV|Republic of Maldives
+4|Palestine|State of Palestine|PSE
 ` });
 EVO.cat({ ...{"id": "states", "name": "US states", "icon": "🇺🇸", "q": "Name a **US state**.", "strip": ["state"], "level": 1}, list: `
 0|California|The Golden State|State of California|California, United States|Cal.|Cali
@@ -13232,6 +13426,218 @@ EVO.cat({ ...{"id": "ballondor", "name": "Ballon d'Or", "icon": "⚽", "q": "Nam
 4|Josef Masopust
 5|Igor Belanov
 ` });
+EVO.cat({ ...{"id": "greekgods", "name": "Greek gods", "icon": "⚡", "q": "Name a **Greek god or goddess**.", "strip": ["god", "goddess"], "level": 2}, list: `
+0|Zeus|Jupiter|Dias|Jove
+0|Athena|Athina
+0|Aphrodite|Cytherea|Erycina
+0|Apollo|Apeilōn|Apellōn|Aploun|Apollōn|Phoebus
+0|Poseidon|Posidon
+0|Ares
+0|Hades|Pluton|Plouton
+0|Artemis
+2|Hera
+2|Dionysus
+2|Demeter|Deo
+2|Hephaestus|Hephaestos
+2|Hestia|Histia, Vesta
+1|Eros|Cupid
+2|Persephone|Kore
+1|Nike
+2|Pan
+2|Asclepius|Aesculapius|Æsculapius|Asklēpiós
+2|Selene
+2|Helios|Helius
+2|Eos|Rhododactylos|Erigeneia
+2|Hecate|Hekate|Hecat
+2|Hebe
+2|Nemesis|Rhamnousia|Rhamnusia
+2|Iris
+2|Thanatos
+2|Circe|Kirke
+2|Adonis
+2|Orion
+2|Charon|Kharon
+5|Hypnos
+2|Amphitrite
+2|Morpheus
+2|Eris|Strife|Goddess of Discord
+2|Echidna|Mother of Monsters
+2|Aeolus|Eolus|Æolus
+2|Cybele
+2|Hemera
+2|Harmonia|Harmony
+2|Phobos|Timor
+2|Serapis|Sarapis
+2|Hymen
+2|Astarte|Ashtoreth|Ashtaroth|ʿAṯtart
+2|Psyche
+2|Eileithyia|Eilithyia|Ilithyia|Ilithia
+2|Deimos
+2|Plutus|Ploutos
+2|Aristaeus|Aristaios|Aristæus
+2|Hermaphroditus|Hermaphroditos
+2|Hygieia|Hygeia|Hygiea
+3|Eirene|Irene
+3|Enyo
+3|Momus
+3|Thalia|Thaleia
+3|Astraea|Astrea|Astræa
+3|Zelus
+3|Harpocrates
+3|Atropos
+3|Dike|Dicea
+3|Britomartis
+3|Kratos|Potestas|Cratos|Cratus
+3|Clotho|Klotho
+3|Hesperus
+3|Aglaia|Aglaea
+3|Bia
+3|Despoina|Despina|Despoena
+3|Anteros
+3|Euphrosyne
+3|Panacea|Panakeia
+3|Moros|Morus
+3|Lachesis|Lakhesis
+3|Pasithea
+3|Pheme|Ossa
+3|Agdistis
+3|Aion
+3|Phosphorus|Lucifer|Eosphorus|Heosphoros
+3|Zagreus
+3|Eunomia
+3|Phantasos
+3|Glycon|Glicó
+3|Phobetor
+3|Sabazios|Sabazius
+3|Arete
+3|Iacchus|Iachus|Iakchos
+3|Bendis
+3|Pandia
+3|Aphaia|Aphaea
+3|Enipeus
+3|Himeros|Himerus
+3|Agathodaemon|Agathodaimon|Agathos daemon
+3|Melinoë
+3|Ḫepat|Khepat
+3|Benthesikyme|Benthesicyme
+3|Paean|Paian
+3|Venus Anadyomene|Anadyomene|The Burlesque of Venus
+3|Elpis
+3|Lyssa
+3|Adikia
+3|Aphroditus
+3|Adranus|Adranos
+3|Aidos
+3|Antheia
+3|Kotys|Cotys|Cotytto|Kotyto
+4|Limos
+4|Penia
+4|Sophrosyne
+4|Aceso
+4|Telesphorus|Telesphoros
+4|Poena|Poene|Poine|Poenae|Poina|Poinai
+4|Thyia
+4|Comus|Komos
+4|Neikea
+4|Adephagia
+4|Aergia
+4|Brizo
+4|Praxidice|Praxidike
+4|Eleos|Mercy|Pity
+4|Enyalius|Enyalios
+4|Angelos|Angelus
+4|Krotos|Crotus
+4|Philophrosyne
+4|Sardus
+4|Dolus|Dolos
+4|Adrasteia|Adrasteya
+4|Caerus|Kairos
+4|Cayster|Caystrus|Caystros
+4|Kakia
+4|Philomelus|Bootes|Philomenus
+4|Arke|Arce
+4|Celtus|Keltos
+4|Epiphron
+4|Gelos
+4|Kourotrophos
+4|Penthus|Pentos|Penthos
+4|Phthonus|Zelus
+4|Eucleia
+4|Algea|Algos
+4|Angelia
+4|Artemis of Ephesus|Ephesia
+4|Ekecheiria
+4|Epiales|Epialos
+4|Hylates
+4|Koalemos
+4|Palioxis
+4|Proioxis
+4|Sosipolis
+4|Athena Alea|Alea
+4|Athena Alkidemos|Alcidemos|Alcidemus|Alkidemos
+4|Cleta
+4|Dyssebeia|Dyssebia
+4|Enodia|Ennodia
+4|Neaera|Neera|Néère
+4|Opora
+4|Orthanes|Orthannes
+4|Phaenna
+4|Ptocheia
+4|Homonoia
+4|Adrestia
+4|Apheleia
+4|Aphrodite Pandemos|Pandemos|Pandemos Aphodite|Pandemus
+4|Caryatis|Karyatis
+4|Ceuthonymus|Keuthonymos
+4|Eleutheria
+4|Eunostus|Promylaea
+4|Heimarmene
+4|Homados|Homadus
+4|Itonia
+4|Peitharchia
+4|Prophasis
+4|Theandrios
+4|Thrasos
+4|Amechania
+4|Eupraxia
+4|Hedylogos
+4|Ioke
+4|Nomos
+4|Acmon
+4|Eulabeia
+4|Horme|Hormes
+4|Horror|Phrike
+4|Mene|Menae
+4|Mese
+4|Paregoros
+4|Tychon
+4|Aphrodite of the Gardens
+4|Athena Areia
+4|Hypate
+4|Ichnaea|Ichnaia
+4|Meilichios|Meilichius|Milichius
+4|Mise|Misatis
+4|Nete
+4|Pseudea
+4|Soter
+4|Staphylus
+4|Amphictyonis
+4|Apotropaei|Apotropaios
+4|Artemis Tauropolos|Tauropolus
+4|Atabyrius
+4|Auxesia|Avxesia
+4|Dionysus-Osiris|Osiris-Dionysus
+4|Genetyllides
+4|Hera Alexandros
+4|Kallone
+4|Pasikrata
+4|Pepromene
+4|Chaldean Hekate|Chaldean Hecate
+4|Dodonian Zeus
+4|Planē
+4|Pyrrhichos|Pyrrichus|Pyrrhichus
+4|Zeus Georgos|Georgos
+` });
 EVO.cat({ ...{"id": "norsegods", "name": "Norse gods", "icon": "🔨", "q": "Name a **Norse god or goddess**.", "strip": ["god", "goddess"], "level": 3}, list: `
 0|Thor|Donar|Ðunor|Thunor|Þórr
 0|Odin|Othin|Wodin
@@ -16766,6 +17172,420 @@ EVO.cat({ ...{"id": "musicals", "name": "Musicals", "icon": "🎤", "q": "Name a
 4|The Golden Apple
 4|Very Good Eddie
 ` });
+EVO.cat({ ...{"id": "consoles", "name": "Game consoles", "icon": "🎮", "q": "Name a **video game console**.", "strip": ["console"], "level": 2}, list: `
+0|Wii|Revolution|Nintendo Wii
+0|PlayStation 4|PS4
+0|Xbox
+0|PlayStation 5|PS5
+0|Nintendo Switch 2|Switch 2
+0|Xbox 360|360|X360|XB360|Xbox 360 E
+0|PlayStation 3|PS3|Sony PlayStation 3|Sony PS3
+0|PlayStation 2|PS2
+0|Xbox One
+0|Nintendo Entertainment System|NES|Comboy|Famicom|Family Computer|Hyundai Comboy|Nintendo 8-bit|Nintendo Famicom|Nintendo Family Computer|Tata Famicom
+0|PlayStation Portable|PSP|PS Portable|PSP-1000|PSP-1006|PSP-2006|PSP-3000|Sony PSP
+0|Nintendo DS|Developers' System|Double Screen|Dual Screen|IiQue DS|iQue Dual Screen|N DS|Nintendo Developers' System|Nintendo Double Screen|Nintendo Dual Screen|Project Nitro|DS
+0|GameCube|Nintendo GameCube|Dolphin|GCN|NGC
+0|Nintendo 64|N64|Famicom 64|Family Computer 64|FC 64|Project Reality|Ultra 64|Nintendo Ultra 64
+2|PlayStation Vita|Vita|PSV|Psvita
+2|Super Nintendo Entertainment System|Nintendo 16-bit|Nintendo SNES|Nintendo Super-NES|SNES|SNES 16-bit|Super Comboy|Super Famicom|Super NES|Super Nintendo|Super Nintendo 16-bit|SFC|Super Family Computer
+2|Wii U|Nintendo Wii U|Project Café
+2|Meta Quest|Oculus Quest|Quest
+2|Steam Deck
+2|Game Boy|1989 Game Boy|Game Boy Classic|GB Classic|Nintendo Game Boy|Nintendo GB
+2|Sega Genesis|Genesis|Mega Drive|Sega Mega Drive
+2|Game Boy Advance|GBA|Nintendo Game Boy Advance|Nintendo GBA
+2|Nintendo 3DS|3DS|iQue 3DS|N 3DS
+2|Game Boy Color
+2|Atari 2600|1977 Atari VCS|Sears Tele-Games Video Arcade|Sears Video Arcade|Video Computer System
+2|Nintendo Switch
+2|PlayStation
+2|Dreamcast|Sega Dreamcast
+2|Sega Saturn|Saturn
+2|Master System|Sega Master System
+2|Super NES CD-ROM|Super Disc|SFDS|Nintendo Play Station|PlayStation|SFC-CD|SNES CD|SNES Disk System|SNES PlayStation|Super Famicom CD|Super Famicom CD-ROM|Super Famicom Disk System|Super Famicom Play Station|Super Family Computer Disk System|Super FDS|Super NES CD|Super NES Disk System|Super Nintendo Play Station|PS1|PlayStation 1
+2|Nintendo Switch Lite|NS Lite|Switch Lite|NSL
+2|Game & Watch|Game & Watch series|G & W|G & W line|G & W series|Game & Watch line|Game Watch|Nintendo G & W|Nintendo G & W line|Nintendo G & W series|Nintendo Game & Watch|Nintendo Game & Watch line|Nintendo Game & Watch series
+2|Atari Jaguar|Jaguar|Jaguar 64
+2|Game Gear|Sega Game Gear
+2|Xbox Series X and Series S
+2|Nintendo Switch OLED|Nintendo Switch – OLED Model|Nintendo Switch|Switch
+2|Magnavox Odyssey|Odyssey|Odyssee
+2|Nintendo DSi|DSi|iQue DSi|NDSi
+2|Xbox Series X|Scarlett|Microsoft Xbox Series X|Project Scarlett|Series X|Xbox Project Scarlett|Xbox Scarlett|XBSX|XSX
+2|3DO|3DO Interactive Multiplayer
+2|Game Boy Advance SP|Game Boy Advance Special|GBA SP|GBA Special
+1|Virtual Boy|Nintendo Virtual Boy|VR 32
+2|Atari Lynx|Lynx
+2|ColecoVision|CBS ColecoVision
+2|Intellivision|Mattel Electronic's Intellivision
+2|TurboGrafx-16|PC Engine|PCE|TG16|TurboGrafx-16 Entertainment SuperSystem|TurboGrafx
+2|Atari 5200
+2|Atari 7800
+2|Handheld game|Handheld game console|handheld video game console|portable video game console|portable game console|handheld gaming console|handheld gaming system|handheld game system|handheld game device|handheld gaming device|handheld video gaming console|pocket console|pocket game console|pocket gaming console|pocket video game console|pocket video gaming console|portable console|portable gaming console|portable video gaming console
+2|Game Boy Micro|GBM|Oxy|GB micro|Nintendo Game Boy Micro
+2|Neo Geo|MULTI VIDEO SYSTEM|MVS|Neo Geo AES|Neo Geo MVS
+2|Nintendo 2DS|2DS|N 2DS
+2|Ouya
+2|Sega CD|Mega CD
+2|Amiga
+2|Commodore 64|C64
+2|DS Lite
+2|Legion Go
+2|PS4 Pro
+2|PS5 Pro
+2|PlayStation Portal
+2|PlayStation VR|PS VR
+2|ROG Ally
+2|Wii Mini
+2|ZX Spectrum|Spectrum
+2|N-Gage|Nokia N-Gage
+2|32X|Sega 32X
+2|Amiga CD32|CD32
+2|Nintendo DS Lite
+2|SG-1000|Sega Computer Videogame SG-1000|Sega Game 1000
+2|Color TV-Game|Color TV-Game series
+2|Magnavox Odyssey 2|Magnavox Odyssey²|Odyssey 2|Philips Odyssey 2|Philips Odyssey²|Philips Videopac G7000|Videopac|Videopac G7000
+2|NES Classic Edition|Famicom Classic|Famicom Classic Edition|Famicom Mini|Family Computer Classic|Family Computer Classic Edition|Family Computer Mini|Mini NES|NES Classic|NES Classic Mini|NES Mini|Nintendo Entertainment System Classic|Nintendo Entertainment System Classic Edition
+2|Super NES Classic Edition|SNES Mini|SNES Classic|SNES Classic Mini
+2|Apple Pippin|Apple Pippin platform|PiPP!N|Pippin
+2|CD-i|Philips CD-i|Compact Disc Interactive|Philips Compact Disc Interactive
+2|Genesis Nomad
+5|Vectrex|GCE Vectrex
+2|WonderSwan
+2|PlayStation Classic
+2|Fairchild Channel F|Channel F
+2|New Nintendo 3DS|New 3DS
+2|Famicom Disk System|FDS|NFDS|FCDS|NFCDS|Nintendo Famicom Disk System|Nintendo Family Computer Disk System|Nintendo FCDS|Nintendo FDS
+2|Xbox Series S|XSS|Microsoft Xbox Series S|Series S|XBSS
+2|Gizmondo|Gametraq
+2|Pokémon Mini|Nintendo Pokémon Mini
+2|Microvision|MB Microvision|Milton Bradley Microvision
+2|PC-FX
+2|PocketStation
+2|PSP Go
+2|Arcadia 2001|Emerson Arcadia 2001
+2|Coleco Telstar series
+2|GP2X|GPX2
+2|Super Game Boy
+2|Zeebo
+2|Amazon Fire TV|Fire TV|Fire TV Cube|Fire TV Stick|Fire TV Stick 4K|Fire TV Stick 4K Max
+3|Casio Loopy|Loopy|My Seal Computer|SV-100
+3|FM Towns Marty|Fujitsu FM Towns Marty
+3|GX4000|Amstrad GX4000
+3|Xperia Play
+3|CDTV|Commodore Dynamic Total Vision|Commodore CDTV
+3|IQue Player
+3|PV-1000|Casio PV-1000
+3|PlayStation TV
+3|Game Boy Pocket
+3|Commodore 64 Games System|C64GS
+3|WonderSwan Color|Bandai WonderSwan Color|WSC
+3|Bally Astrocade|Astrocade|Bally ABA-1000[|Bally Arcade|Bally Computer System|The Professional Arcade
+3|Game Boy family|Game Boy line|Game Boy product family|Game Boy product line|Game Boy product series|Game Boy series
+3|Neo Geo Pocket|NeoGeo Pocket Color
+3|Pandora|4=Pandora|OpenPandora Pandora
+3|Sega Pico
+3|Playdia|BA-X|Bandai Playdia|Playdia QIS|Playdia Quick Interactive System
+3|Atari VCS|2021 Atari VCS|Project Ataribox
+3|GP2X Wiz|GP3X|Myungtendo
+3|GP32
+3|HyperScan|Mattel HyperScan
+3|Intellivision Amico
+3|Nvidia Shield Portable
+3|PSX|Sony PSX
+3|@ Mark Color (model TVG 57253)
+3|@ Mark Modell 64562
+3|A.G.S. Electronics Ltd. Ags TVG 101-4
+3|Academy TVG-406-6
+3|Academy Video Game (D-5654)
+3|Academy Video Game (D-5715)
+3|Acetronic Colour TV Game
+3|Acetronic Sports-Action TV Game 922
+3|Acetronic Tele-Sports IV
+3|Ajax Color Video Game BM-1000
+3|Ajax Programaster 1125
+3|Ajax T-338
+3|Ajax TV Game (TVG-406-6)
+3|Ajax TV Game AU-807
+3|Ajax TV Game T-800
+3|Ajax TV Game TVG-621
+3|Ajax TV Sports
+3|Akur TVG-SD-01-8 Color
+3|Atari ST
+3|Ayaneo
+3|Ayaneo 2
+3|Etch A Sketch Animator 2000
+3|Home Pong
+3|Nintendo 64DD|64DD
+3|P ECE
+3|Satellaview
+3|Sega Nomad
+3|TECNO Pocket Go
+3|RCA Studio II|RCA Studio 2|Studio 2|Studio II
+3|Playdate
+3|Game.com|GCOM|Tiger Game.com
+3|Handheld electronic game|dedicated handheld|Handheld Electronic LCD|LCD game
+3|Interton Video Computer 4000|INTERTON ELECTRONIC VC 4000 VIDEO COMPUTER|Interton VC 4000|VC 4000|Video Computer 4000|VIDEO COMPUTER VC 4000
+3|LaserActive|Pioneer LaserActive|CLD-A100|LD-ROM² System
+3|Neo Geo CD
+3|Nvidia Shield TV|Nvidia Shield|Shield Android TV|Shield Console
+3|Sega Genesis Mini|Mega Drive Mini|Sega Mega Drive Mini
+3|Tapwave Zodiac|Tapwave Zodiac 1|Tapwave Zodiac 2|Zodiac 1|Zodiac 2
+3|VMU|Dreamcast VMS|Dreamcast VMU|Visual Memory System|Visual Memory Unit
+3|Dendy
+3|APF TV Fun series
+3|Dingoo|Dingoo A320
+3|New Nintendo 2DS XL|N2DS XL|New 2DS XL|NN2DS XL
+3|TurboExpress|PC Engine GT
+3|Cassette Vision|Epoch Cassette Vision
+3|Nintendo DSi XL|DSi XL
+3|Super A'Can|Funtech Super Acan
+3|Entex Adventure Vision|AVIS|Adventure Vision|Entex Electronic Arcade
+3|Famiclone|Nintendo Entertainment System hardware clone
+3|N-Gage QD
+3|Odyssey series|versions of the Odyssey
+3|PC Engine SuperGrafx|SuperGrafx
+3|PolyStation|Game Player|PS Kid|PSMan
+3|TV Tennis Electrotennis|Electrotennis|Epoch Electrotennis|Epoch TV Tennis|Epoch TV Tennis Electrotennis|first Japanese video game console|TV Tennis|video game console
+3|Video Pinball series|Atari Video Pinball|Atari Video Pinball series|Video Pinball
+3|Atari XEGS|Atari XE Video Game System
+3|Watara Supervision|Supervision|Tiger Boy|Hartung SV-100|QuickShot Supervision
+3|Coleco Telstar
+3|Memorex VIS
+3|Wondermega
+3|Barcode Battler|CARD BATTLE SYSTEM
+3|Epoch Game Pocket Computer|GPC|Epoch GPC|Game Pocket Computer|Gēmupokekon|Pokekon
+3|Flipper Zero
+3|GameStick
+3|SwanCrystal
+3|Atari Flashback|Atari Flashback series|FB series|Flashback|Atari FB|Atari FB series
+3|Atari Panther
+3|Bandai Super Vision 8000|Super Vision 8000|SV8000|TV Jack 8000
+3|C64 Direct-to-TV|C64DTV
+3|Dedicated|Dedicated console|dedicated home video game console|dedicated home game console|dedicated game console|dedicated gaming console|dedicated home console|dedicated video game console|early console
+3|Entex Select-A-Game|SAG
+3|Halcyon
+3|New-Style NES|NES-101|NES 2|NES Control Deck|NES Top Loader|New NES|Nintendo Entertainment System Control Deck
+3|PICO-8
+3|R-Zone|Tiger R-Zone
+3|Rubik's WOWCube|WowCube
+3|APF-MP1000|APF-M1000
+3|Caanoo|GP2X CAANOO
+3|Microconsole
+4|Neo Geo X
+4|Philips Tele-Game series|Philips Tele-Game|Philips Tele-Spiel|Philips Tele-Spiel series
+4|Tomy Tutor|Grandstand Tutor|Pyuta
+4|V.Flash|V.FLASH HOME EDUTAINMENT SYSTEM|V.Smile Pro|VTech V.Flash
+4|V.Smile|V.SMILE TV LEARNING SYSTEM|VTech Vsmile
+4|VTech CreatiVision|Dick Smith Wizzard
+4|Super Cassette Vision|Epoch Super Cassette Vision
+4|Analogue Pocket
+4|1292 Advanced Programmable Video System|1292 APVS|APVS
+4|BSS 01|Bildschirmspiel 01|RFT TV-Spiel|TV-Spiel
+4|Canon de 155 C modèle 1917 Schneider
+4|EVO Smart Console|EVO|EVO Smart
+4|Game Wave Family Entertainment System|Game Wave|GWFES
+4|Mylo|My Life Online|Sony My Life Online|Sony mylo
+4|Nintendo 3DS XL
+4|Nuon
+4|Panasonic Q|SL-GC10-S|Panasonic SL-GC10
+4|Pokémon Pikachu|Pocket Pikachu
+4|Sharp Nintendo Television|C1 NES TV|Game Television|My Computer TV C1
+4|Twin Famicom
+4|XGP|Extreme Game Player
+4|Xavix|XaviXPort consoles|DIS|Domyos Interactive System
+4|Action Max|WoW Action Max
+4|TeraDrive|Sega TeraDrive|STT
+4|1chipMSX
+4|APF Imagination Machine
+4|Coleco Gemini
+4|GameKing|Timetop GameKing
+4|Micro Genius
+4|Nvidia Shield Tablet|Shield Tablet|Shield Tablet K1
+4|PC-50x family|SD-050|9015|SD-070|SD-090
+4|Panasonic M2|3DO M2
+4|Sega Mark III
+4|TV Vader|Epoch TV Vader
+4|TurboDuo|PC Engine Duo
+4|TurboGrafx-16 Mini|PC Engine Core Grafx Mini|PC Engine Mini
+4|VTech Socrates
+4|Gamate|Bit Corporation Gamate|Bitcorp Gamate
+4|Mega Duck|Cougar Boy|Mega Duck WG-108|Timlex Mega Duck
+4|Ameprod Television Game 10|TVG-10|Ameprod TVG-10|Television Game 10
+4|Cybiko
+4|GPD Win
+4|GPD XD
+4|Gakken Compact Vision TV Boy|Compact Vision TV Boy|Gakken COMPACT VISION
+4|Merlin|Merlin – the Electronic Wizard
+4|Minimig|Mini Amiga
+4|Philips Videopac+ G7400|Videopac+ G7400
+4|Ping-O-Tronic|Sèleco Ping-O-Tronic|Zanussi Ping-O-Tronic
+4|TIC-80
+4|Telejogo
+4|Telejogo II|Telejogo 2
+4|Zemmix|Daewoo Electronics Zemmix|Daewoo Zemmix
+4|Amstrad Mega PC|Mega PC
+4|Arduboy|Bateske Arduboy
+4|BBC Bridge Companion
+4|Coleco Telstar Arcade|Telstar Arcade|Cleco Telstar Arcade
+4|Evercade
+4|Fantasy video game|Fantasy video game console|fantasy console|fantasy computer
+4|GCW Zero
+4|Game Master|Hartung Game Master|Game Tronic|Super Game|Systema 2000
+4|Palmtex Portable Videogame System|PVS|Palmsized Videogame System|PVS Command Console|Super Micro
+4|PlayStation 4 Pro
+4|Sega Zone|Zone|Sega Reactor|AtGames Reactor
+4|TV Boy
+4|Telescore 750|Telescore SEB 750
+4|Turnir|Teleigra
+4|VideoSport MK2|MK2
+4|ZX Spectrum Vega
+4|Xbox One S|X One S
+4|Xbox One X|One X|Project Scorpio|X One X
+4|Atari Game Brain|Game Brain|Atari C-700|C-700
+4|Brick Game
+4|Children's Discovery System|CDS
+4|Coleco Telstar Marksman|Telstar Marksman
+4|Konix Multisystem
+4|LeapFrog Didj
+4|Mi2|Pocket Dream Console Touch
+4|Mojo|Project Mojo
+4|Pocket Dream Console|Pocket Dream
+4|RetroN|RetroN 3
+4|Terebikko|See 'n Say|Terebikko Video Communication System
+4|View-Master Interactive Vision|VMIV
+4|ApeXtreme|Apex Extreme
+4|Atari 2700|Atari Remote Control VCS
+4|Bandai LCD Solarpower|LCD Solarpower
+4|Bandai RX-78|RX-78
+4|Coleco Sonic|PlayPal|Pocket Gear
+4|Design Master Denshi Mangajuku|Design Master Senshi Mangajukuu|Denshi Manga Juku|Design Master
+4|Digi Casse
+4|Famicom Titler|AN-510|Famicom Editor
+4|Gameroom Tele-Pong|Entex Gameroom Tele-Pong
+4|Handheld TV game|plug and play game|plug-'n'-play game|TV game
+4|Interton Video 2800|Video 2800
+4|Jungle|Panasonic Jungle
+4|Leapster
+4|MoMA Eve
+4|Power Player Super Joy III|Power Player|Power Games|Power Joy|XA-76-1E
+4|Romtec Colorvision|Colorvision
+4|TV Scoreboard|Radioshack TV Scoreboard|Tandy TV Scoreboard
+4|Tomytronic 3D
+4|VG Pocket|Pelican VG Pocket
+4|Video Information System|Tandy Video Information System|VIS|TVIS|Tandy VIS
+4|AirConsole
+4|Anbernic RG351
+4|Atari Joystick Controller TV Video Game System|Atari Plug & Play TV Games 10-in-1
+4|Blip|Blip-o-Mat|Blip-o-Matic|Blip. THE DIGITAL GAME|World Tennis
+4|Capcom CPS Changer|CP System Changer
+4|Cube World
+4|Famicom Data Recorder
+4|GPD Win 2
+4|GPD Win Max
+4|Home video game console generations
+4|Indi One
+4|Interton Video 2000|Video 2000
+4|Interton Video 2400|Video 2400|Aureac videojuego color
+4|Interton Video 2501|Video 2501
+4|Interton Video 3000|Video 3000
+4|Interton Video 3001|Video 3001
+4|Lenovo Legion Go
+4|MSI Claw A1M
+4|Mega Sg|Analogue Mega Sg
+4|My Vision|Game System My Vision|KH-1000
+4|New-Style Super NES|SNES-101|SNES 2|SNES Jr.|SNES Mini|Super Famicom Jr.
+4|Nintendo 3DS family|N3DS family|Nintendo 3DS line
+4|PC-FXGA
+4|Palladium Tele-Cassetten Game|Tele-Cassetten-Game
+4|Pegasus
+4|Pixter
+4|SuFami Turbo
+4|Super Famicom Naizou TV SF1|SF1|SF1 SNES TV
+4|Thumby
+4|Tovertafel|Magic table|Active Cues
+4|VTech 3D Gamate
+4|VTech Variety|Variety
+4|Video Challenger|Takara Video Challenger
+4|Wonder Wizard|7702|FOR FAMILY TELEVISION SPORTS GAMES FUN!|FOR FAMILY TELEVISION SPORTS GAMES FUN! Made in U.S.A.
+4|Advanced Pico Beena
+4|Analogue 3D
+4|Analogue Nt
+4|Analogue Nt Mini|Nt mini|Nt mini Noir
+4|Archos GamePad
+4|Atari Flashback Portable
+4|Ayn Odin
+4|Control-Vision|NEMO
+4|Dina|Chuang Zao Zhe 50|Telegames Personal Arcade
+4|DragonBox Pyra
+4|Evercade VS
+4|GPD Win 4
+4|Game Gadget
+4|HYDRA Game Development Kit
+4|JXD S5100
+4|LJN Video Art
+4|LeapTV|LeapTV VCD
+4|Leapster Explorer|LeadPad Explorer
+4|Leisure Vision
+4|Nex Playground
+4|Nintendo Entertainment System models
+4|Nintendo Switch family|Nintendo Switch line|Nintendo Switch series|Switch family|Switch line|Switch series
+4|PV-2000|Casio PV-2000|RakuGaki
+4|Picotron
+4|PlayStation 2 models|PS2 models|Sony PlayStation 2 models|Sony PS2 models
+4|PlayStation 5 Pro|Project Trinity
+4|Red Jade
+4|Retroid Pocket 2
+4|Sega Master System II
+4|Sifteo Cubes
+4|Somua S40
+4|Super Nt|Analogue Super Nt
+4|Swinxs
+4|TRDR Pocket
+4|Tele-Fever|Tchibo tele-fever
+4|Terminator 2|Ending-Man Terminator|Jippy|Top Console
+4|Toio
+4|Top Game
+4|Visteon Dockable Entertainment
+4|Wikipad
+4|Xbox 360 s
+4|ZX Spectrum Vega+
+4|Apple Bandai Pippin|Apple Pippin|PiP P!N
+4|Atari 2600+
+4|Atari Plug and Play TV Game|Atari
+4|CT510|CT310|eBox|iSec
+4|Chameleon|Retro VGS|Coleco Chameleon|Retro Chameleon
+4|Computer Mah-jong Yakuman
+4|Designer's World
+4|E-kara
+4|Fuze Tomahawk F1|Tomahawk F1|Fuse Tomahawk F1
+4|GamePop
+4|Hybrid video game|Hybrid video game console|hybrid console|hybrid game console
+4|Logitech G Cloud|Logitech G CLOUD gaming handheld
+4|MiSTer|MiST on Terasic board
+4|N-Joypad
+4|Namco Plug & Play game|Namco Plug & Play
+4|Net Jet
+4|PocketFami|Pocket Famicom
+4|Pokémon TV
+4|Polymega|RetroBlox
+4|Razer Switchblade
+4|Retro Duo
+4|Super Pocket
+4|Super Retro Trio
+4|VTech PreComputer 1000|PreComputer 1000
+4|VTech PreComputer 2000|Genius Leader 2000|Genius Leader 2000 Plus
+4|Asus ROG Xbox Ally|Xbox Ally series|Xbox Ally|Xbox Ally X
+4|Dream Life
+4|Electronic Quarterback
+4|Handheld|Handheld console|Gaming handheld|Mobile console|Portable console
+4|PlayStation 3 60GB|CECHAxx
+4|SHG Black Point FS 1003/FS 2000|Black Point FS 1003|FS 1003
+4|Sega CD 32X|Sega 32X CD
+4|Xbox 360 Elite
+4|Xbox Ally|Xbox handheld
+` });
 EVO.cat({ ...{"id": "boardgames", "name": "Board games", "icon": "🎲", "q": "Name a **board game**.", "strip": ["game", "board game"], "level": 1}, list: `
 0|Chess|chess game|international chess|modern European chess|Western chess
 0|Checkers|draughts
@@ -17752,14 +18572,14 @@ EVO.cat({ ...{"id": "fonts", "name": "Fonts", "icon": "🔤", "q": "Name a **typ
 4|Whitney
 4|Yale
 ` });
-EVO.cat({ ...{"id": "cereals", "name": "Breakfast cereals", "icon": "🥣", "q": "Name a **breakfast cereal**.", "strip": ["cereal"], "level": 1}, list: `
-0|Frosted Flakes|Frosted Flakes of Corn|Frosties|Sugar Frosted Flakes
+EVO.cat({ ...{"id": "cereals", "name": "Breakfast cereals", "icon": "🥣", "q": "Name a **breakfast cereal**.", "strip": ["cereal", "kelloggs", "kellogg", "post", "general", "mills", "quaker", "nestle"], "level": 1}, list: `
+0|Frosted Flakes|Frosted Flakes of Corn|Frosties|Sugar Frosted Flakes|Frosted flake
 0|Cheerios
 0|Coco Pops|Cocoa Puffs|Cocoa Krispies
 0|Cornflakes
 0|Porridge|Oatmeal
 0|Weetabix
-2|Rice Krispies|Rice Bubbles
+2|Rice Krispies|Rice Bubbles|Rice crispies|Krispies
 2|Chex
 2|Lucky Charms|Lucky Charms cereal
 2|Chocapic|Chocopic|Koko Krunch
@@ -17800,10 +18620,10 @@ EVO.cat({ ...{"id": "cereals", "name": "Breakfast cereals", "icon": "🥣", "q":
 3|Apple Jacks
 3|Bran Flakes
 3|Cap'n Crunch|Captain Crunch
-3|Cinnamon Toast Crunch
+3|Cinnamon Toast Crunch|CTC
 3|Cocoa Pebbles|Fruity Pebbles|Pebbles
 3|Cookie Crisp
-3|Corn Pops
+3|Corn Pops|Pops|Corn pop
 3|Crunchy Nut|Crunchy Nut Cornflakes
 3|Froot Loops|Fruit Loops
 3|Golden Grahams
@@ -35006,6 +35826,556 @@ EVO.cat({ ...{"id": "tvshows", "name": "TV shows", "icon": "📺", "q": "Name a 
 4|Willo the Wisp
 4|Zoom
 4|thirtysomething
+` });
+EVO.cat({ ...{"id": "bands", "name": "Bands", "icon": "🎸", "q": "Name a **band or music group**.", "strip": ["band"], "level": 1}, list: `
+0|Nirvana
+0|Oasis
+0|ABBA
+0|ACDC
+0|BTS
+0|Backstreet Boys
+0|Blackpink
+0|Coldplay
+0|Green Day
+0|Linkin Park
+0|Little Mix
+0|Metallica
+0|One Direction
+0|Queen
+2|Spice Girls
+2|The Beatles
+2|The Rolling Stones
+2|Paramore
+2|Imagine Dragons
+2|Pink Floyd|The Pink Floyd Sound
+2|Led Zeppelin
+2|Aerosmith
+2|Arctic Monkeys
+2|Bee Gees
+2|Black Eyed Peas
+2|Black Sabbath
+2|Blink-182
+2|Blur
+2|Bon Jovi
+2|Busted
+2|Daft Punk
+2|Def Leppard
+2|Depeche Mode
+2|Destiny's Child
+2|Duran Duran
+2|Eagles
+2|Earth Wind and Fire
+2|Eurythmics
+2|Fall Out Boy
+2|Fifth Harmony
+2|Fleetwood Mac
+2|Girls Aloud
+2|Gorillaz
+2|Guns N' Roses
+2|Iron Maiden
+2|Jonas Brothers
+2|Journey
+2|Kiss
+2|Kool and the Gang
+2|Maneskin
+2|McFly
+2|Mumford and Sons
+2|My Chemical Romance
+2|NSYNC
+2|NewJeans
+2|Panic! at the Disco
+2|Pentatonix
+2|Radiohead
+2|Red Hot Chili Peppers
+2|S Club 7
+2|Seventeen
+2|Stray Kids
+2|Take That
+2|Tears for Fears
+2|The Beach Boys
+2|The Carpenters
+2|The Doors
+2|The Jackson 5|Jackson Five
+2|The Killers
+2|The Supremes
+2|The Who
+2|Twenty One Pilots|21 Pilots
+2|Twice
+2|U2
+2|Van Halen
+2|Village People
+2|Westlife
+2|Wham
+2|Muse
+2|Motörhead
+2|Foo Fighters
+2|The Police
+2|Toto
+2|Deep Purple
+2|Pearl Jam|Mookie Blaylock
+2|The Clash
+1|The Velvet Underground|The Velvets
+2|R.E.M.|Bingo Hand Job|Hornets Attack Victor Mature|It Crawled from the South|Twisted Kites
+2|Alice in Chains
+2|Soundgarden|Nudedragons
+2|Pussy Riot
+2|Scorpions
+2|The White Stripes
+2|The Smiths
+2|Evanescence
+2|Florence and the Machine|Florence + the Machine|F+TM|FATM
+5|Talking Heads
+2|5ive|Five
+2|A-ha
+2|ATEEZ
+2|Aespa
+2|All Saints
+2|Atomic Kitten
+2|Bananarama
+2|Bastille
+2|Beastie Boys
+2|Big Bang
+2|Blondie
+2|Blue
+2|Boston
+2|Boyzone
+2|Chic
+2|Culture Club
+2|Devo
+2|Dire Straits
+2|EXO
+2|East 17
+2|Elbow
+2|Electric Light Orchestra|ELO
+2|Erasure
+2|Eternal
+2|Europe
+2|Feeder
+2|Foreigner
+3|Franz Ferdinand
+3|Genesis
+3|Girls' Generation
+3|Glass Animals
+3|Haim
+3|Hanson
+3|Happy Mondays
+3|Hear'Say
+3|Human League
+3|Joy Division
+3|Kasabian
+3|Keane
+3|Kings of Leon
+3|Kraftwerk
+3|Le Sserafim
+3|Liberty X
+3|Lynyrd Skynyrd
+3|Madness
+3|Mamamoo
+3|Manic Street Preachers
+3|Massive Attack
+3|OutKast
+3|Pet Shop Boys
+3|Pixies
+3|Public Enemy
+3|Pulp
+3|Ramones
+3|Red Velvet
+3|Roxette
+3|Roxy Music
+3|Run-DMC
+3|Rush
+3|Sex Pistols
+3|Simple Minds
+3|Simply Red
+3|Slade
+3|Snow Patrol
+3|Soft Cell
+3|Sonic Youth
+3|Spandau Ballet
+3|Status Quo
+3|Steely Dan
+3|Steps
+3|Stereophonics
+3|Sugababes
+3|Super Junior
+3|Supertramp
+3|TLC
+3|Tame Impala
+3|Texas
+3|The 1975
+3|The Animals
+3|The B-52's
+3|The Byrds
+3|The Cure
+3|The Hollies
+3|The Kinks
+3|The Libertines
+3|The Monkees
+3|The Offspring
+3|The Pretenders
+3|The Prodigy
+3|The Specials
+3|The Verve
+3|The Wanted
+3|Thin Lizzy
+3|Tomorrow X Together|TXT
+3|UB40
+3|Wet Wet Wet
+3|Wu-Tang Clan
+3|Yes
+3|ZZ Top
+3|The Strokes
+3|Nickelback
+3|Weezer
+3|Deftones
+3|Uriah Heep
+3|New Order
+3|The Smashing Pumpkins|TSP
+3|The Rasmus
+3|HIM|HER|His Infernal Majesty|Thulsa D
+3|+44
+3|10 Years
+3|10,000 Maniacs
+3|12 Stones
+3|13 Engines
+3|3 Doors Down
+3|311
+3|4 Non Blondes
+3|54-40
+3|8stops7
+3|A
+3|A Day to Remember
+3|A Perfect Circle
+3|A Rocket to the Moon
+3|A Silent Film
+3|AFI
+3|Aaroh
+3|Abandon Kansas
+3|Abandoned Pools
+3|Acceptance
+3|Acid Bath
+3|Acroma
+3|Adam Again
+3|Adema
+3|Adorable
+3|After Midnight Project
+3|Against Me!
+3|Against the Current
+3|Age of Chance
+3|Air
+3|Alexandros
+3|Alien Ant Farm
+3|Alkaline Trio
+3|All Time Low
+3|Alpha Rev
+3|Alt-J
+3|Alter Bridge
+3|American Authors
+3|American Hi-Fi
+3|American Standards
+3|Amplifier
+3|Anathema
+3|Anberlin
+3|Andy Biersack
+3|Animal Collective
+3|Arcade Fire
+3|Arch Enemy
+3|Architects
+3|Avenged Sevenfold
+3|Basement Jaxx
+3|Belle and Sebastian
+3|Biffy Clyro
+3|Big Thief
+3|Black Country New Road
+3|Boards of Canada
+3|Bon Iver
+4|Boygenius
+4|Bring Me the Horizon
+4|Bullet for My Valentine
+4|Buzzcocks
+4|Can
+4|Chemical Brothers
+4|Cocteau Twins
+4|Cream
+4|Dream Theater
+4|Einstürzende Neubauten
+4|Faust
+4|Fleet Foxes
+4|Fontaines DC
+4|Funkadelic
+4|Gang of Four
+4|Gerry and the Pacemakers
+4|Gojira
+4|Grizzly Bear
+4|Idles
+4|In Flames
+4|Incubus
+4|Interpol
+4|Justice
+4|Kent
+4|Khruangbin
+4|Korn
+4|Kyuss
+4|LCD Soundsystem
+4|Leftfield
+4|Limp Bizkit
+4|Lordi
+4|MC5
+4|MGMT
+4|Magazine
+4|Mando Diao
+4|Martha and the Vandellas
+4|Mew
+4|Mogwai
+4|My Bloody Valentine
+4|Neu
+4|New York Dolls
+4|Nightwish
+4|Opeth
+4|Orbital
+4|Parliament
+4|Phoenix
+4|Primal Scream
+4|Queens of the Stone Age
+4|Rage Against the Machine
+4|Rammstein
+4|Sigur Ros
+4|Siouxsie and the Banshees
+4|Slipknot
+4|Slowdive
+4|Sly and the Family Stone
+4|System of a Down
+4|TV on the Radio
+4|Tangerine Dream
+4|Teenage Fanclub
+4|Television
+4|The 77s
+4|The Academy Is...
+4|The Afghan Whigs
+4|The Alarm
+4|The All-American Rejects
+4|The Almost
+4|The Amps
+4|The Black Keys
+4|The Damned
+4|The Drifters
+4|The Everly Brothers
+4|The Fall
+4|The Four Seasons
+4|The Four Tops
+4|The Hives
+4|The Jesus and Mary Chain
+4|The National
+4|The Platters
+4|The Ronettes
+4|The Searchers
+4|The Shadows
+4|The Shangri-Las
+4|The Stooges
+4|The Sugarcubes
+4|The Teardrop Explodes
+4|The Temptations
+4|The Yardbirds
+4|The Zombies
+4|Tool
+4|Underworld
+4|Vampire Weekend
+4|Wet Leg
+4|Wire
+4|XTC
+4|Yeah Yeah Yeahs
+4|Jethro Tull|Tull
+4|King Crimson
+4|Travis
+4|Three Days Grace|TDG|Groundswell|3DG|3 Days Grace
+4|The Stone Roses
+4|Marilyn Manson|Marilyn Manson and the Spooky Kids
+4|T. Rex
+4|Audioslave
+4|Dark Tranquillity
+4|Kreator
+4|DragonForce
+4|Emerson, Lake & Palmer|ELP|EL&P|Emmerson, Lake & Palmer|Fab Three|Keith, Greg and Carl|The Lads from Croydon
+4|The Cardigans
+4|Heart
+4|Suede|London Suede
+4|Santana
+4|Bloc Party
+4|Godsmack
+4|The Jam
+4|Breaking Benjamin
+4|Ensiferum
+4|Die Toten Hosen|Toten Hosen
+4|Echo & the Bunnymen|Bunnymen
+4|Hole
+4|Kamelot
+4|Nazareth
+4|OK Go
+4|Rise Against|Transistor Revolt
+4|Stone Temple Pilots|Mighty Joe Young|STP
+4|Black Flag
+4|Kansas
+4|Seether|Saron Gas
+4|Soulfly
+4|Steppenwolf
+4|Talk Talk
+4|Twisted Sister
+4|Aria
+4|Noir Désir
+4|Smokie|Smokey
+4|Half Japanese
+4|Staind
+4|Stone Sour
+4|Survivor
+4|The Cars
+4|Traffic
+4|Rotting Christ
+4|The Hu|Hu Band|TheHu
+4|Yellowcard
+4|Band-Maid|Band-Maiko
+4|Blind Channel
+4|Iron Butterfly
+4|Rancid
+4|Small Faces
+4|The Lumineers|Wesley Jeremiah
+4|Annihilator
+4|Eagles of Death Metal
+4|Midnight Oil|The Oils
+4|Styx
+4|Suicide Silence
+4|Switchfoot
+4|The Warning
+4|Chumbawamba
+4|Goo Goo Dolls
+4|Killing Joke
+4|Parkway Drive
+4|Sevendust
+4|The Doobie Brothers
+4|Aphrodite's Child
+4|F.T. Island|Five Treasure Island
+4|Hawkwind|Hawkwind Zoo
+4|KMFDM|Kein Mehrheit für die Mitleid
+4|Ministry
+4|The Calling
+4|The Exploited
+4|Daughtry
+4|Sirenia
+4|Smash Mouth
+4|Sparks|Halfnelson
+4|Wishbone Ash
+4|Blessthefall
+4|Free
+4|Lady Pank
+4|Lifehouse|Blyss
+4|Norther
+4|Pertti Kurikan Nimipäivät
+4|Rascal Flatts
+4|Social Distortion
+4|Soul Asylum
+4|Tom Petty and the Heartbreakers
+4|Voivod
+4|Ayreon
+4|Black Label Society
+4|Eels
+4|Hypocrisy
+4|Mano Negra
+4|Mumiy Troll
+4|Nautilus Pompilius|Nautilus|Nau|Ali Baba and the Forty Thieves
+4|Super Furry Animals
+4|Anti Social Media
+4|Girlschool
+4|Krokus
+4|Mad Season
+4|Metsatöll
+4|Silbermond
+4|Ten Years After
+4|The Tremeloes
+4|Therapy?
+4|Violent Femmes
+4|Black Rebel Motorcycle Club
+4|Dope
+4|Mr. Mister
+4|Ocean Colour Scene|OCS
+4|Sonic Syndicate
+4|The Horrors
+4|Alabama Shakes
+4|Atreyu
+4|Babes in Toyland
+4|Bi-2
+4|Discharge
+4|Eloy
+4|Hinder
+4|Runrig
+4|The Makemakes
+4|The Move
+4|The Vines
+4|Winger
+4|Barenaked Ladies|BNL
+4|Boris
+4|Fates Warning
+4|Hanoi Rocks
+4|Live|+LĪVE+
+4|Ride
+4|Silverstein
+4|Skyclad
+4|The J. Geils Band|The J. Geils Blues Band|The J. Geils
+4|White Lion
+4|You Me at Six
+4|Gong
+4|Amon Düül II
+4|Camel
+4|Caravan
+4|Clannad
+4|Comus
+4|Fairport Convention
+4|Felt
+4|Gentle Giant
+4|Hatfield and the North
+4|Henry Cow
+4|Horslips
+4|Josef K
+4|Love
+4|Magma
+4|Orange Juice
+4|Os Mutantes
+4|Pentangle
+4|Planxty
+4|Popol Vuh
+4|Radio Birdman
+4|Renaissance
+4|Silver Apples
+4|Soft Machine
+4|Spirit
+4|Steeleye Span
+4|Stiff Little Fingers
+4|Tall Dwarfs
+4|The 13th Floor Elevators
+4|The Association
+4|The Bothy Band
+4|The Chieftains
+4|The Chills
+4|The Clean
+4|The Dubliners
+4|The Durutti Column
+4|The Go-Betweens
+4|The Incredible String Band
+4|The Left Banke
+4|The Monks
+4|The Pastels
+4|The Pogues
+4|The Raincoats
+4|The Saints
+4|The Seeds
+4|The Shaggs
+4|The Sonics
+4|The Triffids
+4|The Undertones
+4|The United States of America
+4|The Verlaines
+4|Trees
+4|Van der Graaf Generator
+4|Young Marble Giants
+4|The Slits
 ` });
 EVO.cat({ ...{"id": "novels", "name": "Novels", "icon": "📖", "q": "Name a **novel**.", "strip": ["novel", "book"], "level": 2}, list: `
 0|Alice's Adventures in Wonderland|Alice in Wonderland|Alice's Adventures Underground

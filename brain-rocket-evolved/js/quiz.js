@@ -122,6 +122,48 @@ const Quiz = (function () {
     return best && { h: best, d: bestD };
   }
 
+  // Words that pick out an answer: each word (4+ letters) of any of its names, unless it's one of the
+  // words players add ("dog") or so common in the list that it doesn't say which answer you mean
+  // (more than 3 answers have it, like "terrier" or "lake"). Typing one of these words counts as
+  // the best-known answer that has it.
+  const WORD_MAX = 3;
+  const STOP = new Set(['the', 'and', 'of', 'for', 'with', 'from', 'that', 'this', 'into']);
+  const stem = w => w.length > 4 ? w.replace(/(ies)$/, 'y').replace(/(es|s)$/, '') : w;
+  function words(c) {
+    if (c.words) return c.words;
+    const map = new Map();
+    for (const h of c.index.values()) {
+      for (const w of h.v.norm.split(' ')) {
+        if (w.length < 4 || STOP.has(w) || c.strip.includes(w)) continue;
+        const k = stem(w);
+        if (!map.has(k)) map.set(k, new Set());
+        map.get(k).add(h.ent);
+      }
+    }
+    c.words = new Map(); c.common = new Set();
+    for (const [w, ents] of map) {
+      if (ents.size > WORD_MAX) { c.common.add(w); continue; }
+      const best = [...ents].sort((a, b) => a.tier - b.tier || a.id - b.id)[0];
+      c.words.set(w, { ent: best, v: { raw: best.name, norm: norm(best.name), key: keyOf(best.name) } });
+    }
+    return c.words;
+  }
+  function byWord(c, text, typo) {
+    const k = stem(keyOf(text));
+    if (k.length < 4 || norm(text).includes(' ')) return null;
+    const W = words(c);
+    if (W.has(k)) return W.get(k);
+    if (!typo) return null;
+    const max = allowance(k.length);
+    let best = null, bestD = max + 1;
+    for (const [w, h] of W) {
+      if (Math.abs(w.length - k.length) > max) continue;
+      const d = lev(k, w, max);
+      if (d < bestD) { bestD = d; best = h; }
+    }
+    return best;
+  }
+
   /* -> { ent, v, fuzzy } or null */
   function find(c, input) {
     c = built(c);
@@ -134,6 +176,8 @@ const Quiz = (function () {
       if (words.length && words.length < n.split(' ').length) tries.push(words.join(' '));
     }
     for (const t of tries) { const hit = exact(c, t); if (hit) return { ...hit, fuzzy: false }; }
+    // one distinctive word of an answer's name: "pops" for Corn Pops, "hairless" for Sphynx
+    for (const t of tries) { const hit = byWord(c, t, false); if (hit) return { ...hit, fuzzy: false }; }
     // an answer said inside a longer phrase: "a big golden retriever"
     const padded = ` ${n} `;
     let best = null;
@@ -141,10 +185,20 @@ const Quiz = (function () {
       if (h.v.key.length >= 4 && padded.includes(` ${h.v.norm} `) && (!best || h.v.norm.length > best.v.norm.length)) best = h;
     }
     if (best) return { ...best, fuzzy: false };
+    // a word lots of answers share ("terrier", "republic") doesn't say which one you mean
+    const single = !n.includes(' ');
+    if (single) { words(c); if (c.common.has(stem(keyOf(n)))) return null; }
     // the closest typo match over both versions ("beagel dog" is one letter off "beagle")
     let pick = null;
     for (const t of tries) { const f = fuzzy(c, t); if (f && (!pick || f.d < pick.d)) pick = f; }
-    return pick ? { ...pick.h, fuzzy: true } : null;
+    // ...and a misspelt shared word ("retreiver") isn't taken for an answer it's further from
+    if (pick && single) {
+      const k = stem(keyOf(n)), lim = Math.min(2, allowance(k.length));
+      for (const w of c.common) if (Math.abs(w.length - k.length) <= lim && lev(k, w, lim) < pick.d) return null;
+    }
+    if (pick) return { ...pick.h, fuzzy: true };
+    for (const t of tries) { const hit = byWord(c, t, true); if (hit) return { ...hit, fuzzy: true }; }
+    return null;
   }
 
   /* Every answer for the reveal list, rarest first, with the names the player could have typed. */

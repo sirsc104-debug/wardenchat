@@ -305,6 +305,11 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 .arch-day b { font-size: 20px; }
 .arch-day span { color: var(--muted); }
 
+.miss-btns { display: flex; gap: 12px; flex-wrap: wrap; margin: 6px 0 14px; }
+.miss-list { display: grid; gap: 8px; }
+.miss-cat { padding: 8px 12px; border-radius: 12px; background: rgba(255,255,255,0.05); }
+.miss-cat b { display: block; color: var(--gold); font-weight: 600; }
+.miss-text { position: absolute; left: -9999px; width: 10px; height: 10px; }
 .toast { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); background: var(--panel-2); border: 2px solid var(--edge); border-radius: 999px; padding: 12px 24px; font-size: 20px; font-weight: 600; z-index: 30; animation: card-in 0.3s; }
 
 /* ---------- phones held upright ---------- */

@@ -279,6 +279,7 @@
     if (!hit) {
       if (BadWords.test(text)) return crash();
       G.pending = null;
+      noteMiss(G.cat, text);
       Sound.wrong();
       a.classList.remove('shake'); void a.offsetWidth; a.classList.add('shake');
       fb.innerHTML = classic() ? `<span class="bad">“${esc(text)}” isn't on the list.</span> Try another!`
@@ -477,6 +478,7 @@
     else note = (r.best ? `🏆 A new ${m.name} best! ` : `${m.name} best: ${fmt((bests()[r.diff] || { score: 0 }).score)}. `) + (r.picks.length > 10 ? 'Your last 10 questions:' : 'Tap a question to see every answer.');
     $('overNote').textContent = note;
     show('btnShare', daily);
+    paintMisses();
     $('btnAgain').textContent = daily ? 'Play Endless' : 'Fly again';
     if (r.score > 0 && !r.crashed) Scene.confetti(80);
   }
@@ -497,6 +499,39 @@
   function toast(msg) {
     const t = $('toast'); t.textContent = msg; t.classList.remove('hidden');
     clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.add('hidden'), 2200);
+  }
+
+  // ---- Answers that didn't count ---------------------------------------------------------------
+  // Kept in this browser (the newest 300), so the player can copy them and send them in to be added.
+  const misses = () => store.get('missed', []);
+  function noteMiss(c, text) {
+    const all = misses(), k = Quiz.keyOf(text);
+    if (all.some(m => m.cat === c.id && Quiz.keyOf(m.text) === k)) return;
+    all.push({ cat: c.id, text: text.slice(0, 60) });
+    store.set('missed', all.slice(-300));
+  }
+  function missSheet() {
+    const all = misses();
+    const by = new Map();
+    for (const m of all) { if (!by.has(m.cat)) by.set(m.cat, []); by.get(m.cat).push(m.text); }
+    const plain = [...by].map(([id, list]) => { const c = Quiz.get(id); return `${c ? c.q.replace(/\*\*/g, '') : id} ${list.join(', ')}`; }).join('\n');
+    sheet('📝 Answers that didn\'t count', all.length ? `
+      <p>Think one of these should have counted? Copy the list and send it in, and it can be added.</p>
+      <div class="miss-btns"><button type="button" class="go-btn small" id="missCopy">📋 Copy list</button><button type="button" class="ghost-btn" id="missClear">Clear the list</button></div>
+      <div class="miss-list">${[...by].map(([id, list]) => { const c = Quiz.get(id); return `<div class="miss-cat"><b>${c ? c.q.replace(/\*\*(.+?)\*\*/g, '$1') : esc(id)}</b> ${list.map(esc).join(', ')}</div>`; }).join('')}</div>
+      <textarea class="miss-text" id="missText" readonly aria-label="The list as text">${esc(plain)}</textarea>`
+      : '<p>Nothing yet. Answers you type that aren\'t on the list show up here, so you can send them in.</p>');
+    const copy = $('missCopy');
+    if (copy) copy.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(plain); toast('Copied! Paste it anywhere.'); }
+      catch (e) { const t = $('missText'); t.focus(); t.select(); toast('Press Ctrl+C (or ⌘C) to copy.'); }
+    });
+    const clear = $('missClear');
+    if (clear) clear.addEventListener('click', () => { store.set('missed', []); missSheet(); paintMisses(); });
+  }
+  function paintMisses() {
+    const n = misses().length;
+    document.querySelectorAll('[data-misses]').forEach(el => { el.textContent = n ? `📝 Didn't count (${n})` : ''; el.classList.toggle('hidden', !n); });
   }
 
   // ---- Sheets: every answer, the archive, how to play ---------------------------------------
@@ -606,8 +641,9 @@
     document.querySelectorAll('.type-btn').forEach(b => { const on = b.dataset.tab === t; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
     show('paneDaily', t === 'daily'); show('paneEndless', t === 'endless');
     $('tagline').textContent = TABS[t].tagline;
-    $('howBox').innerHTML = TABS[t].how + `<div class="how-links"><button type="button" class="link-btn" data-act="how">How to play</button>${t === 'daily' ? '<button type="button" class="link-btn" data-act="archive">⟲ Archive</button>' : ''}</div>`;
-    $('howBox').querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => { Sound.click(); b.dataset.act === 'how' ? howSheet() : archiveSheet(); }));
+    $('howBox').innerHTML = TABS[t].how + `<div class="how-links"><button type="button" class="link-btn" data-act="how">How to play</button>${t === 'daily' ? '<button type="button" class="link-btn" data-act="archive">⟲ Archive</button>' : ''}<button type="button" class="link-btn hidden" data-act="misses" data-misses></button></div>`;
+    $('howBox').querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => { Sound.click(); ({ how: howSheet, archive: archiveSheet, misses: missSheet })[b.dataset.act](); }));
+    paintMisses();
     placeGlider();
   }
 
@@ -666,6 +702,7 @@
   document.querySelectorAll('.type-btn').forEach(b => b.addEventListener('click', () => { if (b.dataset.tab !== tab) { Sound.click(); setTab(b.dataset.tab); } }));
   document.querySelectorAll('.mode-card').forEach(b => b.addEventListener('click', () => { Sound.click(); startEndless(b.dataset.mode); }));
   $('btnShare').addEventListener('click', share);
+  $('btnMisses').addEventListener('click', () => { Sound.click(); missSheet(); });
   $('btnAgain').addEventListener('click', () => {
     Sound.click();
     if (G.result && G.result.mode === 'endless') startEndless(G.result.diff);

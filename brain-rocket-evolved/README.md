@@ -5,6 +5,9 @@ category, and the rarer your answer, the further your rocket flies. What changed
 
 - **One answer per prompt.** You get 25 seconds and one shot. An answer that isn't on the list
   doesn't use up your shot, so you can try another. The first real answer locks in.
+- **Part of a name counts.** One distinctive word of an answer is enough ("pops" for Corn Pops,
+  "hairless" for Sphynx, "zealand" for New Zealand), unless lots of answers share it ("terrier").
+  Categories can also list nicknames and slang that Wikidata doesn't have (Chevy, Frenchie, Cali).
 - **Very forgiving spelling.** Up to about a third of a long name can be wrong, and spellings that
   sound right count too ("chiwawa", "rotwiler", "phillipines"). The game shows what it read your
   answer as.
@@ -15,6 +18,9 @@ category, and the rarer your answer, the further your rocket flies. What changed
   Pokémon, Best Picture winners. There are no letter rules and no fuzzy "a type of…" prompts.
 - **Rarity worked out from data, not guessed.** An answer's tier comes from how many language
   editions of Wikipedia cover it, nudged by its Brain Rocket tier when it had one.
+- **Answers that didn't count are kept** (in the browser), and "📝 Didn't count" on the home screen
+  and the results lists them with a Copy button, so they can be sent in and added to
+  `tools/categories.py` (as `add` answers or `nick` names).
 - **Every answer is shown** after each prompt, and on the results. You can search them and filter
   them by tier.
 - **New art and music.** The rocket is the same, but everything around it is new: a dusk spaceport
@@ -59,6 +65,7 @@ A timeout scores 0 (⬛). A swear word crashes the rocket and ends the run with 
 ```
 node tools/export_br.js > tools/cache/br-topics.json   # once, or when Brain Rocket's lists change
 python3 tools/build_answers.py --report                # fetches what isn't cached, then writes js/answers.js
+python3 tools/build_cached.py                          # the same from what's already downloaded (no fetching)
 ```
 
 - **`tools/categories.py`** holds the categories: the prompt, its Wikidata sources, which Brain

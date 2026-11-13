@@ -96,10 +96,12 @@ def build(cat, report=False):
                 e = {'name': a['name'], 'names': names, 'links': 0, 'br': a['tier']}
                 ents.append(e)
                 for n in names: by_key.setdefault(key(n), e)
+    # hand-added answers: 'Name/alias/alias@tier', the tier as in Brain Rocket's lists (1 = very common)
     for line in cat.get('add', []):
+        line, _, t = line.partition('@')
         names = [n.strip() for n in line.split('/') if n.strip()]
         if any(key(n) in by_key for n in names): continue
-        e = {'name': names[0], 'names': names, 'links': 0, 'br': 4}
+        e = {'name': names[0], 'names': names, 'links': 0, 'br': int(t) if t else 4}
         ents.append(e)
         for n in names: by_key[key(n)] = e
     # nicknames and slang ("Soob" for Subaru): added to whichever answer has that name
@@ -173,25 +175,32 @@ def build(cat, report=False):
     return ents, lines
 
 
+HEADER = ('/* Brain Rocket – Evolved answer lists. Built by tools/build_answers.py from Wikidata and Brain\n'
+          ' * Rocket\'s lists; do not edit by hand. One answer per line: tier|shown name|alias|…\n'
+          ' * Tiers: 0 Launch Pad, 1 Space Junk, 2 Orbiter, 3 Moonshot, 4 Deep Space, 5 Supernova. */\n')
+
+
+def entry(c, lines):
+    meta = {k: c[k] for k in ('id', 'name', 'icon', 'q', 'strip', 'level') if k in c}
+    if c.get('noDaily'): meta['noDaily'] = True
+    body = '\n'.join(lines)
+    assert '`' not in body and '${' not in body and '</script' not in body.lower()
+    return f"EVO.cat({{ ...{json.dumps(meta, ensure_ascii=False)}, list: `\n{body}\n` }});\n"
+
+
 def main():
     report = '--report' in sys.argv
     only = [a for a in sys.argv[1:] if not a.startswith('--')]
     cats = [c for c in CATEGORIES if not only or c['id'] in only]
     wiki.fetch([s for c in cats for s in c.get('src', [])])
-    out = ['/* Brain Rocket – Evolved answer lists. Built by tools/build_answers.py from Wikidata and Brain\n'
-           ' * Rocket\'s lists; do not edit by hand. One answer per line: tier|shown name|alias|…\n'
-           ' * Tiers: 0 Launch Pad, 1 Space Junk, 2 Orbiter, 3 Moonshot, 4 Deep Space, 5 Supernova. */\n']
+    out = [HEADER]
     total = 0
     for c in cats:
         ents, lines = build(c, report)
         if len(ents) < c.get('min', 25):
             print(f"!! {c['id']} has only {len(ents)} answers; left out"); continue
         total += len(ents)
-        meta = {k: c[k] for k in ('id', 'name', 'icon', 'q', 'strip', 'level') if k in c}
-        if c.get('noDaily'): meta['noDaily'] = True
-        body = '\n'.join(lines)
-        assert '`' not in body and '${' not in body and '</script' not in body.lower()
-        out.append(f"EVO.cat({{ ...{json.dumps(meta, ensure_ascii=False)}, list: `\n{body}\n` }});\n")
+        out.append(entry(c, lines))
     if not only:
         open(OUT, 'w', encoding='utf-8').write(''.join(out))
         print(f'{len(out) - 1} categories, {total} answers, {os.path.getsize(OUT) // 1024} KB -> js/answers.js')
