@@ -659,6 +659,29 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   console.log(`daily quests (${q1.map(q => q.text).join('; ')}), crown chest, win streak: ok`);
 }
 
+// Deck slots, warnings, suggestions and practice
+{
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 1500, best: 1500, claimed: { 0: true }, deck: KC_STARTER_DECK, found: KC_ALL_CARDS.slice(0, 30) }) }));
+  const P9 = G.state;
+  assert.strictEqual(P9.decks.length, 5, 'five deck slots'); assert.strictEqual(P9.deckSlot, 0);
+  assert(P9.decks.every(d => d.join() === KC_STARTER_DECK.join()), 'an older deck fills every slot');
+  assert.deepStrictEqual(G.deckWarnings(), [], 'the starter deck is sound');
+  assert(G.deckWarnings(['rhino', 'wolves', 'gladiator', 'gorilla', 'skeletons', 'cannon', 'footmen', 'flail']).some(w => /flying/.test(w)), 'a deck with nothing for flyers is warned about');
+  const sg = G.suggestDeck(null, KCSim.mulberry(5));
+  assert(sg && sg.deck.length === 8 && sg.deck.every(id => P9.found.includes(id)), 'a suggested deck from your cards');
+  assert(G.setWholeDeck(sg.deck) && P9.decks[0].join() === sg.deck.join());
+  assert(G.useDeckSlot(3) && P9.deck.join() === KC_STARTER_DECK.join() && G.useDeckSlot(0) && P9.deck.join() === sg.deck.join(), 'slots keep their decks');
+  assert(G.setDeck(0, 'wolves') && P9.decks[0][0] === 'wolves', 'changing a card changes the slot');
+  const before = JSON.stringify([P9.trophies, P9.rubies, P9.chests, P9.trophyRecord]);
+  const pf = G.practiceFoe('meteor', KCSim.mulberry(2));
+  assert(pf.kind === 'practice' && pf.yourDeck.includes('meteor') && pf.yourDeck.length === 8 && new Set(pf.yourDeck).size === 8, 'try a card you have not found');
+  assert(pf.yourLevels.meteor >= KC_MIN_LEVEL('meteor'));
+  assert.strictEqual(JSON.stringify([P9.trophies, P9.rubies, P9.chests, P9.trophyRecord]), before, 'practice changes nothing');
+  const reload = G.load(mem({ 'kc.progress': JSON.stringify(P9) }));
+  assert.strictEqual(reload.decks[0].join(), P9.decks[0].join(), 'deck slots are saved');
+  console.log(`deck slots, warnings, a suggested ${sg.name} deck, practice with a card to try: ok`);
+}
+
 // 9. Matchmaking: the win rate of a steady player who keeps their cards level with their trophies, and
 //    of one who never upgrades.
 const N = +process.argv[2] || 120;

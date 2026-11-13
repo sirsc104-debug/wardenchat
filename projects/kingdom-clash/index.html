@@ -72,6 +72,7 @@
               <canvas id="oppPic" width="96" height="96" aria-hidden="true"></canvas>
               <div class="opp-text"><small id="oppLabel">Next Opponent</small><b id="oppName">Trainer Owen</b><span id="oppMeta">Tutorial</span></div>
               <button class="opp-change" id="oppChange" type="button" aria-expanded="false" aria-controls="oppPanel">Trainers <span aria-hidden="true">&#9662;</span></button>
+              <button class="online-btn practice-btn" id="practiceBtn" type="button" title="A practice battle: no trophies, nothing won or lost" hidden>Practice</button>
               <button class="online-btn" id="onlineBtn" type="button" title="Battle other players online"><span class="ob-dot" aria-hidden="true"></span>Online</button>
               <div class="opp-panel" id="oppPanel" hidden><ul id="oppList"></ul></div>
             </div>
@@ -110,12 +111,18 @@
           <div class="plaque deck-plaque">
             <div class="ribbon"><span>Battle Deck</span></div>
             <div class="avg" title="Average energy cost"><span class="drop" aria-hidden="true"></span><b id="avgCost">3.5</b><small>average energy</small></div>
+            <div class="deck-tools"><div class="deck-slots" id="deckSlots" role="tablist" aria-label="Deck slots"></div><button class="mini-btn" id="suggestBtn" type="button" title="Build a deck from your cards in one of the play styles">Suggest a deck</button></div>
             <div class="swap-bar" id="swapBar" hidden><span id="swapText">Pick a card in your deck to swap out</span><button class="mini-btn" id="swapCancel" type="button">Cancel</button></div>
             <div class="deck-row" id="deckRow"></div>
+            <ul class="deck-warn" id="deckWarn" hidden></ul>
           </div>
           <div class="plaque coll-plaque">
             <div class="ribbon"><span>Card Collection</span></div>
             <small class="found" id="foundCount">8 / 8 found</small>
+            <div class="coll-tools">
+              <label class="coll-sort">Sort <select id="collSort"><option value="arena">By arena</option><option value="cost">By energy</option><option value="rarity">By rarity</option><option value="level">By level</option><option value="name">By name</option></select></label>
+              <div class="coll-filter" id="collFilter" role="group" aria-label="Show"><button type="button" class="on" data-f="all">All</button><button type="button" data-f="troop">Troops</button><button type="button" data-f="spell">Spells</button><button type="button" data-f="building">Buildings</button><button type="button" data-f="up">Can upgrade</button><button type="button" data-f="missing">Not found</button></div>
+            </div>
             <div class="coll-grid" id="collGrid"></div>
             <p class="dim" id="collNote">Collect copies from chests, then spend rubies to level a card up (up to level 15).</p>
           </div>
@@ -313,6 +320,7 @@
           <div class="m-actions">
             <button class="up-btn" id="mUpgrade" type="button"><span>Upgrade</span><small id="mUpCost"><i class="ruby-i" aria-hidden="true"></i>5</small></button>
             <button class="use-btn" id="mUse" type="button">Use</button>
+            <button class="use-btn try-btn" id="mTry" type="button" title="A practice battle with this card in your deck: nothing won or lost">Try it</button>
             <span class="m-note" id="mNote"></span>
           </div>
           <div class="m-magic" id="mMagic" hidden></div>

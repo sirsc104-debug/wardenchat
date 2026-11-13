@@ -2121,3 +2121,21 @@ button.slot:hover { transform: translateY(-3px); }
 #chests .slot { position: relative; }
 @media (prefers-reduced-motion: reduce) { .hint-tip { animation: none; } }
 .daily-btn { flex-basis: 150px; }
+
+/* deck slots, warnings, suggestions; collection sort and filter */
+.deck-tools { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.deck-slots { display: flex; gap: 6px; }
+.deck-slots .ds { width: 36px; height: 36px; border-radius: 10px; border: 3px solid var(--outline); background: #3a3263; color: #d9cfee; font-weight: 900; font-size: 16px; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.3); }
+.deck-slots .ds.on { background: linear-gradient(#ffe066, #ffb52b); color: #1c1530; }
+.deck-warn { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.deck-warn li { font-size: 12px; font-weight: 800; color: #ffd9a8; background: rgba(255, 150, 40, 0.15); border: 1px solid rgba(255, 170, 60, 0.4); padding: 3px 10px; border-radius: 99px; }
+.deck-warn li::before { content: '! '; color: #ffb347; }
+.coll-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 4px 0 10px; }
+.coll-sort { font-size: 13px; font-weight: 800; color: #d9cfee; display: flex; align-items: center; gap: 6px; }
+.coll-sort select { font: inherit; color: #fff; background: #2b2452; border: 2px solid var(--outline); border-radius: 8px; padding: 4px 6px; }
+.coll-filter { display: flex; gap: 4px; flex-wrap: wrap; }
+.coll-filter button { font-size: 12px; font-weight: 800; color: #d9cfee; background: #2b2452; border: 2px solid var(--outline); border-radius: 99px; padding: 3px 10px; }
+.coll-filter button.on { background: #5a4bb0; color: #fff; }
+.coll-empty { grid-column: 1 / -1; }
+.try-btn { background: linear-gradient(#6fd0ff, #2f8fe4); }
+.practice-btn { background: linear-gradient(#5c5196, #3d3470); }

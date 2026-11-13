@@ -312,6 +312,7 @@ const KCProgress = (() => {
   // Copies and rubies to go from level L to L+1 (index 0 is level 1 to 2).
   // Copies and rubies to go from level L to L+1 (index 0 is level 1 to 2); from the economy above.
   const UPGRADE = { copies: ECONOMY.upgradeCopies, rubies: ECONOMY.upgradeGold };
+  const DECK_SLOTS = 5;
 
   // Trophy opponents look like any other player. They don't talk (no speech bubbles or result lines).
   const FOE_NAMES = ['EmberFox', 'Kestrel', 'MossKnight', 'Juno77', 'BrickTop', 'Lumen', 'NovaRae', 'Quillon', 'RowanK', 'Tidebreaker',
@@ -391,7 +392,12 @@ const KCProgress = (() => {
     P.emotes = Array.isArray(P.emotes) ? P.emotes.filter(id => EMOTES.some(e => e.id === id)) : [];
     P.pass = Object.assign({ season: 1, points: 0, premium: false, free: {}, paid: {} }, P.pass);
     P.found = KC_ALL_CARDS.filter(id => P.found.includes(id));
-    if (!Array.isArray(P.deck) || P.deck.length !== 8 || new Set(P.deck).size !== 8 || P.deck.some(id => !P.found.includes(id))) P.deck = KC_STARTER_DECK.slice();
+    const okDeck = d => Array.isArray(d) && d.length === 8 && new Set(d).size === 8 && d.every(id => P.found.includes(id));
+    if (!okDeck(P.deck)) P.deck = KC_STARTER_DECK.slice();
+    // five deck slots: an older save's deck becomes the first, and the others start as copies of it
+    P.decks = Array.from({ length: DECK_SLOTS }, (_, i) => (Array.isArray(P.decks) && okDeck(P.decks[i]) ? P.decks[i].slice() : P.deck.slice()));
+    P.deckSlot = Math.max(0, Math.min(DECK_SLOTS - 1, P.deckSlot | 0));
+    P.decks[P.deckSlot] = P.deck.slice();
     while (P.chests.length < 4) P.chests.push(null);
     if (roadOpen() && !P.claimed[0]) P.claimed[0] = true; // the first arena opens with the road
     // A trophy battle that was left before it ended (the page was reloaded or closed) counts as a loss,
@@ -1343,8 +1349,69 @@ const KCProgress = (() => {
     if (was === slot) return true;
     if (was >= 0) P.deck[was] = P.deck[slot];
     P.deck[slot] = id;
+    P.decks[P.deckSlot] = P.deck.slice();
     save();
     return true;
+  }
+  // deck slots: pick which of the five decks you battle with
+  function useDeckSlot(i) {
+    if (i < 0 || i >= DECK_SLOTS) return false;
+    P.decks[P.deckSlot] = P.deck.slice();
+    P.deckSlot = i;
+    P.deck = P.decks[i].slice();
+    save();
+    return true;
+  }
+  // put a whole deck of eight cards you have found into the current slot
+  function setWholeDeck(cards) {
+    if (!Array.isArray(cards) || cards.length !== 8 || new Set(cards).size !== 8 || !cards.every(id => P.found.includes(id))) return false;
+    P.deck = cards.slice();
+    P.decks[P.deckSlot] = P.deck.slice();
+    save();
+    return true;
+  }
+  // What a deck is missing, as short warnings (none for a sound deck).
+  function deckWarnings(deck = P.deck) {
+    const Bot = typeof KCBot !== 'undefined' ? KCBot : null, out = [];
+    if (!Bot) return out;
+    const avg = deck.reduce((a, id) => a + KC_CARDS[id].cost, 0) / deck.length;
+    if (deck.filter(Bot.hitsAir).length < 2) out.push('Only ' + deck.filter(Bot.hitsAir).length + ' card' + (deck.filter(Bot.hitsAir).length === 1 ? '' : 's') + ' can hit flying troops');
+    if (!deck.some(id => KC_CARDS[id].kind === 'spell' && KC_CARDS[id].dmg > 0)) out.push('No damage spell for groups of troops');
+    if (!deck.some(id => Bot.WIN_CARDS.has(id))) out.push('No card that heads straight for towers');
+    if (avg > 4.3) out.push(`Expensive: ${avg.toFixed(1)} energy on average`);
+    if (!deck.some(id => KC_CARDS[id].cost <= 2)) out.push('No cheap card (2 energy or less) to answer quickly');
+    return out;
+  }
+  // a suggested deck from the cards you have, in one of the play styles (and its name)
+  function suggestDeck(style, rand = Math.random) {
+    const Bot = typeof KCBot !== 'undefined' ? KCBot : null;
+    if (!Bot) return null;
+    // a style you have the cards for: one of its win conditions and at least three of its core cards
+    const ok = Bot.STYLE_IDS.filter(id => Bot.STYLES[id].win.some(w => P.found.includes(w)) && Bot.STYLES[id].core.filter(c => P.found.includes(c)).length >= 3);
+    const st = style && Bot.STYLES[style] ? style : (ok.length ? ok : Bot.STYLE_IDS)[Math.floor(rand() * (ok.length || Bot.STYLE_IDS.length))];
+    return { style: st, name: Bot.STYLES[st].name, deck: Bot.buildDeck(st, P.found.slice(), rand) };
+  }
+
+  /* ---------- practice ----------
+     A battle against an opponent like those in trophy battles, with nothing at stake: no trophies,
+     chests, rubies or quests. tryCard: a card to try out (found or not), swapped into your deck at the
+     average level of your deck. */
+  function practiceFoe(tryCard, rand = Math.random) {
+    const f = trophyFoe(rand);
+    const deck = P.deck.slice(), lv = Object.assign({}, cardLevels());
+    let note = null;
+    if (tryCard && KC_CARDS[tryCard] && !deck.includes(tryCard)) {
+      const c = KC_CARDS[tryCard], Bot = typeof KCBot !== 'undefined' ? KCBot : null;
+      // swap out the card most like it: the same kind, then the closest cost, never your only win condition
+      const wins = deck.filter(id => Bot && Bot.WIN_CARDS.has(id));
+      const score = id => (KC_CARDS[id].kind === c.kind ? 0 : 10) + Math.abs(KC_CARDS[id].cost - c.cost) + (wins.length === 1 && wins[0] === id && !(Bot && Bot.WIN_CARDS.has(tryCard)) ? 50 : 0);
+      const out = deck.slice().sort((a, b) => score(a) - score(b))[0];
+      deck[deck.indexOf(out)] = tryCard;
+      const avg = Math.round(P.deck.reduce((a, id) => a + P.cards[id].level, 0) / 8);
+      lv[tryCard] = Math.max(KC_MIN_LEVEL(tryCard), Math.max(P.cards[tryCard].level, avg));
+      note = { card: tryCard, out };
+    } else if (tryCard && deck.includes(tryCard)) note = { card: tryCard, out: null };
+    return Object.assign(f, { id: 'practice', kind: 'practice', tier: 'Practice', stakes: null, yourDeck: deck, yourLevels: lv, tryCard: note });
   }
   const unlockAt = id => { const m = ROAD.find(r => r.kind === 'card' && r.card === id); return m ? m.at : null; };
 
@@ -1358,6 +1425,7 @@ const KCProgress = (() => {
     roll, chestState, unlockingSlot, startUnlock, openChest,
     SHOP, shop, shopEnds, refreshShop, buy, buyChest, grantTest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
+    DECK_SLOTS, useDeckSlot, setWholeDeck, deckWarnings, suggestDeck, practiceFoe,
     MAGIC, MAGIC_ORDER, MAGIC_RULES, wildActive, magicCount, magicFor, useMagic, grantMagic,
     EVO_ARENA, evoOpen, hasEvo, evoList, evoInfo,
     QUESTS, CROWN_CHEST, STREAK, quests, questAdd, claimQuest, questsReady, crownChest, openCrownChest,

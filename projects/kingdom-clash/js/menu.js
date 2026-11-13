@@ -44,6 +44,7 @@ const KCMenu = (() => {
   // Called by the game when a match ends; returns what changed, for the result screen.
   // crowns: the crowns you took, which count toward the Diamond Pass in trophy battles.
   function recordResult(foe, winner, crowns, stats) {
+    if (foe.kind === 'practice') return { kind: 'practice' };
     const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns, foe.trophies, stats) : G.recordTrainer(foe.id, winner);
     return r;
   }
@@ -1384,10 +1385,16 @@ const KCMenu = (() => {
   }
 
   /* ---------- the Cards tab ---------- */
+  let collSort = 'arena', collFilter = 'all';
   function buildCards() {
     const p = P(), deck = p.deck;
     const avg = deck.reduce((a, id) => a + KC_CARDS[id].cost, 0) / deck.length;
     $('#avgCost').textContent = avg.toFixed(1);
+    // deck slots and what the deck is missing
+    $('#deckSlots').innerHTML = Array.from({ length: G.DECK_SLOTS }, (_, i) => `<button type="button" role="tab" class="ds${i === p.deckSlot ? ' on' : ''}" data-ds="${i}" aria-selected="${i === p.deckSlot}" title="Deck ${i + 1}">${i + 1}</button>`).join('');
+    const warn = G.deckWarnings();
+    $('#deckWarn').hidden = !warn.length;
+    $('#deckWarn').innerHTML = warn.map(w => `<li>${esc(w)}</li>`).join('');
     const lvlStrip = id => {
       const u = G.upgradeInfo(id);
       if (!u.found) return `<span class="lvl-strip locked">${G.unlockAt(id) !== null ? `Trophy Road · ${G.unlockAt(id)}` : 'Locked'}</span>`;
@@ -1401,7 +1408,12 @@ const KCMenu = (() => {
     }).join('');
     const found = p.found.length, all = KC_ALL_CARDS.length;
     $('#foundCount').textContent = `${found} / ${all} found`;
-    $('#collGrid').innerHTML = KC_ALL_CARDS.map(id => {
+    const RAR = { common: 0, rare: 1, epic: 2, legendary: 3 };
+    const shown = KC_ALL_CARDS.map((id, i) => ({ id, i, c: KC_CARDS[id], u: G.upgradeInfo(id) })).filter(x =>
+      collFilter === 'all' || (collFilter === 'up' ? x.u.can : collFilter === 'missing' ? !x.u.found : x.c.kind === collFilter));
+    const by = { arena: x => x.i, cost: x => x.c.cost * 100 + x.i, rarity: x => -RAR[x.c.rarity] * 1000 + x.i, level: x => -(x.u.found ? x.u.level : -1) * 1000 + x.i, name: null };
+    if (collSort === 'name') shown.sort((a, b) => a.c.name.localeCompare(b.c.name)); else shown.sort((a, b) => by[collSort](a) - by[collSort](b));
+    $('#collGrid').innerHTML = (shown.length ? '' : '<p class="dim coll-empty">No cards here.</p>') + shown.map(({ id }) => {
       const c = KC_CARDS[id], u = G.upgradeInfo(id);
       return `<button type="button" class="coll-card ${c.rarity}${u.found ? '' : ' not-found'}${u.can ? ' can-up' : ''}" data-id="${id}">
         <span class="cc-art"><img src="${cardImg(id)}" alt=""><span class="cost">${c.cost}</span>${deck.includes(id) ? '<span class="in-deck" title="In your deck">In deck</span>' : ''}${u.can ? '<span class="up-arrow" aria-label="Upgrade ready"></span>' : ''}${G.hasEvo(id) ? '<span class="evo-badge" title="Evolution unlocked">Evo</span>' : ''}</span>
@@ -1409,6 +1421,19 @@ const KCMenu = (() => {
     }).join('');
     for (const b of $$('#deckRow .mini-card')) b.addEventListener('click', () => (swapId ? doSwap(+b.dataset.slot) : openCard(b.dataset.id)));
     for (const b of $$('#collGrid .coll-card')) b.addEventListener('click', () => openCard(b.dataset.id));
+    for (const b of $$('#deckSlots .ds')) b.addEventListener('click', () => { if (G.useDeckSlot(+b.dataset.ds)) { KCSound.play('select'); endSwap(); refresh(); } });
+  }
+  function suggestClick() {
+    const sg = G.suggestDeck();
+    if (!sg || !G.setWholeDeck(sg.deck)) { KCSound.play('error'); return; }
+    KCSound.play('buy');
+    toast(`Deck ${P().deckSlot + 1} is now a ${sg.name} deck. Your other deck slots are as they were.`);
+    endSwap(); refresh();
+  }
+  // a practice battle, with a card to try (or not)
+  function practice(tryCard) {
+    closeCard();
+    opts.onBattle && opts.onBattle(G.practiceFoe(tryCard));
   }
   function startSwap(id) {
     swapId = id;
@@ -1495,6 +1520,8 @@ const KCMenu = (() => {
     $('#mUpCost').innerHTML = `<i class="ruby-i" aria-hidden="true"></i>${fmt(u.cost || 0)}`;
     const inDeck = P().deck.includes(id);
     $('#mUse').hidden = !u.found || inDeck;
+    $('#mTry').hidden = !G.roadOpen();
+    $('#mTry').textContent = inDeck ? 'Practice with it' : 'Try it';
     const lack = [u.count < u.need ? `${fmt(u.need - u.count)} more card${u.need - u.count === 1 ? '' : 's'}` : '', P().rubies < u.cost ? `${fmt(u.cost - P().rubies)} more rubies` : ''].filter(Boolean);
     const toMax = u.found && !u.max ? ` To level ${G.MAX_LEVEL}: ${fmt(G.copiesToMax(id))} more cards and ${fmt(G.goldToMax(id))} rubies.` : '';
     $('#mNote').textContent = !u.found ? 'Reach it on the Trophy Road to add it to your collection.'
@@ -1669,6 +1696,7 @@ const KCMenu = (() => {
     $('#onlineBtn').classList.toggle('locked', !G.onlineOpen() || !KCNet.LIVE);
     $('#onlineBtn').title = KCNet.LIVE ? 'Battle other players online' : 'Online battles are coming soon';
     $('#onlineBtn').hidden = !G.roadOpen();
+    $('#practiceBtn').hidden = !G.roadOpen();
     if (subNow === 'magic') renderMagic(); else $('#magicTag').textContent = String(G.MAGIC_ORDER.reduce((a, id) => a + (id.startsWith('wild_') ? 0 : G.magicCount(id)), 0) || '');
     $('#soundBtn').setAttribute('aria-label', KCSound.on ? 'Sound on' : 'Sound off');
     $('#soundBtn').classList.toggle('off', !KCSound.on);
@@ -1812,6 +1840,17 @@ const KCMenu = (() => {
     $('#passMini').addEventListener('click', openPass);
     $('#passModal').addEventListener('click', e => { if (e.target.id === 'passModal') closePass(); });
     $('#mUse').addEventListener('click', () => startSwap(modalId));
+    $('#mTry').addEventListener('click', () => practice(modalId));
+    $('#practiceBtn').addEventListener('click', () => practice(null));
+    $('#suggestBtn').addEventListener('click', suggestClick);
+    $('#collSort').addEventListener('change', e => { collSort = e.target.value; refresh(); });
+    $('#collFilter').addEventListener('click', e => {
+      const b = e.target.closest('button[data-f]');
+      if (!b) return;
+      collFilter = b.dataset.f;
+      for (const x of $$('#collFilter button')) x.classList.toggle('on', x === b);
+      refresh();
+    });
     $('#swapCancel').addEventListener('click', endSwap);
     $('#chestOpen').addEventListener('click', e => { if (!e.target.closest('#coDone')) chestTap(); });
     $('#coDone').addEventListener('click', closeChest);
@@ -1843,6 +1882,7 @@ const KCMenu = (() => {
 
   return {
     init, refresh, recordResult, nextFoe, cardImg, tab, showChest, chestSvg, openQuests, milestone,
+    practiceAgain: T => G.practiceFoe(T && T.tryCard ? T.tryCard.card : null),
     get name() { return P() ? P().name : 'Player'; },
     show() { refresh(); requestAnimationFrame(placeGlow); },
   };

@@ -49,7 +49,7 @@
     if (typeof foe === 'string') foe = KC_TRAINER[foe];
     const T = G.trainer = foe || KCMenu.nextFoe();
     G.online = null;
-    const trophy = T.kind === 'trophy', arenaNow = KCProgress.arena();
+    const practice = T.kind === 'practice', trophy = T.kind === 'trophy' || practice, arenaNow = KCProgress.arena();
     G.theme = trophy ? arenaNow.theme : 'training';
     G.art = KCArenas.get(G.theme);
     B = G.art.margin;
@@ -57,18 +57,19 @@
     G.embers = [];
     G.s = S.create({
       seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, T.towerDamage],
-      decks: [trophy ? KCProgress.state.deck : KCProgress.trainingDeck(), T.deck || KC_STARTER_DECK], cardLevels: [KCProgress.cardLevels(), T.cardLevels || {}],
+      decks: [practice ? T.yourDeck : trophy ? KCProgress.state.deck : KCProgress.trainingDeck(), T.deck || KC_STARTER_DECK],
+      cardLevels: [practice ? T.yourLevels : KCProgress.cardLevels(), T.cardLevels || {}],
       evos: [KCProgress.evoList(), T.evos || []],
       // tower levels: your King Tower's level; a trophy opponent's from its cards; trainers stay at 1
       levels: [KCProgress.kingInfo().level, trophy ? T.kingLevel || 1 : 1],
     });
     G.sim = G.s;
     G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9), style: T.style });
-    const where = trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
+    const where = practice ? `Practice · ${arenaNow.name}` : trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
       ['#introFoeClan', T.clan || ''], ['#introYouTier', trophy ? `${KCProgress.state.trophies} trophies` : 'Training'],
-      ['#introStakes', trophy && T.stakes ? `Win +${T.stakes.win} · Loss −${T.stakes.loss}` : '']]) $(sel).textContent = text;
+      ['#introStakes', practice ? (T.tryCard && T.tryCard.out ? `Practice · trying ${KC_CARDS[T.tryCard.card].name}` : 'Practice · nothing at stake') : trophy && T.stakes ? `Win +${T.stakes.win} · Loss −${T.stakes.loss}` : '']]) $(sel).textContent = text;
     introYou();
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {},
@@ -82,8 +83,8 @@
     show('battle');
     layout();
     // a trophy battle first looks for an opponent for a moment
-    G.phase = 'intro'; G.intro = trophy ? 2.7 : 1.7; G.finding = trophy;
-    $('#intro').classList.toggle('finding', trophy);
+    G.phase = 'intro'; G.intro = trophy && !practice ? 2.7 : 1.7; G.finding = trophy && !practice;
+    $('#intro').classList.toggle('finding', G.finding);
     $('#intro').hidden = false;
   }
   // your side of the VS screen: your King, in blue
@@ -98,7 +99,7 @@
     // a trophy battle left before it ends (reload, closed tab) counts as a loss next time the game loads
     if (!G.online) {
       KCProgress.battleStarted(G.trainer);
-      if (G.trainer.kind === 'trophy') KCEmotes.foeGreet();
+      if (G.trainer.kind === 'trophy' || G.trainer.kind === 'practice') KCEmotes.foeGreet();
     }
     banner('FIGHT!');
     KCSound.play('fight');
@@ -643,7 +644,7 @@
     puff(e.x, e.y, 16, '#cfc8dc', 1.6);
     if (e.team === 1) {
       setTimeout(() => KCSound.play('crown'), 250);
-      if (e.sub !== 'king') { speak('youTower'); if (!G.online && G.trainer.kind === 'trophy') KCEmotes.foeLostTower(); }
+      if (e.sub !== 'king') { speak('youTower'); if (!G.online && (G.trainer.kind === 'trophy' || G.trainer.kind === 'practice')) KCEmotes.foeLostTower(); }
     } else {
       if (e.sub !== 'king') { speak('myTower'); if (!G.online) KCEmotes.foeTookTower(); }
     }
@@ -900,7 +901,7 @@
     G.res.tip = e.winner === 1 && !G.online ? lossTip() : '';
     if (G.online) endOnline();
     $('#countdown').hidden = true;
-    if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); if (!G.online && G.trainer.kind === 'trophy') KCEmotes.foeLost(); }
+    if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); if (!G.online && (G.trainer.kind === 'trophy' || G.trainer.kind === 'practice')) KCEmotes.foeLost(); }
     else if (e.winner === 1) { banner('Defeat'); setTimeout(() => KCSound.play('lose'), 300); if (!G.online) KCEmotes.foeWon(); }
     else banner('Draw');
   }
@@ -1004,6 +1005,7 @@
     $('#againBtn').className = res.unlockedNext || res.chestNow || claimable ? 'pill' : 'big-btn';
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
     if (res.kind === 'online') { un.hidden = false; un.textContent = 'Online battle · no trophies won or lost'; }
+    if (res.kind === 'practice') { un.hidden = false; un.textContent = 'Practice battle · nothing won or lost'; }
     $('#againBtn').hidden = res.kind === 'online';
     const why = { left: 'Your opponent left the battle.', desync: 'The battle fell out of step between the two screens, so it stopped.', king: 'King Tower down.', time: 'More crowns when time ran out.', overtime: 'First tower in overtime.', tiebreak: 'Tiebreak: the side whose weakest tower had more health wins.', sudden: w === 0 ? 'Sudden death: their tower crumbled first.' : 'Sudden death: your tower crumbled first.', draw: 'Every tower ended with the same health.', test: 'Simulated win (test button).', surrender: 'You surrendered.' }[r.reason];
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
@@ -2046,7 +2048,7 @@
       online: () => !!G.online,
       onSend: id => { if (G.online && !G.online.done) G.online.room.emit('mp.emote', { id }).catch(() => {}); },
     });
-    $('#againBtn').addEventListener('click', () => startBattle(G.trainer.kind === 'trophy' ? KCMenu.nextFoe('trophy') : G.trainer));
+    $('#againBtn').addEventListener('click', () => startBattle(G.trainer.kind === 'trophy' ? KCMenu.nextFoe('trophy') : G.trainer.kind === 'practice' ? KCMenu.practiceAgain(G.trainer) : G.trainer));
     $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext));
     $('#homeBtn').addEventListener('click', () => { if (G.res && G.res.chestNow && !G.res.chestShown) openChestNow(); else goHome(); });
     $('#chestNowBtn').addEventListener('click', openChestNow);
