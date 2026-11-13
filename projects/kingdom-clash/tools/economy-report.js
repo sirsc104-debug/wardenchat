@@ -132,7 +132,7 @@ for (const k of keys) console.log(`| ${k} | ${[spread, focus, casual, rich].map(
 // worth up to `topPlay` levels at 7,000; and players get a little better with practice (`learn` a year, at
 // most `learnMax`).
 const LADDER = {
-  slope: 1.1, topPlay: 1.2, learn: 0.4, learnMax: 0.8,
+  slope: 1.1, topPlay: 1.2, learn: 0.4, learnMax: 0.8, daily: true,
   players: [['average', 'An average player', 0, 1], ['strong', 'A strong player (plays about a level above their cards)', 1, 1],
     ['casual', 'A casual player (half the battles, plays a little worse)', -0.5, 0.5]],
   days: 1100,
@@ -165,6 +165,14 @@ function ladder(edge, pace) {
     for (const type of dayOfChests(st, wins, q.unlockHours * pace)) { const c = G.roll(type, rand); P.rubies += c.rubies; for (const x of c.cards) P.cards[x.id].count += x.n; }
     const f = G.roll(G.ECONOMY.freeChest.type, rand, { bonus: G.ECONOMY.freeChest.bonus }); P.rubies += f.rubies; for (const x of f.cards) P.cards[x.id].count += x.n;
     P.rubies += Math.min(wins, G.ECONOMY.winGold.dailyCap) * G.winGold();
+    // the daily quests (all three done with 5 battles a day, fewer below) and the crown chest (about 10
+    // crowns in 6 battles)
+    if (LADDER.daily) {
+      const qs = Math.min(3, Math.floor(battles * 3 / 5)), chests = [];
+      for (let i = 0; i < qs; i++) chests.push(i === 0 ? 'silver' : 'wooden');
+      if (battles >= 6) chests.push(G.capChest(G.CROWN_CHEST.chest));
+      for (const type of chests) { const c = G.roll(type, rand); P.rubies += c.rubies + 5 * G.winGold(); for (const x of c.cards) P.cards[x.id].count += x.n; }
+    }
     for (let guard = 0; guard < 200; guard++) {
       const order = deck.filter(id => G.upgradeInfo(id).can).sort((a, b) => P.cards[a].level - P.cards[b].level);
       if (!order.length) break;

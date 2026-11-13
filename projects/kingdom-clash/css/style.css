@@ -2016,3 +2016,67 @@ button.slot:hover { transform: translateY(-3px); }
   background: rgba(20, 14, 40, 0.55); padding: 4px 12px; border-radius: 999px; }
 .vs-stakes:empty { display: none; }
 .intro.finding .vs-stakes { visibility: hidden; }
+
+/* daily quests and the crown chest (lobby) */
+.daily { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 2px 0 4px; }
+.daily-btn { position: relative; display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 180px; max-width: 260px; padding: 7px 12px 7px 8px;
+  border-radius: 14px; border: 3px solid var(--outline); background: linear-gradient(#4b3f86, #30285e); color: #fff; text-align: left; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35); }
+.daily-btn:hover { filter: brightness(1.08); }
+.daily-btn > svg { width: 34px; height: 34px; flex: none; }
+.daily-btn .db-text { display: flex; flex-direction: column; min-width: 0; gap: 2px; flex: 1; }
+.daily-btn b { font-size: 15px; line-height: 1.1; }
+.daily-btn small { font-size: 12px; color: #d9cfee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.daily-btn.ready { background: linear-gradient(#2fb36b, #1d7f4a); animation: dailyPulse 1.6s ease-in-out infinite; }
+.daily-btn.ready small { color: #eafff2; font-weight: 800; }
+@keyframes dailyPulse { 50% { transform: translateY(-2px); box-shadow: 0 5px 0 rgba(0, 0, 0, 0.35), 0 0 16px rgba(80, 255, 160, 0.45); } }
+.db-bar { display: block; height: 7px; border-radius: 99px; background: rgba(0, 0, 0, 0.35); overflow: hidden; }
+.db-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ffd34d, #ffae2b); border-radius: inherit; transition: width 0.4s; }
+.db-dot { position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; border-radius: 50%; background: #ff4757; border: 2px solid var(--outline); }
+.quest-card { width: min(520px, 100%); box-sizing: border-box; padding: 24px 20px 18px; display: flex; flex-direction: column; gap: 10px; position: relative; animation: pop 0.2s ease-out; }
+.quest-card h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 28px; }
+.q-sub, .q-streak { margin: 0; color: #d9cfee; font-size: 14px; }
+.q-streak b { color: #ffd34d; }
+.q-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.q-item, .q-crown { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; background: rgba(0, 0, 0, 0.25); }
+.q-item.done:not(.claimed), .q-crown:has(#crownOpen:not([disabled])) { background: rgba(47, 179, 107, 0.25); box-shadow: inset 0 0 0 2px rgba(80, 255, 160, 0.4); }
+.q-item.claimed { opacity: 0.6; }
+.q-chest { width: 48px; height: 48px; flex: none; }
+.q-chest svg { width: 100%; height: 100%; }
+.q-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.q-body b { font-size: 15px; }
+.q-body small { color: #cfc4ea; font-size: 12px; }
+.q-bar { position: relative; height: 16px; border-radius: 99px; background: rgba(0, 0, 0, 0.4); overflow: hidden; }
+.q-bar i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #5fc4ff, #2f6fe4); border-radius: inherit; }
+.q-bar.crown i { background: linear-gradient(90deg, #ffd34d, #ffae2b); }
+.q-bar span { position: relative; display: block; text-align: center; font-size: 11px; font-weight: 900; line-height: 16px; text-shadow: 0 1px 0 #000; }
+.q-claim { flex: none; }
+.q-tick { flex: none; width: 34px; text-align: center; font-size: 22px; color: #6dffa6; font-weight: 900; }
+@media (max-width: 760px) { .daily-btn { flex-basis: 140px; padding: 6px 8px 6px 6px; } .daily-btn > svg { width: 28px; height: 28px; } .daily-btn b { font-size: 13px; } }
+@media (prefers-reduced-motion: reduce) { .daily-btn.ready { animation: none; } }
+
+/* the result screen's rewards */
+.res-rewards { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+.rr { margin: 0; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: rgba(0, 0, 0, 0.25); font-size: 14px; animation: rrIn 0.35s ease-out backwards; }
+@keyframes rrIn { from { opacity: 0; transform: translateY(8px); } }
+.rr b { color: #fff; }
+.rr em { font-style: normal; color: #ffd34d; font-weight: 800; margin-left: 4px; }
+.rr-road, .rr-crown { flex-wrap: wrap; }
+.rr-label { flex: 1 1 100%; color: #d9cfee; }
+.rr-bar { flex: 1; height: 12px; border-radius: 99px; background: rgba(0, 0, 0, 0.4); overflow: hidden; min-width: 60px; }
+.rr-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #ffe066, #ffae2b); transition: width 0.9s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.rr-bar.q i { background: linear-gradient(90deg, #5fc4ff, #2f6fe4); }
+.rr-crown small, .rq small { color: #cfc4ea; font-weight: 800; min-width: 38px; text-align: right; }
+.rr-pic { width: 40px; height: 40px; flex: none; }
+.rr-pic svg { width: 100%; height: 100%; }
+.rr-ruby .ruby-i { width: 26px; height: 26px; flex: none; }
+.rr-ruby b { font-size: 18px; color: #ff7aa8; }
+.rr-quests { flex-direction: column; align-items: stretch; gap: 6px; }
+.rq { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(50px, 1fr) auto; align-items: center; gap: 8px; font-size: 13px; }
+.rq span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rq.done small { color: #6dffa6; }
+.rq.claimed { opacity: 0.55; }
+.rr-tip { color: #ffe3b0; line-height: 1.4; background: rgba(255, 170, 60, 0.12); }
+.rr-chest.full span:last-child { color: #ffc2c7; }
+.result-card { max-height: calc(100dvh - 24px); overflow-y: auto; }
+@media (prefers-reduced-motion: reduce) { .rr { animation: none; } .rr-bar i { transition: none; } }
+.q-claim[disabled] { background: #4a4466; color: #a9a2c4; box-shadow: none; cursor: default; filter: none; }

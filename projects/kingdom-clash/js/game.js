@@ -792,12 +792,75 @@
     G.ended = e.reason === 'king' || e.reason === 'sudden' ? 2.6 : 1.8;
     if (e.winner >= 0) KCScenery.celebrate(e.winner);
     select(-1);
-    G.res = G.online ? { kind: 'online' } : KCMenu.recordResult(G.trainer, e.winner, G.s.crowns[0]);
+    // what you played, for the daily quests
+    const mine = G.s.log.filter(l => l[1] === 0).map(l => KC_CARDS[l[5]]);
+    const stats = { cards: mine.length, spells: mine.filter(c => c.kind === 'spell').length, troops: mine.filter(c => c.kind === 'troop').length };
+    G.res = G.online ? { kind: 'online' } : KCMenu.recordResult(G.trainer, e.winner, G.s.crowns[0], stats);
+    G.res.tip = e.winner === 1 && !G.online ? lossTip() : '';
     if (G.online) endOnline();
     $('#countdown').hidden = true;
     if (e.winner === 0) { banner('Victory!'); setTimeout(() => KCSound.play('win'), 300); if (!G.online && G.trainer.kind === 'trophy') KCEmotes.foeLost(); }
     else if (e.winner === 1) { banner('Defeat'); setTimeout(() => KCSound.play('lose'), 300); if (!G.online) KCEmotes.foeWon(); }
     else banner('Draw');
+  }
+  // after a defeat: a tip, about card levels when theirs were higher, otherwise about play
+  const TIPS = ['Let their push cross the river and defend it next to your towers: your towers help.', 'Spells are worth most on a group of troops, or a troop and a tower together.',
+    'The troops that survive your defence make a strong counter-push: add a card behind them.', 'In double energy, push in the lane where their tower is weakest.',
+    'A cheap card in your hand lets you answer their push without waiting for energy.', 'Keep a card that hits flyers for their air troops.',
+    'Try a few battles against the same opponent styles: some decks beat heavy pushers, others beat swarms.'];
+  function lossTip() {
+    const T = G.trainer, lv = KCProgress.cardLevels();
+    if (T.kind === 'trophy' && T.cardLevels) {
+      const deck = KCProgress.state.deck, mine = deck.reduce((a, id) => a + lv[id], 0) / deck.length;
+      const theirs = Object.values(T.cardLevels).reduce((a, v) => a + v, 0) / Object.keys(T.cardLevels).length;
+      if (theirs - mine >= 0.5) return `Their cards averaged level ${theirs.toFixed(1)}, yours ${mine.toFixed(1)}. Upgrading your deck helps the most.`;
+    }
+    return TIPS[Math.floor(Math.random() * TIPS.length)];
+  }
+  // the rewards of a trophy battle, as a sequence that counts up
+  function roadLabel(m) {
+    if (!m) return '';
+    if (m.kind === 'card') return KC_CARDS[m.card].name;
+    if (m.kind === 'rubies') return `${m.amount.toLocaleString('en-US')} rubies`;
+    if (m.kind === 'chest') return (KCProgress.CHESTS[m.chest] || {}).name || 'a chest';
+    if (m.kind === 'arena') { const a = KCProgress.ARENAS.find(x => x.id === m.arena); return a ? a.name : 'a new arena'; }
+    return 'a reward';
+  }
+  function rewardsHtml(res) {
+    const rows = [], clamp = v => Math.max(0, Math.min(1, v));
+    if (res.nextRoad) {
+      const a = res.prevRoad ? res.prevRoad.at : 0, b = res.nextRoad.at, span = Math.max(1, b - a);
+      rows.push(`<div class="rr rr-road"><span class="rr-label">Next on the Trophy Road: <b>${roadLabel(res.nextRoad)}</b> at ${b.toLocaleString('en-US')}</span>
+        <div class="rr-bar"><i style="width:${(clamp((res.before - a) / span) * 100).toFixed(1)}%" data-to="${(clamp((res.trophies - a) / span) * 100).toFixed(1)}"></i></div></div>`);
+    }
+    if (res.chest) rows.push(`<div class="rr rr-chest"><span class="rr-pic">${KCMenu.chestSvg(res.chest.type)}</span><span><b>${res.chest.name}</b> won · waiting in slot ${res.chest.slot + 1}</span></div>`);
+    else if (res.slotsFull) rows.push(`<div class="rr rr-chest full"><span class="rr-pic">${KCMenu.chestSvg('wooden')}</span><span>Your chest slots are full: open one to make room for the next.</span></div>`);
+    if (res.gold) rows.push(`<div class="rr rr-ruby"><span class="ruby-i" aria-hidden="true"></span><span><b data-count="${res.gold}">+0</b> rubies${res.streakBonus ? ` <em>win streak ${res.streak}: paid twice</em>` : ''}${res.goldLeft === 0 ? ' (the last paid win today)' : ''}</span></div>`);
+    if (res.quests && res.quests.length) {
+      rows.push(`<div class="rr rr-quests">${res.quests.map(q => `<div class="rq${q.done ? ' done' : ''}${q.claimed ? ' claimed' : ''}"><span>${q.text}</span><div class="rr-bar q"><i style="width:${(q.have / q.n * 100).toFixed(1)}%"></i></div><small>${q.claimed ? 'claimed' : q.done ? 'done!' : `${q.have}/${q.n}`}</small></div>`).join('')}</div>`);
+    }
+    if (res.crown) rows.push(`<div class="rr rr-crown"><span class="rr-label">Crown Chest${res.crown.ready ? ': <b>ready to open!</b>' : res.crown.opened ? ': opened today' : ''}</span><div class="rr-bar crown"><i style="width:${(res.crown.crowns / res.crown.need * 100).toFixed(1)}%"></i></div><small>${res.crown.crowns}/${res.crown.need}</small></div>`);
+    if (res.tip) rows.push(`<p class="rr rr-tip">${res.tip}</p>`);
+    return rows.join('');
+  }
+  // count numbers up and fill bars, a moment after the result shows
+  function playRewards() {
+    const box = $('#resRewards');
+    box.querySelectorAll('.rr').forEach((el, i) => { el.style.animationDelay = (0.35 + i * 0.18) + 's'; });
+    setTimeout(() => {
+      box.querySelectorAll('.rr-bar i[data-to]').forEach(i => { i.style.width = i.dataset.to + '%'; });
+      box.querySelectorAll('[data-count]').forEach(el => {
+        const to = +el.dataset.count, t0 = performance.now();
+        const tick = now => { const k = Math.min(1, (now - t0) / 700); el.textContent = '+' + Math.round(to * k); if (k < 1) requestAnimationFrame(tick); else KCSound.play('rubyTick'); };
+        requestAnimationFrame(tick);
+      });
+      const tb = $('#resTrophy b[data-count]');
+      if (tb) {
+        const to = +tb.dataset.count, t0 = performance.now();
+        const tick = now => { const k = Math.min(1, (now - t0) / 800); const v = Math.round(to * k); tb.textContent = (to > 0 ? '+' : to < 0 ? '−' : '') + Math.abs(v); if (k < 1) requestAnimationFrame(tick); };
+        requestAnimationFrame(tick);
+      }
+    }, 650);
   }
   function showResult() {
     const s = G.s, r = s.result, w = r.winner;
@@ -813,8 +876,10 @@
     $('#resLine').hidden = !$('#resLine').textContent;
     const un = $('#resUnlock'), tr = $('#resTrophy');
     const goldNote = res.gold ? `+${res.gold} rubies${res.goldLeft === 0 ? ' (the last paid win today)' : ''}` : '';
-    const notes = [goldNote, res.unlockedNext ? `${res.unlockedNext.name} unlocked!` : '', res.roadOpened ? 'Trophy Road unlocked!' : '',
-      res.chest ? `${res.chest.name} earned!` : '', res.slotsFull ? 'Chest slots full: open one to make room' : '',
+    const trophyRes = res.kind === 'trophy';
+    const notes = [trophyRes ? '' : goldNote, res.unlockedNext ? `${res.unlockedNext.name} unlocked!` : '', res.roadOpened ? 'Trophy Road unlocked!' : '',
+      trophyRes ? (res.finished && res.finished.length ? `Quest complete: ${res.finished.join(', ')}!` : '') : res.chest ? `${res.chest.name} earned!` : '',
+      trophyRes ? '' : res.slotsFull ? 'Chest slots full: open one to make room' : '',
       res.newArena ? `${res.newArena.name} reached!` : '', res.newRewards ? 'Trophy Road reward ready!' : '', res.levelUp ? `Level ${res.levelUp}!` : '',
       res.pass ? `+${res.pass.points} Diamond Pass crown${res.pass.points === 1 ? '' : 's'}${res.pass.tierUp ? ` · tier ${res.pass.tierUp} reached!` : ''}` : ''].filter(Boolean);
     un.hidden = !notes.length;
@@ -822,14 +887,20 @@
     tr.hidden = res.kind !== 'trophy';
     if (res.kind === 'trophy') {
       tr.className = 'res-trophy' + (res.delta > 0 ? ' up' : res.delta < 0 ? ' down' : '');
-      tr.innerHTML = `<i class="trophy-i" aria-hidden="true"></i><b>${res.delta > 0 ? '+' : ''}${res.delta}</b><small>${res.trophies} trophies</small>`;
+      tr.innerHTML = `<i class="trophy-i" aria-hidden="true"></i><b data-count="${res.delta}">${res.delta > 0 ? '+' : ''}0</b><small>${res.trophies.toLocaleString('en-US')} trophies</small>`;
     }
+    const rw = $('#resRewards');
+    rw.innerHTML = res.kind === 'trophy' ? rewardsHtml(res) : res.tip ? `<p class="rr rr-tip">${res.tip}</p>` : '';
+    rw.hidden = !rw.innerHTML;
+    // quest rewards and the crown chest can be claimed straight from here
+    const claimable = res.kind === 'trophy' && ((res.quests || []).some(q => q.done && !q.claimed) || (res.crown && res.crown.ready));
+    $('#claimNowBtn').hidden = !claimable;
     // a trainer's chest, opened on the spot
     $('#chestNowBtn').hidden = !res.chestNow;
     if (res.chestNow) { $('#chestNowText').textContent = `Open ${res.chestNow.name}`; res.chestShown = false; }
     $('#nextBtn').hidden = !res.unlockedNext;
     $('#nextBtn').className = res.chestNow ? 'pill' : 'big-btn';
-    $('#againBtn').className = res.unlockedNext || res.chestNow ? 'pill' : 'big-btn';
+    $('#againBtn').className = res.unlockedNext || res.chestNow || claimable ? 'pill' : 'big-btn';
     if (res.unlockedNext) $('#nextBtnText').textContent = `Battle ${res.unlockedNext.name}`;
     if (res.kind === 'online') { un.hidden = false; un.textContent = 'Online battle · no trophies won or lost'; }
     $('#againBtn').hidden = res.kind === 'online';
@@ -837,7 +908,8 @@
     const m = Math.floor(r.time / 60), sec = String(Math.floor(r.time % 60)).padStart(2, '0');
     $('#resSmall').textContent = res.kind === 'online' ? `${why} ${m}:${sec} played, ${s.played[0]} cards from you.` : `${why} ${m}:${sec} played, ${s.played[0]} cards from you, +${res.xp || 0} XP${res.firstWin ? ' (first win bonus)' : ''}.`;
     $('#result').hidden = false;
-    setTimeout(() => (res.chestNow ? $('#chestNowBtn') : res.unlockedNext ? $('#nextBtn') : $('#againBtn')).focus(), 50);
+    playRewards();
+    setTimeout(() => (res.chestNow ? $('#chestNowBtn') : res.unlockedNext ? $('#nextBtn') : claimable ? $('#claimNowBtn') : $('#againBtn')).focus(), 50);
   }
   // open the trainer's chest: back to the lobby, where the chest opening plays
   function openChestNow() {
@@ -1873,6 +1945,7 @@
     $('#nextBtn').addEventListener('click', () => startBattle(G.res.unlockedNext));
     $('#homeBtn').addEventListener('click', () => { if (G.res && G.res.chestNow && !G.res.chestShown) openChestNow(); else goHome(); });
     $('#chestNowBtn').addEventListener('click', openChestNow);
+    $('#claimNowBtn').addEventListener('click', () => { goHome(); KCMenu.openQuests(); });
     // Surrender: tap once to ask, again within 3 s to give up the battle (a loss, as if the King fell).
     // Online it tells the other player, who wins.
     let leaveT = 0;

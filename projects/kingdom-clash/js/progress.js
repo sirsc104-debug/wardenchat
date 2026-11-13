@@ -571,7 +571,8 @@ const KCProgress = (() => {
     };
   }
   // foeTrophies: the opponent's trophies (from the battle that was started if not given)
-  function recordTrophy(winner, crowns, foeTrophies) {
+  // stats: what you did in the battle ({ cards, spells, troops }) for the daily quests
+  function recordTrophy(winner, crowns, foeTrophies, stats) {
     if (foeTrophies === undefined) foeTrophies = P.live && P.live.trophies !== undefined ? P.live.trophies : Math.max(0, P.trophies + MATCH.offset);
     P.live = null;
     const r = P.trophyRecord, before = P.trophies, beforeArena = arena().id, st = stakes(P.trophies, foeTrophies);
@@ -595,15 +596,108 @@ const KCProgress = (() => {
     if (winner === 0) {
       const today = dayKey(Date.now());
       if (P.winDay.day !== today) P.winDay = { day: today, n: 0 };
-      if (P.winDay.n < ECONOMY.winGold.dailyCap) { P.winDay.n++; gold = winGold(); P.rubies += gold; }
+      if (P.winDay.n < ECONOMY.winGold.dailyCap) {
+        P.winDay.n++; gold = winGold();
+        // a win streak adds a win's rubies again
+        if (P.streak >= STREAK.from) gold += winGold();
+        P.rubies += gold;
+      }
     }
+    // daily quests and the crown chest
+    const now = Date.now(), cc0 = roadOpen() ? crownChest(now) : null;
+    if (cc0 && crowns) P.crownDay.crowns += crowns;
+    const finished = questAdd(Object.assign({ battles: 1, wins: winner === 0 ? 1 : 0, crowns: crowns || 0, three: winner === 0 && crowns >= 3 ? 1 : 0 }, stats || {}), now);
+    const cc = cc0 ? crownChest(now) : null, crownReady = cc && cc.ready && !cc0.ready;
     const xp = winner === 0 ? XP.win : winner === 1 ? XP.loss : XP.draw, levelUp = addXp(xp);
     const newArena = arena().id !== beforeArena ? arena() : null;
     const pass = passAdd(crowns || 0);
     save();
-    return { kind: 'trophy', delta: P.trophies - before, trophies: P.trophies, chest, slotsFull, xp, levelUp, newArena, newRewards: claimable().length, pass, gold,
-      goldLeft: Math.max(0, ECONOMY.winGold.dailyCap - P.winDay.n) };
+    const nextRoad = ROAD.find(m => m.at > P.trophies && !P.claimed[m.at]) || null, prevRoad = ROAD.filter(m => m.at <= P.trophies).pop() || ROAD[0];
+    return { kind: 'trophy', delta: P.trophies - before, before, trophies: P.trophies, chest, slotsFull, xp, levelUp, newArena, newRewards: claimable().length, pass, gold,
+      goldLeft: Math.max(0, ECONOMY.winGold.dailyCap - P.winDay.n), streak: P.streak, streakBonus: winner === 0 && P.streak >= STREAK.from && gold > 0,
+      quests: roadOpen() ? quests(now) : [], finished, crown: cc, crownReady, nextRoad, prevRoad };
   }
+
+  /* ---------- daily quests, the crown chest and win streaks ----------
+     Three quests a day (the same for the whole local day), from trophy battles once the road is open.
+     Each gives a small chest, opened when it is claimed, and rubies (`pay` times a win's rubies). Taking
+     `CROWN_CHEST.crowns` crowns in a day's trophy battles fills the crown chest. Three or more trophy wins in a row add a win's rubies again to each
+     paid win. */
+  const QUESTS = [
+    { id: 'wins', stat: 'wins', n: [2, 3], pay: 6, chest: 'silver', text: n => `Win ${n} trophy battles` },
+    { id: 'battles', stat: 'battles', n: [3, 5], pay: 5, chest: 'wooden', text: n => `Play ${n} trophy battles` },
+    { id: 'crowns', stat: 'crowns', n: [5, 8], pay: 6, chest: 'wooden', text: n => `Take ${n} crowns` },
+    { id: 'cards', stat: 'cards', n: [40, 60], pay: 5, chest: 'wooden', text: n => `Play ${n} cards` },
+    { id: 'spells', stat: 'spells', n: [8, 12], pay: 5, chest: 'wooden', text: n => `Cast ${n} spells` },
+    { id: 'troops', stat: 'troops', n: [25, 40], pay: 5, chest: 'wooden', text: n => `Deploy ${n} troops` },
+    { id: 'three', stat: 'three', n: [1, 1], pay: 8, chest: 'silver', text: () => 'Win a battle with three crowns' },
+    { id: 'upgrades', stat: 'upgrades', n: [1, 2], pay: 5, chest: 'wooden', text: n => `Upgrade ${n === 1 ? 'a card' : n + ' cards'}` },
+    { id: 'chests', stat: 'chests', n: [2, 3], pay: 5, chest: 'wooden', text: n => `Open ${n} chests` },
+  ];
+  const CROWN_CHEST = { crowns: 10, chest: 'silver' };
+  const STREAK = { from: 3 };
+  const hashStr = str => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  // today's quests (made once a day, the same however often the game is opened)
+  function quests(now = Date.now()) {
+    const day = dayKey(now);
+    if (!P.quests || P.quests.day !== day) {
+      const r = KCSim.mulberry(hashStr(day + (P.name || '')));
+      const pool = QUESTS.slice(), list = [];
+      while (list.length < 3) {
+        const q = pool.splice(Math.floor(r() * pool.length), 1)[0];
+        const n = q.n[0] + Math.floor(r() * (q.n[1] - q.n[0] + 1));
+        list.push({ id: q.id, n, have: 0, claimed: false });
+      }
+      P.quests = { day, list };
+    }
+    return P.quests.list.map(q => {
+      const Q = QUESTS.find(x => x.id === q.id);
+      return Object.assign({}, q, { text: Q.text(q.n), done: q.have >= q.n, reward: Q.pay * winGold(), chest: Q.chest, chestName: CHESTS[Q.chest].name });
+    });
+  }
+  function questAdd(stats, now = Date.now()) {
+    if (!roadOpen()) return [];
+    quests(now);
+    const finished = [];
+    for (const q of P.quests.list) {
+      const Q = QUESTS.find(x => x.id === q.id), add = stats[Q.stat] || 0;
+      if (!add || q.have >= q.n) continue;
+      q.have = Math.min(q.n, q.have + add);
+      if (q.have >= q.n) finished.push(Q.text(q.n));
+    }
+    return finished;
+  }
+  function claimQuest(i, now = Date.now()) {
+    const list = quests(now), q = list[i];
+    if (!q || q.claimed || !q.done) return { error: q && q.claimed ? 'claimed' : 'not-done' };
+    P.quests.list[i].claimed = true;
+    const c = roll(q.chest), before = P.found.slice();
+    c.rubies += q.reward;
+    apply(c);
+    const levelUp = addXp(10);
+    save();
+    return { ok: true, chest: q.chest, name: q.chestName, rubies: c.rubies, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items, levelUp };
+  }
+  const questsReady = (now = Date.now()) => (roadOpen() ? quests(now).filter(q => q.done && !q.claimed).length : 0);
+  // the crown chest: crowns taken today, and whether today's chest is still to open
+  function crownChest(now = Date.now()) {
+    const day = dayKey(now);
+    if (!P.crownDay || P.crownDay.day !== day) P.crownDay = { day, crowns: 0, opened: false };
+    const type = capChest(CROWN_CHEST.chest);
+    return { crowns: Math.min(CROWN_CHEST.crowns, P.crownDay.crowns), need: CROWN_CHEST.crowns, opened: P.crownDay.opened,
+      ready: !P.crownDay.opened && P.crownDay.crowns >= CROWN_CHEST.crowns, type, name: CHESTS[type].name };
+  }
+  function openCrownChest(now = Date.now(), rand) {
+    const cc = crownChest(now);
+    if (!cc.ready) return { error: cc.opened ? 'opened' : 'crowns' };
+    P.crownDay.opened = true;
+    const c = roll(cc.type, rand), before = P.found.slice();
+    apply(c);
+    countChest(now);
+    save();
+    return { ok: true, chest: cc.type, name: 'Crown Chest', rubies: c.rubies, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
+  }
+  const countChest = now => questAdd({ chests: 1 }, now);
 
   /* ---------- chests ---------- */
   // The cards a chest can give: every card you have found, and every card of the arenas you have ever
@@ -728,6 +822,7 @@ const KCProgress = (() => {
     P.chests[i] = null;
     const before = P.found.slice();
     apply(c.contents);
+    countChest(now);
     save();
     return Object.assign({ chest: c.type }, c.contents, { cards: c.contents.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)) });
   }
@@ -925,6 +1020,7 @@ const KCProgress = (() => {
     P.freeChestDay = dayKey(now);
     const F = ECONOMY.freeChest, c = roll(F.type, rand, { bonus: F.bonus }), before = P.found.slice();
     apply(c);
+    countChest(now);
     save();
     return { ok: true, chest: F.type, rubies: c.rubies, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)), items: c.items };
   }
@@ -1226,6 +1322,7 @@ const KCProgress = (() => {
     P.cards[id].count -= u.need;
     P.rubies -= u.cost;
     P.cards[id].level++;
+    questAdd({ upgrades: 1 });
     const xp = 4 * P.cards[id].level, levelUp = addXp(xp);
     save();
     return { level: P.cards[id].level, xp, levelUp };
@@ -1261,6 +1358,7 @@ const KCProgress = (() => {
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
     MAGIC, MAGIC_ORDER, MAGIC_RULES, wildActive, magicCount, magicFor, useMagic, grantMagic,
     EVO_ARENA, evoOpen, hasEvo, evoList, evoInfo,
+    QUESTS, CROWN_CHEST, STREAK, quests, questAdd, claimQuest, questsReady, crownChest, openCrownChest,
     kingInfo, upgradeKing, ONLINE_AT, onlineOpen, EMOTES, EMOTE_SHOP, emoteOffers, buyEmote, chestPool,
     PASS, passOpen, passPremium, passTier, passInto, passMax, passState, passClaimable, claimPass, buyPass,
   };

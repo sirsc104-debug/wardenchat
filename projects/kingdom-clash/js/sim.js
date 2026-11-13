@@ -49,7 +49,7 @@ const KCSim = (() => {
       tick: 0, time: 0, phase: 'regular', timeLeft: REGULAR, double: false,
       ents: [], projs: [], zones: [], events: [], nextId: 1,
       energy: [START_ENERGY, START_ENERGY], crowns: [0, 0], result: null,
-      hands: [], queues: [], levels: opts.levels || [1, 1], played: [0, 0],
+      hands: [], queues: [], levels: opts.levels || [1, 1], played: [0, 0], log: [],
       // Each team's card levels ({ cardId: level }); a card not listed uses the team's level.
       cardLevels: opts.cardLevels || [{}, {}],
       // How hard each team's troops and spells hit towers (Trainer Owen hits them at a quarter).
@@ -259,6 +259,8 @@ const KCSim = (() => {
     s.hands[team][slot] = s.queues[team].shift();
     s.queues[team].push(id0);
     s.played[team]++;
+    // every play, for the stats after the battle and for replays: [tick, team, slot, x, y, card]
+    s.log.push([s.tick, team, slot, x, y, id0]);
     if (!c0.mirror) s.last[team] = id0;
     if (c0.mirror) {
       // Divine Reflection: the last card again, one level higher (no evolution, no new "last card")

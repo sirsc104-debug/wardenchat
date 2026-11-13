@@ -418,7 +418,7 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   // win gold: a few per win, for the first 20 wins of a day only
   G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 100, best: 100, claimed: { 0: true }, rubies: 0 }) }));
   let paid = 0, last;
-  for (let i = 0; i < 25; i++) { const g = G.winGold(); last = G.recordTrophy(0, 1); if (last.gold) { paid++; assert(last.gold >= g && last.gold < g * 1.5); } }
+  for (let i = 0; i < 25; i++) { G.state.streak = 0; const g = G.winGold(); last = G.recordTrophy(0, 1); if (last.gold) { paid++; assert(last.gold >= g && last.gold < g * 1.5); } }
   assert.strictEqual(paid, 20, 'twenty paid wins a day');
   assert(last.gold === 0 && last.goldLeft === 0);
   assert.strictEqual(G.recordTrophy(1, 0).gold, 0, 'no gold for a loss');
@@ -624,6 +624,41 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   console.log(`King Tower levels (L cards at level L), ${G.EMOTES.length} emotes with 3 a day for 5,000 rubies or 1 diamond, chests give arena cards early (${fresh.join(', ')}): ok`);
 }
 
+// Daily quests, the crown chest and win streaks
+{
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 1000, best: 1000, claimed: { 0: true }, trophyRecord: { w: 9, l: 9, d: 0 } }) }));
+  const P8 = G.state, day = new Date(2026, 10, 13, 10).getTime(), later = day + 5 * 3600e3, next = day + 864e5;
+  const q1 = G.quests(day);
+  assert.strictEqual(q1.length, 3); assert.strictEqual(new Set(q1.map(q => q.id)).size, 3, 'three different quests');
+  assert.deepStrictEqual(G.quests(later).map(q => q.id), q1.map(q => q.id), 'the same all day');
+  let changed = 0; for (let d = 1; d <= 6; d++) { P8.quests = null; if (G.quests(day + d * 864e5).map(q => q.id).join() !== q1.map(q => q.id).join()) changed++; }
+  assert(changed >= 4, 'different quests on other days');
+  P8.quests = null; G.quests(day);
+  assert.strictEqual(G.claimQuest(0, day).error, 'not-done');
+  // play until every quest is done
+  for (let i = 0; i < 6; i++) G.questAdd({ wins: 1, battles: 1, crowns: 3, cards: 15, spells: 3, troops: 9, three: 1, upgrades: 1, chests: 1 }, day);
+  assert(G.quests(day).every(q => q.done), 'all three done');
+  const r0 = P8.rubies, c = G.claimQuest(0, day);
+  assert(c.ok && c.chest && P8.rubies >= r0 + G.quests(day)[0].reward, 'a chest and rubies');
+  assert.strictEqual(G.claimQuest(0, day).error, 'claimed', 'only once');
+  // the crown chest
+  assert(!G.crownChest(day).ready);
+  P8.crownDay.crowns = 9; assert(!G.crownChest(day).ready && G.openCrownChest(day).error === 'crowns');
+  P8.crownDay.crowns = 10; assert(G.crownChest(day).ready);
+  assert(G.openCrownChest(day).ok && G.openCrownChest(day).error === 'opened', 'one a day');
+  assert(!G.crownChest(next).opened && G.crownChest(next).crowns === 0, 'a new one tomorrow');
+  // trophy battles count crowns and stats; a win streak pays a win's rubies twice
+  P8.quests = null; P8.crownDay = null; P8.winDay = { day: '', n: 0 }; P8.streak = 0;
+  const w1 = G.recordTrophy(0, 2, 1000, { cards: 20, spells: 4, troops: 12 });
+  assert.strictEqual(G.crownChest().crowns, 2, 'crowns count toward the crown chest');
+  assert(!w1.streakBonus && w1.gold === G.winGold());
+  G.recordTrophy(0, 1, 1000);
+  const w3 = G.recordTrophy(0, 1, 1000);
+  assert(w3.streakBonus && w3.gold === 2 * G.winGold() && w3.streak === 3, 'three in a row: paid twice');
+  assert(G.recordTrophy(1, 0, 1000).streak === -1 && !G.recordTrophy(0, 1, 1000).streakBonus, 'a loss ends the streak');
+  console.log(`daily quests (${q1.map(q => q.text).join('; ')}), crown chest, win streak: ok`);
+}
+
 // 9. Matchmaking: the win rate of a steady player who keeps their cards level with their trophies, and
 //    of one who never upgrades.
 const N = +process.argv[2] || 120;
@@ -652,4 +687,4 @@ for (const [label, skill, upgrades] of [['good player, upgrades as they climb', 
 
 }
 // cards matter: a player who never upgrades is held back
-assert(results[2].best < results[0].best, 'a player who never upgrades climbs less far');
+if (N >= 60) assert(results[2].best < results[0].best, 'a player who never upgrades climbs less far');

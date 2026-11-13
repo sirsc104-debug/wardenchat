@@ -43,8 +43,8 @@ const KCMenu = (() => {
   }
   // Called by the game when a match ends; returns what changed, for the result screen.
   // crowns: the crowns you took, which count toward the Diamond Pass in trophy battles.
-  function recordResult(foe, winner, crowns) {
-    const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns, foe.trophies) : G.recordTrainer(foe.id, winner);
+  function recordResult(foe, winner, crowns, stats) {
+    const r = foe.kind === 'trophy' ? G.recordTrophy(winner, crowns, foe.trophies, stats) : G.recordTrainer(foe.id, winner);
     return r;
   }
 
@@ -837,6 +837,55 @@ const KCMenu = (() => {
   }
   function openExchange() { $('#exAmount').value = ''; renderExchange(); $('#exModal').hidden = false; $('#exAmount').focus(); }
   function closeExchange() { $('#exModal').hidden = true; }
+
+  /* ---------- daily quests and the crown chest ---------- */
+  function renderDaily() {
+    const open = G.roadOpen();
+    $('#daily').hidden = !open;
+    if (!open) return;
+    const qs = G.quests(), done = qs.filter(q => q.done).length, ready = G.questsReady(), cc = G.crownChest();
+    $('#questSum').textContent = ready ? `${ready} reward${ready === 1 ? '' : 's'} to claim!` : done === 3 ? 'All done · new ones at midnight' : `${done} / 3 done`;
+    $('#questDot').hidden = !ready;
+    $('#crownSum').textContent = cc.opened ? 'Opened · a new one tomorrow' : cc.ready ? 'Ready to open!' : `${cc.crowns} / ${cc.need} crowns`;
+    $('#crownFill').style.width = (cc.opened ? 100 : cc.crowns / cc.need * 100) + '%';
+    $('#crownDot').hidden = !cc.ready;
+    $('#crownBtn').classList.toggle('ready', cc.ready);
+    $('#questBtn').classList.toggle('ready', ready > 0);
+    if (!$('#questModal').hidden) renderQuests();
+  }
+  function renderQuests() {
+    const qs = G.quests(), cc = G.crownChest(), p = P();
+    const left = G.shopEnds() - Date.now(), h = Math.floor(left / 3600e3), m = Math.floor((left % 3600e3) / 60e3);
+    $('#questNew').textContent = `New quests in ${h ? h + 'h ' : ''}${m}m. Trophy battles count.`;
+    $('#questList').innerHTML = qs.map((q, i) => `<li class="q-item${q.done ? ' done' : ''}${q.claimed ? ' claimed' : ''}">
+      <div class="q-chest">${chestSvg(q.chest, q.claimed)}</div>
+      <div class="q-body"><b>${esc(q.text)}</b><div class="q-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${q.n}" aria-valuenow="${q.have}"><i style="width:${(q.have / q.n * 100).toFixed(1)}%"></i><span>${fmt(q.have)} / ${fmt(q.n)}</span></div>
+        <small>${esc(q.chestName)} + ${fmt(q.reward)} rubies</small></div>
+      ${q.claimed ? '<span class="q-tick" aria-label="Claimed">&#10003;</span>' : `<button type="button" class="mini-btn q-claim" data-q="${i}"${q.done ? '' : ' disabled'}>Claim</button>`}</li>`).join('');
+    $('#questCrown').innerHTML = `<div class="q-chest">${chestSvg(cc.type, cc.opened)}</div>
+      <div class="q-body"><b>Crown Chest · ${esc(cc.name)}</b><div class="q-bar crown" role="progressbar" aria-valuemin="0" aria-valuemax="${cc.need}" aria-valuenow="${cc.crowns}"><i style="width:${(cc.crowns / cc.need * 100).toFixed(1)}%"></i><span>${cc.crowns} / ${cc.need} crowns</span></div>
+        <small>${cc.opened ? 'Opened today. A new one fills tomorrow.' : `Take ${cc.need} crowns in today's trophy battles.`}</small></div>
+      ${cc.opened ? '<span class="q-tick" aria-label="Opened">&#10003;</span>' : `<button type="button" class="mini-btn q-claim" id="crownOpen"${cc.ready ? '' : ' disabled'}>Open</button>`}`;
+    const k = p.streak || 0;
+    $('#questStreak').innerHTML = k >= G.STREAK.from ? `<b>Win streak: ${k}!</b> Each win pays its rubies twice while it lasts.`
+      : k > 0 ? `Win streak: ${k}. At ${G.STREAK.from} wins in a row, each win pays its rubies twice.` : `Win ${G.STREAK.from} trophy battles in a row and each win pays its rubies twice.`;
+  }
+  function openQuests() { renderQuests(); $('#questModal').hidden = false; ($('#questList .q-claim:not([disabled])') || $('#questX')).focus(); }
+  function closeQuests() { $('#questModal').hidden = true; }
+  function claimQuestClick(i) {
+    const q = G.quests()[i], r = G.claimQuest(i);
+    if (!r.ok) { KCSound.play('error'); renderQuests(); return; }
+    KCSound.play('buy');
+    closeQuests(); refresh();
+    showChest(r.chest, r, q.text);
+  }
+  function crownClick() {
+    const r = G.openCrownChest();
+    if (!r.ok) { KCSound.play('error'); renderQuests(); return; }
+    KCSound.play('buy');
+    closeQuests(); refresh();
+    showChest(r.chest, r, 'Crown Chest');
+  }
   function doExchange() {
     const r = G.exchange($('#exAmount').value);
     if (!r.ok) { KCSound.play('error'); renderExchange(); return; }
@@ -1571,6 +1620,7 @@ const KCMenu = (() => {
     if (!$('#exModal').hidden) renderExchange();
     $('#shopTag').hidden = !G.freeChestReady();
     passPlaque();
+    renderDaily();
     $('#onlineBtn').classList.toggle('locked', !G.onlineOpen() || !KCNet.LIVE);
     $('#onlineBtn').title = KCNet.LIVE ? 'Battle other players online' : 'Online battles are coming soon';
     $('#onlineBtn').hidden = !G.roadOpen();
@@ -1698,6 +1748,15 @@ const KCMenu = (() => {
     $('#cp').addEventListener('click', cpGo);
     $('#cp').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && G.roadOpen()) { e.preventDefault(); cpGo(); } });
     $('#exX').addEventListener('click', closeExchange);
+    $('#questBtn').addEventListener('click', openQuests);
+    $('#crownBtn').addEventListener('click', openQuests);
+    $('#questX').addEventListener('click', closeQuests);
+    $('#questModal').addEventListener('click', e => {
+      if (e.target.id === 'questModal') { closeQuests(); return; }
+      const b = e.target.closest('.q-claim');
+      if (!b || b.disabled) return;
+      if (b.id === 'crownOpen') crownClick(); else claimQuestClick(+b.dataset.q);
+    });
     $('#exModal').addEventListener('click', e => { if (e.target.id === 'exModal') closeExchange(); });
     $('#exAmount').addEventListener('input', renderExchange);
     $('#exAmount').addEventListener('keydown', e => { if (e.key === 'Enter' && !$('#exGo').disabled) doExchange(); });
@@ -1717,8 +1776,8 @@ const KCMenu = (() => {
         else if (e.key === ' ' || e.key === 'Enter') { chestTap(); e.preventDefault(); }
         return;
       }
-      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); closeExchange(); if (!$('#onlineModal').hidden) closeOnline(); return; }
-      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#exModal').hidden || !$('#onlineModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
+      if (e.key === 'Escape') { closeCard(); closePops(); endSwap(); closePass(); closeKing(); closeExchange(); closeQuests(); if (!$('#onlineModal').hidden) closeOnline(); return; }
+      if (!$('#cardModal').hidden || !$('#passModal').hidden || !$('#kingModal').hidden || !$('#exModal').hidden || !$('#onlineModal').hidden || !$('#questModal').hidden || /INPUT|SELECT|TEXTAREA/.test((document.activeElement || {}).tagName || '')) return;
       const n = '12345'.indexOf(e.key);
       if (n >= 0) { tab(TABS[n]); e.preventDefault(); }
       else if (e.key === 'Enter' && tabNow === 'battle' && (document.activeElement === document.body || !document.activeElement)) { opts.onBattle && opts.onBattle(nextFoe()); e.preventDefault(); }
@@ -1737,7 +1796,7 @@ const KCMenu = (() => {
   }
 
   return {
-    init, refresh, recordResult, nextFoe, cardImg, tab, showChest,
+    init, refresh, recordResult, nextFoe, cardImg, tab, showChest, chestSvg, openQuests,
     get name() { return P() ? P().name : 'Player'; },
     show() { refresh(); requestAnimationFrame(placeGlow); },
   };

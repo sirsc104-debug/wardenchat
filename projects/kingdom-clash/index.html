@@ -83,6 +83,10 @@
                 <button class="sim-win" id="testRich" type="button" title="Test button: sets your rubies, wallet coins and diamonds to 1,000,000"><small>Test</small>1,000,000 rubies, coins &amp; diamonds</button>
               </div>
             </div>
+            <div class="daily" id="daily" hidden>
+              <button type="button" class="daily-btn" id="questBtn" aria-haspopup="dialog"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="9" y="5" width="22" height="30" rx="4" fill="#f3e6c4" stroke="#1c1530" stroke-width="2.6"/><path d="M14 13h12M14 19h12M14 25h8" stroke="#8a6a3c" stroke-width="2.6" stroke-linecap="round"/><circle cx="30" cy="30" r="7" fill="#2fb36b" stroke="#1c1530" stroke-width="2.4"/><path d="M26.8 30l2.2 2.2 4-4.4" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="db-text"><b>Daily Quests</b><small id="questSum">0 / 3 done</small></span><i class="db-dot" id="questDot" hidden></i></button>
+              <button type="button" class="daily-btn" id="crownBtn" aria-haspopup="dialog"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 31l-2-18 9 7 7-12 7 12 9-7-2 18z" fill="#ffcd33" stroke="#1c1530" stroke-width="2.6" stroke-linejoin="round"/><rect x="6" y="30" width="28" height="5" rx="2" fill="#e8a91f" stroke="#1c1530" stroke-width="2.4"/></svg><span class="db-text"><b>Crown Chest</b><small id="crownSum">0 / 10 crowns</small><span class="db-bar"><i id="crownFill"></i></span></span><i class="db-dot" id="crownDot" hidden></i></button>
+            </div>
             <div class="chests" id="chests" aria-label="Chest slots"></div>
             <button type="button" class="pass-mini" id="passMini" hidden><span class="pass-tier"><b>&#9670;</b></span><span><b>Diamond Pass</b><small id="passMiniText">Tier 0</small></span></button>
           </div>
@@ -262,6 +266,18 @@
       </div>
     </div>
 
+    <!-- today's quests, the crown chest and the win streak -->
+    <div class="modal" id="questModal" hidden>
+      <div class="quest-card plaque" role="dialog" aria-modal="true" aria-labelledby="questTitle">
+        <button class="modal-x" id="questX" type="button" aria-label="Close">&#x2715;</button>
+        <h3 id="questTitle">Daily Quests</h3>
+        <p class="q-sub" id="questNew">New quests at midnight</p>
+        <ul class="q-list" id="questList"></ul>
+        <div class="q-crown" id="questCrown"></div>
+        <p class="q-streak" id="questStreak"></p>
+      </div>
+    </div>
+
     <!-- the Diamond Pass: every tier's free and Diamond Pass reward -->
     <div class="modal" id="passModal" hidden>
       <div class="pass-card plaque" role="dialog" aria-modal="true" aria-labelledby="passTitle">
@@ -351,10 +367,12 @@
         <div class="res-row you"><span>You</span><div class="res-crowns" id="resYou"></div></div>
         <p class="res-line" id="resLine"></p>
         <div class="res-trophy" id="resTrophy" hidden></div>
+        <div class="res-rewards" id="resRewards" hidden></div>
         <p class="res-unlock" id="resUnlock" hidden></p>
         <p class="res-small" id="resSmall"></p>
         <div class="res-btns">
           <button class="big-btn chest-now" id="chestNowBtn" type="button" hidden><span id="chestNowText">Open Silver Chest</span></button>
+          <button class="big-btn claim-now" id="claimNowBtn" type="button" hidden><span>Claim Rewards</span></button>
           <button class="big-btn" id="nextBtn" type="button" hidden><span id="nextBtnText">Battle Trainer Romeo</span></button>
           <button class="big-btn" id="againBtn" type="button"><span>Play Again</span></button>
           <button class="pill" id="homeBtn" type="button">Home</button>
