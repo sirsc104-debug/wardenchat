@@ -1663,7 +1663,7 @@ EVO.cat({ ...{"id": "sharks", "name": "Sharks", "icon": "🦈", "q": "Name a **s
 2|Broadnose sevengill|Broadnose sevengill shark|Notorynchus cepedianus
 2|Smalleye hammerhead|Sphyrna tudes|Smalleye Hammerhead Shark|Golden Hammerhead
 2|Kitefin|Kitefin shark|Dalatias licha|squale liche|darkie charlie
-2|Tasselled wobbegong|Eucrossorhinus dasypogon|Bearded wobbegong|Ogilbys Wobbegong
+5|Tasselled wobbegong|Eucrossorhinus dasypogon|Bearded wobbegong|Ogilbys Wobbegong
 2|Sicklefin lemon|Sicklefin lemon shark|sharptooth lemon shark|Negaprion acutidens
 2|Smalltooth sand tiger|Odontaspis ferox|Smalltooth sand tiger shark
 2|Spot-tail|Spot-tail shark|sorrah shark
@@ -1904,7 +1904,7 @@ EVO.cat({ ...{"id": "sharks", "name": "Sharks", "icon": "🦈", "q": "Name a **s
 3|Narrownose smooth-hound|Mustelus schmitti
 3|Northern wobbegong|Orectolobus wardi
 3|Ocellated angelshark|Squatina tergocellatoides
-5|Oman bullhead|Oman bullhead shark|Heterodontus omanensis
+4|Oman bullhead|Oman bullhead shark|Heterodontus omanensis
 4|Onefin catshark|Pentanchus profundicolus
 4|Ornate angelshark|Squatina tergocellata
 4|Pale catshark|Apristurus sibogae
@@ -9636,7 +9636,7 @@ EVO.cat({ ...{"id": "heritage", "name": "World Heritage", "icon": "🏺", "q": "
 4|Casa Garden
 4|Colegiata de Santa Maria la Mayor, Calatayud|Collegiate church of Santa María|Collegiate Church of the Assumption of Our Lady
 4|Dacian Limes|Limes Dacicus|Frontiers of the Roman Empire - Dacia|Limes Daciae
-4|Historic Sanctuary of Machu Picchu
+1|Historic Sanctuary of Machu Picchu
 4|Historic centre of Puebla
 4|Kas Plateau Reserved Forest|Kaas Plateau
 4|Modern architecture of Kaunas|Modernist architecture in Kaunas
@@ -13488,15 +13488,21 @@ EVO.cat({ ...{"id": "greekgods", "name": "Greek gods", "icon": "⚡", "q": "Name
 0|Athena|Athina
 0|Aphrodite|Cytherea|Erycina
 0|Apollo|Apeilōn|Apellōn|Aploun|Apollōn|Phoebus
+0|Heracles|Hercules
 0|Poseidon|Posidon
 0|Hermes
 0|Ares
-0|Hades|Pluton|Plouton
+2|Hades|Pluton|Plouton
 2|Artemis
 2|Hera
 2|Dionysus
 2|Demeter|Deo
 2|Hephaestus|Hephaestos
+2|Atlas
+2|Cronus|Kronos
+2|Gaia|Gaea
+2|Prometheus
+2|Rhea
 2|Hestia|Histia, Vesta
 1|Eros|Cupid
 2|Persephone|Kore
@@ -13509,6 +13515,8 @@ EVO.cat({ ...{"id": "greekgods", "name": "Greek gods", "icon": "⚡", "q": "Name
 2|Hecate|Hekate|Hecat
 2|Hebe
 2|Nemesis|Rhamnousia|Rhamnusia
+2|Nyx
+2|Uranus|Ouranos
 2|Iris
 2|Thanatos
 2|Circe|Kirke
@@ -13529,12 +13537,12 @@ EVO.cat({ ...{"id": "greekgods", "name": "Greek gods", "icon": "⚡", "q": "Name
 2|Hymen
 2|Astarte|Ashtoreth|Ashtaroth|ʿAṯtart
 2|Psyche
-2|Eileithyia|Eilithyia|Ilithyia|Ilithia
-2|Deimos
-2|Plutus|Ploutos
-2|Aristaeus|Aristaios|Aristæus
-2|Hermaphroditus|Hermaphroditos
-2|Hygieia|Hygeia|Hygiea
+3|Eileithyia|Eilithyia|Ilithyia|Ilithia
+3|Deimos
+3|Plutus|Ploutos
+3|Aristaeus|Aristaios|Aristæus
+3|Hermaphroditus|Hermaphroditos
+3|Hygieia|Hygeia|Hygiea
 3|Eirene|Irene
 3|Enyo
 3|Momus
@@ -13548,6 +13556,12 @@ EVO.cat({ ...{"id": "greekgods", "name": "Greek gods", "icon": "⚡", "q": "Name
 3|Kratos|Potestas|Cratos|Cratus
 3|Clotho|Klotho
 3|Hesperus
+3|Chaos
+3|Hyperion
+3|Mnemosyne
+3|Oceanus
+3|Tethys
+3|Themis
 3|Aglaia|Aglaea
 3|Bia
 3|Despoina|Despina|Despoena
@@ -13580,14 +13594,14 @@ EVO.cat({ ...{"id": "greekgods", "name": "Greek gods", "icon": "⚡", "q": "Name
 3|Benthesikyme|Benthesicyme
 3|Paean|Paian
 3|Venus Anadyomene|Anadyomene|The Burlesque of Venus
-3|Elpis
-3|Lyssa
-3|Adikia
-3|Aphroditus
-3|Adranus|Adranos
-3|Aidos
-3|Antheia
-3|Kotys|Cotys|Cotytto|Kotyto
+4|Elpis
+4|Lyssa
+4|Adikia
+4|Aphroditus
+4|Adranus|Adranos
+4|Aidos
+4|Antheia
+4|Kotys|Cotys|Cotytto|Kotyto
 4|Limos
 4|Penia
 4|Sophrosyne
@@ -14353,6 +14367,142 @@ EVO.cat({ ...{"id": "bestpicture", "name": "Best Picture", "icon": "🎬", "q": 
 4|Hamlet
 4|Oliver!
 ` });
+EVO.cat({ ...{"id": "pixar", "name": "Pixar", "icon": "🧸", "q": "Name a **Pixar** feature film.", "strip": ["film", "movie"], "level": 1}, list: `
+0|Toy Story
+0|WALL-E
+0|Finding Nemo
+0|Ratatouille
+0|Toy Story 2
+0|Monsters, Inc.
+0|Inside Out
+0|Toy Story 3
+0|Up
+0|The Incredibles
+0|Cars
+0|Brave
+2|Toy Story 4
+2|Coco
+2|A Bug's Life
+2|Finding Dory
+2|Monsters University
+2|Turning Red
+2|Cars 2
+2|The Good Dinosaur
+2|Incredibles 2
+2|Soul
+1|Onward
+2|Lightyear
+2|Cars 3
+2|Inside Out 2
+2|Luca
+2|Toy Story 5
+2|Planes
+2|Elemental
+5|Elio
+3|Hoppers
+3|Geri's Game
+3|Luxo Jr.|Luxo Junior
+3|Piper
+3|Cars Toons|Mater's Tall Tales
+3|For the Birds
+3|Gatto
+3|Tin Toy
+3|Day & Night
+3|Hawaiian Vacation
+3|Bao
+3|Boundin'
+3|Buzz Lightyear of Star Command: The Adventure Begins
+3|Lava
+3|Mater and the Ghostlight
+3|One Man Band
+3|Partysaurus Rex
+3|Small Fry
+3|BURN-E
+3|Jack-Jack Attack
+3|Knick Knack
+3|La Luna|Luna
+3|Presto
+3|The Adventures of André & Wally B.|The Adventures of André and Wally B.By Richard Williams
+4|The Blue Umbrella
+4|Mike's New Car
+4|Red's Dream
+4|Lifted
+4|Your Friend the Rat
+4|Kitbull
+4|Lou
+4|Partly Cloudy
+4|Burrow
+4|Dug's Special Mission
+4|Sanjay's Super Team
+4|Dream Productions
+4|Forky Asks a Question
+4|Riley's First Date?
+4|Toy Story Toons
+4|Win or Lose
+4|Borrowed Time
+4|Party Central
+4|The Legend of Mor'du
+4|George and A.J.
+4|Mr. Incredible and Pals
+4|Care Bears: Journey to Joke-a-lot
+4|Float
+4|Loop
+4|Out
+4|Purl
+4|Smash and Grab
+4|Coco 2
+4|Exploring the Reef with Jean-Michel Cousteau|Exploring the Reef
+4|Wind
+4|Ciao Alberto
+4|It's Tough to Be a Bug!
+4|Nona
+4|Twenty Something
+4|A Spark Story
+4|Tiny Toy Stories
+4|Tokyo Mater
+4|Light & Heavy
+4|Self
+` });
+EVO.cat({ ...{"id": "ghibli", "name": "Studio Ghibli", "icon": "🌿", "q": "Name a **Studio Ghibli** film.", "strip": ["film", "movie"], "level": 2}, list: `
+0|Spirited Away|Sen to Chihiro no Kamikakushi
+0|Princess Mononoke|Mononoke-hime
+0|Howl's Moving Castle|Howl no Ugoku Shiro
+0|My Neighbor Totoro|Tonari no Totoro
+0|Castle in the Sky|Laputa|Tenkū no Shiro Laputa|Tenkuu no Shiro Laputa
+1|Grave of the Fireflies|Hotaru no Haka
+2|Ponyo|Gake no ue no Ponyo|Ponyo on the Cliff by the Sea
+2|Porco Rosso|Kurenai no Buta
+2|Kiki's Delivery Service|Kiki the Little Witch|Majo no Takkyūbin|Majo no Takkyuubin|Witch Delivery Service
+2|The Wind Rises|Kaze Tachinu
+2|Arrietty|The Secret World of Arrietty|Karigurashi no Arrietty|The Borrower Arrietty
+2|The Cat Returns|Neko no Ongaeshi
+2|The Boy and the Heron|How Do You Live?|Kimitachi wa Do Ikiru ka
+3|Only Yesterday|Omohide Poro Poro|Omoide Poro Poro
+3|Whisper of the Heart|Mimi o Sumaseba|Mimi wo Sumaseba
+3|Tales from Earthsea|Gedo Senki
+3|The Tale of the Princess Kaguya|Kaguya-Hime no Monogatari
+3|When Marnie Was There|Marnie of [My] Memories|Omoide no Marnie
+3|Pom Poko|Heisei Tanuki Gassen Ponpoko
+3|From Up on Poppy Hill|Coquelicot-zaka kara|Kokuriko-zaka kara
+3|Ghost in the Shell 2: Innocence|Innocence
+3|My Neighbors the Yamadas|Hōhokekyo Tonari no Yamada-kun|My Neighbours the Yamadas
+3|The Red Turtle
+5|Ocean Waves|I Can Hear the Sea|Umi ga Kikoeru
+4|Earwig and the Witch|Aya and the Witch|Aya to Majo
+4|On Your Mark
+4|Boro the Caterpillar|Kemushi no Boro
+4|Mizugumo Monmon
+4|Kujiratori
+4|Kūsō no Sora Tobu Kikaitachi|Kuusou no Sora Tobu Kikaitachi
+4|Looking for a Home|Yadosagashi
+4|Hoshi o Katta Hi
+4|Iblard Jikan
+4|Koro's Big Day Out|Koro no Daisanpo
+4|The Night of Taneyamagahara|Taneyamagahara no Yoru
+4|The Story of Yanagawa's Canals|Yanagawa Horiwari Monogatari
+4|A Sumo Wrestler's Tail|Nezumi no Sumo
+4|Nandarō|Nandarou
+` });
 EVO.cat({ ...{"id": "simpsons", "name": "The Simpsons", "icon": "🍩", "q": "Name a character from **The Simpsons**.", "strip": ["simpson"], "level": 1}, list: `
 0|Homer Simpson|Jay Simpson Homer|Homer
 0|Bart Simpson|The Boy|Ratboy|Bartman|Bartholomew Jo-Jo "Bart" Simpson|Bartholomew Jo-Jo Simpson|El Barto|Bart
@@ -14556,6 +14706,325 @@ EVO.cat({ ...{"id": "simpsons", "name": "The Simpsons", "icon": "🍩", "q": "Na
 4|Steve Mobbs
 4|The Winfields
 4|Wendy Sage|Dr. Wendy Sage
+` });
+EVO.cat({ ...{"id": "beatles", "name": "Beatles songs", "icon": "🎸", "q": "Name a song by **the Beatles**.", "strip": ["song"], "level": 2}, list: `
+0|Sgt. Pepper's Lonely Hearts Club Band|Sgt. Pepper's
+0|Abbey Road
+0|Please Please Me
+0|With the Beatles
+0|Help!
+0|Rubber Soul
+0|Beatles for Sale|GEP 8931
+0|Yesterday|GEP 8948
+0|Magical Mystery Tour|SMAL-2835
+0|Hey Jude
+0|Let It Be
+0|Strawberry Fields Forever
+2|All You Need Is Love
+2|Eleanor Rigby
+2|Love Me Do
+2|Come Together
+2|Something
+2|A Day in the Life|Day in the Life, A
+2|Lucy in the Sky with Diamonds|LSD|looking glass ties|plasticine porters|rocking horse people
+2|Norwegian Wood
+2|Now and Then
+2|I Want to Hold Your Hand
+2|While My Guitar Gently Weeps|WMGGW
+2|Yellow Submarine
+2|Penny Lane
+2|A Hard Day's Night
+2|Can't Buy Me Love|Can't Buy My Love
+2|She Loves You
+2|Hello, Goodbye
+2|Helter Skelter
+2|I Saw Her Standing There
+2|In My Life
+2|Across the Universe
+2|Here Comes the Sun
+2|Ob-La-Di, Ob-La-Da
+2|Taxman
+2|Free as a Bird
+2|Get Back
+2|Michelle
+2|Ticket to Ride
+2|With a Little Help from My Friends
+2|All My Loving|GEP 8891
+2|Blackbird
+2|I Am the Walrus
+2|Tomorrow Never Knows
+2|Ask Me Why
+2|Nowhere Man|GEP 8952
+2|Octopus's Garden
+2|P.S. I Love You
+2|Revolution|Revolution 1
+2|The Long and Winding Road
+2|And I Love Her
+2|From Me to You
+2|Misery
+2|Paperback Writer
+2|Because
+2|Being for the Benefit of Mr. Kite!
+2|Day Tripper
+2|Golden Slumbers
+2|Her Majesty
+2|Here, There and Everywhere
+2|I Want You
+2|Oh! Darling
+2|The Beatles' rooftop concert
+2|When I'm Sixty-Four
+2|Back in the U.S.S.R.
+2|Do You Want to Know a Secret
+2|Don't Bother Me
+2|Don't Let Me Down
+2|Drive My Car
+2|Eight Days a Week
+2|Happiness Is a Warm Gun
+2|I Should Have Known Better
+2|I'm Only Sleeping
+2|Lady Madonna
+2|Meet the Beatles!|ST 2047
+3|Rain
+3|Sun King
+3|The End
+3|We Can Work It Out
+3|Anthology 1
+3|Dear Prudence
+3|Getting Better
+3|Girl
+3|Glass Onion
+3|Got to Get You into My Life
+3|I Feel Fine
+3|If I Fell
+3|Introducing... The Beatles|VJLP 1062
+3|Martha My Dear
+3|Maxwell's Silver Hammer
+1|Revolution 9|Revolution No. 9
+3|Rocky Raccoon
+3|She Came In Through the Bathroom Window
+3|Within You Without You
+3|1962–1966|The Red Album
+3|A Taste of Honey
+3|Carry That Weight
+3|Don't Pass Me By
+3|Long Tall Sally|GEP 8913
+3|Love You To
+3|Lovely Rita
+3|Mean Mr. Mustard|"a bit of crap I wrote in India" - John Lennon
+3|Piggies
+3|Polythene Pam
+3|Real Love
+3|She's Leaving Home
+3|The Ballad of John and Yoko
+3|The Beatles Anthology
+3|This Boy
+3|Wild Honey Pie
+3|Yesterday and Today|T 2553
+3|You Never Give Me Your Money
+3|1967–1970|The Beatles 1967-1970
+3|All I've Got to Do
+3|And Your Bird Can Sing
+3|Anthology 3
+3|Beatles '65
+3|Dig a Pony
+3|Doctor Robert
+3|Everybody's Got Something to Hide Except Me and My Monkey
+3|Fixing a Hole|fixin' a hole|I'm fixing a hole
+3|For No One
+3|Good Day Sunshine
+3|Good Morning Good Morning
+3|Hey Bulldog|Hey Bullfrog|She Can Talk to Me
+3|Honey Pie
+3|I Wanna Be Your Man
+3|I Want to Tell You
+3|I'll Cry Instead
+3|I'll Follow the Sun
+3|I'll Get You|Get You in the End
+3|I'm Happy Just to Dance with You
+3|I'm So Tired
+3|I've Just Seen a Face
+3|If I Needed Someone
+3|It Won't Be Long
+3|Julia
+3|Let It Be... Naked
+3|She Said She Said
+3|Thank You Girl
+3|The Continuing Story of Bungalow Bill
+5|The Inner Light
+3|Things We Said Today
+3|Two of Us
+3|Yellow Submarine Songtrack
+3|You've Got to Hide Your Love Away
+3|Anthology 2
+3|Baby, You're a Rich Man
+3|Blue Jay Way
+3|Cry Baby Cry
+3|For You Blue
+3|Hold Me Tight
+3|I Me Mine
+3|I Need You
+3|I Will
+4|I'm Looking Through You
+4|I'm a Loser
+4|I've Got a Feeling
+4|It's Only Love
+4|Little Child
+4|Past Masters|Past Masters Volumes One & Two
+4|Savoy Truffle
+4|She's a Woman
+4|The Fool on the Hill
+4|The Night Before
+4|The Word
+4|What Goes On
+4|When the Levee Breaks
+4|Why Don't We Do It in the Road?
+4|You Can't Do That
+4|You Won't See Me
+4|Your Mother Should Know
+4|Beatles VI|T 2358
+4|Birthday
+4|Dig It|1970 song by The Beatles
+4|Good Night
+4|I Don't Want to Spoil the Party
+4|I'm Down
+4|Maggie May|Roud 1757
+4|Mother Nature's Son
+4|No Reply
+4|One After 909
+4|Run for Your Life
+4|Sexy Sadie
+4|The Early Beatles|T 2309
+4|There's a Place
+4|Think for Yourself
+4|Wait
+4|Yes It Is
+4|You Like Me Too Much
+4|You're Going to Lose That Girl
+4|Any Time at All
+4|Baby's in Black
+4|Long, Long, Long
+4|Not a Second Time
+4|Old Brown Shoe
+4|Only a Northern Song|Only a Northern
+4|Tell Me Why
+4|The Beatles at the Hollywood Bowl|Live at the Hollywood Bowl|0C 062-06377|EMTV 4
+4|The Beatles' Story|STBO 2222
+4|Twist and Shout|GEP 8882
+4|What You're Doing
+4|Yer Blues
+4|You Know My Name|333
+4|A Collection of Beatles Oldies|A Collection of Beatles Oldies - But Goldies!
+4|All Together Now
+4|Another Girl
+4|Christmas Time|Christmas Time Is Here Again
+4|Every Little Thing
+4|Flying
+4|I Call Your Name
+4|I'll Be Back
+4|Tell Me What You See
+4|The Beatles' Hits|GEP 8880
+4|When I Get Home
+4|It's All Too Much
+4|On Air – Live at the BBC Volume 2
+4|Reel Music
+4|The Beatles|The Beatles Stereo Box Set|The Beatles in Stereo|GEP 8883
+4|The Beatles Ballads
+4|12-Bar Original
+4|Carnival of Light
+4|Extracts from the Film A Hard Day's Night
+4|Live! at the Star-Club in Hamburg, Germany; 1962
+4|The Beatles in Mono
+4|4 by the Beatles|R-5365
+4|Beatlemania! With the Beatles|T 6051
+4|Beatles for Sale No. 2|Beatles for Sale
+4|The U.S. Albums
+4|A Beginning
+4|Anthology 4
+4|Four by the Beatles|EAP 1-2121
+4|If You've Got Trouble
+4|Souvenir of Their Visit to America|VJ EP 1-903
+4|That Means a Lot
+4|The Beatles Box Set
+4|The Beatles at Shea Stadium
+4|The Beatles' First|LPHM 46432
+4|The Beatles' Long Tall Sally|Long Tall Sally|T6063
+4|The Beatles' Million Sellers|Beatles' Golden Discs|GEP 8946
+4|The Beatles' Movie Medley|Movie Medley
+4|The Capitol Albums, Volume 1|The Capitol Albums Vol. 1
+4|The Capitol Albums, Volume 2|The Capitol Albums Vol. 2
+4|You Know What to Do
+4|Komm, gib mir deine Hand / Sie liebt dich|Komm, gib mir deine Hand|Sie liebt dich
+4|Rarities
+4|The Beatles Bootleg Recordings 1963
+4|The Beatles Box|From Liverpool – The Beatles Box
+4|The Beatles Collection
+4|The Beatles' Decca audition
+4|What's the New Mary Jane
+4|Lend Me Your Comb
+4|Take Out Some Insurance|If You Love Me|Take Out Some Insurance on Me, Baby
+4|The Beatles: The First U.S. Visit
+4|Cayenne
+4|The Beatles' 1965 US tour
+4|The Japan Box
+4|You'll Be Mine
+4|First Live Recordings
+4|I Got to Find My Baby
+4|Lonesome Tears in My Eyes
+4|Very Together
+4|Everyday Chemistry
+4|So How Come
+4|The Beatles with Tony Sheridan and Their Guests|The Beatles with Tony Sheridan & Guests
+4|The Beatles' 1964 North American tour
+4|The Beatles' 1964 world tour
+4|The Beatles' 1965 European tour
+4|The Early Tapes of the Beatles
+4|Anthology Collection
+4|Hear the Beatles Tell All
+4|In the Beginning
+4|Kum Back
+4|Mono Masters
+4|Peace of Mind
+4|Por Siempre Beatles
+4|The Beatles Beat
+4|The Beatles EP Collection|E.P. Collection
+4|The Beatles Mono Collection|Mono Collection
+4|The Beatles in Italy
+4|The Beatles' 1965 UK tour
+4|The Beatles' 1966 US tour
+4|The Beatles: The Collection|The Collection
+4|The Number Ones|23 The Number Ones
+4|The Palace of the King of the Birds|The Beatles, The Palace of the King of the Birds
+4|Watching Rainbows
+4|Etcetera
+4|Jolly What!
+4|The Beatles Winter 1963 Helen Shapiro Tour
+4|The Beatles' 1966 tour of Germany, Japan and the Philippines
+4|The Beatles' Greatest
+4|The Essential Beatles
+4|The Singles Collection 1962–1970
+4|Your Feet's Too Big
+4|20 Golden Hits|20 Exitos De Oro
+4|Commonwealth
+4|Heather
+4|Madman
+4|Only The Beatles...
+4|Sgt. Pepper's Lonely Hearts Club Band: 50th Anniversary Edition
+4|Song of Love
+4|The Beatles Tapes from the David Wigg Interviews
+4|The Beatles timeline
+4|The Beatles' Christmas records|The Beatles' Christmas records discography|discography from The Beatles' Christmas records|discography of The Beatles' Christmas records
+4|The Beatles: 1964 U.S. Albums in Mono
+4|Thinking of Linking
+4|Abbey Road: 50th Anniversary Edition
+4|Around the Beatles
+4|Compilation Deluxe
+4|Get Back – The Rooftop Performance
+4|Let It Be: Special Edition|Let It Be
+4|No Other Love
+4|Revolver: Special Edition|Revolver
+4|Rubber Soul: Special Edition
+4|The Beatles: 50th Anniversary Edition
+4|Ultra Rare Trax
 ` });
 EVO.cat({ ...{"id": "swift", "name": "Taylor Swift songs", "icon": "💜", "q": "Name a song by **Taylor Swift**.", "strip": ["song", "taylors version"], "level": 2}, list: `
 0|Look What You Made Me Do
@@ -22251,21 +22720,59 @@ EVO.cat({ ...{"id": "constellations", "name": "Constellations", "icon": "✨", "
 4|Rangifer
 4|Taurus Poniatovii
 ` });
-EVO.cat({ ...{"id": "minerals", "name": "Minerals", "icon": "💎", "q": "Name a **mineral**.", "strip": ["mineral"], "level": 3}, list: `
+EVO.cat({ ...{"id": "minerals", "name": "Minerals & gems", "icon": "💎", "q": "Name a **mineral or gemstone**.", "strip": ["mineral"], "level": 3}, list: `
 0|Diamond
+0|Chalk
+0|Coal
+0|Emerald
+0|Gold
+0|Granite
+0|Limestone
+0|Marble
+0|Pearl
+0|Ruby
+0|Sandstone
+0|Sapphire
 0|Quartz|α-Quarz|SiO2
 0|Graphite|plumbago|graphite-2H|graphite-3R|black lead|mineral carbon|silver graphite
-0|Gypsum|calcium(II) sulfate dihydrate|gypsum Fibrosum|gypsum mineral|gypsum stone|hydrated calcium sulfate|mineral white|jabsin
-0|Topaz|Al2SiO4(F, OH)2
-0|Turquoise|chalchit
-0|Halite|rock salt|Salt
-0|Talc|talcum|hydrous magnesium silicate
-0|Opal
-0|Beryl
-0|Calcite|orange calcite|red calcite
-0|Corundum|corinvindum|sapphire-ruby
-0|Hematite|haematite|blood stone|haematitis of Pliny|Hem|iron(3+);oxygen|oligiste|raphisiderite
-0|Dolomite|miemite
+2|Gypsum|calcium(II) sulfate dihydrate|gypsum Fibrosum|gypsum mineral|gypsum stone|hydrated calcium sulfate|mineral white|jabsin
+2|Topaz|Al2SiO4(F, OH)2
+2|Turquoise|chalchit
+2|Agate
+2|Amber
+2|Amethyst
+2|Aquamarine
+2|Basalt
+2|Citrine
+2|Clay
+2|Crystal
+2|Feldspar
+2|Flint
+2|Fossil
+2|Garnet
+2|Gravel
+2|Iron Ore
+2|Jade
+2|Jasper
+2|Lava Rock
+2|Mica
+2|Moonstone
+2|Obsidian
+2|Onyx
+2|Peridot
+2|Pumice
+2|Rose Quartz
+2|Shale
+2|Slate
+2|Tiger's Eye
+2|Halite|rock salt|Salt
+2|Talc|talcum|hydrous magnesium silicate
+2|Opal
+2|Beryl
+2|Calcite|orange calcite|red calcite
+2|Corundum|corinvindum|sapphire-ruby
+2|Hematite|haematite|blood stone|haematitis of Pliny|Hem|iron(3+);oxygen|oligiste|raphisiderite
+2|Dolomite|miemite
 2|Pyrite|iron pyrite|fool's gold
 2|Lazurite|lapis lazuli|Lapis
 2|Cinnabar
@@ -22279,6 +22786,70 @@ EVO.cat({ ...{"id": "minerals", "name": "Minerals", "icon": "💎", "q": "Name a
 2|Spinel
 2|Baryte|barite|baritine|barytine|heavy spar
 2|Orthoclase|orthose
+2|Alexandrite
+2|Amazonite
+2|Ametrine
+2|Ammolite
+2|Andesite
+2|Asbestos
+2|Aventurine
+2|Bauxite
+2|Black Opal
+2|Blue Diamond
+2|Breccia
+2|Carnelian
+2|Cat's Eye
+2|Chalcedony
+2|Chert
+2|Chrysoprase
+2|Clear Quartz|Rock Crystal
+2|Conglomerate
+2|Coral
+2|Cubic Zirconia
+2|Desert Rose
+2|Diorite
+2|Fire Opal
+2|Gabbro
+2|Geode
+2|Gneiss
+2|Igneous
+2|Iolite
+2|Jet
+2|Kunzite
+2|Labradorite
+2|Larimar
+2|Lepidolite
+2|Lodestone
+2|Metamorphic
+2|Meteorite
+2|Morganite
+2|Mother of Pearl
+2|Mudstone
+2|Nephrite
+2|Olivine
+2|Peridotite
+2|Pink Diamond
+2|Platinum
+2|Quartzite
+2|Rhyolite
+2|Schist
+2|Sedimentary
+2|Selenite
+2|Serpentine
+2|Serpentinite
+2|Siltstone
+2|Silver
+2|Smoky Quartz
+2|Soapstone
+2|Star Sapphire
+2|Sulfur|Sulphur
+2|Sunstone
+2|Tanzanite
+2|Tourmaline
+2|Travertine
+2|Tufa
+2|Tuff
+2|Unakite
 2|Chrysoberyl|BeAl2O4|BeAl₂O₄
 2|Aragonite|Sau
 2|Kyanite
@@ -22436,6 +23007,83 @@ EVO.cat({ ...{"id": "minerals", "name": "Minerals", "icon": "💎", "q": "Name a
 2|Riebeckite
 2|Stannite
 2|Tenorite|melaconite
+2|Acetamide
+2|Aegirine-augite
+2|Akoya Pearl
+2|Amphibolite
+2|Andesine
+2|Anorthosite
+2|Aplite
+2|Arkose
+2|Biotite
+2|Blueschist
+2|Carbonatite
+2|Chlorite
+2|Chrome Diopside
+2|Conch Pearl
+2|Coquina
+2|Dacite
+2|Demantoid
+2|Diabase|Dolerite
+2|Dunite
+2|Eclogite
+2|Evaporite
+2|Ferroaxinite
+2|Goshenite
+2|Granulite
+2|Greenschist
+2|Greywacke|Graywacke
+2|Heliodor
+2|Hessonite
+2|Hiddenite
+2|Hornblende
+2|Hornfels
+2|Ignimbrite
+2|Indicolite
+2|Keshi Pearl
+2|Kimberlite
+2|Komatiite
+2|Lamproite
+2|Laterite
+2|Libyan Desert Glass
+2|Manganaxinite
+2|Manganoan calcite
+2|Marl
+2|Melo Pearl
+2|Migmatite
+2|Moldavite
+2|Monzonite
+2|Mylonite
+2|Norite
+2|Oolite
+2|Padparadscha
+2|Paraiba Tourmaline
+2|Pegmatite
+2|Petrified Wood
+2|Phonolite
+2|Phyllite
+2|Porphyry
+2|Pyroxenite
+2|Red Beryl|Bixbite
+2|Rhodolite
+2|Rubellite
+2|Scapolite
+2|Scoria
+2|Seraphinite
+2|Skarn
+2|South Sea Pearl
+2|Spilite
+2|Syenite
+2|Tahitian Pearl
+2|Tektite
+2|Tinzenite
+2|Tonalite
+2|Trachyte
+2|Trondhjemite
+2|Tsavorite
+2|Watermelon Tourmaline
+2|Wolframite
+2|Zeolite
 2|Dioptase
 2|Lonsdaleite|IMA1966-044
 2|Pyromorphite|minera plumbi virides|phosphomimetite
@@ -22472,147 +23120,160 @@ EVO.cat({ ...{"id": "minerals", "name": "Minerals", "icon": "💎", "q": "Name a
 2|Painite
 2|Salammoniac
 2|Samarskite-|ampangabeite
-2|Sassolite
-2|Skutterudite
-2|Amblygonite
-2|Chamosite|clinochamosite|orthochamosite
-2|Ettringite|Candlot salt|woodfordite
-2|Franklinite
-2|Gersdorffite|gersdorffite-P2₁3
-2|Laumontite|laumonite|lomonite
-2|Litharge
-2|Loellingite|löllingite
-2|Matlockite
-2|Nosean|nosian
-2|Pectolite
-2|Rosasite
-2|Scorodite
-2|Troilite
-2|Adelite|CaMgAsO4OH
-2|Antigorite
-2|Argyrodite
-2|Armalcolite|IMA1970-006
-2|Awaruite
-2|Berthierite
-2|Bertrandite
-2|Bismutite|bismuthite
-2|Cubanite
-2|Cummingtonite|cummingtonite, ferroan
-2|Dundasite
-2|Ferberite
-2|Glauberite
-2|Lawsonite
-2|Mullite
-2|Omphacite
-2|Powellite
-2|Schorl|schürl|black tourmaline
-2|Taaffeite|magnesiotaaffeite-2N'2S
-2|Thénardite|IMA14-A
-2|Wüstite|wuestite
-2|Eudialyte
-2|Proustite
-2|Pyrargyrite
-2|Bromargyrite|bromyrite
-2|Cancrinite
-2|Chondrodite
-2|Clinozoisite
-2|Greigite|IMA1963-007|melnikovite
-2|Hessite
-2|Hydromagnesite
-2|Kermesite
-2|Linarite
-2|Massicot|C.I. Pigment Yellow 46|masticot|painters' litharge|plumbic ocher|plumbic ochre
-2|Mellite|aluminium mellitate hydrate|benzene hexacarboxylate hydrate
-2|Otavite
-2|Paragonite|Soda mica
-2|Saponite|zebedassite
-2|Scolecite
-2|Sperrylite
-2|Taenite
-2|Ringwoodite|IMA1968-036
-2|Trona
-2|Wavellite|bialite
-2|Abenakiite-|IMA1991-054
-2|Alunogen
-2|Artinite
-2|Bischofite
-2|Bismite
-2|Copiapite
-2|Cyanotrichite
-2|Domeykite|arsenical copper
-2|Halotrichite|iron alum
-2|Hydrotalcite
-2|Jacobsite
-2|Krennerite
-2|Maghemite|IMA17-H
-2|Melilite
-2|Neptunite
-2|Polybasite
-2|Spherocobaltite
-2|Howlite
-2|Arfvedsonite
-2|Coesite
-2|Kieserite
-2|Mimetite
-2|Pollucite
-2|Acuminite|IMA1986-038
-2|Algodonite
-2|Auricupride
-2|Avicennite|Tl2O3|Tl₂O₃
-2|Babingtonite
-2|Becquerelite
-2|Boleite
-2|Bunsenite
-2|Bustamite
-2|Chloritoid
-2|Clinoclase
-2|Coffinite
-2|Creedite
-2|Curite
-2|Devilline|devillite|herrengrundite
-2|Euchroite
-2|Hollandite
-2|Lechatelierite
-2|Miargyrite|kenngottite
-2|Monticellite
-2|Okenite
-2|Petzite
-2|Phosgenite
-2|Phosphophyllite|hydrated zinc iron phosphate
-2|Piemontite|piedmontite
-2|Pseudomalachite|ehlite
-2|Stephanite
-2|Stolzite
-2|Tyuyamunite
-2|Uranophane|alpha-uranophane|uranophane-alpha
-2|Borax
-2|Aikinite
-2|Jadarite|IMA2006-036
-2|Kernite
-2|Polyhalite
-2|Abswurmbachite|IMA1990-007
-2|Afwillite
-2|Agrellite|IMA1973-032
-2|Anapaite
-2|Blödite|astrakanite|astrakhanite|bloedite
-2|Cohenite|cementite
-2|Conichalcite
-2|Danalite
-2|Dawsonite
-2|Harmotome|cross stone
-2|Hauerite
-2|Iodargyrite|iodyrite
-2|Jeremejevite
-2|Leadhillite
-2|Libethenite
-2|Mesolite
-2|Nagyágite
-2|Nitratine|Chile saltpeter|nitratite
-2|Pargasite
-2|Purpurite
-2|Roselite
-2|Schreibersite
-2|Tephroite
+3|Sassolite
+3|Skutterudite
+3|Amblygonite
+3|Chamosite|clinochamosite|orthochamosite
+3|Ettringite|Candlot salt|woodfordite
+3|Franklinite
+3|Gersdorffite|gersdorffite-P2₁3
+3|Laumontite|laumonite|lomonite
+3|Litharge
+3|Loellingite|löllingite
+3|Matlockite
+3|Nosean|nosian
+3|Pectolite
+3|Rosasite
+3|Scorodite
+3|Troilite
+3|Adelite|CaMgAsO4OH
+3|Antigorite
+3|Argyrodite
+3|Armalcolite|IMA1970-006
+3|Awaruite
+3|Berthierite
+3|Bertrandite
+3|Bismutite|bismuthite
+3|Cubanite
+3|Cummingtonite|cummingtonite, ferroan
+3|Dundasite
+3|Ferberite
+3|Glauberite
+3|Lawsonite
+3|Mullite
+3|Omphacite
+3|Powellite
+3|Schorl|schürl|black tourmaline
+3|Taaffeite|magnesiotaaffeite-2N'2S
+3|Thénardite|IMA14-A
+3|Wüstite|wuestite
+3|Eudialyte
+3|Proustite
+3|Pyrargyrite
+3|Bromargyrite|bromyrite
+3|Cancrinite
+3|Chondrodite
+3|Clinozoisite
+3|Greigite|IMA1963-007|melnikovite
+3|Hessite
+3|Hydromagnesite
+3|Kermesite
+3|Linarite
+3|Massicot|C.I. Pigment Yellow 46|masticot|painters' litharge|plumbic ocher|plumbic ochre
+3|Mellite|aluminium mellitate hydrate|benzene hexacarboxylate hydrate
+3|Otavite
+3|Paragonite|Soda mica
+3|Saponite|zebedassite
+3|Scolecite
+3|Sperrylite
+3|Taenite
+3|Ringwoodite|IMA1968-036
+3|Trona
+3|Wavellite|bialite
+3|Abenakiite-|IMA1991-054
+3|Alunogen
+3|Artinite
+3|Bischofite
+3|Bismite
+3|Copiapite
+3|Cyanotrichite
+3|Domeykite|arsenical copper
+3|Halotrichite|iron alum
+3|Hydrotalcite
+3|Jacobsite
+3|Krennerite
+3|Maghemite|IMA17-H
+3|Melilite
+3|Neptunite
+3|Polybasite
+3|Spherocobaltite
+3|Howlite
+3|Arfvedsonite
+3|Coesite
+3|Kieserite
+3|Mimetite
+3|Pollucite
+3|Acuminite|IMA1986-038
+3|Algodonite
+3|Auricupride
+3|Avicennite|Tl2O3|Tl₂O₃
+3|Babingtonite
+3|Becquerelite
+3|Boleite
+3|Bunsenite
+3|Bustamite
+3|Chloritoid
+3|Clinoclase
+3|Coffinite
+3|Creedite
+3|Curite
+3|Devilline|devillite|herrengrundite
+3|Euchroite
+3|Hollandite
+3|Lechatelierite
+3|Miargyrite|kenngottite
+3|Monticellite
+3|Okenite
+3|Petzite
+3|Phosgenite
+3|Phosphophyllite|hydrated zinc iron phosphate
+3|Piemontite|piedmontite
+3|Pseudomalachite|ehlite
+3|Stephanite
+3|Stolzite
+3|Tyuyamunite
+3|Uranophane|alpha-uranophane|uranophane-alpha
+3|Borax
+3|Aikinite
+3|Jadarite|IMA2006-036
+3|Kernite
+3|Polyhalite
+3|Agardite
+3|Binghamite
+3|Bytownite
+3|Ceruleite
+3|Chiastolite
+3|Dendritic Agate
+3|Fulgurite
+3|Larvikite
+3|Maw Sit Sit
+3|Pallasite Peridot
+3|Red Diamond
+3|Tetrahedrite
+3|Thunder Egg
+3|Abswurmbachite|IMA1990-007
+3|Afwillite
+3|Agrellite|IMA1973-032
+3|Anapaite
+3|Blödite|astrakanite|astrakhanite|bloedite
+3|Cohenite|cementite
+3|Conichalcite
+3|Danalite
+3|Dawsonite
+3|Harmotome|cross stone
+3|Hauerite
+3|Iodargyrite|iodyrite
+3|Jeremejevite
+3|Leadhillite
+3|Libethenite
+3|Mesolite
+3|Nagyágite
+3|Nitratine|Chile saltpeter|nitratite
+3|Pargasite
+3|Purpurite
+3|Roselite
+3|Schreibersite
+3|Tephroite
 3|Tyrolite|Kupferschaum
 3|Villiaumite
 3|Colemanite
@@ -22941,112 +23602,112 @@ EVO.cat({ ...{"id": "minerals", "name": "Minerals", "icon": "💎", "q": "Name a
 3|Zhemchuzhnikovite
 3|Zippeite|IMA1971-029a
 3|Zirconolite|zirconolite-2M|zirconolite-3O|zirconolite-3T
-3|Alamosite
-3|Augelite
-3|Clinohumite
-3|Achávalite
-3|Akatoreite|IMA1969-015
-3|Alarsite|IMA1993-003
-3|Althausite|IMA1974-050
-3|Amarantite
-3|Anilite|IMA1968-030
-3|Arcanite
-3|Arseniosiderite
-3|Arthurite|IMA1964-002
-3|Asbolane
-3|Asisite|IMA1987-003
-3|Banalsite
-3|Bannisterite|IMA1967-005
-3|Baotite
-3|Bayleyite
-3|Birnessite
-3|Boothite
-3|Brassite|IMA1973-047
-3|Brownleeite|Bwn|IMA2008-011
-3|Brownmillerite|calcium aluminoferrite|IMA1963-017
-3|Bukovskyite|IMA1967-022
-3|Cahnite
-3|Calderite|Cdr
-3|Canfieldite
-3|Changesite-|IMA2022-023a
-3|Chapmanite
-3|Chiolite|arksutite
-3|Cornetite
-3|Cornubite
-3|Cryptomelane|ebelmenite
-3|Cyrilovite
-3|Diadochite
-3|Doyleite|IMA1980-041
-3|Eulytine
-3|Feroxyhyte|IMA1975-032
-3|Ferroselite
-3|Fluor-uvite|Fluvt
-3|Franckeite
-3|Geikielite
-3|Gratonite
-3|Grossite|IMA1993-052
-3|Hopeite
-3|Imogolite
-3|Jennite|IMA1965-021
-3|Kalsilite
-3|Karelianite
-3|Lansfordite
-3|Leonite
-3|Mackinawite
-3|Majorite|IMA1969-018
-3|Marshite
-3|Maucherite
-3|Montroydite|HgO
-3|Moolooite|IMA1980-082
-3|Nenadkevichite
-3|Niningerite|IMA1966-036
-3|Nobleite
-3|Oregonite
-3|Phosphosiderite
-3|Phosphuranylite
-3|Plancheite
-3|Polycrase
-3|Poudretteite|IMA1986-028|màlayalam
-3|Quenstedtite
-3|Quetzalcoatlite|IMA1973-010
-3|Ramsdellite
-3|Rickardite
-3|Rozenite|IMA1962-006
-3|Saleeite
-3|Sanbornite
-3|Santabarbaraite|Azovskite|IMA2000-052
-3|Sartorite
-3|Seeligerite|IMA1970-036
-3|Seligmannite
-3|Sengierite
-3|Simpsonite
-3|Strashimirite|IMA1967-025
-3|Strunzite
-3|Stützite|stuetzite
-3|Talnakhite|IMA1967-014
-3|Tellurobismuthite
-3|Thomsenolite
-3|Tiemannite
-3|Tschermigite
-3|Tungstite
-3|Ulrichite|IMA1988-006
-3|Uytenbogaardtite|IMA1977-018
-3|Vanuralite
-3|Weddellite
-3|Wöhlerite
-3|Xanthiosite
-3|Xocomecatlite|IMA1974-048
-3|Zemannite|IMA1968-009
-3|Zykaite|IMA1976-039
-3|Abellaite|IMA2014-111
-3|Aktashite|Cu6Hg3As4S12
-3|Wadsleyite|IMA1982-012
-3|Allabogdanite|IMA2000-038
-3|Allanpringite|IMA2004-050
-3|Alloclasite
-3|Althupite|Ahp|IMA1986-003
-3|Anthonyite
-3|Archerite|IMA1975-008
+4|Alamosite
+4|Augelite
+4|Clinohumite
+4|Achávalite
+4|Akatoreite|IMA1969-015
+4|Alarsite|IMA1993-003
+4|Althausite|IMA1974-050
+4|Amarantite
+4|Anilite|IMA1968-030
+4|Arcanite
+4|Arseniosiderite
+4|Arthurite|IMA1964-002
+4|Asbolane
+4|Asisite|IMA1987-003
+4|Banalsite
+4|Bannisterite|IMA1967-005
+4|Baotite
+4|Bayleyite
+4|Birnessite
+4|Boothite
+4|Brassite|IMA1973-047
+4|Brownleeite|Bwn|IMA2008-011
+4|Brownmillerite|calcium aluminoferrite|IMA1963-017
+4|Bukovskyite|IMA1967-022
+4|Cahnite
+4|Calderite|Cdr
+4|Canfieldite
+4|Changesite-|IMA2022-023a
+4|Chapmanite
+4|Chiolite|arksutite
+4|Cornetite
+4|Cornubite
+4|Cryptomelane|ebelmenite
+4|Cyrilovite
+4|Diadochite
+4|Doyleite|IMA1980-041
+4|Eulytine
+4|Feroxyhyte|IMA1975-032
+4|Ferroselite
+4|Fluor-uvite|Fluvt
+4|Franckeite
+4|Geikielite
+4|Gratonite
+4|Grossite|IMA1993-052
+4|Hopeite
+4|Imogolite
+4|Jennite|IMA1965-021
+4|Kalsilite
+4|Karelianite
+4|Lansfordite
+4|Leonite
+4|Mackinawite
+4|Majorite|IMA1969-018
+4|Marshite
+4|Maucherite
+4|Montroydite|HgO
+4|Moolooite|IMA1980-082
+4|Nenadkevichite
+4|Niningerite|IMA1966-036
+4|Nobleite
+4|Oregonite
+4|Phosphosiderite
+4|Phosphuranylite
+4|Plancheite
+4|Polycrase
+4|Poudretteite|IMA1986-028|màlayalam
+4|Quenstedtite
+4|Quetzalcoatlite|IMA1973-010
+4|Ramsdellite
+4|Rickardite
+4|Rozenite|IMA1962-006
+4|Saleeite
+4|Sanbornite
+4|Santabarbaraite|Azovskite|IMA2000-052
+4|Sartorite
+4|Seeligerite|IMA1970-036
+4|Seligmannite
+4|Sengierite
+4|Simpsonite
+4|Strashimirite|IMA1967-025
+4|Strunzite
+4|Stützite|stuetzite
+4|Talnakhite|IMA1967-014
+4|Tellurobismuthite
+4|Thomsenolite
+4|Tiemannite
+4|Tschermigite
+4|Tungstite
+4|Ulrichite|IMA1988-006
+4|Uytenbogaardtite|IMA1977-018
+4|Vanuralite
+4|Weddellite
+4|Wöhlerite
+4|Xanthiosite
+4|Xocomecatlite|IMA1974-048
+4|Zemannite|IMA1968-009
+4|Zykaite|IMA1976-039
+4|Abellaite|IMA2014-111
+4|Aktashite|Cu6Hg3As4S12
+4|Wadsleyite|IMA1982-012
+4|Allabogdanite|IMA2000-038
+4|Allanpringite|IMA2004-050
+4|Alloclasite
+4|Althupite|Ahp|IMA1986-003
+4|Anthonyite
+4|Archerite|IMA1975-008
 4|Arctite|IMA1980-049
 4|Ardaite|IMA1979-073
 4|Arhbarite|IMA1981-044
@@ -40285,6 +40946,378 @@ EVO.cat({ ...{"id": "films", "name": "Movies", "icon": "🎞️", "q": "Name a *
 4|The Spirit of the Beehive|El espiritu de la colmena
 4|Steamboat Bill, Jr.
 ` });
+EVO.cat({ ...{"id": "animated", "name": "Animated films", "icon": "🎨", "q": "Name an **animated feature film**.", "strip": ["movie", "film"], "level": 1}, list: `
+0|Trolls World Tour
+0|101 Dalmatians|One Hundred and One Dalmatians
+0|A Bug's Life
+0|Bambi
+0|Big Hero 6
+0|Brave
+0|Captain Underpants|Captain Underpants The First Epic Movie
+0|Cars 2
+0|Cars 3
+0|Cloudy with a Chance of Meatballs
+0|Coco
+0|Despicable Me 2
+0|Despicable Me 3
+2|Despicable Me 4
+2|Dumbo
+2|Elemental
+2|Elio
+2|Finding Dory
+2|Frozen 2|Frozen II
+2|Hercules
+2|Hotel Transylvania
+2|Hotel Transylvania 3|Hotel Transylvania 3 Summer Vacation
+2|How to Train Your Dragon
+2|How to Train Your Dragon 2
+2|Ice Age
+2|Ice Age Collision Course
+2|Incredibles 2
+2|Inside Out 2
+2|KPop Demon Hunters
+2|Kung Fu Panda
+2|Kung Fu Panda 4
+2|Lilo and Stitch
+2|Luca
+2|Madagascar
+2|Megamind
+2|Minions The Rise of Gru|Minions Rise of Gru
+2|Moana 2
+2|Monsters Inc|Monsters Incorporated
+2|Monsters University
+2|Mulan
+2|Onward
+2|Peter Pan
+2|Pinocchio
+2|Planes
+2|Pocahontas
+2|Puss in Boots
+2|Ratatouille
+2|Raya and the Last Dragon|Raya
+2|Rio 2
+2|Shrek 2
+2|Shrek Forever After
+2|Shrek the Third
+2|Sing
+2|Sing 2
+2|Sleeping Beauty
+2|Smallfoot
+2|Soul
+2|Spider-Man Across the Spider-Verse|Across the Spider-Verse
+2|Spider-Man Into the Spider-Verse|Into the Spider-Verse|Spider-Verse
+2|Spirited Away
+2|Storks
+2|Tangled
+2|Tarzan
+2|The Boss Baby
+2|The Boss Baby Family Business|The Boss Baby 2
+2|The Croods A New Age|The Croods 2
+2|The Emoji Movie
+2|The Garfield Movie
+2|The Grinch
+2|The Incredibles
+2|The Jungle Book
+2|The Lego Movie
+2|The Polar Express
+2|The Secret Life of Pets
+2|The Simpsons Movie
+2|The SpongeBob SquarePants Movie|SpongeBob Movie
+2|The Super Mario Bros Movie|Mario Movie
+2|The Wild Robot
+2|Toy Story 2
+2|Toy Story 3
+2|Toy Story 4
+2|Trolls
+2|Turning Red
+2|Up
+2|WALL-E
+2|Wish
+2|Wreck-It Ralph
+3|Zootopia|Zootropolis
+3|Zootopia 2
+3|Teenage Mutant Ninja Turtles: Mutant Mayhem|TMNT Mutant Mayhem|Mutant Mayhem
+3|Aladdin
+3|Beauty and the Beast
+3|Cars
+3|Cinderella
+3|Despicable Me
+3|Encanto
+3|Finding Nemo
+3|Frozen
+3|Hotel Transylvania 2
+3|How to Train Your Dragon The Hidden World|How to Train Your Dragon 3
+3|Ice Age Continental Drift|Ice Age 4
+3|Inside Out
+3|Kung Fu Panda 3
+3|Madagascar 3|Madagascar 3 Europe's Most Wanted
+3|Minions
+3|Moana
+3|Puss in Boots The Last Wish|Puss in Boots 2
+3|Ralph Breaks the Internet|Wreck-It Ralph 2
+3|Shrek
+3|Snow White and the Seven Dwarfs|Snow White
+3|The Lego Movie 2|The Lego Movie 2 The Second Part
+3|The Lion King
+3|The Little Mermaid
+3|The Secret Life of Pets 2
+3|Toy Story
+3|Sonic the Hedgehog 3|Sonic Movie 3
+3|Justin and the Knights of Valour|Justin and the Knights of Valor
+3|Ron's Gone Wrong
+3|The Hunchback of Notre Dame II
+3|Paw Patrol: The Mighty Movie
+3|3 Little Kungpoo Goats
+3|A Boy Named Charlie Brown
+3|A Giant Adventure
+3|A Mystery on the Cattle Hill Express
+3|A Silent Voice
+3|Akira
+3|Alice in Wonderland
+3|All Dogs Go to Heaven
+3|Allahyar and the 100 Flowers of God
+3|Amader Choto Russel Shona
+3|An American Tail
+3|Anastasia
+3|Anomalisa
+3|Antz
+3|Arrietty|The Secret World of Arrietty
+3|Art College 1994
+3|Arthur Christmas
+3|Atlantis The Lost Empire|Atlantis
+3|Baby Shark's Big Movie!
+3|Babylon 5: The Road Home
+3|Balto
+3|Bamse and the World's Smallest Adventure
+3|Bee Movie
+3|Bolt
+3|Boonie Bears: Guardian Code
+3|Brother Bear
+3|Butterfly Tale
+3|Castle in the Sky
+3|Cats Don't Dance
+3|Cats in the Museum
+3|Chang'an
+3|Charlotte's Web
+3|Cheburashka
+3|Chicken Little
+3|Chicken Run
+3|Coraline
+3|Corpse Bride
+3|Deep Sea
+3|Dinosaur
+3|Early Man
+3|Emesis Blue
+3|Epic Tails
+3|Ernest and Celestine
+3|Fantasia
+3|Fantasia 2000
+3|Fantastic Mr Fox
+3|Fantastic Planet
+3|Ferdinand
+3|FernGully|FernGully The Last Rainforest
+3|Flow
+3|Flushed Away
+3|Fritz the Cat
+3|Gajaman
+3|Ghost in the Shell
+3|Glisten and the Merry Mission
+3|Grave of the Fireflies
+3|Gulliver's Travels
+3|Happy Feet
+3|Heroes of the Golden Masks
+3|Hidden Dragon
+4|Home
+4|Home on the Range
+4|Hoodwinked
+4|Horton Hears a Who
+4|Howl's Moving Castle
+4|I Lost My Body
+4|IDOLiSH7 LIVE 4bit BEYOND THE PERiOD
+4|Ice Age Dawn of the Dinosaurs|Ice Age 3
+4|Ice Age The Meltdown|Ice Age 2
+4|Isle of Dogs
+4|Katak: The Brave Beluga
+4|Kiki's Delivery Service
+4|Klaus
+4|Kubo and the Two Strings
+4|Kundan Satti
+4|Kung Fu Panda 2
+4|La leyenda de los Chaneques
+4|Lady and the Tramp
+4|Ladybug & Cat Noir: The Movie
+4|Leo
+4|Lightyear
+4|Luck
+4|Madagascar Escape 2 Africa|Madagascar 2
+4|Make Mine Music
+4|Mars Express
+4|Mary and Max
+4|Mavka: The Forest Song
+4|Meet the Robinsons
+4|Melody Time
+4|Metalocalypse: Army of the Doomstar
+4|Migration
+4|Mirai
+4|Missing Link
+4|Monsters vs Aliens
+4|Mr Peabody and Sherman
+4|Mujib Bhai
+4|My Life as a Zucchini
+4|My Neighbor Totoro|Totoro
+4|Nausicaa of the Valley of the Wind|Nausicaa
+4|Nimona
+4|Oh My School!
+4|Oliver and Company
+4|Once Upon a Forest
+4|Open Season
+4|Over the Hedge
+4|Over the Moon
+4|Ozi: Voice of the Forest
+4|Paprika
+4|ParaNorman
+4|Perfect Blue
+4|Persepolis
+4|Pole Princess!!
+4|Ponyo
+4|Poop, Spring and the Others
+4|Porco Rosso
+4|Princess Mononoke
+4|Puffin Rock and the New Friends
+4|Quest for Camelot
+4|Rally Road Racers
+4|Rango
+4|Rio
+4|Rise of the Guardians
+4|Robin Hood
+4|Robot Dreams
+4|Robots
+4|Saludos Amigos
+4|Shark Tale
+4|Shaun the Sheep Movie
+4|Sinbad Legend of the Seven Seas|Sinbad
+4|Song of the Sea
+4|Spies in Disguise
+4|Spirit Stallion of the Cimarron|Spirit
+4|Strange World
+4|Surf's Up
+4|Suzume
+4|The Aristocats
+4|The Bad Guys
+4|The Black Cauldron
+4|The Boy and the Heron
+4|The Brave Little Toaster
+4|The Breadwinner
+4|The Canterville Ghost
+4|The Care Bears Movie
+4|The Cat Returns
+4|The Croods
+4|The Emperor's New Groove
+4|The Fox and the Hound
+4|The Good Dinosaur
+4|The Great Mouse Detective
+4|The Hunchback of Notre Dame
+4|The Illusionist
+4|The Inseparables
+4|The Inventor
+4|The Iron Giant
+4|The Jungle Bunch 2: World Tour
+4|The Land Before Time
+4|The Last Unicorn
+4|The Lego Batman Movie
+4|The Lorax
+4|The Magician's Elephant
+4|The Many Adventures of Winnie the Pooh
+4|The Mitchells vs the Machines
+4|The Monkey King
+4|The Nightmare Before Christmas
+4|The Peanuts Movie
+4|The Pebble and the Penguin
+4|The Plague Dogs
+4|The Prince of Egypt
+4|The Princess and the Frog
+4|The Red Turtle
+4|The Rescuers
+4|The Rescuers Down Under
+4|The Road to El Dorado
+4|The Sea Beast
+4|The Secret of Kells
+4|The Secret of NIMH
+4|The Snowman
+4|The Swan Princess
+4|The Sword in the Stone
+4|The Tale of the Princess Kaguya|Princess Kaguya
+4|The Three Caballeros
+4|The Tigger Movie
+4|The Transformers The Movie
+5|The Triplets of Belleville
+4|The Wind Rises
+4|Thumbelina
+4|Titan AE
+4|Treasure Planet
+4|Trolls Band Together
+4|Turbo
+4|Vivo
+4|Wallace and Gromit The Curse of the Were-Rabbit|Curse of the Were-Rabbit
+4|Waltz with Bashir
+4|Watership Down
+4|We're Back! A Dinosaur's Story|We're Back
+4|Weathering with You
+4|When Marnie Was There
+4|When the Wind Blows
+4|Whisper of the Heart
+4|Winnie the Pooh
+4|Wolf Children
+4|Wolfwalkers
+4|Yellow Submarine
+4|Your Name
+4|Sahara
+4|Beavis and Butt-Head Do America
+4|The Wild Thornberrys Movie|The Wild Thornberrys
+4|Ooops! Noah Is Gone...|Two by Two|All Creatures Big and Small
+4|Back to the Outback
+4|Bigfoot Family|Son of Bigfoot 2
+4|Walking with Dinosaurs
+4|Hey Arnold!: The Movie
+4|The Glassworker|Sheesha Gar
+4|Bionicle: Mask of Light|Bionicle 1
+4|The Blue Umbrella
+4|The King and I
+4|Gone Nutty|Scrat's Missing Adventure
+4|Mummies
+4|Ronal the Barbarian|Ronal Barbaren
+4|The Fabulous Baron Munchausen
+4|Latte and the Magic Waterstone
+4|Faust
+4|Luis and the Aliens|Luis and His Friends from Outer Space
+4|Dragon Rider|Firedrake the Silver Dragon
+4|Dreambuilders|Drømmebyggerne
+4|Allegro Non Troppo
+4|Angel's Egg
+4|Animal Farm
+4|Azur and Asmar
+4|Belladonna of Sadness
+4|Fire and Ice
+4|Gay Purr-ee
+4|Heavy Metal
+4|Hoppity Goes to Town|Mr Bug Goes to Town
+4|Kirikou and the Sorceress|Kirikou
+4|Millennium Actress
+4|Mind Game
+4|Night on the Galactic Railroad
+4|Redline
+4|Rock and Rule
+4|Tekkonkinkreet
+4|The Adventures of Prince Achmed
+4|The King and the Mockingbird
+4|The Man Who Planted Trees
+4|The Point!
+4|The Thief and the Cobbler
+4|The White Snake Enchantress|Hakujaden
+4|Tokyo Godfathers
+4|Twice Upon a Time
+4|Wizards
+` });
 EVO.cat({ ...{"id": "tvshows", "name": "TV shows", "icon": "📺", "q": "Name a **TV series**.", "strip": ["show", "tv", "series"], "level": 1}, list: `
 0|Friends
 0|Teletubbies
@@ -41522,227 +42555,508 @@ EVO.cat({ ...{"id": "tvshows", "name": "TV shows", "icon": "📺", "q": "Name a 
 4|thirtysomething
 ` });
 EVO.cat({ ...{"id": "bands", "name": "Bands", "icon": "🎸", "q": "Name a **band or music group**.", "strip": ["band"], "level": 1}, list: `
-0|Nirvana
-0|Oasis
-0|ABBA
-0|ACDC
-0|BTS
-0|Backstreet Boys
-0|Blackpink
-0|Coldplay
-0|Green Day
-0|Linkin Park
-0|Little Mix
-0|Metallica
-0|One Direction
+0|The Beatles|John, Paul, George, and Ringo|The Lads from Liverpool|The Silver Beetles|The Silver Beatles|Beatals|The Beetles
 0|Queen
-2|Spice Girls
-2|The Beatles
-2|The Rolling Stones
+0|ABBA|Festfolket
+0|The Rolling Stones
+0|Metallica
+0|BTS
+0|Linkin Park
+0|Nirvana
+0|Blackpink
+0|Little Mix
+0|Spice Girls
+0|Coldplay|Starfish|Big Fat Noises|Los Unidades
+0|AC/DC|Acca Dacca
+0|One Direction
+2|Green Day
+2|The Carpenters
+2|The Doors
+2|Oasis
+2|Backstreet Boys|BSB
 2|Paramore
 2|Imagine Dragons
 2|Pink Floyd|The Pink Floyd Sound
 2|Led Zeppelin
-2|Aerosmith
-2|Arctic Monkeys
-2|Bee Gees
-2|Black Eyed Peas
-2|Black Sabbath
-2|Blink-182
-2|Blur
-2|Bon Jovi
-2|Busted
-2|Daft Punk
-2|Def Leppard
-2|Depeche Mode
-2|Destiny's Child
-2|Duran Duran
-2|Eagles
-2|Earth Wind and Fire
-2|Eurythmics
-2|Fall Out Boy
-2|Fifth Harmony
-2|Fleetwood Mac
-2|Girls Aloud
-2|Gorillaz
-2|Guns N' Roses
+2|U2
 2|Iron Maiden
-2|Jonas Brothers
-2|Journey
+2|Red Hot Chili Peppers|Chili Peppers|Chilis|Red Chili Peppers|Red Hots Chili|RHCP
+2|Guns N' Roses
+2|Duran Duran
+2|The Who|The Horrible 'oo
+2|Radiohead|On a Friday
+2|Bon Jovi
 2|Kiss
-2|Kool and the Gang
-2|Maneskin
-2|McFly
-2|Mumford and Sons
-2|My Chemical Romance
+2|Aerosmith
+2|Muse
+2|Depeche Mode
+2|The Beach Boys|tbb|Kenny & The Cadets|The California Legends|The Pendeltones
+2|Eagles
+2|Måneskin
+2|Black Eyed Peas|BEP|Black Eyed Pods
+2|Bee Gees
+2|Blink-182
+2|Lordi
+2|Arctic Monkeys|The Death Ramps
+2|Daft Punk
+2|My Chemical Romance|My Chem Romance
+2|The Killers
+2|Jonas Brothers
+2|Motörhead
+2|Fifth Harmony
+2|Girls Aloud
 2|NSYNC
 2|NewJeans
-2|Panic! at the Disco
-2|Pentatonix
-2|Radiohead
-2|Red Hot Chili Peppers
-2|S Club 7
-2|Seventeen
-2|Stray Kids
 2|Take That
 2|Tears for Fears
-2|The Beach Boys
-2|The Carpenters
-2|The Doors
-2|The Jackson 5|Jackson Five
-2|The Killers
-2|The Supremes
-2|The Who
-2|Twenty One Pilots|21 Pilots
 2|Twice
-2|U2
-2|Van Halen
-2|Village People
 2|Westlife
 2|Wham
-2|Muse
-2|Motörhead
+2|Fleetwood Mac|Peter Green's Fleetwood Mac
 2|Foo Fighters
 2|The Police
+2|Blur
+2|Twenty One Pilots|21P|TOP|21 Pilots
+2|Van Halen|Mammoet
+2|Def Leppard|Ded Flatbird|The Good Ol' Boys
+2|Destiny's Child|Girl's Tyme
+2|Gorillaz
+2|The Jackson 5|The Jackson Brothers|The Jacksons|The Jackson 5ive|Jackson Five
+2|Fall Out Boy|Forget Me Not|FOB|Saved Latin
+2|Stray Kids|SKZ
+2|The Supremes|Diana Ross & the Supremes|The '70s Supremes|The New Supremes|The Primettes|The Supremes with Diana Ross
 2|Toto
 2|Deep Purple
+2|Nightwish
+2|Panic! at the Disco|P!ATD
+2|Sex Pistols
+2|Dire Straits
+2|Eurythmics|bonkars
+2|Earth, Wind & Fire|EWF|EW&F
+2|Seventeen
+2|Thirty Seconds to Mars|30 Seconds to Mars|30STM
+2|Village People
 2|Pearl Jam|Mookie Blaylock
 2|The Clash
+2|The Prodigy|The Prodigy band
+2|Rammstein|Ramstein
+2|Ramones
 1|The Velvet Underground|The Velvets
+2|The Cure
+2|Journey
+2|Mumford & Sons
+2|Joy Division|Ian Curtis, Peter Hook, Bernard Sumner, Stephen Morris
 2|R.E.M.|Bingo Hand Job|Hornets Attack Victor Mature|It Crawled from the South|Twisted Kites
+2|Kool & the Gang|K&G|Jazziacs
+2|Exo
+2|Pentatonix|PTX
+2|Genesis|Genesis Rock Band
+2|Judas Priest
 2|Alice in Chains
 2|Soundgarden|Nudedragons
+2|Kraftwerk
 2|Pussy Riot
 2|Scorpions
+2|System of a Down|SOAD|System
+2|Modern Talking
+2|BigBang
+2|Roxette
+2|The Kinks|The Ravens
 2|The White Stripes
+2|Yes
+2|McFly
+2|Blondie
+2|Lynyrd Skynyrd|Lynard Skynard
+2|Maroon 5|Kara's Flowers|Maroon Five|Ryan Michael Dusick
+2|The Offspring|Manic Subsidal
+2|Lacuna Coil|Ethereal|Sleep of Right
+2|Europe
+2|Franz Ferdinand
 2|The Smiths
+2|Slipknot
 2|Evanescence
 2|Florence and the Machine|Florence + the Machine|F+TM|FATM
-5|Talking Heads
-2|5ive|Five
-2|A-ha
-2|ATEEZ
-2|Aespa
-2|All Saints
-2|Atomic Kitten
-2|Bananarama
-2|Bastille
+2|Sonic Youth
+2|Korn|KoЯn
+2|Nine Inch Nails|NIN
+2|The Cranberries|The Cranberry Saw Us
 2|Beastie Boys
-2|Big Bang
-2|Blondie
-2|Blue
-2|Boston
+2|Snow Patrol
+5|Talking Heads
+2|ZZ Top|That Little Ol' Band from Texas
+2|AKB48|AKB|Akihabara 48
+2|Keane
+2|The Strokes
+2|Rage Against the Machine|Rage|R.A.T.M.
+2|Tokio Hotel
+2|Sum 41|Kaspir|The Sums
+2|Public Enemy
+2|Super Junior|SUJU
+2|Wu-Tang Clan|Wu Tang
+2|Dream Theater
+2|Kara
+2|Limp Bizkit
+2|Momoiro Clover Z|MCZ|Momoclo
+2|Nickelback
+2|A-ha
+2|The Animals|Animals & Friends|Eric Burdon and the Animals|The New Animals|Animals II|Valentine's Animals
+2|Weezer
+2|Aespa
+2|Rush
+2|Avenged Sevenfold|A7X
+2|Boney M.
+2|OneRepublic
+2|Pixies
+2|Heaven & Hell|Black Sabbath
+2|Kino|Garin i Giperboloidy
+2|Pantera
+2|The Pussycat Dolls|Amazon
+2|Creedence Clearwater Revival|CCR|Creedence
+2|Deftones
+2|Uriah Heep
+2|Kings of Leon
+2|New Order
+2|Burzum
+2|Mayhem
+2|Sepultura
+2|The Smashing Pumpkins|TSP
+2|Jefferson Airplane
+2|Sigur Rós
 2|Boyzone
-2|Chic
-2|Culture Club
-2|Devo
-2|Dire Straits
-2|EXO
-2|East 17
+2|Children of Bodom
+2|S Club|S Club 7
+2|The Rasmus
+2|Tool
+2|Foreigner
+2|Massive Attack
+2|Status Quo
+2|HIM|HER|His Infernal Majesty|Thulsa D
+2|Placebo
+2|Buranovskiye Babushki
+2|Garbage
+2|The Monkees
+2|Apocalyptica
+2|Jethro Tull|Tull
+2|N.W.A|Niggaz Wit Attitudes
+2|Sabaton
+2|Within Temptation
+2|Blue
+2|Electric Light Orchestra|ELO|Jeff Lynne's ELO
+2|Sugababes
+2|All Saints
 2|Elbow
-2|Electric Light Orchestra|ELO
 2|Erasure
 2|Eternal
-2|Europe
-2|Feeder
-2|Foreigner
-3|Franz Ferdinand
-3|Genesis
-3|Girls' Generation
-3|Glass Animals
+2|Girls' Generation
+2|Hear'Say
+2|Le Sserafim
+2|Liberty X
+2|Mamamoo
+2|Pet Shop Boys
+2|Red Velvet
+2|Soft Cell
+2|King Crimson
+2|Thin Lizzy
+2|Disturbed
+2|Grateful Dead|The Dead
+2|Helloween
+2|Little Big
+2|Bananarama
+2|Boston
+2|Outkast|Two Shades Deep
+2|Supertramp
+2|Tame Impala|Kevin Parker
+2|The Byrds
+2|Travis
+2|UB40
+2|Ace of Base
+2|Anthrax
+2|Bullet for My Valentine|BFMV
+2|Candies
+2|Cannibal Corpse
+2|Il Divo|II Devo
+2|Itzy
+2|No Doubt
+2|Shinee
+2|The Mars Volta
+2|Cream|S. Splurge
+2|Three Days Grace|TDG|Groundswell|3DG|3 Days Grace
+2|Kasabian
+2|Manic Street Preachers|Manics
+2|Roxy Music
+2|The Stone Roses
+2|The Verve
+2|Clannad
+2|5 Seconds of Summer|5SOS|Five Seconds of Summer
+2|Arch Enemy
+2|Bring Me the Horizon|BMTH
+2|Simple Plan|Plan simple
+2|The Roop
+2|Venom
+2|X Japan|WE ARE X|X JP
+2|Run-DMC
+2|Simple Minds
+2|Slade
+2|TLC
+2|Arcade Fire
+2|Bathory
+2|Faith No More
+2|Marilyn Manson|Marilyn Manson and the Spooky Kids
+2|Opeth
+2|Atomic Kitten
+2|T. Rex
+2|The Pretenders
+2|Tomorrow X Together|TXT
+2|Busted
+2|Good Charlotte
+2|INXS
+2|In Flames
+2|Korpiklaani
+2|Papa Roach
+2|Queens of the Stone Age|Gamma Ray|QotSA
+2|Siouxsie and the Banshees
+2|Whitesnake
+2|Ateez|KQ Fellaz
+2|Spandau Ballet
+2|Steely Dan
+2|Die Antwoord
+2|Enigma
+2|Epica
+2|Ricchi e Poveri|Ricchi & Poveri
+2|The Moody Blues
+2|Simply Red
+2|The Human League|The Men|The League Unlimited Orchestra
+2|The Libertines
+2|Audioslave
+2|Cascada
+2|Chicago|Chicago Transit Authority|The Big Thing
+2|Cradle of Filth
+2|Dark Tranquillity
+2|Hoobastank
+2|Jamiroquai
+2|Kreator
+2|Portishead
+2|Sonata Arctica
+2|Stratovarius
+2|The Stooges|Iggy and the Stooges|Iggy Pop and the Stooges|Psychedelic Stooges
+2|Behemoth
+2|Blind Guardian
+2|DragonForce
+2|Gipsy Kings|Gypsy Kings|Djobi Djoba
+2|Laibach
+2|Peter, Paul and Mary
+2|Rainbow|Blackmore's Rainbow|Ritchie Blackmore's Rainbow
+2|The Corrs
+2|The Mamas & the Papas
+2|The Yardbirds
+2|Bastille|BΔSTILLE
+2|Culture Club|In Praise of Lemmings|The Sex Gang Children
+2|Pulp
+2|The 1975
+2|The Wanted|Lads
+2|Accept
+2|Darkthrone|Black Death
+2|Dead Kennedys|DK Kennedys
+2|Emerson, Lake & Palmer|ELP|EL&P|Emmerson, Lake & Palmer|Fab Three|Keith, Greg and Carl|The Lads from Croydon
+2|Gojira|Godzilla
+2|Il Volo
+2|Lamb of God|LoG|Burn the Priest
+2|O-Zone
+2|Procol Harum
+2|The Allman Brothers Band|Allman Brothers
+2|The Cardigans
+2|Heart
+2|Stereophonics
+2|Suede|London Suede
+2|Air|Aie
+2|Cypress Hill
+2|Dead Can Dance
+2|Immortal
+3|Kaiser Chiefs
+3|Santana
+3|Tenacious D
+3|The Bangles
 3|Haim
-3|Hanson
-3|Happy Mondays
-3|Hear'Say
-3|Human League
-3|Joy Division
-3|Kasabian
-3|Keane
-3|Kings of Leon
-3|Kraftwerk
-3|Le Sserafim
-3|Liberty X
-3|Lynyrd Skynyrd
-3|Madness
-3|Mamamoo
-3|Manic Street Preachers
-3|Massive Attack
-3|OutKast
-3|Pet Shop Boys
-3|Pixies
-3|Public Enemy
-3|Pulp
-3|Ramones
-3|Red Velvet
-3|Roxette
-3|Roxy Music
-3|Run-DMC
-3|Rush
-3|Sex Pistols
-3|Simple Minds
-3|Simply Red
-3|Slade
-3|Snow Patrol
-3|Soft Cell
-3|Sonic Youth
-3|Spandau Ballet
-3|Status Quo
-3|Steely Dan
-3|Steps
-3|Stereophonics
-3|Sugababes
-3|Super Junior
-3|Supertramp
-3|TLC
-3|Tame Impala
 3|Texas
-3|The 1975
-3|The Animals
-3|The B-52's
-3|The Byrds
-3|The Cure
+3|The B-52s
 3|The Hollies
-3|The Kinks
-3|The Libertines
-3|The Monkees
-3|The Offspring
-3|The Pretenders
-3|The Prodigy
+3|3 Doors Down|Three Doors Down
+3|Bloc Party
+3|Creed
+3|Godsmack
+3|Interpol
+3|Meshuggah
+3|NOFX|Home Street Home|NOFX & Friends
+3|Napalm Death
+3|Owl City
+3|Swedish House Mafia|SHM
+3|The Script
+3|Type O Negative
+3|Madness
+3|The Jam
+3|Aqua|Joyspeed
+3|Bauhaus|Bauhaus Band
+3|HammerFall
+3|I-dle|(G)I-DLE
+3|Incubus
+3|Katrina and the Waves|The Waves
+3|Röyksopp
+3|Secret Garden
+3|Skillet
+3|The Chemical Brothers|Bonus Beats Orchestra|Tom Rowlands & Ed Simons
+3|Yeah Yeah Yeahs
+3|A Perfect Circle
+3|Alphaville
+3|Anathema|Pagan Angel
+3|Billy Talent|Pezz
+3|Blue Öyster Cult|BOC
+3|Breaking Benjamin
+3|Clean Bandit
+3|D12|Dirty Dozen
+3|Eluveitie
+3|Ensiferum
+3|Ghost
+3|Go A
+3|MGMT|The Management
+3|New Kids on the Block|NKOTB
+3|Porcupine Tree
+3|RBD
+3|Savage Garden
+3|Scooter
+3|Bloodhound Gang
+3|Carcass
+3|Cartel de Santa
+3|Die Toten Hosen|Toten Hosen
+3|Echo & the Bunnymen|Bunnymen
+3|Fugees|Refugee Camp|Tranzlator Crew
+3|Hole
+3|Justice|Jus†ice
+3|Mastodon
+3|Morbid Angel
+3|Okean Elzy
+3|Paul McCartney and Wings|Wings|Paul McCartney & The Wings|Suzy And The Red Stripes|The Country Hams
+3|Rhapsody of Fire|Rapsodia|Thundercross
+3|The Band|The Hawks|Canadian Squires|Levon and the Hawks|The Crackers|The Crackers from Big Pink|The Honkies|The Levon Helm Sextet|The Ron Hawkins Quartet
+3|Vader
+3|Vanilla Ninja
 3|The Specials
-3|The Verve
-3|The Wanted
-3|Thin Lizzy
-3|Tomorrow X Together|TXT
-3|UB40
-3|Wet Wet Wet
-3|Wu-Tang Clan
-3|Yes
-3|ZZ Top
-3|The Strokes
-3|Nickelback
-3|Weezer
-3|Deftones
-3|Uriah Heep
-3|New Order
-3|The Smashing Pumpkins|TSP
-3|The Rasmus
-3|HIM|HER|His Infernal Majesty|Thulsa D
-3|+44
+3|Alter Bridge
+3|Babymetal
+3|Black Veil Brides|BVB
+3|Celtic Frost
+3|Cocteau Twins
+3|Dschinghis Khan
+3|Emperor|W. Kaiser
+3|Hurts
+3|Kamelot
+3|Lady A|Lady Antebellum
+3|Las Ketchup
+3|Machine Head
+3|Manga
+3|Migos
+3|Milli Vanilli|The Real Milli Vanilli|Rob & Fab
+3|Mogwai
+3|Monsta X
+3|Nazareth
+3|Neutral Milk Hotel
+3|OK Go
+3|Pendulum
+3|Rise Against|Transistor Revolt
+3|Riva
+3|Sodom
+3|Stone Temple Pilots|Mighty Joe Young|STP
+3|The Kooks
+3|The Shadows
+3|Therion
+3|Traveling Wilburys
+3|Black Flag
+3|Die Ärzte
+3|EXID
+3|Fun
+3|Gorgoroth
+3|Herreys
+3|Hooverphonic|Hoover|Alex Callier, Geike Arnaert, Raymond Geerts|Discophonic|Geike Arnaert (vocals), Raymond Geerts (guitars),|Milk Fisk
+3|Kansas
+3|Killswitch Engage|KSE|Killswitch
+3|Kinto Sol
+3|L'Arc-en-Ciel|L'Arc|Laruku
+3|Misfits
+3|My Bloody Valentine
+3|Nu Virgos|VIA Gra
+3|Obituary|Executioner|Orbituary|Xecutioner
+3|Seether|Saron Gas
+3|Soulfly
+3|Steppenwolf
+3|SunStroke Project
+3|T-ara|Tiara
+3|Talk Talk
+3|Tangerine Dream
+3|The Pretty Reckless
+3|The Temptations
+3|Trivium
+3|Twisted Sister
+3|+44|Plus Forty-four
+3|Angels & Airwaves
+3|Aria
+3|Asking Alexandria
+3|Babymonster|Baemon
+3|Bon Iver
+3|Buffalo Springfield
+3|Can|Inner Space
+3|Finntroll
+3|Five Finger Death Punch|5FDP|FFDP
+3|G-Unit
+3|Gogol Bordello
+3|IKon
+3|Lostprophets
+3|Marduk
+3|Noir Désir
+3|Skid Row
+3|Smokie|Smokey
+3|Soilwork
+3|The Cult
+3|The Neighbourhood|NBHD
+3|Tristania
+3|All Time Low
+3|Arkona
+3|Brotherhood of Man
+3|Bucks Fizz
+3|Canned Heat
+3|Cigarettes After Sex
+3|Death Cab for Cutie|DCFC|Death Cab
+3|Eiffel 65
+3|El Sueño de Morfeo
+3|Enon
+3|Fugazi
+3|Half Japanese
+3|Iced Earth
+3|Ladytron
+3|M83
+3|Major Lazer
+3|Men at Work
+3|Minor Threat
+3|Of Monsters and Men|OMAM
+3|S.H.E
+3|Satyricon
+3|Saxon|Son of a Bitch
+3|The Alan Parsons Project
+3|The Hives
+3|The Jimi Hendrix Experience
+3|The Ronettes
+3|The Ting Tings
+3|Vampire Weekend
+3|Chic
+3|Five|5ive
 3|10 Years
 3|10,000 Maniacs
 3|12 Stones
 3|13 Engines
-3|3 Doors Down
 3|311
-3|4 Non Blondes
 3|54-40
 3|8stops7
 3|A
-3|A Day to Remember
-3|A Perfect Circle
 3|A Rocket to the Moon
 3|A Silent Film
-3|AFI
 3|Aaroh
 3|Abandon Kansas
 3|Abandoned Pools
@@ -41756,319 +43070,1001 @@ EVO.cat({ ...{"id": "bands", "name": "Bands", "icon": "🎸", "q": "Name a **ban
 3|Against Me!
 3|Against the Current
 3|Age of Chance
-3|Air
 3|Alexandros
-3|Alien Ant Farm
 3|Alkaline Trio
-3|All Time Low
 3|Alpha Rev
-3|Alt-J
-3|Alter Bridge
 3|American Authors
 3|American Hi-Fi
 3|American Standards
 3|Amplifier
-3|Anathema
 3|Anberlin
 3|Andy Biersack
-3|Animal Collective
-3|Arcade Fire
-3|Arch Enemy
-3|Architects
-3|Avenged Sevenfold
-3|Basement Jaxx
-3|Belle and Sebastian
-3|Biffy Clyro
 3|Big Thief
 3|Black Country New Road
-3|Boards of Canada
-3|Bon Iver
-4|Boygenius
-4|Bring Me the Horizon
-4|Bullet for My Valentine
-4|Buzzcocks
-4|Can
-4|Chemical Brothers
-4|Cocteau Twins
-4|Cream
-4|Dream Theater
-4|Einstürzende Neubauten
-4|Faust
-4|Fleet Foxes
-4|Fontaines DC
-4|Funkadelic
-4|Gang of Four
-4|Gerry and the Pacemakers
-4|Gojira
-4|Grizzly Bear
-4|Idles
-4|In Flames
-4|Incubus
-4|Interpol
-4|Justice
-4|Kent
-4|Khruangbin
-4|Korn
-4|Kyuss
-4|LCD Soundsystem
-4|Leftfield
-4|Limp Bizkit
-4|Lordi
-4|MC5
-4|MGMT
-4|Magazine
-4|Mando Diao
-4|Martha and the Vandellas
-4|Mew
-4|Mogwai
-4|My Bloody Valentine
-4|Neu
-4|New York Dolls
-4|Nightwish
-4|Opeth
-4|Orbital
-4|Parliament
-4|Phoenix
-4|Primal Scream
-4|Queens of the Stone Age
-4|Rage Against the Machine
-4|Rammstein
-4|Sigur Ros
-4|Siouxsie and the Banshees
-4|Slipknot
-4|Slowdive
-4|Sly and the Family Stone
-4|System of a Down
-4|TV on the Radio
-4|Tangerine Dream
-4|Teenage Fanclub
-4|Television
-4|The 77s
-4|The Academy Is...
-4|The Afghan Whigs
-4|The Alarm
-4|The All-American Rejects
-4|The Almost
-4|The Amps
-4|The Black Keys
-4|The Damned
-4|The Drifters
-4|The Everly Brothers
-4|The Fall
-4|The Four Seasons
-4|The Four Tops
-4|The Hives
-4|The Jesus and Mary Chain
-4|The National
-4|The Platters
-4|The Ronettes
-4|The Searchers
-4|The Shadows
-4|The Shangri-Las
-4|The Stooges
-4|The Sugarcubes
-4|The Teardrop Explodes
-4|The Temptations
-4|The Yardbirds
-4|The Zombies
-4|Tool
+3|Boygenius
+3|Idles
+3|Khruangbin
+3|Leftfield
+3|Parliament
+3|Teenage Fanclub
+3|The 77s
+3|The Academy Is...
+3|The Afghan Whigs
+3|The Alarm
+3|The Almost
+3|The Amps
+3|The Black Keys
+3|The Everly Brothers
+3|The Shangri-Las
+3|The Teardrop Explodes
+3|Wet Leg
+3|XTC
+3|A Tribe Called Quest|A T C Q|A Tribe Called|A.T.C.Q.|Actq|Tribe Vibes
+3|AOA|Ace of Angels
+3|Blackmore's Night
+3|Deicide
+3|Delain
+3|Dinosaur Jr.|Dinosaur Junior
+3|Era|+eRa+
+3|Exodus
+3|Fort Minor
+3|Foster the People
+3|Gamma Ray
+3|Godspeed You! Black Emperor|GY!BE
+3|Highlight|BEAST|B2ST
+3|Marillion
+3|Mudvayne
+3|My Dying Bride
+3|Oomph!
+3|P.O.D.|Payable on Death
+3|Powerwolf
+3|Scissor Sisters
+3|Slowdive
+3|Staind
+3|Static-X
+3|Stone Sour
+3|Survivor
+3|Symphony X
+3|The Cars
+3|The Chicks|Dixie Chicks
+3|The xx
+3|Vengaboys
+3|W.A.S.P.
+3|Devo|Dove|The De-Evolution Band
+3|2PM
+3|4 Non Blondes
+3|4Minute
+3|Air Supply
+3|Alexandrov Ensemble|Red Army Choir|The Alexandrov Red Army Ensemble
+3|America
+3|Amorphis
+3|Anti-Flag
+3|Belle and Sebastian
+3|Blood, Sweat & Tears|BS&T
+3|BtoB
+3|Buzzcocks
+3|Crass
+3|DDT
+3|Destruction
+3|Dir En Grey
+3|Dropkick Murphys
+3|Fear Factory
+3|Guano Apes
+3|Hatari
+3|Jane's Addiction
+3|Jimmy Eat World|JEW
+3|Kyuss
+3|Matchbox Twenty|MB20|Matchbox 20
+3|Melvins|Melvins 1983
+3|Mobb Deep|The Infamous Mobb Deep|Havoc & Prodigy|Poetical Prophets
+3|New York Dolls
+3|Poison|Paris
+3|Sistar
+3|The Buggles
+3|The Flowers of Romance
+3|The Fray
+3|The Jesus and Mary Chain|Death of Joey|The Poppy Seeds
+3|Traffic
+3|Ultravox
+3|Velvet Revolver
+3|Wardruna
+3|Glass Animals
+3|Hanson
+3|Wet Wet Wet
+3|10cc
+3|3+2|Three Plus Two
+3|AFI|A fire inside|Anthems for Insubordinates|Crush Pop|Despair Faction|Javey|Mark Stopholese|Markus Stopholese|Vic Chalker|Victor Chalker|Victor Kenyon
+3|As I Lay Dying|AILD
+3|At the Gates
+3|B.A.P
+3|Budka Suflera
+3|Control Machete
+3|Day6
+3|Death Grips
+3|Derek and the Dominos
+3|Enslaved
+3|Faithless
+3|Hüsker Dü
+3|Joker Out
+3|Kneecap
+3|MC5
+3|Malice Mizer
+3|Momoland|MMLD
+3|Múm
+3|Ogene|O'G3NE|Lisa, Amy & Shelley
+3|Paradise Lost
+3|Rotting Christ
+3|Shkodra Elektronike
+3|The Andrews Sisters
+3|The Darkness
+3|The Hu|Hu Band|TheHu
+3|The Platters
+3|Train
+3|Wir sind Helden
+3|Years & Years
+3|Yellowcard
+3|Alt-J
+3|Band-Maid|Band-Maiko
+3|Big Time Rush|BTR
+3|Blind Channel
+3|Bzikebi|Wasps
+3|Cake
+3|Cutting Crew
+3|Daron Malakian and Scars on Broadway|SOB|Scars on Broadway
+3|Dead by Sunrise|Snow White Tan
+3|Dreamcatcher
+3|Drowning Pool
+3|Flyleaf
+3|Foals
+3|Frankie Goes to Hollywood|FGTH
+3|Girl's Day
+3|Grand Funk Railroad|GFR|Grand Funk
+3|Grazhdanskaya Oborona|GrOb|Civil Defense
+3|Gym Class Heroes
+3|Hatebreed
+3|Hollywood Undead
+3|Iron Butterfly
+3|KAJ
+3|Keiino
+3|LCD Soundsystem
+3|Leaves' Eyes
+3|Mandinga
+3|Modest Mouse
+3|Nick Cave and the Bad Seeds
+3|No Angels
+3|One Ok Rock|OOR
+3|Pierce the Veil
+3|Primal Scream
+3|Primus|Primate
+3|Rancid
+3|Scandal|SCAP|Nintama Scatarō|Nurse Jogakuin|Scashi|Sukyandaru
+3|Selena Gomez & the Scene|Unbroken|The Scene
+3|Silverchair
+3|Six Feet Under
+3|Skunk Anansie
+3|Small Faces
+3|Sonny & Cher
+3|Suicidal Tendencies
+3|The All-American Rejects
+3|The Damned
+3|The Flaming Lips
+3|The Gazette
+3|The National
+4|The Pointer Sisters
+4|The Quarrymen|The Blackjacks|Johnny and the Moondogs
+4|The Shins
+4|The Sweet|Sweetshop
+4|Tinariwen
+4|Two Steps from Hell
+4|UFO
 4|Underworld
-4|Vampire Weekend
-4|Wet Leg
-4|Wire
-4|XTC
-4|Yeah Yeah Yeahs
-4|Jethro Tull|Tull
-4|King Crimson
-4|Travis
-4|Three Days Grace|TDG|Groundswell|3DG|3 Days Grace
-4|The Stone Roses
-4|Marilyn Manson|Marilyn Manson and the Spooky Kids
-4|T. Rex
-4|Audioslave
-4|Dark Tranquillity
-4|Kreator
-4|DragonForce
-4|Emerson, Lake & Palmer|ELP|EL&P|Emmerson, Lake & Palmer|Fab Three|Keith, Greg and Carl|The Lads from Croydon
-4|The Cardigans
-4|Heart
-4|Suede|London Suede
-4|Santana
-4|Bloc Party
-4|Godsmack
-4|The Jam
-4|Breaking Benjamin
-4|Ensiferum
-4|Die Toten Hosen|Toten Hosen
-4|Echo & the Bunnymen|Bunnymen
-4|Hole
-4|Kamelot
-4|Nazareth
-4|OK Go
-4|Rise Against|Transistor Revolt
-4|Stone Temple Pilots|Mighty Joe Young|STP
-4|Black Flag
-4|Kansas
-4|Seether|Saron Gas
-4|Soulfly
-4|Steppenwolf
-4|Talk Talk
-4|Twisted Sister
-4|Aria
-4|Noir Désir
-4|Smokie|Smokey
-4|Half Japanese
-4|Staind
-4|Stone Sour
-4|Survivor
-4|The Cars
-4|Traffic
-4|Rotting Christ
-4|The Hu|Hu Band|TheHu
-4|Yellowcard
-4|Band-Maid|Band-Maiko
-4|Blind Channel
-4|Iron Butterfly
-4|Rancid
-4|Small Faces
+4|Wilco
+4|Yellow Magic Orchestra|YMO
+4|Ylvis|Ylvisaker|Ylvisaker brothers
+4|Zdob și Zdub
+4|East 17|E-17
 4|The Lumineers|Wesley Jeremiah
+4|After Forever|Apocalypse
 4|Annihilator
+4|Badfinger|The Iveys
+4|Biffy Clyro
+4|Boards of Canada|BoC|Hell Interface
+4|Cage the Elephant
+4|Celtic Woman
+4|Counting Crows
+4|Crystal Castles
+4|DNCE
 4|Eagles of Death Metal
+4|Feminnem
+4|Herman's Hermits|Herman & the Hermits
+4|Kaoma
+4|Kep1er
+4|Lacrimosa
+4|Lake Malawi
 4|Midnight Oil|The Oils
+4|Mott the Hoople
+4|Musiqq
+4|NU'EST
+4|Nile
+4|Orchestral Manoeuvres in the Dark|OMD|Orchestral Manœuvres in the Dark
+4|Sade
+4|Ska-P
+4|Sly and the Family Stone
+4|Smile
 4|Styx
 4|Suicide Silence
 4|Switchfoot
+4|Teach-In
+4|The Knife
 4|The Warning
+4|The Zombies
+4|Urban Symphony
+4|Aarzemnieki
+4|At the Drive-In
+4|Aventura
+4|Azerbaijan State Symphony Orchestra
+4|Bad Company
+4|Brainstorm|Reigani|Prātu Vētra
+4|Bright Eyes|Bright Eye
 4|Chumbawamba
+4|Cinderella
+4|Crowded House
+4|D mol
+4|Dave Matthews Band|DMB|Dave Mathew's Band|Dave Matthews
+4|Dimitri Vegas & Like Mike|Dimitri Thivaios & Michael Thivaios|DV&LM|DVLM
+4|Editors
+4|Entombed
+4|Far East Movement|FEM
+4|Flogging Molly
+4|Golden Earring
 4|Goo Goo Dolls
+4|Heaven Shall Burn
+4|I'm from Barcelona
+4|Katarsis
 4|Killing Joke
+4|Last Pizza Slice|LPS
+4|Madcon|Mad Conspiracy
+4|Maná
+4|Maximum the Hormone
+4|Milk and Honey|Gali Atari & Milk and Honey|Gali Atari with Milk & Honey
+4|Moje 3
+4|Morcheeba
+4|Mr. Big
+4|Nevermore
 4|Parkway Drive
+4|Plastic Ono Band|Plastic Ono Elephant's Memory Band|Plastic Ono Nuclear Band|Plastic U.F. Ono Band|Yoko Ono Plastic Ono Band|Plastic Ono
+4|Poets of the Fall
+4|Rat Pack
+4|Rouge
+4|STAYC|Star to a Young Culture
 4|Sevendust
+4|Shinedown
+4|Shocking Blue
+4|Sinplus
+4|Soul Militia|2XL
+4|Sudden Lights
+4|Supergrass
+4|Takasa|Heilsarmee
+4|Television
+4|The Coasters
 4|The Doobie Brothers
+4|The KLF|The Justified Ancients of Mu Mu|K2 Plant Hire|The JAMs|The Timelords
+4|The Kelly Family
+4|The Last Shadow Puppets|TLSP
+4|The Vamps
+4|Theatre of Tragedy
+4|They Might Be Giants|TMBG
+4|Tiamat
+4|Vaya Con Dios
+4|Ziferblat
+4|Happy Mondays
+4|Steps
+4|!!!|Chik Chik Chik|Chk Chk Chk
+4|Agalloch
+4|Animal Collective|Avey Tare & Panda Bear|Avey Tare Panda Bear & Geologist|Campfire Songs
 4|Aphrodite's Child
+4|Azúcar Moreno
+4|Bad Boys Blue|BBB
+4|Bad Brains|Mind Power
+4|Beirut
+4|Blind Faith
+4|Booker T. & the M.G.'s
+4|Buena Vista Social Club
+4|Bush|Bushx
+4|Carousel
+4|Chvrches|CHVRCHΞS
+4|Citi Zēni
+4|Edguy
+4|Einstürzende Neubauten
+4|Empire of the Sun
+4|Extreme
 4|F.T. Island|Five Treasure Island
+4|Hari Mata Hari
 4|Hawkwind|Hawkwind Zoo
 4|KMFDM|Kein Mehrheit für die Mitleid
+4|Katatonia
+4|Kent
+4|Koza Mostra
+4|La Oreja de Van Gogh|LOVG
+4|Let 3
+4|Liquid Tension Experiment|LTE
+4|Living Colour
+4|London Grammar
+4|Lukas Graham
+4|Madame Monsieur
+4|Magic!
+4|Mando Diao
 4|Ministry
+4|Molchat Doma
+4|Mudhoney
+4|O.Torvald
+4|Omega
+4|Pavement
+4|Pollapönk
+4|Rednex
+4|Regina|Group Regina|Grupa Regina
+4|Royal Philharmonic Orchestra|The London Royal Philharmonic
+4|Sash!
+4|Slint
+4|Teen Top
 4|The Calling
 4|The Exploited
+4|The Go-Go's
+4|The Sisters of Mercy
+4|Three 6 Mafia|Three Six Mafia
+4|Throbbing Gristle
+4|Timebelle
+4|Volbeat
+4|Weather Report
+4|Wolfmother
+4|Feeder
+4|Soft Machine|Softworks
+4|2AM
+4|All That Remains
+4|Amadou & Mariam|Amadou et Mariam
+4|Aquarium|Akvarium
+4|Bachman–Turner Overdrive
+4|Beady Eye
+4|Bijelo Dugme
+4|Bone Thugs-n-Harmony
+4|Boys Like Girls
+4|Candlemass
 4|Daughtry
+4|Echosmith
+4|Escape the Fate
+4|Explosions in the Sky|explosionsinthesky.bandcamp.com|Mark Smith, Michael James, Munaf Rayani, Christopher Hrasky
+4|Fine Young Cannibals|FYC
+4|Gang of Four|Andrew Gill, Jon King, Steve Goulding, Sarah Lee
+4|Genealogy
+4|Gerry and the Pacemakers
+4|Greta Van Fleet|GVF|Greta Van Fleet Band
+4|Haggard
+4|Halestorm
+4|Hot Chip
+4|Insomnium
+4|JYJ
+4|Korol i Shut|King and Jester|KiSh
+4|La Bouche
+4|Lelek
+4|Leningrad
+4|Lord of the Lost
+4|Modjo|Modjo Band
+4|Moonsorrow
+4|Mountain
+4|Mägo de Oz
+4|Naviband|NAVI
+4|New Found Glory|NFG
+4|Pain of Salvation
+4|Phoenix
+4|Portugal. The Man
+4|REO Speedwagon
+4|Rudimental
+4|Sentenced
 4|Sirenia
+4|Sixpence None the Richer
 4|Smash Mouth
 4|Sparks|Halfnelson
+4|Steve Miller Band|Steve Miller Blues Band|Steve Miller
+4|Sublime
+4|Tankard
+4|The Black Dahlia Murder
+4|The Dave Clark Five|Dave Clark & Friends|The DC5
+4|The Decemberists
+4|The Four Seasons|The 4 Seasons
+4|The Lonely Island|Incredibad|2 Guyz|Andy Samberg, Akiva Schaffer, Jorma Taccone|Bing Bong Brothers|The Party Andersons|The Style Boyz
+4|The Mothers of Invention
+4|The Residents|Delta Nudes
+4|The Saturdays
+4|The Used
+4|The Ventures|The New Ventures|The Versatones
+4|Twiins|Tweens|Twice As Nice
+4|Týr
+4|Vesna
+4|Wintersun
 4|Wishbone Ash
+4|Yazoo|Yaz
+4|The Dubliners
+4|The Pogues|Pogue Mahone
+4|3OH!3|three oh! three
+4|Akcent
+4|Alcazar
+4|Alien Ant Farm
+4|Amaranthe
+4|Basement Jaxx
+4|Beach House
+4|Berlin
+4|Bikini Kill
 4|Blessthefall
+4|Bronski Beat
+4|Circus Mircus
+4|Converge
+4|De La Soul
+4|Dead or Alive|DOA|Mike Percy|Tim Lever|International Chrysis|Nightmares in Wax
+4|Dissection
+4|DoReDoS
+4|Elaiza
+4|En Vogue
+4|Enter Shikari
+4|Eurobandið
+4|Faces
+4|Falling in Reverse
+4|Fleet Foxes|Fleet Foxes Band
+4|Focus
+4|Fools Garden
 4|Free
+4|Gregorian
+4|Gåte
+4|In This Moment
+4|Jet
+4|Juli
+4|Karmin
+4|Kings of Convenience
+4|L.A. Guns
 4|Lady Pank
 4|Lifehouse|Blyss
+4|London Philharmonic Orchestra
+4|Lyube|Lubeh
+4|Madredeus
+4|Mazzy Star
+4|Mindless Self Indulgence|MSI
+4|Mo-Do
+4|Mor ve ötesi
+4|Napa|Men On The Couch
 4|Norther
+4|Orphaned Land|Resurrection
+4|Pain
+4|Pennywise
 4|Pertti Kurikan Nimipäivät
+4|Public Image Ltd|PiL|Public Image Limited
+4|Quiet Riot
+4|R5|R5 band
 4|Rascal Flatts
 4|Social Distortion
 4|Soul Asylum
+4|Sunrise Avenue|Sunrise Ave
+4|SuperM
+4|Swans
+4|The Dandy Warhols
+4|The Raconteurs|The Saboteurs
+4|The Roots|Radio Activity|Black to the Future|The Fifth Dynasty|The Legendary Roots Crew|The Square Roots
+4|The Runaways|Runaways, Joan Jett and The Runaways
+4|The Stranglers
+4|The Troggs|The Troglodytes
 4|Tom Petty and the Heartbreakers
+4|Trackshittaz
+4|Trio Mandili
+4|Two Door Cinema Club
+4|Underoath
 4|Voivod
+4|WayV
+4|Ween
+4|Wig Wam
+4|Wire|Wir
+4|Xandria
+4|Camel
+4|A-Teens
+4|AWS
+4|Above & Beyond
+4|Adam and the Ants
+4|Airbourne
+4|Apollo 440|@440|Apollo Four Forty|Stealth Sonic Orchestra|Stealth Sonic Soul|Trevor Gray,Howard Grey,Noko
+4|Asia
 4|Ayreon
+4|B'z
 4|Black Label Society
+4|Block B
+4|Box Car Racer
+4|Cheap Trick
+4|Chickenfoot
+4|CocoRosie
+4|Dark Funeral
+4|Death Angel
+4|Decapitated
+4|DevilDriver
+4|Die Krupps
+4|Dorians
+4|Dubioza kolektiv
 4|Eels
+4|Elf|The Elves|Ronnie And The Red Caps|Ronnie Dio And The Prophets|The Electric Elves
+4|Grizzly Bear
+4|Gyllene Tider
 4|Hypocrisy
+4|In Extremo
+4|Insane Clown Posse|ICP
+4|Iriao
+4|JLS|Jack lad swing|Jack The Lad Swing
+4|Jefferson Starship|Starship
+4|Kalafina
+4|La Roux
+4|Ladaniva
+4|Lavina
+4|Leningrad Cowboys
+4|Mahavishnu Orchestra
+4|Malcolm Lincoln
+4|Mamagama
 4|Mano Negra
+4|Metal Church
 4|Mumiy Troll
+4|N.E.R.D.
 4|Nautilus Pompilius|Nautilus|Nau|Ali Baba and the Forty Thieves
+4|Neu!
+4|Noel Gallagher's High Flying Birds|High Flying Birds
+4|Nouvelle Vague
+4|Possessed
+4|Primal Fear
+4|Rae Sremmurd|Dem Outta ST8 Boyz
+4|Razorlight
+4|Remember Monday
+4|Skinny Puppy
+4|Skrewdriver
+4|Snap!
 4|Super Furry Animals
+4|TV on the Radio|Tunde Adebimpe, David Andrew Sitek, Jason Sitek
+4|Tautumeitas
+4|Temple of the Dog
+4|Teräsbetoni
+4|The Black Crowes
+4|The Black Mamba
+4|The Breeders
+4|The Busker
+4|The Fall
+4|The Fratellis
+4|The Gathering
+4|The Guess Who|Chad Allan & The Expressions
+4|The Lovin' Spoonful
+4|The Searchers
+4|Them|The Belfast Gypsies
+4|Them Crooked Vultures
+4|Tulia
+4|Ulver
+4|Voyager
+4|Wolf Alice
+4|A Day to Remember|End of an Era|A.D.T.R
+4|A Flock of Seagulls|AFOS
+4|A Friend in London|Aske Damm|Aske Damm Bramming|Calling a Friend|Esben Svane|Sebastian Vinther
+4|AAA|Triple A|Attack All Around
+4|Agatha Christie|Agata Kristi
+4|An Cafe|Antic Cafe
 4|Anti Social Media
+4|Baltimora|Baltimore|James McShane
+4|Bay City Rollers|The Rollers|70s Bay City Rollers|Les Mckeown And The 70-s Bay City Rollers|The New Rollers|The Saxons
+4|Big Star
+4|Blood Red Shoes
+4|Blue Cheer
+4|Blue System
+4|Bomfunk MC's
+4|Bowling for Soup
+4|Bread
+4|Carpathian Forest
+4|Cavalera Conspiracy|Inflikted
+4|Chevelle
+4|Clutch
+4|Compact Disco
+4|Country Joe and the Fish|The Fish
+4|Damageplan
+4|Deep Forest
+4|Diamond Head
+4|E Street Band|Bruce Springsteen & The E-Street Band|E Street
+4|El Canto del Loco
+4|Emigrate
+4|Gipsy.cz
 4|Girlschool
+4|Gossip
+4|Gotan Project
+4|Grave Digger
+4|Green River
+4|Groove Armada
+4|Groove Coverage
+4|House of Pain
+4|Huun-Huur-Tu
+4|Ill Niño
+4|Indochine|Indo
+4|KC and the Sunshine Band|KC and the Sunshine
+4|Kataklysm
+4|Knife Party
 4|Krokus
+4|M2M|Marit & Marion
 4|Mad Season
+4|Manfred Mann
+4|Martha and the Vandellas|Martha Reeves & the Vandellas|The Vandellas
+4|Mecano
 4|Metsatöll
+4|Michael Learns to Rock|MLTR
+4|Mike and the Mechanics|Mike + The Mechanics|M1ke & the Mechan1c5|Mike & The Mecanics|The Mike and Mechanics
+4|Molotov
+4|Monrose
+4|Morandi
+4|Mr. Bungle
+4|Mungo Jerry
+4|Nada Surf
+4|Norma John
+4|Onyx
+4|Otep|OT3P
+4|Rage
+4|Ratt
+4|Rodrigo y Gabriela|Rodrigo & Gabriela
+4|Salt-N-Pepa
+4|Samael
 4|Silbermond
+4|Stereolab
+4|Systur|Sigga, Beta & Elín|Tripolia
+4|Taake|Thule
 4|Ten Years After
+4|The Ark
+4|The Blues Brothers|The Blues Brothers' Show Band and Revue
+4|The Chordettes
+4|The Crickets|Buddy Holly & The Crickets
+4|The Dead Weather
+4|The Dodos
+4|The Drifters
+4|The Hardkiss
+4|The Kills
+4|The Mamas
+4|The Presidents of the United States of America|PUSA|The Presidents|Pot USA|The Presidents of the United States|The Quitters
+4|The Sugarcubes|Sykurmolarnir
+4|The Sugarhill Gang|Rapper's Delight Ft. Wonder Mike & Master Gee|The Original Sugarhill Gang
 4|The Tremeloes
 4|Therapy?
+4|Three Dog Night|Redwood|3 dog night
+4|Ugly Kid Joe|Overdrive|Suburban White Alcoholic Trash
+4|VNV Nation
 4|Violent Femmes
+4|We Are Domi|DOMI
+4|Wild Youth
+4|Windir
+4|X Ambassadors|Ambassadors
+4|Gentle Giant
+4|Van der Graaf Generator|Van der Graaf|VdGG
+4|3JS
+4|Alcest
+4|Alestorm|Battleheart
+4|Anaal Nathrakh
+4|Architects
+4|Argo
+4|Asian Dub Foundation|ADF
+4|Asian Kung-Fu Generation|AKG|Ajikan|AKFG
+4|Avatar
 4|Black Rebel Motorcycle Club
+4|Bob Marley and the Wailers|The Wailers|The Wailing Wailers|The Teenagers|The Wailing Rudeboys
+4|Body Count
+4|BoomBox
+4|CNCO
+4|Clawfinger
+4|Commodores
+4|D'Nash
+4|Daughter
+4|Death in June
+4|Deathstars
+4|Dervish
+4|Descendents
+4|Dexys Midnight Runners
 4|Dope
+4|Down
+4|Equilibrium
+4|Evergrey
+4|Fontaines D.C.|Fontaines
+4|Fountains of Wayne
+4|Funeral for a Friend
+4|Glay
+4|Gorky Park
+4|H.O.T.|High-five Of Teenagers
+4|Hotel FM
+4|Isis|Celestial
+4|John Mayall & the Bluesbreakers
+4|Kajagoogoo
+4|Kaleo
+4|Kard|K ♠ RD
+4|Klapa s Mora|Klapa Ensemble
+4|Kronos Quartet
+4|Level 42
+4|Mashina Vremeni|Time Machine
+4|Maxïmo Park
+4|Meat Puppets
+4|Metric
+4|Metro Station
+4|Mew
 4|Mr. Mister
+4|Mr. President|Satellite One
+4|NCT Dream
+4|Nightmare|naitomea
 4|Ocean Colour Scene|OCS
+4|Odd Future|Odd Future Wolf Gang Kill Them All
+4|Onewe|MAS|M.A.S 0094|Make A Sound|Make a Sound 0094
+4|Opus
+4|Orbital
+4|PeR
+4|Pesniary|Pesnyary|Belarusian State Ensemble "Pesnyary"|State pop ensemble "Pesnyary"|Vocal and instrumental ensemble "Pesnyary"
+4|Pink Martini
+4|Plain White T's
+4|Puddle of Mudd|Greg Upchurch
+4|Running Wild|Granite Heart|Rock'n Rolf
+4|Savatage
+4|Scar Symmetry
+4|Screaming Trees
+4|Sham 69
+4|Showtek
+4|Sister Sledge
+4|Softengine
 4|Sonic Syndicate
+4|Strapping Young Lad|SYL
+4|Technotronic
+4|The 69 Eyes
+4|The Agonist
+4|The Boomtown Rats
+4|The Dillinger Escape Plan
 4|The Horrors
+4|The Isley Brothers
+4|The Kingston Trio
+4|The Lemonheads
+4|The Nice|Emerlist Davjack
+4|The Osmonds|Osmond Brothers
+4|The Shin
+4|Toots and the Maytals|The Maytals
+4|Triana Park
+4|Turisas
+4|Van Canto
+4|Walk the Moon
+4|White Lies|Fear Of Flying
+4|Why Don't We|WDW
+4|Yüksek Sadakat
+4|The 13th Floor Elevators
+4|1349
+4|5miinust
+4|A Touch of Class|ATC
+4|ABC
 4|Alabama Shakes
+4|Alesana
+4|Angra
+4|Arcturus
+4|Army of Lovers
+4|Arrested Development
+4|Ash Ra Tempel|Ashra
 4|Atreyu
 4|Babes in Toyland
+4|Balkanika|Sanja Ilić & Balkanika
+4|Belphegor|Betrayer
 4|Bi-2
+4|Big Brother and the Holding Company
+4|Blonde Redhead
+4|Bloodbath
+4|Borknagar
+4|Brockhampton|AliveSinceForever
+4|Cabaret Voltaire|The Pressure Company
+4|Crash Test Dummies
+4|Deafheaven
 4|Discharge
+4|Draconian
 4|Eloy
+4|Elvenking
+4|Faun
+4|Faust
+4|Firelight
+4|Flotsam and Jetsam|Paradox|Dredlox|The Dogz
+4|Fusedmarc
+4|Gwar
+4|Hillsong United
 4|Hinder
+4|Inner Circle|Bad Boys of Reggae|The Inner Circle Band
+4|Klaxons
+4|Kodaline|21 Demands
+4|Kula Shaker
+4|L7|Camel Lips
+4|Megara
+4|Minus One|Marianne’s Wish
+4|Modern Jazz Quartet|MJQ
+4|Mother Love Bone|Lords of the Wasteland
+4|Myrath
+4|Nine Muses|9 Muses
+4|Novi fosili
+4|Ottawan
+4|Outlandish
+4|Outlawz|Dramacydal|Outlaw Immortalz|Tha Outlawz
+4|Pirates of the Sea
+4|Premiata Forneria Marconi|PFM
+4|Puuluup
+4|Quilapayún
+4|Ram Jam
+4|Riverside
 4|Runrig
+4|Scooch
+4|Sick Puppies
+4|Sleater-Kinney
+4|Sleeping with Sirens|SWS
+4|Story of the Year
+4|Stray Cats
+4|TNMK|Novye Doma|Tanok na Maidani Kongo
+4|The Brian Jonestown Massacre|BJM
+4|The Cross
+4|The Donnas
 4|The Makemakes
 4|The Move
+4|The Orb
+4|The Piano Guys|TPG
+4|The Postal Service
+4|The Replacements
+4|The Swinging Blue Jeans
+4|The The
 4|The Vines
+4|The Waterboys
+4|The Wiggles
+4|Thousand Foot Krutch|TFK
+4|Tindersticks
+4|U.D.O.
+4|Walk off the Earth
+4|Wallows
+4|White Zombie
+4|Wilson Phillips
 4|Winger
+4|Yo La Tengo
+4|Love
+4|Amaral|Higguj
+4|Atheist|Oblivion|R.A.V.A.G.E.
+4|Axwell & Ingrosso|Axwell Λ Ingrosso
+4|Babyshambles
+4|Band Aid
+4|Band of Horses
+4|Bandidos do Cante
 4|Barenaked Ladies|BNL
+4|Bill Haley & His Comets|Bill Haley and The Comets|Bill Haley's Comets
+4|Black Uhuru
 4|Boris
+4|CSS|Cansei de Ser Sexy
+4|Cattle Decapitation
+4|Cobra Starship
+4|Corrosion of Conformity|COC
+4|Cosmic Gate
+4|Crazy Town|CXT|Crazy Town X
+4|Cryptopsy
+4|Dixie Dregs|The Dregs
+4|Doves
+4|Dying Fetus
+4|Edenbridge
+4|Eisbrecher
+4|Eldrine
+4|Equinox
 4|Fates Warning
+4|Finger Eleven|Rainbow Butt Monkeys
+4|Flor-de-Lis
+4|Four Tops|The Four Aims
+4|Funkadelic
+4|Godflesh
+4|Golden Child
 4|Hanoi Rocks
+4|Helmet
+4|Hey! Say! JUMP
+4|Highway
+4|Héroes del Silencio
+4|InCulto
+4|Inti-Illimani
+4|Les Rita Mitsouko|Rita Mitsouko
+4|Lighthouse X
 4|Live|+LĪVE+
+4|Luna Sea|Lunacy
+4|Magazin|Group Magazin|Grupa Magazin
+4|Magazine
+4|Mastercastle
+4|Milky Chance
+4|Miodio
+4|Moi dix Mois
+4|Mother Mother
+4|Motionless in White|M.I.V.
+4|Neon Trees
+4|No Use for a Name|NUFAN|No Use
+4|Nokturnal Mortum
+4|One Night Only
+4|Panik
+4|Paul Revere & the Raiders
+4|Phish
+4|Piqued Jacks
+4|Riblja Čorba
 4|Ride
+4|Sektor Gaza
+4|Septicflesh
+4|Shining
 4|Silverstein
 4|Skyclad
+4|Soda Stereo
+4|Sopor Aeternus and The Ensemble of Shadows
+4|Spin Doctors
+4|Stormtroopers of Death|S.O.D.
+4|Stryper
+4|Suffocation
+4|Suicide
+4|Summoning
+4|Tabernacle Choir|The Tabernacle Choir at Temple Square|Mormon Tabernacle Choir|MoTab|Salt Lake Mormon Tabernacle Choir|Salt Lake Tabernacle Choir
+4|Taking Back Sunday
+4|Teriyaki Boyz
+4|The Cramps
+4|The Devil Wears Prada
+4|The Distillers
+4|The Dresden Dolls
+4|The Impressions
 4|The J. Geils Band|The J. Geils Blues Band|The J. Geils
+4|The Knack|Berton Averre
+4|The Kovenant|Covenant|Thy Dyling Light
+4|The Last Dinner Party
+4|The Mills Brothers|The Four Mills Brothers|The Mills Bros.
+4|The Psychedelic Furs
+4|The Red Jumpsuit Apparatus|RJA|RJSA
+4|The Seekers
+4|The Turtles|The Crossfires|The Nightriders|The Tyrtles
+4|Third Eye Blind|3EB
+4|Toy Dolls
+4|Turbonegro|TRBNGR|Turboneger
+4|Twin Twin
+4|VAL
+4|Vopli Vidopliassova
+4|We the Kings
+4|Westside Connection
 4|White Lion
+4|Whitechapel
 4|You Me at Six
-4|Gong
-4|Amon Düül II
-4|Camel
-4|Caravan
-4|Clannad
-4|Comus
+4|Zebrahead
 4|Fairport Convention
+4|Magma|Vandertop
+4|Amon Düül II
+4|Comus
 4|Felt
-4|Gentle Giant
 4|Hatfield and the North
 4|Henry Cow
 4|Horslips
 4|Josef K
-4|Love
-4|Magma
 4|Orange Juice
-4|Os Mutantes
-4|Pentangle
 4|Planxty
 4|Popol Vuh
 4|Radio Birdman
 4|Renaissance
 4|Silver Apples
-4|Soft Machine
 4|Spirit
 4|Steeleye Span
 4|Stiff Little Fingers
 4|Tall Dwarfs
-4|The 13th Floor Elevators
 4|The Association
 4|The Bothy Band
-4|The Chieftains
 4|The Chills
 4|The Clean
-4|The Dubliners
 4|The Durutti Column
 4|The Go-Betweens
-4|The Incredible String Band
 4|The Left Banke
 4|The Monks
 4|The Pastels
-4|The Pogues
 4|The Raincoats
 4|The Saints
 4|The Seeds
 4|The Shaggs
 4|The Sonics
 4|The Triffids
-4|The Undertones
 4|The United States of America
 4|The Verlaines
 4|Trees
-4|Van der Graaf Generator
 4|Young Marble Giants
+4|Caravan
+4|The Incredible String Band|The Incredible String
+4|Gong
+4|Os Mutantes
+4|The Chieftains
+4|The Undertones
+4|Pentangle
 4|The Slits
 ` });
 EVO.cat({ ...{"id": "novels", "name": "Novels", "icon": "📖", "q": "Name a **novel**.", "strip": ["novel", "book"], "level": 2}, list: `
@@ -57864,28 +59860,39 @@ EVO.cat({ ...{"id": "islands", "name": "Islands", "icon": "🏝️", "q": "Name 
 4|Tory Island|Tory
 4|Bass Rock
 ` });
-EVO.cat({ ...{"id": "mountains", "name": "Mountains", "icon": "⛰️", "q": "Name a **mountain**.", "strip": ["mount", "mt", "mountain"], "level": 2}, list: `
+EVO.cat({ ...{"id": "mountains", "name": "Mountains", "icon": "⛰️", "q": "Name a **mountain or mountain range**.", "strip": ["mount", "mt", "mountain"], "level": 2}, list: `
 0|Mount Everest|Chomolangma|Himalaya Peak XV|Mount Chomolubutangma|Mount Qomolangma|Mount Sagarmatha|Mt Everest|Peak XV|Qomolangma Feng|World highest peak|Everest
+0|Alps
+0|Andes
+0|Himalayas
+0|Kilimanjaro|Mount Kilimanjaro
+0|Rocky Mountains|Rockies
 0|Mount Fuji|Mt Fuji|Fujisan|Fujiyama|Fuji Mountain|Fuji
 0|Mount Vesuvius|Vesuvius
 0|Mont Blanc|Il Bianco|La Dame blanche|Mt Blanc
 5|Aconcagua
+1|K2|Mount K2|Chhogori|Mount Godwin-Austen|Mt. Qogir
 0|Mount Olympus|Olympus|Oros Olympos|Mt. Olympus|El Cerro Nevada de Santa Rosalia|Sunh-a-do|Troodos|Chionístra
 0|Kangchenjunga|Kanchenjunga|Kanchinjinga|Kañcanjaṅghā|Kangchendzonga
 0|Denali|Mount McKinley|Mt. McKinley|Bolshaya Gora|Mount Denali|Mt. Denali|Tenada
-0|Mount Rushmore|Mt. Rushmore
-0|Matterhorn|Mont Cervin
-0|Mount Sinai|Mount Horeb|Jebel Musa|Sinai
-0|Mount St. Helens|St. Helens|Saint Helens|Goat Rocks dome|Mount Saint Helens|Saint Helens, Mount
-0|Ben Nevis|Beinn Nibheis
-0|Table Mountain|Table
+2|Mount Rushmore|Mt. Rushmore
+2|Matterhorn|Mont Cervin
+2|Appalachians|Appalachian Mountains
+2|Atlas Mountains|Atlas
+2|Mount Etna|Etna
+2|Pyrenees
+2|Uluru
+2|Urals|Ural Mountains
+2|Mount Sinai|Mount Horeb|Jebel Musa|Sinai
+2|Mount St. Helens|St. Helens|Saint Helens|Goat Rocks dome|Mount Saint Helens|Saint Helens, Mount
+2|Ben Nevis|Beinn Nibheis
+2|Table Mountain|Table
 2|Mount Elbrus|Elbrus|Elbruz|Mingi Tau|Mount Elbruz
 2|Mount Rainier|Tacoma|Tahoma|Rainier|Mt Rainier|Mt. Regnier
 2|Mount Ararat|Ararat|Agri Dagi|Greater Ararat|Mount Aghri|Mount Agri
 2|Mount Kailash|Kailash|Kailas
 2|Dhaulagiri|Dhaulagiri I|Dhwalagiri
 2|Nanga Parbat|Diamer|Diamir
-2|K2|Mount K2|Chhogori|Mount Godwin-Austen|Mt. Qogir
 2|Makalu
 2|Mount Kenya|Mount Kenia
 2|Mauna Kea|Mount Mauna Kea
@@ -57909,6 +59916,57 @@ EVO.cat({ ...{"id": "mountains", "name": "Mountains", "icon": "⛰️", "q": "Na
 2|Cotopaxi|Cotopaxi volcano
 2|Pico de Orizaba|Citlaltepetl|Orizaba
 2|Triglav|Mount Triglav|Tricorno|Terglau
+2|Adirondacks
+2|Alaska Range
+2|Altai
+2|Apennines
+2|Balkan Mountains
+2|Black Forest
+2|Black Hills
+2|Blue Ridge Mountains
+2|Brecon Beacons|Bannau Brycheiniog
+2|Brooks Range
+2|Cairngorms
+2|Carpathians
+2|Cascades
+2|Caucasus
+2|Coast Mountains
+2|Dolomites
+2|Drakensberg
+2|Galdhopiggen
+2|Grampians
+2|Harz
+2|Helvellyn
+2|Hindu Kush
+2|Jura
+2|Karakoram
+2|Kilauea
+2|Krakatoa
+2|Kunlun
+2|Mauna Loa
+2|Mount Taranaki
+2|Mount Teide|Teide
+2|Mourne Mountains
+2|Ozarks
+2|Pamirs
+2|Pennines
+2|Popocatepetl
+2|Ruapehu
+2|Ruwenzori|Rwenzori
+2|Scandinavian Mountains
+2|Sierra Madre
+2|Sierra Nevada
+2|Skiddaw
+2|Smoky Mountains|Great Smoky Mountains
+2|Snowdonia|Eryri
+2|Sudetes
+2|Tatras
+2|Tian Shan
+2|Torres del Paine
+2|Transantarctic Mountains
+2|Vinson|Vinson Massif
+2|Vosges
+2|Zagros
 2|Mount Damavand|Damavand|Demavend|Mount Demavend
 2|Grossglockner|Glockner
 2|Mount Paektu|Baekdu Mountain|Baekdu|Baekdu Mountains|Changbai Mountain|Paektu|Paektu Mountain
@@ -58053,35 +60111,35 @@ EVO.cat({ ...{"id": "mountains", "name": "Mountains", "icon": "⛰️", "q": "Na
 2|Nevado del Huila
 2|Novarupta
 2|Nuptse|Nubtse
-2|Rakaposhi
-2|Weisshorn|Weisshorn VS
-2|Pikes Peak|Pikes Peak, Colorado
-2|Feldberg
-2|Gjeravica|Đeravica
-2|Kamet
-2|Kelud|Kelut|Gunung Kelut|Keloed
-2|La Soufrière
-2|Monte Amiata|Mount Amiata
-2|Mount Hiei|Eizan|Hieizan|Hokurei|Miyako Fuji
-2|Namcha Barwa
-2|Osorno|Osorno Volcano
-2|Mount Korab|Korab
-2|Acotango
-2|Cayambe|Cayambe volcano|Volcán Cayambe
-2|Corno Grande
-2|Gasherbrum IV
-2|Maromokotro
-2|Monte Viso|Viso|Monviso|Mount Viso
-2|Mount Elbert|Mt. Elbert
-2|Mount Lycabettus|Lycabettos|Lycabettus|Lycabettus Hill|Lykabettos|Lykavitos|Lykavittos|Mount Lycabettos|Mount Lykabettos|Mount Lykavittos
-2|Mount Mitchell|Attakulla|Attakulla Mountain|Mount Attakulla|Mountain of Attakulla|Mt. Attakulla|Mt. Mitchell
-2|Mount Tongariro
-2|Tupungato|Tupungato Volcano|Cerro Tupungato
-2|Uludağ|Bithynian Olympus|Mysian Olympus
-2|Villarrica|Villarrica Volcano
-2|Volcán Barú
-2|Wildspitze
-2|Ol Doinyo Lengai
+3|Rakaposhi
+3|Weisshorn|Weisshorn VS
+3|Pikes Peak|Pikes Peak, Colorado
+3|Feldberg
+3|Gjeravica|Đeravica
+3|Kamet
+3|Kelud|Kelut|Gunung Kelut|Keloed
+3|La Soufrière
+3|Monte Amiata|Mount Amiata
+3|Mount Hiei|Eizan|Hieizan|Hokurei|Miyako Fuji
+3|Namcha Barwa
+3|Osorno|Osorno Volcano
+3|Mount Korab|Korab
+3|Acotango
+3|Cayambe|Cayambe volcano|Volcán Cayambe
+3|Corno Grande
+3|Gasherbrum IV
+3|Maromokotro
+3|Monte Viso|Viso|Monviso|Mount Viso
+3|Mount Elbert|Mt. Elbert
+3|Mount Lycabettus|Lycabettos|Lycabettus|Lycabettus Hill|Lykabettos|Lykavitos|Lykavittos|Mount Lycabettos|Mount Lykabettos|Mount Lykavittos
+3|Mount Mitchell|Attakulla|Attakulla Mountain|Mount Attakulla|Mountain of Attakulla|Mt. Attakulla|Mt. Mitchell
+3|Mount Tongariro
+3|Tupungato|Tupungato Volcano|Cerro Tupungato
+3|Uludağ|Bithynian Olympus|Mysian Olympus
+3|Villarrica|Villarrica Volcano
+3|Volcán Barú
+3|Wildspitze
+3|Ol Doinyo Lengai
 3|Ambrym|Ambrim
 3|Arashiyama
 3|Fanjingshan|Mount Fanjing
@@ -58110,6 +60168,71 @@ EVO.cat({ ...{"id": "mountains", "name": "Mountains", "icon": "⛰️", "q": "Na
 3|Pacaya|Pacaya Volcano|Volcano Pacaya
 3|Puyehue-Cordón Caulle
 3|Roman-Kosh
+3|Agung
+3|Alam Kuh
+3|Annapurna III
+3|Aso
+3|Bandarpunch
+3|Bighorn Mountains
+3|Changabang
+3|Chic-Chocs
+3|Chirripo
+3|Chugach
+3|Coropuna
+3|Dhaulagiri II
+3|El Capitan
+3|Emi Koussi
+3|Hallasan
+3|Hotaka
+3|Ismoil Somoni
+3|Iztaccihuatl
+3|Kedarnath
+3|Kita
+3|Kongur
+3|Laurentians
+3|Liankang Kangri
+3|Long Range Mountains
+3|Mamostong Kangri
+3|Maroon Bells
+3|Merapi
+3|Meru
+3|Molamenqing
+3|Mount Assiniboine
+3|Mount Hunter
+3|Mount Katahdin
+3|Mount Mansfield
+3|Mount Monadnock
+3|Mount Speke
+3|Mount Stanley
+3|Muchu Chhish
+3|Nevado de Toluca
+3|Nevado del Ruiz
+3|Ontake
+3|Pumari Chhish
+3|Rimo I
+3|Roraima
+3|Saint Elias Mountains
+3|Sajama
+3|Sakurajima
+3|Salkantay
+3|San Juan Mountains
+3|Sangre de Cristo
+3|Saser Kangri II
+3|Saser Kangri III
+3|Semeru
+3|Shivling
+3|Silberzacken
+3|Stok Kangri
+3|Tahat
+3|Tajumulco
+3|Tirich Mir
+3|Torngat Mountains
+3|Uinta
+3|Wasatch
+3|Wind River Range
+3|Wrangell
+3|Yarigatake
+3|Yukshin Gardan Sar
 3|Half Dome|South Dome
 3|Jebel Shams|Jabal Shams|Jabal ash Sham|Jabal Sham|Wisham
 3|Kelimutu|Keli Mutubuurai
@@ -58283,58 +60406,58 @@ EVO.cat({ ...{"id": "mountains", "name": "Mountains", "icon": "⛰️", "q": "Na
 3|Allalinhorn
 3|Alphubel
 3|Barbeau Peak
-3|Bogd Khan Mountain|Bogd Khan
-3|Brandberg Mountain|Brandberg
-3|Cerro Bonete|Cerro Bonete Chico
-3|Cheekha Dar
-3|Chomo Lonzo
-3|Diamond Head, Hawaii|Diamond Head|Lē'ahi
-3|Fagradalsfjall|Fagradalsfjall á Reykjanesi|Langhóll|Mount Fagradalsfjall
-3|Gramos|Grammos
-3|Herðubreið
-3|Jebel ech Chambi|Mount Ash-Sha'nabi
-3|Katahdin|Mt. Katahdin
-3|Kitzsteinhorn
-3|Krasheninnikov
-3|Kumbhakarna Mountain|Jannu|Mount Kumbhakarna|Phoktanglungma|Kumbhakarna
-3|Lake Yojoa
-3|Monte Hacho
-3|Morne Diablotins
-3|Mount Melbourne
-3|Mount Nyangani
-3|Mount Pulag|Mount Pulog, Mount Pulag
-3|Mount Sabyinyo|Sabyinyo
-3|Ngadi Chuli|Harka Gurung Chuli|Gurkha Massif
-3|Pangaion Hills|Pangaion|Mount Pangaio
-3|Petřín
-3|Piz Buin
-3|Pomerape
-3|Porak|Axarbaxar
-3|Sahand|Mount Sahand
-3|San Cristóbal Volcano|Volcán San Cristóbal
-3|Savo Island
-3|Silisili|Mount Silisili
-3|Tai Mo Shan
-3|Turrialba Volcano|Turrialba
-3|Ubinas
-3|Vignemale
-3|Vinicunca|Cerro Colorado|Montaña Arcoiris|Rainbow mountain|Winikunka
-3|Vodno
-3|Mawson Peak|Big Ben
-3|Ampato
-3|Auyán-tepui|Auyán Tepuy|Mount Auyán
-3|Ayu-Dag
-3|Canigó|Canigou
-3|Dammastock
-3|Gamalama|Mount Gamalama
-3|Gaztelugatxe|Gaztelugatx
-3|Grünhorn|Gross Grünhorn
-3|Ichinsky|Vulkan Ichinskaya Sopka
-3|Jablanica|Jablanica Mountains
-3|Jade Dragon Snow Mountain|Yulong Snow Mountain|Jade Dragon Snow
-3|Janga|Dzhangi-Tau|Jangi-Tau
-3|Kanjut Sar
-3|Kao
+4|Bogd Khan Mountain|Bogd Khan
+4|Brandberg Mountain|Brandberg
+4|Cerro Bonete|Cerro Bonete Chico
+4|Cheekha Dar
+4|Chomo Lonzo
+4|Diamond Head, Hawaii|Diamond Head|Lē'ahi
+4|Fagradalsfjall|Fagradalsfjall á Reykjanesi|Langhóll|Mount Fagradalsfjall
+4|Gramos|Grammos
+4|Herðubreið
+4|Jebel ech Chambi|Mount Ash-Sha'nabi
+4|Katahdin|Mt. Katahdin
+4|Kitzsteinhorn
+4|Krasheninnikov
+4|Kumbhakarna Mountain|Jannu|Mount Kumbhakarna|Phoktanglungma|Kumbhakarna
+4|Lake Yojoa
+4|Monte Hacho
+4|Morne Diablotins
+4|Mount Melbourne
+4|Mount Nyangani
+4|Mount Pulag|Mount Pulog, Mount Pulag
+4|Mount Sabyinyo|Sabyinyo
+4|Ngadi Chuli|Harka Gurung Chuli|Gurkha Massif
+4|Pangaion Hills|Pangaion|Mount Pangaio
+4|Petřín
+4|Piz Buin
+4|Pomerape
+4|Porak|Axarbaxar
+4|Sahand|Mount Sahand
+4|San Cristóbal Volcano|Volcán San Cristóbal
+4|Savo Island
+4|Silisili|Mount Silisili
+4|Tai Mo Shan
+4|Turrialba Volcano|Turrialba
+4|Ubinas
+4|Vignemale
+4|Vinicunca|Cerro Colorado|Montaña Arcoiris|Rainbow mountain|Winikunka
+4|Vodno
+4|Mawson Peak|Big Ben
+4|Ampato
+4|Auyán-tepui|Auyán Tepuy|Mount Auyán
+4|Ayu-Dag
+4|Canigó|Canigou
+4|Dammastock
+4|Gamalama|Mount Gamalama
+4|Gaztelugatxe|Gaztelugatx
+4|Grünhorn|Gross Grünhorn
+4|Ichinsky|Vulkan Ichinskaya Sopka
+4|Jablanica|Jablanica Mountains
+4|Jade Dragon Snow Mountain|Yulong Snow Mountain|Jade Dragon Snow
+4|Janga|Dzhangi-Tau|Jangi-Tau
+4|Kanjut Sar
+4|Kao
 4|Klein Matterhorn
 4|Lagginhorn
 4|Lauteraarhorn
@@ -58366,6 +60489,45 @@ EVO.cat({ ...{"id": "mountains", "name": "Mountains", "icon": "⛰️", "q": "Na
 4|Himalchuli
 4|Kinyeti|Mount Kinyeti
 4|Vihren|El Tepe|Vihren peak
+4|Annapurna IV
+4|Askja
+4|Batura II
+4|Batura III
+4|Botev
+4|Dinara
+4|Durmitor
+4|Eyjafjallajokull
+4|Gangapurna
+4|Ghent Kangri
+4|Halti
+4|Hekla
+4|Herdubreid
+4|Hvannadalshnukur
+4|Jebel Marra
+4|Katla
+4|Kibo
+4|Maja Jezerce
+4|Mawenzi
+4|Moldoveanu
+4|Mount Hampton
+4|Mount Hanang
+4|Mount Mulanje|Sapitwa
+4|Mount Nimba
+4|Mount Ross
+4|Mount Shinn
+4|Negoiu
+4|Nelion
+4|Nyiragongo
+4|Pallastunturi
+4|Petermann Peak
+4|Point Lenana
+4|Prokletije
+4|Shira
+4|Shispare
+4|Snaefellsjokull
+4|Snohetta
+4|Store Skagastolstind
+4|Uhuru Peak
 4|Acamarachi
 4|Aiguille Verte|Green Needle
 4|Aiguille du Dru
@@ -60175,21 +62337,56 @@ EVO.cat({ ...{"id": "carmodels", "name": "Car models", "icon": "🚙", "q": "Nam
 4|Škoda 1000 MB
 4|Škoda Citigo
 ` });
-EVO.cat({ ...{"id": "birds", "name": "Birds", "icon": "🐦", "q": "Name a **species of bird** (its common name).", "strip": ["bird"], "level": 2}, list: `
+EVO.cat({ ...{"id": "birds", "name": "Birds", "icon": "🐦", "q": "Name a **bird**.", "strip": ["bird"], "level": 2}, list: `
 0|Common ostrich|Struthio camelus|African ostrich|ostrich
 0|Carrion crow|crow|black crow|Corvus corone|corbie|corone, Corvus
-0|American robin|robin|robin redbreast|Turdus migratorius
-0|Common raven|Northern Raven|corax raven|raven|Corvus corax|western raven
-0|Eurasian magpie|common magpie|Pica pica|magpie
-0|Common blackbird|Blackbird|Eurasian Blackbird|Turdus merula
-0|Dodo|dodo bird
-0|Common starling|starling|Sturnus vulgaris
-0|Barn swallow|swallow|Hirundo rustica
-0|Emu
-0|Budgerigar|budgie|Melopsittacus undulatus|Parakeet
-0|Eurasian wren|Troglodytes troglodytes|Wren
-0|Mallard|wild duck|Anas platyrhynchos|mallard duck
-0|Atlantic puffin|common puffin|Fratercula arctica|puffin
+0|Chicken
+0|Duck
+0|Eagle
+0|Flamingo
+0|Goose
+0|Owl
+0|Parrot
+0|Peacock
+0|Penguin
+0|Pigeon
+0|Seagull|Gull
+0|Swan
+2|Turkey
+2|American robin|robin|robin redbreast|Turdus migratorius
+2|Common raven|Northern Raven|corax raven|raven|Corvus corax|western raven
+2|Eurasian magpie|common magpie|Pica pica|magpie
+2|Common blackbird|Blackbird|Eurasian Blackbird|Turdus merula
+2|Dodo|dodo bird
+2|Common starling|starling|Sturnus vulgaris
+2|Barn swallow|swallow|Hirundo rustica
+2|Albatross
+2|Bluebird
+2|Cardinal
+2|Cockatoo
+2|Condor
+2|Crane
+2|Dove
+2|Falcon
+2|Finch
+2|Hawk
+2|Heron
+2|Hummingbird
+2|Kingfisher
+2|Kiwi
+2|Kookaburra
+2|Macaw
+2|Pelican
+2|Sparrow
+2|Stork
+2|Toucan
+2|Vulture
+2|Woodpecker
+2|Emu
+2|Budgerigar|budgie|Melopsittacus undulatus|Parakeet
+2|Eurasian wren|Troglodytes troglodytes|Wren
+2|Mallard|wild duck|Anas platyrhynchos|mallard duck
+2|Atlantic puffin|common puffin|Fratercula arctica|puffin
 2|Common quail|quail|Coturnix coturnix|European quail
 2|Blue jay|jaybird|Cyanocitta cristata
 2|Common cuckoo|cuckoo|Cuculus canorus
@@ -60211,6 +62408,42 @@ EVO.cat({ ...{"id": "birds", "name": "Birds", "icon": "🐦", "q": "Name a **spe
 2|Common moorhen|Gallinula chloropus|Moorhen|Waterhen
 2|Eurasian blue tit|blue tit|Cyanistes caeruleus|Parus caeruleus|European blue tit|Common blue tit|Tit|Titmouse
 2|European robin|robin|redbreast|Erithacus rubecula|robin redbreast
+2|Bird of Paradise
+2|Booby
+2|Buzzard
+2|Cassowary
+2|Chickadee
+2|Curlew
+2|Egret
+2|Frigatebird
+2|Goshawk
+2|Grackle
+2|Grebe
+2|Harrier
+2|Hornbill
+2|Jackdaw
+2|Kestrel
+2|Kite
+2|Loon
+2|Lovebird
+2|Lyrebird
+2|Martin
+2|Mockingbird
+2|Nuthatch
+2|Oriole
+2|Partridge
+2|Plover
+2|Quetzal
+2|Rhea
+2|Roadrunner
+2|Sandpiper
+2|Snipe
+2|Spoonbill
+2|Swift
+2|Tern
+2|Thrush
+2|Warbler
+2|Weaver Bird|Weaver
 2|Common pheasant|Pheasant|Phasianus colchicus|ring-necked pheasant
 2|Eurasian chaffinch|Chaffinch|Common Chaffinch|Fringilla coelebs
 2|Eurasian skylark|Skylark|Alauda arvensis|Lark
@@ -60887,6 +63120,35 @@ EVO.cat({ ...{"id": "birds", "name": "Birds", "icon": "🐦", "q": "Name a **spe
 2|White-rumped shama|Copsychus malabaricus
 2|Wilson's phalarope|Phalaropus tricolor
 2|Yellow-footed green pigeon|Treron phoenicopterus
+2|Aracari
+2|Baudo guan
+2|Bowerbird
+2|Bunting
+2|Crossbill
+2|Godwit
+2|Gray tinamou
+2|Honeyeater
+2|Jacana
+2|Linnet
+2|Merganser
+2|Moa
+2|Motmot
+2|Petrel
+2|Pintail
+2|Pipit
+2|Potoo
+2|Shearwater
+2|Shrike
+2|Siskin
+2|Skua
+2|Sunbird
+2|Tanager
+2|Toucanet
+2|Treecreeper
+2|Trogon
+2|Umbrellabird
+2|Wagtail
+2|Wigeon
 2|African darter|Anhinga rufa
 2|American black duck|Anas rubripes|black duck
 2|Arctic redpoll|Acanthis hornemanni|Carduelis hornemanni|hoary redpoll
@@ -61146,84 +63408,84 @@ EVO.cat({ ...{"id": "birds", "name": "Birds", "icon": "🐦", "q": "Name a **spe
 2|Oriental dollarbird|Eurystomus orientalis
 2|Rain quail|Coturnix coromandelica
 2|Red-headed woodpecker|Melanerpes erythrocephalus
-2|Redhead|Aythya americana|red-headed duck
-2|Rodrigues solitaire|Pezophaps solitaria|Rodriguez solitaire
-2|Rufous hornbill|Buceros hydrocorax
-2|Rufous hornero|Furnarius rufus
-2|Short-tailed shearwater|Ardenna tenuirostris|moonbird|muttonbird|slender-billed shearwater|yolla
-2|Siberian stonechat|Saxicola maurus
-2|Southern yellow-billed hornbill|Tockus leucomelas
-2|Stilt sandpiper|Micropalama himantopus|Calidris himantopus|Micropalama himatopus
-2|Superb lyrebird|Menura novaehollandiae|Menura superba
-2|Tricoloured munia|Lonchura malacca|Black-headed Munia|Tricolored Munia
-2|Tufted puffin|Fratercula cirrhata
-2|Tūī|parson bird|Prosthemadera novaeseelandiae
-2|Verreaux's eagle|Aquila verreauxii|Verreauxis eagle
-2|Von Schrenck's bittern|Botaurus eurhythmus|Ixobrychus eurhythmus
-2|Yellow-eyed pigeon|Columba eversmanni|Pale-backed Pigeon
-2|Yellow-tailed black cockatoo|Calyptorhynchus funereus|Zanda funerea
-2|Zebra dove|Geopelia striata
-2|Acorn woodpecker|Melanerpes formicivorus
-2|African stonechat|Saxicola torquatus
-2|American avocet|Recurvirostra americana
-2|Arabian bustard|Ardeotis arabs
-2|Asian dowitcher|Limnodromus semipalmatus
-2|Asian fairy-bluebird|Irena puella
-2|Australasian bittern|Botaurus poiciloptilus
-2|Bank myna|Acridotheres ginginianus
-2|Bat hawk|Macheiramphus alcinus
-2|Besra|Accipiter virgatus
-2|Bimaculated lark|Melanocorypha bimaculata
-2|Black lark|Melanocorypha yeltonensis|Melanocorypha yeltoniensis
-2|Black stilt|Himantopus novaezelandiae|New Zealand black stilt
-2|Black-billed magpie|Pica hudsonia
-2|Bobolink|Dolichonyx oryzivorus
-2|Brown boobook|Ninox scutulata
-2|Brown dipper|Cinclus pallasii
-2|Buffy fish owl|Ketupa ketupu|Malay fish owl
-2|Bulwer's petrel|Bulweria bulwerii
-2|Channel-billed toucan|Ramphastos vitellinus
-2|Chestnut munia|Lonchura atricapilla|Southern Black-headed Munia
-2|Chestnut-headed bee-eater|Bay-headed Bee-eater|Merops leschenaulti
-2|Collared falconet|Microhierax caerulescens
-2|Common green magpie|Cissa chinensis
-2|Crested kingfisher|Megaceryle lugubris
-2|Crested myna|Acridotheres cristatellus|crested mynah
-2|Crested partridge|crested wood partridge|green wood partridge|green wood quail|red-crowned wood partridge|Rollulus rouloul|roul-roul
-2|Eastern bluebird|Sialia sialis
-2|Eastern rosella|Platycercus (Violania) eximius|Platycercus eximius
-2|Edible-nest swiftlet|Aerodramus fuciphagus|white-nest swiftlet
-2|Golden-fronted leafbird|Chloropsis aurifrons
-2|Great blue turaco|Corythaeola cristata
-2|Greater racket-tailed drongo|Dicrurus paradiseus
-2|Greater sage-grouse|Sage Grouse|Sagehen|Centrocercus urophasianus
-2|Green-winged teal|Anas carolinensis
-2|Grey francolin|Francolinus pondicerianus|Indian grey francolin
-2|Grey-headed lovebird|Agapornis canus
-2|Horned puffin|Fratercula corniculata
-2|Hudsonian godwit|Limosa haemastica
-2|Imperial woodpecker|Campephilus imperialis
-2|Indian scops owl|Otus bakkamoena
-2|Indian silverbill|Euodice malabarica
-2|Jerdon's baza|Aviceda jerdoni
-2|Lilian's lovebird|Agapornis lilianae|Lilianis lovebird
-2|Little blue heron|Egretta caerulea
-2|Long-crested eagle|Lophaetus occipitalis|Spizaetus occipitalis
-2|Madagascar ibis|Lophotibis cristata|Madagascar crested ibis
-2|Mountain bluebird|Sialia currucoides
-2|Mountain imperial pigeon|Ducula badia|Maroon-backed Imperial pigeon
-2|New Zealand falcon|Falco novaeseelandiae
-2|Northern rockhopper penguin|Eudyptes moseleyi|Moseley's Rockhopper Penguin
-2|Oriental pied hornbill|Anthracoceros albirostris
-2|Pechora pipit|Anthus gustavi
-2|Peruvian booby|Sula variegata
-2|Pesquet's parrot|Psittrichas fulgidus
-2|Pied bush chat|Saxicola caprata
-2|Pin-tailed snipe|Pintail Snipe|Gallinago stenura
-2|Pink-necked green pigeon
-2|Puerto Rican amazon|Amazona vittata
-2|Red-fronted serin|Serinus pusillus
-2|Red-necked nightjar|Caprimulgus ruficollis
+3|Redhead|Aythya americana|red-headed duck
+3|Rodrigues solitaire|Pezophaps solitaria|Rodriguez solitaire
+3|Rufous hornbill|Buceros hydrocorax
+3|Rufous hornero|Furnarius rufus
+3|Short-tailed shearwater|Ardenna tenuirostris|moonbird|muttonbird|slender-billed shearwater|yolla
+3|Siberian stonechat|Saxicola maurus
+3|Southern yellow-billed hornbill|Tockus leucomelas
+3|Stilt sandpiper|Micropalama himantopus|Calidris himantopus|Micropalama himatopus
+3|Superb lyrebird|Menura novaehollandiae|Menura superba
+3|Tricoloured munia|Lonchura malacca|Black-headed Munia|Tricolored Munia
+3|Tufted puffin|Fratercula cirrhata
+3|Tūī|parson bird|Prosthemadera novaeseelandiae
+3|Verreaux's eagle|Aquila verreauxii|Verreauxis eagle
+3|Von Schrenck's bittern|Botaurus eurhythmus|Ixobrychus eurhythmus
+3|Yellow-eyed pigeon|Columba eversmanni|Pale-backed Pigeon
+3|Yellow-tailed black cockatoo|Calyptorhynchus funereus|Zanda funerea
+3|Zebra dove|Geopelia striata
+3|Acorn woodpecker|Melanerpes formicivorus
+3|African stonechat|Saxicola torquatus
+3|American avocet|Recurvirostra americana
+3|Arabian bustard|Ardeotis arabs
+3|Asian dowitcher|Limnodromus semipalmatus
+3|Asian fairy-bluebird|Irena puella
+3|Australasian bittern|Botaurus poiciloptilus
+3|Bank myna|Acridotheres ginginianus
+3|Bat hawk|Macheiramphus alcinus
+3|Besra|Accipiter virgatus
+3|Bimaculated lark|Melanocorypha bimaculata
+3|Black lark|Melanocorypha yeltonensis|Melanocorypha yeltoniensis
+3|Black stilt|Himantopus novaezelandiae|New Zealand black stilt
+3|Black-billed magpie|Pica hudsonia
+3|Bobolink|Dolichonyx oryzivorus
+3|Brown boobook|Ninox scutulata
+3|Brown dipper|Cinclus pallasii
+3|Buffy fish owl|Ketupa ketupu|Malay fish owl
+3|Bulwer's petrel|Bulweria bulwerii
+3|Channel-billed toucan|Ramphastos vitellinus
+3|Chestnut munia|Lonchura atricapilla|Southern Black-headed Munia
+3|Chestnut-headed bee-eater|Bay-headed Bee-eater|Merops leschenaulti
+3|Collared falconet|Microhierax caerulescens
+3|Common green magpie|Cissa chinensis
+3|Crested kingfisher|Megaceryle lugubris
+3|Crested myna|Acridotheres cristatellus|crested mynah
+3|Crested partridge|crested wood partridge|green wood partridge|green wood quail|red-crowned wood partridge|Rollulus rouloul|roul-roul
+3|Eastern bluebird|Sialia sialis
+3|Eastern rosella|Platycercus (Violania) eximius|Platycercus eximius
+3|Edible-nest swiftlet|Aerodramus fuciphagus|white-nest swiftlet
+3|Golden-fronted leafbird|Chloropsis aurifrons
+3|Great blue turaco|Corythaeola cristata
+3|Greater racket-tailed drongo|Dicrurus paradiseus
+3|Greater sage-grouse|Sage Grouse|Sagehen|Centrocercus urophasianus
+3|Green-winged teal|Anas carolinensis
+3|Grey francolin|Francolinus pondicerianus|Indian grey francolin
+3|Grey-headed lovebird|Agapornis canus
+3|Horned puffin|Fratercula corniculata
+3|Hudsonian godwit|Limosa haemastica
+3|Imperial woodpecker|Campephilus imperialis
+3|Indian scops owl|Otus bakkamoena
+3|Indian silverbill|Euodice malabarica
+3|Jerdon's baza|Aviceda jerdoni
+3|Lilian's lovebird|Agapornis lilianae|Lilianis lovebird
+3|Little blue heron|Egretta caerulea
+3|Long-crested eagle|Lophaetus occipitalis|Spizaetus occipitalis
+3|Madagascar ibis|Lophotibis cristata|Madagascar crested ibis
+3|Mountain bluebird|Sialia currucoides
+3|Mountain imperial pigeon|Ducula badia|Maroon-backed Imperial pigeon
+3|New Zealand falcon|Falco novaeseelandiae
+3|Northern rockhopper penguin|Eudyptes moseleyi|Moseley's Rockhopper Penguin
+3|Oriental pied hornbill|Anthracoceros albirostris
+3|Pechora pipit|Anthus gustavi
+3|Peruvian booby|Sula variegata
+3|Pesquet's parrot|Psittrichas fulgidus
+3|Pied bush chat|Saxicola caprata
+3|Pin-tailed snipe|Pintail Snipe|Gallinago stenura
+3|Pink-necked green pigeon
+3|Puerto Rican amazon|Amazona vittata
+3|Red-fronted serin|Serinus pusillus
+3|Red-necked nightjar|Caprimulgus ruficollis
 3|Red-shouldered macaw|Diopsittaca nobilis
 3|Ringed teal|Callonetta leucophrys
 3|Ruby-throated hummingbird|Archilochus colubris
@@ -62085,6 +64347,17 @@ EVO.cat({ ...{"id": "birds", "name": "Birds", "icon": "🐦", "q": "Name a **spe
 3|Yellow-browed bunting|Emberiza chrysophrys
 3|Yellow-headed amazon|Amazona oratrix|Yellow-headed Parrot
 3|Yellow-streaked lory|Yellowish-streaked Lory|Chalcopsitta sintillata|Chalcopsitta scintillata|Yellowish-streaked loly
+3|Andean teal
+3|Bristlehead
+3|Hypocolius
+3|Jacamar
+3|Mesite
+3|Picathartes|Rockfowl
+3|Puffbird
+3|Seedsnipe
+3|Seriema
+3|Sheathbill
+3|Tinamou
 3|Afep pigeon|Columba unicincta
 3|African broadbill|Smithornis capensis
 3|African cuckoo-hawk|African baza|Aviceda cuculoides
@@ -62455,67 +64728,67 @@ EVO.cat({ ...{"id": "birds", "name": "Birds", "icon": "🐦", "q": "Name a **spe
 3|Long-tailed glossy starling|Lamprotornis caudatus
 3|Long-tailed paradise whydah|Vidua paradisaea
 3|Long-tailed parakeet|Psittacula longicauda
-3|Long-tailed widowbird|Euplectes progne|Kaffir finch
-3|Lyall's wren|Stephens Island Wren|Xenicus lyalli
-3|Madagascar jacana|Actophilornis albinucha
-3|Madagascar plover|Anarhynchus thoracicus|Charadrius thoracicus
-3|Madagascar pochard|Aythya innotata|Madagascan pochard
-3|Magpie shrike|Urolestes melanoleucus
-3|Magpie-lark|Grallina cyanoleuca
-3|Malagasy sacred ibis|Threskiornis bernieri
-3|Mangrove pitta|Pitta megarhyncha
-3|Mariana crow|aga|Corvus kubaryi
-3|Maroon woodpecker|Blythipicus rubiginosus
-3|Maroon-bellied parakeet|Pyrrhura frontalis
-3|Marvelous spatuletail|Loddigesia mirabilis|Marvellous Spatuletail juju
-3|Mascarene parrot|Mascarinus mascarin|Mascarinus mascarinus
-3|Mauritius blue pigeon|Alectroenas nitidissimus
-3|Meadow bunting|Emberiza cioides
-3|Mindanao hornbill|Penelopides affinis
-3|Moluccan king parrot|Alisterus amboinensis
-3|Moluccan megapode|Moluccan Scrubfowl|Eulipoa wallacei
-3|Monteiro's hornbill|Tockus monteiri
-3|Mottled duck|Anas fulvigula
-3|Mountain parakeet|Psilopsiagon aurifrons
-3|Musk lorikeet|Glossopsitta concinna
-3|Nankeen kestrel|Falco (Tinnunculus) cenchroides|Falco cenchroides
-3|Nocturnal curassow|Nothocrax urumutum
-3|Northern black korhaan|White-quilled Korhaan|Afrotis afraoides
-3|Northern emerald toucanet|Emerald Toucanet|Aulacorhynchus prasinus
-3|Northern saw-whet owl|Aegolius acadicus
-3|Orange-bellied leafbird|Chloropsis hardwickii
-3|Oriental plover|Anarhynchus veredus|Charadrius (Eupoda) veredus|Charadrius veredus
-3|Ovambo sparrowhawk|Accipiter ovampensis|Ovampo sparrowhawk
-3|Pacific imperial pigeon|Ducula pacifica
-3|Pale-billed hornbill|Lophoceros pallidirostris
-3|Palestine sunbird|Cinnyris osea|Northern Orange-tufted sunbird
-3|Patagonian tinamou|Tinamotis ingoufi
-3|Pied falconet|Microhierax melanoleucos|Microhierax melanoleucus
-3|Pied goshawk|Accipiter albogularis
-3|Pink-throated twinspot|Hypargos margaritatus
-3|Piping crow|Corvus typicus
-3|Plain swift|Apus unicolor
-3|Puerto Rican tanager|Nesospingus speculiferus
-3|Purple-bearded bee-eater|celebes bee-eater|Meropogon forsteni
-3|Red-and-blue lory|Eos histrio
-3|Red-backed mousebird|Colius castanotus
-3|Red-billed malkoha|Phaenicophaeus javanicus|Zanclostomus javanicus
-3|Red-crested cardinal|Paroaria coronata
-3|Red-throated twinspot|Hypargos niveoguttatus
-3|Reddish hermit|Phaethornis ruber
-3|Ringed kingfisher|Megaceryle torquata
-3|Rosy bee-eater|Merops malimbicus
-3|Rouget's rail|Rougetis rail|Rougetius rougetii
-3|Ruddy cuckoo-dove|Macropygia emiliana
-3|Rufous piculet|Sasia abnormis
-3|Rufous-tailed jacamar|Galbula ruficauda
-3|Rufous-tailed lark|Ammomanes phoenicura
-3|Rusty tinamou|Crypturellus brevirostris
-3|Rusty-naped pitta|Hydrornis oatesi
-3|Saffron finch|Sicalis flaveola
-3|Saint Helena plover|St. Helena Plover|Anarhynchus sanctaehelenae|Charadrius sanctaehelenae
-3|Saint Lucia amazon|Amazona versicolor|Saint Lucia parrot
-3|Savannah sparrow|Passerculus sandwichensis
+4|Long-tailed widowbird|Euplectes progne|Kaffir finch
+4|Lyall's wren|Stephens Island Wren|Xenicus lyalli
+4|Madagascar jacana|Actophilornis albinucha
+4|Madagascar plover|Anarhynchus thoracicus|Charadrius thoracicus
+4|Madagascar pochard|Aythya innotata|Madagascan pochard
+4|Magpie shrike|Urolestes melanoleucus
+4|Magpie-lark|Grallina cyanoleuca
+4|Malagasy sacred ibis|Threskiornis bernieri
+4|Mangrove pitta|Pitta megarhyncha
+4|Mariana crow|aga|Corvus kubaryi
+4|Maroon woodpecker|Blythipicus rubiginosus
+4|Maroon-bellied parakeet|Pyrrhura frontalis
+4|Marvelous spatuletail|Loddigesia mirabilis|Marvellous Spatuletail juju
+4|Mascarene parrot|Mascarinus mascarin|Mascarinus mascarinus
+4|Mauritius blue pigeon|Alectroenas nitidissimus
+4|Meadow bunting|Emberiza cioides
+4|Mindanao hornbill|Penelopides affinis
+4|Moluccan king parrot|Alisterus amboinensis
+4|Moluccan megapode|Moluccan Scrubfowl|Eulipoa wallacei
+4|Monteiro's hornbill|Tockus monteiri
+4|Mottled duck|Anas fulvigula
+4|Mountain parakeet|Psilopsiagon aurifrons
+4|Musk lorikeet|Glossopsitta concinna
+4|Nankeen kestrel|Falco (Tinnunculus) cenchroides|Falco cenchroides
+4|Nocturnal curassow|Nothocrax urumutum
+4|Northern black korhaan|White-quilled Korhaan|Afrotis afraoides
+4|Northern emerald toucanet|Emerald Toucanet|Aulacorhynchus prasinus
+4|Northern saw-whet owl|Aegolius acadicus
+4|Orange-bellied leafbird|Chloropsis hardwickii
+4|Oriental plover|Anarhynchus veredus|Charadrius (Eupoda) veredus|Charadrius veredus
+4|Ovambo sparrowhawk|Accipiter ovampensis|Ovampo sparrowhawk
+4|Pacific imperial pigeon|Ducula pacifica
+4|Pale-billed hornbill|Lophoceros pallidirostris
+4|Palestine sunbird|Cinnyris osea|Northern Orange-tufted sunbird
+4|Patagonian tinamou|Tinamotis ingoufi
+4|Pied falconet|Microhierax melanoleucos|Microhierax melanoleucus
+4|Pied goshawk|Accipiter albogularis
+4|Pink-throated twinspot|Hypargos margaritatus
+4|Piping crow|Corvus typicus
+4|Plain swift|Apus unicolor
+4|Puerto Rican tanager|Nesospingus speculiferus
+4|Purple-bearded bee-eater|celebes bee-eater|Meropogon forsteni
+4|Red-and-blue lory|Eos histrio
+4|Red-backed mousebird|Colius castanotus
+4|Red-billed malkoha|Phaenicophaeus javanicus|Zanclostomus javanicus
+4|Red-crested cardinal|Paroaria coronata
+4|Red-throated twinspot|Hypargos niveoguttatus
+4|Reddish hermit|Phaethornis ruber
+4|Ringed kingfisher|Megaceryle torquata
+4|Rosy bee-eater|Merops malimbicus
+4|Rouget's rail|Rougetis rail|Rougetius rougetii
+4|Ruddy cuckoo-dove|Macropygia emiliana
+4|Rufous piculet|Sasia abnormis
+4|Rufous-tailed jacamar|Galbula ruficauda
+4|Rufous-tailed lark|Ammomanes phoenicura
+4|Rusty tinamou|Crypturellus brevirostris
+4|Rusty-naped pitta|Hydrornis oatesi
+4|Saffron finch|Sicalis flaveola
+4|Saint Helena plover|St. Helena Plover|Anarhynchus sanctaehelenae|Charadrius sanctaehelenae
+4|Saint Lucia amazon|Amazona versicolor|Saint Lucia parrot
+4|Savannah sparrow|Passerculus sandwichensis
 4|Scaly-bellied woodpecker|Picus squamatus
 4|Scarlet finch|Carpodacus sipahi|Haematospiza sipahi
 4|Scarlet tanager|Piranga olivacea
@@ -65345,7 +67618,7 @@ EVO.cat({ ...{"id": "birds", "name": "Birds", "icon": "🐦", "q": "Name a **spe
 4|Speckled chachalaca|Ortalis guttata
 4|Sickle-winged guan|Chamaepetes goudotii
 ` });
-EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a **species of mammal** (its common name).", "level": 2}, list: `
+EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a **mammal**.", "level": 2}, list: `
 0|Lion|African lion|Asiatic lion|Panthera leo|q140
 0|Tiger|tigers|tigress|P. tigris|Panthera tigris
 0|Wolf|grey wolf|gray wolf|gray wolves|grey wolves|timber wolf|timber wolves|Canis lupus
@@ -65353,13 +67626,23 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 0|Polar bear|Ursus maritimus|ice bear|white bear
 0|Cheetah|Felis lanea|Acinonyx jubatus|African cheetah|geopard|white cheetah|woolly cheetah
 0|Hippopotamus|Nile hippopotamus|hippo|river hippopotamus|common hippopotamus|Hippopotamus amphibius
-0|Giant panda|panda|giant panda bear|Ailuropoda melanoleuca|panda bear
-0|Brown bear|grizzly bear|Ursus arctos
-0|Moose|elk|Eurasian elk|Alces alces|moofe deer
-0|Koala|coala|koala bear|koolah|Phascolarctos cinereus
-0|Chimpanzee|chimp|common chimpanzee|Pan troglodytes|robust chimpanzee
-0|Brown rat|rat|wharf rat|Hanover rat|Norway rat|Norwegian rat|Parisian rat|Rattus norvegicus|sewer rat|street rat|water rat|Rattus|common rat
-0|Wild boar|Eurasian wild boar|Eurasian wild pig|European wild boar|European wild pig|wild pig|wild swine|boar|pig|Sus scrofa|wild boar, eurasian wild boar|Sus
+0|Bear
+0|Crocodile
+0|Elephant
+0|Gorilla
+0|Kangaroo
+0|Monkey
+0|Penguin
+2|Rhino|Rhinoceros
+2|Zebra
+2|giraffe|Giraffa
+2|Giant panda|panda|giant panda bear|Ailuropoda melanoleuca|panda bear
+2|Brown bear|grizzly bear|Ursus arctos
+2|Moose|elk|Eurasian elk|Alces alces|moofe deer
+2|Koala|coala|koala bear|koolah|Phascolarctos cinereus
+2|Chimpanzee|chimp|common chimpanzee|Pan troglodytes|robust chimpanzee
+2|Brown rat|rat|wharf rat|Hanover rat|Norway rat|Norwegian rat|Parisian rat|Rattus norvegicus|sewer rat|street rat|water rat|Rattus|common rat
+2|Wild boar|Eurasian wild boar|Eurasian wild pig|European wild boar|European wild pig|wild pig|wild swine|boar|pig|Sus scrofa|wild boar, eurasian wild boar|Sus
 2|Red fox|fox|Vulpes vulpes|Eurasian fox|European fox
 2|Yak|Bos grunniens|domestic yak
 2|Snow leopard|ounce|Uncia uncia|P. uncia|Panthera uncia
@@ -65367,6 +67650,7 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 2|Cougar|mountain lion|catamount|Puma concolor|puma|Felis concolor|deer tiger
 2|Least weasel|Mustela nivalis|weasel|dwarf weasel|snow weasel|weasel, least weasel|Mustela
 2|House mouse|mouse|mice|Mus musculus
+2|Reindeer|Rangifer tarandus|caribou
 2|Platypus|duck-billed platypus|duckbill platypus|duckbill|duckmole|watermole|Ornithorhynchus anatinus
 2|Walrus|Odobenus rosmarus
 2|Orca|Orcinus orca|killer whale|dwarf killer whale|Orca gladiator|orca whale
@@ -65379,7 +67663,47 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 2|Arctic fox|polar fox|Alopex|snow fox|Alopex lagopus|Canis lagopus|blue fox|Vulpes lagopus
 2|Capybara|greater capybara|Hydrochoerus hydrochaeris|true capybara
 2|Llama|Lama glama|Domestic llama|Domesticated llama
+2|Alligator
+2|Anteater
+2|Antelope
+2|Armadillo
+2|Baboon|Papio
+2|Bat
+2|Buffalo
+2|Butterflies|Butterfly
+2|Camel
+2|Eagle
+2|Emu
+2|Flamingo
+2|Gazelle
+2|Hyena
+2|Iguana
+2|Komodo Dragon
+2|Lemur
+2|Lizard
+2|Ostrich
+2|Otter
+2|Owl
+2|Parrot
+2|Peacock
+2|Porcupine
+2|Scorpion
+2|Sea Lion
+2|Seal
+2|Sloth
+2|Snake
+2|Tarantula
+2|Tortoise
+2|Toucan
+2|Turtle
+2|Wallaby
+2|elephant seal|Mirounga
+2|hare|Lepus
+2|orangutan|Pongo
+2|tapir|Tapirus
+2|wildebeest|Connochaetes
 2|Vicugna pacos|alpaca
+2|Okapi|Okapia johnstoni|Congolese giraffe|forest giraffe|zebra giraffe
 2|American bison|bison|plains bison|American buffalo|Bison bison|plains buffalo|prairie bison|prairie buffalo
 2|Sperm whale|cachalot|spermaceti whale|Physeter macrocephalus
 2|Asian elephant|Asiatic elephant|Elephas maximus|Indian Elephant
@@ -65400,6 +67724,7 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 2|Eurasian otter|Lutra lutra|common otter|Eurasian river otter|European otter|Old World otter|European river otter
 2|Neanderthal|Neanderthals|Homo neanderthalensis
 2|Eurasian lynx|Lynx lynx
+2|Common warthog|African warthog|Phacochoerus africanus|wart hog
 2|Mule|Equus asinus × Equus caballus
 2|Red squirrel|Eurasian Red Squirrel|Sciurus vulgaris
 2|Red deer|Cervus elaphus|West European red deer|western red deer
@@ -65412,28 +67737,97 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 2|European wildcat|wild cat|wildcats|Felis silvestris
 2|Dromedary|Camelus dromedarius|Arabian camel|dromedary camel|hajeen|hygeen|mehari|One-humped Camel
 2|Golden jackal|C. aureus|Canis aureus|common jackal|Asiatic Jackal
+2|Serval|Leptailurus serval
 2|European rabbit|Poponejo|domestic rabbit|coney|Oryctolagus cuniculus|wild rabbit
 2|American black bear|black bear|Ursus americanus
 2|Bactrian camel|Camelus bactrianus
 2|Bonobo|dwarf chimpanzee|gracile chimpanzee|Pan paniscus|pygmy chimpanzee
-2|Okapi|Okapia johnstoni|Congolese giraffe|forest giraffe|zebra giraffe
 2|European pine marten|Martes martes|Pine Marten
 2|Thylacine|Tasmanian tiger|Tasmanian wolf|Tassie tiger|Thylacinus cynocephalus
 2|Impala|Aepyceros melampus|rooibok|Common Impala|Black-faced Impala
 2|African wild dog|African painted dog|Lycaon pictus|hyena dog|painted dog|African Hunting Dog|Cape Hunting Dog
 2|Ocelot|ocelots|dwarf leopard|Leopardus pardalis
 2|African bush elephant|African elephant|Loxodonta africana|Loxodonta
+2|Dhole|red dog|red wild dog|Asian wild dog|Asiatic wild dog|Cuon alpinus|Indian Wild Dog
 2|Fennec fox|Vulpes zerda|fennec|Fennecus zerda
 2|Muskrat|beaver-rat|musquash|Ondatra zibethicus|swamp rat|Common Muskrat
 2|Bobcat|Felis rufus|Lynx rufus|red lynx|bay lynx
 2|European fallow deer|Dama dama|fallow deer|Common Fallow-deer
 2|Muskox|Ovibos moschatus|musk oxen
+2|Agouti
+2|Anaconda
+1|Axolotl
+2|Babirusa
+2|Bald Eagle
+2|Bearded Dragon
+2|Bilby
+2|Boa
+2|Bush Baby|Galago
+2|Caiman
+2|Capuchin
+2|Cassowary
+2|Chameleon
+2|Chinchilla
+2|Cobra
+2|Cockatoo
+2|Colobus
+2|Condor
+2|Crane
+2|Echidna
+2|Eland
+2|Flying Fox
+2|Gecko
+2|Gharial
+2|Gibbon
+2|Gila Monster
+2|Homo
+2|Hornbill
+2|Howler Monkey
+2|Ibex
+2|Ibis
+2|Kiwi
+2|Kookaburra
+2|Kudu
+2|Lorikeet
+2|Lynx
+2|Macaw
+2|Mammuthus
+2|Mara
+2|Marmoset
+2|Marmot|Marmota
+2|Mongoose
+2|Monitor Lizard
+2|Oryx
+1|Pangolin
+2|Peccary
+2|Pelican
+2|Poison Dart Frog
+2|Prairie Dog
+2|Przewalski's Horse
+2|Puffin
+2|Pygmy Goat
+2|Pygmy Hippo
+2|Python
+2|Rattlesnake
+2|Red Wolf
+2|Rhea
+2|Salamander
+2|Slow Loris
+2|Snowy Owl
+2|Spider Monkey
+2|Spoonbill
+2|Squirrel Monkey
+2|Stingray
+2|Stork
+2|Tamarin
+2|Tarsier
+2|Vulture
+2|Wombat
+2|macaques|Macaca
 2|Clouded leopard|mainland clouded leopard|Neofelis nebulosa
 2|Dugong|Dugong dugon|Sea Cow
 2|Homo erectus|Caveman
-2|Serval|Leptailurus serval
 2|Sun bear|Helarctos malayanus|Malayan sun bear|Malaysian sun bear|Malayan Bear
-2|Reindeer|Rangifer tarandus|caribou
 2|European mole|mole|common mole|Talpa europaea
 2|Indian rhinoceros|great Indian rhinoceros|greater one-horned rhinoceros|Indian one-horned rhinoceros|Indian rhino|one-horned rhino|Rhinoceros unicornis
 2|European bison|Bison bonasus|wisent
@@ -65442,22 +67836,42 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 2|Asian black bear|Ursus thibetanus|Asiatic black bear|Selenarctos thibetanus
 2|Pallas's cat|manul|Pallas' cat|Otocolobus manul
 2|European hare|Lepus europaeus|Brown Hare
+5|Aye-aye|Daubentonia madagascariensis
+2|Onager|Asian wild ass|Asiatic wild ass|Equus hemionus|Gobi kulan|hemione|Mongolian kulan|Persian onager|Syrian onager
+2|Sloth bear|Melursus ursinus
+2|Spectacled bear|Tremarctos ornatus|oso andino|oso andino de cara corta|oso de anteojos
 2|Homo habilis|H. habilis
+2|Binturong|Bearcat|Arctictis binturong
+2|Fossa|Cryptoprocta ferox
 2|Chamois|Alpine chamois|northern chamois|Rupicapra rupicapra|Balkan Chamois
 2|European polecat|Mustela putorius|black polecat|forest polecat|Western Polecat|western polecat, polecat
+2|Sand cat|Felis margarita|sand dune cat
+2|Markhor|Markor|Capra falconeri|Maarkhor
+2|Guanaco|Lama guanicoe
+2|Addax|Addax nasomaculatus
+2|Mandrill|Mandrillus sphinx
 2|Common raccoon dog|Nyctereutes procyonoides|tanuki|mangut|raccoon dog
+2|Quokka|Setonix brachyurus
 2|Elk|Cervus canadensis|North American elk|wapiti|American elk|C. canadensis
 2|Iberian lynx|Lynx pardinus|Pardel lynx
 2|Aurochs|aurochsen|Bos primigenius
 2|Homo sapiens|man|men|humans|human being|human|human beings
 2|Saiga antelope|Saiga|Colus|Saiga tatarica|Western Saiga Antelope|Western Saiga
+2|Giant anteater|M. jubata|Myrmecophaga tridactyla
+2|Maned wolf|Chrysocyon brachyurus
+2|Gaur|Bos gaurus|Indian bison
 2|Spotted hyena|Crocuta crocuta|laughing hyena|spotted hyaena
 2|Vicuña|Lama vicugna|Vicugna vicugna|Vicugna
 2|Canada lynx|Canadian lynx|Felis lynx|Felis lynx canadensis|Lynx canadensis|American lynx
 2|Wild yak|Bos mutus
+2|Siamang|Hylobates syndactylus|Symphalangus syndactylus
+2|Waterbuck|Kobus ellipsiprymnus
 2|American mink|Mustela vison|Neogale vision|Neovison vison|Neogale vison
+2|Blackbuck|Antilope cervicapra|Indian antelope
 2|Fishing cat|Prionailurus viverrinus
 2|Javan rhinoceros|Javan rhino|lesser one-horned rhinoceros|Rhinoceros sondaicus|Sunda rhinoceros|Javan One-horned Rhinoceros
+2|Bongo|Tragelaphus eurycerus
+2|Kinkajou|Night ape
 2|European mink|Mustela lutreola
 2|Jaguarundi|Herpailurus yagouaroundi
 2|Mountain hare|Irish hare|Lepus timidus|tundra hare|white hare|alpine hare|blue hare|snow hare|variable hare
@@ -65468,43 +67882,30 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 2|Common bottlenose dolphin|bottlenose dolphin|Atlantic bottlenose dolphin|Bottle-Nosed Dolphin
 2|Common eland|Taurotragus oryx
 2|Harbor seal|Phoca vitulina|common seal|Harbour Seal
-2|Sumatran rhinoceros|Asiatic two-horned rhinoceros|Dicerorhinus sumatrensis|Didermocerus sumatrensis|hairy rhino|hairy rhinoceros|Sumatran rhino|Two-horned Asiatic rhinoceros
 2|Aardwolf|civet hyena|maanhaar-jackal|Proteles cristata|Proteles cristatus|termite-eating hyena
-5|Aye-aye|Daubentonia madagascariensis
-2|Onager|Asian wild ass|Asiatic wild ass|Equus hemionus|Gobi kulan|hemione|Mongolian kulan|Persian onager|Syrian onager
 2|Ring-tailed lemur|Lemur catta
-2|Sloth bear|Melursus ursinus
-2|Spectacled bear|Tremarctos ornatus|oso andino|oso andino de cara corta|oso de anteojos
-2|Dhole|red dog|red wild dog|Asian wild dog|Asiatic wild dog|Cuon alpinus|Indian Wild Dog
-2|African forest elephant|Loxodonta cyclotis|Forest elephant
 2|Argali|Ovis ammon
 2|Fin whale|razorback|Balaenoptera physalus|common rorqual|finback whale|herring whale
+2|Sitatunga|marshbuck|Tragelaphus spekii
 2|Black rat|Rattus rattus|black ship rat|house rat|roof rat|ship rat
 2|Black-footed cat|Felis nigripes|small-spotted cat
 2|European edible dormouse|edible dormouse|Glis glis
 2|Homo heidelbergensis|H. heidelbergensis
 2|Sable|Martes zibellina
-2|Binturong|Bearcat|Arctictis binturong
 2|Corsac fox|Vulpes corsac
-2|Fossa|Cryptoprocta ferox
 2|Nilgai|Boselaphus tragocamelus|Antilope tragocamelus|Antilope picta|Antilope albipes|Antilope leucopus|Blue bull|Boselaphus albipes|Boselaphus picta|Cemas picta|Cemas tragocamelus|Damalis picta|Damalis risia|Nilgai antelope|Nilghai|Nylghai|Nylghau|Portax risia|Portax tragelaphus|Tragelaphus hippelaphus
-2|Sand cat|Felis margarita|sand dune cat
-2|Asian golden cat|Pardofelis temminckii|Asiatic golden cat
 2|Asian palm civet|Paradoxurus hermaphroditus|palm civet|musang|toddy cat
 2|Bengal fox|Indian Fox|Vulpes bengalensis|Black tailed fox
 2|Bowhead whale|Arctic whale|Balaena mysticetus|Greenland right whale
-2|Common warthog|African warthog|Phacochoerus africanus|wart hog
 2|Ferret|Mustela putorius furo|ferrets
-2|Markhor|Markor|Capra falconeri|Maarkhor
 2|Plains zebra|Equus quagga|common zebra
 2|Eurasian beaver|Castor fiber|European beaver
-2|Guanaco|Lama guanicoe
 2|Leopard cat|Prionailurus bengalensis
-2|Addax|Addax nasomaculatus
 2|Barbary macaque|Macaca sylvanus|magot|Barbary ape|Barbary monkey|rock ape|rock monkey
 2|Chital|Axis axis|cheetal|Axis deer
-2|Mandrill|Mandrillus sphinx
 2|Proboscis monkey|Nasalis larvatus|kahau|kahau nosatý|long-nosed monkey
+2|Rock hyrax|Procavia capensis|Cape hyrax|dassie|rock rabbit
+2|West Indian manatee|manatee|American manatee|Antillean manatee|Caribbean manatee|Trichechus manatus
 2|Beech marten|stone marten|house marten|Martes foina|white breasted marten|stone marten, beech marten
 2|Baiji|Chinese river dolphin|Lipotes vexillifer|pai-chi|Whitefin dolphin|Yangtze dolphin|Yangtze river dolphin
 2|Banteng|Bos javanicus|Tembadau
@@ -65512,107 +67913,194 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 2|Ganges river dolphin|Platanista gangetica|South Asian river dolphin
 2|Homo ergaster
 2|Homo floresiensis|Flores Man
-2|Marbled cat|Pardofelis marmorata
 2|Pygmy hippopotamus|Choeropsis liberiensis
-2|Quokka|Setonix brachyurus
 2|Sambar deer|sambar|Cervus unicolor|Rusa unicolor
+2|Scimitar oryx|Oryx dammah|Sahara oryx|scimitar-horned oryx
 2|Grey seal|Atlantic seal|gray seal|Halichoerus grypus|horsehead seal
 2|Pronghorn|American antelope|Antilocapra americana|prairie antelope|pronghorn antelope|speed goat
 2|Wild horse|Eurasian wild horse|tarpan
+2|Nyala|inyala|Nyala angasii|Tragelaphus angasii|lowland nyala
 2|African civet|civet|Civettictis civetta
 2|Arctic hare|Lepus arcticus
 2|Common dolphin|Short-beaked Common Dolphin|Delphinus delphis
 2|Leopard seal|Hydrurga leptonyx|sea leopard
-2|Oncilla|savanna tiger cat|savannah tiger-cat|tiger cat|Leopardus tigrinus|northern tiger cat
 2|Woolly rhinoceros|woolly rhino
-2|Giant anteater|M. jubata|Myrmecophaga tridactyla
 2|Gray whale|Agaphelus glaucus|Balaena gibbosa|Eschrichtius glaucus|devil fish|Atlantic gray whale|California gray whale|Eschrichtius gibbosus|Eschrichtius robustus|Gray back whale|grey whale|Pacific gray whale|Rhachianectes glaucus
 2|Grévy's zebra|Equus grevyi|imperial zebra
 2|Hamadryas baboon|Papio hamadryas
 2|Japanese macaque|Macaca fuscata|snow monkey
-2|Maned wolf|Chrysocyon brachyurus
 2|Margay|Leopardus wiedii
 2|Mediterranean monk seal|Monachus monachus
 2|Mountain goat|Oreamnos americanus
 2|Takin|Budorcas taxicolor
 2|Woolly mammoth|Mammuthus primigenius
-2|Gaur|Bos gaurus|Indian bison
-2|Bat-eared fox|Otocyon megalotis|big-eared fox|black-eared fox
-2|Chinese mountain cat|Felis bieti|Chinese desert cat|pale desert cat
-2|Greater kudu
-2|Hazel dormouse|Muscardinus avellanarius|Common dormouse
-2|Kodkod|guigna|Leopardus guigna
-2|Mountain zebra|Hartmann's mountain zebra|Cape mountain zebra|Equus zebra
-2|Sei whale|Balaenoptera borealis
-2|Brown hyena|Brown Hyaena|P. brunnea|Parahyaena brunnea|strandwolf
-2|Cave bear|Ursus spelaeus
-2|Harbour porpoise|Phocoena phocoena|Harbor porpoise
-2|Olive baboon|Papio anubis
-2|Siamang|Hylobates syndactylus|Symphalangus syndactylus
-2|Waterbuck|Kobus ellipsiprymnus
-2|African golden cat|Profelis aurata
-2|Blackbuck|Antilope cervicapra|Indian antelope
-2|Wild goat|Capra aegagrus
-2|Amazon river dolphin|boto|Inia geoffrensis|pink river dolphin
-2|Bearded seal|Erignathus barbatus
-2|Bongo|Tragelaphus eurycerus
-2|Common minke whale|minke whale|Balaenoptera acutorostrata
-2|Ethiopian wolf|Canis simensis|kuberow|Simian jackal|Simien fox|Red jackal
-2|Gemsbok|gemsbuck|Oryx gazella|South African oryx
-2|Gerenuk|Litocranius walleri
-2|Hartebeest|Alcelaphus caama|Bubale|Alcelaphus buselaphus|kaama
-2|Kinkajou|Night ape
-2|Virginia opossum|Didelphis virginiana|opossum|possum|North American opossum|Virginian opossum
-2|White-tailed deer|Odocoileus virginianus|whitetail|Dama virginiana|Odocoileus spelaeus|white tail deer|Virginia deer
-2|Wood mouse|Apodemus sylvaticus
-2|African wild ass|Equus africanus|Atlas wild ass|Nubian wild ass|Somali wild ass
-2|Bush dog|Speothos venaticus
-2|Rusty-spotted cat|Prionailurus rubiginosus
-2|Siberian flying squirrel|Pteromys volans
-2|Western gorilla|Gorilla gorilla
-2|Bornean orangutan|Pongo pygmaeus
-2|European hamster|Cricetus cricetus
-2|European water vole|Arvicola amphibius
-2|Gelada|Theropithecus gelada
-2|Geoffroy's cat|Geoffroyis cat|Leopardus geoffroyi
-2|Gray fox|Grey fox|Tree fox|Urocyon cinereoargenteus
-2|Indri|Indri indri
-2|Irrawaddy dolphin|Orcaella brevirostris
-2|Marbled polecat|European marbled polecat|Vormela peregusna
-2|Olinguito|B. neblina|Bassaricyon neblina
-2|Oribi|Ourebia ourebi
-2|Risso's dolphin|Grampus griseus
-2|Siberian weasel|Mustela sibirica|kolonok
-2|American badger|Taxidea taxus
-2|Andean mountain cat|Leopardus jacobita|Andean cat|Oreailurus jacobita
-2|Barasingha|Rucervus duvaucelii
-2|Blue wildebeest|Connochaetes taurinus|white-bearded wildebeest
-2|Cape fox|Vulpes chama
-2|Eastern gray squirrel|Grey squirrel|Sciurus carolinensis
-2|Goitered gazelle|Gazella subgutturosa|black-tailed gazelle|Persian gazelle
-2|Malayan tapir|Asian tapir|Indian tapir|Malay tapir|Tapirus indicus
-2|Numbat|Myrmecobius fasciatus|noombat|walpurti
-2|Ringed seal|Pusa hispida
-2|Sable antelope|Hippotragus niger
-2|Saola|Pseudoryx nghetinhensis
-2|Sitatunga|marshbuck|Tragelaphus spekii
-2|Steller's sea cow|Hydrodamalis gigas
-2|Tilcayo
-2|Arabian oryx|Oryx leucoryx
-2|Asian small-clawed otter|oriental small-clawed otter|Asian short-clawed otter
-2|Baikal seal|Nerpa|Lake baikal seal|Phoca sibirica|Pusa sibirica
-2|Barbary sheep|Ammotragus lervia
-2|Eurasian harvest mouse|harvest mouse|Micromys minutus
-2|Giant otter|giant river otter|Pteronura brasiliensis
-2|Homo naledi|H. naledi
-2|Macaca fascicularis|crab-eating macaque|Cynomolgus irus|cynomolgus monkey|long-tailed macaque|Macaca irus
-2|Pampas cat|Leopardus colocola|Colocolo|Chilean Pampa Cat
-2|Short-beaked echidna
-2|Tibetan fox|Tibetan sand fox|Vulpes ferrilata
-2|Australopithecus afarensis|Australopithecus afarensis cumio|A. afarensis
-2|Bank vole|Clethrionomys glareolus|Myodes glareolus
-2|Blanford's fox|Vulpes cana
-2|Common vole|Microtus arvalis
+2|African clawed frog
+2|Aldabra Tortoise
+2|Alligator Snapping Turtle
+3|American avocet
+3|American flamingo
+3|Amur Leopard
+3|Amur Tiger|Siberian Tiger
+3|Andean Condor
+3|Anoa
+3|Australopithecus
+3|Bettong
+3|Bird of Paradise
+3|Black Mamba
+3|Black-and-White Ruff Lemur
+3|Blesbok
+3|Bushbuck
+3|Chinese Giant Salamander
+3|Cuscus
+3|Dik-Dik
+3|Duiker
+3|Emerald Tree Boa
+3|False water cobra
+3|Fiji banded iguana
+3|Fly River turtle
+3|Fowler's toad
+3|Frilled Lizard
+3|Gaboon Viper
+3|Gadwall
+3|Galapagos Tortoise
+3|Genet
+3|Goat
+3|Grand Cayman blue iguana
+3|Gray catbird
+3|Greater rhea
+3|Green Mamba
+3|Green Tree Python
+3|Green aracari
+3|Ground Hornbill
+3|Grysbok
+3|Hamerkop
+3|Harpy Eagle
+3|Hellbender
+3|Home's hinge-back tortoise
+3|Horseshoe crab
+3|Hyacinth Macaw
+3|Iranian fat-tailed gecko
+3|Japanese giant salamander
+3|Kea
+3|King Cheetah
+3|King Cobra
+3|King Vulture
+3|Kori Bustard
+3|Kunekune pig
+3|La Plata three-banded armadillo
+3|Lappet-Faced Vulture
+3|Leafcutter Ants
+3|Lemur leaf frog
+3|Leopard Tortoise
+3|Linsang
+3|Long-tailed salamander
+3|Malayan Tiger
+3|Mangrove snake
+3|Marabou Stork
+3|Matamata
+3|McCord’s box turtle
+3|Mexican Beaded Lizard
+3|Mouse Deer|Chevrotain
+3|Mummichog
+3|Muntjac
+3|New Caledonian gecko
+3|Nicobar Pigeon
+3|Northern blue-tongued skink
+3|Northern mockingbird
+3|Potoroo
+3|Pudu
+3|Quoll
+3|Radiated Tortoise
+3|Reedbuck
+3|Reticulated Python
+3|Rhinoceros Viper
+3|Secretary Bird
+3|Shoebill
+3|Sifaka
+3|Steller's Sea Eagle
+3|Sumatran Tiger
+3|Thorny Devil
+3|Tree Kangaroo
+3|True foxes|Vulpes
+3|Tsessebe
+3|Tuatara
+3|Victoria Crowned Pigeon
+3|White Lion
+3|White Tiger
+3|big cats|Panthera
+3|marten|Martes
+3|Bat-eared fox|Otocyon megalotis|big-eared fox|black-eared fox
+3|Chinese mountain cat|Felis bieti|Chinese desert cat|pale desert cat
+3|Greater kudu
+3|Hazel dormouse|Muscardinus avellanarius|Common dormouse
+3|Mountain zebra|Hartmann's mountain zebra|Cape mountain zebra|Equus zebra
+3|Sei whale|Balaenoptera borealis
+3|Kiang|Equus kiang
+3|Naked mole-rat|desert mole rat|Heterocephalus glaber|sand puppy
+3|Brown hyena|Brown Hyaena|P. brunnea|Parahyaena brunnea|strandwolf
+3|Cave bear|Ursus spelaeus
+3|Harbour porpoise|Phocoena phocoena|Harbor porpoise
+3|Olive baboon|Papio anubis
+3|African golden cat|Profelis aurata
+3|Wild goat|Capra aegagrus
+3|Amazon river dolphin|boto|Inia geoffrensis|pink river dolphin
+3|Bearded seal|Erignathus barbatus
+3|Common minke whale|minke whale|Balaenoptera acutorostrata
+3|Gemsbok|gemsbuck|Oryx gazella|South African oryx
+3|Gerenuk|Litocranius walleri
+3|Hartebeest|Alcelaphus caama|Bubale|Alcelaphus buselaphus|kaama
+3|Virginia opossum|Didelphis virginiana|opossum|possum|North American opossum|Virginian opossum
+3|White-tailed deer|Odocoileus virginianus|whitetail|Dama virginiana|Odocoileus spelaeus|white tail deer|Virginia deer
+3|Wood mouse|Apodemus sylvaticus
+3|Sumatran rhinoceros|Asiatic two-horned rhinoceros|Dicerorhinus sumatrensis|Didermocerus sumatrensis|hairy rhino|hairy rhinoceros|Sumatran rhino|Two-horned Asiatic rhinoceros
+3|African wild ass|Equus africanus|Atlas wild ass|Nubian wild ass|Somali wild ass
+3|Bush dog|Speothos venaticus
+3|Rusty-spotted cat|Prionailurus rubiginosus
+3|Siberian flying squirrel|Pteromys volans
+3|Western gorilla|Gorilla gorilla
+3|White-nosed coati|coatimundi|coati
+3|Bornean orangutan|Pongo pygmaeus
+3|European hamster|Cricetus cricetus
+3|European water vole|Arvicola amphibius
+3|Gelada|Theropithecus gelada
+3|Geoffroy's cat|Geoffroyis cat|Leopardus geoffroyi
+3|Gray fox|Grey fox|Tree fox|Urocyon cinereoargenteus
+3|Indri|Indri indri
+3|Irrawaddy dolphin|Orcaella brevirostris
+3|Marbled polecat|European marbled polecat|Vormela peregusna
+3|Olinguito|B. neblina|Bassaricyon neblina
+3|Oribi|Ourebia ourebi
+3|Risso's dolphin|Grampus griseus
+3|Siberian weasel|Mustela sibirica|kolonok
+3|African forest elephant|Loxodonta cyclotis|Forest elephant
+3|American badger|Taxidea taxus
+3|Barasingha|Rucervus duvaucelii
+3|Blue wildebeest|Connochaetes taurinus|white-bearded wildebeest
+3|Cape fox|Vulpes chama
+3|Eastern gray squirrel|Grey squirrel|Sciurus carolinensis
+3|Goitered gazelle|Gazella subgutturosa|black-tailed gazelle|Persian gazelle
+3|Numbat|Myrmecobius fasciatus|noombat|walpurti
+3|Ringed seal|Pusa hispida
+3|Sable antelope|Hippotragus niger
+3|Saola|Pseudoryx nghetinhensis
+3|Steller's sea cow|Hydrodamalis gigas
+3|Tilcayo
+3|Arabian oryx|Oryx leucoryx
+3|Asian small-clawed otter|oriental small-clawed otter|Asian short-clawed otter
+3|Baikal seal|Nerpa|Lake baikal seal|Phoca sibirica|Pusa sibirica
+3|Barbary sheep|Ammotragus lervia
+3|Eurasian harvest mouse|harvest mouse|Micromys minutus
+3|Giant otter|giant river otter|Pteronura brasiliensis
+3|Homo naledi|H. naledi
+3|Macaca fascicularis|crab-eating macaque|Cynomolgus irus|cynomolgus monkey|long-tailed macaque|Macaca irus
+3|Pampas cat|Leopardus colocola|Colocolo|Chilean Pampa Cat
+3|Short-beaked echidna
+3|Tibetan fox|Tibetan sand fox|Vulpes ferrilata
+3|Asian golden cat|Pardofelis temminckii|Asiatic golden cat
+3|Australopithecus afarensis|Australopithecus afarensis cumio|A. afarensis
+3|Bank vole|Clethrionomys glareolus|Myodes glareolus
+3|Blanford's fox|Vulpes cana
+3|Common vole|Microtus arvalis
 3|Culpeo|Lycalopex culpaeus
 3|Dire wolf|Aenocyon dirus
 3|Homo antecessor
@@ -65623,6 +68111,7 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Tamaraw|Bubalus mindorensis|Mindoro dwarf buffalo
 3|Tibetan antelope|Pantholops hodgsonii|chiru
 3|Water deer|Chinese water deer|Hydropotes inermis|vampire deer
+3|Red river hog|Bush pig|Potamochoerus porcus
 3|Alpine marmot|Marmota marmota
 3|Brown long-eared bat|Plecotus auritus
 3|Common pipistrelle|Pipistrellus pipistrellus
@@ -65631,15 +68120,14 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Etruscan shrew|Savi’s pygmy shrew|Suncus etruscus
 3|Falkland Islands wolf|warrah|Dusicyon australis|Falkland Island wolf|Falkland Islands fox|Falkland Island fox
 3|Fisher|Pekania pennanti|fisher cat|Martes pennanti
-3|Flat-headed cat|Prionailurus planiceps
 3|Four-horned antelope|Tetracerus quadricornis|Chousingha
 3|Harp seal|Pagophilus groenlandica|Pagophilus groenlandicus
 3|Père David's deer|Elaphurus davidianus|elaphure|milu
 3|Roan antelope|Hippotragus equinus
-3|Rock hyrax|Procavia capensis|Cape hyrax|dassie|rock rabbit
 3|Siberian chipmunk|Tamias sibiricus
 3|Southern elephant seal|Mirounga leonina
-3|West Indian manatee|manatee|American manatee|Antillean manatee|Caribbean manatee|Trichechus manatus
+3|Marbled cat|Pardofelis marmorata
+3|Common vampire bat|vampire bat|Desmodus rotundus
 3|African palm civet|Nandinia binotata
 3|Bryde's whale|Balaenoptera brydei
 3|Cape hare|Lepus capensis|desert hare|brown hare
@@ -65650,9 +68138,7 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Irish elk|Megaloceros giganteus|Irish deer|Giant deer
 3|North Atlantic right whale|Eubalaena glacialis
 3|Rüppell's fox|Rüppel's fox|Vulpes rueppellii
-3|Scimitar oryx|Oryx dammah|Sahara oryx|scimitar-horned oryx
 3|Striped dolphin|Stenella coeruleoalba
-3|Sumatran orangutan|Pongo abelii
 3|Yellow baboon|Papio cynocephalus
 3|Yellow-throated marten|Martes flavigula
 3|Chinese pangolin|Manis pentadactyla|short-tailed Pangolin
@@ -65662,7 +68148,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Lar gibbon|H. lar|Hylobates lar|White-handed gibbon
 3|Lechwe|Kobus leche|southern lechwe|red lechwe
 3|Northern elephant seal|Mirounga angustirostris
-3|Nyala|inyala|Nyala angasii|Tragelaphus angasii|lowland nyala
 3|Smooth-coated otter|Lutrogale perspicillata
 3|Southern right whale|Eubalaena australis
 3|Sunda clouded leopard|Diard’s clouded leopard|Neofelis diardi
@@ -65670,9 +68155,9 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Thomson's gazelle|Eudorcas thomsonii|Thomson gazelle|tommie
 3|Tigon|Panthera tigris × Panthera leo|tiglon
 3|Yellow-necked mouse|Apodemus flavicollis
+3|Oncilla|savanna tiger cat|savannah tiger-cat|tiger cat|Leopardus tigrinus|northern tiger cat
 3|American marten|American sable|Pacific marten|pine marten|Hudson Bay sable|Martes americana|American pine marten
 3|Australopithecus africanus|A. africanus
-3|Baird's tapir|Central American tapir|Tapirus bairdii
 3|Bharal|blue sheep|Pseudois nayaur
 3|Bighorn sheep|Ovis canadensis
 3|Crested porcupine|African crested porcupine|Hystrix cristata|North African crested porcupine
@@ -65680,7 +68165,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Garden dormouse|Eliomys quercinus
 3|Indian grey mongoose|Herpestes edwardsii|great ichneumon
 3|Kit fox|Vulpes macrotis
-3|Mountain tapir|Andean tapir|Tapirus pinchaque|woolly tapir
 3|Nubian ibex|Capra nubiana
 3|Polynesian rat|Rattus exulans|Pacific rat
 3|Serotine bat|big brown bat|common serotine bat|Eptesicus serotinus|silky bat
@@ -65689,6 +68173,7 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Small Indian civet|Viverricula indica|Lesser Oriental Civet|Oriental civet
 3|South American coati|coatimundi|Nasua nasua|coatimundi's
 3|South American tapir|Amazonian tapir|Brazilian tapir|lowland tapir|maned tapir|Tapirus terrestris
+3|Kodkod|guigna|Leopardus guigna
 3|African wildcat|Felis lybica
 3|Cuvier's beaked whale|goose-beaked whale|Ziphius cavirostris
 3|Eastern grey kangaroo|forester kangaroo|great grey kangaroo|Macropus giganteus
@@ -65696,13 +68181,11 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Groundhog|Marmota monax|gopher|woodchuck|whistlepig
 3|Himalayan tahr|Hemitragus jemlahicus|Shapi
 3|Hooded seal|Cystophora cristata
-3|Kiang|Equus kiang
 3|Kitti's hog-nosed bat|bumblebee bat|Craseonycteris thonglongyai|hog-nosed Bat
 3|Large Indian civet|Civet cat|Viverra zibetha zibetha|Viverra zibetha
 3|Lion-tailed macaque|Macaca silenus|wanderoo
 3|Masked palm civet|Paguma larvata
 3|Mountain weasel|Altai weasel|Mustela altaica|pale weasel|solongoi
-3|Naked mole-rat|desert mole rat|Heterocephalus glaber|sand puppy
 3|Natterer's bat|Myotis nattereri|Natterer's myotis
 3|Pampas fox|Lycalopex gymnocercus
 3|Western pygmy marmoset|Pygmy marmoset|Callithrix pygmaea|dwarf marmoset
@@ -65711,22 +68194,19 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Black-tailed jackrabbit|Lepus californicus|American desert hare
 3|Celebes crested macaque|Macaca nigra|crested black macaque
 3|Crabeater seal|Lobodon carcinophaga|Lobodon carcinophagus
-3|Dibatag|Ammodorcas clarkei|Clarke's gazelle
 3|Hawaiian monk seal|Monachus schauinslandi
 3|Hoary fox|Lycalopex vetulus
 3|Indian crested porcupine|Hystrix indica|Indian porcupine
-3|Island fox|Urocyon littoralis
 3|Klipspringer|Oreotragus oreotragus
 3|Marsh deer|Blastocerus dichotomus
 3|Mule deer|Odocoileus hemionus
 3|Pygmy right whale|Caperea marginata
 3|Russian desman|Desmana moschata
-3|Short-eared dog|Atelocynus microtis|Small-eared zorro
 3|Steppe polecat|Mustela eversmanii
 3|Swift fox|Vulpes velox
-3|Tufted deer|elaphode|Elaphodus cephalophus
 3|Whiskered bat|Myotis mystacinus|whiskered myotis
 3|White-beaked dolphin|Lagenorhynchus albirostris
+3|Ethiopian wolf|Canis simensis|kuberow|Simian jackal|Simien fox|Red jackal
 3|Arctocephalus pusillus|Brown Fur Seal|Australian fur seal|Cape fur seal|South African fur seal
 3|Black wildebeest|Connochaetes gnou|white-tailed gnu
 3|Black-footed ferret|American polecat|Mustela nigripes|prairie dog hunter
@@ -65738,7 +68218,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Common patas monkey|patas monkey|Erythrocebus patas|hussar monkey|wadi monkey
 3|Common shrew|Sorex araneus
 3|Common wombat|bare-nosed wombat|Bass Strait wombat|coarse-haired wombat|Flinders Island wombat|forest wombat|Tasmanian wombat|Vombatus ursinus
-3|Darwin's fox|Lycalopex fulvipes
 3|Daubenton's bat|Daubenton's myotis|Myotis daubentonii
 3|Eastern gorilla|Gorilla beringei
 3|Eld's deer|Rucervus eldii|brow-antlered deer|thamin
@@ -65774,7 +68253,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Northern bottlenose whale|Hyperoodon ampullatus
 3|Persian fallow deer|Dama mesopotamica
 3|Puku|Kobus vardonii
-3|Pygmy hog|Porcula salvania
 3|Sechuran fox|Lycalopex sechurae|Sechura fox
 3|South American gray fox|Chilla|Lycalopex griseus|South American grey fox
 3|Southern white-breasted hedgehog|Erinaceus concolor
@@ -65782,12 +68260,12 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Striped field mouse|Apodemus agrarius
 3|Tayra|Eira barbara
 3|Weddell seal|Leptonychotes weddellii
-3|White-nosed coati|coatimundi|coati
+3|Andean mountain cat|Leopardus jacobita|Andean cat|Oreailurus jacobita
+3|Malayan tapir|Asian tapir|Indian tapir|Malay tapir|Tapirus indicus
 3|Antarctic fur seal|Arctocephalus gazella
 3|Common duiker|Sylvicapra grimmia
 3|Hairy-nosed otter|Lutra sumatrana
 3|Hector's dolphin|Cephalorhynchus hectori
-3|Hirola|Beatragus hunteri|Hunter's antelope|Hunter's hartebeest
 3|Lesser kudu|Tragelaphus imberbis
 3|North American river otter|Lontra canadensis|Lutra canadensis|North American otter|northern river otter|river otter
 3|Northern white-breasted hedgehog|Erinaceus roumanicus
@@ -65795,13 +68273,11 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|South American sea lion|Otaria dentro|Otaria flavescens
 3|Steller sea lion|Steller's sea lion|Eumatopias jubatus|Eumetopias jubatus|Lyon marine
 3|Sugar glider|Petaurus breviceps
-3|Tapanuli orangutan|Pongo tapanuliensis
 3|Atlantic white-sided dolphin|Lagenorhynchus acutus
 3|Bay cat|Catopuma badia
 3|Commerson's dolphin|Cephalorhynchus commersonii
 3|Common degu|Octodon degus|degu|brush-tailed rat
 3|Common silky anteater|Silky anteater|Cyclopes Badajatus Camachus|Cyclopes didactylus|Pygmy anteater
-3|Giant armadillo|Priodontes giganteus|Priodontes maximus
 3|Giant forest hog|Hylochoerus meinertzhageni|Forest hog
 3|Grant's gazelle|Nanger granti
 3|Japanese serow|Antilope crispa|Capricornis crispus|Naemorhedus crispus
@@ -65837,98 +68313,97 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 3|Orrorin tugenensis|O. tugenensis
 3|Parti-coloured bat|Vespertilio murinus
 3|Philippine tarsier|Carlito syrichta
-3|Red river hog|Bush pig|Potamochoerus porcus
 3|Rough-toothed dolphin|Steno bredanensis
 3|Spotted seal|Phoca largha
 3|Steenbok|Raphicerus campestris|steinbok|steinbuck
 3|West Caucasian tur|Capra caucasica
-3|African clawless otter|Aonyx capensis
-3|Alaskan hare|tundra hare|Lepus othus
-3|Blue duiker|Philantomba monticola
-3|Brandt's bat|Myotis brandtii|Brandt's myotis
-3|Caribbean monk seal|Monachus tropicalis
-3|Caucasian squirrel|Persian squirrel|Sciurus anomalus
-3|Common vampire bat|vampire bat|Desmodus rotundus
-3|Crab-eating mongoose|Herpestes urva
-3|Damaliscus lunatus|Common tsessebe|Topi|sassabi
-3|Grey long-eared bat|Plecotus austriacus
-3|La Plata dolphin|Franciscana|Pontoporia blainvillei
-3|Lesula|Cercopithecus lomamiensis
-3|Long-eared hedgehog|Hemiechinus auritus
-3|Malagasy civet|Fossa fossana|Striped civet
-3|Mustela frenata|long-tailed weasel|Neogale frenata|bridled weasel
-3|Neotropical otter|Lontra longicaudis
-3|New Zealand sea lion|Hooker’s sea lion|Phocarctos hookeri
-3|Omura's whale|Balaenoptera omurai
-3|Patagonian mara|Dolichotis patagonum|Patagonian cavy
-3|Pink fairy armadillo|Chlamyphorus truncatus|Lesser fairy armadillo|pichiciego
-3|Ringtail|Bassariscus astutus|cacomistle|ring-tailed cat
-3|Royal antelope|Neotragus pygmaeus
-3|Southern flying squirrel|Glaucomys volans|assapan
-3|Southern pig-tailed macaque|Macaca nemestrina|Sunda pig-tailed macaque
-3|Stump-tailed macaque|bear macaque|Macaca arctoides|stumptail macaque
-3|Sunda flying lemur|Galeopterus variegatus|Malayan colugo
-3|Sunda slow loris|greater slow loris
-3|Tucuxi|Sotalia fluviatilis|Tucuxi dolphin
-3|Tundra vole|Microtus oeconomus
-3|Ural field mouse|Apodemus uralensis
-3|Walia ibex|Capra walie
-3|Yellow mongoose|Cynictis penicillata
-3|Amami rabbit|Pentalagus furnessi
-3|Antelope jackrabbit|Lepus alleni|Allen's hare|Allen's jackrabbit|antelope hare
-3|Assam macaque|Macaca assamensis
-3|Australopithecus garhi|A. garhi
-3|Beira|Dorcatragus megalotis
-3|Chacma baboon|Papio ursinus|Cape baboon
-3|Crab-eating raccoon|Procyon cancrivorus
-3|Dall sheep|Dall's sheep|Ovis dalli|Thinhorn sheep
-3|East Caucasian tur|Capra cylindricornis|Eastern tur
-3|Emperor tamarin|Saguinus imperator
-3|European free-tailed bat|Tadarida teniotis|bulldog bat|mastiff bat
-3|Gayal|Bos frontalis|Mithun|Ghayal
-3|Giant pangolin|Smutsia gigantea|Giant ground pangolin|Manis gigantea|Pholidotus africanus|Manis wagneri|Phataginus gigantea|Manis gigantean
-3|Greater bilby|Macrotis lagotis
-3|Greater noctule bat|Giant noctule|Nyctalus lasiopterus
-3|Grivet|Chlorocebus aethiops|grivet monkey
-3|Guinea baboon|Papio papio
-3|Himalayan marmot|Marmota himalayana
-3|Homo rhodesiensis|H. rhodesiensis
-3|Java mouse-deer|Javan mouse-deer|Tragulus javanicus
-3|Leopardus pajeros|Pampas cat
-3|Lesser white-toothed shrew|Crocidura suaveolens
-3|Mainland serow|Sumatran serow|Capricornis sumatraensis
-3|Mountain nyala|Tragelaphus buxtoni
-3|Nilgiri marten|Martes gwatkinsii
-3|North American porcupine|common porcupine|Erethizon dorsata|Erethizon dorsatum
-3|Paranthropus robustus|Australopithecus robustus|P. robustus
-3|Pecari tajacu|collared peccary|baquiro|javelina|Mexican hog|musk hog|quenk|saino
-3|Pygmy rabbit|Brachylagus idahoensis
-3|Pygmy sperm whale|Kogia breviceps
-3|Pyrenean desman|Galemys pyrenaicus
-3|Reeves's muntjac|Reeve's muntjac
-3|Roborovski dwarf hamster|Roborovski hamster|Desert Hamster|Phodopus roborovskii
-3|Ross seal|Ommatophoca rossii
-3|Short-finned pilot whale|Globicephala macrorhynchus
-3|Southern tamandua|yellow tamandua|Collared anteater|Tamandua tetradactyla
-3|Star-nosed mole|Condylura cristata|Putisina
-3|Sumatran striped rabbit|Nesolagus netscheri|Sumatran rabbit|Sumatra short-eared rabbit
-3|Thorold's deer|Przewalskium albirostris|Cervus albirostris
-3|Volcano rabbit|Conejo de los volcanes|Romerolagus diazi|Tepolito|Teporingo|Zacatuche
-3|Water opossum|Chironectes minimus|yapok
-3|West African potto|Bosman's potto|Perodicticus potto
-3|Asian house shrew|grey musk shrew|house shrew|Suncus murinus
-3|Australian sea lion|Neophoca cinerea
-3|Australopithecus bahrelghazali|A. bahrelghazali
-3|Black giant squirrel|Ratufa bicolor
-3|Blainville's beaked whale|Mesoplodon densirostris
-3|Corsican hare|Apennine hare|Italian hare|Lepus corsicanus
-3|Dama gazelle|Gazella dama|addra gazelle|mhorr gazelle|Nanger dama
-3|Desert warthog|Phacochoerus aethiopicus
-3|Dwarf sperm whale|Kogia sima
-3|East African oryx|Beisa oryx|Oryx beisa
-3|Eastern cottontail|Sylvilagus floridanus
-3|Eastern quoll|Dasyurus viverrinus|eastern native cat
-3|Golden snub-nosed monkey|Rhinopithecus roxellana
+4|Flat-headed cat|Prionailurus planiceps
+4|African clawless otter|Aonyx capensis
+4|Alaskan hare|tundra hare|Lepus othus
+4|Blue duiker|Philantomba monticola
+4|Brandt's bat|Myotis brandtii|Brandt's myotis
+4|Caribbean monk seal|Monachus tropicalis
+4|Caucasian squirrel|Persian squirrel|Sciurus anomalus
+4|Crab-eating mongoose|Herpestes urva
+4|Damaliscus lunatus|Common tsessebe|Topi|sassabi
+4|Grey long-eared bat|Plecotus austriacus
+4|La Plata dolphin|Franciscana|Pontoporia blainvillei
+4|Lesula|Cercopithecus lomamiensis
+4|Long-eared hedgehog|Hemiechinus auritus
+4|Malagasy civet|Fossa fossana|Striped civet
+4|Mustela frenata|long-tailed weasel|Neogale frenata|bridled weasel
+4|Neotropical otter|Lontra longicaudis
+4|New Zealand sea lion|Hooker’s sea lion|Phocarctos hookeri
+4|Omura's whale|Balaenoptera omurai
+4|Patagonian mara|Dolichotis patagonum|Patagonian cavy
+4|Ringtail|Bassariscus astutus|cacomistle|ring-tailed cat
+4|Royal antelope|Neotragus pygmaeus
+4|Southern flying squirrel|Glaucomys volans|assapan
+4|Southern pig-tailed macaque|Macaca nemestrina|Sunda pig-tailed macaque
+4|Stump-tailed macaque|bear macaque|Macaca arctoides|stumptail macaque
+4|Sunda flying lemur|Galeopterus variegatus|Malayan colugo
+4|Sunda slow loris|greater slow loris
+4|Tucuxi|Sotalia fluviatilis|Tucuxi dolphin
+4|Tundra vole|Microtus oeconomus
+4|Ural field mouse|Apodemus uralensis
+4|Walia ibex|Capra walie
+4|Yellow mongoose|Cynictis penicillata
+4|Sumatran orangutan|Pongo abelii
+4|Amami rabbit|Pentalagus furnessi
+4|Antelope jackrabbit|Lepus alleni|Allen's hare|Allen's jackrabbit|antelope hare
+4|Assam macaque|Macaca assamensis
+4|Australopithecus garhi|A. garhi
+4|Chacma baboon|Papio ursinus|Cape baboon
+4|Crab-eating raccoon|Procyon cancrivorus
+4|Dall sheep|Dall's sheep|Ovis dalli|Thinhorn sheep
+4|East Caucasian tur|Capra cylindricornis|Eastern tur
+4|Emperor tamarin|Saguinus imperator
+4|European free-tailed bat|Tadarida teniotis|bulldog bat|mastiff bat
+4|Gayal|Bos frontalis|Mithun|Ghayal
+4|Giant pangolin|Smutsia gigantea|Giant ground pangolin|Manis gigantea|Pholidotus africanus|Manis wagneri|Phataginus gigantea|Manis gigantean
+4|Greater bilby|Macrotis lagotis
+4|Greater noctule bat|Giant noctule|Nyctalus lasiopterus
+4|Grivet|Chlorocebus aethiops|grivet monkey
+4|Guinea baboon|Papio papio
+4|Himalayan marmot|Marmota himalayana
+4|Homo rhodesiensis|H. rhodesiensis
+4|Java mouse-deer|Javan mouse-deer|Tragulus javanicus
+4|Leopardus pajeros|Pampas cat
+4|Lesser white-toothed shrew|Crocidura suaveolens
+4|Mainland serow|Sumatran serow|Capricornis sumatraensis
+4|Mountain nyala|Tragelaphus buxtoni
+4|Nilgiri marten|Martes gwatkinsii
+4|Paranthropus robustus|Australopithecus robustus|P. robustus
+4|Pecari tajacu|collared peccary|baquiro|javelina|Mexican hog|musk hog|quenk|saino
+4|Pygmy rabbit|Brachylagus idahoensis
+4|Pygmy sperm whale|Kogia breviceps
+4|Pyrenean desman|Galemys pyrenaicus
+4|Reeves's muntjac|Reeve's muntjac
+4|Roborovski dwarf hamster|Roborovski hamster|Desert Hamster|Phodopus roborovskii
+4|Ross seal|Ommatophoca rossii
+4|Short-finned pilot whale|Globicephala macrorhynchus
+4|Southern tamandua|yellow tamandua|Collared anteater|Tamandua tetradactyla
+4|Star-nosed mole|Condylura cristata|Putisina
+4|Sumatran striped rabbit|Nesolagus netscheri|Sumatran rabbit|Sumatra short-eared rabbit
+4|Thorold's deer|Przewalskium albirostris|Cervus albirostris
+4|Volcano rabbit|Conejo de los volcanes|Romerolagus diazi|Tepolito|Teporingo|Zacatuche
+4|Water opossum|Chironectes minimus|yapok
+4|West African potto|Bosman's potto|Perodicticus potto
+4|Baird's tapir|Central American tapir|Tapirus bairdii
+4|Mountain tapir|Andean tapir|Tapirus pinchaque|woolly tapir
+4|Asian house shrew|grey musk shrew|house shrew|Suncus murinus
+4|Australian sea lion|Neophoca cinerea
+4|Australopithecus bahrelghazali|A. bahrelghazali
+4|Black giant squirrel|Ratufa bicolor
+4|Blainville's beaked whale|Mesoplodon densirostris
+4|Corsican hare|Apennine hare|Italian hare|Lepus corsicanus
+4|Dama gazelle|Gazella dama|addra gazelle|mhorr gazelle|Nanger dama
+4|Desert warthog|Phacochoerus aethiopicus
+4|Dwarf sperm whale|Kogia sima
+4|East African oryx|Beisa oryx|Oryx beisa
+4|Eastern cottontail|Sylvilagus floridanus
+4|Eastern quoll|Dasyurus viverrinus|eastern native cat
+4|Golden snub-nosed monkey|Rhinopithecus roxellana
 4|Grey rhebok|common rhebok|Pelea capreolus|rhebok|vaal rhebok
 4|Guianan squirrel monkey|Saimiri sciureus|Common squirrel monkey|South American squirrel monkey
 4|Hairy-fronted muntjac|Black muntjac|Muntiacus crinifrons
@@ -65983,7 +68458,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Otter civet|Cynogale bennettii
 4|Pale-throated sloth|Pale-throated Three-toed Sloth|Bradypus tridactylus
 4|Paranthropus aethiopicus|P. aethiopicus
-4|Pygmy three-toed sloth|Bradypus pygmaeus
 4|Red-faced spider monkey|Ateles paniscus|Black spider monkey|Coaita
 4|Silvery gibbon|H. moloch|Hylobates moloch|Javan gibbon
 4|Spotted-necked otter|Hydrictis maculicollis|speckle-throated otter
@@ -65994,6 +68468,49 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Toque macaque|Macaco sinica
 4|Tufted capuchin|Sapajus apella
 4|Yellow-backed duiker|Cephalophus silvicultor
+4|Dibatag|Ammodorcas clarkei|Clarke's gazelle
+4|Island fox|Urocyon littoralis
+4|Short-eared dog|Atelocynus microtis|Small-eared zorro
+4|Tufted deer|elaphode|Elaphodus cephalophus
+4|African plated lizard
+4|American alligator
+4|Bali Myna
+4|Bornean Bay Cat
+4|Borneo Pygmy Elephant
+4|Capra
+4|Cross River Gorilla
+4|Emperor newt
+4|Equus
+4|Felis
+4|Flagtail characin
+4|Freshwater stingray
+4|Gazella
+4|Golden-Headed Langur
+4|Grasshopper sparrow
+4|Grauer's Gorilla
+4|Gray tree frog
+4|Indigo bunting
+4|Japanese koi
+4|Kagu
+4|Land hermit crab
+4|Lord Howe Island Stick Insect
+4|Magnolia warbler
+4|Miniature donkey
+4|Mountain Bongo
+4|Mountain Gorilla
+4|Mus
+4|Northern White Rhino
+4|Northern copperhead
+4|Ovis
+4|Pan
+4|Partula Snail
+4|Philippine Eagle
+4|Socorro Dove
+4|Solenodon
+4|Spix's Macaw
+4|Spoon-Billed Sandpiper
+4|Takahe
+4|Trichechus
 4|Arctocephalus forsteri|Fur seal|New Zealand fur seal|Antipodean fur seal|Australasian fur seal|long-nosed fur seal|South Australian fur seal
 4|Atlantic spotted dolphin|Stenella frontalis
 4|Banded palm civet|Banded civet|Hemigalus derbyanus
@@ -66004,7 +68521,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Broom hare|Lepus castroviejoi
 4|Buru babirusa|Babyrousa babyrussa|hairy babirusa
 4|Cape grysbok|Raphicerus melanotis
-4|Chacoan peccary|Catagonus wagneri
 4|Chilean dolphin|Cephalorhynchus eutropia
 4|Chinese ferret-badger|Melogale moschata
 4|Common bent-wing bat|Miniopterus schreibersii|Schreibers' bat|Schreibers' long-fingered bat
@@ -66014,7 +68530,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Common spotted cuscus|Spilocuscus maculatus
 4|Diana monkey|Cercopithecus diana|Diana guenon
 4|Goa|Procapra picticaudata|Tibetan gazelle
-4|Goeldi's marmoset|Callimico goeldii|Goeldi's monkey
 4|Greater white-toothed shrew|Crocidura russula
 4|Honey possum|noolbenger|Tarsipes rostratus
 4|Hourglass dolphin|Lagenorhynchus cruciger
@@ -66041,6 +68556,7 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Wild Bactrian camel|Camelus ferus|snow-camel
 4|Woolly hare|Lepus oiostolus
 4|Yellow-bellied marmot|groundhog|Marmota flaviventris|rock chuck
+4|Darwin's fox|Lycalopex fulvipes
 4|African striped weasel|Poecilogale albinucha
 4|Allen's swamp monkey|Allenopithecus nigroviridis
 4|Barbary ground squirrel|Atlantoxerus getulus
@@ -66059,7 +68575,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Golden bamboo lemur|Hapalemur aureus
 4|Goodfellow's tree-kangaroo|Dendrolagus goodfellowi|ornate tree-kangaroo
 4|Gray marmot|Marmota baibacina
-4|Greater bamboo lemur|Prolemur simus
 4|Hammer-headed bat|Hypsignathus monstrosus
 4|Hoffmann's two-toed sloth
 4|Indian flying fox|Pteropus medius
@@ -66087,6 +68602,9 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Verreaux's sifaka|Propithecus verreauxi
 4|White-sided jackrabbit|Lepus callotis|Mexican hare
 4|Yellow-bellied weasel|Mustela kathiah
+4|Pygmy hog|Porcula salvania
+4|Hirola|Beatragus hunteri|Hunter's antelope|Hunter's hartebeest
+4|Tapanuli orangutan|Pongo tapanuliensis
 4|African pygmy mouse|Mus minutoides
 4|African savanna hare|Lepus microtis|Lepus victoriae
 4|Agile wallaby|grass wallaby|jungle wallaby|Notamacropus agilis|river wallaby|sandy wallaby
@@ -66126,7 +68644,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Northern pig-tailed macaque|Macaca leonina|Northern pigtail macaque
 4|Pagai Island macaque|Mentawai macaque|Macaca pagensis
 4|Peale's dolphin|Lagenorhynchus australis
-4|Pileated gibbon|H. pileatus|Hylobates pileatus
 4|Red-fronted gazelle|Eudorcas rufifrons
 4|Rhim gazelle|Gazella leptoceros|Loder's gazelle|Slender-horned gazelle
 4|Schomburgk's deer|Rucervus schomburgki
@@ -66137,6 +68654,7 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Spectacled porpoise|Phocoena dioptrica
 4|Taruca|Hippocamelus antisensis
 4|White-bellied pangolin|Phataginus tricuspis|African tree pangolin|common African pangolin|three-cusped pangolin
+4|Giant armadillo|Priodontes giganteus|Priodontes maximus
 4|Agile gibbon|black-handed gibbon|H. agilis|Hylobates agilis
 4|Alaska marmot|Marmota broweri
 4|Asian badger|Meles leucurus
@@ -66248,6 +68766,7 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|White-bellied spider monkey|Ateles belzebuth|Marimonda|White-fronted spider monkey
 4|White-tailed mongoose|Ichneumia albicauda
 4|Yucatán black howler|Alouatta pigra|Black howler monkey|Guatemalan black howler
+4|Pink fairy armadillo|Chlamyphorus truncatus|Lesser fairy armadillo|pichiciego
 4|Abyssinian hare
 4|American red squirrel|Tamiasciurus hudsonicus
 4|Angola colobus|Colobus angolensis
@@ -66274,7 +68793,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Humboldt's hog-nosed skunk|Conepatus humboldtii
 4|Japanese dwarf flying squirrel|Pteromys momonga
 4|Kenyanthropus platyops
-4|Kipunji|Rungwecebus kipunji
 4|Kloss's gibbon|Bilou|H. klossii|Hylobates klossii|Mentawai gibbon
 4|Lesser bilby|lesser rabbit-eared bandicoot|Macrotis leucura|yallara
 4|Lichtenstein's hartebeest|Alcelaphus lichtensteinii
@@ -66305,7 +68823,8 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|White-bellied musk deer|Himalayan musk deer|Moschus leucogaster
 4|Yarkand hare|Lepus yarkandensis
 4|Yunnan hare|Lepus comus
-4|Zanzibar red colobus|Piliocolobus kirkii
+4|Beira|Dorcatragus megalotis
+4|North American porcupine|common porcupine|Erethizon dorsata|Erethizon dorsatum
 4|Abert's squirrel|Sciurus aberti|tassel-eared squirrel
 4|Alpine musk deer|Moschus chrysogaster
 4|Angolan talapoin|Miopithecus talapoin
@@ -66366,7 +68885,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Reticulated giraffe|Giraffa reticulata|Somali giraffe
 4|Roloway monkey|Cercopithecus roloway
 4|Ruddy mongoose|Herpestes smithii
-4|Silky sifaka|Propithecus candidus
 4|Small five-toed jerboa|Allactaga elater
 4|Southern greater glider|Petauroides volans|greater glider
 4|Southern pig-footed bandicoot|Chaeropus ecaudatus|pig-footed bandicoot
@@ -66376,7 +68894,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Striped possum|Dactylopsila trivirgata
 4|Superagüi lion tamarin|Black-faced lion tamarin|Leontopithecus caissara
 4|Swamp rabbit|Sylvilagus aquaticus
-4|Tonkin snub-nosed monkey|Rhinopithecus avunculus|Dollman's snub-nosed monkey
 4|Toolache wallaby|Notamacropus greyi
 4|Vancouver Island marmot|Marmota vancouverensis
 4|Western hoolock gibbon|Hoolock hoolock|H. hoolock|hoolock gibbon|western hoolock
@@ -66384,6 +68901,7 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Western red colobus|Piliocolobus badius
 4|Yellow-cheeked gibbon|buffed-cheeked gibbon|Gabriella's crested gibbon|golden-cheeked crested gibbon|golden-cheeked gibbon|N. gabriellae|Nomascus gabriellae|red-cheeked gibbon|yellow-cheeked crested gibbon
 4|Yellow-spotted rock hyrax|Bush hyrax|Heterohyrax brucei
+4|Pygmy three-toed sloth|Bradypus pygmaeus
 4|Afghan pika|Ochotona rufescens
 4|American pika|Ochotona princeps
 4|Angolan genet|Genetta angolensis
@@ -66456,6 +68974,8 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Western brush wallaby|Notamacropus irma|Halmaturus irma|black-gloved wallaby|Macropus irma|western bush wallaby
 4|White-eared opossum|Didelphis albiventris|Didelphis Uruguayensis
 4|Wood lemming|Myopus schisticolor
+4|Chacoan peccary|Catagonus wagneri
+4|Goeldi's marmoset|Callimico goeldii|Goeldi's monkey
 4|Abbott's duiker|Cephalophus spadix
 4|Aders's duiker|Leucocephalophus adersi
 4|Alpine shrew|Sorex alpinus
@@ -66519,11 +69039,11 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Tana River mangabey|Cercocebus galeritus
 4|Tonkean macaque|Macaca tonkeana
 4|Ursine colobus|Colobus vellerosus|Geoffroy’s black-and-white colobus
-4|Visayan warty pig
 4|White-footed mouse|Peromyscus leucopus
 4|White-headed marmoset|Callithrix geoffroyi|Geoffrey's marmoset|Geoffroy's marmoset|sagüi|saguim|tufted-ear marmoset
 4|White-lipped tamarin|Saguinus labiatus
 4|Yellow ground squirrel|Spermophilus fulvus
+4|Greater bamboo lemur|Prolemur simus
 4|Agile mangabey|Cercocebus agilis
 4|Alexander's kusimanse|Crossarchus alexandri
 4|American hog-nosed skunk|Conepatus leuconotus|common hog-nosed skunk
@@ -66560,7 +69080,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Greater naked-tailed armadillo|Cabassous tatouay
 4|Grizzled giant squirrel|Ratufa macroura
 4|Ground cuscus|Phalanger gymnotis
-4|Hainan black crested gibbon|Hainan gibbon|N. hainanus|Nomascus hainanus
 4|Hamlyn's monkey|Cercopithecus hamlyni|Owl-faced guenon
 4|Hausa genet|Haussa genet|Genetta thierryi
 4|Heck's macaque|Macaca hecki
@@ -66588,7 +69107,6 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|Peters's duiker|Cephalophus callipygus|Peter’s duiker
 4|Plantain squirrel|banana squirrel|Callosciurus notatus|tricoloured squirrel|coconut squirrel
 4|Raffles' banded langur|banded surili|banded langur|Presbytis femoralis
-4|Rodrigues flying fox
 4|Saharan striped polecat|Ictonyx libyca|Libyan striped weasel|North African Striped Weasel|Saharan striped weasel
 4|Seven-banded armadillo|Dasypus septemcinctus|Seven-banded, long-nosed armadillo
 4|Side-striped jackal|Lupulella adusta
@@ -66610,6 +69128,14 @@ EVO.cat({ ...{"id": "mammals", "name": "Mammals", "icon": "🦔", "q": "Name a *
 4|White-footed tamarin|Saguinus leucopus|Silvery-brown bare-face tamarin
 4|Wroughton's free-tailed bat|Otomops wroughtoni
 4|Yellow-footed rock-wallaby|Petrogale xanthopus|ring-tailed wallaby
+4|Pileated gibbon|H. pileatus|Hylobates pileatus
+4|Kipunji|Rungwecebus kipunji
+4|Zanzibar red colobus|Piliocolobus kirkii
+4|Silky sifaka|Propithecus candidus
+4|Tonkin snub-nosed monkey|Rhinopithecus avunculus|Dollman's snub-nosed monkey
+4|Visayan warty pig
+4|Hainan black crested gibbon|Hainan gibbon|N. hainanus|Nomascus hainanus
+4|Rodrigues flying fox
 ` });
 EVO.cat({ ...{"id": "frogs", "name": "Frogs", "icon": "🐸", "q": "Name a **species of frog or toad**.", "strip": ["frog", "toad"], "level": 3}, list: `
 0|Common|Common toad|toad|Bufo bufo|European toad|Common frog|European brown frog|European common brown frog|European common frog|European grass frog|European Holarctic true frog|European pond frog|grass frog|Rana temporaria
@@ -66625,7 +69151,7 @@ EVO.cat({ ...{"id": "frogs", "name": "Frogs", "icon": "🐸", "q": "Name a **spe
 0|African clawed|African clawed frog|Xenopus laevis|African claw-toed frog|African clawed toad|platanna|plattie|xenopus|South African clawed frog|Common Clawed Frog|Clawed Toad|Common Clawed Frogs
 0|Common Surinam|Common Surinam toad|Surinam toad|Pipa pipa|Suriname toad
 0|Darwin's|Darwin's frog|Rhinoderma darwinii
-0|Strawberry poison dart|Strawberry poison dart frog|Flaming poison-arrow frog|Oophaga pumilio|Strawberry poison frog
+1|Strawberry poison dart|Strawberry poison dart frog|Flaming poison-arrow frog|Oophaga pumilio|Strawberry poison frog
 2|Common midwife|Common midwife toad|Alytes obstetricans|midwife toad
 2|Marsh|Marsh frog|Pelophylax ridibundus|Eurasian Marsh Frog
 2|Blue poison dart|Blue poison dart frog|blue poison arrow frog|Dendrobates azureus|okopipi
