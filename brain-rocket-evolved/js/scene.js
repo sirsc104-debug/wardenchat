@@ -275,7 +275,7 @@ const Scene = (function () {
     ctx.strokeStyle = RIM; ctx.lineWidth = 2.5;
     ctx.beginPath(); ctx.arc(x, top + 6, 46, -Math.PI * 0.45, 0.05); ctx.stroke();
     ctx.fillStyle = 'rgba(255,154,122,0.85)'; ctx.font = '700 15px Fredoka, sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('BR-E', x, top + 22); ctx.textAlign = 'start';
+    ctx.fillText('SirSC', x, top + 22); ctx.textAlign = 'start';
   }
 
   function drawVab(hz) {

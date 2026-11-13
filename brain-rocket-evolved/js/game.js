@@ -137,20 +137,29 @@
   // ---- Altitude, stops and the track ------------------------------------------------------
   const placeAt = score => { let p = STOPS[0]; for (const m of STOPS) if (score >= m.pts) p = m; return p; };
   const nextPlace = score => STOPS.find(m => m.pts > score) || null;
-  // Endless scores are on Brain Rocket's scale, so they climb the same 50,000-point route.
+  // The track spaces the stops evenly (the real gaps grow the further out you go); the rocket moves
+  // between two stops in proportion to the points between them.
+  function trackFrac(score) {
+    const n = STOPS.length - 1;
+    for (let i = 0; i < n; i++) {
+      const a = STOPS[i], b = STOPS[i + 1];
+      if (score < b.pts) return (i + Math.max(0, score - a.pts) / (b.pts - a.pts)) / n;
+    }
+    return 1;
+  }
   function buildTrack() {
     const box = $('trackStops'); box.innerHTML = '';
     for (const m of STOPS) {
       if (m.pts === 0) continue;
       const d = document.createElement('div');
       d.className = 'track-stop'; d.textContent = m.icon; d.title = m.name;
-      d.style.top = (100 - (m.pts / 50000) * 100) + '%';
+      d.style.top = (100 - trackFrac(m.pts) * 100) + '%';
       box.appendChild(d);
     }
     updateTrack();
   }
   function updateTrack() {
-    const f = Math.min(1, G.score / 50000);
+    const f = trackFrac(G.score);
     $('trackFill').style.height = f * 100 + '%';
     $('trackRocket').style.top = (100 - f * 100) + '%';
     const stops = $('trackStops').children;
