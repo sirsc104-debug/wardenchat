@@ -5,7 +5,9 @@
      - the kc_* database functions for the cloud save, friends, presence and battle invites;
      - the SirSC wallet's sirsc_me / sirsc_member_claim, and kc_spend / kc_exchange, for diamonds, coins
        and membership (the server decides every balance; the game shows what it says);
-     - Supabase Realtime (private channels kc-<code>) for battles with friends.
+     - Supabase Realtime (private channels kc-<code>) for battles with friends;
+     - the kc-battle Edge Function for trophy battles: the server picks each opponent and the seeds,
+       replays the battle from the player's plays (server/verify.js) and keeps the trophies.
    The back-end half is BACKEND_HANDOFF.md. Until kc_ping answers, accounts stay switched off and the
    game works exactly as before, saving on this device only. The demo build swaps in a pretend back end
    (js/account-mock.js). All of it reaches the game through js/backend.js (KCBackend.connect). */
@@ -116,6 +118,21 @@ const KCAccount = (() => {
       throw e;
     });
   }
+  // an Edge Function (POST /functions/v1/<name>): errors come back as { error: '<code>' }
+  function fn(name, body) {
+    const at = epoch;
+    const go = force => token(force).then(t => call('POST', '/functions/v1/' + name, body, t)).then(r => {
+      if (r.status >= 200 && r.status < 300) return r.data;
+      const d = r.data || {}, own = typeof d.error === 'string' && /^(kc|sirsc)_[a-z_]+$/.test(d.error) ? d.error : '';
+      const code = own === 'kc_not_signed_in' ? 'unauthorized' : own || (r.status === 404 ? 'not_deployed' : r.status === 401 ? 'unauthorized' : r.status === 429 ? 'rate_limited' : r.status >= 500 ? 'server_error' : 'error');
+      if (code === 'unauthorized' && !force) return go(true);
+      throw new ApiError(code, r.status);
+    });
+    return go(false).catch(e => {
+      if (e.code === 'unauthorized' && at === epoch) return refused().then(() => { throw e; });
+      throw e;
+    });
+  }
   // A refused call: banned or suspended on Warden Chat, or just signed out somewhere else?
   function refused() {
     if (!sess) return Promise.resolve();
@@ -180,7 +197,7 @@ const KCAccount = (() => {
      copies, then Rubies). The server keeps the copies it replaces (BACKEND_HANDOFF.md), and a copy this
      device gives up is kept in kc.progress.backup, so nothing is ever lost. A device that held another
      account's progress keeps it for them (kc.progress.of.<id>) and gets it back when they sign in. */
-  const LOCAL_ONLY = ['log', 'live', 'abandoned', 'passRolled', 'diamonds', 'wallet', 'member'];
+  const LOCAL_ONLY = ['log', 'live', 'abandoned', 'passRolled', 'forfeit', 'diamonds', 'wallet', 'member'];
   const MAX_DOC = 120000;
   function docOf(p) {
     const d = {};
@@ -215,6 +232,8 @@ const KCAccount = (() => {
       const r = await rpc('kc_get_progress');
       if (me() !== u) return;
       const cloud = r && r.doc && typeof r.doc === 'object' ? r.doc : null, rev = r ? r.rev | 0 : 0, L = link(), P = KCProgress.state;
+      // the server keeps the trophies (checked trophy battles) when it answers with them
+      rankedOn = !!r && Object.prototype.hasOwnProperty.call(r, 'trophies');
       if (L && L.user && L.user !== u.id) {
         // another account's progress is on this device: kept for them, and this account's comes in
         if (!fresh(P)) keepIn('kc.progress.of.' + L.user, P);
@@ -237,7 +256,9 @@ const KCAccount = (() => {
         setLink(u.id, rev);   // this device has more progress: it goes up (the account keeps the copy it replaces)
       }
       ready = true;
+      if (r && r.trophies && KCProgress.setTrophies(r.trophies) && typeof KCMenu !== 'undefined') KCMenu.refresh();
       await push();
+      if (rankedOn) flushFinishes().catch(() => {});
     } catch (e) { if (!e.offline) console.error('cloud save', e); } finally { ready = true; }
   }
   // send this device's progress up (one at a time)
@@ -256,6 +277,49 @@ const KCAccount = (() => {
     }).catch(e => { if (!e.offline) console.error('cloud save', e); });
     return chain;
   }
+
+  /* ---------- trophy battles checked by the server (the kc-battle Edge Function) ----------
+     start: the server settles any battle left open (a loss), picks the opponent and the seeds, and reads
+     the player's cards from their saved progress (sent up first). finish: the player's plays; the server
+     replays the battle and answers with the trophies. A finish that can't be sent (no connection) waits
+     here and goes before the next battle starts, so a dropped connection never costs a battle. */
+  let rankedOn = false;
+  const FINISH_KEY = () => 'kc.battleFinish.' + ((me() && me().id) || '');
+  const pending = () => { const a = load(FINISH_KEY()); return Array.isArray(a) ? a : []; };
+  const setPending = a => keepIn(FINISH_KEY(), a.length ? a.slice(-5) : null);
+  async function sendFinish(job) {
+    try {
+      const r = await fn('kc-battle', Object.assign({ action: 'finish' }, job));
+      setPending(pending().filter(j => j.battle_id !== job.battle_id));
+      if (r && r.trophies && KCProgress.setTrophies(r.trophies) && typeof KCMenu !== 'undefined') KCMenu.refresh();
+      return r;
+    } catch (e) {
+      // a refusal stays a refusal (the battle was closed); only a lost connection is worth another try
+      if (!e.offline && e.code !== 'server_error' && e.code !== 'rate_limited') setPending(pending().filter(j => j.battle_id !== job.battle_id));
+      throw e;
+    }
+  }
+  async function flushFinishes() {
+    // a checked battle this device left (the page was reloaded or closed mid-battle): the server hears it now
+    const P = KCProgress.state, left = P.forfeit;
+    if (left && !pending().some(j => j.battle_id === left)) setPending(pending().concat({ battle_id: left, plays: [], end: { reason: 'left' }, claimed: null }));
+    if (left) { delete P.forfeit; KCProgress.save(); }
+    for (const job of pending()) { try { await sendFinish(job); } catch (e) { if (e.offline) throw e; } }
+  }
+  const battles = {
+    async start(rules) {
+      await flushFinishes();
+      KCBackend.flush(); await push();
+      const r = await fn('kc-battle', { action: 'start', rules: String(rules || '') });
+      if (r && r.trophies && KCProgress.setTrophies(r.trophies) && typeof KCMenu !== 'undefined') KCMenu.refresh();
+      return r;
+    },
+    finish(battleId, plays, end, claimed) {
+      const job = { battle_id: battleId, plays, end: end || null, claimed: claimed || null };
+      setPending(pending().filter(j => j.battle_id !== battleId).concat(job));
+      return sendFinish(job);
+    },
+  };
 
   /* ---------- the SirSC wallet ---------- */
   let wal = null, walletLoad = null;
@@ -310,6 +374,7 @@ const KCAccount = (() => {
       }
       if (r && typeof r.requests === 'number') signal(r.requests);
       if (++polls % 8 === 0) loadWallet();   // diamonds bought on Warden Chat show up here
+      if (rankedOn && polls % 4 === 0 && pending().length) flushFinishes().catch(() => {});
     } catch (e) { /* offline for a moment */ }
     if (me()) pollT = setTimeout(poll, (document.hidden ? 30 : CFG.pollSeconds) * 1000);
   }
@@ -385,6 +450,7 @@ const KCAccount = (() => {
     signOut: () => { KCBackend.flush(); return push().then(() => account.signOut()); },
     save: () => push(),
     friends, transport: lobby, wallet, rules: RULES, get chatUrl() { return CFG.chatUrl; },
+    ranked: () => rankedOn && st.status === 'signedIn', battles,
   };
   let lastKey = '';
   account.on(s => {
@@ -395,7 +461,7 @@ const KCAccount = (() => {
     if (!KCBackend.connected()) KCBackend.connect(impl); else KCBackend.changed();
     if (s.status === 'signedIn') { pull(); loadWallet(); seen.clear(); poll(); }
     else {
-      clearTimeout(pollT); wal = null; ready = false; lists = { friends: [], incoming: [], outgoing: [] }; signal(0);
+      clearTimeout(pollT); wal = null; ready = false; rankedOn = false; lists = { friends: [], incoming: [], outgoing: [] }; signal(0);
       // signed out: the wallet's diamonds and coins are the account's, not this device's
       if (KCProgress.setWallet(null) && typeof KCMenu !== 'undefined') KCMenu.refresh();
     }

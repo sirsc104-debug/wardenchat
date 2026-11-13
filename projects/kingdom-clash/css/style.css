@@ -1605,7 +1605,7 @@ button.slot:hover { transform: translateY(-3px); }
 /* ---------- online battles ---------- */
 .online-btn { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 14px; padding: 8px 12px; border-radius: 10px; border: 3px solid var(--outline);
   background: linear-gradient(#4cd47a, #239150); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), 0 3px 0 #145a30; white-space: nowrap; }
-.online-btn .ob-dot { width: 9px; height: 9px; border-radius: 50%; background: #c8ffd8; box-shadow: 0 0 6px #9dffb9; }
+.online-btn .ob-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #c8ffd8; box-shadow: 0 0 6px #9dffb9; }
 .online-btn.locked { background: linear-gradient(#6a6a86, #45455e); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.15), 0 3px 0 #2a2a3a; }
 .online-btn.locked .ob-dot { background: #9a9ab0; box-shadow: none; }
 .online-card { width: min(620px, 100%); box-sizing: border-box; padding: 28px 22px 20px; display: flex; flex-direction: column; gap: 12px; animation: pop 0.2s ease-out; }
@@ -2236,7 +2236,9 @@ button.slot:hover { transform: translateY(-3px); }
 
 /* Practice and Online, with the daily buttons */
 .daily-modes { display: flex; gap: 8px; grid-column: 1 / -1; }
-.daily-modes .online-btn { flex: 1 1 0; justify-content: center; }
+.daily-modes .online-btn { flex: 1 1 0; min-width: 0; justify-content: center; }
+/* in the side plaque the two share its width by their names (Play a Friend is the longer one) */
+.daily-plaque .daily-modes .online-btn { flex: 1 1 auto; font-size: 13px; padding: 8px 8px; gap: 5px; }
 .center > .daily .daily-modes { order: 5; }
 .opp[hidden] { display: none; }
 /* the result screen: its one column is the overlay's width, so the card fits inside it */
@@ -2317,3 +2319,33 @@ button.slot:hover { transform: translateY(-3px); }
 .fr-sent { margin: 4px 0 0; font-size: 12px; }
 #frSignIn { margin-top: 6px; align-self: flex-start; }
 #olSignIn { display: block; margin: 10px auto 0; }
+/* shorter screens (1280×720 and the like): the right column keeps the Daily plaque, with Practice and
+   Play a Friend, clear of the navigation: two upcoming rewards instead of three, no footnote */
+@media (min-width: 1081px) and (max-height: 820px) {
+  .lobby-side { gap: 22px; }
+  .lobby-side #rightNote { display: none; }
+  .lobby-side .rewards { margin-bottom: 0; }
+  .lobby-side .rewards li:nth-child(n+3) { display: none; }
+}
+/* narrower desktop windows (1081 to 1360 px): the top bar tightens so the lobby never runs off the right
+   edge (big Ruby balances, and the Friends button) */
+@media (min-width: 761px) and (max-width: 1360px) {
+  .topbar { gap: 10px; }
+  .res { gap: 6px; }
+  .res-chip { min-width: 0; gap: 6px; }
+  .res-chip b { font-size: 17px; min-width: 2ch; }
+  .lvl-bar { width: 116px; }
+  .who-text b { font-size: 19px; }
+}
+@media (min-width: 761px) and (max-width: 1180px) {
+  .topbar { gap: 8px; }
+  .who { padding-right: 10px; }
+  .who-text small { display: none; }
+  .lvl-bar { width: 84px; }
+  .king-chip { padding-inline: 6px; }
+  .res-chip b { font-size: 16px; }
+  .topbar .icon-btn { width: 40px; height: 40px; }
+}
+
+/* a trophy battle being fetched from the server */
+body.kc-wait, body.kc-wait button { cursor: progress; }

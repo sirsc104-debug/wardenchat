@@ -149,7 +149,9 @@ console.log('save and reload: ok');
   assert.strictEqual(G.buyChest('gold').error, 'locked', 'gold chests are sold from Arena 2');
   assert(!G.chestShopOpen('platinum') && !G.chestShopOpen('mythic'));
   P4.best = 950; P4.trophies = 950; P4.rubies = 100;
-  assert(G.chestShopOpen('mythic') && G.buyChest('mythic').error === 'rubies', 'mythic in the Shop from Arena 4, priced high');
+  assert(G.chestShopOpen('legendary') && G.buyChest('legendary').error === 'rubies' && G.buyChest('mythic').error === 'locked', 'legendary in the Shop from Arena 4, mythic not yet');
+  P4.best = 2100; P4.trophies = 2100;
+  assert(G.chestShopOpen('mythic') && G.buyChest('mythic').error === 'rubies', 'mythic in the Shop from Arena 5, priced high');
   assert(G.chestPrice('mythic') > 20000, 'a bought mythic costs tens of thousands of rubies ' + G.chestPrice('mythic'));
   P4.best = 0; P4.trophies = 0;
   assert.strictEqual(P4.chests.filter(Boolean).length, 0, 'shop chests do not use the chest slots');
@@ -160,9 +162,15 @@ console.log('save and reload: ok');
   assert(G.freeChestReady(day2) && G.claimFreeChest(day2).ok, 'a new free chest the next day');
   // contents follow trophies first, then account level; a new arena is a clear step up
   const odds = (lv, tr) => G.chestOdds('gold', { level: lv, trophies: tr });
-  assert.strictEqual(odds(1, 0).cards, Math.round(40 * G.ECONOMY.arenaCards[1]));
+  assert.strictEqual(odds(1, 0).cards, Math.round(40 * G.ECONOMY.arenaCards[1] * G.ECONOMY.gateBoost[1][0]), 'Arena 1 chests hold more, the gate holding the bigger ones back');
+  // with the arena gate a chest never gets smaller on reaching an arena (the new tiers are the step up)
+  for (const a of G.ARENAS.slice(1)) assert(odds(1, a.min).cards >= odds(1, a.min - 1).cards && odds(1, a.min).rubies[0] >= odds(1, a.min - 1).rubies[0], `no smaller chests at Arena ${a.number}`);
+  for (let n = 1; n < 4; n++) assert(G.ECONOMY.gateBoost[n][0] <= G.ECONOMY.gateBoost[n + 1][0] * 1.2 + 1e-9 && G.ECONOMY.gateBoost[n][1] <= G.ECONOMY.gateBoost[n + 1][1] * 1.2 + 1e-9, 'gate boosts fall gently');
+  // without it, every arena is a clear step up by itself
+  G.CHEST_RULES.allUnlocked = true;
   assert(odds(1, 300).cards > odds(1, 299).cards * 1.15 && odds(1, 300).rubies[0] > odds(1, 299).rubies[0] * 1.15, 'reaching an arena is a step up');
   for (const a of G.ARENAS.slice(1)) assert(odds(1, a.min).cards > odds(1, a.min - 1).cards * 1.15 && odds(1, a.min).rubies[0] > odds(1, a.min - 1).rubies[0] * 1.15, `a step up at Arena ${a.number}`);
+  G.CHEST_RULES.allUnlocked = false;
   assert(odds(1, 1999).rubies[0] > odds(1, 900).rubies[0] * 1.8, 'Stormspire climbs steeply toward Arena 5');
   assert(odds(1, 6000).cards > odds(1, 2000).cards * 3, 'the late arenas pay far more');
   assert(odds(12, 100).cards > odds(2, 100).cards && odds(12, 100).rubies[0] > odds(2, 100).rubies[0], 'account level adds more in the same arena');
@@ -174,8 +182,8 @@ console.log('save and reload: ok');
   P4.xp = 99999; P4.trophies = 0; P4.best = 0;
   assert(!G.chestPool().some(id => ['spears', 'mole', 'owl', 'camel', 'thundercloud'].includes(id)));
   P4.xp = 0;
-  // the arena gate (switched on just for this test): Arena 1 gives wooden and silver only
-  G.CHEST_RULES.allUnlocked = false;
+  // the arena gate (on): Arena 1 gives wooden and silver only
+  assert.strictEqual(G.CHEST_RULES.allUnlocked, false, 'the chest gate is on');
   P4.trophies = 0; P4.cycle = 7; P4.chests = [null, null, null, null];
   assert(!G.chestAllowed('gold') && G.chestAllowed('silver'));
   assert.strictEqual(G.capChest('mythic'), 'silver');
@@ -189,6 +197,9 @@ console.log('save and reload: ok');
   G.CHEST_RULES.allUnlocked = true;
   assert.strictEqual(G.capChest('mythic'), 'mythic', 'with the gate off every tier is allowed');
   for (const t of G.TIERS) assert(G.chestAllowed(t));
+  G.CHEST_RULES.allUnlocked = false;
+  // each arena's highest chest
+  for (const [n, top] of [[1, 'silver'], [2, 'gold'], [3, 'platinum'], [4, 'legendary'], [5, 'mythic'], [10, 'mythic']]) assert.strictEqual(G.capChest('mythic', n), top, `Arena ${n} gives up to ${top}`);
   console.log('chests: tiers, gate, level scaling, repeat buys, free daily: ok');
   // Arena 2: Briar Hollow at 300 trophies, its cards on the road, wild cards from Arena 2 on
   G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 290, claimed: { 0: true } }) }));

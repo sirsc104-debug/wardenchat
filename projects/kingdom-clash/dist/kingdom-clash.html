@@ -1611,7 +1611,7 @@ button.slot:hover { transform: translateY(-3px); }
 /* ---------- online battles ---------- */
 .online-btn { display: flex; align-items: center; gap: 6px; font-weight: 900; font-size: 14px; padding: 8px 12px; border-radius: 10px; border: 3px solid var(--outline);
   background: linear-gradient(#4cd47a, #239150); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), 0 3px 0 #145a30; white-space: nowrap; }
-.online-btn .ob-dot { width: 9px; height: 9px; border-radius: 50%; background: #c8ffd8; box-shadow: 0 0 6px #9dffb9; }
+.online-btn .ob-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #c8ffd8; box-shadow: 0 0 6px #9dffb9; }
 .online-btn.locked { background: linear-gradient(#6a6a86, #45455e); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.15), 0 3px 0 #2a2a3a; }
 .online-btn.locked .ob-dot { background: #9a9ab0; box-shadow: none; }
 .online-card { width: min(620px, 100%); box-sizing: border-box; padding: 28px 22px 20px; display: flex; flex-direction: column; gap: 12px; animation: pop 0.2s ease-out; }
@@ -2242,7 +2242,9 @@ button.slot:hover { transform: translateY(-3px); }
 
 /* Practice and Online, with the daily buttons */
 .daily-modes { display: flex; gap: 8px; grid-column: 1 / -1; }
-.daily-modes .online-btn { flex: 1 1 0; justify-content: center; }
+.daily-modes .online-btn { flex: 1 1 0; min-width: 0; justify-content: center; }
+/* in the side plaque the two share its width by their names (Play a Friend is the longer one) */
+.daily-plaque .daily-modes .online-btn { flex: 1 1 auto; font-size: 13px; padding: 8px 8px; gap: 5px; }
 .center > .daily .daily-modes { order: 5; }
 .opp[hidden] { display: none; }
 /* the result screen: its one column is the overlay's width, so the card fits inside it */
@@ -2323,6 +2325,36 @@ button.slot:hover { transform: translateY(-3px); }
 .fr-sent { margin: 4px 0 0; font-size: 12px; }
 #frSignIn { margin-top: 6px; align-self: flex-start; }
 #olSignIn { display: block; margin: 10px auto 0; }
+/* shorter screens (1280×720 and the like): the right column keeps the Daily plaque, with Practice and
+   Play a Friend, clear of the navigation: two upcoming rewards instead of three, no footnote */
+@media (min-width: 1081px) and (max-height: 820px) {
+  .lobby-side { gap: 22px; }
+  .lobby-side #rightNote { display: none; }
+  .lobby-side .rewards { margin-bottom: 0; }
+  .lobby-side .rewards li:nth-child(n+3) { display: none; }
+}
+/* narrower desktop windows (1081 to 1360 px): the top bar tightens so the lobby never runs off the right
+   edge (big Ruby balances, and the Friends button) */
+@media (min-width: 761px) and (max-width: 1360px) {
+  .topbar { gap: 10px; }
+  .res { gap: 6px; }
+  .res-chip { min-width: 0; gap: 6px; }
+  .res-chip b { font-size: 17px; min-width: 2ch; }
+  .lvl-bar { width: 116px; }
+  .who-text b { font-size: 19px; }
+}
+@media (min-width: 761px) and (max-width: 1180px) {
+  .topbar { gap: 8px; }
+  .who { padding-right: 10px; }
+  .who-text small { display: none; }
+  .lvl-bar { width: 84px; }
+  .king-chip { padding-inline: 6px; }
+  .res-chip b { font-size: 16px; }
+  .topbar .icon-btn { width: 40px; height: 40px; }
+}
+
+/* a trophy battle being fetched from the server */
+body.kc-wait, body.kc-wait button { cursor: progress; }
 
 </style>
 <div id="app">
@@ -2468,7 +2500,7 @@ button.slot:hover { transform: translateY(-3px); }
               <div class="road-scroll" id="roadScroll"><div class="road-rail" aria-hidden="true"><i id="roadFill"></i></div><span class="road-me" id="roadMe" aria-hidden="true"><b id="roadMeN">0</b></span><ol class="road-track" id="roadTrack"></ol></div>
               <button type="button" class="road-arrow right" id="roadRight" aria-label="Scroll the road on">&#9654;</button>
             </div>
-            <p class="dim road-note">Win trophy battles to climb. A win is +30 trophies, a loss is &minus;20, and you never drop below your arena&rsquo;s floor. Claim each reward as you pass it.</p>
+            <p class="dim road-note">Win trophy battles to climb. A battle is worth 20 to 40 trophies, by your opponent&rsquo;s trophies, and you never drop below your arena&rsquo;s floor. Claim each reward as you pass it.</p>
           </div>
           <div class="plaque info-plaque" id="roadLocked">
             <div class="big-lock" id="roadLock" aria-hidden="true"></div>
@@ -2805,6 +2837,9 @@ button.slot:hover { transform: translateY(-3px); }
        wallet              -> the SirSC wallet, or null when signed out:
                                 spend(kind, diamonds, ref) -> Promise of { me } (the server takes the diamonds)
                                 exchange(coins)            -> Promise of { coins, rubies, me }
+       ranked()            -> true when the server keeps the player's trophies (trophy battles are checked)
+       battles             -> start() -> Promise of { battle_id, seed, bot_seed, foe, setup, trophies }
+                              finish(battleId, plays, end, claimed) -> Promise of { trophies, ... }
        rules, chatUrl      -> Warden Chat's name and password rules, and its address
      })
 
@@ -2900,9 +2935,34 @@ const KCBackend = (() => {
       return { error: e && e.code === 'kc_exchange_cap' ? 'cap' : e && e.code === 'kc_not_enough_coins' ? 'coins' : e && e.offline ? 'offline' : 'wallet', code: e && e.code };
     }
   }
+  /* Trophy battles checked by the server. ranked(): signed in, and the server keeps the trophies. Then a
+     trophy battle starts with battleStart (the server's opponent, seeds and the player's cards) and ends
+     with battleFinish (the player's plays; the server replays the battle and says what the trophies are).
+     battleStart resolves to { ok, foe } (the foe carries battleId, seed, botSeed and setup), { local }
+     when the server can't check battles (play as before), or { error }. */
+  const ranked = () => !!(impl && account() && impl.ranked && impl.battles && impl.ranked());
+  async function battleStart() {
+    const B = impl && account() && impl.battles;
+    if (!B || !ranked()) return { local: true };
+    try {
+      const r = await B.start(KCProgress.RULES);
+      if (!r || !r.foe || !r.setup) return { error: 'error' };
+      return { ok: true, foe: Object.assign(r.foe, { battleId: r.battle_id, seed: r.seed >>> 0, botSeed: r.bot_seed >>> 0, setup: r.setup }) };
+    } catch (e) {
+      if (e && e.code === 'not_deployed') return { local: true };
+      return { error: e && e.offline ? 'offline' : (e && e.code) || 'error' };
+    }
+  }
+  async function battleFinish(battleId, plays, end, claimed) {
+    const B = impl && impl.battles;
+    if (!B) return { error: 'off' };
+    try { const r = await B.finish(battleId, plays, end, claimed); return Object.assign({ ok: true }, r); }
+    catch (e) { return { error: e && e.offline ? 'offline' : (e && e.code) || 'error' }; }
+  }
   const newRef = () => 'kc-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
   return {
     connect, connected, status, account, restriction, login, signOut, changed, saved, flush, restore, transport, friends, wallet, pay, exchange,
+    ranked, battleStart, battleFinish,
     get rules() { return (impl && impl.rules) || { nameMin: 3, nameMax: 24, nameRe: /^[a-zA-Z0-9_.-]+$/, passwordMin: 10 }; },
     get chatUrl() { return (impl && impl.chatUrl) || 'https://chat.sirsc104.com/'; },
     onChange(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
@@ -4999,16 +5059,17 @@ const KCSim = (() => {
    tested in Node: tools/progress-test.js).
 
    - The Training Grounds: beat Trainer Owen, Romeo and Luc in order to open the Trophy Road.
-   - The Trophy Road: trophy battles against bots matched to your trophies. A win is +30 trophies
-     and earns a chest if a slot is free; a loss is -20 (never below the arena's floor). Milestones on
-     the road give fixed rewards you claim: rubies, chests, new cards and arenas.
+   - The Trophy Road: trophy battles against bots matched to your trophies, through ten arenas (Eclipse
+     Throne, the tenth, is the last). A battle is worth 20 to 40 trophies by the opponent's trophies (never
+     below the arena's floor), and a win earns a chest if a slot is free. Milestones on the road give
+     fixed rewards you claim: rubies, chests, new cards and arenas.
    - Opponents: their cards level up one at a time with their trophies (all level 1 below 50, then one
      card up a level every 12.5 trophies); their skill follows your recent results (up a step
      after a win, down a step after a loss), settling at about 52% wins for everyone.
    - Chests: six tiers (wooden, silver, gold, platinum, legendary, mythic) and four slots. A chest is
      rolled the moment you win it; one chest unlocks at a time, on a real-time timer. Opening gives rubies
      and copies of cards you have found; how much grows with the account level. Each arena allows higher
-     tiers (CHEST_RULES; switched off for now, so every tier can drop anywhere).
+     tiers (CHEST_RULES): a chest above the player's arena is given as the highest tier it allows.
    - Card levels: copies plus rubies upgrade a card, up to level 15.
    - Arena cards (Skeleton Pack, Cannon) are found on the Trophy Road in Arena 1 only. Trainers never
      use them, and in a Training Grounds match your deck goes back to the starter cards.
@@ -5024,6 +5085,10 @@ const KCSim = (() => {
 
 const KCProgress = (() => {
   const KEY = 'kc.progress';
+  // The version of the battle rules (cards, simulation, computer player and this file). The builds stamp it
+  // (build-artifact.py, build-server.py) from those files, so the server only checks a trophy battle with
+  // the same rules the game played it with. 'dev' when running from the folder.
+  const RULES = 'a10c8b5a6465';
   const MAX_LEVEL = 15;
   const XP_PER_LEVEL = 100;
   const XP = { win: 20, draw: 10, loss: 6, firstWin: 30 };
@@ -5091,6 +5156,13 @@ const KCProgress = (() => {
       legendary: { gold: [800, 1000], cards: 200, kinds: 6, rare: { share: 0.15, min: 20 }, epic: { min: 1, chance: 0.5 }, legendary: { chance: 0.08 } },
       mythic: { gold: [1800, 2300], cards: 420, kinds: 8, rare: { share: 0.16, min: 45 }, epic: { min: 2, chance: 0.5 }, legendary: { min: 1 } },
     },
+    // the arena gate (CHEST_RULES) holds the bigger chests back until Arena 5, so in Arenas 1 to 4 every
+    // chest holds more: [cards, rubies, rares, epics] times (the rares and epics on top of the cards). This
+    // keeps the pace the economy was set for (cards of about 7-8 entering Arena 4); legendaries stay what
+    // the Legendary and Mythic Chests bring. tools/economy-report.js shows it.
+    // The boosts fall from arena to arena no faster than rewards climb inside one, so a chest never gets
+    // smaller on reaching a new arena (tools/progress-test.js checks it).
+    gateBoost: { 1: [1.9, 1.98, 3.2, 1], 2: [1.61, 1.66, 2.6, 2], 3: [1.38, 1.4, 2.1, 3], 4: [1.19, 1.19, 1.6, 2] },
     // what a missing rarity is paid in instead
     fallback: { legendary: ['epic', 3], epic: ['rare', 5] },
     // gold for each trophy-battle win (times the gold tier), for the first `dailyCap` wins of a day
@@ -5105,7 +5177,7 @@ const KCProgress = (() => {
     // (their rubies plus `chestCardShare` of the value of the cards inside), from the arena in `chestArena`.
     shop: { perCopy: { common: 20, rare: 200, epic: 2000, legendary: 40000 }, maxQty: { common: 50, rare: 10, epic: 1, legendary: 0 },
       megaQty: { common: 100, rare: 20, epic: 2, legendary: 0 }, chestCardShare: 0.5, chestPriceScale: 2, chestsPerDay: 1,
-      chestArena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 4 } },
+      chestArena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 5 } },   // as the arena gate (CHEST_RULES)
     // the three diamond-only Shop sections, made fresh each day:
     //  - deals: two bundles of wild cards and rubies, always worth over twice their price. Contents and
     //    price grow together with the arena (`dealScale`: card tier / Arena 4's, between min and max); epic
@@ -5301,9 +5373,10 @@ const KCProgress = (() => {
   const TIERS = ['wooden', 'silver', 'gold', 'platinum', 'legendary', 'mythic'];
   // Which chests each arena can give: a tier starts at the arena number listed (so Arena 1 gives only
   // wooden and silver, Arena 2 adds gold, and so on). Anything above the player's arena is given as the
-  // highest tier they have reached instead. allUnlocked turns the gate off: every tier everywhere.
-  // allUnlocked is on (the gate is off): set it to false to switch the gate on.
-  const CHEST_RULES = { allUnlocked: true, arena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 5 } };
+  // highest tier they have reached instead: in battle wins, Trophy Road rewards, the crown chest, the daily
+  // challenge, the Diamond Pass and the Shop. The gate is on; allUnlocked: true would turn it off (every
+  // tier everywhere).
+  const CHEST_RULES = { allUnlocked: false, arena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 5 } };
   // The order chests are won in, repeating (before the arena gate is applied).
   const CYCLE = ['wooden', 'wooden', 'silver', 'wooden', 'silver', 'wooden', 'wooden', 'gold', 'wooden', 'silver',
     'wooden', 'silver', 'gold', 'wooden', 'platinum', 'silver', 'wooden', 'gold', 'silver', 'wooden', 'legendary', 'silver', 'gold', 'mythic'];
@@ -5404,8 +5477,10 @@ const KCProgress = (() => {
     // so a loss can't be dodged. `abandoned` tells the lobby to say so once.
     P.abandoned = null;
     if (P.live && P.live.kind === 'trophy') {
-      const name = P.live.name, r = recordTrophy(1, 0);
+      const name = P.live.name, battleId = P.live.battleId || null, r = recordTrophy(1, 0);
       P.abandoned = { name, delta: r.delta };
+      // a battle the server issued: it is told the battle was left (js/account.js), and its count stands
+      if (battleId) P.forfeit = battleId;
     }
     P.live = null;
     return P;
@@ -5414,7 +5489,7 @@ const KCProgress = (() => {
   // the guided first battle has been played (or skipped)
   function finishTutorial() { P.tutorial = true; save(); }
   function battleStarted(foe) {
-    P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, trophies: foe.trophies, boss: !!foe.boss, at: Date.now() } : null;
+    P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, trophies: foe.trophies, boss: !!foe.boss, battleId: foe.battleId || null, at: Date.now() } : null;
     save();
   }
   // saved in this browser, and (once the backend is connected, js/backend.js) to the player's account
@@ -5601,6 +5676,30 @@ const KCProgress = (() => {
       evos: foeEvos(deck, foeTrophies, rand),
     };
   }
+  /* ---------- trophy battles checked by the server (server/verify.js, BACKEND_HANDOFF.md) ----------
+     Signed in, a trophy battle comes from the server: it picks the opponent and the seeds, the game plays
+     that battle, and the server replays it from the player's plays and pays the trophies. Both sides build
+     the battle with this one function, so they build the same one. setup: the player's side, as the server
+     read it from their saved progress ({ deck, cardLevels, evos, king }). */
+  function trophyBattleOpts(foe, setup, seed) {
+    return { seed: seed >>> 0, towerDamage: [1, foe.towerDamage], decks: [setup.deck.slice(), (foe.deck || KC_STARTER_DECK).slice()],
+      cardLevels: [Object.assign({}, setup.cardLevels), Object.assign({}, foe.cardLevels || {})], evos: [setup.evos.slice(), (foe.evos || []).slice()],
+      energyMult: false, firstTower: false, levels: [setup.king, foe.kingLevel || 1] };
+  }
+  // the player's side of a battle, from this save
+  const battleSetup = () => ({ deck: P.deck.slice(), cardLevels: cardLevels(), evos: evoList(), king: kingInfo().level });
+  // the trophies as the server keeps them, and taking the server's word for them
+  const trophyState = () => ({ trophies: P.trophies, best: P.best, w: P.trophyRecord.w, l: P.trophyRecord.l, d: P.trophyRecord.d, streak: P.streak || 0 });
+  function setTrophies(t) {
+    if (!t || typeof t !== 'object') return false;
+    const n = v => (Number.isFinite(+v) && +v > 0 ? Math.floor(+v) : 0);
+    const next = { trophies: n(t.trophies), best: Math.max(n(t.best), n(t.trophies)), w: n(t.w), l: n(t.l), d: n(t.d), streak: Number.isFinite(+t.streak) ? Math.trunc(+t.streak) : 0 };
+    const now = trophyState();
+    if (Object.keys(next).every(k => now[k] === next[k])) return false;
+    P.trophies = next.trophies; P.best = next.best; P.trophyRecord = { w: next.w, l: next.l, d: next.d }; P.streak = next.streak;
+    save();
+    return true;
+  }
   // foeTrophies: the opponent's trophies (from the battle that was started if not given)
   // stats: what you did in the battle ({ cards, spells, troops }) for the daily quests
   // boss: the battle was against SirSC (no trophies lost)
@@ -5762,9 +5861,11 @@ const KCProgress = (() => {
   const chestMult = lv => rewardTier(lv ? { level: lv } : {}).cards;
   // What a chest holds for this player, on average: shown on Shop tiles, used by roll().
   function chestOdds(type, opts) {
-    const T = ECONOMY.chests[type], M = rewardTier(opts), cards = Math.round(T.cards * M.cards);
-    const rareN = Math.max(Math.round((T.rare.min || 0) * M.cards), Math.round(cards * (T.rare.share || 0)));
-    const ex = (r, pow) => { const e = T[r] || {}; return ((e.min || 0) + (e.chance || 0)) * Math.pow(M.cards, pow); };
+    // the arena gate's chests hold more in the arenas it holds back (ECONOMY.gateBoost)
+    const T = ECONOMY.chests[type], M0 = rewardTier(opts), B = (!CHEST_RULES.allUnlocked && ECONOMY.gateBoost[M0.arena]) || [1, 1, 1, 1];
+    const M = Object.assign({}, M0, { cards: M0.cards * B[0], gold: M0.gold * B[1] }), cards = Math.round(T.cards * M.cards);
+    const rareN = Math.min(cards, Math.round(Math.max(Math.round((T.rare.min || 0) * M.cards), Math.round(cards * (T.rare.share || 0))) * B[2]));
+    const ex = (r, pow) => { const e = T[r] || {}; return ((e.min || 0) + (e.chance || 0)) * Math.pow(M.cards, pow) * (r === 'epic' ? B[3] : 1); };
     return { cards, rubies: [Math.round(T.gold[0] * M.gold), Math.round(T.gold[1] * M.gold)], kinds: T.kinds, rares: rareN, rareChance: T.rare.chance || 0,
       epics: ex('epic', ECONOMY.epicPow), legendaries: ex('legendary', ECONOMY.legendaryPow),
       epicMin: (T.epic && T.epic.min) || 0, legendaryMin: (T.legendary && T.legendary.min) || 0, tier: M };
@@ -6375,9 +6476,10 @@ const KCProgress = (() => {
     if (R.kind === 'rubies') { P.rubies += R.n; out.rubies = R.n; }
     else if (R.kind === 'item') { P.magic[R.item] = magicCount(R.item) + R.n; out.items = [{ id: R.item, n: R.n }]; }
     else if (R.kind === 'chest') {
-      const before = P.found.slice(), c = roll(R.chest);
+      // the arena gate applies here too (the pass shows the chest you will get)
+      const t = capChest(R.chest), before = P.found.slice(), c = roll(t);
       apply(c);
-      out = Object.assign(out, c, { chest: R.chest, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)) });
+      out = Object.assign(out, c, { chest: t, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)) });
     } else if (R.kind === 'evo') {
       // an evolution you already have comes as its shards instead
       if (hasEvo(R.card)) { const n = KC_EVOS[R.card].shards; P.magic.shards = magicCount('shards') + n; out.items = [{ id: 'shards', n }]; }
@@ -6615,7 +6717,7 @@ const KCProgress = (() => {
     load, save, battleStarted, finishTutorial, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,
-    trophyFoe, foeUpgrades, spreadLevels, recordTrophy, SIRSC, sirscFoe,
+    trophyFoe, foeUpgrades, spreadLevels, recordTrophy, SIRSC, sirscFoe, RULES, trophyBattleOpts, battleSetup, trophyState, setTrophies,
     roll, chestState, unlockingSlot, startUnlock, openChest,
     SHOP, shop, shopEnds, refreshShop, buy, buyChest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
@@ -13929,7 +14031,7 @@ const KCMenu = (() => {
   // A pass reward as a small picture and a label.
   function rewardArt(R) {
     if (R.kind === 'rubies') return { art: '<span class="pr-rubies" aria-hidden="true"><i class="ruby-i"></i><i class="ruby-i"></i></span>', label: `${fmt(R.n)} rubies` };
-    if (R.kind === 'chest') return { art: `<span class="pr-chest">${chestSvg(R.chest)}</span>`, label: G.CHESTS[R.chest].name };
+    if (R.kind === 'chest') { const t = G.capChest(R.chest); return { art: `<span class="pr-chest">${chestSvg(t)}</span>`, label: G.CHESTS[t].name }; }
     if (R.kind === 'item') return { art: `<span class="pr-item">${itemSvg(R.item)}</span>`, label: `${G.MAGIC[R.item].name} ×${fmt(R.n)}` };
     if (R.kind === 'evo') return { art: `<img class="pr-evo" src="${cardImg(R.card, true)}" alt="">`, label: KC_EVOS[R.card].name };
     return { art: '', label: '' };
@@ -14589,11 +14691,13 @@ const KCMenu = (() => {
     cp.dataset.arena = open ? G.arena().theme : 'training';
     $('#cpFallback').textContent = art.name;
     if (open) {
-      const a = G.arena(), na = G.nextArena(), lo = a.min, hi = na ? na.min : a.min + 300;
+      // toward the next arena; in the last one (Eclipse Throne, there is no arena after it) toward the
+      // end of the Trophy Road, and full once it is reached
+      const a = G.arena(), na = G.nextArena(), end = G.ROAD[G.ROAD.length - 1].at, lo = a.min, hi = na ? na.min : Math.max(end, a.min + 1);
       $('#cpImg').alt = `${a.name} arena`;
       $('#cpFill').style.width = (Math.max(0, Math.min(1, (p.trophies - lo) / (hi - lo))) * 100).toFixed(1) + '%';
-      $('#cpText').textContent = `${fmt(p.trophies)} / ${fmt(hi)} Trophies`;
-      bar.setAttribute('aria-label', 'Trophies toward the next arena');
+      $('#cpText').textContent = !na && p.trophies >= hi ? `${fmt(p.trophies)} Trophies · Top arena` : `${fmt(p.trophies)} / ${fmt(hi)} Trophies`;
+      bar.setAttribute('aria-label', na ? 'Trophies toward the next arena' : 'Trophies toward the end of the Trophy Road');
       bar.setAttribute('aria-valuenow', String(p.trophies)); bar.setAttribute('aria-valuemax', String(hi));
       bar.classList.toggle('full', p.trophies >= hi);
     } else {
@@ -15234,7 +15338,10 @@ const KCEmotes = (() => {
   function startBattle(foe) {
     KCSound.unlock();
     if (typeof foe === 'string') foe = KC_TRAINER[foe];
-    const T = G.trainer = foe || KCMenu.nextFoe();
+    foe = foe || KCMenu.nextFoe();
+    // signed in, a trophy battle comes from the server, which checks it afterwards (js/backend.js)
+    if (foe.kind === 'trophy' && !foe.battleId && !foe.unranked && KCBackend.ranked()) { startRanked(); return; }
+    const T = G.trainer = foe;
     G.online = null;
     G.replay = null;
     const challenge = T.kind === 'challenge', practice = T.kind === 'practice' || T.kind === 'friend' || challenge, trophy = T.kind === 'trophy' || practice, arenaNow = KCProgress.arena();
@@ -15243,7 +15350,7 @@ const KCEmotes = (() => {
     B = G.art.margin;
     KCScenery.setArena(G.theme);
     G.embers = [];
-    G.s = S.create(G.simOpts = {
+    G.s = S.create(G.simOpts = T.battleId ? KCProgress.trophyBattleOpts(T, T.setup, T.seed) : {
       seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, T.towerDamage],
       decks: [practice ? T.yourDeck : trophy ? KCProgress.state.deck : KCProgress.trainingDeck(), T.deck || KC_STARTER_DECK],
       cardLevels: [practice ? T.yourLevels : KCProgress.cardLevels(), T.cardLevels || {}],
@@ -15254,7 +15361,7 @@ const KCEmotes = (() => {
       levels: [challenge ? T.towerLevel : KCProgress.kingInfo().level, trophy ? T.kingLevel || 1 : 1],
     });
     G.sim = G.s;
-    G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9), style: T.style });
+    G.bot = KCBot.create(1, { skill: T.skill, seed: T.battleId ? T.botSeed >>> 0 : Math.floor(Math.random() * 1e9), style: T.style });
     const where = challenge ? `Daily Challenge · ${T.challenge.name}` : practice ? `Practice · ${arenaNow.name}` : trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
@@ -15278,6 +15385,38 @@ const KCEmotes = (() => {
     $('#intro').classList.toggle('finding', G.finding);
     $('#intro').classList.toggle('boss', !!T.boss);
     $('#intro').hidden = false;
+  }
+  /* A trophy battle checked by the server: it picks the opponent and the seeds (and has the player's
+     cards from their saved progress); afterwards it replays the battle from the player's plays and says
+     what the trophies are. Without a connection, trophy battles wait (Practice works offline). */
+  let starting = false;
+  async function startRanked() {
+    if (starting) return;
+    starting = true; document.body.classList.add('kc-wait');
+    const slow = setTimeout(() => rankedSay('Finding an opponent…'), 450);
+    const r = await KCBackend.battleStart();
+    clearTimeout(slow); starting = false; document.body.classList.remove('kc-wait');
+    if (r.local) { startBattle(Object.assign(KCMenu.nextFoe('trophy'), { unranked: true })); return; }
+    if (!r.ok) {
+      KCSound.play('error');
+      rankedSay(r.error === 'offline' ? "Can't reach WardenChat. Trophy battles need a connection; Practice works offline."
+        : r.error === 'kc_update_needed' ? 'A new version of Kingdom Clash is out. Reload the page to play trophy battles.'
+          : r.error === 'kc_rate_limited' ? 'That is a lot of battles! Take a short break and try again.' : "Trophy battles can't start right now. Try again in a moment.");
+      if (G.phase !== 'end') KCMenu.refresh();
+      return;
+    }
+    startBattle(r.foe);
+  }
+  const rankedSay = msg => (G.phase === 'end' || G.phase === 'play' ? toast(msg) : KCMenu.toast(msg));
+  // the end of a checked battle: the player's plays go to the server, and its trophies are the ones kept
+  function finishRanked(T, e) {
+    const s = G.s, mine = s.log.filter(l => l[1] === 0).map(l => [l[0], l[2], l[3], l[4], l[5]]);
+    const end = e.reason === 'surrender' ? { tick: s.tick, reason: 'surrender' } : null, shown = KCProgress.state.trophies;
+    KCBackend.battleFinish(T.battleId, mine, end, { winner: e.winner, crowns: s.crowns.slice() }).then(r => {
+      if (!r.ok) return;
+      if (r.trophies && r.trophies.trophies !== shown) rankedSay(`Your trophies were checked: ${r.trophies.trophies.toLocaleString('en-US')}.`);
+      KCMenu.refresh();
+    });
   }
   // Under the VS screen the battle is already laid out: until it starts, the opponent's name reads
   // Loading… and your cards lie face down; they flip over when the fight begins.
@@ -16148,6 +16287,7 @@ const KCEmotes = (() => {
     const stats = { cards: mine.length, spells: mine.filter(c => c.kind === 'spell').length, troops: mine.filter(c => c.kind === 'troop').length };
     if (G.replay) { G.res = { kind: 'replay' }; $('#countdown').hidden = true; banner(e.winner === 0 ? 'Victory!' : e.winner === 1 ? 'Defeat' : 'Draw'); return; }
     G.res = G.online ? { kind: 'online' } : KCMenu.recordResult(G.trainer, e.winner, G.s.crowns[0], stats);
+    if (!G.online && G.trainer.battleId) finishRanked(G.trainer, e);
     if (!G.online && G.simOpts) logThis(e);
     G.res.tip = e.winner === 1 && !G.online ? lossTip() : '';
     if (G.online) endOnline();
@@ -17476,7 +17616,9 @@ const KCEmotes = (() => {
      - the kc_* database functions for the cloud save, friends, presence and battle invites;
      - the SirSC wallet's sirsc_me / sirsc_member_claim, and kc_spend / kc_exchange, for diamonds, coins
        and membership (the server decides every balance; the game shows what it says);
-     - Supabase Realtime (private channels kc-<code>) for battles with friends.
+     - Supabase Realtime (private channels kc-<code>) for battles with friends;
+     - the kc-battle Edge Function for trophy battles: the server picks each opponent and the seeds,
+       replays the battle from the player's plays (server/verify.js) and keeps the trophies.
    The back-end half is BACKEND_HANDOFF.md. Until kc_ping answers, accounts stay switched off and the
    game works exactly as before, saving on this device only. The demo build swaps in a pretend back end
    (js/account-mock.js). All of it reaches the game through js/backend.js (KCBackend.connect). */
@@ -17587,6 +17729,21 @@ const KCAccount = (() => {
       throw e;
     });
   }
+  // an Edge Function (POST /functions/v1/<name>): errors come back as { error: '<code>' }
+  function fn(name, body) {
+    const at = epoch;
+    const go = force => token(force).then(t => call('POST', '/functions/v1/' + name, body, t)).then(r => {
+      if (r.status >= 200 && r.status < 300) return r.data;
+      const d = r.data || {}, own = typeof d.error === 'string' && /^(kc|sirsc)_[a-z_]+$/.test(d.error) ? d.error : '';
+      const code = own === 'kc_not_signed_in' ? 'unauthorized' : own || (r.status === 404 ? 'not_deployed' : r.status === 401 ? 'unauthorized' : r.status === 429 ? 'rate_limited' : r.status >= 500 ? 'server_error' : 'error');
+      if (code === 'unauthorized' && !force) return go(true);
+      throw new ApiError(code, r.status);
+    });
+    return go(false).catch(e => {
+      if (e.code === 'unauthorized' && at === epoch) return refused().then(() => { throw e; });
+      throw e;
+    });
+  }
   // A refused call: banned or suspended on Warden Chat, or just signed out somewhere else?
   function refused() {
     if (!sess) return Promise.resolve();
@@ -17651,7 +17808,7 @@ const KCAccount = (() => {
      copies, then Rubies). The server keeps the copies it replaces (BACKEND_HANDOFF.md), and a copy this
      device gives up is kept in kc.progress.backup, so nothing is ever lost. A device that held another
      account's progress keeps it for them (kc.progress.of.<id>) and gets it back when they sign in. */
-  const LOCAL_ONLY = ['log', 'live', 'abandoned', 'passRolled', 'diamonds', 'wallet', 'member'];
+  const LOCAL_ONLY = ['log', 'live', 'abandoned', 'passRolled', 'forfeit', 'diamonds', 'wallet', 'member'];
   const MAX_DOC = 120000;
   function docOf(p) {
     const d = {};
@@ -17686,6 +17843,8 @@ const KCAccount = (() => {
       const r = await rpc('kc_get_progress');
       if (me() !== u) return;
       const cloud = r && r.doc && typeof r.doc === 'object' ? r.doc : null, rev = r ? r.rev | 0 : 0, L = link(), P = KCProgress.state;
+      // the server keeps the trophies (checked trophy battles) when it answers with them
+      rankedOn = !!r && Object.prototype.hasOwnProperty.call(r, 'trophies');
       if (L && L.user && L.user !== u.id) {
         // another account's progress is on this device: kept for them, and this account's comes in
         if (!fresh(P)) keepIn('kc.progress.of.' + L.user, P);
@@ -17708,7 +17867,9 @@ const KCAccount = (() => {
         setLink(u.id, rev);   // this device has more progress: it goes up (the account keeps the copy it replaces)
       }
       ready = true;
+      if (r && r.trophies && KCProgress.setTrophies(r.trophies) && typeof KCMenu !== 'undefined') KCMenu.refresh();
       await push();
+      if (rankedOn) flushFinishes().catch(() => {});
     } catch (e) { if (!e.offline) console.error('cloud save', e); } finally { ready = true; }
   }
   // send this device's progress up (one at a time)
@@ -17727,6 +17888,49 @@ const KCAccount = (() => {
     }).catch(e => { if (!e.offline) console.error('cloud save', e); });
     return chain;
   }
+
+  /* ---------- trophy battles checked by the server (the kc-battle Edge Function) ----------
+     start: the server settles any battle left open (a loss), picks the opponent and the seeds, and reads
+     the player's cards from their saved progress (sent up first). finish: the player's plays; the server
+     replays the battle and answers with the trophies. A finish that can't be sent (no connection) waits
+     here and goes before the next battle starts, so a dropped connection never costs a battle. */
+  let rankedOn = false;
+  const FINISH_KEY = () => 'kc.battleFinish.' + ((me() && me().id) || '');
+  const pending = () => { const a = load(FINISH_KEY()); return Array.isArray(a) ? a : []; };
+  const setPending = a => keepIn(FINISH_KEY(), a.length ? a.slice(-5) : null);
+  async function sendFinish(job) {
+    try {
+      const r = await fn('kc-battle', Object.assign({ action: 'finish' }, job));
+      setPending(pending().filter(j => j.battle_id !== job.battle_id));
+      if (r && r.trophies && KCProgress.setTrophies(r.trophies) && typeof KCMenu !== 'undefined') KCMenu.refresh();
+      return r;
+    } catch (e) {
+      // a refusal stays a refusal (the battle was closed); only a lost connection is worth another try
+      if (!e.offline && e.code !== 'server_error' && e.code !== 'rate_limited') setPending(pending().filter(j => j.battle_id !== job.battle_id));
+      throw e;
+    }
+  }
+  async function flushFinishes() {
+    // a checked battle this device left (the page was reloaded or closed mid-battle): the server hears it now
+    const P = KCProgress.state, left = P.forfeit;
+    if (left && !pending().some(j => j.battle_id === left)) setPending(pending().concat({ battle_id: left, plays: [], end: { reason: 'left' }, claimed: null }));
+    if (left) { delete P.forfeit; KCProgress.save(); }
+    for (const job of pending()) { try { await sendFinish(job); } catch (e) { if (e.offline) throw e; } }
+  }
+  const battles = {
+    async start(rules) {
+      await flushFinishes();
+      KCBackend.flush(); await push();
+      const r = await fn('kc-battle', { action: 'start', rules: String(rules || '') });
+      if (r && r.trophies && KCProgress.setTrophies(r.trophies) && typeof KCMenu !== 'undefined') KCMenu.refresh();
+      return r;
+    },
+    finish(battleId, plays, end, claimed) {
+      const job = { battle_id: battleId, plays, end: end || null, claimed: claimed || null };
+      setPending(pending().filter(j => j.battle_id !== battleId).concat(job));
+      return sendFinish(job);
+    },
+  };
 
   /* ---------- the SirSC wallet ---------- */
   let wal = null, walletLoad = null;
@@ -17781,6 +17985,7 @@ const KCAccount = (() => {
       }
       if (r && typeof r.requests === 'number') signal(r.requests);
       if (++polls % 8 === 0) loadWallet();   // diamonds bought on Warden Chat show up here
+      if (rankedOn && polls % 4 === 0 && pending().length) flushFinishes().catch(() => {});
     } catch (e) { /* offline for a moment */ }
     if (me()) pollT = setTimeout(poll, (document.hidden ? 30 : CFG.pollSeconds) * 1000);
   }
@@ -17856,6 +18061,7 @@ const KCAccount = (() => {
     signOut: () => { KCBackend.flush(); return push().then(() => account.signOut()); },
     save: () => push(),
     friends, transport: lobby, wallet, rules: RULES, get chatUrl() { return CFG.chatUrl; },
+    ranked: () => rankedOn && st.status === 'signedIn', battles,
   };
   let lastKey = '';
   account.on(s => {
@@ -17866,7 +18072,7 @@ const KCAccount = (() => {
     if (!KCBackend.connected()) KCBackend.connect(impl); else KCBackend.changed();
     if (s.status === 'signedIn') { pull(); loadWallet(); seen.clear(); poll(); }
     else {
-      clearTimeout(pollT); wal = null; ready = false; lists = { friends: [], incoming: [], outgoing: [] }; signal(0);
+      clearTimeout(pollT); wal = null; ready = false; rankedOn = false; lists = { friends: [], incoming: [], outgoing: [] }; signal(0);
       // signed out: the wallet's diamonds and coins are the account's, not this device's
       if (KCProgress.setWallet(null) && typeof KCMenu !== 'undefined') KCMenu.refresh();
     }

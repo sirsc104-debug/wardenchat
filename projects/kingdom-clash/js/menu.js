@@ -1328,7 +1328,7 @@ const KCMenu = (() => {
   // A pass reward as a small picture and a label.
   function rewardArt(R) {
     if (R.kind === 'rubies') return { art: '<span class="pr-rubies" aria-hidden="true"><i class="ruby-i"></i><i class="ruby-i"></i></span>', label: `${fmt(R.n)} rubies` };
-    if (R.kind === 'chest') return { art: `<span class="pr-chest">${chestSvg(R.chest)}</span>`, label: G.CHESTS[R.chest].name };
+    if (R.kind === 'chest') { const t = G.capChest(R.chest); return { art: `<span class="pr-chest">${chestSvg(t)}</span>`, label: G.CHESTS[t].name }; }
     if (R.kind === 'item') return { art: `<span class="pr-item">${itemSvg(R.item)}</span>`, label: `${G.MAGIC[R.item].name} ×${fmt(R.n)}` };
     if (R.kind === 'evo') return { art: `<img class="pr-evo" src="${cardImg(R.card, true)}" alt="">`, label: KC_EVOS[R.card].name };
     return { art: '', label: '' };
@@ -1988,11 +1988,13 @@ const KCMenu = (() => {
     cp.dataset.arena = open ? G.arena().theme : 'training';
     $('#cpFallback').textContent = art.name;
     if (open) {
-      const a = G.arena(), na = G.nextArena(), lo = a.min, hi = na ? na.min : a.min + 300;
+      // toward the next arena; in the last one (Eclipse Throne, there is no arena after it) toward the
+      // end of the Trophy Road, and full once it is reached
+      const a = G.arena(), na = G.nextArena(), end = G.ROAD[G.ROAD.length - 1].at, lo = a.min, hi = na ? na.min : Math.max(end, a.min + 1);
       $('#cpImg').alt = `${a.name} arena`;
       $('#cpFill').style.width = (Math.max(0, Math.min(1, (p.trophies - lo) / (hi - lo))) * 100).toFixed(1) + '%';
-      $('#cpText').textContent = `${fmt(p.trophies)} / ${fmt(hi)} Trophies`;
-      bar.setAttribute('aria-label', 'Trophies toward the next arena');
+      $('#cpText').textContent = !na && p.trophies >= hi ? `${fmt(p.trophies)} Trophies · Top arena` : `${fmt(p.trophies)} / ${fmt(hi)} Trophies`;
+      bar.setAttribute('aria-label', na ? 'Trophies toward the next arena' : 'Trophies toward the end of the Trophy Road');
       bar.setAttribute('aria-valuenow', String(p.trophies)); bar.setAttribute('aria-valuemax', String(hi));
       bar.classList.toggle('full', p.trophies >= hi);
     } else {

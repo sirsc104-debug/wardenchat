@@ -16,6 +16,9 @@
        wallet              -> the SirSC wallet, or null when signed out:
                                 spend(kind, diamonds, ref) -> Promise of { me } (the server takes the diamonds)
                                 exchange(coins)            -> Promise of { coins, rubies, me }
+       ranked()            -> true when the server keeps the player's trophies (trophy battles are checked)
+       battles             -> start() -> Promise of { battle_id, seed, bot_seed, foe, setup, trophies }
+                              finish(battleId, plays, end, claimed) -> Promise of { trophies, ... }
        rules, chatUrl      -> Warden Chat's name and password rules, and its address
      })
 
@@ -111,9 +114,34 @@ const KCBackend = (() => {
       return { error: e && e.code === 'kc_exchange_cap' ? 'cap' : e && e.code === 'kc_not_enough_coins' ? 'coins' : e && e.offline ? 'offline' : 'wallet', code: e && e.code };
     }
   }
+  /* Trophy battles checked by the server. ranked(): signed in, and the server keeps the trophies. Then a
+     trophy battle starts with battleStart (the server's opponent, seeds and the player's cards) and ends
+     with battleFinish (the player's plays; the server replays the battle and says what the trophies are).
+     battleStart resolves to { ok, foe } (the foe carries battleId, seed, botSeed and setup), { local }
+     when the server can't check battles (play as before), or { error }. */
+  const ranked = () => !!(impl && account() && impl.ranked && impl.battles && impl.ranked());
+  async function battleStart() {
+    const B = impl && account() && impl.battles;
+    if (!B || !ranked()) return { local: true };
+    try {
+      const r = await B.start(KCProgress.RULES);
+      if (!r || !r.foe || !r.setup) return { error: 'error' };
+      return { ok: true, foe: Object.assign(r.foe, { battleId: r.battle_id, seed: r.seed >>> 0, botSeed: r.bot_seed >>> 0, setup: r.setup }) };
+    } catch (e) {
+      if (e && e.code === 'not_deployed') return { local: true };
+      return { error: e && e.offline ? 'offline' : (e && e.code) || 'error' };
+    }
+  }
+  async function battleFinish(battleId, plays, end, claimed) {
+    const B = impl && impl.battles;
+    if (!B) return { error: 'off' };
+    try { const r = await B.finish(battleId, plays, end, claimed); return Object.assign({ ok: true }, r); }
+    catch (e) { return { error: e && e.offline ? 'offline' : (e && e.code) || 'error' }; }
+  }
   const newRef = () => 'kc-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
   return {
     connect, connected, status, account, restriction, login, signOut, changed, saved, flush, restore, transport, friends, wallet, pay, exchange,
+    ranked, battleStart, battleFinish,
     get rules() { return (impl && impl.rules) || { nameMin: 3, nameMax: 24, nameRe: /^[a-zA-Z0-9_.-]+$/, passwordMin: 10 }; },
     get chatUrl() { return (impl && impl.chatUrl) || 'https://chat.sirsc104.com/'; },
     onChange(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },

@@ -13,11 +13,17 @@ js/account.js, so sign-in, cloud saves, friends, invites and the SirSC wallet ca
 real one (accounts: demo, pal and sam, password kingdom12345). Never publish a demo build.
 """
 import base64
+import importlib.util
 import pathlib
 import re
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
+sys.dont_write_bytecode = True   # no __pycache__ left in the folder
+# the rules version and the server's bundle come from build-server.py
+_spec = importlib.util.spec_from_file_location('build_server', HERE / 'build-server.py')
+build_server = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(build_server)
 
 
 def main(out, standalone=False, demo=False):
@@ -32,7 +38,15 @@ def main(out, standalone=False, demo=False):
     if demo:
         scripts.insert(scripts.index('js/account.js') + 1, 'js/account-mock.js')
     body = re.sub(r'\s*<script src="[^"]+"></script>', '', body).strip()
-    js = '\n'.join((HERE / src).read_text(encoding='utf-8') for src in scripts)
+    version = build_server.rules_version()
+    def source(src):
+        text = (HERE / src).read_text(encoding='utf-8')
+        # the game says which battle rules it plays with (the server checks trophy battles with the same)
+        return build_server.stamp(text, version) if src == 'js/progress.js' else text
+    js = '\n'.join(source(src) for src in scripts)
+    if demo:
+        # the pretend back end checks trophy battles with the server's own bundle, as the real one will
+        js += '\nconst KCServerCore = ' + build_server.core_source(version) + ';\n'
     # Images the scripts load (the scenery backgrounds) are baked in as data URIs.
     def inline(m):
         path = HERE / m.group(1)

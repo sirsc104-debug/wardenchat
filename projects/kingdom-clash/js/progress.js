@@ -2,16 +2,17 @@
    tested in Node: tools/progress-test.js).
 
    - The Training Grounds: beat Trainer Owen, Romeo and Luc in order to open the Trophy Road.
-   - The Trophy Road: trophy battles against bots matched to your trophies. A win is +30 trophies
-     and earns a chest if a slot is free; a loss is -20 (never below the arena's floor). Milestones on
-     the road give fixed rewards you claim: rubies, chests, new cards and arenas.
+   - The Trophy Road: trophy battles against bots matched to your trophies, through ten arenas (Eclipse
+     Throne, the tenth, is the last). A battle is worth 20 to 40 trophies by the opponent's trophies (never
+     below the arena's floor), and a win earns a chest if a slot is free. Milestones on the road give
+     fixed rewards you claim: rubies, chests, new cards and arenas.
    - Opponents: their cards level up one at a time with their trophies (all level 1 below 50, then one
      card up a level every 12.5 trophies); their skill follows your recent results (up a step
      after a win, down a step after a loss), settling at about 52% wins for everyone.
    - Chests: six tiers (wooden, silver, gold, platinum, legendary, mythic) and four slots. A chest is
      rolled the moment you win it; one chest unlocks at a time, on a real-time timer. Opening gives rubies
      and copies of cards you have found; how much grows with the account level. Each arena allows higher
-     tiers (CHEST_RULES; switched off for now, so every tier can drop anywhere).
+     tiers (CHEST_RULES): a chest above the player's arena is given as the highest tier it allows.
    - Card levels: copies plus rubies upgrade a card, up to level 15.
    - Arena cards (Skeleton Pack, Cannon) are found on the Trophy Road in Arena 1 only. Trainers never
      use them, and in a Training Grounds match your deck goes back to the starter cards.
@@ -27,6 +28,10 @@
 
 const KCProgress = (() => {
   const KEY = 'kc.progress';
+  // The version of the battle rules (cards, simulation, computer player and this file). The builds stamp it
+  // (build-artifact.py, build-server.py) from those files, so the server only checks a trophy battle with
+  // the same rules the game played it with. 'dev' when running from the folder.
+  const RULES = 'dev';
   const MAX_LEVEL = 15;
   const XP_PER_LEVEL = 100;
   const XP = { win: 20, draw: 10, loss: 6, firstWin: 30 };
@@ -94,6 +99,13 @@ const KCProgress = (() => {
       legendary: { gold: [800, 1000], cards: 200, kinds: 6, rare: { share: 0.15, min: 20 }, epic: { min: 1, chance: 0.5 }, legendary: { chance: 0.08 } },
       mythic: { gold: [1800, 2300], cards: 420, kinds: 8, rare: { share: 0.16, min: 45 }, epic: { min: 2, chance: 0.5 }, legendary: { min: 1 } },
     },
+    // the arena gate (CHEST_RULES) holds the bigger chests back until Arena 5, so in Arenas 1 to 4 every
+    // chest holds more: [cards, rubies, rares, epics] times (the rares and epics on top of the cards). This
+    // keeps the pace the economy was set for (cards of about 7-8 entering Arena 4); legendaries stay what
+    // the Legendary and Mythic Chests bring. tools/economy-report.js shows it.
+    // The boosts fall from arena to arena no faster than rewards climb inside one, so a chest never gets
+    // smaller on reaching a new arena (tools/progress-test.js checks it).
+    gateBoost: { 1: [1.9, 1.98, 3.2, 1], 2: [1.61, 1.66, 2.6, 2], 3: [1.38, 1.4, 2.1, 3], 4: [1.19, 1.19, 1.6, 2] },
     // what a missing rarity is paid in instead
     fallback: { legendary: ['epic', 3], epic: ['rare', 5] },
     // gold for each trophy-battle win (times the gold tier), for the first `dailyCap` wins of a day
@@ -108,7 +120,7 @@ const KCProgress = (() => {
     // (their rubies plus `chestCardShare` of the value of the cards inside), from the arena in `chestArena`.
     shop: { perCopy: { common: 20, rare: 200, epic: 2000, legendary: 40000 }, maxQty: { common: 50, rare: 10, epic: 1, legendary: 0 },
       megaQty: { common: 100, rare: 20, epic: 2, legendary: 0 }, chestCardShare: 0.5, chestPriceScale: 2, chestsPerDay: 1,
-      chestArena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 4 } },
+      chestArena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 5 } },   // as the arena gate (CHEST_RULES)
     // the three diamond-only Shop sections, made fresh each day:
     //  - deals: two bundles of wild cards and rubies, always worth over twice their price. Contents and
     //    price grow together with the arena (`dealScale`: card tier / Arena 4's, between min and max); epic
@@ -304,9 +316,10 @@ const KCProgress = (() => {
   const TIERS = ['wooden', 'silver', 'gold', 'platinum', 'legendary', 'mythic'];
   // Which chests each arena can give: a tier starts at the arena number listed (so Arena 1 gives only
   // wooden and silver, Arena 2 adds gold, and so on). Anything above the player's arena is given as the
-  // highest tier they have reached instead. allUnlocked turns the gate off: every tier everywhere.
-  // allUnlocked is on (the gate is off): set it to false to switch the gate on.
-  const CHEST_RULES = { allUnlocked: true, arena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 5 } };
+  // highest tier they have reached instead: in battle wins, Trophy Road rewards, the crown chest, the daily
+  // challenge, the Diamond Pass and the Shop. The gate is on; allUnlocked: true would turn it off (every
+  // tier everywhere).
+  const CHEST_RULES = { allUnlocked: false, arena: { wooden: 1, silver: 1, gold: 2, platinum: 3, legendary: 4, mythic: 5 } };
   // The order chests are won in, repeating (before the arena gate is applied).
   const CYCLE = ['wooden', 'wooden', 'silver', 'wooden', 'silver', 'wooden', 'wooden', 'gold', 'wooden', 'silver',
     'wooden', 'silver', 'gold', 'wooden', 'platinum', 'silver', 'wooden', 'gold', 'silver', 'wooden', 'legendary', 'silver', 'gold', 'mythic'];
@@ -407,8 +420,10 @@ const KCProgress = (() => {
     // so a loss can't be dodged. `abandoned` tells the lobby to say so once.
     P.abandoned = null;
     if (P.live && P.live.kind === 'trophy') {
-      const name = P.live.name, r = recordTrophy(1, 0);
+      const name = P.live.name, battleId = P.live.battleId || null, r = recordTrophy(1, 0);
       P.abandoned = { name, delta: r.delta };
+      // a battle the server issued: it is told the battle was left (js/account.js), and its count stands
+      if (battleId) P.forfeit = battleId;
     }
     P.live = null;
     return P;
@@ -417,7 +432,7 @@ const KCProgress = (() => {
   // the guided first battle has been played (or skipped)
   function finishTutorial() { P.tutorial = true; save(); }
   function battleStarted(foe) {
-    P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, trophies: foe.trophies, boss: !!foe.boss, at: Date.now() } : null;
+    P.live = foe && foe.kind === 'trophy' ? { kind: 'trophy', name: foe.name, trophies: foe.trophies, boss: !!foe.boss, battleId: foe.battleId || null, at: Date.now() } : null;
     save();
   }
   // saved in this browser, and (once the backend is connected, js/backend.js) to the player's account
@@ -604,6 +619,30 @@ const KCProgress = (() => {
       evos: foeEvos(deck, foeTrophies, rand),
     };
   }
+  /* ---------- trophy battles checked by the server (server/verify.js, BACKEND_HANDOFF.md) ----------
+     Signed in, a trophy battle comes from the server: it picks the opponent and the seeds, the game plays
+     that battle, and the server replays it from the player's plays and pays the trophies. Both sides build
+     the battle with this one function, so they build the same one. setup: the player's side, as the server
+     read it from their saved progress ({ deck, cardLevels, evos, king }). */
+  function trophyBattleOpts(foe, setup, seed) {
+    return { seed: seed >>> 0, towerDamage: [1, foe.towerDamage], decks: [setup.deck.slice(), (foe.deck || KC_STARTER_DECK).slice()],
+      cardLevels: [Object.assign({}, setup.cardLevels), Object.assign({}, foe.cardLevels || {})], evos: [setup.evos.slice(), (foe.evos || []).slice()],
+      energyMult: false, firstTower: false, levels: [setup.king, foe.kingLevel || 1] };
+  }
+  // the player's side of a battle, from this save
+  const battleSetup = () => ({ deck: P.deck.slice(), cardLevels: cardLevels(), evos: evoList(), king: kingInfo().level });
+  // the trophies as the server keeps them, and taking the server's word for them
+  const trophyState = () => ({ trophies: P.trophies, best: P.best, w: P.trophyRecord.w, l: P.trophyRecord.l, d: P.trophyRecord.d, streak: P.streak || 0 });
+  function setTrophies(t) {
+    if (!t || typeof t !== 'object') return false;
+    const n = v => (Number.isFinite(+v) && +v > 0 ? Math.floor(+v) : 0);
+    const next = { trophies: n(t.trophies), best: Math.max(n(t.best), n(t.trophies)), w: n(t.w), l: n(t.l), d: n(t.d), streak: Number.isFinite(+t.streak) ? Math.trunc(+t.streak) : 0 };
+    const now = trophyState();
+    if (Object.keys(next).every(k => now[k] === next[k])) return false;
+    P.trophies = next.trophies; P.best = next.best; P.trophyRecord = { w: next.w, l: next.l, d: next.d }; P.streak = next.streak;
+    save();
+    return true;
+  }
   // foeTrophies: the opponent's trophies (from the battle that was started if not given)
   // stats: what you did in the battle ({ cards, spells, troops }) for the daily quests
   // boss: the battle was against SirSC (no trophies lost)
@@ -765,9 +804,11 @@ const KCProgress = (() => {
   const chestMult = lv => rewardTier(lv ? { level: lv } : {}).cards;
   // What a chest holds for this player, on average: shown on Shop tiles, used by roll().
   function chestOdds(type, opts) {
-    const T = ECONOMY.chests[type], M = rewardTier(opts), cards = Math.round(T.cards * M.cards);
-    const rareN = Math.max(Math.round((T.rare.min || 0) * M.cards), Math.round(cards * (T.rare.share || 0)));
-    const ex = (r, pow) => { const e = T[r] || {}; return ((e.min || 0) + (e.chance || 0)) * Math.pow(M.cards, pow); };
+    // the arena gate's chests hold more in the arenas it holds back (ECONOMY.gateBoost)
+    const T = ECONOMY.chests[type], M0 = rewardTier(opts), B = (!CHEST_RULES.allUnlocked && ECONOMY.gateBoost[M0.arena]) || [1, 1, 1, 1];
+    const M = Object.assign({}, M0, { cards: M0.cards * B[0], gold: M0.gold * B[1] }), cards = Math.round(T.cards * M.cards);
+    const rareN = Math.min(cards, Math.round(Math.max(Math.round((T.rare.min || 0) * M.cards), Math.round(cards * (T.rare.share || 0))) * B[2]));
+    const ex = (r, pow) => { const e = T[r] || {}; return ((e.min || 0) + (e.chance || 0)) * Math.pow(M.cards, pow) * (r === 'epic' ? B[3] : 1); };
     return { cards, rubies: [Math.round(T.gold[0] * M.gold), Math.round(T.gold[1] * M.gold)], kinds: T.kinds, rares: rareN, rareChance: T.rare.chance || 0,
       epics: ex('epic', ECONOMY.epicPow), legendaries: ex('legendary', ECONOMY.legendaryPow),
       epicMin: (T.epic && T.epic.min) || 0, legendaryMin: (T.legendary && T.legendary.min) || 0, tier: M };
@@ -1378,9 +1419,10 @@ const KCProgress = (() => {
     if (R.kind === 'rubies') { P.rubies += R.n; out.rubies = R.n; }
     else if (R.kind === 'item') { P.magic[R.item] = magicCount(R.item) + R.n; out.items = [{ id: R.item, n: R.n }]; }
     else if (R.kind === 'chest') {
-      const before = P.found.slice(), c = roll(R.chest);
+      // the arena gate applies here too (the pass shows the chest you will get)
+      const t = capChest(R.chest), before = P.found.slice(), c = roll(t);
       apply(c);
-      out = Object.assign(out, c, { chest: R.chest, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)) });
+      out = Object.assign(out, c, { chest: t, cards: c.cards.map(x => Object.assign({ isNew: !before.includes(x.id) }, x)) });
     } else if (R.kind === 'evo') {
       // an evolution you already have comes as its shards instead
       if (hasEvo(R.card)) { const n = KC_EVOS[R.card].shards; P.magic.shards = magicCount('shards') + n; out.items = [{ id: 'shards', n }]; }
@@ -1618,7 +1660,7 @@ const KCProgress = (() => {
     load, save, battleStarted, finishTutorial, get state() { return P; },
     level, unlocked, nextTrainer, roadOpen, beatenCount, trainer, mode, setMode, recordTrainer,
     arena, nextArena, roadState, claimable, claim,
-    trophyFoe, foeUpgrades, spreadLevels, recordTrophy, SIRSC, sirscFoe,
+    trophyFoe, foeUpgrades, spreadLevels, recordTrophy, SIRSC, sirscFoe, RULES, trophyBattleOpts, battleSetup, trophyState, setTrophies,
     roll, chestState, unlockingSlot, startUnlock, openChest,
     SHOP, shop, shopEnds, refreshShop, buy, buyChest,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,

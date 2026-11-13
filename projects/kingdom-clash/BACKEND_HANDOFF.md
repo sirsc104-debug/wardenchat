@@ -4,34 +4,65 @@
 first a prompt to paste in, then the contract (every table, function, parameter, JSON key, error code,
 Realtime policy and the checklist), then how the whole game works.
 
+**Trophies are checked by the server.** A signed-in player's trophy battles come from the server: it picks
+the opponent and the seeds, the game plays that battle, and the server replays it from the player's card
+plays alone and pays the trophies. The trophies are the server's; editing a save can't change them. The
+replay code is already written and tested: `server/kc-battle-core.mjs`, the game's own rules bundled for
+an Edge Function.
+
 - Repo: `sirsc104-debug/wardenchat`, branch `claude/lucid-rubin-o0imt5`, folder `projects/kingdom-clash/`
-- Front end for the back end: `js/account.js` (Supabase Auth, the `kc_*` and `sirsc_*` calls, Realtime),
-  `js/backend.js` (where it plugs into the game), `js/net.js` (rooms and invites), `js/menu.js` (the screens)
-- Pretend back end that follows the contract: `js/account-mock.js` (demo builds only)
+- Front end for the back end: `js/account.js` (Supabase Auth, the `kc_*` and `sirsc_*` calls, the
+  `kc-battle` Edge Function, Realtime), `js/backend.js` (where it plugs into the game), `js/net.js` (rooms and
+  invites), `js/game.js` (trophy battles from the server), `js/menu.js` (the screens)
+- Server code, ready to import: `server/kc-battle-core.mjs`, built from the game's files and
+  `server/verify.js` by `python3 build-server.py`; tested by `node tools/verify-test.js`
+- Pretend back end that follows the contract: `js/account-mock.js` (demo builds only). It runs the real
+  `kc-battle` logic with the same bundle, so it is also a reference for the Edge Function.
 
 ---
 
 ## The prompt (paste this into Codex)
 
-> Build the back end for Kingdom Clash, a real-time card battler on the Warden Chat accounts. The front end (`projects/kingdom-clash/` in `sirsc104-debug/wardenchat`, branch `claude/lucid-rubin-o0imt5`) is already built against the contract below and calls Supabase directly from the browser, the same way Apples to Oranges and Wildcard Chess do. Your job is **one new migration in `sirsc104-debug/warden-chat`**, plus tests. Don't change the interface. If something in the contract can't work, stop and say what and why.
+> Build the back end for Kingdom Clash, a real-time card battler on the Warden Chat accounts, with **trophies checked by the server**. The front end (`projects/kingdom-clash/` in `sirsc104-debug/wardenchat`, branch `claude/lucid-rubin-o0imt5`) is already built against the contract below and calls Supabase directly from the browser, the same way Apples to Oranges and Wildcard Chess do. Your job, in `sirsc104-debug/warden-chat`:
+> - **one new migration**;
+> - **one Edge Function, `kc-battle`**, which checks trophy battles;
+> - tests.
+>
+> Don't change the interface. If something in the contract can't work, stop and say what and why.
 >
 > Read `projects/kingdom-clash/BACKEND_HANDOFF.md` fully first, then build exactly what its contract specifies: names, parameters, JSON keys and error codes. It builds on:
 > - the Brain Rocket accounts migration (friend requests and friendships, `br_assert_session()`);
 > - the SirSC economy (`docs/ECONOMY-API.md` in `sirsc104-debug/claude`: `sirsc_wallets`, `sirsc_ledger`, `sirsc_me`, `sirsc_member_claim`), with game id `kc`.
 >
+> **How the trophy check works.** The battle simulation and the computer opponent are deterministic, so the same seeds and the same player plays always give the same battle. The browser never reports a result the server takes on trust:
+> - `start`: the server picks the opponent and three seeds and reads the player's cards from their saved progress. It keeps all of that in `kc_battles`.
+> - `finish`: the game sends only the player's card plays. The function replays the battle with the game's own code and pays the trophies for the result it computes.
+> - The game's code is already bundled for you: `projects/kingdom-clash/server/kc-battle-core.mjs` (`KCServerCore.issue`, `setup`, `replay`, `settle`, `abandon`, `adopt`). Copy it into the function unchanged, and rebuild it with `python3 build-server.py` whenever the game's rules change.
+> - The function refuses a game built with other rules (`kc_update_needed`).
+> - `node tools/verify-test.js` in that folder shows the replay matching real battles and catching tampered plays.
+>
 > Conventions, as in the Apples to Oranges, Wildcard Chess and SirSC economy migrations:
 > - RLS on every table and no table grants to `anon`/`authenticated`;
 > - `SECURITY DEFINER` functions with `set search_path = public, pg_temp`, helpers in `warden_private`;
-> - the `warden_private.game_session_valid()` session check, refusing as `kc_not_signed_in`;
-> - errors as `raise exception '<code>' using errcode = 'P0001'`;
+> - the `warden_private.game_session_valid()` session check, refusing as `kc_not_signed_in` (in the Edge Function too);
+> - errors as `raise exception '<code>' using errcode = 'P0001'` (the Edge Function answers `{ "error": "<code>" }`);
 > - `kc_ping` granted to `anon` and `authenticated`, everything else to `authenticated` only.
 >
 > What to build (the checklist at the end of the contract is the definition of done):
-> 1. The tables: `kc_progress` with its private history, `kc_presence`, `kc_invites`, and the private spend and exchange logs.
-> 2. The functions: `kc_ping`, `kc_get_progress`, `kc_save_progress`, `kc_friends`, `kc_friend_request`, `kc_friend_respond`, `kc_poll`, `kc_invite`, `kc_invite_respond`, `kc_spend` and `kc_exchange`. Also check that `sirsc_me` and `sirsc_member_claim` work with `game = 'kc'`.
-> 3. The Realtime authorization policies for the private battle channels `kc-<code>`.
-> 4. Wallet safety: every balance change locks the wallet row, never goes below zero, and writes a ledger row in the same transaction. `kc_spend` is idempotent on `ref`.
-> 5. Tests like the existing ones (native PostgreSQL, no Docker), with every existing test still passing, plus the `scripts/verify.mjs` checks in the checklist.
+> 1. **Server-owned trophies**: `kc_trophies` and `kc_battles`, and the `kc-battle` Edge Function (`start` and `finish`) exactly as in *Trophy battles checked by the server*:
+>    - only the function writes trophies;
+>    - one open battle at a time per player, and starting another counts the open one as a loss;
+>    - a battle left mid-way is a loss, except against SirSC;
+>    - a player's trophies are adopted from their save once, the first time;
+>    - `kc_get_progress` returns them, and `kc_exchange` reads `best` from them.
+> 2. The other tables: `kc_progress` with its private history, `kc_presence`, `kc_invites`, and the private spend and exchange logs.
+> 3. The other functions: `kc_ping`, `kc_get_progress`, `kc_save_progress`, `kc_friends`, `kc_friend_request`, `kc_friend_respond`, `kc_poll`, `kc_invite`, `kc_invite_respond`, `kc_spend` and `kc_exchange`. Also check that `sirsc_me` and `sirsc_member_claim` work with `game = 'kc'`.
+> 4. The Realtime authorization policies for the private channels `kc-<code>`, used by battles with friends.
+> 5. Wallet safety: every balance change locks the wallet row, never goes below zero, and writes a ledger row in the same transaction. `kc_spend` is idempotent on `ref`.
+> 6. Tests, all passing with every existing test still passing:
+>    - SQL tests like the existing ones (native PostgreSQL, no Docker);
+>    - Edge Function tests, including a full battle played through `start` and `finish` (use the battles in `tools/verify-test.js` as fixtures);
+>    - the `scripts/verify.mjs` checks in the checklist.
 >
 > Before you finish: run the full test suite, check every name and JSON key against the contract, and report what you built, what the tests checked, and anything you had to interpret. Push the branch, but don't deploy to the live Warden Chat project until SirSC says so.
 
@@ -47,9 +78,14 @@ Realtime policy and the checklist), then how the whole game works.
   account in the game creates a Warden Chat account, exactly as Warden Chat's own sign-up does
   (`<username>@warden.invalid`, the username in `user_metadata.username`, so `handle_new_user` makes
   the profile).
-- **There is no Kingdom Clash server.** The browser talks straight to Supabase: Auth to sign in, the
-  `kc_*` functions (PostgREST, `POST /rest/v1/rpc/<name>`) for everything else, and Supabase Realtime for
-  battles with friends. Every rule the server owns lives in the database.
+- **The browser talks straight to Supabase:**
+  - Auth to sign in;
+  - the `kc_*` SQL functions (PostgREST, `POST /rest/v1/rpc/<name>`);
+  - **one Edge Function, `kc-battle`** (`POST /functions/v1/kc-battle`), for trophy battles, because
+    checking one means running the game's JavaScript;
+  - Supabase Realtime for battles with friends.
+
+  Every other rule the server owns lives in the database.
 - **Friends are the Warden Chat friends players already have.** Use the friendships Warden Chat's games
   already share: Brain Rocket's `br_friend_requests` and `br_friendships`, which Apples to Oranges also
   uses. If Warden Chat's own Friends feature (the one in full use) keeps friendships elsewhere, use that
@@ -57,11 +93,17 @@ Realtime policy and the checklist), then how the whole game works.
 - **Diamonds, coins and membership are the SirSC wallet's**, with game id `kc`. The game shows what
   `sirsc_me('kc')` says. The server takes diamonds (`kc_spend`) or coins (`kc_exchange`) **before** a
   purchase in the game goes through. The game never pays out coins or diamonds: there is no `kc_reward`.
-  Diamonds are bought or granted on Warden Chat, as today. **Rubies** (the in-game currency), cards,
-  trophies and everything else are the game's own and live in the progress document.
-- **The progress document is the player's own save**, like Apples to Oranges' bests. The server stores
-  it, keeps old copies, and refuses saves based on an old revision. It doesn't judge what is inside,
-  except that `kc_exchange` reads `best` from it.
+  Diamonds are bought or granted on Warden Chat, as today.
+- **Trophies are the server's.** A signed-in player's trophies, best trophies, record and streak live in
+  `kc_trophies` and change only through `kc-battle`, from battles the server issued and replayed itself
+  (see *Trophy battles checked by the server*). The game shows what the server says: whatever a save
+  holds, the next sync puts the server's numbers back.
+- **The progress document is the player's own save**, like Apples to Oranges' bests. It holds **Rubies**
+  (the in-game currency), cards, chests and everything else. The server stores it, keeps old copies,
+  and refuses saves based on an old revision. It doesn't judge what is inside, except two reads:
+  - `kc-battle` reads the player's deck, card levels, evolutions and King Tower from it when a battle
+    starts;
+  - it adopts the player's trophies from it once, the first time.
 - **Banned or suspended accounts.** Every `kc_*` function except `kc_ping` refuses a restricted account
   the same way as no session: `kc_not_signed_in`. The browser then calls Warden Chat's existing
   `my_account_state()` and shows the restriction. Nothing more to build for that.
@@ -148,6 +190,31 @@ create table warden_private.kc_exchanges (
   user_id uuid not null references auth.users(id) on delete cascade,
   day date not null, coins integer not null default 0 check (coins >= 0), primary key (user_id, day)
 );
+-- trophies, owned by the server: written only by the kc-battle Edge Function
+create table public.kc_trophies (
+  user_id    uuid primary key references auth.users(id) on delete cascade,
+  trophies   integer not null default 0 check (trophies >= 0),
+  best       integer not null default 0 check (best >= trophies),
+  w integer not null default 0, l integer not null default 0, d integer not null default 0,   -- trophy-battle record
+  streak     integer not null default 0,        -- + wins in a row, - losses in a row (matchmaking uses it)
+  updated_at timestamptz not null default now()
+);
+-- every trophy battle the server issued: what the game needs to play it, and what the replay found
+create table public.kc_battles (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  rules       text not null,                     -- the rules version it was played with
+  seed        bigint not null, bot_seed bigint not null, foe_seed bigint not null,   -- 0 to 2^32 - 1
+  foe         jsonb not null,                    -- KCServerCore.issue(...)
+  setup       jsonb not null,                    -- KCServerCore.setup(doc): the player's side
+  status      text not null default 'open' check (status in ('open', 'finished', 'abandoned', 'invalid')),
+  plays       jsonb,                             -- what the game sent
+  result      jsonb,                             -- the replay: { ok, winner, crowns, reason, tick } or { ok: false, error, at }
+  trophies_before jsonb, trophies_after jsonb,   -- kc_trophies before and after
+  created_at  timestamptz not null default now(),
+  finished_at timestamptz
+);
+create index on public.kc_battles (user_id, status);
 ```
 
 Invites older than **120 seconds** count as expired. Old invites, and presence rows older than a day,
@@ -162,9 +229,14 @@ that stay on each device:
 - `abandoned`, `passRolled`;
 - the wallet's mirrors: `diamonds`, `wallet` (coins) and `member`.
 
-It also carries `"kcSchema": 1`. A real save is about 5 KB; the limit is 128 KB. The server only needs:
-- `doc->>'best'`: the highest trophies ever reached, a whole number, used by `kc_exchange`;
-- optionally `doc->>'trophies'`, `doc->>'xp'` and `doc->>'name'` for future leaderboards.
+It also carries `"kcSchema": 1`. A real save is about 5 KB; the limit is 128 KB. What the server reads
+from it:
+- **`kc-battle`** reads it through `KCServerCore.setup(doc)` (deck, card levels, evolutions, King Tower)
+  when a battle starts. The game saves first, so the copy is current. The first time, it also reads it
+  through `KCServerCore.adopt(doc)` for the trophies. After that, the `trophies`, `best`, `trophyRecord`
+  and `streak` in the document are just the game's copy of `kc_trophies`, and the server ignores them.
+- **`kc_exchange`** reads `best` from `kc_trophies`, or from `doc->>'best'` while the player has no
+  `kc_trophies` row yet.
 
 The full field list is in *How the game works* below.
 
@@ -194,7 +266,11 @@ error shows "Something went wrong".
 Returns `true`. Callable with only the publishable key.
 
 #### `kc_get_progress() returns json`
-`{ "doc": <jsonb or null>, "rev": <int, 0 when no row> }`
+`{ "doc": <jsonb or null>, "rev": <int, 0 when no row>, "trophies": <kc_trophies row or null> }`
+- `trophies` is `{ "trophies", "best", "w", "l", "d", "streak" }`, or `null` before the player's first
+  checked battle.
+- **The key must always be there.** Its presence tells the game that trophies are checked: from then
+  on every trophy battle goes through `kc-battle`, and the game takes these numbers over its own.
 
 #### `kc_save_progress(doc jsonb, base_rev integer) returns json`
 - `doc` must be an object of at most 131,072 bytes (`octet_length(doc::text)`); otherwise `kc_bad_progress`.
@@ -299,8 +375,10 @@ go below zero, and every spend is in the ledger.
 Swaps wallet coins for Rubies, **one way**, at 1 coin = 1 Ruby, up to a daily limit that depends on
 the highest arena the player has reached.
 - `coins` must be a whole number from 1 to 10,000; otherwise `kc_bad_amount`.
-- The arena comes from `best = (kc_progress.doc->>'best')::int`, taken as 0 when there is no row or
-  the value isn't a number:
+- The arena comes from `best`:
+  - `kc_trophies.best`;
+  - or, while there is no `kc_trophies` row, `(kc_progress.doc->>'best')::int`;
+  - 0 when there is neither or it isn't a number.
 
 | best trophies | 0 | 300 | 600 | 900 | 2,000 | 2,600 | 3,300 | 4,100 | 5,000 | 6,000 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -318,6 +396,116 @@ the highest arena the player has reached.
   5. return `{ "ok": true, "coins": <n>, "rubies": <n>, "used": <today's total>, "cap": <limit>, "me": <sirsc_me('kc')> }`.
 
   The game adds the Rubies to the save.
+
+### Trophy battles checked by the server: the `kc-battle` Edge Function
+
+The battle simulation (`js/sim.js`) is deterministic: exact arithmetic, seeded randomness, no clock. So
+is the computer opponent (`js/bot.js`), given its seed. So a battle is fully decided by:
+1. the opponent;
+2. three seeds;
+3. the player's side;
+4. the player's own card plays.
+
+The server picks 1–3 and reads 3 from the save; only 4 comes from the browser. The server replays the
+battle with the game's own code and pays trophies for **its** result. The game's claimed result is
+only logged.
+
+**The code is done.** `server/kc-battle-core.mjs` is an ES module (Deno or Node) holding the game's
+`cards`, `trainers`, `sim`, `bot` and `progress` files with `server/verify.js`. `import { KCServerCore }
+from './kc-battle-core.mjs'` gives:
+
+| Call | Returns |
+| --- | --- |
+| `KCServerCore.RULES` | the rules version (12 hex characters), the same one the game sends |
+| `adopt(doc)` | `{ trophies, best, w, l, d, streak }` from a save: a player's trophies the first time |
+| `roadOpen(doc)` | whether the save has the Trophy Road open (Trainer Luc beaten) |
+| `setup(doc)` | `{ deck, cardLevels, evos, king }`: the player's side, from the save |
+| `issue(trophies, foeSeed)` | the opponent (JSON): what the game's matchmaking gives at these trophies, SirSC included |
+| `replay({ seed, botSeed, setup, foe, plays, end })` | `{ ok: true, winner, crowns, reason, tick }`, or `{ ok: false, error, at }` when a play can't have happened |
+| `settle(trophies, foe, winner, crowns)` | the trophies after a result, by the game's rules: stakes 20–40, arena floors, streaks, SirSC costs nothing; plus `delta` and `boss` |
+| `abandon(trophies, foe)` | the same for a battle that was left: a loss (nothing against SirSC) |
+| `clean(trophies)` | a trophy object with junk numbers fixed |
+
+In the game's terms, `winner` is 0 (the player), 1 (the opponent) or −1 (a draw), and `crowns` is
+`[player, opponent]`. A replay takes about 0.1 s of CPU (6,000–7,000 steps). Each call loads its own
+copy of the rules, so requests never share state.
+
+**`POST /functions/v1/kc-battle`.** The player's access token is in `Authorization: Bearer`, the
+publishable key in `apikey`, and the body is JSON. Answer CORS preflight (`OPTIONS`) for the game's
+origin. Use the service role inside the function, and check the caller's session the way the SQL
+functions do. Errors are HTTP 4xx with `{ "error": "<code>" }`: `kc_not_signed_in` (401), the others
+400 or 409 as noted.
+
+**`{ "action": "start", "rules": "<version>" }`** begins a trophy battle. In one transaction, with the
+player's `kc_trophies` row locked:
+1. `rules` must equal `KCServerCore.RULES`; otherwise `kc_update_needed` (409). The game then says a
+   new version is out.
+2. Read `kc_progress.doc`; no row → `kc_no_progress`. `KCServerCore.roadOpen(doc)` false →
+   `kc_road_closed`.
+3. Get the trophies:
+   - the `kc_trophies` row;
+   - or, the first time, `KCServerCore.adopt(doc)`, inserted as the row.
+4. **Settle every `open` battle of the player as `abandoned`.** For each, update the trophies to
+   `KCServerCore.abandon(trophies, foe)`, so starting a new battle never dodges a loss.
+5. Pick `seed`, `bot_seed` and `foe_seed`: random whole numbers from 0 to 2^32 − 1, from a secure
+   source. Then compute:
+   - `foe = KCServerCore.issue(trophies, foe_seed)`;
+   - `setup = KCServerCore.setup(doc)`.
+6. Insert the `kc_battles` row (`open`). At most 120 battles an hour → `kc_rate_limited`.
+7. Return:
+
+```jsonc
+{ "battle_id": "uuid", "seed": 3052700269, "bot_seed": 1830022651, "foe": { ... }, "setup": { ... },
+  "trophies": { "trophies": 1500, "best": 1600, "w": 60, "l": 50, "d": 0, "streak": 0 } }
+```
+
+The game plays exactly that battle and shows those trophies.
+
+**`{ "action": "finish", "battle_id": "uuid", "plays": [[tick, slot, x, y, card], ...], "end": null | { "tick": n, "reason": "surrender" } | { "reason": "left" }, "claimed": { "winner", "crowns" } }`**
+ends one. In one transaction, with the battle row and the `kc_trophies` row locked:
+1. The battle must be the caller's and `open`; otherwise `kc_battle_closed` (409). Accept it for 24
+   hours after `created_at`: the game resends a finish it couldn't deliver before its next battle.
+2. `plays` is at most 1,500 entries (otherwise `kc_bad_request`). `end` and `claimed` are as shown.
+3. Work out the result:
+   - `end.reason = 'left'` (the page was closed or reloaded mid-battle) → `abandoned`, settled with
+     `KCServerCore.abandon`.
+   - Otherwise `r = KCServerCore.replay({ seed, botSeed: bot_seed, setup, foe, plays, end })`:
+     - `r.ok` → `finished`, `KCServerCore.settle(trophies, foe, r.winner, r.crowns[0])`;
+     - not ok (a play that can't have happened: a card not in that slot, energy it didn't have, a
+       wrong place, plays out of order or after the end) → `invalid`, settled as a loss with
+       `abandon`, and kept for review.
+4. Store `plays`, `result`, `trophies_before`, `trophies_after` and `finished_at`. Update `kc_trophies`.
+5. Return:
+
+```jsonc
+{ "battle_id": "uuid", "verified": true, "winner": 1, "crowns": [0, 3], "reason": "king", "delta": -34, "boss": false,
+  "trophies": { "trophies": 1466, "best": 1600, "w": 60, "l": 51, "d": 0, "streak": -1 } }
+```
+
+`verified` is false for `left` and `invalid`.
+
+**Battles nobody finishes.** An `open` battle is settled as `abandoned`:
+- when the same player starts their next one (step 4 above);
+- or by a cleanup more than 24 hours after `created_at`.
+
+**What the game does around it** (already built):
+- **Signed out**, or `kc_get_progress` without the `trophies` key: trophy battles are local, as
+  before.
+- **Signed in:** before `start` the game sends its latest save, so `setup` matches it.
+- **Offline:** without a connection trophy battles wait (Practice works offline).
+- **Results:** the result screen shows the game's own count at once, then takes the server's (they
+  are the same unless the save was tampered with).
+- **A finish that can't be sent** waits on the device and goes before the next `start`.
+- **A battle left by a reload** is sent as `{ "reason": "left" }` when the game next loads.
+- **Not deployed:** if `kc-battle` answers 404, the game plays the battle locally. Deploy it together
+  with the migration.
+
+**Rules versions.** `KCServerCore.RULES` is a hash of the files that decide a battle (`js/cards.js`,
+`js/sim.js`, `js/bot.js`, `js/progress.js`). The game's build stamps the same hash and sends it with
+`start`. **Whenever those files change, run `python3 build-server.py` and redeploy the function with
+the new `server/kc-battle-core.mjs`.** Until then the new game gets `kc_update_needed`, so nobody's
+battle is checked with the wrong rules. Battles already issued keep their own `rules`, so the function
+can keep older bundles alongside if a release ever needs a changeover window.
 
 ### Battles with friends: Supabase Realtime
 
@@ -351,7 +539,8 @@ create policy "kc rooms: write" on realtime.messages for insert to authenticated
 
   So a battle is about 30 small messages a second for about 3–4 minutes. Check the project's Realtime
   quota (messages per second, concurrent channels) for the number of battles expected.
-- Battles with friends pay nothing: no trophies, chests, Rubies or experience. Nothing to record.
+- Battles with friends pay nothing: no trophies, chests, Rubies or experience. Nothing to record, and
+  nothing for `kc-battle` to check.
 
 ### What players can and can't see
 
@@ -364,46 +553,65 @@ create policy "kc rooms: write" on realtime.messages for insert to authenticated
 
 ### Checklist
 
-1. One migration in `sirsc104-debug/warden-chat`:
+1. **Server-checked trophies:**
+   - `kc_trophies` and `kc_battles`;
+   - the `kc-battle` Edge Function with `start` and `finish` exactly as specified, using
+     `server/kc-battle-core.mjs` unchanged;
+   - `kc_get_progress` always returns the `trophies` key;
+   - `kc_exchange` reads `best` from `kc_trophies`.
+
+   Test it:
+   - a full battle through the function (the `tools/verify-test.js` battles as fixtures) pays what
+     `settle` says;
+   - a tampered play gives `invalid` and a loss;
+   - `left` is a loss;
+   - SirSC losses cost nothing;
+   - starting while a battle is open counts it as lost;
+   - the first battle adopts the save's trophies;
+   - a wrong `rules` gets `kc_update_needed`;
+   - nothing but the function writes `kc_trophies`.
+2. One migration in `sirsc104-debug/warden-chat`:
    - the tables above, with RLS on, no table grants, `on delete cascade`;
    - the functions above, `SECURITY DEFINER`, `set search_path = public, pg_temp`, with the session
      check;
    - the error codes and JSON keys exactly as written;
    - `execute` granted to `authenticated`, plus `anon` on `kc_ping`.
-2. `kc_save_progress`: optimistic locking on `rev`, a conflict returned (not raised), the replaced copy
+3. `kc_save_progress`: optimistic locking on `rev`, a conflict returned (not raised), the replaced copy
    kept in `kc_progress_history`.
-3. Friends through the existing friendships: a friendship made in any Warden Chat game shows here.
+4. Friends through the existing friendships: a friendship made in any Warden Chat game shows here.
    `online` and `in_game` come from `kc_presence`.
-4. Invites: only to friends, expire after 120 s, a newer one cancels the older one to the same friend,
+5. Invites: only to friends, expire after 120 s, a newer one cancels the older one to the same friend,
    only the invited player can answer.
-5. Wallet:
+6. Wallet:
    - `kc_spend` and `kc_exchange` lock the wallet row, never go below zero, and write the ledger row
      in the same transaction;
    - `kc_spend` is idempotent on `ref` and enforces the kind table;
    - `kc_exchange` enforces the arena limit per UTC day;
    - `sirsc_me` and `sirsc_member_claim` work with `game = 'kc'`.
-6. Realtime policies: a signed-in player can join `kc-abcde` and a restricted or anonymous one can't.
-7. Tests (native PostgreSQL, no Docker), with the existing tests still passing. Cover:
+7. Realtime policies: a signed-in player can join `kc-abcde` and a restricted or anonymous one can't.
+8. Tests (native PostgreSQL, no Docker), with the existing tests still passing. Cover:
    - save, conflict, history;
    - friends' visibility, presence;
    - invites: expiry, cancel, respond, not friends;
    - spends: each kind's limits, idempotency, not enough diamonds;
    - exchange: limit by arena, UTC day, not enough coins;
    - restricted accounts refused.
-8. `scripts/verify.mjs` checks:
+9. `scripts/verify.mjs` checks:
    - anon can call `kc_ping` but nothing else;
-   - a player can't read another player's progress;
+   - a player can't read another player's progress or trophies, and nobody can write `kc_trophies` or
+     `kc_battles` except through `kc-battle`;
    - non-friends don't see each other's presence;
    - a suspended account gets `kc_not_signed_in`.
-9. Leave Supabase Auth settings alone (email confirmation stays off).
-10. Deploy to the Warden Chat project once SirSC says so. Nothing changes in the game: accounts appear
-    on their own once `kc_ping` answers.
+10. Leave Supabase Auth settings alone (email confirmation stays off).
+11. Deploy the migration and the function together, once SirSC says so. Nothing changes in the game:
+    accounts appear on their own once `kc_ping` answers, and trophy battles are checked from then on.
 
 **Trying the front end before the back end exists:**
 `python3 build-artifact.py demo.html --standalone --accounts-demo` builds the game with the pretend
 back end. Sign in as `demo` / `kingdom12345`; `pal` and `sam` have the same password.
 - Open a second tab and sign in as `pal` (each tab keeps its own session).
 - Invite pal from demo's Friends window; accepting in pal's tab starts a battle between the two tabs.
+- Trophy battles there go through the pretend `kc-battle`, which checks them with the real bundle.
 - The two tabs share one progress save in the demo; real players each have their own.
 
 ---
@@ -421,6 +629,8 @@ back end. Sign in as `demo` / `kingdom12345`; `pal` and `sam` have the same pass
   1. `backend`, `cards`, `trainers`, `sim`, `progress`, `bot`;
   2. `arenas`, `art`, `art2`–`art5`, `scenery`, `audio`, `items`, `upgrades`;
   3. `net`, `menu`, `emotes`, `game`, `account`.
+- **The server's copy of the rules:** `python3 build-server.py` writes `server/kc-battle-core.mjs` (see
+  *Trophy battles checked by the server*).
 - **Builds:** `python3 build-artifact.py OUT.html [--standalone] [--accounts-demo]` inlines everything
   into one file. Images become data URIs; it must stay under 16 MB and is about 13.4 MB.
   - `dist/kingdom-clash.html`: the claude.ai artifact build.
@@ -430,6 +640,7 @@ back end. Sign in as `demo` / `kingdom12345`; `pal` and `sam` have the same pass
     host the standalone file (or the folder) on the Warden Chat domain.
 - **Tests** (Node, headless): `node tools/<name>.js`:
   - `progress-test`, `trainers-test 100`, `cards-test`, `sim-test 40`, `path-test`;
+  - `verify-test` (the server's replay of trophy battles: it builds `server/kc-battle-core.mjs` first);
   - `arenas5-10-test`, `expansion-test`, `evo-test`;
   - `balance-test` (balance report).
 
@@ -490,6 +701,9 @@ All the rules are here, with no screen code. Every change calls `save()`, which 
   - The first 3 trophy battles are against beginners (`FIRST_STEPS`).
   - **No hidden handicaps either way.**
   - A trophy battle left unfinished (reload, closed tab) counts as a loss at the next load (`live`).
+  - **Signed in, the server checks every trophy battle** and keeps the trophies (`kc-battle` above). The
+    game builds the battle with `KCProgress.trophyBattleOpts(foe, setup, seed)`, the same function the
+    server's replay uses, and takes the server's numbers with `KCProgress.setTrophies`.
 - **SirSC:** from 4,100 trophies, about 1 trophy battle in 25 is against SirSC (`SIRSC`).
   - Every card and his King Tower are at level 50, with the best play.
   - Losing to him costs no trophies and doesn't count toward a losing streak; leaving his battle
@@ -519,7 +733,7 @@ All the rules are here, with no screen code. Every change calls `save()`, which 
   - Contents are rolled when the chest is won and stored, so reopening the game can't reroll them.
   - One chest unlocks at a time on a real-time timer (`ends`); diamonds skip the timer (`skip`).
   - Which cards can drop depends on the best trophies reached.
-  - The arena gate on tiers is in `CHEST_RULES` and is switched off for now (`allUnlocked: true`).
+  - The arena gate on tiers is in `CHEST_RULES` and is on: a chest above the player's arena is given as the highest tier it allows (Arena 1: Wooden and Silver; Gold from 2, Platinum from 3, Legendary from 4, Mythic from 5), and chests in Arenas 1 to 4 hold more to make up for it (`ECONOMY.gateBoost`).
 - **Cards:**
   - 70 cards: 22 spells, 12 buildings, 36 troops.
   - Rarities start at levels 1, 3, 6 and 9, up to 15.
@@ -593,14 +807,18 @@ document:
   - the wallet mirror: `sirsc_me` on sign-in, on returning to the tab, and every eighth poll;
   - `kc_spend` and `kc_exchange`;
   - the friends provider and `kc_poll`;
-  - the Realtime room transport.
+  - the Realtime room transport;
+  - trophy battles: `kc-battle` `start` and `finish`, the queue of finishes waiting for a connection,
+    and the server's trophies on every sync.
 
   Its settings are in `KCAccount.CFG`: Supabase URL and key, `supabaseJs`, poll seconds.
 - `js/backend.js` (`KCBackend`) is the seam the game uses:
   - `status`, `account`, `login`, `signOut`, `saved`, `restore`;
   - `pay(kind, diamonds)`: before every diamond purchase;
   - `exchange(coins)`;
-  - `friends()`, `transport()`, `wallet()`.
+  - `friends()`, `transport()`, `wallet()`;
+  - `ranked()`, `battleStart()`, `battleFinish()`: trophy battles checked by the server (used by
+    `js/game.js`).
 - The screens (`js/menu.js`):
   - the Settings account row (*Sign in* / *Signed in as …* / *Sign out*);
   - the sign-in window (sign in or create an account);
@@ -612,13 +830,11 @@ document:
 
 ### Not part of this handoff (later, maybe)
 
-- **Server-checked trophy battles and leaderboards.** Today the progress document is the player's own,
-  as in Apples to Oranges. Two possible next steps:
-  - **Leaderboards** could read `trophies`/`best` from `kc_progress`, but a determined player can edit
-    their own save.
-  - **Trusted trophies**: the server issues each battle's seed and opponent (port
-    `KCProgress.trophyFoe` and `js/sim.js` to an edge function; both are plain JavaScript), and the
-    client sends the plays. The server replays them and pays the trophies.
+- **Leaderboards.** `kc_trophies` is now trustworthy, so a leaderboard can read it directly (the game
+  has no screen for one yet).
+- **Cards, chests and Rubies on the server.** They are still the player's own save, as in Apples to
+  Oranges. Trophies are checked, but the card levels a battle is played with come from the save. The
+  battle really was played and won under the game's rules, with the cards the save says. Moving chests
+  and upgrades to the server would close that too.
 - The **Clan** tab (shows "Soon").
 - Profile pictures from Warden Chat (the game uses letter avatars).
-- Arena 11 (no art yet).

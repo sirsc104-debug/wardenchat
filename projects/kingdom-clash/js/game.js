@@ -48,7 +48,10 @@
   function startBattle(foe) {
     KCSound.unlock();
     if (typeof foe === 'string') foe = KC_TRAINER[foe];
-    const T = G.trainer = foe || KCMenu.nextFoe();
+    foe = foe || KCMenu.nextFoe();
+    // signed in, a trophy battle comes from the server, which checks it afterwards (js/backend.js)
+    if (foe.kind === 'trophy' && !foe.battleId && !foe.unranked && KCBackend.ranked()) { startRanked(); return; }
+    const T = G.trainer = foe;
     G.online = null;
     G.replay = null;
     const challenge = T.kind === 'challenge', practice = T.kind === 'practice' || T.kind === 'friend' || challenge, trophy = T.kind === 'trophy' || practice, arenaNow = KCProgress.arena();
@@ -57,7 +60,7 @@
     B = G.art.margin;
     KCScenery.setArena(G.theme);
     G.embers = [];
-    G.s = S.create(G.simOpts = {
+    G.s = S.create(G.simOpts = T.battleId ? KCProgress.trophyBattleOpts(T, T.setup, T.seed) : {
       seed: (Date.now() ^ Math.floor(Math.random() * 1e9)) >>> 0, towerDamage: [1, T.towerDamage],
       decks: [practice ? T.yourDeck : trophy ? KCProgress.state.deck : KCProgress.trainingDeck(), T.deck || KC_STARTER_DECK],
       cardLevels: [practice ? T.yourLevels : KCProgress.cardLevels(), T.cardLevels || {}],
@@ -68,7 +71,7 @@
       levels: [challenge ? T.towerLevel : KCProgress.kingInfo().level, trophy ? T.kingLevel || 1 : 1],
     });
     G.sim = G.s;
-    G.bot = KCBot.create(1, { skill: T.skill, seed: Math.floor(Math.random() * 1e9), style: T.style });
+    G.bot = KCBot.create(1, { skill: T.skill, seed: T.battleId ? T.botSeed >>> 0 : Math.floor(Math.random() * 1e9), style: T.style });
     const where = challenge ? `Daily Challenge · ${T.challenge.name}` : practice ? `Practice · ${arenaNow.name}` : trophy ? `${arenaNow.name} · ${T.tier}` : `Training Grounds · ${T.tier}`;
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', where], ['#scoreFoe', T.name], ['#introFoeName', T.name],
       ['#introFoeTier', trophy ? T.tier : `Level ${T.level} · ${T.tier}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
@@ -92,6 +95,38 @@
     $('#intro').classList.toggle('finding', G.finding);
     $('#intro').classList.toggle('boss', !!T.boss);
     $('#intro').hidden = false;
+  }
+  /* A trophy battle checked by the server: it picks the opponent and the seeds (and has the player's
+     cards from their saved progress); afterwards it replays the battle from the player's plays and says
+     what the trophies are. Without a connection, trophy battles wait (Practice works offline). */
+  let starting = false;
+  async function startRanked() {
+    if (starting) return;
+    starting = true; document.body.classList.add('kc-wait');
+    const slow = setTimeout(() => rankedSay('Finding an opponent…'), 450);
+    const r = await KCBackend.battleStart();
+    clearTimeout(slow); starting = false; document.body.classList.remove('kc-wait');
+    if (r.local) { startBattle(Object.assign(KCMenu.nextFoe('trophy'), { unranked: true })); return; }
+    if (!r.ok) {
+      KCSound.play('error');
+      rankedSay(r.error === 'offline' ? "Can't reach WardenChat. Trophy battles need a connection; Practice works offline."
+        : r.error === 'kc_update_needed' ? 'A new version of Kingdom Clash is out. Reload the page to play trophy battles.'
+          : r.error === 'kc_rate_limited' ? 'That is a lot of battles! Take a short break and try again.' : "Trophy battles can't start right now. Try again in a moment.");
+      if (G.phase !== 'end') KCMenu.refresh();
+      return;
+    }
+    startBattle(r.foe);
+  }
+  const rankedSay = msg => (G.phase === 'end' || G.phase === 'play' ? toast(msg) : KCMenu.toast(msg));
+  // the end of a checked battle: the player's plays go to the server, and its trophies are the ones kept
+  function finishRanked(T, e) {
+    const s = G.s, mine = s.log.filter(l => l[1] === 0).map(l => [l[0], l[2], l[3], l[4], l[5]]);
+    const end = e.reason === 'surrender' ? { tick: s.tick, reason: 'surrender' } : null, shown = KCProgress.state.trophies;
+    KCBackend.battleFinish(T.battleId, mine, end, { winner: e.winner, crowns: s.crowns.slice() }).then(r => {
+      if (!r.ok) return;
+      if (r.trophies && r.trophies.trophies !== shown) rankedSay(`Your trophies were checked: ${r.trophies.trophies.toLocaleString('en-US')}.`);
+      KCMenu.refresh();
+    });
   }
   // Under the VS screen the battle is already laid out: until it starts, the opponent's name reads
   // Loading… and your cards lie face down; they flip over when the fight begins.
@@ -962,6 +997,7 @@
     const stats = { cards: mine.length, spells: mine.filter(c => c.kind === 'spell').length, troops: mine.filter(c => c.kind === 'troop').length };
     if (G.replay) { G.res = { kind: 'replay' }; $('#countdown').hidden = true; banner(e.winner === 0 ? 'Victory!' : e.winner === 1 ? 'Defeat' : 'Draw'); return; }
     G.res = G.online ? { kind: 'online' } : KCMenu.recordResult(G.trainer, e.winner, G.s.crowns[0], stats);
+    if (!G.online && G.trainer.battleId) finishRanked(G.trainer, e);
     if (!G.online && G.simOpts) logThis(e);
     G.res.tip = e.winner === 1 && !G.online ? lossTip() : '';
     if (G.online) endOnline();

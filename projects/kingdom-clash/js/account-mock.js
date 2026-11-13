@@ -18,7 +18,7 @@
     let d = null;
     try { d = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { d = null; }
     if (d && d.v === 1) return d;
-    d = { v: 1, users: {}, progress: {}, friendships: [], requests: [], presence: {}, invites: [], spends: {}, exchanged: {}, tokens: {} };
+    d = { v: 1, users: {}, progress: {}, friendships: [], requests: [], presence: {}, invites: [], spends: {}, exchanged: {}, tokens: {}, trophies: {}, battles: {} };
     const add = (uid, username, diamonds, coins) => { d.users[uid] = { id: uid, username, password: 'kingdom12345', diamonds, coins, member: false }; };
     add('u-demo', 'demo', 60, 25000); add('u-pal', 'pal', 10, 5000); add('u-sam', 'sam', 0, 0);
     d.friendships.push(['u-demo', 'u-pal']);
@@ -47,7 +47,7 @@
   const RPC = {
     kc_ping: () => ok(true),
     my_account_state: () => ok({ active: true }),
-    kc_get_progress: (d, u) => { const r = d.progress[u.id]; return ok({ doc: r ? r.doc : null, rev: r ? r.rev : 0 }); },
+    kc_get_progress: (d, u) => { const r = d.progress[u.id]; return ok({ doc: r ? r.doc : null, rev: r ? r.rev : 0, trophies: (d.trophies || {})[u.id] || null }); },
     kc_save_progress(d, u, a) {
       const doc = a.doc;
       if (!doc || typeof doc !== 'object' || Array.isArray(doc) || JSON.stringify(doc).length > 131072) return fail('kc_bad_progress');
@@ -113,7 +113,7 @@
     kc_exchange(d, u, a) {
       const n = a.coins;
       if (!Number.isInteger(n) || n <= 0) return fail('kc_bad_amount');
-      const best = (d.progress[u.id] && d.progress[u.id].doc && d.progress[u.id].doc.best) | 0;
+      const tr = (d.trophies || {})[u.id], best = tr ? tr.best | 0 : (d.progress[u.id] && d.progress[u.id].doc && d.progress[u.id].doc.best) | 0;
       const arena = ARENA_AT.filter(t => best >= t).length || 1, cap = CAP[arena];
       const x = d.exchanged[u.id] && d.exchanged[u.id].day === day() ? d.exchanged[u.id] : { day: day(), n: 0 };
       if (x.n + n > cap) return fail('kc_exchange_cap');
@@ -123,6 +123,39 @@
     },
   };
 
+  /* The kc-battle Edge Function: trophy battles checked with the server's bundle (KCServerCore, the same
+     server/kc-battle-core.mjs the real function imports). */
+  const rand32 = () => (Math.random() * 4294967296) >>> 0;
+  function battle(d, u, a) {
+    const V = KCServerCore;
+    d.trophies = d.trophies || {}; d.battles = d.battles || {};
+    const mine = Object.values(d.battles).filter(b => b.user === u.id && b.status === 'open');
+    if (a.action === 'start') {
+      if (String(a.rules || '') !== V.RULES) return { status: 409, data: { error: 'kc_update_needed' } };
+      const doc = d.progress[u.id] && d.progress[u.id].doc;
+      if (!doc) return { status: 400, data: { error: 'kc_no_progress' } };
+      if (!V.roadOpen(doc)) return { status: 400, data: { error: 'kc_road_closed' } };
+      let t = d.trophies[u.id] || V.adopt(doc);
+      for (const b of mine) { t = V.abandon(t, b.foe); b.status = 'abandoned'; }
+      const seed = rand32(), botSeed = rand32(), foe = V.issue(t, rand32()), setup = V.setup(doc), id = 'b-' + Math.random().toString(36).slice(2, 10);
+      d.trophies[u.id] = V.clean(t);
+      d.battles[id] = { id, user: u.id, seed, bot_seed: botSeed, foe, setup, status: 'open', at: Date.now() };
+      return ok({ battle_id: id, seed, bot_seed: botSeed, foe, setup, trophies: d.trophies[u.id] });
+    }
+    if (a.action === 'finish') {
+      const b = d.battles[a.battle_id];
+      if (!b || b.user !== u.id || b.status !== 'open') return { status: 409, data: { error: 'kc_battle_closed' } };
+      const t = d.trophies[u.id] || V.adopt(d.progress[u.id].doc);
+      // left mid-battle: a loss (not against SirSC), no replay needed
+      const left = a.end && a.end.reason === 'left';
+      const r = left ? { ok: false, error: 'left' } : V.replay({ seed: b.seed, botSeed: b.bot_seed, setup: b.setup, foe: b.foe, plays: a.plays, end: a.end });
+      const after = r.ok ? V.settle(t, b.foe, r.winner, r.crowns[0]) : V.abandon(t, b.foe);
+      d.trophies[u.id] = V.clean(after);
+      b.status = left ? 'abandoned' : r.ok ? 'finished' : 'invalid'; b.result = r;
+      return ok({ battle_id: b.id, verified: !!r.ok, winner: r.ok ? r.winner : 1, crowns: r.ok ? r.crowns : [0, 0], reason: r.ok ? r.reason : 'invalid', delta: after.delta, boss: !!b.foe.boss, trophies: d.trophies[u.id] });
+    }
+    return { status: 400, data: { error: 'kc_bad_request' } };
+  }
   function mock(method, url, headers, body) {
     return new Promise(res => setTimeout(() => {
       const d = db(), u0 = new URL(url), path = u0.pathname, a = body || {};
@@ -141,6 +174,10 @@
         if (byName(d, name)) out = authFail('user_already_exists', 'User already registered', 422);
         else if (String(a.password || '').length < 10) out = authFail('weak_password', 'Password should be at least 10 characters', 422);
         else { const u = { id: id('u'), username: name, password: a.password, diamonds: 0, coins: 0, member: false }; d.users[u.id] = u; out = ok(session(d, u)); }
+      } else if (path === '/functions/v1/kc-battle') {
+        const tok = String(headers.Authorization || '').replace(/^Bearer /, ''), t = d.tokens[tok];
+        const u = t && t.kind === 'access' && t.exp > Date.now() ? d.users[t.user] : null;
+        out = u ? battle(d, u, a) : { status: 401, data: { error: 'kc_not_signed_in' } };
       } else if (path === '/auth/v1/logout') {
         out = { status: 204, data: null };
       } else if (path.startsWith('/rest/v1/rpc/')) {
