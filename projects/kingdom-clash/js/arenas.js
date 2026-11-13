@@ -14,7 +14,7 @@ const KCArenas = (() => {
   const ART = {
     training: {
       name: 'Training Grounds',
-      centerpiece: { src: 'img/training-grounds.webp', w: 1448, h: 1086, bar: { left: 26.4, top: 87.9, width: 47.2, height: 5 } },
+      centerpiece: { src: 'img/training-grounds.webp', w: 1448, h: 1086, bar: { left: 26.87, top: 88.62, width: 46.06, height: 3.88 } },
       field: null, palette: 'training', margin: 0.6, fx: 'water',
       scenery: {
         left: {
@@ -48,7 +48,7 @@ const KCArenas = (() => {
 
     cinder: {
       name: 'Cinder Keep',
-      centerpiece: { src: 'img/cinder_keep_volcanic_arena_badge.webp', w: 1254, h: 1254, bar: { left: 23.6, top: 86.7, width: 52.8, height: 4.1 } },
+      centerpiece: { src: 'img/cinder_keep_volcanic_arena_badge.webp', w: 1254, h: 1254, bar: { left: 24.64, top: 86.79, width: 50.65, height: 5.28 } },
       palette: 'cinder', margin: 1.4, fx: 'lava',
       field: {
         src: 'img/cinder_keep_molten_battle_arena.webp', w: 1024, h: 1536,
@@ -96,7 +96,7 @@ const KCArenas = (() => {
   // Arena 2: Briar Hollow: mossy ruins in a forest, a stream for the river, lanterns on the walls.
   ART.briar = {
     name: 'Briar Hollow',
-    centerpiece: { src: 'img/briar_hollow_badge.webp', w: 1254, h: 1254, bar: { left: 24.3, top: 86, width: 51.4, height: 4.3 } },
+    centerpiece: { src: 'img/briar_hollow_badge.webp', w: 1254, h: 1254, bar: { left: 24.17, top: 86.67, width: 51.26, height: 4.73 } },
     palette: 'briar', margin: 1.4, fx: 'water',
     field: {
       src: 'img/briar_hollow_battlefield.webp', w: 1024, h: 1536,
@@ -147,7 +147,7 @@ const KCArenas = (() => {
   // Arena 3: Sunstone Arena: a sandstone desert fortress with an oasis channel for the river.
   ART.sunstone = {
     name: 'Sunstone Arena',
-    centerpiece: { src: 'img/sunstone_arena_badge.webp', w: 1122, h: 1402, bar: { left: 23.6, top: 84.1, width: 52.8, height: 4.4 } },
+    centerpiece: { src: 'img/sunstone_arena_badge.webp', w: 1122, h: 1402, bar: { left: 24.89, top: 85.56, width: 49.77, height: 3.13 } },
     palette: 'sunstone', margin: 1.4, fx: 'water',
     field: {
       src: 'img/sunstone_arena_battlefield.webp', w: 1024, h: 1536,
@@ -200,7 +200,7 @@ const KCArenas = (() => {
   // Arena 4: Stormspire: a storm-wrapped stone fortress with gold trim, blue gems and waterfalls.
   ART.stormspire = {
     name: 'Stormspire',
-    centerpiece: { src: 'img/stormspire_badge.webp', w: 1122, h: 1402, bar: { left: 24.1, top: 82.9, width: 53.5, height: 4.4 } },
+    centerpiece: { src: 'img/stormspire_badge.webp', w: 1122, h: 1402, bar: { left: 24.8, top: 83.99, width: 50.22, height: 3.13 } },
     palette: 'stormspire', margin: 1.4, fx: 'water',
     field: {
       src: 'img/stormspire_battlefield.webp', w: 1024, h: 1536,
@@ -247,7 +247,7 @@ const KCArenas = (() => {
   // Arena 5: Frostfang Keep: a frozen mountain fortress, an icy stream for the river, blue fire bowls.
   ART.frostfang = {
     name: 'Frostfang Keep',
-    centerpiece: { src: 'img/frostfang_badge.webp', w: 1122, h: 1402, bar: { left: 25, top: 82.5, width: 51, height: 4.3 } },
+    centerpiece: { src: 'img/frostfang_badge.webp', w: 1122, h: 1402, bar: { left: 24.12, top: 83.7, width: 50.52, height: 3.93 } },
     palette: 'frostfang', margin: 1.4, fx: 'water',
     field: {
       src: 'img/frostfang_battlefield.webp', w: 1024, h: 1536,
@@ -293,7 +293,7 @@ const KCArenas = (() => {
   // Arena 6: Blackwater Harbor: a sunny pirate harbor, a channel of sea water for the river, rope bridges.
   ART.blackwater = {
     name: 'Blackwater Harbor',
-    centerpiece: { src: 'img/blackwater_badge.webp', w: 1122, h: 1402, bar: { left: 22.5, top: 81.3, width: 55, height: 4 } },
+    centerpiece: { src: 'img/blackwater_badge.webp', w: 1122, h: 1402, bar: { left: 23.59, top: 82.1, width: 52.56, height: 3.96 } },
     palette: 'blackwater', margin: 1.4, fx: 'water',
     field: {
       src: 'img/blackwater_battlefield.webp', w: 1024, h: 1536,
@@ -340,7 +340,7 @@ const KCArenas = (() => {
   // Arena 7: Gearforge Citadel: a bronze fortress of furnaces and gears, a channel of glowing coolant.
   ART.gearforge = {
     name: 'Gearforge Citadel',
-    centerpiece: { src: 'img/gearforge_badge.webp', w: 1122, h: 1402, bar: { left: 22.5, top: 76.6, width: 55, height: 4 } },
+    centerpiece: { src: 'img/gearforge_badge.webp', w: 1122, h: 1402, bar: { left: 23.15, top: 75.2, width: 53.61, height: 4.6 } },
     palette: 'gearforge', margin: 1.4, fx: 'water',
     field: {
       src: 'img/gearforge_battlefield.webp', w: 1024, h: 1536,
@@ -384,7 +384,7 @@ const KCArenas = (() => {
   // Arena 8: Crystal Chasm: an underground cavern of glowing crystals, a stream of light for the river.
   ART.crystal = {
     name: 'Crystal Chasm',
-    centerpiece: { src: 'img/crystal_badge.webp', w: 1122, h: 1402, bar: { left: 20, top: 77.6, width: 60, height: 3.9 } },
+    centerpiece: { src: 'img/crystal_badge.webp', w: 1122, h: 1402, bar: { left: 23.25, top: 77.22, width: 52.71, height: 4.05 } },
     palette: 'crystal', margin: 1.4, fx: 'water',
     field: {
       src: 'img/crystal_battlefield.webp', w: 1024, h: 1536,
@@ -427,7 +427,7 @@ const KCArenas = (() => {
   // Arena 9: Skyward Sanctuary: a white marble and gold sanctuary on the clouds, a lily stream for the river.
   ART.skyward = {
     name: 'Skyward Sanctuary',
-    centerpiece: { src: 'img/skyward_badge.webp', w: 1228, h: 1254, bar: { left: 29.5, top: 82.4, width: 41.5, height: 3.8 } },
+    centerpiece: { src: 'img/skyward_badge.webp', w: 1228, h: 1254, bar: { left: 30.35, top: 82.31, width: 39.94, height: 3.15 } },
     palette: 'skyward', margin: 1.4, fx: 'water',
     field: {
       src: 'img/skyward_battlefield.webp', w: 1024, h: 1536,
@@ -472,7 +472,7 @@ const KCArenas = (() => {
   // Arena 10: Eclipse Throne: an obsidian fortress under a black sun, a river of lava, violet fire bowls.
   ART.eclipse = {
     name: 'Eclipse Throne',
-    centerpiece: { src: 'img/eclipse_badge.webp', w: 1218, h: 1254, bar: { left: 30.4, top: 87, width: 41.5, height: 3.4 } },
+    centerpiece: { src: 'img/eclipse_badge.webp', w: 1218, h: 1254, bar: { left: 30.9, top: 86.73, width: 40.5, height: 3.57 } },
     palette: 'eclipse', margin: 1.4, fx: 'lava',
     field: {
       src: 'img/eclipse_battlefield.webp', w: 1024, h: 1536,
