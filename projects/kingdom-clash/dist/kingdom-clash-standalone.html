@@ -2105,14 +2105,14 @@ button.slot:hover { transform: translateY(-3px); }
 @media (prefers-reduced-motion: reduce) { #hand .card.coach-pick { animation: none; } .coach { animation: none; } }
 
 /* milestone scenes */
-.scene { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px 16px;
+.ms-scene { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px 16px;
   box-sizing: border-box; overflow-y: auto; text-align: center; background: radial-gradient(circle at 50% 40%, #3b2f8a, #120c2c 70%); animation: sceneIn 0.5s ease-out; }
 @keyframes sceneIn { from { opacity: 0; } }
 .scene-rays { position: absolute; inset: -30%; background: repeating-conic-gradient(from 0deg, rgba(255, 220, 120, 0.09) 0 10deg, transparent 10deg 20deg); animation: sceneSpin 40s linear infinite; pointer-events: none; }
 @keyframes sceneSpin { to { transform: rotate(360deg); } }
-.scene > *:not(.scene-rays) { position: relative; }
+.ms-scene > *:not(.scene-rays) { position: relative; }
 .scene-kicker { color: #ffd34d; font-weight: 900; font-size: 18px; letter-spacing: 0.04em; text-transform: uppercase; animation: pop 0.4s ease-out 0.2s backwards; }
-.scene h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(34px, 6vw, 64px); color: #fff; text-shadow: 0 4px 0 var(--outline); animation: slamVs 0.5s ease-out 0.3s backwards; }
+.ms-scene h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(34px, 6vw, 64px); color: #fff; text-shadow: 0 4px 0 var(--outline); animation: slamVs 0.5s ease-out 0.3s backwards; }
 .scene-art { width: min(420px, 80vw, 42dvh); height: auto; filter: drop-shadow(0 14px 24px rgba(0, 0, 0, 0.5)); animation: pop 0.6s ease-out 0.45s backwards; }
 .scene-text { max-width: 560px; margin: 0; color: #e6ddff; font-size: 16px; line-height: 1.45; }
 .scene-cards { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 640px; }
@@ -2122,7 +2122,7 @@ button.slot:hover { transform: translateY(-3px); }
 .scene-cards img { width: 100%; border-radius: 10px; border: 3px solid var(--outline); }
 .scene-cards figcaption { font-size: 11px; font-weight: 800; color: #d9cfee; }
 @media (max-width: 760px) { .scene-cards figure { width: 56px; } .scene-text { font-size: 14px; } }
-@media (prefers-reduced-motion: reduce) { .scene, .scene-rays, .scene * { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .ms-scene, .scene-rays, .ms-scene * { animation: none !important; } }
 /* first-time pointers */
 .hint-tip { position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translateX(-50%); white-space: nowrap; z-index: 5; pointer-events: none;
   background: #ffe066; color: #1c1530; font-size: 12px; font-weight: 900; padding: 4px 10px; border-radius: 10px; border: 2px solid var(--outline); animation: hintBob 1.1s ease-in-out infinite; text-shadow: none; }
@@ -2219,6 +2219,56 @@ button.slot:hover { transform: translateY(-3px); }
   .center > .daily .challenge-btn { grid-column: 1 / -1; order: 3; }
 }
 
+/* under the VS screen: your cards face down until the fight begins, then they flip over */
+#battle.veiled .hand .card img, #battle.veiled .hand .card .cost, #battle.veiled .hand .card .evo-pips, #battle.veiled .hand .card .key, #battle.veiled .next img { visibility: hidden; }
+#battle.veiled .hand .card::after, #battle.veiled .next::after { content: '?'; position: absolute; inset: 0; display: grid; place-items: center; border-radius: 12px; border: 3px solid var(--outline);
+  background: repeating-linear-gradient(45deg, #3b2f8a 0 10px, #33287a 10px 20px); color: #ffd34d; font-family: var(--display); font-size: 44px; text-shadow: 0 3px 0 var(--outline); }
+#battle.veiled .next { position: relative; }
+#battle.veiled .next::after { top: auto; height: calc(var(--cardw, 110px) * 0.6); font-size: 24px; border-radius: 8px; border-width: 2px; }
+#battle.unveil .hand .card { animation: cardFlipIn 0.5s ease-out backwards; }
+@keyframes cardFlipIn { from { transform: perspective(400px) rotateY(90deg); } 60% { transform: perspective(400px) rotateY(-12deg); } }
+@media (prefers-reduced-motion: reduce) { #battle.unveil .hand .card { animation: none; } }
+
+/* the result screen: two columns when there are rewards (title and score left, rewards right), and the
+   buttons always in view */
+.result-card { max-height: calc(100dvh - 24px); overflow-y: auto; }
+.result-card:has(#resRewards:not([hidden])) { overflow: hidden; width: min(900px, 100%); display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); column-gap: 22px; row-gap: 12px; align-content: start; }
+.result-card:has(#resRewards:not([hidden])) > * { grid-column: 1; }
+.result-card:has(#resRewards:not([hidden])) > #resRewards { grid-column: 2; grid-row: 1 / span 8; align-self: start; max-height: calc(100dvh - 160px); overflow-y: auto; padding-right: 2px; }
+.result-card:has(#resRewards:not([hidden])) > .res-btns { grid-column: 1 / -1; }
+.result-card:has(#resRewards:not([hidden])) h2 { font-size: 48px; }
+.res-btns { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+.res-btns .big-btn { width: auto; min-width: 220px; flex: 1 1 220px; max-width: 360px; }
+.res-btns .pill { flex: 0 0 auto; }
+@media (max-width: 760px) {
+  .result-card, .result-card:has(#resRewards:not([hidden])) { display: flex; flex-direction: column; overflow-y: auto; }
+  .result-card:has(#resRewards:not([hidden])) > #resRewards { max-height: none; overflow: visible; }
+  .res-btns { position: sticky; bottom: -24px; margin: 0 -24px -24px; padding: 10px 16px 16px; background: linear-gradient(rgba(40, 30, 80, 0), var(--panel) 30%); }
+}
+/* the Shop on the result screen */
+.rr-earned { color: #e6ddff; font-size: 13px; }
+.rr-shop { flex-direction: column; align-items: stretch; gap: 8px; }
+.rs-head { font-family: var(--display); font-weight: 400; font-size: 20px; color: #ffd34d; }
+.rs-offers { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.rs-offer { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 6px; border-radius: 12px; background: rgba(0, 0, 0, 0.25); text-align: center; }
+.rs-offer small { font-size: 10px; font-weight: 900; color: #ffd9a8; text-transform: uppercase; letter-spacing: 0.04em; }
+.rs-offer b { font-size: 13px; }
+.rs-art { position: relative; width: 64px; height: 76px; border-radius: 10px; overflow: hidden; border: 3px solid var(--outline); display: grid; place-items: center; background: #2b2452; }
+.rs-art img { width: 100%; height: 100%; object-fit: cover; }
+.rs-art em { position: absolute; bottom: 2px; right: 3px; font-style: normal; font-weight: 900; font-size: 12px; text-shadow: 0 1px 0 #000, 0 0 3px #000; }
+.rs-rubies .ruby-i { width: 40px; height: 40px; }
+.rs-offer .buy-btn { width: 100%; }
+
+/* Practice and Online, with the daily buttons */
+.daily-modes { display: flex; gap: 8px; grid-column: 1 / -1; }
+.daily-modes .online-btn { flex: 1 1 0; justify-content: center; }
+.center > .daily .daily-modes { order: 5; }
+.opp[hidden] { display: none; }
+/* the result screen: its one column is the overlay's width, so the card fits inside it */
+.result { grid-template-columns: minmax(0, 1fr); justify-items: center; padding: 12px; box-sizing: border-box; }
+.daily-plaque .daily-modes { order: 5; }
+@media (max-width: 760px) { .rs-offers { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; } .rs-art { width: 52px; height: 62px; } .rs-offer { padding: 6px 4px; } .rs-offer .buy-btn { font-size: 14px; } }
+
 </style>
 </head>
 <body>
@@ -2284,8 +2334,6 @@ button.slot:hover { transform: translateY(-3px); }
               <canvas id="oppPic" width="96" height="96" aria-hidden="true"></canvas>
               <div class="opp-text"><small id="oppLabel">Next Opponent</small><b id="oppName">Trainer Owen</b><span id="oppMeta">Tutorial</span></div>
               <button class="opp-change" id="oppChange" type="button" aria-expanded="false" aria-controls="oppPanel">Trainers <span aria-hidden="true">&#9662;</span></button>
-              <button class="online-btn practice-btn" id="practiceBtn" type="button" title="A practice battle: no trophies, nothing won or lost" hidden>Practice</button>
-              <button class="online-btn" id="onlineBtn" type="button" title="Battle other players online"><span class="ob-dot" aria-hidden="true"></span>Online</button>
               <div class="opp-panel" id="oppPanel" hidden><ul id="oppList"></ul></div>
             </div>
             <div class="battle-wrap">
@@ -2299,6 +2347,10 @@ button.slot:hover { transform: translateY(-3px); }
             <div class="daily" id="daily" hidden>
               <button type="button" class="daily-btn" id="questBtn" aria-haspopup="dialog"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="9" y="5" width="22" height="30" rx="4" fill="#f3e6c4" stroke="#1c1530" stroke-width="2.6"/><path d="M14 13h12M14 19h12M14 25h8" stroke="#8a6a3c" stroke-width="2.6" stroke-linecap="round"/><circle cx="30" cy="30" r="7" fill="#2fb36b" stroke="#1c1530" stroke-width="2.4"/><path d="M26.8 30l2.2 2.2 4-4.4" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="db-text"><b>Daily Quests</b><small id="questSum">0 / 3 done</small></span><i class="db-dot" id="questDot" hidden></i></button>
               <button type="button" class="daily-btn challenge-btn" id="challengeBtn"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" fill="#ff7a3d" stroke="#1c1530" stroke-width="2.6"/><path d="M22 7l-9 15h7l-3 11 10-16h-7z" fill="#ffe066" stroke="#1c1530" stroke-width="2.2" stroke-linejoin="round"/></svg><span class="db-text"><b id="challengeName">Daily Challenge</b><small id="challengeSum">3 chest wins left today</small></span><i class="db-dot" id="challengeDot" hidden></i></button>
+              <div class="daily-modes">
+                <button class="online-btn practice-btn" id="practiceBtn" type="button" title="A practice battle: no trophies, nothing won or lost" hidden>Practice</button>
+                <button class="online-btn" id="onlineBtn" type="button" title="Battle other players online"><span class="ob-dot" aria-hidden="true"></span>Online</button>
+              </div>
               <button type="button" class="daily-btn" id="crownBtn" aria-haspopup="dialog"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M6 31l-2-18 9 7 7-12 7 12 9-7-2 18z" fill="#ffcd33" stroke="#1c1530" stroke-width="2.6" stroke-linejoin="round"/><rect x="6" y="30" width="28" height="5" rx="2" fill="#e8a91f" stroke="#1c1530" stroke-width="2.4"/></svg><span class="db-text"><b>Crown Chest</b><small id="crownSum">0 / 10 crowns</small><span class="db-bar"><i id="crownFill"></i></span></span><i class="db-dot" id="crownDot" hidden></i></button>
             </div>
             <div class="chests" id="chests" aria-label="Chest slots"></div>
@@ -2489,7 +2541,7 @@ button.slot:hover { transform: translateY(-3px); }
     </div>
 
     <!-- a milestone: a new arena, the Trophy Road opening -->
-    <div class="scene" id="scene" hidden role="dialog" aria-modal="true" aria-labelledby="sceneTitle">
+    <div class="ms-scene" id="scene" hidden role="dialog" aria-modal="true" aria-labelledby="sceneTitle">
       <div class="scene-rays" aria-hidden="true"></div>
       <small class="scene-kicker" id="sceneKicker">New Arena!</small>
       <h2 id="sceneTitle">Briar Hollow</h2>
@@ -4795,7 +4847,7 @@ const KCProgress = (() => {
     // what a missing rarity is paid in instead
     fallback: { legendary: ['epic', 3], epic: ['rare', 5] },
     // gold for each trophy-battle win (times the gold tier), for the first `dailyCap` wins of a day
-    winGold: { base: 10, dailyCap: 20 },
+    winGold: { base: 250, dailyCap: 20 },
     // the free daily chest: a wooden chest with this many times its usual contents
     freeChest: { type: 'wooden', bonus: 3 },
     // diamonds can skip a chest's timer: 1 diamond for every 5 minutes left (rounded up)
@@ -13801,6 +13853,7 @@ const KCMenu = (() => {
     const p = P(), open = G.roadOpen(), mode = G.mode(), T = G.trainer(), next = G.nextTrainer();
     // after the Trophy Road opens the trainers can't be picked again: no Trainers button, no list
     $('#oppChange').hidden = open;
+    $('#opp').hidden = open;
     if (open && !$('#oppPanel').hidden) { $('#oppPanel').hidden = true; $('#oppChange').setAttribute('aria-expanded', 'false'); }
     const pic = $('#oppPic');
     if (mode === 'trophy') {
@@ -13810,7 +13863,8 @@ const KCMenu = (() => {
       const st = G.nextStakes();
       $('#oppMeta').textContent = `${fmt(p.trophies)} trophies · win about +${st.win} / loss about −${st.loss}`;
       if (pic.dataset.id !== TROPHY_ID) { pic.dataset.id = TROPHY_ID; trophyPic(pic); }
-      $('#battleSub').textContent = `Trophy battle · ${a.name}`;
+      // the opponent bar is only for the trainers: in trophy battles the Battle button says what's at stake
+      $('#battleSub').textContent = `Trophy battle · win about +${st.win} / loss −${st.loss}`;
     } else {
       $('#oppLabel').textContent = open ? 'Trainer rematch · starter deck · no trophies' : next && T.id === next.id ? 'Next Opponent' : 'Rematch';
       $('#oppName').textContent = T.name;
@@ -14595,6 +14649,7 @@ const KCEmotes = (() => {
       ['#introFoeClan', T.clan || ''], ['#introYouTier', trophy ? `${KCProgress.state.trophies} trophies` : 'Training'],
       ['#introStakes', challenge ? `Daily Challenge · ${T.challenge.name}` : practice ? (T.tryCard && T.tryCard.out ? `Practice · trying ${KC_CARDS[T.tryCard.card].name}` : 'Practice · nothing at stake') : trophy && T.stakes ? `Win +${T.stakes.win} · Loss −${T.stakes.loss}` : '']]) $(sel).textContent = text;
     introYou();
+    veil(T.name, where);
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: false, ui: {}, shake: 0, beamStage: {}, views: {},
       falls: {}, slowmo: 0, flash: 0, fireworks: 0 });
@@ -14611,6 +14666,28 @@ const KCEmotes = (() => {
     $('#intro').classList.toggle('finding', G.finding);
     $('#intro').hidden = false;
   }
+  // Under the VS screen the battle is already laid out: until it starts, the opponent's name reads
+  // Loading… and your cards lie face down; they flip over when the fight begins.
+  function veil(name, tier) {
+    G.reveal = { name, tier };
+    for (const sel of ['#foeName', '#scoreFoe']) $(sel).textContent = 'Loading…';
+    $('#foeTier').textContent = '';
+    $('#battle').classList.add('veiled');
+    $('#battle').classList.remove('unveil');
+  }
+  function unveil() {
+    const R = G.reveal;
+    if (!R) return;
+    G.reveal = null;
+    for (const sel of ['#foeName', '#scoreFoe']) $(sel).textContent = R.name;
+    $('#foeTier').textContent = R.tier;
+    const b = $('#battle');
+    b.classList.remove('veiled');
+    b.classList.add('unveil');
+    document.querySelectorAll('#hand .card').forEach((c, i) => { c.style.animationDelay = (i * 0.09) + 's'; });
+    setTimeout(() => b.classList.remove('unveil'), 1200);
+    KCSound.play('cardFlip');
+  }
   // your side of the VS screen: your King, in blue
   function introYou() {
     const el = $('#introYouPic'), av = KCProgress.profile().avatar;
@@ -14619,6 +14696,7 @@ const KCEmotes = (() => {
   function begin() {
     $('#intro').hidden = true;
     G.phase = 'play';
+    unveil();
     KCSound.music('battle'); KCSound.crowd(true);
     tutStart();
     // a trophy battle left before it ends (reload, closed tab) counts as a loss next time the game loads
@@ -15313,6 +15391,7 @@ const KCEmotes = (() => {
       ['#introFoeTier', `Online battle · King Tower ${foe.king}`], ['#resFoeName', T.name], ['#introYou', KCMenu.name],
       ['#introFoeClan', ''], ['#introYouTier', `${KCProgress.state.trophies} trophies`], ['#introStakes', '']]) $(sel).textContent = text;
     introYou();
+    veil(T.name, `Online · ${T.tier}`);
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {},
       views: {}, falls: {}, slowmo: 0, flash: 0, fireworks: 0, finding: false });
@@ -15487,6 +15566,44 @@ const KCEmotes = (() => {
     if (res.tip) rows.push(`<p class="rr rr-tip">${res.tip}</p>`);
     return rows.join('');
   }
+  const SHOP_CHANCE = 0.2;
+  // what the battle earned, in one line (when the Shop takes the rewards' place)
+  function earnedLine(res) {
+    const bits = [res.chest ? `${res.chest.name} (slot ${res.chest.slot + 1})` : res.slotsFull ? 'chest slots full' : '', res.gold ? `+${res.gold.toLocaleString('en-US')} rubies${res.streakBonus ? ' (win streak)' : ''}` : '',
+      res.finished && res.finished.length ? `quest done: ${res.finished.join(', ')}` : ''].filter(Boolean);
+    return bits.length ? `<p class="rr rr-earned">Earned: ${bits.join(' · ')}</p>` : '';
+  }
+  // today's Shop offers that can still be bought, in the Shop's own order and at its prices
+  function shopOffersHtml() {
+    const shop = KCProgress.shop(), P = KCProgress.state, list = [];
+    shop.offers.forEach((o, i) => {
+      const sold = !!shop.bought[o.id] && !o.repeat, maxed = o.card && KCProgress.upgradeInfo(o.card).max;
+      if (!sold && !maxed && list.length < 3) list.push([o, i]);
+    });
+    if (!list.length) return '';
+    return `<div class="rr rr-shop"><b class="rs-head">From today's Shop</b><div class="rs-offers">${list.map(([o, i]) => {
+      const gem = o.currency === 'diamonds', poor = (gem ? P.diamonds : P.rubies) < o.price;
+      const art = o.kind === 'rubies' ? '<span class="rs-art rs-rubies"><i class="ruby-i"></i></span>' : `<span class="rs-art ${KC_CARDS[o.card].rarity}"><img src="${KCMenu.cardImg(o.card)}" alt=""><em>×${o.qty.toLocaleString('en-US')}</em></span>`;
+      const name = o.kind === 'rubies' ? `${o.qty.toLocaleString('en-US')} Rubies` : KC_CARDS[o.card].name;
+      return `<div class="rs-offer"><small>${o.tag}</small>${art}<b>${name}</b><button type="button" class="buy-btn${gem ? ' gem' : ''}${poor ? ' poor' : ''}" data-roffer="${i}"><i class="${gem ? 'gem-i' : 'ruby-i'}" aria-hidden="true"></i>${o.price.toLocaleString('en-US')}</button></div>`;
+    }).join('')}</div></div>`;
+  }
+  // buying from the result screen: diamonds take a second click, as in the Shop; the reveal plays in the lobby
+  let rConfirm = -1;
+  function resultBuy(btn) {
+    const i = +btn.dataset.roffer, o = KCProgress.shop().offers[i], P = KCProgress.state;
+    if (!o) return;
+    const gem = o.currency === 'diamonds';
+    if ((gem ? P.diamonds : P.rubies) < o.price) { KCSound.play('error'); btn.textContent = gem ? 'Not enough diamonds' : 'Not enough rubies'; return; }
+    if (gem && rConfirm !== i) { rConfirm = i; btn.classList.add('confirm'); btn.textContent = 'Confirm?'; KCSound.play('select'); return; }
+    rConfirm = -1;
+    const r = KCProgress.buy(i);
+    if (!r || !r.ok) { KCSound.play('error'); btn.disabled = true; btn.textContent = 'Not available'; return; }
+    KCSound.play('buy');
+    if (G.res) G.res.chestShown = true;
+    goHome();
+    KCMenu.showChest(null, r, 'Purchased');
+  }
   // count numbers up and fill bars, a moment after the result shows
   function playRewards() {
     const box = $('#resRewards');
@@ -15534,6 +15651,7 @@ const KCEmotes = (() => {
     for (const [sel, text] of [['#foeName', T.name], ['#foeTier', 'Replay'], ['#scoreFoe', T.name], ['#introFoeName', T.name], ['#introFoeTier', 'Replay'],
       ['#resFoeName', T.name], ['#introYou', KCMenu.name], ['#introFoeClan', ''], ['#introYouTier', ''], ['#introStakes', 'Replay']]) $(sel).textContent = text;
     introYou();
+    veil(T.name, 'Replay');
     A.trainer($('#introFoe'), T.look);
     Object.assign(G, { fx: [], embers: [], sel: -1, hover: null, acc: 0, ended: 0, lastSec: -1, handKey: '', zoneKey: '', idleHint: true, ui: {}, shake: 0, beamStage: {}, views: {},
       falls: {}, slowmo: 0, flash: 0, fireworks: 0, finding: false });
@@ -15589,7 +15707,12 @@ const KCEmotes = (() => {
       tr.innerHTML = `<i class="trophy-i" aria-hidden="true"></i><b data-count="${res.delta}">${res.delta > 0 ? '+' : ''}0</b><small>${res.trophies.toLocaleString('en-US')} trophies</small>`;
     }
     const rw = $('#resRewards');
-    rw.innerHTML = res.kind === 'trophy' ? rewardsHtml(res) : res.tip ? `<p class="rr rr-tip">${res.tip}</p>` : '';
+    // One result in five (whatever the outcome) shows today's Shop offers instead, exactly as the Shop
+    // lists them, with a line for what this battle earned.
+    const shopNow = res.kind === 'trophy' && Math.random() < SHOP_CHANCE ? shopOffersHtml() : '';
+    res.shopShown = !!shopNow;
+    rw.innerHTML = shopNow ? earnedLine(res) + shopNow : res.kind === 'trophy' ? rewardsHtml(res) : res.tip ? `<p class="rr rr-tip">${res.tip}</p>` : '';
+    rw.classList.toggle('shop-mode', !!shopNow);
     rw.hidden = !rw.innerHTML;
     // quest rewards and the crown chest can be claimed straight from here
     const claimable = res.kind === 'trophy' && ((res.quests || []).some(q => q.done && !q.claimed) || (res.crown && res.crown.ready));
@@ -16661,6 +16784,7 @@ const KCEmotes = (() => {
     $('#replaySpeed').addEventListener('click', () => { if (!G.replay) return; G.replay.speed = G.replay.speed === 1 ? 2 : G.replay.speed === 2 ? 4 : 1; $('#replaySpeed').textContent = G.replay.speed + '×'; });
     $('#replayExit').addEventListener('click', () => { if (!G.replay) return; G.replay = null; $('#replayBar').hidden = true; G.res = null; goHome(); KCMenu.openProfile(); });
     $('#claimNowBtn').addEventListener('click', () => { goHome(); KCMenu.openQuests(); });
+    $('#resRewards').addEventListener('click', e => { const b = e.target.closest('button[data-roffer]'); if (b && !b.disabled) resultBuy(b); });
     // Surrender: tap once to ask, again within 3 s to give up the battle (a loss, as if the King fell).
     // Online it tells the other player, who wins.
     let leaveT = 0;
