@@ -16,28 +16,28 @@ const KC_CARDS = {
     hp: 80, dmg: 45, hit: 1.0, range: 0.4, speed: 1.8, targets: 'ground', air: false,
     radius: 0.36, mass: 1,
     blurb: 'A pack of four fast wolves. Great for swarming one big troop.',
-    evo: 'Pack Howl: they bite faster while 2 or more are alive.',
+    evo: 'Pack Howl: they bite about 50% faster while two or more are close together.',
   },
   gladiator: {
     id: 'gladiator', name: 'Gladiator', cost: 3, rarity: 'common', kind: 'troop', role: 'Mini tank', count: 1,
     hp: 900, dmg: 80, hit: 1.2, range: 0.5, speed: 1.0, targets: 'ground', air: false,
     radius: 0.55, mass: 4,
     blurb: 'An arena fighter with a round shield. Tough for its cost.',
-    evo: 'Taunt, and a shield that bounces the first hit back.',
+    evo: 'Shield Bash: arrives with a shield, and bashes the enemies round it when the shield breaks.',
   },
   hawks: {
     id: 'hawks', name: 'Hawks', cost: 3, rarity: 'common', kind: 'troop', role: 'Air', count: 2,
     hp: 180, dmg: 40, hit: 1.1, range: 2.0, speed: 1.5, targets: 'both', air: true,
     radius: 0.42, mass: 1,
     blurb: 'Two hawks that dive from above. Ground troops with swords can’t reach them.',
-    evo: 'Dive: the first attack does double damage.',
+    evo: 'Dive: each hawk\'s first strike on a new target does double damage.',
   },
   archers: {
     id: 'archers', name: 'Archers', cost: 3, rarity: 'common', kind: 'troop', role: 'Ranged', count: 2,
     hp: 230, dmg: 60, hit: 0.9, range: 4.5, speed: 1.0, targets: 'both', air: false,
     radius: 0.42, mass: 1.5, proj: 'arrow', projSpeed: 13,
     blurb: 'Two archers that shoot ground and air troops from a safe distance.',
-    evo: 'Ricochet: arrows bounce to a second target.',
+    evo: 'Ricochet: each arrow bounces on to another enemy nearby for 45% damage.',
   },
   snowman: {
     id: 'snowman', name: 'Snowman', cost: 4, rarity: 'rare', kind: 'troop', role: 'Splash', count: 1,
@@ -531,6 +531,19 @@ const KC_CARDS = {
 const KC_EVOS = {
   snowman: { shards: 6, cycle: 3, name: 'Snowman Evolution', projSpeed: 1.5, splash: 1.5, size: 1.5,
     blurb: 'Every third Snowman you play is evolved: its snowballs are 1.5x the size and 1.5x as fast, for the same damage.' },
+  // the starter deck's evolutions (js/sim.js: spawn, attack, projStep, damage, spellHit)
+  archers: { shards: 6, cycle: 3, name: 'Archers Evolution', ricochet: { r: 2.5, f: 0.45 },
+    blurb: 'Every third Archers you play are evolved: each arrow bounces on to another enemy nearby for 45% of its damage.' },
+  wolves: { shards: 6, cycle: 2, name: 'Wolves Evolution', pack: { n: 2, r: 3, f: 0.65 },
+    blurb: 'Every second Wolves you play are evolved: while two or more of the pack are close together, they bite about 50% faster.' },
+  gladiator: { shards: 6, cycle: 3, name: 'Gladiator Evolution', bash: { shield: 0.22, r: 2, f: 1 },
+    blurb: 'Every third Gladiator you play is evolved: it arrives with a shield worth a fifth of its health, and when the shield breaks it bashes every ground enemy round it.' },
+  hawks: { shards: 6, cycle: 2, name: 'Hawks Evolution', dive: 2,
+    blurb: 'Every second Hawks you play are evolved: each hawk dives on every new target, for double damage on the first strike.' },
+  gorilla: { shards: 6, cycle: 2, name: 'Gorilla Evolution', pound: { every: 3, f: 2 },
+    blurb: 'Every second Gorilla you play is evolved: every third hit is a Chest Pound for double damage.' },
+  fireball: { shards: 6, cycle: 2, name: 'Fireball Evolution', burn: { dur: 2, f: 0.15, r: 0.85 },
+    blurb: 'Every second Fireball you cast is evolved: it leaves the ground burning for 2 seconds.' },
 };
 
 // The level a card of each rarity starts at when it is found (it can never be lower): a Rare starts at

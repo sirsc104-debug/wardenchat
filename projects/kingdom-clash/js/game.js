@@ -602,7 +602,22 @@
           sparks(e.x, e.y, 10, '#fff3c4', 4); puff(e.x, e.y, 8, '#e0c08a', 0.8);
           break;
         case 'shoot': KCSound.play(SHOOT[e.kind] || 'arrow'); break;
+        case 'ricochet':
+          // an evolved arrow glancing off on to the next enemy
+          sparks(e.x, e.y - 0.4, 6, '#d9b8ff', 3); KCSound.play('arrow');
+          break;
         case 'hit':
+          if (e.evoHit === 'pound') {
+            // the evolved Gorilla's chest pound: a violet shockwave and a thump
+            KCSound.play('slam'); G.shake = Math.max(G.shake, 0.3);
+            shock(e.x, e.y, 1.6, '#c79bff', 0.45); sparks(e.x, e.y, 10, '#efe2ff', 4); debris(e.x, e.y, 6, ['#8a7a6a', '#c9b8a8'], 2.5);
+            break;
+          }
+          if (e.evoHit === 'dive') {
+            // an evolved hawk diving in: a streak of feathers and a sharp crack
+            KCSound.play('smash'); sparks(e.x, e.y - 0.6, 9, '#e8d4ff', 4.5); puff(e.x, e.y - 0.4, 5, '#ffffff', 0.5);
+            break;
+          }
           if (e.card === 'gorilla' || e.card === 'rhino') { KCSound.play('smash'); G.shake = Math.max(G.shake, e.card === 'rhino' ? 0.12 : 0.18); sparks(e.x, e.y, 6, '#fff3c4'); }
           else if (e.kind === 'cannon') sparks(e.x, e.y, 5, '#ffd27a');
           else if (e.kind === 'prismray') sparks(e.x, e.y - 0.5, 4, '#efe2ff', 2.5);
@@ -627,6 +642,7 @@
           break;
         case 'death': KCSound.play('death'); puff(e.x, e.y - (e.air ? 1.1 : 0.3), 7, '#d9d4e8', 0.5); break;
         case 'boom':
+          if (e.evo && e.card === 'fireball') { G.fx.push({ kind: 'flash', x: e.x, y: e.y - 0.2, r: e.r * 1.2, life: 0.4, max: 0.4 }); shock(e.x, e.y, e.r * 1.1, '#c79bff', 0.5); KCSound.play('fireBurst'); }
           if (e.card === 'glacierslam') { KCSound.play('iceShatter'); G.shake = Math.max(G.shake, 0.2); shock(e.x, e.y, e.r, '#cfeeff', 0.55); debris(e.x, e.y, 16, ['#e8f8ff', '#9fd4f0', '#ffffff'], 4); break; }
           if (e.card === 'flashfreeze') {
             KCSound.play('freeze'); shock(e.x, e.y, e.r, '#cfeeff', 0.7); shock(e.x, e.y, e.r * 0.6, '#ffffff', 0.5);
@@ -1481,6 +1497,14 @@
       c.fillStyle = g; c.fillRect(-k * 1.1, -k * 1.7, k * 2.2, k * 2.2);
       c.globalAlpha *= 0.55;
     }
+    if (e.bash && e.shield > 0) {
+      const pulse = 0.8 + Math.sin(t * 5) * 0.1, r = k * 0.95;
+      c.save(); c.globalAlpha *= 0.55 * pulse;
+      const g = c.createRadialGradient(0, -k * 0.7, r * 0.3, 0, -k * 0.7, r);
+      g.addColorStop(0, 'rgba(200,160,255,0)'); g.addColorStop(0.8, 'rgba(190,140,255,0.35)'); g.addColorStop(1, 'rgba(230,210,255,0.9)');
+      c.fillStyle = g; A.ell(c, 0, -k * 0.7, r, r * 1.05); c.fill();
+      c.restore();
+    }
     const o = { team: e.team, t: t + e.id * 0.37, walk: e.moving, atk: Math.max(0, e.atk / 0.28), face: e.face, id: e.id, view: facingOf(e), evo: e.evo };
     // archers aim their bows at their target
     if (e.card === 'archers' && e.target && !e.moving) { const tg = G.s.ents.find(u => u.id === e.target); if (tg) o.aim = Math.atan2(tg.y - e.y, tg.x - e.x); }
@@ -1692,6 +1716,24 @@
     if (stroke) { c.strokeStyle = stroke; c.lineWidth = Math.max(2, k * 0.08); if (dash) { c.setLineDash([k * 0.4, k * 0.3]); c.lineDashOffset = -t * k * 2; } c.stroke(); c.setLineDash([]); }
   };
   const NEWZ = {
+    // an evolved Fireball's burning ground: a glowing scorch with flames licking up from it
+    burn(c, z, k, t) {
+      const f = fadeOf(z), x = SX(z.x), y = SY(z.y);
+      c.save(); c.globalAlpha = 0.85 * f;
+      disc(c, z, k, 'rgba(60,20,30,0.45)', null);
+      c.globalCompositeOperation = 'lighter';
+      const g = c.createRadialGradient(x, y, 0, x, y, z.r * k);
+      g.addColorStop(0, 'rgba(255,150,60,0.55)'); g.addColorStop(0.7, 'rgba(200,90,255,0.25)'); g.addColorStop(1, 'rgba(200,90,255,0)');
+      c.fillStyle = g; A.ell(c, x, y, z.r * k, z.r * k * 0.6); c.fill();
+      for (let i = 0; i < 9; i++) {
+        const a = i * 2.4 + z.x, d = ((i * 0.37) % 1) * z.r * 0.85, fx = x + Math.cos(a) * d * k, fy = y + Math.sin(a) * d * k * 0.6;
+        const h = k * (0.35 + 0.2 * Math.sin(t * 9 + i * 1.7)), w = k * 0.13;
+        c.beginPath(); c.moveTo(fx - w, fy); c.quadraticCurveTo(fx - w * 0.4, fy - h * 0.6, fx, fy - h); c.quadraticCurveTo(fx + w * 0.4, fy - h * 0.6, fx + w, fy); c.closePath();
+        c.fillStyle = i % 3 ? 'rgba(255,170,60,0.8)' : 'rgba(210,140,255,0.8)'; c.fill();
+      }
+      c.restore();
+      if (Math.random() < 0.4) G.fx.push({ kind: 'dot', x: z.x + (Math.random() - 0.5) * z.r * 1.4, y: z.y + (Math.random() - 0.5) * z.r * 0.8, vx: 0, vy: -1.6, r: 0.07, col: 'rgba(255,190,90,0.95)', life: 0.5, max: 0.5 });
+    },
     magmaquake(c, z, k, t) {
       c.save(); c.globalAlpha = 0.9 * fadeOf(z);
       disc(c, z, k, 'rgba(70,40,40,0.35)', 'rgba(255,140,60,0.8)', true, t);

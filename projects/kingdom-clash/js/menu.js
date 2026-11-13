@@ -1285,7 +1285,8 @@ const KCMenu = (() => {
     if (!E) { $('#mEvoTag').textContent = '(unlocks later)'; $('#mEvo').textContent = c.evo; act.hidden = true; return; }
     $('#mEvo').textContent = E.blurb;
     act.hidden = false;
-    if (E.has) { $('#mEvoTag').textContent = 'Unlocked'; act.innerHTML = `<img src="${cardImg(id, true)}" alt="${esc(c.name)} evolved"><span>In every battle, every third ${esc(c.name)} you play is evolved.</span>`; return; }
+    const nth = ['', 'every', 'every second', 'every third', 'every fourth'][KC_EVOS[id].cycle] || `every ${KC_EVOS[id].cycle}th`;
+    if (E.has) { $('#mEvoTag').textContent = 'Unlocked'; act.innerHTML = `<img src="${cardImg(id, true)}" alt="${esc(c.name)} evolved"><span>In every battle, ${nth} ${esc(c.name)} you play is evolved.</span>`; return; }
     if (!E.open) { $('#mEvoTag').textContent = '(opens in Sunstone Arena)'; act.innerHTML = `<span>Reach Sunstone Arena (600 trophies) to unlock evolutions with Evolution Shards or the Diamond Pass.</span>`; return; }
     $('#mEvoTag').textContent = `${Math.min(E.shards, E.need)} / ${E.need} shards`;
     act.innerHTML = `<span class="evo-shards"><span class="mi-art">${itemSvg('shards')}</span><span class="pass-track"><i style="width:${Math.min(100, E.shards / E.need * 100).toFixed(0)}%"></i></span></span>

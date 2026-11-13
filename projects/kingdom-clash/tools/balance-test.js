@@ -19,6 +19,13 @@ const DECKS = {
   'Mole for Gladiator': ['rhino', 'wolves', 'mole', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'],
   'Camel Jockey for Rhino': ['camel', 'wolves', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'],
   'Evolved Snowman': { deck: STARTER, evos: ['snowman'] },
+  // the starter deck's evolutions (named "Evo: ...", so they can be run on their own)
+  'Evo: Archers': { deck: STARTER, evos: ['archers'] },
+  'Evo: Wolves': { deck: STARTER, evos: ['wolves'] },
+  'Evo: Gladiator': { deck: STARTER, evos: ['gladiator'] },
+  'Evo: Hawks': { deck: STARTER, evos: ['hawks'] },
+  'Evo: Gorilla': { deck: STARTER, evos: ['gorilla'] },
+  'Evo: Fireball': { deck: STARTER, evos: ['fireball'] },
   // Stormspire
   'Bees for Wolves': ['rhino', 'bees', 'gladiator', 'hawks', 'archers', 'snowman', 'gorilla', 'fireball'],
   'Owl for Archers': ['rhino', 'wolves', 'gladiator', 'hawks', 'owl', 'snowman', 'gorilla', 'fireball'],

@@ -275,6 +275,13 @@ const KCSim = (() => {
   // A card coming into play (after its cost is paid): every kind of card, by what it does.
   function cast(s, team, id, x, y, mirrored) {
     const c = KC_CARDS[id];
+    // an evolution comes round every cycle-th play of the card
+    let evo = false;
+    if (KC_EVOS[id] && s.evos[team].includes(id) && !mirrored) {
+      const n = s.evoPlays[team][id] || 0;
+      evo = n % KC_EVOS[id].cycle === KC_EVOS[id].cycle - 1;
+      s.evoPlays[team][id] = n + 1;
+    }
     if (c.kind === 'spell' && castSpell(s, team, id, x, y)) return 'ok';
     if (c.storm) {
       // a sandstorm: no projectile, the storm rises where it is cast
@@ -308,8 +315,8 @@ const KCSim = (() => {
     if (c.kind === 'spell') {
       const k = tower(s, team, 'K');
       s.projs.push({ kind: c.projKind || 'fireball', spell: id, team, x: k.x, y: k.y, sx: k.x, sy: k.y, tx: x, ty: y, target: 0,
-        speed: c.projSpeed, dmg: Math.round(c.dmg * levelMult(cardLevel(s, team, id))), card: id, level: cardLevel(s, team, id) });
-      s.events.push({ type: 'cast', team, card: id, x, y });
+        speed: c.projSpeed, dmg: Math.round(c.dmg * levelMult(cardLevel(s, team, id))), card: id, level: cardLevel(s, team, id), evo });
+      s.events.push({ type: 'cast', team, card: id, x, y, evo });
       return 'ok';
     }
     if (c.kind === 'building' && c.burrow) {
@@ -332,13 +339,6 @@ const KCSim = (() => {
       u.tunnel = { tx: x, ty: y }; u.deploy = 0;
       s.events.push({ type: 'burrow', team, card: id, x: sx, y: sy, tx: x, ty: y });
       return 'ok';
-    }
-    // an evolution comes round every cycle-th play of the card
-    let evo = false;
-    if (KC_EVOS[id] && s.evos[team].includes(id) && !mirrored) {
-      const n = s.evoPlays[team][id] || 0;
-      evo = n % KC_EVOS[id].cycle === KC_EVOS[id].cycle - 1;
-      s.evoPlays[team][id] = n + 1;
     }
     const offs = formation(c.count), lvl = cardLevel(s, team, id);
     if (c.squad) {
@@ -430,7 +430,13 @@ const KCSim = (() => {
       slowCd: c.rider.slowCd, cd: 0.6, snareCd: 0, atk: 0, aim: 0 };
     if (evo && KC_EVOS[id]) {
       const E = KC_EVOS[id];
-      Object.assign(u, { evo: true, proj: 'bigsnow', projSpeed: u.projSpeed * E.projSpeed, splash: u.splash * E.splash });
+      u.evo = true;
+      if (id === 'snowman') Object.assign(u, { proj: 'bigsnow', projSpeed: u.projSpeed * E.projSpeed, splash: u.splash * E.splash });
+      if (E.ricochet) u.ricochet = E.ricochet;
+      if (E.pack) u.pack = E.pack;
+      if (E.bash) { u.shield = u.maxShield = Math.round(u.maxHp * E.bash.shield); u.bash = { r: E.bash.r, dmg: Math.round(u.dmg * E.bash.f) }; }
+      if (E.dive) { u.dive = E.dive; u.diveAt = 0; }
+      if (E.pound) { u.pound = E.pound; u.hits = 0; }
     }
     clampArena(u);
     s.ents.push(u);
@@ -449,6 +455,7 @@ const KCSim = (() => {
       if (!e.shield) {
         s.events.push({ type: 'shieldbreak', team: e.team, card: e.card, x: e.x, y: e.y });
         if (KC_CARDS[e.card] && KC_CARDS[e.card].turret) toTurret(s, e);
+        if (e.bash) { const b = e.bash; e.bash = null; blast(s, e.team, e.x, e.y, b.r, b.dmg, e.card); }
       }
       return;
     }
@@ -741,12 +748,15 @@ const KCSim = (() => {
     if (u.proj) {
       s.projs.push({ kind: u.proj, team: u.team, x: u.x, y: u.y, sx: u.x, sy: u.y, tx: t.x, ty: t.y,
         target: t.id, speed: u.projSpeed, dmg: u.dmg, splash: u.splash, targets: u.targets, card: u.card,
-        air: u.air, zone: u.zone, evo: u.evo, stun: u.stunHit || 0, slowHit: u.slowHit || null });
+        air: u.air, zone: u.zone, evo: u.evo, stun: u.stunHit || 0, slowHit: u.slowHit || null, ricochet: u.ricochet || null });
       s.events.push({ type: 'shoot', kind: u.proj, team: u.team, x: u.x, y: u.y });
     } else {
-      let dmg = u.dmg, charged = false;
+      let dmg = u.dmg, charged = false, evoHit = null;
       if (u.chargeHit && u.run >= u.chargeHit) { dmg *= 2; charged = true; }
       u.run = 0;
+      // evolved Hawks dive on each new target; an evolved Gorilla's every third hit is a chest pound
+      if (u.dive && u.diveAt !== t.id) { dmg *= u.dive; u.diveAt = t.id; evoHit = 'dive'; }
+      if (u.pound && ++u.hits % u.pound.every === 0) { dmg *= u.pound.f; evoHit = 'pound'; }
       if (t.kind === 'tower') dmg = Math.round(dmg * u.towerDmg);
       damage(s, t, dmg, u.team);
       if (u.meleeSplash) {
@@ -756,8 +766,14 @@ const KCSim = (() => {
           if (hyp(o.x - t.x, o.y - t.y) - o.radius <= u.meleeSplash) damage(s, o, u.dmg, u.team);
         }
       }
-      s.events.push({ type: charged ? 'charge' : 'hit', card: u.card, team: u.team, x: t.x, y: t.y, by: u.id, r: u.meleeSplash || 0 });
+      s.events.push({ type: charged ? 'charge' : 'hit', card: u.card, team: u.team, x: t.x, y: t.y, by: u.id, r: u.meleeSplash || 0, evoHit });
     }
+  }
+  // Evolved Wolves bite faster while enough of the pack is close by (the wolf itself included).
+  function packNear(s, u) {
+    let n = 0;
+    for (const o of s.ents) if (o.pack && o.card === u.card && o.team === u.team && !o.dead && hyp(o.x - u.x, o.y - u.y) <= u.pack.r) n++;
+    return n >= u.pack.n;
   }
   // Area damage on the ground around a spot (a landing knight, a sage arriving, a drill surfacing).
   function blast(s, team, x, y, r, dmg, card) {
@@ -962,7 +978,7 @@ const KCSim = (() => {
       }
       // the Walking Smelter has no attack: it stops at the building and keeps making emberlings
       if (!u.dmg) { u.locked = true; return; }
-      if (u.cd <= 0) { attack(s, u, t); u.cd = u.hit; u.locked = true; }
+      if (u.cd <= 0) { attack(s, u, t); u.cd = u.hit * (u.pack && packNear(s, u) ? u.pack.f : 1); u.locked = true; }
       return;
     }
     if (u.locked && d > u.range + 0.6) u.locked = false;
@@ -1136,6 +1152,21 @@ const KCSim = (() => {
         s.events.push({ type: 'splash', kind: p.kind, x: p.x, y: p.y, r: p.splash });
       } else if (t && !t.dead) {
         damage(s, t, p.dmg, p.team);
+        // an evolved Archer's arrow bounces on to the nearest other enemy (not a tower)
+        if (p.ricochet) {
+          let n = null, nd = p.ricochet.r;
+          for (const o of s.ents) {
+            if (o === t || o.dead || o.team === p.team || o.kind === 'tower' || o.tunnel || o.leap || o.hidden) continue;
+            if (p.targets === 'ground' && o.air) continue;
+            const d = hyp(o.x - p.x, o.y - p.y);
+            if (d < nd) { nd = d; n = o; }
+          }
+          if (n) {
+            s.projs.push({ kind: p.kind, team: p.team, x: p.x, y: p.y, sx: p.x, sy: p.y, tx: n.x, ty: n.y, target: n.id, speed: p.speed, dmg: Math.max(1, Math.round(p.dmg * p.ricochet.f)),
+              splash: 0, targets: p.targets, card: p.card, evo: true });
+            s.events.push({ type: 'ricochet', team: p.team, x: p.x, y: p.y, tx: n.x, ty: n.y });
+          }
+        }
         if (p.stun && !t.dead) stun(s, t, p.stun, 'zap');
         if (p.slow && !t.dead) { slowDown(s, t, p.slow.f, p.slow.dur, 'lasso'); s.events.push({ type: 'snare', team: p.team, x: t.x, y: t.y, id: t.id }); }
         s.events.push({ type: 'hit', kind: p.kind, team: p.team, x: p.x, y: p.y });
@@ -1219,7 +1250,13 @@ const KCSim = (() => {
         clampArena(e);
       }
     }
-    s.events.push({ type: 'boom', team: p.team, card: c.id, x: p.x, y: p.y, r: c.area });
+    s.events.push({ type: 'boom', team: p.team, card: c.id, x: p.x, y: p.y, r: c.area, evo: !!p.evo });
+    const E = p.evo && KC_EVOS[c.id];
+    if (E && E.burn) {
+      // an evolved Fireball leaves the ground burning (towers too, at the spell's tower share)
+      s.zones.push({ x: p.x, y: p.y, r: c.area * E.burn.r, team: p.team, dps: Math.round(p.dmg * E.burn.f), left: E.burn.dur, dur: E.burn.dur, pulse: 0,
+        kind: 'burn', targets: 'ground', towerPct: c.towerPct, card: c.id });
+    }
   }
   // Lingering damage areas, in pulses of a tenth of a second.
   function zoneStep(s) {

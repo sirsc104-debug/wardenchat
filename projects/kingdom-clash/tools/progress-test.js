@@ -325,10 +325,12 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
     }
     assert(styles.size >= 5, `several play styles: ${[...styles]}`);
     P6.trophies = 1200;
-    // the free path's shards: exactly 2; the Diamond Pass's tier 1 is the Snowman Evolution
+    // the free path's shards: exactly 2; the Diamond Pass's tier 1 is the week's featured evolution
     const freeShards = G.PASS.tiers.reduce((n, t) => n + (t.free.kind === 'item' && t.free.item === 'shards' ? t.free.n : 0), 0);
     assert.strictEqual(freeShards, 2, 'the free path gives 2 shards');
-    assert.deepStrictEqual(G.PASS.tiers[0].paid, { kind: 'evo', card: 'snowman' });
+    const fe = G.featuredEvo();
+    assert.deepStrictEqual(G.PASS.tiers[0].paid, { kind: 'evo', card: fe });
+    assert(Object.keys(KC_EVOS).every((id, i) => G.featuredEvo(i + 1) === id), 'each week features the next evolution');
     assert(G.PASS.tiers.some(t => t.free.kind === 'chest' && t.free.chest === 'gold') && G.PASS.tiers.some(t => t.paid.kind === 'chest' && t.paid.chest === 'gold'), 'gold chests on the pass');
     // crowns move you up; the paid track needs the pass
     P6.pass.points = 0;
@@ -341,12 +343,13 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
     assert.strictEqual(G.claimPass(0, 'free'), null, 'a reward is claimed once');
     assert.strictEqual(G.buyPass().ok, true); assert.strictEqual(P6.diamonds, 20 - G.PASS.price);
     assert.strictEqual(G.buyPass().error, 'owned');
-    assert(G.claimPass(0, 'paid').evo === 'snowman' && G.hasEvo('snowman'), 'the pass gives the Snowman Evolution');
-    assert.deepStrictEqual(G.evoList(), ['snowman']);
+    assert(G.claimPass(0, 'paid').evo === fe && G.hasEvo(fe), 'the pass gives the featured evolution');
+    assert.deepStrictEqual(G.evoList(), [fe]);
+    P6.evos = ['snowman'];
     // shards: 6 unlock an evolution (the Snowman's is already owned here, so it can't be used again)
     P6.magic.shards = 6;
     assert.strictEqual(G.magicFor('shards', 'snowman').reason, 'evo-owned');
-    assert.strictEqual(G.magicFor('shards', 'archers').reason, 'no-evo');
+    assert.strictEqual(G.magicFor('shards', 'rhino').reason, 'no-evo');
     P6.evos = []; P6.magic.shards = 5;
     assert.strictEqual(G.magicFor('shards', 'snowman').reason, 'shards');
     P6.magic.shards = 6;

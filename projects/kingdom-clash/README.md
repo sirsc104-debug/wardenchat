@@ -268,14 +268,26 @@ From Stormspire on, the **Online** button beside *Trainers* in the lobby opens t
 
 ## Evolutions
 
-Evolutions open in Sunstone Arena. An evolution is unlocked once, with **6 Evolution Shards** (Magic Items, or the Evolution part of the card's window) or from the Diamond Pass, and then works in every battle: **every third play of that card is the evolved one**. A card in your hand shows a violet pip for each play counted; when the next play will be evolved, the card turns into its violet evolved card and glows. Only the **Snowman's** is built (`KC_EVOS` in `js/cards.js`): its snowballs are **1.5x the size (splash radius) and 1.5x as fast, for the same damage**, and the evolved Snowman stands a little taller with an ice crown, frost shards and a violet glow. Past 700 trophies about half the opponents with a Snowman have its evolution too. Unlocking one plays its own scene: shards swirl into the card, it shakes and glows, then bursts into its evolved card. The evolution as specified is a small upgrade: in a direct test (the same Snowman against swarms) it killed exactly as many as the normal one, since it changes size and speed, not damage.
+Evolutions open in Sunstone Arena. An evolution is unlocked once, with **6 Evolution Shards** (Magic Items, or the Evolution part of the card's window) or from the Diamond Pass, and then works in every battle: **every second or third play of that card is the evolved one**. A card in your hand shows a violet pip for each play counted; when the next play will be evolved, the card turns into its violet evolved card and glows. Evolved troops stand a little bigger in a violet glow. Unlocking one plays its own scene: shards swirl into the card, it shakes and glows, then bursts into its evolved card. Seven are built (`KC_EVOS` in `js/cards.js`, mechanics in `js/sim.js`, checked by `node tools/evo-test.js`):
+
+| Card | Evolved | Every | What changes | Against the plain starter deck (`node tools/balance-test.js 80 Evo`) |
+| --- | --- | --- | --- | --- |
+| Snowman | Giant Snowballs | 3rd | snowballs 1.5x the size and 1.5x as fast, same damage; an ice crown | 58% |
+| Archers | Ricochet | 3rd | each arrow bounces on to another enemy within 2.5 tiles for 45% of its damage (not towers) | 60% |
+| Wolves | Pack Howl | 2nd | while two or more of the pack are within 3 tiles, they bite about 50% faster | 58% |
+| Gladiator | Shield Bash | 3rd | arrives with a shield worth a fifth of its health (a violet bubble); when it breaks, it bashes every ground enemy within 2 tiles | 61% |
+| Hawks | Dive | 2nd | each hawk's first strike on a new target does double damage | 61% |
+| Gorilla | Chest Pound | 2nd | every third hit is a chest pound for double damage, with a shockwave | 60% |
+| Fireball | Burning Ground | 2nd | leaves the ground burning for 2 seconds (15% of its damage a second, towers at the spell's share) | 58% |
+
+From 700 trophies opponents start to have the evolutions of cards in their deck (one or two; 20% each at 700, rising to 60%).
 
 ## The Diamond Pass
 
-A season pass in the lobby (the Diamond Pass plaque; a small button under the chests on narrow screens), open from Sunstone Arena. Every **crown** you take in a trophy battle is a pass point, and every 8 make a tier (15 tiers). Each tier has a **free** reward and a **Diamond Pass** reward, all shown before you buy:
+A season pass in the lobby (the Diamond Pass plaque; a small button under the chests on narrow screens), open from Sunstone Arena. **A season is a week**, Monday to Monday: when a new one starts, the rewards you reached but didn't claim are added for you (shown in a reveal), the pass starts again at tier 0, and the Diamond Pass track is bought for the week (members always have it; a pass bought before seasons were weekly lasts through the first weekly season). The Shop and the pass show the season and the time left. Every **crown** you take in a trophy battle is a pass point, and every 8 make a tier (15 tiers). Each tier has a **free** reward and a **Diamond Pass** reward, all shown before you buy:
 
 - Free path: rubies, wild cards, **4 Gold Chests**, and **2 Evolution Shards** in all (tiers 5 and 10).
-- Diamond Pass path: the **Snowman Evolution at tier 1**, Gold, Platinum and Legendary Chests, rubies, wild cards, books and 4 more shards.
+- Diamond Pass path: **the week's featured evolution at tier 1** (a different one each week, in turn), Gold, Platinum and Legendary Chests, rubies, wild cards, books and 4 more shards.
 
 The Diamond Pass is bought in the **Shop** (first tile in Daily Offers) for **10 diamonds** (`PASS.price` in `js/progress.js`), with a second click to confirm. Members get it as part of their membership (`member` in the save; the membership itself comes with the wallet). An evolution you already own comes as its 6 shards instead. The result screen shows the crowns you earned and any new tier.
 
@@ -488,6 +500,7 @@ Progress is saved in this browser: which trainers you have beaten, your record a
 | `tools/economy-report.js` | `node tools/economy-report.js` prints a day's rubies and copies for five kinds of player, the days to each upgrade milestone, and careers on the ladder (trophies from battles), using `ECONOMY`, the matchmaking rules and the game's chest rolls |
 | `tools/progress-test.js` | `node tools/progress-test.js [matches]` checks old saves, trophies, chests and timers, road rewards, upgrades, the deck and the Training Grounds deck rule, the Shop's offers and purchases, Sunstone Arena, evolutions and the Diamond Pass (2 free shards, the Snowman Evolution at tier 1, claiming, buying), the trophy stakes, the first steps, the deck rules, daily quests, the crown chest and win streaks, deck slots, practice, the daily challenge, the battle log (a replay is the same battle), deck and friend codes, then plays trophy matches to check where players settle |
 | `tools/balance-test.js` | `node tools/balance-test.js [matches]` plays decks with the Briar Hollow cards against the starter deck and times one-on-one trades |
+| `tools/evo-test.js` | `node tools/evo-test.js` checks every evolution: it comes round on the right play, each evolved card does what it says against a plain copy in the same fight, and a battle with every evolution on both sides plays out the same twice |
 | `tools/sim-test.js` | `node tools/sim-test.js 40` plays 40 bot-vs-bot matches headless and checks they end cleanly (no NaNs, no troops in the river) |
 | `img/` | Arena art (see *Arena art*): the Training Grounds and Cinder Keep centerpieces (transparent), scenery panels (793 × 1983) and the Cinder Keep battlefield (1024 × 1536) |
 | `build-artifact.py` | Bundles everything into one page, with the images baked in as data URIs: `python3 build-artifact.py OUT.html` (claude.ai Artifact) or `--standalone` (a complete page) |

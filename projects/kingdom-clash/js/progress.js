@@ -539,6 +539,12 @@ const KCProgress = (() => {
   }
   // what the next trophy battle is likely to be worth (the opponent isn't found until it starts)
   const nextStakes = () => stakes(P.trophies, P.trophies + matchOffset());
+  function foeEvos(deck, t, rand) {
+    if (t < 700) return [];
+    const chance = Math.min(0.6, 0.2 + (t - 700) / 6000), out = [];
+    for (const id of deck) if (KC_EVOS[id] && out.length < 2 && rand() < chance) out.push(id);
+    return out;
+  }
   // How well a computer opponent plays, from 0 (a beginner) to 1.
   const skillFor = d => ({
     react: [lerp(2.2, 0.6, d), lerp(3.6, 1.2, d)], sloppy: lerp(0.5, 0.12, d), attackAt: lerp(9.8, 8, d), idle: lerp(0.45, 0.08, d),
@@ -576,8 +582,9 @@ const KCProgress = (() => {
       id: 'trophy', kind: 'trophy', name, short: name, level: lvl, tier: `${foeTrophies} trophies`,
       look: foeLook(rand), lines: null, skill, towerDamage: 1, deck, cardLevels, trophies: foeTrophies, kingLevel,
       style, styleName: style && Bot ? Bot.STYLES[style].name : null, clan, mood, stakes: stakes(t, foeTrophies), breather, first, skillLevel: d,
-      // past 700 trophies about half the opponents with a Snowman have its evolution
-      evos: foeTrophies >= 700 && deck.includes('snowman') && rand() < 0.5 ? ['snowman'] : [],
+      // from 700 trophies opponents start to have evolutions of the cards in their deck (one or two, more
+      // often higher up)
+      evos: foeEvos(deck, foeTrophies, rand),
     };
   }
   // foeTrophies: the opponent's trophies (from the battle that was started if not given)
@@ -1112,7 +1119,7 @@ const KCProgress = (() => {
     book_legendary: { name: 'Book of Legendary', kind: 'book', rarity: 'legendary', blurb: 'Use on a legendary card to fill all the copies it still needs for its next level.' },
     book_books: { name: 'Book of Books', kind: 'book', rarity: 'any', blurb: 'Works on a card of any rarity: fills all the copies it still needs for its next level.' },
     hammer_books: { name: 'Hammer of Books', kind: 'hammer', rarity: 'any', blurb: 'Upgrades a card one level for free: it fills any copies the card is missing and needs no rubies.' },
-    shards: { name: 'Evolution Shards', kind: 'shard', rarity: 'any', blurb: 'Collect 6 and use them on a card that has an evolution to unlock it. Evolutions open in Sunstone Arena (Arena 3); the Snowman\'s is the first.' },
+    shards: { name: 'Evolution Shards', kind: 'shard', rarity: 'any', blurb: 'Collect 6 and use them on a card that has an evolution to unlock it: the Snowman, Archers, Wolves, Gladiator, Hawks, Gorilla or Fireball. Evolutions open in Sunstone Arena (Arena 3).' },
   };
   const MAGIC_ORDER = ['wild_common', 'wild_rare', 'wild_epic', 'wild_legendary', 'book_common', 'book_rare', 'book_epic', 'book_legendary', 'book_books', 'hammer_books', 'shards'];
   const MAGIC_RULES = {
