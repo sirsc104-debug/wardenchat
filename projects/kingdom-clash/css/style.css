@@ -2196,3 +2196,15 @@ button.slot:hover { transform: translateY(-3px); }
 @keyframes rbBlink { 50% { opacity: 0.2; } }
 .prof-card .modal-x { top: 8px; right: 8px; }
 .prof-card .prof-head { padding-right: 40px; }
+
+/* the daily buttons in the right-hand panel */
+.daily-plaque .daily { flex-direction: column; flex-wrap: nowrap; gap: 8px; margin: 0; }
+.daily-plaque .daily-btn { flex: none; max-width: none; width: 100%; box-sizing: border-box; }
+.daily-plaque .challenge-btn { flex-basis: auto; }
+/* where the side panels are hidden: the three daily buttons in one row (two and one on phones) */
+.center > .daily { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: min(100%, 760px); margin-left: auto; margin-right: auto; }
+.center > .daily .daily-btn { max-width: none; min-width: 0; }
+@media (max-width: 560px) {
+  .center > .daily { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .center > .daily .challenge-btn { grid-column: 1 / -1; order: 3; }
+}

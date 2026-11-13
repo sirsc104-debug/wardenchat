@@ -954,9 +954,19 @@ const KCMenu = (() => {
   }
 
   /* ---------- daily quests and the crown chest ---------- */
+  // the daily buttons: under Next Rewards on wide screens (keeping the arena picture big), under the
+  // Battle button where the side panels are hidden
+  const wideLobby = window.matchMedia ? window.matchMedia('(min-width: 1081px)') : { matches: false };
+  function placeDaily() {
+    const d = $('#daily'), side = $('#dailySide');
+    if (wideLobby.matches) { if (d.parentNode !== side) side.appendChild(d); }
+    else if (d.parentNode !== $('#chests').parentNode) $('#chests').parentNode.insertBefore(d, $('#chests'));
+    side.hidden = !wideLobby.matches || d.hidden;
+  }
   function renderDaily() {
     const open = G.roadOpen();
     $('#daily').hidden = !open;
+    placeDaily();
     if (!open) return;
     const qs = G.quests(), done = qs.filter(q => q.done).length, ready = G.questsReady(), cc = G.crownChest();
     $('#questSum').textContent = ready ? `${ready} reward${ready === 1 ? '' : 's'} to claim!` : done === 3 ? 'All done · new ones at midnight' : `${done} / 3 done`;
@@ -1775,9 +1785,10 @@ const KCMenu = (() => {
     $('#onlineBtn').hidden = !G.roadOpen();
     $('#practiceBtn').hidden = !G.roadOpen();
     if (subNow === 'magic') renderMagic(); else $('#magicTag').textContent = String(G.MAGIC_ORDER.reduce((a, id) => a + (id.startsWith('wild_') ? 0 : G.magicCount(id)), 0) || '');
-    $('#soundBtn').setAttribute('aria-label', KCSound.on ? 'Sound on' : 'Sound off');
-    $('#soundBtn').classList.toggle('off', !KCSound.on);
+    $('#soundBtn').setAttribute('aria-label', KCSound.on || KCSound.musicOn ? 'Sound on' : 'Sound off');
+    $('#soundBtn').classList.toggle('off', !KCSound.on && !KCSound.musicOn);
     $('#soundToggle').checked = KCSound.on;
+    $('#musicToggle').checked = KCSound.musicOn;
     $('.who-text small').textContent = open ? `Arena ${G.arena().number} · ${G.arena().name}` : 'Training Grounds';
     // centerpiece: trainers beaten, then trophies toward the next arena
     const cp = $('#cp'), bar = $('#cpBar');
@@ -1859,8 +1870,13 @@ const KCMenu = (() => {
     $('#whoBtn').addEventListener('click', e => { e.stopPropagation(); closePops(); openProfile(); });
     for (const el of ['#settings', '#oppPanel']) $(el).addEventListener('click', e => e.stopPropagation());
     document.addEventListener('click', () => closePops());
-    $('#soundBtn').addEventListener('click', () => { KCSound.on = !KCSound.on; refresh(); });
+    // the speaker in the top bar switches all sound, effects and music together
+    $('#soundBtn').addEventListener('click', () => { const any = KCSound.on || KCSound.musicOn; KCSound.on = !any; KCSound.musicOn = !any; refresh(); });
     $('#soundToggle').addEventListener('change', e => { KCSound.on = e.target.checked; refresh(); });
+    $('#musicToggle').addEventListener('change', e => { KCSound.musicOn = e.target.checked; refresh(); });
+    // the lobby's music starts with the first click or key (browsers only play sound after one)
+    const startMusic = () => { document.removeEventListener('pointerdown', startMusic); document.removeEventListener('keydown', startMusic); if (!$('#home').hidden) KCSound.music('lobby'); };
+    document.addEventListener('pointerdown', startMusic); document.addEventListener('keydown', startMusic);
     $('#nameForm').addEventListener('submit', e => {
       e.preventDefault();
       const v = $('#nameInput').value.replace(/\s+/g, ' ').trim().slice(0, 16);
@@ -1895,6 +1911,7 @@ const KCMenu = (() => {
     $('#cp').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && G.roadOpen()) { e.preventDefault(); cpGo(); } });
     $('#exX').addEventListener('click', closeExchange);
     $('#questBtn').addEventListener('click', openQuests);
+    if (wideLobby.addEventListener) wideLobby.addEventListener('change', placeDaily);
     $('#profX').addEventListener('click', closeProfile);
     $('#profPic').addEventListener('click', avatarPicker);
     $('#profRename').addEventListener('click', e => { e.stopPropagation(); closeProfile(); if ($('#settings').hidden) toggle('#settings', '#settingsBtn'); const i = $('#nameInput'); i.value = P().name; i.focus(); i.select(); });

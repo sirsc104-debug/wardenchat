@@ -27,6 +27,7 @@
   }
   function goHome() {
     G.phase = 'home'; G.s = null;
+    KCSound.music('lobby'); KCSound.crowd(false);
     $('#result').hidden = true;
     show('home');
     KCMenu.show();
@@ -98,6 +99,7 @@
   function begin() {
     $('#intro').hidden = true;
     G.phase = 'play';
+    KCSound.music('battle'); KCSound.crowd(true);
     tutStart();
     // a trophy battle left before it ends (reload, closed tab) counts as a loss next time the game loads
     if (!G.online) {
@@ -435,12 +437,24 @@
   const shock = (x, y, r, col, life) => G.fx.push({ kind: 'ring', x, y, r, col, life: life || 0.45, max: life || 0.45 });
   const debris = (x, y, n, cols, v) => { for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, sp = (v || 3) * (0.4 + Math.random()); G.fx.push({ kind: 'rock', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * 0.6, z: 0, vz: 3 + Math.random() * 4, r: 0.07 + Math.random() * 0.12, life: 0.9, max: 0.9, col: cols[i % cols.length] }); } };
   const liftOf = e => (e.air ? LIFT[e.card] || 1.1 : 0);
+  // which deploy sound a card makes
+  const SWARM = new Set(['skeletons', 'wolves', 'bees', 'footmen', 'wraiths', 'dockraiders', 'shardguards', 'sparkbots']);
+  function deploySound(id) {
+    const c = KC_CARDS[id];
+    if (!c) return 'deploy';
+    if (c.kind === 'building') return 'deployBuilding';
+    if (c.air) return 'deployAir';
+    if (SWARM.has(id) || (c.count || 1) >= 3) return 'deploySwarm';
+    if ((c.mass || 1) >= 6 || c.cost >= 6) return 'deployHeavy';
+    if ((c.range || 0) >= 3) return 'deployRanged';
+    return 'deploy';
+  }
   function handleEvents() {
     const s = G.s;
     for (const e of s.events) {
       switch (e.type) {
         case 'deploy':
-          KCSound.play('deploy');
+          KCSound.play(deploySound(e.card));
           if (e.card === 'bees') KCSound.play('buzz');
           ring(e.x, e.y, e.team, 1.4);
           dust(e.x, e.y, 8);
@@ -613,9 +627,9 @@
           sparks(e.x, e.y, 18, '#ffb030', 4);
           break;
         case 'tower': towerFx(e); if (G.tut && e.team === 1 && e.sub !== 'king') setTimeout(() => G.tut && tutGo('tower'), 1400); break;
-        case 'double': banner('×2 Energy!', 'Last minute'); KCSound.play('double'); speak('double'); if (G.tut) tutGo('double'); break;
-        case 'overtime': banner('Overtime!', 'Next tower wins'); KCSound.play('double'); speak('overtime'); break;
-        case 'sudden': banner('Sudden Death!', 'Every tower is crumbling: the weakest falls first'); KCSound.play('thunderclap'); G.shake = Math.max(G.shake, 0.4); break;
+        case 'double': banner('×2 Energy!', 'Last minute'); KCSound.play('double'); KCSound.intensity(1); speak('double'); if (G.tut) tutGo('double'); break;
+        case 'overtime': banner('Overtime!', 'Next tower wins'); KCSound.play('double'); KCSound.intensity(2); speak('overtime'); break;
+        case 'sudden': banner('Sudden Death!', 'Every tower is crumbling: the weakest falls first'); KCSound.play('thunderclap'); KCSound.intensity(2); G.shake = Math.max(G.shake, 0.4); break;
         case 'end': endBattle(e); break;
       }
     }
@@ -645,6 +659,7 @@
       sparks(e.x, e.y, 22, '#ffb030', 5);
     }
     puff(e.x, e.y, 16, '#cfc8dc', 1.6);
+    KCSound.play('crowdCheer');
     if (e.team === 1) {
       setTimeout(() => KCSound.play('crown'), 250);
       if (e.sub !== 'king') { speak('youTower'); if (!G.online && (G.trainer.kind === 'trophy' || G.trainer.kind === 'practice')) KCEmotes.foeLostTower(); }
@@ -894,6 +909,7 @@
   /* ---------- the end ---------- */
   function endBattle(e) {
     G.phase = 'end';
+    KCSound.music(null); KCSound.crowd(false);
     if (G.tut) tutDone(true);
     G.ended = e.reason === 'king' || e.reason === 'sudden' ? 2.6 : 1.8;
     if (e.winner >= 0) KCScenery.celebrate(e.winner);

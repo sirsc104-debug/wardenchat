@@ -1,20 +1,23 @@
-/* Kingdom Clash: sound effects made on the fly with Web Audio (no sound files). Starts on the first
-   click, as browsers require. */
+/* Kingdom Clash: sound effects and music made on the fly with Web Audio (no sound files). Starts on
+   the first click, as browsers require. Effects and music can each be switched off (Settings). */
 'use strict';
 
 const KCSound = (() => {
-  let ac = null, master = null, on = true;
+  let ac = null, master = null, on = true, musicOn = true, musicBus = null, crowdBus = null, pv = 1;
   const lastAt = {};
   let snapN = 0, snapAt = 0;
-  try { on = localStorage.getItem('kc.sound') !== 'off'; } catch (e) { /* storage blocked */ }
+  try { on = localStorage.getItem('kc.sound') !== 'off'; musicOn = localStorage.getItem('kc.music') !== 'off'; } catch (e) { /* storage blocked */ }
 
-  function ensure() {
-    if (!on) return null;
+  // the audio context, made on the first click; `any` makes it even with effects off (for the music)
+  function ensure(any) {
+    if (!on && !(any && musicOn)) return null;
     if (!ac) {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return null;
       ac = new AC();
       master = ac.createGain(); master.gain.value = 0.5; master.connect(ac.destination);
+      musicBus = ac.createGain(); musicBus.gain.value = 0; musicBus.connect(ac.destination);
+      crowdBus = ac.createGain(); crowdBus.gain.value = 0; crowdBus.connect(ac.destination);
     }
     if (ac.state === 'suspended') ac.resume();
     return ac;
@@ -22,6 +25,7 @@ const KCSound = (() => {
   function tone(f1, f2, dur, type, vol, delay) {
     const a = ensure(); if (!a) return;
     const t = a.currentTime + (delay || 0), o = a.createOscillator(), g = a.createGain();
+    f1 *= pv; if (f2) f2 *= pv;
     o.type = type || 'sine'; o.frequency.setValueAtTime(f1, t);
     if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
     g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.2, t + 0.01);
@@ -119,6 +123,13 @@ const KCSound = (() => {
     unlockFanfare: () => [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => tone(f, 0, i === 6 ? 1 : 0.25, 'triangle', 0.16, i * 0.1)),
     buy: () => { tone(880, 1320, 0.1, 'triangle', 0.15); tone(1760, 0, 0.18, 'sine', 0.1, 0.09); },
     deploy: () => { tone(220, 90, 0.16, 'sine', 0.3); noise(0.12, 0.12, 600); },
+    // deploy sounds by what lands: heavy, a swarm, a flyer, a ranged troop, a building
+    deployHeavy: () => { tone(110, 40, 0.35, 'sine', 0.42); noise(0.3, 0.22, 260); tone(70, 30, 0.25, 'triangle', 0.15, 0.04); },
+    deploySwarm: () => { for (let i = 0; i < 5; i++) { noise(0.04, 0.07, 1400 + i * 300, 'bandpass', i * 0.045); tone(420 + i * 40, 300, 0.04, 'triangle', 0.04, i * 0.045); } },
+    deployAir: () => { for (let i = 0; i < 3; i++) noise(0.09, 0.08, 900, 'bandpass', i * 0.08); tone(500, 900, 0.18, 'sine', 0.05); },
+    deployRanged: () => { tone(260, 120, 0.14, 'sine', 0.22); noise(0.08, 0.06, 3200, 'highpass', 0.05); tone(900, 1300, 0.06, 'triangle', 0.04, 0.06); },
+    deployBuilding: () => { tone(180, 90, 0.2, 'square', 0.09); noise(0.18, 0.18, 700); tone(1200, 1100, 0.12, 'triangle', 0.05, 0.12); },
+    crowdCheer: () => cheer(),
     // Briar Hollow cards
     spearsCast: () => { for (let i = 0; i < 6; i++) noise(0.14, 0.06, 2600 + i * 300, 'bandpass', i * 0.04); },
     spears: () => { for (let i = 0; i < 7; i++) { noise(0.05, 0.1, 900, 'bandpass', i * 0.035); tone(260 - i * 12, 150, 0.04, 'square', 0.05, i * 0.035); } },
@@ -177,16 +188,122 @@ const KCSound = (() => {
     meteor: () => { noise(1.0, 0.5, 250); tone(60, 25, 0.9, 'sine', 0.45); },
     pop: () => tone(700, 1100, 0.06, 'triangle', 0.05),
   };
+  // battle sounds heard over and over come out a little higher or lower each time
+  const VARY = new Set(['hit', 'arrow', 'death', 'smash', 'cannon', 'snow', 'deploy', 'deployHeavy', 'deploySwarm', 'deployAir', 'deployRanged', 'deployBuilding', 'quill', 'iceHit', 'sparkShot', 'frostShot', 'puffShot', 'pop', 'stunZap']);
   function play(name) {
     if (!on || !SFX[name]) return;
     const now = performance.now();
     if (lastAt[name] && now - lastAt[name] < 45) return;
     lastAt[name] = now;
+    pv = VARY.has(name) ? 0.93 + Math.random() * 0.14 : 1;
     try { SFX[name](); } catch (e) { /* audio unavailable */ }
+    pv = 1;
+  }
+
+  /* ---------- music ----------
+     Original tunes written as chord progressions and patterns, played by a small sequencer that looks a
+     little ahead on the audio clock. 'lobby' is calm (C major); 'battle' drives (A minor) and gets
+     faster and busier with `intensity`: 1 at double energy, 2 in overtime and sudden death. */
+  const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
+  const TRACKS = {
+    lobby: { bpm: 96, chords: [[60, 64, 67], [55, 59, 62], [57, 60, 64], [53, 57, 60]], bass: [48, 43, 45, 41],
+      lead: [0, 2, 1, 2, 3, 2, 1, 0, 1, 2, 3, 4, 3, 2, 1, 2], vol: 0.11 },
+    battle: { bpm: 122, chords: [[57, 60, 64], [53, 57, 60], [48, 52, 55], [55, 59, 62]], bass: [45, 41, 36, 43],
+      lead: [0, -1, 2, -1, 1, 2, -1, 0, 3, -1, 2, 1, -1, 2, 0, -1], vol: 0.12 },
+  };
+  const M = { track: null, intensity: 0, step: 0, next: 0, timer: 0 };
+  function mnote(t, f, dur, type, vol, cutoff) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    if (cutoff) { const fl = ac.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = cutoff; o.connect(fl); fl.connect(g); } else o.connect(g);
+    g.connect(musicBus); o.start(t); o.stop(t + dur + 0.05);
+  }
+  let noiseBuf = null;
+  function mdrum(t, kind, vol) {
+    if (kind === 'kick') { const o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.16);
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22); o.connect(g); g.connect(musicBus); o.start(t); o.stop(t + 0.25); return; }
+    if (!noiseBuf) { noiseBuf = ac.createBuffer(1, ac.sampleRate * 0.4, ac.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+    const src = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(), len = kind === 'snare' ? 0.16 : kind === 'tom' ? 0.2 : 0.04;
+    src.buffer = noiseBuf; f.type = kind === 'hat' ? 'highpass' : 'bandpass'; f.frequency.value = kind === 'hat' ? 7000 : kind === 'tom' ? 300 : 1800;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    src.connect(f); f.connect(g); g.connect(musicBus); src.start(t); src.stop(t + len + 0.02);
+  }
+  // one sixteenth of a bar
+  function mstep(t, T, k) {
+    const bar = Math.floor(k / 16) % 4, s16 = k % 16, I = M.intensity, v = T.vol;
+    // tension: the last chord of the battle progression darkens in overtime
+    const ch = T.chords[bar].map(n => n + (M.track === 'battle' && I >= 2 && bar === 3 ? -1 : 0)), beat = 60 / (T.bpm * (1 + I * 0.1)) / 4;
+    if (s16 === 0) for (const n of ch) mnote(t, NOTE(n), beat * 15, 'triangle', v * 0.32, 1800);
+    if (M.track === 'lobby') {
+      if (s16 % 8 === 0) mnote(t, NOTE(T.bass[bar]), beat * 7, 'sine', v * 0.9);
+      if (s16 % 2 === 0) { const li = T.lead[(s16 / 2 + bar * 2) % T.lead.length]; mnote(t, NOTE(ch[li % 3] + 12 * (li >= 3 ? 1 : 0) + 12), beat * 3, 'triangle', v * 0.42); }
+      if (s16 % 4 === 2) mdrum(t, 'hat', v * 0.25);
+    } else {
+      if (s16 % 2 === 0) mnote(t, NOTE(T.bass[bar] - 12 + (s16 % 8 === 6 ? 12 : 0)), beat * 1.6, 'sawtooth', v * 0.5, 600 + I * 300);
+      if (s16 % 8 === 0) mdrum(t, 'kick', v * 2.2);
+      if (s16 % 8 === 4) mdrum(t, 'snare', v * 1.1);
+      if (I >= 1 && s16 % 2 === 1) mdrum(t, 'hat', v * 0.35);
+      if (I >= 2 && s16 >= 12 && bar === 3) mdrum(t, 'tom', v * 1.2);
+      const li = T.lead[s16];
+      if (li >= 0 && (s16 % 2 === 0 || I >= 1)) mnote(t, NOTE(ch[li % 3] + 12 * (li >= 3 ? 2 : 1)), beat * 1.8, 'square', v * 0.16, 2400);
+    }
+  }
+  function schedule() {
+    if (!ac || !M.track) return;
+    const T = TRACKS[M.track];
+    while (M.next < ac.currentTime + 0.25) {
+      mstep(M.next, T, M.step);
+      M.next += 60 / (T.bpm * (1 + M.intensity * 0.1)) / 4;
+      M.step++;
+    }
+  }
+  function music(track) {
+    if (track === M.track) return;
+    M.track = track || null; M.intensity = 0;
+    if (!musicOn || !track) { fadeMusic(0); return; }
+    const a = ensure(true); if (!a) return;
+    M.step = 0; M.next = a.currentTime + 0.1;
+    fadeMusic(1);
+    if (!M.timer) M.timer = setInterval(schedule, 60);
+  }
+  function fadeMusic(to) {
+    if (!musicBus) return;
+    const t = ac.currentTime;
+    musicBus.gain.cancelScheduledValues(t); musicBus.gain.setValueAtTime(musicBus.gain.value, t); musicBus.gain.linearRampToValueAtTime(to, t + (to ? 1.2 : 0.6));
+  }
+  // the crowd: a murmur under the battle, and a cheer when a tower falls
+  let crowdSrc = null;
+  function crowd(onOff) {
+    if (!onOff) { if (crowdBus) { const t = ac.currentTime; crowdBus.gain.cancelScheduledValues(t); crowdBus.gain.setValueAtTime(crowdBus.gain.value, t); crowdBus.gain.linearRampToValueAtTime(0, t + 0.8); } return; }
+    if (!on) return;
+    const a = ensure(); if (!a) return;
+    if (!crowdSrc) {
+      const n = a.sampleRate * 3, buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+      let lp = 0; for (let i = 0; i < n; i++) { lp = lp * 0.97 + (Math.random() * 2 - 1) * 0.03; d[i] = lp * (0.7 + 0.3 * Math.sin(i / n * Math.PI * 6)); }
+      crowdSrc = a.createBufferSource(); crowdSrc.buffer = buf; crowdSrc.loop = true;
+      const f = a.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 700; f.Q.value = 0.6;
+      crowdSrc.connect(f); f.connect(crowdBus); crowdSrc.start();
+    }
+    const t = a.currentTime;
+    crowdBus.gain.cancelScheduledValues(t); crowdBus.gain.setValueAtTime(crowdBus.gain.value, t); crowdBus.gain.linearRampToValueAtTime(0.5, t + 1.5);
+  }
+  function cheer() {
+    if (!crowdBus || !on) return;
+    const t = ac.currentTime;
+    crowdBus.gain.cancelScheduledValues(t); crowdBus.gain.setValueAtTime(crowdBus.gain.value, t);
+    crowdBus.gain.linearRampToValueAtTime(2.6, t + 0.25); crowdBus.gain.linearRampToValueAtTime(0.5, t + 2.4);
+    noise(0.8, 0.08, 1100, 'bandpass', 0.05);
   }
   return {
-    play, unlock: ensure,
+    play, unlock: () => ensure(true), music, crowd,
+    intensity(n) { M.intensity = n; },
     get on() { return on; },
-    set on(v) { on = !!v; try { localStorage.setItem('kc.sound', on ? 'on' : 'off'); } catch (e) { /* storage blocked */ } if (on) ensure(); },
+    set on(v) { on = !!v; try { localStorage.setItem('kc.sound', on ? 'on' : 'off'); } catch (e) { /* storage blocked */ } if (on) ensure(); else crowd(false); },
+    get musicOn() { return musicOn; },
+    set musicOn(v) {
+      musicOn = !!v; try { localStorage.setItem('kc.music', musicOn ? 'on' : 'off'); } catch (e) { /* storage blocked */ }
+      const t = M.track; M.track = null; if (musicOn) music(t); else { fadeMusic(0); M.track = t; }
+    },
   };
 })();

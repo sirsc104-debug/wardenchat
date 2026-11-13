@@ -39,6 +39,7 @@
           <h3>Settings</h3>
           <form class="name-form" id="nameForm"><label for="nameInput">Your name</label><div><input id="nameInput" maxlength="16" autocomplete="off"><button class="mini-btn" type="submit">Save</button></div></form>
           <label class="switch"><input type="checkbox" id="soundToggle"><span>Sound effects</span></label>
+          <label class="switch"><input type="checkbox" id="musicToggle"><span>Music</span></label>
           <p class="keys"><kbd>1</kbd>&ndash;<kbd>5</kbd> switch tabs &middot; <kbd>Enter</kbd> battle &middot; <kbd>Esc</kbd> close</p>
         </div>
       </header>
@@ -99,6 +100,8 @@
               <ul class="rewards" id="rewards"></ul>
               <p class="dim" id="rightNote">First win against each trainer gives a 30 XP bonus.</p>
             </div>
+            <!-- on wide screens the daily quests, crown chest and challenge sit here (js/menu.js placeDaily) -->
+            <div class="plaque daily-plaque" id="dailySide" hidden><div class="ribbon"><span>Daily</span></div></div>
           </aside>
         </section>
 
