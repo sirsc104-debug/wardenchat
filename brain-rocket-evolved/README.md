@@ -33,8 +33,9 @@ browser, or serve the folder with `python3 -m http.server`.
 - **🌅 Daily Launch.** 10 prompts a day, the same for everyone, with a fresh set at midnight in the
   player's own time zone. Launch #1 is November 13, 2026 (`EPOCH` in `js/game.js`). One go a day:
   leaving part-way still counts, with the rest as misses. 50,000 points (5,000 a prompt) reaches the
-  Edge of the Universe. After each prompt you see your tier, the prompt's Supernova and the most
-  common answers. The results show a share grid (📋 Share copies it, or opens the phone's share
+  Edge of the Universe. After each prompt you see your tier. Each prompt's Supernova and most common
+  answers stay hidden until the day is over (midnight), so nobody can pass them on; after that,
+  the day's results show each Supernova, and Archive replays reveal them as you play. The results show a share grid (📋 Share copies it, or opens the phone's share
   sheet), every prompt with your answer, and a day streak.
   - The order works through every category before any comes back. The categories are sorted by
     id, shuffled once per cycle, and each day takes the next ten (`Quiz.daily` in `js/quiz.js`).

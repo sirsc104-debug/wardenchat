@@ -36,6 +36,7 @@ def norm(s):
 
 key = lambda s: norm(s).replace(' ', '')
 PAREN = re.compile(r'\s*\([^)]*\)\s*$')
+BINOMIAL = re.compile(r'^[A-Z][a-z]+ [a-z]+( [a-z]+)?$')
 BAD_ALIAS = re.compile(r'[:/|`$\\]|^Q\d+$|https?')
 
 
@@ -44,8 +45,13 @@ def shown(item, cat):
     t = PAREN.sub('', item['title']).strip()
     words = t.split()
     # only a lower-case trailing word: "Dalmatian dog" -> "Dalmatian", but "Spanish Water Dog" stays
-    while len(words) > 1 and words[-1] in cat.get('strip', []) and len(' '.join(words[:-1])) >= 3: words.pop()
+    while cat.get('short_names') and len(words) > 1 and words[-1] in cat.get('strip', []) and len(' '.join(words[:-1])) >= 3: words.pop()
     t = ' '.join(words)
+    # species often have the scientific name as their title ("Pieris brassicae"): show a common name
+    if cat.get('common_names') and BINOMIAL.match(t):
+        for a in [item.get('label', '')] + item.get('aliases', []):
+            a = PAREN.sub('', a).strip()
+            if len(a) >= 4 and not BINOMIAL.match(a) and not re.search(r'[:/]', a): t = a[0].upper() + a[1:]; break
     if cat.get('trim'):
         short = re.sub(cat['trim'], '', t)
         if len(short) >= 2: t = short

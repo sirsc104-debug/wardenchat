@@ -48,6 +48,8 @@
   const dayNumber = (d = new Date()) => Math.floor((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - EPOCH) / 864e5) + 1;
   const dateOf = n => { const d = new Date(EPOCH + (n - 1) * 864e5); return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()); };
   const dateText = n => dateOf(n).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  // Today's best answers stay hidden until the day is over, so nobody can pass them on.
+  const dayOver = n => n < dayNumber();
   function msToNextDay() { const n = new Date(), m = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1); return m - n; }
   const hms = ms => { const s = Math.max(0, Math.round(ms / 1000)); return `${Math.floor(s / 3600)}h ${String(Math.floor(s / 60) % 60).padStart(2, '0')}m`; };
 
@@ -380,10 +382,12 @@
       $('rvLine').textContent = 'Out of time on this one.';
     }
     const lines = [];
-    if (c.gem && ent !== c.gem) lines.push(`🌟 The Supernova was <b>${esc(c.gem.name)}</b>.`);
     if (ent && ent === c.gem) lines.push('🌟 You found this prompt\'s one Supernova!');
-    const pad = Quiz.examples(c, 0, 3);
-    if (pad.length) lines.push(`🏁 Most people say ${pad.map(n => `<b>${esc(n)}</b>`).join(', ')}.`);
+    if (dayOver(G.day)) {
+      if (c.gem && ent !== c.gem) lines.push(`🌟 The Supernova was <b>${esc(c.gem.name)}</b>.`);
+      const pad = Quiz.examples(c, 0, 3);
+      if (pad.length) lines.push(`🏁 Most people say ${pad.map(n => `<b>${esc(n)}</b>`).join(', ')}.`);
+    } else lines.push('🔒 This prompt\'s Supernova and its most common answers are revealed after midnight, once everyone has had today\'s launch.');
     lines.push(`${fmt(c.entities.length)} answers counted.`);
     $('rvExtra').innerHTML = lines.join('<br>');
     $('rvNext').textContent = G.i + 1 >= Quiz.DAILY ? 'Results ▸' : 'Next ▸';
@@ -470,18 +474,21 @@
       const pts = pk.tier >= 0 ? (pk.pts != null ? pk.pts : T[pk.tier].pts) : 0;
       const b = document.createElement('div');
       b.className = 'round-row';
+      const gem = daily && dayOver(r.day) && Quiz.built(c).gem;
       b.innerHTML = `<span class="rr-e">${emojiOf(pk)}</span><span class="rr-q">${c.q.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')}</span>` +
-        `<span class="rr-a ${pk.tier >= 0 ? 'tier-' + pk.tier : 'tier-x'}">${pk.tier >= 0 ? esc(pk.name) : '—'}</span><span class="rr-p">${fmt(pts)}</span>`;
+        `<span class="rr-a ${pk.tier >= 0 ? 'tier-' + pk.tier : 'tier-x'}">${pk.tier >= 0 ? esc(pk.name) : '—'}</span><span class="rr-p">${fmt(pts)}</span>` +
+        (gem ? `<span class="rr-g">🌟 Supernova: <b>${esc(gem.name)}</b></span>` : '');
       rows.appendChild(b);
     }
     let note = '';
-    if (r.mode === 'daily') note = `🔥 ${streak().count}-day streak · next launch in ${hms(msToNextDay())}`;
+    if (r.past) note = 'Your launch on the day. Replays are archive launches and don\'t change it.';
+    else if (r.mode === 'daily') note = `🔥 ${streak().count}-day streak · next launch in ${hms(msToNextDay())}` + (dayOver(r.day) ? '' : ' · each prompt\'s Supernova is revealed then');
     else if (r.mode === 'archive') note = 'Archive launches don\'t count toward your streak.';
     else note = (r.best ? `🏆 A new ${m.name} best! ` : `${m.name} best: ${fmt((bests()[r.diff] || { score: 0 }).score)}. `) + (r.picks.length > 10 ? 'Your last 10 questions:' : '');
     $('overNote').textContent = note;
     show('btnShare', daily);
     paintMisses();
-    $('btnAgain').textContent = daily ? 'Play Endless' : 'Fly again';
+    $('btnAgain').textContent = r.past ? '⟲ Replay' : daily ? 'Play Endless' : 'Fly again';
     if (r.score > 0 && !r.crashed) Scene.confetti(80);
   }
 
@@ -560,10 +567,13 @@
       const state = d && d.done ? `${fmt(d.score)} · ${gridOf(d.picks)}` : a ? `Archive best ${fmt(a.score)}` : 'Not played';
       items.push(`<button type="button" class="arch-day" data-n="${n}"><b>#${n}</b><span>${dateText(n)}</span><span>${state}</span></button>`);
     }
-    sheet('⟲ Archive', items.length ? `<p>Play any past Daily Launch. Archive launches don't change your streak or that day's score.</p><div class="arch-list">${items.join('')}</div>` : '<p>Launch #1 is today, so there are no past launches yet. Come back tomorrow!</p>');
+    sheet('⟲ Archive', items.length ? `<p>Play any past Daily Launch, or open one you played to see each prompt's Supernova. Archive launches don't change your streak or that day's score.</p><div class="arch-list">${items.join('')}</div>` : '<p>Launch #1 is today, so there are no past launches yet. Come back tomorrow!</p>');
     $('sheetBody').querySelectorAll('.arch-day').forEach(b => b.addEventListener('click', () => {
       Sound.click(); closeSheet();
-      startDaily(+b.dataset.n, true);
+      const n = +b.dataset.n, d = days()[n];
+      // a day you played: your results from it, now with each prompt's Supernova (Replay plays it again)
+      if (d && d.done) showResults({ mode: 'daily', day: n, ...d, past: true });
+      else startDaily(n, true);
     }));
   }
   function howSheet() {
@@ -573,7 +583,7 @@
       <div class="how-tiers">${T.map((t, i) => `<span class="ht-e">${t.emoji}</span><span class="tier-${i}">${t.name} · ${fmt(t.pts)} (Endless ${CLASSIC_PTS[i]})</span><span>${esc(t.blurb)}</span>`).join('')}</div>
       <p><b>🌅 Daily Launch</b> (one difficulty): 10 prompts a day, the same for everyone, new at midnight. 25 seconds and one answer each:
       an answer that isn't on the list doesn't use up your shot, and the first real answer locks in. 50,000 points reaches the Edge of the Universe.
-      One go a day, and leaving part-way still counts.</p>
+      One go a day, and leaving part-way still counts. Each prompt's Supernova and most common answers are revealed after midnight, once everyone has played.</p>
       <p><b>∞ Endless</b> plays by Brain Rocket's classic rules: Owen (30s, 5 fuel cells, 5 skips, hints), Medium (20s, ×1.5), Hard (12s, ×2) and
       Ultra Hard (12s, ×2.5, and you fall while you think). Answer in the first quarter of the timer for ×2, the first half for ×1.5. Each answer
       in a row adds ×0.25, up to ×5, and a Supernova is a deepest cut (×1.5). Wrong guesses are free; running out of time burns a fuel cell.</p>
@@ -677,6 +687,7 @@
   $('btnAgain').addEventListener('click', () => {
     Sound.click();
     if (G.result && G.result.mode === 'endless') startEndless(G.result.diff);
+    else if (G.result && G.result.past) startDaily(G.result.day, true);
     else { tab = 'endless'; showTitle(); }
   });
   $('btnMenu').addEventListener('click', () => { Sound.click(); showTitle(); });

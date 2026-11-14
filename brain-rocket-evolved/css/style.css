@@ -272,6 +272,9 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 .round-row .rr-q b { color: var(--ink); font-weight: 600; }
 .round-row .rr-a { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .round-row .rr-p { font-weight: 700; text-align: right; }
+.round-row .rr-g { grid-column: 2 / 4; font-size: 13.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.round-row .rr-g b { color: var(--t5); font-weight: 600; }
+.round-row:has(.rr-g) .rr-e { grid-row: span 3; }
 .over-note { font-size: 17px; color: var(--muted); }
 .over-btns { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 6px; }
 

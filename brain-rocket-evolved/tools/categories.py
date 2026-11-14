@@ -10,6 +10,7 @@
   min_links             leave out items with fewer Wikipedia pages than this (trims junk entries)
   pad                   share of answers that are Launch Pad (default 3.5%, at most pad_max = 14)
   short                 allow 2-letter aliases (element symbols, state codes)
+  short_names           show "Dalmatian" for "Dalmatian dog" (drops a trailing lower-case strip word)
   trim                  a regex cut off the end of shown names ("Saab Automobile" -> "Saab")
   nick                  nicknames and slang Wikidata doesn't record: {answer: [nickname, …]}
 """
@@ -311,3 +312,5 @@ NICKNAMES = {
 }
 for c in CATEGORIES:
     if c['id'] in NICKNAMES: c.setdefault('nick', NICKNAMES[c['id']])
+    if c['id'] in ('dogs', 'cats', 'horses', 'chickens', 'cheese'): c.setdefault('short_names', True)
+    if c['id'] in ('birds', 'mammals', 'frogs', 'butterflies', 'sharks', 'cats'): c.setdefault('common_names', True)
