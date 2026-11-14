@@ -138,6 +138,8 @@ const Account = (() => {
     on(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     useTransport(fn) { transport = fn; },
     init, rpc: (fn, p) => rpc(fn, p),
+    // a call that also works signed out (the leaderboard): anonymous unless signed in
+    ask: (fn, p) => rpc(fn, p, st.status !== 'signedIn'),
     signIn: (username, password) => auth('password', { email: identity(username), password }).then(signedIn),
     signUp(username, password) {
       const at = ++epoch;
@@ -221,9 +223,11 @@ const Wallet = (() => {
     cancelRequest: id => call('sirsc_cancel_request', { request_id: id }).then(keep),
     /* A finished Daily Launch or Endless run: the server works out the coins and returns the breakdown. */
     reward(r) {
-      return call('bre_reward', { mode: r.mode, diff: r.diff || '', day: r.day | 0, score: Math.round(r.score), prompts: r.prompts | 0, answers: r.answers | 0, duration_ms: Math.round(r.durationMs) })
+      return call('bre_reward', { mode: r.mode, diff: r.diff || '', day: r.day | 0, score: Math.round(r.score), prompts: r.prompts | 0, answers: r.answers | 0, duration_ms: Math.round(r.durationMs), tiers: r.tiers || null })
         .then(x => { keep(x && x.me); return x; });
     },
+    /* The Daily Launch leaderboard for a day: scope 'all' or 'friends' (friends needs a sign-in). */
+    board: (day, scope) => Account.ask('bre_daily_board', { day: day | 0, scope: scope || 'all' }),
   };
 })();
 

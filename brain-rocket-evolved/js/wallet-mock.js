@@ -9,6 +9,43 @@
   const KEY = 'brEvolved.demo-db';
   const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return null; } };
   let mem = load() || { users: {}, wallets: {}, owned: {}, equipped: {}, requests: [], rewards: [], dailies: {} };
+  mem.boards = mem.boards || {};
+  const TIER_PTS = [500, 750, 1500, 3000, 4250, 5000];
+
+  // Pretend rivals for the leaderboard: the same 40 players every day, with scores seeded by the day.
+  const RIVALS = ['Rook_Rival', 'luna', 'Sam_W', 'NovaKid', 'pixelpanda', 'Captain_Q', 'mossy', 'zed.exe', 'Juniper', 'OrbitOwl',
+    'marmalade', 'Tycho', 'beanbag', 'Quasar_Q', 'kestrel', 'Pip', 'Ada_L', 'snowcone', 'Vega', 'Rocket_Rae', 'Bramble', 'ollie.b',
+    'Comet_Kai', 'fizz', 'Hollis', 'nebulynn', 'Wren', 'otto_matic', 'Saffron', 'Dex', 'Moonpie', 'Ilsa', 'Gizmo', 'tinsel',
+    'Rhea_S', 'Banjo', 'Mira', 'clementine', 'Atlas_J', 'zuzu'];
+  const FRIENDS = ['luna', 'Sam_W', 'Rook_Rival', 'marmalade', 'Wren'];
+  function seeded(n) { let a = n >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = Math.imul(a ^ (a >>> 15), a | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function rivals(day) {
+    const r = seeded(day * 7919 + 17), out = [];
+    for (const name of RIVALS) {
+      if (r() < 0.25) continue;   // not everyone plays every day
+      const skill = r(), tiers = Array.from({ length: 10 }, () => { const x = r(); return x < 0.12 - skill * 0.08 ? -1 : x < 0.4 - skill * 0.2 ? 0 : x < 0.5 ? 1 : x < 0.75 - skill * 0.1 ? 2 : x < 0.9 - skill * 0.05 ? 3 : x < 0.985 ? 4 : 5; });
+      out.push({ user_id: 'bot-' + name, username: name, member: r() < 0.2, tiers, score: tiers.reduce((t, k) => t + (k >= 0 ? TIER_PTS[k] : 0), 0), at: Date.now() - Math.floor(r() * 8e7) });
+    }
+    return out;
+  }
+  function ranked(day) {
+    const all = rivals(day).concat(mem.boards[day] || []);
+    all.sort((a, b) => b.score - a.score || a.at - b.at);
+    return all.map(e => ({ ...e, rank: 1 + all.filter(x => x.score > e.score).length }));
+  }
+  function board(b, u) {
+    const day = b.day | 0, scope = b.scope === 'friends' ? 'friends' : 'all';
+    if (day < 1 || day > utcDay() + 1) return fail('sirsc_bad_request');
+    if (scope === 'friends' && !u) return fail('sirsc_not_signed_in');
+    let all = ranked(day);
+    if (scope === 'friends') {
+      all = all.filter(e => FRIENDS.includes(e.username) || (u && e.user_id === u.id));
+      all = all.map(e => ({ ...e, rank: 1 + all.filter(x => x.score > e.score).length }));
+    }
+    const show = e => ({ rank: e.rank, username: e.username, member: e.member, score: e.score, tiers: e.tiers, you: !!(u && e.user_id === u.id) });
+    const me = u && all.find(e => e.user_id === u.id);
+    return R(200, { day, scope, players: all.length, me: me ? show(me) : null, rows: all.slice(0, 50).map(show) });
+  }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) { /* storage blocked: in memory only */ } };
   const R = (status, data) => Promise.resolve({ status, data });
   const fail = code => R(400, { code: 'P0001', message: code });
@@ -47,10 +84,18 @@
       const okDay = Math.abs((b.day | 0) - utcDay()) <= 1;
       if (!okDay || b.prompts !== 10 || b.answers < 0 || b.answers > 10 || b.score < b.answers * 500 || b.score > b.answers * 5000 || b.score % 250
         || b.duration_ms < 10000 || b.duration_ms > 10800000) return fail('sirsc_bad_reward');
+      const tiers = b.tiers;
+      if (!Array.isArray(tiers) || tiers.length !== 10 || tiers.some(t => !Number.isInteger(t) || t < -1 || t > 5)
+        || tiers.reduce((t, k) => t + (k >= 0 ? TIER_PTS[k] : 0), 0) !== b.score || tiers.filter(t => t >= 0).length !== b.answers) return fail('sirsc_bad_reward');
       const paidKey = id + ':' + b.day, already = !!mem.dailies[paidKey];
+      if (!already) {
+        const list = (mem.boards[b.day] = mem.boards[b.day] || []);
+        list.push({ user_id: id, username: (mem.users[id] || {}).name || 'you', member: isMember(w), tiers, score: b.score, at: Date.now() });
+      }
       const base = 10000, bonus = Math.floor(0.6 * b.score), coins = already ? 0 : Math.floor((base + bonus) * memberM);
       if (!already) { mem.dailies[paidKey] = true; w.coins += coins; save(); }
-      return R(200, { coins, base, score_bonus: bonus, member_mult: memberM, already_paid: already, me: meOf(id) });
+      const mine = ranked(b.day).find(e => e.user_id === id);
+      return R(200, { coins, base, score_bonus: bonus, member_mult: memberM, already_paid: already, rank: mine ? mine.rank : null, players: ranked(b.day).length, me: meOf(id) });
     }
     if (b.mode === 'endless') {
       if (!['easy', 'medium', 'hard', 'ultra'].includes(b.diff) || b.prompts < 1 || b.prompts > 2000 || b.answers < 0 || b.answers > b.prompts
@@ -73,6 +118,7 @@
   function rpc(fn, b, u) {
     if (fn === 'bre_ping') return R(200, true);
     if (fn === 'my_account_state') return R(200, { active: true });
+    if (fn === 'bre_daily_board') return board(b, u);
     if (!u) return fail('sirsc_not_signed_in');
     const id = u.id, w = wallet(id);
     if (fn === 'sirsc_me') return R(200, meOf(id));

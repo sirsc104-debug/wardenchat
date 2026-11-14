@@ -40,6 +40,13 @@ browser, or serve the folder with `python3 -m http.server`.
   - The order works through every category before any comes back. The categories are sorted by
     id, shuffled once per cycle, and each day takes the next ten (`Quiz.daily` in `js/quiz.js`).
     Adding or removing a category changes future days (and past ones in the archive).
+- **🏆 Daily leaderboard.** Signed-in players' first launch of each day goes on that day's board
+  (🏆 Leaderboard on the Daily card and the results). It shows ranks, names (with the SirSC Diamond for
+  members), scores and each player's emoji grid, never their answers. Switch between Everyone and
+  Friends (Brain Rocket's friends on Warden Chat), step back through past days, and see your own rank
+  even outside the top 50. The server keeps and ranks the scores (`bre_daily_board` in
+  [`docs/ECONOMY-BRE.md`](docs/ECONOMY-BRE.md)); until it's live the button stays hidden, and the
+  wallet demo build fills the board with pretend rivals.
 - **∞ Endless.** Prompts back to back, never the same category twice until all of them have come
   up. A timeout or a skip burns a fuel cell, and three end the run. Your best is saved.
 - **⟲ Archive.** Play any past Daily Launch. It doesn't change your streak or that day's score.
@@ -139,6 +146,7 @@ No AI is used anywhere: not to build the lists, and not while playing.
 - `js/catalog.js`: what the shop sells and how each rocket, flame and trail looks.
 - `js/wallet.js`: Warden Chat sign-in and the SirSC wallet (from Wildcard Chess).
 - `js/shop.js`: what's equipped, the account chip, signing in, the shop, and the coins on the results.
+- `js/board.js`: the Daily Launch leaderboard.
 - `js/wallet-mock.js`: a pretend wallet, only in `--wallet-demo` builds.
 - `docs/ECONOMY-BRE.md`, `docs/CODEX-PROMPT-BRE.md`: the back end for coins and the shop.
 - `tools/build_page.py`: builds one self-contained HTML file (for an artifact link, or

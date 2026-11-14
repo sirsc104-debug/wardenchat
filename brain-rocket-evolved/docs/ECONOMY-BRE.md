@@ -5,7 +5,8 @@ the same Warden Chat accounts, the same `sirsc_wallets` / `sirsc_ledger` / `sirs
 `sirsc_owned` tables, and the same `sirsc_me`, `sirsc_member_claim`, `sirsc_buy`, `sirsc_equip`,
 `sirsc_request_diamonds` and `sirsc_cancel_request` functions, called with `game = 'bre'`. That
 contract is `docs/ECONOMY-API.md` in `sirsc104-debug/claude`; everything there applies unchanged.
-This file is only what this game adds: two functions, a private table and the `bre` catalog rows.
+This file is only what this game adds: three functions (`bre_ping`, `bre_reward` and the Daily
+Launch leaderboard, `bre_daily_board`), a private table and the `bre` catalog rows.
 
 Conventions as in ECONOMY-API.md and Wildcard Chess's `docs/ECONOMY-WCC.md`: one new migration in
 `sirsc104-debug/warden-chat` on top of the SirSC economy migration; RLS on, no table grants to
@@ -23,7 +24,7 @@ built against this contract and a pretend back end that follows it (`js/wallet-m
 Returns `true`. Callable anonymously. The game calls it on load: until it answers, accounts stay
 hidden and the game works exactly as it does without them.
 
-## `bre_reward(mode text, diff text, day integer, score integer, prompts integer, answers integer, duration_ms integer) returns json`
+## `bre_reward(mode text, diff text, day integer, score integer, prompts integer, answers integer, duration_ms integer, tiers integer[]) returns json`
 
 The game calls this once when a **Daily Launch** or an **Endless** run ends. Archive launches, runs
 that end in a crash (a rude word) and Dailies left part-way never call it.
@@ -39,12 +40,15 @@ own calendar day, so accept `day` within 1 of the UTC launch number
 **coins = floor((10,000 + floor(0.6 × score)) × member_mult)**: 10,000 for finishing, up to 40,000 for a
 perfect 50,000 (60,000 for members).
 
-- **Paid once per player per `day`.** Record it in `warden_private.bre_daily_paid (user_id, day,
-  coins, created_at, primary key (user_id, day))`. A second call for the same day pays 0 and returns
-  `already_paid: true` (no error).
-- **Plausibility** → else `sirsc_bad_reward`: `prompts` = 10; `answers` 0 to 10; `score` from
-  `answers × 500` to `answers × 5,000` and a multiple of 250 (every tier is a multiple of 250);
-  `duration_ms` 10,000 to 10,800,000 (3 hours).
+- `tiers` is the launch's 10 results in order: the tier of each answer (0 Launch Pad, 1 Space Junk,
+  2 Orbiter, 3 Moonshot, 4 Deep Space, 5 Supernova) or -1 for a miss. The leaderboard shows them.
+- **Paid once per player per `day`, and that first launch is the one on the leaderboard.** Record it
+  in `warden_private.bre_daily_scores (user_id, day, score, tiers smallint[], answers, coins,
+  finished_at timestamptz default now(), primary key (user_id, day))`. A second call for the same day
+  pays 0, changes nothing on the board and returns `already_paid: true` (no error).
+- **Plausibility** → else `sirsc_bad_reward`: `prompts` = 10; `tiers` has exactly 10 integers from -1
+  to 5; `answers` = how many of them are 0 or more; **`score` = the sum of the tiers' points**
+  (500, 750, 1,500, 3,000, 4,250, 5,000; a miss is 0); `duration_ms` 10,000 to 10,800,000 (3 hours).
 - Not part of the Endless daily cap, but it counts toward the wallet-wide 300,000-a-day cap of
   ECONOMY-API.md.
 
@@ -52,15 +56,19 @@ Returns:
 
 ```jsonc
 { "coins": 28000, "base": 10000, "score_bonus": 18000, "member_mult": 1, "already_paid": false,
-  "me": <sirsc_me('bre')> }
+  "rank": 12, "players": 340, "me": <sirsc_me('bre')> }
 ```
+
+`rank` and `players` are the player's place on that day's board (as `bre_daily_board` counts it) and
+how many players are on it.
 
 Examples: 30,000 points: 10,000 + 18,000 = 28,000. 50,000 as a member: 40,000 × 1.5 = 60,000.
 Ten misses (0 points): 10,000.
 
 ### `mode = 'endless'`
 
-`diff` is `easy`, `medium`, `hard` or `ultra` (anything else → `sirsc_bad_reward`); `day` is ignored.
+`diff` is `easy`, `medium`, `hard` or `ultra` (anything else → `sirsc_bad_reward`); `day` and `tiers`
+are ignored (`tiers` is null). Endless runs are not on the leaderboard.
 Endless scores use Brain Rocket's classic points (10 to 200 an answer, times up to ×2.5 for the
 difficulty, ×2 for speed, ×5 for a streak and ×1.5 for a Supernova), and on Ultra Hard the score is
 the highest point reached.
@@ -85,6 +93,33 @@ Returns:
 
 Both modes write one ledger row (`reward`, game `bre`, coins = what was paid, note like
 `daily #3 30000` or `endless hard 12400`), lock the wallet row, and never take the balance below zero.
+
+## `bre_daily_board(day integer, scope text) returns json`
+
+The Daily Launch leaderboard for one day. Callable **anonymously** (anyone can look) and by
+`authenticated`. It never returns answers, only tiers, so nothing is given away before midnight.
+
+- `day`: a launch number from 1 to the UTC launch number + 1 → else `sirsc_bad_request`.
+- `scope`: `'all'` (everyone) or `'friends'`: the caller and their accepted friends from Brain
+  Rocket's `public.br_friendships` (pairs stored once, `user_a < user_b`). `'friends'` needs a
+  sign-in → `sirsc_not_signed_in`. Anything else → `sirsc_bad_request`.
+- Rows come from `warden_private.bre_daily_scores` for that day, joined to `public.profiles` for the
+  username. Leave out accounts that aren't active on Warden Chat (banned or suspended,
+  `warden_private.account_is_active()`).
+- **Order**: score, highest first; ties in the order they finished (`finished_at`, earliest first).
+- **Rank**: 1 + the number of players in the scope with a higher score, so ties share a rank
+  (1, 2, 2, 4).
+- `rows` is the top 50 of the scope. `me` is the caller's own row (even when it isn't in the top 50),
+  or null when signed out or not on the board. `players` is how many are in the scope.
+- `member` is true when that player is a SirSC Member right now (the badge by their name).
+
+```jsonc
+{ "day": 2, "scope": "all", "players": 340,
+  "me": { "rank": 12, "username": "MomSaab", "member": false, "score": 31250,
+          "tiers": [3, 2, 4, -1, 0, 3, 5, 2, 1, 4], "you": true },
+  "rows": [ { "rank": 1, "username": "luna", "member": true, "score": 42500,
+              "tiers": [4, 4, 3, 5, 4, 2, 4, 3, 4, 4], "you": false }, … ] }
+```
 
 ## The catalog to seed (game `bre`)
 
@@ -140,13 +175,16 @@ rows: everyone has them.
 
 ## Checklist
 
-1. One migration: `warden_private.bre_daily_paid`, whatever private table the hourly limit and the
-   Endless daily cap need (or reuse the economy's reward log with `game = 'bre'`), the `bre` catalog
-   rows, `bre_ping`, `bre_reward`. Exact names, parameters, JSON keys and error codes.
+1. One migration: `warden_private.bre_daily_scores` (indexed on `(day, score desc, finished_at)`),
+   whatever private table the hourly limit and the Endless daily cap need (or reuse the economy's
+   reward log with `game = 'bre'`), the `bre` catalog rows, `bre_ping`, `bre_reward`,
+   `bre_daily_board`. Exact names, parameters, JSON keys and error codes.
 2. `bre_reward` locks the wallet row, pays a Daily at most once per day, and writes the ledger row in
    the same transaction.
 3. Tests (as for the economy, no Docker): both formulas with and without membership, the Daily once
    per day (second call pays 0 with `already_paid`), the day window (±1), the Endless 80,000 cap (cut,
-   then 0), the 300,000 wallet-wide cap still applying, every plausibility error, the hourly limit, and
+   then 0), the 300,000 wallet-wide cap still applying, every plausibility error (a score that doesn't
+   add up from the tiers), the hourly limit, the board (order, shared ranks, `me` outside the top 50,
+   the friends scope, anonymous reads, banned players left out, no answers anywhere), and
    `sirsc_buy` / `sirsc_equip` / `sirsc_member_claim` working with `game = 'bre'`.
 4. Deploy to the Warden Chat project once SirSC says so.

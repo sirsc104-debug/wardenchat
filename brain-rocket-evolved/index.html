@@ -674,6 +674,7 @@
         <div class="over-btns">
           <button type="button" class="go-btn" id="btnShare">📋 Share</button>
           <button type="button" class="ghost-btn" id="btnAgain">Fly Endless</button>
+          <button type="button" class="ghost-btn hidden" id="btnBoard" data-board="">🏆 Leaderboard</button>
           <button type="button" class="ghost-btn hidden" id="btnMisses" data-misses></button>
           <button type="button" class="ghost-btn" id="btnMenu">Menu</button>
         </div>
@@ -698,6 +699,20 @@
         <div class="si-btns"><button type="submit" class="go-btn small">Sign in</button><button type="button" class="ghost-btn small" id="siCreate">Create a Warden Chat account</button></div>
         <p class="si-note">Creating an account here creates a Warden Chat account. Change your password or delete your account on <a id="siChat" href="https://chat.sirsc104.com/" target="_blank" rel="noopener">Warden Chat</a>.</p>
       </form>
+    </div>
+
+    <!-- The Daily Launch leaderboard -->
+    <div id="board" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="bdTitle">
+      <div class="sheet-panel bd-panel">
+        <div class="sheet-head"><h2 id="bdTitle">🏆 Daily Launch leaderboard</h2><button type="button" class="icon-btn" id="bdClose" aria-label="Close">✕</button></div>
+        <div class="bd-tools">
+          <div class="bd-days"><button type="button" class="icon-btn" id="bdPrev" aria-label="The day before">‹</button><span id="bdDay"></span><button type="button" class="icon-btn" id="bdNext" aria-label="The day after">›</button></div>
+          <div class="bd-scope" role="group" aria-label="Whose scores"><button type="button" data-bdscope="all">Everyone</button><button type="button" data-bdscope="friends">Friends</button></div>
+        </div>
+        <div class="bd-head"><span>#</span><span>Player</span><span>Launch</span><span>Score</span></div>
+        <div class="sheet-body bd-list" id="bdList"></div>
+        <p class="bd-foot" id="bdFoot"></p>
+      </div>
     </div>
 
     <!-- The SirSC Shop -->
@@ -729,6 +744,7 @@
 <script src="js/badwords.js"></script>
 <script src="js/wallet.js"></script>
 <script src="js/shop.js"></script>
+<script src="js/board.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>

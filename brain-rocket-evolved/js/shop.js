@@ -235,7 +235,7 @@ const Shop = (() => {
       if (r.mode === 'daily') lines.push(`<li><span>Daily Launch finished</span><b>${fmt(x.base)}</b></li>`, `<li><span>${fmt(r.score)} points</span><b>+${fmt(x.score_bonus)}</b></li>`);
       else lines.push(`<li><span>${fmt(r.score)} points${x.score_coins >= 20000 ? ' (the most a run pays)' : ''}</span><b>${fmt(x.score_coins)}</b></li>`);
       if (x.member_mult > 1) lines.push(`<li><span>${SIRSC_BADGE_SVG} Member</span><b>×${x.member_mult}</b></li>`);
-      const note = r.mode === 'daily' ? (x.already_paid ? 'You’ve already been paid for today’s launch.' : 'One reward per Daily Launch.')
+      const note = r.mode === 'daily' ? (x.already_paid ? 'You’ve already been paid for today’s launch.' : 'One reward per Daily Launch.') + (x.rank ? ` <b>🏆 You’re #${fmt(x.rank)} of ${fmt(x.players)} today.</b> <button type="button" class="link-btn" data-board="${r.day}">See the leaderboard</button>` : '')
         : x.capped ? `You’ve hit today’s ${fmt(x.daily_cap)}-coin limit for Endless. It resets at midnight UTC.` : `Endless today: ${fmt(x.today)} of ${fmt(x.daily_cap)} coins.`;
       box.innerHTML = `<div class="rw-total">🪙 <span id="rwCount">0</span></div><ul class="rw-lines">${lines.join('')}</ul><p class="rw-note">${note}</p>`;
       countUp($('rwCount'), x.coins);

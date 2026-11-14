@@ -437,8 +437,9 @@
       if (rec.best) { all[G.diff] = { score, answers: G.picks.filter(p => p.tier >= 0).length }; store.set('bests', all); }
     }
     showResults({ mode: G.mode, day: G.day, ...rec });
-    Shop.reward({ mode: G.mode, diff: G.diff, day: G.day, score, crashed: !!crashed, prompts: G.picks.length,
-      answers: G.picks.filter(p => p.tier >= 0).length, durationMs: Date.now() - G.startedAt });
+    Shop.reward({ mode: G.mode, diff: G.diff, day: G.day, score, crashed: !!crashed, prompts: rec.picks.length,
+      answers: rec.picks.filter(p => p.tier >= 0).length, durationMs: Date.now() - G.startedAt,
+      tiers: G.mode === 'daily' ? rec.picks.map(p => p.tier) : null });
   }
 
   const VERDICTS = [
@@ -487,6 +488,9 @@
     else note = (r.best ? `🏆 A new ${m.name} best! ` : `${m.name} best: ${fmt((bests()[r.diff] || { score: 0 }).score)}. `) + (r.picks.length > 10 ? 'Your last 10 questions:' : '');
     $('overNote').textContent = note;
     show('btnShare', daily);
+    $('btnBoard').dataset.board = daily ? r.day : '';
+    $('btnBoard').classList.toggle('no-board', !daily);
+    Board.paint();
     paintMisses();
     $('btnAgain').textContent = r.past ? '⟲ Replay' : daily ? 'Play Endless' : 'Fly again';
     if (r.score > 0 && !r.crashed) Scene.confetti(80);
@@ -626,6 +630,7 @@
     $('howBox').querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => { Sound.click(); ({ how: howSheet, archive: archiveSheet, misses: missSheet })[b.dataset.act](); }));
     paintMisses();
     Shop.renderChip();
+    Board.paint();
     placeGlider();
   }
 
@@ -657,13 +662,13 @@
       const p = placeAt(rec.score, ROUTES.daily);
       box.innerHTML = `<div class="dc-done"><div class="dc-score">${fmt(rec.score)} <small>/ 50,000 · ${p.icon} ${esc(p.name)}</small></div>
         <div class="dc-grid">${gridOf(rec.picks)}</div>
-        <div class="dc-row"><button type="button" class="go-btn small" id="dcResults">See results</button><span class="dc-next" id="dcNext"></span></div></div>`;
+        <div class="dc-row"><button type="button" class="go-btn small" id="dcResults">See results</button><button type="button" class="ghost-btn small hidden" data-board="${n}">🏆 Leaderboard</button><span class="dc-next" id="dcNext"></span></div></div>`;
       $('dcResults').addEventListener('click', () => { Sound.click(); startDaily(n); });
       const tick = () => { const el = $('dcNext'); if (!el) return; el.textContent = `Next launch in ${hms(msToNextDay())}`; if (msToNextDay() < 1500) later(showTitle, 1600); };
       tick(); clearInterval(showTitle.iv); showTitle.iv = setInterval(tick, 30000);
     } else {
       box.innerHTML = `<p class="dc-lead">Today's ten prompts are waiting. <b>Name the rarest answer you can</b> to every one.</p>
-        <button type="button" class="go-btn" id="dcGo">▲ LAUNCH ▲</button>`;
+        <div class="dc-row"><button type="button" class="go-btn" id="dcGo">▲ LAUNCH ▲</button><button type="button" class="ghost-btn small hidden" data-board="${n}">🏆 Today's leaderboard</button></div>`;
       $('dcGo').addEventListener('click', () => { Sound.click(); startDaily(n); });
     }
     const all = bests();
@@ -763,6 +768,7 @@
 
   Scene.init($('scene'));
   Shop.init();
+  Board.init();
   fit();
   showTitle();
   requestAnimationFrame(frame);

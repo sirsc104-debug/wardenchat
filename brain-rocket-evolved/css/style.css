@@ -393,3 +393,29 @@ button.acct-in:hover { background: var(--panel-2); }
 .rw-lines li b { color: var(--ink); font-variant-numeric: tabular-nums; }
 .rw-note { margin: 0; font-size: 16px; color: var(--muted); text-align: center; }
 .rw-note b { color: var(--gold); }
+
+/* ---------- Daily Launch leaderboard ---------- */
+.bd-panel { width: 820px; }
+.bd-tools { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 0 28px 10px; flex-wrap: wrap; }
+.bd-days { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; }
+.bd-days .icon-btn { width: 44px; height: 44px; font-size: 26px; }
+.bd-days .icon-btn:disabled { opacity: 0.3; cursor: default; }
+.bd-scope { display: flex; gap: 6px; padding: 4px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1.5px solid var(--edge); }
+.bd-scope button { font: 600 16px var(--font); padding: 6px 16px; border-radius: 999px; background: none; border: 0; color: var(--muted); }
+.bd-scope button.on { background: linear-gradient(#ffe27a, #ff9a52); color: #3b1230; }
+.bd-head, .bd-row { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto 96px; gap: 12px; align-items: center; }
+.bd-head { padding: 0 40px 6px; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.bd-head span:last-child, .bd-score { text-align: right; }
+.bd-list { padding-top: 0; }
+.bd-row { padding: 8px 12px; border-radius: 14px; font-size: 18px; }
+.bd-row:nth-child(odd) { background: rgba(255,255,255,0.04); }
+.bd-row.you { background: rgba(255,216,77,0.16); border: 1.5px solid rgba(255,216,77,0.5); }
+.bd-rank { font-weight: 700; font-size: 20px; text-align: center; font-variant-numeric: tabular-nums; }
+.bd-name { font-weight: 600; display: inline-flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bd-name i { font-style: normal; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); }
+.bd-grid { font-size: 17px; letter-spacing: 1px; white-space: nowrap; }
+.bd-score { font-weight: 700; font-variant-numeric: tabular-nums; }
+.bd-gap { text-align: center; color: var(--muted); padding: 2px 0; }
+.bd-note { color: var(--muted); text-align: center; padding: 24px 0 10px; margin: 0; }
+.bd-list .go-btn { display: block; margin: 0 auto; }
+.bd-foot { margin: 0; padding: 10px 28px 18px; font-size: 15.5px; color: var(--muted); border-top: 1px solid rgba(255,255,255,0.08); }
