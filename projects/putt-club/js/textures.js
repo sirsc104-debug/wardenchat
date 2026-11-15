@@ -394,6 +394,29 @@
     return tex(c);
   });
 
+  // A woven desert rug for the Canyon tee: rust with cream, turquoise and black bands and a stepped diamond.
+  T.teeRug = () => once('teeRug', () => {
+    const W = 256, Hh = 200, c = canvas(W, Hh), g = c.getContext('2d'), rnd = U.rng(447);
+    g.fillStyle = '#8a3a1c'; g.fillRect(0, 0, W, Hh);
+    const band = (y, h, colr) => { g.fillStyle = colr; g.fillRect(0, y, W, h); g.fillRect(0, Hh - y - h, W, h); };
+    band(14, 6, '#f0dcb4'); band(24, 10, '#2a1a12'); band(38, 6, '#3a9a8a'); band(48, 4, '#f0dcb4');
+    // a stepped diamond in the middle
+    const cx = W / 2, cy = Hh / 2, step = 9;
+    [['#f0dcb4', 6], ['#2a1a12', 4], ['#3a9a8a', 2], ['#f0dcb4', 1]].forEach(([colr, n]) => {
+      g.fillStyle = colr;
+      for (let i = -n; i <= n; i++) { const w = (n - Math.abs(i) + 1) * step * 2 - step; g.fillRect(cx - w / 2, cy + i * step * 0.62 - step * 0.31, w, step * 0.62); }
+    });
+    // little zigzags either side
+    g.strokeStyle = '#f0dcb4'; g.lineWidth = 3;
+    [36, W - 36].forEach(x => { g.beginPath(); for (let k = 0; k <= 6; k++) g.lineTo(x + (k % 2 ? 9 : -9), 66 + k * 11); g.stroke(); });
+    // the weave: fine threads across and along
+    for (let y = 0; y < Hh; y += 2) { g.fillStyle = `rgba(0,0,0,${0.04 + rnd() * 0.05})`; g.fillRect(0, y, W, 1); }
+    for (let x = 0; x < W; x += 3) { g.fillStyle = `rgba(255,240,220,${rnd() * 0.05})`; g.fillRect(x, 0, 1, Hh); }
+    // a fringe edge
+    g.fillStyle = '#e8d2a8'; for (let x = 2; x < W; x += 5) { g.fillRect(x, 0, 2, 6); g.fillRect(x, Hh - 6, 2, 6); }
+    return tex(c);
+  });
+
   // Dry twigs on a clear background, for the shell of a tumbleweed.
   T.twigs = () => once('twigs', () => {
     const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(431);

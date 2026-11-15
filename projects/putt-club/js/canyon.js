@@ -5,7 +5,7 @@
   'use strict';
   const U = PC.U, K = PC.Kit, DEG = Math.PI / 180;
   const rect = U.rect, rp = U.roundPoly;
-  const LOOK = (extra) => Object.assign({ theme: 'canyon', light: 'canyon', rail: 'plank', flag: '#d9482b', flowers: ['#ffd23f', '#ff7a3a', '#ff5d8f', '#ffffff'] }, extra || {});
+  const LOOK = (extra) => Object.assign({ theme: 'canyon', light: 'mesa', rail: 'plank', flag: '#d9482b', flowers: ['#ffd23f', '#ff7a3a', '#ff5d8f', '#ffffff'] }, extra || {});
 
   // Cactus kinds: how wide they are to the ball, and how tall.
   const KIND = { saguaro: [0.3, 2.2], barrel: [0.34, 0.55], pear: [0.42, 0.7], cholla: [0.3, 0.9] };
@@ -154,7 +154,7 @@
     id: 'dust-devil', name: 'Dust Devil', par: 3,
     special: 'Gusts toward a cactus patch',
     tip: 'Every few seconds a gust of dust blows east, toward a patch of cholla along the right. The tumbleweeds blow with it.',
-    look: LOOK({ light: 'mesa' }), tee: [0, 1.3], cup: [-1.2, 15],
+    look: LOOK(), tee: [0, 1.3], cup: [-1.2, 15],
     floors: [rp(rect(-3, 0, 3, 17), 1.0)],
     features: [
       { type: 'wind', dust: true, dir: [1, 0], power: 2.4, period: 6.0, gust: 2.4 },
@@ -235,7 +235,7 @@
     id: 'rock-arch', name: 'Rock Arch', par: 3,
     special: 'A natural rock arch',
     tip: 'A sandstone arch spans the lane, and prickly pear fill the gaps beside its legs, so the only way is under it. A tumbleweed drifts in and out of the arch.',
-    look: LOOK({ light: 'mesa' }), tee: [0, 1.3], cup: [0.3, 14.2],
+    look: LOOK(), tee: [0, 1.3], cup: [0.3, 14.2],
     floors: [rp(rect(-2.6, 0, 2.6, 16.5), 0.9)],
     posts: [{ x: -1.5, y: 8, r: 0.55, h: 0.9, style: 'sandrock' }, { x: 1.5, y: 8, r: 0.55, h: 0.9, style: 'sandrock' }],
     features: [
@@ -266,7 +266,7 @@
     id: 'hoodoo-pinball', name: 'Hoodoo Pinball', par: 3,
     special: 'Bouncy hoodoos among cacti',
     tip: 'Springy hoodoo rocks fling the ball about, and barrel cacti stand between them. Bounce off the rocks, never the cacti.',
-    look: LOOK({ light: 'mesa' }), tee: [0, 1.3], cup: [0, 12.8],
+    look: LOOK(), tee: [0, 1.3], cup: [0, 12.8],
     floors: [rp([[-2.4, 0], [2.4, 0], [3.6, 3], [3.6, 12], [2.4, 14.5], [-2.4, 14.5], [-3.6, 12], [-3.6, 3]], [0.6, 0.6, 1, 1, 1.2, 1.2, 1, 1])],
     features: [
       { type: 'bumpers', hoodoo: true, list: [{ x: 0, y: 5.6, r: 0.5 }, { x: -1.9, y: 7.8, r: 0.45 }, { x: 1.9, y: 7.8, r: 0.45 }, { x: 0, y: 10.0, r: 0.42 }, { x: -2.3, y: 11.2, r: 0.4 }, { x: 2.3, y: 11.2, r: 0.4 }] },
@@ -309,7 +309,7 @@
     id: 'coyote-bowl', name: 'Coyote Bowl', par: 2,
     special: 'A bowl with cacti on its slopes',
     tip: 'The green is a bowl that runs down to the cup, but barrel cacti sit on its slopes right where a ball rolls in. A tumbleweed circles the rim.',
-    look: LOOK({ light: 'mesa' }), tee: [0, 1.3], cup: bowlC,
+    look: LOOK(), tee: [0, 1.3], cup: bowlC,
     floors: [K.laneCircle(1.6, 0, bowlC[1], 4.4)],
     height: (x, y) => { const d = Math.hypot(x - bowlC[0], y - bowlC[1]); return d < 4.0 ? -0.42 * Math.pow(1 - d / 4.0, 2) : 0; },
     features: [
@@ -430,7 +430,7 @@
     id: 'canyon-rim', name: 'Canyon Rim', par: 3,
     special: 'A lane along a cliff edge',
     tip: 'The left side of this lane is the edge of the canyon, with no rail. Cacti line the safe side, and tumbleweeds keep blowing toward the drop.',
-    look: LOOK({ light: 'mesa' }), tee: [0.4, 1.3], cup: [0.3, 16.6],
+    look: LOOK(), tee: [0.4, 1.3], cup: [0.3, 16.6],
     floors: [rim],
     rails: [{ pts: K.openRail(rim, [-1.6, 0], [-1.6, 18.5]) }],
     hazards: [{ kind: 'chasm', poly: rect(-20, -6, -1.6, 26) }],
@@ -454,7 +454,7 @@
     id: 'sunset-mesa', name: 'Sunset Mesa', par: 4,
     special: 'A mesa climb at sunset',
     tip: 'The finale: one narrow ramp climbs the mesa between barrel cacti, with a tumbleweed rolling up and down it. On top, saguaros and another tumbleweed guard the cup.',
-    look: LOOK({ light: 'mesa', cell: 0.12 }), tee: [0, 1.3], cup: [1, 20.4],
+    look: LOOK({ cell: 0.12 }), tee: [0, 1.3], cup: [1, 20.4],
     floors: [rp(rect(-3.6, 0, 3.6, 22), 1.2)],
     height: mesaH,
     walls: [
