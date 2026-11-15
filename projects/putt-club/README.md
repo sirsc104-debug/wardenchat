@@ -1,6 +1,6 @@
 # SirSC's Putt Club
 
-Mini golf in 3D, played against three rivals. There are two courses: **the Garden**, 27 holes each built around its own garden trick, and **the Abyss**, 18 hellscape holes of par 6 and up that float over a sea of lava with no rails at all. Every round deals a random 9 or 18 from one course. The Course book lists all 45 holes and lets you practise any one of them.
+Mini golf in 3D, played against three rivals. There are two courses: **the Garden**, 27 holes each built around its own garden trick, and **the Abyss**, 18 holes of par 6 and up in an underground volcanic temple, floating over a lava abyss with no rails at all. Every round deals a random 9 or 18 from one course. The Course book lists all 45 holes and lets you practise any one of them.
 
 Plain HTML, CSS and JavaScript with three.js r128 from cdnjs. There is no build step for playing locally: serve the folder with `python3 -m http.server` and open `index.html`. All textures are painted on canvases and all sound is synthesised, so there are no image or audio files.
 
@@ -15,7 +15,7 @@ The title screen copies the SirSC games' menu (Bigger Fish, Tower Defense, Brain
 | Owen | Garden | The whole putt, played out in a copy of the hole, so it shows every bounce, slope and current exactly. The cup also pulls a little harder. | Owen, Clover, Fern |
 | Medium | Garden | A line to the first wall and one bounce. | Fern, Bramble, Blaze |
 | Hard | Garden | A short line that only shows direction. | Bramble, Blaze, Thorn |
-| Ultra | The Abyss | None: just the arrow. No rails anywhere, so any edge is a drop. Par 6 to 8, and you pick up at par + 5. | Thorn, Cinder, SirSC |
+| Ultra | The Abyss | None: just the arrow. No rails anywhere, so any edge is a drop. Par 6 to 9, and you pick up at par + 5. | Thorn, Cinder, SirSC |
 
 ## Rivals
 
@@ -67,26 +67,30 @@ Water, flowerbeds, lava and the edges of the Abyss cost one penalty stroke and p
 
 ## The Abyss: 18 holes (Ultra)
 
+An underground volcanic temple suspended over a lava abyss. The platforms are ancient flagstones on stone columns with a thin bronze inlay along every drop. Around them: obsidian cliffs and a stalactite roof, lava falls pouring down the cliff walls, a temple facade carved into the rock ahead, giant pillars with carved bands of glowing runes, ruined islands drifting in the dark, smoke and embers rising, and light falling through cracks in the roof. A colossal rune wheel turns slowly in the abyss below the course, chained to the cliffs; runes appear only on the pillars, the facade and the wheels.
+
+Every hole is built so that even perfect aim needs several putts: corners with nothing to bank off, ledges that only meet for a short stretch, slabs you must land on and stop. Each par is the strokes the test bot needed, plus two (the bot never misses).
+
 | # | Hole | Par | Its trick |
 | --- | --- | --- | --- |
-| 1 | Gates of Dis | 6 | Three obsidian walls, each with an iron gate that rises and slams. |
-| 2 | Reaper's Mill | 6 | Thin bridges on and off a platform where three iron blades sweep. |
-| 3 | Imp Patrol | 7 | A zigzag causeway with an imp pacing across every leg. |
-| 4 | Magma Pinball | 6 | Glowing magma boulders fling the ball, and nothing catches it. |
-| 5 | Geyser Leap | 6 | Three separate platforms; geysers hurl the ball across the gaps. |
-| 6 | Raft of Charon | 7 | Two basalt rafts ferry the ball over a lava lake via an island. |
-| 7 | Portal Maze | 6 | Unconnected platforms joined by paired portals; one sends you back. |
-| 8 | Doom Pendulum | 6 | Two spiked iron balls swing across the causeway. |
-| 9 | Rune Wheel | 6 | Ride a turning rune circle round until it points at the exit. |
-| 10 | Obsidian Slide | 6 | Corners of polished obsidian, as slippery as ice. |
-| 11 | Tar Pits | 6 | Tar stops the ball dead and lava pools swallow it. |
-| 12 | Ash River | 7 | A river of hot ash carries the ball, with lava outside every bend. |
-| 13 | Volcano Summit | 6 | Putt up a volcano to the cup in its crater. |
-| 14 | The Crater | 6 | A long thin bridge into a crater full of imps and lava. |
-| 15 | Bone Bridge | 7 | A rune raises a bone bridge; a slab rocks over the second channel. |
-| 16 | Soul Cart | 6 | Fire jets blast the ball sideways; the cup rides on a cart. |
-| 17 | Sulfur Winds | 7 | Gusts across a winding causeway with no edges. |
-| 18 | The Descent | 8 | Four ledges down, fire runes that blast you on, blades at the end. |
+| 1 | Gates of Dis | 7 | A narrow causeway turning at every corner, with an iron gate slamming across each leg. |
+| 2 | Reaper's Mill | 7 | Two discs of sweeping blades, joined by thin bridges that leave at right angles. |
+| 3 | Imp Patrol | 9 | Six legs with no edges and an imp pacing across most of them. |
+| 4 | Magma Pinball | 7 | Two arenas of magma boulders whose exits are nowhere near their entrances. |
+| 5 | Geyser Leap | 7 | Four floating slabs; each geyser throws the ball the way it rolls, and the next slab is off to one side. |
+| 6 | Raft of Charon | 9 | Three rafts across a lava lake, north, then east, then north again. |
+| 7 | Portal Maze | 6 | Slabs joined only by paired portals (one sends you back to the tee); the cup sits in a lava ring open at the back. |
+| 8 | Doom Pendulum | 7 | Four spiked balls on chains from the roof, swinging across a narrow L-shaped bridge. |
+| 9 | Rune Wheel | 6 | The great rune wheel: three bridges leave it and only one leads on, to a second wheel turning the other way. |
+| 10 | Obsidian Slide | 8 | A causeway that turns five times, much of it polished obsidian as slippery as ice. |
+| 11 | Tar Pits | 6 | Rows of lava pools with one gap each, never in line, tar between them, and a lava ring round the cup. |
+| 12 | Ash River | 8 | A winding causeway with a river of ash running down it, against you. |
+| 13 | Volcano Summit | 7 | Lava down every slope but two narrow ridges; work round the base, then climb to the crater. |
+| 14 | The Crater | 8 | A crooked bridge into a crater sloping down to lava, with the cup on a mesa reached by two steep ramps. |
+| 15 | Bone Bridge | 7 | Runes raise bone bridges over two lava channels; a rocking slab crosses the one between. |
+| 16 | Soul Cart | 7 | Fire jets blast across thin bridges with three turns; the cup rides on a cart between lava pools. |
+| 17 | Sulfur Winds | 7 | Gusts blowing across thin causeways with no edges. |
+| 18 | The Descent | 7 | Five ledges down, each meeting the next only for a short stretch off to one side. |
 
 ## Testing the holes
 
@@ -111,7 +115,7 @@ js/bots.js          the rivals: workers, timing, skill
 js/textures.js      canvas-painted textures
 js/world.js         the three.js scene: greens, rails, water, cup, ball, effects
 js/vis.js           the garden around each hole and how each feature looks
-js/vis-abyss.js     the hellscape and the Abyss versions of each feature
+js/vis-abyss.js     the volcanic temple and the Abyss versions of each feature
 js/audio.js         synthesised sound effects and music
 js/game.js          menu, difficulties, rounds, rivals, scoring, camera, controls and screens
 tools/test-holes.js the hole-testing bot

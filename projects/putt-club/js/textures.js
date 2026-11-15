@@ -298,42 +298,12 @@
   });
 
   // ---------- The Abyss ----------
-  // Charred felt for the platforms, with faint ember stripes.
-  T.ashTurf = () => once('ashTurf', () => {
-    const c = canvas(512, 512), g = c.getContext('2d'), rnd = U.rng(201);
-    g.fillStyle = '#3d3336'; g.fillRect(0, 0, 256, 512);
-    g.fillStyle = '#332a2d'; g.fillRect(256, 0, 256, 512);
-    g.globalAlpha = 0.5;
-    for (let i = 0; i < 9000; i++) { g.fillStyle = ['#463b3e', '#2c2427', '#3a2f32', '#4d3a36'][i % 4]; g.fillRect(rnd() * 512, rnd() * 512, 1.6, 3 + rnd() * 3); }
-    g.globalAlpha = 0.55;
-    for (let i = 0; i < 260; i++) { g.fillStyle = rnd() < 0.5 ? '#ff5a1f' : '#ffae3a'; g.fillRect(rnd() * 512, rnd() * 512, 1.4, 1.4); }
-    g.globalAlpha = 1;
-    return tex(c);
-  });
 
-  // Basalt with glowing cracks: a colour map and a matching glow map.
-  T.basalt = () => once('basalt', () => {
-    const S = 256, rnd = U.rng(211);
-    const c = canvas(S, S), g = c.getContext('2d'), e = canvas(S, S), h = e.getContext('2d');
-    g.fillStyle = '#2a2124'; g.fillRect(0, 0, S, S);
-    speckle(g, S, S, 500, ['#33282b', '#221a1c', '#3b2e2f', '#2e2426'], 3, 12, rnd);
-    h.fillStyle = '#000000'; h.fillRect(0, 0, S, S);
-    for (let k = 0; k < 14; k++) {
-      let x = rnd() * S, y = rnd() * S;
-      const pts = [[x, y]];
-      for (let i = 0; i < 6; i++) { x += (rnd() - 0.5) * 60; y += (rnd() - 0.5) * 60; pts.push([x, y]); }
-      [[g, '#8a2a0c', 4], [g, '#ff6a1a', 1.6], [h, '#ff7a2a', 3], [h, '#ffd27a', 1]].forEach(([ctx, colr, w]) => {
-        ctx.strokeStyle = colr; ctx.lineWidth = w; ctx.lineJoin = 'round';
-        ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.stroke();
-      });
-    }
-    return { map: tex(c), glow: tex(e) };
-  });
 
   // Molten lava: soft overlapping glows with a few darker crusts and bright seams.
   T.lava = () => once('lava', () => {
     const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(221);
-    g.fillStyle = '#e84a0c'; g.fillRect(0, 0, S, S);
+    g.fillStyle = '#b8340a'; g.fillRect(0, 0, S, S);
     const blob = (x, y, r, colr, a) => {
       for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) {
         const grd = g.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, r);
@@ -341,27 +311,12 @@
         g.fillStyle = grd; g.fillRect(x + ox - r, y + oy - r, r * 2, r * 2);
       }
     };
-    for (let i = 0; i < 70; i++) blob(rnd() * S, rnd() * S, 20 + rnd() * 50, 'rgba(255,170,40,A)', 0.55);
-    for (let i = 0; i < 40; i++) blob(rnd() * S, rnd() * S, 14 + rnd() * 34, 'rgba(120,20,4,A)', 0.55);
-    for (let i = 0; i < 30; i++) blob(rnd() * S, rnd() * S, 6 + rnd() * 14, 'rgba(255,230,140,A)', 0.7);
+    for (let i = 0; i < 70; i++) blob(rnd() * S, rnd() * S, 20 + rnd() * 50, 'rgba(255,120,24,A)', 0.55);
+    for (let i = 0; i < 46; i++) blob(rnd() * S, rnd() * S, 14 + rnd() * 34, 'rgba(70,12,2,A)', 0.6);
+    for (let i = 0; i < 26; i++) blob(rnd() * S, rnd() * S, 6 + rnd() * 14, 'rgba(255,200,90,A)', 0.6);
     return tex(c);
   });
 
-  // The sea far below: mostly dark crust with glowing seams.
-  T.lavaSea = () => once('lavaSea', () => {
-    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(281);
-    g.fillStyle = '#2a0a06'; g.fillRect(0, 0, S, S);
-    speckle(g, S, S, 120, ['#3a0e08', '#1c0604', '#4a1208'], 10, 34, rnd);
-    g.lineCap = 'round';
-    for (let i = 0; i < 26; i++) {
-      let x = rnd() * S, y = rnd() * S;
-      const pts = [[x, y]];
-      for (let k = 0; k < 5; k++) { x += (rnd() - 0.5) * 70; y += (rnd() - 0.5) * 70; pts.push([x, y]); }
-      [['#ff5a0a', 5], ['#ffb43a', 1.6]].forEach(([cl, w]) => { g.strokeStyle = cl; g.lineWidth = w; g.beginPath(); pts.forEach((p, j) => (j ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]))); g.stroke(); });
-    }
-    g.globalAlpha = 0.8; speckle(g, S, S, 40, ['#ff7a1a', '#ff9a2a'], 3, 9, rnd); g.globalAlpha = 1;
-    return tex(c);
-  });
 
   T.obsidian = () => once('obsidian', () => {
     const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(231);
@@ -390,19 +345,162 @@
     return tex(c);
   });
 
+  // ---------- The temple ----------
+  // Polished dark flagstones for the putting surfaces: 4 x 4 slabs per tile (one slab per unit).
+  T.templeFloor = () => once('templeFloor', () => {
+    const S = 512, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(301);
+    const q = S / 4;
+    for (let j = 0; j < 4; j++) for (let i = 0; i < 4; i++) {
+      const v = (rnd() - 0.5) * 0.06;
+      g.fillStyle = new THREE.Color('#3b3436').offsetHSL(0, 0, v).getStyle();
+      g.fillRect(i * q, j * q, q, q);
+      g.globalAlpha = 0.18;
+      for (let k = 0; k < 220; k++) { g.fillStyle = rnd() < 0.5 ? '#2c2628' : '#4a4144'; g.fillRect(i * q + rnd() * q, j * q + rnd() * q, 1 + rnd() * 2, 1 + rnd() * 2); }
+      g.globalAlpha = 0.12; g.strokeStyle = '#5a4e4c'; g.lineWidth = 1;
+      for (let k = 0; k < 3; k++) { g.beginPath(); const x = i * q + rnd() * q, y = j * q + rnd() * q; g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 50, y + (rnd() - 0.5) * 50); g.stroke(); }
+      g.globalAlpha = 1;
+    }
+    g.fillStyle = '#1b1517';
+    for (let i = 0; i <= 4; i++) { g.fillRect(i * q - 1.5, 0, 3, S); g.fillRect(0, i * q - 1.5, S, 3); }
+    g.globalAlpha = 0.25; g.fillStyle = '#6a5a52';
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { g.fillRect(i * q + 2, j * q + 2, q - 4, 2); }
+    g.globalAlpha = 1;
+    return tex(c);
+  });
+
+  // Plain dressed masonry for the sides of platforms, columns and ruins.
+  T.templeStone = () => once('templeStone', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(311);
+    g.fillStyle = '#161214'; g.fillRect(0, 0, S, S);
+    let y = 0;
+    while (y < S) {
+      const h = 26 + rnd() * 14; let x = -rnd() * 40;
+      while (x < S) {
+        const w = 44 + rnd() * 40;
+        g.fillStyle = new THREE.Color('#3a3234').offsetHSL(0, 0, (rnd() - 0.5) * 0.08).getStyle();
+        g.fillRect(x + 1.5, y + 1.5, w - 3, h - 3);
+        g.fillStyle = 'rgba(255,255,255,0.05)'; g.fillRect(x + 3, y + 3, w - 8, 2);
+        g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(x + 3, y + h - 6, w - 6, 3);
+        x += w;
+      }
+      y += h;
+    }
+    g.globalAlpha = 0.2; speckle(g, S, S, 300, ['#0e0b0c', '#4a4042'], 1, 3, rnd); g.globalAlpha = 1;
+    return tex(c);
+  });
+
+  // A carved band of runes: a dark stone map and a glow map where only the runes are lit.
+  T.runeBand = () => once('runeBand', () => {
+    const W = 512, H = 128, rnd = U.rng(321);
+    const c = canvas(W, H), g = c.getContext('2d'), e = canvas(W, H), h = e.getContext('2d');
+    g.fillStyle = '#241e20'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#3a3032'; g.fillRect(0, 0, W, 10); g.fillRect(0, H - 10, W, 10);
+    h.fillStyle = '#000'; h.fillRect(0, 0, W, H);
+    const glyphs = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ';
+    [g, h].forEach((ctx, k) => {
+      ctx.font = '700 64px Georgia, serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      for (let i = 0; i < 8; i++) {
+        const ch = glyphs[(i * 7 + 3) % glyphs.length];
+        if (k === 0) { ctx.fillStyle = '#120c0c'; ctx.fillText(ch, 32 + i * 64, 66); }
+        else { ctx.shadowColor = '#ff6a1a'; ctx.shadowBlur = 14; ctx.fillStyle = '#ffb060'; ctx.fillText(ch, 32 + i * 64, 66); ctx.shadowBlur = 0; }
+      }
+      ctx.fillStyle = k ? '#ff7a2a' : '#120c0c';
+      ctx.fillRect(0, 16, W, 3); ctx.fillRect(0, H - 19, W, 3);
+    });
+    void rnd;
+    return { map: tex(c), glow: tex(e) };
+  });
+
+  // Dark rock with a few thin glowing veins (magma boulders, the volcano, rafts).
+  T.magmaRock = () => once('magmaRock', () => {
+    const S = 256, rnd = U.rng(331);
+    const c = canvas(S, S), g = c.getContext('2d'), e = canvas(S, S), h = e.getContext('2d');
+    g.fillStyle = '#231c1d'; g.fillRect(0, 0, S, S);
+    speckle(g, S, S, 420, ['#2c2324', '#1a1415', '#352a2a'], 3, 12, rnd);
+    h.fillStyle = '#000'; h.fillRect(0, 0, S, S);
+    for (let k = 0; k < 4; k++) {
+      let x = rnd() * S, y = rnd() * S;
+      const pts = [[x, y]];
+      for (let i = 0; i < 5; i++) { x += (rnd() - 0.5) * 70; y += (rnd() - 0.5) * 70; pts.push([x, y]); }
+      [[g, '#7a2a0c', 2.4], [h, '#ff7a2a', 2.2], [h, '#ffd27a', 0.8]].forEach(([ctx, colr, w]) => {
+        ctx.strokeStyle = colr; ctx.lineWidth = w; ctx.lineJoin = 'round';
+        ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.stroke();
+      });
+    }
+    return { map: tex(c), glow: tex(e) };
+  });
+
+  // Rough cliff rock for the cavern walls (tiles a lot, so it stays subtle).
+  T.cliff = () => once('cliff', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(341);
+    g.fillStyle = '#1a1519'; g.fillRect(0, 0, S, S);
+    for (let i = 0; i < 60; i++) { g.strokeStyle = rnd() < 0.5 ? 'rgba(60,48,58,0.5)' : 'rgba(8,6,8,0.6)'; g.lineWidth = 2 + rnd() * 6; g.beginPath(); const x = rnd() * S; g.moveTo(x, 0); g.bezierCurveTo(x + (rnd() - 0.5) * 40, S * 0.3, x + (rnd() - 0.5) * 40, S * 0.7, x + (rnd() - 0.5) * 30, S); g.stroke(); }
+    speckle(g, S, S, 200, ['#241d22', '#0f0c0e'], 2, 6, rnd);
+    return tex(c);
+  });
+
+  // The lava far below: dark crust broken by wide, softly glowing flows (tiles seamlessly).
+  T.lavaDeep = () => once('lavaDeep', () => {
+    const S = 1024, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(351);
+    g.fillStyle = '#170502'; g.fillRect(0, 0, S, S);
+    speckle(g, S, S, 260, ['#220804', '#100302', '#2c0c06'], 16, 60, rnd);
+    // broad rivers that all run roughly the same way, like a lake slowly flowing
+    const a0 = 0.5, flows = [];
+    for (let i = 0; i < 6; i++) {
+      const pts = []; let x = rnd() * S, y = (i / 6) * S + rnd() * 60;
+      for (let k = 0; k < 9; k++) { pts.push([x, y]); const a = a0 + Math.sin(k * 0.9 + i * 2.1) * 0.45; x += Math.cos(a) * 150; y += Math.sin(a) * 150 * 0.35; }
+      flows.push({ pts, w: 0.7 + rnd() * 0.8 });
+    }
+    const stroke = (w, colr, blur, alpha) => {
+      g.globalAlpha = alpha; g.strokeStyle = colr; g.lineCap = 'round'; g.lineJoin = 'round'; g.shadowColor = colr; g.shadowBlur = blur;
+      flows.forEach(f => { g.lineWidth = w * f.w; for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) { g.beginPath(); f.pts.forEach((p, k) => { if (k) { const q = f.pts[k - 1]; g.quadraticCurveTo(q[0] + ox, q[1] + oy, (q[0] + p[0]) / 2 + ox, (q[1] + p[1]) / 2 + oy); } else g.moveTo(p[0] + ox, p[1] + oy); }); g.stroke(); } });
+    };
+    stroke(90, '#a0280a', 60, 0.35); stroke(44, '#e8480e', 40, 0.6); stroke(16, '#ff9a3a', 20, 0.7);
+    g.globalAlpha = 1; g.shadowBlur = 0;
+    // dark rafts of crust floating on the flows
+    speckle(g, S, S, 70, ['#1a0603', '#260a05'], 8, 26, rnd);
+    return tex(c);
+  });
+
+  // Streaks for the lava waterfalls (tiles vertically, so it can scroll down).
+  T.lavaFall = () => once('lavaFall', () => {
+    const W = 128, H = 256, c = canvas(W, H), g = c.getContext('2d'), rnd = U.rng(361);
+    g.fillStyle = '#c8400c'; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 70; i++) {
+      const x = rnd() * W, w = 2 + rnd() * 8, y = rnd() * H, l = 40 + rnd() * 160;
+      g.fillStyle = rnd() < 0.55 ? 'rgba(255,190,80,0.55)' : 'rgba(110,20,4,0.45)';
+      g.fillRect(x, y, w, l); g.fillRect(x, y - H, w, l);
+    }
+    const edge = g.createLinearGradient(0, 0, W, 0);
+    edge.addColorStop(0, 'rgba(60,10,2,0.8)'); edge.addColorStop(0.2, 'rgba(60,10,2,0)'); edge.addColorStop(0.8, 'rgba(60,10,2,0)'); edge.addColorStop(1, 'rgba(60,10,2,0.8)');
+    g.fillStyle = edge; g.fillRect(0, 0, W, H);
+    return tex(c);
+  });
+
+  // A soft vertical fade, used for light shafts and the glow over the lava.
+  T.fade = () => once('fade', () => {
+    const c = canvas(8, 128), g = c.getContext('2d');
+    const grd = g.createLinearGradient(0, 0, 0, 128);
+    grd.addColorStop(0, 'rgba(255,255,255,0)'); grd.addColorStop(0.35, 'rgba(255,255,255,1)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grd; g.fillRect(0, 0, 8, 128);
+    return tex(c, false);
+  });
+
   // A rune circle for the turning wheel.
   T.runes = () => once('runes', () => {
     const S = 1024, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(261);
-    g.fillStyle = '#2a2127'; g.beginPath(); g.arc(S / 2, S / 2, S / 2, 0, 7); g.fill();
-    speckle(g, S, S, 700, ['#33292f', '#221a20', '#3a2e34'], 4, 16, rnd);
-    g.strokeStyle = '#ff5a1a'; g.shadowColor = '#ff7a2a'; g.shadowBlur = 18;
-    [[0.46, 10], [0.38, 6], [0.16, 6]].forEach(([r, w]) => { g.lineWidth = w; g.beginPath(); g.arc(S / 2, S / 2, S * r, 0, 7); g.stroke(); });
-    g.lineWidth = 7; g.beginPath();
-    for (let i = 0; i <= 5; i++) { const a = -Math.PI / 2 + (i * 4 * Math.PI) / 5, x = S / 2 + Math.cos(a) * S * 0.38, y = S / 2 + Math.sin(a) * S * 0.38; i ? g.lineTo(x, y) : g.moveTo(x, y); }
-    g.stroke();
-    g.font = '700 64px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ff8a3a';
+    g.fillStyle = '#211b1e'; g.beginPath(); g.arc(S / 2, S / 2, S / 2, 0, 7); g.fill();
+    speckle(g, S, S, 500, ['#2a2226', '#181315', '#2f262a'], 4, 16, rnd);
+    // carved spokes between the rings
+    g.strokeStyle = '#141011'; g.lineWidth = 8;
+    for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; g.beginPath(); g.moveTo(S / 2 + Math.cos(a) * S * 0.2, S / 2 + Math.sin(a) * S * 0.2); g.lineTo(S / 2 + Math.cos(a) * S * 0.36, S / 2 + Math.sin(a) * S * 0.36); g.stroke(); }
+    g.strokeStyle = '#ff6a1a'; g.shadowColor = '#ff7a2a'; g.shadowBlur = 22;
+    [[0.47, 12], [0.37, 5], [0.19, 7], [0.09, 5]].forEach(([r, w]) => { g.lineWidth = w; g.beginPath(); g.arc(S / 2, S / 2, S * r, 0, 7); g.stroke(); });
+    g.font = '700 70px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffb060';
     const glyphs = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃ';
     for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; g.save(); g.translate(S / 2 + Math.cos(a) * S * 0.42, S / 2 + Math.sin(a) * S * 0.42); g.rotate(a + Math.PI / 2); g.fillText(glyphs[i], 0, 0); g.restore(); }
+    g.font = '700 54px Georgia, serif';
+    for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + 0.26; g.save(); g.translate(S / 2 + Math.cos(a) * S * 0.28, S / 2 + Math.sin(a) * S * 0.28); g.rotate(a + Math.PI / 2); g.fillText(glyphs[(i * 5) % 12], 0, 0); g.restore(); }
     g.shadowBlur = 0;
     return tex(c, false);
   });

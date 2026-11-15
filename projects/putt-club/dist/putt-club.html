@@ -638,7 +638,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
     WATER_BED: -0.55,
   };
 
-  const ZONE_FRIC = { slime: 0.2, honey: 7, soil: 1.35, seeds: 1.05, sand: 3, moss: 1.15, glass: 0.2, tar: 7, ash: 1.3 };
+  const ZONE_FRIC = { slime: 0.2, honey: 7, soil: 1.35, seeds: 1.05, sand: 3, moss: 1.15, glass: 0.2, tar: 7, ash: 1.3, cinder: 2.4 };
   PC.ZONE_FRIC = ZONE_FRIC;
 
   // Turn a hole design into the shape the simulator and renderer share.
@@ -758,7 +758,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
       const O = this.hole.overHazards;
       for (let i = 0; i < O.length; i++) {
         if (!U.inPoly(x, y, O[i].poly)) continue;
-        const fh = this.floorHeight(x, y);
+        const fh = O[i].level !== undefined ? O[i].level : this.floorHeight(x, y);
         return { kind: O[i].kind, h: fh - 0.45, top: fh - 0.05, hazard: O[i] };
       }
       if (this.floorAt(x, y)) return { kind: 'floor', h: this.floorHeight(x, y), fric: this.zoneFric(x, y) };
@@ -1813,255 +1813,328 @@ body.abyss .intro-rivals { color: #ff9a62; }
   PC.holeById = id => H.find(h => h.id === id) || (PC.ABYSS || []).find(h => h.id === id);
 });
 
-/* Putt Club: The Abyss. 18 hellscape holes for Ultra, every one par 6 or more.
-   Stone platforms float over a sea of lava with no rails at all: roll off an edge and the ball is gone.
+/* Putt Club: The Abyss. 18 temple holes for Ultra, every one par 6 or more.
+   Ancient stone platforms float over a lava abyss with no rails at all: roll off an edge and the ball is gone.
+   The holes are built so a perfect player still needs several putts: corners with nothing to bank off,
+   ledges you can only drop through a narrow window, platforms you must land on and stop.
    Lava pools are set into the platforms (kind 'lava', over: true) and follow the platform's height. */
 (function (mod) { const PC = window.PC = window.PC || {}; mod(PC); (PC.SRC = PC.SRC || []).push(mod); })(function (PC) {
   'use strict';
-  const U = PC.U, K = PC.Kit, TAU = U.TAU;
+  const U = PC.U, DEG = Math.PI / 180;
   const rect = U.rect, rp = U.roundPoly, circ = (x, y, r) => U.circle(x, y, r, Math.max(28, Math.ceil(r * 16)));
   const lava = (x, y, r) => ({ kind: 'lava', over: true, poly: U.circle(x, y, r, 28) });
-  const LOOK = (extra) => Object.assign({ theme: 'abyss', light: 'abyss', flag: '#14080a', flowers: ['#ff5a1f', '#ffb000', '#ff2d2d', '#ffe27a'] }, extra || {});
-  const wallsAcross = (ys, gap) => ys.flatMap(y => [
-    { pts: [[-1.6, y], [-gap, y]], w: 0.36, h: 0.7, style: 'obsidian' },
-    { pts: [[gap, y], [1.6, y]], w: 0.36, h: 0.7, style: 'obsidian' },
-  ]);
+  const LOOK = (extra) => Object.assign({ theme: 'abyss', light: 'abyss', flag: '#ff5a1a', flowers: ['#ff5a1f', '#ffb000', '#ff2d2d', '#ffe27a'] }, extra || {});
+
+  // An axis-aligned causeway through waypoints, w wide, with a square pad at every corner.
+  function causeway(pts, w, pad) {
+    const out = [], h = w / 2;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [ax, ay] = pts[i], [bx, by] = pts[i + 1];
+      if (ax === bx) out.push(rect(ax - h, Math.min(ay, by) - h, ax + h, Math.max(ay, by) + h));
+      else out.push(rect(Math.min(ax, bx) - h, ay - h, Math.max(ax, bx) + h, ay + h));
+    }
+    for (let i = 1; i < pts.length - 1; i++) out.push(rect(pts[i][0] - pad / 2, pts[i][1] - pad / 2, pts[i][0] + pad / 2, pts[i][1] + pad / 2));
+    return out;
+  }
+  // Part of a ring (for lava around a cup or down a volcano), angles in degrees.
+  function sector(cx, cy, r0, r1, a0, a1) {
+    const out = [], n = Math.max(8, Math.ceil(Math.abs(a1 - a0) / 6));
+    for (let i = 0; i <= n; i++) { const a = (a0 + ((a1 - a0) * i) / n) * DEG; out.push([cx + Math.cos(a) * r1, cy + Math.sin(a) * r1]); }
+    for (let i = n; i >= 0; i--) { const a = (a0 + ((a1 - a0) * i) / n) * DEG; out.push([cx + Math.cos(a) * r0, cy + Math.sin(a) * r0]); }
+    return out;
+  }
+  const lavaSector = (cx, cy, r0, r1, a0, a1) => ({ kind: 'lava', over: true, poly: sector(cx, cy, r0, r1, a0, a1) });
+  // Half a ring of lava whose straight ends run exactly along a ramp hw either side of the east-west line,
+  // so no sliver of floor is left between them to trap a ball.
+  function lavaHalfRing(cx, cy, r0, r1, hw, south) {
+    const k = south ? -1 : 1, out = [];
+    const ao = Math.asin(hw / r1) / DEG, ai = Math.asin(hw / r0) / DEG;
+    const n = 24;
+    for (let i = 0; i <= n; i++) { const a = (ao + ((180 - 2 * ao) * i) / n) * DEG; out.push([cx + Math.cos(a) * r1, cy + k * Math.sin(a) * r1]); }
+    for (let i = n; i >= 0; i--) { const a = (ai + ((180 - 2 * ai) * i) / n) * DEG; out.push([cx + Math.cos(a) * r0, cy + k * Math.sin(a) * r0]); }
+    return { kind: 'lava', over: true, poly: out, level: -0.6 };
+  }
+  const teePad = (w = 3, l = 4) => rp(rect(-w / 2, 0, w / 2, l), [0.6, 0.6, 0.2, 0.2]);
 
   const A = [];
 
+  // 1. Four legs, each with an iron gate across it; nothing to stop a ball at the corners.
   A.push({
-    id: 'gates-of-dis', name: 'Gates of Dis', par: 6,
-    special: 'Iron gates that slam shut',
-    tip: 'Three obsidian walls cross the causeway, each with an iron gate that rises and slams. Lava pools wait beside them.',
-    look: LOOK(), tee: [0, 1.3], cup: [0.8, 29.6],
-    floors: [K.laneCircle(1.6, 0, 29, 3.2)],
-    walls: wallsAcross([7, 13, 19], 0.6),
-    hazards: [lava(-1.0, 10, 0.55), lava(1.0, 16, 0.55), lava(-0.9, 22.4, 0.55)],
+    id: 'gates-of-dis', name: 'Gates of Dis', par: 7,
+    special: 'Iron gates on a winding causeway',
+    tip: 'Four iron gates rise and slam across a narrow causeway that turns at every corner. Stop on each corner pad, then time the next gate.',
+    look: LOOK(), tee: [0, 1.3], cup: [1, 28.9],
+    floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 10], [8, 10], [8, 19], [1, 19], [1, 26.6]], 1.8, 3.0), circ(1, 28.4, 2.0)],
+    hazards: [lava(8.95, 10.95, 0.42), lava(8.95, 19.95, 0.42), lava(0.05, 19.95, 0.42), lava(-0.1, 29.7, 0.36), lava(2.2, 28.0, 0.36)],
     features: [{ type: 'gates', list: [
-      { a: [-0.6, 7], b: [0.6, 7], period: 3.2, phase: 0 },
-      { a: [-0.6, 13], b: [0.6, 13], period: 2.7, phase: 0.4 },
-      { a: [-0.6, 19], b: [0.6, 19], period: 2.2, phase: 0.75 },
+      { a: [-0.95, 6.2], b: [0.95, 6.2], period: 3.4, phase: 0 },
+      { a: [4, 9.05], b: [4, 10.95], period: 3.0, phase: 0.4 },
+      { a: [7.05, 14.5], b: [8.95, 14.5], period: 2.8, phase: 0.75 },
+      { a: [4.5, 18.05], b: [4.5, 19.95], period: 2.6, phase: 0.2 },
     ] }],
   });
 
+  // 2. Two blade discs joined by thin bridges at right angles.
   A.push({
-    id: 'reapers-mill', name: "Reaper's Mill", par: 6,
-    special: 'Spinning reaper blades',
-    tip: 'Thin bridges lead on and off a round platform where three iron blades sweep. Miss the bridge and you fall.',
-    look: LOOK(), tee: [0, 1.3], cup: [0, 29.6],
-    floors: [rp(rect(-2, 0, 2, 6.3), [0.8, 0.8, 0, 0]), rect(-0.9, 6, 0.9, 12.6), circ(0, 16, 4), rect(-0.9, 19.6, 0.9, 27.1), circ(0, 29, 2.6)],
-    features: [{ type: 'spinner', x: 0, y: 16, arms: 3, len: 3.3, w: 0.16, omega: 1.05, h: 1.2 }],
+    id: 'reapers-mill', name: "Reaper's Mill", par: 7,
+    special: 'Two discs of reaper blades',
+    tip: 'Thin bridges join two round platforms where iron blades sweep. The bridges leave at right angles, so stop on each disc, between the blades.',
+    look: LOOK(), tee: [0, 1.3], cup: [5.6, 23.4],
+    floors: [teePad(2.6, 4), rect(-0.5, 3.8, 0.5, 9.2), circ(0, 12.5, 3.6), rect(3.4, 12, 10.1, 13), circ(13.5, 12.5, 3.6), ...causeway([[13.5, 15.8], [13.5, 23], [8, 23]], 0.9, 2.2), circ(5.9, 23, 1.8)],
+    hazards: [lava(-2.3, 14.8, 0.45), lava(15.8, 10.2, 0.45), lava(14.3, 23.8, 0.36), lava(5.2, 24.3, 0.34), lava(6.9, 22.0, 0.34)],
+    features: [
+      { type: 'spinner', x: 0, y: 12.5, arms: 3, len: 3.2, w: 0.16, omega: 1.1, h: 1.2 },
+      { type: 'spinner', x: 13.5, y: 12.5, arms: 3, len: 3.2, w: 0.16, omega: -1.3, h: 1.2, phase: 0.6 },
+    ],
   });
 
+  // 3. Six narrow legs, an imp pacing across every one.
   A.push({
-    id: 'imp-patrol', name: 'Imp Patrol', par: 7,
-    special: 'Marching imps',
-    tip: 'A zigzag causeway with no edges, and an imp pacing across every leg. A bump from one can knock you over the side.',
-    look: LOOK(), tee: [0, 1.3], cup: [0.6, 25.4],
-    floors: [rp(rect(-1.6, 0, 1.6, 10), [0.6, 0.6, 0, 0]), rect(-1.6, 7, 9, 10), rect(5.8, 7, 9, 20), rect(-1, 17, 9, 20), rp(rect(-1, 17, 2.2, 27), [0, 0, 0.8, 0.8])],
+    id: 'imp-patrol', name: 'Imp Patrol', par: 9,
+    special: 'Imps on a zigzag causeway',
+    tip: 'Six narrow legs with no edges, and an imp pacing across each one. A bump from an imp knocks the ball straight over the side.',
+    look: LOOK(), tee: [0, 1.3], cup: [7, 29.8],
+    floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 8], [7, 8], [7, 15], [0, 15], [0, 22], [7, 22], [7, 27.6]], 2.0, 2.8), circ(7, 29.4, 1.9)],
     features: [{ type: 'patrol', sound: 'bonk', imps: true, movers: [
-      { a: [-1.4, 4.5], b: [1.4, 4.5], period: 3.6, r: 0.34, h: 0.8 },
-      { a: [3.6, 7.2], b: [3.6, 9.8], period: 2.6, phase: 0.3, r: 0.34, h: 0.8 },
-      { a: [6.0, 13.5], b: [8.8, 13.5], period: 3.2, phase: 0.6, r: 0.34, h: 0.8 },
-      { a: [3.8, 17.2], b: [3.8, 19.8], period: 2.4, phase: 0.15, r: 0.34, h: 0.8 },
-      { a: [-0.8, 23], b: [2.0, 23], period: 3.0, phase: 0.5, r: 0.34, h: 0.8 },
+      { a: [-0.75, 5.2], b: [0.75, 5.2], period: 3.4, r: 0.34, h: 0.8 },
+      { a: [6.25, 11.5], b: [7.75, 11.5], period: 3.2, phase: 0.6, r: 0.34, h: 0.8 },
+      { a: [3.5, 14.25], b: [3.5, 15.75], period: 3.0, phase: 0.15, r: 0.34, h: 0.8 },
+      { a: [-0.75, 18.5], b: [0.75, 18.5], period: 3.3, phase: 0.5, r: 0.34, h: 0.8 },
+      { a: [6.25, 25.2], b: [7.75, 25.2], period: 3.1, phase: 0.35, r: 0.34, h: 0.8 },
     ] }],
   });
 
+  // 4. Two boulder arenas whose bridges leave at different angles from where you came in.
   A.push({
-    id: 'magma-pinball', name: 'Magma Pinball', par: 6,
-    special: 'Magma boulders',
-    tip: 'Glowing magma boulders fling the ball away faster than it arrived, and the arenas have no walls to catch it.',
-    look: LOOK(), tee: [0, 1.3], cup: [0, 25.0],
-    floors: [rp(rect(-1.5, 0, 1.5, 5.9), [0.6, 0.6, 0, 0]), circ(0, 10.5, 5.2), rect(-0.9, 15.3, 0.9, 20.7), circ(0, 24.6, 4.2)],
-    hazards: [lava(-3.5, 9, 0.7), lava(3.5, 9, 0.7), lava(0, 21.6, 0.42)],
+    id: 'magma-pinball', name: 'Magma Pinball', par: 7,
+    special: 'Magma boulders in open arenas',
+    tip: 'Each arena is full of magma boulders that fling the ball, and its way out is nowhere near its way in. Settle the ball first, then find the exit.',
+    look: LOOK(), tee: [0, 1.3], cup: [1.6, 28.0],
+    floors: [teePad(2.6, 4), rect(-0.55, 3.8, 0.55, 5.4), circ(0, 9.2, 4.2), U.ribbon([[2.2, 11.8], [6.7, 16.9]], 0.55), circ(9, 19.6, 4.0), U.ribbon([[6.3, 22.2], [3.1, 26.4]], 0.55), circ(2.0, 27.6, 1.9)],
+    hazards: [lava(-2.6, 7.3, 0.55), lava(2.9, 7.6, 0.5), lava(-1.6, 11.9, 0.45), lava(11.6, 18.5, 0.55), lava(8.2, 22.8, 0.45), lava(6.6, 17.9, 0.4), lava(3.1, 28.6, 0.34)],
     features: [{ type: 'bumpers', rocks: true, list: [
-      { x: 0, y: 8.6, r: 0.55, kick: 2.8 }, { x: -2.4, y: 10.6, r: 0.5, kick: 2.8 }, { x: 2.4, y: 10.6, r: 0.5, kick: 2.8 },
-      { x: -1.2, y: 12.8, r: 0.45, kick: 2.8 }, { x: 1.2, y: 12.8, r: 0.45, kick: 2.8 }, { x: 0, y: 6.8, r: 0.38, kick: 2.4 },
-      { x: -1.9, y: 23.8, r: 0.45, kick: 2.6 }, { x: 1.9, y: 23.8, r: 0.45, kick: 2.6 }, { x: 0, y: 27.2, r: 0.4, kick: 2.4 },
+      { x: 0, y: 8.4, r: 0.5, kick: 2.8 }, { x: -2.1, y: 9.8, r: 0.45, kick: 2.8 }, { x: 1.9, y: 10.2, r: 0.45, kick: 2.8 }, { x: -0.6, y: 11.6, r: 0.4, kick: 2.8 }, { x: 1.2, y: 6.6, r: 0.38, kick: 2.4 },
+      { x: 9, y: 18.6, r: 0.5, kick: 2.8 }, { x: 7.2, y: 20.4, r: 0.45, kick: 2.8 }, { x: 10.6, y: 20.9, r: 0.45, kick: 2.8 }, { x: 9.4, y: 21.9, r: 0.38, kick: 2.6 },
     ] }],
   });
 
+  // 5. Four separate platforms: each geyser throws the ball the way it was rolling.
   A.push({
-    id: 'geyser-leap', name: 'Geyser Leap', par: 6,
-    special: 'Lava geysers',
-    tip: 'Three platforms with nothing between them. Roll over a geyser vent and it hurls the ball across the gap.',
-    look: LOOK(), tee: [0, 1.3], cup: [-0.6, 26.4],
-    floors: [rp(rect(-1.8, 0, 1.8, 7), [0.6, 0.6, 0.3, 0.3]), rp(rect(-2, 10, 2, 18), 0.4), rp(rect(-2.2, 21, 2.2, 31), [0.3, 0.3, 1, 1])],
-    walls: [{ pts: [[-1.6, 30.5], [1.6, 30.5]], w: 0.3, h: 0.5, style: 'obsidian' }],
-    zones: [{ type: 'ash', poly: rect(-2, 10.1, 2, 15.6) }, { type: 'ash', poly: rect(-2.2, 21.1, 2.2, 25) }],
+    id: 'geyser-leap', name: 'Geyser Leap', par: 7,
+    special: 'Lava geysers between floating slabs',
+    tip: 'Four slabs with nothing between them. A geyser throws the ball the way it is rolling, and the next slab is always off to one side.',
+    look: LOOK(), tee: [0, 1.3], cup: [-1.2, 32.0],
+    floors: [rp(rect(-1.6, 0, 1.6, 6.6), 0.4), rp(rect(-2, 10, 2, 16.6), 0.4), rp(rect(2.4, 18.8, 7, 25.2), 0.4), rp(rect(-3.4, 27.0, 2.0, 33.8), 0.5)],
+    zones: [{ type: 'cinder', poly: rect(-2, 10, 2, 15.2) }, { type: 'cinder', poly: rect(2.4, 18.8, 7, 23.4) }, { type: 'cinder', poly: rect(-3.4, 27.0, 2.0, 30.4) }],
     features: [
-      { type: 'launch', x: 0, y: 6.3, r: 0.55, vz: 7, minSpeed: 6.2, maxSpeed: 7.0, geyser: true, land: [0, 11.2] },
-      { type: 'launch', x: 0.8, y: 17.2, r: 0.55, vz: 7, minSpeed: 6.2, maxSpeed: 7.0, geyser: true, land: [0.6, 22.4] },
+      { type: 'launch', x: 0, y: 5.4, r: 0.55, vz: 7, minSpeed: 6.2, maxSpeed: 7.0, geyser: true, land: [0, 12] },
+      { type: 'launch', x: 1.2, y: 15.4, r: 0.55, vz: 7, minSpeed: 6.2, maxSpeed: 7.0, geyser: true, land: [4.4, 21.0] },
+      { type: 'launch', x: 3.4, y: 24.0, r: 0.55, vz: 7, minSpeed: 6.2, maxSpeed: 7.0, geyser: true, land: [-0.4, 28.8] },
     ],
   });
 
+  // 6. Three rafts across a lava lake, each running a different way.
   A.push({
-    id: 'raft-of-charon', name: 'Raft of Charon', par: 7,
-    special: 'Basalt rafts on a lava lake',
-    tip: 'Two stone rafts drift across the lava lake, with a rocky island between them. Ride one, then the other.',
-    look: LOOK(), tee: [0, 1.3], cup: [0.7, 27.4],
-    floors: [rp(rect(-2, 0, 2, 6), [0.7, 0.7, 0, 0]), circ(0, 14.5, 2.2), rp(rect(-2.4, 23, 2.4, 30), [0, 0, 1, 1])],
-    hazards: [{ kind: 'lava', poly: rp(rect(-5, 4.6, 5, 24.4), 2.2), top: -0.25, bed: -0.6 }],
+    id: 'raft-of-charon', name: 'Raft of Charon', par: 9,
+    special: 'Three rafts across a lava lake',
+    tip: 'Ride a raft to the first island, a second raft east to the next, and a third north to the far shore. Each raft waits a moment at each end.',
+    look: LOOK(), tee: [0, 1.3], cup: [2.2, 24.2],
+    floors: [rp(rect(-2, 0, 2, 5), [0.7, 0.7, 0, 0]), circ(0, 13.2, 1.8), circ(10.2, 13.2, 1.8), rp(rect(7.6, 21.4, 12.8, 26.6), [0, 0, 0.6, 0.6]), rect(3.6, 23.5, 8, 24.7), circ(2.2, 24.1, 1.7)],
+    hazards: [{ kind: 'lava', poly: rp(rect(-3.6, 4.4, 14.2, 22.6), 2.2), top: -0.25, bed: -0.6 }, lava(1.2, 25.1, 0.34), lava(3.2, 23.0, 0.32)],
     features: [
-      { type: 'ferry', a: [0, 7.05], b: [0, 11.25], r: 1.05, travel: 2.8, pause: 1.8, raft: true },
-      { type: 'ferry', a: [0, 17.75], b: [0, 21.95], r: 1.05, travel: 2.6, pause: 1.6, phase: 1.3, raft: true },
+      { type: 'ferry', a: [0, 6.1], b: [0, 10.4], r: 1.0, travel: 2.8, pause: 1.6, raft: true },
+      { type: 'ferry', a: [2.9, 13.2], b: [7.3, 13.2], r: 1.0, travel: 2.6, pause: 1.5, phase: 1.1, raft: true },
+      { type: 'ferry', a: [10.2, 16.1], b: [10.2, 20.4], r: 1.0, travel: 2.6, pause: 1.5, phase: 2.0, raft: true },
     ],
   });
 
+  // 7. Floating slabs joined only by portals; the easy-looking one sends you back.
   A.push({
     id: 'portal-maze', name: 'Portal Maze', par: 6,
-    special: 'Hell portals',
-    tip: 'The platforms are not joined at all. Portals of the same colour are linked. One of them sends you back to the start.',
-    look: LOOK(), tee: [0, 1.3], cup: [0.7, 21.4],
-    floors: [rp(rect(-2.2, 0, 2.2, 6), 0.6), rp(rect(-8.2, 8, -2.8, 13.4), 0.6), rp(rect(2.8, 8, 8.2, 13.4), 0.6), rp(rect(-2.6, 16.5, 2.6, 23.5), 0.8)],
+    special: 'Paired portals and a lava ring',
+    tip: 'No slab touches another. Portals of the same colour are linked, and one of them sends you back to the tee. The cup sits in a ring of lava, open only at the back.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 22.6],
+    floors: [rp(rect(-2.2, 0, 2.2, 6), 0.6), rp(rect(-10, 8, -5, 13.4), 0.6), rp(rect(5, 8, 10, 13.4), 0.6), rp(rect(-2.4, 8.6, 2.4, 13.6), 0.6), rp(rect(-2.6, 16.8, 2.6, 26.2), 0.8)],
+    hazards: [lava(8.2, 10.7, 0.45), lava(0.1, 11.2, 0.55), lava(-1.0, 12.7, 0.4), lavaSector(0, 22.6, 0.75, 1.35, 120, 420), lava(-1.9, 19.4, 0.4), lava(1.9, 19.4, 0.4)],
     features: [{ type: 'tunnels', r: 0.34, portals: true, pairs: [
-      { a: [-1.2, 4.6], b: [-5.5, 9.0], dirA: -Math.PI / 2, dirB: Math.PI / 2 },
-      { a: [1.2, 4.6], b: [5.5, 9.0], dirA: -Math.PI / 2, dirB: Math.PI / 2 },
-      { a: [-5.5, 12.2], b: [0, 17.4], dirA: -Math.PI / 2, dirB: Math.PI / 2 },
-      { a: [5.5, 12.2], b: [1.6, 1.6], dirA: -Math.PI / 2, dirB: Math.PI / 2 },
+      { a: [-1.2, 4.6], b: [-7.5, 9.0], dirA: -Math.PI / 2, dirB: Math.PI / 2 },
+      { a: [1.2, 4.6], b: [7.5, 9.0], dirA: -Math.PI / 2, dirB: Math.PI / 2 },
+      { a: [-7.5, 12.3], b: [1.7, 1.0], dirA: -Math.PI / 2, dirB: Math.PI },
+      { a: [8.9, 12.3], b: [1.6, 9.6], dirA: -Math.PI / 2, dirB: Math.PI / 2 },
+      { a: [-1.7, 12.6], b: [0, 17.6], dirA: -Math.PI / 2, dirB: Math.PI / 2 },
     ] }],
   });
 
+  // 8. An L-shaped bridge with four spiked pendulums.
   A.push({
-    id: 'doom-pendulum', name: 'Doom Pendulum', par: 6,
-    special: 'Swinging spiked balls',
-    tip: 'Two spiked iron balls swing across the causeway on chains. Time your putt between the swings.',
-    look: LOOK(), tee: [0, 1.3], cup: [-0.7, 29.4],
-    floors: [K.laneCircle(1.6, 0, 29, 3)],
-    hazards: [lava(-1.05, 12.5, 0.5), lava(1.05, 12.5, 0.5), lava(0, 22.5, 0.5)],
+    id: 'doom-pendulum', name: 'Doom Pendulum', par: 7,
+    special: 'Spiked pendulums on a narrow bridge',
+    tip: 'Four spiked iron balls swing across a narrow bridge that turns once. One touch and the ball is knocked into the abyss.',
+    look: LOOK(), tee: [0, 1.3], cup: [9, 29.5],
+    floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 15], [9, 15], [9, 27.4]], 1.2, 2.6), circ(9, 29.2, 1.9)],
+    hazards: [lava(0.85, 15.85, 0.4), lava(9.85, 14.15, 0.4), lava(8.1, 30.2, 0.34)],
     features: [
-      { type: 'swing', x: 0, y: 8, len: 4.95, zp: 5.4, amp: 0.39, period: 3.2, rt: 0.5, spiked: true },
-      { type: 'swing', x: 0, y: 17, len: 4.95, zp: 5.4, amp: 0.39, period: 2.6, phase: 1.4, rt: 0.5, spiked: true },
+      { type: 'swing', x: 0, y: 6, len: 4.95, zp: 5.4, amp: 0.39, period: 3.0, rt: 0.5, spiked: true },
+      { type: 'swing', x: 0, y: 11, len: 4.95, zp: 5.4, amp: 0.39, period: 2.5, phase: 1.4, rt: 0.5, spiked: true },
+      { type: 'swing', x: 9, y: 19.5, len: 4.95, zp: 5.4, amp: 0.39, period: 2.8, phase: 0.7, rt: 0.5, spiked: true },
+      { type: 'swing', x: 9, y: 24, len: 4.95, zp: 5.4, amp: 0.39, period: 2.3, phase: 2.1, rt: 0.5, spiked: true },
     ],
   });
 
+  // 9. The great rune wheel: three bridges leave it and only one goes anywhere.
   A.push({
     id: 'rune-wheel', name: 'Rune Wheel', par: 6,
-    special: 'A turning rune circle',
-    tip: 'The exit is off to the right. Ride the turning rune circle round until it points the way, then go.',
-    look: LOOK(), tee: [0, 1.3], cup: [13.1, 10.4],
-    floors: [rp(rect(-1.5, 0, 1.5, 6.8), [0.6, 0.6, 0, 0]), circ(0, 10, 3.7), rect(3.2, 8.6, 10.6, 11.4), circ(12.6, 10, 2.6)],
-    features: [{ type: 'turntable', x: 0, y: 10, r: 3.2, omega: 0.8, runes: true, pots: [{ a: 0, d: 1.9, r: 0.32 }, { a: Math.PI, d: 1.9, r: 0.32 }] }],
+    special: 'Two turning rune wheels',
+    tip: 'The great rune wheel turns with you on it. Three bridges leave it and only the east one leads on, to a second wheel turning the other way.',
+    look: LOOK(), tee: [0, 1.3], cup: [4.4, 21.2],
+    floors: [teePad(2.6, 4), rect(-0.5, 3.8, 0.5, 6.6), circ(0, 10, 3.9), rect(-9, 9.55, -3.6, 10.45), rect(-0.45, 13.6, 0.45, 18), rect(3.6, 9.55, 8.6, 10.45), circ(11.6, 10, 3.3), ...causeway([[11.6, 13.0], [11.6, 21], [6.0, 21]], 0.9, 2.2), circ(4.6, 21, 1.8)],
+    hazards: [lava(-8.4, 10, 0.45), lava(0, 17.4, 0.45), lava(12.4, 21.8, 0.36), lava(3.8, 22.2, 0.34), lava(5.6, 19.9, 0.34)],
+    features: [
+      { type: 'turntable', x: 0, y: 10, r: 3.6, omega: 0.8, runes: true, big: true, pots: [{ a: 0, d: 2.0, r: 0.32 }, { a: Math.PI, d: 2.0, r: 0.32 }] },
+      { type: 'turntable', x: 11.6, y: 10, r: 3.0, omega: -1.0, runes: true, pots: [{ a: Math.PI / 2, d: 1.6, r: 0.3 }] },
+    ],
   });
 
+  // 10. Glassy obsidian legs: the ball slides five times further than on stone.
   A.push({
-    id: 'obsidian-slide', name: 'Obsidian Slide', par: 6,
-    special: 'Glassy obsidian',
-    tip: 'The corners are polished obsidian, as slippery as ice. Putt soft or slide straight off the edge.',
-    look: LOOK(), tee: [0, 1.3], cup: [-8.6, 20.4],
-    floors: [rp(rect(-1.8, 0, 1.8, 12.6), [0.6, 0.6, 0, 0]), rect(-10.4, 9, 1.8, 12.6), rp(rect(-10.4, 9, -6.8, 22.5), [0, 0, 0.9, 0.9])],
-    zones: [{ type: 'glass', poly: rect(-1.8, 4.5, 1.8, 12.6) }, { type: 'glass', poly: rect(-6.8, 9, -1.8, 12.6) }, { type: 'glass', poly: rect(-10.4, 9, -6.8, 16) }],
+    id: 'obsidian-slide', name: 'Obsidian Slide', par: 8,
+    special: 'Polished obsidian legs',
+    tip: 'Most of this causeway is polished obsidian, as slippery as ice, and it turns five times. Putt soft or slide straight off the end.',
+    look: LOOK(), tee: [0, 1.3], cup: [-2, 30.2],
+    floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 10], [-8, 10], [-8, 18], [0, 18], [0, 24], [-2, 24], [-2, 27.8]], 2.2, 3.0), circ(-2, 29.8, 1.9)],
+    zones: [{ type: 'glass', poly: rect(-1.1, 4.5, 1.1, 8.4) }, { type: 'glass', poly: rect(-6.4, 8.9, -1.6, 11.1) }, { type: 'glass', poly: rect(-9.1, 11.6, -6.9, 16.4) }, { type: 'glass', poly: rect(-6.4, 16.9, -1.6, 19.1) }],
+    hazards: [lava(-1.2, 30.8, 0.34)],
   });
 
+  // 11. A slalom between tar and lava, to a cup ringed with lava.
   A.push({
     id: 'tar-pits', name: 'Tar Pits', par: 6,
-    special: 'Sticky tar and lava',
-    tip: 'Black tar stops a ball dead and lava pools swallow it. Thread the gaps between them.',
-    look: LOOK(), tee: [0, 1.3], cup: [0, 26.3],
-    floors: [rp(rect(-3.2, 0, 3.2, 28), 1.0)],
-    zones: [
-      { type: 'tar', poly: U.blob(0, 6.5, 1.6, 21) }, { type: 'tar', poly: U.blob(-1.9, 12.5, 1.2, 22) }, { type: 'tar', poly: U.blob(1.9, 13.2, 1.2, 23) },
-      { type: 'tar', poly: U.blob(0, 18.8, 1.5, 24) }, { type: 'tar', poly: U.blob(-2, 23.6, 0.9, 25) }, { type: 'tar', poly: U.blob(2.1, 23.2, 0.9, 26) },
+    special: 'A slalom of tar and lava',
+    tip: 'Rows of lava pools leave one gap each, never in line. Tar stops a ball dead. The cup sits in a lava ring that is open only at the back.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 26],
+    floors: [rp(rect(-3.2, 0, 3.2, 29.6), 1.0)],
+    zones: [{ type: 'tar', poly: U.blob(1.6, 4.6, 0.9, 21) }, { type: 'tar', poly: U.blob(-1.4, 10.4, 0.9, 22) }, { type: 'tar', poly: U.blob(1.4, 16.4, 0.9, 23) }, { type: 'tar', poly: U.blob(-2.2, 22, 0.8, 24) }],
+    hazards: [
+      lava(-2.6, 7.2, 0.6), lava(-1.3, 7.2, 0.6), lava(0.0, 7.2, 0.6), lava(1.1, 7.2, 0.5),
+      lava(-1.1, 13.2, 0.5), lava(0.0, 13.2, 0.6), lava(1.3, 13.2, 0.6), lava(2.6, 13.2, 0.6),
+      lava(-2.6, 19.2, 0.6), lava(-1.3, 19.2, 0.6), lava(0.0, 19.2, 0.6), lava(1.1, 19.2, 0.5),
+      lava(0.2, 10.2, 0.75), lava(-0.2, 16.2, 0.75), lava(0.2, 22.4, 0.6),
+      lavaSector(0, 26, 0.75, 1.4, 125, 415), lava(-2.6, 26, 0.45), lava(2.6, 26, 0.45),
     ],
-    hazards: [lava(-2.6, 9.4, 0.45), lava(2.6, 9.4, 0.45), lava(0, 15.8, 0.5), lava(-2.5, 20.8, 0.45), lava(2.5, 20.8, 0.45)],
   });
 
+  // 12. The ash river runs back toward the tee and crosses the whole platform four times.
   A.push({
-    id: 'ash-river', name: 'Ash River', par: 7,
-    special: 'A river of glowing ash',
-    tip: 'A river of hot ash winds down the platform and its current carries the ball. Lava sits outside every bend.',
-    look: LOOK(), tee: [2.6, 1.3], cup: [1.4, 28.0],
-    floors: [rp(rect(-4, 0, 4, 30), 1.4)],
-    hazards: [lava(3.1, 4, 0.55), lava(-3.2, 9.5, 0.55), lava(3.2, 15, 0.55), lava(-3.1, 20.5, 0.6), lava(3.0, 25.5, 0.5)],
-    features: [{ type: 'brook', ash: true, line: [[-3, 1], [-2.4, 4], [2, 6.5], [2.8, 9.5], [-2, 12.5], [-2.8, 15.5], [1.8, 18.5], [2.6, 21.5], [-1, 24.5], [0.6, 27.2]], width: 1.2, depth: 0.14, flow: 3.4 }],
+    id: 'ash-river', name: 'Ash River', par: 8,
+    special: 'A river of ash flowing the wrong way',
+    tip: 'A river of hot ash runs down the whole winding causeway, flowing back toward the tee. Stay out of it where you can, and watch the lava at the bends.',
+    look: LOOK(), tee: [0, 1.3], cup: [1.5, 30.2],
+    floors: [teePad(3.4, 3.4), ...causeway([[0, 2.6], [0, 10], [-7, 10], [-7, 19], [0, 19], [0, 26], [1.5, 26], [1.5, 28.4]], 3.0, 3.4), circ(1.5, 30, 1.8)],
+    hazards: [lava(1.2, 11.2, 0.42), lava(-8.2, 8.8, 0.42), lava(-8.2, 20.2, 0.42), lava(1.2, 17.8, 0.42), lava(0.6, 31.0, 0.34), lava(2.6, 30.6, 0.32)],
+    features: [{ type: 'brook', ash: true, line: [[1.5, 28.6], [1.2, 26.4], [0.2, 25.4], [0, 20], [-1, 19], [-6, 19], [-7, 18], [-7, 11], [-6, 10], [-1, 10], [0, 9], [0, 3.6]], width: 1.5, depth: 0.2, flow: 5 }],
   });
 
-  const volc = [0, 17];
+  // 13. A volcano you can only climb by two narrow ridges, from a ledge around its base.
+  const volc = [0, 18];
+  const vh = (x, y) => { const d = Math.hypot(x - volc[0], y - volc[1]); return 1.5 * (1 - U.smooth(0.9, 5.0, d)) - 0.3 * (1 - U.smooth(0.2, 0.9, d)); };
   A.push({
-    id: 'volcano-summit', name: 'Volcano Summit', par: 6,
-    special: 'A volcano with the cup in its crater',
-    tip: 'Putt up the side of a volcano to the cup in its crater. Lava runs down its slopes and the base drops away into nothing.',
+    id: 'volcano-summit', name: 'Volcano Summit', par: 7,
+    special: 'Two ridges up a volcano',
+    tip: 'Lava runs down every slope of the volcano but two narrow ridges at the back. Work round the ledge at its base, then climb a ridge to the cup in the crater.',
     look: LOOK(), tee: [0, 1.3], cup: volc,
-    floors: [K.laneCircle(1.7, 0, volc[1], 5.6)],
-    height: (x, y) => { const d = Math.hypot(x - volc[0], y - volc[1]); return 1.1 * (1 - U.smooth(0.7, 4.4, d)) - 0.14 * (1 - U.smooth(0.25, 0.7, d)); },
-    hazards: [25, 155, 225, 315].map(deg => {
-      const a = (deg * Math.PI) / 180;
-      return { kind: 'lava', over: true, poly: U.ribbon([[Math.cos(a) * 1.2, volc[1] + Math.sin(a) * 1.2], [Math.cos(a) * 2.6, volc[1] + Math.sin(a) * 2.6 + 0.1], [Math.cos(a) * 4.0, volc[1] + Math.sin(a) * 4.0]], 0.22) };
-    }),
-    posts: [0, 60, 120, 180].map(deg => { const a = (deg * Math.PI) / 180; return { x: Math.cos(a) * 4.9, y: volc[1] + Math.sin(a) * 4.9, r: 0.38, h: 0.5, style: 'basalt' }; }),
+    floors: [teePad(2.6, 4), rect(-0.6, 3.8, 0.6, 11.8), circ(volc[0], volc[1], 6.6)],
+    height: vh,
+    hazards: [lavaSector(volc[0], volc[1], 1.0, 5.0, 44, 136), lavaSector(volc[0], volc[1], 1.0, 5.0, 164, 376)],
+    posts: [200, 250, 290, 340].map(deg => ({ x: Math.cos(deg * DEG) * 5.8, y: volc[1] + Math.sin(deg * DEG) * 5.8, r: 0.32, h: 0.5, style: 'basalt' })),
     features: [{ type: 'rockery', x: volc[0], y: volc[1], volcano: true }],
   });
 
-  const crat = [0, 19.4];
+  // 14. A crater whose floor is lava, with the cup on a mesa reached by two steep ramps.
+  const crat = [0, 20];
   A.push({
-    id: 'the-crater', name: 'The Crater', par: 6,
-    special: 'A crater full of imps',
-    tip: 'Cross the long thin bridge into a crater. The ball runs down toward the cup, but imps and lava pools are in the way.',
-    look: LOOK(), tee: [0, 1.3], cup: crat,
-    floors: [rp(rect(-2, 0, 2, 4), [0.6, 0.6, 0, 0]), rect(-0.8, 3.8, 0.8, 14.4), circ(crat[0], crat[1], 5.4)],
-    height: (x, y) => { const d = Math.hypot(x - crat[0], y - crat[1]); return d < 5 ? -0.7 * Math.pow(1 - d / 5, 2) : 0; },
-    hazards: [90, 210, 330].map(deg => { const a = (deg * Math.PI) / 180; return lava(crat[0] + Math.cos(a) * 2.6, crat[1] + Math.sin(a) * 2.6, 0.55); }),
+    id: 'the-crater', name: 'The Crater', par: 8,
+    special: 'A mesa in a crater of lava',
+    tip: 'A thin, crooked bridge leads into a crater that slopes down into a lake of lava. The cup sits on a mesa in the middle, reached only by two steep ramps from the east and west.',
+    look: LOOK({ cell: 0.1 }), tee: [0, 1.3], cup: [crat[0], crat[1] + 0.55],
+    floors: [teePad(2.6, 4), ...causeway([[0, 3.6], [0, 9], [3, 9], [3, 15.1]], 0.9, 2.0), circ(crat[0], crat[1], 6)],
+    height: (x, y) => {
+      const dx = x - crat[0], dy = y - crat[1], d = Math.hypot(dx, dy);
+      if (d <= 1.1) return 0;
+      if (Math.abs(dy) < 0.28 && Math.abs(dx) < 2.9) return -0.6 * (Math.abs(dx) - 1.1) / 1.8;
+      if (d <= 2.8) return -0.6;
+      return d <= 6 ? -0.6 * (1 - U.smooth(2.8, 6, d)) : 0;
+    },
+    hazards: [lavaHalfRing(crat[0], crat[1], 1.1, 2.86, 0.28, false), lavaHalfRing(crat[0], crat[1], 1.1, 2.86, 0.28, true)],
     features: [{ type: 'patrol', sound: 'bonk', imps: true, movers: [
-      { a: [-3.6, 17.2], b: [3.6, 17.2], period: 4.6, r: 0.34, h: 0.8 },
-      { a: [3.6, 21.6], b: [-3.6, 21.6], period: 3.8, phase: 0.4, r: 0.34, h: 0.8 },
+      { a: [-4.2, 23.4], b: [4.2, 23.4], period: 4.6, r: 0.34, h: 0.8 },
+      { a: [4.4, 17], b: [-4.4, 17], period: 3.8, phase: 0.4, r: 0.34, h: 0.8 },
     ] }],
   });
 
+  // 15. Three lava channels: a bone bridge, a rocking slab, and a second bone bridge.
   A.push({
     id: 'bone-bridge', name: 'Bone Bridge', par: 7,
-    special: 'A bone bridge and a rocking slab',
-    tip: 'Roll over the rune to raise a bone bridge over the first lava channel. The second channel has a slab that rocks side to side.',
-    look: LOOK(), tee: [-1.2, 1.3], cup: [0.6, 24.6],
-    floors: [rp(rect(-2.6, 0, 2.6, 7), [0.7, 0.7, 0, 0]), rect(-2.6, 10, 2.6, 17), rp(rect(-2.6, 20, 2.6, 27), [0, 0, 0.9, 0.9])],
-    hazards: [{ kind: 'lava', poly: rect(-2.6, 6.95, 2.6, 10.05), top: -0.25, bed: -0.6 }, { kind: 'lava', poly: rect(-2.6, 16.95, 2.6, 20.05), top: -0.25, bed: -0.6 }],
+    special: 'Bone bridges and a rocking slab',
+    tip: 'Roll over a rune to raise a bone bridge for a few seconds. The first channel has one, the second a slab that rocks, and the third a rune right in front of a narrower bridge: roll over it and keep going.',
+    look: LOOK(), tee: [-1.2, 1.3], cup: [0.8, 31.8],
+    floors: [rp(rect(-2.6, 0, 2.6, 7), [0.7, 0.7, 0, 0]), rect(-2.6, 10, 2.6, 16), rect(-2.6, 19, 2.6, 25), rp(rect(-2.6, 28, 2.6, 34), [0, 0, 0.9, 0.9])],
+    hazards: [
+      { kind: 'lava', poly: rect(-2.6, 6.95, 2.6, 10.05), top: -0.25, bed: -0.6 },
+      { kind: 'lava', poly: rect(-2.6, 15.95, 2.6, 19.05), top: -0.25, bed: -0.6 },
+      { kind: 'lava', poly: rect(-2.6, 24.95, 2.6, 28.05), top: -0.25, bed: -0.6 },
+      lava(-0.4, 31.4, 0.34), lava(1.9, 32.6, 0.34),
+    ],
     features: [
-      { type: 'beanstalk', bones: true, button: [2.0, 4.6], br: 0.45, rect: [-0.7, 6.8, 0.7, 10.2], duration: 12, grow: 1.2 },
-      { type: 'seesaw', slab: true, x0: -0.75, x1: 0.75, y0: 16.8, y1: 20.2, amp: 0.14, period: 3.4 },
+      { type: 'beanstalk', bones: true, button: [2.0, 4.6], br: 0.45, rect: [-0.7, 6.8, 0.7, 10.2], duration: 14, grow: 1.2 },
+      { type: 'seesaw', slab: true, x0: -1.9, x1: -0.5, y0: 15.8, y1: 19.2, amp: 0.15, period: 3.2 },
+      { type: 'beanstalk', bones: true, button: [1.5, 20.6], br: 0.45, rect: [0.8, 24.8, 2.2, 28.2], duration: 13, grow: 0.6 },
     ],
   });
 
+  // 16. Fire jets blast across a narrow L of bridges; the cup rides on a cart.
   A.push({
-    id: 'soul-cart', name: 'Soul Cart', par: 6,
+    id: 'soul-cart', name: 'Soul Cart', par: 7,
     special: 'Fire jets and a moving cup',
-    tip: 'Turning fire jets blast a rolling ball sideways, and the cup rides back and forth on an iron cart at the far end.',
-    look: LOOK(), tee: [0, 1.3], cup: [0, 22],
-    floors: [rp(rect(-2.4, 0, 2.4, 20), [0.7, 0.7, 0, 0]), rp(rect(-4, 18, 4, 25), [0, 0, 1.1, 1.1])],
-    hazards: [lava(0, 17.2, 0.45)],
+    tip: 'Turning fire jets blast a rolling ball sideways off the narrow bridges. At the end the cup rides back and forth on an iron cart between lava pools.',
+    look: LOOK(), tee: [0, 1.3], cup: [10, 23],
+    floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 9], [-4, 9], [-4, 14], [10, 14], [10, 19.2]], 1.1, 2.4), circ(-1.5, 6, 0.6), circ(3, 15.5, 0.6), circ(11.5, 17, 0.55), rp(rect(6.4, 19.4, 13.6, 25.6), 0.8)],
+    hazards: [lava(10, 20.4, 0.42), lava(6.9, 25.1, 0.36), lava(13.1, 25.1, 0.36), lava(10, 25.1, 0.34)],
     features: [
-      { type: 'sprinkler', fire: true, x: -1.2, y: 7, omega: 1.1, range: 3.6, power: 9, spread: 0.26 },
-      { type: 'sprinkler', fire: true, x: 1.2, y: 13, omega: -1.3, range: 3.6, power: 9, spread: 0.26, phase: 1.5 },
-      { type: 'movingCup', cart: true, a: [-3, 22], b: [3, 22], period: 6.5 },
+      { type: 'sprinkler', fire: true, x: -1.5, y: 6, omega: 1.1, range: 3.4, power: 10, spread: 0.26 },
+      { type: 'sprinkler', fire: true, x: 3, y: 15.5, omega: -1.3, range: 3.6, power: 10, spread: 0.26, phase: 1.5 },
+      { type: 'sprinkler', fire: true, x: 11.5, y: 17, omega: 1.5, range: 2.6, power: 9, spread: 0.3, phase: 0.6 },
+      { type: 'movingCup', cart: true, a: [7.4, 23], b: [12.6, 23], period: 6.0 },
     ],
   });
 
+  // 17. Gusts across thin legs.
   A.push({
     id: 'sulfur-winds', name: 'Sulfur Winds', par: 7,
-    special: 'Gusts of sulfur',
-    tip: 'Hot gusts blow across a winding causeway with no edges. Watch the tattered banner and putt between gusts.',
-    look: LOOK(), tee: [0, 1.3], cup: [-0.6, 26],
-    floors: [rp(rect(-1.3, 0, 1.3, 11), [0.5, 0.5, 0, 0]), rect(-1.3, 8.4, 7, 11), rect(4.4, 8.4, 7, 22), rect(-2, 19.4, 7, 22), rp(rect(-2, 19.4, 0.8, 28), [0, 0, 0.7, 0.7])],
-    hazards: [lava(5.7, 15.2, 0.4)],
-    features: [{ type: 'wind', ash: true, dir: [1, 0], power: 3.0, period: 5.8, gust: 2.4 }],
+    special: 'Gusts across thin causeways',
+    tip: 'Hot gusts blow across thin legs with no edges, pushing the ball east. Watch the banner, and putt between gusts.',
+    look: LOOK(), tee: [0, 1.3], cup: [-1, 30.6],
+    floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 9], [7, 9], [7, 17], [-1, 17], [-1, 23], [5, 23], [5, 26.4], [-1, 26.4], [-1, 28.4]], 1.5, 2.6), circ(-1, 30.2, 1.8)],
+    hazards: [lava(-0.2, 31.2, 0.32)],
+    features: [{ type: 'wind', ash: true, dir: [1, 0], power: 3.0, period: 5.6, gust: 2.2 }],
   });
 
+  // 18. Five ledges down, each dropping through a narrow window off to one side.
+  const descH = (x, y) => (y < 7 ? 2.4 : y < 13 ? 1.8 : y < 19 ? 1.2 : y < 25 ? 0.6 : 0);
   A.push({
-    id: 'the-descent', name: 'The Descent', par: 8,
+    id: 'the-descent', name: 'The Descent', par: 7,
     special: 'Ledges down into the abyss',
-    tip: 'Four ledges step down toward the lava. Fire runes blast you forward, and blades guard the last platform.',
-    look: LOOK(), tee: [0, 1.3], cup: [0, 32.3],
-    floors: [rp(rect(-2.4, 0, 2.4, 7), [0.8, 0.8, 0, 0]), rect(-2.4, 7, 2.4, 14), rect(-2.4, 14, 2.4, 21), rect(-2.4, 21, 2.4, 27.2), circ(0, 30, 3.2)],
-    height: (x, y) => (y < 7 ? 1.8 : y < 14 ? 1.2 : y < 21 ? 0.6 : 0),
+    tip: 'Five ledges step down toward the lava. Each one only meets the next for a short stretch, off to one side, so stop on every ledge and drop through the gap.',
+    look: LOOK(), tee: [0, 1.3], cup: [1.6, 29.6],
+    floors: [rp(rect(-1.2, 0, 1.2, 7), [0.5, 0.5, 0, 0]), rect(0.4, 7, 4.0, 13), rect(2.8, 13, 6.4, 19), rect(-0.2, 19, 3.6, 25), circ(1.6, 27.4, 2.8)],
+    height: descH,
     walls: [
-      { pts: [[-2.4, 7], [2.4, 7]], w: 0.04, h: 0, top: () => 1.8, style: 'none' },
-      { pts: [[-2.4, 14], [2.4, 14]], w: 0.04, h: 0, top: () => 1.2, style: 'none' },
-      { pts: [[-2.4, 21], [2.4, 21]], w: 0.04, h: 0, top: () => 0.6, style: 'none' },
+      { pts: [[-1.2, 7], [4.0, 7]], w: 0.04, h: 0, top: () => 2.4, style: 'none' },
+      { pts: [[0.4, 13], [6.4, 13]], w: 0.04, h: 0, top: () => 1.8, style: 'none' },
+      { pts: [[-0.2, 19], [6.4, 19]], w: 0.04, h: 0, top: () => 1.2, style: 'none' },
+      { pts: [[-1.2, 25], [4.4, 25]], w: 0.04, h: 0, top: () => 0.6, style: 'none' },
     ],
-    features: [
-      { type: 'boost', fire: true, pads: [{ x: 0, y: 10.5, dir: [0, 1], power: 6 }, { x: -1, y: 17.5, dir: [0.3, 1], power: 6 }] },
-      { type: 'spinner', x: 0, y: 30, arms: 3, len: 2.0, w: 0.16, omega: 1.2, h: 1.0 },
-      { type: 'falls', steps: [7, 14, 21], lava: true },
-    ],
+    hazards: [lava(3.3, 9.0, 0.4), lava(5.6, 15.4, 0.4), lava(0.6, 21.6, 0.4)],
+    features: [{ type: 'spinner', x: 1.6, y: 27.2, arms: 3, len: 1.9, w: 0.16, omega: 1.2, h: 1.0 }],
   });
 
   A.forEach((h, i) => { h.num = i + 1; h.course = 'abyss'; });
@@ -2204,6 +2277,9 @@ body.abyss .intro-rivals { color: #ff9a62; }
     const add = (tx, ty, k) => {
       const ang = Math.atan2(ty - b.y, tx - b.x), d = Math.hypot(tx - b.x, ty - b.y);
       out.push({ ang, p: Nav.powerFor(d * k) });
+      // Uphill takes more: climbing h costs about as much as rolling 7h further on the flat.
+      const dh = sim.floorHeight(tx, ty) - sim.floorHeight(b.x, b.y);
+      if (dh > 0.2) [1, 1.4].forEach(m => out.push({ ang, p: Nav.powerFor(d * k + dh * 7 * m) }));
     };
     const direct = Nav.clear(sim, b.x, b.y, cp[0], cp[1]);
     if (direct) [0.92, 1.0, 1.08, 1.18].forEach(k => add(cp[0], cp[1], k));
@@ -2262,7 +2338,13 @@ body.abyss .intro-rivals { color: #ff9a62; }
       if (s.t - t0 > 0.35 && s.resting()) {
         // Raising a bridge is worth a lot, even though the ball is no nearer the cup yet.
         const raised = beans.some(f => f.left > 6);
-        return { score: F.at(s.ball.x, s.ball.y) - (raised ? 8 : 0) };
+        // Is it safe where it stopped? Watch a little longer: blades, imps and rafts can carry it off.
+        const tRest = s.t;
+        while (s.t - tRest < 1.6) {
+          s.step(dt);
+          if (s.ball.mode === 'lost') return { score: startD + 5 };
+        }
+        return { score: F.at(s.ball.x, s.ball.y) - (raised ? 8 : 0) + (s.resting() ? 0 : 0.6) };
       }
     }
     return { score: F.at(s.ball.x, s.ball.y) + 2 };
@@ -2590,42 +2672,12 @@ body.abyss .intro-rivals { color: #ff9a62; }
   });
 
   // ---------- The Abyss ----------
-  // Charred felt for the platforms, with faint ember stripes.
-  T.ashTurf = () => once('ashTurf', () => {
-    const c = canvas(512, 512), g = c.getContext('2d'), rnd = U.rng(201);
-    g.fillStyle = '#3d3336'; g.fillRect(0, 0, 256, 512);
-    g.fillStyle = '#332a2d'; g.fillRect(256, 0, 256, 512);
-    g.globalAlpha = 0.5;
-    for (let i = 0; i < 9000; i++) { g.fillStyle = ['#463b3e', '#2c2427', '#3a2f32', '#4d3a36'][i % 4]; g.fillRect(rnd() * 512, rnd() * 512, 1.6, 3 + rnd() * 3); }
-    g.globalAlpha = 0.55;
-    for (let i = 0; i < 260; i++) { g.fillStyle = rnd() < 0.5 ? '#ff5a1f' : '#ffae3a'; g.fillRect(rnd() * 512, rnd() * 512, 1.4, 1.4); }
-    g.globalAlpha = 1;
-    return tex(c);
-  });
 
-  // Basalt with glowing cracks: a colour map and a matching glow map.
-  T.basalt = () => once('basalt', () => {
-    const S = 256, rnd = U.rng(211);
-    const c = canvas(S, S), g = c.getContext('2d'), e = canvas(S, S), h = e.getContext('2d');
-    g.fillStyle = '#2a2124'; g.fillRect(0, 0, S, S);
-    speckle(g, S, S, 500, ['#33282b', '#221a1c', '#3b2e2f', '#2e2426'], 3, 12, rnd);
-    h.fillStyle = '#000000'; h.fillRect(0, 0, S, S);
-    for (let k = 0; k < 14; k++) {
-      let x = rnd() * S, y = rnd() * S;
-      const pts = [[x, y]];
-      for (let i = 0; i < 6; i++) { x += (rnd() - 0.5) * 60; y += (rnd() - 0.5) * 60; pts.push([x, y]); }
-      [[g, '#8a2a0c', 4], [g, '#ff6a1a', 1.6], [h, '#ff7a2a', 3], [h, '#ffd27a', 1]].forEach(([ctx, colr, w]) => {
-        ctx.strokeStyle = colr; ctx.lineWidth = w; ctx.lineJoin = 'round';
-        ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.stroke();
-      });
-    }
-    return { map: tex(c), glow: tex(e) };
-  });
 
   // Molten lava: soft overlapping glows with a few darker crusts and bright seams.
   T.lava = () => once('lava', () => {
     const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(221);
-    g.fillStyle = '#e84a0c'; g.fillRect(0, 0, S, S);
+    g.fillStyle = '#b8340a'; g.fillRect(0, 0, S, S);
     const blob = (x, y, r, colr, a) => {
       for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) {
         const grd = g.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, r);
@@ -2633,27 +2685,12 @@ body.abyss .intro-rivals { color: #ff9a62; }
         g.fillStyle = grd; g.fillRect(x + ox - r, y + oy - r, r * 2, r * 2);
       }
     };
-    for (let i = 0; i < 70; i++) blob(rnd() * S, rnd() * S, 20 + rnd() * 50, 'rgba(255,170,40,A)', 0.55);
-    for (let i = 0; i < 40; i++) blob(rnd() * S, rnd() * S, 14 + rnd() * 34, 'rgba(120,20,4,A)', 0.55);
-    for (let i = 0; i < 30; i++) blob(rnd() * S, rnd() * S, 6 + rnd() * 14, 'rgba(255,230,140,A)', 0.7);
+    for (let i = 0; i < 70; i++) blob(rnd() * S, rnd() * S, 20 + rnd() * 50, 'rgba(255,120,24,A)', 0.55);
+    for (let i = 0; i < 46; i++) blob(rnd() * S, rnd() * S, 14 + rnd() * 34, 'rgba(70,12,2,A)', 0.6);
+    for (let i = 0; i < 26; i++) blob(rnd() * S, rnd() * S, 6 + rnd() * 14, 'rgba(255,200,90,A)', 0.6);
     return tex(c);
   });
 
-  // The sea far below: mostly dark crust with glowing seams.
-  T.lavaSea = () => once('lavaSea', () => {
-    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(281);
-    g.fillStyle = '#2a0a06'; g.fillRect(0, 0, S, S);
-    speckle(g, S, S, 120, ['#3a0e08', '#1c0604', '#4a1208'], 10, 34, rnd);
-    g.lineCap = 'round';
-    for (let i = 0; i < 26; i++) {
-      let x = rnd() * S, y = rnd() * S;
-      const pts = [[x, y]];
-      for (let k = 0; k < 5; k++) { x += (rnd() - 0.5) * 70; y += (rnd() - 0.5) * 70; pts.push([x, y]); }
-      [['#ff5a0a', 5], ['#ffb43a', 1.6]].forEach(([cl, w]) => { g.strokeStyle = cl; g.lineWidth = w; g.beginPath(); pts.forEach((p, j) => (j ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]))); g.stroke(); });
-    }
-    g.globalAlpha = 0.8; speckle(g, S, S, 40, ['#ff7a1a', '#ff9a2a'], 3, 9, rnd); g.globalAlpha = 1;
-    return tex(c);
-  });
 
   T.obsidian = () => once('obsidian', () => {
     const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(231);
@@ -2682,19 +2719,162 @@ body.abyss .intro-rivals { color: #ff9a62; }
     return tex(c);
   });
 
+  // ---------- The temple ----------
+  // Polished dark flagstones for the putting surfaces: 4 x 4 slabs per tile (one slab per unit).
+  T.templeFloor = () => once('templeFloor', () => {
+    const S = 512, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(301);
+    const q = S / 4;
+    for (let j = 0; j < 4; j++) for (let i = 0; i < 4; i++) {
+      const v = (rnd() - 0.5) * 0.06;
+      g.fillStyle = new THREE.Color('#3b3436').offsetHSL(0, 0, v).getStyle();
+      g.fillRect(i * q, j * q, q, q);
+      g.globalAlpha = 0.18;
+      for (let k = 0; k < 220; k++) { g.fillStyle = rnd() < 0.5 ? '#2c2628' : '#4a4144'; g.fillRect(i * q + rnd() * q, j * q + rnd() * q, 1 + rnd() * 2, 1 + rnd() * 2); }
+      g.globalAlpha = 0.12; g.strokeStyle = '#5a4e4c'; g.lineWidth = 1;
+      for (let k = 0; k < 3; k++) { g.beginPath(); const x = i * q + rnd() * q, y = j * q + rnd() * q; g.moveTo(x, y); g.lineTo(x + (rnd() - 0.5) * 50, y + (rnd() - 0.5) * 50); g.stroke(); }
+      g.globalAlpha = 1;
+    }
+    g.fillStyle = '#1b1517';
+    for (let i = 0; i <= 4; i++) { g.fillRect(i * q - 1.5, 0, 3, S); g.fillRect(0, i * q - 1.5, S, 3); }
+    g.globalAlpha = 0.25; g.fillStyle = '#6a5a52';
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { g.fillRect(i * q + 2, j * q + 2, q - 4, 2); }
+    g.globalAlpha = 1;
+    return tex(c);
+  });
+
+  // Plain dressed masonry for the sides of platforms, columns and ruins.
+  T.templeStone = () => once('templeStone', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(311);
+    g.fillStyle = '#161214'; g.fillRect(0, 0, S, S);
+    let y = 0;
+    while (y < S) {
+      const h = 26 + rnd() * 14; let x = -rnd() * 40;
+      while (x < S) {
+        const w = 44 + rnd() * 40;
+        g.fillStyle = new THREE.Color('#3a3234').offsetHSL(0, 0, (rnd() - 0.5) * 0.08).getStyle();
+        g.fillRect(x + 1.5, y + 1.5, w - 3, h - 3);
+        g.fillStyle = 'rgba(255,255,255,0.05)'; g.fillRect(x + 3, y + 3, w - 8, 2);
+        g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(x + 3, y + h - 6, w - 6, 3);
+        x += w;
+      }
+      y += h;
+    }
+    g.globalAlpha = 0.2; speckle(g, S, S, 300, ['#0e0b0c', '#4a4042'], 1, 3, rnd); g.globalAlpha = 1;
+    return tex(c);
+  });
+
+  // A carved band of runes: a dark stone map and a glow map where only the runes are lit.
+  T.runeBand = () => once('runeBand', () => {
+    const W = 512, H = 128, rnd = U.rng(321);
+    const c = canvas(W, H), g = c.getContext('2d'), e = canvas(W, H), h = e.getContext('2d');
+    g.fillStyle = '#241e20'; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#3a3032'; g.fillRect(0, 0, W, 10); g.fillRect(0, H - 10, W, 10);
+    h.fillStyle = '#000'; h.fillRect(0, 0, W, H);
+    const glyphs = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛊᛏᛒᛖᛗᛚᛜᛞᛟ';
+    [g, h].forEach((ctx, k) => {
+      ctx.font = '700 64px Georgia, serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      for (let i = 0; i < 8; i++) {
+        const ch = glyphs[(i * 7 + 3) % glyphs.length];
+        if (k === 0) { ctx.fillStyle = '#120c0c'; ctx.fillText(ch, 32 + i * 64, 66); }
+        else { ctx.shadowColor = '#ff6a1a'; ctx.shadowBlur = 14; ctx.fillStyle = '#ffb060'; ctx.fillText(ch, 32 + i * 64, 66); ctx.shadowBlur = 0; }
+      }
+      ctx.fillStyle = k ? '#ff7a2a' : '#120c0c';
+      ctx.fillRect(0, 16, W, 3); ctx.fillRect(0, H - 19, W, 3);
+    });
+    void rnd;
+    return { map: tex(c), glow: tex(e) };
+  });
+
+  // Dark rock with a few thin glowing veins (magma boulders, the volcano, rafts).
+  T.magmaRock = () => once('magmaRock', () => {
+    const S = 256, rnd = U.rng(331);
+    const c = canvas(S, S), g = c.getContext('2d'), e = canvas(S, S), h = e.getContext('2d');
+    g.fillStyle = '#231c1d'; g.fillRect(0, 0, S, S);
+    speckle(g, S, S, 420, ['#2c2324', '#1a1415', '#352a2a'], 3, 12, rnd);
+    h.fillStyle = '#000'; h.fillRect(0, 0, S, S);
+    for (let k = 0; k < 4; k++) {
+      let x = rnd() * S, y = rnd() * S;
+      const pts = [[x, y]];
+      for (let i = 0; i < 5; i++) { x += (rnd() - 0.5) * 70; y += (rnd() - 0.5) * 70; pts.push([x, y]); }
+      [[g, '#7a2a0c', 2.4], [h, '#ff7a2a', 2.2], [h, '#ffd27a', 0.8]].forEach(([ctx, colr, w]) => {
+        ctx.strokeStyle = colr; ctx.lineWidth = w; ctx.lineJoin = 'round';
+        ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.stroke();
+      });
+    }
+    return { map: tex(c), glow: tex(e) };
+  });
+
+  // Rough cliff rock for the cavern walls (tiles a lot, so it stays subtle).
+  T.cliff = () => once('cliff', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(341);
+    g.fillStyle = '#1a1519'; g.fillRect(0, 0, S, S);
+    for (let i = 0; i < 60; i++) { g.strokeStyle = rnd() < 0.5 ? 'rgba(60,48,58,0.5)' : 'rgba(8,6,8,0.6)'; g.lineWidth = 2 + rnd() * 6; g.beginPath(); const x = rnd() * S; g.moveTo(x, 0); g.bezierCurveTo(x + (rnd() - 0.5) * 40, S * 0.3, x + (rnd() - 0.5) * 40, S * 0.7, x + (rnd() - 0.5) * 30, S); g.stroke(); }
+    speckle(g, S, S, 200, ['#241d22', '#0f0c0e'], 2, 6, rnd);
+    return tex(c);
+  });
+
+  // The lava far below: dark crust broken by wide, softly glowing flows (tiles seamlessly).
+  T.lavaDeep = () => once('lavaDeep', () => {
+    const S = 1024, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(351);
+    g.fillStyle = '#170502'; g.fillRect(0, 0, S, S);
+    speckle(g, S, S, 260, ['#220804', '#100302', '#2c0c06'], 16, 60, rnd);
+    // broad rivers that all run roughly the same way, like a lake slowly flowing
+    const a0 = 0.5, flows = [];
+    for (let i = 0; i < 6; i++) {
+      const pts = []; let x = rnd() * S, y = (i / 6) * S + rnd() * 60;
+      for (let k = 0; k < 9; k++) { pts.push([x, y]); const a = a0 + Math.sin(k * 0.9 + i * 2.1) * 0.45; x += Math.cos(a) * 150; y += Math.sin(a) * 150 * 0.35; }
+      flows.push({ pts, w: 0.7 + rnd() * 0.8 });
+    }
+    const stroke = (w, colr, blur, alpha) => {
+      g.globalAlpha = alpha; g.strokeStyle = colr; g.lineCap = 'round'; g.lineJoin = 'round'; g.shadowColor = colr; g.shadowBlur = blur;
+      flows.forEach(f => { g.lineWidth = w * f.w; for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) { g.beginPath(); f.pts.forEach((p, k) => { if (k) { const q = f.pts[k - 1]; g.quadraticCurveTo(q[0] + ox, q[1] + oy, (q[0] + p[0]) / 2 + ox, (q[1] + p[1]) / 2 + oy); } else g.moveTo(p[0] + ox, p[1] + oy); }); g.stroke(); } });
+    };
+    stroke(90, '#a0280a', 60, 0.35); stroke(44, '#e8480e', 40, 0.6); stroke(16, '#ff9a3a', 20, 0.7);
+    g.globalAlpha = 1; g.shadowBlur = 0;
+    // dark rafts of crust floating on the flows
+    speckle(g, S, S, 70, ['#1a0603', '#260a05'], 8, 26, rnd);
+    return tex(c);
+  });
+
+  // Streaks for the lava waterfalls (tiles vertically, so it can scroll down).
+  T.lavaFall = () => once('lavaFall', () => {
+    const W = 128, H = 256, c = canvas(W, H), g = c.getContext('2d'), rnd = U.rng(361);
+    g.fillStyle = '#c8400c'; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 70; i++) {
+      const x = rnd() * W, w = 2 + rnd() * 8, y = rnd() * H, l = 40 + rnd() * 160;
+      g.fillStyle = rnd() < 0.55 ? 'rgba(255,190,80,0.55)' : 'rgba(110,20,4,0.45)';
+      g.fillRect(x, y, w, l); g.fillRect(x, y - H, w, l);
+    }
+    const edge = g.createLinearGradient(0, 0, W, 0);
+    edge.addColorStop(0, 'rgba(60,10,2,0.8)'); edge.addColorStop(0.2, 'rgba(60,10,2,0)'); edge.addColorStop(0.8, 'rgba(60,10,2,0)'); edge.addColorStop(1, 'rgba(60,10,2,0.8)');
+    g.fillStyle = edge; g.fillRect(0, 0, W, H);
+    return tex(c);
+  });
+
+  // A soft vertical fade, used for light shafts and the glow over the lava.
+  T.fade = () => once('fade', () => {
+    const c = canvas(8, 128), g = c.getContext('2d');
+    const grd = g.createLinearGradient(0, 0, 0, 128);
+    grd.addColorStop(0, 'rgba(255,255,255,0)'); grd.addColorStop(0.35, 'rgba(255,255,255,1)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grd; g.fillRect(0, 0, 8, 128);
+    return tex(c, false);
+  });
+
   // A rune circle for the turning wheel.
   T.runes = () => once('runes', () => {
     const S = 1024, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(261);
-    g.fillStyle = '#2a2127'; g.beginPath(); g.arc(S / 2, S / 2, S / 2, 0, 7); g.fill();
-    speckle(g, S, S, 700, ['#33292f', '#221a20', '#3a2e34'], 4, 16, rnd);
-    g.strokeStyle = '#ff5a1a'; g.shadowColor = '#ff7a2a'; g.shadowBlur = 18;
-    [[0.46, 10], [0.38, 6], [0.16, 6]].forEach(([r, w]) => { g.lineWidth = w; g.beginPath(); g.arc(S / 2, S / 2, S * r, 0, 7); g.stroke(); });
-    g.lineWidth = 7; g.beginPath();
-    for (let i = 0; i <= 5; i++) { const a = -Math.PI / 2 + (i * 4 * Math.PI) / 5, x = S / 2 + Math.cos(a) * S * 0.38, y = S / 2 + Math.sin(a) * S * 0.38; i ? g.lineTo(x, y) : g.moveTo(x, y); }
-    g.stroke();
-    g.font = '700 64px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ff8a3a';
+    g.fillStyle = '#211b1e'; g.beginPath(); g.arc(S / 2, S / 2, S / 2, 0, 7); g.fill();
+    speckle(g, S, S, 500, ['#2a2226', '#181315', '#2f262a'], 4, 16, rnd);
+    // carved spokes between the rings
+    g.strokeStyle = '#141011'; g.lineWidth = 8;
+    for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; g.beginPath(); g.moveTo(S / 2 + Math.cos(a) * S * 0.2, S / 2 + Math.sin(a) * S * 0.2); g.lineTo(S / 2 + Math.cos(a) * S * 0.36, S / 2 + Math.sin(a) * S * 0.36); g.stroke(); }
+    g.strokeStyle = '#ff6a1a'; g.shadowColor = '#ff7a2a'; g.shadowBlur = 22;
+    [[0.47, 12], [0.37, 5], [0.19, 7], [0.09, 5]].forEach(([r, w]) => { g.lineWidth = w; g.beginPath(); g.arc(S / 2, S / 2, S * r, 0, 7); g.stroke(); });
+    g.font = '700 70px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ffb060';
     const glyphs = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃ';
     for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; g.save(); g.translate(S / 2 + Math.cos(a) * S * 0.42, S / 2 + Math.sin(a) * S * 0.42); g.rotate(a + Math.PI / 2); g.fillText(glyphs[i], 0, 0); g.restore(); }
+    g.font = '700 54px Georgia, serif';
+    for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + 0.26; g.save(); g.translate(S / 2 + Math.cos(a) * S * 0.28, S / 2 + Math.sin(a) * S * 0.28); g.rotate(a + Math.PI / 2); g.fillText(glyphs[(i * 5) % 12], 0, 0); g.restore(); }
     g.shadowBlur = 0;
     return tex(c, false);
   });
@@ -2750,7 +2930,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
     day: { top: '#4f9fe0', mid: '#a9d6f5', horizon: '#eef8ff', sun: '#fff1da', sunI: 2.5, hemiSky: '#d6ecff', hemiGround: '#5d7a3c', hemiI: 0.95, fog: '#dcefff', turf: '#3f9434', grass: '#4a7f36', hills: ['#7fb36a', '#8fc07a', '#a6c99a'], exposure: 1.0 },
     spring: { top: '#62b3ea', mid: '#bfe6fb', horizon: '#f4fcff', sun: '#fffaf0', sunI: 2.4, hemiSky: '#e6f6ff', hemiGround: '#6aa04a', hemiI: 1.0, fog: '#e6f6fd', turf: '#43993a', grass: '#4c8638', hills: ['#86bf73', '#9acb88', '#b3d6a8'], exposure: 1.02 },
     golden: { top: '#5d97cf', mid: '#d9c7a8', horizon: '#ffe2b8', sun: '#ffd49a', sunI: 2.7, hemiSky: '#ffe8c8', hemiGround: '#6e6a35', hemiI: 0.85, fog: '#f6e0c2', turf: '#4a9636', grass: '#527f35', hills: ['#8aa865', '#a4b57a', '#c8c49a'], exposure: 1.0 },
-    abyss: { top: '#070205', mid: '#2a0708', horizon: '#9a2a0c', sun: '#ff9a62', sunI: 1.8, hemiSky: '#5a2032', hemiGround: '#ff5a14', hemiI: 1.0, fog: '#1c0605', turf: '#3a3134', grass: '#1a1212', hills: ['#2a1214', '#3a1610', '#1c0c0c'], exposure: 1.12 },
+    abyss: { top: '#040205', mid: '#0c0507', horizon: '#2a0a06', sun: '#ffb27a', sunI: 1.5, hemiSky: '#2c2232', hemiGround: '#a8380e', hemiI: 0.7, fog: '#1e0805', turf: '#3a3134', grass: '#1a1212', hills: ['#2a1214', '#3a1610', '#1c0c0c'], exposure: 1.15 },
     autumn: { top: '#6aa3d0', mid: '#d6c7b3', horizon: '#ffdcb5', sun: '#ffcf96', sunI: 2.6, hemiSky: '#ffe6c9', hemiGround: '#7a5a2a', hemiI: 0.9, fog: '#f1dcc0', turf: '#4f9535', grass: '#647c34', hills: ['#a59a5c', '#b8a06a', '#cdb48a'], exposure: 1.0 },
   };
   PC.LIGHTS = LIGHTS;
@@ -2946,7 +3126,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
       r.shadowMap.enabled = true;
       r.shadowMap.type = THREE.PCFSoftShadowMap;
       this.scene = new THREE.Scene();
-      this.camera = new THREE.PerspectiveCamera(48, 1, 0.1, 500);
+      this.camera = new THREE.PerspectiveCamera(48, 1, 0.1, 600);
       this.mats = {};
 
       this.hemi = new THREE.HemisphereLight(0xffffff, 0x445522, 0.9);
@@ -2979,12 +3159,23 @@ body.abyss .intro-rivals { color: #ff9a62; }
       this.ground = ground;
 
       // The Abyss: a sea of lava far below the platforms
-      const lt = T.lavaSea(); lt.repeat.set(90, 90);
-      this.lavaSeaMat = new THREE.MeshStandardMaterial({ map: lt, emissiveMap: lt, emissive: col('#ff5a14'), emissiveIntensity: 0.75, roughness: 0.8, color: col('#5a2a1e') });
-      this.lavaSeaTex = lt;
-      this.lavaSea = new THREE.Mesh(new THREE.CircleGeometry(260, 48), this.lavaSeaMat);
-      this.lavaSea.rotation.x = -Math.PI / 2; this.lavaSea.position.y = -16; this.lavaSea.visible = false;
+      // The Abyss: a lake of flowing lava far below, in two layers drifting different ways
+      this.lavaSea = new THREE.Group();
+      const lt1 = T.lavaDeep().clone(); lt1.needsUpdate = true; lt1.repeat.set(5, 5);
+      const lt2 = T.lavaDeep().clone(); lt2.needsUpdate = true; lt2.repeat.set(2.3, 2.3); lt2.rotation = 0.7;
+      const sea1 = new THREE.Mesh(new THREE.CircleGeometry(240, 48), new THREE.MeshBasicMaterial({ map: lt1, color: col('#ffffff') }));
+      const sea2 = new THREE.Mesh(new THREE.CircleGeometry(240, 48), new THREE.MeshBasicMaterial({ map: lt2, color: col('#ff7a2a'), transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false }));
+      sea1.rotation.x = sea2.rotation.x = -Math.PI / 2;
+      sea2.position.y = 0.3;
+      this.lavaSea.add(sea1, sea2);
+      this.lavaSea.position.y = -62; this.lavaSea.visible = false;
+      this.lavaSeaTex = [lt1, lt2];
       this.scene.add(this.lavaSea);
+
+      // Lights only the Abyss uses. They always exist (at zero in the Garden) so materials never need rebuilding.
+      this.rim = new THREE.DirectionalLight(col('#7a86ff'), 0);
+      this.scene.add(this.rim, this.rim.target);
+      this.pts = [0, 1, 2].map(() => { const l = new THREE.PointLight(col('#ff6a1a'), 0, 90, 1.6); this.scene.add(l); return l; });
 
       this.holeGroup = new THREE.Group();
       this.scene.add(this.holeGroup);
@@ -3017,6 +3208,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
 
       this.fx = new Particles(this.scene, 700, T.petal());
       this.glow = new Particles(this.scene, 400, T.dot());
+      this.smoke = new Particles(this.scene, 140, T.dot());
       this.trail = [];
       this.resize();
     }
@@ -3030,6 +3222,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
       this.camera.updateProjectionMatrix();
       this.fx.points.material.uniforms.scale.value = h * 0.9;
       this.glow.points.material.uniforms.scale.value = h * 0.9;
+      if (this.smoke) this.smoke.points.material.uniforms.scale.value = h * 0.9;
     }
 
     setLight(name) {
@@ -3039,10 +3232,12 @@ body.abyss .intro-rivals { color: #ff9a62; }
       this.hemi.color = col(L.hemiSky); this.hemi.groundColor = col(L.hemiGround); this.hemi.intensity = L.hemiI;
       this.sun.color = col(L.sun); this.sun.intensity = L.sunI;
       const hell = name === 'abyss';
-      this.scene.fog = hell ? new THREE.Fog(col(L.fog), 14, 95) : new THREE.Fog(col(L.fog), 45, 190);
+      this.scene.fog = hell ? new THREE.Fog(col(L.fog), 24, 135) : new THREE.Fog(col(L.fog), 45, 190);
       this.groundMat.color = col(L.grass).multiplyScalar(1.25);
       this.ground.visible = !hell;
       this.lavaSea.visible = hell;
+      this.rim.intensity = hell ? 0.45 : 0;
+      this.pts.forEach(l => { l.intensity = 0; });
       this.renderer.toneMappingExposure = L.exposure;
     }
 
@@ -3052,7 +3247,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
       while (g.children.length) g.remove(g.children[0]);
       this.vis = [];
       this.ghosts = [];
-      this.fx.clear(); this.glow.clear(); this.trail = [];
+      this.fx.clear(); this.glow.clear(); this.smoke.clear(); this.trail = [];
     }
 
     // Build everything for one hole.
@@ -3070,20 +3265,21 @@ body.abyss .intro-rivals { color: #ff9a62; }
       const sc = this.sun.shadow.camera;
       sc.left = -ext; sc.right = ext; sc.top = ext; sc.bottom = -ext; sc.near = 1; sc.far = 60;
       sc.updateProjectionMatrix();
+      this.rim.position.copy(V(cx + 14, cy + 30, 26)); this.rim.target.position.copy(V(cx, cy, 0));
 
       const hAt = (x, y) => sim.floorHeight(x, y);
       const hell = hole.look.theme === 'abyss';
       this.hell = hell;
-      const turf = hell ? T.ashTurf() : T.turf(L.turf);
-      const turfMat = new THREE.MeshStandardMaterial({ map: turf, roughness: 0.92, color: hell ? col('#ffffff') : col('#e4f0dc') });
-      const skirtStyle = hell ? 'basalt' : hole.look.skirt || (hole.look.rail === 'stone' || hole.look.rail === 'brick' ? hole.look.rail : 'soil');
+      const turf = hell ? T.templeFloor() : T.turf(L.turf);
+      const turfMat = new THREE.MeshStandardMaterial({ map: turf, roughness: hell ? 0.55 : 0.92, metalness: hell ? 0.1 : 0, color: hell ? col('#ffffff') : col('#e4f0dc') });
+      const skirtStyle = hell ? 'temple' : hole.look.skirt || (hole.look.rail === 'stone' || hole.look.rail === 'brick' ? hole.look.rail : 'soil');
       const skirtMat = this.railMaterials(skirtStyle).body;
-      const skirtBottom = hell ? -2.2 : GROUND_Y - 0.02;
+      const skirtBottom = hell ? -1.5 : GROUND_Y - 0.02;
 
       hole.floors.forEach((f, fi) => {
         let m = turfMat;
         if (f.mat === 'planks') { const t = T.planks(); m = new THREE.MeshStandardMaterial({ map: t, roughness: 0.8 }); }
-        const geo = surfaceGeometry(f.poly, hAt, { lift: fi * 0.002, uv: f.mat === 'planks' ? (x, y) => [x / 1.2 + 0.5, y / 2] : undefined });
+        const geo = surfaceGeometry(f.poly, hAt, { lift: fi * 0.002, cell: hole.look.cell || 0.3, uv: f.mat === 'planks' ? (x, y) => [x / 1.2 + 0.5, y / 2] : undefined });
         const mesh = new THREE.Mesh(geo, m); mesh.receiveShadow = true; G.add(mesh);
         const sk = new THREE.Mesh(skirtGeometry(f.poly, (x, y) => {
           const c = U.centroid(f.poly), dx = c[0] - x, dy = c[1] - y, l = Math.hypot(dx, dy) || 1;
@@ -3122,7 +3318,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
           case 'glass': { const t = T.wood('#f4f4ee'); return { body: M({ map: t, roughness: 0.6 }), cap: M({ color: col('#ffffff'), roughness: 0.5 }) }; }
           case 'trellis': { const t = T.wood('#ece7dc'); return { body: M({ map: t, roughness: 0.7 }), cap: M({ color: col('#fbfaf5') }) }; }
           case 'soil': { const t = T.soil(); return { body: M({ map: t, roughness: 1 }), cap: null }; }
-          case 'basalt': { const b = T.basalt(); b.map.repeat.set(1, 1); return { body: M({ map: b.map, emissiveMap: b.glow, emissive: col('#ff6a1a'), emissiveIntensity: 1.2, roughness: 0.95 }), cap: null }; }
+          case 'basalt': case 'temple': { const t = T.templeStone(); return { body: M({ map: t, roughness: 0.9 }), cap: M({ color: col('#4a3e3c'), roughness: 0.7 }) }; }
           case 'obsidian': { const t = T.obsidian(); return { body: M({ map: t, roughness: 0.25, metalness: 0.2 }), cap: M({ color: col('#ff5a1a'), emissive: col('#ff4a10'), emissiveIntensity: 0.9, roughness: 0.5 }) }; }
           default: { const t = T.wood('#a8713f'); return { body: M({ map: t }), cap: M({ color: col('#c99a63'), roughness: 0.75 }) }; }
         }
@@ -3162,7 +3358,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
         }
         case 'glass': m = new THREE.MeshPhysicalMaterial({ map: T.obsidian(), color: col('#ffffff'), roughness: 0.03, metalness: 0.3, clearcoat: 1, clearcoatRoughness: 0.02 }); lift = 0.008; uv = (x, y) => [x / 2, y / 2]; break;
         case 'tar': m = new THREE.MeshPhysicalMaterial({ map: T.tar(), color: col('#ffffff'), roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.1 }); lift = 0.012; uv = (x, y) => [x / 2.5, y / 2.5]; break;
-        case 'ash': { const t = T.ash(); m = new THREE.MeshStandardMaterial({ map: t, roughness: 1 }); uv = (x, y) => [x / 2, y / 2]; break; }
+        case 'ash': case 'cinder': { const t = T.ash(); m = new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: col(z.type === 'cinder' ? '#8a7a76' : '#ffffff') }); uv = (x, y) => [x / 2, y / 2]; break; }
         default: return;
       }
       const geo = surfaceGeometry(z.poly, (x, y) => hAt(x, y), { lift, uv, cell: 0.25 });
@@ -3180,17 +3376,19 @@ body.abyss .intro-rivals { color: #ff9a62; }
       };
       if (z.kind === 'lava') {
         const lt = T.lava(); lt.repeat.set(0.3, 0.3);
-        const lm = new THREE.MeshStandardMaterial({ map: lt, emissiveMap: lt, emissive: col('#ff6a1a'), emissiveIntensity: 1.25, roughness: 0.55, color: col('#ff9a4a') });
+        // Lava makes its own light, so it is drawn unlit and never picks up the cavern's colours.
+        const lm = new THREE.MeshBasicMaterial({ map: lt, color: col('#ffb27a') });
         if (z.over) {
-          const geo = surfaceGeometry(z.poly, (x, y) => this.sim.floorHeight(x, y), { lift: 0.014, uv: (x, y) => [x / 2.5, y / 2.5], cell: 0.2 });
+          const lvl = z.level;
+          const geo = surfaceGeometry(z.poly, lvl !== undefined ? () => lvl : (x, y) => this.sim.floorHeight(x, y), { lift: 0.014, uv: (x, y) => [x / 2.5, y / 2.5], cell: 0.2 });
           const m = new THREE.Mesh(geo, lm); G.add(m);
-          const rim = railGeometry(z.poly, true, 'out', 0.09, (x, y) => this.sim.floorHeight(x, y) + 0.03, 0, { thick: 0.05 });
-          const rm = new THREE.Mesh(rim.geo, this.railMaterials('basalt').body); G.add(rm);
+          const rim = railGeometry(z.poly, true, 'out', 0.09, lvl !== undefined ? () => lvl + 0.03 : (x, y) => this.sim.floorHeight(x, y) + 0.03, 0, { thick: 0.05 });
+          const rm = new THREE.Mesh(rim.geo, this.railMaterials('temple').cap); G.add(rm);
         } else {
           G.add(new THREE.Mesh(flat(z.poly, z.top - 0.02), lm));
-          const rim = new THREE.Mesh(skirtGeometry(z.poly, () => z.top + 0.05, -2.2), this.railMaterials('basalt').body); G.add(rim);
+          const rim = new THREE.Mesh(skirtGeometry(z.poly, () => z.top + 0.05, -1.5), this.railMaterials('temple').body); G.add(rim);
         }
-        this.vis.push({ update: (t) => { lt.offset.set(t * 0.012, t * 0.008); lm.emissiveIntensity = 1.15 + Math.sin(t * 2.1) * 0.12; } });
+        this.vis.push({ update: (t) => { lt.offset.set(t * 0.012, t * 0.008); lm.color.setRGB(1, 0.62 + Math.sin(t * 2.1) * 0.05, 0.42); } });
         return;
       }
       if (z.kind === 'water') {
@@ -3273,9 +3471,10 @@ body.abyss .intro-rivals { color: #ff9a62; }
       const g = new THREE.BufferGeometry();
       g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
       g.computeVertexNormals();
-      this.edgeMat = new THREE.MeshBasicMaterial({ color: col('#ff7a2a'), side: THREE.DoubleSide });
+      // A thin inlay of hot bronze along every drop, so the edge is always easy to see.
+      this.edgeMat = new THREE.MeshBasicMaterial({ color: col('#e8813a'), side: THREE.DoubleSide });
       this.holeGroup.add(new THREE.Mesh(g, this.edgeMat));
-      this.vis.push({ update: (t) => { this.edgeMat.color.copy(col('#ff7a2a')).multiplyScalar(0.85 + Math.sin(t * 2.6) * 0.15); } });
+      this.vis.push({ update: (t) => { this.edgeMat.color.copy(col('#e8813a')).multiplyScalar(0.9 + Math.sin(t * 1.6) * 0.1); } });
     }
 
     // Rivals show as see-through balls of their own colour with a name tag.
@@ -3412,9 +3611,9 @@ body.abyss .intro-rivals { color: #ff9a62; }
           this.glow.spawn({ x: ball.position.x, y: ball.position.y, z: ball.position.z, vx: 0, vy: 0, vz: 0, g: 0, life: 0.35, size: 0.09 * Math.min(1, sp / 8), color: col('#ffffff'), a: 0.35 });
         }
       }
-      if (this.hell && this.lavaSeaTex) this.lavaSeaTex.offset.set(t * 0.004, t * 0.0025);
+      if (this.hell && this.lavaSeaTex) { this.lavaSeaTex[0].offset.set(t * 0.0025, t * 0.0015); this.lavaSeaTex[1].offset.set(-t * 0.004, t * 0.003); }
       this.vis.forEach(v => v.update && v.update(t, dt, sim));
-      this.fx.update(dt); this.glow.update(dt);
+      this.fx.update(dt); this.glow.update(dt); this.smoke.update(dt);
     }
 
     render() { this.renderer.render(this.scene, this.camera); }
@@ -4808,7 +5007,8 @@ body.abyss .intro-rivals { color: #ff9a62; }
   const glowM = (hex, k = 1) => new THREE.MeshStandardMaterial({ color: col(hex), emissive: col(hex), emissiveIntensity: k, roughness: 0.5 });
   const mesh = (geo, mat, cast = true) => { const m = new THREE.Mesh(geo, mat); m.castShadow = cast; m.receiveShadow = true; return m; };
   const at = (o, x, y, h) => { o.position.copy(V(x, y, h)); return o; };
-  const basaltMat = () => { const b = T.basalt(); return new THREE.MeshStandardMaterial({ map: b.map, emissiveMap: b.glow, emissive: col('#ff6a1a'), emissiveIntensity: 1.3, roughness: 0.95 }); };
+  const basaltMat = (k = 1) => { const b = T.magmaRock(); return new THREE.MeshStandardMaterial({ map: b.map, emissiveMap: b.glow, emissive: col('#ff6a1a'), emissiveIntensity: 1.3 * k, roughness: 0.9 }); };
+  const plainStone = () => new THREE.MeshStandardMaterial({ map: T.templeStone(), roughness: 0.9 });
   const rockGeo = (r, seed) => {
     const g = new THREE.DodecahedronGeometry(r, 1), rnd = U.rng(seed), p = g.attributes.position;
     for (let i = 0; i < p.count; i++) { const k = 0.82 + rnd() * 0.3; p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k); }
@@ -4817,76 +5017,286 @@ body.abyss .intro-rivals { color: #ff9a62; }
   };
   const ember = (world, x, y, h, o = {}) => world.glow.spawn(Object.assign({ x, y: h, z: -y, vx: (Math.random() - 0.5) * 0.3, vy: 0.6 + Math.random() * 0.8, vz: (Math.random() - 0.5) * 0.3, g: 0.2, drag: 0.99, life: 1.6 + Math.random(), size: 0.05 + Math.random() * 0.04, color: col(Math.random() < 0.5 ? '#ff7a2a' : '#ffc04a'), wobble: 0.6, seed: Math.random() * 9 }, o));
 
-  // ---------- The hellscape around each hole ----------
-  VIS.decorateAbyss = function (hole, world) {
-    const rnd = U.rng(U.hash(hole.id));
-    const box = hole.box, G = world.holeGroup;
-    const polys = hole.floors.map(f => f.poly).concat(hole.hazards.map(z => z.poly));
-    const clear = (x, y, m) => polys.every(P => !U.inPoly(x, y, P) && U.distToPoly(x, y, P) > m);
-    const bm = basaltMat();
+  // ---------- The temple: an underground volcanic temple suspended over a lava abyss ----------
+  const stoneMat = (rx = 1, ry = 1, colr = '#ffffff') => { const t = T.templeStone().clone(); t.needsUpdate = true; t.repeat.set(rx, ry); return new THREE.MeshStandardMaterial({ map: t, color: col(colr), roughness: 0.88 }); };
+  const runeMat = (rx, k = 1.6) => { const r = T.runeBand(); const m = r.map.clone(), g = r.glow.clone(); m.needsUpdate = g.needsUpdate = true; m.repeat.set(rx, 1); g.repeat.set(rx, 1); return new THREE.MeshStandardMaterial({ map: m, emissiveMap: g, emissive: col('#ff7a2a'), emissiveIntensity: k, roughness: 0.7 }); };
 
-    // Floating rocks below and around the platforms
-    const rocks = [];
-    for (let i = 0; i < 300 && rocks.length < 22; i++) {
-      const x = box.x0 - 16 + rnd() * (box.w + 32), y = box.y0 - 8 + rnd() * (box.h + 18);
-      if (!clear(x, y, 3.5)) continue;
-      rocks.push({ x, y: -3 - rnd() * 5, z: -y, s: 0.4 + rnd() * 1.0, ry: rnd() * 6, rx: rnd(), sy: 0.6 + rnd() * 0.5 });
+  // Join geometries that share one material (each with its own transform) into one mesh.
+  function mergeGeos(parts) {
+    const pos = [], nrm = [], uv = [];
+    parts.forEach(({ g, m }) => {
+      const n = (g.index ? g.toNonIndexed() : g.clone()).applyMatrix4(m);
+      const p = n.attributes.position.array, q = n.attributes.normal.array, u = n.attributes.uv ? n.attributes.uv.array : null;
+      for (let i = 0; i < p.length; i++) { pos.push(p[i]); nrm.push(q[i]); }
+      for (let i = 0; i < p.length / 3; i++) { uv.push(u ? u[i * 2] : 0, u ? u[i * 2 + 1] : 0); }
+    });
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('normal', new THREE.Float32BufferAttribute(nrm, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    return g;
+  }
+  const M4 = (x, y, z, rx = 0, ry = 0, rz = 0, sx = 1, sy = 1, sz = 1) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz));
+
+  // A ruined island: a floor slab on a rocky root, with broken columns, an arch, a wall and steps.
+  function ruinIsland(rnd, r) {
+    const parts = [];
+    const add = (g, m) => parts.push({ g, m });
+    add(new THREE.CylinderGeometry(r, r * 0.92, 0.7, 9), M4(0, -0.35, 0));
+    add(new THREE.CylinderGeometry(r * 0.88, r * 0.94, 0.3, 9), M4(0, -0.85, 0));
+    const col1 = (x, z, h, rr) => { add(new THREE.CylinderGeometry(rr, rr * 1.08, h, 10), M4(x, h / 2, z)); add(new THREE.BoxGeometry(rr * 2.6, 0.25, rr * 2.6), M4(x, 0.12, z)); };
+    const kind = Math.floor(rnd() * 3);
+    if (kind === 0) {
+      // an arch between two columns, and a broken one
+      const w = r * 0.9, h = 3 + rnd() * 1.5;
+      col1(-w / 2, 0, h, 0.32); col1(w / 2, 0, h, 0.32);
+      add(new THREE.BoxGeometry(w + 1, 0.5, 0.8), M4(0, h + 0.25, 0));
+      col1(r * 0.4, r * 0.5, 1 + rnd() * 1.2, 0.3);
+    } else if (kind === 1) {
+      // a colonnade with columns at different heights, one fallen
+      for (let i = 0; i < 4; i++) { const a = (i / 4) * Math.PI * 2 + rnd(); col1(Math.cos(a) * r * 0.6, Math.sin(a) * r * 0.6, i === 0 ? 4 : 0.8 + rnd() * 2.6, 0.3); }
+      add(new THREE.CylinderGeometry(0.3, 0.3, 3.2, 10), M4(0, 0.3, 0, 0, rnd() * 3, Math.PI / 2));
+    } else {
+      // a wall with a doorway, and steps up to it
+      const w = r * 1.3, h = 2.6 + rnd();
+      add(new THREE.BoxGeometry(w * 0.36, h, 0.6), M4(-w * 0.32, h / 2, 0));
+      add(new THREE.BoxGeometry(w * 0.36, h * (0.6 + rnd() * 0.3), 0.6), M4(w * 0.32, h * 0.35, 0));
+      add(new THREE.BoxGeometry(w * 0.3, 0.5, 0.6), M4(-w * 0.1, h - 0.25, 0));
+      for (let i = 0; i < 3; i++) add(new THREE.BoxGeometry(w * 0.4, 0.2, 0.5), M4(0, 0.1 + i * 0.2, 0.6 + (2 - i) * 0.4));
     }
-    VIS.instanced(world, rockGeo(1, 3), bm, rocks.map(r => Object.assign(r, { sy: r.s * r.sy })), false);
-    // Basalt spires rising out of the lava sea
-    const spires = [], tips = [];
-    for (let i = 0; i < 70; i++) {
-      const a = rnd() * TAU, d = 14 + rnd() * 60, x = box.cx + Math.cos(a) * d, y = box.cy + Math.sin(a) * d;
-      if (y < hole.tee[1] - 2 && Math.abs(x - hole.tee[0]) < 9 && d < 30) continue;
-      const h = d < 32 ? 4 + rnd() * 5 : 6 + rnd() * 14, r = 0.8 + rnd() * 2.2;
-      spires.push({ x, y: -16 + (h + 7) / 2, z: -y, sx: r, sy: h + 7, sz: r, ry: rnd() * 6 });
-      if (rnd() < 0.3) tips.push({ x, y: -9 + h + 0.2, z: -y, s: r * 0.3 });
+    return mergeGeos(parts);
+  }
+
+  VIS.decorateAbyss = function (hole, world) {
+    const rnd = U.rng(U.hash(hole.id) + 7);
+    const box = hole.box, G = world.holeGroup;
+    const cx = box.cx, cy = box.cy;
+    const R = Math.hypot(box.w, box.h) / 2;
+    const Rc = Math.max(70, R + 46);
+    const fwd = Math.atan2(hole.cup[1] - hole.tee[1], hole.cup[0] - hole.tee[0]);
+    const behind = a => Math.abs(U.wrapAngle(a - (fwd + Math.PI))) < 1.0;   // where the camera usually sits
+    const polys = hole.floors.map(f => f.poly).concat(hole.hazards.map(z => z.poly));
+    const clearOf = (x, y, m) => polys.every(P => !U.inPoly(x, y, P) && U.distToPoly(x, y, P) > m);
+    const P = (a, d) => [cx + Math.cos(a) * d, cy + Math.sin(a) * d];
+    const SEA = -62;
+
+    // --- The cavern: obsidian cliffs all round, and a ceiling hung with stalactites ---
+    const cliff = new THREE.CylinderGeometry(Rc, Rc * 1.18, 130, 72, 22, true);
+    const cp = cliff.attributes.position, colors = [];
+    const ph = [rnd() * 9, rnd() * 9, rnd() * 9];
+    const lowC = col('#ff9a5a'), highC = col('#8a7a8e');
+    for (let i = 0; i < cp.count; i++) {
+      const x = cp.getX(i), y = cp.getY(i), z = cp.getZ(i);
+      const a = Math.atan2(z, x);
+      const n = 0.55 * Math.sin(a * 5 + ph[0] + y * 0.02) + 0.3 * Math.sin(a * 13 + ph[1] + y * 0.05) + 0.15 * Math.sin(a * 31 + ph[2] - y * 0.09) + 0.12 * Math.sin(y * 0.35 + a * 3);
+      const k = 1 + 0.13 * n;
+      cp.setXYZ(i, x * k, y, z * k);
+      const t = U.smooth(-60, 5, y);
+      const c = lowC.clone().lerp(highC, t);
+      colors.push(c.r, c.g, c.b);
     }
-    VIS.instanced(world, new THREE.ConeGeometry(1, 1, 7), bm, spires, false);
-    VIS.instanced(world, new THREE.SphereGeometry(1, 8, 6), glowM('#ff6a1a', 1.0), tips, false);
-    // Distant volcanoes
-    const volc = [];
-    for (let i = 0; i < 4; i++) {
-      const a = (i / 4) * TAU + rnd(), d = 95 + rnd() * 40;
-      const x = box.cx + Math.cos(a) * d, y = box.cy + Math.sin(a) * d, s = 25 + rnd() * 20;
-      volc.push({ x, y, s });
-      G.add(at(mesh(new THREE.ConeGeometry(s, s * 0.9, 9, 1, true), M('#1c0f10', { roughness: 1 }), false), x, y, -16 + s * 0.45));
-      G.add(at(mesh(new THREE.CylinderGeometry(s * 0.18, s * 0.22, 0.8, 9), glowM('#ff6a1a', 2), false), x, y, -16 + s * 0.9 - 0.3));
+    cliff.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    cliff.computeVertexNormals();
+    const ct = T.cliff().clone(); ct.needsUpdate = true; ct.repeat.set(14, 5);
+    const cliffMesh = new THREE.Mesh(cliff, new THREE.MeshStandardMaterial({ map: ct, vertexColors: true, roughness: 0.62, metalness: 0.08, side: THREE.BackSide }));
+    cliffMesh.position.set(cx, 1, -cy);
+    G.add(cliffMesh);
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(Rc * 1.25, 48, 12, 0, Math.PI * 2, 0, 0.62), new THREE.MeshStandardMaterial({ map: ct, color: col('#4a4050'), roughness: 0.8, metalness: 0.05, side: THREE.BackSide }));
+    dome.position.set(cx, 66 - Rc * 1.25 * Math.cos(0.62) * 0.25, -cy);
+    G.add(dome);
+    const stal = [];
+    for (let i = 0; i < 90; i++) {
+      const a = rnd() * Math.PI * 2, d = 10 + Math.sqrt(rnd()) * (Rc - 12);
+      const [x, y] = P(a, d), L = 5 + rnd() * 16, r = 0.8 + rnd() * 2.2;
+      stal.push({ x, y: 64 - L / 2 - (d / Rc) * 18, z: -y, sx: r, sy: L, sz: r, rx: Math.PI, ry: rnd() * 6 });
     }
-    // Dark smoke clouds
-    const clouds = [];
-    for (let i = 0; i < 10; i++) {
-      const a = rnd() * TAU, d = 80 + rnd() * 70, cx = box.cx + Math.cos(a) * d, cy = box.cy + Math.sin(a) * d;
-      for (let k = 0; k < 5; k++) clouds.push({ x: cx + (rnd() - 0.5) * 26, y: 26 + rnd() * 14, z: -(cy + (rnd() - 0.5) * 12), s: 8 + rnd() * 8, sy: 3 + rnd() * 2 });
+    VIS.instanced(world, new THREE.ConeGeometry(1, 1, 7), new THREE.MeshStandardMaterial({ map: ct, color: col('#6a5c6a'), roughness: 0.7, metalness: 0.05 }), stal, false);
+
+    // --- Lava waterfalls pouring down the cliffs into the abyss ---
+    const fallTex = T.lavaFall().clone(); fallTex.needsUpdate = true; fallTex.repeat.set(1, 5);
+    const fallMat = new THREE.MeshBasicMaterial({ map: fallTex, color: col('#ffffff'), side: THREE.DoubleSide });
+    const glowMat = new THREE.MeshBasicMaterial({ map: T.fade(), color: col('#ff6a1a'), transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    const falls = [];
+    [fwd + 0.75, fwd - 0.95, fwd + 1.9, fwd - 2.05].forEach((a, i) => {
+      const d = Rc * 0.92, [x, y] = P(a, d), top = 18 + rnd() * 18, w = i < 2 ? 5 + rnd() * 2 : 3.5 + rnd() * 2;
+      const h = top - SEA;
+      const g = new THREE.Group();
+      const sheet = new THREE.Mesh(new THREE.PlaneGeometry(w, h, 1, 8), fallMat);
+      const halo = new THREE.Mesh(new THREE.PlaneGeometry(w * 3.2, h), glowMat);
+      halo.position.z = -0.6;
+      // a dark overhang of rock that the lava spills out of
+      const mouth = new THREE.Mesh(new THREE.DodecahedronGeometry(w * 0.9, 1), new THREE.MeshStandardMaterial({ map: ct, color: col('#6a5a62'), roughness: 0.8 }));
+      mouth.scale.set(1.4, 0.7, 1); mouth.position.set(0, h / 2 + w * 0.35, -0.4);
+      const spill = new THREE.Mesh(new THREE.CircleGeometry(w * 0.55, 16, 0, Math.PI), glowM('#ffb04a', 2.2));
+      spill.position.set(0, h / 2 - 0.2, 0.05); spill.rotation.z = Math.PI;
+      // a cloud of glowing mist where it meets the lake
+      const mist = new THREE.Mesh(new THREE.PlaneGeometry(w * 4, 14), new THREE.MeshBasicMaterial({ map: T.dot(), color: col('#ff7a2a'), transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }));
+      mist.position.set(0, -h / 2 + 2, 0.4);
+      g.add(halo, sheet, mouth, spill, mist);
+      g.position.set(x, SEA + h / 2, -y);
+      g.lookAt(cx, SEA + h / 2, -cy);
+      G.add(g);
+      falls.push({ x, y, w });
+    });
+    // Two lights stand by the biggest falls; one glows up from the wheel below the course.
+    world.pts[0].position.set(cx, -20, -cy); world.pts[0].intensity = 2.2; world.pts[0].distance = 95; world.pts[0].color = col('#ff6a1a');
+    [0, 1].forEach(i => { const f = falls[i], [x, y] = [cx + (f.x - cx) * 0.8, cy + (f.y - cy) * 0.8]; const l = world.pts[i + 1]; l.position.set(x, -6, -y); l.intensity = 2.0; l.distance = 120; l.color = col('#ff7a2a'); });
+
+    // --- The temple facade carved into the cliff ahead ---
+    {
+      const a = fwd, d = Rc * 0.8, [x, y] = P(a, d);
+      const g = new THREE.Group();
+      const sm = stoneMat(4, 4, '#bfb4b6');
+      const W = 34, H = 26;
+      for (let i = 0; i < 4; i++) { const st = new THREE.Mesh(new THREE.BoxGeometry(W + 6 - i * 2, 1.2, 3 - i * 0.4), sm); st.position.set(0, -14 + i * 1.2, 1.5 + (3 - i) * 0.8); g.add(st); }
+      for (let i = 0; i < 6; i++) {
+        if (i === 2 || i === 3) continue;
+        const cxm = -W / 2 + 3 + i * (W - 6) / 5;
+        const c1 = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.25, H - 4, 14), sm); c1.position.set(cxm, -10 + (H - 4) / 2, 1.6); g.add(c1);
+        const band = new THREE.Mesh(new THREE.CylinderGeometry(1.32, 1.32, 1.2, 14, 1, true), runeMat(2, 1.2)); band.position.set(cxm, -4 + i % 2 * 5, 1.6); g.add(band);
+      }
+      const ent = new THREE.Mesh(new THREE.BoxGeometry(W, 2.6, 3.4), sm); ent.position.set(0, -10 + H - 4 + 1.3, 1.6); g.add(ent);
+      const frieze = new THREE.Mesh(new THREE.PlaneGeometry(W - 1, 1.6), runeMat(9, 1.8)); frieze.position.set(0, -10 + H - 4 + 1.3, 3.32); g.add(frieze);
+      const ped = new THREE.Shape(); ped.moveTo(-W / 2 - 0.5, 0); ped.lineTo(W / 2 + 0.5, 0); ped.lineTo(0, 6); ped.closePath();
+      const pm = new THREE.Mesh(new THREE.ExtrudeGeometry(ped, { depth: 3, bevelEnabled: false }), sm); pm.position.set(0, -10 + H - 1.4, 0.1); g.add(pm);
+      const back = new THREE.Mesh(new THREE.BoxGeometry(W + 2, H + 6, 1), stoneMat(5, 4, '#7a7072')); back.position.set(0, -10 + H / 2, -0.6); g.add(back);
+      // the doorway glows from deep inside
+      const door = new THREE.Mesh(new THREE.PlaneGeometry(7, 13), new THREE.MeshBasicMaterial({ color: col('#ff7a2a'), map: T.fade(), transparent: true }));
+      door.position.set(0, -10 + 6.5, 0.0); g.add(door);
+      const doorFrame = new THREE.Mesh(new THREE.TorusGeometry(4.2, 0.45, 8, 24, Math.PI), runeMat(6, 2)); doorFrame.position.set(0, -10 + 9, 0.3); g.add(doorFrame);
+      g.position.set(x, 0, -y);
+      g.lookAt(cx, 0, -cy);
+      G.add(g);
     }
-    VIS.instanced(world, new THREE.IcosahedronGeometry(1, 1), new THREE.MeshBasicMaterial({ color: col('#2a1210'), transparent: true, opacity: 0.85 }), clouds, false);
-    // Braziers on floating pillars beside the course
-    const braziers = [];
-    for (let i = 0; i < 200 && braziers.length < 5; i++) {
-      const x = box.x0 - 3 + rnd() * (box.w + 6), y = box.y0 + rnd() * box.h;
-      if (!clear(x, y, 1.4)) continue;
-      if (polys.every(P => U.distToPoly(x, y, P) > 2.2)) continue;
-      braziers.push([x, y]);
-      const pil = mesh(new THREE.CylinderGeometry(0.22, 0.3, 16.4, 7), bm, false);
-      G.add(at(pil, x, y, -8.1));
-      const bowl = mesh(new THREE.CylinderGeometry(0.34, 0.2, 0.25, 10, 1, true), M('#3a2a24', { metalness: 0.6, roughness: 0.5, side: THREE.DoubleSide }));
-      G.add(at(bowl, x, y, 0.22));
-      G.add(at(mesh(new THREE.CircleGeometry(0.3, 12).rotateX(-Math.PI / 2), glowM('#ff7a1a', 1.1), false), x, y, 0.26));
+
+    // --- Giant runic pillars rising out of the abyss ---
+    const pillars = [];
+    const nP = 6;
+    for (let i = 0; i < nP * 4 && pillars.length < nP; i++) {
+      const a = fwd + (i / (nP * 4)) * Math.PI * 2 + rnd() * 0.2;
+      if (behind(a)) continue;
+      const d = R + 15 + rnd() * 16;
+      const [x, y] = P(a, d);
+      if (!clearOf(x, y, 6) || pillars.some(p => Math.hypot(p.x - x, p.y - y) < 14)) continue;
+      pillars.push({ x, y, r: 1.5 + rnd() * 0.8, top: 3 + rnd() * 6 });
     }
+    pillars.forEach((p, i) => {
+      const g = new THREE.Group();
+      const h = p.top - SEA;
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(p.r, p.r * 1.12, h, 12), stoneMat(3, h / 4));
+      shaft.position.y = SEA + h / 2; g.add(shaft);
+      // runes only in carved bands, so they read as part of the pillar
+      [p.top - 2.5, p.top - 9, p.top - 17, p.top - 26].forEach((yy, k) => {
+        const band = new THREE.Mesh(new THREE.CylinderGeometry(p.r * 1.06, p.r * 1.06, 1.5, 24, 1, true), runeMat(3, k === 0 ? 2.2 : 1.4));
+        band.position.y = yy; g.add(band);
+      });
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(p.r * 1.5, p.r * 1.15, 1.2, 12), stoneMat(3, 1, '#d0c4c4')); cap.position.y = p.top + 0.6; g.add(cap);
+      const bowl = new THREE.Mesh(new THREE.CylinderGeometry(p.r * 1.1, p.r * 0.7, 0.8, 12, 1, true), M('#3a2c28', { metalness: 0.6, roughness: 0.4, side: THREE.DoubleSide })); bowl.position.y = p.top + 1.6; g.add(bowl);
+      const coals = new THREE.Mesh(new THREE.CircleGeometry(p.r * 1.0, 16).rotateX(-Math.PI / 2), glowM('#ff8a2a', 2.4)); coals.position.y = p.top + 1.7; g.add(coals);
+      g.position.set(p.x, 0, -p.y);
+      G.add(g);
+      p.fire = p.top + 1.8;
+    });
+
+    // --- Ruined islands drifting around the course ---
+    const islands = [];
+    for (let i = 0; i < 80 && islands.length < 8; i++) {
+      const a = rnd() * Math.PI * 2;
+      if (behind(a)) continue;
+      const d = R + 6 + rnd() * 26, [x, y] = P(a, d);
+      const r = 2 + rnd() * 2.2;
+      if (!clearOf(x, y, r + 3) || pillars.some(p => Math.hypot(p.x - x, p.y - y) < r + 4) || islands.some(q => Math.hypot(q.x - x, q.y - y) < q.r + r + 3)) continue;
+      islands.push({ x, y, r, h: -1.5 - rnd() * 8 });
+    }
+    const ruinMat = stoneMat(1.2, 1.2, '#c8bcbc');
+    const rootMat = new THREE.MeshStandardMaterial({ map: ct, color: col('#7a6c74'), roughness: 0.75, metalness: 0.05 });
+    islands.forEach(q => {
+      const m = new THREE.Mesh(ruinIsland(rnd, q.r), ruinMat);
+      m.position.set(q.x, q.h, -q.y); m.rotation.y = rnd() * 6; m.castShadow = true; m.receiveShadow = true;
+      G.add(m);
+      const root = new THREE.Mesh(new THREE.ConeGeometry(q.r * 0.9, q.r * 3, 8), rootMat);
+      root.rotation.x = Math.PI; root.position.set(q.x, q.h - 1 - q.r * 1.5, -q.y);
+      G.add(root);
+    });
+
+    // --- Columns holding up the course itself ---
+    const cols = [];
+    hole.floors.forEach(f => {
+      const b = U.bounds([f.poly]);
+      const long = Math.max(b.w, b.h), thin = Math.min(b.w, b.h);
+      if (thin < 2.2 && long < 9) return;   // corner pads and short bridges hang off their neighbours
+      const r = thin < 2.2 ? 0.45 : Math.min(0.95, Math.max(0.55, thin * 0.2));
+      const n = Math.max(1, Math.round(long / 11));
+      for (let k = 0; k < n; k++) {
+        const t = (k + 0.5) / n;
+        const x = b.w >= b.h ? b.x0 + b.w * t : b.cx, y = b.w >= b.h ? b.cy : b.y0 + b.h * t;
+        if (!U.inPoly(x, y, f.poly)) continue;
+        cols.push({ x, y: (-1.5 + SEA) / 2, z: -y, sx: r, sy: -1.5 - SEA, sz: r });
+        cols.push({ x, y: -1.75, z: -y, sx: r * 1.9, sy: 0.5, sz: r * 1.9 });
+      }
+    });
+    VIS.instanced(world, new THREE.CylinderGeometry(1, 1, 1, 10), stoneMat(1, 8, '#a89c9c'), cols.filter(c => c.sy > 1), false);
+    VIS.instanced(world, new THREE.BoxGeometry(1, 1, 1), stoneMat(1, 1, '#a89c9c'), cols.filter(c => c.sy <= 1), false);
+
+    // --- The centerpiece: a colossal rune wheel turning slowly in the abyss below the course ---
+    const wheel = new THREE.Group();
+    const WR = Math.max(16, R * 0.9);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(WR, 1.4, 12, 96), stoneMat(24, 1, '#b8acac'));
+    ring.rotation.x = Math.PI / 2; wheel.add(ring);
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(WR + 1.45, WR + 1.45, 1.3, 96, 1, true), runeMat(26, 2)); wheel.add(band);
+    const discTex = T.runes();
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(WR - 1, 96), new THREE.MeshStandardMaterial({ map: discTex, emissiveMap: discTex, emissive: col('#ff6a1a'), emissiveIntensity: 1.5, roughness: 0.8 }));
+    disc.rotation.x = -Math.PI / 2; disc.position.y = 0.05; wheel.add(disc);
+    const halo = new THREE.Mesh(new THREE.CircleGeometry(WR * 1.6, 48), new THREE.MeshBasicMaterial({ map: T.dot(), color: col('#ff5a10'), transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false }));
+    halo.rotation.x = -Math.PI / 2; halo.position.y = -0.5; wheel.add(halo);
+    wheel.position.set(cx, -30, -cy);
+    G.add(wheel);
+    // great chains from the wheel to the cliffs
+    const linkGeo = new THREE.TorusGeometry(0.7, 0.2, 6, 12);
+    const links = [];
+    [fwd + 0.4, fwd + 2.1, fwd - 1.2, fwd - 2.7].forEach(a => {
+      const x0 = cx + Math.cos(a) * (WR + 1), y0 = cy + Math.sin(a) * (WR + 1), x1 = cx + Math.cos(a) * Rc * 0.9, y1 = cy + Math.sin(a) * Rc * 0.9;
+      const n = Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 1.1);
+      for (let k = 0; k <= n; k++) {
+        const t = k / n, x = U.lerp(x0, x1, t), y = U.lerp(y0, y1, t), h = U.lerp(-30, 2, t) - Math.sin(Math.PI * t) * 9;
+        links.push({ x, y: h, z: -y, ry: -a + Math.PI / 2, rx: k % 2 ? Math.PI / 2 : 0, rz: 0.2 * Math.sin(t * 9) });
+      }
+    });
+    VIS.instanced(world, linkGeo, M('#3a3236', { metalness: 0.8, roughness: 0.4 }), links, false);
+
+    // --- Light falling through cracks in the ceiling ---
+    const shaftMat = new THREE.MeshBasicMaterial({ map: T.fade(), color: col('#ffc08a'), transparent: true, opacity: 0.09, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    islands.slice(0, 2).concat(pillars.slice(0, 1)).forEach(q => {
+      const h = 64 - (q.h || q.top);
+      const sh = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 5.5, h, 20, 1, true), shaftMat);
+      sh.position.set(q.x, 64 - h / 2, -q.y);
+      G.add(sh);
+    });
+
     VIS.sign(hole, world, world.sim, true);
 
-    let acc = 0, emb = 0;
+    let emb = 0, smk = 0;
     world.vis.push({
       update(t, dt) {
-        acc += dt;
-        while (acc > 0.05) {
-          acc -= 0.05;
-          braziers.forEach(([x, y]) => world.glow.spawn({ x: x + (Math.random() - 0.5) * 0.2, y: 0.35, z: -y + (Math.random() - 0.5) * 0.2, vx: 0, vy: 1.2 + Math.random(), vz: 0, g: 0.5, life: 0.5 + Math.random() * 0.3, size: 0.14 + Math.random() * 0.08, grow: -0.6, color: col(Math.random() < 0.5 ? '#ff8a2a' : '#ffd25a') }));
-        }
+        wheel.rotation.y = t * 0.035;
+        disc.material.emissiveIntensity = 1.35 + Math.sin(t * 0.9) * 0.25;
+        band.material.emissiveIntensity = 1.8 + Math.sin(t * 0.9 + 1) * 0.4;
+        fallTex.offset.set(0, t * 0.9);
+        world.pts[0].intensity = 2.0 + Math.sin(t * 0.9) * 0.3;
+        // embers rising from the abyss and from the pillar fires
         emb += dt;
         while (emb > 0.03) {
           emb -= 0.03;
-          ember(world, box.x0 - 6 + Math.random() * (box.w + 12), box.y0 - 4 + Math.random() * (box.h + 8), -3 + Math.random() * 2, { vy: 1 + Math.random() * 1.4, life: 3 + Math.random() * 2 });
+          const a = Math.random() * Math.PI * 2, d = 4 + Math.random() * (R + 30);
+          world.glow.spawn({ x: cx + Math.cos(a) * d, y: -14 + Math.random() * 10, z: -(cy + Math.sin(a) * d), vx: (Math.random() - 0.5) * 0.4, vy: 1.4 + Math.random() * 1.8, vz: (Math.random() - 0.5) * 0.4, g: 0, drag: 1, life: 7 + Math.random() * 4, size: 0.07 + Math.random() * 0.06, color: col(Math.random() < 0.6 ? '#ff7a2a' : '#ffc04a'), wobble: 0.5, seed: Math.random() * 9 });
+          if (Math.random() < 0.35 && pillars.length) { const p = pillars[Math.floor(Math.random() * pillars.length)]; world.glow.spawn({ x: p.x + (Math.random() - 0.5) * p.r, y: p.fire, z: -p.y + (Math.random() - 0.5) * p.r, vx: 0, vy: 2 + Math.random() * 1.5, vz: 0, g: 0.6, life: 0.7 + Math.random() * 0.4, size: 0.35 + Math.random() * 0.3, grow: -0.6, color: col(Math.random() < 0.5 ? '#ff8a2a' : '#ffd25a') }); }
+        }
+        // slow smoke from the lava, which the fog turns into haze
+        smk += dt;
+        while (smk > 0.18) {
+          smk -= 0.18;
+          const a = Math.random() * Math.PI * 2, d = Math.random() * (R + 40);
+          world.smoke.spawn({ x: cx + Math.cos(a) * d, y: SEA + 6, z: -(cy + Math.sin(a) * d), vx: 0.3, vy: 2.4 + Math.random(), vz: 0, g: 0, drag: 1, life: 16, size: 9 + Math.random() * 8, grow: 1.2, color: col('#3a2622'), a: 0.22 });
         }
       },
     });
@@ -4997,7 +5407,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
   AV.launch = function (s, world, f) {
     const h0 = world.sim.groundRaw(s.x, s.y);
     const g = new THREE.Group();
-    const ring = mesh(new THREE.TorusGeometry(s.r * 0.95, 0.12, 8, 20), basaltMat());
+    const ring = mesh(new THREE.TorusGeometry(s.r * 0.95, 0.12, 8, 20), plainStone());
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.04; ring.scale.z = 0.6;
     const core = mesh(new THREE.CircleGeometry(s.r * 0.85, 24), glowM('#ff7a1a', 2), false);
     core.rotation.x = -Math.PI / 2; core.position.y = 0.012;
@@ -5019,8 +5429,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
 
   AV.ferry = function (s, world, f) {
     const raft = new THREE.Group();
-    const b = T.basalt();
-    const top = mesh(new THREE.CylinderGeometry(s.r, s.r * 0.85, 0.22, 24), new THREE.MeshStandardMaterial({ map: b.map, emissiveMap: b.glow, emissive: col('#ff6a1a'), emissiveIntensity: 1.1, roughness: 0.95 }));
+    const top = mesh(new THREE.CylinderGeometry(s.r, s.r * 0.85, 0.22, 24), basaltMat(0.7));
     top.position.y = -0.11;
     raft.add(top);
     world.holeGroup.add(raft);
@@ -5056,15 +5465,18 @@ body.abyss .intro-rivals { color: #ff9a62; }
   };
 
   AV.swing = function (s, world, f) {
-    const g = new THREE.Group();
-    const pm = M('#1a1418', { roughness: 0.4, metalness: 0.3 });
-    [-1, 1].forEach(k => { const pil = mesh(new THREE.BoxGeometry(0.4, s.zp + 9.5, 0.4), pm); pil.position.set(k * 3.1, (s.zp - 9.5) / 2 + 0.2, 0); g.add(pil); });
-    const beam = mesh(new THREE.BoxGeometry(6.6, 0.32, 0.32), pm); beam.position.y = s.zp + 0.2; g.add(beam);
-    world.holeGroup.add(at(g, s.x, s.y, 0));
-    const chain = mesh(new THREE.CylinderGeometry(0.03, 0.03, 1, 6), M('#5a5056', { metalness: 0.8, roughness: 0.3 }));
+    // Hung on a chain that runs up out of sight to the cavern roof, so nothing stands in the way.
+    const iron = M('#3a3236', { metalness: 0.6, roughness: 0.4 });
+    const anchor = mesh(new THREE.TorusGeometry(0.28, 0.07, 8, 16), iron);
+    anchor.position.copy(V(s.x, s.y, s.zp)); anchor.rotation.y = Math.PI / 2;
+    world.holeGroup.add(anchor);
+    const up = mesh(new THREE.CylinderGeometry(0.045, 0.045, 60, 6), iron, false);
+    up.position.copy(V(s.x, s.y, s.zp + 30.2));
+    world.holeGroup.add(up);
+    const chain = mesh(new THREE.CylinderGeometry(0.03, 0.03, 1, 6), M('#5a5056', { metalness: 0.6, roughness: 0.35 }));
     const ball = new THREE.Group();
-    ball.add(mesh(new THREE.SphereGeometry(s.rt * 0.75, 18, 14), M('#26222a', { metalness: 0.8, roughness: 0.35 })));
-    for (let i = 0; i < 14; i++) { const a = Math.acos(1 - 2 * (i + 0.5) / 14), b = i * 2.4; const dir = new THREE.Vector3(Math.sin(a) * Math.cos(b), Math.cos(a), Math.sin(a) * Math.sin(b)); const sp = mesh(new THREE.ConeGeometry(0.06, 0.22, 6), M('#4a4248', { metalness: 0.8, roughness: 0.3 })); sp.position.copy(dir.clone().multiplyScalar(s.rt * 0.8)); sp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir); ball.add(sp); }
+    ball.add(mesh(new THREE.SphereGeometry(s.rt * 0.75, 18, 14), M('#26222a', { metalness: 0.5, roughness: 0.4 })));
+    for (let i = 0; i < 14; i++) { const a = Math.acos(1 - 2 * (i + 0.5) / 14), b = i * 2.4; const dir = new THREE.Vector3(Math.sin(a) * Math.cos(b), Math.cos(a), Math.sin(a) * Math.sin(b)); const sp = mesh(new THREE.ConeGeometry(0.06, 0.22, 6), M('#5a5258', { metalness: 0.5, roughness: 0.35 })); sp.position.copy(dir.clone().multiplyScalar(s.rt * 0.8)); sp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir); ball.add(sp); }
     world.holeGroup.add(chain, ball);
     return {
       update() {
@@ -5078,10 +5490,28 @@ body.abyss .intro-rivals { color: #ff9a62; }
 
   AV.turntable = function (s, world, f) {
     const g = new THREE.Group();
-    const disc = mesh(new THREE.CircleGeometry(s.r, 64), new THREE.MeshStandardMaterial({ map: T.runes(), emissiveMap: T.runes(), emissive: col('#ff6a1a'), emissiveIntensity: 0.9, roughness: 0.85 }));
+    const rt = T.runes();
+    const disc = mesh(new THREE.CircleGeometry(s.r, 72), new THREE.MeshStandardMaterial({ map: rt, emissiveMap: rt, emissive: col('#ff6a1a'), emissiveIntensity: 1.2, roughness: 0.75 }));
     disc.rotation.x = -Math.PI / 2; disc.position.y = 0.008;
     g.add(disc);
-    const gap = mesh(new THREE.RingGeometry(s.r - 0.01, s.r + 0.04, 64), glowM('#ff4a1a', 1.4), false);
+    // A carved stone rim round the wheel with a band of runes, and a glow rising off it.
+    const rim = new THREE.Group();
+    const stone = new THREE.MeshStandardMaterial({ map: T.templeStone(), roughness: 0.85, color: col('#c8bcbc') });
+    const lip = mesh(new THREE.TorusGeometry(s.r + 0.16, 0.12, 8, 80), glowM('#ff6a1a', 1.6), false);
+    lip.rotation.x = -Math.PI / 2; lip.position.y = 0.01;
+    rim.add(lip);
+    const rb = T.runeBand();
+    const band = mesh(new THREE.CylinderGeometry(s.r + 0.3, s.r + 0.3, 0.5, 80, 1, true), new THREE.MeshStandardMaterial({ map: rb.map, emissiveMap: rb.glow, emissive: col('#ff7a2a'), emissiveIntensity: 1.8, roughness: 0.7, side: THREE.DoubleSide }), false);
+    band.position.y = -0.27;
+    rim.add(band);
+    const skirt = mesh(new THREE.CylinderGeometry(s.r + 0.32, s.r * 0.6, s.big ? 3.2 : 2.2, 48, 1, true), stone, false);
+    skirt.position.y = -0.52 - (s.big ? 1.6 : 1.1);
+    rim.add(skirt);
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(s.r, s.r, s.big ? 3.2 : 2.2, 48, 1, true), new THREE.MeshBasicMaterial({ map: T.fade(), color: col('#ff6a1a'), transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+    beam.position.y = s.big ? 1.2 : 0.9;
+    rim.add(beam);
+    world.holeGroup.add(at(rim, s.x, s.y, 0));
+    const gap = mesh(new THREE.RingGeometry(s.r - 0.01, s.r + 0.04, 72), M('#120a08'), false);
     gap.rotation.x = -Math.PI / 2; gap.position.y = 0.006;
     world.holeGroup.add(at(gap, s.x, s.y, 0));
     const pots = (s.pots || []).map(p => {
@@ -5093,7 +5523,17 @@ body.abyss .intro-rivals { color: #ff9a62; }
       return pg;
     });
     world.holeGroup.add(at(g, s.x, s.y, 0));
-    return { update() { disc.rotation.z = f.ang; f.pots().forEach((p, i) => { pots[i].position.set(p.x - s.x, 0.27, -(p.y - s.y)); pots[i].rotation.y = f.ang; }); } };
+    let acc = 0;
+    return {
+      update(t, dt) {
+        disc.rotation.z = f.ang;
+        disc.material.emissiveIntensity = 1.15 + Math.sin(t * 1.3) * 0.25;
+        beam.material.opacity = 0.18 + Math.sin(t * 1.3) * 0.06;
+        f.pots().forEach((p, i) => { pots[i].position.set(p.x - s.x, 0.27, -(p.y - s.y)); pots[i].rotation.y = f.ang; });
+        acc += dt;
+        while (acc > 0.08) { acc -= 0.08; const a = Math.random() * Math.PI * 2; world.glow.spawn({ x: s.x + Math.cos(a) * s.r, y: 0.05, z: -(s.y + Math.sin(a) * s.r), vx: 0, vy: 0.8 + Math.random() * 0.6, vz: 0, g: 0, life: 1.4, size: 0.06, color: col('#ffb04a') }); }
+      },
+    };
   };
 
   AV.brook = function (s, world, f) {
@@ -5192,7 +5632,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
     slab.position.y = -0.06; g.add(slab);
     [-1, 1].forEach(k => { const e = mesh(new THREE.BoxGeometry(0.04, 0.02, l), glowM('#ff5a1a', 1.5), false); e.position.set(k * (w / 2 - 0.02), 0.002, 0); g.add(e); });
     world.holeGroup.add(at(g, (s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, 0));
-    world.holeGroup.add(at(mesh(new THREE.CylinderGeometry(0.18, 0.18, l + 0.6, 10), basaltMat()).rotateX(Math.PI / 2), (s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, -0.3));
+    world.holeGroup.add(at(mesh(new THREE.CylinderGeometry(0.18, 0.18, l + 0.6, 10), plainStone()).rotateX(Math.PI / 2), (s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, -0.3));
     return { update() { g.rotation.z = f.th; } };
   };
 
@@ -5232,7 +5672,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
   AV.wind = function (s, world, f) {
     const box = world.hole.box;
     const px = box.x0 - 1.6, py = box.cy;
-    world.holeGroup.add(at(mesh(new THREE.CylinderGeometry(0.06, 0.08, 11, 7), basaltMat()), px, py, -3.5));
+    world.holeGroup.add(at(mesh(new THREE.CylinderGeometry(0.08, 0.1, 11, 7), plainStone()), px, py, -3.5));
     const cloth = mesh(new THREE.PlaneGeometry(1.4, 0.6, 10, 3), new THREE.MeshStandardMaterial({ color: col('#7a1414'), side: THREE.DoubleSide, roughness: 0.9 }));
     cloth.geometry.translate(0.7, 0, 0);
     const base = cloth.geometry.attributes.position.array.slice();

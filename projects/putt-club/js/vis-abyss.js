@@ -11,7 +11,8 @@
   const glowM = (hex, k = 1) => new THREE.MeshStandardMaterial({ color: col(hex), emissive: col(hex), emissiveIntensity: k, roughness: 0.5 });
   const mesh = (geo, mat, cast = true) => { const m = new THREE.Mesh(geo, mat); m.castShadow = cast; m.receiveShadow = true; return m; };
   const at = (o, x, y, h) => { o.position.copy(V(x, y, h)); return o; };
-  const basaltMat = () => { const b = T.basalt(); return new THREE.MeshStandardMaterial({ map: b.map, emissiveMap: b.glow, emissive: col('#ff6a1a'), emissiveIntensity: 1.3, roughness: 0.95 }); };
+  const basaltMat = (k = 1) => { const b = T.magmaRock(); return new THREE.MeshStandardMaterial({ map: b.map, emissiveMap: b.glow, emissive: col('#ff6a1a'), emissiveIntensity: 1.3 * k, roughness: 0.9 }); };
+  const plainStone = () => new THREE.MeshStandardMaterial({ map: T.templeStone(), roughness: 0.9 });
   const rockGeo = (r, seed) => {
     const g = new THREE.DodecahedronGeometry(r, 1), rnd = U.rng(seed), p = g.attributes.position;
     for (let i = 0; i < p.count; i++) { const k = 0.82 + rnd() * 0.3; p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k); }
@@ -20,76 +21,286 @@
   };
   const ember = (world, x, y, h, o = {}) => world.glow.spawn(Object.assign({ x, y: h, z: -y, vx: (Math.random() - 0.5) * 0.3, vy: 0.6 + Math.random() * 0.8, vz: (Math.random() - 0.5) * 0.3, g: 0.2, drag: 0.99, life: 1.6 + Math.random(), size: 0.05 + Math.random() * 0.04, color: col(Math.random() < 0.5 ? '#ff7a2a' : '#ffc04a'), wobble: 0.6, seed: Math.random() * 9 }, o));
 
-  // ---------- The hellscape around each hole ----------
-  VIS.decorateAbyss = function (hole, world) {
-    const rnd = U.rng(U.hash(hole.id));
-    const box = hole.box, G = world.holeGroup;
-    const polys = hole.floors.map(f => f.poly).concat(hole.hazards.map(z => z.poly));
-    const clear = (x, y, m) => polys.every(P => !U.inPoly(x, y, P) && U.distToPoly(x, y, P) > m);
-    const bm = basaltMat();
+  // ---------- The temple: an underground volcanic temple suspended over a lava abyss ----------
+  const stoneMat = (rx = 1, ry = 1, colr = '#ffffff') => { const t = T.templeStone().clone(); t.needsUpdate = true; t.repeat.set(rx, ry); return new THREE.MeshStandardMaterial({ map: t, color: col(colr), roughness: 0.88 }); };
+  const runeMat = (rx, k = 1.6) => { const r = T.runeBand(); const m = r.map.clone(), g = r.glow.clone(); m.needsUpdate = g.needsUpdate = true; m.repeat.set(rx, 1); g.repeat.set(rx, 1); return new THREE.MeshStandardMaterial({ map: m, emissiveMap: g, emissive: col('#ff7a2a'), emissiveIntensity: k, roughness: 0.7 }); };
 
-    // Floating rocks below and around the platforms
-    const rocks = [];
-    for (let i = 0; i < 300 && rocks.length < 22; i++) {
-      const x = box.x0 - 16 + rnd() * (box.w + 32), y = box.y0 - 8 + rnd() * (box.h + 18);
-      if (!clear(x, y, 3.5)) continue;
-      rocks.push({ x, y: -3 - rnd() * 5, z: -y, s: 0.4 + rnd() * 1.0, ry: rnd() * 6, rx: rnd(), sy: 0.6 + rnd() * 0.5 });
+  // Join geometries that share one material (each with its own transform) into one mesh.
+  function mergeGeos(parts) {
+    const pos = [], nrm = [], uv = [];
+    parts.forEach(({ g, m }) => {
+      const n = (g.index ? g.toNonIndexed() : g.clone()).applyMatrix4(m);
+      const p = n.attributes.position.array, q = n.attributes.normal.array, u = n.attributes.uv ? n.attributes.uv.array : null;
+      for (let i = 0; i < p.length; i++) { pos.push(p[i]); nrm.push(q[i]); }
+      for (let i = 0; i < p.length / 3; i++) { uv.push(u ? u[i * 2] : 0, u ? u[i * 2 + 1] : 0); }
+    });
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('normal', new THREE.Float32BufferAttribute(nrm, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    return g;
+  }
+  const M4 = (x, y, z, rx = 0, ry = 0, rz = 0, sx = 1, sy = 1, sz = 1) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz));
+
+  // A ruined island: a floor slab on a rocky root, with broken columns, an arch, a wall and steps.
+  function ruinIsland(rnd, r) {
+    const parts = [];
+    const add = (g, m) => parts.push({ g, m });
+    add(new THREE.CylinderGeometry(r, r * 0.92, 0.7, 9), M4(0, -0.35, 0));
+    add(new THREE.CylinderGeometry(r * 0.88, r * 0.94, 0.3, 9), M4(0, -0.85, 0));
+    const col1 = (x, z, h, rr) => { add(new THREE.CylinderGeometry(rr, rr * 1.08, h, 10), M4(x, h / 2, z)); add(new THREE.BoxGeometry(rr * 2.6, 0.25, rr * 2.6), M4(x, 0.12, z)); };
+    const kind = Math.floor(rnd() * 3);
+    if (kind === 0) {
+      // an arch between two columns, and a broken one
+      const w = r * 0.9, h = 3 + rnd() * 1.5;
+      col1(-w / 2, 0, h, 0.32); col1(w / 2, 0, h, 0.32);
+      add(new THREE.BoxGeometry(w + 1, 0.5, 0.8), M4(0, h + 0.25, 0));
+      col1(r * 0.4, r * 0.5, 1 + rnd() * 1.2, 0.3);
+    } else if (kind === 1) {
+      // a colonnade with columns at different heights, one fallen
+      for (let i = 0; i < 4; i++) { const a = (i / 4) * Math.PI * 2 + rnd(); col1(Math.cos(a) * r * 0.6, Math.sin(a) * r * 0.6, i === 0 ? 4 : 0.8 + rnd() * 2.6, 0.3); }
+      add(new THREE.CylinderGeometry(0.3, 0.3, 3.2, 10), M4(0, 0.3, 0, 0, rnd() * 3, Math.PI / 2));
+    } else {
+      // a wall with a doorway, and steps up to it
+      const w = r * 1.3, h = 2.6 + rnd();
+      add(new THREE.BoxGeometry(w * 0.36, h, 0.6), M4(-w * 0.32, h / 2, 0));
+      add(new THREE.BoxGeometry(w * 0.36, h * (0.6 + rnd() * 0.3), 0.6), M4(w * 0.32, h * 0.35, 0));
+      add(new THREE.BoxGeometry(w * 0.3, 0.5, 0.6), M4(-w * 0.1, h - 0.25, 0));
+      for (let i = 0; i < 3; i++) add(new THREE.BoxGeometry(w * 0.4, 0.2, 0.5), M4(0, 0.1 + i * 0.2, 0.6 + (2 - i) * 0.4));
     }
-    VIS.instanced(world, rockGeo(1, 3), bm, rocks.map(r => Object.assign(r, { sy: r.s * r.sy })), false);
-    // Basalt spires rising out of the lava sea
-    const spires = [], tips = [];
-    for (let i = 0; i < 70; i++) {
-      const a = rnd() * TAU, d = 14 + rnd() * 60, x = box.cx + Math.cos(a) * d, y = box.cy + Math.sin(a) * d;
-      if (y < hole.tee[1] - 2 && Math.abs(x - hole.tee[0]) < 9 && d < 30) continue;
-      const h = d < 32 ? 4 + rnd() * 5 : 6 + rnd() * 14, r = 0.8 + rnd() * 2.2;
-      spires.push({ x, y: -16 + (h + 7) / 2, z: -y, sx: r, sy: h + 7, sz: r, ry: rnd() * 6 });
-      if (rnd() < 0.3) tips.push({ x, y: -9 + h + 0.2, z: -y, s: r * 0.3 });
+    return mergeGeos(parts);
+  }
+
+  VIS.decorateAbyss = function (hole, world) {
+    const rnd = U.rng(U.hash(hole.id) + 7);
+    const box = hole.box, G = world.holeGroup;
+    const cx = box.cx, cy = box.cy;
+    const R = Math.hypot(box.w, box.h) / 2;
+    const Rc = Math.max(70, R + 46);
+    const fwd = Math.atan2(hole.cup[1] - hole.tee[1], hole.cup[0] - hole.tee[0]);
+    const behind = a => Math.abs(U.wrapAngle(a - (fwd + Math.PI))) < 1.0;   // where the camera usually sits
+    const polys = hole.floors.map(f => f.poly).concat(hole.hazards.map(z => z.poly));
+    const clearOf = (x, y, m) => polys.every(P => !U.inPoly(x, y, P) && U.distToPoly(x, y, P) > m);
+    const P = (a, d) => [cx + Math.cos(a) * d, cy + Math.sin(a) * d];
+    const SEA = -62;
+
+    // --- The cavern: obsidian cliffs all round, and a ceiling hung with stalactites ---
+    const cliff = new THREE.CylinderGeometry(Rc, Rc * 1.18, 130, 72, 22, true);
+    const cp = cliff.attributes.position, colors = [];
+    const ph = [rnd() * 9, rnd() * 9, rnd() * 9];
+    const lowC = col('#ff9a5a'), highC = col('#8a7a8e');
+    for (let i = 0; i < cp.count; i++) {
+      const x = cp.getX(i), y = cp.getY(i), z = cp.getZ(i);
+      const a = Math.atan2(z, x);
+      const n = 0.55 * Math.sin(a * 5 + ph[0] + y * 0.02) + 0.3 * Math.sin(a * 13 + ph[1] + y * 0.05) + 0.15 * Math.sin(a * 31 + ph[2] - y * 0.09) + 0.12 * Math.sin(y * 0.35 + a * 3);
+      const k = 1 + 0.13 * n;
+      cp.setXYZ(i, x * k, y, z * k);
+      const t = U.smooth(-60, 5, y);
+      const c = lowC.clone().lerp(highC, t);
+      colors.push(c.r, c.g, c.b);
     }
-    VIS.instanced(world, new THREE.ConeGeometry(1, 1, 7), bm, spires, false);
-    VIS.instanced(world, new THREE.SphereGeometry(1, 8, 6), glowM('#ff6a1a', 1.0), tips, false);
-    // Distant volcanoes
-    const volc = [];
-    for (let i = 0; i < 4; i++) {
-      const a = (i / 4) * TAU + rnd(), d = 95 + rnd() * 40;
-      const x = box.cx + Math.cos(a) * d, y = box.cy + Math.sin(a) * d, s = 25 + rnd() * 20;
-      volc.push({ x, y, s });
-      G.add(at(mesh(new THREE.ConeGeometry(s, s * 0.9, 9, 1, true), M('#1c0f10', { roughness: 1 }), false), x, y, -16 + s * 0.45));
-      G.add(at(mesh(new THREE.CylinderGeometry(s * 0.18, s * 0.22, 0.8, 9), glowM('#ff6a1a', 2), false), x, y, -16 + s * 0.9 - 0.3));
+    cliff.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+    cliff.computeVertexNormals();
+    const ct = T.cliff().clone(); ct.needsUpdate = true; ct.repeat.set(14, 5);
+    const cliffMesh = new THREE.Mesh(cliff, new THREE.MeshStandardMaterial({ map: ct, vertexColors: true, roughness: 0.62, metalness: 0.08, side: THREE.BackSide }));
+    cliffMesh.position.set(cx, 1, -cy);
+    G.add(cliffMesh);
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(Rc * 1.25, 48, 12, 0, Math.PI * 2, 0, 0.62), new THREE.MeshStandardMaterial({ map: ct, color: col('#4a4050'), roughness: 0.8, metalness: 0.05, side: THREE.BackSide }));
+    dome.position.set(cx, 66 - Rc * 1.25 * Math.cos(0.62) * 0.25, -cy);
+    G.add(dome);
+    const stal = [];
+    for (let i = 0; i < 90; i++) {
+      const a = rnd() * Math.PI * 2, d = 10 + Math.sqrt(rnd()) * (Rc - 12);
+      const [x, y] = P(a, d), L = 5 + rnd() * 16, r = 0.8 + rnd() * 2.2;
+      stal.push({ x, y: 64 - L / 2 - (d / Rc) * 18, z: -y, sx: r, sy: L, sz: r, rx: Math.PI, ry: rnd() * 6 });
     }
-    // Dark smoke clouds
-    const clouds = [];
-    for (let i = 0; i < 10; i++) {
-      const a = rnd() * TAU, d = 80 + rnd() * 70, cx = box.cx + Math.cos(a) * d, cy = box.cy + Math.sin(a) * d;
-      for (let k = 0; k < 5; k++) clouds.push({ x: cx + (rnd() - 0.5) * 26, y: 26 + rnd() * 14, z: -(cy + (rnd() - 0.5) * 12), s: 8 + rnd() * 8, sy: 3 + rnd() * 2 });
+    VIS.instanced(world, new THREE.ConeGeometry(1, 1, 7), new THREE.MeshStandardMaterial({ map: ct, color: col('#6a5c6a'), roughness: 0.7, metalness: 0.05 }), stal, false);
+
+    // --- Lava waterfalls pouring down the cliffs into the abyss ---
+    const fallTex = T.lavaFall().clone(); fallTex.needsUpdate = true; fallTex.repeat.set(1, 5);
+    const fallMat = new THREE.MeshBasicMaterial({ map: fallTex, color: col('#ffffff'), side: THREE.DoubleSide });
+    const glowMat = new THREE.MeshBasicMaterial({ map: T.fade(), color: col('#ff6a1a'), transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    const falls = [];
+    [fwd + 0.75, fwd - 0.95, fwd + 1.9, fwd - 2.05].forEach((a, i) => {
+      const d = Rc * 0.92, [x, y] = P(a, d), top = 18 + rnd() * 18, w = i < 2 ? 5 + rnd() * 2 : 3.5 + rnd() * 2;
+      const h = top - SEA;
+      const g = new THREE.Group();
+      const sheet = new THREE.Mesh(new THREE.PlaneGeometry(w, h, 1, 8), fallMat);
+      const halo = new THREE.Mesh(new THREE.PlaneGeometry(w * 3.2, h), glowMat);
+      halo.position.z = -0.6;
+      // a dark overhang of rock that the lava spills out of
+      const mouth = new THREE.Mesh(new THREE.DodecahedronGeometry(w * 0.9, 1), new THREE.MeshStandardMaterial({ map: ct, color: col('#6a5a62'), roughness: 0.8 }));
+      mouth.scale.set(1.4, 0.7, 1); mouth.position.set(0, h / 2 + w * 0.35, -0.4);
+      const spill = new THREE.Mesh(new THREE.CircleGeometry(w * 0.55, 16, 0, Math.PI), glowM('#ffb04a', 2.2));
+      spill.position.set(0, h / 2 - 0.2, 0.05); spill.rotation.z = Math.PI;
+      // a cloud of glowing mist where it meets the lake
+      const mist = new THREE.Mesh(new THREE.PlaneGeometry(w * 4, 14), new THREE.MeshBasicMaterial({ map: T.dot(), color: col('#ff7a2a'), transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }));
+      mist.position.set(0, -h / 2 + 2, 0.4);
+      g.add(halo, sheet, mouth, spill, mist);
+      g.position.set(x, SEA + h / 2, -y);
+      g.lookAt(cx, SEA + h / 2, -cy);
+      G.add(g);
+      falls.push({ x, y, w });
+    });
+    // Two lights stand by the biggest falls; one glows up from the wheel below the course.
+    world.pts[0].position.set(cx, -20, -cy); world.pts[0].intensity = 2.2; world.pts[0].distance = 95; world.pts[0].color = col('#ff6a1a');
+    [0, 1].forEach(i => { const f = falls[i], [x, y] = [cx + (f.x - cx) * 0.8, cy + (f.y - cy) * 0.8]; const l = world.pts[i + 1]; l.position.set(x, -6, -y); l.intensity = 2.0; l.distance = 120; l.color = col('#ff7a2a'); });
+
+    // --- The temple facade carved into the cliff ahead ---
+    {
+      const a = fwd, d = Rc * 0.8, [x, y] = P(a, d);
+      const g = new THREE.Group();
+      const sm = stoneMat(4, 4, '#bfb4b6');
+      const W = 34, H = 26;
+      for (let i = 0; i < 4; i++) { const st = new THREE.Mesh(new THREE.BoxGeometry(W + 6 - i * 2, 1.2, 3 - i * 0.4), sm); st.position.set(0, -14 + i * 1.2, 1.5 + (3 - i) * 0.8); g.add(st); }
+      for (let i = 0; i < 6; i++) {
+        if (i === 2 || i === 3) continue;
+        const cxm = -W / 2 + 3 + i * (W - 6) / 5;
+        const c1 = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.25, H - 4, 14), sm); c1.position.set(cxm, -10 + (H - 4) / 2, 1.6); g.add(c1);
+        const band = new THREE.Mesh(new THREE.CylinderGeometry(1.32, 1.32, 1.2, 14, 1, true), runeMat(2, 1.2)); band.position.set(cxm, -4 + i % 2 * 5, 1.6); g.add(band);
+      }
+      const ent = new THREE.Mesh(new THREE.BoxGeometry(W, 2.6, 3.4), sm); ent.position.set(0, -10 + H - 4 + 1.3, 1.6); g.add(ent);
+      const frieze = new THREE.Mesh(new THREE.PlaneGeometry(W - 1, 1.6), runeMat(9, 1.8)); frieze.position.set(0, -10 + H - 4 + 1.3, 3.32); g.add(frieze);
+      const ped = new THREE.Shape(); ped.moveTo(-W / 2 - 0.5, 0); ped.lineTo(W / 2 + 0.5, 0); ped.lineTo(0, 6); ped.closePath();
+      const pm = new THREE.Mesh(new THREE.ExtrudeGeometry(ped, { depth: 3, bevelEnabled: false }), sm); pm.position.set(0, -10 + H - 1.4, 0.1); g.add(pm);
+      const back = new THREE.Mesh(new THREE.BoxGeometry(W + 2, H + 6, 1), stoneMat(5, 4, '#7a7072')); back.position.set(0, -10 + H / 2, -0.6); g.add(back);
+      // the doorway glows from deep inside
+      const door = new THREE.Mesh(new THREE.PlaneGeometry(7, 13), new THREE.MeshBasicMaterial({ color: col('#ff7a2a'), map: T.fade(), transparent: true }));
+      door.position.set(0, -10 + 6.5, 0.0); g.add(door);
+      const doorFrame = new THREE.Mesh(new THREE.TorusGeometry(4.2, 0.45, 8, 24, Math.PI), runeMat(6, 2)); doorFrame.position.set(0, -10 + 9, 0.3); g.add(doorFrame);
+      g.position.set(x, 0, -y);
+      g.lookAt(cx, 0, -cy);
+      G.add(g);
     }
-    VIS.instanced(world, new THREE.IcosahedronGeometry(1, 1), new THREE.MeshBasicMaterial({ color: col('#2a1210'), transparent: true, opacity: 0.85 }), clouds, false);
-    // Braziers on floating pillars beside the course
-    const braziers = [];
-    for (let i = 0; i < 200 && braziers.length < 5; i++) {
-      const x = box.x0 - 3 + rnd() * (box.w + 6), y = box.y0 + rnd() * box.h;
-      if (!clear(x, y, 1.4)) continue;
-      if (polys.every(P => U.distToPoly(x, y, P) > 2.2)) continue;
-      braziers.push([x, y]);
-      const pil = mesh(new THREE.CylinderGeometry(0.22, 0.3, 16.4, 7), bm, false);
-      G.add(at(pil, x, y, -8.1));
-      const bowl = mesh(new THREE.CylinderGeometry(0.34, 0.2, 0.25, 10, 1, true), M('#3a2a24', { metalness: 0.6, roughness: 0.5, side: THREE.DoubleSide }));
-      G.add(at(bowl, x, y, 0.22));
-      G.add(at(mesh(new THREE.CircleGeometry(0.3, 12).rotateX(-Math.PI / 2), glowM('#ff7a1a', 1.1), false), x, y, 0.26));
+
+    // --- Giant runic pillars rising out of the abyss ---
+    const pillars = [];
+    const nP = 6;
+    for (let i = 0; i < nP * 4 && pillars.length < nP; i++) {
+      const a = fwd + (i / (nP * 4)) * Math.PI * 2 + rnd() * 0.2;
+      if (behind(a)) continue;
+      const d = R + 15 + rnd() * 16;
+      const [x, y] = P(a, d);
+      if (!clearOf(x, y, 6) || pillars.some(p => Math.hypot(p.x - x, p.y - y) < 14)) continue;
+      pillars.push({ x, y, r: 1.5 + rnd() * 0.8, top: 3 + rnd() * 6 });
     }
+    pillars.forEach((p, i) => {
+      const g = new THREE.Group();
+      const h = p.top - SEA;
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(p.r, p.r * 1.12, h, 12), stoneMat(3, h / 4));
+      shaft.position.y = SEA + h / 2; g.add(shaft);
+      // runes only in carved bands, so they read as part of the pillar
+      [p.top - 2.5, p.top - 9, p.top - 17, p.top - 26].forEach((yy, k) => {
+        const band = new THREE.Mesh(new THREE.CylinderGeometry(p.r * 1.06, p.r * 1.06, 1.5, 24, 1, true), runeMat(3, k === 0 ? 2.2 : 1.4));
+        band.position.y = yy; g.add(band);
+      });
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(p.r * 1.5, p.r * 1.15, 1.2, 12), stoneMat(3, 1, '#d0c4c4')); cap.position.y = p.top + 0.6; g.add(cap);
+      const bowl = new THREE.Mesh(new THREE.CylinderGeometry(p.r * 1.1, p.r * 0.7, 0.8, 12, 1, true), M('#3a2c28', { metalness: 0.6, roughness: 0.4, side: THREE.DoubleSide })); bowl.position.y = p.top + 1.6; g.add(bowl);
+      const coals = new THREE.Mesh(new THREE.CircleGeometry(p.r * 1.0, 16).rotateX(-Math.PI / 2), glowM('#ff8a2a', 2.4)); coals.position.y = p.top + 1.7; g.add(coals);
+      g.position.set(p.x, 0, -p.y);
+      G.add(g);
+      p.fire = p.top + 1.8;
+    });
+
+    // --- Ruined islands drifting around the course ---
+    const islands = [];
+    for (let i = 0; i < 80 && islands.length < 8; i++) {
+      const a = rnd() * Math.PI * 2;
+      if (behind(a)) continue;
+      const d = R + 6 + rnd() * 26, [x, y] = P(a, d);
+      const r = 2 + rnd() * 2.2;
+      if (!clearOf(x, y, r + 3) || pillars.some(p => Math.hypot(p.x - x, p.y - y) < r + 4) || islands.some(q => Math.hypot(q.x - x, q.y - y) < q.r + r + 3)) continue;
+      islands.push({ x, y, r, h: -1.5 - rnd() * 8 });
+    }
+    const ruinMat = stoneMat(1.2, 1.2, '#c8bcbc');
+    const rootMat = new THREE.MeshStandardMaterial({ map: ct, color: col('#7a6c74'), roughness: 0.75, metalness: 0.05 });
+    islands.forEach(q => {
+      const m = new THREE.Mesh(ruinIsland(rnd, q.r), ruinMat);
+      m.position.set(q.x, q.h, -q.y); m.rotation.y = rnd() * 6; m.castShadow = true; m.receiveShadow = true;
+      G.add(m);
+      const root = new THREE.Mesh(new THREE.ConeGeometry(q.r * 0.9, q.r * 3, 8), rootMat);
+      root.rotation.x = Math.PI; root.position.set(q.x, q.h - 1 - q.r * 1.5, -q.y);
+      G.add(root);
+    });
+
+    // --- Columns holding up the course itself ---
+    const cols = [];
+    hole.floors.forEach(f => {
+      const b = U.bounds([f.poly]);
+      const long = Math.max(b.w, b.h), thin = Math.min(b.w, b.h);
+      if (thin < 2.2 && long < 9) return;   // corner pads and short bridges hang off their neighbours
+      const r = thin < 2.2 ? 0.45 : Math.min(0.95, Math.max(0.55, thin * 0.2));
+      const n = Math.max(1, Math.round(long / 11));
+      for (let k = 0; k < n; k++) {
+        const t = (k + 0.5) / n;
+        const x = b.w >= b.h ? b.x0 + b.w * t : b.cx, y = b.w >= b.h ? b.cy : b.y0 + b.h * t;
+        if (!U.inPoly(x, y, f.poly)) continue;
+        cols.push({ x, y: (-1.5 + SEA) / 2, z: -y, sx: r, sy: -1.5 - SEA, sz: r });
+        cols.push({ x, y: -1.75, z: -y, sx: r * 1.9, sy: 0.5, sz: r * 1.9 });
+      }
+    });
+    VIS.instanced(world, new THREE.CylinderGeometry(1, 1, 1, 10), stoneMat(1, 8, '#a89c9c'), cols.filter(c => c.sy > 1), false);
+    VIS.instanced(world, new THREE.BoxGeometry(1, 1, 1), stoneMat(1, 1, '#a89c9c'), cols.filter(c => c.sy <= 1), false);
+
+    // --- The centerpiece: a colossal rune wheel turning slowly in the abyss below the course ---
+    const wheel = new THREE.Group();
+    const WR = Math.max(16, R * 0.9);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(WR, 1.4, 12, 96), stoneMat(24, 1, '#b8acac'));
+    ring.rotation.x = Math.PI / 2; wheel.add(ring);
+    const band = new THREE.Mesh(new THREE.CylinderGeometry(WR + 1.45, WR + 1.45, 1.3, 96, 1, true), runeMat(26, 2)); wheel.add(band);
+    const discTex = T.runes();
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(WR - 1, 96), new THREE.MeshStandardMaterial({ map: discTex, emissiveMap: discTex, emissive: col('#ff6a1a'), emissiveIntensity: 1.5, roughness: 0.8 }));
+    disc.rotation.x = -Math.PI / 2; disc.position.y = 0.05; wheel.add(disc);
+    const halo = new THREE.Mesh(new THREE.CircleGeometry(WR * 1.6, 48), new THREE.MeshBasicMaterial({ map: T.dot(), color: col('#ff5a10'), transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false }));
+    halo.rotation.x = -Math.PI / 2; halo.position.y = -0.5; wheel.add(halo);
+    wheel.position.set(cx, -30, -cy);
+    G.add(wheel);
+    // great chains from the wheel to the cliffs
+    const linkGeo = new THREE.TorusGeometry(0.7, 0.2, 6, 12);
+    const links = [];
+    [fwd + 0.4, fwd + 2.1, fwd - 1.2, fwd - 2.7].forEach(a => {
+      const x0 = cx + Math.cos(a) * (WR + 1), y0 = cy + Math.sin(a) * (WR + 1), x1 = cx + Math.cos(a) * Rc * 0.9, y1 = cy + Math.sin(a) * Rc * 0.9;
+      const n = Math.ceil(Math.hypot(x1 - x0, y1 - y0) / 1.1);
+      for (let k = 0; k <= n; k++) {
+        const t = k / n, x = U.lerp(x0, x1, t), y = U.lerp(y0, y1, t), h = U.lerp(-30, 2, t) - Math.sin(Math.PI * t) * 9;
+        links.push({ x, y: h, z: -y, ry: -a + Math.PI / 2, rx: k % 2 ? Math.PI / 2 : 0, rz: 0.2 * Math.sin(t * 9) });
+      }
+    });
+    VIS.instanced(world, linkGeo, M('#3a3236', { metalness: 0.8, roughness: 0.4 }), links, false);
+
+    // --- Light falling through cracks in the ceiling ---
+    const shaftMat = new THREE.MeshBasicMaterial({ map: T.fade(), color: col('#ffc08a'), transparent: true, opacity: 0.09, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide });
+    islands.slice(0, 2).concat(pillars.slice(0, 1)).forEach(q => {
+      const h = 64 - (q.h || q.top);
+      const sh = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 5.5, h, 20, 1, true), shaftMat);
+      sh.position.set(q.x, 64 - h / 2, -q.y);
+      G.add(sh);
+    });
+
     VIS.sign(hole, world, world.sim, true);
 
-    let acc = 0, emb = 0;
+    let emb = 0, smk = 0;
     world.vis.push({
       update(t, dt) {
-        acc += dt;
-        while (acc > 0.05) {
-          acc -= 0.05;
-          braziers.forEach(([x, y]) => world.glow.spawn({ x: x + (Math.random() - 0.5) * 0.2, y: 0.35, z: -y + (Math.random() - 0.5) * 0.2, vx: 0, vy: 1.2 + Math.random(), vz: 0, g: 0.5, life: 0.5 + Math.random() * 0.3, size: 0.14 + Math.random() * 0.08, grow: -0.6, color: col(Math.random() < 0.5 ? '#ff8a2a' : '#ffd25a') }));
-        }
+        wheel.rotation.y = t * 0.035;
+        disc.material.emissiveIntensity = 1.35 + Math.sin(t * 0.9) * 0.25;
+        band.material.emissiveIntensity = 1.8 + Math.sin(t * 0.9 + 1) * 0.4;
+        fallTex.offset.set(0, t * 0.9);
+        world.pts[0].intensity = 2.0 + Math.sin(t * 0.9) * 0.3;
+        // embers rising from the abyss and from the pillar fires
         emb += dt;
         while (emb > 0.03) {
           emb -= 0.03;
-          ember(world, box.x0 - 6 + Math.random() * (box.w + 12), box.y0 - 4 + Math.random() * (box.h + 8), -3 + Math.random() * 2, { vy: 1 + Math.random() * 1.4, life: 3 + Math.random() * 2 });
+          const a = Math.random() * Math.PI * 2, d = 4 + Math.random() * (R + 30);
+          world.glow.spawn({ x: cx + Math.cos(a) * d, y: -14 + Math.random() * 10, z: -(cy + Math.sin(a) * d), vx: (Math.random() - 0.5) * 0.4, vy: 1.4 + Math.random() * 1.8, vz: (Math.random() - 0.5) * 0.4, g: 0, drag: 1, life: 7 + Math.random() * 4, size: 0.07 + Math.random() * 0.06, color: col(Math.random() < 0.6 ? '#ff7a2a' : '#ffc04a'), wobble: 0.5, seed: Math.random() * 9 });
+          if (Math.random() < 0.35 && pillars.length) { const p = pillars[Math.floor(Math.random() * pillars.length)]; world.glow.spawn({ x: p.x + (Math.random() - 0.5) * p.r, y: p.fire, z: -p.y + (Math.random() - 0.5) * p.r, vx: 0, vy: 2 + Math.random() * 1.5, vz: 0, g: 0.6, life: 0.7 + Math.random() * 0.4, size: 0.35 + Math.random() * 0.3, grow: -0.6, color: col(Math.random() < 0.5 ? '#ff8a2a' : '#ffd25a') }); }
+        }
+        // slow smoke from the lava, which the fog turns into haze
+        smk += dt;
+        while (smk > 0.18) {
+          smk -= 0.18;
+          const a = Math.random() * Math.PI * 2, d = Math.random() * (R + 40);
+          world.smoke.spawn({ x: cx + Math.cos(a) * d, y: SEA + 6, z: -(cy + Math.sin(a) * d), vx: 0.3, vy: 2.4 + Math.random(), vz: 0, g: 0, drag: 1, life: 16, size: 9 + Math.random() * 8, grow: 1.2, color: col('#3a2622'), a: 0.22 });
         }
       },
     });
@@ -200,7 +411,7 @@
   AV.launch = function (s, world, f) {
     const h0 = world.sim.groundRaw(s.x, s.y);
     const g = new THREE.Group();
-    const ring = mesh(new THREE.TorusGeometry(s.r * 0.95, 0.12, 8, 20), basaltMat());
+    const ring = mesh(new THREE.TorusGeometry(s.r * 0.95, 0.12, 8, 20), plainStone());
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.04; ring.scale.z = 0.6;
     const core = mesh(new THREE.CircleGeometry(s.r * 0.85, 24), glowM('#ff7a1a', 2), false);
     core.rotation.x = -Math.PI / 2; core.position.y = 0.012;
@@ -222,8 +433,7 @@
 
   AV.ferry = function (s, world, f) {
     const raft = new THREE.Group();
-    const b = T.basalt();
-    const top = mesh(new THREE.CylinderGeometry(s.r, s.r * 0.85, 0.22, 24), new THREE.MeshStandardMaterial({ map: b.map, emissiveMap: b.glow, emissive: col('#ff6a1a'), emissiveIntensity: 1.1, roughness: 0.95 }));
+    const top = mesh(new THREE.CylinderGeometry(s.r, s.r * 0.85, 0.22, 24), basaltMat(0.7));
     top.position.y = -0.11;
     raft.add(top);
     world.holeGroup.add(raft);
@@ -259,15 +469,18 @@
   };
 
   AV.swing = function (s, world, f) {
-    const g = new THREE.Group();
-    const pm = M('#1a1418', { roughness: 0.4, metalness: 0.3 });
-    [-1, 1].forEach(k => { const pil = mesh(new THREE.BoxGeometry(0.4, s.zp + 9.5, 0.4), pm); pil.position.set(k * 3.1, (s.zp - 9.5) / 2 + 0.2, 0); g.add(pil); });
-    const beam = mesh(new THREE.BoxGeometry(6.6, 0.32, 0.32), pm); beam.position.y = s.zp + 0.2; g.add(beam);
-    world.holeGroup.add(at(g, s.x, s.y, 0));
-    const chain = mesh(new THREE.CylinderGeometry(0.03, 0.03, 1, 6), M('#5a5056', { metalness: 0.8, roughness: 0.3 }));
+    // Hung on a chain that runs up out of sight to the cavern roof, so nothing stands in the way.
+    const iron = M('#3a3236', { metalness: 0.6, roughness: 0.4 });
+    const anchor = mesh(new THREE.TorusGeometry(0.28, 0.07, 8, 16), iron);
+    anchor.position.copy(V(s.x, s.y, s.zp)); anchor.rotation.y = Math.PI / 2;
+    world.holeGroup.add(anchor);
+    const up = mesh(new THREE.CylinderGeometry(0.045, 0.045, 60, 6), iron, false);
+    up.position.copy(V(s.x, s.y, s.zp + 30.2));
+    world.holeGroup.add(up);
+    const chain = mesh(new THREE.CylinderGeometry(0.03, 0.03, 1, 6), M('#5a5056', { metalness: 0.6, roughness: 0.35 }));
     const ball = new THREE.Group();
-    ball.add(mesh(new THREE.SphereGeometry(s.rt * 0.75, 18, 14), M('#26222a', { metalness: 0.8, roughness: 0.35 })));
-    for (let i = 0; i < 14; i++) { const a = Math.acos(1 - 2 * (i + 0.5) / 14), b = i * 2.4; const dir = new THREE.Vector3(Math.sin(a) * Math.cos(b), Math.cos(a), Math.sin(a) * Math.sin(b)); const sp = mesh(new THREE.ConeGeometry(0.06, 0.22, 6), M('#4a4248', { metalness: 0.8, roughness: 0.3 })); sp.position.copy(dir.clone().multiplyScalar(s.rt * 0.8)); sp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir); ball.add(sp); }
+    ball.add(mesh(new THREE.SphereGeometry(s.rt * 0.75, 18, 14), M('#26222a', { metalness: 0.5, roughness: 0.4 })));
+    for (let i = 0; i < 14; i++) { const a = Math.acos(1 - 2 * (i + 0.5) / 14), b = i * 2.4; const dir = new THREE.Vector3(Math.sin(a) * Math.cos(b), Math.cos(a), Math.sin(a) * Math.sin(b)); const sp = mesh(new THREE.ConeGeometry(0.06, 0.22, 6), M('#5a5258', { metalness: 0.5, roughness: 0.35 })); sp.position.copy(dir.clone().multiplyScalar(s.rt * 0.8)); sp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir); ball.add(sp); }
     world.holeGroup.add(chain, ball);
     return {
       update() {
@@ -281,10 +494,28 @@
 
   AV.turntable = function (s, world, f) {
     const g = new THREE.Group();
-    const disc = mesh(new THREE.CircleGeometry(s.r, 64), new THREE.MeshStandardMaterial({ map: T.runes(), emissiveMap: T.runes(), emissive: col('#ff6a1a'), emissiveIntensity: 0.9, roughness: 0.85 }));
+    const rt = T.runes();
+    const disc = mesh(new THREE.CircleGeometry(s.r, 72), new THREE.MeshStandardMaterial({ map: rt, emissiveMap: rt, emissive: col('#ff6a1a'), emissiveIntensity: 1.2, roughness: 0.75 }));
     disc.rotation.x = -Math.PI / 2; disc.position.y = 0.008;
     g.add(disc);
-    const gap = mesh(new THREE.RingGeometry(s.r - 0.01, s.r + 0.04, 64), glowM('#ff4a1a', 1.4), false);
+    // A carved stone rim round the wheel with a band of runes, and a glow rising off it.
+    const rim = new THREE.Group();
+    const stone = new THREE.MeshStandardMaterial({ map: T.templeStone(), roughness: 0.85, color: col('#c8bcbc') });
+    const lip = mesh(new THREE.TorusGeometry(s.r + 0.16, 0.12, 8, 80), glowM('#ff6a1a', 1.6), false);
+    lip.rotation.x = -Math.PI / 2; lip.position.y = 0.01;
+    rim.add(lip);
+    const rb = T.runeBand();
+    const band = mesh(new THREE.CylinderGeometry(s.r + 0.3, s.r + 0.3, 0.5, 80, 1, true), new THREE.MeshStandardMaterial({ map: rb.map, emissiveMap: rb.glow, emissive: col('#ff7a2a'), emissiveIntensity: 1.8, roughness: 0.7, side: THREE.DoubleSide }), false);
+    band.position.y = -0.27;
+    rim.add(band);
+    const skirt = mesh(new THREE.CylinderGeometry(s.r + 0.32, s.r * 0.6, s.big ? 3.2 : 2.2, 48, 1, true), stone, false);
+    skirt.position.y = -0.52 - (s.big ? 1.6 : 1.1);
+    rim.add(skirt);
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(s.r, s.r, s.big ? 3.2 : 2.2, 48, 1, true), new THREE.MeshBasicMaterial({ map: T.fade(), color: col('#ff6a1a'), transparent: true, opacity: 0.22, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+    beam.position.y = s.big ? 1.2 : 0.9;
+    rim.add(beam);
+    world.holeGroup.add(at(rim, s.x, s.y, 0));
+    const gap = mesh(new THREE.RingGeometry(s.r - 0.01, s.r + 0.04, 72), M('#120a08'), false);
     gap.rotation.x = -Math.PI / 2; gap.position.y = 0.006;
     world.holeGroup.add(at(gap, s.x, s.y, 0));
     const pots = (s.pots || []).map(p => {
@@ -296,7 +527,17 @@
       return pg;
     });
     world.holeGroup.add(at(g, s.x, s.y, 0));
-    return { update() { disc.rotation.z = f.ang; f.pots().forEach((p, i) => { pots[i].position.set(p.x - s.x, 0.27, -(p.y - s.y)); pots[i].rotation.y = f.ang; }); } };
+    let acc = 0;
+    return {
+      update(t, dt) {
+        disc.rotation.z = f.ang;
+        disc.material.emissiveIntensity = 1.15 + Math.sin(t * 1.3) * 0.25;
+        beam.material.opacity = 0.18 + Math.sin(t * 1.3) * 0.06;
+        f.pots().forEach((p, i) => { pots[i].position.set(p.x - s.x, 0.27, -(p.y - s.y)); pots[i].rotation.y = f.ang; });
+        acc += dt;
+        while (acc > 0.08) { acc -= 0.08; const a = Math.random() * Math.PI * 2; world.glow.spawn({ x: s.x + Math.cos(a) * s.r, y: 0.05, z: -(s.y + Math.sin(a) * s.r), vx: 0, vy: 0.8 + Math.random() * 0.6, vz: 0, g: 0, life: 1.4, size: 0.06, color: col('#ffb04a') }); }
+      },
+    };
   };
 
   AV.brook = function (s, world, f) {
@@ -395,7 +636,7 @@
     slab.position.y = -0.06; g.add(slab);
     [-1, 1].forEach(k => { const e = mesh(new THREE.BoxGeometry(0.04, 0.02, l), glowM('#ff5a1a', 1.5), false); e.position.set(k * (w / 2 - 0.02), 0.002, 0); g.add(e); });
     world.holeGroup.add(at(g, (s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, 0));
-    world.holeGroup.add(at(mesh(new THREE.CylinderGeometry(0.18, 0.18, l + 0.6, 10), basaltMat()).rotateX(Math.PI / 2), (s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, -0.3));
+    world.holeGroup.add(at(mesh(new THREE.CylinderGeometry(0.18, 0.18, l + 0.6, 10), plainStone()).rotateX(Math.PI / 2), (s.x0 + s.x1) / 2, (s.y0 + s.y1) / 2, -0.3));
     return { update() { g.rotation.z = f.th; } };
   };
 
@@ -435,7 +676,7 @@
   AV.wind = function (s, world, f) {
     const box = world.hole.box;
     const px = box.x0 - 1.6, py = box.cy;
-    world.holeGroup.add(at(mesh(new THREE.CylinderGeometry(0.06, 0.08, 11, 7), basaltMat()), px, py, -3.5));
+    world.holeGroup.add(at(mesh(new THREE.CylinderGeometry(0.08, 0.1, 11, 7), plainStone()), px, py, -3.5));
     const cloth = mesh(new THREE.PlaneGeometry(1.4, 0.6, 10, 3), new THREE.MeshStandardMaterial({ color: col('#7a1414'), side: THREE.DoubleSide, roughness: 0.9 }));
     cloth.geometry.translate(0.7, 0, 0);
     const base = cloth.geometry.attributes.position.array.slice();

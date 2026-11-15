@@ -134,6 +134,9 @@
     const add = (tx, ty, k) => {
       const ang = Math.atan2(ty - b.y, tx - b.x), d = Math.hypot(tx - b.x, ty - b.y);
       out.push({ ang, p: Nav.powerFor(d * k) });
+      // Uphill takes more: climbing h costs about as much as rolling 7h further on the flat.
+      const dh = sim.floorHeight(tx, ty) - sim.floorHeight(b.x, b.y);
+      if (dh > 0.2) [1, 1.4].forEach(m => out.push({ ang, p: Nav.powerFor(d * k + dh * 7 * m) }));
     };
     const direct = Nav.clear(sim, b.x, b.y, cp[0], cp[1]);
     if (direct) [0.92, 1.0, 1.08, 1.18].forEach(k => add(cp[0], cp[1], k));
@@ -192,7 +195,13 @@
       if (s.t - t0 > 0.35 && s.resting()) {
         // Raising a bridge is worth a lot, even though the ball is no nearer the cup yet.
         const raised = beans.some(f => f.left > 6);
-        return { score: F.at(s.ball.x, s.ball.y) - (raised ? 8 : 0) };
+        // Is it safe where it stopped? Watch a little longer: blades, imps and rafts can carry it off.
+        const tRest = s.t;
+        while (s.t - tRest < 1.6) {
+          s.step(dt);
+          if (s.ball.mode === 'lost') return { score: startD + 5 };
+        }
+        return { score: F.at(s.ball.x, s.ball.y) - (raised ? 8 : 0) + (s.resting() ? 0 : 0.6) };
       }
     }
     return { score: F.at(s.ball.x, s.ball.y) + 2 };

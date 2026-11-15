@@ -19,7 +19,7 @@
     WATER_BED: -0.55,
   };
 
-  const ZONE_FRIC = { slime: 0.2, honey: 7, soil: 1.35, seeds: 1.05, sand: 3, moss: 1.15, glass: 0.2, tar: 7, ash: 1.3 };
+  const ZONE_FRIC = { slime: 0.2, honey: 7, soil: 1.35, seeds: 1.05, sand: 3, moss: 1.15, glass: 0.2, tar: 7, ash: 1.3, cinder: 2.4 };
   PC.ZONE_FRIC = ZONE_FRIC;
 
   // Turn a hole design into the shape the simulator and renderer share.
@@ -139,7 +139,7 @@
       const O = this.hole.overHazards;
       for (let i = 0; i < O.length; i++) {
         if (!U.inPoly(x, y, O[i].poly)) continue;
-        const fh = this.floorHeight(x, y);
+        const fh = O[i].level !== undefined ? O[i].level : this.floorHeight(x, y);
         return { kind: O[i].kind, h: fh - 0.45, top: fh - 0.05, hazard: O[i] };
       }
       if (this.floorAt(x, y)) return { kind: 'floor', h: this.floorHeight(x, y), fric: this.zoneFric(x, y) };

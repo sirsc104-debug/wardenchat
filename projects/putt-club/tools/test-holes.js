@@ -97,6 +97,15 @@ function solve(hole, opts = {}) {
   const timed = (hole.features || []).some(f => TIMED.has(f.type));
   const angles = timed ? 40 : 60, powers = timed ? [0.18, 0.3, 0.42, 0.55, 0.7, 0.86, 1] : [0.12, 0.2, 0.28, 0.36, 0.45, 0.55, 0.66, 0.78, 0.9, 1];
   const waits = timed ? [0, 0.9, 1.8, 2.7] : [0];
+  // Lower is better: the distance left along the course, with a penalty for falling and for not raising a bridge first.
+  const scoreOf = (r, s) => {
+    if (r.result === 'sunk') return -1;
+    let score = r.result === 'lost' ? field(s.ball.x, s.ball.y) + 6 : field(s.ball.x, s.ball.y) + (r.result === 'timeout' ? 3 : 0);
+    s.feats.filter(f => f.type === 'beanstalk').forEach(bean => {
+      if (s.ball.y < bean.spec.rect[3] - 0.3 && s.ball.y > bean.spec.rect[1] - 7 && !(bean.left > 4)) score += 20;
+    });
+    return score;
+  };
   let sim = new PC.Sim(hole);
   // let the ball settle on the tee
   for (let i = 0; i < 120; i++) sim.step(C.DT);
@@ -117,19 +126,37 @@ function solve(hole, opts = {}) {
         const ang = (a / angles) * Math.PI * 2;
         s.shoot(ang, p);
         const r = play(s);
-        let score;
-        if (r.result === 'sunk') score = -1;
-        else if (r.result === 'lost') score = field(s.ball.x, s.ball.y) + 6;
-        else score = field(s.ball.x, s.ball.y) + (r.result === 'timeout' ? 3 : 0);
-        // The beanstalk only grows once the seed packet is pressed: reward pressing it.
-        const bean = s.feats.find(f => f.type === 'beanstalk');
-        if (bean && r.result !== 'sunk' && s.ball.y < 7 && !(bean.left > 4)) score += 20;
+        const score = scoreOf(r, s);
         if (strokes === 0) { firstTrials++; if (r.result === 'sunk') aces++; }
         if (!best || score < best.score) best = { score, ang, p, w, r, snap: snapshot(r.sim) };
       }
     }
+    // Nothing got closer: try finer strengths around the best few directions.
+    if (best.r.result !== 'sunk' && strokes > 0 && best.score > field(sim.ball.x, sim.ball.y) - 0.3) {
+      const tried = [];
+      for (const w of waits) {
+        const pre = restore(hole, base);
+        while (pre.t - base.t < w) pre.step(C.DT);
+        if (!pre.resting() && w > 0) continue;
+        const preSnap = snapshot(pre);
+        for (let a = 0; a < 72; a++) {
+          const ang = (a / 72) * Math.PI * 2;
+          for (let p = 0.06; p <= 1.001; p += 0.04) {
+            const s2 = restore(hole, preSnap);
+            s2.shoot(ang, p);
+            const r = play(s2);
+            const score = scoreOf(r, s2);
+            tried.push(1);
+            if (score < best.score) best = { score, ang, p, w, r, snap: snapshot(r.sim) };
+            if (best.score < 0) break;
+          }
+          if (best.score < 0) break;
+        }
+        if (best.score < 0) break;
+      }
+    }
     strokes++;
-    log.push(`${(best.ang * 180 / Math.PI).toFixed(0)}deg p${best.p} wait${best.w} -> ${best.r.result}${best.r.kind ? '(' + best.r.kind + ')' : ''} d=${best.score.toFixed(2)}`);
+    log.push(`${(best.ang * 180 / Math.PI).toFixed(0)}deg p${best.p} wait${best.w} -> ${best.r.result}${best.r.kind ? '(' + best.r.kind + ')' : ''} d=${best.score.toFixed(2)} at (${best.snap.ball.x.toFixed(2)}, ${best.snap.ball.y.toFixed(2)}, z ${best.snap.ball.z.toFixed(2)})`);
     if (best.r.result === 'sunk') return { strokes, log, aces, firstTrials, teeMove };
     sim = restore(hole, best.snap);
   }
