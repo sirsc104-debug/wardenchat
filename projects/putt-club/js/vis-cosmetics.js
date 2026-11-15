@@ -105,7 +105,16 @@
         g.beginPath(); g.arc(128, 66, 30, 0, TAU); g.fill(); g.fillRect(110, 84, 36, 20);
         g.fillStyle = '#121212'; g.beginPath(); g.arc(116, 64, 8, 0, TAU); g.arc(140, 64, 8, 0, TAU); g.fill(); g.fillRect(118, 92, 4, 10); g.fillRect(126, 92, 4, 10); g.fillRect(134, 92, 4, 10);
         g.strokeStyle = '#f4f1e8'; g.lineWidth = 12; g.lineCap = 'round'; g.beginPath(); g.moveTo(84, 108); g.lineTo(172, 146); g.moveTo(172, 108); g.lineTo(84, 146); g.stroke();
-      } else if (style === 'rainbow') { RAINBOW.forEach((k, i) => { g.fillStyle = k; g.fillRect(0, i * 160 / 6, 256, 160 / 6 + 1); }); }
+      } else if (style === 'usa') {
+        // Thirteen stripes, and the hole number on the blue where the stars would be.
+        for (let i = 0; i < 13; i++) { g.fillStyle = i % 2 ? '#ffffff' : '#b22234'; g.fillRect(0, i * 160 / 13, 256, 160 / 13 + 1); }
+        const cw = 110, ch = 160 * 7 / 13;
+        g.fillStyle = '#3c3b6e'; g.fillRect(0, 0, cw, ch);
+        g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = `700 ${String(num).length > 1 ? 58 : 66}px Fredoka, Outfit, system-ui, sans-serif`;
+        g.fillText(String(num), cw / 2, ch / 2 + 3);
+        return tex(c, false);
+      }
       else if (style === 'dragon') {
         g.fillStyle = '#1f5a34'; g.fillRect(0, 0, 256, 160); g.fillStyle = '#d42a3a';
         g.beginPath(); g.moveTo(60, 120); g.quadraticCurveTo(80, 50, 140, 60); g.lineTo(170, 34); g.lineTo(176, 62); g.lineTo(206, 70); g.lineTo(178, 84); g.quadraticCurveTo(150, 92, 130, 86); g.quadraticCurveTo(110, 110, 150, 128); g.quadraticCurveTo(90, 140, 60, 120); g.fill();

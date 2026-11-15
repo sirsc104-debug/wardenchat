@@ -4630,7 +4630,7 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
       quad([ia[0], ta, -ia[1]], [ia[0], ba, -ia[1]], [ib[0], tb, -ib[1]], [ib[0], bb2, -ib[1]], u0, u1, ta, ba);
       quad([oa[0], ta, -oa[1]], [ia[0], ta, -ia[1]], [ob[0], tb, -ob[1]], [ib[0], tb, -ib[1]], u0, u1, 0.3, 0);
       quad([ob[0], tb, -ob[1]], [ob[0], bb2, -ob[1]], [oa[0], ta, -oa[1]], [oa[0], ba, -oa[1]], u1, u0, tb, bb2);
-      if (thick) quad([ib[0], bb2, -ib[1]], [ob[0], bb2, -ob[1]], [ia[0], ba, -ia[1]], [oa[0], ba, -oa[1]], u0, u1, 0.3, 0);
+      if (thick) quad([ia[0], ba, -ia[1]], [oa[0], ba, -oa[1]], [ib[0], bb2, -ib[1]], [ob[0], bb2, -ob[1]], u0, u1, 0.3, 0);
       acc += l;
     }
     if (!closed) {
@@ -4639,7 +4639,8 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
         if (flip) quad([oa[0], ta, -oa[1]], [oa[0], ba, -oa[1]], [ia[0], ta, -ia[1]], [ia[0], ba, -ia[1]], 0, w, ta, ba);
         else quad([ia[0], ta, -ia[1]], [ia[0], ba, -ia[1]], [oa[0], ta, -oa[1]], [oa[0], ba, -oa[1]], 0, w, ta, ba);
       };
-      cap(0, false); cap(P.length - 1, true);
+      // The first end faces back along the line and the last one forward (the order of corners sets which way).
+      cap(0, true); cap(P.length - 1, false);
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -9037,7 +9038,16 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
         g.beginPath(); g.arc(128, 66, 30, 0, TAU); g.fill(); g.fillRect(110, 84, 36, 20);
         g.fillStyle = '#121212'; g.beginPath(); g.arc(116, 64, 8, 0, TAU); g.arc(140, 64, 8, 0, TAU); g.fill(); g.fillRect(118, 92, 4, 10); g.fillRect(126, 92, 4, 10); g.fillRect(134, 92, 4, 10);
         g.strokeStyle = '#f4f1e8'; g.lineWidth = 12; g.lineCap = 'round'; g.beginPath(); g.moveTo(84, 108); g.lineTo(172, 146); g.moveTo(172, 108); g.lineTo(84, 146); g.stroke();
-      } else if (style === 'rainbow') { RAINBOW.forEach((k, i) => { g.fillStyle = k; g.fillRect(0, i * 160 / 6, 256, 160 / 6 + 1); }); }
+      } else if (style === 'usa') {
+        // Thirteen stripes, and the hole number on the blue where the stars would be.
+        for (let i = 0; i < 13; i++) { g.fillStyle = i % 2 ? '#ffffff' : '#b22234'; g.fillRect(0, i * 160 / 13, 256, 160 / 13 + 1); }
+        const cw = 110, ch = 160 * 7 / 13;
+        g.fillStyle = '#3c3b6e'; g.fillRect(0, 0, cw, ch);
+        g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = `700 ${String(num).length > 1 ? 58 : 66}px Fredoka, Outfit, system-ui, sans-serif`;
+        g.fillText(String(num), cw / 2, ch / 2 + 3);
+        return tex(c, false);
+      }
       else if (style === 'dragon') {
         g.fillStyle = '#1f5a34'; g.fillRect(0, 0, 256, 160); g.fillStyle = '#d42a3a';
         g.beginPath(); g.moveTo(60, 120); g.quadraticCurveTo(80, 50, 140, 60); g.lineTo(170, 34); g.lineTo(176, 62); g.lineTo(206, 70); g.lineTo(178, 84); g.quadraticCurveTo(150, 92, 130, 86); g.quadraticCurveTo(110, 110, 150, 128); g.quadraticCurveTo(90, 140, 60, 120); g.fill();
@@ -9802,7 +9812,7 @@ const PUTT_CATALOG = [
   { item_id: 'sink:goldrush', coins: null, diamonds: 15 },
   { item_id: 'flag:checkered', coins: 7500, diamonds: 2 },
   { item_id: 'flag:pirate', coins: 7500, diamonds: 2 },
-  { item_id: 'flag:rainbow', coins: 7500, diamonds: 2 },
+  { item_id: 'flag:usa', coins: 7500, diamonds: 2 },
   { item_id: 'flag:dragon', coins: 15000, diamonds: 4 },
   { item_id: 'flag:sirsc', coins: null, diamonds: null, member_only: true, claim_from: null, claim_until: null },
   { item_id: 'scene:sunset', coins: 30000, diamonds: 8 },
@@ -9864,7 +9874,7 @@ const COSMETICS = {
     classic: { name: 'Club Flag', desc: 'The course colour with the hole number.' },
     checkered: { name: 'Chequered', desc: 'Black and white, like the end of a race.' },
     pirate: { name: 'Jolly Roger', desc: 'Skull and crossbones on black.' },
-    rainbow: { name: 'Rainbow', desc: 'Every colour in stripes.' },
+    usa: { name: 'Stars and Stripes', desc: 'The USA flag, with the hole number on the blue instead of the stars.' },
     dragon: { name: 'Dragon Banner', desc: 'A red dragon on forest green.' },
     sirsc: { name: 'SirSC Standard', desc: 'The SirSC Diamond on royal blue. For SirSC Members.' },
   },

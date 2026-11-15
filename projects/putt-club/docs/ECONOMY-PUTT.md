@@ -90,7 +90,7 @@ Priced like the other games: 1 💎 = 5,000 coins, and coin prices are 75% of th
 | sink:goldrush | – | 15 | diamonds only |
 | flag:checkered | 7,500 | 2 | flags: the flag in every cup |
 | flag:pirate | 7,500 | 2 | |
-| flag:rainbow | 7,500 | 2 | |
+| flag:usa | 7,500 | 2 | the USA flag, with the hole number in place of the stars |
 | flag:dragon | 15,000 | 4 | |
 | flag:sirsc | – | – | member_only, no claim window |
 | scene:sunset | 30,000 | 8 | scenery: sky, light and effects on every course (not the Abyss) |

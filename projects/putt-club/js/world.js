@@ -140,7 +140,7 @@
       quad([ia[0], ta, -ia[1]], [ia[0], ba, -ia[1]], [ib[0], tb, -ib[1]], [ib[0], bb2, -ib[1]], u0, u1, ta, ba);
       quad([oa[0], ta, -oa[1]], [ia[0], ta, -ia[1]], [ob[0], tb, -ob[1]], [ib[0], tb, -ib[1]], u0, u1, 0.3, 0);
       quad([ob[0], tb, -ob[1]], [ob[0], bb2, -ob[1]], [oa[0], ta, -oa[1]], [oa[0], ba, -oa[1]], u1, u0, tb, bb2);
-      if (thick) quad([ib[0], bb2, -ib[1]], [ob[0], bb2, -ob[1]], [ia[0], ba, -ia[1]], [oa[0], ba, -oa[1]], u0, u1, 0.3, 0);
+      if (thick) quad([ia[0], ba, -ia[1]], [oa[0], ba, -oa[1]], [ib[0], bb2, -ib[1]], [ob[0], bb2, -ob[1]], u0, u1, 0.3, 0);
       acc += l;
     }
     if (!closed) {
@@ -149,7 +149,8 @@
         if (flip) quad([oa[0], ta, -oa[1]], [oa[0], ba, -oa[1]], [ia[0], ta, -ia[1]], [ia[0], ba, -ia[1]], 0, w, ta, ba);
         else quad([ia[0], ta, -ia[1]], [ia[0], ba, -ia[1]], [oa[0], ta, -oa[1]], [oa[0], ba, -oa[1]], 0, w, ta, ba);
       };
-      cap(0, false); cap(P.length - 1, true);
+      // The first end faces back along the line and the last one forward (the order of corners sets which way).
+      cap(0, true); cap(P.length - 1, false);
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
