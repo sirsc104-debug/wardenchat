@@ -8,7 +8,7 @@
      collide(ball, sim)      moving colliders
      onStep(ball, sim)       triggers: tunnels, launch pads, switches, boost pads
      cupPos(t)               a moving cup: [x, y, vx, vy] */
-(function (PC) {
+(function (mod) { const PC = window.PC = window.PC || {}; mod(PC); (PC.SRC = PC.SRC || []).push(mod); })(function (PC) {
   'use strict';
   const U = PC.U, C = PC.C, TAU = U.TAU;
   const F = PC.FEAT = {};
@@ -146,7 +146,7 @@
         if (Math.hypot(b.x - s.x, b.y - s.y) > s.r) return;
         const sp = Math.hypot(b.vx, b.vy);
         if (sp < 0.35) return;
-        const k = Math.max(sp, s.minSpeed || 3) / sp;
+        const k = U.clamp(sp, s.minSpeed || 3, s.maxSpeed || 99) / sp;
         b.vx *= k; b.vy *= k;
         b.mode = 'air'; b.vz = s.vz; b.z += 0.02;
         this.hit = sim.t; this.cool = sim.t + 0.6;
@@ -334,4 +334,4 @@
 
   // Pieces that only change the look (handled in vis.js) still need a physics stub.
   ['decor', 'wheelbarrow', 'koi', 'hive', 'carrots', 'greenhouse', 'trellis', 'falls', 'rockery', 'sunflower', 'maze'].forEach(k => { F[k] = { make() { return {}; } }; });
-})(window.PC = window.PC || {});
+});

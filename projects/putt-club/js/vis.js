@@ -241,7 +241,7 @@
     });
   };
 
-  VIS.sign = function (hole, world, sim) {
+  VIS.sign = function (hole, world, sim, hell) {
     const [tx, ty] = hole.tee;
     const ta = Math.atan2(hole.cup[1] - ty, hole.cup[0] - tx);
     // to the left of the tee, outside the green
@@ -252,12 +252,14 @@
       if (polys.every(P => !U.inPoly(x, y, P) && U.distToPoly(x, y, P) > 0.9)) { sx = x; sy = y; break; }
     }
     const g = new THREE.Group();
-    const post = mesh(new THREE.BoxGeometry(0.1, 1.3, 0.1), M('#6b4a2f'));
-    post.position.y = 0.65;
-    const board = mesh(new THREE.BoxGeometry(1.5, 0.75, 0.06), [M('#6b4a2f'), M('#6b4a2f'), M('#6b4a2f'), M('#6b4a2f'), new THREE.MeshStandardMaterial({ map: T.sign(hole.num, hole.name, hole.par), roughness: 0.8 }), M('#6b4a2f')]);
+    const edge = hell ? '#1e1719' : '#6b4a2f';
+    const postLen = hell ? 10.3 : 1.3;
+    const post = mesh(new THREE.BoxGeometry(hell ? 0.18 : 0.1, postLen, hell ? 0.18 : 0.1), M(edge));
+    post.position.y = 1.3 - postLen / 2;
+    const board = mesh(new THREE.BoxGeometry(1.5, 0.75, 0.06), [M(edge), M(edge), M(edge), M(edge), new THREE.MeshStandardMaterial({ map: T.sign(hole.num, hole.name, hole.par, hell), roughness: 0.8, emissive: col(hell ? '#3a1206' : '#000000') }), M(edge)]);
     board.position.y = 1.25;
     g.add(post, board);
-    at(g, sx, sy, GY());
+    at(g, sx, sy, hell ? 0 : GY());
     g.rotation.y = ta - Math.PI / 2 + 0.35;
     world.holeGroup.add(g);
   };

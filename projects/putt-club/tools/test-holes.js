@@ -11,7 +11,7 @@ const ROOT = path.join(__dirname, '..');
 const ctx = { console, Math, Date };
 ctx.window = ctx;
 vm.createContext(ctx);
-['util', 'physics', 'features', 'holes'].forEach(f => vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', f + '.js'), 'utf8'), ctx, { filename: f + '.js' }));
+['util', 'physics', 'features', 'holes', 'abyss', 'nav'].forEach(f => vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', f + '.js'), 'utf8'), ctx, { filename: f + '.js' }));
 const PC = ctx.PC, U = PC.U, C = PC.C;
 
 const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable']);
@@ -25,7 +25,7 @@ function distanceField(hole) {
   for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
     const x = x0 + i * cell, y = y0 + j * cell;
     const g = sim.ground(x, y);
-    let c = g.kind === 'floor' || g.kind === 'platform' ? 1 : g.kind === 'water' || g.kind === 'flowers' ? 4 : Infinity;
+    let c = g.kind === 'floor' || g.kind === 'platform' ? 1 : g.kind === 'water' || g.kind === 'flowers' || g.kind === 'lava' ? 4 : Infinity;
     if (c === Infinity) continue;
     for (const s of hole.segs) {
       if (s.ghost) continue;
@@ -93,7 +93,7 @@ function play(sim, maxT = 18) {
 }
 
 function solve(hole, opts = {}) {
-  const field = distanceField(hole);
+  const field = PC.Nav.field(hole).at;
   const timed = (hole.features || []).some(f => TIMED.has(f.type));
   const angles = timed ? 40 : 60, powers = timed ? [0.18, 0.3, 0.42, 0.55, 0.7, 0.86, 1] : [0.12, 0.2, 0.28, 0.36, 0.45, 0.55, 0.66, 0.78, 0.9, 1];
   const waits = timed ? [0, 0.9, 1.8, 2.7] : [0];
@@ -103,7 +103,8 @@ function solve(hole, opts = {}) {
   const teeMove = Math.hypot(sim.ball.x - hole.tee[0], sim.ball.y - hole.tee[1]);
   let strokes = 0, aces = 0, firstTrials = 0;
   const log = [];
-  while (strokes < 8) {
+  const MAXS = PC.maxStrokes(hole);
+  while (strokes < MAXS) {
     const base = snapshot(sim);
     let best = null;
     for (const w of waits) {
@@ -146,7 +147,8 @@ function check(hole) {
 }
 
 const want = process.argv.slice(2);
-const holes = PC.HOLES.filter(h => !want.length || want.includes(h.id) || want.includes(String(h.num)));
+const pool = want.includes('abyss') ? PC.ABYSS : want.includes('garden') ? PC.HOLES : PC.HOLES.concat(PC.ABYSS);
+const holes = pool.filter(h => !want.filter(w => w !== 'abyss' && w !== 'garden').length || want.includes(h.id) || want.includes(String(h.num)));
 let fails = 0;
 for (const spec of holes) {
   const hole = PC.prepareHole(spec);
@@ -156,7 +158,7 @@ for (const spec of holes) {
   const ms = Date.now() - t0;
   const ok = r.strokes !== 'X' && problems.length === 0;
   if (!ok) fails++;
-  console.log(`${String(hole.num).padStart(2)} ${hole.name.padEnd(18)} par ${hole.par}  bot ${String(r.strokes).padEnd(2)} aces ${r.aces}/${r.firstTrials}  tee drift ${r.teeMove.toFixed(3)}  ${ms}ms ${problems.join('; ')}`);
+  console.log(`${hole.course === 'abyss' ? 'A' : ' '}${String(hole.num).padStart(2)} ${hole.name.padEnd(18)} par ${hole.par}  bot ${String(r.strokes).padEnd(2)} aces ${r.aces}/${r.firstTrials}  tee drift ${r.teeMove.toFixed(3)}  ${ms}ms ${problems.join('; ')}`);
   if (!ok || process.env.VERBOSE) r.log.forEach(l => console.log('     ' + l));
 }
 console.log(fails ? `${fails} hole(s) need work` : 'All holes finished');

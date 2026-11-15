@@ -1,7 +1,7 @@
 /* Putt Club: shared math and 2D geometry.
    Courses are designed on paper in (x, y): x to the right, y forward from the tee.
    The renderer maps that to three.js as (x, height, -y). Everything hangs off window.PC. */
-(function (PC) {
+(function (mod) { const PC = window.PC = window.PC || {}; mod(PC); (PC.SRC = PC.SRC || []).push(mod); })(function (PC) {
   'use strict';
   const U = PC.U = {};
   const TAU = U.TAU = Math.PI * 2;
@@ -187,4 +187,4 @@
     polys.forEach(P => P.forEach(p => { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); }));
     return { x0, y0, x1, y1, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, w: x1 - x0, h: y1 - y0 };
   };
-})(window.PC = window.PC || {});
+});

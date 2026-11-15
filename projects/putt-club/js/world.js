@@ -14,6 +14,7 @@
     day: { top: '#4f9fe0', mid: '#a9d6f5', horizon: '#eef8ff', sun: '#fff1da', sunI: 2.5, hemiSky: '#d6ecff', hemiGround: '#5d7a3c', hemiI: 0.95, fog: '#dcefff', turf: '#3f9434', grass: '#4a7f36', hills: ['#7fb36a', '#8fc07a', '#a6c99a'], exposure: 1.0 },
     spring: { top: '#62b3ea', mid: '#bfe6fb', horizon: '#f4fcff', sun: '#fffaf0', sunI: 2.4, hemiSky: '#e6f6ff', hemiGround: '#6aa04a', hemiI: 1.0, fog: '#e6f6fd', turf: '#43993a', grass: '#4c8638', hills: ['#86bf73', '#9acb88', '#b3d6a8'], exposure: 1.02 },
     golden: { top: '#5d97cf', mid: '#d9c7a8', horizon: '#ffe2b8', sun: '#ffd49a', sunI: 2.7, hemiSky: '#ffe8c8', hemiGround: '#6e6a35', hemiI: 0.85, fog: '#f6e0c2', turf: '#4a9636', grass: '#527f35', hills: ['#8aa865', '#a4b57a', '#c8c49a'], exposure: 1.0 },
+    abyss: { top: '#070205', mid: '#2a0708', horizon: '#9a2a0c', sun: '#ff9a62', sunI: 1.8, hemiSky: '#5a2032', hemiGround: '#ff5a14', hemiI: 1.0, fog: '#1c0605', turf: '#3a3134', grass: '#1a1212', hills: ['#2a1214', '#3a1610', '#1c0c0c'], exposure: 1.12 },
     autumn: { top: '#6aa3d0', mid: '#d6c7b3', horizon: '#ffdcb5', sun: '#ffcf96', sunI: 2.6, hemiSky: '#ffe6c9', hemiGround: '#7a5a2a', hemiI: 0.9, fog: '#f1dcc0', turf: '#4f9535', grass: '#647c34', hills: ['#a59a5c', '#b8a06a', '#cdb48a'], exposure: 1.0 },
   };
   PC.LIGHTS = LIGHTS;
@@ -241,6 +242,14 @@
       this.scene.add(ground);
       this.ground = ground;
 
+      // The Abyss: a sea of lava far below the platforms
+      const lt = T.lavaSea(); lt.repeat.set(90, 90);
+      this.lavaSeaMat = new THREE.MeshStandardMaterial({ map: lt, emissiveMap: lt, emissive: col('#ff5a14'), emissiveIntensity: 0.75, roughness: 0.8, color: col('#5a2a1e') });
+      this.lavaSeaTex = lt;
+      this.lavaSea = new THREE.Mesh(new THREE.CircleGeometry(260, 48), this.lavaSeaMat);
+      this.lavaSea.rotation.x = -Math.PI / 2; this.lavaSea.position.y = -16; this.lavaSea.visible = false;
+      this.scene.add(this.lavaSea);
+
       this.holeGroup = new THREE.Group();
       this.scene.add(this.holeGroup);
 
@@ -260,7 +269,7 @@
       this.arrow.rotation.x = -Math.PI / 2;
       this.arrowPivot = new THREE.Group(); this.arrowPivot.add(this.arrow);
       this.aim.add(this.arrowPivot);
-      this.dots = new THREE.InstancedMesh(new THREE.CircleGeometry(0.035, 10), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false }), 60);
+      this.dots = new THREE.InstancedMesh(new THREE.CircleGeometry(0.035, 10), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false }), 140);
       this.dots.frustumCulled = false;
       this.aim.add(this.dots);
       this.ring = new THREE.Mesh(new THREE.RingGeometry(C.R * 1.6, C.R * 2.1, 40, 1, 0, Math.PI * 2), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8, depthWrite: false }));
@@ -293,8 +302,11 @@
       this.skyU.top.value.set(L.top); this.skyU.mid.value.set(L.mid); this.skyU.horizon.value.set(L.horizon);
       this.hemi.color = col(L.hemiSky); this.hemi.groundColor = col(L.hemiGround); this.hemi.intensity = L.hemiI;
       this.sun.color = col(L.sun); this.sun.intensity = L.sunI;
-      this.scene.fog = new THREE.Fog(col(L.fog), 45, 190);
+      const hell = name === 'abyss';
+      this.scene.fog = hell ? new THREE.Fog(col(L.fog), 14, 95) : new THREE.Fog(col(L.fog), 45, 190);
       this.groundMat.color = col(L.grass).multiplyScalar(1.25);
+      this.ground.visible = !hell;
+      this.lavaSea.visible = hell;
       this.renderer.toneMappingExposure = L.exposure;
     }
 
@@ -303,6 +315,7 @@
       g.traverse(o => { if (o.geometry && !o.userData.shared) o.geometry.dispose(); });
       while (g.children.length) g.remove(g.children[0]);
       this.vis = [];
+      this.ghosts = [];
       this.fx.clear(); this.glow.clear(); this.trail = [];
     }
 
@@ -323,22 +336,26 @@
       sc.updateProjectionMatrix();
 
       const hAt = (x, y) => sim.floorHeight(x, y);
-      const turf = T.turf(L.turf);
-      const turfMat = new THREE.MeshStandardMaterial({ map: turf, roughness: 0.92, color: col('#e4f0dc') });
-      const skirtStyle = hole.look.skirt || (hole.look.rail === 'stone' || hole.look.rail === 'brick' ? hole.look.rail : 'soil');
+      const hell = hole.look.theme === 'abyss';
+      this.hell = hell;
+      const turf = hell ? T.ashTurf() : T.turf(L.turf);
+      const turfMat = new THREE.MeshStandardMaterial({ map: turf, roughness: 0.92, color: hell ? col('#ffffff') : col('#e4f0dc') });
+      const skirtStyle = hell ? 'basalt' : hole.look.skirt || (hole.look.rail === 'stone' || hole.look.rail === 'brick' ? hole.look.rail : 'soil');
       const skirtMat = this.railMaterials(skirtStyle).body;
+      const skirtBottom = hell ? -2.2 : GROUND_Y - 0.02;
 
-      hole.floors.forEach(f => {
+      hole.floors.forEach((f, fi) => {
         let m = turfMat;
         if (f.mat === 'planks') { const t = T.planks(); m = new THREE.MeshStandardMaterial({ map: t, roughness: 0.8 }); }
-        const geo = surfaceGeometry(f.poly, hAt, { uv: f.mat === 'planks' ? (x, y) => [x / 1.2 + 0.5, y / 2] : undefined });
+        const geo = surfaceGeometry(f.poly, hAt, { lift: fi * 0.002, uv: f.mat === 'planks' ? (x, y) => [x / 1.2 + 0.5, y / 2] : undefined });
         const mesh = new THREE.Mesh(geo, m); mesh.receiveShadow = true; G.add(mesh);
         const sk = new THREE.Mesh(skirtGeometry(f.poly, (x, y) => {
           const c = U.centroid(f.poly), dx = c[0] - x, dy = c[1] - y, l = Math.hypot(dx, dy) || 1;
           return hAt(x + dx / l * 0.01, y + dy / l * 0.01) - 0.002;
-        }, GROUND_Y - 0.02, true, 0.02), skirtMat);
+        }, skirtBottom, true, 0.02), skirtMat);
         sk.receiveShadow = true; G.add(sk);
       });
+      if (hell) this.buildEdges(hole, hAt);
 
       // Friction zones painted on the green
       hole.zones.forEach(z => this.buildZone(z, hole, hAt));
@@ -351,8 +368,9 @@
 
       this.buildCup(hole, sim);
       this.buildTee(hole, sim);
-      PC.VIS.decorate(hole, this, sim);
-      (sim.feats || []).forEach(f => { const v = PC.VIS[f.type]; if (v) { const o = v(f.spec, this, f, sim); if (o) this.vis.push(o); } });
+      if (hell) PC.VIS.decorateAbyss(hole, this, sim); else PC.VIS.decorate(hole, this, sim);
+      (sim.feats || []).forEach(f => { const v = (hell && PC.VIS.abyss[f.type]) || PC.VIS[f.type]; if (v) { const o = v(f.spec, this, f, sim); if (o) this.vis.push(o); } });
+      this.ghosts = [];
       return this;
     }
 
@@ -368,6 +386,8 @@
           case 'glass': { const t = T.wood('#f4f4ee'); return { body: M({ map: t, roughness: 0.6 }), cap: M({ color: col('#ffffff'), roughness: 0.5 }) }; }
           case 'trellis': { const t = T.wood('#ece7dc'); return { body: M({ map: t, roughness: 0.7 }), cap: M({ color: col('#fbfaf5') }) }; }
           case 'soil': { const t = T.soil(); return { body: M({ map: t, roughness: 1 }), cap: null }; }
+          case 'basalt': { const b = T.basalt(); b.map.repeat.set(1, 1); return { body: M({ map: b.map, emissiveMap: b.glow, emissive: col('#ff6a1a'), emissiveIntensity: 1.2, roughness: 0.95 }), cap: null }; }
+          case 'obsidian': { const t = T.obsidian(); return { body: M({ map: t, roughness: 0.25, metalness: 0.2 }), cap: M({ color: col('#ff5a1a'), emissive: col('#ff4a10'), emissiveIntensity: 0.9, roughness: 0.5 }) }; }
           default: { const t = T.wood('#a8713f'); return { body: M({ map: t }), cap: M({ color: col('#c99a63'), roughness: 0.75 }) }; }
         }
       });
@@ -404,6 +424,9 @@
           uv = (x, y) => [(x - f.x) / (2 * f.r) + 0.5, (y - f.y) / (2 * f.r) + 0.5];
           break;
         }
+        case 'glass': m = new THREE.MeshPhysicalMaterial({ map: T.obsidian(), color: col('#ffffff'), roughness: 0.03, metalness: 0.3, clearcoat: 1, clearcoatRoughness: 0.02 }); lift = 0.008; uv = (x, y) => [x / 2, y / 2]; break;
+        case 'tar': m = new THREE.MeshPhysicalMaterial({ map: T.tar(), color: col('#ffffff'), roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.1 }); lift = 0.012; uv = (x, y) => [x / 2.5, y / 2.5]; break;
+        case 'ash': { const t = T.ash(); m = new THREE.MeshStandardMaterial({ map: t, roughness: 1 }); uv = (x, y) => [x / 2, y / 2]; break; }
         default: return;
       }
       const geo = surfaceGeometry(z.poly, (x, y) => hAt(x, y), { lift, uv, cell: 0.25 });
@@ -419,6 +442,21 @@
         g.translate(0, y, 0);
         return g;
       };
+      if (z.kind === 'lava') {
+        const lt = T.lava(); lt.repeat.set(0.3, 0.3);
+        const lm = new THREE.MeshStandardMaterial({ map: lt, emissiveMap: lt, emissive: col('#ff6a1a'), emissiveIntensity: 1.25, roughness: 0.55, color: col('#ff9a4a') });
+        if (z.over) {
+          const geo = surfaceGeometry(z.poly, (x, y) => this.sim.floorHeight(x, y), { lift: 0.014, uv: (x, y) => [x / 2.5, y / 2.5], cell: 0.2 });
+          const m = new THREE.Mesh(geo, lm); G.add(m);
+          const rim = railGeometry(z.poly, true, 'out', 0.09, (x, y) => this.sim.floorHeight(x, y) + 0.03, 0, { thick: 0.05 });
+          const rm = new THREE.Mesh(rim.geo, this.railMaterials('basalt').body); G.add(rm);
+        } else {
+          G.add(new THREE.Mesh(flat(z.poly, z.top - 0.02), lm));
+          const rim = new THREE.Mesh(skirtGeometry(z.poly, () => z.top + 0.05, -2.2), this.railMaterials('basalt').body); G.add(rim);
+        }
+        this.vis.push({ update: (t) => { lt.offset.set(t * 0.012, t * 0.008); lm.emissiveIntensity = 1.15 + Math.sin(t * 2.1) * 0.12; } });
+        return;
+      }
       if (z.kind === 'water') {
         const bed = new THREE.Mesh(flat(z.poly, z.bed), new THREE.MeshStandardMaterial({ map: T.pebbles(), color: col('#7c8f86'), roughness: 1 }));
         bed.geometry.attributes.uv && bed.material.map.repeat.set(0.6, 0.6);
@@ -468,7 +506,7 @@
       const [tx, ty] = hole.tee;
       const h = sim.floorHeight(tx, ty);
       const ang = Math.atan2(hole.cup[1] - ty, hole.cup[0] - tx);
-      const mat = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 0.75), new THREE.MeshStandardMaterial({ map: T.turf('#3f8a33'), roughness: 1 }));
+      const mat = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 0.75), new THREE.MeshStandardMaterial({ map: hole.look.theme === 'abyss' ? T.ash() : T.turf('#3f8a33'), roughness: 1 }));
       mat.rotation.x = -Math.PI / 2; mat.rotation.z = ang - Math.PI / 2;
       mat.position.copy(V(tx, ty, h + 0.004)); mat.receiveShadow = true;
       G.add(mat);
@@ -477,6 +515,66 @@
         const px = tx + Math.cos(ang + Math.PI / 2) * 0.62 * s, py = ty + Math.sin(ang + Math.PI / 2) * 0.62 * s;
         m.position.copy(V(px, py, sim.floorHeight(px, py) + 0.06)); m.castShadow = true;
         G.add(m);
+      });
+    }
+
+    // Abyss platforms have no rails, so their edges glow to show where the drop is.
+    buildEdges(hole, hAt) {
+      const others = (fi, x, y) => hole.floors.some((g, gi) => gi !== fi && U.inPoly(x, y, g.poly) && U.distToPoly(x, y, g.poly) > 0.05);
+      const pos = [];
+      hole.floors.forEach((f, fi) => {
+        const P = U.resample(f.poly, 0.2, true);
+        const N = U.normals(P, true);
+        for (let i = 0; i < P.length; i++) {
+          const a = P[i], b = P[(i + 1) % P.length], na = N[i], nb = N[(i + 1) % P.length];
+          if (others(fi, a[0], a[1]) || others(fi, b[0], b[1])) continue;
+          const w = 0.07, y = 0.006 + fi * 0.002;
+          const ia = [a[0] - na[0] * w, a[1] - na[1] * w], ib = [b[0] - nb[0] * w, b[1] - nb[1] * w];
+          const ha = hAt(a[0] - na[0] * 0.02, a[1] - na[1] * 0.02) + y, hb = hAt(b[0] - nb[0] * 0.02, b[1] - nb[1] * 0.02) + y;
+          pos.push(a[0], ha, -a[1], ia[0], ha, -ia[1], b[0], hb, -b[1], b[0], hb, -b[1], ia[0], ha, -ia[1], ib[0], hb, -ib[1]);
+        }
+      });
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      g.computeVertexNormals();
+      this.edgeMat = new THREE.MeshBasicMaterial({ color: col('#ff7a2a'), side: THREE.DoubleSide });
+      this.holeGroup.add(new THREE.Mesh(g, this.edgeMat));
+      this.vis.push({ update: (t) => { this.edgeMat.color.copy(col('#ff7a2a')).multiplyScalar(0.85 + Math.sin(t * 2.6) * 0.15); } });
+    }
+
+    // Rivals show as see-through balls of their own colour with a name tag.
+    setGhosts(list) {
+      this.ghosts = list.map(r => {
+        const m = new THREE.Mesh(this.ball.geometry, new THREE.MeshStandardMaterial({ color: col(r.color), transparent: true, opacity: 0.6, emissive: col(r.color), emissiveIntensity: 0.45, roughness: 0.4, depthWrite: false }));
+        m.userData.shared = true;
+        const c = document.createElement('canvas'); c.width = 256; c.height = 72;
+        const g = c.getContext('2d');
+        g.fillStyle = 'rgba(16,24,20,0.82)';
+        if (g.roundRect) { g.beginPath(); g.roundRect(4, 8, 248, 56, 28); g.fill(); } else g.fillRect(4, 8, 248, 56);
+        g.fillStyle = r.color; g.beginPath(); g.arc(36, 36, 12, 0, 7); g.fill();
+        g.fillStyle = '#ffffff'; g.font = '700 32px Fredoka, Outfit, system-ui, sans-serif'; g.textBaseline = 'middle'; g.fillText(r.name, 58, 38);
+        const tex = new THREE.CanvasTexture(c);
+        const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
+        lab.scale.set(0.62, 0.175, 1);
+        lab.renderOrder = 6;
+        this.holeGroup.add(m, lab);
+        return { m, lab, r, q: new THREE.Quaternion() };
+      });
+    }
+    updateGhosts(dt) {
+      (this.ghosts || []).forEach(gh => {
+        const b = gh.r.sim.ball;
+        const vis = !gh.r.done && !b.hidden && b.mode !== 'lost' && b.mode !== 'sunk';
+        gh.m.visible = vis; gh.lab.visible = vis;
+        if (!vis) return;
+        gh.m.position.copy(V(b.x, b.y, b.z));
+        gh.lab.position.copy(V(b.x, b.y, b.z + 0.36));
+        // Tags fade out near your own ball so they never cover it.
+        const me = this.sim && this.sim.ball, near = me ? Math.hypot(me.x - b.x, me.y - b.y) : 9;
+        gh.lab.material.opacity = U.clamp((near - 0.5) / 0.8, 0, 1);
+        gh.lab.visible = gh.lab.material.opacity > 0.02;
+        const sp = Math.hypot(b.vx, b.vy);
+        if (sp > 0.01) { gh.q.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(-b.vy, 0, -b.vx).normalize(), (sp * dt) / C.R)); gh.m.quaternion.copy(gh.q); }
       });
     }
 
@@ -495,7 +593,7 @@
       this.ring.material.color.copy(c);
       const m = new THREE.Matrix4(), q = new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0));
       let n = 0;
-      if (path) for (let i = 0; i < path.length && n < 60; i++, n++) {
+      if (path) for (let i = 0; i < path.length && n < 140; i++, n++) {
         const p = path[i];
         const s = 1 - i / Math.max(1, path.length) * 0.6;
         m.compose(new THREE.Vector3(p[0], p[2] + 0.015, -p[1]), q, new THREE.Vector3(s, s, s));
@@ -578,6 +676,7 @@
           this.glow.spawn({ x: ball.position.x, y: ball.position.y, z: ball.position.z, vx: 0, vy: 0, vz: 0, g: 0, life: 0.35, size: 0.09 * Math.min(1, sp / 8), color: col('#ffffff'), a: 0.35 });
         }
       }
+      if (this.hell && this.lavaSeaTex) this.lavaSeaTex.offset.set(t * 0.004, t * 0.0025);
       this.vis.forEach(v => v.update && v.update(t, dt, sim));
       this.fx.update(dt); this.glow.update(dt);
     }

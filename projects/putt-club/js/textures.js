@@ -264,24 +264,24 @@
     const c = canvas(256, 160), g = c.getContext('2d');
     g.fillStyle = color; g.fillRect(0, 0, 256, 160);
     g.fillStyle = 'rgba(255,255,255,0.14)'; g.fillRect(0, 0, 256, 20);
-    g.fillStyle = '#ffffff'; g.font = '700 108px Outfit, system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = '#ffffff'; g.font = '700 108px Fredoka, Outfit, system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText(String(num), 128, 86);
     return tex(c, false);
   };
 
   // The wooden sign by each tee.
-  T.sign = (num, name, par) => {
+  T.sign = (num, name, par, hell) => {
     const c = canvas(512, 256), g = c.getContext('2d');
-    g.fillStyle = '#7a4a26'; g.fillRect(0, 0, 512, 256);
+    g.fillStyle = hell ? '#2a2124' : '#7a4a26'; g.fillRect(0, 0, 512, 256);
     const rnd = U.rng(num * 7);
     g.globalAlpha = 0.25;
     for (let i = 0; i < 40; i++) { g.strokeStyle = rnd() < 0.5 ? '#5a3418' : '#9a6638'; g.lineWidth = 1 + rnd() * 2; const y = rnd() * 256; g.beginPath(); g.moveTo(0, y); g.bezierCurveTo(170, y + 6, 340, y - 6, 512, y + 3); g.stroke(); }
     g.globalAlpha = 1;
-    g.strokeStyle = '#f3e3c3'; g.lineWidth = 6; g.strokeRect(14, 14, 484, 228);
-    g.fillStyle = '#f3e3c3'; g.textAlign = 'center';
-    g.font = '400 36px Outfit, system-ui, sans-serif'; g.fillText('HOLE ' + num + '  ·  PAR ' + par, 256, 74);
-    g.font = '400 64px Shrikhand, Georgia, serif';
-    let size = 64; while (g.measureText(name).width > 440 && size > 30) { size -= 4; g.font = `400 ${size}px Shrikhand, Georgia, serif`; }
+    g.strokeStyle = hell ? '#ff6a1a' : '#f3e3c3'; g.lineWidth = 6; g.strokeRect(14, 14, 484, 228);
+    g.fillStyle = hell ? '#ffb06a' : '#f3e3c3'; g.textAlign = 'center';
+    g.font = '600 36px Fredoka, Outfit, system-ui, sans-serif'; g.fillText((hell ? 'ABYSS ' : 'HOLE ') + num + '  ·  PAR ' + par, 256, 74);
+    g.font = '700 66px Fredoka, Outfit, system-ui, sans-serif';
+    let size = 66; while (g.measureText(name).width > 440 && size > 30) { size -= 4; g.font = `700 ${size}px Fredoka, Outfit, system-ui, sans-serif`; }
     g.fillText(name, 256, 168);
     return tex(c, false);
   };
@@ -295,6 +295,124 @@
     for (let i = 0; i < 5; i++) { g.beginPath(); g.ellipse(50 + i * 40, 110, 14, 22, 0.3, 0, 7); g.fill(); }
     g.fillStyle = '#7a4a26'; g.font = '600 20px Outfit, system-ui, sans-serif'; g.fillText('roll over to plant', 128, 172);
     return tex(c, false);
+  });
+
+  // ---------- The Abyss ----------
+  // Charred felt for the platforms, with faint ember stripes.
+  T.ashTurf = () => once('ashTurf', () => {
+    const c = canvas(512, 512), g = c.getContext('2d'), rnd = U.rng(201);
+    g.fillStyle = '#3d3336'; g.fillRect(0, 0, 256, 512);
+    g.fillStyle = '#332a2d'; g.fillRect(256, 0, 256, 512);
+    g.globalAlpha = 0.5;
+    for (let i = 0; i < 9000; i++) { g.fillStyle = ['#463b3e', '#2c2427', '#3a2f32', '#4d3a36'][i % 4]; g.fillRect(rnd() * 512, rnd() * 512, 1.6, 3 + rnd() * 3); }
+    g.globalAlpha = 0.55;
+    for (let i = 0; i < 260; i++) { g.fillStyle = rnd() < 0.5 ? '#ff5a1f' : '#ffae3a'; g.fillRect(rnd() * 512, rnd() * 512, 1.4, 1.4); }
+    g.globalAlpha = 1;
+    return tex(c);
+  });
+
+  // Basalt with glowing cracks: a colour map and a matching glow map.
+  T.basalt = () => once('basalt', () => {
+    const S = 256, rnd = U.rng(211);
+    const c = canvas(S, S), g = c.getContext('2d'), e = canvas(S, S), h = e.getContext('2d');
+    g.fillStyle = '#2a2124'; g.fillRect(0, 0, S, S);
+    speckle(g, S, S, 500, ['#33282b', '#221a1c', '#3b2e2f', '#2e2426'], 3, 12, rnd);
+    h.fillStyle = '#000000'; h.fillRect(0, 0, S, S);
+    for (let k = 0; k < 14; k++) {
+      let x = rnd() * S, y = rnd() * S;
+      const pts = [[x, y]];
+      for (let i = 0; i < 6; i++) { x += (rnd() - 0.5) * 60; y += (rnd() - 0.5) * 60; pts.push([x, y]); }
+      [[g, '#8a2a0c', 4], [g, '#ff6a1a', 1.6], [h, '#ff7a2a', 3], [h, '#ffd27a', 1]].forEach(([ctx, colr, w]) => {
+        ctx.strokeStyle = colr; ctx.lineWidth = w; ctx.lineJoin = 'round';
+        ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]))); ctx.stroke();
+      });
+    }
+    return { map: tex(c), glow: tex(e) };
+  });
+
+  // Molten lava: soft overlapping glows with a few darker crusts and bright seams.
+  T.lava = () => once('lava', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(221);
+    g.fillStyle = '#e84a0c'; g.fillRect(0, 0, S, S);
+    const blob = (x, y, r, colr, a) => {
+      for (const ox of [-S, 0, S]) for (const oy of [-S, 0, S]) {
+        const grd = g.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, r);
+        grd.addColorStop(0, colr.replace('A', a)); grd.addColorStop(1, colr.replace('A', 0));
+        g.fillStyle = grd; g.fillRect(x + ox - r, y + oy - r, r * 2, r * 2);
+      }
+    };
+    for (let i = 0; i < 70; i++) blob(rnd() * S, rnd() * S, 20 + rnd() * 50, 'rgba(255,170,40,A)', 0.55);
+    for (let i = 0; i < 40; i++) blob(rnd() * S, rnd() * S, 14 + rnd() * 34, 'rgba(120,20,4,A)', 0.55);
+    for (let i = 0; i < 30; i++) blob(rnd() * S, rnd() * S, 6 + rnd() * 14, 'rgba(255,230,140,A)', 0.7);
+    return tex(c);
+  });
+
+  // The sea far below: mostly dark crust with glowing seams.
+  T.lavaSea = () => once('lavaSea', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(281);
+    g.fillStyle = '#2a0a06'; g.fillRect(0, 0, S, S);
+    speckle(g, S, S, 120, ['#3a0e08', '#1c0604', '#4a1208'], 10, 34, rnd);
+    g.lineCap = 'round';
+    for (let i = 0; i < 26; i++) {
+      let x = rnd() * S, y = rnd() * S;
+      const pts = [[x, y]];
+      for (let k = 0; k < 5; k++) { x += (rnd() - 0.5) * 70; y += (rnd() - 0.5) * 70; pts.push([x, y]); }
+      [['#ff5a0a', 5], ['#ffb43a', 1.6]].forEach(([cl, w]) => { g.strokeStyle = cl; g.lineWidth = w; g.beginPath(); pts.forEach((p, j) => (j ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1]))); g.stroke(); });
+    }
+    g.globalAlpha = 0.8; speckle(g, S, S, 40, ['#ff7a1a', '#ff9a2a'], 3, 9, rnd); g.globalAlpha = 1;
+    return tex(c);
+  });
+
+  T.obsidian = () => once('obsidian', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(231);
+    g.fillStyle = '#120e16'; g.fillRect(0, 0, S, S);
+    g.globalAlpha = 0.35;
+    for (let i = 0; i < 40; i++) { g.strokeStyle = rnd() < 0.5 ? '#3a2a5a' : '#5a2a3a'; g.lineWidth = 1 + rnd() * 3; g.beginPath(); const y = rnd() * S; g.moveTo(0, y); g.bezierCurveTo(80, y + (rnd() - 0.5) * 60, 170, y + (rnd() - 0.5) * 60, S, y + (rnd() - 0.5) * 30); g.stroke(); }
+    g.globalAlpha = 1;
+    return tex(c);
+  });
+
+  T.tar = () => once('tar', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(241);
+    g.fillStyle = '#141012'; g.fillRect(0, 0, S, S);
+    g.globalAlpha = 0.5; speckle(g, S, S, 90, ['#221a1e', '#0a0809', '#2a1f22'], 8, 26, rnd);
+    g.globalAlpha = 0.6; g.strokeStyle = '#4a3a40'; g.lineWidth = 1.5;
+    for (let i = 0; i < 30; i++) { g.beginPath(); g.arc(rnd() * S, rnd() * S, 3 + rnd() * 6, 0, 7); g.stroke(); }
+    g.globalAlpha = 1;
+    return tex(c);
+  });
+
+  T.ash = () => once('ash', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(251);
+    g.fillStyle = '#5a5150'; g.fillRect(0, 0, S, S);
+    speckle(g, S, S, 900, ['#4a4241', '#6a605e', '#3a3333', '#7a6e6a'], 1.5, 5, rnd);
+    g.globalAlpha = 0.6; speckle(g, S, S, 60, ['#ff5a1f'], 1, 2, rnd); g.globalAlpha = 1;
+    return tex(c);
+  });
+
+  // A rune circle for the turning wheel.
+  T.runes = () => once('runes', () => {
+    const S = 1024, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(261);
+    g.fillStyle = '#2a2127'; g.beginPath(); g.arc(S / 2, S / 2, S / 2, 0, 7); g.fill();
+    speckle(g, S, S, 700, ['#33292f', '#221a20', '#3a2e34'], 4, 16, rnd);
+    g.strokeStyle = '#ff5a1a'; g.shadowColor = '#ff7a2a'; g.shadowBlur = 18;
+    [[0.46, 10], [0.38, 6], [0.16, 6]].forEach(([r, w]) => { g.lineWidth = w; g.beginPath(); g.arc(S / 2, S / 2, S * r, 0, 7); g.stroke(); });
+    g.lineWidth = 7; g.beginPath();
+    for (let i = 0; i <= 5; i++) { const a = -Math.PI / 2 + (i * 4 * Math.PI) / 5, x = S / 2 + Math.cos(a) * S * 0.38, y = S / 2 + Math.sin(a) * S * 0.38; i ? g.lineTo(x, y) : g.moveTo(x, y); }
+    g.stroke();
+    g.font = '700 64px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#ff8a3a';
+    const glyphs = 'ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃ';
+    for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; g.save(); g.translate(S / 2 + Math.cos(a) * S * 0.42, S / 2 + Math.sin(a) * S * 0.42); g.rotate(a + Math.PI / 2); g.fillText(glyphs[i], 0, 0); g.restore(); }
+    g.shadowBlur = 0;
+    return tex(c, false);
+  });
+
+  T.bone = () => once('bone', () => {
+    const c = canvas(128, 256), g = c.getContext('2d'), rnd = U.rng(271);
+    g.fillStyle = '#e6dbc2'; g.fillRect(0, 0, 128, 256);
+    for (let i = 0; i < 8; i++) { g.fillStyle = 'rgba(90,70,50,0.35)'; g.fillRect(0, i * 32 + 28, 128, 4); }
+    speckle(g, 128, 256, 120, ['#d4c6a8', '#f2e9d6', '#c9b994'], 1, 4, rnd);
+    return tex(c);
   });
 
   T.lattice = () => once('lattice', () => {

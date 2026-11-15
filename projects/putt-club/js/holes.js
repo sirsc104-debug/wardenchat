@@ -1,6 +1,6 @@
 /* Putt Club: the 27 garden holes. Laid out on paper in (x, y), with the tee near y = 0 and the cup up the page.
    Each one has a garden thing of its own (`special`). A round deals a random handful of them. */
-(function (PC) {
+(function (mod) { const PC = window.PC = window.PC || {}; mod(PC); (PC.SRC = PC.SRC || []).push(mod); })(function (PC) {
   'use strict';
   const U = PC.U, TAU = U.TAU;
   const rect = U.rect, rp = U.roundPoly;
@@ -140,7 +140,7 @@
       { pts: [[-2.6, 8.6], [1.7, 8.6]], w: 0.4, h: 0.42, style: 'hedge' },
       { pts: [[1.7, 8.6], [1.7, 12.2]], w: 0.3, h: 0.42, style: 'hedge' },
     ],
-    features: [{ type: 'launch', x: -0.6, y: 6.4, r: 0.5, vz: 6.2, minSpeed: 3.2 }],
+    features: [{ type: 'launch', x: -0.6, y: 6.4, r: 0.5, vz: 6.2, minSpeed: 3.2, land: [-0.8, 10.2] }],
   });
 
   // 8
@@ -455,7 +455,8 @@
     }],
   });
 
-  H.forEach((h, i) => { h.num = i + 1; });
+  PC.Kit = { openRail, laneCircle };
+  H.forEach((h, i) => { h.num = i + 1; h.course = 'garden'; });
   PC.HOLES = H;
-  PC.holeById = id => H.find(h => h.id === id);
-})(window.PC = window.PC || {});
+  PC.holeById = id => H.find(h => h.id === id) || (PC.ABYSS || []).find(h => h.id === id);
+});

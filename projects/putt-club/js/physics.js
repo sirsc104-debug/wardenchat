@@ -1,6 +1,6 @@
 /* Putt Club: ball physics. Pure data, no three.js, so it also runs under Node for the hole tests.
    The ball rolls on the course in 2D (x, y) and keeps a height z for ramps, drops and jumps. */
-(function (PC) {
+(function (mod) { const PC = window.PC = window.PC || {}; mod(PC); (PC.SRC = PC.SRC || []).push(mod); })(function (PC) {
   'use strict';
   const U = PC.U;
 
@@ -19,7 +19,7 @@
     WATER_BED: -0.55,
   };
 
-  const ZONE_FRIC = { slime: 0.2, honey: 7, soil: 1.35, seeds: 1.05, sand: 3, moss: 1.15 };
+  const ZONE_FRIC = { slime: 0.2, honey: 7, soil: 1.35, seeds: 1.05, sand: 3, moss: 1.15, glass: 0.2, tar: 7, ash: 1.3 };
   PC.ZONE_FRIC = ZONE_FRIC;
 
   // Turn a hole design into the shape the simulator and renderer share.
@@ -34,10 +34,12 @@
       return o;
     });
     hole.hazards = (spec.hazards || []).map(z => Object.assign({ kind: 'water', top: C.WATER_TOP, bed: C.WATER_BED }, z, { poly: U.ccw(z.poly) }));
+    hole.overHazards = hole.hazards.filter(z => z.over);
     hole.zones = (spec.zones || []).map(z => Object.assign({}, z, { poly: U.ccw(z.poly), fric: z.fric || ZONE_FRIC[z.type] || 1 }));
     const look = hole.look = Object.assign({ rail: 'timber', light: 'day' }, spec.look || {});
     let rails = spec.rails;
-    if (!rails) rails = [{ pts: hole.floors[0].poly, closed: true }];
+    // Abyss holes float over nothing: no rails unless the hole asks for them.
+    if (!rails) rails = look.theme === 'abyss' ? [] : [{ pts: hole.floors[0].poly, closed: true }];
     hole.rails = rails.map(r => Object.assign({ side: 'out', h: C.RAIL_H, w: 0.2, style: look.rail, e: 0.72 }, r));
     (spec.walls || []).forEach(w => hole.rails.push(Object.assign({ side: 'center', closed: false, h: 0.5, w: 0.3, style: 'hedge', e: 0.6 }, w)));
     hole.posts = (spec.posts || []).map(p => Object.assign({ h: 0.5, e: 0.6, style: 'rock' }, p));
@@ -59,8 +61,10 @@
   };
 
   class Sim {
-    constructor(hole) {
+    constructor(hole, opts) {
       this.hole = PC.prepareHole(hole);
+      this.opts = opts || {};
+      this.assist = this.opts.assist || 1;
       this.t = 0;
       this.events = [];
       this.feats = (this.hole.features || []).map(f => {
@@ -130,6 +134,13 @@
       for (let i = 0; i < this.surfFeats.length; i++) {
         const s = this.surfFeats[i].surface(x, y, this.t, this);
         if (s) return s;
+      }
+      // Pools of lava set into a green follow the green's height.
+      const O = this.hole.overHazards;
+      for (let i = 0; i < O.length; i++) {
+        if (!U.inPoly(x, y, O[i].poly)) continue;
+        const fh = this.floorHeight(x, y);
+        return { kind: O[i].kind, h: fh - 0.45, top: fh - 0.05, hazard: O[i] };
       }
       if (this.floorAt(x, y)) return { kind: 'floor', h: this.floorHeight(x, y), fric: this.zoneFric(x, y) };
       const hz = this.hazardAt(x, y);
@@ -265,7 +276,8 @@
       const cp = this.cupPos();
       const cdx = cp[0] - b.x, cdy = cp[1] - b.y, cd = Math.hypot(cdx, cdy);
       const relCup = Math.hypot(b.vx - cp[2], b.vy - cp[3]);
-      if (cd < C.CUP_R + 0.1 && cd > 1e-4 && relCup < 1.8) { ax += (cdx / cd) * 3.2; ay += (cdy / cd) * 3.2; }
+      const A = this.assist;
+      if (cd < C.CUP_R + 0.1 * A && cd > 1e-4 && relCup < 1.8 * A) { ax += (cdx / cd) * 3.2 * A; ay += (cdy / cd) * 3.2 * A; }
 
       const cvx = g.carry ? g.carry[0] : 0, cvy = g.carry ? g.carry[1] : 0;
       b.vx += ax * dt; b.vy += ay * dt;
@@ -295,7 +307,9 @@
         if (rel < C.SINK_V) { this.sink(cp2); return; }
         if (!b.lipped) {
           b.lipped = true;
-          const a = (Math.random() - 0.5) * 0.4, c = Math.cos(a), s = Math.sin(a);
+          // A lip-out: the deflection depends only on where and how the ball arrives, so previews match.
+          const r = Math.sin(b.x * 127.1 + b.y * 311.7 + b.vx * 74.7 + b.vy * 19.3) * 43758.5453;
+          const a = (r - Math.floor(r) - 0.5) * 0.4, c = Math.cos(a), s = Math.sin(a);
           const vx = b.vx * c - b.vy * s, vy = b.vx * s + b.vy * c;
           b.vx = vx * 0.84; b.vy = vy * 0.84;
           this.emit({ type: 'lip' });
@@ -354,6 +368,27 @@
 
     // Put the ball back where the last shot was taken from (after water or out of bounds).
     restore() { this.place(this.safe[0], this.safe[1]); }
+
+    // Everything needed to rebuild this moment in another Sim (for rivals thinking in a worker).
+    snapshot() {
+      const copy = v => JSON.parse(JSON.stringify(v));
+      return {
+        t: this.t, ball: copy(this.ball), safe: this.safe.slice(),
+        feats: this.feats.map(f => { const o = {}; Object.keys(f).forEach(k => { if (typeof f[k] !== 'function' && k !== 'spec' && k !== 'type' && k !== 'line') o[k] = f[k]; }); return copy(o); }),
+      };
+    }
+    load(snap) {
+      this.t = snap.t;
+      this.feats.forEach((f, i) => Object.assign(f, snap.feats[i]));
+      this.feats.forEach(f => f.update && f.update(this.t, this));
+      Object.assign(this.ball, snap.ball);
+      this.safe = snap.safe.slice();
+      this.events.length = 0;
+      return this;
+    }
+    clone() { return new Sim(this.hole, this.opts).load(this.snapshot()); }
   }
   PC.Sim = Sim;
-})(window.PC = window.PC || {});
+  // The most strokes before you pick up: 8 in the garden, par + 5 in the Abyss.
+  PC.maxStrokes = hole => (hole.par >= 6 ? hole.par + 5 : 8);
+});
