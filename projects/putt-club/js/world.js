@@ -557,10 +557,21 @@
     buildCup(hole, sim) {
       const G = this.holeGroup;
       const cup = new THREE.Group();
-      const disc = new THREE.Mesh(new THREE.CircleGeometry(C.CUP_R, 40), new THREE.MeshBasicMaterial({ map: T.cupShade() }));
-      disc.rotation.x = -Math.PI / 2; disc.position.y = 0.016;
-      const rim = new THREE.Mesh(new THREE.RingGeometry(C.CUP_R - 0.005, C.CUP_R + 0.03, 48), new THREE.MeshStandardMaterial({ color: col('#f6f6f0'), roughness: 0.5 }));
-      rim.rotation.x = -Math.PI / 2; rim.position.y = 0.017;
+      // The hole and its rim follow the green's shape, so a cup at the bottom of a dip (a bowl, a funnel)
+      // is never covered by the slope around it. The extra lift covers the green's mesh being a little
+      // flatter than the true slope between its points.
+      const [cx0, cy0] = hole.cup, h0 = sim.floorHeight(cx0, cy0);
+      const e = 0.02, gx = (sim.floorHeight(cx0 + e, cy0) - sim.floorHeight(cx0 - e, cy0)) / (2 * e), gy = (sim.floorHeight(cx0, cy0 + e) - sim.floorHeight(cx0, cy0 - e)) / (2 * e);
+      const extra = Math.min(0.1, Math.hypot(gx, gy) * 0.3);
+      const conform = (geo, lift) => {
+        geo.rotateX(-Math.PI / 2);
+        const p = geo.attributes.position;
+        for (let i = 0; i < p.count; i++) p.setY(i, sim.floorHeight(cx0 + p.getX(i), cy0 - p.getZ(i)) - h0 + lift + extra);
+        geo.computeVertexNormals();
+        return geo;
+      };
+      const disc = new THREE.Mesh(conform(new THREE.CircleGeometry(C.CUP_R, 40, 0), 0.016), new THREE.MeshBasicMaterial({ map: T.cupShade(), polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }));
+      const rim = new THREE.Mesh(conform(new THREE.RingGeometry(C.CUP_R - 0.005, C.CUP_R + 0.03, 48, 2), 0.017), new THREE.MeshStandardMaterial({ color: col('#f6f6f0'), roughness: 0.5, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }));
       cup.add(disc, rim);
       const flagG = new THREE.Group();
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 1.75, 10), new THREE.MeshStandardMaterial({ map: T.pole(), roughness: 0.5 }));
