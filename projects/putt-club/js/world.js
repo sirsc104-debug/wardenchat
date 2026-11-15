@@ -118,7 +118,14 @@
     if (closed) { inner.push(inner[0]); outer.push(outer[0]); tops.push(tops[0]); P = P.concat([P[0]]); }
     const pos = [], uvs = [];
     let acc = 0;
+    // The faces are wound for normals on the left of the direction of travel; when they are on the right
+    // (a polygon going the other way round) every face is turned round, or it would be culled from the
+    // side it faces and the rail would look hollow.
+    let cr = 0;
+    for (let i = 0; i < P.length - 1; i++) { const dx = P[i + 1][0] - P[i][0], dy = P[i + 1][1] - P[i][1]; cr += dx * N[i][1] - dy * N[i][0]; }
+    const flip = cr < 0;
     const quad = (a, b, c, d, ua, ub, va, vb) => {
+      if (flip) { pos.push(...a, ...c, ...b, ...b, ...c, ...d); uvs.push(ua, va, ub, va, ua, vb, ua, vb, ub, va, ub, vb); return; }
       pos.push(...a, ...b, ...c, ...c, ...b, ...d);
       uvs.push(ua, va, ua, vb, ub, va, ub, va, ua, vb, ub, vb);
     };
@@ -427,7 +434,9 @@
       const visH = r.style === 'hedge' ? r.h + 0.06 : r.style === 'trellis' ? 0.16 : r.h;
       const topAt = r.top ? (x, y, px, py) => r.top(px, py) : (x, y) => sim.groundRaw(x, y) + visH;
       const w = r.style === 'hedge' ? r.w + 0.04 : r.w;
-      const body = railGeometry(r.pts, r.closed, r.side, w, topAt, GROUND_Y - 0.03, { uScale: r.style === 'hedge' ? 1.5 : 1 });
+      // A wall stands on the green (on a floating platform it must not hang below it); a rail runs down to the ground.
+      const bottom = r.side === 'center' ? Math.min(...U.resample(r.pts, 0.3, false).map(p => sim.groundRaw(p[0], p[1]))) - 0.01 : GROUND_Y - 0.03;
+      const body = railGeometry(r.pts, r.closed, r.side, w, topAt, bottom, { uScale: r.style === 'hedge' ? 1.5 : 1 });
       const m = new THREE.Mesh(body.geo, mats.body); m.castShadow = true; m.receiveShadow = true; G.add(m);
       if (mats.cap) {
         const capTop = (x, y, px, py) => topAt(x, y, px, py) + 0.045;
@@ -440,6 +449,11 @@
     // The face of a ledge (an invisible wall you can drop off but not climb): a strip from the lower
     // ground up to the ledge, in the course's skirt material, so the step is easy to see.
     buildLedge(r, hole, sim) {
+      // Separate platforms already show their own sides; only draw a face where one green steps down.
+      const rs = U.resample(r.pts, 0.5, false), mid = rs[Math.floor(rs.length / 2)], q = rs[Math.min(rs.length - 1, Math.floor(rs.length / 2) + 1)] || mid;
+      const ddx = q[0] - mid[0], ddy = q[1] - mid[1], dl = Math.hypot(ddx, ddy) || 1;
+      const fa = sim.floorAt(mid[0] - ddy / dl * 0.15, mid[1] + ddx / dl * 0.15), fb = sim.floorAt(mid[0] + ddy / dl * 0.15, mid[1] - ddx / dl * 0.15);
+      if (!fa || fa !== fb) return;
       const theme = hole.look.theme, style = theme === 'winter' ? 'snow' : theme === 'canyon' ? 'sandstone' : theme === 'abyss' ? 'temple' : 'soil';
       const pts = U.resample(r.pts, 0.15, false), pos = [], uv = [], idx = [];
       let run = 0;
@@ -525,7 +539,7 @@
       if (z.kind === 'water' && z.over) {
         // A pool set into the green, like the lava pools: water sitting just below the surface, with a stone lip.
         const n = T.waterNormal().clone(); n.needsUpdate = true; n.repeat.set(0.4, 0.4);
-        const wm = new THREE.MeshPhysicalMaterial({ color: col(z.cold ? '#1f5a78' : '#2f8fa8'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: 0.9, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1 });
+        const wm = new THREE.MeshPhysicalMaterial({ color: col(z.cold ? '#1f5a78' : '#2f8fa8'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: z.cold ? 0.97 : 0.9, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1 });
         const geo = surfaceGeometry(z.poly, (x, y) => this.sim.floorHeight(x, y), { lift: 0.012, uv: (x, y) => [x / 2, y / 2], cell: 0.2 });
         G.add(new THREE.Mesh(geo, wm));
         const rim = railGeometry(z.poly, true, 'out', 0.16, (x, y) => this.sim.floorHeight(x, y) + 0.04, 0, { thick: 0.06 });
@@ -538,7 +552,7 @@
         bed.geometry.attributes.uv && bed.material.map.repeat.set(0.6, 0.6);
         bed.receiveShadow = true; G.add(bed);
         const n = T.waterNormal();
-        const wm = new THREE.MeshPhysicalMaterial({ color: col(z.cold ? '#24607e' : '#3b93ad'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: z.cold ? 0.88 : 0.78, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1, clearcoatRoughness: 0.1 });
+        const wm = new THREE.MeshPhysicalMaterial({ color: col(z.cold ? '#24607e' : '#3b93ad'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: z.cold ? 0.97 : 0.78, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1, clearcoatRoughness: 0.1 });
         n.repeat.set(0.35, 0.35);
         const water = new THREE.Mesh(flat(z.poly, z.top - 0.02), wm);
         water.receiveShadow = true; water.renderOrder = 2; G.add(water);

@@ -14,6 +14,7 @@
   const now = (t, sim) => (sim ? sim.t : t);
   const texMat = (tex, rx, ry, o) => { const t = tex.clone(); t.needsUpdate = true; t.repeat.set(rx, ry); return new THREE.MeshStandardMaterial(Object.assign({ map: t, roughness: 0.8 }, o || {})); };
   const SNOW = () => M('#ffffff', { roughness: 1 });
+  const UP = new THREE.Vector3(0, 1, 0);
 
   // ---------- Models ----------
   // A candy cane: a striped tube going up and curling over at the top.
@@ -401,7 +402,7 @@
     const G = world.holeGroup;
     [-1, 1].forEach(k => { const c = candyCane(s.zp + 0.3, 0.12); c.rotation.y = k > 0 ? Math.PI : 0; G.add(at(c, s.x + k * 3.2, s.y, GY())); });
     const beam = mesh(new THREE.CylinderGeometry(0.1, 0.1, 6.4, 12), texMat(T.candy(), 12, 1, { roughness: 0.3 })); beam.rotation.z = Math.PI / 2; beam.position.copy(V(s.x, s.y, s.zp + 0.12)); G.add(beam);
-    const rope = mesh(new THREE.CylinderGeometry(0.015, 0.015, 1, 6), M('#f2c94c', { metalness: 0.6, roughness: 0.3 }));
+    const rope = mesh(new THREE.CylinderGeometry(0.03, 0.03, 1, 8), M('#f2c94c', { metalness: 0.6, roughness: 0.3 }));
     const ball = new THREE.Group();
     const glass = mesh(new THREE.SphereGeometry(s.rt, 28, 20), new THREE.MeshPhysicalMaterial({ color: col('#c8102e'), metalness: 0.55, roughness: 0.12, clearcoat: 1 }));
     const cap = mesh(new THREE.CylinderGeometry(s.rt * 0.22, s.rt * 0.26, s.rt * 0.2, 12), M('#f2c94c', { metalness: 0.8, roughness: 0.25 })); cap.position.y = s.rt * 0.98;
@@ -410,9 +411,11 @@
     G.add(rope, ball);
     return {
       update() {
-        ball.position.copy(V(f.xc, s.y, f.zc)); ball.rotation.z = -f.th;
-        const top = V(s.x, s.y, s.zp), bot = V(f.xc, s.y, f.zc + s.rt);
-        rope.position.copy(top.clone().add(bot).multiplyScalar(0.5)); rope.scale.y = top.distanceTo(bot); rope.rotation.z = -f.th;
+        // the cap points up the cord at the pivot, and the cord runs from the pivot to the cap
+        ball.position.copy(V(f.xc, s.y, f.zc)); ball.rotation.z = f.th;
+        const top = V(s.x, s.y, s.zp), c = V(f.xc, s.y, f.zc), dir = top.clone().sub(c).normalize();
+        const bot = c.clone().add(dir.clone().multiplyScalar(s.rt * 1.08));
+        rope.position.copy(top.clone().add(bot).multiplyScalar(0.5)); rope.scale.y = top.distanceTo(bot); rope.quaternion.setFromUnitVectors(UP, dir);
       },
     };
   };

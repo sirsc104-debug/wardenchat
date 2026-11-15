@@ -4381,7 +4381,14 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
     if (closed) { inner.push(inner[0]); outer.push(outer[0]); tops.push(tops[0]); P = P.concat([P[0]]); }
     const pos = [], uvs = [];
     let acc = 0;
+    // The faces are wound for normals on the left of the direction of travel; when they are on the right
+    // (a polygon going the other way round) every face is turned round, or it would be culled from the
+    // side it faces and the rail would look hollow.
+    let cr = 0;
+    for (let i = 0; i < P.length - 1; i++) { const dx = P[i + 1][0] - P[i][0], dy = P[i + 1][1] - P[i][1]; cr += dx * N[i][1] - dy * N[i][0]; }
+    const flip = cr < 0;
     const quad = (a, b, c, d, ua, ub, va, vb) => {
+      if (flip) { pos.push(...a, ...c, ...b, ...b, ...c, ...d); uvs.push(ua, va, ub, va, ua, vb, ua, vb, ub, va, ub, vb); return; }
       pos.push(...a, ...b, ...c, ...c, ...b, ...d);
       uvs.push(ua, va, ua, vb, ub, va, ub, va, ua, vb, ub, vb);
     };
@@ -4690,7 +4697,9 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
       const visH = r.style === 'hedge' ? r.h + 0.06 : r.style === 'trellis' ? 0.16 : r.h;
       const topAt = r.top ? (x, y, px, py) => r.top(px, py) : (x, y) => sim.groundRaw(x, y) + visH;
       const w = r.style === 'hedge' ? r.w + 0.04 : r.w;
-      const body = railGeometry(r.pts, r.closed, r.side, w, topAt, GROUND_Y - 0.03, { uScale: r.style === 'hedge' ? 1.5 : 1 });
+      // A wall stands on the green (on a floating platform it must not hang below it); a rail runs down to the ground.
+      const bottom = r.side === 'center' ? Math.min(...U.resample(r.pts, 0.3, false).map(p => sim.groundRaw(p[0], p[1]))) - 0.01 : GROUND_Y - 0.03;
+      const body = railGeometry(r.pts, r.closed, r.side, w, topAt, bottom, { uScale: r.style === 'hedge' ? 1.5 : 1 });
       const m = new THREE.Mesh(body.geo, mats.body); m.castShadow = true; m.receiveShadow = true; G.add(m);
       if (mats.cap) {
         const capTop = (x, y, px, py) => topAt(x, y, px, py) + 0.045;
@@ -4703,6 +4712,11 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
     // The face of a ledge (an invisible wall you can drop off but not climb): a strip from the lower
     // ground up to the ledge, in the course's skirt material, so the step is easy to see.
     buildLedge(r, hole, sim) {
+      // Separate platforms already show their own sides; only draw a face where one green steps down.
+      const rs = U.resample(r.pts, 0.5, false), mid = rs[Math.floor(rs.length / 2)], q = rs[Math.min(rs.length - 1, Math.floor(rs.length / 2) + 1)] || mid;
+      const ddx = q[0] - mid[0], ddy = q[1] - mid[1], dl = Math.hypot(ddx, ddy) || 1;
+      const fa = sim.floorAt(mid[0] - ddy / dl * 0.15, mid[1] + ddx / dl * 0.15), fb = sim.floorAt(mid[0] + ddy / dl * 0.15, mid[1] - ddx / dl * 0.15);
+      if (!fa || fa !== fb) return;
       const theme = hole.look.theme, style = theme === 'winter' ? 'snow' : theme === 'canyon' ? 'sandstone' : theme === 'abyss' ? 'temple' : 'soil';
       const pts = U.resample(r.pts, 0.15, false), pos = [], uv = [], idx = [];
       let run = 0;
@@ -4788,7 +4802,7 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
       if (z.kind === 'water' && z.over) {
         // A pool set into the green, like the lava pools: water sitting just below the surface, with a stone lip.
         const n = T.waterNormal().clone(); n.needsUpdate = true; n.repeat.set(0.4, 0.4);
-        const wm = new THREE.MeshPhysicalMaterial({ color: col(z.cold ? '#1f5a78' : '#2f8fa8'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: 0.9, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1 });
+        const wm = new THREE.MeshPhysicalMaterial({ color: col(z.cold ? '#1f5a78' : '#2f8fa8'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: z.cold ? 0.97 : 0.9, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1 });
         const geo = surfaceGeometry(z.poly, (x, y) => this.sim.floorHeight(x, y), { lift: 0.012, uv: (x, y) => [x / 2, y / 2], cell: 0.2 });
         G.add(new THREE.Mesh(geo, wm));
         const rim = railGeometry(z.poly, true, 'out', 0.16, (x, y) => this.sim.floorHeight(x, y) + 0.04, 0, { thick: 0.06 });
@@ -4801,7 +4815,7 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
         bed.geometry.attributes.uv && bed.material.map.repeat.set(0.6, 0.6);
         bed.receiveShadow = true; G.add(bed);
         const n = T.waterNormal();
-        const wm = new THREE.MeshPhysicalMaterial({ color: col(z.cold ? '#24607e' : '#3b93ad'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: z.cold ? 0.88 : 0.78, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1, clearcoatRoughness: 0.1 });
+        const wm = new THREE.MeshPhysicalMaterial({ color: col(z.cold ? '#24607e' : '#3b93ad'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: z.cold ? 0.97 : 0.78, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1, clearcoatRoughness: 0.1 });
         n.repeat.set(0.35, 0.35);
         const water = new THREE.Mesh(flat(z.poly, z.top - 0.02), wm);
         water.receiveShadow = true; water.renderOrder = 2; G.add(water);
@@ -6117,12 +6131,13 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
       update() {
         const px = s.x, pz = s.zp;
         tire.position.copy(V(f.xc, s.y, f.zc));
-        tire.rotation.z = -f.th;
-        const top = V(px, s.y, pz), bot = V(f.xc, s.y, f.zc + s.rt - 0.05);
+        tire.rotation.z = f.th;
+        const top = V(px, s.y, pz), c = V(f.xc, s.y, f.zc), dir = top.clone().sub(c).normalize();
+        const bot = c.clone().add(dir.clone().multiplyScalar(s.rt - 0.05));
         const mid = top.clone().add(bot).multiplyScalar(0.5);
         rope.position.copy(mid);
         rope.scale.y = top.distanceTo(bot);
-        rope.rotation.z = -f.th;
+        rope.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
       },
     };
   };
@@ -7006,9 +7021,9 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
     return {
       update() {
         ball.position.copy(V(f.xc, s.y, f.zc)); ball.rotation.z = -f.th * 2;
-        const top = V(s.x, s.y, s.zp), bot = V(f.xc, s.y, f.zc + s.rt * 0.75);
+        const top = V(s.x, s.y, s.zp), c = V(f.xc, s.y, f.zc), bot = c.clone().add(top.clone().sub(c).normalize().multiplyScalar(s.rt * 0.75));
         chain.position.copy(top.clone().add(bot).multiplyScalar(0.5));
-        chain.scale.y = top.distanceTo(bot); chain.rotation.z = -f.th;
+        chain.scale.y = top.distanceTo(bot); chain.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), top.clone().sub(bot).normalize());
       },
     };
   };
@@ -8025,6 +8040,7 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
   const now = (t, sim) => (sim ? sim.t : t);
   const texMat = (tex, rx, ry, o) => { const t = tex.clone(); t.needsUpdate = true; t.repeat.set(rx, ry); return new THREE.MeshStandardMaterial(Object.assign({ map: t, roughness: 0.8 }, o || {})); };
   const SNOW = () => M('#ffffff', { roughness: 1 });
+  const UP = new THREE.Vector3(0, 1, 0);
 
   // ---------- Models ----------
   // A candy cane: a striped tube going up and curling over at the top.
@@ -8412,7 +8428,7 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
     const G = world.holeGroup;
     [-1, 1].forEach(k => { const c = candyCane(s.zp + 0.3, 0.12); c.rotation.y = k > 0 ? Math.PI : 0; G.add(at(c, s.x + k * 3.2, s.y, GY())); });
     const beam = mesh(new THREE.CylinderGeometry(0.1, 0.1, 6.4, 12), texMat(T.candy(), 12, 1, { roughness: 0.3 })); beam.rotation.z = Math.PI / 2; beam.position.copy(V(s.x, s.y, s.zp + 0.12)); G.add(beam);
-    const rope = mesh(new THREE.CylinderGeometry(0.015, 0.015, 1, 6), M('#f2c94c', { metalness: 0.6, roughness: 0.3 }));
+    const rope = mesh(new THREE.CylinderGeometry(0.03, 0.03, 1, 8), M('#f2c94c', { metalness: 0.6, roughness: 0.3 }));
     const ball = new THREE.Group();
     const glass = mesh(new THREE.SphereGeometry(s.rt, 28, 20), new THREE.MeshPhysicalMaterial({ color: col('#c8102e'), metalness: 0.55, roughness: 0.12, clearcoat: 1 }));
     const cap = mesh(new THREE.CylinderGeometry(s.rt * 0.22, s.rt * 0.26, s.rt * 0.2, 12), M('#f2c94c', { metalness: 0.8, roughness: 0.25 })); cap.position.y = s.rt * 0.98;
@@ -8421,9 +8437,11 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
     G.add(rope, ball);
     return {
       update() {
-        ball.position.copy(V(f.xc, s.y, f.zc)); ball.rotation.z = -f.th;
-        const top = V(s.x, s.y, s.zp), bot = V(f.xc, s.y, f.zc + s.rt);
-        rope.position.copy(top.clone().add(bot).multiplyScalar(0.5)); rope.scale.y = top.distanceTo(bot); rope.rotation.z = -f.th;
+        // the cap points up the cord at the pivot, and the cord runs from the pivot to the cap
+        ball.position.copy(V(f.xc, s.y, f.zc)); ball.rotation.z = f.th;
+        const top = V(s.x, s.y, s.zp), c = V(f.xc, s.y, f.zc), dir = top.clone().sub(c).normalize();
+        const bot = c.clone().add(dir.clone().multiplyScalar(s.rt * 1.08));
+        rope.position.copy(top.clone().add(bot).multiplyScalar(0.5)); rope.scale.y = top.distanceTo(bot); rope.quaternion.setFromUnitVectors(UP, dir);
       },
     };
   };

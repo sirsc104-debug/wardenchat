@@ -969,12 +969,13 @@
       update() {
         const px = s.x, pz = s.zp;
         tire.position.copy(V(f.xc, s.y, f.zc));
-        tire.rotation.z = -f.th;
-        const top = V(px, s.y, pz), bot = V(f.xc, s.y, f.zc + s.rt - 0.05);
+        tire.rotation.z = f.th;
+        const top = V(px, s.y, pz), c = V(f.xc, s.y, f.zc), dir = top.clone().sub(c).normalize();
+        const bot = c.clone().add(dir.clone().multiplyScalar(s.rt - 0.05));
         const mid = top.clone().add(bot).multiplyScalar(0.5);
         rope.position.copy(mid);
         rope.scale.y = top.distanceTo(bot);
-        rope.rotation.z = -f.th;
+        rope.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
       },
     };
   };

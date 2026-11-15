@@ -486,9 +486,9 @@
     return {
       update() {
         ball.position.copy(V(f.xc, s.y, f.zc)); ball.rotation.z = -f.th * 2;
-        const top = V(s.x, s.y, s.zp), bot = V(f.xc, s.y, f.zc + s.rt * 0.75);
+        const top = V(s.x, s.y, s.zp), c = V(f.xc, s.y, f.zc), bot = c.clone().add(top.clone().sub(c).normalize().multiplyScalar(s.rt * 0.75));
         chain.position.copy(top.clone().add(bot).multiplyScalar(0.5));
-        chain.scale.y = top.distanceTo(bot); chain.rotation.z = -f.th;
+        chain.scale.y = top.distanceTo(bot); chain.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), top.clone().sub(bot).normalize());
       },
     };
   };
