@@ -186,6 +186,10 @@ body.canyon .hud-hole h2, body.canyon .intro h2 { color: #a8431c; }
 body.canyon .chip { background: #d9682b; color: #fff8ee; }
 body.canyon .chip::before { background: #fff8ee; }
 body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
+body.winter .hud-hole h2, body.winter .intro h2 { color: #1f5a8a; }
+body.winter .chip { background: #d42a3a; color: #ffffff; }
+body.winter .chip::before { background: #ffffff; }
+body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
 @keyframes rise { from { opacity: 0; transform: translate(-50%, 16px) scale(0.97); } }
 
 .toast { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; pointer-events: none; padding: 14px 26px; border-radius: 20px; background: var(--paper); box-shadow: 0 14px 40px rgba(23, 63, 47, 0.28); }
@@ -207,6 +211,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
 .book-sec small { font-size: 15px; font-weight: 500; color: var(--muted); }
 .book-sec.hell { color: #a8200f; }
 .book-sec.desert { color: #b4532a; }
+.book-sec.frost { color: #2f6fa8; }
 .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px; }
 .hole-card { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; padding: 10px 12px 12px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); transition: transform .12s, box-shadow .12s; }
 .hole-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(23, 63, 47, 0.16); }
@@ -221,6 +226,10 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
 .hole-card.canyon canvas { background: #f2dcb8; }
 .hole-card.canyon .hc-name { color: #8a3a1a; }
 .hole-card.canyon .hc-no { background: #d9682b; color: #fff8ee; }
+.hole-card.winter { background: #f2f8fd; border-color: #cfe0ef; }
+.hole-card.winter canvas { background: #e4eef8; }
+.hole-card.winter .hc-name { color: #1f5a8a; }
+.hole-card.winter .hc-no { background: #d42a3a; color: #ffffff; }
 .hc-no { position: absolute; top: 16px; left: 18px; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: var(--flag); color: #fff; font-weight: 700; font-size: 14px; }
 .hc-name { font-weight: 700; font-size: 18px; line-height: 1.1; color: var(--club); }
 .hc-sp { font-size: 13.5px; color: var(--ink); }

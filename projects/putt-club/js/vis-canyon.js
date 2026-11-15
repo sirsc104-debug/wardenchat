@@ -739,28 +739,6 @@
     return null;
   };
 
-  // Sunset Mesa: banded cliff faces where the mesa top drops to the lower green.
-  CV.mesa = function (s, world) {
-    const box = world.hole.box, mat = stoneMat(1, 0.6);
-    mat.side = THREE.DoubleSide;
-    const face = (x0, x1, y, h0, h1) => {
-      const g = new THREE.BufferGeometry();
-      const pos = [x0, 0, -y, x1, 0, -y, x1, h1, -y, x0, 0, -y, x1, h1, -y, x0, h0, -y];
-      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-      g.setAttribute('uv', new THREE.Float32BufferAttribute([x0 / 2, 0, x1 / 2, 0, x1 / 2, h1, x0 / 2, 0, x1 / 2, h1, x0 / 2, h0], 2));
-      g.computeVertexNormals();
-      world.holeGroup.add(mesh(g, mat, false));
-    };
-    face(box.x0, -s.hw, s.y1 - 0.01, s.top, s.top);
-    face(s.hw, box.x1, s.y1 - 0.01, s.top, s.top);
-    // the ramp's side walls, as triangles rising with it
-    [-s.hw, s.hw].forEach(x => {
-      const g = new THREE.BufferGeometry();
-      g.setAttribute('position', new THREE.Float32BufferAttribute([x, 0, -s.y0, x, 0, -s.y1, x, s.top, -s.y1], 3));
-      g.setAttribute('uv', new THREE.Float32BufferAttribute([s.y0 / 2, 0, s.y1 / 2, 0, s.y1 / 2, s.top], 2));
-      g.computeVertexNormals();
-      world.holeGroup.add(mesh(g, mat, false));
-    });
-    return null;
-  };
+  // Sunset Mesa's cliff faces are drawn by the world with every other ledge.
+  CV.mesa = () => null;
 })(window.PC);

@@ -1,6 +1,6 @@
 # SirSC's Putt Club
 
-Mini golf in 3D, played against three rivals. There are three courses: **the Garden**, 27 holes each built around its own garden trick; **the Canyon**, 27 desert holes built around cacti that pop the ball and tumbleweeds that blow across the green; and **the Abyss**, 18 holes of par 6 and up in an underground volcanic temple, floating over a lava abyss with no rails at all. Every round deals a random 9 or 18 from one course. The Course book lists all 72 holes and lets you practise any one of them.
+Mini golf in 3D, played against three rivals. Each difficulty has its own course: **the Garden** (Owen), 27 holes each built around its own garden trick; **the Canyon** (Medium), 27 desert holes built around cacti that pop the ball and tumbleweeds that blow across the green; **the Winter Wonderland** (Hard), 27 snowy holes among gingerbread houses and candy canes, with ice, thin ice, snowdrifts, sliding penguins and rolling snowballs; and **the Abyss** (Ultra), 18 holes of par 6 and up in an underground volcanic temple, floating over a lava abyss with no rails at all. Every round deals a random 9 or 18 from one course. The Course book lists all 99 holes and lets you practise any one of them.
 
 Plain HTML, CSS and JavaScript with three.js r128 from cdnjs. There is no build step for playing locally: serve the folder with `python3 -m http.server` and open `index.html`. All textures are painted on canvases and all sound is synthesised, so there are no image or audio files.
 
@@ -14,7 +14,7 @@ The title screen copies the SirSC games' menu (Bigger Fish, Tower Defense, Brain
 | --- | --- | --- | --- |
 | Owen | Garden | The whole putt, played out in a copy of the hole, so it shows every bounce, slope and current exactly. The cup also pulls a little harder. | Owen, Clover, Fern |
 | Medium | Canyon | A line to the first wall and one bounce. Cacti pop the ball. | Fern, Bramble, Blaze |
-| Hard | Garden | A short line that only shows direction. | Bramble, Blaze, Thorn |
+| Hard | Winter Wonderland | A short line that only shows direction. Ice, thin ice, snowdrifts, penguins and snowballs. | Bramble, Blaze, Thorn |
 | Ultra | The Abyss | None: just the arrow. No rails anywhere, so any edge is a drop. Springs: gold ones jump walls, red ones throw you off the edge. Par 6 to 11, and you pick up at par + 5. | Thorn, Cinder, SirSC |
 
 ## Rivals
@@ -31,9 +31,9 @@ Rivals play the same hole at the same time as you, each in its own copy of the h
 | Q / E or the ⟲ ⟳ buttons, right-drag | Turn the camera. Scroll or pinch to zoom. |
 | Esc or *Menu* | Pause, with the how-to and sound toggles. M toggles music, N toggles sound. |
 
-Water, flowerbeds, cacti, gulches, lava and the edges of the Abyss cost one penalty stroke and put the ball back where it was putted from. Eight strokes is the most on a Garden hole and par + 5 in the Abyss. After each hole a scorecard is filled in, golf style: birdies are circled, eagles double circled, bogeys boxed. Best rounds for each length and difficulty, your best on each hole and holes in one are kept in the browser.
+Water, flowerbeds, cacti, gulches, thin ice that gives way, lava, fire pits and the edges of the Abyss cost one penalty stroke and put the ball back where it was putted from. Eight strokes is the most on a Garden hole and par + 5 in the Abyss. After each hole a scorecard is filled in, golf style: birdies are circled, eagles double circled, bogeys boxed. Best rounds for each length and difficulty, your best on each hole and holes in one are kept in the browser.
 
-## The Garden: 27 holes (Owen and Hard)
+## The Garden: 27 holes (Owen)
 
 | # | Hole | Par | Its garden trick |
 | --- | --- | --- | --- |
@@ -102,9 +102,52 @@ A desert of red sandstone: mesas, buttes and spires on the horizon, saguaros dot
 | 26 | Canyon Rim | 3 | A lane along the canyon edge with no rail, and tumbleweeds blowing toward the drop. |
 | 27 | Sunset Mesa | 4 | One narrow ramp up a mesa at sunset, a tumbleweed rolling up and down it. |
 
+## The Winter Wonderland: 27 holes (Hard)
+
+A snowy valley ringed by white-capped mountains, with snow falling, snow-laden pines, gingerbread houses with iced roofs and glowing windows, giant candy canes, lollipops and snowmen. The greens are evergreen felt inside candy-cane rails, and the tee is a knitted mat. Every hole uses some of these:
+
+- **Ice** keeps the ball sliding long after it would stop on felt.
+- **Thin ice** sits over freezing water. The moment any ball rolls onto it, it starts to crack, and exactly 4 seconds later it breaks, whatever happens: a ball still on it falls through (a penalty stroke), and that sheet stays broken for the rest of the hole. Each player has their own copy of the hole, so your ice only breaks under your ball. There is always another way round, and if the spot you putted from has gone, the ball goes back to the nearest solid green.
+- **Snowdrifts** stop the ball dead.
+- **Penguins** belly-slide back and forth across the lanes and knock the ball away.
+- **Snowballs** roll down slopes toward you, speeding up and growing as they come, then burst at the bottom while the next one sets off.
+- Winter versions of the moving parts: a peppermint turnstile, gumdrop bumpers, candy cane gates, gingerbread houses you tunnel between, a giant bauble swinging over an ice bridge, an ice floe ferry, a ski jump, a turning ice rink, a sleigh carrying the cup, a gift-box spring and blizzard gusts.
+
+Each par is the test bot's strokes plus one, so Hard is tight: five holes are par 2.
+
+| # | Hole | Par | Its trick |
+| --- | --- | --- | --- |
+| 1 | Candy Cane Lane | 3 | A dogleg across slick ice with a candy cane slalom and a penguin in the corner. |
+| 2 | Penguin Parade | 3 | Three penguins sliding across, between gingerbread fences with gaps on opposite sides. |
+| 3 | Thin Ice Crossing | 3 | Thin ice across a frozen pond, or the long way through a drift; the cup hides behind a snowbank. |
+| 4 | Gingerbread Village | 4 | Tunnel through gingerbread houses under a wall, then past a penguin in the gap of a snowbank. |
+| 5 | Snowball Slope | 3 | Putt uphill while snowballs roll down three lanes at you. |
+| 6 | Gumdrop Pinball | 3 | Springy gumdrops on ice, and a fence across the front of the cup. |
+| 7 | Peppermint Twist | 3 | A peppermint turnstile with snowdrifts in the side bays. |
+| 8 | Frozen Pond | 2 | Snowmen on a skating pond, with the cup out on the ice. |
+| 9 | Ice Floe Ferry | 3 | Ride an ice floe across freezing water. |
+| 10 | Ski Jump | 3 | Hit the jump fast enough to fly a deep snowdrift. |
+| 11 | Blizzard Pass | 4 | Gusts blow toward an unrailed drop, and snowbanks force you along the edge. |
+| 12 | Snowman Alley | 3 | A crowd of snowmen, then a fence gap with a penguin sliding across it. |
+| 13 | Ornament Swing | 3 | A giant bauble swinging over a narrow, railless ice bridge. |
+| 14 | Toboggan Run | 3 | A winding downhill run, icy on its straights. |
+| 15 | Ice Rink | 3 | A turning ice rink carries the ball round, with snowmen riding on it. |
+| 16 | Sleigh Ride | 2 | The cup rides in a sleigh behind a fence open only at its ends. |
+| 17 | Cracking Shortcut | 3 | Straight across a thin-ice lake, or up, across and back down. |
+| 18 | Avalanche | 3 | Four lanes of snowballs down a steep slope, with two drifts to shelter in. |
+| 19 | Candy Cane Gates | 4 | Three gingerbread fences, each with a swinging candy cane gate. |
+| 20 | Present Hop | 3 | A wall of presents you hop with a gold gift-box spring. |
+| 21 | Penguin Slide | 2 | Penguins sliding diagonally down an ice chute. |
+| 22 | Frosty's Maze | 4 | A snowbank switchback with an icy middle run. |
+| 23 | Snow Globe | 2 | An icy bowl with snowmen in the middle and the cup on the far rim. |
+| 24 | Snowdrift Dunes | 3 | Rows of snowdrifts, each with one gap, and a penguin. |
+| 25 | Lift Line | 3 | Three ledges under a running chairlift, with a penguin and a snowball. |
+| 26 | Hockey Rink | 2 | A penguin goalie in the goal mouth, with snowman defenders. |
+| 27 | Gingerbread Summit | 4 | Two ramps up to a gingerbread house, past a penguin, a snowball and thin ice. |
+
 ## The Abyss: 18 holes (Ultra)
 
-An underground volcanic temple suspended over a lava abyss. The platforms are ancient flagstones on stone columns with a thin bronze inlay along every drop. Around them: obsidian cliffs and a stalactite roof, lava falls pouring down the cliff walls, a temple facade carved into the rock ahead, giant pillars with carved bands of glowing runes, ruined islands drifting in the dark, smoke and embers rising, and light falling through cracks in the roof. A colossal rune wheel turns slowly in the abyss below the course, chained to the cliffs; runes appear only on the pillars, the facade and the wheels.
+An underground volcanic temple suspended over a lava abyss. The small pits in the platforms are fire pits, with flames licking up out of glowing coals. The platforms are ancient flagstones on stone columns with a thin bronze inlay along every drop. Around them: obsidian cliffs and a stalactite roof, lava falls pouring down the cliff walls, a temple facade carved into the rock ahead, giant pillars with carved bands of glowing runes, ruined islands drifting in the dark, smoke and embers rising, and light falling through cracks in the roof. A colossal rune wheel turns slowly in the abyss below the course, chained to the cliffs; runes appear only on the pillars, the facade and the wheels.
 
 Every hole is built so that even perfect aim needs several putts: corners with nothing to bank off, ledges that only meet for a short stretch, slabs you must land on and stop. Springs come in two kinds: a gold spring throws the ball up and on, over a wall it could never get past otherwise (it only fires if you roll onto it heading for the far side, and its landing spot is ringed in gold), and a red spring flings the ball off the edge the way its arrow points. Each par is the strokes the test bot needed, plus two (the bot never misses).
 
@@ -131,7 +174,7 @@ Every hole is built so that even perfect aim needs several putts: corners with n
 
 ## Testing the holes
 
-`node tools/test-holes.js` (add `garden`, `canyon` or `abyss` to test one course) plays every hole with a search bot (it tries hundreds of putts per stroke and keeps the one that gets closest along the course) and reports how many strokes it needed and how often a random putt from the tee is a hole in one. Pass hole ids or numbers to test just those. It fails if a hole can't be finished within its stroke limit or if the tee, cup or a post is off the green. `node tools/test-rivals.js abyss 0.97` plays each hole three times with the rivals' own shot search at a given skill and reports their strokes.
+`node tools/test-holes.js` (add `garden`, `canyon`, `winter` or `abyss` to test one course) plays every hole with a search bot (it tries hundreds of putts per stroke and keeps the one that gets closest along the course) and reports how many strokes it needed and how often a random putt from the tee is a hole in one. Pass hole ids or numbers to test just those. It fails if a hole can't be finished within its stroke limit or if the tee, cup or a post is off the green. `node tools/test-rivals.js abyss 0.97` plays each hole three times with the rivals' own shot search at a given skill and reports their strokes.
 
 ## Single-file build
 
@@ -147,6 +190,7 @@ js/physics.js       ball physics (no three.js; also runs in Node)
 js/features.js      the moving and special parts of each hole (physics)
 js/holes.js         the 27 Garden holes
 js/canyon.js        the 27 Canyon holes
+js/winter.js        the 27 Winter Wonderland holes
 js/abyss.js         the 18 Abyss holes
 js/nav.js           the rivals' course map and shot search (also runs in their workers)
 js/bots.js          the rivals: workers, timing, skill
@@ -155,6 +199,7 @@ js/world.js         the three.js scene: greens, rails, water, cup, ball, effects
 js/vis.js           the garden around each hole and how each feature looks
 js/vis-abyss.js     the volcanic temple and the Abyss versions of each feature
 js/vis-canyon.js    the desert, cacti, tumbleweeds, springs and the Canyon versions of each feature
+js/vis-winter.js    the wonderland, thin ice, snowballs, penguins and the winter versions of each feature
 js/audio.js         synthesised sound effects and music
 js/game.js          menu, difficulties, rounds, rivals, scoring, camera, controls and screens
 tools/test-holes.js the hole-testing bot

@@ -417,6 +417,73 @@
     return tex(c);
   });
 
+  // ---------- Winter Wonderland ----------
+  // Fresh snow: white with soft blue hollows and a few glints.
+  T.snow = () => once('snow', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(511);
+    g.fillStyle = '#f4f8fc'; g.fillRect(0, 0, S, S);
+    for (let i = 0; i < 70; i++) { const x = rnd() * S, y = rnd() * S, r = 10 + rnd() * 30; const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, 'rgba(170,195,225,0.22)'); gr.addColorStop(1, 'rgba(170,195,225,0)'); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); }
+    speckle(g, S, S, 900, ['#ffffff', '#e2ecf6', '#d6e4f2'], 0.5, 1.4, rnd);
+    for (let i = 0; i < 60; i++) { g.fillStyle = 'rgba(255,255,255,0.95)'; g.fillRect(rnd() * S, rnd() * S, 1.5, 1.5); }
+    return tex(c);
+  });
+  // Red and white candy stripes running on the diagonal.
+  T.candy = (red = '#d42a3a') => once('candy' + red, () => {
+    const S = 128, c = canvas(S, S), g = c.getContext('2d');
+    g.fillStyle = '#fbf6f0'; g.fillRect(0, 0, S, S);
+    g.fillStyle = red;
+    for (let k = -2; k < 4; k++) { g.beginPath(); const o = k * 64; g.moveTo(o, 0); g.lineTo(o + 30, 0); g.lineTo(o + 30 + S, S); g.lineTo(o + S, S); g.closePath(); g.fill(); }
+    g.fillStyle = 'rgba(255,255,255,0.25)'; g.fillRect(0, S * 0.18, S, S * 0.12);
+    return tex(c);
+  });
+  // Baked gingerbread with darker freckles.
+  T.gingerbread = () => once('gingerbread', () => {
+    const S = 128, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(523);
+    g.fillStyle = '#a8642e'; g.fillRect(0, 0, S, S);
+    speckle(g, S, S, 700, ['#8e5222', '#b8743a', '#7a4418', '#c0844a'], 0.6, 2.2, rnd);
+    return tex(c);
+  });
+  // Pale blue ice with skate scratches and a few cracks.
+  T.ice = () => once('ice', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(531);
+    const gr = g.createLinearGradient(0, 0, S, S); gr.addColorStop(0, '#cfe9f6'); gr.addColorStop(1, '#a9d4ec');
+    g.fillStyle = gr; g.fillRect(0, 0, S, S);
+    for (let i = 0; i < 40; i++) { const x = rnd() * S, y = rnd() * S, r = 20 + rnd() * 50; const rg = g.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, 'rgba(255,255,255,0.18)'); rg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = rg; g.fillRect(x - r, y - r, r * 2, r * 2); }
+    g.strokeStyle = 'rgba(255,255,255,0.55)'; g.lineWidth = 1;
+    for (let i = 0; i < 26; i++) { const x = rnd() * S, y = rnd() * S, a = rnd() * 6.28, l = 20 + rnd() * 60; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + Math.cos(a + 0.4) * l * 0.5, y + Math.sin(a + 0.4) * l * 0.5, x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke(); }
+    g.strokeStyle = 'rgba(120,170,205,0.5)';
+    for (let i = 0; i < 6; i++) { let x = rnd() * S, y = rnd() * S; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 5; k++) { x += (rnd() - 0.5) * 40; y += (rnd() - 0.5) * 40; g.lineTo(x, y); } g.stroke(); }
+    return tex(c);
+  });
+  // A knitted tee mat in a red and white Nordic pattern.
+  T.teeKnit = () => once('teeKnit', () => {
+    const W = 256, Hh = 200, c = canvas(W, Hh), g = c.getContext('2d');
+    g.fillStyle = '#b8202e'; g.fillRect(0, 0, W, Hh);
+    const st = 8, cols = W / st, rows = Hh / st;
+    const on = (i, j) => {
+      if (j === 2 || j === rows - 3) return true;
+      if (j === 4 || j === rows - 5) return (i % 4) < 2;
+      const cy = rows / 2, cx = cols / 2, dx = Math.abs(i - cx), dy = Math.abs(j - cy);
+      if (dx + dy === 5 || dx + dy === 3 || (dx === 0 && dy === 0)) return true;            // a snowflake diamond
+      if (dx === 0 || dy === 0) return dx + dy < 5;
+      if (Math.abs(i - 4) + Math.abs(j - cy) === 2 || Math.abs(i - (cols - 5)) + Math.abs(j - cy) === 2) return true;
+      return false;
+    };
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+      g.fillStyle = on(i, j) ? '#f8f2ea' : '#b8202e';
+      g.beginPath(); g.ellipse(i * st + st / 2, j * st + st / 2, st * 0.42, st * 0.55, 0, 0, 7); g.fill();
+      g.fillStyle = 'rgba(0,0,0,0.12)'; g.fillRect(i * st + st / 2 - 0.5, j * st, 1, st);
+    }
+    return tex(c);
+  });
+  // Wrapping paper: a colour with a white stripe and dots.
+  T.wrap = (base = '#2f8a4a') => once('wrap' + base, () => {
+    const S = 64, c = canvas(S, S), g = c.getContext('2d');
+    g.fillStyle = base; g.fillRect(0, 0, S, S);
+    g.fillStyle = 'rgba(255,255,255,0.85)'; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { g.beginPath(); g.arc(8 + i * 16 + (j % 2) * 8, 8 + j * 16, 2.2, 0, 7); g.fill(); }
+    return tex(c);
+  });
+
   // Dry twigs on a clear background, for the shell of a tumbleweed.
   T.twigs = () => once('twigs', () => {
     const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(431);

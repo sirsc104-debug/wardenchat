@@ -19,7 +19,7 @@
     WATER_BED: -0.55,
   };
 
-  const ZONE_FRIC = { slime: 0.2, honey: 7, soil: 1.35, seeds: 1.05, sand: 3, moss: 1.15, glass: 0.2, tar: 7, ash: 1.3, cinder: 2.4 };
+  const ZONE_FRIC = { slime: 0.2, honey: 7, soil: 1.35, seeds: 1.05, sand: 3, moss: 1.15, glass: 0.2, tar: 7, ash: 1.3, cinder: 2.4, ice: 0.16, snow: 8 };
   PC.ZONE_FRIC = ZONE_FRIC;
 
   // Turn a hole design into the shape the simulator and renderer share.
@@ -368,7 +368,17 @@
     }
 
     // Put the ball back where the last shot was taken from (after water or out of bounds).
-    restore() { this.place(this.safe[0], this.safe[1]); }
+    restore() {
+      let [x, y] = this.safe;
+      // If the spot has gone (thin ice that broke since), use the nearest bit of solid green instead.
+      const ok = (px, py) => { const g = this.ground(px, py); return g.kind === 'floor' || g.kind === 'platform'; };
+      if (!ok(x, y)) {
+        let found = null;
+        for (let d = 0.25; d < 8 && !found; d += 0.25) for (let k = 0; k < 24; k++) { const a = (k / 24) * Math.PI * 2, px = x + Math.cos(a) * d, py = y + Math.sin(a) * d; if (ok(px, py) && ok(px + 0.15, py) && ok(px - 0.15, py) && ok(px, py + 0.15) && ok(px, py - 0.15)) { found = [px, py]; break; } }
+        [x, y] = found || this.hole.tee;
+      }
+      this.place(x, y);
+    }
 
     // Everything needed to rebuild this moment in another Sim (for rivals thinking in a worker).
     snapshot() {

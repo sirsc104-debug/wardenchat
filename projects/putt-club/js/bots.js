@@ -14,7 +14,7 @@
     Cinder: { color: '#ff9a1f', skill: 0.85 },
     SirSC: { color: '#4ff3ff', skill: 0.97 },
   };
-  const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'sprinkler', 'tumbleweeds']);
+  const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'sprinkler', 'tumbleweeds', 'snowballs']);
 
   // Runs inside the worker, built from the same physics source as the page.
   function workerMain(PC) {
@@ -23,9 +23,9 @@
       const m = e.data;
       try {
         let H = holes[m.holeId];
-        if (!H) { H = holes[m.holeId] = PC.prepareHole(PC.holeById(m.holeId)); fields[m.holeId] = PC.Nav.field(H); }
+        if (!H) { H = holes[m.holeId] = PC.prepareHole(PC.holeById(m.holeId)); fields[m.holeId] = {}; }
         const sim = new PC.Sim(H, m.opts).load(m.snap);
-        self.postMessage({ id: m.id, res: PC.Nav.choose(sim, fields[m.holeId], m) });
+        self.postMessage({ id: m.id, res: PC.Nav.choose(sim, PC.Nav.fieldFor(H, sim, fields[m.holeId]), m) });
       } catch (err) { self.postMessage({ id: m.id, error: String((err && err.message) || err) }); }
     };
   }
@@ -59,7 +59,7 @@
     setHole(hole, roster, opts) {
       this.gen++;
       this.cb.clear();
-      this.hole = hole; this.field = null;
+      this.hole = hole; this.fields = null;
       this.max = PC.maxStrokes(hole);
       this.timed = (hole.features || []).some(f => TIMED.has(f.type));
       this.list = roster.map((r, i) => ({
@@ -134,8 +134,8 @@
     ask(msg, cb) {
       if (!this.workers.length) {
         // No worker available: think on the main thread instead, with a lighter search.
-        const F = this.field || (this.field = PC.Nav.field(this.hole));
         const sim = new PC.Sim(this.hole, msg.opts).load(msg.snap);
+        const F = PC.Nav.fieldFor(this.hole, sim, this.fields || (this.fields = {}));
         setTimeout(() => cb(PC.Nav.choose(sim, F, Object.assign({}, msg, { n: 12, check: 2 }))), 0);
         return;
       }

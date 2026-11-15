@@ -354,6 +354,84 @@
   } };
 
   // Cacti: touch one and the ball is popped.
+  // Thin ice over cold water: it cracks the moment a ball rolls onto it and gives way a few seconds later
+  // (4 by default) whatever happens, then stays broken for the rest of the hole.
+  F.thinice = { make(s) {
+    const polys = s.list.map(p => U.ccw(p.poly || p)), delay = s.delay || 4;
+    const list = polys.map(() => ({ crack: -1, broken: false, cx: 0, cy: 0 }));
+    return {
+      list,
+      update(t, sim) {
+        // State lives on this.list (not the closure) so a snapshot loaded into another Sim carries it.
+        this.list.forEach((p, i) => {
+          const br = p.crack >= 0 && t >= p.crack + delay;
+          if (br && !p.broken && sim && sim.emit) sim.emit({ type: 'icebreak', i, x: p.cx, y: p.cy });
+          p.broken = br;
+        });
+      },
+      onStep(b, sim) {
+        if (b.mode !== 'roll') return;
+        for (let i = 0; i < polys.length; i++) {
+          const p = this.list[i];
+          if (p.crack >= 0 || !U.inPoly(b.x, b.y, polys[i])) continue;
+          p.crack = sim.t; p.cx = b.x; p.cy = b.y;
+          sim.emit({ type: 'crack', i, x: b.x, y: b.y });
+        }
+      },
+      surface(x, y, t, sim) {
+        for (let i = 0; i < polys.length; i++) if (!this.list[i].broken && U.inPoly(x, y, polys[i])) return { kind: 'platform', h: sim.floorHeight(x, y), fric: s.fric || 0.4, ice: true };
+        return null;
+      },
+      // When the ice under a resting ball will give way (for the rivals' planning), or null.
+      breaksAt(x, y) {
+        for (let i = 0; i < polys.length; i++) if (!this.list[i].broken && this.list[i].crack >= 0 && U.inPoly(x, y, polys[i])) return this.list[i].crack + delay;
+        return null;
+      },
+    };
+  } };
+
+  // Snowballs rolling down a slope, speeding up and growing as they go, then bursting at the bottom.
+  // A new one sets off from the top every cycle.
+  F.snowballs = { make(s) {
+    const geo = s.list.map(w => {
+      const L = [0];
+      for (let i = 1; i < w.path.length; i++) L.push(L[i - 1] + Math.hypot(w.path[i][0] - w.path[i - 1][0], w.path[i][1] - w.path[i - 1][1]));
+      return { line: w.path, cum: L, len: L[L.length - 1] };
+    });
+    const at = (g, d) => {
+      d = U.clamp(d, 0, g.len);
+      let i = 1; while (i < g.cum.length - 1 && g.cum[i] < d) i++;
+      const a = g.line[i - 1], b = g.line[i], seg = g.cum[i] - g.cum[i - 1] || 1, k = (d - g.cum[i - 1]) / seg;
+      return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, (b[0] - a[0]) / seg, (b[1] - a[1]) / seg];
+    };
+    const list = s.list.map((w, i) => ({ x: w.path[0][0], y: w.path[0][1], vx: 0, vy: 0, r: w.r0 || 0.15, on: false, hit: -9, u: 0, n: 0,
+      r0: w.r0 || 0.15, r1: w.r1 || 0.5, travel: w.travel || 4, cycle: (w.travel || 4) + (w.rest || 1.5), phase: w.phase || 0, gi: i }));
+    return {
+      list,
+      update(t) {
+        list.forEach(w => {
+          const g = geo[w.gi], tt = t + w.phase * w.cycle, c = Math.floor(tt / w.cycle), local = tt - c * w.cycle;
+          w.n = c;
+          const u = local / w.travel;
+          w.on = u <= 1;
+          w.u = Math.min(1, u);
+          // Speeding up as it rolls: distance goes with the square of time, nudged so it starts moving straight away.
+          const f = 0.25 * w.u + 0.75 * w.u * w.u, df = (0.25 + 1.5 * w.u) / w.travel;
+          const p = at(g, f * g.len);
+          w.x = p[0]; w.y = p[1];
+          w.vx = w.on ? p[2] * g.len * df : 0; w.vy = w.on ? p[3] * g.len * df : 0;
+          w.r = w.r0 + (w.r1 - w.r0) * w.u;
+        });
+      },
+      collide(b, sim) {
+        list.forEach(w => {
+          if (!w.on) return;
+          if (sim.hitCircle(w.x, w.y, w.r, sim.groundRaw(w.x, w.y) + w.r * 2, 0.55, w.vx, w.vy, 'snowball')) w.hit = sim.t;
+        });
+      },
+    };
+  } };
+
   F.cacti = { make(s) {
     const list = s.list.map(c => Object.assign({ r: 0.3, h: 1.6, kind: 'saguaro', hit: -9 }, c));
     return {
@@ -425,5 +503,5 @@
   } };
 
   // Pieces that only change the look (handled in vis.js) still need a physics stub.
-  ['decor', 'wheelbarrow', 'koi', 'hive', 'carrots', 'greenhouse', 'trellis', 'falls', 'rockery', 'sunflower', 'maze', 'arch', 'oasis', 'mesa', 'town'].forEach(k => { F[k] = { make() { return {}; } }; });
+  ['decor', 'wheelbarrow', 'koi', 'hive', 'carrots', 'greenhouse', 'trellis', 'falls', 'rockery', 'sunflower', 'maze', 'arch', 'oasis', 'mesa', 'town', 'village', 'lift', 'rink'].forEach(k => { F[k] = { make() { return {}; } }; });
 });

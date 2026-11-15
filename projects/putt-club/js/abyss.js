@@ -7,7 +7,8 @@
   'use strict';
   const U = PC.U, DEG = Math.PI / 180;
   const rect = U.rect, rp = U.roundPoly, circ = (x, y, r) => U.circle(x, y, r, Math.max(28, Math.ceil(r * 16)));
-  const lava = (x, y, r) => ({ kind: 'lava', over: true, poly: U.circle(x, y, r, 28) });
+  // Small pits of fire set into the platforms (drawn as burning braziers).
+  const lava = (x, y, r) => ({ kind: 'lava', over: true, fire: true, poly: U.circle(x, y, r, 28) });
   const LOOK = (extra) => Object.assign({ theme: 'abyss', light: 'abyss', flag: '#ff5a1a', flowers: ['#ff5a1f', '#ffb000', '#ff2d2d', '#ffe27a'] }, extra || {});
 
   // An axis-aligned causeway through waypoints, w wide, with a square pad at every corner.

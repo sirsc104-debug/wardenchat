@@ -192,6 +192,10 @@ body.canyon .hud-hole h2, body.canyon .intro h2 { color: #a8431c; }
 body.canyon .chip { background: #d9682b; color: #fff8ee; }
 body.canyon .chip::before { background: #fff8ee; }
 body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
+body.winter .hud-hole h2, body.winter .intro h2 { color: #1f5a8a; }
+body.winter .chip { background: #d42a3a; color: #ffffff; }
+body.winter .chip::before { background: #ffffff; }
+body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
 @keyframes rise { from { opacity: 0; transform: translate(-50%, 16px) scale(0.97); } }
 
 .toast { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; pointer-events: none; padding: 14px 26px; border-radius: 20px; background: var(--paper); box-shadow: 0 14px 40px rgba(23, 63, 47, 0.28); }
@@ -213,6 +217,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
 .book-sec small { font-size: 15px; font-weight: 500; color: var(--muted); }
 .book-sec.hell { color: #a8200f; }
 .book-sec.desert { color: #b4532a; }
+.book-sec.frost { color: #2f6fa8; }
 .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px; }
 .hole-card { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; padding: 10px 12px 12px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); transition: transform .12s, box-shadow .12s; }
 .hole-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(23, 63, 47, 0.16); }
@@ -227,6 +232,10 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
 .hole-card.canyon canvas { background: #f2dcb8; }
 .hole-card.canyon .hc-name { color: #8a3a1a; }
 .hole-card.canyon .hc-no { background: #d9682b; color: #fff8ee; }
+.hole-card.winter { background: #f2f8fd; border-color: #cfe0ef; }
+.hole-card.winter canvas { background: #e4eef8; }
+.hole-card.winter .hc-name { color: #1f5a8a; }
+.hole-card.winter .hc-no { background: #d42a3a; color: #ffffff; }
 .hc-no { position: absolute; top: 16px; left: 18px; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: var(--flag); color: #fff; font-weight: 700; font-size: 14px; }
 .hc-name { font-weight: 700; font-size: 18px; line-height: 1.1; color: var(--club); }
 .hc-sp { font-size: 13.5px; color: var(--ink); }
@@ -366,7 +375,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
               <button class="type-btn" data-tab="18" role="tab" type="button"><span class="type-icon">🏌️</span><span class="type-name">18 holes</span><span class="type-sub">The full round</span></button>
               <button class="type-btn soon" data-tab="online" role="tab" type="button"><span class="type-icon">🌐</span><span class="type-name">Play online</span><span class="type-sub">Coming soon</span></button>
             </div>
-            <div class="type-toggle"><button class="type-btn" id="openBook" type="button"><span class="type-icon">📖</span><span class="type-name">Course book</span><span class="type-sub">All 72 holes</span></button></div>
+            <div class="type-toggle"><button class="type-btn" id="openBook" type="button"><span class="type-icon">📖</span><span class="type-name">Course book</span><span class="type-sub">All 99 holes</span></button></div>
           </div>
           <div class="modes" id="modes"></div>
           <div class="how" id="how"></div>
@@ -386,10 +395,12 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
         </div>
         <button class="btn" id="bookBack" type="button"><span>Back</span></button>
       </header>
-      <h3 class="book-sec">The Garden <small>27 holes · Owen and Hard</small></h3>
+      <h3 class="book-sec">The Garden <small>27 holes · Owen</small></h3>
       <div class="book-grid" id="bookGrid"></div>
       <h3 class="book-sec desert">The Canyon <small>27 holes · Medium, cacti and tumbleweeds</small></h3>
       <div class="book-grid" id="canyonGrid"></div>
+      <h3 class="book-sec frost">The Winter Wonderland <small>27 holes · Hard, ice, thin ice and penguins</small></h3>
+      <div class="book-grid" id="winterGrid"></div>
       <h3 class="book-sec hell">The Abyss <small>18 holes · Ultra, par 6 and up, no rails</small></h3>
       <div class="book-grid" id="abyssGrid"></div>
     </div>
@@ -649,7 +660,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     WATER_BED: -0.55,
   };
 
-  const ZONE_FRIC = { slime: 0.2, honey: 7, soil: 1.35, seeds: 1.05, sand: 3, moss: 1.15, glass: 0.2, tar: 7, ash: 1.3, cinder: 2.4 };
+  const ZONE_FRIC = { slime: 0.2, honey: 7, soil: 1.35, seeds: 1.05, sand: 3, moss: 1.15, glass: 0.2, tar: 7, ash: 1.3, cinder: 2.4, ice: 0.16, snow: 8 };
   PC.ZONE_FRIC = ZONE_FRIC;
 
   // Turn a hole design into the shape the simulator and renderer share.
@@ -998,7 +1009,17 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     }
 
     // Put the ball back where the last shot was taken from (after water or out of bounds).
-    restore() { this.place(this.safe[0], this.safe[1]); }
+    restore() {
+      let [x, y] = this.safe;
+      // If the spot has gone (thin ice that broke since), use the nearest bit of solid green instead.
+      const ok = (px, py) => { const g = this.ground(px, py); return g.kind === 'floor' || g.kind === 'platform'; };
+      if (!ok(x, y)) {
+        let found = null;
+        for (let d = 0.25; d < 8 && !found; d += 0.25) for (let k = 0; k < 24; k++) { const a = (k / 24) * Math.PI * 2, px = x + Math.cos(a) * d, py = y + Math.sin(a) * d; if (ok(px, py) && ok(px + 0.15, py) && ok(px - 0.15, py) && ok(px, py + 0.15) && ok(px, py - 0.15)) { found = [px, py]; break; } }
+        [x, y] = found || this.hole.tee;
+      }
+      this.place(x, y);
+    }
 
     // Everything needed to rebuild this moment in another Sim (for rivals thinking in a worker).
     snapshot() {
@@ -1380,6 +1401,84 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
   } };
 
   // Cacti: touch one and the ball is popped.
+  // Thin ice over cold water: it cracks the moment a ball rolls onto it and gives way a few seconds later
+  // (4 by default) whatever happens, then stays broken for the rest of the hole.
+  F.thinice = { make(s) {
+    const polys = s.list.map(p => U.ccw(p.poly || p)), delay = s.delay || 4;
+    const list = polys.map(() => ({ crack: -1, broken: false, cx: 0, cy: 0 }));
+    return {
+      list,
+      update(t, sim) {
+        // State lives on this.list (not the closure) so a snapshot loaded into another Sim carries it.
+        this.list.forEach((p, i) => {
+          const br = p.crack >= 0 && t >= p.crack + delay;
+          if (br && !p.broken && sim && sim.emit) sim.emit({ type: 'icebreak', i, x: p.cx, y: p.cy });
+          p.broken = br;
+        });
+      },
+      onStep(b, sim) {
+        if (b.mode !== 'roll') return;
+        for (let i = 0; i < polys.length; i++) {
+          const p = this.list[i];
+          if (p.crack >= 0 || !U.inPoly(b.x, b.y, polys[i])) continue;
+          p.crack = sim.t; p.cx = b.x; p.cy = b.y;
+          sim.emit({ type: 'crack', i, x: b.x, y: b.y });
+        }
+      },
+      surface(x, y, t, sim) {
+        for (let i = 0; i < polys.length; i++) if (!this.list[i].broken && U.inPoly(x, y, polys[i])) return { kind: 'platform', h: sim.floorHeight(x, y), fric: s.fric || 0.4, ice: true };
+        return null;
+      },
+      // When the ice under a resting ball will give way (for the rivals' planning), or null.
+      breaksAt(x, y) {
+        for (let i = 0; i < polys.length; i++) if (!this.list[i].broken && this.list[i].crack >= 0 && U.inPoly(x, y, polys[i])) return this.list[i].crack + delay;
+        return null;
+      },
+    };
+  } };
+
+  // Snowballs rolling down a slope, speeding up and growing as they go, then bursting at the bottom.
+  // A new one sets off from the top every cycle.
+  F.snowballs = { make(s) {
+    const geo = s.list.map(w => {
+      const L = [0];
+      for (let i = 1; i < w.path.length; i++) L.push(L[i - 1] + Math.hypot(w.path[i][0] - w.path[i - 1][0], w.path[i][1] - w.path[i - 1][1]));
+      return { line: w.path, cum: L, len: L[L.length - 1] };
+    });
+    const at = (g, d) => {
+      d = U.clamp(d, 0, g.len);
+      let i = 1; while (i < g.cum.length - 1 && g.cum[i] < d) i++;
+      const a = g.line[i - 1], b = g.line[i], seg = g.cum[i] - g.cum[i - 1] || 1, k = (d - g.cum[i - 1]) / seg;
+      return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, (b[0] - a[0]) / seg, (b[1] - a[1]) / seg];
+    };
+    const list = s.list.map((w, i) => ({ x: w.path[0][0], y: w.path[0][1], vx: 0, vy: 0, r: w.r0 || 0.15, on: false, hit: -9, u: 0, n: 0,
+      r0: w.r0 || 0.15, r1: w.r1 || 0.5, travel: w.travel || 4, cycle: (w.travel || 4) + (w.rest || 1.5), phase: w.phase || 0, gi: i }));
+    return {
+      list,
+      update(t) {
+        list.forEach(w => {
+          const g = geo[w.gi], tt = t + w.phase * w.cycle, c = Math.floor(tt / w.cycle), local = tt - c * w.cycle;
+          w.n = c;
+          const u = local / w.travel;
+          w.on = u <= 1;
+          w.u = Math.min(1, u);
+          // Speeding up as it rolls: distance goes with the square of time, nudged so it starts moving straight away.
+          const f = 0.25 * w.u + 0.75 * w.u * w.u, df = (0.25 + 1.5 * w.u) / w.travel;
+          const p = at(g, f * g.len);
+          w.x = p[0]; w.y = p[1];
+          w.vx = w.on ? p[2] * g.len * df : 0; w.vy = w.on ? p[3] * g.len * df : 0;
+          w.r = w.r0 + (w.r1 - w.r0) * w.u;
+        });
+      },
+      collide(b, sim) {
+        list.forEach(w => {
+          if (!w.on) return;
+          if (sim.hitCircle(w.x, w.y, w.r, sim.groundRaw(w.x, w.y) + w.r * 2, 0.55, w.vx, w.vy, 'snowball')) w.hit = sim.t;
+        });
+      },
+    };
+  } };
+
   F.cacti = { make(s) {
     const list = s.list.map(c => Object.assign({ r: 0.3, h: 1.6, kind: 'saguaro', hit: -9 }, c));
     return {
@@ -1451,7 +1550,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
   } };
 
   // Pieces that only change the look (handled in vis.js) still need a physics stub.
-  ['decor', 'wheelbarrow', 'koi', 'hive', 'carrots', 'greenhouse', 'trellis', 'falls', 'rockery', 'sunflower', 'maze', 'arch', 'oasis', 'mesa', 'town'].forEach(k => { F[k] = { make() { return {}; } }; });
+  ['decor', 'wheelbarrow', 'koi', 'hive', 'carrots', 'greenhouse', 'trellis', 'falls', 'rockery', 'sunflower', 'maze', 'arch', 'oasis', 'mesa', 'town', 'village', 'lift', 'rink'].forEach(k => { F[k] = { make() { return {}; } }; });
 });
 
 /* Putt Club: the 27 garden holes. Laid out on paper in (x, y), with the tee near y = 0 and the cup up the page.
@@ -1914,7 +2013,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
   PC.Kit = { openRail, laneCircle };
   H.forEach((h, i) => { h.num = i + 1; h.course = 'garden'; });
   PC.HOLES = H;
-  PC.holeById = id => H.find(h => h.id === id) || (PC.CANYON || []).find(h => h.id === id) || (PC.ABYSS || []).find(h => h.id === id);
+  PC.holeById = id => H.find(h => h.id === id) || (PC.CANYON || []).find(h => h.id === id) || (PC.WINTER || []).find(h => h.id === id) || (PC.ABYSS || []).find(h => h.id === id);
 });
 
 /* Putt Club: The Canyon. 27 desert holes for Medium, each built around cacti and tumbleweeds.
@@ -2397,6 +2496,436 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
   PC.CANYON = H;
 });
 
+/* Putt Club: the Winter Wonderland. 27 snowy holes for Hard, among gingerbread houses and candy canes.
+   Ice keeps the ball sliding, snowdrifts stop it dead, and thin ice breaks 4 seconds after a ball first rolls onto it
+   (and stays broken). Penguins slide across the lanes and snowballs roll downhill, growing as they go. */
+(function (mod) { const PC = window.PC = window.PC || {}; mod(PC); (PC.SRC = PC.SRC || []).push(mod); })(function (PC) {
+  'use strict';
+  const U = PC.U, K = PC.Kit, DEG = Math.PI / 180;
+  const rect = U.rect, rp = U.roundPoly;
+  const LOOK = (extra) => Object.assign({ theme: 'winter', light: 'winter', rail: 'candy', flag: '#d42a3a', flowers: ['#d42a3a', '#ffffff', '#2f9a5a', '#f2c94c'] }, extra || {});
+
+  const ice = poly => ({ type: 'ice', poly });
+  const drift = poly => ({ type: 'snow', poly });
+  const cane = (x, y) => ({ x, y, r: 0.14, h: 1.1, style: 'cane' });
+  const snowman = (x, y, r = 0.34) => ({ x, y, r, h: 1.2, style: 'snowman' });
+  const penguins = movers => ({ type: 'patrol', penguins: true, sound: 'bonk', movers: movers.map(m => Object.assign({ r: 0.28, h: 0.6 }, m)) });
+  const across = (y, x0, x1, period, phase = 0) => ({ a: [x0, y], b: [x1, y], period, phase });
+  const snowballs = list => ({ type: 'snowballs', list: list.map(w => Object.assign({ r0: 0.12, r1: 0.42, travel: 4, rest: 1.4 }, w)) });
+  // Thin ice: a sheet over cold water. Returns the water to add to hazards and the feature that holds it up.
+  const thin = polys => ({ water: polys.map(p => ({ kind: 'water', over: true, cold: true, poly: p })), feat: { type: 'thinice', list: polys.map(p => ({ poly: p })) } });
+
+  const H = [];
+
+  // 1
+  H.push({
+    id: 'candy-cane-lane', name: 'Candy Cane Lane', par: 3,
+    special: 'A candy cane slalom on ice',
+    tip: 'The lane turns right across a slick patch of ice, so the ball keeps sliding long after you expect, and candy canes stand in a slalom on both legs. A penguin slides across the corner.',
+    look: LOOK(), tee: [0, 1.3], cup: [3.8, 14.8],
+    floors: [rp([[-2.2, 0], [2.2, 0], [2.2, 7], [6, 7], [6, 16.6], [1.6, 16.6], [1.6, 10.8], [-2.2, 10.8]], [0.8, 0.8, 0, 0.9, 0.9, 0.9, 0, 0.9])],
+    zones: [ice(rect(-2.2, 7.0, 6.0, 10.8))],
+    posts: [cane(-1.2, 4.2), cane(1.1, 5.6), cane(4.6, 11.8), cane(2.9, 12.8), cane(4.9, 13.6)],
+    features: [penguins([across(9.0, 2.6, 5.5, 2.6)])],
+  });
+
+  // 2
+  H.push({
+    id: 'penguin-parade', name: 'Penguin Parade', par: 3,
+    special: 'Three sliding penguins',
+    tip: 'Three penguins belly-slide across the lane, each at its own pace, and two gingerbread fences leave gaps on opposite sides with ice between them. Time each gap.',
+    look: LOOK(), tee: [0, 1.3], cup: [-0.8, 15.6],
+    floors: [rp(rect(-2.6, 0, 2.6, 17.5), 1.0)],
+    walls: [{ pts: [[-1.0, 7.0], [2.6, 7.0]], w: 0.26, h: 0.6, style: 'gingerbread' }, { pts: [[-2.6, 11.0], [1.0, 11.0]], w: 0.26, h: 0.6, style: 'gingerbread' }],
+    zones: [ice(rect(-2.6, 7.2, 2.6, 10.8))],
+    posts: [snowman(1.5, 15.4)],
+    features: [penguins([across(5.2, -2.15, 2.15, 3.0), across(9.0, 2.15, -2.15, 2.4, 0.3), across(12.8, -2.15, 2.15, 3.6, 0.6)])],
+  });
+
+  // 3
+  const crossPond = rp(rect(-3.6, 6.2, 1.8, 10.8), [0, 0.8, 0.8, 0]);
+  const crossIce = thin([crossPond]);
+  H.push({
+    id: 'thin-ice-crossing', name: 'Thin Ice Crossing', par: 3,
+    special: 'Thin ice across a frozen pond',
+    tip: 'A frozen pond fills most of the lane. Its ice holds a ball for 4 seconds after it first rolls on, then breaks for good: cross in one go, or take the snowy path on the right and wade through its drift. A snowbank hides the cup, so come round its right end.',
+    look: LOOK(), tee: [0, 1.3], cup: [-2.0, 14.8],
+    floors: [rp(rect(-3.6, 0, 3.6, 17), 1.0)],
+    hazards: crossIce.water,
+    walls: [{ pts: [[-3.6, 12.6], [1.0, 12.6]], w: 0.45, h: 0.55, style: 'snowbank' }],
+    zones: [drift(rect(2.0, 7.6, 3.6, 9.4))],
+    posts: [snowman(2.6, 15.4)],
+    features: [crossIce.feat],
+  });
+
+  // 4
+  H.push({
+    id: 'gingerbread-village', name: 'Gingerbread Village', par: 4,
+    special: 'Tunnels through gingerbread houses',
+    tip: 'A gingerbread wall blocks the way. Roll in at the door of a gingerbread house and you come out of the one across the wall, but one of them opens right in front of a snowman. Then thread the gap in the snowbank while the penguin slides across it.',
+    look: LOOK(), tee: [0, 1.3], cup: [-1.6, 14.8],
+    floors: [rp(rect(-3, 0, 3, 16.5), 1.0)],
+    walls: [{ pts: [[-3, 8], [3, 8]], w: 0.7, h: 1.0, style: 'gingerbread' }, { pts: [[-3, 12.2], [-0.6, 12.2]], w: 0.45, h: 0.55, style: 'snowbank' }, { pts: [[0.6, 12.2], [3, 12.2]], w: 0.45, h: 0.55, style: 'snowbank' }],
+    posts: [snowman(1.9, 10.6)],
+    features: [
+      { type: 'tunnels', r: 0.32, ginger: true, pairs: [
+        { a: [-1.8, 6.4], b: [1.9, 9.7], dirA: -Math.PI / 2, dirB: Math.PI / 2 },
+        { a: [1.8, 6.4], b: [-1.9, 9.7], dirA: -Math.PI / 2, dirB: Math.PI / 2 },
+      ] },
+      penguins([across(13.1, -1.2, 1.2, 2.6)]),
+      { type: 'village' },
+    ],
+  });
+
+  // 5
+  H.push({
+    id: 'snowball-slope', name: 'Snowball Slope', par: 3,
+    special: 'Snowballs rolling down at you',
+    tip: 'Putt uphill while snowballs roll down three lanes toward you, speeding up and growing as they come. One will knock the ball right back down.',
+    look: LOOK(), tee: [0, 1.3], cup: [0.9, 16.6],
+    floors: [rp(rect(-2.6, 0, 2.6, 18.5), 1.0)],
+    height: (x, y) => 1.1 * U.smooth(3, 15, y),
+    features: [snowballs([
+      { path: [[-1.4, 17.6], [-1.4, 2.2]], travel: 4.2, rest: 1.2 },
+      { path: [[0.2, 17.6], [0.2, 2.2]], travel: 3.6, rest: 1.8, phase: 0.4 },
+      { path: [[1.7, 17.0], [1.7, 2.2]], travel: 4.8, rest: 0.8, phase: 0.7 },
+    ])],
+  });
+
+  // 6
+  H.push({
+    id: 'gumdrop-pinball', name: 'Gumdrop Pinball', par: 3,
+    special: 'Bouncy gumdrops on ice',
+    tip: 'Springy gumdrops fling the ball about, and the ice under the first ones means nothing slows it down. Candy canes stand between them, and a gingerbread fence guards the front of the cup.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 12.8],
+    floors: [rp([[-2.4, 0], [2.4, 0], [3.6, 3], [3.6, 12], [2.4, 14.5], [-2.4, 14.5], [-3.6, 12], [-3.6, 3]], [0.6, 0.6, 1, 1, 1.2, 1.2, 1, 1])],
+    zones: [ice(rect(-3.6, 4.4, 3.6, 8.8))],
+    walls: [{ pts: [[-1.1, 11.9], [1.1, 11.9]], w: 0.24, h: 0.5, style: 'gingerbread' }],
+    posts: [cane(-1.05, 9.3), cane(-2.9, 4.4)],
+    features: [{ type: 'bumpers', gumdrop: true, list: [{ x: 0, y: 5.6, r: 0.5 }, { x: -1.9, y: 7.8, r: 0.45 }, { x: 1.9, y: 7.8, r: 0.45 }, { x: 0, y: 10.0, r: 0.42 }, { x: -2.3, y: 11.2, r: 0.4 }, { x: 2.3, y: 11.2, r: 0.4 }] }],
+  });
+
+  // 7
+  H.push({
+    id: 'peppermint-twist', name: 'Peppermint Twist', par: 3,
+    special: 'A peppermint turnstile',
+    tip: 'A giant peppermint turns like a turnstile in the middle. Snowdrifts fill the side bays, so a bounce off a vane can leave you stuck in the snow.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 13.6],
+    floors: [rp([[-1.9, 0], [1.9, 0], [1.9, 5], [3.4, 6.4], [3.4, 10], [1.9, 11.4], [1.9, 15], [-1.9, 15], [-1.9, 11.4], [-3.4, 10], [-3.4, 6.4], [-1.9, 5]], [0.7, 0.7, 0.5, 0.9, 0.9, 0.5, 0.9, 0.9, 0.5, 0.9, 0.9, 0.5])],
+    zones: [drift(rect(-3.4, 6.6, -2.5, 9.8)), drift(rect(2.5, 6.6, 3.4, 9.8))],
+    posts: [cane(-1.5, 4.4), cane(1.5, 12.0)],
+    features: [{ type: 'spinner', x: 0, y: 8.2, arms: 4, len: 2.45, w: 0.14, omega: 1.1, h: 0.9, peppermint: true }],
+  });
+
+  // 8
+  H.push({
+    id: 'frozen-pond', name: 'Frozen Pond', par: 2,
+    special: 'A skating pond with snowmen',
+    tip: 'A frozen pond fills the round green, with snowmen standing on the ice and a penguin skating past the far side. The cup sits out on the ice behind a snowman, and the ice carries the ball a long way.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 13.3],
+    floors: [K.laneCircle(1.8, 0, 10.5, 5.0)],
+    zones: [ice(U.circle(0, 10.2, 3.6))],
+    posts: [snowman(0, 8.0), snowman(-1.7, 10.4), snowman(1.6, 11.2), snowman(0, 11.7, 0.3)],
+    features: [penguins([across(12.6, -2.6, 2.6, 4.0)]), { type: 'rink' }],
+  });
+
+  // 9
+  const floeNear = rp(rect(-2.2, 0, 2.2, 5.8), [0.6, 0.6, 0, 0]), floeFar = rp(rect(-2.2, 11.2, 2.2, 17), [0, 0, 0.7, 0.7]);
+  H.push({
+    id: 'ice-floe-ferry', name: 'Ice Floe Ferry', par: 3,
+    special: 'An ice floe across freezing water',
+    tip: 'An ice floe drifts across the freezing water and waits at each bank. Roll on, ride it over, roll off, past the penguin on the far side.',
+    look: LOOK(), tee: [0, 1.3], cup: [0.9, 15.3],
+    floors: [floeNear, floeFar],
+    rails: [{ pts: K.openRail(floeNear, [-2.2, 5.8], [2.2, 5.8]) }, { pts: K.openRail(floeFar, [2.2, 11.2], [-2.2, 11.2]) }],
+    hazards: [{ kind: 'water', cold: true, poly: rp(rect(-4.6, 4.6, 4.6, 12.4), 2.0) }],
+    posts: [snowman(-1.3, 15.9)],
+    features: [{ type: 'ferry', a: [0, 6.85], b: [0, 10.15], r: 1.05, travel: 2.8, pause: 1.9, floe: true }, penguins([across(13.4, -1.7, 1.7, 3.0)])],
+  });
+
+  // 10
+  H.push({
+    id: 'ski-jump', name: 'Ski Jump', par: 3,
+    special: 'A ski jump over a snowdrift',
+    tip: 'Putt up the ski jump fast enough to fly the deep snowdrift beyond it. Too soft and the ball drops into the snow and stops dead.',
+    look: LOOK(), tee: [0, 1.3], cup: [0.2, 15.6],
+    floors: [rp(rect(-2.4, 0, 2.4, 18), 0.9)],
+    height: (x, y) => (y < 3 ? 0 : y < 7.4 ? 0.6 * (y - 3) / 4.4 : 0),
+    walls: [{ pts: [[-2.4, 7.4], [2.4, 7.4]], w: 0.04, h: 0, top: () => 0.6, style: 'none' }],
+    zones: [drift(rect(-2.4, 7.6, 2.4, 10.0))],
+    posts: [cane(-1.3, 12.6), cane(1.4, 13.4)],
+    features: [{ type: 'launch', x: 0, y: 7.0, r: 0.6, vz: 5.0, minSpeed: 3.6, maxSpeed: 4.8, land: [0, 11], ski: true }],
+  });
+
+  // 11
+  const pass = rect(-1.8, 0, 1.8, 19);
+  H.push({
+    id: 'blizzard-pass', name: 'Blizzard Pass', par: 4,
+    special: 'Gusts toward a snowy drop',
+    tip: 'The left side of the pass drops away with no rail, and every few seconds a blizzard gust blows toward the edge. Snowbanks jut out from the safe side, so the only way past each is right along the edge. Shelter in the drifts, or putt between gusts.',
+    look: LOOK(), tee: [0.4, 1.3], cup: [0.4, 17.4],
+    floors: [pass],
+    rails: [{ pts: K.openRail(pass, [-1.8, 0], [-1.8, 19]) }],
+    hazards: [{ kind: 'chasm', poly: rect(-20, -6, -1.8, 26) }],
+    walls: [{ pts: [[1.8, 6.4], [-0.5, 6.4]], w: 0.45, h: 0.55, style: 'snowbank' }, { pts: [[1.8, 12.4], [-0.5, 12.4]], w: 0.45, h: 0.55, style: 'snowbank' }],
+    zones: [drift(rect(0.9, 4.2, 1.8, 5.8)), drift(rect(0.9, 10.2, 1.8, 11.8))],
+    features: [{ type: 'wind', snow: true, dir: [-1, 0], power: 2.6, period: 5.5, gust: 2.2 }],
+  });
+
+  // 12
+  H.push({
+    id: 'snowman-alley', name: 'Snowman Alley', par: 3,
+    special: 'A crowd of snowmen',
+    tip: 'Snowmen stand all over the alley, so there is no straight line to the cup, then a gingerbread fence with one gap in the middle and a penguin sliding across it.',
+    look: LOOK(), tee: [0, 1.3], cup: [-1.7, 15.4],
+    floors: [rp(rect(-2.8, 0, 2.8, 17), 1.0)],
+    walls: [{ pts: [[-2.8, 12.6], [-0.7, 12.6]], w: 0.26, h: 0.6, style: 'gingerbread' }, { pts: [[0.7, 12.6], [2.8, 12.6]], w: 0.26, h: 0.6, style: 'gingerbread' }],
+    posts: [snowman(-1.6, 5.0), snowman(0.3, 5.8), snowman(1.9, 7.2), snowman(-0.9, 8.8), snowman(1.1, 10.2), snowman(-1.8, 11.2)],
+    features: [penguins([across(13.4, -1.2, 1.2, 2.4)])],
+  });
+
+  // 13
+  const swNear = rp(rect(-2.2, 0, 2.2, 5.6), [0.6, 0.6, 0, 0]), swFar = rp(rect(-2.2, 11.4, 2.2, 17), [0, 0, 0.7, 0.7]);
+  H.push({
+    id: 'ornament-swing', name: 'Ornament Swing', par: 3,
+    special: 'A giant bauble over an ice bridge',
+    tip: 'A narrow bridge of slick ice crosses freezing water with no rails, and a giant Christmas bauble swings across it from a candy cane arch.',
+    look: LOOK(), tee: [0, 1.3], cup: [0.8, 15.2],
+    floors: [swNear, rect(-0.7, 5.5, 0.7, 11.5), swFar],
+    rails: [{ pts: K.openRail(swNear, [-2.2, 5.6], [2.2, 5.6]) }, { pts: K.openRail(swFar, [2.2, 11.4], [-2.2, 11.4]) }],
+    hazards: [{ kind: 'water', cold: true, poly: rp(rect(-4.6, 4.4, 4.6, 12.6), 1.6) }],
+    zones: [ice(rect(-0.7, 5.6, 0.7, 11.4))],
+    posts: [snowman(-1.3, 14.0)],
+    features: [{ type: 'swing', x: 0, y: 8.5, len: 4.95, zp: 5.4, amp: 0.39, period: 3.4, rt: 0.45, bauble: true }],
+  });
+
+  // 14
+  const run = [[0, 0.6], [0, 5], [2.5, 8], [2.5, 11], [-0.5, 14], [-0.5, 17], [1.5, 20], [1.5, 22.6]];
+  H.push({
+    id: 'toboggan-run', name: 'Toboggan Run', par: 3,
+    special: 'A winding icy toboggan run',
+    tip: 'A toboggan run winds downhill all the way, icy on its straights, so the ball picks up speed. Bank it round each bend without flying into the next.',
+    look: LOOK(), tee: [0, 1.3], cup: [1.5, 21.6],
+    floors: [U.ribbon(run, 1.3)],
+    height: (x, y) => 1.5 * (1 - U.smooth(1, 22, y)),
+    zones: [ice(rect(-1.4, 1.5, 1.4, 4.6)), ice(rect(-1.9, 14.2, 0.9, 16.8))],
+    features: [],
+  });
+
+  // 15
+  H.push({
+    id: 'ice-rink', name: 'Ice Rink', par: 3,
+    special: 'A turning ice rink',
+    tip: 'The rink in the middle turns slowly and carries the ball round with it, and two snowmen ride on it too. Beyond it a snowbank leaves a way through on the right only.',
+    look: LOOK(), tee: [0, 1.2], cup: [-1.0, 14.8],
+    floors: [K.laneCircle(1.7, 0, 8.0, 3.3, 16.6)],
+    walls: [{ pts: [[-3.3, 11.8], [0.6, 11.8]], w: 0.45, h: 0.55, style: 'snowbank' }],
+    features: [{ type: 'turntable', x: 0, y: 8.0, r: 2.6, omega: 0.75, rink: true, pots: [{ a: 0, d: 1.55, r: 0.3 }, { a: Math.PI, d: 1.55, r: 0.3 }] }],
+  });
+
+  // 16
+  H.push({
+    id: 'sleigh-ride', name: 'Sleigh Ride', par: 2,
+    special: 'The cup rides on a sleigh',
+    tip: 'The cup is set in a sleigh that glides from side to side. The approach is icy, and a gingerbread fence leaves gaps only at the two ends, so come in at an angle, lead the sleigh and putt softer than you think.',
+    look: LOOK(), tee: [0, 1.2], cup: [0, 13.5],
+    floors: [rp([[-1.8, 0], [1.8, 0], [1.8, 6], [3.4, 8], [3.4, 15.6], [-3.4, 15.6], [-3.4, 8], [-1.8, 6]], [0.6, 0.6, 0.6, 0.6, 1, 1, 0.6, 0.6])],
+    zones: [ice(rect(-1.8, 3.6, 1.8, 7.4))],
+    walls: [{ pts: [[-2.0, 11.4], [2.0, 11.4]], w: 0.26, h: 0.6, style: 'gingerbread' }],
+    posts: [cane(-1.7, 9.6), cane(1.7, 9.6)],
+    features: [{ type: 'movingCup', a: [-2.4, 13.5], b: [2.4, 13.5], period: 7.5, sleigh: true }],
+  });
+
+  // 17
+  const uFloor = [[-2.2, 0], [1.4, 0], [1.4, 10.4], [5.6, 10.4], [5.6, 0], [9.2, 0], [9.2, 14.5], [-2.2, 14.5]];
+  H.push({
+    id: 'cracking-shortcut', name: 'Cracking Shortcut', par: 3,
+    special: 'A thin ice shortcut',
+    tip: 'The course goes up, across and back down round a frozen lake. Straight across the lake is far shorter, but the thin ice breaks 4 seconds after your ball first touches it and never comes back.',
+    look: LOOK(), tee: [-0.4, 1.3], cup: [7.4, 1.9],
+    floors: [uFloor],
+    rails: [{ pts: K.openRail(uFloor, [5.6, 0], [1.4, 0]) }],
+    hazards: [{ kind: 'water', cold: true, poly: rect(1.4, -1.2, 5.6, 10.4) }],
+    posts: [snowman(-0.4, 12.2), snowman(7.4, 12.2)],
+    features: [{ type: 'thinice', list: [{ poly: rect(1.4, 0, 5.6, 10.4) }] }, penguins([across(12.4, 1.6, 5.4, 3.4)])],
+  });
+
+  // 18
+  H.push({
+    id: 'avalanche', name: 'Avalanche', par: 3,
+    special: 'Four lanes of snowballs',
+    tip: 'Snowballs pour down four lanes of a steep slope. Two snowdrifts give you somewhere to stop on the way up, if you can get out of them again.',
+    look: LOOK(), tee: [0, 1.3], cup: [-0.4, 17.6],
+    floors: [rp(rect(-3.4, 0, 3.4, 19), 1.1)],
+    height: (x, y) => 1.3 * U.smooth(2.5, 16, y),
+    zones: [drift(rect(-2.0, 7.0, -1.2, 8.2)), drift(rect(1.2, 11.0, 2.0, 12.2))],
+    features: [snowballs([
+      { path: [[-2.3, 18.3], [-2.3, 2.0]], travel: 3.6, rest: 1.0 },
+      { path: [[-0.75, 18.3], [-0.75, 2.0]], travel: 4.4, rest: 0.6, phase: 0.35 },
+      { path: [[0.8, 18.3], [0.8, 2.0]], travel: 3.4, rest: 1.4, phase: 0.6 },
+      { path: [[2.3, 18.3], [2.3, 2.0]], travel: 4.6, rest: 0.8, phase: 0.15 },
+    ])],
+  });
+
+  // 19
+  H.push({
+    id: 'candy-cane-gates', name: 'Candy Cane Gates', par: 4,
+    special: 'Candy cane gates in gingerbread fences',
+    tip: 'Three gingerbread fences cross the lane, each with a candy cane gate that swings open and shut, never in line. Ice between the last two fences makes it hard to stop and wait.',
+    look: LOOK(), tee: [0, 1.3], cup: [1.2, 18.2],
+    floors: [rp(rect(-3, 0, 3, 20), 1.0)],
+    walls: [
+      { pts: [[-3, 5.5], [-2.3, 5.5]], w: 0.26, h: 0.6, style: 'gingerbread' }, { pts: [[-1.1, 5.5], [3, 5.5]], w: 0.26, h: 0.6, style: 'gingerbread' },
+      { pts: [[-3, 10.5], [0.6, 10.5]], w: 0.26, h: 0.6, style: 'gingerbread' }, { pts: [[1.8, 10.5], [3, 10.5]], w: 0.26, h: 0.6, style: 'gingerbread' },
+      { pts: [[-3, 15.5], [-0.6, 15.5]], w: 0.26, h: 0.6, style: 'gingerbread' }, { pts: [[0.6, 15.5], [3, 15.5]], w: 0.26, h: 0.6, style: 'gingerbread' },
+    ],
+    zones: [ice(rect(-3, 10.7, 3, 15.3))],
+    features: [{ type: 'gates', candy: true, list: [{ a: [-2.3, 5.5], b: [-1.1, 5.5], period: 3.0, phase: 0 }, { a: [0.6, 10.5], b: [1.8, 10.5], period: 2.6, phase: 0.35 }, { a: [-0.6, 15.5], b: [0.6, 15.5], period: 3.4, phase: 0.7 }] }],
+  });
+
+  // 20
+  H.push({
+    id: 'present-hop', name: 'Present Hop', par: 3,
+    special: 'A wall of presents and a spring',
+    tip: 'A wall of wrapped presents blocks the lane. Roll over the gold spring to hop it, then watch out for the penguin on the other side.',
+    look: LOOK(), tee: [0, 1.3], cup: [0.8, 14.6],
+    floors: [rp(rect(-2.6, 0, 2.6, 17), 1.0)],
+    walls: [{ pts: [[-2.6, 8.5], [2.6, 8.5]], w: 0.5, h: 0.7, style: 'present' }],
+    features: [
+      { type: 'spring', x: 0, y: 6.6, r: 0.45, vz: 6.5, minSpeed: 4.6, maxSpeed: 5.6, land: [0, 10.4], gift: true },
+      penguins([across(12.4, -2.1, 2.1, 3.0)]),
+    ],
+  });
+
+  // 21
+  H.push({
+    id: 'penguin-slide', name: 'Penguin Slide', par: 2,
+    special: 'Penguins sliding down an ice chute',
+    tip: 'The middle of the lane is a chute of ice, and three penguins slide down it on their bellies, crossing your line on the diagonal. A snowbank shields the cup, open only on the right.',
+    look: LOOK(), tee: [0, 1.3], cup: [-1.2, 17],
+    floors: [rp(rect(-3, 0, 3, 19), 1.0)],
+    walls: [{ pts: [[-3, 15.2], [0.6, 15.2]], w: 0.45, h: 0.55, style: 'snowbank' }],
+    zones: [ice(rect(-3, 5, 3, 14))],
+    features: [penguins([
+      { a: [-2.5, 6.0], b: [2.5, 9.0], period: 2.8 },
+      { a: [2.5, 9.6], b: [-2.5, 12.6], period: 3.4, phase: 0.4 },
+      { a: [-2.5, 13.4], b: [2.5, 14.6], period: 3.0, phase: 0.7 },
+    ])],
+  });
+
+  // 22
+  H.push({
+    id: 'frosty-maze', name: "Frosty's Maze", par: 4,
+    special: 'A maze of snowbanks',
+    tip: 'Snowbanks turn the green into a switchback, with slick ice on the long middle run and snowmen standing at the turns.',
+    look: LOOK({ rail: 'snowbank' }), tee: [-2.6, 1.3], cup: [-2.8, 14.4],
+    floors: [rp(rect(-4, 0, 4, 16), 1.0)],
+    walls: [
+      { pts: [[-4, 4.5], [1.6, 4.5]], w: 0.5, h: 0.6, style: 'snowbank' },
+      { pts: [[-1.6, 8.5], [4, 8.5]], w: 0.5, h: 0.6, style: 'snowbank' },
+      { pts: [[-4, 12], [1.6, 12]], w: 0.5, h: 0.6, style: 'snowbank' },
+    ],
+    zones: [ice(rect(-4, 4.8, 4, 8.2))],
+    posts: [snowman(3.0, 6.5), snowman(-3.0, 10.3)],
+  });
+
+  // 23
+  const globe = [0, 10];
+  H.push({
+    id: 'snow-globe', name: 'Snow Globe', par: 2,
+    special: 'An icy bowl',
+    tip: 'The green is an icy bowl with four snowmen in its middle, and the cup sits up on the far rim. Too soft and the ball slides back down to the snowmen; too hard and it flies past.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 13.6],
+    floors: [K.laneCircle(1.6, 0, globe[1], 4.4)],
+    height: (x, y) => { const d = Math.hypot(x - globe[0], y - globe[1]); return d < 4.0 ? -0.45 * Math.pow(1 - d / 4.0, 2) : 0; },
+    zones: [ice(U.circle(0, 10, 3.6))],
+    posts: [45, 135, 225, 315].map(a => snowman(Math.cos(a * DEG) * 1.15, 10 + Math.sin(a * DEG) * 1.15, 0.3)),
+  });
+
+  // 24
+  H.push({
+    id: 'snowdrift-dunes', name: 'Snowdrift Dunes', par: 3,
+    special: 'Rows of snowdrifts',
+    tip: 'Three rows of deep snowdrifts each leave one gap, never in line. Land in a drift and the ball stops dead. A penguin slides across behind the second row.',
+    look: LOOK(), tee: [0, 1.3], cup: [0.4, 16.6],
+    floors: [rp(rect(-2.6, 0, 2.6, 18.5), 1.0)],
+    zones: [
+      drift(rect(-2.6, 4.6, 0.5, 5.8)), drift(rect(1.7, 4.6, 2.6, 5.8)),
+      drift(rect(-2.6, 9.0, -1.6, 10.2)), drift(rect(-0.4, 9.0, 2.6, 10.2)),
+      drift(rect(-2.6, 13.4, -0.2, 14.6)), drift(rect(1.0, 13.4, 2.6, 14.6)),
+    ],
+    features: [penguins([across(11.8, -2.1, 2.1, 2.8)])],
+  });
+
+  // 25
+  const liftH = (x, y) => (y < 6.5 ? 1.0 : y < 12.5 ? 0.5 : 0);
+  H.push({
+    id: 'lift-line', name: 'Lift Line', par: 3,
+    special: 'Ledges under the ski lift',
+    tip: 'Three ledges step down under the ski lift, each with a snowbank and the way down at alternate ends. A penguin patrols the middle ledge and a snowball rolls across the bottom.',
+    look: LOOK(), tee: [0, 1.3], cup: [-1.2, 17],
+    floors: [rp(rect(-2.8, 0, 2.8, 19), 1.0)],
+    height: liftH,
+    walls: [
+      { pts: [[-2.8, 6.5], [2.8, 6.5]], w: 0.04, h: 0, top: () => 1.0, style: 'none' },
+      { pts: [[-2.8, 12.5], [2.8, 12.5]], w: 0.04, h: 0, top: () => 0.5, style: 'none' },
+      { pts: [[-2.8, 6.1], [0.8, 6.1]], w: 0.4, h: 0.5, style: 'snowbank' },
+      { pts: [[-0.8, 12.1], [2.8, 12.1]], w: 0.4, h: 0.5, style: 'snowbank' },
+    ],
+    features: [
+      penguins([across(9.4, -2.3, 2.3, 3.0)]),
+      snowballs([{ path: [[2.4, 15.0], [-2.4, 15.2]], travel: 3.2, rest: 1.6, r1: 0.36 }]),
+      { type: 'lift' },
+    ],
+  });
+
+  // 26
+  H.push({
+    id: 'hockey-rink', name: 'Hockey Rink', par: 2,
+    special: 'A penguin goalie',
+    tip: 'An ice hockey rink with the cup in the goal mouth, and a penguin goalie sliding back and forth in front of it. The boards close off the goal line except for the mouth, and two snowman defenders and a penguin skating across centre ice stand in the way.',
+    look: LOOK({ rail: 'ice' }), tee: [0, 1.4], cup: [0, 15.0],
+    floors: [rp(rect(-3.6, 0, 3.6, 16.4), 2.2)],
+    zones: [ice(rect(-3.6, 0, 3.6, 16.4))],
+    walls: [{ pts: [[-3.6, 14.4], [-0.6, 14.4]], w: 0.2, h: 0.5, style: 'ice' }, { pts: [[0.6, 14.4], [3.6, 14.4]], w: 0.2, h: 0.5, style: 'ice' }],
+    posts: [cane(-0.62, 14.4), cane(0.62, 14.4), snowman(-1.3, 9.0), snowman(1.3, 10.6)],
+    features: [penguins([{ a: [-0.75, 13.8], b: [0.75, 13.8], period: 1.9 }, { a: [-2.8, 7.0], b: [2.8, 7.0], period: 3.0, phase: 0.3 }]), { type: 'rink' }],
+  });
+
+  // 27
+  const sumH = (x, y) => {
+    if (y >= 17) return 1.0;
+    if (y > 15 && x > 0.6) return 0.5 + 0.5 * (y - 15) / 2;
+    if (y >= 9) return 0.5;
+    if (y > 7 && x < -0.6) return 0.5 * (y - 7) / 2;
+    return 0;
+  };
+  H.push({
+    id: 'gingerbread-summit', name: 'Gingerbread Summit', par: 4,
+    special: 'A climb to a gingerbread house',
+    tip: 'The finale: climb two ramps to the summit, where the cup waits by a gingerbread house. A penguin patrols the middle terrace, snowballs roll down the top ramp, and the corner above the first ramp is thin ice over freezing water.',
+    look: LOOK({ cell: 0.12 }), tee: [-1.6, 1.3], cup: [-1.0, 21.4],
+    floors: [rp(rect(-3.4, 0, 3.4, 23.4), 1.2)],
+    height: sumH,
+    walls: [
+      { pts: [[-0.6, 9], [3.4, 9]], w: 0.04, h: 0, top: () => 0.5, style: 'none' },
+      { pts: [[-0.6, 9], [-0.6, 7]], w: 0.04, h: 0, top: (x, y) => 0.5 * (y - 7) / 2, style: 'none' },
+      { pts: [[-3.4, 17], [0.6, 17]], w: 0.04, h: 0, top: () => 1.0, style: 'none' },
+      { pts: [[0.6, 15], [0.6, 17]], w: 0.04, h: 0, top: (x, y) => 0.5 + 0.5 * (y - 15) / 2, style: 'none' },
+    ],
+    hazards: [{ kind: 'water', over: true, cold: true, poly: rect(-3.4, 13.4, -1.4, 15.4) }],
+    features: [
+      { type: 'thinice', list: [{ poly: rect(-3.4, 13.4, -1.4, 15.4) }] },
+      penguins([across(11.6, -1.6, 2.6, 3.2)]),
+      snowballs([{ path: [[2.0, 22.4], [2.0, 17.6], [2.0, 14.6]], travel: 3.0, rest: 1.8, r1: 0.36 }]),
+      { type: 'village', summit: true },
+    ],
+  });
+
+  H.forEach((h, i) => { h.num = i + 1; h.course = 'winter'; });
+  PC.WINTER = H;
+});
+
 /* Putt Club: The Abyss. 18 temple holes for Ultra, every one par 6 or more.
    Ancient stone platforms float over a lava abyss with no rails at all: roll off an edge and the ball is gone.
    The holes are built so a perfect player still needs several putts: corners with nothing to bank off,
@@ -2406,7 +2935,8 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
   'use strict';
   const U = PC.U, DEG = Math.PI / 180;
   const rect = U.rect, rp = U.roundPoly, circ = (x, y, r) => U.circle(x, y, r, Math.max(28, Math.ceil(r * 16)));
-  const lava = (x, y, r) => ({ kind: 'lava', over: true, poly: U.circle(x, y, r, 28) });
+  // Small pits of fire set into the platforms (drawn as burning braziers).
+  const lava = (x, y, r) => ({ kind: 'lava', over: true, fire: true, poly: U.circle(x, y, r, 28) });
   const LOOK = (extra) => Object.assign({ theme: 'abyss', light: 'abyss', flag: '#ff5a1a', flowers: ['#ff5a1f', '#ffb000', '#ff2d2d', '#ffe27a'] }, extra || {});
 
   // An axis-aligned causeway through waypoints, w wide, with a square pad at every corner.
@@ -2798,9 +3328,14 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
 
   // Distance along the course to the cup, on a 0.2-unit grid. Water and lava cost extra but can be crossed
   // (that is where ferries and bridges are); the void cannot.
-  Nav.field = function (hole) {
+  // Which sheets of thin ice have broken, as a string ('' when the hole has none): each state gets its own map.
+  Nav.iceKey = sim => { const f = (sim.feats || []).find(q => q.type === 'thinice'); return f ? f.list.map(p => (p.broken ? 1 : 0)).join('') : ''; };
+  Nav.fieldFor = function (hole, sim, cache) { const k = Nav.iceKey(sim); return cache[k] || (cache[k] = Nav.field(hole, k)); };
+
+  Nav.field = function (hole, iceKey) {
     hole = PC.prepareHole(hole);
     const sim = new PC.Sim(hole);
+    if (iceKey) sim.feats.filter(f => f.type === 'thinice').forEach(f => { f.list.forEach((p, i) => { if (iceKey[i] === '1') p.crack = -99; }); f.update(0, null); });
     const b = hole.box, cell = 0.2;
     const x0 = b.x0 - 0.6, y0 = b.y0 - 0.6;
     const nx = Math.ceil((b.w + 1.2) / cell), ny = Math.ceil((b.h + 1.2) / cell);
@@ -2849,7 +3384,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
         const k = c * nx + a;
         if (cost[k] === Infinity) continue;
         // A ledge can be dropped off but not climbed: the ball would roll from k up to (i, j).
-        if (ledges.length && hgt[j * nx + i] - hgt[k] > 0.12) {
+        if (ledges.length && hgt[j * nx + i] - hgt[k] > 0.04) {
           const mx = x0 + (i + a) * cell / 2, my = y0 + (j + c) * cell / 2;
           if (ledges.some(s => { const q = U.closestOnSeg(mx, my, s.ax, s.ay, s.bx, s.by); return Math.hypot(mx - q[0], my - q[1]) < cell * 0.8; })) continue;
         }
@@ -2983,9 +3518,12 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
       if (s.t - t0 > 0.35 && s.resting()) {
         // Raising a bridge is worth a lot, even though the ball is no nearer the cup yet.
         const raised = beans.some(f => f.left > 6);
-        // Is it safe where it stopped? Watch a little longer: blades, imps and rafts can carry it off.
+        // Is it safe where it stopped? Watch a little longer: blades, imps and rafts can carry it off,
+        // and cracked thin ice gives way under it.
         const tRest = s.t;
-        while (s.t - tRest < 1.6) {
+        const ice = s.feats.find(f => f.type === 'thinice'), brk = ice && ice.breaksAt(s.ball.x, s.ball.y);
+        const watch = brk ? Math.max(1.6, brk - s.t + 0.3) : 1.6;
+        while (s.t - tRest < watch) {
           s.step(dt);
           if (s.ball.mode === 'lost') return { score: startD + 5 };
         }
@@ -3005,9 +3543,9 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
       for (const c of cands) all.push({ ang: c.ang, p: c.p, wait, score: Nav.evaluate(sim, c, F, wait, maxT).score });
     }
     all.sort((a, b) => a.score - b.score);
-    // If every putt it thought of is lost, cast about at random before settling for one.
+    // If every putt it thought of is lost, or none gets any nearer, cast about at random before settling for one.
     const startD = F.at(sim.ball.x, sim.ball.y);
-    if (all.length && all[0].score >= startD + 4.9) {
+    if (all.length && (all[0].score >= startD + 4.9 || all[0].score > startD - 0.25)) {
       for (let i = 0; i < 40; i++) {
         const c = { ang: rnd() * Math.PI * 2, p: 0.08 + rnd() * 0.6 }, wait = waits[i % waits.length];
         all.push({ ang: c.ang, p: c.p, wait, score: Nav.evaluate(sim, c, F, wait, maxT).score });
@@ -3445,6 +3983,73 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     return tex(c);
   });
 
+  // ---------- Winter Wonderland ----------
+  // Fresh snow: white with soft blue hollows and a few glints.
+  T.snow = () => once('snow', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(511);
+    g.fillStyle = '#f4f8fc'; g.fillRect(0, 0, S, S);
+    for (let i = 0; i < 70; i++) { const x = rnd() * S, y = rnd() * S, r = 10 + rnd() * 30; const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, 'rgba(170,195,225,0.22)'); gr.addColorStop(1, 'rgba(170,195,225,0)'); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); }
+    speckle(g, S, S, 900, ['#ffffff', '#e2ecf6', '#d6e4f2'], 0.5, 1.4, rnd);
+    for (let i = 0; i < 60; i++) { g.fillStyle = 'rgba(255,255,255,0.95)'; g.fillRect(rnd() * S, rnd() * S, 1.5, 1.5); }
+    return tex(c);
+  });
+  // Red and white candy stripes running on the diagonal.
+  T.candy = (red = '#d42a3a') => once('candy' + red, () => {
+    const S = 128, c = canvas(S, S), g = c.getContext('2d');
+    g.fillStyle = '#fbf6f0'; g.fillRect(0, 0, S, S);
+    g.fillStyle = red;
+    for (let k = -2; k < 4; k++) { g.beginPath(); const o = k * 64; g.moveTo(o, 0); g.lineTo(o + 30, 0); g.lineTo(o + 30 + S, S); g.lineTo(o + S, S); g.closePath(); g.fill(); }
+    g.fillStyle = 'rgba(255,255,255,0.25)'; g.fillRect(0, S * 0.18, S, S * 0.12);
+    return tex(c);
+  });
+  // Baked gingerbread with darker freckles.
+  T.gingerbread = () => once('gingerbread', () => {
+    const S = 128, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(523);
+    g.fillStyle = '#a8642e'; g.fillRect(0, 0, S, S);
+    speckle(g, S, S, 700, ['#8e5222', '#b8743a', '#7a4418', '#c0844a'], 0.6, 2.2, rnd);
+    return tex(c);
+  });
+  // Pale blue ice with skate scratches and a few cracks.
+  T.ice = () => once('ice', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(531);
+    const gr = g.createLinearGradient(0, 0, S, S); gr.addColorStop(0, '#cfe9f6'); gr.addColorStop(1, '#a9d4ec');
+    g.fillStyle = gr; g.fillRect(0, 0, S, S);
+    for (let i = 0; i < 40; i++) { const x = rnd() * S, y = rnd() * S, r = 20 + rnd() * 50; const rg = g.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, 'rgba(255,255,255,0.18)'); rg.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = rg; g.fillRect(x - r, y - r, r * 2, r * 2); }
+    g.strokeStyle = 'rgba(255,255,255,0.55)'; g.lineWidth = 1;
+    for (let i = 0; i < 26; i++) { const x = rnd() * S, y = rnd() * S, a = rnd() * 6.28, l = 20 + rnd() * 60; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + Math.cos(a + 0.4) * l * 0.5, y + Math.sin(a + 0.4) * l * 0.5, x + Math.cos(a) * l, y + Math.sin(a) * l); g.stroke(); }
+    g.strokeStyle = 'rgba(120,170,205,0.5)';
+    for (let i = 0; i < 6; i++) { let x = rnd() * S, y = rnd() * S; g.beginPath(); g.moveTo(x, y); for (let k = 0; k < 5; k++) { x += (rnd() - 0.5) * 40; y += (rnd() - 0.5) * 40; g.lineTo(x, y); } g.stroke(); }
+    return tex(c);
+  });
+  // A knitted tee mat in a red and white Nordic pattern.
+  T.teeKnit = () => once('teeKnit', () => {
+    const W = 256, Hh = 200, c = canvas(W, Hh), g = c.getContext('2d');
+    g.fillStyle = '#b8202e'; g.fillRect(0, 0, W, Hh);
+    const st = 8, cols = W / st, rows = Hh / st;
+    const on = (i, j) => {
+      if (j === 2 || j === rows - 3) return true;
+      if (j === 4 || j === rows - 5) return (i % 4) < 2;
+      const cy = rows / 2, cx = cols / 2, dx = Math.abs(i - cx), dy = Math.abs(j - cy);
+      if (dx + dy === 5 || dx + dy === 3 || (dx === 0 && dy === 0)) return true;            // a snowflake diamond
+      if (dx === 0 || dy === 0) return dx + dy < 5;
+      if (Math.abs(i - 4) + Math.abs(j - cy) === 2 || Math.abs(i - (cols - 5)) + Math.abs(j - cy) === 2) return true;
+      return false;
+    };
+    for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
+      g.fillStyle = on(i, j) ? '#f8f2ea' : '#b8202e';
+      g.beginPath(); g.ellipse(i * st + st / 2, j * st + st / 2, st * 0.42, st * 0.55, 0, 0, 7); g.fill();
+      g.fillStyle = 'rgba(0,0,0,0.12)'; g.fillRect(i * st + st / 2 - 0.5, j * st, 1, st);
+    }
+    return tex(c);
+  });
+  // Wrapping paper: a colour with a white stripe and dots.
+  T.wrap = (base = '#2f8a4a') => once('wrap' + base, () => {
+    const S = 64, c = canvas(S, S), g = c.getContext('2d');
+    g.fillStyle = base; g.fillRect(0, 0, S, S);
+    g.fillStyle = 'rgba(255,255,255,0.85)'; for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { g.beginPath(); g.arc(8 + i * 16 + (j % 2) * 8, 8 + j * 16, 2.2, 0, 7); g.fill(); }
+    return tex(c);
+  });
+
   // Dry twigs on a clear background, for the shell of a tumbleweed.
   T.twigs = () => once('twigs', () => {
     const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(431);
@@ -3673,6 +4278,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     spring: { top: '#62b3ea', mid: '#bfe6fb', horizon: '#f4fcff', sun: '#fffaf0', sunI: 2.4, hemiSky: '#e6f6ff', hemiGround: '#6aa04a', hemiI: 1.0, fog: '#e6f6fd', turf: '#43993a', grass: '#4c8638', hills: ['#86bf73', '#9acb88', '#b3d6a8'], exposure: 1.02 },
     golden: { top: '#5d97cf', mid: '#d9c7a8', horizon: '#ffe2b8', sun: '#ffd49a', sunI: 2.7, hemiSky: '#ffe8c8', hemiGround: '#6e6a35', hemiI: 0.85, fog: '#f6e0c2', turf: '#4a9636', grass: '#527f35', hills: ['#8aa865', '#a4b57a', '#c8c49a'], exposure: 1.0 },
     mesa: { top: '#3a5ca8', mid: '#e0a07a', horizon: '#ffc27a', sun: '#ffc48a', sunI: 2.3, hemiSky: '#ffd8b8', hemiGround: '#a0502e', hemiI: 0.55, fog: '#eebc90', turf: '#b8683e', grass: '#cc9c68', hills: ['#b85c32', '#a84c2a', '#c8703e'], exposure: 0.9 },
+    winter: { top: '#2f6fc4', mid: '#9cc8ee', horizon: '#eef6ff', sun: '#fff4e6', sunI: 1.9, hemiSky: '#dcecff', hemiGround: '#9fb4cc', hemiI: 0.75, fog: '#e2ecf8', turf: '#2f7d55', grass: '#f4f8fc', hills: ['#e8f0f8', '#d8e4f0', '#f4f8fc'], exposure: 0.86 },
     abyss: { top: '#040205', mid: '#0c0507', horizon: '#2a0a06', sun: '#ffb27a', sunI: 1.5, hemiSky: '#2c2232', hemiGround: '#a8380e', hemiI: 0.7, fog: '#1e0805', turf: '#3a3134', grass: '#1a1212', hills: ['#2a1214', '#3a1610', '#1c0c0c'], exposure: 1.15 },
     autumn: { top: '#6aa3d0', mid: '#d6c7b3', horizon: '#ffdcb5', sun: '#ffcf96', sunI: 2.6, hemiSky: '#ffe6c9', hemiGround: '#7a5a2a', hemiI: 0.9, fog: '#f1dcc0', turf: '#4f9535', grass: '#647c34', hills: ['#a59a5c', '#b8a06a', '#cdb48a'], exposure: 1.0 },
   };
@@ -3974,7 +4580,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
       this.skyU.top.value.set(L.top); this.skyU.mid.value.set(L.mid); this.skyU.horizon.value.set(L.horizon);
       this.hemi.color = col(L.hemiSky); this.hemi.groundColor = col(L.hemiGround); this.hemi.intensity = L.hemiI;
       this.sun.color = col(L.sun); this.sun.intensity = L.sunI;
-      const hell = name === 'abyss', desert = name === 'mesa';
+      const hell = name === 'abyss', desert = name === 'mesa' || name === 'winter';
       this.scene.fog = hell ? new THREE.Fog(col(L.fog), 24, 135) : desert ? new THREE.Fog(col(L.fog), 70, 240) : new THREE.Fog(col(L.fog), 45, 190);
       this.groundMat.color = col(L.grass).multiplyScalar(1.25);
       this.ground.visible = !hell && !desert;
@@ -4011,12 +4617,13 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
       this.rim.position.copy(V(cx + 14, cy + 30, 26)); this.rim.target.position.copy(V(cx, cy, 0));
 
       const hAt = (x, y) => sim.floorHeight(x, y);
-      const hell = hole.look.theme === 'abyss', desert = hole.look.theme === 'canyon';
+      const hell = hole.look.theme === 'abyss', desert = hole.look.theme === 'canyon', winter = hole.look.theme === 'winter';
       this.hell = hell;
       const turf = hell ? T.templeFloor() : T.turf(L.turf);
-      const turfMat = new THREE.MeshStandardMaterial({ map: turf, roughness: hell ? 0.55 : 0.92, metalness: hell ? 0.1 : 0, color: hell || desert ? col('#ffffff') : col('#e4f0dc') });
-      const skirtStyle = hell ? 'temple' : desert ? 'sandstone' : hole.look.skirt || (hole.look.rail === 'stone' || hole.look.rail === 'brick' ? hole.look.rail : 'soil');
+      const turfMat = new THREE.MeshStandardMaterial({ map: turf, roughness: hell ? 0.55 : 0.92, metalness: hell ? 0.1 : 0, color: hell || desert || winter ? col('#ffffff') : col('#e4f0dc') });
+      const skirtStyle = hell ? 'temple' : desert ? 'sandstone' : winter ? 'snow' : hole.look.skirt || (hole.look.rail === 'stone' || hole.look.rail === 'brick' ? hole.look.rail : 'soil');
       if (desert) this.buildDesertGround(hole);
+      if (winter) this.buildDesertGround(hole, T.snow(), '#ffffff');
       const skirtMat = this.railMaterials(skirtStyle).body;
       const skirtBottom = hell ? -1.5 : GROUND_Y - 0.02;
 
@@ -4044,8 +4651,8 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
 
       this.buildCup(hole, sim);
       this.buildTee(hole, sim);
-      if (hell) PC.VIS.decorateAbyss(hole, this, sim); else if (desert) PC.VIS.decorateCanyon(hole, this, sim); else PC.VIS.decorate(hole, this, sim);
-      (sim.feats || []).forEach(f => { const v = (hell && PC.VIS.abyss[f.type]) || (desert && PC.VIS.canyon[f.type]) || PC.VIS[f.type]; if (v) { const o = v(f.spec, this, f, sim); if (o) this.vis.push(o); } });
+      if (hell) PC.VIS.decorateAbyss(hole, this, sim); else if (desert) PC.VIS.decorateCanyon(hole, this, sim); else if (winter) PC.VIS.decorateWinter(hole, this, sim); else PC.VIS.decorate(hole, this, sim);
+      (sim.feats || []).forEach(f => { const v = (hell && PC.VIS.abyss[f.type]) || (desert && PC.VIS.canyon[f.type]) || (winter && PC.VIS.winter[f.type]) || PC.VIS[f.type]; if (v) { const o = v(f.spec, this, f, sim); if (o) this.vis.push(o); } });
       this.ghosts = [];
       return this;
     }
@@ -4064,6 +4671,11 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
           case 'soil': { const t = T.soil(); return { body: M({ map: t, roughness: 1 }), cap: null }; }
           case 'sandstone': { const t = T.sandstone(); return { body: M({ map: t, roughness: 0.95 }), cap: M({ color: col('#e0a070'), roughness: 0.9 }) }; }
           case 'plank': { const t = T.wood('#9a7a52'); return { body: M({ map: t, roughness: 0.95 }), cap: M({ color: col('#b89466'), roughness: 0.9 }) }; }
+          case 'candy': { const t = T.candy().clone(); t.needsUpdate = true; t.repeat.set(1.4, 1); return { body: M({ map: t, roughness: 0.35 }), cap: M({ color: col('#fbf6f0'), roughness: 0.3 }) }; }
+          case 'gingerbread': { const t = T.gingerbread(); return { body: M({ map: t, roughness: 0.9 }), cap: M({ color: col('#fffaf4'), roughness: 0.6 }) }; }
+          case 'present': { const t = T.wrap('#c8283a'); return { body: M({ map: t, roughness: 0.6 }), cap: M({ color: col('#f2c94c'), roughness: 0.4, metalness: 0.3 }) }; }
+          case 'snowbank': case 'snow': { const t = T.snow(); return { body: M({ map: t, roughness: 1, color: col('#f2f6fb') }), cap: style === 'snowbank' ? M({ color: col('#ffffff'), roughness: 1 }) : null }; }
+          case 'ice': { const t = T.ice(); return { body: M({ map: t, roughness: 0.15, metalness: 0.05, transparent: true, opacity: 0.85 }), cap: M({ color: col('#e8f6ff'), roughness: 0.1 }) }; }
           case 'basalt': case 'temple': { const t = T.templeStone(); return { body: M({ map: t, roughness: 0.9 }), cap: M({ color: col('#4a3e3c'), roughness: 0.7 }) }; }
           case 'obsidian': { const t = T.obsidian(); return { body: M({ map: t, roughness: 0.25, metalness: 0.2 }), cap: M({ color: col('#ff5a1a'), emissive: col('#ff4a10'), emissiveIntensity: 0.9, roughness: 0.5 }) }; }
           default: { const t = T.wood('#a8713f'); return { body: M({ map: t }), cap: M({ color: col('#c99a63'), roughness: 0.75 }) }; }
@@ -4072,7 +4684,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     }
 
     buildRail(r, hole, sim) {
-      if (r.style === 'none') return;
+      if (r.style === 'none') { if (r.top && r.h === 0) this.buildLedge(r, hole, sim); return; }
       const G = this.holeGroup;
       const mats = this.railMaterials(r.style);
       const visH = r.style === 'hedge' ? r.h + 0.06 : r.style === 'trellis' ? 0.16 : r.h;
@@ -4086,6 +4698,31 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
         const cm = new THREE.Mesh(cap.geo, mats.cap); cm.castShadow = true; cm.receiveShadow = true; G.add(cm);
       }
       if (PC.VIS.railExtras) PC.VIS.railExtras(r, body, this, sim);
+    }
+
+    // The face of a ledge (an invisible wall you can drop off but not climb): a strip from the lower
+    // ground up to the ledge, in the course's skirt material, so the step is easy to see.
+    buildLedge(r, hole, sim) {
+      const theme = hole.look.theme, style = theme === 'winter' ? 'snow' : theme === 'canyon' ? 'sandstone' : theme === 'abyss' ? 'temple' : 'soil';
+      const pts = U.resample(r.pts, 0.15, false), pos = [], uv = [], idx = [];
+      let run = 0;
+      pts.forEach((p, i) => {
+        const q = pts[Math.min(i + 1, pts.length - 1)], o = pts[Math.max(i - 1, 0)];
+        const dx = q[0] - o[0], dy = q[1] - o[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
+        if (i) run += Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]);
+        const top = r.top(p[0], p[1]);
+        const low = Math.min(sim.floorHeight(p[0] + nx * 0.12, p[1] + ny * 0.12), sim.floorHeight(p[0] - nx * 0.12, p[1] - ny * 0.12));
+        pos.push(p[0], top + 0.004, -p[1], p[0], low - 0.01, -p[1]);
+        uv.push(run / 2, top / 2, run / 2, low / 2);
+      });
+      for (let i = 0; i < pts.length - 1; i++) { const a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+      g.setIndex(idx); g.computeVertexNormals();
+      const m = this.railMaterials(style).body.clone(); m.side = THREE.DoubleSide;
+      const face = new THREE.Mesh(g, m); face.receiveShadow = true;
+      this.holeGroup.add(face);
     }
 
     buildZone(z, hole, hAt) {
@@ -4105,6 +4742,14 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
         case 'glass': m = new THREE.MeshPhysicalMaterial({ map: T.obsidian(), color: col('#ffffff'), roughness: 0.03, metalness: 0.3, clearcoat: 1, clearcoatRoughness: 0.02 }); lift = 0.008; uv = (x, y) => [x / 2, y / 2]; break;
         case 'tar': m = new THREE.MeshPhysicalMaterial({ map: T.tar(), color: col('#ffffff'), roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.1 }); lift = 0.012; uv = (x, y) => [x / 2.5, y / 2.5]; break;
         case 'sand': { const t = T.sand(); m = new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: col('#f4e2c0') }); uv = (x, y) => [x / 2, y / 2]; break; }
+        case 'ice': m = new THREE.MeshPhysicalMaterial({ map: T.ice(), color: col('#ffffff'), roughness: 0.06, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.03 }); lift = 0.008; uv = (x, y) => [x / 3, y / 3]; break;
+        case 'snow': {
+          // A soft drift that bulges up away from its edges (the ball sinks into it).
+          const t = T.snow(); m = new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: col('#ffffff') });
+          const P = z.poly, geo = surfaceGeometry(P, (x, y) => hAt(x, y) + 0.015 + 0.13 * U.smooth(0, 0.55, U.inPoly(x, y, P) ? U.distToPoly(x, y, P) : 0) * (0.85 + 0.15 * Math.sin(x * 3.1 + y * 2.3)), { uv: (x, y) => [x / 2, y / 2], cell: 0.12 });
+          const dm = new THREE.Mesh(geo, m); dm.receiveShadow = true; dm.castShadow = true; G.add(dm);
+          return;
+        }
         case 'ash': case 'cinder': { const t = T.ash(); m = new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: col(z.type === 'cinder' ? '#8a7a76' : '#ffffff') }); uv = (x, y) => [x / 2, y / 2]; break; }
         default: return;
       }
@@ -4121,6 +4766,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
         g.translate(0, y, 0);
         return g;
       };
+      if (z.kind === 'lava' && z.fire) { this.buildFirePit(z); return; }
       if (z.kind === 'lava') {
         const lt = T.lava(); lt.repeat.set(0.3, 0.3);
         // Lava makes its own light, so it is drawn unlit and never picks up the cavern's colours.
@@ -4142,11 +4788,11 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
       if (z.kind === 'water' && z.over) {
         // A pool set into the green, like the lava pools: water sitting just below the surface, with a stone lip.
         const n = T.waterNormal().clone(); n.needsUpdate = true; n.repeat.set(0.4, 0.4);
-        const wm = new THREE.MeshPhysicalMaterial({ color: col('#2f8fa8'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: 0.88, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1 });
+        const wm = new THREE.MeshPhysicalMaterial({ color: col(z.cold ? '#1f5a78' : '#2f8fa8'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: 0.9, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1 });
         const geo = surfaceGeometry(z.poly, (x, y) => this.sim.floorHeight(x, y), { lift: 0.012, uv: (x, y) => [x / 2, y / 2], cell: 0.2 });
         G.add(new THREE.Mesh(geo, wm));
         const rim = railGeometry(z.poly, true, 'out', 0.16, (x, y) => this.sim.floorHeight(x, y) + 0.04, 0, { thick: 0.06 });
-        G.add(new THREE.Mesh(rim.geo, this.railMaterials('sandstone').cap));
+        G.add(new THREE.Mesh(rim.geo, z.cold ? this.railMaterials('snow').body : this.railMaterials('sandstone').cap));
         this.vis.push({ update: (t) => { n.offset.set(t * 0.02, t * 0.013); } });
         return;
       }
@@ -4155,15 +4801,15 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
         bed.geometry.attributes.uv && bed.material.map.repeat.set(0.6, 0.6);
         bed.receiveShadow = true; G.add(bed);
         const n = T.waterNormal();
-        const wm = new THREE.MeshPhysicalMaterial({ color: col('#3b93ad'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: 0.78, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1, clearcoatRoughness: 0.1 });
+        const wm = new THREE.MeshPhysicalMaterial({ color: col(z.cold ? '#24607e' : '#3b93ad'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: z.cold ? 0.88 : 0.78, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1, clearcoatRoughness: 0.1 });
         n.repeat.set(0.35, 0.35);
         const water = new THREE.Mesh(flat(z.poly, z.top - 0.02), wm);
         water.receiveShadow = true; water.renderOrder = 2; G.add(water);
         this.vis.push({ update: (t) => { n.offset.set(t * 0.02, t * 0.013); } });
-        const rim = new THREE.Mesh(skirtGeometry(z.poly, () => z.top + 0.07, GROUND_Y - 0.02), this.railMaterials('stone').body);
+        const rim = new THREE.Mesh(skirtGeometry(z.poly, () => z.top + 0.07, GROUND_Y - 0.02), this.railMaterials(z.cold ? 'snow' : 'stone').body);
         rim.receiveShadow = true; G.add(rim);
         const lip = railGeometry(z.poly, true, 'out', 0.26, () => z.top + 0.1, GROUND_Y - 0.02, { thick: 0.08, inset: 0.03 });
-        const lm = new THREE.Mesh(lip.geo, this.railMaterials('stone').body); lm.receiveShadow = true; lm.castShadow = true; G.add(lm);
+        const lm = new THREE.Mesh(lip.geo, this.railMaterials(z.cold ? 'snow' : 'stone').body); lm.receiveShadow = true; lm.castShadow = true; G.add(lm);
       } else {
         const bed = new THREE.Mesh(flat(z.poly, z.top - 0.18), new THREE.MeshStandardMaterial({ map: T.soil(), roughness: 1 }));
         bed.receiveShadow = true; G.add(bed);
@@ -4199,9 +4845,9 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
       const [tx, ty] = hole.tee;
       const h = sim.floorHeight(tx, ty);
       const ang = Math.atan2(hole.cup[1] - ty, hole.cup[0] - tx);
-      const mat = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 0.75), new THREE.MeshStandardMaterial({ map: hole.look.theme === 'abyss' ? T.ash() : hole.look.theme === 'canyon' ? T.teeRug() : T.turf('#3f8a33'), roughness: 1 }));
+      const mat = new THREE.Mesh(new THREE.PlaneGeometry(0.95, 0.75), new THREE.MeshStandardMaterial({ map: hole.look.theme === 'abyss' ? T.ash() : hole.look.theme === 'canyon' ? T.teeRug() : hole.look.theme === 'winter' ? T.teeKnit() : T.turf('#3f8a33'), roughness: 1 }));
       mat.rotation.x = -Math.PI / 2; mat.rotation.z = ang - Math.PI / 2;
-      mat.position.copy(V(tx, ty, h + 0.004)); mat.receiveShadow = true;
+      mat.position.copy(V(tx, ty, h + 0.026)); mat.receiveShadow = true;   // above any ice or snow painted on the green
       G.add(mat);
       [-1, 1].forEach(s => {
         const m = new THREE.Mesh(new THREE.SphereGeometry(0.07, 14, 10), new THREE.MeshStandardMaterial({ color: col(s < 0 ? '#e2463b' : '#ffffff'), roughness: 0.4 }));
@@ -4212,7 +4858,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     }
 
     // The desert floor for a canyon hole, with any gulches cut out of it so they really drop away.
-    buildDesertGround(hole) {
+    buildDesertGround(hole, groundTex, tint) {
       const G = this.holeGroup, b = hole.box;
       const shape = new THREE.Shape(U.circle(b.cx, b.cy, 230, 64).map(p => new THREE.Vector2(p[0], p[1])));
       hole.hazards.filter(z => z.kind === 'chasm').forEach(z => {
@@ -4222,11 +4868,68 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
       const geo = new THREE.ShapeGeometry(shape, 1);
       geo.rotateX(-Math.PI / 2);
       geo.translate(0, GROUND_Y, 0);
-      const t = T.sand().clone(); t.needsUpdate = true; t.repeat.set(0.25, 0.25);
-      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: col('#f0dcc0') }));
+      const t = (groundTex || T.sand()).clone(); t.needsUpdate = true; t.repeat.set(0.25, 0.25);
+      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: col(tint || '#f0dcc0') }));
       m.receiveShadow = true;
       G.add(m);
     }
+    // A burning pit set into the platform: a ring of stone, a bed of glowing coals and flames licking up.
+    buildFirePit(z) {
+      const G = this.holeGroup, sim = this.sim;
+      const c = U.centroid(z.poly), r = Math.max(...z.poly.map(p => Math.hypot(p[0] - c[0], p[1] - c[1])));
+      const h = sim.floorHeight(c[0], c[1]);
+      const coalT = T.lava().clone(); coalT.needsUpdate = true; coalT.repeat.set(0.5, 0.5);
+      const coals = new THREE.MeshBasicMaterial({ map: coalT, color: col('#ff8a3a') });
+      const geo = surfaceGeometry(z.poly, (x, y) => sim.floorHeight(x, y), { lift: 0.006, uv: (x, y) => [x / 1.5, y / 1.5], cell: 0.15 });
+      G.add(new THREE.Mesh(geo, coals));
+      const rim = railGeometry(z.poly, true, 'out', 0.11, (x, y) => sim.floorHeight(x, y) + 0.07, 0, { thick: 0.08 });
+      G.add(new THREE.Mesh(rim.geo, this.railMaterials('temple').body));
+      const flame = this.mat('flame', () => new THREE.ShaderMaterial({
+        uniforms: { t: { value: 0 }, seed: { value: 0 } },
+        vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+        fragmentShader: [
+          'uniform float t; uniform float seed; varying vec2 vUv;',
+          'float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }',
+          'float n(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h(i), h(i + vec2(1.0, 0.0)), f.x), mix(h(i + vec2(0.0, 1.0)), h(i + vec2(1.0, 1.0)), f.x), f.y); }',
+          'void main() {',
+          '  vec2 uv = vUv; float y = uv.y; float tt = t + seed * 7.0;',
+          '  float q = n(vec2(uv.x * 4.0 + seed * 3.0, y * 3.0 - tt * 2.6)) * 0.6 + n(vec2(uv.x * 9.0 - seed, y * 7.0 - tt * 4.3)) * 0.4;',
+          '  float w = (1.0 - y) * 0.5 + 0.06;',
+          '  float d = abs(uv.x - 0.5 + (q - 0.5) * 0.25 * y) / w;',
+          '  float f = clamp((1.0 - d - y * 0.55 + (q - 0.5) * 0.8 * (0.25 + y)) * 1.7, 0.0, 1.0);',
+          '  vec3 c = mix(vec3(0.95, 0.18, 0.02), vec3(1.0, 0.62, 0.12), smoothstep(0.15, 0.6, f));',
+          '  c = mix(c, vec3(1.0, 0.95, 0.75), smoothstep(0.7, 1.0, f));',
+          '  float a = f * smoothstep(0.0, 0.06, y) * (1.0 - smoothstep(0.8, 1.0, y));',
+          '  gl_FragColor = vec4(c * a, a);',
+          '}',
+        ].join('\n'),
+        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+      }));
+      const fm = flame.clone(); fm.uniforms = { t: { value: 0 }, seed: { value: (c[0] * 0.37 + c[1] * 0.71) % 1 } };
+      const fg = new THREE.Group();
+      const hgt = 0.75 + r * 1.1, wid = r * 2.1;
+      for (let i = 0; i < 3; i++) {
+        const p = new THREE.Mesh(new THREE.PlaneGeometry(wid, hgt), fm);
+        p.position.y = hgt / 2; p.rotation.y = (i / 3) * Math.PI;
+        p.renderOrder = 5;
+        fg.add(p);
+      }
+      const glow = new THREE.Mesh(new THREE.CircleGeometry(r * 2.6, 24), new THREE.MeshBasicMaterial({ map: T.fade ? T.fade() : null, color: col('#ff6a1a'), transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false }));
+      glow.rotation.x = -Math.PI / 2; glow.position.y = 0.02;
+      fg.add(glow);
+      fg.position.copy(V(c[0], c[1], h));
+      G.add(fg);
+      let acc = Math.random();
+      this.vis.push({ update: (t, dt) => {
+        fm.uniforms.t.value = t;
+        coalT.offset.set(t * 0.02, t * 0.013);
+        coals.color.setRGB(1, 0.5 + Math.sin(t * 3.1 + c[0]) * 0.08, 0.2);
+        fg.scale.set(1, 1 + Math.sin(t * 7 + c[1]) * 0.06, 1);
+        acc += dt || 0;
+        if (acc > 0.18) { acc = 0; this.glow.spawn({ x: c[0] + (Math.random() - 0.5) * r, y: h + 0.3, z: -c[1] + (Math.random() - 0.5) * r, vx: (Math.random() - 0.5) * 0.3, vy: 1.2 + Math.random(), vz: (Math.random() - 0.5) * 0.3, g: 0.1, drag: 0.98, life: 1.2, size: 0.05, color: col(Math.random() < 0.5 ? '#ff8a2a' : '#ffd25a') }); }
+      } });
+    }
+
     buildChasm(z) {
       const G = this.holeGroup;
       // Banded walls that darken as they go down, so the gulch reads as deep.
@@ -7291,29 +7994,675 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     return null;
   };
 
-  // Sunset Mesa: banded cliff faces where the mesa top drops to the lower green.
-  CV.mesa = function (s, world) {
-    const box = world.hole.box, mat = stoneMat(1, 0.6);
-    mat.side = THREE.DoubleSide;
-    const face = (x0, x1, y, h0, h1) => {
-      const g = new THREE.BufferGeometry();
-      const pos = [x0, 0, -y, x1, 0, -y, x1, h1, -y, x0, 0, -y, x1, h1, -y, x0, h0, -y];
-      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-      g.setAttribute('uv', new THREE.Float32BufferAttribute([x0 / 2, 0, x1 / 2, 0, x1 / 2, h1, x0 / 2, 0, x1 / 2, h1, x0 / 2, h0], 2));
-      g.computeVertexNormals();
-      world.holeGroup.add(mesh(g, mat, false));
-    };
-    face(box.x0, -s.hw, s.y1 - 0.01, s.top, s.top);
-    face(s.hw, box.x1, s.y1 - 0.01, s.top, s.top);
-    // the ramp's side walls, as triangles rising with it
-    [-s.hw, s.hw].forEach(x => {
-      const g = new THREE.BufferGeometry();
-      g.setAttribute('position', new THREE.Float32BufferAttribute([x, 0, -s.y0, x, 0, -s.y1, x, s.top, -s.y1], 3));
-      g.setAttribute('uv', new THREE.Float32BufferAttribute([s.y0 / 2, 0, s.y1 / 2, 0, s.y1 / 2, s.top], 2));
-      g.computeVertexNormals();
-      world.holeGroup.add(mesh(g, mat, false));
+  // Sunset Mesa's cliff faces are drawn by the world with every other ledge.
+  CV.mesa = () => null;
+})(window.PC);
+
+/* Putt Club: how the Winter Wonderland looks. Snowy mountains and pines, gingerbread houses and candy canes,
+   falling snow, and winter versions of the moving parts (PC.VIS.winter[type] is used instead of PC.VIS[type]
+   when a hole's look.theme is 'winter'). Thin ice and snowballs are drawn here for every course. */
+(function (PC) {
+  'use strict';
+  const U = PC.U, T = PC.TEX, TAU = U.TAU, C = PC.C;
+  const col = PC.col, V = PC.V;
+  const VIS = PC.VIS;
+  const WV = VIS.winter = {};
+  const GY = () => PC.GROUND_Y;
+  const M = (hex, o) => new THREE.MeshStandardMaterial(Object.assign({ color: col(hex), roughness: 0.7 }, o || {}));
+  const mesh = (geo, mat, cast = true) => { const m = new THREE.Mesh(geo, mat); m.castShadow = cast; m.receiveShadow = true; return m; };
+  const at = (o, x, y, h) => { o.position.copy(V(x, y, h)); return o; };
+  const now = (t, sim) => (sim ? sim.t : t);
+  const texMat = (tex, rx, ry, o) => { const t = tex.clone(); t.needsUpdate = true; t.repeat.set(rx, ry); return new THREE.MeshStandardMaterial(Object.assign({ map: t, roughness: 0.8 }, o || {})); };
+  const SNOW = () => M('#ffffff', { roughness: 1 });
+
+  // ---------- Models ----------
+  // A candy cane: a striped tube going up and curling over at the top.
+  class CaneCurve extends THREE.Curve {
+    constructor(h, hook) { super(); this.h = h; this.k = hook; }
+    getPoint(t, out = new THREE.Vector3()) {
+      const straight = this.h - this.k, L = straight + Math.PI * this.k, s = t * L;
+      if (s <= straight) return out.set(0, s, 0);
+      const a = (s - straight) / this.k;
+      return out.set(this.k - Math.cos(a) * this.k, straight + Math.sin(a) * this.k, 0);
+    }
+  }
+  function candyCane(h, r) {
+    const g = new THREE.TubeGeometry(new CaneCurve(h, Math.max(0.12, h * 0.16)), 40, r, 10, false);
+    const m = mesh(g, texMat(T.candy(), Math.round(h * 6), 1, { roughness: 0.3 }));
+    return m;
+  }
+  VIS.candyCane = candyCane;
+
+  function snowman(r, rnd) {
+    const g = new THREE.Group(), snow = M('#fbfdff', { roughness: 0.9 });
+    const r1 = r, r2 = r * 0.74, r3 = r * 0.52;
+    const b1 = mesh(new THREE.SphereGeometry(r1, 18, 14), snow); b1.position.y = r1 * 0.9;
+    const b2 = mesh(new THREE.SphereGeometry(r2, 16, 12), snow); b2.position.y = r1 * 1.7 + r2 * 0.7;
+    const b3 = mesh(new THREE.SphereGeometry(r3, 16, 12), snow); b3.position.y = b2.position.y + r2 * 0.8 + r3 * 0.75;
+    const coal = M('#1a1a1e', { roughness: 0.5 });
+    const eyes = [-1, 1].map(s => { const e = mesh(new THREE.SphereGeometry(r3 * 0.12, 8, 6), coal, false); e.position.set(s * r3 * 0.35, b3.position.y + r3 * 0.2, r3 * 0.88); return e; });
+    const nose = mesh(new THREE.ConeGeometry(r3 * 0.14, r3 * 0.8, 10), M('#ff7a1a'), false);
+    nose.rotation.x = Math.PI / 2; nose.position.set(0, b3.position.y, r3 * 1.2);
+    const scarfCol = ['#d42a3a', '#2f9a5a', '#2f6fc4'][Math.floor(rnd() * 3)];
+    const scarf = mesh(new THREE.TorusGeometry(r2 * 0.72, r2 * 0.16, 8, 20), M(scarfCol, { roughness: 0.9 }));
+    scarf.rotation.x = Math.PI / 2; scarf.position.y = b2.position.y + r2 * 0.62;
+    const tail = mesh(new THREE.BoxGeometry(r2 * 0.25, r2 * 0.7, r2 * 0.08), M(scarfCol, { roughness: 0.9 }));
+    tail.position.set(r2 * 0.45, b2.position.y + r2 * 0.25, r2 * 0.6); tail.rotation.z = 0.2;
+    const buttons = [0, 1, 2].map(i => { const bt = mesh(new THREE.SphereGeometry(r2 * 0.08, 6, 5), coal, false); bt.position.set(0, b2.position.y + r2 * (0.3 - i * 0.35), r2 * (0.95 - Math.abs(i - 0.5) * 0.06)); return bt; });
+    const hat = new THREE.Group();
+    const brim = mesh(new THREE.CylinderGeometry(r3 * 0.95, r3 * 0.95, r3 * 0.08, 18), coal); const crown = mesh(new THREE.CylinderGeometry(r3 * 0.62, r3 * 0.62, r3 * 0.85, 18), coal);
+    crown.position.y = r3 * 0.45;
+    const band = mesh(new THREE.CylinderGeometry(r3 * 0.64, r3 * 0.64, r3 * 0.16, 18), M('#d42a3a'), false); band.position.y = r3 * 0.12;
+    hat.add(brim, crown, band); hat.position.y = b3.position.y + r3 * 0.85; hat.rotation.z = (rnd() - 0.5) * 0.3;
+    const arms = [-1, 1].map(s => { const a = mesh(new THREE.CylinderGeometry(0.015, 0.025, r * 1.6, 5), M('#5a3a22'), false); a.position.set(s * (r2 + r * 0.45), b2.position.y + r2 * 0.2, 0); a.rotation.z = s * (1.0 + rnd() * 0.3); return a; });
+    g.add(b1, b2, b3, ...eyes, nose, scarf, tail, ...buttons, hat, ...arms);
+    return g;
+  }
+  VIS.snowman = snowman;
+
+  function penguin() {
+    const g = new THREE.Group(), body = new THREE.Group();
+    const black = M('#1c2230', { roughness: 0.5 }), white = M('#f8f8f4', { roughness: 0.6 }), orange = M('#ff9a1a', { roughness: 0.5 });
+    const b = mesh(new THREE.SphereGeometry(0.22, 18, 14), black); b.scale.set(1, 1.35, 0.95); b.position.y = 0.3;
+    const belly = mesh(new THREE.SphereGeometry(0.2, 16, 12), white); belly.scale.set(0.85, 1.22, 0.7); belly.position.set(0, 0.28, 0.08);
+    const head = mesh(new THREE.SphereGeometry(0.14, 16, 12), black); head.position.y = 0.6;
+    const face = mesh(new THREE.SphereGeometry(0.1, 12, 10), white); face.scale.set(1, 0.9, 0.6); face.position.set(0, 0.6, 0.07);
+    const beak = mesh(new THREE.ConeGeometry(0.04, 0.12, 8), orange); beak.rotation.x = Math.PI / 2; beak.position.set(0, 0.58, 0.18);
+    const eyes = [-1, 1].map(s => { const e = mesh(new THREE.SphereGeometry(0.018, 6, 5), M('#111111'), false); e.position.set(s * 0.05, 0.64, 0.12); return e; });
+    const flips = [-1, 1].map(s => { const f = mesh(new THREE.SphereGeometry(0.1, 10, 8), black); f.scale.set(0.25, 1, 0.55); f.position.set(s * 0.22, 0.32, 0); f.rotation.z = s * 0.3; return f; });
+    const feet = [-1, 1].map(s => { const f = mesh(new THREE.SphereGeometry(0.06, 8, 6), orange); f.scale.set(1, 0.35, 1.6); f.position.set(s * 0.08, 0.02, 0.06); return f; });
+    const scarf = mesh(new THREE.TorusGeometry(0.13, 0.035, 8, 18), M('#d42a3a', { roughness: 0.9 })); scarf.rotation.x = Math.PI / 2; scarf.position.y = 0.48;
+    body.add(b, belly, head, face, beak, ...eyes, ...flips, ...feet, scarf);
+    g.add(body);
+    g.userData = { body, flips };
+    return g;
+  }
+  VIS.penguin = penguin;
+
+  // A gingerbread house: cookie walls, an iced roof, gumdrops on the ridge and warm windows.
+  function gingerHouse(w, d, h, rnd) {
+    const g = new THREE.Group();
+    const cookie = texMat(T.gingerbread(), w, h, { roughness: 0.9 });
+    const icing = M('#fffaf4', { roughness: 0.55 });
+    const body = mesh(new THREE.BoxGeometry(w, h, d), cookie); body.position.y = h / 2;
+    g.add(body);
+    const rh = w * 0.42, slope = Math.atan2(rh, w / 2), rl = Math.hypot(w / 2, rh) + 0.12;
+    [-1, 1].forEach(s => {
+      // each half of the roof starts at the ridge and runs down past the eave
+      const ux = s * Math.cos(slope), uy = -Math.sin(slope), nx = s * Math.sin(slope), ny = Math.cos(slope);
+      const cx = ux * (rl / 2 - 0.03), cy = h + rh + uy * (rl / 2 - 0.03);
+      const roof = mesh(new THREE.BoxGeometry(rl, 0.08, d + 0.24), cookie);
+      roof.position.set(cx, cy, 0); roof.rotation.z = -s * slope;
+      const snow = mesh(new THREE.BoxGeometry(rl, 0.07, d + 0.26), icing);
+      snow.position.set(cx + nx * 0.07, cy + ny * 0.07, 0); snow.rotation.z = -s * slope;
+      g.add(roof, snow);
     });
+    // gable ends
+    const gable = new THREE.Shape(); gable.moveTo(-w / 2, 0); gable.lineTo(w / 2, 0); gable.lineTo(0, rh); gable.closePath();
+    [-1, 1].forEach(s => { const gm = mesh(new THREE.ShapeGeometry(gable), cookie); gm.position.set(0, h, s * (d / 2 + 0.001)); if (s < 0) gm.rotation.y = Math.PI; g.add(gm); });
+    // icing drips along the eaves
+    for (let i = 0; i < 9; i++) [-1, 1].forEach(s => { const dr = mesh(new THREE.SphereGeometry(0.05, 6, 5), icing, false); dr.scale.y = 1.6; dr.position.set(s * (w / 2 + 0.04), h - 0.02, -d / 2 + (i + 0.5) * d / 9); g.add(dr); });
+    // gumdrops on the ridge
+    const gum = ['#e8384f', '#2fbf71', '#f2c94c', '#9b59d0', '#3fa9f5'];
+    for (let i = 0; i < 5; i++) { const gd = mesh(new THREE.SphereGeometry(0.07, 10, 8, 0, TAU, 0, Math.PI / 2), M(gum[i % 5], { roughness: 0.3 })); gd.position.set(0, h + rh + 0.05, -d / 2 + (i + 0.5) * d / 5); g.add(gd); }
+    // door and windows on the front (+z)
+    const door = mesh(new THREE.BoxGeometry(w * 0.24, h * 0.5, 0.04), M('#6a3a18')); door.position.set(0, h * 0.25, d / 2 + 0.02);
+    const doorTrim = mesh(new THREE.TorusGeometry(w * 0.13, 0.025, 6, 16, Math.PI), icing, false); doorTrim.position.set(0, h * 0.5, d / 2 + 0.03);
+    g.add(door, doorTrim);
+    const winM = new THREE.MeshStandardMaterial({ color: col('#ffd27a'), emissive: col('#ffb84a'), emissiveIntensity: 0.9 });
+    [-1, 1].forEach(s => {
+      const wn = mesh(new THREE.BoxGeometry(w * 0.18, h * 0.22, 0.03), winM, false); wn.position.set(s * w * 0.3, h * 0.58, d / 2 + 0.02);
+      const fr = mesh(new THREE.BoxGeometry(w * 0.22, h * 0.26, 0.02), icing, false); fr.position.set(s * w * 0.3, h * 0.58, d / 2 + 0.008);
+      g.add(fr, wn);
+    });
+    // a little candy cane by the door and a chimney with snow
+    const cc = candyCane(h * 0.6, 0.03); cc.position.set(w * 0.2, 0, d / 2 + 0.15); cc.rotation.y = Math.PI; g.add(cc);
+    const ch = mesh(new THREE.BoxGeometry(0.16, 0.36, 0.16), texMat(T.gingerbread(), 0.3, 0.6)); ch.position.set(w * 0.22, h + rh * 0.6, -d * 0.15);
+    const chs = mesh(new THREE.BoxGeometry(0.2, 0.06, 0.2), icing); chs.position.set(w * 0.22, h + rh * 0.6 + 0.2, -d * 0.15);
+    g.add(ch, chs);
+    g.userData.chimney = [w * 0.22, h + rh * 0.6 + 0.25, -d * 0.15];
+    void rnd;
+    return g;
+  }
+  VIS.gingerHouse = gingerHouse;
+
+  function pine(rnd) {
+    const g = new THREE.Group(), h = 2.6 + rnd() * 2.6, green = M(['#24563a', '#2c6444', '#1f4a32'][Math.floor(rnd() * 3)], { roughness: 0.9, flatShading: true });
+    const trunk = mesh(new THREE.CylinderGeometry(0.08, 0.12, h * 0.25, 6), M('#5a3a22', { roughness: 1 })); trunk.position.y = h * 0.12; g.add(trunk);
+    for (let i = 0; i < 3; i++) {
+      const r = (0.75 - i * 0.18) * h * 0.38, y = h * (0.22 + i * 0.22), th = h * 0.42;
+      const c = mesh(new THREE.ConeGeometry(r, th, 8), green); c.position.y = y + th / 2; g.add(c);
+      const sc = mesh(new THREE.ConeGeometry(r * 0.72, th * 0.38, 8), M('#ffffff', { roughness: 1, flatShading: true }), false); sc.position.y = y + th * 0.82; g.add(sc);
+    }
+    return g;
+  }
+
+  // ---------- Snowbanks: lumps of snow along the top of the wall ----------
+  const baseExtras = VIS.railExtras;
+  VIS.railExtras = function (r, body, world, sim) {
+    if (r.style !== 'snowbank') return baseExtras && baseExtras(r, body, world, sim);
+    const rnd = U.rng(Math.round(r.pts[0][0] * 31 + r.pts[0][1] * 17)), items = [];
+    const P = body.line, N = body.normals, Tp = body.tops;
+    for (let i = 0; i < P.length - 1; i++) {
+      const n = N[Math.min(i, N.length - 1)];
+      for (let k = 0; k < 2; k++) {
+        const t = rnd(), off = r.side === 'out' ? r.w / 2 : 0;
+        const x = P[i][0] + (P[i + 1][0] - P[i][0]) * t + n[0] * (off + (rnd() - 0.5) * r.w * 0.4), y = P[i][1] + (P[i + 1][1] - P[i][1]) * t + n[1] * (off + (rnd() - 0.5) * r.w * 0.4);
+        const sc = r.w * (0.5 + rnd() * 0.25);
+        items.push({ x, y: Tp[i] - sc * 0.35, z: -y, s: sc, sy: sc * 0.6, ry: rnd() * 6, c: rnd() < 0.5 ? '#ffffff' : '#f2f7fc' });
+      }
+    }
+    VIS.instanced(world, new THREE.IcosahedronGeometry(1, 2), new THREE.MeshStandardMaterial({ roughness: 1 }), items);
+  };
+
+  // ---------- Posts ----------
+  const basePost = VIS.post;
+  VIS.post = function (p, world) {
+    const h0 = world.sim.groundRaw(p.x, p.y), rnd = U.rng(Math.round(p.x * 37 + p.y * 91));
+    if (p.style === 'cane') { const m = candyCane(p.h, p.r); m.rotation.y = rnd() * TAU; world.holeGroup.add(at(m, p.x, p.y, h0)); return; }
+    if (p.style === 'snowman') { const m = snowman(p.r, rnd); m.rotation.y = Math.atan2(world.hole.tee[0] - p.x, -(world.hole.tee[1] - p.y)) + (rnd() - 0.5) * 0.6; world.holeGroup.add(at(m, p.x, p.y, h0)); return; }
+    return basePost(p, world);
+  };
+
+  // ---------- Thin ice (every course) ----------
+  VIS.thinice = function (s, world, f) {
+    const sim = world.sim, G = world.holeGroup;
+    const sheets = s.list.map((q, i) => {
+      const poly = U.ccw(q.poly || q);
+      const it = T.ice().clone(); it.needsUpdate = true;
+      const mat = new THREE.MeshPhysicalMaterial({ map: it, color: col('#e6f6ff'), roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.05, transparent: true, opacity: 0.82 });
+      const geo = surfaceGeometry(poly, (x, y) => sim.floorHeight(x, y) + 0.02, (x, y) => [x / 3, y / 3]);
+      const sheet = mesh(geo, mat, false);
+      G.add(sheet);
+      // cracks, built when the ice first cracks, spreading over the 4 seconds
+      const cracks = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: col('#ffffff'), transparent: true, opacity: 0.95 }));
+      cracks.visible = false; G.add(cracks);
+      // shards that float on the water once it breaks
+      const shards = new THREE.Group(); shards.visible = false; G.add(shards);
+      const rnd = U.rng(i * 7 + 3), box = U.bbox ? U.bbox(poly) : null;
+      const xs = poly.map(p => p[0]), ys = poly.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+      void box;
+      for (let k = 0; k < 18; k++) {
+        const x = x0 + rnd() * (x1 - x0), y = y0 + rnd() * (y1 - y0);
+        if (!U.inPoly(x, y, poly)) continue;
+        const sh = new THREE.Shape(); const n = 3 + Math.floor(rnd() * 3), rr = 0.15 + rnd() * 0.3;
+        for (let j = 0; j < n; j++) { const a = (j / n) * TAU + rnd() * 0.6, d = rr * (0.6 + rnd() * 0.6); j ? sh.lineTo(Math.cos(a) * d, Math.sin(a) * d) : sh.moveTo(Math.cos(a) * d, Math.sin(a) * d); }
+        const m = mesh(new THREE.ShapeGeometry(sh), mat, false); m.rotation.x = -Math.PI / 2; m.position.copy(V(x, y, sim.floorHeight(x, y) + 0.022)); m.userData.ph = rnd() * 6; m.userData.base = m.position.y;
+        shards.add(m);
+      }
+      return { poly, sheet, mat, cracks, shards, built: false, x0, x1, y0, y1, center: U.centroid(poly) };
+    });
+    const buildCracks = (o, cx, cy) => {
+      const pts = [], rnd = U.rng(Math.round(cx * 100 + cy * 37));
+      const R = Math.hypot(o.x1 - o.x0, o.y1 - o.y0);
+      for (let b = 0; b < 9; b++) {
+        let a = (b / 9) * TAU + rnd() * 0.5, x = cx, y = cy;
+        const steps = 8;
+        for (let k = 0; k < steps; k++) {
+          const l = R / steps * (0.6 + rnd() * 0.8);
+          a += (rnd() - 0.5) * 0.9;
+          const nx = x + Math.cos(a) * l, ny = y + Math.sin(a) * l;
+          pts.push([x, y, nx, ny, k / steps]);
+          if (rnd() < 0.3) { const ba = a + (rnd() < 0.5 ? 1 : -1) * (0.6 + rnd() * 0.6), bl = l * 0.8; pts.push([nx, ny, nx + Math.cos(ba) * bl, ny + Math.sin(ba) * bl, (k + 0.5) / steps]); }
+          x = nx; y = ny;
+        }
+      }
+      // order by distance from the start so drawRange spreads them outward
+      pts.sort((p, q) => p[4] - q[4]);
+      const arr = [];
+      pts.forEach(p => {
+        const ok = U.inPoly(p[0], p[1], o.poly) && U.inPoly(p[2], p[3], o.poly);
+        if (!ok) return;
+        arr.push(p[0], sim.floorHeight(p[0], p[1]) + 0.026, -p[1], p[2], sim.floorHeight(p[2], p[3]) + 0.026, -p[3]);
+      });
+      o.cracks.geometry.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3));
+      o.nSeg = arr.length / 6;
+      o.built = true;
+    };
+    return {
+      update(t, dt, s2) {
+        const tt = now(t, s2);
+        sheets.forEach((o, i) => {
+          const st = f.list[i];
+          if (st.crack < 0) { o.sheet.visible = true; o.shards.visible = false; o.cracks.visible = false; return; }
+          if (!o.built) buildCracks(o, st.cx, st.cy);
+          const k = U.clamp((tt - st.crack) / 4, 0, 1);
+          if (!st.broken) {
+            o.cracks.visible = true;
+            o.cracks.geometry.setDrawRange(0, Math.max(2, Math.floor(o.nSeg * Math.min(1, 0.15 + k * 1.1)) * 2));
+            o.mat.opacity = 0.82 - k * 0.2;
+            o.sheet.position.y = k > 0.75 ? Math.sin(tt * 60) * 0.006 * (k - 0.75) * 4 : 0;
+          } else {
+            o.sheet.visible = false; o.cracks.visible = false; o.shards.visible = true;
+            o.shards.children.forEach(m => { m.position.y = m.userData.base + Math.sin(tt * 1.6 + m.userData.ph) * 0.012; m.rotation.z = Math.sin(tt * 0.4 + m.userData.ph) * 0.3; });
+          }
+        });
+      },
+    };
+  };
+  // the same geometry helper the world uses for greens
+  function surfaceGeometry(P, hAt, uvf) {
+    const shape = new THREE.Shape(P.map(p => new THREE.Vector2(p[0], p[1])));
+    const g = new THREE.ShapeGeometry(shape, 1);
+    const pos = g.attributes.position, uv = [];
+    // subdivide coarsely by re-triangulating a grid is overkill here: thin ice sits on flat ground
+    const arr = [];
+    for (let i = 0; i < pos.count; i++) { const x = pos.getX(i), y = pos.getY(i); arr.push(x, hAt(x, y), -y); const q = uvf(x, y); uv.push(q[0], q[1]); }
+    const out = new THREE.BufferGeometry();
+    out.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3));
+    out.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    out.setIndex(g.index);
+    out.computeVertexNormals();
+    return out;
+  }
+
+  // ---------- Snowballs (every course) ----------
+  VIS.snowballs = function (s, world, f) {
+    const sim = world.sim;
+    const geo = new THREE.IcosahedronGeometry(1, 2);
+    const p = geo.attributes.position, rnd = U.rng(5), seen = new Map();
+    for (let i = 0; i < p.count; i++) { const key = p.getX(i).toFixed(3) + p.getY(i).toFixed(3) + p.getZ(i).toFixed(3); if (!seen.has(key)) seen.set(key, 0.9 + rnd() * 0.18); const k = seen.get(key); p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k); }
+    geo.computeVertexNormals();
+    const mat = texMat(T.snow(), 1, 1, { roughness: 0.95 });
+    const balls = f.list.map(() => { const m = mesh(geo, mat); world.holeGroup.add(m); return { m, n: -1, px: 0, py: 0 }; });
+    const q = new THREE.Quaternion(), axis = new THREE.Vector3();
+    return {
+      update() {
+        f.list.forEach((w, i) => {
+          const o = balls[i];
+          if (o.n !== w.n) {
+            // the last one burst at the bottom of its run
+            if (o.n >= 0) { const path = s.list[i].path, e = path[path.length - 1]; world.burst('puff', e[0], e[1], sim.groundRaw(e[0], e[1]), { color: '#ffffff', n: 16 }); }
+            o.n = w.n; o.px = w.x; o.py = w.y;
+          }
+          o.m.visible = w.on;
+          if (!w.on) return;
+          const dx = w.x - o.px, dy = w.y - o.py, d = Math.hypot(dx, dy);
+          if (d > 1e-5 && d < 1) { axis.set(-dy / d, 0, -dx / d); q.setFromAxisAngle(axis, d / Math.max(0.05, w.r)); o.m.quaternion.premultiply(q); }
+          o.px = w.x; o.py = w.y;
+          o.m.scale.setScalar(w.r);
+          o.m.position.copy(V(w.x, w.y, sim.groundRaw(w.x, w.y) + w.r * 0.95));
+        });
+      },
+    };
+  };
+
+  // ---------- Winter versions of the moving parts ----------
+  WV.patrol = function (s, world, f) {
+    if (!s.penguins) return VIS.patrol(s, world, f);
+    const models = f.movers.map(() => { const g = penguin(); world.holeGroup.add(g); return g; });
+    return {
+      update(t) {
+        f.movers.forEach((mv, i) => {
+          const g = models[i], sp = Math.hypot(mv.vx, mv.vy);
+          g.position.copy(V(mv.x, mv.y, world.sim.groundRaw(mv.x, mv.y)));
+          if (sp > 0.05) g.rotation.y = Math.atan2(mv.vx, -mv.vy);   // beak (+z) along the way it slides
+          // belly-slide when going fast, stand up to turn round at each end
+          const slide = U.smooth(0.4, 1.4, sp);
+          g.userData.body.rotation.x = slide * 0.85;
+          g.userData.body.position.y = slide * 0.05;
+          g.userData.flips.forEach((fl, k) => { fl.rotation.z = (k ? 1 : -1) * (0.3 + slide * 1.0 + (1 - slide) * Math.abs(Math.sin(t * 8)) * 0.4); });
+          const hit = t - (mv.hit || -9), sq = hit >= 0 && hit < 0.3 ? 1 + Math.sin(hit * 20) * 0.08 * (1 - hit / 0.3) : 1;
+          g.scale.set(sq, 2 - sq, sq);
+        });
+      },
+    };
+  };
+
+  // A peppermint turnstile: striped vanes under a giant peppermint candy.
+  WV.spinner = function (s, world, f) {
+    const g = new THREE.Group(), h0 = world.sim.groundRaw(s.x, s.y);
+    const post = candyCane(s.h + 0.1, 0.16); post.geometry = new THREE.CylinderGeometry(0.16, 0.18, s.h + 0.1, 16); post.position.y = (s.h + 0.1) / 2; g.add(post);
+    const rot = new THREE.Group();
+    const vaneMat = texMat(T.candy(), 2, 0.6, { roughness: 0.35 });
+    for (let i = 0; i < s.arms; i++) {
+      const hh = new THREE.Group();
+      const v = mesh(new THREE.BoxGeometry(s.len - 0.2, s.h * 0.6, s.w * 0.9), vaneMat); v.position.set((s.len + 0.2) / 2, s.h * 0.32, 0);
+      hh.add(v); hh.rotation.y = (i * TAU) / s.arms; rot.add(hh);
+    }
+    // the peppermint: a white disc with red swirls, wrapped ends left off
+    const c = document.createElement('canvas'); c.width = c.height = 256;
+    const x2 = c.getContext('2d'); x2.fillStyle = '#fbf6f0'; x2.beginPath(); x2.arc(128, 128, 126, 0, TAU); x2.fill();
+    x2.fillStyle = '#d42a3a';
+    for (let i = 0; i < 8; i++) { const a0 = (i / 8) * TAU; x2.beginPath(); x2.moveTo(128, 128); for (let k = 0; k <= 20; k++) { const r = (k / 20) * 124, a = a0 + (k / 20) * 0.9; x2.lineTo(128 + Math.cos(a) * r, 128 + Math.sin(a) * r); } for (let k = 20; k >= 0; k--) { const r = (k / 20) * 124, a = a0 + 0.32 + (k / 20) * 0.9; x2.lineTo(128 + Math.cos(a) * r, 128 + Math.sin(a) * r); } x2.closePath(); x2.fill(); }
+    const tex = new THREE.CanvasTexture(c); if (THREE.sRGBEncoding) tex.encoding = THREE.sRGBEncoding;
+    const mint = mesh(new THREE.CylinderGeometry(s.len * 0.55, s.len * 0.55, 0.14, 40), [M('#fbf6f0', { roughness: 0.25 }), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.25 }), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.25 })]);
+    mint.position.y = s.h + 0.1;
+    rot.add(mint);
+    g.add(rot);
+    world.holeGroup.add(at(g, s.x, s.y, h0));
+    return { update() { rot.rotation.y = f.ang; } };
+  };
+
+  // Candy cane gates: striped bars that swing open from candy cane posts.
+  WV.gates = function (s, world, f) {
+    const sim = world.sim, bar = texMat(T.candy(), 3, 1, { roughness: 0.35 });
+    const doors = f.list.map(g => {
+      const dx = g.b[0] - g.a[0], dy = g.b[1] - g.a[1], len = Math.hypot(dx, dy), half = len / 2, ang = Math.atan2(dy, dx);
+      const make = (hinge, dir) => {
+        const piv = new THREE.Group(), holder = new THREE.Group();
+        [0.15, 0.42].forEach(y => { const b = mesh(new THREE.CylinderGeometry(0.045, 0.045, half - 0.04, 10), bar); b.rotation.z = Math.PI / 2; b.position.set(half / 2, y, 0); holder.add(b); });
+        const st = mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.32, 8), M('#fbf6f0', { roughness: 0.3 })); st.position.set(half - 0.06, 0.28, 0); holder.add(st);
+        holder.scale.x = dir; piv.add(holder);
+        piv.position.copy(V(hinge[0], hinge[1], sim.groundRaw(hinge[0], hinge[1]))); piv.rotation.y = ang;
+        world.holeGroup.add(piv);
+        const cane = candyCane(0.95, 0.06); cane.rotation.y = ang + (dir > 0 ? Math.PI : 0);
+        world.holeGroup.add(at(cane, hinge[0], hinge[1], sim.groundRaw(hinge[0], hinge[1])));
+        return piv;
+      };
+      return { g, a: make(g.a, 1), b: make(g.b, -1), ang };
+    });
+    return { update() { doors.forEach(d => { const o = U.smooth(0, 1, d.g.open); d.a.rotation.y = d.ang + o * 1.45; d.b.rotation.y = d.ang - o * 1.45; }); } };
+  };
+
+  // Gumdrops: sugary domes in bright colours.
+  WV.bumpers = function (s, world, f) {
+    const cols = ['#e8384f', '#2fbf71', '#f2c94c', '#9b59d0', '#3fa9f5', '#ff8a2a'];
+    const items = f.list.map((p, i) => {
+      const prof = []; for (let k = 0; k <= 12; k++) { const a = (k / 12) * Math.PI / 2; prof.push(new THREE.Vector2(p.r * 1.05 * Math.cos(a) * (1 - 0.15 * Math.sin(a)), 0.62 * Math.sin(a) * 1.1)); }
+      prof.push(new THREE.Vector2(0, 0.68));
+      const g = mesh(new THREE.LatheGeometry(prof, 28), new THREE.MeshPhysicalMaterial({ color: col(cols[i % cols.length]), roughness: 0.55, clearcoat: 0.3 }));
+      world.holeGroup.add(at(g, p.x, p.y, world.sim.groundRaw(p.x, p.y)));
+      return g;
+    });
+    return { update(t, dt, s2) { const tt = now(t, s2); f.list.forEach((p, i) => { const k = tt - p.hit; const q = k >= 0 && k < 0.4 ? 1 + Math.sin(k * 30) * 0.12 * (1 - k / 0.4) : 1; items[i].scale.set(q, 2 - q, q); }); } };
+  };
+
+  // Gingerbread houses over each tunnel mouth.
+  WV.tunnels = function (s, world, f) {
+    const rnd = U.rng(11), houses = [];
+    s.pairs.forEach((p, i) => [p.a, p.b].forEach((e, end) => {
+      const h = world.sim.groundRaw(e[0], e[1]);
+      const hole = new THREE.Mesh(new THREE.CircleGeometry(0.33, 24), new THREE.MeshBasicMaterial({ map: T.cupShade() }));
+      hole.rotation.x = -Math.PI / 2; world.holeGroup.add(at(hole, e[0], e[1], h + 0.012));
+      const mat = new THREE.Mesh(new THREE.RingGeometry(0.33, 0.48, 24), M('#fffaf4', { roughness: 0.6 }));
+      mat.rotation.x = -Math.PI / 2; world.holeGroup.add(at(mat, e[0], e[1], h + 0.01));
+      // the house sits behind the hole, its door facing the way the ball comes out
+      const dir = end ? p.dirB : p.dirA;
+      const house = gingerHouse(0.95, 0.75, 0.75, rnd);
+      const bx = e[0] - Math.cos(dir) * 0.95, by = e[1] - Math.sin(dir) * 0.95;
+      house.rotation.y = Math.atan2(Math.cos(dir), -Math.sin(dir));
+      world.holeGroup.add(at(house, bx, by, h));
+      houses.push({ house, i, end });
+    }));
+    return {
+      update(t) {
+        houses.forEach(o => {
+          const tp = f.pops && f.pops[o.i] ? f.pops[o.i][o.end] : -9, k = t - (tp - 0.75);
+          const q = k > 0 && k < 0.4 ? 1 + Math.sin(k * 25) * 0.05 : 1;
+          o.house.scale.set(q, 2 - q, q);
+        });
+      },
+    };
+  };
+
+  // A giant bauble swinging from a candy cane arch.
+  WV.swing = function (s, world, f) {
+    const G = world.holeGroup;
+    [-1, 1].forEach(k => { const c = candyCane(s.zp + 0.3, 0.12); c.rotation.y = k > 0 ? Math.PI : 0; G.add(at(c, s.x + k * 3.2, s.y, GY())); });
+    const beam = mesh(new THREE.CylinderGeometry(0.1, 0.1, 6.4, 12), texMat(T.candy(), 12, 1, { roughness: 0.3 })); beam.rotation.z = Math.PI / 2; beam.position.copy(V(s.x, s.y, s.zp + 0.12)); G.add(beam);
+    const rope = mesh(new THREE.CylinderGeometry(0.015, 0.015, 1, 6), M('#f2c94c', { metalness: 0.6, roughness: 0.3 }));
+    const ball = new THREE.Group();
+    const glass = mesh(new THREE.SphereGeometry(s.rt, 28, 20), new THREE.MeshPhysicalMaterial({ color: col('#c8102e'), metalness: 0.55, roughness: 0.12, clearcoat: 1 }));
+    const cap = mesh(new THREE.CylinderGeometry(s.rt * 0.22, s.rt * 0.26, s.rt * 0.2, 12), M('#f2c94c', { metalness: 0.8, roughness: 0.25 })); cap.position.y = s.rt * 0.98;
+    const band = mesh(new THREE.TorusGeometry(s.rt * 1.0, 0.025, 6, 32), M('#f2c94c', { metalness: 0.8, roughness: 0.25 })); band.rotation.x = Math.PI / 2;
+    ball.add(glass, cap, band);
+    G.add(rope, ball);
+    return {
+      update() {
+        ball.position.copy(V(f.xc, s.y, f.zc)); ball.rotation.z = -f.th;
+        const top = V(s.x, s.y, s.zp), bot = V(f.xc, s.y, f.zc + s.rt);
+        rope.position.copy(top.clone().add(bot).multiplyScalar(0.5)); rope.scale.y = top.distanceTo(bot); rope.rotation.z = -f.th;
+      },
+    };
+  };
+
+  // An ice floe for the ferry.
+  WV.ferry = function (s, world, f) {
+    const g = new THREE.Group();
+    const geo = new THREE.CylinderGeometry(s.r, s.r * 0.9, 0.24, 14, 1);
+    const p = geo.attributes.position, rnd = U.rng(9);
+    const ks = []; for (let i = 0; i < 15; i++) ks.push(0.9 + rnd() * 0.16);
+    for (let i = 0; i < p.count; i++) { const a = Math.atan2(p.getZ(i), p.getX(i)), k = ks[Math.floor(((a + Math.PI) / TAU) * 14) % 14]; p.setX(i, p.getX(i) * k); p.setZ(i, p.getZ(i) * k); }
+    geo.computeVertexNormals();
+    const floe = mesh(geo, [texMat(T.ice(), 2, 0.3, { roughness: 0.2 }), texMat(T.snow(), 1, 1, { roughness: 1 }), M('#bfe0f2')]);
+    floe.position.y = -0.12;
+    g.add(floe);
+    world.holeGroup.add(g);
+    return { update(t) { g.position.copy(V(f.x, f.y, (s.h === undefined ? -0.03 : s.h) + Math.sin(t * 1.3) * 0.006)); g.rotation.y = Math.sin(t * 0.4) * 0.15; } };
+  };
+
+  // A ski-jump kicker with gate flags either side.
+  WV.launch = function (s, world, f) {
+    const G = world.holeGroup, h0 = world.sim.floorHeight(s.x, s.y);
+    const lip = mesh(new THREE.BoxGeometry(s.r * 2.2, 0.05, 0.5), texMat(T.snow(), 1, 1)); lip.position.copy(V(s.x, s.y, h0 + 0.01)); G.add(lip);
+    const mark = new THREE.Mesh(new THREE.RingGeometry(s.r * 0.75, s.r, 28), M('#2f6fc4')); mark.rotation.x = -Math.PI / 2; G.add(at(mark, s.x, s.y, h0 + 0.02));
+    [-1, 1].forEach(k => {
+      const pole = mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.3, 6), M('#ffffff')); G.add(at(pole, s.x + k * (s.r + 0.35), s.y, h0 + 0.65));
+      const flag = mesh(new THREE.PlaneGeometry(0.4, 0.3), M(k < 0 ? '#d42a3a' : '#2f6fc4', { side: THREE.DoubleSide }), false); G.add(at(flag, s.x + k * (s.r + 0.35) + k * 0.2, s.y, h0 + 1.15));
+    });
+    return { update(t, dt, s2) { const k = now(t, s2) - f.hit; mark.material.emissive = col(k >= 0 && k < 0.4 ? '#4a8aff' : '#000000'); } };
+  };
+
+  // A blizzard: snow streaming across in gusts, and a candy-striped windsock.
+  WV.wind = function (s, world, f) {
+    const box = world.hole.box, dx = s.dir[0], dy = s.dir[1];
+    const px = dx < 0 ? box.x1 + 1.4 : box.x0 - 1.4, py = box.cy;
+    const pole = mesh(new THREE.CylinderGeometry(0.05, 0.06, 2.6, 8), texMat(T.candy(), 6, 1)); world.holeGroup.add(at(pole, px, py, GY() + 1.3));
+    const sockG = new THREE.Group();
+    const sock = mesh(new THREE.CylinderGeometry(0.18, 0.08, 1.0, 14, 5, true), new THREE.MeshStandardMaterial({ map: T.candy(), side: THREE.DoubleSide, roughness: 0.6 }));
+    sock.rotation.z = Math.PI / 2; sock.position.x = 0.5; sockG.add(sock);
+    world.holeGroup.add(at(sockG, px, py, GY() + 2.5));
+    sockG.rotation.y = Math.atan2(dy, dx);
+    let acc = 0;
+    return {
+      update(t, dt) {
+        const k = f.gust || 0;
+        sockG.rotation.z = -1.2 + k * 1.15 + Math.sin(t * 3) * 0.05;
+        acc += dt * (4 + k * 50);
+        while (acc > 1) {
+          acc -= 1;
+          const along = dx < 0 ? box.x1 + 3 : box.x0 - 3, y = box.y0 + Math.random() * box.h;
+          world.glow.spawn({ x: along, y: 0.1 + Math.random() * 2.2, z: -y, vx: dx * (2 + k * 9), vy: -0.2, vz: -dy * (2 + k * 9) + (Math.random() - 0.5) * 0.5, g: 0, drag: 1, life: 2.4, size: 0.04 + Math.random() * 0.04, color: col('#ffffff'), a: 0.9, wobble: 1.4, seed: Math.random() * 9 });
+        }
+      },
+    };
+  };
+
+  // The ice rink turntable: a turning disc of ice with snowmen riding on it.
+  WV.turntable = function (s, world, f) {
+    const g = new THREE.Group();
+    const disc = mesh(new THREE.CircleGeometry(s.r, 64), new THREE.MeshPhysicalMaterial({ map: T.ice(), roughness: 0.06, clearcoat: 1 }), false);
+    disc.rotation.x = -Math.PI / 2; disc.position.y = 0.008; g.add(disc);
+    const line = new THREE.Mesh(new THREE.RingGeometry(s.r * 0.45, s.r * 0.48, 48), M('#d42a3a')); line.rotation.x = -Math.PI / 2; line.position.y = 0.012;
+    const centre = new THREE.Mesh(new THREE.CircleGeometry(0.12, 20), M('#2f6fc4')); centre.rotation.x = -Math.PI / 2; centre.position.y = 0.012;
+    const turn = new THREE.Group(); turn.add(disc, line, centre); g.add(turn);
+    const gap = mesh(new THREE.RingGeometry(s.r - 0.01, s.r + 0.04, 64), M('#9ab8d0'), false); gap.rotation.x = -Math.PI / 2; gap.position.y = 0.006; g.add(gap);
+    const men = (s.pots || []).map((p, i) => { const m = snowman(p.r, U.rng(i + 2)); g.add(m); return m; });
+    world.holeGroup.add(at(g, s.x, s.y, 0));
+    return { update() { turn.rotation.y = f.ang; f.pots().forEach((p, i) => { men[i].position.set(p.x - s.x, 0, -(p.y - s.y)); men[i].rotation.y = f.ang; }); } };
+  };
+
+  // The cup rides in a little red sleigh.
+  WV.movingCup = function (s, world, f) {
+    const G = world.holeGroup;
+    const len = Math.hypot(s.b[0] - s.a[0], s.b[1] - s.a[1]) + C.CUP_R * 2 + 0.3;
+    const track = mesh(new THREE.PlaneGeometry(len, C.CUP_R * 2 + 0.2), texMat(T.ice(), 2, 0.3, { roughness: 0.1 }), false);
+    track.rotation.x = -Math.PI / 2; track.rotation.z = Math.atan2(s.b[1] - s.a[1], s.b[0] - s.a[0]);
+    G.add(at(track, (s.a[0] + s.b[0]) / 2, (s.a[1] + s.b[1]) / 2, 0.004));
+    const sleigh = new THREE.Group();
+    const red = M('#c8102e', { roughness: 0.4, metalness: 0.1 }), gold = M('#f2c94c', { metalness: 0.8, roughness: 0.25 });
+    const back = mesh(new THREE.BoxGeometry(0.5, 0.36, 0.08), red); back.position.set(0, 0.2, C.CUP_R + 0.12);
+    const sides = [-1, 1].map(k => { const sd = mesh(new THREE.BoxGeometry(0.06, 0.16, C.CUP_R * 2 + 0.3), red); sd.position.set(k * (C.CUP_R + 0.1), 0.08, 0); return sd; });
+    const front = mesh(new THREE.TorusGeometry(0.16, 0.03, 8, 16, Math.PI), red); front.position.set(0, 0.16, -(C.CUP_R + 0.14)); front.rotation.y = Math.PI / 2;
+    const runners = [-1, 1].map(k => { const r = mesh(new THREE.TorusGeometry(0.12, 0.018, 6, 16, Math.PI * 1.2), gold); r.position.set(k * (C.CUP_R + 0.1), 0.02, -(C.CUP_R + 0.12)); r.rotation.y = Math.PI / 2; return r; });
+    sleigh.add(back, ...sides, front, ...runners);
+    G.add(sleigh);
+    return { update() { sleigh.position.copy(V(f.x, f.y, 0.0)); } };
+  };
+
+  // A gift box spring: the pad is the lid of a wrapped present.
+  WV.spring = function (s, world, f) {
+    const o = VIS.spring(s, world, f);
+    const h0 = world.sim.groundRaw(s.x, s.y);
+    const box = mesh(new THREE.BoxGeometry(s.r * 2.3, 0.06, s.r * 2.3), texMat(T.wrap('#2f8a4a'), 1, 1)); world.holeGroup.add(at(box, s.x, s.y, h0 + 0.01));
+    const ribbon = mesh(new THREE.BoxGeometry(s.r * 2.32, 0.065, 0.08), M('#d42a3a')); world.holeGroup.add(at(ribbon, s.x, s.y, h0 + 0.012));
+    return o;
+  };
+
+  // Gingerbread houses along a gingerbread wall, or one big one by the cup at the summit.
+  WV.village = function (s, world) {
+    const hole = world.hole, rnd = U.rng(31), G = world.holeGroup;
+    if (s.summit) {
+      const hs = gingerHouse(3.2, 2.4, 2.2, rnd);
+      hs.rotation.y = 0;
+      G.add(at(hs, hole.cup[0] + 0.6, hole.box.y1 + 2.4, GY()));
+      return null;
+    }
+    const wall = (hole.walls || []).find(w => w.style === 'gingerbread');
+    if (!wall) return null;
+    const y = wall.pts[0][1];
+    [hole.box.x0 - 2.2, hole.box.x1 + 2.2].forEach((x, i) => { const hs = gingerHouse(2.4, 1.8, 1.7, rnd); hs.rotation.y = i ? -Math.PI / 2 : Math.PI / 2; G.add(at(hs, x, y, GY())); });
     return null;
+  };
+
+  // A chairlift running over the hole.
+  WV.lift = function (s, world) {
+    const box = world.hole.box, G = world.holeGroup;
+    const ax = box.x0 - 4, bx = box.x1 + 4, y = box.cy + 1.5, top = 6.5;
+    [ax, bx].forEach(x => {
+      const tw = mesh(new THREE.CylinderGeometry(0.14, 0.2, top, 8), M('#5a5f6a', { metalness: 0.6, roughness: 0.4 })); G.add(at(tw, x, y, GY() + top / 2));
+      const arm = mesh(new THREE.BoxGeometry(0.2, 0.15, 1.4), M('#5a5f6a', { metalness: 0.6 })); G.add(at(arm, x, y, GY() + top));
+    });
+    const cables = [-0.6, 0.6].map(dz => { const c = mesh(new THREE.CylinderGeometry(0.015, 0.015, bx - ax, 4), M('#2a2a2e'), false); c.rotation.z = Math.PI / 2; G.add(at(c, (ax + bx) / 2, y + dz, GY() + top - 0.05)); return c; });
+    void cables;
+    const chairs = [];
+    for (let i = 0; i < 6; i++) {
+      const ch = new THREE.Group();
+      const hang = mesh(new THREE.CylinderGeometry(0.02, 0.02, 1.1, 5), M('#2a2a2e')); hang.position.y = -0.55;
+      const seat = mesh(new THREE.BoxGeometry(0.9, 0.08, 0.4), M(i % 2 ? '#d42a3a' : '#2f6fc4')); seat.position.y = -1.1;
+      const backr = mesh(new THREE.BoxGeometry(0.9, 0.4, 0.06), M(i % 2 ? '#d42a3a' : '#2f6fc4')); backr.position.set(0, -0.9, -0.2);
+      ch.add(hang, seat, backr); G.add(ch); chairs.push({ ch, k: i / 6, side: i % 2 ? 1 : -1 });
+    }
+    return { update(t) { chairs.forEach(c => { const u = (c.k + t * 0.02) % 1, dir = c.side; const x = dir > 0 ? ax + (bx - ax) * u : bx - (bx - ax) * u; c.ch.position.copy(V(x, y + dir * 0.6, GY() + top - 0.05)); c.ch.rotation.z = Math.sin(t * 1.3 + c.k * 9) * 0.05; }); } };
+  };
+
+  // Hockey goal behind the cup on the rink hole; nothing extra on the pond.
+  WV.rink = function (s, world) {
+    if (world.hole.id !== 'hockey-rink') return null;
+    const [cx, cy] = world.hole.cup, G = world.holeGroup, red = M('#d42a3a', { roughness: 0.4 });
+    const frame = new THREE.Group();
+    [-1, 1].forEach(k => { const p = mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.7, 8), red); p.position.set(k * 1.0, 0.35, 0); frame.add(p); });
+    const bar = mesh(new THREE.CylinderGeometry(0.035, 0.035, 2.0, 8), red); bar.rotation.z = Math.PI / 2; bar.position.y = 0.7; frame.add(bar);
+    const net = mesh(new THREE.PlaneGeometry(2.0, 0.7, 10, 4), new THREE.MeshStandardMaterial({ color: col('#ffffff'), wireframe: true, transparent: true, opacity: 0.6 }), false); net.position.set(0, 0.35, -0.6); frame.add(net);
+    G.add(at(frame, cx, cy + 1.6, 0));
+    return null;
+  };
+
+  // ---------- The wonderland round each hole ----------
+  VIS.decorateWinter = function (hole, world, sim) {
+    const rnd = U.rng(U.hash(hole.id) + 9);
+    const box = hole.box, G = world.holeGroup, base = GY();
+    const polys = hole.floors.map(f => f.poly).concat(hole.hazards.map(z => z.poly));
+    const clear = (x, y, m) => polys.every(P => !U.inPoly(x, y, P) && U.distToPoly(x, y, P) > m);
+    const fwd = Math.atan2(hole.cup[1] - hole.tee[1], hole.cup[0] - hole.tee[0]);
+    const behind = (x, y) => { const a = Math.atan2(y - hole.tee[1], x - hole.tee[0]); return Math.abs(U.wrapAngle(a - (fwd + Math.PI))) < 0.7 && Math.hypot(x - hole.tee[0], y - hole.tee[1]) < 18; };
+    const cx = box.cx, cy = box.cy;
+
+    // --- Snowy mountains all round ---
+    const rock = [], caps = [];
+    for (let i = 0; i < 18; i++) {
+      const a = (i / 18) * TAU + rnd() * 0.25, d = 150 + rnd() * 80, r = 22 + rnd() * 30, h = 34 + rnd() * 40;
+      const x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d;
+      rock.push({ x, y: base + h / 2 - 2, z: -y, sx: r, sy: h, sz: r, ry: rnd() * 6, c: ['#7d8ca6', '#8a98b0', '#6f7f9a'][i % 3] });
+      caps.push({ x, y: base + h - 2 - h * 0.21 + 0.3, z: -y, sx: r * 0.44, sy: h * 0.44, sz: r * 0.44, ry: rnd() * 6, c: '#ffffff' });
+    }
+    VIS.instanced(world, new THREE.ConeGeometry(1, 1, 7), new THREE.MeshStandardMaterial({ roughness: 1, flatShading: true }), rock, false);
+    VIS.instanced(world, new THREE.ConeGeometry(1, 1, 7), new THREE.MeshStandardMaterial({ roughness: 0.9, flatShading: true }), caps, false);
+
+    // --- Snowy pines, near and far ---
+    for (let i = 0, n = 0; i < 260 && n < 26; i++) {
+      const x = box.x0 - 16 + rnd() * (box.w + 32), y = box.y0 - 6 + rnd() * (box.h + 22);
+      if (!clear(x, y, 4.5) || behind(x, y)) continue;
+      n++;
+      const p = pine(rnd); p.scale.setScalar(0.8 + rnd() * 0.6); G.add(at(p, x, y, base));
+    }
+    const far = [], farCap = [];
+    for (let i = 0; i < 140; i++) {
+      const a = rnd() * TAU, d = 36 + rnd() * 60, x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d;
+      if (behind(x, y)) continue;
+      const h = 4 + rnd() * 4;
+      far.push({ x, y: base + h / 2, z: -y, sx: h * 0.32, sy: h, sz: h * 0.32, c: ['#24563a', '#2c6444', '#1f4a32'][i % 3] });
+      farCap.push({ x, y: base + h * 0.78, z: -y, sx: h * 0.16, sy: h * 0.34, sz: h * 0.16, c: '#ffffff' });
+    }
+    VIS.instanced(world, new THREE.ConeGeometry(1, 1, 7), new THREE.MeshStandardMaterial({ roughness: 0.9 }), far, false);
+    VIS.instanced(world, new THREE.ConeGeometry(1, 1, 7), new THREE.MeshStandardMaterial({ roughness: 1 }), farCap, false);
+
+    // --- Gingerbread houses, candy canes, lollipops and snowmen near the course ---
+    const spots = [];
+    for (let i = 0; i < 400 && spots.length < 12; i++) {
+      const x = box.x0 - 9 + rnd() * (box.w + 18), y = box.y0 - 3 + rnd() * (box.h + 10);
+      if (!clear(x, y, 2.6) || behind(x, y) || spots.some(s => Math.hypot(s[0] - x, s[1] - y) < 3.2)) continue;
+      spots.push([x, y]);
+    }
+    spots.forEach(([x, y], i) => {
+      const toward = Math.atan2(box.cx - x, -(box.cy - y));   // turns a model's front (+z) toward the course
+      if (i % 4 === 0) { const hs = gingerHouse(1.8 + rnd() * 0.8, 1.4 + rnd() * 0.6, 1.3 + rnd() * 0.5, rnd); hs.rotation.y = toward; G.add(at(hs, x, y, base)); }
+      else if (i % 4 === 1) { const c = candyCane(2 + rnd() * 1.6, 0.1 + rnd() * 0.04); c.rotation.y = rnd() * TAU; G.add(at(c, x, y, base)); }
+      else if (i % 4 === 2) {
+        const lg = new THREE.Group();
+        const stick = mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.6, 8), M('#ffffff', { roughness: 0.4 })); stick.position.y = 0.8;
+        const c = document.createElement('canvas'); c.width = c.height = 128; const x2 = c.getContext('2d');
+        const cols = [['#e8384f', '#ffffff'], ['#2fbf71', '#f2c94c'], ['#9b59d0', '#ffffff']][i % 3];
+        for (let k = 60; k > 0; k -= 6) { x2.fillStyle = cols[(k / 6) % 2]; x2.beginPath(); x2.arc(64, 64, k, 0, TAU); x2.fill(); }
+        const tx = new THREE.CanvasTexture(c); if (THREE.sRGBEncoding) tx.encoding = THREE.sRGBEncoding;
+        const pop = mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.12, 32), [M(cols[0], { roughness: 0.3 }), new THREE.MeshStandardMaterial({ map: tx, roughness: 0.3 }), new THREE.MeshStandardMaterial({ map: tx, roughness: 0.3 })]);
+        pop.rotation.x = Math.PI / 2; pop.position.y = 1.9;
+        lg.add(stick, pop); lg.rotation.y = toward; G.add(at(lg, x, y, base));
+      } else { const sm = snowman(0.42 + rnd() * 0.15, rnd); sm.rotation.y = toward; G.add(at(sm, x, y, base)); }
+    });
+
+    // --- Snow mounds and a snowy path to the tee ---
+    const mounds = [];
+    for (let i = 0; i < 160; i++) {
+      const x = box.x0 - 14 + rnd() * (box.w + 28), y = box.y0 - 8 + rnd() * (box.h + 22);
+      if (!clear(x, y, 1.2)) continue;
+      const s = 0.3 + rnd() * 1.1;
+      mounds.push({ x, y: base - s * 0.2, z: -y, sx: s * (1 + rnd()), sy: s * 0.35, sz: s, ry: rnd() * 6, c: '#ffffff' });
+    }
+    VIS.instanced(world, new THREE.SphereGeometry(1, 12, 8), new THREE.MeshStandardMaterial({ roughness: 1 }), mounds, false);
+    const ta = Math.atan2(hole.cup[1] - hole.tee[1], hole.cup[0] - hole.tee[0]);
+    const lamps = [];
+    for (let i = 1; i < 5; i++) {
+      const d = 1.6 + i * 1.6;
+      [-1, 1].forEach(k => {
+        const x = hole.tee[0] - Math.cos(ta) * d + Math.sin(ta) * k * 1.1, y = hole.tee[1] - Math.sin(ta) * d - Math.cos(ta) * k * 1.1;
+        if (clear(x, y, 0.4)) lamps.push([x, y]);
+      });
+    }
+    lamps.forEach(([x, y]) => { const c = candyCane(0.9, 0.035); c.rotation.y = rnd() * TAU; G.add(at(c, x, y, base)); });
+    VIS.sign(hole, world, sim);
+
+    // --- Falling snow: its own cloud of flakes, drifting down and starting again at the top ---
+    const N = 900, pos = new Float32Array(N * 3), spd = new Float32Array(N), ph = new Float32Array(N);
+    const sx0 = box.x0 - 12, sw = box.w + 24, sy0 = box.y0 - 10, sh = box.h + 20, top = 9;
+    for (let i = 0; i < N; i++) { pos[i * 3] = sx0 + Math.random() * sw; pos[i * 3 + 1] = base + Math.random() * (top - base); pos[i * 3 + 2] = -(sy0 + Math.random() * sh); spd[i] = 0.5 + Math.random() * 0.5; ph[i] = Math.random() * 9; }
+    const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const flakes = new THREE.Points(sg, new THREE.PointsMaterial({ map: T.dot(), color: 0xffffff, size: 0.09, transparent: true, depthWrite: false, opacity: 0.95 }));
+    flakes.frustumCulled = false;
+    G.add(flakes);
+    world.vis.push({
+      update(t, dt) {
+        dt = Math.min(dt || 0, 0.05);
+        for (let i = 0; i < N; i++) {
+          let y = pos[i * 3 + 1] - spd[i] * dt;
+          pos[i * 3] += (Math.sin(t * 0.8 + ph[i]) * 0.25 + 0.12) * dt;
+          if (y < base) { y = top; pos[i * 3] = sx0 + Math.random() * sw; pos[i * 3 + 2] = -(sy0 + Math.random() * sh); }
+          pos[i * 3 + 1] = y;
+        }
+        sg.attributes.position.needsUpdate = true;
+      },
+    });
   };
 })(window.PC);
 
@@ -7432,6 +8781,18 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
           this.noise(t, 0.16, { filter: 'bandpass', freq: 1300, q: 0.8, vol: Math.min(0.35, 0.08 + k * 0.06) });
           for (let i = 0; i < 3; i++) this.noise(t + 0.02 + i * 0.03, 0.025, { freq: 2600 + i * 400, q: 4, vol: 0.08 });
           break;
+        case 'crack':   // thin ice starting to crack
+          for (let i = 0; i < 4; i++) this.noise(t + i * 0.05 + Math.random() * 0.03, 0.035, { freq: 2600 + Math.random() * 1800, q: 6, vol: 0.2 });
+          this.tone(1800, t, 0.25, { to: 900, vol: 0.05, type: 'triangle' });
+          break;
+        case 'shatter': // thin ice giving way into the water
+          this.noise(t, 0.4, { filter: 'highpass', freq: 2200, to: 900, vol: 0.32 });
+          for (let i = 0; i < 6; i++) this.tone(1400 + Math.random() * 1800, t + i * 0.04, 0.12, { vol: 0.07, type: 'triangle' });
+          this.noise(t + 0.08, 0.55, { filter: 'lowpass', freq: 1600, to: 220, vol: 0.38 });
+          break;
+        case 'snowball': // a snowball thumping into the ball
+          this.noise(t, 0.18, { filter: 'lowpass', freq: 900, to: 300, vol: Math.min(0.4, 0.14 + k * 0.08) });
+          break;
         case 'boost':
           this.noise(t, 0.5, { freq: 400, to: 3600, q: 2, vol: 0.3 });
           this.tone(500, t, 0.4, { to: 1400, vol: 0.08, type: 'triangle' });
@@ -7533,7 +8894,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     Cinder: { color: '#ff9a1f', skill: 0.85 },
     SirSC: { color: '#4ff3ff', skill: 0.97 },
   };
-  const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'sprinkler', 'tumbleweeds']);
+  const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'sprinkler', 'tumbleweeds', 'snowballs']);
 
   // Runs inside the worker, built from the same physics source as the page.
   function workerMain(PC) {
@@ -7542,9 +8903,9 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
       const m = e.data;
       try {
         let H = holes[m.holeId];
-        if (!H) { H = holes[m.holeId] = PC.prepareHole(PC.holeById(m.holeId)); fields[m.holeId] = PC.Nav.field(H); }
+        if (!H) { H = holes[m.holeId] = PC.prepareHole(PC.holeById(m.holeId)); fields[m.holeId] = {}; }
         const sim = new PC.Sim(H, m.opts).load(m.snap);
-        self.postMessage({ id: m.id, res: PC.Nav.choose(sim, fields[m.holeId], m) });
+        self.postMessage({ id: m.id, res: PC.Nav.choose(sim, PC.Nav.fieldFor(H, sim, fields[m.holeId]), m) });
       } catch (err) { self.postMessage({ id: m.id, error: String((err && err.message) || err) }); }
     };
   }
@@ -7578,7 +8939,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     setHole(hole, roster, opts) {
       this.gen++;
       this.cb.clear();
-      this.hole = hole; this.field = null;
+      this.hole = hole; this.fields = null;
       this.max = PC.maxStrokes(hole);
       this.timed = (hole.features || []).some(f => TIMED.has(f.type));
       this.list = roster.map((r, i) => ({
@@ -7653,8 +9014,8 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     ask(msg, cb) {
       if (!this.workers.length) {
         // No worker available: think on the main thread instead, with a lighter search.
-        const F = this.field || (this.field = PC.Nav.field(this.hole));
         const sim = new PC.Sim(this.hole, msg.opts).load(msg.snap);
+        const F = PC.Nav.fieldFor(this.hole, sim, this.fields || (this.fields = {}));
         setTimeout(() => cb(PC.Nav.choose(sim, F, Object.assign({}, msg, { n: 12, check: 2 }))), 0);
         return;
       }
@@ -7692,16 +9053,16 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
   ['3', '9', '18'].forEach(n => { if (save.best[n] && !save.best[n + '-medium']) save.best[n + '-medium'] = save.best[n]; delete save.best[n]; });
   const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) { /* private mode */ } };
 
-  // The four difficulties. Medium is played in the Canyon and Ultra in the Abyss; Owen and Hard stay in the Garden.
+  // The four difficulties, each on its own course: Owen in the Garden, Medium in the Canyon, Hard in the Winter Wonderland, Ultra in the Abyss.
   const DIFFS = {
     owen: { id: 'owen', name: 'OWEN', icon: '🐣', cls: 'mode-easy', course: 'garden', guide: 'full', assist: 1.7, rivals: ['Owen', 'Clover', 'Fern'], info: 'See the whole putt<br>and a friendlier cup' },
     medium: { id: 'medium', name: 'MEDIUM', icon: '🌵', cls: 'mode-medium', course: 'canyon', guide: 'bounce', assist: 1, rivals: ['Fern', 'Bramble', 'Blaze'], info: 'Cacti pop your ball,<br>aim to the 1st bounce' },
-    hard: { id: 'hard', name: 'HARD', icon: '🌷', cls: 'mode-hard', course: 'garden', guide: 'short', assist: 1, rivals: ['Bramble', 'Blaze', 'Thorn'], info: 'A short aim line,<br>sharper rivals' },
+    hard: { id: 'hard', name: 'HARD', icon: '❄️', cls: 'mode-hard', course: 'winter', guide: 'short', assist: 1, rivals: ['Bramble', 'Blaze', 'Thorn'], info: 'Ice and thin ice,<br>a short aim line' },
     ultra: { id: 'ultra', name: 'ULTRA', icon: '👹', cls: 'mode-ultra', course: 'abyss', guide: 'none', assist: 1, rivals: ['Thorn', 'Cinder', 'SirSC'], info: 'No guide, no rails,<br>par 6 and up' },
   };
   const ORDER = ['owen', 'medium', 'hard', 'ultra'];
-  const COURSE = { garden: 'Garden', canyon: 'Canyon', abyss: 'Abyss' };
-  const poolOf = course => (course === 'abyss' ? PC.ABYSS : course === 'canyon' ? PC.CANYON : PC.HOLES);
+  const COURSE = { garden: 'Garden', canyon: 'Canyon', winter: 'Wonderland', abyss: 'Abyss' };
+  const poolOf = course => ({ abyss: PC.ABYSS, canyon: PC.CANYON, winter: PC.WINTER })[course] || PC.HOLES;
 
   const world = new PC.World($('view'));
   const audio = new PC.Audio(save);
@@ -7754,7 +9115,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
 
   function startPractice(id) {
     const spec = PC.holeById(id);
-    round = { ids: [id], idx: 0, diff: spec.course === 'abyss' ? 'ultra' : 'medium', practice: true, players: [{ name: 'You', you: true, color: '#ffffff', scores: [] }] };
+    round = { ids: [id], idx: 0, diff: spec.course === 'abyss' ? 'ultra' : spec.course === 'winter' ? 'hard' : 'medium', practice: true, players: [{ name: 'You', you: true, color: '#ffffff', scores: [] }] };
     beginHole();
   }
 
@@ -7777,6 +9138,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     $('feed').innerHTML = '';
     document.body.classList.toggle('abyss', hole.course === 'abyss');
     document.body.classList.toggle('canyon', hole.course === 'canyon');
+    document.body.classList.toggle('winter', hole.course === 'winter');
     updateHud();
     const it = $('intro');
     $('introNo').textContent = round.practice ? `Practice · ${COURSE[hole.course] || 'Garden'} hole ${hole.num}` : `Hole ${round.idx + 1} of ${round.ids.length} · ${DIFFS[round.diff].name}`;
@@ -7842,8 +9204,11 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     $('waitBar').hidden = false;
   }
 
-  function lostMsg(kind) {
-    return kind === 'water' ? 'Splash!' : kind === 'flowers' ? 'Into the flowers!' : kind === 'lava' ? 'Melted!' : kind === 'cactus' ? 'Popped!' : kind === 'chasm' && hole.course === 'canyon' ? 'Into the gulch!' : hole.course === 'abyss' ? 'Into the abyss!' : 'Off the course!';
+  // Was the ball lost through a sheet of thin ice?
+  function throughIce(e) { const f = sim && sim.feats.find(q => q.type === 'thinice'); return !!(f && e && f.spec.list.some(q => U.inPoly(e.x, e.y, U.ccw(q.poly || q)))); }
+  function lostMsg(kind, e) {
+    if (kind === 'water' && throughIce(e)) return 'Through the ice!';
+    return kind === 'water' ? 'Splash!' : kind === 'flowers' ? 'Into the flowers!' : kind === 'lava' ? 'Melted!' : kind === 'cactus' ? 'Popped!' : kind === 'chasm' && hole.course === 'canyon' ? 'Into the gulch!' : kind === 'chasm' && hole.course === 'winter' ? 'Over the edge!' : hole.course === 'abyss' ? 'Into the abyss!' : 'Off the course!';
   }
 
   function lost(e) {
@@ -7855,7 +9220,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     else { world.burst('puff', e.x, e.y, -0.2, { color: kind === 'flowers' ? '#ffb3c6' : '#e9e1cf', n: 20 }); audio.play('flowers'); }
     strokes += 1;
     updateHud();
-    toast(lostMsg(kind), 'One penalty stroke. Back to where you putted from.', 'bad');
+    toast(lostMsg(kind, e), 'One penalty stroke. Back to where you putted from.', 'bad');
     later(1300, () => {
       if (finished) return;
       sim.restore();
@@ -8013,7 +9378,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
 
   // ---------- title menu (the same layout as Bigger Fish and Brain Rocket) ----------
   const TAG = {
-    9: 'Mini golf with a trick on every hole. Putt against three rivals over a fresh 9. Medium heads out to the Canyon, where cacti pop your ball.',
+    9: 'Mini golf with a trick on every hole. Putt against three rivals over a fresh 9. Medium heads out to the Canyon, Hard to the Winter Wonderland.',
     18: 'The full round: 18 holes, three rivals, one scorecard. Ultra takes you down into the Abyss.',
     online: 'Putt against your friends on the same holes at the same time. Online play is coming soon.',
   };
@@ -8075,7 +9440,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     $('hud').hidden = true; $('intro').hidden = true; $('toast').hidden = true; $('waitBar').hidden = true;
     const spec = PC.HOLES[Math.floor(Math.random() * PC.HOLES.length)];
     loadHole(spec, DIFFS.medium);
-    document.body.classList.remove('abyss', 'canyon');
+    document.body.classList.remove('abyss', 'canyon', 'winter');
     cam.cur = null;
     state = 'title';
     show('title');
@@ -8093,7 +9458,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
         grid.dataset.built = '1';
         list.forEach(h => {
           const btn = document.createElement('button');
-          btn.className = 'hole-card' + (h.course === 'abyss' ? ' abyss' : h.course === 'canyon' ? ' canyon' : '');
+          btn.className = 'hole-card' + (h.course === 'garden' ? '' : ' ' + h.course);
           btn.type = 'button';
           btn.innerHTML = `<canvas width="240" height="300" aria-hidden="true"></canvas><span class="hc-no">${h.num}</span><span class="hc-name">${h.name}</span><span class="hc-sp">${h.special}</span><span class="hc-meta">Par ${h.par} · <span data-best="${h.id}"></span></span>`;
           btn.addEventListener('click', () => { audio.unlock(); audio.play('click'); startPractice(h.id); });
@@ -8104,6 +9469,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
     };
     fill('bookGrid', PC.HOLES);
     fill('canyonGrid', PC.CANYON);
+    fill('winterGrid', PC.WINTER);
     fill('abyssGrid', PC.ABYSS);
     document.querySelectorAll('[data-best]').forEach(el => { const v = save.holeBest[el.dataset.best]; el.textContent = v ? `your best ${v}` : 'not played yet'; });
     show('book');
@@ -8112,23 +9478,30 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
   // A little top-down plan of a hole for the course book.
   function drawMap(cv, h) {
     const g = cv.getContext('2d'), W = cv.width, H = cv.height;
-    const b = h.box, pad = 18;
+    // Frame the greens themselves (a gulch or drop can reach far beyond them).
+    const fx = [], fy = [];
+    h.floors.forEach(f => f.poly.forEach(p => { fx.push(p[0]); fy.push(p[1]); }));
+    const x0 = Math.min(...fx) - 0.6, x1 = Math.max(...fx) + 0.6, y0 = Math.min(...fy) - 0.6, y1 = Math.max(...fy) + 0.6;
+    const b = { w: x1 - x0, h: y1 - y0, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 }, pad = 18;
     const s = Math.min((W - pad * 2) / b.w, (H - pad * 2) / b.h);
     const ox = W / 2 - b.cx * s, oy = H / 2 + b.cy * s;
     const P = (x, y) => [ox + x * s, oy - y * s];
     const path = (pts, close = true) => { g.beginPath(); pts.forEach((p, i) => { const q = P(p[0], p[1]); i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]); }); if (close) g.closePath(); };
-    const hell = h.course === 'abyss', desert = h.course === 'canyon';
+    const hell = h.course === 'abyss', desert = h.course === 'canyon', winter = h.course === 'winter';
     g.clearRect(0, 0, W, H);
-    h.hazards.filter(z => !z.over).forEach(z => { path(z.poly); g.fillStyle = z.kind === 'water' ? '#7cc3dd' : z.kind === 'lava' ? '#ff6a1a' : z.kind === 'chasm' ? '#5a2a14' : '#f3a6c3'; g.fill(); });
-    h.floors.forEach(f => { path(f.poly); g.fillStyle = hell ? '#5a4a4c' : f.mat === 'planks' ? '#b0773f' : desert ? '#d9b27a' : '#6fbf4f'; g.fill(); if (hell) { g.strokeStyle = '#ff7a2a'; g.lineWidth = 1.5; g.stroke(); } });
-    h.zones.forEach(z => { path(z.poly); g.fillStyle = { slime: '#c7f06b', honey: '#f2b236', soil: '#8a5f3a', seeds: '#6b4220', glass: '#1a1420', tar: '#0d0a0b', ash: '#7a6e6a', sand: '#f0d9a4', cinder: '#3a2a2a' }[z.type] || '#999'; g.fill(); });
-    h.hazards.filter(z => z.over).forEach(z => { path(z.poly); g.fillStyle = z.kind === 'water' ? '#4aa8c8' : '#ff6a1a'; g.fill(); });
+    h.hazards.filter(z => !z.over).forEach(z => { path(z.poly); g.fillStyle = z.kind === 'water' ? (z.cold ? '#3a7a9a' : '#7cc3dd') : z.kind === 'lava' ? '#ff6a1a' : z.kind === 'chasm' ? (winter ? '#9fb4cc' : '#5a2a14') : '#f3a6c3'; g.fill(); });
+    h.floors.forEach(f => { path(f.poly); g.fillStyle = hell ? '#5a4a4c' : f.mat === 'planks' ? '#b0773f' : desert ? '#d9b27a' : winter ? '#3f8f63' : '#6fbf4f'; g.fill(); if (hell) { g.strokeStyle = '#ff7a2a'; g.lineWidth = 1.5; g.stroke(); } });
+    h.zones.forEach(z => { path(z.poly); g.fillStyle = { slime: '#c7f06b', honey: '#f2b236', soil: '#8a5f3a', seeds: '#6b4220', glass: '#1a1420', tar: '#0d0a0b', ash: '#7a6e6a', sand: '#f0d9a4', cinder: '#3a2a2a', ice: '#bfe6f7', snow: '#ffffff' }[z.type] || '#999'; g.fill(); });
+    h.hazards.filter(z => z.over).forEach(z => { path(z.poly); g.fillStyle = z.kind === 'water' ? (z.cold ? '#3a7a9a' : '#4aa8c8') : '#ff6a1a'; g.fill(); });
     g.lineCap = 'round'; g.lineJoin = 'round';
     h.rails.forEach(r => { if (r.style === 'none') return; path(r.pts, r.closed); g.strokeStyle = r.style === 'hedge' ? '#2f6b2a' : r.style === 'obsidian' ? '#120e16' : '#7a4a26'; g.lineWidth = Math.max(2, (r.side === 'center' ? r.w : 0.2) * s); g.stroke(); });
     h.posts.forEach(p => { const q = P(p.x, p.y); g.beginPath(); g.arc(q[0], q[1], p.r * s, 0, 7); g.fillStyle = hell ? '#2a2124' : desert ? '#c0784a' : '#8f897d'; g.fill(); });
     (h.features || []).forEach(f => {
       if (f.type === 'cacti') f.list.forEach(c => { const q = P(c.x, c.y); g.beginPath(); g.arc(q[0], q[1], Math.max(2.5, (c.r || 0.3) * s), 0, 7); g.fillStyle = '#2f7a34'; g.fill(); g.strokeStyle = '#f4f0dc'; g.lineWidth = 1; g.stroke(); });
       if (f.type === 'tumbleweeds') f.list.forEach(w => { g.setLineDash([3, 3]); path(w.path, !!w.loop); g.strokeStyle = 'rgba(122,82,40,0.75)'; g.lineWidth = 1.5; g.stroke(); g.setLineDash([]); const q = P(w.path[0][0], w.path[0][1]); g.beginPath(); g.arc(q[0], q[1], (w.r || 0.42) * s, 0, 7); g.fillStyle = '#a8844e'; g.fill(); });
+      if (f.type === 'thinice') f.list.forEach(q => { path(q.poly || q); g.fillStyle = 'rgba(220,242,255,0.85)'; g.fill(); g.setLineDash([3, 3]); g.strokeStyle = '#3a7a9a'; g.lineWidth = 1.2; g.stroke(); g.setLineDash([]); });
+      if (f.type === 'snowballs') f.list.forEach(w => { g.setLineDash([2, 3]); path(w.path, false); g.strokeStyle = 'rgba(80,110,150,0.8)'; g.lineWidth = 1.5; g.stroke(); g.setLineDash([]); const q = P(w.path[0][0], w.path[0][1]); g.beginPath(); g.arc(q[0], q[1], 3.5, 0, 7); g.fillStyle = '#ffffff'; g.fill(); g.strokeStyle = '#6a8ab0'; g.stroke(); });
+      if (f.type === 'patrol' && f.penguins) f.movers.forEach(m => { path([m.a, m.b], false); g.setLineDash([2, 2]); g.strokeStyle = 'rgba(28,34,48,0.7)'; g.lineWidth = 1.2; g.stroke(); g.setLineDash([]); const q = P((m.a[0] + m.b[0]) / 2, (m.a[1] + m.b[1]) / 2); g.beginPath(); g.arc(q[0], q[1], 3.5, 0, 7); g.fillStyle = '#1c2230'; g.fill(); });
       if (f.type === 'spring') { const q = P(f.x, f.y); g.beginPath(); g.arc(q[0], q[1], Math.max(3, f.r * s), 0, 7); g.fillStyle = f.dir !== undefined ? '#e0332a' : '#f2b81f'; g.fill(); }
     });
     const t = P(h.tee[0], h.tee[1]); g.fillStyle = '#ffffff'; g.beginPath(); g.arc(t[0], t[1], 4, 0, 7); g.fill();
@@ -8383,7 +9756,7 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
   }
 
   // ---------- main loop ----------
-  const SOUND = { wall: 'wall', post: 'post', paddle: 'paddle', gate: 'gate', bonk: 'bonk', squish: 'squish', tire: 'tire', tumble: 'tumble' };
+  const SOUND = { wall: 'wall', post: 'post', paddle: 'paddle', gate: 'gate', bonk: 'bonk', squish: 'squish', tire: 'tire', tumble: 'tumble', snowball: 'snowball' };
   function handleEvents() {
     for (const e of sim.events) {
       if (state === 'title') continue;
@@ -8393,6 +9766,8 @@ body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
       else if (e.type === 'tunnel') { audio.play('tunnel'); world.burst('puff', sim.ball.x, sim.ball.y, 0, { color: hole.course === 'abyss' ? '#ff3df2' : '#8a6a4a', n: 16 }); }
       else if (e.type === 'popout') { audio.play('popout'); world.burst('puff', e.x, e.y, 0, { color: hole.course === 'abyss' ? '#ff3df2' : '#8a6a4a', n: 16 }); }
       else if (e.type === 'spring') { audio.play('boing'); world.burst('spark', e.x, e.y, sim.floorHeight(e.x, e.y) + 0.1, { color: e.trap ? '#ff6a4a' : '#ffe27a', n: 14 }); }
+      else if (e.type === 'crack') { audio.play('crack'); world.burst('spark', e.x, e.y, sim.floorHeight(e.x, e.y) + 0.03, { color: '#e8f6ff', n: 10 }); }
+      else if (e.type === 'icebreak') { audio.play('shatter'); world.burst('splash', e.x, e.y, sim.floorHeight(e.x, e.y)); }
       else if (e.type === 'boost') audio.play('boost');
       else if (e.type === 'switch') audio.play('switch');
       else if (e.type === 'lip') audio.play('lip');

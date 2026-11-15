@@ -113,6 +113,18 @@
           this.noise(t, 0.16, { filter: 'bandpass', freq: 1300, q: 0.8, vol: Math.min(0.35, 0.08 + k * 0.06) });
           for (let i = 0; i < 3; i++) this.noise(t + 0.02 + i * 0.03, 0.025, { freq: 2600 + i * 400, q: 4, vol: 0.08 });
           break;
+        case 'crack':   // thin ice starting to crack
+          for (let i = 0; i < 4; i++) this.noise(t + i * 0.05 + Math.random() * 0.03, 0.035, { freq: 2600 + Math.random() * 1800, q: 6, vol: 0.2 });
+          this.tone(1800, t, 0.25, { to: 900, vol: 0.05, type: 'triangle' });
+          break;
+        case 'shatter': // thin ice giving way into the water
+          this.noise(t, 0.4, { filter: 'highpass', freq: 2200, to: 900, vol: 0.32 });
+          for (let i = 0; i < 6; i++) this.tone(1400 + Math.random() * 1800, t + i * 0.04, 0.12, { vol: 0.07, type: 'triangle' });
+          this.noise(t + 0.08, 0.55, { filter: 'lowpass', freq: 1600, to: 220, vol: 0.38 });
+          break;
+        case 'snowball': // a snowball thumping into the ball
+          this.noise(t, 0.18, { filter: 'lowpass', freq: 900, to: 300, vol: Math.min(0.4, 0.14 + k * 0.08) });
+          break;
         case 'boost':
           this.noise(t, 0.5, { freq: 400, to: 3600, q: 2, vol: 0.3 });
           this.tone(500, t, 0.4, { to: 1400, vol: 0.08, type: 'triangle' });

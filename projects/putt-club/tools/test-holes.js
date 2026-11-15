@@ -11,10 +11,10 @@ const ROOT = path.join(__dirname, '..');
 const ctx = { console, Math, Date };
 ctx.window = ctx;
 vm.createContext(ctx);
-['util', 'physics', 'features', 'holes', 'canyon', 'abyss', 'nav'].forEach(f => vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', f + '.js'), 'utf8'), ctx, { filename: f + '.js' }));
+['util', 'physics', 'features', 'holes', 'canyon', 'winter', 'abyss', 'nav'].forEach(f => vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', f + '.js'), 'utf8'), ctx, { filename: f + '.js' }));
 const PC = ctx.PC, U = PC.U, C = PC.C;
 
-const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'tumbleweeds']);
+const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'tumbleweeds', 'snowballs']);
 
 function distanceField(hole) {
   const sim = new PC.Sim(hole);
@@ -87,19 +87,25 @@ function play(sim, maxT = 18) {
     const b = sim.ball;
     if (b.mode === 'sunk') return { result: 'sunk', sim };
     if (b.mode === 'lost') { lost = b.lostKind; sim.restore(); return { result: 'lost', kind: lost, sim }; }
-    if (sim.t - start > 0.4 && sim.resting()) return { result: 'rest', sim };
+    if (sim.t - start > 0.4 && sim.resting()) {
+      // Resting on cracked thin ice: wait and see if it gives way.
+      const ice = sim.feats.find(f => f.type === 'thinice'), brk = ice && ice.breaksAt(b.x, b.y);
+      if (brk) { while (sim.t < brk + 0.3) { sim.step(C.DT); if (sim.ball.mode === 'lost') { lost = sim.ball.lostKind; sim.restore(); return { result: 'lost', kind: lost, sim }; } } }
+      return { result: 'rest', sim };
+    }
   }
   return { result: 'timeout', sim };
 }
 
 function solve(hole, opts = {}) {
-  const field = PC.Nav.field(hole).at;
+  const cache = {}, fieldOf = s => PC.Nav.fieldFor(hole, s, cache).at;
   const timed = (hole.features || []).some(f => TIMED.has(f.type));
   const angles = timed ? 40 : 60, powers = timed ? [0.18, 0.3, 0.42, 0.55, 0.7, 0.86, 1] : [0.12, 0.2, 0.28, 0.36, 0.45, 0.55, 0.66, 0.78, 0.9, 1];
   const waits = timed ? [0, 0.9, 1.8, 2.7] : [0];
   // Lower is better: the distance left along the course, with a penalty for falling and for not raising a bridge first.
   const scoreOf = (r, s) => {
     if (r.result === 'sunk') return -1;
+    const field = fieldOf(s);
     let score = r.result === 'lost' ? field(s.ball.x, s.ball.y) + 6 : field(s.ball.x, s.ball.y) + (r.result === 'timeout' ? 3 : 0);
     s.feats.filter(f => f.type === 'beanstalk').forEach(bean => {
       if (s.ball.y < bean.spec.rect[3] - 0.3 && s.ball.y > bean.spec.rect[1] - 7 && !(bean.left > 4)) score += 20;
@@ -132,7 +138,7 @@ function solve(hole, opts = {}) {
       }
     }
     // Nothing got closer: try finer strengths around the best few directions.
-    if (best.r.result !== 'sunk' && strokes > 0 && best.score > field(sim.ball.x, sim.ball.y) - 0.3) {
+    if (best.r.result !== 'sunk' && strokes > 0 && best.score > fieldOf(sim)(sim.ball.x, sim.ball.y) - 0.3) {
       const tried = [];
       for (const w of waits) {
         const pre = restore(hole, base);
@@ -174,9 +180,9 @@ function check(hole) {
 }
 
 const want = process.argv.slice(2);
-const COURSES = { garden: PC.HOLES, canyon: PC.CANYON, abyss: PC.ABYSS };
+const COURSES = { garden: PC.HOLES, canyon: PC.CANYON, winter: PC.WINTER, abyss: PC.ABYSS };
 const named = want.filter(w => COURSES[w]);
-const pool = named.length ? [].concat(...named.map(w => COURSES[w])) : PC.HOLES.concat(PC.CANYON, PC.ABYSS);
+const pool = named.length ? [].concat(...named.map(w => COURSES[w])) : PC.HOLES.concat(PC.CANYON, PC.WINTER, PC.ABYSS);
 const holes = pool.filter(h => !want.filter(w => !COURSES[w]).length || want.includes(h.id) || want.includes(String(h.num)));
 let fails = 0;
 for (const spec of holes) {
@@ -187,7 +193,7 @@ for (const spec of holes) {
   const ms = Date.now() - t0;
   const ok = r.strokes !== 'X' && problems.length === 0;
   if (!ok) fails++;
-  console.log(`${hole.course === 'abyss' ? 'A' : hole.course === 'canyon' ? 'C' : ' '}${String(hole.num).padStart(2)} ${hole.name.padEnd(18)} par ${hole.par}  bot ${String(r.strokes).padEnd(2)} aces ${r.aces}/${r.firstTrials}  tee drift ${r.teeMove.toFixed(3)}  ${ms}ms ${problems.join('; ')}`);
+  console.log(`${hole.course === 'abyss' ? 'A' : hole.course === 'canyon' ? 'C' : hole.course === 'winter' ? 'W' : ' '}${String(hole.num).padStart(2)} ${hole.name.padEnd(18)} par ${hole.par}  bot ${String(r.strokes).padEnd(2)} aces ${r.aces}/${r.firstTrials}  tee drift ${r.teeMove.toFixed(3)}  ${ms}ms ${problems.join('; ')}`);
   if (!ok || process.env.VERBOSE) r.log.forEach(l => console.log('     ' + l));
 }
 console.log(fails ? `${fails} hole(s) need work` : 'All holes finished');

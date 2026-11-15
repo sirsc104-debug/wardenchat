@@ -44,9 +44,14 @@
 
   // Distance along the course to the cup, on a 0.2-unit grid. Water and lava cost extra but can be crossed
   // (that is where ferries and bridges are); the void cannot.
-  Nav.field = function (hole) {
+  // Which sheets of thin ice have broken, as a string ('' when the hole has none): each state gets its own map.
+  Nav.iceKey = sim => { const f = (sim.feats || []).find(q => q.type === 'thinice'); return f ? f.list.map(p => (p.broken ? 1 : 0)).join('') : ''; };
+  Nav.fieldFor = function (hole, sim, cache) { const k = Nav.iceKey(sim); return cache[k] || (cache[k] = Nav.field(hole, k)); };
+
+  Nav.field = function (hole, iceKey) {
     hole = PC.prepareHole(hole);
     const sim = new PC.Sim(hole);
+    if (iceKey) sim.feats.filter(f => f.type === 'thinice').forEach(f => { f.list.forEach((p, i) => { if (iceKey[i] === '1') p.crack = -99; }); f.update(0, null); });
     const b = hole.box, cell = 0.2;
     const x0 = b.x0 - 0.6, y0 = b.y0 - 0.6;
     const nx = Math.ceil((b.w + 1.2) / cell), ny = Math.ceil((b.h + 1.2) / cell);
@@ -95,7 +100,7 @@
         const k = c * nx + a;
         if (cost[k] === Infinity) continue;
         // A ledge can be dropped off but not climbed: the ball would roll from k up to (i, j).
-        if (ledges.length && hgt[j * nx + i] - hgt[k] > 0.12) {
+        if (ledges.length && hgt[j * nx + i] - hgt[k] > 0.04) {
           const mx = x0 + (i + a) * cell / 2, my = y0 + (j + c) * cell / 2;
           if (ledges.some(s => { const q = U.closestOnSeg(mx, my, s.ax, s.ay, s.bx, s.by); return Math.hypot(mx - q[0], my - q[1]) < cell * 0.8; })) continue;
         }
@@ -229,9 +234,12 @@
       if (s.t - t0 > 0.35 && s.resting()) {
         // Raising a bridge is worth a lot, even though the ball is no nearer the cup yet.
         const raised = beans.some(f => f.left > 6);
-        // Is it safe where it stopped? Watch a little longer: blades, imps and rafts can carry it off.
+        // Is it safe where it stopped? Watch a little longer: blades, imps and rafts can carry it off,
+        // and cracked thin ice gives way under it.
         const tRest = s.t;
-        while (s.t - tRest < 1.6) {
+        const ice = s.feats.find(f => f.type === 'thinice'), brk = ice && ice.breaksAt(s.ball.x, s.ball.y);
+        const watch = brk ? Math.max(1.6, brk - s.t + 0.3) : 1.6;
+        while (s.t - tRest < watch) {
           s.step(dt);
           if (s.ball.mode === 'lost') return { score: startD + 5 };
         }
@@ -251,9 +259,9 @@
       for (const c of cands) all.push({ ang: c.ang, p: c.p, wait, score: Nav.evaluate(sim, c, F, wait, maxT).score });
     }
     all.sort((a, b) => a.score - b.score);
-    // If every putt it thought of is lost, cast about at random before settling for one.
+    // If every putt it thought of is lost, or none gets any nearer, cast about at random before settling for one.
     const startD = F.at(sim.ball.x, sim.ball.y);
-    if (all.length && all[0].score >= startD + 4.9) {
+    if (all.length && (all[0].score >= startD + 4.9 || all[0].score > startD - 0.25)) {
       for (let i = 0; i < 40; i++) {
         const c = { ang: rnd() * Math.PI * 2, p: 0.08 + rnd() * 0.6 }, wait = waits[i % waits.length];
         all.push({ ang: c.ang, p: c.p, wait, score: Nav.evaluate(sim, c, F, wait, maxT).score });
