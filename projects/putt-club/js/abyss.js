@@ -45,18 +45,22 @@
 
   // 1. Four legs, each with an iron gate across it; nothing to stop a ball at the corners.
   A.push({
-    id: 'gates-of-dis', name: 'Gates of Dis', par: 7,
+    id: 'gates-of-dis', name: 'Gates of Dis', par: 8,
     special: 'Iron gates on a winding causeway',
-    tip: 'Four iron gates rise and slam across a narrow causeway that turns at every corner. Stop on each corner pad, then time the next gate.',
+    tip: 'Four iron gates rise and slam across a narrow causeway that turns at every corner. Stop on each corner pad, then time the next gate. Red springs on two corners fling the ball into the abyss.',
     look: LOOK(), tee: [0, 1.3], cup: [1, 28.9],
     floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 10], [8, 10], [8, 19], [1, 19], [1, 26.6]], 1.8, 3.0), circ(1, 28.4, 2.0)],
-    hazards: [lava(8.95, 10.95, 0.42), lava(8.95, 19.95, 0.42), lava(0.05, 19.95, 0.42), lava(-0.1, 29.7, 0.36), lava(2.2, 28.0, 0.36)],
-    features: [{ type: 'gates', list: [
+    hazards: [lava(0.05, 19.95, 0.42), lava(-0.1, 29.7, 0.36), lava(2.2, 28.0, 0.36)],
+    features: [
+      { type: 'spring', x: 8.85, y: 10.85, r: 0.38, dir: 45 * DEG, speed: 7, vz: 5 },
+      { type: 'spring', x: 8.85, y: 19.85, r: 0.38, dir: 45 * DEG, speed: 7, vz: 5 },
+      { type: 'gates', list: [
       { a: [-0.95, 6.2], b: [0.95, 6.2], period: 3.4, phase: 0 },
       { a: [4, 9.05], b: [4, 10.95], period: 3.0, phase: 0.4 },
       { a: [7.05, 14.5], b: [8.95, 14.5], period: 2.8, phase: 0.75 },
       { a: [4.5, 18.05], b: [4.5, 19.95], period: 2.6, phase: 0.2 },
-    ] }],
+    ] },
+    ],
   });
 
   // 2. Two blade discs joined by thin bridges at right angles.
@@ -77,10 +81,14 @@
   A.push({
     id: 'imp-patrol', name: 'Imp Patrol', par: 9,
     special: 'Imps on a zigzag causeway',
-    tip: 'Six narrow legs with no edges, and an imp pacing across each one. A bump from an imp knocks the ball straight over the side.',
+    tip: 'Six narrow legs with no edges, and imps pacing across them. A bump from an imp knocks the ball over the side. A wall blocks the sixth leg: roll over the gold spring to jump it.',
     look: LOOK(), tee: [0, 1.3], cup: [7, 29.8],
     floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 8], [7, 8], [7, 15], [0, 15], [0, 22], [7, 22], [7, 27.6]], 2.0, 2.8), circ(7, 29.4, 1.9)],
-    features: [{ type: 'patrol', sound: 'bonk', imps: true, movers: [
+    walls: [{ pts: [[4.0, 21.0], [4.0, 23.0]], w: 0.36, h: 0.7, style: 'obsidian' }],
+    zones: [{ type: 'tar', poly: rect(5.3, 21.0, 7.0, 23.0) }],
+    features: [
+      { type: 'spring', x: 2.2, y: 22, r: 0.42, vz: 6.5, minSpeed: 4.6, maxSpeed: 5.8, land: [6.2, 22] },
+      { type: 'patrol', sound: 'bonk', imps: true, movers: [
       { a: [-0.75, 5.2], b: [0.75, 5.2], period: 3.4, r: 0.34, h: 0.8 },
       { a: [6.25, 11.5], b: [7.75, 11.5], period: 3.2, phase: 0.6, r: 0.34, h: 0.8 },
       { a: [3.5, 14.25], b: [3.5, 15.75], period: 3.0, phase: 0.15, r: 0.34, h: 0.8 },
@@ -93,14 +101,18 @@
   A.push({
     id: 'magma-pinball', name: 'Magma Pinball', par: 7,
     special: 'Magma boulders in open arenas',
-    tip: 'Each arena is full of magma boulders that fling the ball, and its way out is nowhere near its way in. Settle the ball first, then find the exit.',
+    tip: 'Each arena is full of magma boulders that fling the ball, and its way out is nowhere near its way in. Keep clear of the red springs near the edges.',
     look: LOOK(), tee: [0, 1.3], cup: [1.6, 28.0],
     floors: [teePad(2.6, 4), rect(-0.55, 3.8, 0.55, 5.4), circ(0, 9.2, 4.2), U.ribbon([[2.2, 11.8], [6.7, 16.9]], 0.55), circ(9, 19.6, 4.0), U.ribbon([[6.3, 22.2], [3.1, 26.4]], 0.55), circ(2.0, 27.6, 1.9)],
     hazards: [lava(-2.6, 7.3, 0.55), lava(2.9, 7.6, 0.5), lava(-1.6, 11.9, 0.45), lava(11.6, 18.5, 0.55), lava(8.2, 22.8, 0.45), lava(6.6, 17.9, 0.4), lava(3.1, 28.6, 0.34)],
-    features: [{ type: 'bumpers', rocks: true, list: [
+    features: [
+      { type: 'spring', x: -3.1, y: 10.7, r: 0.4, dir: 160 * DEG, speed: 7, vz: 5 },
+      { type: 'spring', x: 11.7, y: 21.3, r: 0.4, dir: 30 * DEG, speed: 7, vz: 5 },
+      { type: 'bumpers', rocks: true, list: [
       { x: 0, y: 8.4, r: 0.5, kick: 2.8 }, { x: -2.1, y: 9.8, r: 0.45, kick: 2.8 }, { x: 1.9, y: 10.2, r: 0.45, kick: 2.8 }, { x: -0.6, y: 11.6, r: 0.4, kick: 2.8 }, { x: 1.2, y: 6.6, r: 0.38, kick: 2.4 },
       { x: 9, y: 18.6, r: 0.5, kick: 2.8 }, { x: 7.2, y: 20.4, r: 0.45, kick: 2.8 }, { x: 10.6, y: 20.9, r: 0.45, kick: 2.8 }, { x: 9.4, y: 21.9, r: 0.38, kick: 2.6 },
-    ] }],
+    ] },
+    ],
   });
 
   // 5. Four separate platforms: each geyser throws the ball the way it was rolling.
@@ -154,11 +166,14 @@
   A.push({
     id: 'doom-pendulum', name: 'Doom Pendulum', par: 7,
     special: 'Spiked pendulums on a narrow bridge',
-    tip: 'Four spiked iron balls swing across a narrow bridge that turns once. One touch and the ball is knocked into the abyss.',
+    tip: 'Four spiked iron balls swing across a narrow bridge that turns once, and a wall blocks the middle. Hit the gold spring dead straight to jump it.',
     look: LOOK(), tee: [0, 1.3], cup: [9, 29.5],
     floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 15], [9, 15], [9, 27.4]], 1.2, 2.6), circ(9, 29.2, 1.9)],
     hazards: [lava(0.85, 15.85, 0.4), lava(9.85, 14.15, 0.4), lava(8.1, 30.2, 0.34)],
+    walls: [{ pts: [[5.2, 14.3], [5.2, 15.7]], w: 0.36, h: 0.7, style: 'obsidian' }],
+    zones: [{ type: 'tar', poly: rect(6.5, 14.4, 8.3, 15.6) }],
     features: [
+      { type: 'spring', x: 3.4, y: 15, r: 0.42, vz: 6.5, minSpeed: 4.6, maxSpeed: 5.8, land: [7.4, 15] },
       { type: 'swing', x: 0, y: 6, len: 4.95, zp: 5.4, amp: 0.39, period: 3.0, rt: 0.5, spiked: true },
       { type: 'swing', x: 0, y: 11, len: 4.95, zp: 5.4, amp: 0.39, period: 2.5, phase: 1.4, rt: 0.5, spiked: true },
       { type: 'swing', x: 9, y: 19.5, len: 4.95, zp: 5.4, amp: 0.39, period: 2.8, phase: 0.7, rt: 0.5, spiked: true },
@@ -193,17 +208,21 @@
 
   // 11. A slalom between tar and lava, to a cup ringed with lava.
   A.push({
-    id: 'tar-pits', name: 'Tar Pits', par: 6,
+    id: 'tar-pits', name: 'Tar Pits', par: 7,
     special: 'A slalom of tar and lava',
-    tip: 'Rows of lava pools leave one gap each, never in line. Tar stops a ball dead. The cup sits in a lava ring that is open only at the back.',
+    tip: 'Rows of lava pools leave one gap each, and a wall runs right across the middle: only the gold spring gets you over it. The red one throws you off the side. The cup sits in a lava ring open only at the back.',
     look: LOOK(), tee: [0, 1.3], cup: [0, 26],
     floors: [rp(rect(-3.2, 0, 3.2, 29.6), 1.0)],
-    zones: [{ type: 'tar', poly: U.blob(1.6, 4.6, 0.9, 21) }, { type: 'tar', poly: U.blob(-1.4, 10.4, 0.9, 22) }, { type: 'tar', poly: U.blob(1.4, 16.4, 0.9, 23) }, { type: 'tar', poly: U.blob(-2.2, 22, 0.8, 24) }],
+    zones: [{ type: 'tar', poly: U.blob(1.6, 4.6, 0.9, 21) }, { type: 'tar', poly: U.blob(-1.8, 10.0, 0.8, 22) }, { type: 'tar', poly: U.blob(0.5, 16.0, 1.25, 23) }, { type: 'tar', poly: U.blob(-2.2, 22, 0.8, 24) }],
+    walls: [{ pts: [[-3.2, 13.2], [3.2, 13.2]], w: 0.36, h: 0.7, style: 'obsidian' }],
+    features: [
+      { type: 'spring', x: 0.4, y: 11.4, r: 0.42, vz: 6.5, minSpeed: 4.6, maxSpeed: 5.8, land: [0.4, 15.4] },
+      { type: 'spring', x: -2.5, y: 10.8, r: 0.38, dir: 180 * DEG, speed: 7, vz: 5 },
+    ],
     hazards: [
       lava(-2.6, 7.2, 0.6), lava(-1.3, 7.2, 0.6), lava(0.0, 7.2, 0.6), lava(1.1, 7.2, 0.5),
-      lava(-1.1, 13.2, 0.5), lava(0.0, 13.2, 0.6), lava(1.3, 13.2, 0.6), lava(2.6, 13.2, 0.6),
       lava(-2.6, 19.2, 0.6), lava(-1.3, 19.2, 0.6), lava(0.0, 19.2, 0.6), lava(1.1, 19.2, 0.5),
-      lava(0.2, 10.2, 0.75), lava(-0.2, 16.2, 0.75), lava(0.2, 22.4, 0.6),
+      lava(0.2, 22.4, 0.6),
       lavaSector(0, 26, 0.75, 1.4, 125, 415), lava(-2.6, 26, 0.45), lava(2.6, 26, 0.45),
     ],
   });
@@ -294,13 +313,18 @@
 
   // 17. Gusts across thin legs.
   A.push({
-    id: 'sulfur-winds', name: 'Sulfur Winds', par: 7,
+    id: 'sulfur-winds', name: 'Sulfur Winds', par: 11,
     special: 'Gusts across thin causeways',
-    tip: 'Hot gusts blow across thin legs with no edges, pushing the ball east. Watch the banner, and putt between gusts.',
+    tip: 'Hot gusts blow across thin legs with no edges, pushing the ball east. A wall blocks the fourth leg: jump it with the gold spring, between gusts.',
     look: LOOK(), tee: [0, 1.3], cup: [-1, 30.6],
     floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 9], [7, 9], [7, 17], [-1, 17], [-1, 23], [5, 23], [5, 26.4], [-1, 26.4], [-1, 28.4]], 1.5, 2.6), circ(-1, 30.2, 1.8)],
     hazards: [lava(-0.2, 31.2, 0.32)],
-    features: [{ type: 'wind', ash: true, dir: [1, 0], power: 3.0, period: 5.6, gust: 2.2 }],
+    walls: [{ pts: [[2.6, 16.1], [2.6, 17.9]], w: 0.36, h: 0.7, style: 'obsidian' }],
+    zones: [{ type: 'tar', poly: rect(-0.6, 16.25, 1.3, 17.75) }],
+    features: [
+      { type: 'wind', ash: true, dir: [1, 0], power: 3.0, period: 5.6, gust: 2.2 },
+      { type: 'spring', x: 4.4, y: 17, r: 0.42, vz: 6.5, minSpeed: 4.6, maxSpeed: 5.8, land: [0.6, 17] },
+    ],
   });
 
   // 18. Five ledges down, each dropping through a narrow window off to one side.
@@ -308,7 +332,7 @@
   A.push({
     id: 'the-descent', name: 'The Descent', par: 7,
     special: 'Ledges down into the abyss',
-    tip: 'Five ledges step down toward the lava. Each one only meets the next for a short stretch, off to one side, so stop on every ledge and drop through the gap.',
+    tip: 'Five ledges step down toward the lava. Each one only meets the next for a short stretch, off to one side, so stop on every ledge and drop through the gap. A red spring on the third ledge throws the ball off the edge.',
     look: LOOK(), tee: [0, 1.3], cup: [1.6, 29.6],
     floors: [rp(rect(-1.2, 0, 1.2, 7), [0.5, 0.5, 0, 0]), rect(0.4, 7, 4.0, 13), rect(2.8, 13, 6.4, 19), rect(-0.2, 19, 3.6, 25), circ(1.6, 27.4, 2.8)],
     height: descH,
@@ -319,7 +343,10 @@
       { pts: [[-1.2, 25], [4.4, 25]], w: 0.04, h: 0, top: () => 0.6, style: 'none' },
     ],
     hazards: [lava(3.3, 9.0, 0.4), lava(5.6, 15.4, 0.4), lava(0.6, 21.6, 0.4)],
-    features: [{ type: 'spinner', x: 1.6, y: 27.2, arms: 3, len: 1.9, w: 0.16, omega: 1.2, h: 1.0 }],
+    features: [
+      { type: 'spinner', x: 1.6, y: 27.2, arms: 3, len: 1.9, w: 0.16, omega: 1.2, h: 1.0 },
+      { type: 'spring', x: 5.8, y: 17.4, r: 0.4, dir: 0, speed: 7, vz: 5 },
+    ],
   });
 
   A.forEach((h, i) => { h.num = i + 1; h.course = 'abyss'; });

@@ -458,5 +458,5 @@
   PC.Kit = { openRail, laneCircle };
   H.forEach((h, i) => { h.num = i + 1; h.course = 'garden'; });
   PC.HOLES = H;
-  PC.holeById = id => H.find(h => h.id === id) || (PC.ABYSS || []).find(h => h.id === id);
+  PC.holeById = id => H.find(h => h.id === id) || (PC.CANYON || []).find(h => h.id === id) || (PC.ABYSS || []).find(h => h.id === id);
 });

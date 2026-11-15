@@ -14,7 +14,7 @@
     Cinder: { color: '#ff9a1f', skill: 0.85 },
     SirSC: { color: '#4ff3ff', skill: 0.97 },
   };
-  const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'sprinkler']);
+  const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'sprinkler', 'tumbleweeds']);
 
   // Runs inside the worker, built from the same physics source as the page.
   function workerMain(PC) {
@@ -113,7 +113,9 @@
       // The plan is for a moment a little ahead, long enough for the thinking to finish first.
       const lead = this.timed ? U.clamp(this.thinkAvg * (speed || 1) * 1.6 + 0.4, 1.0, 5) : 0.6;
       const waits = this.timed && r.skill > 0.45 ? [lead, lead + 0.8, lead + 1.6] : [lead];
-      const msg = { holeId: this.hole.id, opts: r.sim.opts, snap: r.sim.snapshot(), waits, n: Math.round(10 + r.skill * 22), seed: Math.floor(Math.random() * 1e9), maxT: 7, slot: this.list.indexOf(r) };
+      const msg = { holeId: this.hole.id, opts: r.sim.opts, snap: r.sim.snapshot(), waits, n: Math.round(10 + r.skill * 22), seed: Math.floor(Math.random() * 1e9), maxT: 7, slot: this.list.indexOf(r),
+        // A shakier rival checks its putts against bigger mistakes, so it keeps clear of cacti and edges it would likely hit.
+        wobble: 0.012 + (1 - r.skill) * 0.05, pwobble: 0.02 + (1 - r.skill) * 0.08, check: 6 };
       this.ask(msg, res => {
         if (gen !== this.gen || r.done) return;
         const took = (performance.now() - started) / 1000;

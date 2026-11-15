@@ -1,6 +1,6 @@
 # SirSC's Putt Club
 
-Mini golf in 3D, played against three rivals. There are two courses: **the Garden**, 27 holes each built around its own garden trick, and **the Abyss**, 18 holes of par 6 and up in an underground volcanic temple, floating over a lava abyss with no rails at all. Every round deals a random 9 or 18 from one course. The Course book lists all 45 holes and lets you practise any one of them.
+Mini golf in 3D, played against three rivals. There are three courses: **the Garden**, 27 holes each built around its own garden trick; **the Canyon**, 27 desert holes built around cacti that pop the ball and tumbleweeds that blow across the green; and **the Abyss**, 18 holes of par 6 and up in an underground volcanic temple, floating over a lava abyss with no rails at all. Every round deals a random 9 or 18 from one course. The Course book lists all 72 holes and lets you practise any one of them.
 
 Plain HTML, CSS and JavaScript with three.js r128 from cdnjs. There is no build step for playing locally: serve the folder with `python3 -m http.server` and open `index.html`. All textures are painted on canvases and all sound is synthesised, so there are no image or audio files.
 
@@ -13,9 +13,9 @@ The title screen copies the SirSC games' menu (Bigger Fish, Tower Defense, Brain
 | Difficulty | Course | Aim guide | Rivals |
 | --- | --- | --- | --- |
 | Owen | Garden | The whole putt, played out in a copy of the hole, so it shows every bounce, slope and current exactly. The cup also pulls a little harder. | Owen, Clover, Fern |
-| Medium | Garden | A line to the first wall and one bounce. | Fern, Bramble, Blaze |
+| Medium | Canyon | A line to the first wall and one bounce. Cacti pop the ball. | Fern, Bramble, Blaze |
 | Hard | Garden | A short line that only shows direction. | Bramble, Blaze, Thorn |
-| Ultra | The Abyss | None: just the arrow. No rails anywhere, so any edge is a drop. Par 6 to 9, and you pick up at par + 5. | Thorn, Cinder, SirSC |
+| Ultra | The Abyss | None: just the arrow. No rails anywhere, so any edge is a drop. Springs: gold ones jump walls, red ones throw you off the edge. Par 6 to 11, and you pick up at par + 5. | Thorn, Cinder, SirSC |
 
 ## Rivals
 
@@ -31,9 +31,9 @@ Rivals play the same hole at the same time as you, each in its own copy of the h
 | Q / E or the ⟲ ⟳ buttons, right-drag | Turn the camera. Scroll or pinch to zoom. |
 | Esc or *Menu* | Pause, with the how-to and sound toggles. M toggles music, N toggles sound. |
 
-Water, flowerbeds, lava and the edges of the Abyss cost one penalty stroke and put the ball back where it was putted from. Eight strokes is the most on a Garden hole and par + 5 in the Abyss. After each hole a scorecard is filled in, golf style: birdies are circled, eagles double circled, bogeys boxed. Best rounds for each length and difficulty, your best on each hole and holes in one are kept in the browser.
+Water, flowerbeds, cacti, gulches, lava and the edges of the Abyss cost one penalty stroke and put the ball back where it was putted from. Eight strokes is the most on a Garden hole and par + 5 in the Abyss. After each hole a scorecard is filled in, golf style: birdies are circled, eagles double circled, bogeys boxed. Best rounds for each length and difficulty, your best on each hole and holes in one are kept in the browser.
 
-## The Garden: 27 holes
+## The Garden: 27 holes (Owen and Hard)
 
 | # | Hole | Par | Its garden trick |
 | --- | --- | --- | --- |
@@ -65,36 +65,73 @@ Water, flowerbeds, lava and the edges of the Abyss cost one penalty stroke and p
 | 26 | Terrace Falls | 3 | Three stone terraces step down beside a waterfall. |
 | 27 | Dandelion Boost | 3 | Dandelion clocks blow the ball along a zigzag. |
 
+## The Canyon: 27 holes (Medium)
+
+A desert of red sandstone: mesas, buttes and spires on the horizon, saguaros dotted over the plain, and vultures circling overhead. The greens are terracotta felt inside plank or sandstone rails. Every hole is built around two things:
+
+- **Cacti** pop the ball on contact: a penalty stroke, back to where you putted from. Saguaros are tall and thin, barrel cacti short and round, prickly pear wide, cholla fuzzy. A ball can fly over the short ones but never through a saguaro.
+- **Tumbleweeds** blow round each hole on fixed routes, speeding up and slowing down like gusts of wind, and the ball bounces off them. Their routes are always the same, so you can learn their timing.
+
+| # | Hole | Par | Its trick |
+| --- | --- | --- | --- |
+| 1 | Saguaro Gate | 3 | Two tall saguaros guard the middle; thread the gap, then dodge the tumbleweed behind. |
+| 2 | Prickly Slalom | 3 | Three rows of prickly pear, each with one gap on alternate sides. |
+| 3 | Tumbleweed Alley | 3 | Three tumbleweeds blow back and forth across a long alley, each in its own rhythm. |
+| 4 | Barrel Ring | 3 | The cup sits in a ring of barrel cacti, open only to the east and west. |
+| 5 | Cholla Corner | 3 | Cholla crowd the inside of a dogleg, so you can't cut the corner. |
+| 6 | Mesa Top | 3 | Up a ramp onto a mesa, barrel cacti either side. |
+| 7 | Dry Wash | 3 | A dry wash cuts across the hole, tumbleweeds rolling along its bed and cacti on both banks. |
+| 8 | Sand Trap Flats | 3 | Sand traps with a cactus growing in each. |
+| 9 | Dust Devil | 3 | Gusts of dust blow the ball toward a patch of cholla; a windpump spins with each gust. |
+| 10 | Rattlesnake Slot | 4 | A narrow slot canyon winds back and forth, cacti tucked into its bends. |
+| 11 | Saloon Doors | 3 | The only way through the fence is a pair of saloon doors swinging open and shut. |
+| 12 | Mine Shaft | 3 | Two mine shafts run under a rock ridge; one comes out facing a cactus. |
+| 13 | Gulch Bridge | 3 | A plank bridge over a deep gulch, with a tumbleweed rolling along it. |
+| 14 | Rock Arch | 3 | A natural sandstone arch, prickly pear beside its legs. |
+| 15 | Cactus Garden | 4 | Slanting rows of cactus, each with its gap at the high end. |
+| 16 | Hoodoo Pinball | 3 | Springy hoodoo rocks fling the ball about between barrel cacti. |
+| 17 | Dune Ridge | 3 | Dunes ripple across the lane, prickly pear in the hollows. |
+| 18 | Wagon Wheel | 3 | An old wagon wheel turns like a turnstile; cacti wait in the side bays. |
+| 19 | Coyote Bowl | 2 | A bowl running down to the cup, with barrel cacti on its slopes. |
+| 20 | Plank Seesaw | 3 | The only way over the gulch is a plank that rocks from side to side. |
+| 21 | Switchback Trail | 4 | A trail stepping down two ledges, each lined with barrel cacti and the way down at alternate ends. |
+| 22 | Tumble Twins | 3 | Two tumbleweeds trace a figure of eight right over the cup. |
+| 23 | Box Canyon | 3 | A wall of barrel cacti with one narrow gap, and a tumbleweed patrolling it. |
+| 24 | Oasis | 3 | A spring-fed pool among palms, cacti on its banks. |
+| 25 | Ghost Town | 4 | Main street between false-front shops, fenced into three stretches with saloon doors and a tumbleweed. |
+| 26 | Canyon Rim | 3 | A lane along the canyon edge with no rail, and tumbleweeds blowing toward the drop. |
+| 27 | Sunset Mesa | 4 | One narrow ramp up a mesa at sunset, a tumbleweed rolling up and down it. |
+
 ## The Abyss: 18 holes (Ultra)
 
 An underground volcanic temple suspended over a lava abyss. The platforms are ancient flagstones on stone columns with a thin bronze inlay along every drop. Around them: obsidian cliffs and a stalactite roof, lava falls pouring down the cliff walls, a temple facade carved into the rock ahead, giant pillars with carved bands of glowing runes, ruined islands drifting in the dark, smoke and embers rising, and light falling through cracks in the roof. A colossal rune wheel turns slowly in the abyss below the course, chained to the cliffs; runes appear only on the pillars, the facade and the wheels.
 
-Every hole is built so that even perfect aim needs several putts: corners with nothing to bank off, ledges that only meet for a short stretch, slabs you must land on and stop. Each par is the strokes the test bot needed, plus two (the bot never misses).
+Every hole is built so that even perfect aim needs several putts: corners with nothing to bank off, ledges that only meet for a short stretch, slabs you must land on and stop. Springs come in two kinds: a gold spring throws the ball up and on, over a wall it could never get past otherwise (it only fires if you roll onto it heading for the far side, and its landing spot is ringed in gold), and a red spring flings the ball off the edge the way its arrow points. Each par is the strokes the test bot needed, plus two (the bot never misses).
 
 | # | Hole | Par | Its trick |
 | --- | --- | --- | --- |
-| 1 | Gates of Dis | 7 | A narrow causeway turning at every corner, with an iron gate slamming across each leg. |
+| 1 | Gates of Dis | 8 | A narrow causeway turning at every corner, with an iron gate slamming across each leg and red springs on two corners. |
 | 2 | Reaper's Mill | 7 | Two discs of sweeping blades, joined by thin bridges that leave at right angles. |
-| 3 | Imp Patrol | 9 | Six legs with no edges and an imp pacing across most of them. |
-| 4 | Magma Pinball | 7 | Two arenas of magma boulders whose exits are nowhere near their entrances. |
+| 3 | Imp Patrol | 9 | Seven legs with no edges, an imp pacing across most of them, and a wall you jump with a gold spring. |
+| 4 | Magma Pinball | 7 | Two arenas of magma boulders whose exits are nowhere near their entrances, with red springs by the edges. |
 | 5 | Geyser Leap | 7 | Four floating slabs; each geyser throws the ball the way it rolls, and the next slab is off to one side. |
 | 6 | Raft of Charon | 9 | Three rafts across a lava lake, north, then east, then north again. |
 | 7 | Portal Maze | 6 | Slabs joined only by paired portals (one sends you back to the tee); the cup sits in a lava ring open at the back. |
-| 8 | Doom Pendulum | 7 | Four spiked balls on chains from the roof, swinging across a narrow L-shaped bridge. |
+| 8 | Doom Pendulum | 7 | Four spiked balls on chains from the roof, swinging across a narrow L-shaped bridge, and a wall to spring over. |
 | 9 | Rune Wheel | 6 | The great rune wheel: three bridges leave it and only one leads on, to a second wheel turning the other way. |
 | 10 | Obsidian Slide | 8 | A causeway that turns five times, much of it polished obsidian as slippery as ice. |
-| 11 | Tar Pits | 6 | Rows of lava pools with one gap each, never in line, tar between them, and a lava ring round the cup. |
+| 11 | Tar Pits | 7 | Rows of lava pools with one gap each, a wall only a gold spring gets you over (the red one throws you off), and a lava ring round the cup. |
 | 12 | Ash River | 8 | A winding causeway with a river of ash running down it, against you. |
 | 13 | Volcano Summit | 7 | Lava down every slope but two narrow ridges; work round the base, then climb to the crater. |
 | 14 | The Crater | 8 | A crooked bridge into a crater sloping down to lava, with the cup on a mesa reached by two steep ramps. |
 | 15 | Bone Bridge | 7 | Runes raise bone bridges over two lava channels; a rocking slab crosses the one between. |
 | 16 | Soul Cart | 7 | Fire jets blast across thin bridges with three turns; the cup rides on a cart between lava pools. |
-| 17 | Sulfur Winds | 7 | Gusts blowing across thin causeways with no edges. |
-| 18 | The Descent | 7 | Five ledges down, each meeting the next only for a short stretch off to one side. |
+| 17 | Sulfur Winds | 11 | Gusts blowing across thin causeways with no edges, and a wall to spring over between gusts. |
+| 18 | The Descent | 7 | Five ledges down, each meeting the next only for a short stretch off to one side, and a red spring on the third. |
 
 ## Testing the holes
 
-`node tools/test-holes.js` (add `garden` or `abyss` to test one course) plays every hole with a search bot (it tries hundreds of putts per stroke and keeps the one that gets closest along the course) and reports how many strokes it needed and how often a random putt from the tee is a hole in one. Pass hole ids or numbers to test just those. It fails if a hole can't be finished within its stroke limit or if the tee, cup or a post is off the green. `node tools/test-rivals.js abyss 0.97` plays each hole three times with the rivals' own shot search at a given skill and reports their strokes.
+`node tools/test-holes.js` (add `garden`, `canyon` or `abyss` to test one course) plays every hole with a search bot (it tries hundreds of putts per stroke and keeps the one that gets closest along the course) and reports how many strokes it needed and how often a random putt from the tee is a hole in one. Pass hole ids or numbers to test just those. It fails if a hole can't be finished within its stroke limit or if the tee, cup or a post is off the green. `node tools/test-rivals.js abyss 0.97` plays each hole three times with the rivals' own shot search at a given skill and reports their strokes.
 
 ## Single-file build
 
@@ -109,6 +146,7 @@ js/util.js          math and 2D geometry
 js/physics.js       ball physics (no three.js; also runs in Node)
 js/features.js      the moving and special parts of each hole (physics)
 js/holes.js         the 27 Garden holes
+js/canyon.js        the 27 Canyon holes
 js/abyss.js         the 18 Abyss holes
 js/nav.js           the rivals' course map and shot search (also runs in their workers)
 js/bots.js          the rivals: workers, timing, skill
@@ -116,6 +154,7 @@ js/textures.js      canvas-painted textures
 js/world.js         the three.js scene: greens, rails, water, cup, ball, effects
 js/vis.js           the garden around each hole and how each feature looks
 js/vis-abyss.js     the volcanic temple and the Abyss versions of each feature
+js/vis-canyon.js    the desert, cacti, tumbleweeds, springs and the Canyon versions of each feature
 js/audio.js         synthesised sound effects and music
 js/game.js          menu, difficulties, rounds, rivals, scoring, camera, controls and screens
 tools/test-holes.js the hole-testing bot

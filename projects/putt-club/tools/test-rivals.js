@@ -5,15 +5,15 @@
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.join(__dirname, '..');
 const ctx = { console, Math, Date }; ctx.window = ctx; vm.createContext(ctx);
-['util', 'physics', 'features', 'holes', 'abyss', 'nav'].forEach(f => vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', f + '.js'), 'utf8'), ctx, { filename: f + '.js' }));
+['util', 'physics', 'features', 'holes', 'canyon', 'abyss', 'nav'].forEach(f => vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', f + '.js'), 'utf8'), ctx, { filename: f + '.js' }));
 const PC = ctx.PC, C = PC.C, U = PC.U;
 const args = process.argv.slice(2);
-const course = args.includes('garden') ? 'garden' : 'abyss';
+const course = args.includes('garden') ? 'garden' : args.includes('canyon') ? 'canyon' : 'abyss';
 const skill = +(args.find(a => /^0?\.\d+$|^1$/.test(a)) || 0.97);
-const ids = args.filter(a => a !== 'garden' && a !== 'abyss' && !/^0?\.\d+$|^1$/.test(a));
-const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'sprinkler']);
+const ids = args.filter(a => a !== 'garden' && a !== 'abyss' && a !== 'canyon' && !/^0?\.\d+$|^1$/.test(a));
+const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'sprinkler', 'tumbleweeds']);
 const gauss = () => { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
-const pool = (course === 'abyss' ? PC.ABYSS : PC.HOLES).filter(h => !ids.length || ids.includes(h.id));
+const pool = (course === 'abyss' ? PC.ABYSS : course === 'canyon' ? PC.CANYON : PC.HOLES).filter(h => !ids.length || ids.includes(h.id));
 let tot = 0, totPar = 0;
 for (const spec of pool) {
   const hole = PC.prepareHole(spec), F = PC.Nav.field(hole), max = PC.maxStrokes(hole);
@@ -24,7 +24,7 @@ for (const spec of pool) {
     let strokes = 0, t0 = Date.now(), log = [];
     while (strokes < max) {
       const lead = 1.0;
-      const res = PC.Nav.choose(sim.clone(), F, { waits: timed ? [lead, lead + 0.8, lead + 1.6] : [lead], n: Math.round(10 + skill * 22), seed: Math.floor(Math.random() * 1e9), maxT: 7 });
+      const res = PC.Nav.choose(sim.clone(), F, { waits: timed ? [lead, lead + 0.8, lead + 1.6] : [lead], n: Math.round(10 + skill * 22), seed: Math.floor(Math.random() * 1e9), maxT: 7, wobble: 0.012 + (1 - skill) * 0.05, pwobble: 0.02 + (1 - skill) * 0.08, check: 6 });
       const k = 1 - skill;
       let w = 0; while (w < res.wait) { sim.step(C.DT); w += C.DT; }
       sim.shoot(res.ang + gauss() * k * 0.1, U.clamp(res.p * (1 + gauss() * k * 0.16), 0.03, 1));

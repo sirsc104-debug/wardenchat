@@ -14,6 +14,8 @@
     day: { top: '#4f9fe0', mid: '#a9d6f5', horizon: '#eef8ff', sun: '#fff1da', sunI: 2.5, hemiSky: '#d6ecff', hemiGround: '#5d7a3c', hemiI: 0.95, fog: '#dcefff', turf: '#3f9434', grass: '#4a7f36', hills: ['#7fb36a', '#8fc07a', '#a6c99a'], exposure: 1.0 },
     spring: { top: '#62b3ea', mid: '#bfe6fb', horizon: '#f4fcff', sun: '#fffaf0', sunI: 2.4, hemiSky: '#e6f6ff', hemiGround: '#6aa04a', hemiI: 1.0, fog: '#e6f6fd', turf: '#43993a', grass: '#4c8638', hills: ['#86bf73', '#9acb88', '#b3d6a8'], exposure: 1.02 },
     golden: { top: '#5d97cf', mid: '#d9c7a8', horizon: '#ffe2b8', sun: '#ffd49a', sunI: 2.7, hemiSky: '#ffe8c8', hemiGround: '#6e6a35', hemiI: 0.85, fog: '#f6e0c2', turf: '#4a9636', grass: '#527f35', hills: ['#8aa865', '#a4b57a', '#c8c49a'], exposure: 1.0 },
+    canyon: { top: '#2f78d0', mid: '#93c3ea', horizon: '#ffe0b4', sun: '#fff0d4', sunI: 2.1, hemiSky: '#d4e8ff', hemiGround: '#b86a3a', hemiI: 0.6, fog: '#f0d4ac', turf: '#c27744', grass: '#d4ac74', hills: ['#c8703e', '#b85c32', '#d88a52'], exposure: 0.88 },
+    mesa: { top: '#3a5ca8', mid: '#e0a07a', horizon: '#ffc27a', sun: '#ffc48a', sunI: 2.3, hemiSky: '#ffd8b8', hemiGround: '#a0502e', hemiI: 0.55, fog: '#eebc90', turf: '#b8683e', grass: '#cc9c68', hills: ['#b85c32', '#a84c2a', '#c8703e'], exposure: 0.9 },
     abyss: { top: '#040205', mid: '#0c0507', horizon: '#2a0a06', sun: '#ffb27a', sunI: 1.5, hemiSky: '#2c2232', hemiGround: '#a8380e', hemiI: 0.7, fog: '#1e0805', turf: '#3a3134', grass: '#1a1212', hills: ['#2a1214', '#3a1610', '#1c0c0c'], exposure: 1.15 },
     autumn: { top: '#6aa3d0', mid: '#d6c7b3', horizon: '#ffdcb5', sun: '#ffcf96', sunI: 2.6, hemiSky: '#ffe6c9', hemiGround: '#7a5a2a', hemiI: 0.9, fog: '#f1dcc0', turf: '#4f9535', grass: '#647c34', hills: ['#a59a5c', '#b8a06a', '#cdb48a'], exposure: 1.0 },
   };
@@ -315,10 +317,10 @@
       this.skyU.top.value.set(L.top); this.skyU.mid.value.set(L.mid); this.skyU.horizon.value.set(L.horizon);
       this.hemi.color = col(L.hemiSky); this.hemi.groundColor = col(L.hemiGround); this.hemi.intensity = L.hemiI;
       this.sun.color = col(L.sun); this.sun.intensity = L.sunI;
-      const hell = name === 'abyss';
-      this.scene.fog = hell ? new THREE.Fog(col(L.fog), 24, 135) : new THREE.Fog(col(L.fog), 45, 190);
+      const hell = name === 'abyss', desert = name === 'canyon' || name === 'mesa';
+      this.scene.fog = hell ? new THREE.Fog(col(L.fog), 24, 135) : desert ? new THREE.Fog(col(L.fog), 70, 240) : new THREE.Fog(col(L.fog), 45, 190);
       this.groundMat.color = col(L.grass).multiplyScalar(1.25);
-      this.ground.visible = !hell;
+      this.ground.visible = !hell && !desert;
       this.lavaSea.visible = hell;
       this.rim.intensity = hell ? 0.45 : 0;
       this.pts.forEach(l => { l.intensity = 0; });
@@ -352,11 +354,12 @@
       this.rim.position.copy(V(cx + 14, cy + 30, 26)); this.rim.target.position.copy(V(cx, cy, 0));
 
       const hAt = (x, y) => sim.floorHeight(x, y);
-      const hell = hole.look.theme === 'abyss';
+      const hell = hole.look.theme === 'abyss', desert = hole.look.theme === 'canyon';
       this.hell = hell;
       const turf = hell ? T.templeFloor() : T.turf(L.turf);
-      const turfMat = new THREE.MeshStandardMaterial({ map: turf, roughness: hell ? 0.55 : 0.92, metalness: hell ? 0.1 : 0, color: hell ? col('#ffffff') : col('#e4f0dc') });
-      const skirtStyle = hell ? 'temple' : hole.look.skirt || (hole.look.rail === 'stone' || hole.look.rail === 'brick' ? hole.look.rail : 'soil');
+      const turfMat = new THREE.MeshStandardMaterial({ map: turf, roughness: hell ? 0.55 : 0.92, metalness: hell ? 0.1 : 0, color: hell || desert ? col('#ffffff') : col('#e4f0dc') });
+      const skirtStyle = hell ? 'temple' : desert ? 'sandstone' : hole.look.skirt || (hole.look.rail === 'stone' || hole.look.rail === 'brick' ? hole.look.rail : 'soil');
+      if (desert) this.buildDesertGround(hole);
       const skirtMat = this.railMaterials(skirtStyle).body;
       const skirtBottom = hell ? -1.5 : GROUND_Y - 0.02;
 
@@ -384,8 +387,8 @@
 
       this.buildCup(hole, sim);
       this.buildTee(hole, sim);
-      if (hell) PC.VIS.decorateAbyss(hole, this, sim); else PC.VIS.decorate(hole, this, sim);
-      (sim.feats || []).forEach(f => { const v = (hell && PC.VIS.abyss[f.type]) || PC.VIS[f.type]; if (v) { const o = v(f.spec, this, f, sim); if (o) this.vis.push(o); } });
+      if (hell) PC.VIS.decorateAbyss(hole, this, sim); else if (desert) PC.VIS.decorateCanyon(hole, this, sim); else PC.VIS.decorate(hole, this, sim);
+      (sim.feats || []).forEach(f => { const v = (hell && PC.VIS.abyss[f.type]) || (desert && PC.VIS.canyon[f.type]) || PC.VIS[f.type]; if (v) { const o = v(f.spec, this, f, sim); if (o) this.vis.push(o); } });
       this.ghosts = [];
       return this;
     }
@@ -402,6 +405,8 @@
           case 'glass': { const t = T.wood('#f4f4ee'); return { body: M({ map: t, roughness: 0.6 }), cap: M({ color: col('#ffffff'), roughness: 0.5 }) }; }
           case 'trellis': { const t = T.wood('#ece7dc'); return { body: M({ map: t, roughness: 0.7 }), cap: M({ color: col('#fbfaf5') }) }; }
           case 'soil': { const t = T.soil(); return { body: M({ map: t, roughness: 1 }), cap: null }; }
+          case 'sandstone': { const t = T.sandstone(); return { body: M({ map: t, roughness: 0.95 }), cap: M({ color: col('#e0a070'), roughness: 0.9 }) }; }
+          case 'plank': { const t = T.wood('#9a7a52'); return { body: M({ map: t, roughness: 0.95 }), cap: M({ color: col('#b89466'), roughness: 0.9 }) }; }
           case 'basalt': case 'temple': { const t = T.templeStone(); return { body: M({ map: t, roughness: 0.9 }), cap: M({ color: col('#4a3e3c'), roughness: 0.7 }) }; }
           case 'obsidian': { const t = T.obsidian(); return { body: M({ map: t, roughness: 0.25, metalness: 0.2 }), cap: M({ color: col('#ff5a1a'), emissive: col('#ff4a10'), emissiveIntensity: 0.9, roughness: 0.5 }) }; }
           default: { const t = T.wood('#a8713f'); return { body: M({ map: t }), cap: M({ color: col('#c99a63'), roughness: 0.75 }) }; }
@@ -442,6 +447,7 @@
         }
         case 'glass': m = new THREE.MeshPhysicalMaterial({ map: T.obsidian(), color: col('#ffffff'), roughness: 0.03, metalness: 0.3, clearcoat: 1, clearcoatRoughness: 0.02 }); lift = 0.008; uv = (x, y) => [x / 2, y / 2]; break;
         case 'tar': m = new THREE.MeshPhysicalMaterial({ map: T.tar(), color: col('#ffffff'), roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.1 }); lift = 0.012; uv = (x, y) => [x / 2.5, y / 2.5]; break;
+        case 'sand': { const t = T.sand(); m = new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: col('#f4e2c0') }); uv = (x, y) => [x / 2, y / 2]; break; }
         case 'ash': case 'cinder': { const t = T.ash(); m = new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: col(z.type === 'cinder' ? '#8a7a76' : '#ffffff') }); uv = (x, y) => [x / 2, y / 2]; break; }
         default: return;
       }
@@ -473,6 +479,18 @@
           const rim = new THREE.Mesh(skirtGeometry(z.poly, () => z.top + 0.05, -1.5), this.railMaterials('temple').body); G.add(rim);
         }
         this.vis.push({ update: (t) => { lt.offset.set(t * 0.012, t * 0.008); lm.color.setRGB(1, 0.62 + Math.sin(t * 2.1) * 0.05, 0.42); } });
+        return;
+      }
+      if (z.kind === 'chasm') { this.buildChasm(z); return; }
+      if (z.kind === 'water' && z.over) {
+        // A pool set into the green, like the lava pools: water sitting just below the surface, with a stone lip.
+        const n = T.waterNormal().clone(); n.needsUpdate = true; n.repeat.set(0.4, 0.4);
+        const wm = new THREE.MeshPhysicalMaterial({ color: col('#2f8fa8'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: 0.88, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1 });
+        const geo = surfaceGeometry(z.poly, (x, y) => this.sim.floorHeight(x, y), { lift: 0.012, uv: (x, y) => [x / 2, y / 2], cell: 0.2 });
+        G.add(new THREE.Mesh(geo, wm));
+        const rim = railGeometry(z.poly, true, 'out', 0.16, (x, y) => this.sim.floorHeight(x, y) + 0.04, 0, { thick: 0.06 });
+        G.add(new THREE.Mesh(rim.geo, this.railMaterials('sandstone').cap));
+        this.vis.push({ update: (t) => { n.offset.set(t * 0.02, t * 0.013); } });
         return;
       }
       if (z.kind === 'water') {
@@ -534,6 +552,57 @@
         m.position.copy(V(px, py, sim.floorHeight(px, py) + 0.06)); m.castShadow = true;
         G.add(m);
       });
+    }
+
+    // The desert floor for a canyon hole, with any gulches cut out of it so they really drop away.
+    buildDesertGround(hole) {
+      const G = this.holeGroup, b = hole.box;
+      const shape = new THREE.Shape(U.circle(b.cx, b.cy, 230, 64).map(p => new THREE.Vector2(p[0], p[1])));
+      hole.hazards.filter(z => z.kind === 'chasm').forEach(z => {
+        const P = U.cw(z.poly.map(p => [U.clamp(p[0], b.cx - 220, b.cx + 220), U.clamp(p[1], b.cy - 220, b.cy + 220)]));
+        shape.holes.push(new THREE.Path(P.map(p => new THREE.Vector2(p[0], p[1]))));
+      });
+      const geo = new THREE.ShapeGeometry(shape, 1);
+      geo.rotateX(-Math.PI / 2);
+      geo.translate(0, GROUND_Y, 0);
+      const t = T.sand().clone(); t.needsUpdate = true; t.repeat.set(0.25, 0.25);
+      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: col('#f0dcc0') }));
+      m.receiveShadow = true;
+      G.add(m);
+    }
+    buildChasm(z) {
+      const G = this.holeGroup;
+      // Banded walls that darken as they go down, so the gulch reads as deep.
+      const P = U.resample(z.poly, 0.4, true); P.push(P[0]);
+      const rows = [GROUND_Y, GROUND_Y - 0.3, -1.2, -1.9, -2.8, -4, -6, -10];
+      const pos = [], uvs = [], cols = [], idx = [], top = col('#ffffff'), low = col('#2a1208');
+      let run = 0;
+      P.forEach((p, i) => {
+        if (i) run += Math.hypot(p[0] - P[i - 1][0], p[1] - P[i - 1][1]);
+        rows.forEach(y => {
+          pos.push(p[0], y, -p[1]); uvs.push(run / 3, y / 2.2);
+          const k = Math.pow(U.clamp((y + 4.6) / (4.6 + GROUND_Y), 0, 1), 1.6), c = low.clone().lerp(top, k);
+          cols.push(c.r, c.g, c.b);
+        });
+      });
+      const R = rows.length;
+      for (let i = 0; i < P.length - 1; i++) for (let r = 0; r < R - 1; r++) { const a = i * R + r, b = (i + 1) * R + r; idx.push(a, b, a + 1, b, b + 1, a + 1); }
+      const wg = new THREE.BufferGeometry();
+      wg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      wg.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+      wg.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+      wg.setIndex(idx); wg.computeVertexNormals();
+      const wt = T.sandstone().clone(); wt.needsUpdate = true;
+      const walls = new THREE.Mesh(wg, new THREE.MeshStandardMaterial({ map: wt, vertexColors: true, roughness: 0.95, side: THREE.DoubleSide }));
+      G.add(walls);
+      const shape = new THREE.Shape(z.poly.map(p => new THREE.Vector2(p[0], p[1])));
+      const floor = new THREE.Mesh(new THREE.ShapeGeometry(shape, 1).rotateX(-Math.PI / 2).translate(0, -10, 0), new THREE.MeshBasicMaterial({ color: col('#2a140a') }));
+      G.add(floor);
+      // A dark haze deeper down so the gulch looks deep.
+      for (let i = 1; i <= 3; i++) {
+        const haze = new THREE.Mesh(new THREE.ShapeGeometry(shape, 1).rotateX(-Math.PI / 2).translate(0, GROUND_Y - i * 2.6, 0), new THREE.MeshBasicMaterial({ color: col('#3a1e10'), transparent: true, opacity: 0.32, depthWrite: false }));
+        G.add(haze);
+      }
     }
 
     // Abyss platforms have no rails, so their edges glow to show where the drop is.

@@ -41,6 +41,7 @@
     return g;
   }
   const M4 = (x, y, z, rx = 0, ry = 0, rz = 0, sx = 1, sy = 1, sz = 1) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz));
+  VIS.mergeGeos = mergeGeos; VIS.M4 = M4;
 
   // A ruined island: a floor slab on a rocky root, with broken columns, an arch, a wall and steps.
   function ruinIsland(rnd, r) {

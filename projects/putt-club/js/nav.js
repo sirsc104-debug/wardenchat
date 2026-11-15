@@ -23,7 +23,16 @@
     return 1;
   };
 
+  // Cacti count as solid, with room to spare: brushing one pops the ball.
+  function cactusNear(hole, x, y, pad) {
+    for (const f of hole.features || []) {
+      if (f.type !== 'cacti') continue;
+      for (const c of f.list) if (Math.hypot(x - c.x, y - c.y) < (c.r || 0.3) + C.R * pad + 0.06) return true;
+    }
+    return false;
+  }
   function blockedBySolid(hole, x, y, pad) {
+    if (cactusNear(hole, x, y, pad)) return true;
     for (const s of hole.segs) {
       if (s.top && s.h === 0) continue;   // ledges you drop off, not walls
       const q = U.closestOnSeg(x, y, s.ax, s.ay, s.bx, s.by);
@@ -41,10 +50,11 @@
     const b = hole.box, cell = 0.2;
     const x0 = b.x0 - 0.6, y0 = b.y0 - 0.6;
     const nx = Math.ceil((b.w + 1.2) / cell), ny = Math.ceil((b.h + 1.2) / cell);
-    const cost = new Float32Array(nx * ny).fill(Infinity);
+    const cost = new Float32Array(nx * ny).fill(Infinity), hgt = new Float32Array(nx * ny);
     for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
       const x = x0 + i * cell, y = y0 + j * cell;
       const g = sim.ground(x, y);
+      hgt[j * nx + i] = g.h || 0;
       let c = g.kind === 'floor' || g.kind === 'platform' ? 1 : g.kind === 'water' || g.kind === 'flowers' || g.kind === 'lava' ? 5 : Infinity;
       if (c !== Infinity && blockedBySolid(hole, x, y, 0.9)) c = Infinity;
       cost[j * nx + i] = c;
@@ -62,7 +72,16 @@
     (hole.features || []).forEach(f => {
       if (f.type === 'tunnels') f.pairs.forEach(p => { link(p.a[0], p.a[1], p.b[0], p.b[1]); link(p.b[0], p.b[1], p.a[0], p.a[1]); });
       if (f.type === 'launch' && f.land) link(f.x, f.y, f.land[0], f.land[1]);
+      if (f.type === 'spring' && f.land) {
+        // A jump spring only works from behind, so the route reaches it from its approach side
+        // and goes round the pad itself.
+        const ux = f.land[0] - f.x, uy = f.land[1] - f.y, ul = Math.hypot(ux, uy) || 1;
+        const r = f.r || 0.4;
+        for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const x = x0 + i * cell, y = y0 + j * cell; if (Math.hypot(x - f.x, y - f.y) < r + 0.1) cost[j * nx + i] = Infinity; }
+        [r + 0.25, r + 0.6, r + 1.0].forEach(k => link(f.x - (ux / ul) * k, f.y - (uy / ul) * k, f.land[0], f.land[1]));
+      }
     });
+    const ledges = hole.segs.filter(s => s.top && s.h === 0);
     const ci = Math.round((hole.cup[0] - x0) / cell), cj = Math.round((hole.cup[1] - y0) / cell);
     dist[cj * nx + ci] = 0; push([0, ci, cj]);
     while (heap.length) {
@@ -75,6 +94,11 @@
         if (a < 0 || c < 0 || a >= nx || c >= ny) continue;
         const k = c * nx + a;
         if (cost[k] === Infinity) continue;
+        // A ledge can be dropped off but not climbed: the ball would roll from k up to (i, j).
+        if (ledges.length && hgt[j * nx + i] - hgt[k] > 0.12) {
+          const mx = x0 + (i + a) * cell / 2, my = y0 + (j + c) * cell / 2;
+          if (ledges.some(s => { const q = U.closestOnSeg(mx, my, s.ax, s.ay, s.bx, s.by); return Math.hypot(mx - q[0], my - q[1]) < cell * 0.8; })) continue;
+        }
         const nd = d + w * cell * cost[k];
         if (nd < dist[k]) { dist[k] = nd; push([nd, a, c]); }
       }
@@ -167,6 +191,16 @@
       const bt = f.spec.button;
       [0.95, 1.1, 1.3].forEach(k => add(bt[0], bt[1], k));
     });
+    // Jump springs: from behind one, roll straight over the pad, gently enough to land on the far side.
+    (sim.feats || []).forEach(f => {
+      if (f.type !== 'spring' || !f.spec.land) return;
+      const sp = f.spec, d = Math.hypot(sp.x - b.x, sp.y - b.y);
+      if (d > 7 || d < 0.05) return;
+      const ux = sp.land[0] - sp.x, uy = sp.land[1] - sp.y, ul = Math.hypot(ux, uy) || 1;
+      if (((sp.x - b.x) * ux + (sp.y - b.y) * uy) / (d * ul) < 0.5) return;
+      const ang = Math.atan2(sp.y - b.y, sp.x - b.x);
+      [0.6, 1.0, 1.6, 2.4].forEach(k => out.push({ ang, p: Nav.powerFor(d + k) }));
+    });
     // Moving platforms: try stopping where they are and where they will be.
     (sim.feats || []).forEach(f => {
       if (f.type !== 'ferry') return;
@@ -217,11 +251,20 @@
       for (const c of cands) all.push({ ang: c.ang, p: c.p, wait, score: Nav.evaluate(sim, c, F, wait, maxT).score });
     }
     all.sort((a, b) => a.score - b.score);
+    // If every putt it thought of is lost, cast about at random before settling for one.
+    const startD = F.at(sim.ball.x, sim.ball.y);
+    if (all.length && all[0].score >= startD + 4.9) {
+      for (let i = 0; i < 40; i++) {
+        const c = { ang: rnd() * Math.PI * 2, p: 0.08 + rnd() * 0.6 }, wait = waits[i % waits.length];
+        all.push({ ang: c.ang, p: c.p, wait, score: Nav.evaluate(sim, c, F, wait, maxT).score });
+      }
+      all.sort((a, b) => a.score - b.score);
+    }
     // Check the best few with small mistakes added, and keep the one that holds up best.
-    const da = opts.wobble === undefined ? 0.012 : opts.wobble;
+    const da = opts.wobble === undefined ? 0.012 : opts.wobble, dp = opts.pwobble === undefined ? 0.02 : opts.pwobble;
     let best = null;
     for (const c of all.slice(0, opts.check || 5)) {
-      const near = [[da, 0.02], [-da, -0.02]].map(([a, k]) => Nav.evaluate(sim, { ang: c.ang + a, p: U.clamp(c.p * (1 + k), 0.03, 1) }, F, c.wait, maxT).score);
+      const near = [[da, dp], [-da, -dp]].map(([a, k]) => Nav.evaluate(sim, { ang: c.ang + a, p: U.clamp(c.p * (1 + k), 0.03, 1) }, F, c.wait, maxT).score);
       const sc = (c.score + near[0] + near[1]) / 3 + Math.max(0, Math.max(near[0], near[1]) - c.score) * 0.15;
       if (!best || sc < best.robust) best = Object.assign({}, c, { robust: sc });
     }

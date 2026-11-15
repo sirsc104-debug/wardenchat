@@ -332,6 +332,98 @@
     };
   } };
 
+  // A spring pad. Without `dir` it throws the ball up the way it is rolling (to jump a wall);
+  // with `dir` it is a trap that flings the ball off that way, usually over an edge.
+  F.spring = { make(s) {
+    return {
+      cool: -1, hit: -9,
+      onStep(b, sim) {
+        if (b.mode !== 'roll' || sim.t < this.cool) return;
+        if (Math.hypot(b.x - s.x, b.y - s.y) > s.r) return;
+        const sp = Math.hypot(b.vx, b.vy);
+        if (sp < 0.3) return;
+        // A jump spring only fires for a ball heading roughly toward where it throws you.
+        if (s.land) { const lx = s.land[0] - s.x, ly = s.land[1] - s.y, ll = Math.hypot(lx, ly) || 1; if ((b.vx * lx + b.vy * ly) / ll < sp * 0.35) return; }
+        if (s.dir !== undefined) { const v = s.speed || 7; b.vx = Math.cos(s.dir) * v; b.vy = Math.sin(s.dir) * v; }
+        else { const k = U.clamp(sp, s.minSpeed || 4.5, s.maxSpeed || 6) / sp; b.vx *= k; b.vy *= k; }
+        b.mode = 'air'; b.vz = s.vz || 6.5; b.z += 0.02;
+        this.hit = sim.t; this.cool = sim.t + 0.6;
+        sim.emit({ type: 'spring', trap: s.dir !== undefined, x: s.x, y: s.y });
+      },
+    };
+  } };
+
+  // Cacti: touch one and the ball is popped.
+  F.cacti = { make(s) {
+    const list = s.list.map(c => Object.assign({ r: 0.3, h: 1.6, kind: 'saguaro', hit: -9 }, c));
+    return {
+      list,
+      collide(b, sim) {
+        if (b.mode !== 'roll' && b.mode !== 'air') return;
+        for (let i = 0; i < list.length; i++) {
+          const c = list[i], dx = b.x - c.x, dy = b.y - c.y, rr = c.r + C.R;
+          if (dx * dx + dy * dy > rr * rr) continue;
+          if (b.z - sim.groundRaw(c.x, c.y) > c.h + C.R) continue;
+          c.hit = sim.t;
+          sim.lose('cactus');
+          return;
+        }
+      },
+    };
+  } };
+
+  // Tumbleweeds blowing round the hole on fixed routes. Their speed rises and falls like gusts of wind,
+  // and on an open route they slow, stop and drift back the other way. Everything depends only on time.
+  function closedCurve(pts, per) {
+    const out = [], n = pts.length;
+    for (let i = 0; i < n; i++) {
+      const p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
+      for (let k = 0; k < per; k++) {
+        const t = k / per, t2 = t * t, t3 = t2 * t;
+        const f = (a, b, c, d) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
+        out.push([f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])]);
+      }
+    }
+    out.push(out[0].slice());
+    return out;
+  }
+  F.tumbleweeds = { make(s) {
+    const geo = [];
+    const list = s.list.map((w, i) => {
+      const line = w.loop ? closedCurve(w.path, 12) : U.catmull(w.path, 12);
+      const cum = [0];
+      for (let k = 1; k < line.length; k++) cum.push(cum[k - 1] + Math.hypot(line[k][0] - line[k - 1][0], line[k][1] - line[k - 1][1]));
+      geo.push({ line, cum, L: cum[cum.length - 1] });
+      const speed = w.speed || 1.2, gust = w.gust === undefined ? 0.5 : w.gust;
+      const f1 = 0.55 + ((i * 0.37) % 0.5), f2 = 1.3 + ((i * 0.61) % 0.6);
+      return { r: w.r || 0.42, e: 0.78, x: 0, y: 0, vx: 0, vy: 0, hit: -9, loop: !!w.loop, speed, a1: (gust * 0.62 * speed) / f1, a2: (gust * 0.3 * speed) / f2, f1, f2, ph: w.phase || 0 };
+    });
+    const at = (g, d) => {
+      let lo = 0, hi = g.cum.length - 1;
+      while (hi - lo > 1) { const m = (lo + hi) >> 1; if (g.cum[m] <= d) lo = m; else hi = m; }
+      const a = g.line[lo], b = g.line[hi], seg = g.cum[hi] - g.cum[lo] || 1, t = (d - g.cum[lo]) / seg;
+      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, (b[0] - a[0]) / seg, (b[1] - a[1]) / seg];
+    };
+    return {
+      list,
+      update(t) {
+        list.forEach((w, i) => {
+          const g = geo[i], tt = t + w.ph * 7.3;
+          const u = w.speed * tt + w.a1 * Math.sin(w.f1 * tt + w.ph * 3) + w.a2 * Math.sin(w.f2 * tt + w.ph * 5);
+          const du = w.speed + w.a1 * w.f1 * Math.cos(w.f1 * tt + w.ph * 3) + w.a2 * w.f2 * Math.cos(w.f2 * tt + w.ph * 5);
+          let d, dd;
+          if (w.loop) { d = ((u % g.L) + g.L) % g.L; dd = du; }
+          else { const phi = (u / g.L) * Math.PI; d = g.L * (0.5 - 0.5 * Math.cos(phi)); dd = g.L * 0.5 * Math.sin(phi) * (du / g.L) * Math.PI; }
+          const p = at(g, U.clamp(d, 0, g.L));
+          w.x = p[0]; w.y = p[1]; w.vx = p[2] * dd; w.vy = p[3] * dd;
+        });
+      },
+      collide(b, sim) {
+        list.forEach(w => { if (sim.hitCircle(w.x, w.y, w.r, sim.groundRaw(w.x, w.y) + w.r * 2, w.e, w.vx, w.vy, 'tumble')) w.hit = sim.t; });
+      },
+    };
+  } };
+
   // Pieces that only change the look (handled in vis.js) still need a physics stub.
-  ['decor', 'wheelbarrow', 'koi', 'hive', 'carrots', 'greenhouse', 'trellis', 'falls', 'rockery', 'sunflower', 'maze'].forEach(k => { F[k] = { make() { return {}; } }; });
+  ['decor', 'wheelbarrow', 'koi', 'hive', 'carrots', 'greenhouse', 'trellis', 'falls', 'rockery', 'sunflower', 'maze', 'arch', 'oasis', 'mesa', 'town'].forEach(k => { F[k] = { make() { return {}; } }; });
 });

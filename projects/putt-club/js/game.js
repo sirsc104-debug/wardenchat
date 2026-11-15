@@ -11,14 +11,16 @@
   ['3', '9', '18'].forEach(n => { if (save.best[n] && !save.best[n + '-medium']) save.best[n + '-medium'] = save.best[n]; delete save.best[n]; });
   const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) { /* private mode */ } };
 
-  // The four difficulties. Ultra is played on its own course, The Abyss.
+  // The four difficulties. Medium is played in the Canyon and Ultra in the Abyss; Owen and Hard stay in the Garden.
   const DIFFS = {
     owen: { id: 'owen', name: 'OWEN', icon: '🐣', cls: 'mode-easy', course: 'garden', guide: 'full', assist: 1.7, rivals: ['Owen', 'Clover', 'Fern'], info: 'See the whole putt<br>and a friendlier cup' },
-    medium: { id: 'medium', name: 'MEDIUM', icon: '🌷', cls: 'mode-medium', course: 'garden', guide: 'bounce', assist: 1, rivals: ['Fern', 'Bramble', 'Blaze'], info: 'An aim line to<br>the first bounce' },
-    hard: { id: 'hard', name: 'HARD', icon: '🌵', cls: 'mode-hard', course: 'garden', guide: 'short', assist: 1, rivals: ['Bramble', 'Blaze', 'Thorn'], info: 'A short aim line,<br>sharper rivals' },
+    medium: { id: 'medium', name: 'MEDIUM', icon: '🌵', cls: 'mode-medium', course: 'canyon', guide: 'bounce', assist: 1, rivals: ['Fern', 'Bramble', 'Blaze'], info: 'Cacti pop your ball,<br>aim to the 1st bounce' },
+    hard: { id: 'hard', name: 'HARD', icon: '🌷', cls: 'mode-hard', course: 'garden', guide: 'short', assist: 1, rivals: ['Bramble', 'Blaze', 'Thorn'], info: 'A short aim line,<br>sharper rivals' },
     ultra: { id: 'ultra', name: 'ULTRA', icon: '👹', cls: 'mode-ultra', course: 'abyss', guide: 'none', assist: 1, rivals: ['Thorn', 'Cinder', 'SirSC'], info: 'No guide, no rails,<br>par 6 and up' },
   };
   const ORDER = ['owen', 'medium', 'hard', 'ultra'];
+  const COURSE = { garden: 'Garden', canyon: 'Canyon', abyss: 'Abyss' };
+  const poolOf = course => (course === 'abyss' ? PC.ABYSS : course === 'canyon' ? PC.CANYON : PC.HOLES);
 
   const world = new PC.World($('view'));
   const audio = new PC.Audio(save);
@@ -63,7 +65,7 @@
   }
 
   function startRound(n, diff) {
-    const pool = DIFFS[diff].course === 'abyss' ? PC.ABYSS : PC.HOLES;
+    const pool = poolOf(DIFFS[diff].course);
     const ids = U.shuffle(pool.map(h => h.id)).slice(0, n);
     round = { ids, idx: 0, diff, practice: false, players: newPlayers(diff) };
     beginHole();
@@ -93,9 +95,10 @@
     $('waitBar').hidden = true;
     $('feed').innerHTML = '';
     document.body.classList.toggle('abyss', hole.course === 'abyss');
+    document.body.classList.toggle('canyon', hole.course === 'canyon');
     updateHud();
     const it = $('intro');
-    $('introNo').textContent = round.practice ? `Practice · ${hole.course === 'abyss' ? 'Abyss' : 'Garden'} hole ${hole.num}` : `Hole ${round.idx + 1} of ${round.ids.length} · ${DIFFS[round.diff].name}`;
+    $('introNo').textContent = round.practice ? `Practice · ${COURSE[hole.course] || 'Garden'} hole ${hole.num}` : `Hole ${round.idx + 1} of ${round.ids.length} · ${DIFFS[round.diff].name}`;
     $('introName').textContent = hole.name;
     $('introSpecial').textContent = hole.special;
     $('introTip').textContent = hole.tip;
@@ -159,13 +162,15 @@
   }
 
   function lostMsg(kind) {
-    return kind === 'water' ? 'Splash!' : kind === 'flowers' ? 'Into the flowers!' : kind === 'lava' ? 'Melted!' : hole.course === 'abyss' ? 'Into the abyss!' : 'Off the course!';
+    return kind === 'water' ? 'Splash!' : kind === 'flowers' ? 'Into the flowers!' : kind === 'lava' ? 'Melted!' : kind === 'cactus' ? 'Popped!' : kind === 'chasm' && hole.course === 'canyon' ? 'Into the gulch!' : hole.course === 'abyss' ? 'Into the abyss!' : 'Off the course!';
   }
 
   function lost(e) {
     const kind = e.kind;
     if (kind === 'water') { world.burst('splash', e.x, e.y, C.WATER_TOP); audio.play('splash'); }
     else if (kind === 'lava') { world.burst('spark', e.x, e.y, sim.floorHeight(e.x, e.y), { color: '#ff8a2a', n: 40 }); audio.play('splash'); }
+    else if (kind === 'cactus') { const h = sim.ball.z; world.burst('spark', e.x, e.y, h, { color: '#ffffff', n: 30 }); world.burst('puff', e.x, e.y, h - 0.1, { color: '#f4f0dc', n: 12 }); audio.play('pop'); }
+    else if (kind === 'chasm' && hole.course === 'canyon') { world.burst('puff', e.x, e.y, -0.4, { color: '#d8b88a', n: 20 }); audio.play('flowers'); }
     else { world.burst('puff', e.x, e.y, -0.2, { color: kind === 'flowers' ? '#ffb3c6' : '#e9e1cf', n: 20 }); audio.play('flowers'); }
     strokes += 1;
     updateHud();
@@ -258,7 +263,7 @@
       return `<tr class="${pl.you ? 'you' : ''}"><th scope="row"><i class="dot" style="background:${pl.color}"></i>${pl.name}</th>${cells}<td class="tot"><span class="pencil">${any ? tot : ''}</span></td></tr>`;
     }).join('');
     return `<table class="sheet"><thead><tr><th scope="row">Hole</th>${head}<th scope="col">${title}</th></tr></thead>
-      <tbody><tr class="names"><th scope="row">${hole.course === 'abyss' ? 'Abyss' : 'Garden'}</th>${names}<td></td></tr>
+      <tbody><tr class="names"><th scope="row">${COURSE[hole.course] || 'Garden'}</th>${names}<td></td></tr>
       <tr class="par"><th scope="row">Par</th>${pars}<td class="tot">${parT}</td></tr>${rows}</tbody></table>`;
   }
 
@@ -327,23 +332,23 @@
 
   // ---------- title menu (the same layout as Bigger Fish and Brain Rocket) ----------
   const TAG = {
-    9: 'Garden mini golf with a trick on every hole. Putt against three rivals over a fresh 9.',
+    9: 'Mini golf with a trick on every hole. Putt against three rivals over a fresh 9. Medium heads out to the Canyon, where cacti pop your ball.',
     18: 'The full round: 18 holes, three rivals, one scorecard. Ultra takes you down into the Abyss.',
     online: 'Putt against your friends on the same holes at the same time. Online play is coming soon.',
   };
   const HOW = `<div><b>⛳ Drag back to putt.</b> Press anywhere, pull back and let go. The further you pull, the harder you hit.</div>
     <div><b>👻 Beat your rivals.</b> They play the same hole at the same time as see-through ghost balls.</div>
-    <div><b>💧 Water, lava and edges</b> cost a stroke and put you back where you putted from.</div>
+    <div><b>🌵 Cacti, water, lava and edges</b> cost a stroke and put you back where you putted from.</div>
     <div><b>🎥 C shows the whole hole.</b> Q and E turn the camera. Arrow keys aim and Space putts.</div>`;
   const HOW_ONLINE = `<div><b>🌐 Rooms with friends.</b> Share a code, everyone plays the same holes, and your friends show as ghost balls.</div>
     <div><b>🏆 One scorecard.</b> The lowest total after the round wins. Online play is coming soon.</div>`;
 
   function bestText(n, d) { const b = save.best[n + '-' + d]; return b ? `Best: ${b.s} (${vsPar(b.d)})` : 'Not played yet'; }
   function modeCards() {
-    if (menuTab === 'online') return ORDER.map(id => { const m = DIFFS[id]; return `<div class="mode-card ${m.cls} locked"><span class="mode-lock">🔒</span><span class="mode-icon">${m.icon}</span><span class="mode-name">${m.name}</span><span class="mode-tag">Coming soon</span><span class="mode-info">Play friends<br>${m.course === 'abyss' ? 'in the Abyss' : 'in the Garden'}</span><span class="mode-best"></span></div>`; }).join('');
+    if (menuTab === 'online') return ORDER.map(id => { const m = DIFFS[id]; return `<div class="mode-card ${m.cls} locked"><span class="mode-lock">🔒</span><span class="mode-icon">${m.icon}</span><span class="mode-name">${m.name}</span><span class="mode-tag">Coming soon</span><span class="mode-info">Play friends<br>in the ${COURSE[m.course]}</span><span class="mode-best"></span></div>`; }).join('');
     return ORDER.map(id => {
       const m = DIFFS[id];
-      return `<button class="mode-card ${m.cls}" type="button" data-diff="${id}"><span class="mode-icon">${m.icon}</span><span class="mode-name">${m.name}</span><span class="mode-tag">${m.course === 'abyss' ? 'The Abyss' : 'The Garden'}</span><span class="mode-info">${m.info}<br><small>vs ${m.rivals.join(', ')}</small></span><span class="mode-best">${bestText(menuTab, id)}</span></button>`;
+      return `<button class="mode-card ${m.cls}" type="button" data-diff="${id}"><span class="mode-icon">${m.icon}</span><span class="mode-name">${m.name}</span><span class="mode-tag">The ${COURSE[m.course]}</span><span class="mode-info">${m.info}<br><small>vs ${m.rivals.join(', ')}</small></span><span class="mode-best">${bestText(menuTab, id)}</span></button>`;
     }).join('');
   }
   function renderMenu(animate) {
@@ -389,7 +394,7 @@
     $('hud').hidden = true; $('intro').hidden = true; $('toast').hidden = true; $('waitBar').hidden = true;
     const spec = PC.HOLES[Math.floor(Math.random() * PC.HOLES.length)];
     loadHole(spec, DIFFS.medium);
-    document.body.classList.remove('abyss');
+    document.body.classList.remove('abyss', 'canyon');
     cam.cur = null;
     state = 'title';
     show('title');
@@ -407,7 +412,7 @@
         grid.dataset.built = '1';
         list.forEach(h => {
           const btn = document.createElement('button');
-          btn.className = 'hole-card' + (h.course === 'abyss' ? ' abyss' : '');
+          btn.className = 'hole-card' + (h.course === 'abyss' ? ' abyss' : h.course === 'canyon' ? ' canyon' : '');
           btn.type = 'button';
           btn.innerHTML = `<canvas width="240" height="300" aria-hidden="true"></canvas><span class="hc-no">${h.num}</span><span class="hc-name">${h.name}</span><span class="hc-sp">${h.special}</span><span class="hc-meta">Par ${h.par} · <span data-best="${h.id}"></span></span>`;
           btn.addEventListener('click', () => { audio.unlock(); audio.play('click'); startPractice(h.id); });
@@ -417,6 +422,7 @@
       }
     };
     fill('bookGrid', PC.HOLES);
+    fill('canyonGrid', PC.CANYON);
     fill('abyssGrid', PC.ABYSS);
     document.querySelectorAll('[data-best]').forEach(el => { const v = save.holeBest[el.dataset.best]; el.textContent = v ? `your best ${v}` : 'not played yet'; });
     show('book');
@@ -430,15 +436,20 @@
     const ox = W / 2 - b.cx * s, oy = H / 2 + b.cy * s;
     const P = (x, y) => [ox + x * s, oy - y * s];
     const path = (pts, close = true) => { g.beginPath(); pts.forEach((p, i) => { const q = P(p[0], p[1]); i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]); }); if (close) g.closePath(); };
-    const hell = h.course === 'abyss';
+    const hell = h.course === 'abyss', desert = h.course === 'canyon';
     g.clearRect(0, 0, W, H);
-    h.hazards.filter(z => !z.over).forEach(z => { path(z.poly); g.fillStyle = z.kind === 'water' ? '#7cc3dd' : z.kind === 'lava' ? '#ff6a1a' : '#f3a6c3'; g.fill(); });
-    h.floors.forEach(f => { path(f.poly); g.fillStyle = hell ? '#5a4a4c' : f.mat === 'planks' ? '#b0773f' : '#6fbf4f'; g.fill(); if (hell) { g.strokeStyle = '#ff7a2a'; g.lineWidth = 1.5; g.stroke(); } });
-    h.zones.forEach(z => { path(z.poly); g.fillStyle = { slime: '#c7f06b', honey: '#f2b236', soil: '#8a5f3a', seeds: '#6b4220', glass: '#1a1420', tar: '#0d0a0b', ash: '#7a6e6a' }[z.type] || '#999'; g.fill(); });
-    h.hazards.filter(z => z.over).forEach(z => { path(z.poly); g.fillStyle = '#ff6a1a'; g.fill(); });
+    h.hazards.filter(z => !z.over).forEach(z => { path(z.poly); g.fillStyle = z.kind === 'water' ? '#7cc3dd' : z.kind === 'lava' ? '#ff6a1a' : z.kind === 'chasm' ? '#5a2a14' : '#f3a6c3'; g.fill(); });
+    h.floors.forEach(f => { path(f.poly); g.fillStyle = hell ? '#5a4a4c' : f.mat === 'planks' ? '#b0773f' : desert ? '#d9b27a' : '#6fbf4f'; g.fill(); if (hell) { g.strokeStyle = '#ff7a2a'; g.lineWidth = 1.5; g.stroke(); } });
+    h.zones.forEach(z => { path(z.poly); g.fillStyle = { slime: '#c7f06b', honey: '#f2b236', soil: '#8a5f3a', seeds: '#6b4220', glass: '#1a1420', tar: '#0d0a0b', ash: '#7a6e6a', sand: '#f0d9a4', cinder: '#3a2a2a' }[z.type] || '#999'; g.fill(); });
+    h.hazards.filter(z => z.over).forEach(z => { path(z.poly); g.fillStyle = z.kind === 'water' ? '#4aa8c8' : '#ff6a1a'; g.fill(); });
     g.lineCap = 'round'; g.lineJoin = 'round';
     h.rails.forEach(r => { if (r.style === 'none') return; path(r.pts, r.closed); g.strokeStyle = r.style === 'hedge' ? '#2f6b2a' : r.style === 'obsidian' ? '#120e16' : '#7a4a26'; g.lineWidth = Math.max(2, (r.side === 'center' ? r.w : 0.2) * s); g.stroke(); });
-    h.posts.forEach(p => { const q = P(p.x, p.y); g.beginPath(); g.arc(q[0], q[1], p.r * s, 0, 7); g.fillStyle = hell ? '#2a2124' : '#8f897d'; g.fill(); });
+    h.posts.forEach(p => { const q = P(p.x, p.y); g.beginPath(); g.arc(q[0], q[1], p.r * s, 0, 7); g.fillStyle = hell ? '#2a2124' : desert ? '#c0784a' : '#8f897d'; g.fill(); });
+    (h.features || []).forEach(f => {
+      if (f.type === 'cacti') f.list.forEach(c => { const q = P(c.x, c.y); g.beginPath(); g.arc(q[0], q[1], Math.max(2.5, (c.r || 0.3) * s), 0, 7); g.fillStyle = '#2f7a34'; g.fill(); g.strokeStyle = '#f4f0dc'; g.lineWidth = 1; g.stroke(); });
+      if (f.type === 'tumbleweeds') f.list.forEach(w => { g.setLineDash([3, 3]); path(w.path, !!w.loop); g.strokeStyle = 'rgba(122,82,40,0.75)'; g.lineWidth = 1.5; g.stroke(); g.setLineDash([]); const q = P(w.path[0][0], w.path[0][1]); g.beginPath(); g.arc(q[0], q[1], (w.r || 0.42) * s, 0, 7); g.fillStyle = '#a8844e'; g.fill(); });
+      if (f.type === 'spring') { const q = P(f.x, f.y); g.beginPath(); g.arc(q[0], q[1], Math.max(3, f.r * s), 0, 7); g.fillStyle = f.dir !== undefined ? '#e0332a' : '#f2b81f'; g.fill(); }
+    });
     const t = P(h.tee[0], h.tee[1]); g.fillStyle = '#ffffff'; g.beginPath(); g.arc(t[0], t[1], 4, 0, 7); g.fill();
     const c = P(h.cup[0], h.cup[1]); g.fillStyle = hell ? '#ffffff' : '#1b2a22'; g.beginPath(); g.arc(c[0], c[1], 4.5, 0, 7); g.fill();
     g.strokeStyle = hell ? '#ffffff' : '#1b2a22'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(c[0], c[1]); g.lineTo(c[0], c[1] - 16); g.stroke();
@@ -691,7 +702,7 @@
   }
 
   // ---------- main loop ----------
-  const SOUND = { wall: 'wall', post: 'post', paddle: 'paddle', gate: 'gate', bonk: 'bonk', squish: 'squish', tire: 'tire' };
+  const SOUND = { wall: 'wall', post: 'post', paddle: 'paddle', gate: 'gate', bonk: 'bonk', squish: 'squish', tire: 'tire', tumble: 'tumble' };
   function handleEvents() {
     for (const e of sim.events) {
       if (state === 'title') continue;
@@ -700,6 +711,7 @@
       else if (e.type === 'launch') { audio.play('launch'); world.burst('puff', sim.ball.x, sim.ball.y, 0.1, { color: '#ffffff' }); }
       else if (e.type === 'tunnel') { audio.play('tunnel'); world.burst('puff', sim.ball.x, sim.ball.y, 0, { color: hole.course === 'abyss' ? '#ff3df2' : '#8a6a4a', n: 16 }); }
       else if (e.type === 'popout') { audio.play('popout'); world.burst('puff', e.x, e.y, 0, { color: hole.course === 'abyss' ? '#ff3df2' : '#8a6a4a', n: 16 }); }
+      else if (e.type === 'spring') { audio.play('boing'); world.burst('spark', e.x, e.y, sim.floorHeight(e.x, e.y) + 0.1, { color: e.trap ? '#ff6a4a' : '#ffe27a', n: 14 }); }
       else if (e.type === 'boost') audio.play('boost');
       else if (e.type === 'switch') audio.play('switch');
       else if (e.type === 'lip') audio.play('lip');
@@ -725,7 +737,7 @@
         } else feed(`${r.name} picked up`, r.color);
       } else if (ev.type === 'lost') {
         if (ev.kind === 'water') world.burst('splash', ev.x, ev.y, C.WATER_TOP);
-        else world.burst('puff', ev.x, ev.y, 0, { n: 10, color: ev.kind === 'lava' ? '#ff8a2a' : '#e9e1cf' });
+        else world.burst('puff', ev.x, ev.y, 0, { n: 10, color: ev.kind === 'lava' ? '#ff8a2a' : ev.kind === 'cactus' ? '#ffffff' : '#e9e1cf' });
         feed(`${r.name}: ${lostMsg(ev.kind).replace('!', '')}`, r.color);
       }
     });

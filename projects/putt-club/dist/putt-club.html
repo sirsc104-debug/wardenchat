@@ -188,6 +188,10 @@ body.abyss .toast[data-tone="bad"] b { color: #ff6a4a; }
 .intro-tip { margin: 0; color: var(--muted); line-height: 1.45; max-width: 38ch; }
 .intro-rivals { margin: 0 0 6px; font-weight: 600; font-size: 14px; color: var(--club-2); }
 body.abyss .intro-rivals { color: #ff9a62; }
+body.canyon .hud-hole h2, body.canyon .intro h2 { color: #a8431c; }
+body.canyon .chip { background: #d9682b; color: #fff8ee; }
+body.canyon .chip::before { background: #fff8ee; }
+body.canyon .hint b, body.canyon .toast b, body.canyon .tool { color: #a8431c; }
 @keyframes rise { from { opacity: 0; transform: translate(-50%, 16px) scale(0.97); } }
 
 .toast { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; pointer-events: none; padding: 14px 26px; border-radius: 20px; background: var(--paper); box-shadow: 0 14px 40px rgba(23, 63, 47, 0.28); }
@@ -208,6 +212,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
 .book-sec { margin: 22px 0 12px; font-size: 26px; color: var(--club); display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .book-sec small { font-size: 15px; font-weight: 500; color: var(--muted); }
 .book-sec.hell { color: #a8200f; }
+.book-sec.desert { color: #b4532a; }
 .book-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 12px; }
 .hole-card { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; padding: 10px 12px 12px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); transition: transform .12s, box-shadow .12s; }
 .hole-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(23, 63, 47, 0.16); }
@@ -218,6 +223,10 @@ body.abyss .intro-rivals { color: #ff9a62; }
 .hole-card.abyss .hc-sp { color: #f2d8cc; }
 .hole-card.abyss .hc-meta { color: #c99a88; }
 .hole-card.abyss .hc-no { background: #ff5a1a; color: #1a0606; }
+.hole-card.canyon { background: #fbf1e2; border-color: #e8cfae; }
+.hole-card.canyon canvas { background: #f2dcb8; }
+.hole-card.canyon .hc-name { color: #8a3a1a; }
+.hole-card.canyon .hc-no { background: #d9682b; color: #fff8ee; }
 .hc-no { position: absolute; top: 16px; left: 18px; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: var(--flag); color: #fff; font-weight: 700; font-size: 14px; }
 .hc-name { font-weight: 700; font-size: 18px; line-height: 1.1; color: var(--club); }
 .hc-sp { font-size: 13.5px; color: var(--ink); }
@@ -357,7 +366,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
               <button class="type-btn" data-tab="18" role="tab" type="button"><span class="type-icon">🏌️</span><span class="type-name">18 holes</span><span class="type-sub">The full round</span></button>
               <button class="type-btn soon" data-tab="online" role="tab" type="button"><span class="type-icon">🌐</span><span class="type-name">Play online</span><span class="type-sub">Coming soon</span></button>
             </div>
-            <div class="type-toggle"><button class="type-btn" id="openBook" type="button"><span class="type-icon">📖</span><span class="type-name">Course book</span><span class="type-sub">All 45 holes</span></button></div>
+            <div class="type-toggle"><button class="type-btn" id="openBook" type="button"><span class="type-icon">📖</span><span class="type-name">Course book</span><span class="type-sub">All 72 holes</span></button></div>
           </div>
           <div class="modes" id="modes"></div>
           <div class="how" id="how"></div>
@@ -377,8 +386,10 @@ body.abyss .intro-rivals { color: #ff9a62; }
         </div>
         <button class="btn" id="bookBack" type="button"><span>Back</span></button>
       </header>
-      <h3 class="book-sec">The Garden <small>27 holes · Owen, Medium and Hard</small></h3>
+      <h3 class="book-sec">The Garden <small>27 holes · Owen and Hard</small></h3>
       <div class="book-grid" id="bookGrid"></div>
+      <h3 class="book-sec desert">The Canyon <small>27 holes · Medium, cacti and tumbleweeds</small></h3>
+      <div class="book-grid" id="canyonGrid"></div>
       <h3 class="book-sec hell">The Abyss <small>18 holes · Ultra, par 6 and up, no rails</small></h3>
       <div class="book-grid" id="abyssGrid"></div>
     </div>
@@ -652,7 +663,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
       o.holes = (o.holes || []).map(U.cw);
       return o;
     });
-    hole.hazards = (spec.hazards || []).map(z => Object.assign({ kind: 'water', top: C.WATER_TOP, bed: C.WATER_BED }, z, { poly: U.ccw(z.poly) }));
+    hole.hazards = (spec.hazards || []).map(z => Object.assign({ kind: 'water', top: C.WATER_TOP, bed: C.WATER_BED }, z.kind === 'chasm' ? { top: -0.3, bed: -9 } : {}, z, { poly: U.ccw(z.poly) }));
     hole.overHazards = hole.hazards.filter(z => z.over);
     hole.zones = (spec.zones || []).map(z => Object.assign({}, z, { poly: U.ccw(z.poly), fric: z.fric || ZONE_FRIC[z.type] || 1 }));
     const look = hole.look = Object.assign({ rail: 'timber', light: 'day' }, spec.look || {});
@@ -951,6 +962,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
       const ox = b.x, oy = b.y, oz = b.z;
       b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt;
       this.collide();
+      if (b.mode === 'lost') return;   // a cactus got it in mid-air
       const g = this.ground(b.x, b.y);
       if (g.kind === 'void') { if (b.z < -1.5) this.lose('oob'); return; }
       if (g.kind !== 'floor' && g.kind !== 'platform') {
@@ -1346,8 +1358,100 @@ body.abyss .intro-rivals { color: #ff9a62; }
     };
   } };
 
+  // A spring pad. Without `dir` it throws the ball up the way it is rolling (to jump a wall);
+  // with `dir` it is a trap that flings the ball off that way, usually over an edge.
+  F.spring = { make(s) {
+    return {
+      cool: -1, hit: -9,
+      onStep(b, sim) {
+        if (b.mode !== 'roll' || sim.t < this.cool) return;
+        if (Math.hypot(b.x - s.x, b.y - s.y) > s.r) return;
+        const sp = Math.hypot(b.vx, b.vy);
+        if (sp < 0.3) return;
+        // A jump spring only fires for a ball heading roughly toward where it throws you.
+        if (s.land) { const lx = s.land[0] - s.x, ly = s.land[1] - s.y, ll = Math.hypot(lx, ly) || 1; if ((b.vx * lx + b.vy * ly) / ll < sp * 0.35) return; }
+        if (s.dir !== undefined) { const v = s.speed || 7; b.vx = Math.cos(s.dir) * v; b.vy = Math.sin(s.dir) * v; }
+        else { const k = U.clamp(sp, s.minSpeed || 4.5, s.maxSpeed || 6) / sp; b.vx *= k; b.vy *= k; }
+        b.mode = 'air'; b.vz = s.vz || 6.5; b.z += 0.02;
+        this.hit = sim.t; this.cool = sim.t + 0.6;
+        sim.emit({ type: 'spring', trap: s.dir !== undefined, x: s.x, y: s.y });
+      },
+    };
+  } };
+
+  // Cacti: touch one and the ball is popped.
+  F.cacti = { make(s) {
+    const list = s.list.map(c => Object.assign({ r: 0.3, h: 1.6, kind: 'saguaro', hit: -9 }, c));
+    return {
+      list,
+      collide(b, sim) {
+        if (b.mode !== 'roll' && b.mode !== 'air') return;
+        for (let i = 0; i < list.length; i++) {
+          const c = list[i], dx = b.x - c.x, dy = b.y - c.y, rr = c.r + C.R;
+          if (dx * dx + dy * dy > rr * rr) continue;
+          if (b.z - sim.groundRaw(c.x, c.y) > c.h + C.R) continue;
+          c.hit = sim.t;
+          sim.lose('cactus');
+          return;
+        }
+      },
+    };
+  } };
+
+  // Tumbleweeds blowing round the hole on fixed routes. Their speed rises and falls like gusts of wind,
+  // and on an open route they slow, stop and drift back the other way. Everything depends only on time.
+  function closedCurve(pts, per) {
+    const out = [], n = pts.length;
+    for (let i = 0; i < n; i++) {
+      const p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n], p3 = pts[(i + 2) % n];
+      for (let k = 0; k < per; k++) {
+        const t = k / per, t2 = t * t, t3 = t2 * t;
+        const f = (a, b, c, d) => 0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3);
+        out.push([f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])]);
+      }
+    }
+    out.push(out[0].slice());
+    return out;
+  }
+  F.tumbleweeds = { make(s) {
+    const geo = [];
+    const list = s.list.map((w, i) => {
+      const line = w.loop ? closedCurve(w.path, 12) : U.catmull(w.path, 12);
+      const cum = [0];
+      for (let k = 1; k < line.length; k++) cum.push(cum[k - 1] + Math.hypot(line[k][0] - line[k - 1][0], line[k][1] - line[k - 1][1]));
+      geo.push({ line, cum, L: cum[cum.length - 1] });
+      const speed = w.speed || 1.2, gust = w.gust === undefined ? 0.5 : w.gust;
+      const f1 = 0.55 + ((i * 0.37) % 0.5), f2 = 1.3 + ((i * 0.61) % 0.6);
+      return { r: w.r || 0.42, e: 0.78, x: 0, y: 0, vx: 0, vy: 0, hit: -9, loop: !!w.loop, speed, a1: (gust * 0.62 * speed) / f1, a2: (gust * 0.3 * speed) / f2, f1, f2, ph: w.phase || 0 };
+    });
+    const at = (g, d) => {
+      let lo = 0, hi = g.cum.length - 1;
+      while (hi - lo > 1) { const m = (lo + hi) >> 1; if (g.cum[m] <= d) lo = m; else hi = m; }
+      const a = g.line[lo], b = g.line[hi], seg = g.cum[hi] - g.cum[lo] || 1, t = (d - g.cum[lo]) / seg;
+      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, (b[0] - a[0]) / seg, (b[1] - a[1]) / seg];
+    };
+    return {
+      list,
+      update(t) {
+        list.forEach((w, i) => {
+          const g = geo[i], tt = t + w.ph * 7.3;
+          const u = w.speed * tt + w.a1 * Math.sin(w.f1 * tt + w.ph * 3) + w.a2 * Math.sin(w.f2 * tt + w.ph * 5);
+          const du = w.speed + w.a1 * w.f1 * Math.cos(w.f1 * tt + w.ph * 3) + w.a2 * w.f2 * Math.cos(w.f2 * tt + w.ph * 5);
+          let d, dd;
+          if (w.loop) { d = ((u % g.L) + g.L) % g.L; dd = du; }
+          else { const phi = (u / g.L) * Math.PI; d = g.L * (0.5 - 0.5 * Math.cos(phi)); dd = g.L * 0.5 * Math.sin(phi) * (du / g.L) * Math.PI; }
+          const p = at(g, U.clamp(d, 0, g.L));
+          w.x = p[0]; w.y = p[1]; w.vx = p[2] * dd; w.vy = p[3] * dd;
+        });
+      },
+      collide(b, sim) {
+        list.forEach(w => { if (sim.hitCircle(w.x, w.y, w.r, sim.groundRaw(w.x, w.y) + w.r * 2, w.e, w.vx, w.vy, 'tumble')) w.hit = sim.t; });
+      },
+    };
+  } };
+
   // Pieces that only change the look (handled in vis.js) still need a physics stub.
-  ['decor', 'wheelbarrow', 'koi', 'hive', 'carrots', 'greenhouse', 'trellis', 'falls', 'rockery', 'sunflower', 'maze'].forEach(k => { F[k] = { make() { return {}; } }; });
+  ['decor', 'wheelbarrow', 'koi', 'hive', 'carrots', 'greenhouse', 'trellis', 'falls', 'rockery', 'sunflower', 'maze', 'arch', 'oasis', 'mesa', 'town'].forEach(k => { F[k] = { make() { return {}; } }; });
 });
 
 /* Putt Club: the 27 garden holes. Laid out on paper in (x, y), with the tee near y = 0 and the cup up the page.
@@ -1810,7 +1914,487 @@ body.abyss .intro-rivals { color: #ff9a62; }
   PC.Kit = { openRail, laneCircle };
   H.forEach((h, i) => { h.num = i + 1; h.course = 'garden'; });
   PC.HOLES = H;
-  PC.holeById = id => H.find(h => h.id === id) || (PC.ABYSS || []).find(h => h.id === id);
+  PC.holeById = id => H.find(h => h.id === id) || (PC.CANYON || []).find(h => h.id === id) || (PC.ABYSS || []).find(h => h.id === id);
+});
+
+/* Putt Club: The Canyon. 27 desert holes for Medium, each built around cacti and tumbleweeds.
+   A cactus pops the ball on contact (a penalty stroke, back to where you putted from).
+   Tumbleweeds blow round each hole on fixed routes that speed up and slow down like gusts; balls bounce off them. */
+(function (mod) { const PC = window.PC = window.PC || {}; mod(PC); (PC.SRC = PC.SRC || []).push(mod); })(function (PC) {
+  'use strict';
+  const U = PC.U, K = PC.Kit, DEG = Math.PI / 180;
+  const rect = U.rect, rp = U.roundPoly;
+  const LOOK = (extra) => Object.assign({ theme: 'canyon', light: 'canyon', rail: 'plank', flag: '#d9482b', flowers: ['#ffd23f', '#ff7a3a', '#ff5d8f', '#ffffff'] }, extra || {});
+
+  // Cactus kinds: how wide they are to the ball, and how tall.
+  const KIND = { saguaro: [0.3, 2.2], barrel: [0.34, 0.55], pear: [0.42, 0.7], cholla: [0.3, 0.9] };
+  const cac = (kind, x, y, r) => ({ kind, x, y, r: r || KIND[kind][0], h: KIND[kind][1] });
+  const cacti = list => ({ type: 'cacti', list });
+  const weeds = list => ({ type: 'tumbleweeds', list });
+  const across = (y, x0, x1, bend = 0.5) => [[x0, y], [(x0 + x1) / 2, y + bend], [x1, y]];
+  const ring = (cx, cy, r, n = 10) => { const out = []; for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; out.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r * 0.92]); } return out; };
+  // Cacti along a line from a to b, every `step`, skipping any that fall in [gap0, gap1] of the way along.
+  const rowOf = (kind, a, b, step, gap0 = 2, gap1 = 2) => {
+    const out = [], len = Math.hypot(b[0] - a[0], b[1] - a[1]), n = Math.max(1, Math.round(len / step));
+    for (let i = 0; i <= n; i++) { const t = i / n; if (t > gap0 && t < gap1) continue; out.push(cac(kind, a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)); }
+    return out;
+  };
+  // A point along a curved line, pushed sideways by `off` (for cacti in the bends of a slot canyon).
+  const along = (line, f, off) => {
+    const i = Math.min(line.length - 2, Math.floor(f * (line.length - 1))), a = line[i], b = line[i + 1];
+    const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1;
+    return [a[0] - (dy / l) * off, a[1] + (dx / l) * off];
+  };
+
+  const H = [];
+
+  // 1
+  H.push({
+    id: 'saguaro-gate', name: 'Saguaro Gate', par: 3,
+    special: 'Two saguaros and a tumbleweed',
+    tip: 'Two tall saguaros stand guard in the middle with barrels beside them. Thread the gap between them, then dodge the tumbleweed blowing across behind.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 13.4],
+    floors: [rp(rect(-2.4, 0, 2.4, 15.5), 0.9)],
+    features: [
+      cacti([cac('saguaro', -0.75, 7.6), cac('saguaro', 0.75, 7.6), cac('barrel', -1.85, 7.6), cac('barrel', 1.85, 7.6), cac('barrel', 1.4, 12.4)]),
+      weeds([{ path: across(9.9, -1.95, 1.95), speed: 1.5, gust: 0.5 }]),
+    ],
+  });
+
+  // 2
+  H.push({
+    id: 'prickly-slalom', name: 'Prickly Slalom', par: 3,
+    special: 'Rows of prickly pear',
+    tip: 'Three rows of prickly pear each leave one gap, always on the other side. A tumbleweed loops between the rows.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 16.6],
+    floors: [rp(rect(-2.6, 0, 2.6, 18.5), 1.0)],
+    features: [
+      cacti([-2.1, -1.25, -0.4, 0.45].map(x => cac('pear', x, 5)).concat([2.1, 1.25, 0.4, -0.45].map(x => cac('pear', x, 9.5)), [-2.1, -1.25, -0.4, 0.45].map(x => cac('pear', x, 14)))),
+      weeds([{ path: [[-1.6, 7.2], [1.7, 7.0], [1.6, 11.8], [-1.7, 12.0]], loop: true, speed: 0.9, gust: 0.6 }]),
+    ],
+  });
+
+  // 3
+  H.push({
+    id: 'tumbleweed-alley', name: 'Tumbleweed Alley', par: 3,
+    special: 'Three tumbleweeds blowing across',
+    tip: 'Three tumbleweeds blow back and forth across a long alley, each in its own rhythm. A bounce off one can send the ball into the barrels along the sides.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 18],
+    floors: [rp(rect(-2.2, 0, 2.2, 20), 0.8)],
+    features: [
+      cacti([cac('barrel', -1.85, 8.2), cac('barrel', 1.85, 8.2), cac('barrel', -1.85, 12.6), cac('barrel', 1.85, 12.6), cac('barrel', 1.5, 16.6)]),
+      weeds([
+        { path: across(6, -1.75, 1.75), speed: 1.6, gust: 0.7 },
+        { path: across(10.4, 1.75, -1.75, -0.4), speed: 1.2, gust: 0.6, phase: 0.4 },
+        { path: across(14.6, -1.75, 1.75), speed: 2.0, gust: 0.5, phase: 0.8 },
+      ]),
+    ],
+  });
+
+  // 4
+  const ringBarrels = (cx, cy, r, skip) => { const out = []; for (let a = 0; a < 360; a += 20) { if (skip.some(s => Math.abs(((a - s + 540) % 360) - 180) < 25)) continue; out.push(cac('barrel', cx + Math.cos(a * DEG) * r, cy + Math.sin(a * DEG) * r, 0.3)); } return out; };
+  H.push({
+    id: 'barrel-ring', name: 'Barrel Ring', par: 3,
+    special: 'A ring of barrel cacti round the cup',
+    tip: 'The cup sits inside a ring of barrel cacti, open only to the east and west. A tumbleweed circles outside the ring.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 10],
+    floors: [K.laneCircle(1.6, 0, 10, 4.3)],
+    features: [
+      cacti(ringBarrels(0, 10, 1.75, [0, 180])),
+      weeds([{ path: ring(0, 10, 3.25, 12), loop: true, speed: 1.1, gust: 0.5 }]),
+    ],
+  });
+
+  // 5
+  H.push({
+    id: 'cholla-corner', name: 'Cholla Corner', par: 3,
+    special: 'Cholla on the inside of a dogleg',
+    tip: 'Cholla crowd the inside of the bend, so you cannot cut the corner. One tumbleweed loops in the bend, another blows along the arm to the cup.',
+    look: LOOK(), tee: [0, 1.3], cup: [9.4, 9.8],
+    floors: [rp([[-2, 0], [2, 0], [2, 7.6], [11, 7.6], [11, 12], [-2, 12]], [0.7, 0.7, 0.9, 0.9, 0.9, 1.6])],
+    features: [
+      cacti([cac('cholla', 2.5, 8.2), cac('cholla', 3.3, 8.25), cac('cholla', 2.4, 9.0), cac('barrel', 6.2, 11.6)]),
+      weeds([
+        { path: [[-1.2, 9.2], [0.6, 11.3], [3.6, 10.8], [1.2, 9.6]], loop: true, speed: 1.0, gust: 0.6 },
+        { path: across(10.4, 5, 10.2, 0.3), speed: 1.3, gust: 0.6, phase: 0.5 },
+      ]),
+    ],
+  });
+
+  // 6
+  H.push({
+    id: 'mesa-top', name: 'Mesa Top', par: 3,
+    special: 'A mesa with cacti up the ramp',
+    tip: 'Putt up the ramp onto the mesa. Barrel cacti line both sides of the ramp, and a tumbleweed blows across the top.',
+    look: LOOK(), tee: [0, 1.3], cup: [0.9, 14.6],
+    floors: [rp(rect(-2.4, 0, 2.4, 16.5), 0.9)],
+    height: (x, y) => 0.6 * U.smooth(6, 9, y),
+    features: [
+      cacti([cac('barrel', -1.6, 7.4), cac('barrel', 1.6, 7.4), cac('barrel', -2.0, 8.6), cac('barrel', 2.0, 8.6), cac('saguaro', -1.5, 11.6), cac('barrel', -0.6, 14.9)]),
+      weeds([{ path: across(12.5, -2.0, 2.0, 0.4), speed: 1.3, gust: 0.6 }]),
+    ],
+  });
+
+  // 7
+  const washH = (x, y) => (y > 6.5 && y < 10.5 ? -0.35 * Math.sin((Math.PI * (y - 6.5)) / 4) : 0);
+  H.push({
+    id: 'dry-wash', name: 'Dry Wash', par: 3,
+    special: 'A dry riverbed full of tumbleweeds',
+    tip: 'A dry wash cuts across the hole. Tumbleweeds roll up and down its bed, and cacti wait on both banks.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 15],
+    floors: [rp(rect(-3, 0, 3, 17), 1.0)],
+    height: washH,
+    zones: [{ type: 'sand', poly: rect(-3, 7.4, 3, 9.6) }],
+    features: [
+      cacti([cac('barrel', -2.2, 6.0), cac('barrel', 0.9, 6.1), cac('barrel', 2.3, 10.9), cac('barrel', -1.0, 11.0), cac('pear', 2.4, 5.4)]),
+      weeds([
+        { path: [[-2.5, 8.4], [0, 8.7], [2.5, 8.4]], speed: 1.6, gust: 0.6 },
+        { path: [[2.5, 8.1], [0, 8.9], [-2.5, 8.9]], speed: 1.0, gust: 0.7, phase: 0.5, r: 0.36 },
+      ]),
+    ],
+  });
+
+  // 8
+  H.push({
+    id: 'sand-trap-flats', name: 'Sand Trap Flats', par: 3,
+    special: 'Sand traps with cacti in them',
+    tip: 'Three sand traps, each with a cactus growing in the middle. Sand slows the ball, so a ball that stops short in one may be right next to a cactus.',
+    look: LOOK(), tee: [0, 1.3], cup: [1.4, 14.4],
+    floors: [rp(rect(-3.4, 0, 3.4, 16.5), 1.2)],
+    zones: [{ type: 'sand', poly: U.blob(-1.4, 6, 1.4, 41) }, { type: 'sand', poly: U.blob(1.6, 9.6, 1.5, 42) }, { type: 'sand', poly: U.blob(-1.2, 12.8, 1.2, 43) }],
+    features: [
+      cacti([cac('saguaro', -1.4, 6), cac('saguaro', 1.6, 9.6), cac('barrel', -1.2, 12.8), cac('pear', 2.6, 5.2), cac('pear', -2.6, 10)]),
+      weeds([{ path: [[0, 3.8], [2.6, 7.2], [0.2, 11.2], [-2.4, 8.4]], loop: true, speed: 1.0, gust: 0.6 }]),
+    ],
+  });
+
+  // 9
+  H.push({
+    id: 'dust-devil', name: 'Dust Devil', par: 3,
+    special: 'Gusts toward a cactus patch',
+    tip: 'Every few seconds a gust of dust blows east, toward a patch of cholla along the right. The tumbleweeds blow with it.',
+    look: LOOK({ light: 'mesa' }), tee: [0, 1.3], cup: [-1.2, 15],
+    floors: [rp(rect(-3, 0, 3, 17), 1.0)],
+    features: [
+      { type: 'wind', dust: true, dir: [1, 0], power: 2.4, period: 6.0, gust: 2.4 },
+      cacti([cac('cholla', 2.4, 5), cac('cholla', 2.5, 7.6), cac('cholla', 2.3, 10.2), cac('cholla', 2.5, 12.8), cac('pear', 1.5, 6.4), cac('pear', 1.6, 11.4)]),
+      weeds([
+        { path: across(8.8, -2.4, 1.2, 0.3), speed: 1.8, gust: 0.8 },
+        { path: across(13.6, -2.4, 1.2, -0.3), speed: 1.5, gust: 0.8, phase: 0.6 },
+      ]),
+    ],
+  });
+
+  // 10
+  const slot = U.catmull([[0, 0.6], [0, 4], [2.6, 7.5], [3, 11], [0.6, 14.5], [0, 17.5], [0, 20.6]], 8);
+  H.push({
+    id: 'rattlesnake-slot', name: 'Rattlesnake Slot', par: 4,
+    special: 'A winding slot canyon',
+    tip: 'A narrow slot canyon winds back and forth, with cacti tucked into its bends. A tumbleweed rolls up and down the whole slot.',
+    look: LOOK({ rail: 'sandstone' }), tee: [0, 1.8], cup: [0, 19.2],
+    floors: [U.ribbon(slot, 1.25)],
+    features: [
+      cacti([along(slot, 0.2, -0.75), along(slot, 0.38, 0.8), along(slot, 0.53, -0.8), along(slot, 0.7, 0.8), along(slot, 0.86, -0.75)].map((p, i) => cac(i % 2 ? 'barrel' : 'cholla', p[0], p[1]))),
+      weeds([{ path: slot.filter((p, i) => i % 4 === 0 && p[1] > 5 && p[1] < 17.5), speed: 1.4, gust: 0.6, r: 0.38 }]),
+    ],
+  });
+
+  // 11
+  H.push({
+    id: 'saloon-doors', name: 'Saloon Doors', par: 3,
+    special: 'Swinging saloon doors',
+    tip: 'The only way through the fence is a pair of saloon doors that swing open and shut. Two barrel cacti stand just behind them, and a tumbleweed blows past.',
+    look: LOOK(), tee: [0, 1.3], cup: [0.6, 14.4],
+    floors: [rp(rect(-2.6, 0, 2.6, 16.5), 0.9)],
+    walls: [{ pts: [[-2.6, 8], [-0.6, 8]], w: 0.24, h: 0.55, style: 'plank' }, { pts: [[0.6, 8], [2.6, 8]], w: 0.24, h: 0.55, style: 'plank' }],
+    features: [
+      { type: 'gates', list: [{ a: [-0.6, 8], b: [0.6, 8], period: 2.8, phase: 0 }] },
+      cacti([cac('barrel', -0.95, 9.3), cac('barrel', 0.95, 9.3), cac('pear', -2.0, 12.6)]),
+      weeds([{ path: across(11.5, -2.1, 2.1, 0.3), speed: 1.4, gust: 0.6 }]),
+    ],
+  });
+
+  // 12
+  H.push({
+    id: 'mine-shaft', name: 'Mine Shaft', par: 3,
+    special: 'Mine shafts under a ridge',
+    tip: 'A rock ridge blocks the way. Two old mine shafts run under it, but one of them comes out facing a barrel cactus.',
+    look: LOOK(), tee: [0, 1.3], cup: [0.8, 14.2],
+    floors: [rp(rect(-3, 0, 3, 16.5), 1.0)],
+    walls: [{ pts: [[-3, 8], [3, 8]], w: 0.6, h: 0.9, style: 'sandstone' }],
+    features: [
+      { type: 'tunnels', r: 0.32, mine: true, pairs: [
+        { a: [-1.8, 6.4], b: [1.9, 9.6], dirA: -Math.PI / 2, dirB: Math.PI / 2 },
+        { a: [1.8, 6.4], b: [-1.9, 9.6], dirA: -Math.PI / 2, dirB: Math.PI / 2 },
+      ] },
+      cacti([cac('barrel', -1.9, 11.0), cac('cholla', 2.5, 12.2), cac('pear', -0.6, 13.4)]),
+      weeds([{ path: [[-2.2, 11.8], [0, 13.0], [2.0, 11.4], [0.2, 10.6]], loop: true, speed: 0.9, gust: 0.6, r: 0.38 }]),
+    ],
+  });
+
+  // 13
+  const gNear = rp(rect(-2.4, 0, 2.4, 6.6), [0.7, 0.7, 0, 0]), gFar = rp(rect(-2.4, 11.4, 2.4, 18), [0, 0, 0.9, 0.9]);
+  H.push({
+    id: 'gulch-bridge', name: 'Gulch Bridge', par: 3,
+    special: 'A tumbleweed on a gulch bridge',
+    tip: 'A narrow plank bridge crosses a deep gulch, and a tumbleweed rolls back and forth along it. Saguaros wait at the far end.',
+    look: LOOK(), tee: [0, 1.3], cup: [0.9, 16.2],
+    floors: [gNear, { poly: rect(-0.65, 6.5, 0.65, 11.5), mat: 'planks' }, gFar],
+    rails: [{ pts: K.openRail(gNear, [-2.4, 6.6], [2.4, 6.6]) }, { pts: K.openRail(gFar, [2.4, 11.4], [-2.4, 11.4]) }],
+    walls: [{ pts: [[-0.65, 6.6], [-0.65, 11.4]], w: 0.1, h: 0.22, style: 'plank' }, { pts: [[0.65, 11.4], [0.65, 6.6]], w: 0.1, h: 0.22, style: 'plank' }],
+    hazards: [{ kind: 'chasm', poly: rect(-18, 6.6, 18, 11.4) }],
+    features: [
+      cacti([cac('saguaro', -1.4, 13), cac('saguaro', 1.4, 13), cac('barrel', -0.8, 15.3), cac('pear', 2.0, 16.9)]),
+      weeds([{ path: [[0, 7.0], [0.05, 9], [0, 11.0]], speed: 1.2, gust: 0.6, r: 0.36 }]),
+    ],
+  });
+
+  // 14
+  H.push({
+    id: 'rock-arch', name: 'Rock Arch', par: 3,
+    special: 'A natural rock arch',
+    tip: 'A sandstone arch spans the lane, and prickly pear fill the gaps beside its legs, so the only way is under it. A tumbleweed drifts in and out of the arch.',
+    look: LOOK({ light: 'mesa' }), tee: [0, 1.3], cup: [0.3, 14.2],
+    floors: [rp(rect(-2.6, 0, 2.6, 16.5), 0.9)],
+    posts: [{ x: -1.5, y: 8, r: 0.55, h: 0.9, style: 'sandrock' }, { x: 1.5, y: 8, r: 0.55, h: 0.9, style: 'sandrock' }],
+    features: [
+      { type: 'arch', x: 0, y: 8, span: 3.0 },
+      cacti([cac('pear', -2.25, 8.1), cac('pear', 2.25, 8.1), cac('barrel', -1.2, 13.2), cac('barrel', 1.5, 13.6), cac('barrel', -0.5, 15.4)]),
+      weeds([{ path: [[-0.7, 6.4], [0.3, 8], [-0.2, 10.2]], speed: 0.8, gust: 0.7, r: 0.38 }]),
+    ],
+  });
+
+  // 15
+  H.push({
+    id: 'cactus-garden', name: 'Cactus Garden', par: 4,
+    special: 'Slanting rows of cactus',
+    tip: 'Three slanting rows of cactus, each with its gap at the high end. Two tumbleweeds weave through the open ground between them.',
+    look: LOOK(), tee: [0, 1.3], cup: [2.2, 19],
+    floors: [rp(rect(-3.6, 0, 3.6, 21), 1.2)],
+    features: [
+      cacti([].concat(rowOf('cholla', [-3.2, 4], [1.2, 6.8], 0.62), rowOf('pear', [3.2, 9.2], [-1.2, 12], 0.8), rowOf('cholla', [-3.2, 14.2], [1.2, 17], 0.62))),
+      weeds([
+        { path: [[-2.4, 7.4], [0.6, 8.4], [2.6, 7.0], [-0.2, 6.6]], loop: true, speed: 1.0, gust: 0.6, r: 0.38 },
+        { path: [[2.6, 13.2], [-0.4, 14.4], [-2.6, 12.0], [0.4, 12.4]], loop: true, speed: 1.1, gust: 0.6, phase: 0.5, r: 0.38 },
+      ]),
+    ],
+  });
+
+  // 16
+  H.push({
+    id: 'hoodoo-pinball', name: 'Hoodoo Pinball', par: 3,
+    special: 'Bouncy hoodoos among cacti',
+    tip: 'Springy hoodoo rocks fling the ball about, and barrel cacti stand between them. Bounce off the rocks, never the cacti.',
+    look: LOOK({ light: 'mesa' }), tee: [0, 1.3], cup: [0, 12.8],
+    floors: [rp([[-2.4, 0], [2.4, 0], [3.6, 3], [3.6, 12], [2.4, 14.5], [-2.4, 14.5], [-3.6, 12], [-3.6, 3]], [0.6, 0.6, 1, 1, 1.2, 1.2, 1, 1])],
+    features: [
+      { type: 'bumpers', hoodoo: true, list: [{ x: 0, y: 5.6, r: 0.5 }, { x: -1.9, y: 7.8, r: 0.45 }, { x: 1.9, y: 7.8, r: 0.45 }, { x: 0, y: 10.0, r: 0.42 }, { x: -2.3, y: 11.2, r: 0.4 }, { x: 2.3, y: 11.2, r: 0.4 }] },
+      cacti([cac('barrel', -1.05, 9.3), cac('barrel', 2.8, 5.0), cac('barrel', -2.9, 4.6), cac('barrel', 2.7, 13.0)]),
+      weeds([{ path: [[-2.0, 2.6], [0, 3.6], [2.0, 2.6]], speed: 1.1, gust: 0.6, r: 0.36 }]),
+    ],
+  });
+
+  // 17
+  H.push({
+    id: 'dune-ridge', name: 'Dune Ridge', par: 3,
+    special: 'Sand dunes and a rolling tumbleweed',
+    tip: 'Three dunes ripple across the lane, with prickly pear in the hollows. A tumbleweed rolls up and down over the dunes toward you.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 16.8],
+    floors: [rp(rect(-2.6, 0, 2.6, 18.5), 0.9)],
+    height: (x, y) => (y > 3.5 && y < 14.9 ? 0.3 * (0.5 - 0.5 * Math.cos((2 * Math.PI * (y - 3.5)) / 3.8)) : 0),
+    features: [
+      cacti([cac('pear', -1.8, 5.4), cac('pear', 1.9, 9.2), cac('pear', -1.7, 13.0), cac('barrel', 1.6, 5.6), cac('barrel', -1.6, 9.4)]),
+      weeds([{ path: [[0.4, 4.0], [-0.3, 9.5], [0.3, 15.0]], speed: 1.4, gust: 0.6 }]),
+    ],
+  });
+
+  // 18
+  H.push({
+    id: 'wagon-wheel', name: 'Wagon Wheel', par: 3,
+    special: 'A turning wagon-wheel turnstile',
+    tip: 'An old wagon wheel turns like a turnstile in the middle. Barrel cacti wait in the side bays where a bounce off a spoke would send you.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 13.6],
+    floors: [rp([[-1.9, 0], [1.9, 0], [1.9, 5], [3.4, 6.4], [3.4, 10], [1.9, 11.4], [1.9, 15], [-1.9, 15], [-1.9, 11.4], [-3.4, 10], [-3.4, 6.4], [-1.9, 5]], [0.7, 0.7, 0.5, 0.9, 0.9, 0.5, 0.9, 0.9, 0.5, 0.9, 0.9, 0.5])],
+    features: [
+      { type: 'spinner', x: 0, y: 8.2, arms: 4, len: 2.45, w: 0.14, omega: 1.1, h: 0.9, wagon: true },
+      cacti([cac('barrel', -2.95, 8.2), cac('barrel', 2.95, 8.2), cac('barrel', -1.5, 4.4), cac('barrel', 1.5, 12.0)]),
+      weeds([{ path: across(12.6, -1.5, 1.5, 0.3), speed: 1.0, gust: 0.6, r: 0.36 }]),
+    ],
+  });
+
+  // 19
+  const bowlC = [0, 10];
+  H.push({
+    id: 'coyote-bowl', name: 'Coyote Bowl', par: 2,
+    special: 'A bowl with cacti on its slopes',
+    tip: 'The green is a bowl that runs down to the cup, but barrel cacti sit on its slopes right where a ball rolls in. A tumbleweed circles the rim.',
+    look: LOOK({ light: 'mesa' }), tee: [0, 1.3], cup: bowlC,
+    floors: [K.laneCircle(1.6, 0, bowlC[1], 4.4)],
+    height: (x, y) => { const d = Math.hypot(x - bowlC[0], y - bowlC[1]); return d < 4.0 ? -0.42 * Math.pow(1 - d / 4.0, 2) : 0; },
+    features: [
+      cacti([cac('barrel', 0.0, 8.0), cac('barrel', -1.6, 10.9), cac('barrel', 1.7, 10.6), cac('barrel', 0.5, 12.3)]),
+      weeds([{ path: ring(0, 10, 3.5, 12), loop: true, speed: 1.2, gust: 0.5 }]),
+    ],
+  });
+
+  // 20
+  const sNear = rp(rect(-2.2, 0, 2.2, 6.6), [0.6, 0.6, 0, 0]), sFar = rp(rect(-2.2, 10.4, 2.2, 17), [0, 0, 0.8, 0.8]);
+  H.push({
+    id: 'plank-seesaw', name: 'Plank Seesaw', par: 3,
+    special: 'A rocking plank over a gulch',
+    tip: 'The only way over the gulch is a plank that rocks from side to side. Barrel cacti flank where it lands, and a tumbleweed blows across beyond.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 15.2],
+    floors: [sNear, sFar],
+    rails: [{ pts: K.openRail(sNear, [-2.2, 6.6], [2.2, 6.6]) }, { pts: K.openRail(sFar, [2.2, 10.4], [-2.2, 10.4]) }],
+    hazards: [{ kind: 'chasm', poly: rect(-18, 6.6, 18, 10.4) }],
+    features: [
+      { type: 'seesaw', x0: -0.75, x1: 0.75, y0: 6.45, y1: 10.55, amp: 0.14, period: 3.6 },
+      cacti([cac('barrel', -1.25, 11.4), cac('barrel', 1.25, 11.4), cac('pear', 1.6, 15.8)]),
+      weeds([{ path: across(13.3, -1.8, 1.8, 0.3), speed: 1.3, gust: 0.6, r: 0.38 }]),
+    ],
+  });
+
+  // 21
+  const swH = (x, y) => (y < 6.5 ? 1.0 : y < 12.5 ? 0.5 : 0);
+  H.push({
+    id: 'switchback-trail', name: 'Switchback Trail', par: 4,
+    special: 'Ledges with cactus fences',
+    tip: 'The trail steps down two ledges. A fence of barrel cacti lines each ledge, with the way down at alternate ends, and a tumbleweed patrols each level.',
+    look: LOOK(), tee: [0, 1.3], cup: [-1.2, 17],
+    floors: [rp(rect(-2.8, 0, 2.8, 19), 1.0)],
+    height: swH,
+    walls: [
+      { pts: [[-2.8, 6.5], [2.8, 6.5]], w: 0.04, h: 0, top: () => 1.0, style: 'none' },
+      { pts: [[-2.8, 12.5], [2.8, 12.5]], w: 0.04, h: 0, top: () => 0.5, style: 'none' },
+    ],
+    features: [
+      cacti([].concat(rowOf('barrel', [-2.45, 6.1], [0.95, 6.1], 0.62), rowOf('barrel', [-0.95, 12.1], [2.45, 12.1], 0.62))),
+      weeds([
+        { path: across(9.4, -2.3, 2.3, 0.4), speed: 1.3, gust: 0.6, r: 0.38 },
+        { path: across(15.2, 2.3, -2.3, 0.3), speed: 1.1, gust: 0.6, phase: 0.4, r: 0.38 },
+      ]),
+    ],
+  });
+
+  // 22
+  const twin = [0, 11];
+  const eight = [[0, 11], [2.2, 13], [3.3, 11], [2.2, 9], [0, 11], [-2.2, 13], [-3.3, 11], [-2.2, 9]];
+  H.push({
+    id: 'tumble-twins', name: 'Tumble Twins', par: 3,
+    special: 'Two tumbleweeds in a figure of eight',
+    tip: 'Four prickly pears guard the cup, leaving gaps on the diagonals, and two tumbleweeds trace a figure of eight right over it.',
+    look: LOOK(), tee: [0, 1.3], cup: twin,
+    floors: [K.laneCircle(1.8, 0, 11, 4.8)],
+    features: [
+      cacti([cac('pear', 1.35, 11), cac('pear', -1.35, 11), cac('pear', 0, 12.35), cac('pear', 0, 9.65)]),
+      weeds([{ path: eight, loop: true, speed: 1.1, gust: 0.5, r: 0.36 }, { path: eight, loop: true, speed: 1.1, gust: 0.5, phase: 1.9, r: 0.36 }]),
+    ],
+  });
+
+  // 23
+  H.push({
+    id: 'box-canyon', name: 'Box Canyon', par: 3,
+    special: 'A cactus wall with one gap',
+    tip: 'A wall of barrel cacti cuts across the box canyon with one narrow gap at the right, and a tumbleweed patrols right in front of it.',
+    look: LOOK({ rail: 'sandstone' }), tee: [0, 1.3], cup: [-2.2, 12.4],
+    floors: [rp(rect(-4, 0, 4, 14.5), 0.8)],
+    features: [
+      cacti([].concat(rowOf('barrel', [-3.65, 9], [1.45, 9], 0.6), [cac('barrel', 3.2, 9), cac('barrel', 3.72, 9), cac('saguaro', -3.3, 13.6)])),
+      weeds([{ path: [[0.6, 7.7], [2.2, 7.4], [3.6, 7.7]], speed: 1.4, gust: 0.7 }]),
+    ],
+  });
+
+  // 24
+  H.push({
+    id: 'oasis', name: 'Oasis', par: 3,
+    special: 'An oasis pool among cacti',
+    tip: 'A spring-fed pool fills the middle of the green, with palms beyond and cacti on its banks. A tumbleweed blows round the water.',
+    look: LOOK(), tee: [0, 1.3], cup: [0, 14.2],
+    floors: [K.laneCircle(1.8, 0, 10.5, 5.0)],
+    hazards: [{ kind: 'water', over: true, poly: U.blob(0, 10.4, 1.9, 31, 0.14) }],
+    features: [
+      { type: 'oasis', x: 0, y: 10.4 },
+      cacti([cac('pear', -2.5, 8.0), cac('pear', 2.6, 12.4), cac('barrel', 2.7, 8.4), cac('barrel', -2.3, 12.9)]),
+      weeds([{ path: ring(0, 10.4, 3.0, 12), loop: true, speed: 1.0, gust: 0.6, r: 0.38 }]),
+    ],
+  });
+
+  // 25
+  H.push({
+    id: 'ghost-town', name: 'Ghost Town', par: 4,
+    special: 'Fences and saloon doors down main street',
+    tip: 'Main street is fenced into three stretches: saloon doors through the first fence, an open gap in the second with a tumbleweed rolling past, and doors again in the third.',
+    look: LOOK(), tee: [0, 1.3], cup: [1.8, 19.4],
+    floors: [rp(rect(-3.4, 0, 3.4, 21), 1.0)],
+    walls: [
+      { pts: [[-3.4, 6], [1.4, 6]], w: 0.24, h: 0.55, style: 'plank' }, { pts: [[2.6, 6], [3.4, 6]], w: 0.24, h: 0.55, style: 'plank' },
+      { pts: [[-1.4, 12], [3.4, 12]], w: 0.24, h: 0.55, style: 'plank' },
+      { pts: [[-3.4, 17], [-0.6, 17]], w: 0.24, h: 0.55, style: 'plank' }, { pts: [[0.6, 17], [3.4, 17]], w: 0.24, h: 0.55, style: 'plank' },
+    ],
+    features: [
+      { type: 'gates', list: [{ a: [1.4, 6], b: [2.6, 6], period: 3.0, phase: 0 }, { a: [-0.6, 17], b: [0.6, 17], period: 2.6, phase: 0.5 }] },
+      cacti([cac('barrel', 1.3, 7.3), cac('barrel', 3.0, 7.6), cac('barrel', -3.0, 13.2), cac('pear', 1.6, 14.2), cac('barrel', -0.95, 18.2), cac('barrel', 3.0, 17.9)]),
+      weeds([
+        { path: across(9.2, -2.9, 2.9, 0.4), speed: 1.6, gust: 0.7 },
+        { path: [[-2.0, 10.6], [-2.2, 12], [-1.8, 13.6]], speed: 1.0, gust: 0.6, phase: 0.3, r: 0.38 },
+        { path: across(15.0, 2.9, -2.9, 0.3), speed: 1.3, gust: 0.6, phase: 0.7 },
+      ]),
+      { type: 'town' },
+    ],
+  });
+
+  // 26
+  const rim = rect(-1.6, 0, 1.6, 18.5);
+  H.push({
+    id: 'canyon-rim', name: 'Canyon Rim', par: 3,
+    special: 'A lane along a cliff edge',
+    tip: 'The left side of this lane is the edge of the canyon, with no rail. Cacti line the safe side, and tumbleweeds keep blowing toward the drop.',
+    look: LOOK({ light: 'mesa' }), tee: [0.4, 1.3], cup: [0.3, 16.6],
+    floors: [rim],
+    rails: [{ pts: K.openRail(rim, [-1.6, 0], [-1.6, 18.5]) }],
+    hazards: [{ kind: 'chasm', poly: rect(-20, -6, -1.6, 26) }],
+    features: [
+      cacti([cac('pear', 1.15, 4.2), cac('cholla', 1.2, 6.4), cac('pear', 1.15, 8.8), cac('cholla', 1.2, 11.2), cac('pear', 1.1, 13.4)]),
+      weeds([
+        { path: [[1.0, 5.4], [-0.2, 5.6], [-1.3, 5.3]], speed: 1.2, gust: 0.7, r: 0.36 },
+        { path: [[1.0, 10.0], [-0.2, 10.2], [-1.3, 9.9]], speed: 1.0, gust: 0.7, phase: 0.5, r: 0.36 },
+        { path: [[1.0, 14.6], [-0.2, 14.8], [-1.3, 14.5]], speed: 1.3, gust: 0.7, phase: 0.2, r: 0.36 },
+      ]),
+    ],
+  });
+
+  // 27
+  const mesaH = (x, y) => {
+    if (y >= 14) return 0.7;
+    if (y > 11 && Math.abs(x) < 1.0) return 0.7 * (y - 11) / 3;
+    return 0;
+  };
+  H.push({
+    id: 'sunset-mesa', name: 'Sunset Mesa', par: 4,
+    special: 'A mesa climb at sunset',
+    tip: 'The finale: one narrow ramp climbs the mesa between barrel cacti, with a tumbleweed rolling up and down it. On top, saguaros and another tumbleweed guard the cup.',
+    look: LOOK({ light: 'mesa', cell: 0.12 }), tee: [0, 1.3], cup: [1, 20.4],
+    floors: [rp(rect(-3.6, 0, 3.6, 22), 1.2)],
+    height: mesaH,
+    walls: [
+      { pts: [[-3.6, 14], [-1.0, 14]], w: 0.04, h: 0, top: () => 0.7, style: 'none' },
+      { pts: [[1.0, 14], [3.6, 14]], w: 0.04, h: 0, top: () => 0.7, style: 'none' },
+      { pts: [[-1.0, 11], [-1.0, 14]], w: 0.04, h: 0, top: (x, y) => 0.7 * (y - 11) / 3, style: 'none' },
+      { pts: [[1.0, 14], [1.0, 11]], w: 0.04, h: 0, top: (x, y) => 0.7 * (y - 11) / 3, style: 'none' },
+    ],
+    features: [
+      { type: 'mesa', y0: 11, y1: 14, hw: 1.0, top: 0.7 },
+      cacti([cac('barrel', -1.5, 10.5), cac('barrel', 1.5, 10.5), cac('pear', -2.6, 6.2), cac('saguaro', -2.0, 17), cac('saguaro', 2.4, 18.4), cac('pear', -0.9, 19.8)]),
+      weeds([
+        { path: across(7, -3.0, 3.0, 0.5), speed: 1.6, gust: 0.7 },
+        { path: [[0, 9.2], [0.1, 12.5], [0, 15.6]], speed: 1.0, gust: 0.6, phase: 0.4, r: 0.36 },
+        { path: [[-2.6, 16.2], [0, 17.6], [2.8, 16.4], [0.4, 15.4]], loop: true, speed: 1.1, gust: 0.6, phase: 0.8, r: 0.38 },
+      ]),
+    ],
+  });
+
+  H.forEach((h, i) => { h.num = i + 1; h.course = 'canyon'; });
+  PC.CANYON = H;
 });
 
 /* Putt Club: The Abyss. 18 temple holes for Ultra, every one par 6 or more.
@@ -1860,18 +2444,22 @@ body.abyss .intro-rivals { color: #ff9a62; }
 
   // 1. Four legs, each with an iron gate across it; nothing to stop a ball at the corners.
   A.push({
-    id: 'gates-of-dis', name: 'Gates of Dis', par: 7,
+    id: 'gates-of-dis', name: 'Gates of Dis', par: 8,
     special: 'Iron gates on a winding causeway',
-    tip: 'Four iron gates rise and slam across a narrow causeway that turns at every corner. Stop on each corner pad, then time the next gate.',
+    tip: 'Four iron gates rise and slam across a narrow causeway that turns at every corner. Stop on each corner pad, then time the next gate. Red springs on two corners fling the ball into the abyss.',
     look: LOOK(), tee: [0, 1.3], cup: [1, 28.9],
     floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 10], [8, 10], [8, 19], [1, 19], [1, 26.6]], 1.8, 3.0), circ(1, 28.4, 2.0)],
-    hazards: [lava(8.95, 10.95, 0.42), lava(8.95, 19.95, 0.42), lava(0.05, 19.95, 0.42), lava(-0.1, 29.7, 0.36), lava(2.2, 28.0, 0.36)],
-    features: [{ type: 'gates', list: [
+    hazards: [lava(0.05, 19.95, 0.42), lava(-0.1, 29.7, 0.36), lava(2.2, 28.0, 0.36)],
+    features: [
+      { type: 'spring', x: 8.85, y: 10.85, r: 0.38, dir: 45 * DEG, speed: 7, vz: 5 },
+      { type: 'spring', x: 8.85, y: 19.85, r: 0.38, dir: 45 * DEG, speed: 7, vz: 5 },
+      { type: 'gates', list: [
       { a: [-0.95, 6.2], b: [0.95, 6.2], period: 3.4, phase: 0 },
       { a: [4, 9.05], b: [4, 10.95], period: 3.0, phase: 0.4 },
       { a: [7.05, 14.5], b: [8.95, 14.5], period: 2.8, phase: 0.75 },
       { a: [4.5, 18.05], b: [4.5, 19.95], period: 2.6, phase: 0.2 },
-    ] }],
+    ] },
+    ],
   });
 
   // 2. Two blade discs joined by thin bridges at right angles.
@@ -1892,10 +2480,14 @@ body.abyss .intro-rivals { color: #ff9a62; }
   A.push({
     id: 'imp-patrol', name: 'Imp Patrol', par: 9,
     special: 'Imps on a zigzag causeway',
-    tip: 'Six narrow legs with no edges, and an imp pacing across each one. A bump from an imp knocks the ball straight over the side.',
+    tip: 'Six narrow legs with no edges, and imps pacing across them. A bump from an imp knocks the ball over the side. A wall blocks the sixth leg: roll over the gold spring to jump it.',
     look: LOOK(), tee: [0, 1.3], cup: [7, 29.8],
     floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 8], [7, 8], [7, 15], [0, 15], [0, 22], [7, 22], [7, 27.6]], 2.0, 2.8), circ(7, 29.4, 1.9)],
-    features: [{ type: 'patrol', sound: 'bonk', imps: true, movers: [
+    walls: [{ pts: [[4.0, 21.0], [4.0, 23.0]], w: 0.36, h: 0.7, style: 'obsidian' }],
+    zones: [{ type: 'tar', poly: rect(5.3, 21.0, 7.0, 23.0) }],
+    features: [
+      { type: 'spring', x: 2.2, y: 22, r: 0.42, vz: 6.5, minSpeed: 4.6, maxSpeed: 5.8, land: [6.2, 22] },
+      { type: 'patrol', sound: 'bonk', imps: true, movers: [
       { a: [-0.75, 5.2], b: [0.75, 5.2], period: 3.4, r: 0.34, h: 0.8 },
       { a: [6.25, 11.5], b: [7.75, 11.5], period: 3.2, phase: 0.6, r: 0.34, h: 0.8 },
       { a: [3.5, 14.25], b: [3.5, 15.75], period: 3.0, phase: 0.15, r: 0.34, h: 0.8 },
@@ -1908,14 +2500,18 @@ body.abyss .intro-rivals { color: #ff9a62; }
   A.push({
     id: 'magma-pinball', name: 'Magma Pinball', par: 7,
     special: 'Magma boulders in open arenas',
-    tip: 'Each arena is full of magma boulders that fling the ball, and its way out is nowhere near its way in. Settle the ball first, then find the exit.',
+    tip: 'Each arena is full of magma boulders that fling the ball, and its way out is nowhere near its way in. Keep clear of the red springs near the edges.',
     look: LOOK(), tee: [0, 1.3], cup: [1.6, 28.0],
     floors: [teePad(2.6, 4), rect(-0.55, 3.8, 0.55, 5.4), circ(0, 9.2, 4.2), U.ribbon([[2.2, 11.8], [6.7, 16.9]], 0.55), circ(9, 19.6, 4.0), U.ribbon([[6.3, 22.2], [3.1, 26.4]], 0.55), circ(2.0, 27.6, 1.9)],
     hazards: [lava(-2.6, 7.3, 0.55), lava(2.9, 7.6, 0.5), lava(-1.6, 11.9, 0.45), lava(11.6, 18.5, 0.55), lava(8.2, 22.8, 0.45), lava(6.6, 17.9, 0.4), lava(3.1, 28.6, 0.34)],
-    features: [{ type: 'bumpers', rocks: true, list: [
+    features: [
+      { type: 'spring', x: -3.1, y: 10.7, r: 0.4, dir: 160 * DEG, speed: 7, vz: 5 },
+      { type: 'spring', x: 11.7, y: 21.3, r: 0.4, dir: 30 * DEG, speed: 7, vz: 5 },
+      { type: 'bumpers', rocks: true, list: [
       { x: 0, y: 8.4, r: 0.5, kick: 2.8 }, { x: -2.1, y: 9.8, r: 0.45, kick: 2.8 }, { x: 1.9, y: 10.2, r: 0.45, kick: 2.8 }, { x: -0.6, y: 11.6, r: 0.4, kick: 2.8 }, { x: 1.2, y: 6.6, r: 0.38, kick: 2.4 },
       { x: 9, y: 18.6, r: 0.5, kick: 2.8 }, { x: 7.2, y: 20.4, r: 0.45, kick: 2.8 }, { x: 10.6, y: 20.9, r: 0.45, kick: 2.8 }, { x: 9.4, y: 21.9, r: 0.38, kick: 2.6 },
-    ] }],
+    ] },
+    ],
   });
 
   // 5. Four separate platforms: each geyser throws the ball the way it was rolling.
@@ -1969,11 +2565,14 @@ body.abyss .intro-rivals { color: #ff9a62; }
   A.push({
     id: 'doom-pendulum', name: 'Doom Pendulum', par: 7,
     special: 'Spiked pendulums on a narrow bridge',
-    tip: 'Four spiked iron balls swing across a narrow bridge that turns once. One touch and the ball is knocked into the abyss.',
+    tip: 'Four spiked iron balls swing across a narrow bridge that turns once, and a wall blocks the middle. Hit the gold spring dead straight to jump it.',
     look: LOOK(), tee: [0, 1.3], cup: [9, 29.5],
     floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 15], [9, 15], [9, 27.4]], 1.2, 2.6), circ(9, 29.2, 1.9)],
     hazards: [lava(0.85, 15.85, 0.4), lava(9.85, 14.15, 0.4), lava(8.1, 30.2, 0.34)],
+    walls: [{ pts: [[5.2, 14.3], [5.2, 15.7]], w: 0.36, h: 0.7, style: 'obsidian' }],
+    zones: [{ type: 'tar', poly: rect(6.5, 14.4, 8.3, 15.6) }],
     features: [
+      { type: 'spring', x: 3.4, y: 15, r: 0.42, vz: 6.5, minSpeed: 4.6, maxSpeed: 5.8, land: [7.4, 15] },
       { type: 'swing', x: 0, y: 6, len: 4.95, zp: 5.4, amp: 0.39, period: 3.0, rt: 0.5, spiked: true },
       { type: 'swing', x: 0, y: 11, len: 4.95, zp: 5.4, amp: 0.39, period: 2.5, phase: 1.4, rt: 0.5, spiked: true },
       { type: 'swing', x: 9, y: 19.5, len: 4.95, zp: 5.4, amp: 0.39, period: 2.8, phase: 0.7, rt: 0.5, spiked: true },
@@ -2008,17 +2607,21 @@ body.abyss .intro-rivals { color: #ff9a62; }
 
   // 11. A slalom between tar and lava, to a cup ringed with lava.
   A.push({
-    id: 'tar-pits', name: 'Tar Pits', par: 6,
+    id: 'tar-pits', name: 'Tar Pits', par: 7,
     special: 'A slalom of tar and lava',
-    tip: 'Rows of lava pools leave one gap each, never in line. Tar stops a ball dead. The cup sits in a lava ring that is open only at the back.',
+    tip: 'Rows of lava pools leave one gap each, and a wall runs right across the middle: only the gold spring gets you over it. The red one throws you off the side. The cup sits in a lava ring open only at the back.',
     look: LOOK(), tee: [0, 1.3], cup: [0, 26],
     floors: [rp(rect(-3.2, 0, 3.2, 29.6), 1.0)],
-    zones: [{ type: 'tar', poly: U.blob(1.6, 4.6, 0.9, 21) }, { type: 'tar', poly: U.blob(-1.4, 10.4, 0.9, 22) }, { type: 'tar', poly: U.blob(1.4, 16.4, 0.9, 23) }, { type: 'tar', poly: U.blob(-2.2, 22, 0.8, 24) }],
+    zones: [{ type: 'tar', poly: U.blob(1.6, 4.6, 0.9, 21) }, { type: 'tar', poly: U.blob(-1.8, 10.0, 0.8, 22) }, { type: 'tar', poly: U.blob(0.5, 16.0, 1.25, 23) }, { type: 'tar', poly: U.blob(-2.2, 22, 0.8, 24) }],
+    walls: [{ pts: [[-3.2, 13.2], [3.2, 13.2]], w: 0.36, h: 0.7, style: 'obsidian' }],
+    features: [
+      { type: 'spring', x: 0.4, y: 11.4, r: 0.42, vz: 6.5, minSpeed: 4.6, maxSpeed: 5.8, land: [0.4, 15.4] },
+      { type: 'spring', x: -2.5, y: 10.8, r: 0.38, dir: 180 * DEG, speed: 7, vz: 5 },
+    ],
     hazards: [
       lava(-2.6, 7.2, 0.6), lava(-1.3, 7.2, 0.6), lava(0.0, 7.2, 0.6), lava(1.1, 7.2, 0.5),
-      lava(-1.1, 13.2, 0.5), lava(0.0, 13.2, 0.6), lava(1.3, 13.2, 0.6), lava(2.6, 13.2, 0.6),
       lava(-2.6, 19.2, 0.6), lava(-1.3, 19.2, 0.6), lava(0.0, 19.2, 0.6), lava(1.1, 19.2, 0.5),
-      lava(0.2, 10.2, 0.75), lava(-0.2, 16.2, 0.75), lava(0.2, 22.4, 0.6),
+      lava(0.2, 22.4, 0.6),
       lavaSector(0, 26, 0.75, 1.4, 125, 415), lava(-2.6, 26, 0.45), lava(2.6, 26, 0.45),
     ],
   });
@@ -2109,13 +2712,18 @@ body.abyss .intro-rivals { color: #ff9a62; }
 
   // 17. Gusts across thin legs.
   A.push({
-    id: 'sulfur-winds', name: 'Sulfur Winds', par: 7,
+    id: 'sulfur-winds', name: 'Sulfur Winds', par: 11,
     special: 'Gusts across thin causeways',
-    tip: 'Hot gusts blow across thin legs with no edges, pushing the ball east. Watch the banner, and putt between gusts.',
+    tip: 'Hot gusts blow across thin legs with no edges, pushing the ball east. A wall blocks the fourth leg: jump it with the gold spring, between gusts.',
     look: LOOK(), tee: [0, 1.3], cup: [-1, 30.6],
     floors: [teePad(2.6, 3.4), ...causeway([[0, 2.6], [0, 9], [7, 9], [7, 17], [-1, 17], [-1, 23], [5, 23], [5, 26.4], [-1, 26.4], [-1, 28.4]], 1.5, 2.6), circ(-1, 30.2, 1.8)],
     hazards: [lava(-0.2, 31.2, 0.32)],
-    features: [{ type: 'wind', ash: true, dir: [1, 0], power: 3.0, period: 5.6, gust: 2.2 }],
+    walls: [{ pts: [[2.6, 16.1], [2.6, 17.9]], w: 0.36, h: 0.7, style: 'obsidian' }],
+    zones: [{ type: 'tar', poly: rect(-0.6, 16.25, 1.3, 17.75) }],
+    features: [
+      { type: 'wind', ash: true, dir: [1, 0], power: 3.0, period: 5.6, gust: 2.2 },
+      { type: 'spring', x: 4.4, y: 17, r: 0.42, vz: 6.5, minSpeed: 4.6, maxSpeed: 5.8, land: [0.6, 17] },
+    ],
   });
 
   // 18. Five ledges down, each dropping through a narrow window off to one side.
@@ -2123,7 +2731,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
   A.push({
     id: 'the-descent', name: 'The Descent', par: 7,
     special: 'Ledges down into the abyss',
-    tip: 'Five ledges step down toward the lava. Each one only meets the next for a short stretch, off to one side, so stop on every ledge and drop through the gap.',
+    tip: 'Five ledges step down toward the lava. Each one only meets the next for a short stretch, off to one side, so stop on every ledge and drop through the gap. A red spring on the third ledge throws the ball off the edge.',
     look: LOOK(), tee: [0, 1.3], cup: [1.6, 29.6],
     floors: [rp(rect(-1.2, 0, 1.2, 7), [0.5, 0.5, 0, 0]), rect(0.4, 7, 4.0, 13), rect(2.8, 13, 6.4, 19), rect(-0.2, 19, 3.6, 25), circ(1.6, 27.4, 2.8)],
     height: descH,
@@ -2134,7 +2742,10 @@ body.abyss .intro-rivals { color: #ff9a62; }
       { pts: [[-1.2, 25], [4.4, 25]], w: 0.04, h: 0, top: () => 0.6, style: 'none' },
     ],
     hazards: [lava(3.3, 9.0, 0.4), lava(5.6, 15.4, 0.4), lava(0.6, 21.6, 0.4)],
-    features: [{ type: 'spinner', x: 1.6, y: 27.2, arms: 3, len: 1.9, w: 0.16, omega: 1.2, h: 1.0 }],
+    features: [
+      { type: 'spinner', x: 1.6, y: 27.2, arms: 3, len: 1.9, w: 0.16, omega: 1.2, h: 1.0 },
+      { type: 'spring', x: 5.8, y: 17.4, r: 0.4, dir: 0, speed: 7, vz: 5 },
+    ],
   });
 
   A.forEach((h, i) => { h.num = i + 1; h.course = 'abyss'; });
@@ -2166,7 +2777,16 @@ body.abyss .intro-rivals { color: #ff9a62; }
     return 1;
   };
 
+  // Cacti count as solid, with room to spare: brushing one pops the ball.
+  function cactusNear(hole, x, y, pad) {
+    for (const f of hole.features || []) {
+      if (f.type !== 'cacti') continue;
+      for (const c of f.list) if (Math.hypot(x - c.x, y - c.y) < (c.r || 0.3) + C.R * pad + 0.06) return true;
+    }
+    return false;
+  }
   function blockedBySolid(hole, x, y, pad) {
+    if (cactusNear(hole, x, y, pad)) return true;
     for (const s of hole.segs) {
       if (s.top && s.h === 0) continue;   // ledges you drop off, not walls
       const q = U.closestOnSeg(x, y, s.ax, s.ay, s.bx, s.by);
@@ -2184,10 +2804,11 @@ body.abyss .intro-rivals { color: #ff9a62; }
     const b = hole.box, cell = 0.2;
     const x0 = b.x0 - 0.6, y0 = b.y0 - 0.6;
     const nx = Math.ceil((b.w + 1.2) / cell), ny = Math.ceil((b.h + 1.2) / cell);
-    const cost = new Float32Array(nx * ny).fill(Infinity);
+    const cost = new Float32Array(nx * ny).fill(Infinity), hgt = new Float32Array(nx * ny);
     for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
       const x = x0 + i * cell, y = y0 + j * cell;
       const g = sim.ground(x, y);
+      hgt[j * nx + i] = g.h || 0;
       let c = g.kind === 'floor' || g.kind === 'platform' ? 1 : g.kind === 'water' || g.kind === 'flowers' || g.kind === 'lava' ? 5 : Infinity;
       if (c !== Infinity && blockedBySolid(hole, x, y, 0.9)) c = Infinity;
       cost[j * nx + i] = c;
@@ -2205,7 +2826,16 @@ body.abyss .intro-rivals { color: #ff9a62; }
     (hole.features || []).forEach(f => {
       if (f.type === 'tunnels') f.pairs.forEach(p => { link(p.a[0], p.a[1], p.b[0], p.b[1]); link(p.b[0], p.b[1], p.a[0], p.a[1]); });
       if (f.type === 'launch' && f.land) link(f.x, f.y, f.land[0], f.land[1]);
+      if (f.type === 'spring' && f.land) {
+        // A jump spring only works from behind, so the route reaches it from its approach side
+        // and goes round the pad itself.
+        const ux = f.land[0] - f.x, uy = f.land[1] - f.y, ul = Math.hypot(ux, uy) || 1;
+        const r = f.r || 0.4;
+        for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const x = x0 + i * cell, y = y0 + j * cell; if (Math.hypot(x - f.x, y - f.y) < r + 0.1) cost[j * nx + i] = Infinity; }
+        [r + 0.25, r + 0.6, r + 1.0].forEach(k => link(f.x - (ux / ul) * k, f.y - (uy / ul) * k, f.land[0], f.land[1]));
+      }
     });
+    const ledges = hole.segs.filter(s => s.top && s.h === 0);
     const ci = Math.round((hole.cup[0] - x0) / cell), cj = Math.round((hole.cup[1] - y0) / cell);
     dist[cj * nx + ci] = 0; push([0, ci, cj]);
     while (heap.length) {
@@ -2218,6 +2848,11 @@ body.abyss .intro-rivals { color: #ff9a62; }
         if (a < 0 || c < 0 || a >= nx || c >= ny) continue;
         const k = c * nx + a;
         if (cost[k] === Infinity) continue;
+        // A ledge can be dropped off but not climbed: the ball would roll from k up to (i, j).
+        if (ledges.length && hgt[j * nx + i] - hgt[k] > 0.12) {
+          const mx = x0 + (i + a) * cell / 2, my = y0 + (j + c) * cell / 2;
+          if (ledges.some(s => { const q = U.closestOnSeg(mx, my, s.ax, s.ay, s.bx, s.by); return Math.hypot(mx - q[0], my - q[1]) < cell * 0.8; })) continue;
+        }
         const nd = d + w * cell * cost[k];
         if (nd < dist[k]) { dist[k] = nd; push([nd, a, c]); }
       }
@@ -2310,6 +2945,16 @@ body.abyss .intro-rivals { color: #ff9a62; }
       const bt = f.spec.button;
       [0.95, 1.1, 1.3].forEach(k => add(bt[0], bt[1], k));
     });
+    // Jump springs: from behind one, roll straight over the pad, gently enough to land on the far side.
+    (sim.feats || []).forEach(f => {
+      if (f.type !== 'spring' || !f.spec.land) return;
+      const sp = f.spec, d = Math.hypot(sp.x - b.x, sp.y - b.y);
+      if (d > 7 || d < 0.05) return;
+      const ux = sp.land[0] - sp.x, uy = sp.land[1] - sp.y, ul = Math.hypot(ux, uy) || 1;
+      if (((sp.x - b.x) * ux + (sp.y - b.y) * uy) / (d * ul) < 0.5) return;
+      const ang = Math.atan2(sp.y - b.y, sp.x - b.x);
+      [0.6, 1.0, 1.6, 2.4].forEach(k => out.push({ ang, p: Nav.powerFor(d + k) }));
+    });
     // Moving platforms: try stopping where they are and where they will be.
     (sim.feats || []).forEach(f => {
       if (f.type !== 'ferry') return;
@@ -2360,11 +3005,20 @@ body.abyss .intro-rivals { color: #ff9a62; }
       for (const c of cands) all.push({ ang: c.ang, p: c.p, wait, score: Nav.evaluate(sim, c, F, wait, maxT).score });
     }
     all.sort((a, b) => a.score - b.score);
+    // If every putt it thought of is lost, cast about at random before settling for one.
+    const startD = F.at(sim.ball.x, sim.ball.y);
+    if (all.length && all[0].score >= startD + 4.9) {
+      for (let i = 0; i < 40; i++) {
+        const c = { ang: rnd() * Math.PI * 2, p: 0.08 + rnd() * 0.6 }, wait = waits[i % waits.length];
+        all.push({ ang: c.ang, p: c.p, wait, score: Nav.evaluate(sim, c, F, wait, maxT).score });
+      }
+      all.sort((a, b) => a.score - b.score);
+    }
     // Check the best few with small mistakes added, and keep the one that holds up best.
-    const da = opts.wobble === undefined ? 0.012 : opts.wobble;
+    const da = opts.wobble === undefined ? 0.012 : opts.wobble, dp = opts.pwobble === undefined ? 0.02 : opts.pwobble;
     let best = null;
     for (const c of all.slice(0, opts.check || 5)) {
-      const near = [[da, 0.02], [-da, -0.02]].map(([a, k]) => Nav.evaluate(sim, { ang: c.ang + a, p: U.clamp(c.p * (1 + k), 0.03, 1) }, F, c.wait, maxT).score);
+      const near = [[da, dp], [-da, -dp]].map(([a, k]) => Nav.evaluate(sim, { ang: c.ang + a, p: U.clamp(c.p * (1 + k), 0.03, 1) }, F, c.wait, maxT).score);
       const sc = (c.score + near[0] + near[1]) / 3 + Math.max(0, Math.max(near[0], near[1]) - c.score) * 0.15;
       if (!best || sc < best.robust) best = Object.assign({}, c, { robust: sc });
     }
@@ -2719,6 +3373,71 @@ body.abyss .intro-rivals { color: #ff9a62; }
     return tex(c);
   });
 
+  // ---------- The canyon ----------
+  // Wind-rippled sand for the desert floor.
+  T.sand = () => once('sand', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(401);
+    g.fillStyle = '#d9b07a'; g.fillRect(0, 0, S, S);
+    for (let y = 0; y < S; y += 2) { const v = Math.sin((y / S) * Math.PI * 2 * 9 + Math.sin(y * 0.05) * 1.5); g.fillStyle = v > 0 ? 'rgba(255,240,210,0.10)' : 'rgba(150,100,60,0.08)'; g.fillRect(0, y, S, 2); }
+    speckle(g, S, S, 1400, ['#c99a62', '#e6c08a', '#b88a56', '#f0d4a4'], 0.6, 1.8, rnd);
+    return tex(c);
+  });
+
+  // Banded red sandstone: canyon walls, mesas, the sides of the course.
+  T.sandstone = () => once('sandstone', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(411);
+    const bands = ['#b8562e', '#c96a3a', '#a84a28', '#d8814a', '#c25f34', '#e09a62', '#9c4424'];
+    let y = 0, i = 0;
+    while (y < S) {
+      const h = 6 + rnd() * 26;
+      g.fillStyle = bands[(i++ * 3 + Math.floor(rnd() * 2)) % bands.length];
+      g.beginPath(); g.moveTo(0, y);
+      for (let x = 0; x <= S; x += 16) g.lineTo(x, y + Math.sin(x * 0.05 + i) * 2);
+      g.lineTo(S, y + h); g.lineTo(0, y + h); g.fill();
+      y += h;
+    }
+    g.globalAlpha = 0.25; speckle(g, S, S, 500, ['#7a3a1c', '#f0b07a'], 0.8, 2.5, rnd);
+    g.globalAlpha = 0.18; g.strokeStyle = '#5a2a14';
+    for (let k = 0; k < 18; k++) { g.lineWidth = 1 + rnd() * 2; g.beginPath(); const x = rnd() * S; g.moveTo(x, rnd() * S); g.lineTo(x + (rnd() - 0.5) * 10, rnd() * S); g.stroke(); }
+    g.globalAlpha = 1;
+    return tex(c);
+  });
+
+  // Cactus skin: green ribs with little white spines along them.
+  T.cactus = (tone = '#4f8a3a') => once('cactus' + tone, () => {
+    const W = 128, Hh = 128, c = canvas(W, Hh), g = c.getContext('2d'), rnd = U.rng(421);
+    const base = new THREE.Color(tone);
+    const ribs = 8, w = W / ribs;
+    for (let i = 0; i < ribs; i++) {
+      const grd = g.createLinearGradient(i * w, 0, (i + 1) * w, 0);
+      grd.addColorStop(0, base.clone().offsetHSL(0, 0, -0.1).getStyle()); grd.addColorStop(0.5, base.clone().offsetHSL(0, 0, 0.06).getStyle()); grd.addColorStop(1, base.clone().offsetHSL(0, 0, -0.1).getStyle());
+      g.fillStyle = grd; g.fillRect(i * w, 0, w, Hh);
+    }
+    for (let i = 0; i < ribs; i++) for (let y = 4; y < Hh; y += 11) {
+      const x = i * w + w / 2 + (rnd() - 0.5);
+      g.fillStyle = '#f4f0dc'; g.beginPath(); g.arc(x, y, 1.4, 0, 7); g.fill();
+      g.strokeStyle = 'rgba(250,248,230,0.8)'; g.lineWidth = 0.8;
+      g.beginPath(); g.moveTo(x - 3, y - 2); g.lineTo(x + 3, y + 2); g.moveTo(x + 3, y - 2); g.lineTo(x - 3, y + 2); g.stroke();
+    }
+    return tex(c);
+  });
+
+  // Dry twigs on a clear background, for the shell of a tumbleweed.
+  T.twigs = () => once('twigs', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(431);
+    g.clearRect(0, 0, S, S);
+    g.lineCap = 'round';
+    for (let i = 0; i < 150; i++) {
+      g.strokeStyle = ['#8a6a3c', '#a8844e', '#6e5230', '#c0a068'][i % 4];
+      g.lineWidth = 1.2 + rnd() * 2;
+      let x = rnd() * S, y = rnd() * S, a = rnd() * 6.28;
+      g.beginPath(); g.moveTo(x, y);
+      for (let k = 0; k < 4; k++) { a += (rnd() - 0.5) * 1.6; x += Math.cos(a) * 14; y += Math.sin(a) * 14; g.lineTo(x, y); }
+      g.stroke();
+    }
+    return tex(c);
+  });
+
   // ---------- The temple ----------
   // Polished dark flagstones for the putting surfaces: 4 x 4 slabs per tile (one slab per unit).
   T.templeFloor = () => once('templeFloor', () => {
@@ -2930,6 +3649,8 @@ body.abyss .intro-rivals { color: #ff9a62; }
     day: { top: '#4f9fe0', mid: '#a9d6f5', horizon: '#eef8ff', sun: '#fff1da', sunI: 2.5, hemiSky: '#d6ecff', hemiGround: '#5d7a3c', hemiI: 0.95, fog: '#dcefff', turf: '#3f9434', grass: '#4a7f36', hills: ['#7fb36a', '#8fc07a', '#a6c99a'], exposure: 1.0 },
     spring: { top: '#62b3ea', mid: '#bfe6fb', horizon: '#f4fcff', sun: '#fffaf0', sunI: 2.4, hemiSky: '#e6f6ff', hemiGround: '#6aa04a', hemiI: 1.0, fog: '#e6f6fd', turf: '#43993a', grass: '#4c8638', hills: ['#86bf73', '#9acb88', '#b3d6a8'], exposure: 1.02 },
     golden: { top: '#5d97cf', mid: '#d9c7a8', horizon: '#ffe2b8', sun: '#ffd49a', sunI: 2.7, hemiSky: '#ffe8c8', hemiGround: '#6e6a35', hemiI: 0.85, fog: '#f6e0c2', turf: '#4a9636', grass: '#527f35', hills: ['#8aa865', '#a4b57a', '#c8c49a'], exposure: 1.0 },
+    canyon: { top: '#2f78d0', mid: '#93c3ea', horizon: '#ffe0b4', sun: '#fff0d4', sunI: 2.1, hemiSky: '#d4e8ff', hemiGround: '#b86a3a', hemiI: 0.6, fog: '#f0d4ac', turf: '#c27744', grass: '#d4ac74', hills: ['#c8703e', '#b85c32', '#d88a52'], exposure: 0.88 },
+    mesa: { top: '#3a5ca8', mid: '#e0a07a', horizon: '#ffc27a', sun: '#ffc48a', sunI: 2.3, hemiSky: '#ffd8b8', hemiGround: '#a0502e', hemiI: 0.55, fog: '#eebc90', turf: '#b8683e', grass: '#cc9c68', hills: ['#b85c32', '#a84c2a', '#c8703e'], exposure: 0.9 },
     abyss: { top: '#040205', mid: '#0c0507', horizon: '#2a0a06', sun: '#ffb27a', sunI: 1.5, hemiSky: '#2c2232', hemiGround: '#a8380e', hemiI: 0.7, fog: '#1e0805', turf: '#3a3134', grass: '#1a1212', hills: ['#2a1214', '#3a1610', '#1c0c0c'], exposure: 1.15 },
     autumn: { top: '#6aa3d0', mid: '#d6c7b3', horizon: '#ffdcb5', sun: '#ffcf96', sunI: 2.6, hemiSky: '#ffe6c9', hemiGround: '#7a5a2a', hemiI: 0.9, fog: '#f1dcc0', turf: '#4f9535', grass: '#647c34', hills: ['#a59a5c', '#b8a06a', '#cdb48a'], exposure: 1.0 },
   };
@@ -3231,10 +3952,10 @@ body.abyss .intro-rivals { color: #ff9a62; }
       this.skyU.top.value.set(L.top); this.skyU.mid.value.set(L.mid); this.skyU.horizon.value.set(L.horizon);
       this.hemi.color = col(L.hemiSky); this.hemi.groundColor = col(L.hemiGround); this.hemi.intensity = L.hemiI;
       this.sun.color = col(L.sun); this.sun.intensity = L.sunI;
-      const hell = name === 'abyss';
-      this.scene.fog = hell ? new THREE.Fog(col(L.fog), 24, 135) : new THREE.Fog(col(L.fog), 45, 190);
+      const hell = name === 'abyss', desert = name === 'canyon' || name === 'mesa';
+      this.scene.fog = hell ? new THREE.Fog(col(L.fog), 24, 135) : desert ? new THREE.Fog(col(L.fog), 70, 240) : new THREE.Fog(col(L.fog), 45, 190);
       this.groundMat.color = col(L.grass).multiplyScalar(1.25);
-      this.ground.visible = !hell;
+      this.ground.visible = !hell && !desert;
       this.lavaSea.visible = hell;
       this.rim.intensity = hell ? 0.45 : 0;
       this.pts.forEach(l => { l.intensity = 0; });
@@ -3268,11 +3989,12 @@ body.abyss .intro-rivals { color: #ff9a62; }
       this.rim.position.copy(V(cx + 14, cy + 30, 26)); this.rim.target.position.copy(V(cx, cy, 0));
 
       const hAt = (x, y) => sim.floorHeight(x, y);
-      const hell = hole.look.theme === 'abyss';
+      const hell = hole.look.theme === 'abyss', desert = hole.look.theme === 'canyon';
       this.hell = hell;
       const turf = hell ? T.templeFloor() : T.turf(L.turf);
-      const turfMat = new THREE.MeshStandardMaterial({ map: turf, roughness: hell ? 0.55 : 0.92, metalness: hell ? 0.1 : 0, color: hell ? col('#ffffff') : col('#e4f0dc') });
-      const skirtStyle = hell ? 'temple' : hole.look.skirt || (hole.look.rail === 'stone' || hole.look.rail === 'brick' ? hole.look.rail : 'soil');
+      const turfMat = new THREE.MeshStandardMaterial({ map: turf, roughness: hell ? 0.55 : 0.92, metalness: hell ? 0.1 : 0, color: hell || desert ? col('#ffffff') : col('#e4f0dc') });
+      const skirtStyle = hell ? 'temple' : desert ? 'sandstone' : hole.look.skirt || (hole.look.rail === 'stone' || hole.look.rail === 'brick' ? hole.look.rail : 'soil');
+      if (desert) this.buildDesertGround(hole);
       const skirtMat = this.railMaterials(skirtStyle).body;
       const skirtBottom = hell ? -1.5 : GROUND_Y - 0.02;
 
@@ -3300,8 +4022,8 @@ body.abyss .intro-rivals { color: #ff9a62; }
 
       this.buildCup(hole, sim);
       this.buildTee(hole, sim);
-      if (hell) PC.VIS.decorateAbyss(hole, this, sim); else PC.VIS.decorate(hole, this, sim);
-      (sim.feats || []).forEach(f => { const v = (hell && PC.VIS.abyss[f.type]) || PC.VIS[f.type]; if (v) { const o = v(f.spec, this, f, sim); if (o) this.vis.push(o); } });
+      if (hell) PC.VIS.decorateAbyss(hole, this, sim); else if (desert) PC.VIS.decorateCanyon(hole, this, sim); else PC.VIS.decorate(hole, this, sim);
+      (sim.feats || []).forEach(f => { const v = (hell && PC.VIS.abyss[f.type]) || (desert && PC.VIS.canyon[f.type]) || PC.VIS[f.type]; if (v) { const o = v(f.spec, this, f, sim); if (o) this.vis.push(o); } });
       this.ghosts = [];
       return this;
     }
@@ -3318,6 +4040,8 @@ body.abyss .intro-rivals { color: #ff9a62; }
           case 'glass': { const t = T.wood('#f4f4ee'); return { body: M({ map: t, roughness: 0.6 }), cap: M({ color: col('#ffffff'), roughness: 0.5 }) }; }
           case 'trellis': { const t = T.wood('#ece7dc'); return { body: M({ map: t, roughness: 0.7 }), cap: M({ color: col('#fbfaf5') }) }; }
           case 'soil': { const t = T.soil(); return { body: M({ map: t, roughness: 1 }), cap: null }; }
+          case 'sandstone': { const t = T.sandstone(); return { body: M({ map: t, roughness: 0.95 }), cap: M({ color: col('#e0a070'), roughness: 0.9 }) }; }
+          case 'plank': { const t = T.wood('#9a7a52'); return { body: M({ map: t, roughness: 0.95 }), cap: M({ color: col('#b89466'), roughness: 0.9 }) }; }
           case 'basalt': case 'temple': { const t = T.templeStone(); return { body: M({ map: t, roughness: 0.9 }), cap: M({ color: col('#4a3e3c'), roughness: 0.7 }) }; }
           case 'obsidian': { const t = T.obsidian(); return { body: M({ map: t, roughness: 0.25, metalness: 0.2 }), cap: M({ color: col('#ff5a1a'), emissive: col('#ff4a10'), emissiveIntensity: 0.9, roughness: 0.5 }) }; }
           default: { const t = T.wood('#a8713f'); return { body: M({ map: t }), cap: M({ color: col('#c99a63'), roughness: 0.75 }) }; }
@@ -3358,6 +4082,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
         }
         case 'glass': m = new THREE.MeshPhysicalMaterial({ map: T.obsidian(), color: col('#ffffff'), roughness: 0.03, metalness: 0.3, clearcoat: 1, clearcoatRoughness: 0.02 }); lift = 0.008; uv = (x, y) => [x / 2, y / 2]; break;
         case 'tar': m = new THREE.MeshPhysicalMaterial({ map: T.tar(), color: col('#ffffff'), roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.1 }); lift = 0.012; uv = (x, y) => [x / 2.5, y / 2.5]; break;
+        case 'sand': { const t = T.sand(); m = new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: col('#f4e2c0') }); uv = (x, y) => [x / 2, y / 2]; break; }
         case 'ash': case 'cinder': { const t = T.ash(); m = new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: col(z.type === 'cinder' ? '#8a7a76' : '#ffffff') }); uv = (x, y) => [x / 2, y / 2]; break; }
         default: return;
       }
@@ -3389,6 +4114,18 @@ body.abyss .intro-rivals { color: #ff9a62; }
           const rim = new THREE.Mesh(skirtGeometry(z.poly, () => z.top + 0.05, -1.5), this.railMaterials('temple').body); G.add(rim);
         }
         this.vis.push({ update: (t) => { lt.offset.set(t * 0.012, t * 0.008); lm.color.setRGB(1, 0.62 + Math.sin(t * 2.1) * 0.05, 0.42); } });
+        return;
+      }
+      if (z.kind === 'chasm') { this.buildChasm(z); return; }
+      if (z.kind === 'water' && z.over) {
+        // A pool set into the green, like the lava pools: water sitting just below the surface, with a stone lip.
+        const n = T.waterNormal().clone(); n.needsUpdate = true; n.repeat.set(0.4, 0.4);
+        const wm = new THREE.MeshPhysicalMaterial({ color: col('#2f8fa8'), roughness: 0.06, metalness: 0.05, transparent: true, opacity: 0.88, normalMap: n, normalScale: new THREE.Vector2(0.35, 0.35), clearcoat: 1 });
+        const geo = surfaceGeometry(z.poly, (x, y) => this.sim.floorHeight(x, y), { lift: 0.012, uv: (x, y) => [x / 2, y / 2], cell: 0.2 });
+        G.add(new THREE.Mesh(geo, wm));
+        const rim = railGeometry(z.poly, true, 'out', 0.16, (x, y) => this.sim.floorHeight(x, y) + 0.04, 0, { thick: 0.06 });
+        G.add(new THREE.Mesh(rim.geo, this.railMaterials('sandstone').cap));
+        this.vis.push({ update: (t) => { n.offset.set(t * 0.02, t * 0.013); } });
         return;
       }
       if (z.kind === 'water') {
@@ -3450,6 +4187,57 @@ body.abyss .intro-rivals { color: #ff9a62; }
         m.position.copy(V(px, py, sim.floorHeight(px, py) + 0.06)); m.castShadow = true;
         G.add(m);
       });
+    }
+
+    // The desert floor for a canyon hole, with any gulches cut out of it so they really drop away.
+    buildDesertGround(hole) {
+      const G = this.holeGroup, b = hole.box;
+      const shape = new THREE.Shape(U.circle(b.cx, b.cy, 230, 64).map(p => new THREE.Vector2(p[0], p[1])));
+      hole.hazards.filter(z => z.kind === 'chasm').forEach(z => {
+        const P = U.cw(z.poly.map(p => [U.clamp(p[0], b.cx - 220, b.cx + 220), U.clamp(p[1], b.cy - 220, b.cy + 220)]));
+        shape.holes.push(new THREE.Path(P.map(p => new THREE.Vector2(p[0], p[1]))));
+      });
+      const geo = new THREE.ShapeGeometry(shape, 1);
+      geo.rotateX(-Math.PI / 2);
+      geo.translate(0, GROUND_Y, 0);
+      const t = T.sand().clone(); t.needsUpdate = true; t.repeat.set(0.25, 0.25);
+      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: t, roughness: 1, color: col('#f0dcc0') }));
+      m.receiveShadow = true;
+      G.add(m);
+    }
+    buildChasm(z) {
+      const G = this.holeGroup;
+      // Banded walls that darken as they go down, so the gulch reads as deep.
+      const P = U.resample(z.poly, 0.4, true); P.push(P[0]);
+      const rows = [GROUND_Y, GROUND_Y - 0.3, -1.2, -1.9, -2.8, -4, -6, -10];
+      const pos = [], uvs = [], cols = [], idx = [], top = col('#ffffff'), low = col('#2a1208');
+      let run = 0;
+      P.forEach((p, i) => {
+        if (i) run += Math.hypot(p[0] - P[i - 1][0], p[1] - P[i - 1][1]);
+        rows.forEach(y => {
+          pos.push(p[0], y, -p[1]); uvs.push(run / 3, y / 2.2);
+          const k = Math.pow(U.clamp((y + 4.6) / (4.6 + GROUND_Y), 0, 1), 1.6), c = low.clone().lerp(top, k);
+          cols.push(c.r, c.g, c.b);
+        });
+      });
+      const R = rows.length;
+      for (let i = 0; i < P.length - 1; i++) for (let r = 0; r < R - 1; r++) { const a = i * R + r, b = (i + 1) * R + r; idx.push(a, b, a + 1, b, b + 1, a + 1); }
+      const wg = new THREE.BufferGeometry();
+      wg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      wg.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+      wg.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+      wg.setIndex(idx); wg.computeVertexNormals();
+      const wt = T.sandstone().clone(); wt.needsUpdate = true;
+      const walls = new THREE.Mesh(wg, new THREE.MeshStandardMaterial({ map: wt, vertexColors: true, roughness: 0.95, side: THREE.DoubleSide }));
+      G.add(walls);
+      const shape = new THREE.Shape(z.poly.map(p => new THREE.Vector2(p[0], p[1])));
+      const floor = new THREE.Mesh(new THREE.ShapeGeometry(shape, 1).rotateX(-Math.PI / 2).translate(0, -10, 0), new THREE.MeshBasicMaterial({ color: col('#2a140a') }));
+      G.add(floor);
+      // A dark haze deeper down so the gulch looks deep.
+      for (let i = 1; i <= 3; i++) {
+        const haze = new THREE.Mesh(new THREE.ShapeGeometry(shape, 1).rotateX(-Math.PI / 2).translate(0, GROUND_Y - i * 2.6, 0), new THREE.MeshBasicMaterial({ color: col('#3a1e10'), transparent: true, opacity: 0.32, depthWrite: false }));
+        G.add(haze);
+      }
     }
 
     // Abyss platforms have no rails, so their edges glow to show where the drop is.
@@ -5037,6 +5825,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
     return g;
   }
   const M4 = (x, y, z, rx = 0, ry = 0, rz = 0, sx = 1, sy = 1, sz = 1) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz));
+  VIS.mergeGeos = mergeGeos; VIS.M4 = M4;
 
   // A ruined island: a floor slab on a rocky root, with broken columns, an arch, a wall and steps.
   function ruinIsland(rnd, r) {
@@ -5739,6 +6528,773 @@ body.abyss .intro-rivals { color: #ff9a62; }
   };
 })(window.PC = window.PC || {});
 
+/* Putt Club: how the Canyon looks. The desert round each hole, the cacti and tumbleweeds, the springs,
+   and desert versions of the moving parts (PC.VIS.canyon[type] is used instead of PC.VIS[type] when a hole's look.theme is 'canyon'). */
+(function (PC) {
+  'use strict';
+  const U = PC.U, T = PC.TEX, TAU = U.TAU;
+  const col = PC.col, V = PC.V;
+  const VIS = PC.VIS;
+  const CV = VIS.canyon = {};
+  const GY = () => PC.GROUND_Y;
+  const M = (hex, o) => new THREE.MeshStandardMaterial(Object.assign({ color: col(hex), roughness: 0.85 }, o || {}));
+  const mesh = (geo, mat, cast = true) => { const m = new THREE.Mesh(geo, mat); m.castShadow = cast; m.receiveShadow = true; return m; };
+  const at = (o, x, y, h) => { o.position.copy(V(x, y, h)); return o; };
+  const merge = parts => VIS.mergeGeos(parts);
+  const M4 = (...a) => VIS.M4(...a);
+  const now = (t, sim) => (sim ? sim.t : t);
+
+  const texMat = (tex, rx, ry, o) => { const t = tex.clone(); t.needsUpdate = true; t.repeat.set(rx, ry); return new THREE.MeshStandardMaterial(Object.assign({ map: t, roughness: 0.9 }, o || {})); };
+  const stoneMat = (rx = 1, ry = 1, tint = '#ffffff') => texMat(T.sandstone(), rx, ry, { color: col(tint), roughness: 0.95 });
+  const woodMat = (tone = '#8a6a44', rx = 1, ry = 1) => texMat(T.wood(tone), rx, ry, { roughness: 0.95 });
+  const rough = (g, seed, amt = 0.2) => {
+    const rnd = U.rng(seed), p = g.attributes.position, seen = new Map();
+    for (let i = 0; i < p.count; i++) {
+      const key = p.getX(i).toFixed(3) + ',' + p.getY(i).toFixed(3) + ',' + p.getZ(i).toFixed(3);
+      if (!seen.has(key)) seen.set(key, 1 - amt / 2 + rnd() * amt);
+      const k = seen.get(key);
+      p.setXYZ(i, p.getX(i) * k, p.getY(i) * (1 + (k - 1) * 0.4), p.getZ(i) * k);
+    }
+    g.computeVertexNormals();
+    return g;
+  };
+
+  // A text board painted on a canvas, for shop fronts.
+  function boardTex(text, bg, fg) {
+    const c = document.createElement('canvas'); c.width = 512; c.height = 128;
+    const g = c.getContext('2d');
+    g.fillStyle = bg; g.fillRect(0, 0, 512, 128);
+    for (let i = 0; i < 5; i++) { g.fillStyle = 'rgba(0,0,0,' + (0.05 + (i % 2) * 0.05) + ')'; g.fillRect(0, i * 26, 512, 2); }
+    g.strokeStyle = fg; g.lineWidth = 6; g.strokeRect(10, 10, 492, 108);
+    g.fillStyle = fg; g.font = 'bold 64px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(text, 256, 68, 470);
+    const t = new THREE.CanvasTexture(c); t.anisotropy = 4;
+    if (THREE.sRGBEncoding) t.encoding = THREE.sRGBEncoding;
+    return t;
+  }
+
+  // ---------- Cacti ----------
+  const CACTUS_TONES = { saguaro: '#4c8a3c', barrel: '#5a8f3a', pear: '#6a9e4c', cholla: '#a9a65e' };
+  const cactusMats = {};
+  function cactusMat(kind) {
+    if (!cactusMats[kind]) {
+      const t = T.cactus(CACTUS_TONES[kind]).clone(); t.needsUpdate = true;
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(kind === 'barrel' ? 2.5 : kind === 'saguaro' ? 2 : 1, kind === 'saguaro' ? 3 : 1);
+      cactusMats[kind] = new THREE.MeshStandardMaterial({ map: t, roughness: 0.7 });
+    }
+    return cactusMats[kind];
+  }
+  // One cactus as a group, base at 0. r and h match the physics (how wide and tall it is to the ball).
+  function cactusModel(c, rnd) {
+    const g = new THREE.Group(), mat = cactusMat(c.kind), parts = [];
+    const add = (geo, m) => parts.push({ g: geo, m });
+    const blossoms = [];
+    if (c.kind === 'saguaro') {
+      const r = c.r * 0.95, h = c.h;
+      add(new THREE.CylinderGeometry(r * 0.92, r, h - r, 18, 3), M4(0, (h - r) / 2, 0));
+      add(new THREE.SphereGeometry(r * 0.92, 18, 8, 0, TAU, 0, Math.PI / 2), M4(0, h - r, 0));
+      const arms = 1 + Math.floor(rnd() * 2.2);
+      for (let i = 0; i < arms; i++) {
+        const a = (i === 0 ? rnd() * TAU : i * 2.4 + rnd()), ar = r * 0.58, y0 = h * (0.38 + rnd() * 0.2), out = r + 0.22 + rnd() * 0.12, up = 0.35 + rnd() * 0.45;
+        const ca = Math.cos(a), sa = Math.sin(a);
+        add(new THREE.CylinderGeometry(ar, ar, out, 12), M4(ca * out / 2, y0, -sa * out / 2, 0, a, Math.PI / 2));
+        add(new THREE.SphereGeometry(ar, 12, 8), M4(ca * out, y0, -sa * out));
+        add(new THREE.CylinderGeometry(ar * 0.92, ar, up, 12), M4(ca * out, y0 + up / 2, -sa * out));
+        add(new THREE.SphereGeometry(ar * 0.92, 12, 6, 0, TAU, 0, Math.PI / 2), M4(ca * out, y0 + up, -sa * out));
+      }
+      if (rnd() < 0.7) for (let i = 0; i < 4; i++) { const a = (i / 4) * TAU + rnd(); blossoms.push([Math.cos(a) * r * 0.5, h - r * 0.25, Math.sin(a) * r * 0.5, '#fff6e0']); }
+    } else if (c.kind === 'barrel') {
+      const r = c.r * 0.98, h = c.h;
+      const prof = [];
+      for (let i = 0; i <= 12; i++) { const t = i / 12; prof.push(new THREE.Vector2(r * Math.sin(Math.PI * (0.08 + t * 0.84)) * (t < 0.5 ? 1 : 1 - (t - 0.5) * 0.25), t * h)); }
+      prof.unshift(new THREE.Vector2(0, 0)); prof.push(new THREE.Vector2(0, h));
+      add(new THREE.LatheGeometry(prof, 20), M4(0, 0, 0));
+      for (let i = 0; i < 6; i++) { const a = (i / 6) * TAU; blossoms.push([Math.cos(a) * r * 0.32, h - 0.02, Math.sin(a) * r * 0.32, i % 2 ? '#ffcf3a' : '#ff6a3a']); }
+    } else if (c.kind === 'pear') {
+      // Pads, flat ovals, the first ones on the ground and more growing out of their rims.
+      const pads = [];
+      const pad = (x, y, z, ry, rz, s) => { add(new THREE.SphereGeometry(1, 14, 10), M4(x, y, z, 0, ry, rz, 0.17 * s, 0.22 * s, 0.045 * s)); pads.push([x, y, z, ry, rz, s]); };
+      const n0 = 3;
+      for (let i = 0; i < n0; i++) {
+        const a = (i / n0) * TAU + rnd(), d = c.r * 0.42;
+        pad(Math.cos(a) * d, 0.2, -Math.sin(a) * d, a + Math.PI / 2, (rnd() - 0.5) * 0.4, 1);
+      }
+      for (let i = 0; i < 4; i++) {
+        const b = pads[i % n0], a = b[3] - Math.PI / 2, s = 0.8 + rnd() * 0.15;
+        const tilt = (rnd() < 0.5 ? -1 : 1) * (0.3 + rnd() * 0.4);
+        const x = b[0] * 0.6 - Math.sin(tilt) * 0.12 * Math.cos(b[3]), z = b[2] * 0.6;
+        pad(x, 0.2 + 0.36, z, b[3] + (rnd() - 0.5) * 0.8, tilt, s);
+        if (rnd() < 0.8) blossoms.push([x + (rnd() - 0.5) * 0.12, 0.2 + 0.36 + 0.17 * s, z, '#c2185b', 0.045]);
+      }
+    } else {
+      // Cholla: a short trunk with jointed, fuzzy branches.
+      const seg = (x0, y0, z0, x1, y1, z1, r) => {
+        const dx = x1 - x0, dy = y1 - y0, dz = z1 - z0, L = Math.hypot(dx, dy, dz);
+        const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(dx / L, dy / L, dz / L));
+        add(new THREE.CylinderGeometry(r, r * 1.1, L, 9), new THREE.Matrix4().compose(new THREE.Vector3((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2), q, new THREE.Vector3(1, 1, 1)));
+        add(new THREE.SphereGeometry(r * 1.05, 9, 6), M4(x1, y1, z1));
+      };
+      seg(0, 0, 0, 0, c.h * 0.45, 0, 0.075);
+      const tips = [];
+      for (let i = 0; i < 5; i++) {
+        const a = (i / 5) * TAU + rnd() * 0.6, out = 0.1 + rnd() * 0.12, y1 = c.h * (0.55 + rnd() * 0.2);
+        const x1 = Math.cos(a) * out, z1 = Math.sin(a) * out;
+        seg(0, c.h * 0.42, 0, x1, y1, z1, 0.06);
+        const x2 = x1 * 1.6 + (rnd() - 0.5) * 0.05, z2 = z1 * 1.6, y2 = Math.min(c.h, y1 + 0.18 + rnd() * 0.12);
+        seg(x1, y1, z1, x2, y2, z2, 0.055);
+        tips.push([x2, y2, z2]);
+      }
+      tips.forEach(p => { if (rnd() < 0.6) blossoms.push([p[0], p[1] + 0.05, p[2], '#e8d84a', 0.04]); });
+    }
+    const body = mesh(merge(parts), mat);
+    g.add(body);
+    if (blossoms.length) {
+      const bg = new THREE.SphereGeometry(1, 8, 6);
+      blossoms.forEach(([x, y, z, c2, s]) => { const b = mesh(bg, M(c2, { roughness: 0.6, emissive: col(c2), emissiveIntensity: 0.12 }), false); b.scale.set(s || 0.05, (s || 0.05) * 0.7, s || 0.05); b.position.set(x, y, z); g.add(b); });
+    }
+    g.rotation.y = rnd() * TAU;
+    return g;
+  }
+  VIS.cactusModel = cactusModel;
+
+  VIS.cacti = function (s, world, f) {
+    const sim = world.sim;
+    const items = f.list.map((c, i) => {
+      const g = cactusModel(c, U.rng(Math.round(c.x * 97 + c.y * 31) + i));
+      const base = new THREE.Group(); base.add(g);
+      // a little ring of pebbles round its foot
+      const peb = new THREE.Mesh(new THREE.RingGeometry(c.r * 0.9, c.r * 1.25, 18), M('#b08a5a', { roughness: 1 }));
+      peb.rotation.x = -Math.PI / 2; peb.position.y = 0.006; peb.receiveShadow = true;
+      base.add(peb);
+      world.holeGroup.add(at(base, c.x, c.y, sim.groundRaw(c.x, c.y)));
+      return { c, g, ry: g.rotation.y };
+    });
+    return {
+      update(t, dt, s2) {
+        const tt = now(t, s2);
+        items.forEach(it => {
+          const k = tt - (it.c.hit || -9);
+          if (k >= 0 && k < 0.7) { const w = Math.sin(k * 34) * 0.14 * (1 - k / 0.7); it.g.rotation.z = w; it.g.rotation.x = w * 0.5; }
+          else { it.g.rotation.z = Math.sin(t * 0.6 + it.c.x) * 0.006; it.g.rotation.x = 0; }
+        });
+      },
+    };
+  };
+
+  // ---------- Tumbleweeds ----------
+  VIS.tumbleweeds = function (s, world, f) {
+    const sim = world.sim;
+    const twig = T.twigs();
+    const shellMat = new THREE.MeshStandardMaterial({ map: twig, alphaTest: 0.35, side: THREE.DoubleSide, roughness: 1, color: col('#e8d0a0') });
+    const depth = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: twig, alphaTest: 0.35 });
+    const stickMat = M('#9a7a4c', { roughness: 1 });
+    const weeds = f.list.map((w, i) => {
+      const g = new THREE.Group(), spin = new THREE.Group();
+      const rnd = U.rng(77 + i * 13);
+      [1, 0.78, 0.55].forEach((k, j) => {
+        const sh = new THREE.Mesh(new THREE.IcosahedronGeometry(w.r * k, 2), shellMat);
+        sh.rotation.set(rnd() * 6, rnd() * 6, rnd() * 6);
+        sh.castShadow = true; sh.customDepthMaterial = depth;
+        spin.add(sh);
+      });
+      for (let k = 0; k < 7; k++) {
+        const tor = mesh(new THREE.TorusGeometry(w.r * (0.7 + rnd() * 0.28), 0.012, 4, 22, TAU * (0.5 + rnd() * 0.5)), stickMat, false);
+        tor.rotation.set(rnd() * 6, rnd() * 6, rnd() * 6);
+        spin.add(tor);
+      }
+      g.add(spin);
+      world.holeGroup.add(g);
+      return { w, g, spin, px: w.x, py: w.y, hop: rnd() * 6, dust: 0 };
+    });
+    const axis = new THREE.Vector3(), q = new THREE.Quaternion();
+    return {
+      update(t, dt, s2) {
+        const tt = now(t, s2);
+        weeds.forEach(o => {
+          const w = o.w, dx = w.x - o.px, dy = w.y - o.py, d = Math.hypot(dx, dy);
+          o.px = w.x; o.py = w.y;
+          if (d > 1e-5 && d < 1) {
+            axis.set(-dy / d, 0, -dx / d);
+            q.setFromAxisAngle(axis, d / w.r);
+            o.spin.quaternion.premultiply(q);
+            o.hop += d * 2.2;
+          }
+          const sp = Math.hypot(w.vx, w.vy);
+          const hop = Math.abs(Math.sin(o.hop)) * 0.07 * Math.min(1, sp / 1.2);
+          const k = tt - (w.hit || -9), sq = k >= 0 && k < 0.35 ? 1 - Math.sin(k * 26) * 0.12 * (1 - k / 0.35) : 1;
+          o.g.scale.set(2 - sq, sq, 2 - sq);
+          o.g.position.copy(V(w.x, w.y, sim.groundRaw(w.x, w.y) + w.r * sq + hop));
+          // a little dust kicked up when it lands from a hop
+          o.dust += dt * sp;
+          if (o.dust > 0.5 && hop < 0.01) {
+            o.dust = 0;
+            world.glow.spawn({ x: w.x + (Math.random() - 0.5) * w.r, y: sim.groundRaw(w.x, w.y) + 0.05, z: -w.y + (Math.random() - 0.5) * w.r, vx: -w.vx * 0.15, vy: 0.25, vz: w.vy * 0.15, g: -0.2, life: 0.9, size: 0.14, grow: 1.8, color: col('#d8b88a'), a: 0.4 });
+          }
+        });
+      },
+    };
+  };
+
+  // ---------- Springs (Ultra; drawn here so every course can use them) ----------
+  class Helix extends THREE.Curve {
+    constructor(r, h, turns) { super(); this.r = r; this.h = h; this.turns = turns; }
+    getPoint(t, out = new THREE.Vector3()) { const a = t * this.turns * TAU; return out.set(Math.cos(a) * this.r, t * this.h, Math.sin(a) * this.r); }
+  }
+  VIS.spring = function (s, world, f, hell) {
+    const sim = world.sim, h0 = sim.groundRaw(s.x, s.y);
+    const trap = s.dir !== undefined;
+    const g = new THREE.Group();
+    const metal = hell ? M('#3a3036', { metalness: 0.7, roughness: 0.4 }) : M('#8a8f96', { metalness: 0.8, roughness: 0.3 });
+    const padCol = trap ? '#e0332a' : '#f2b81f';
+    const housing = mesh(new THREE.TorusGeometry(s.r * 0.98, 0.06, 8, 28), metal);
+    housing.rotation.x = -Math.PI / 2; housing.position.y = 0.03;
+    const well = new THREE.Mesh(new THREE.CircleGeometry(s.r * 0.98, 28), new THREE.MeshBasicMaterial({ color: col('#1a1210') }));
+    well.rotation.x = -Math.PI / 2; well.position.y = 0.004;
+    g.add(housing, well);
+    // the coil, squashed flat until it fires
+    const coilGeo = new THREE.TubeGeometry(new Helix(s.r * 0.6, 1, 5), 120, 0.035, 6, false);
+    const coil = mesh(coilGeo, hell ? M('#c8a050', { metalness: 0.8, roughness: 0.35 }) : M('#d8d8d8', { metalness: 0.9, roughness: 0.25 }));
+    coil.scale.y = 0.03;
+    g.add(coil);
+    // the pad on top, with chevrons (jump) or an arrow (trap) painted on
+    const c = document.createElement('canvas'); c.width = c.height = 128;
+    const x2 = c.getContext('2d');
+    x2.fillStyle = padCol; x2.beginPath(); x2.arc(64, 64, 62, 0, TAU); x2.fill();
+    x2.strokeStyle = 'rgba(0,0,0,0.35)'; x2.lineWidth = 6; x2.beginPath(); x2.arc(64, 64, 56, 0, TAU); x2.stroke();
+    x2.fillStyle = trap ? '#ffffff' : '#5a3a08'; x2.strokeStyle = x2.fillStyle; x2.lineWidth = 12; x2.lineCap = 'round'; x2.lineJoin = 'round';
+    if (trap) { x2.beginPath(); x2.moveTo(24, 64); x2.lineTo(92, 64); x2.stroke(); x2.beginPath(); x2.moveTo(104, 64); x2.lineTo(76, 40); x2.lineTo(76, 88); x2.closePath(); x2.fill(); }
+    else { [44, 74].forEach(y => { x2.beginPath(); x2.moveTo(36, y + 14); x2.lineTo(64, y - 10); x2.lineTo(92, y + 14); x2.stroke(); }); }
+    const tex = new THREE.CanvasTexture(c); if (THREE.sRGBEncoding) tex.encoding = THREE.sRGBEncoding;
+    const padTop = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5, metalness: 0.2, emissive: col(padCol), emissiveIntensity: hell ? 0.5 : 0.12 });
+    const pad = mesh(new THREE.CylinderGeometry(s.r * 0.86, s.r * 0.86, 0.05, 28), [M(padCol, { metalness: 0.4, roughness: 0.4 }), padTop, M(padCol)]);
+    pad.position.y = 0.035;
+    // turn the pad so its arrow points the way it throws, or its chevrons point at the landing
+    const dir = trap ? s.dir : s.land ? Math.atan2(s.land[1] - s.y, s.land[0] - s.x) : Math.PI / 2;
+    pad.rotation.y = dir + (trap ? Math.PI / 2 : 0);   // the cap's u runs along local z, v along local x
+    g.add(pad);
+    world.holeGroup.add(at(g, s.x, s.y, h0));
+    // a faint marker where a jump spring lands, so you know where it sends you
+    if (s.land) {
+      const mk = new THREE.Mesh(new THREE.RingGeometry(0.28, 0.36, 24), new THREE.MeshBasicMaterial({ color: col('#f2b81f'), transparent: true, opacity: 0.55, depthWrite: false }));
+      mk.rotation.x = -Math.PI / 2;
+      world.holeGroup.add(at(mk, s.land[0], s.land[1], sim.floorHeight(s.land[0], s.land[1]) + 0.012));
+    }
+    let fired = -9;
+    return {
+      update(t, dt, s2) {
+        const tt = now(t, s2), k = tt - (f.hit === undefined ? -9 : f.hit);
+        let up = 0;
+        if (k >= 0 && k < 0.9) up = k < 0.06 ? k / 0.06 : Math.max(0, Math.exp(-(k - 0.06) * 5) * Math.cos((k - 0.06) * 22));
+        const lift = Math.max(0, up) * 0.42;
+        pad.position.y = 0.035 + lift;
+        coil.scale.y = 0.03 + lift;
+        if (f.hit > fired && k < 0.2) {
+          fired = f.hit;
+          for (let i = 0; i < 18; i++) { const a = Math.random() * TAU, sp = 0.6 + Math.random(); world.glow.spawn({ x: s.x, y: h0 + 0.1, z: -s.y, vx: Math.cos(a) * sp, vy: 1 + Math.random() * 2, vz: Math.sin(a) * sp, g: -6, life: 0.5, size: 0.06, color: col(trap ? '#ff6a4a' : '#ffe27a') }); }
+        }
+        padTop.emissiveIntensity = (hell ? 0.5 : 0.12) + (trap ? 0.1 : 0.15) * (1 + Math.sin(t * 4)) + (k >= 0 && k < 0.4 ? 1 : 0);
+      },
+    };
+  };
+  if (VIS.abyss) VIS.abyss.spring = (s, world, f) => VIS.spring(s, world, f, true);
+
+  // ---------- The desert round each hole ----------
+  VIS.decorateCanyon = function (hole, world, sim) {
+    const rnd = U.rng(U.hash(hole.id) + 3);
+    const box = hole.box, G = world.holeGroup, base = GY();
+    const L = world.L;
+    const sunset = hole.look.light === 'mesa';
+    const polys = hole.floors.map(f => f.poly).concat(hole.hazards.map(z => z.poly));
+    const clear = (x, y, m) => polys.every(P => !U.inPoly(x, y, P) && U.distToPoly(x, y, P) > m);
+    const fwd = Math.atan2(hole.cup[1] - hole.tee[1], hole.cup[0] - hole.tee[0]);
+    const behind = (x, y) => { const a = Math.atan2(y - hole.tee[1], x - hole.tee[0]); return Math.abs(U.wrapAngle(a - (fwd + Math.PI))) < 0.7 && Math.hypot(x - hole.tee[0], y - hole.tee[1]) < 18; };
+    const cx = box.cx, cy = box.cy;
+    const tints = sunset ? ['#ffffff', '#ffd8c0', '#f4c0a0', '#ffe2cc'] : ['#ffffff', '#f6ddc8', '#ecc8a8', '#fff0e0'];
+
+    // --- Mesas, buttes and spires all round the horizon, in banded red sandstone ---
+    const mesaGeo = rough(new THREE.CylinderGeometry(0.86, 1, 1, 9, 3), 11, 0.12);
+    const butteGeo = rough(new THREE.CylinderGeometry(0.7, 1, 1, 7, 4), 12, 0.16);
+    const spireGeo = rough(new THREE.CylinderGeometry(0.25, 1, 1, 7, 5), 13, 0.22);
+    const capGeo = rough(new THREE.CylinderGeometry(1.05, 0.9, 1, 9, 1), 14, 0.12);
+    const big = [], mid = [], spires = [], caps = [];
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * TAU + rnd() * 0.3, d = 150 + rnd() * 70, r = 18 + rnd() * 26, h = 22 + rnd() * 26;
+      const x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d;
+      big.push({ x, y: base + h / 2 - 1, z: -y, sx: r * (1 + rnd() * 0.6), sy: h, sz: r, ry: rnd() * 6, c: tints[i % 4] });
+      caps.push({ x, y: base + h - 1 + 0.6, z: -y, sx: r * (1 + rnd() * 0.6) * 0.9, sy: 1.6, sz: r * 0.9, ry: rnd() * 6, c: '#c87a4a' });
+    }
+    for (let i = 0; i < 14; i++) {
+      const a = rnd() * TAU, d = 55 + rnd() * 70;
+      const x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d;
+      if (behind(x, y)) continue;
+      const r = 3 + rnd() * 6, h = 10 + rnd() * 22;
+      (rnd() < 0.6 ? mid : spires).push({ x, y: base + h / 2 - 0.5, z: -y, sx: r, sy: h, sz: r * (0.8 + rnd() * 0.4), ry: rnd() * 6, c: tints[i % 4] });
+    }
+    VIS.instanced(world, mesaGeo, stoneMat(3, 6), big, false);
+    VIS.instanced(world, capGeo, stoneMat(3, 1, '#b8704a'), caps, false);
+    VIS.instanced(world, butteGeo, stoneMat(2, 5), mid, false);
+    VIS.instanced(world, spireGeo, stoneMat(1, 5), spires, false);
+
+    // --- Boulders, scrub, dry grass and cacti on the sand near the course ---
+    const rocks = [], scrub = [], grass = [], decorCacti = [];
+    for (let i = 0; i < 520; i++) {
+      const x = box.x0 - 18 + rnd() * (box.w + 36), y = box.y0 - 12 + rnd() * (box.h + 30);
+      if (!clear(x, y, 0.9) || behind(x, y) && Math.hypot(x - hole.tee[0], y - hole.tee[1]) < 9) continue;
+      if (hole.hazards.some(z => z.kind === 'chasm' && U.distToPoly(x, y, z.poly) < 1.4)) continue;
+      const r = rnd();
+      if (r < 0.2) { const s = 0.12 + rnd() * 0.36; rocks.push({ x, y: base + s * 0.3, z: -y, sx: s * (1 + rnd()), sy: s * 0.7, sz: s, rx: rnd(), ry: rnd() * 6, c: ['#c88a5a', '#b87a4c', '#d8a070', '#a86a40'][i % 4] }); }
+      else if (r < 0.34) { const s = 0.12 + rnd() * 0.16; for (let k = 0; k < 3; k++) scrub.push({ x: x + (rnd() - 0.5) * s * 2, y: base + s * 0.5, z: -(y + (rnd() - 0.5) * s * 2), s: s * (0.7 + rnd() * 0.5), sy: s * 0.75, ry: rnd() * 6, c: ['#76804c', '#86905a', '#6a7444', '#8a8a56'][(i + k) % 4] }); }
+      else if (r < 0.85) { const s = 0.12 + rnd() * 0.2; grass.push({ x, y: base + s * 0.5, z: -y, sx: s * 0.6, sy: s, sz: s * 0.6, ry: rnd() * 6, c: ['#d8c080', '#c8a860', '#e0cc90'][i % 3] }); }
+      else if (decorCacti.length < 22 && clear(x, y, 3.2)) decorCacti.push([x, y]);
+    }
+    VIS.instanced(world, new THREE.DodecahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ roughness: 1, flatShading: true }), rocks);
+    VIS.instanced(world, new THREE.IcosahedronGeometry(1, 1), new THREE.MeshStandardMaterial({ roughness: 1, flatShading: true }), scrub);
+    VIS.instanced(world, new THREE.ConeGeometry(1, 1, 5, 1, true), new THREE.MeshStandardMaterial({ roughness: 1, side: THREE.DoubleSide }), grass, false);
+    const kinds = ['saguaro', 'saguaro', 'barrel', 'pear', 'cholla'];
+    decorCacti.forEach(([x, y], i) => {
+      const kind = kinds[i % kinds.length], big2 = kind === 'saguaro' ? 1 + rnd() * 0.8 : 1;
+      const m = cactusModel({ kind, r: ({ saguaro: 0.3, barrel: 0.34, pear: 0.42, cholla: 0.3 })[kind] * big2, h: ({ saguaro: 2.2, barrel: 0.55, pear: 0.7, cholla: 0.9 })[kind] * big2 }, U.rng(i * 7 + 1));
+      m.traverse(o => { if (o.isMesh) o.castShadow = kind === 'saguaro'; });
+      G.add(at(m, x, y, base));
+    });
+    // Far-off saguaros on the plain, for scale
+    const farS = [];
+    for (let i = 0; i < 70; i++) {
+      const a = rnd() * TAU, d = 28 + rnd() * 70, x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d;
+      if (behind(x, y) || !clear(x, y, 4)) continue;
+      const h = 2.5 + rnd() * 3;
+      farS.push({ x, y: base + h / 2, z: -y, sx: 0.3, sy: h, sz: 0.3, c: '#5a8a46' });
+      if (rnd() < 0.8) farS.push({ x: x + 0.45, y: base + h * 0.55, z: -y, sx: 0.2, sy: h * 0.35, sz: 0.2, c: '#5a8a46' });
+    }
+    VIS.instanced(world, new THREE.CylinderGeometry(1, 1, 1, 8), new THREE.MeshStandardMaterial({ roughness: 0.8 }), farS, false);
+
+    // --- An old wooden fence and a wagon wheel by the tee, and a sandstone path up to it ---
+    const ta = Math.atan2(hole.cup[1] - hole.tee[1], hole.cup[0] - hole.tee[0]);
+    const slabs = [];
+    for (let i = 1; i < 9; i++) {
+      const d = 1.2 + i * 0.8;
+      const x = hole.tee[0] - Math.cos(ta) * d + Math.sin(i * 1.7) * 0.15, y = hole.tee[1] - Math.sin(ta) * d;
+      if (!clear(x, y, 0.35)) continue;
+      slabs.push({ x, y: base + 0.03, z: -y, sx: 0.36 + rnd() * 0.12, sy: 0.06, sz: 0.28 + rnd() * 0.1, ry: rnd() * 3, c: '#e0a878' });
+    }
+    VIS.instanced(world, new THREE.CylinderGeometry(1, 1, 1, 7), new THREE.MeshStandardMaterial({ roughness: 0.95 }), slabs, false);
+    const fence = [], rails2 = [];
+    const fx0 = box.x0 - 4.5, fy0 = box.y0 + 1;
+    for (let i = 0; i < 6; i++) {
+      const y = fy0 + i * 1.6;
+      if (!clear(fx0, y, 0.6)) continue;
+      fence.push({ x: fx0 + (rnd() - 0.5) * 0.1, y: base + 0.5, z: -y, sx: 0.1, sy: 1, sz: 0.1, rz: (rnd() - 0.5) * 0.12, c: '#8a6a44' });
+      if (i < 5 && clear(fx0, y + 1.6, 0.6)) [0.35, 0.75].forEach(h => rails2.push({ x: fx0, y: base + h, z: -(y + 0.8), sx: 0.05, sy: 0.08, sz: 1.7, rx: (rnd() - 0.5) * 0.05, c: '#9a7a52' }));
+    }
+    VIS.instanced(world, new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ roughness: 1 }), fence.concat(rails2));
+    VIS.sign(hole, world, sim);
+
+    // --- Sky: thin clouds, and vultures circling high above ---
+    const clouds = [];
+    for (let i = 0; i < 7; i++) {
+      const a = rnd() * TAU, d = 120 + rnd() * 60, x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d, h = 50 + rnd() * 20;
+      for (let k = 0; k < 4; k++) clouds.push({ x: x + (rnd() - 0.5) * 30, y: h + rnd() * 3, z: -(y + (rnd() - 0.5) * 8), s: 9 + rnd() * 8, sy: 1.6 + rnd(), c: sunset ? '#ffd8c0' : '#ffffff' });
+    }
+    VIS.instanced(world, new THREE.IcosahedronGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xffffff, fog: false, transparent: true, opacity: 0.8 }), clouds, false);
+    const birds = [];
+    for (let i = 0; i < 3; i++) {
+      const b = new THREE.Group(), wm = M('#2a2220', { side: THREE.DoubleSide });
+      const wl = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.22), wm), wr = wl.clone();
+      wl.position.x = -0.45; wr.position.x = 0.45;
+      const lp = new THREE.Group(), rp = new THREE.Group(); lp.add(wl); rp.add(wr);
+      const body = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), wm); body.scale.z = 2.4;
+      b.add(lp, rp, body);
+      G.add(b);
+      birds.push({ b, lp, rp, ph: rnd() * 9, r: 10 + rnd() * 8, h: 16 + rnd() * 8, cx: cx + (rnd() - 0.5) * 10, cy: cy + 6 + rnd() * 10 });
+    }
+
+    // --- Drifting dust, and the odd shimmer of heat off the sand ---
+    let dustT = 0;
+    world.vis.push({
+      update(t, dt) {
+        birds.forEach(o => {
+          const a = t * 0.18 + o.ph;
+          o.b.position.copy(V(o.cx + Math.cos(a) * o.r, o.cy + Math.sin(a) * o.r, o.h + Math.sin(t * 0.5 + o.ph)));
+          o.b.rotation.set(0, a, 0.25);
+          const flap = Math.sin(t * 2 + o.ph) > 0.85 ? Math.sin(t * 9) * 0.4 : 0.08;
+          o.lp.rotation.z = flap; o.rp.rotation.z = -flap;
+        });
+        dustT += dt;
+        if (dustT > 0.1) {
+          dustT = 0;
+          const x = box.x0 - 4 + Math.random() * (box.w + 8), y = box.y0 + Math.random() * box.h;
+          world.glow.spawn({ x, y: 0.15 + Math.random() * 1.2, z: -y, vx: 0.35, vy: 0.04, vz: (Math.random() - 0.5) * 0.1, g: 0, life: 4, size: 0.03, color: col('#fff0d0'), a: 0.6, wobble: 0.3, seed: Math.random() * 9, drag: 1 });
+        }
+      },
+    });
+  };
+
+  // ---------- Posts: sandstone pillars ----------
+  const basePost = VIS.post;
+  VIS.post = function (p, world) {
+    if (p.style !== 'sandrock') return basePost(p, world);
+    const h0 = world.sim.groundRaw(p.x, p.y);
+    const geo = rough(new THREE.CylinderGeometry(p.r * 0.85, p.r * 1.08, p.h + 0.3, 10, 4), Math.round(p.x * 31 + p.y * 7), 0.16);
+    const m = mesh(geo, stoneMat(1, 0.6));
+    world.holeGroup.add(at(m, p.x, p.y, h0 + (p.h + 0.3) / 2 - 0.3));
+  };
+
+  // ---------- Desert versions of the moving parts ----------
+  // Saloon doors: batwing doors on two posts, swinging open and shut.
+  CV.gates = function (s, world, f) {
+    const sim = world.sim;
+    const plank = woodMat('#8a5a34', 0.4, 0.6), dark = M('#5a3a22', { roughness: 1 });
+    const doors = f.list.map(g => {
+      const dx = g.b[0] - g.a[0], dy = g.b[1] - g.a[1], len = Math.hypot(dx, dy), half = len / 2;
+      const ang = Math.atan2(dy, dx);
+      const make = (hinge, dir) => {
+        const piv = new THREE.Group(), holder = new THREE.Group();
+        const w = half - 0.03;
+        const frame = mesh(new THREE.BoxGeometry(w, 0.6, 0.05), plank);
+        frame.position.set(w / 2, 0.32, 0);
+        holder.add(frame);
+        for (let i = 0; i < 4; i++) { const sl = mesh(new THREE.BoxGeometry(w * 0.8, 0.035, 0.07), dark); sl.position.set(w / 2, 0.16 + i * 0.1, 0); sl.rotation.x = 0.4; holder.add(sl); }
+        const top = mesh(new THREE.CylinderGeometry(w / 2, w / 2, 0.05, 16, 1, false, 0, Math.PI), plank);
+        top.rotation.x = Math.PI / 2; top.rotation.z = Math.PI / 2; top.position.set(w / 2, 0.62, 0); top.scale.set(1, 1, 0.35);
+        holder.add(top);
+        holder.scale.x = dir;
+        piv.add(holder);
+        piv.position.copy(V(hinge[0], hinge[1], sim.groundRaw(hinge[0], hinge[1])));
+        piv.rotation.y = ang;
+        world.holeGroup.add(piv);
+        const post = mesh(new THREE.BoxGeometry(0.12, 1.25, 0.12), dark);
+        world.holeGroup.add(at(post, hinge[0], hinge[1], sim.groundRaw(hinge[0], hinge[1]) + 0.62));
+        return piv;
+      };
+      // a lintel with a sign over the doorway
+      const mx = (g.a[0] + g.b[0]) / 2, my = (g.a[1] + g.b[1]) / 2, h0 = sim.groundRaw(mx, my);
+      const lintel = mesh(new THREE.BoxGeometry(len + 0.3, 0.12, 0.14), dark);
+      lintel.rotation.y = ang;
+      world.holeGroup.add(at(lintel, mx, my, h0 + 1.25));
+      const sign = mesh(new THREE.BoxGeometry(len * 0.9, 0.28, 0.04), [dark, dark, dark, dark, new THREE.MeshStandardMaterial({ map: boardTex('SALOON', '#6a4426', '#f4d8a0'), roughness: 0.9 }), new THREE.MeshStandardMaterial({ map: boardTex('SALOON', '#6a4426', '#f4d8a0'), roughness: 0.9 })]);
+      sign.rotation.y = ang;
+      world.holeGroup.add(at(sign, mx, my, h0 + 1.45));
+      return { g, a: make(g.a, 1), b: make(g.b, -1), ang };
+    });
+    return {
+      update(t) {
+        doors.forEach(d => {
+          const o = U.smooth(0, 1, d.g.open);
+          const flap = d.g.open > 0.98 ? Math.sin(t * 7) * 0.05 : 0;
+          d.a.rotation.y = d.ang + o * 1.45 + flap;
+          d.b.rotation.y = d.ang - o * 1.45 - flap;
+        });
+      },
+    };
+  };
+
+  // Mine shafts: a timber collar round each hole and a little headframe with a winding wheel.
+  CV.tunnels = function (s, world, f) {
+    const timber = woodMat('#6a4a2c', 0.5, 0.5), dark = M('#3a2818', { roughness: 1 });
+    const wheels = [];
+    s.pairs.forEach((p, i) => {
+      [p.a, p.b].forEach((e, end) => {
+        const h = world.sim.groundRaw(e[0], e[1]);
+        const g = new THREE.Group();
+        const hole = new THREE.Mesh(new THREE.CircleGeometry(0.33, 24), new THREE.MeshBasicMaterial({ map: T.cupShade() }));
+        hole.rotation.x = -Math.PI / 2; hole.position.y = 0.012;
+        g.add(hole);
+        const R = 0.48;
+        for (let k = 0; k < 4; k++) {
+          const beam = mesh(new THREE.BoxGeometry(R * 2 + 0.16, 0.08, 0.12), timber);
+          const a = (k / 4) * TAU;
+          beam.position.set(Math.cos(a) * R, 0.04, Math.sin(a) * R);
+          beam.rotation.y = -a + Math.PI / 2;
+          g.add(beam);
+        }
+        // headframe: two legs, a crossbeam and a wheel turning when a ball goes through
+        const legL = mesh(new THREE.BoxGeometry(0.08, 1.5, 0.08), dark), legR = legL.clone();
+        legL.position.set(-R - 0.05, 0.72, 0); legL.rotation.z = -0.12;
+        legR.position.set(R + 0.05, 0.72, 0); legR.rotation.z = 0.12;
+        const cross = mesh(new THREE.BoxGeometry(R * 2 + 0.1, 0.08, 0.1), dark); cross.position.y = 1.42;
+        const wheel = new THREE.Group();
+        const rim = mesh(new THREE.TorusGeometry(0.22, 0.025, 6, 20), M('#5a5a5a', { metalness: 0.7, roughness: 0.4 }));
+        wheel.add(rim);
+        for (let k = 0; k < 4; k++) { const sp = mesh(new THREE.BoxGeometry(0.44, 0.02, 0.02), M('#5a5a5a', { metalness: 0.7 })); sp.rotation.z = (k / 4) * Math.PI; wheel.add(sp); }
+        wheel.position.y = 1.6;
+        const rope = mesh(new THREE.CylinderGeometry(0.008, 0.008, 1.4, 4), M('#c8b080'), false); rope.position.set(0.22, 0.9, 0);
+        g.add(legL, legR, cross, wheel, rope);
+        const exitDir = end ? p.dirB : p.dirA;
+        g.rotation.y = exitDir;   // the frame stands across the way the ball comes out
+        world.holeGroup.add(at(g, e[0], e[1], h));
+        // a lantern on one leg
+        const lamp = mesh(new THREE.SphereGeometry(0.06, 8, 6), new THREE.MeshStandardMaterial({ color: col('#ffcf6a'), emissive: col('#ffb03a'), emissiveIntensity: 1.6 }), false);
+        lamp.position.set(-R - 0.1, 1.05, 0.08); g.add(lamp);
+        wheels.push({ wheel, i, end });
+      });
+    });
+    return {
+      update(t, dt) {
+        wheels.forEach(w => {
+          const tp = f.pops && f.pops[w.i] ? f.pops[w.i][w.end] : -9;
+          const k = t - (tp - 0.75);
+          w.wheel.rotation.z += dt * (k > 0 && k < 1.5 ? 9 : 0.2);
+        });
+      },
+    };
+  };
+
+  // A windpump: its sails spin up with every gust, and dust blows across the hole.
+  CV.wind = function (s, world, f) {
+    const box = world.hole.box, base = GY();
+    const dx = s.dir ? s.dir[0] : 1, dy = s.dir ? s.dir[1] : 0;
+    const px = box.x0 - 3.2, py = box.y1 - 3;
+    const g = new THREE.Group();
+    const leg = M('#6a6a6a', { metalness: 0.6, roughness: 0.5 });
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * TAU + Math.PI / 4, l = mesh(new THREE.CylinderGeometry(0.035, 0.05, 5.4, 6), leg);
+      l.position.set(Math.cos(a) * 0.45, 2.7, Math.sin(a) * 0.45);
+      l.rotation.set(Math.sin(a) * 0.08, 0, -Math.cos(a) * 0.08);
+      g.add(l);
+    }
+    for (let k = 1; k < 4; k++) { const ring = mesh(new THREE.TorusGeometry(0.55 - k * 0.07, 0.02, 4, 4), leg); ring.rotation.set(Math.PI / 2, 0, Math.PI / 4); ring.position.y = k * 1.35; g.add(ring); }
+    const head = new THREE.Group();
+    head.position.y = 5.5;
+    const rotor = new THREE.Group();
+    const blade = M('#d8d0c0', { metalness: 0.3, roughness: 0.5, side: THREE.DoubleSide });
+    for (let i = 0; i < 14; i++) {
+      const b = mesh(new THREE.PlaneGeometry(0.22, 1.0), blade);
+      b.position.set(0, 0.62, 0); b.rotation.y = 0.5;
+      const hh = new THREE.Group(); hh.add(b); hh.rotation.z = (i / 14) * TAU; rotor.add(hh);
+    }
+    const hub = mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.2, 10), leg); hub.rotation.x = Math.PI / 2;
+    rotor.add(hub);
+    rotor.position.z = 0.3;
+    const tail = mesh(new THREE.PlaneGeometry(1.0, 0.6), M('#c84a2a', { side: THREE.DoubleSide }));
+    tail.position.set(0, 0.1, -1.0); tail.rotation.y = Math.PI / 2;
+    const boom = mesh(new THREE.BoxGeometry(0.05, 0.05, 1.0), leg); boom.position.z = -0.5;
+    head.add(rotor, tail, boom);
+    g.add(head);
+    // face into the wind
+    head.rotation.y = Math.atan2(-dx, dy);
+    world.holeGroup.add(at(g, px, py, base));
+    const trough = mesh(new THREE.BoxGeometry(1.4, 0.35, 0.6), woodMat('#7a5a3a'));
+    world.holeGroup.add(at(trough, px + 1.1, py - 0.6, base + 0.17));
+    let acc = 0, spin = 0;
+    return {
+      update(t, dt) {
+        const k = f.gust || 0;
+        spin += dt * (0.6 + k * 9);
+        rotor.rotation.z = -spin;
+        acc += dt * (1 + k * 16 + (f.warn || 0) * 3);
+        while (acc > 1) {
+          acc -= 1;
+          const y = box.y0 + Math.random() * box.h, x = box.x0 - 3;
+          world.glow.spawn({ x, y: 0.1 + Math.random() * 1.2, z: -y, vx: (2.5 + k * 6) * dx, vy: Math.random() * 0.3, vz: -(2.5 + k * 6) * dy + (Math.random() - 0.5) * 0.4, g: 0, drag: 1, life: 3, size: 0.12 + Math.random() * 0.16, grow: 1.6, color: col('#d8b88a'), a: 0.3 + k * 0.25, wobble: 1, seed: Math.random() * 9 });
+        }
+      },
+    };
+  };
+
+  // The wagon-wheel turnstile: plank arms below an old wagon wheel lying flat on the hub.
+  CV.spinner = function (s, world, f) {
+    const g = new THREE.Group(), h0 = world.sim.groundRaw(s.x, s.y);
+    const dark = M('#5a3a22', { roughness: 1 });
+    const post = mesh(new THREE.CylinderGeometry(0.2, 0.24, s.h + 0.2, 12), woodMat('#6a4a2c'));
+    post.position.y = (s.h + 0.2) / 2;
+    g.add(post);
+    const rot = new THREE.Group();
+    const board = woodMat('#9a6a3c', 1, 0.5);
+    for (let i = 0; i < s.arms; i++) {
+      const hh = new THREE.Group();
+      const b = mesh(new THREE.BoxGeometry(s.len - 0.2, s.h * 0.62, s.w * 0.9), board);
+      b.position.set((s.len + 0.2) / 2, s.h * 0.33, 0);
+      hh.add(b);
+      hh.rotation.y = (i * TAU) / s.arms;
+      rot.add(hh);
+    }
+    // the wheel: a rim, sixteen spokes and a hub
+    const wheel = new THREE.Group();
+    const rim = mesh(new THREE.TorusGeometry(s.len - 0.05, 0.07, 6, 48), dark);
+    rim.rotation.x = Math.PI / 2;
+    const tyre = mesh(new THREE.TorusGeometry(s.len - 0.05, 0.035, 6, 48), M('#4a4a4a', { metalness: 0.7, roughness: 0.4 }));
+    tyre.rotation.x = Math.PI / 2; tyre.scale.z = 2.6;
+    wheel.add(rim, tyre);
+    for (let i = 0; i < 16; i++) { const sp = mesh(new THREE.CylinderGeometry(0.035, 0.05, s.len - 0.2, 6), woodMat('#9a6a3c')); sp.rotation.z = Math.PI / 2; sp.position.x = (s.len - 0.2) / 2 + 0.1; const hh = new THREE.Group(); hh.add(sp); hh.rotation.y = (i / 16) * TAU; wheel.add(hh); }
+    const hub = mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.24, 14), dark);
+    wheel.add(hub);
+    wheel.position.y = s.h + 0.05;
+    rot.add(wheel);
+    g.add(rot);
+    world.holeGroup.add(at(g, s.x, s.y, h0));
+    return { update() { rot.rotation.y = f.ang; } };
+  };
+
+  // Hoodoos: banded sandstone columns with a dark capstone, springy to the ball.
+  CV.bumpers = function (s, world, f) {
+    const items = f.list.map((p, i) => {
+      const g = new THREE.Group();
+      const h = 0.9 + (i % 3) * 0.25;
+      const col1 = mesh(rough(new THREE.CylinderGeometry(p.r * 0.7, p.r * 1.05, h, 12, 5), 40 + i, 0.18), stoneMat(1, 0.5));
+      col1.position.y = h / 2;
+      const neck = mesh(rough(new THREE.CylinderGeometry(p.r * 0.45, p.r * 0.7, 0.3, 10, 2), 50 + i, 0.15), stoneMat(1, 0.2, '#ffd0b0'));
+      neck.position.y = h + 0.15;
+      const cap = mesh(rough(new THREE.DodecahedronGeometry(p.r * 1.0, 1), 60 + i, 0.2), M('#7a5040', { roughness: 0.95, flatShading: true }));
+      cap.scale.y = 0.42; cap.position.y = h + 0.38;
+      g.add(col1, neck, cap);
+      world.holeGroup.add(at(g, p.x, p.y, world.sim.groundRaw(p.x, p.y)));
+      g.rotation.y = i * 1.3;
+      return g;
+    });
+    return {
+      update(t, dt, s2) {
+        const tt = now(t, s2);
+        f.list.forEach((p, i) => {
+          const k = tt - p.hit;
+          const s3 = k >= 0 && k < 0.4 ? 1 + Math.sin(k * 30) * 0.08 * (1 - k / 0.4) : 1;
+          items[i].scale.set(s3, 2 - s3, s3);
+        });
+      },
+    };
+  };
+
+  // A natural arch over the lane; its legs are the two sandstone posts.
+  CV.arch = function (s, world) {
+    const half = s.span / 2;
+    const sh = new THREE.Shape();
+    sh.moveTo(-half - 0.6, -0.4); sh.lineTo(-half - 0.66, 1.1);
+    sh.bezierCurveTo(-half - 0.6, 2.4, -half * 0.4, 2.9, 0, 2.85);
+    sh.bezierCurveTo(half * 0.45, 2.85, half + 0.62, 2.5, half + 0.66, 1.1);
+    sh.lineTo(half + 0.6, -0.4); sh.lineTo(half - 0.5, -0.4); sh.lineTo(half - 0.44, 0.9);
+    sh.bezierCurveTo(half - 0.5, 1.75, half * 0.3, 2.05, 0, 2.02);
+    sh.bezierCurveTo(-half * 0.35, 2.0, -half + 0.48, 1.75, -half + 0.44, 0.9);
+    sh.lineTo(-half + 0.5, -0.4); sh.closePath();
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: 1.0, bevelEnabled: true, bevelThickness: 0.18, bevelSize: 0.14, bevelSegments: 2, curveSegments: 18, steps: 2 });
+    geo.translate(0, 0, -0.5);
+    rough(geo, 91, 0.1);
+    const p = geo.attributes.position;
+    for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i); p.setZ(i, p.getZ(i) * (1 + 0.25 * Math.sin(x * 2.1 + 1) * Math.cos(y * 1.7))); }
+    geo.computeVertexNormals();
+    const m = mesh(geo, stoneMat(0.45, 0.45, '#f4d2b8'));
+    world.holeGroup.add(at(m, s.x, s.y, 0));
+    return null;
+  };
+
+  // The oasis: palms and reeds round a spring-fed pool.
+  function palm(world, x, y, h, lean, rnd) {
+    const g = new THREE.Group();
+    const pts = [];
+    for (let i = 0; i <= 6; i++) { const t = i / 6; pts.push(new THREE.Vector3(Math.sin(lean) * h * t * t * 0.4, t * h, Math.cos(lean) * h * t * t * 0.4)); }
+    const curve = new THREE.CatmullRomCurve3(pts);
+    const trunk = mesh(new THREE.TubeGeometry(curve, 16, 0.14, 8, false), texMat(T.wood('#8a6a44'), 1, 6));
+    g.add(trunk);
+    const top = curve.getPoint(1);
+    const frondMat = M('#4a8a3a', { side: THREE.DoubleSide, roughness: 0.8 });
+    for (let i = 0; i < 9; i++) {
+      const sh = new THREE.Shape();
+      sh.moveTo(0, 0); sh.quadraticCurveTo(0.9, 0.28, 2.0, 0); sh.quadraticCurveTo(0.9, -0.28, 0, 0);
+      const fg = new THREE.ShapeGeometry(sh, 8);
+      const p = fg.attributes.position;
+      for (let k = 0; k < p.count; k++) { const fx = p.getX(k); p.setZ(k, -fx * fx * 0.18); }
+      fg.computeVertexNormals();
+      const fr = mesh(fg, frondMat, true);
+      fr.rotation.set(-Math.PI / 2, 0.25 + rnd() * 0.35, 0);   // lay it flat, then droop it
+      const hh = new THREE.Group(); hh.add(fr); hh.position.copy(top); hh.rotation.y = (i / 9) * TAU + rnd() * 0.3;
+      g.add(hh);
+    }
+    for (let i = 0; i < 4; i++) { const c = mesh(new THREE.SphereGeometry(0.1, 8, 6), M('#6a4a2a')); const a = (i / 4) * TAU; c.position.set(top.x + Math.cos(a) * 0.15, top.y - 0.12, top.z + Math.sin(a) * 0.15); g.add(c); }
+    world.holeGroup.add(at(g, x, y, GY()));
+    return g;
+  }
+  CV.oasis = function (s, world) {
+    const rnd = U.rng(5);
+    const hole = world.hole;
+    const clear = (x, y, m) => hole.floors.every(f => !U.inPoly(x, y, f.poly) && U.distToPoly(x, y, f.poly) > m);
+    const palms = [];
+    for (let i = 0; i < 40 && palms.length < 6; i++) {
+      const a = (i / 40) * TAU * 3 + rnd(), d = 6.2 + rnd() * 3;
+      const x = s.x + Math.cos(a) * d, y = s.y + Math.sin(a) * d;
+      if (!clear(x, y, 1.0) || y < s.y - 4) continue;
+      palms.push(palm(world, x, y, 3.8 + rnd() * 2.2, Math.atan2(x - s.x, -(y - s.y)) + (rnd() - 0.5) * 0.5, rnd));
+    }
+    // reeds and a ring of green round the edge of the green
+    const reeds = [], green = [];
+    for (let i = 0; i < 220; i++) {
+      const a = rnd() * TAU, d = 5.2 + rnd() * 2.5, x = s.x + Math.cos(a) * d, y = s.y + Math.sin(a) * d;
+      if (!clear(x, y, 0.25)) continue;
+      const s2 = 0.12 + rnd() * 0.16;
+      if (rnd() < 0.35) reeds.push({ x, y: GY() + 0.35, z: -y, sx: 0.025, sy: 0.7 + rnd() * 0.5, sz: 0.025, rx: (rnd() - 0.5) * 0.3, rz: (rnd() - 0.5) * 0.3, c: rnd() < 0.5 ? '#6a8a3a' : '#8a9a4a' });
+      else green.push({ x, y: GY() + s2 * 0.5, z: -y, sx: s2 * 0.7, sy: s2, sz: s2 * 0.7, ry: rnd() * 6, c: ['#4a7a2c', '#5a8434', '#3e6a26'][i % 3] });
+    }
+    VIS.instanced(world, new THREE.CylinderGeometry(1, 1, 1, 4), new THREE.MeshStandardMaterial({ roughness: 0.9 }), reeds, false);
+    VIS.instanced(world, new THREE.ConeGeometry(1, 1, 6, 1, true), new THREE.MeshStandardMaterial({ roughness: 1, side: THREE.DoubleSide }), green, false);
+    return { update(t) { palms.forEach((p, i) => { p.rotation.z = Math.sin(t * 0.7 + i) * 0.02; }); } };
+  };
+
+  // The ghost town: false-front buildings with porches down both sides of main street.
+  CV.town = function (s, world) {
+    const hole = world.hole, box = hole.box, base = GY();
+    const rnd = U.rng(21);
+    const names = [['SALOON', '#7a3a24'], ['GENERAL STORE', '#3a5a6a'], ['SHERIFF', '#5a4a2a'], ['BANK', '#4a5a3a'], ['HOTEL', '#6a3a4a'], ['ASSAY OFFICE', '#5a4a3a']];
+    const planks = woodMat('#8a6a48', 2, 1), porch = woodMat('#6a4a2c', 2, 1), dark = M('#2a1a10', { roughness: 1 });
+    let n = 0;
+    [-1, 1].forEach(side => {
+      for (let i = 0; i < 3; i++) {
+        const y = box.y0 + 3.4 + i * (box.h - 6) / 2, w = 4.6, d = 4, h = 2.6 + rnd() * 0.7, ff = h + 0.9 + rnd() * 0.5;
+        const xEdge = side < 0 ? box.x0 - 2.8 : box.x1 + 2.8, x = xEdge + side * d / 2;
+        const g = new THREE.Group();
+        const body = mesh(new THREE.BoxGeometry(d, h, w), planks); body.position.y = h / 2;
+        const roof = mesh(new THREE.BoxGeometry(d + 0.2, 0.12, w + 0.2), dark); roof.position.y = h;
+        const front = mesh(new THREE.BoxGeometry(0.14, ff, w + 0.3), planks); front.position.set(-side * d / 2, ff / 2, 0);
+        const [name, bg] = names[n++ % names.length];
+        const sign = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.9, 0.6), new THREE.MeshStandardMaterial({ map: boardTex(name, bg, '#f4e0b0'), roughness: 0.9 }));
+        sign.position.set(-side * (d / 2 + 0.08), ff - 0.55, 0); sign.rotation.y = -side * Math.PI / 2;
+        g.add(body, roof, front, sign);
+        // windows and a door on the street side
+        [-1.4, 1.4].forEach(z => { const win = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.9), M('#1a1a20', { roughness: 0.2, metalness: 0.4 })); win.position.set(-side * (d / 2 + 0.075), 1.4, z); win.rotation.y = -side * Math.PI / 2; g.add(win); });
+        const door = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 1.7), dark); door.position.set(-side * (d / 2 + 0.075), 0.85, 0); door.rotation.y = -side * Math.PI / 2; g.add(door);
+        // a porch roof on posts, and a boardwalk
+        const deck = mesh(new THREE.BoxGeometry(1.1, 0.1, w + 0.3), porch); deck.position.set(-side * (d / 2 + 0.6), 0.05, 0);
+        const awn = mesh(new THREE.BoxGeometry(1.3, 0.07, w + 0.3), porch); awn.position.set(-side * (d / 2 + 0.65), 2.15, 0); awn.rotation.z = side * 0.12;
+        g.add(deck, awn);
+        [-w / 2, 0, w / 2].forEach(z => { const p = mesh(new THREE.BoxGeometry(0.09, 2.15, 0.09), porch); p.position.set(-side * (d / 2 + 1.15), 1.07, z); g.add(p); });
+        // a loose board or two
+        if (rnd() < 0.6) { const b = mesh(new THREE.BoxGeometry(0.05, 0.9, 0.18), planks); b.position.set(-side * (d / 2 + 0.09), 2.0, 1.4); b.rotation.x = 0.5; g.add(b); }
+        world.holeGroup.add(at(g, x, y, base));
+      }
+    });
+    // a water tower at the end of the street
+    const tw = new THREE.Group();
+    const tank = mesh(new THREE.CylinderGeometry(1.3, 1.3, 1.8, 16), woodMat('#7a5a3a', 3, 1)); tank.position.y = 4.4;
+    const cone = mesh(new THREE.ConeGeometry(1.45, 0.7, 16), dark); cone.position.y = 5.65;
+    tw.add(tank, cone);
+    for (let i = 0; i < 4; i++) { const a = (i / 4) * TAU + Math.PI / 4, l = mesh(new THREE.BoxGeometry(0.14, 3.6, 0.14), porch); l.position.set(Math.cos(a) * 1.0, 1.8, Math.sin(a) * 1.0); tw.add(l); }
+    world.holeGroup.add(at(tw, box.x1 + 3.5, box.y1 + 4, base));
+    return null;
+  };
+
+  // Sunset Mesa: banded cliff faces where the mesa top drops to the lower green.
+  CV.mesa = function (s, world) {
+    const box = world.hole.box, mat = stoneMat(1, 0.6);
+    mat.side = THREE.DoubleSide;
+    const face = (x0, x1, y, h0, h1) => {
+      const g = new THREE.BufferGeometry();
+      const pos = [x0, 0, -y, x1, 0, -y, x1, h1, -y, x0, 0, -y, x1, h1, -y, x0, h0, -y];
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      g.setAttribute('uv', new THREE.Float32BufferAttribute([x0 / 2, 0, x1 / 2, 0, x1 / 2, h1, x0 / 2, 0, x1 / 2, h1, x0 / 2, h0], 2));
+      g.computeVertexNormals();
+      world.holeGroup.add(mesh(g, mat, false));
+    };
+    face(box.x0, -s.hw, s.y1 - 0.01, s.top, s.top);
+    face(s.hw, box.x1, s.y1 - 0.01, s.top, s.top);
+    // the ramp's side walls, as triangles rising with it
+    [-s.hw, s.hw].forEach(x => {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute([x, 0, -s.y0, x, 0, -s.y1, x, s.top, -s.y1], 3));
+      g.setAttribute('uv', new THREE.Float32BufferAttribute([s.y0 / 2, 0, s.y1 / 2, 0, s.y1 / 2, s.top], 2));
+      g.computeVertexNormals();
+      world.holeGroup.add(mesh(g, mat, false));
+    });
+    return null;
+  };
+})(window.PC);
+
 /* Putt Club: sound effects, birdsong and a gentle music loop, all synthesised with Web Audio. */
 (function (PC) {
   'use strict';
@@ -5841,6 +7397,19 @@ body.abyss .intro-rivals { color: #ff9a62; }
         case 'popout':
           this.tone(220, t, 0.2, { to: 820, vol: 0.25 }); this.noise(t + 0.05, 0.06, { freq: 3000, vol: 0.2 });
           break;
+        case 'pop':     // a cactus pops the ball
+          this.noise(t, 0.05, { freq: 3800, q: 0.8, vol: 0.5 });
+          this.tone(900, t, 0.09, { to: 260, vol: 0.28, type: 'triangle' });
+          this.noise(t + 0.03, 0.35, { filter: 'highpass', freq: 2400, to: 800, vol: 0.14 });
+          break;
+        case 'boing':   // a spring fires
+          this.tone(150, t, 0.5, { to: 620, glide: 0.18, vol: 0.32, vib: 22, vibDepth: 60, type: 'triangle' });
+          this.noise(t, 0.05, { freq: 1600, q: 3, vol: 0.18 });
+          break;
+        case 'tumble':  // bouncing off a tumbleweed
+          this.noise(t, 0.16, { filter: 'bandpass', freq: 1300, q: 0.8, vol: Math.min(0.35, 0.08 + k * 0.06) });
+          for (let i = 0; i < 3; i++) this.noise(t + 0.02 + i * 0.03, 0.025, { freq: 2600 + i * 400, q: 4, vol: 0.08 });
+          break;
         case 'boost':
           this.noise(t, 0.5, { freq: 400, to: 3600, q: 2, vol: 0.3 });
           this.tone(500, t, 0.4, { to: 1400, vol: 0.08, type: 'triangle' });
@@ -5942,7 +7511,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
     Cinder: { color: '#ff9a1f', skill: 0.85 },
     SirSC: { color: '#4ff3ff', skill: 0.97 },
   };
-  const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'sprinkler']);
+  const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'sprinkler', 'tumbleweeds']);
 
   // Runs inside the worker, built from the same physics source as the page.
   function workerMain(PC) {
@@ -6041,7 +7610,9 @@ body.abyss .intro-rivals { color: #ff9a62; }
       // The plan is for a moment a little ahead, long enough for the thinking to finish first.
       const lead = this.timed ? U.clamp(this.thinkAvg * (speed || 1) * 1.6 + 0.4, 1.0, 5) : 0.6;
       const waits = this.timed && r.skill > 0.45 ? [lead, lead + 0.8, lead + 1.6] : [lead];
-      const msg = { holeId: this.hole.id, opts: r.sim.opts, snap: r.sim.snapshot(), waits, n: Math.round(10 + r.skill * 22), seed: Math.floor(Math.random() * 1e9), maxT: 7, slot: this.list.indexOf(r) };
+      const msg = { holeId: this.hole.id, opts: r.sim.opts, snap: r.sim.snapshot(), waits, n: Math.round(10 + r.skill * 22), seed: Math.floor(Math.random() * 1e9), maxT: 7, slot: this.list.indexOf(r),
+        // A shakier rival checks its putts against bigger mistakes, so it keeps clear of cacti and edges it would likely hit.
+        wobble: 0.012 + (1 - r.skill) * 0.05, pwobble: 0.02 + (1 - r.skill) * 0.08, check: 6 };
       this.ask(msg, res => {
         if (gen !== this.gen || r.done) return;
         const took = (performance.now() - started) / 1000;
@@ -6099,14 +7670,16 @@ body.abyss .intro-rivals { color: #ff9a62; }
   ['3', '9', '18'].forEach(n => { if (save.best[n] && !save.best[n + '-medium']) save.best[n + '-medium'] = save.best[n]; delete save.best[n]; });
   const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) { /* private mode */ } };
 
-  // The four difficulties. Ultra is played on its own course, The Abyss.
+  // The four difficulties. Medium is played in the Canyon and Ultra in the Abyss; Owen and Hard stay in the Garden.
   const DIFFS = {
     owen: { id: 'owen', name: 'OWEN', icon: '🐣', cls: 'mode-easy', course: 'garden', guide: 'full', assist: 1.7, rivals: ['Owen', 'Clover', 'Fern'], info: 'See the whole putt<br>and a friendlier cup' },
-    medium: { id: 'medium', name: 'MEDIUM', icon: '🌷', cls: 'mode-medium', course: 'garden', guide: 'bounce', assist: 1, rivals: ['Fern', 'Bramble', 'Blaze'], info: 'An aim line to<br>the first bounce' },
-    hard: { id: 'hard', name: 'HARD', icon: '🌵', cls: 'mode-hard', course: 'garden', guide: 'short', assist: 1, rivals: ['Bramble', 'Blaze', 'Thorn'], info: 'A short aim line,<br>sharper rivals' },
+    medium: { id: 'medium', name: 'MEDIUM', icon: '🌵', cls: 'mode-medium', course: 'canyon', guide: 'bounce', assist: 1, rivals: ['Fern', 'Bramble', 'Blaze'], info: 'Cacti pop your ball,<br>aim to the 1st bounce' },
+    hard: { id: 'hard', name: 'HARD', icon: '🌷', cls: 'mode-hard', course: 'garden', guide: 'short', assist: 1, rivals: ['Bramble', 'Blaze', 'Thorn'], info: 'A short aim line,<br>sharper rivals' },
     ultra: { id: 'ultra', name: 'ULTRA', icon: '👹', cls: 'mode-ultra', course: 'abyss', guide: 'none', assist: 1, rivals: ['Thorn', 'Cinder', 'SirSC'], info: 'No guide, no rails,<br>par 6 and up' },
   };
   const ORDER = ['owen', 'medium', 'hard', 'ultra'];
+  const COURSE = { garden: 'Garden', canyon: 'Canyon', abyss: 'Abyss' };
+  const poolOf = course => (course === 'abyss' ? PC.ABYSS : course === 'canyon' ? PC.CANYON : PC.HOLES);
 
   const world = new PC.World($('view'));
   const audio = new PC.Audio(save);
@@ -6151,7 +7724,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
   }
 
   function startRound(n, diff) {
-    const pool = DIFFS[diff].course === 'abyss' ? PC.ABYSS : PC.HOLES;
+    const pool = poolOf(DIFFS[diff].course);
     const ids = U.shuffle(pool.map(h => h.id)).slice(0, n);
     round = { ids, idx: 0, diff, practice: false, players: newPlayers(diff) };
     beginHole();
@@ -6181,9 +7754,10 @@ body.abyss .intro-rivals { color: #ff9a62; }
     $('waitBar').hidden = true;
     $('feed').innerHTML = '';
     document.body.classList.toggle('abyss', hole.course === 'abyss');
+    document.body.classList.toggle('canyon', hole.course === 'canyon');
     updateHud();
     const it = $('intro');
-    $('introNo').textContent = round.practice ? `Practice · ${hole.course === 'abyss' ? 'Abyss' : 'Garden'} hole ${hole.num}` : `Hole ${round.idx + 1} of ${round.ids.length} · ${DIFFS[round.diff].name}`;
+    $('introNo').textContent = round.practice ? `Practice · ${COURSE[hole.course] || 'Garden'} hole ${hole.num}` : `Hole ${round.idx + 1} of ${round.ids.length} · ${DIFFS[round.diff].name}`;
     $('introName').textContent = hole.name;
     $('introSpecial').textContent = hole.special;
     $('introTip').textContent = hole.tip;
@@ -6247,13 +7821,15 @@ body.abyss .intro-rivals { color: #ff9a62; }
   }
 
   function lostMsg(kind) {
-    return kind === 'water' ? 'Splash!' : kind === 'flowers' ? 'Into the flowers!' : kind === 'lava' ? 'Melted!' : hole.course === 'abyss' ? 'Into the abyss!' : 'Off the course!';
+    return kind === 'water' ? 'Splash!' : kind === 'flowers' ? 'Into the flowers!' : kind === 'lava' ? 'Melted!' : kind === 'cactus' ? 'Popped!' : kind === 'chasm' && hole.course === 'canyon' ? 'Into the gulch!' : hole.course === 'abyss' ? 'Into the abyss!' : 'Off the course!';
   }
 
   function lost(e) {
     const kind = e.kind;
     if (kind === 'water') { world.burst('splash', e.x, e.y, C.WATER_TOP); audio.play('splash'); }
     else if (kind === 'lava') { world.burst('spark', e.x, e.y, sim.floorHeight(e.x, e.y), { color: '#ff8a2a', n: 40 }); audio.play('splash'); }
+    else if (kind === 'cactus') { const h = sim.ball.z; world.burst('spark', e.x, e.y, h, { color: '#ffffff', n: 30 }); world.burst('puff', e.x, e.y, h - 0.1, { color: '#f4f0dc', n: 12 }); audio.play('pop'); }
+    else if (kind === 'chasm' && hole.course === 'canyon') { world.burst('puff', e.x, e.y, -0.4, { color: '#d8b88a', n: 20 }); audio.play('flowers'); }
     else { world.burst('puff', e.x, e.y, -0.2, { color: kind === 'flowers' ? '#ffb3c6' : '#e9e1cf', n: 20 }); audio.play('flowers'); }
     strokes += 1;
     updateHud();
@@ -6346,7 +7922,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
       return `<tr class="${pl.you ? 'you' : ''}"><th scope="row"><i class="dot" style="background:${pl.color}"></i>${pl.name}</th>${cells}<td class="tot"><span class="pencil">${any ? tot : ''}</span></td></tr>`;
     }).join('');
     return `<table class="sheet"><thead><tr><th scope="row">Hole</th>${head}<th scope="col">${title}</th></tr></thead>
-      <tbody><tr class="names"><th scope="row">${hole.course === 'abyss' ? 'Abyss' : 'Garden'}</th>${names}<td></td></tr>
+      <tbody><tr class="names"><th scope="row">${COURSE[hole.course] || 'Garden'}</th>${names}<td></td></tr>
       <tr class="par"><th scope="row">Par</th>${pars}<td class="tot">${parT}</td></tr>${rows}</tbody></table>`;
   }
 
@@ -6415,23 +7991,23 @@ body.abyss .intro-rivals { color: #ff9a62; }
 
   // ---------- title menu (the same layout as Bigger Fish and Brain Rocket) ----------
   const TAG = {
-    9: 'Garden mini golf with a trick on every hole. Putt against three rivals over a fresh 9.',
+    9: 'Mini golf with a trick on every hole. Putt against three rivals over a fresh 9. Medium heads out to the Canyon, where cacti pop your ball.',
     18: 'The full round: 18 holes, three rivals, one scorecard. Ultra takes you down into the Abyss.',
     online: 'Putt against your friends on the same holes at the same time. Online play is coming soon.',
   };
   const HOW = `<div><b>⛳ Drag back to putt.</b> Press anywhere, pull back and let go. The further you pull, the harder you hit.</div>
     <div><b>👻 Beat your rivals.</b> They play the same hole at the same time as see-through ghost balls.</div>
-    <div><b>💧 Water, lava and edges</b> cost a stroke and put you back where you putted from.</div>
+    <div><b>🌵 Cacti, water, lava and edges</b> cost a stroke and put you back where you putted from.</div>
     <div><b>🎥 C shows the whole hole.</b> Q and E turn the camera. Arrow keys aim and Space putts.</div>`;
   const HOW_ONLINE = `<div><b>🌐 Rooms with friends.</b> Share a code, everyone plays the same holes, and your friends show as ghost balls.</div>
     <div><b>🏆 One scorecard.</b> The lowest total after the round wins. Online play is coming soon.</div>`;
 
   function bestText(n, d) { const b = save.best[n + '-' + d]; return b ? `Best: ${b.s} (${vsPar(b.d)})` : 'Not played yet'; }
   function modeCards() {
-    if (menuTab === 'online') return ORDER.map(id => { const m = DIFFS[id]; return `<div class="mode-card ${m.cls} locked"><span class="mode-lock">🔒</span><span class="mode-icon">${m.icon}</span><span class="mode-name">${m.name}</span><span class="mode-tag">Coming soon</span><span class="mode-info">Play friends<br>${m.course === 'abyss' ? 'in the Abyss' : 'in the Garden'}</span><span class="mode-best"></span></div>`; }).join('');
+    if (menuTab === 'online') return ORDER.map(id => { const m = DIFFS[id]; return `<div class="mode-card ${m.cls} locked"><span class="mode-lock">🔒</span><span class="mode-icon">${m.icon}</span><span class="mode-name">${m.name}</span><span class="mode-tag">Coming soon</span><span class="mode-info">Play friends<br>in the ${COURSE[m.course]}</span><span class="mode-best"></span></div>`; }).join('');
     return ORDER.map(id => {
       const m = DIFFS[id];
-      return `<button class="mode-card ${m.cls}" type="button" data-diff="${id}"><span class="mode-icon">${m.icon}</span><span class="mode-name">${m.name}</span><span class="mode-tag">${m.course === 'abyss' ? 'The Abyss' : 'The Garden'}</span><span class="mode-info">${m.info}<br><small>vs ${m.rivals.join(', ')}</small></span><span class="mode-best">${bestText(menuTab, id)}</span></button>`;
+      return `<button class="mode-card ${m.cls}" type="button" data-diff="${id}"><span class="mode-icon">${m.icon}</span><span class="mode-name">${m.name}</span><span class="mode-tag">The ${COURSE[m.course]}</span><span class="mode-info">${m.info}<br><small>vs ${m.rivals.join(', ')}</small></span><span class="mode-best">${bestText(menuTab, id)}</span></button>`;
     }).join('');
   }
   function renderMenu(animate) {
@@ -6477,7 +8053,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
     $('hud').hidden = true; $('intro').hidden = true; $('toast').hidden = true; $('waitBar').hidden = true;
     const spec = PC.HOLES[Math.floor(Math.random() * PC.HOLES.length)];
     loadHole(spec, DIFFS.medium);
-    document.body.classList.remove('abyss');
+    document.body.classList.remove('abyss', 'canyon');
     cam.cur = null;
     state = 'title';
     show('title');
@@ -6495,7 +8071,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
         grid.dataset.built = '1';
         list.forEach(h => {
           const btn = document.createElement('button');
-          btn.className = 'hole-card' + (h.course === 'abyss' ? ' abyss' : '');
+          btn.className = 'hole-card' + (h.course === 'abyss' ? ' abyss' : h.course === 'canyon' ? ' canyon' : '');
           btn.type = 'button';
           btn.innerHTML = `<canvas width="240" height="300" aria-hidden="true"></canvas><span class="hc-no">${h.num}</span><span class="hc-name">${h.name}</span><span class="hc-sp">${h.special}</span><span class="hc-meta">Par ${h.par} · <span data-best="${h.id}"></span></span>`;
           btn.addEventListener('click', () => { audio.unlock(); audio.play('click'); startPractice(h.id); });
@@ -6505,6 +8081,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
       }
     };
     fill('bookGrid', PC.HOLES);
+    fill('canyonGrid', PC.CANYON);
     fill('abyssGrid', PC.ABYSS);
     document.querySelectorAll('[data-best]').forEach(el => { const v = save.holeBest[el.dataset.best]; el.textContent = v ? `your best ${v}` : 'not played yet'; });
     show('book');
@@ -6518,15 +8095,20 @@ body.abyss .intro-rivals { color: #ff9a62; }
     const ox = W / 2 - b.cx * s, oy = H / 2 + b.cy * s;
     const P = (x, y) => [ox + x * s, oy - y * s];
     const path = (pts, close = true) => { g.beginPath(); pts.forEach((p, i) => { const q = P(p[0], p[1]); i ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]); }); if (close) g.closePath(); };
-    const hell = h.course === 'abyss';
+    const hell = h.course === 'abyss', desert = h.course === 'canyon';
     g.clearRect(0, 0, W, H);
-    h.hazards.filter(z => !z.over).forEach(z => { path(z.poly); g.fillStyle = z.kind === 'water' ? '#7cc3dd' : z.kind === 'lava' ? '#ff6a1a' : '#f3a6c3'; g.fill(); });
-    h.floors.forEach(f => { path(f.poly); g.fillStyle = hell ? '#5a4a4c' : f.mat === 'planks' ? '#b0773f' : '#6fbf4f'; g.fill(); if (hell) { g.strokeStyle = '#ff7a2a'; g.lineWidth = 1.5; g.stroke(); } });
-    h.zones.forEach(z => { path(z.poly); g.fillStyle = { slime: '#c7f06b', honey: '#f2b236', soil: '#8a5f3a', seeds: '#6b4220', glass: '#1a1420', tar: '#0d0a0b', ash: '#7a6e6a' }[z.type] || '#999'; g.fill(); });
-    h.hazards.filter(z => z.over).forEach(z => { path(z.poly); g.fillStyle = '#ff6a1a'; g.fill(); });
+    h.hazards.filter(z => !z.over).forEach(z => { path(z.poly); g.fillStyle = z.kind === 'water' ? '#7cc3dd' : z.kind === 'lava' ? '#ff6a1a' : z.kind === 'chasm' ? '#5a2a14' : '#f3a6c3'; g.fill(); });
+    h.floors.forEach(f => { path(f.poly); g.fillStyle = hell ? '#5a4a4c' : f.mat === 'planks' ? '#b0773f' : desert ? '#d9b27a' : '#6fbf4f'; g.fill(); if (hell) { g.strokeStyle = '#ff7a2a'; g.lineWidth = 1.5; g.stroke(); } });
+    h.zones.forEach(z => { path(z.poly); g.fillStyle = { slime: '#c7f06b', honey: '#f2b236', soil: '#8a5f3a', seeds: '#6b4220', glass: '#1a1420', tar: '#0d0a0b', ash: '#7a6e6a', sand: '#f0d9a4', cinder: '#3a2a2a' }[z.type] || '#999'; g.fill(); });
+    h.hazards.filter(z => z.over).forEach(z => { path(z.poly); g.fillStyle = z.kind === 'water' ? '#4aa8c8' : '#ff6a1a'; g.fill(); });
     g.lineCap = 'round'; g.lineJoin = 'round';
     h.rails.forEach(r => { if (r.style === 'none') return; path(r.pts, r.closed); g.strokeStyle = r.style === 'hedge' ? '#2f6b2a' : r.style === 'obsidian' ? '#120e16' : '#7a4a26'; g.lineWidth = Math.max(2, (r.side === 'center' ? r.w : 0.2) * s); g.stroke(); });
-    h.posts.forEach(p => { const q = P(p.x, p.y); g.beginPath(); g.arc(q[0], q[1], p.r * s, 0, 7); g.fillStyle = hell ? '#2a2124' : '#8f897d'; g.fill(); });
+    h.posts.forEach(p => { const q = P(p.x, p.y); g.beginPath(); g.arc(q[0], q[1], p.r * s, 0, 7); g.fillStyle = hell ? '#2a2124' : desert ? '#c0784a' : '#8f897d'; g.fill(); });
+    (h.features || []).forEach(f => {
+      if (f.type === 'cacti') f.list.forEach(c => { const q = P(c.x, c.y); g.beginPath(); g.arc(q[0], q[1], Math.max(2.5, (c.r || 0.3) * s), 0, 7); g.fillStyle = '#2f7a34'; g.fill(); g.strokeStyle = '#f4f0dc'; g.lineWidth = 1; g.stroke(); });
+      if (f.type === 'tumbleweeds') f.list.forEach(w => { g.setLineDash([3, 3]); path(w.path, !!w.loop); g.strokeStyle = 'rgba(122,82,40,0.75)'; g.lineWidth = 1.5; g.stroke(); g.setLineDash([]); const q = P(w.path[0][0], w.path[0][1]); g.beginPath(); g.arc(q[0], q[1], (w.r || 0.42) * s, 0, 7); g.fillStyle = '#a8844e'; g.fill(); });
+      if (f.type === 'spring') { const q = P(f.x, f.y); g.beginPath(); g.arc(q[0], q[1], Math.max(3, f.r * s), 0, 7); g.fillStyle = f.dir !== undefined ? '#e0332a' : '#f2b81f'; g.fill(); }
+    });
     const t = P(h.tee[0], h.tee[1]); g.fillStyle = '#ffffff'; g.beginPath(); g.arc(t[0], t[1], 4, 0, 7); g.fill();
     const c = P(h.cup[0], h.cup[1]); g.fillStyle = hell ? '#ffffff' : '#1b2a22'; g.beginPath(); g.arc(c[0], c[1], 4.5, 0, 7); g.fill();
     g.strokeStyle = hell ? '#ffffff' : '#1b2a22'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(c[0], c[1]); g.lineTo(c[0], c[1] - 16); g.stroke();
@@ -6779,7 +8361,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
   }
 
   // ---------- main loop ----------
-  const SOUND = { wall: 'wall', post: 'post', paddle: 'paddle', gate: 'gate', bonk: 'bonk', squish: 'squish', tire: 'tire' };
+  const SOUND = { wall: 'wall', post: 'post', paddle: 'paddle', gate: 'gate', bonk: 'bonk', squish: 'squish', tire: 'tire', tumble: 'tumble' };
   function handleEvents() {
     for (const e of sim.events) {
       if (state === 'title') continue;
@@ -6788,6 +8370,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
       else if (e.type === 'launch') { audio.play('launch'); world.burst('puff', sim.ball.x, sim.ball.y, 0.1, { color: '#ffffff' }); }
       else if (e.type === 'tunnel') { audio.play('tunnel'); world.burst('puff', sim.ball.x, sim.ball.y, 0, { color: hole.course === 'abyss' ? '#ff3df2' : '#8a6a4a', n: 16 }); }
       else if (e.type === 'popout') { audio.play('popout'); world.burst('puff', e.x, e.y, 0, { color: hole.course === 'abyss' ? '#ff3df2' : '#8a6a4a', n: 16 }); }
+      else if (e.type === 'spring') { audio.play('boing'); world.burst('spark', e.x, e.y, sim.floorHeight(e.x, e.y) + 0.1, { color: e.trap ? '#ff6a4a' : '#ffe27a', n: 14 }); }
       else if (e.type === 'boost') audio.play('boost');
       else if (e.type === 'switch') audio.play('switch');
       else if (e.type === 'lip') audio.play('lip');
@@ -6813,7 +8396,7 @@ body.abyss .intro-rivals { color: #ff9a62; }
         } else feed(`${r.name} picked up`, r.color);
       } else if (ev.type === 'lost') {
         if (ev.kind === 'water') world.burst('splash', ev.x, ev.y, C.WATER_TOP);
-        else world.burst('puff', ev.x, ev.y, 0, { n: 10, color: ev.kind === 'lava' ? '#ff8a2a' : '#e9e1cf' });
+        else world.burst('puff', ev.x, ev.y, 0, { n: 10, color: ev.kind === 'lava' ? '#ff8a2a' : ev.kind === 'cactus' ? '#ffffff' : '#e9e1cf' });
         feed(`${r.name}: ${lostMsg(ev.kind).replace('!', '')}`, r.color);
       }
     });

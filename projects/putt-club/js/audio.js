@@ -100,6 +100,19 @@
         case 'popout':
           this.tone(220, t, 0.2, { to: 820, vol: 0.25 }); this.noise(t + 0.05, 0.06, { freq: 3000, vol: 0.2 });
           break;
+        case 'pop':     // a cactus pops the ball
+          this.noise(t, 0.05, { freq: 3800, q: 0.8, vol: 0.5 });
+          this.tone(900, t, 0.09, { to: 260, vol: 0.28, type: 'triangle' });
+          this.noise(t + 0.03, 0.35, { filter: 'highpass', freq: 2400, to: 800, vol: 0.14 });
+          break;
+        case 'boing':   // a spring fires
+          this.tone(150, t, 0.5, { to: 620, glide: 0.18, vol: 0.32, vib: 22, vibDepth: 60, type: 'triangle' });
+          this.noise(t, 0.05, { freq: 1600, q: 3, vol: 0.18 });
+          break;
+        case 'tumble':  // bouncing off a tumbleweed
+          this.noise(t, 0.16, { filter: 'bandpass', freq: 1300, q: 0.8, vol: Math.min(0.35, 0.08 + k * 0.06) });
+          for (let i = 0; i < 3; i++) this.noise(t + 0.02 + i * 0.03, 0.025, { freq: 2600 + i * 400, q: 4, vol: 0.08 });
+          break;
         case 'boost':
           this.noise(t, 0.5, { freq: 400, to: 3600, q: 2, vol: 0.3 });
           this.tone(500, t, 0.4, { to: 1400, vol: 0.08, type: 'triangle' });

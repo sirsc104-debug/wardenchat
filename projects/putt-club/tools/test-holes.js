@@ -11,10 +11,10 @@ const ROOT = path.join(__dirname, '..');
 const ctx = { console, Math, Date };
 ctx.window = ctx;
 vm.createContext(ctx);
-['util', 'physics', 'features', 'holes', 'abyss', 'nav'].forEach(f => vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', f + '.js'), 'utf8'), ctx, { filename: f + '.js' }));
+['util', 'physics', 'features', 'holes', 'canyon', 'abyss', 'nav'].forEach(f => vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', f + '.js'), 'utf8'), ctx, { filename: f + '.js' }));
 const PC = ctx.PC, U = PC.U, C = PC.C;
 
-const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable']);
+const TIMED = new Set(['spinner', 'ferry', 'patrol', 'swing', 'gates', 'seesaw', 'movingCup', 'beanstalk', 'wind', 'turntable', 'tumbleweeds']);
 
 function distanceField(hole) {
   const sim = new PC.Sim(hole);
@@ -174,8 +174,10 @@ function check(hole) {
 }
 
 const want = process.argv.slice(2);
-const pool = want.includes('abyss') ? PC.ABYSS : want.includes('garden') ? PC.HOLES : PC.HOLES.concat(PC.ABYSS);
-const holes = pool.filter(h => !want.filter(w => w !== 'abyss' && w !== 'garden').length || want.includes(h.id) || want.includes(String(h.num)));
+const COURSES = { garden: PC.HOLES, canyon: PC.CANYON, abyss: PC.ABYSS };
+const named = want.filter(w => COURSES[w]);
+const pool = named.length ? [].concat(...named.map(w => COURSES[w])) : PC.HOLES.concat(PC.CANYON, PC.ABYSS);
+const holes = pool.filter(h => !want.filter(w => !COURSES[w]).length || want.includes(h.id) || want.includes(String(h.num)));
 let fails = 0;
 for (const spec of holes) {
   const hole = PC.prepareHole(spec);
@@ -185,7 +187,7 @@ for (const spec of holes) {
   const ms = Date.now() - t0;
   const ok = r.strokes !== 'X' && problems.length === 0;
   if (!ok) fails++;
-  console.log(`${hole.course === 'abyss' ? 'A' : ' '}${String(hole.num).padStart(2)} ${hole.name.padEnd(18)} par ${hole.par}  bot ${String(r.strokes).padEnd(2)} aces ${r.aces}/${r.firstTrials}  tee drift ${r.teeMove.toFixed(3)}  ${ms}ms ${problems.join('; ')}`);
+  console.log(`${hole.course === 'abyss' ? 'A' : hole.course === 'canyon' ? 'C' : ' '}${String(hole.num).padStart(2)} ${hole.name.padEnd(18)} par ${hole.par}  bot ${String(r.strokes).padEnd(2)} aces ${r.aces}/${r.firstTrials}  tee drift ${r.teeMove.toFixed(3)}  ${ms}ms ${problems.join('; ')}`);
   if (!ok || process.env.VERBOSE) r.log.forEach(l => console.log('     ' + l));
 }
 console.log(fails ? `${fails} hole(s) need work` : 'All holes finished');

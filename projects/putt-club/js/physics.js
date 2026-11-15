@@ -33,7 +33,7 @@
       o.holes = (o.holes || []).map(U.cw);
       return o;
     });
-    hole.hazards = (spec.hazards || []).map(z => Object.assign({ kind: 'water', top: C.WATER_TOP, bed: C.WATER_BED }, z, { poly: U.ccw(z.poly) }));
+    hole.hazards = (spec.hazards || []).map(z => Object.assign({ kind: 'water', top: C.WATER_TOP, bed: C.WATER_BED }, z.kind === 'chasm' ? { top: -0.3, bed: -9 } : {}, z, { poly: U.ccw(z.poly) }));
     hole.overHazards = hole.hazards.filter(z => z.over);
     hole.zones = (spec.zones || []).map(z => Object.assign({}, z, { poly: U.ccw(z.poly), fric: z.fric || ZONE_FRIC[z.type] || 1 }));
     const look = hole.look = Object.assign({ rail: 'timber', light: 'day' }, spec.look || {});
@@ -332,6 +332,7 @@
       const ox = b.x, oy = b.y, oz = b.z;
       b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt;
       this.collide();
+      if (b.mode === 'lost') return;   // a cactus got it in mid-air
       const g = this.ground(b.x, b.y);
       if (g.kind === 'void') { if (b.z < -1.5) this.lose('oob'); return; }
       if (g.kind !== 'floor' && g.kind !== 'platform') {

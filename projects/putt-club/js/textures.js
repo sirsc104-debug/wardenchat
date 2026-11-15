@@ -345,6 +345,71 @@
     return tex(c);
   });
 
+  // ---------- The canyon ----------
+  // Wind-rippled sand for the desert floor.
+  T.sand = () => once('sand', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(401);
+    g.fillStyle = '#d9b07a'; g.fillRect(0, 0, S, S);
+    for (let y = 0; y < S; y += 2) { const v = Math.sin((y / S) * Math.PI * 2 * 9 + Math.sin(y * 0.05) * 1.5); g.fillStyle = v > 0 ? 'rgba(255,240,210,0.10)' : 'rgba(150,100,60,0.08)'; g.fillRect(0, y, S, 2); }
+    speckle(g, S, S, 1400, ['#c99a62', '#e6c08a', '#b88a56', '#f0d4a4'], 0.6, 1.8, rnd);
+    return tex(c);
+  });
+
+  // Banded red sandstone: canyon walls, mesas, the sides of the course.
+  T.sandstone = () => once('sandstone', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(411);
+    const bands = ['#b8562e', '#c96a3a', '#a84a28', '#d8814a', '#c25f34', '#e09a62', '#9c4424'];
+    let y = 0, i = 0;
+    while (y < S) {
+      const h = 6 + rnd() * 26;
+      g.fillStyle = bands[(i++ * 3 + Math.floor(rnd() * 2)) % bands.length];
+      g.beginPath(); g.moveTo(0, y);
+      for (let x = 0; x <= S; x += 16) g.lineTo(x, y + Math.sin(x * 0.05 + i) * 2);
+      g.lineTo(S, y + h); g.lineTo(0, y + h); g.fill();
+      y += h;
+    }
+    g.globalAlpha = 0.25; speckle(g, S, S, 500, ['#7a3a1c', '#f0b07a'], 0.8, 2.5, rnd);
+    g.globalAlpha = 0.18; g.strokeStyle = '#5a2a14';
+    for (let k = 0; k < 18; k++) { g.lineWidth = 1 + rnd() * 2; g.beginPath(); const x = rnd() * S; g.moveTo(x, rnd() * S); g.lineTo(x + (rnd() - 0.5) * 10, rnd() * S); g.stroke(); }
+    g.globalAlpha = 1;
+    return tex(c);
+  });
+
+  // Cactus skin: green ribs with little white spines along them.
+  T.cactus = (tone = '#4f8a3a') => once('cactus' + tone, () => {
+    const W = 128, Hh = 128, c = canvas(W, Hh), g = c.getContext('2d'), rnd = U.rng(421);
+    const base = new THREE.Color(tone);
+    const ribs = 8, w = W / ribs;
+    for (let i = 0; i < ribs; i++) {
+      const grd = g.createLinearGradient(i * w, 0, (i + 1) * w, 0);
+      grd.addColorStop(0, base.clone().offsetHSL(0, 0, -0.1).getStyle()); grd.addColorStop(0.5, base.clone().offsetHSL(0, 0, 0.06).getStyle()); grd.addColorStop(1, base.clone().offsetHSL(0, 0, -0.1).getStyle());
+      g.fillStyle = grd; g.fillRect(i * w, 0, w, Hh);
+    }
+    for (let i = 0; i < ribs; i++) for (let y = 4; y < Hh; y += 11) {
+      const x = i * w + w / 2 + (rnd() - 0.5);
+      g.fillStyle = '#f4f0dc'; g.beginPath(); g.arc(x, y, 1.4, 0, 7); g.fill();
+      g.strokeStyle = 'rgba(250,248,230,0.8)'; g.lineWidth = 0.8;
+      g.beginPath(); g.moveTo(x - 3, y - 2); g.lineTo(x + 3, y + 2); g.moveTo(x + 3, y - 2); g.lineTo(x - 3, y + 2); g.stroke();
+    }
+    return tex(c);
+  });
+
+  // Dry twigs on a clear background, for the shell of a tumbleweed.
+  T.twigs = () => once('twigs', () => {
+    const S = 256, c = canvas(S, S), g = c.getContext('2d'), rnd = U.rng(431);
+    g.clearRect(0, 0, S, S);
+    g.lineCap = 'round';
+    for (let i = 0; i < 150; i++) {
+      g.strokeStyle = ['#8a6a3c', '#a8844e', '#6e5230', '#c0a068'][i % 4];
+      g.lineWidth = 1.2 + rnd() * 2;
+      let x = rnd() * S, y = rnd() * S, a = rnd() * 6.28;
+      g.beginPath(); g.moveTo(x, y);
+      for (let k = 0; k < 4; k++) { a += (rnd() - 0.5) * 1.6; x += Math.cos(a) * 14; y += Math.sin(a) * 14; g.lineTo(x, y); }
+      g.stroke();
+    }
+    return tex(c);
+  });
+
   // ---------- The temple ----------
   // Polished dark flagstones for the putting surfaces: 4 x 4 slabs per tile (one slab per unit).
   T.templeFloor = () => once('templeFloor', () => {
