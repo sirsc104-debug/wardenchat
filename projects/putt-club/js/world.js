@@ -319,7 +319,8 @@
     }
 
     setLight(name) {
-      const L = LIGHTS[name] || LIGHTS.day;
+      // Bought scenery (cosmetics) swaps the sky and light, never the green's colours.
+      const L = PC.sceneLight ? PC.sceneLight(LIGHTS[name] || LIGHTS.day, name, this.look && this.look.scene) : (LIGHTS[name] || LIGHTS.day);
       this.L = L;
       this.skyU.top.value.set(L.top); this.skyU.mid.value.set(L.mid); this.skyU.horizon.value.set(L.horizon);
       this.hemi.color = col(L.hemiSky); this.hemi.groundColor = col(L.hemiGround); this.hemi.intensity = L.hemiI;
@@ -353,7 +354,8 @@
 
       // Sun over the left shoulder, shadows sized to the hole
       const cx = b.cx, cy = b.cy, ext = Math.max(b.w, b.h) / 2 + 7;
-      this.sun.position.copy(V(cx - 9, cy - 6, 16));
+      const low = PC.SCENES && PC.SCENES[this.look && this.look.scene] && PC.SCENES[this.look.scene].lowSun && hole.look.theme !== 'abyss';
+      this.sun.position.copy(low ? V(cx - 15, cy - 10, 6.5) : V(cx - 9, cy - 6, 16));
       this.sun.target.position.copy(V(cx, cy, 0));
       const sc = this.sun.shadow.camera;
       sc.left = -ext; sc.right = ext; sc.top = ext; sc.bottom = -ext; sc.near = 1; sc.far = 60;
@@ -397,6 +399,7 @@
       this.buildTee(hole, sim);
       if (hell) PC.VIS.decorateAbyss(hole, this, sim); else if (desert) PC.VIS.decorateCanyon(hole, this, sim); else if (winter) PC.VIS.decorateWinter(hole, this, sim); else PC.VIS.decorate(hole, this, sim);
       (sim.feats || []).forEach(f => { const v = (hell && PC.VIS.abyss[f.type]) || (desert && PC.VIS.canyon[f.type]) || (winter && PC.VIS.winter[f.type]) || PC.VIS[f.type]; if (v) { const o = v(f.spec, this, f, sim); if (o) this.vis.push(o); } });
+      if (this.buildSceneFx) this.buildSceneFx(hole);
       this.ghosts = [];
       return this;
     }
@@ -592,7 +595,7 @@
       pole.position.y = 0.875; pole.castShadow = true;
       const flagGeo = new THREE.PlaneGeometry(0.66, 0.42, 12, 4);
       flagGeo.translate(0.33, 0, 0);
-      const flag = new THREE.Mesh(flagGeo, new THREE.MeshStandardMaterial({ map: T.flag(hole.num, hole.look.flag || '#e2463b'), side: THREE.DoubleSide, roughness: 0.8 }));
+      const flag = new THREE.Mesh(flagGeo, new THREE.MeshStandardMaterial({ map: T.flagStyled ? T.flagStyled(hole.num, hole.look.flag || '#e2463b', this.look && this.look.flag) : T.flag(hole.num, hole.look.flag || '#e2463b'), side: THREE.DoubleSide, roughness: 0.8 }));
       flag.position.set(0.02, 1.5, 0); flag.castShadow = true;
       const knob = new THREE.Mesh(new THREE.SphereGeometry(0.04, 12, 8), new THREE.MeshStandardMaterial({ color: col('#ffd23f'), roughness: 0.3, metalness: 0.4 }));
       knob.position.y = 1.77;
@@ -762,7 +765,7 @@
         g.fillStyle = 'rgba(16,24,20,0.82)';
         if (g.roundRect) { g.beginPath(); g.roundRect(4, 8, 248, 56, 28); g.fill(); } else g.fillRect(4, 8, 248, 56);
         g.fillStyle = r.color; g.beginPath(); g.arc(36, 36, 12, 0, 7); g.fill();
-        g.fillStyle = '#ffffff'; g.font = '700 32px Fredoka, Outfit, system-ui, sans-serif'; g.textBaseline = 'middle'; g.fillText(r.name, 58, 38);
+        g.fillStyle = '#ffffff'; g.font = '700 32px Fredoka, Outfit, system-ui, sans-serif'; g.textBaseline = 'middle'; g.fillText((r.icon ? r.icon + ' ' : '') + r.name, 58, 38, 186);
         const tex = new THREE.CanvasTexture(c);
         const lab = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
         lab.scale.set(0.62, 0.175, 1);
@@ -820,6 +823,8 @@
       if (kind === 'splash') {
         for (let i = 0; i < 40; i++) { const a = rnd() * 6.28, s = 0.6 + rnd() * 1.8; D.spawn({ x, y: h, z: -y, vx: Math.cos(a) * s, vy: 2 + rnd() * 3, vz: Math.sin(a) * s, g: -12, life: 0.7 + rnd() * 0.4, size: 0.07 + rnd() * 0.06, color: col('#e8f7ff') }); }
         for (let i = 0; i < 2; i++) D.spawn({ x, y: h + 0.01, z: -y, vx: 0, vy: 0, vz: 0, g: 0, life: 1.1, size: 0.5 + i * 0.5, grow: 2.5, color: col('#d8f2ff'), a: 0.5 });
+      } else if ((kind === 'sink' || kind === 'ace') && this.look && this.look.sink && this.look.sink !== 'confetti' && this.sinkBurst && !opts.plain) {
+        this.sinkBurst(this.look.sink, x, y, h, kind === 'ace');
       } else if (kind === 'sink' || kind === 'ace') {
         const n = kind === 'ace' ? 160 : 60;
         const cols = this.hole.look.flowers || ['#ff7aa8', '#ffd23f', '#ffffff'];
@@ -881,13 +886,16 @@
           this.ballQ.premultiply(q);
         }
         ball.quaternion.copy(this.ballQ);
-        // trail
-        if (sp > 3 && !b.hidden) {
-          this.glow.spawn({ x: ball.position.x, y: ball.position.y, z: ball.position.z, vx: 0, vy: 0, vz: 0, g: 0, life: 0.35, size: 0.09 * Math.min(1, sp / 8), color: col('#ffffff'), a: 0.35 });
+        // trail (a bought trail, or the plain white wisp)
+        if (sp > 0.8 && !b.hidden) {
+          const style = (this.look && this.look.trail) || 'plain';
+          if (this.spawnTrail) this.spawnTrail(style, ball.position, sp, dt, t);
+          else if (sp > 3) this.glow.spawn({ x: ball.position.x, y: ball.position.y, z: ball.position.z, vx: 0, vy: 0, vz: 0, g: 0, life: 0.35, size: 0.09 * Math.min(1, sp / 8), color: col('#ffffff'), a: 0.35 });
         }
       }
       if (this.hell && this.lavaSeaTex) { this.lavaSeaTex[0].offset.set(t * 0.0025, t * 0.0015); this.lavaSeaTex[1].offset.set(-t * 0.004, t * 0.003); }
       this.vis.forEach(v => v.update && v.update(t, dt, sim));
+      if (this.sceneTick) this.sceneTick(t, dt);
       this.fx.update(dt); this.glow.update(dt); this.smoke.update(dt);
     }
 

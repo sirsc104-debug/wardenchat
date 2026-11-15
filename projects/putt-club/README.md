@@ -1,12 +1,12 @@
 # SirSC's Putt Club
 
-Mini golf in 3D, played against three rivals. Each difficulty has its own course: **the Garden** (Owen), 27 holes each built around its own garden trick; **the Canyon** (Medium), 27 desert holes built around cacti that pop the ball and tumbleweeds that blow across the green; **the Winter Wonderland** (Hard), 27 snowy holes among gingerbread houses and candy canes, with ice, thin ice, snowdrifts, sliding penguins and rolling snowballs; and **the Abyss** (Ultra), 18 holes of par 6 and up in an underground volcanic temple, floating over a lava abyss with no rails at all. Every round deals a random 9 or 18 from one course. The Course book lists all 99 holes and lets you practise any one of them.
+Mini golf in 3D, played against three rivals. Each difficulty has its own course: **the Garden** (Owen), 27 holes each built around its own garden trick; **the Canyon** (Medium), 27 desert holes built around cacti that pop the ball and tumbleweeds that blow across the green; **the Winter Wonderland** (Hard), 27 snowy holes among gingerbread houses and candy canes, with ice, thin ice, snowdrifts, sliding penguins and rolling snowballs; and **the Abyss** (Ultra), 18 holes of par 6 and up in an underground volcanic temple, floating over a lava abyss with no rails at all. Every round deals a random 9 or 18 from one course. Training lists all 99 holes and lets you practise any one of them. Rounds pay SirSC coins into the shared SirSC wallet, the Shop sells looks (balls, trails, hole-out celebrations, flags, scenery and avatars) for coins or diamonds, and friends can play the same holes together online.
 
 Plain HTML, CSS and JavaScript with three.js r128 from cdnjs. There is no build step for playing locally: serve the folder with `python3 -m http.server` and open `index.html`. All textures are painted on canvases and all sound is synthesised, so there are no image or audio files.
 
 ## The menu
 
-The title screen copies the SirSC games' menu (Bigger Fish, Tower Defense, Brain Rocket): the SirSC's logo, a three-tab toggle (**9 holes**, **18 holes**, **Play online**, which is coming soon), one card per difficulty, and a rules panel. The Course book sits beside the tabs. Each length and difficulty keeps its own best score.
+The title screen copies the SirSC games' menu (Bigger Fish, Tower Defense, Brain Rocket): the SirSC's logo, a three-tab toggle (**9 holes**, **18 holes**, **Play online**), one card per difficulty, and a rules panel. The top-left corner holds your Warden Chat account (or *Sign in*), your coins and diamonds, the SirSC Member badge if you're a member, the **Shop** and **Training** (every hole, to practise on its own). Each length and difficulty keeps its own best score.
 
 ## Difficulties
 
@@ -172,13 +172,32 @@ Every hole is built so that even perfect aim needs several putts: corners with n
 | 17 | Sulfur Winds | 11 | Gusts blowing across thin causeways with no edges, and a wall to spring over between gusts. |
 | 18 | The Descent | 7 | Five ledges down, each meeting the next only for a short stretch off to one side, and a red spring on the third. |
 
+## SirSC accounts, coins, diamonds and the Shop
+
+Putt Club signs in with the same Warden Chat accounts as SirSC's other games and uses the shared SirSC wallet (the one Downhill Death Run and Wildcard Chess use): coins, diamonds and membership are the same everywhere. The back end is Warden Chat's Supabase project; the game only asks, the server decides every balance, price and reward. Until the server answers `putt_ping` (the Putt Club back end isn't deployed yet), accounts stay hidden and everything else works as before: the Shop can be browsed and previewed but not bought from.
+
+- **Coins** are paid at the end of every round against the rivals: 400 for 9 holes on Owen, 800 on Medium, 1,500 on Hard, 3,000 on Ultra, doubled for 18 holes, ×0.6 for 2nd, ×0.4 for 3rd and ×0.25 for 4th, plus 150 for every stroke under par (up to 3,000), 500 for each hole in one (up to 3) and 1,500 for the first win each day. Members get 1.5×. Up to 25,000 coins a day from Putt Club. Training and online rounds don't pay.
+- **Diamonds** are bought from SirSC (5 for $1, paid in person): the Shop's Diamonds tab sends a request and SirSC adds them. 1 💎 = 5,000 coins; anything sold for coins costs 75% of its diamond price in coins, and the best things are diamonds only.
+- **SirSC Membership** ($3 a month, across all SirSC games): 1.5× coins, 5 💎 a month, the SirSC Diamond badge by your name, each month's members' scenery to keep (November 2026: Harvest Moon), and the SirSC Diamond ball, Diamond Dust trail, SirSC Standard flag and SirSC Royalty avatar while a member.
+- **The Shop** shows a live practice green beside the panel: pick anything and the ball putts in wearing it, scenery included. Balls (Sunny Yellow to Galaxy), trails (Sparkle, Bubbles, Petals, Rainbow, Fire, Stardust), hole-outs (Balloons, Bubble Burst, Fireworks, Snow Globe, Thunderstrike, Gold Rush), flags, scenery that changes the sky and light on every course except the Abyss (Golden Sunset, Cherry Blossom with falling petals, Starry Night with lanterns, Northern Lights, Fireworks Night, Harvest Moon) and avatars. Four picks are featured each week. It's all looks: nothing changes how a ball plays.
+
+The contract for the back end is `docs/ECONOMY-PUTT.md` (with `docs/CODEX-PROMPT-PUTT.md`, the prompt for building it in `sirsc104-debug/warden-chat`).
+
+## Playing online
+
+Signed-in players pick **Play online**, make a room on any course (9 or 18 holes) and send friends the 5-letter code; up to 4 players, and the host tees off. The server deals the holes. Everyone plays their own ball on their own device; each putt is sent once the ball stops (where it was hit from, the physics step, angle and strength, and where it ended), and every other device replays it with the same physics, so friends show as ghost balls with their avatars, exactly like the rivals. Each hole score is reported when the player holes out, and the scorecard fills in for everyone. If someone drops out, the round goes on without them. Online rounds don't pay coins yet. The contract is `docs/ONLINE-PUTT.md` (prompt: `docs/CODEX-PROMPT-ONLINE-PUTT.md`).
+
+## The demo build
+
+`python3 build-artifact.py dist/putt-club-demo.html --wallet-demo` adds `js/wallet-mock.js`, a pretend back end that follows both contracts and keeps everything in the browser: any username with a 10-character password signs in, new accounts start with 40,000 coins and 10 diamonds, the Membership tab has a button to try a month of membership, and online rooms fill with pretend friends who really play each hole (in a Web Worker, with the rivals' aiming) and send their putts the way a real player's game would. Any 5-letter code joins a room a pretend friend has made.
+
 ## Testing the holes
 
 `node tools/test-holes.js` (add `garden`, `canyon`, `winter` or `abyss` to test one course) plays every hole with a search bot (it tries hundreds of putts per stroke and keeps the one that gets closest along the course) and reports how many strokes it needed and how often a random putt from the tee is a hole in one. Pass hole ids or numbers to test just those. It fails if a hole can't be finished within its stroke limit or if the tee, cup or a post is off the green. `node tools/test-rivals.js abyss 0.97` plays each hole three times with the rivals' own shot search at a given skill and reports their strokes.
 
 ## Single-file build
 
-`python3 build-artifact.py dist/putt-club.html` inlines the CSS and scripts into one page for publishing as an artifact (three.js still loads from cdnjs). Add `--standalone` for a complete page to open anywhere.
+`python3 build-artifact.py dist/putt-club.html` inlines the CSS and scripts into one page for publishing as an artifact (three.js still loads from cdnjs). Add `--standalone` for a complete page to open anywhere, and `--wallet-demo` for the demo build.
 
 ## Files
 
@@ -200,8 +219,15 @@ js/vis.js           the garden around each hole and how each feature looks
 js/vis-abyss.js     the volcanic temple and the Abyss versions of each feature
 js/vis-canyon.js    the desert, cacti, tumbleweeds, springs and the Canyon versions of each feature
 js/vis-winter.js    the wonderland, thin ice, snowballs, penguins and the winter versions of each feature
+js/vis-cosmetics.js how the Shop's balls, trails, hole-outs, flags and scenery look
 js/audio.js         synthesised sound effects and music
+js/wallet.js        Warden Chat sign-in and the SirSC wallet (ported from Wildcard Chess)
+js/wallet-mock.js   the pretend back end, demo builds only
+js/cosmetics.js     the catalog, names and which cosmetics this device wears
+js/shop.js          the account pills, sign-in, the Shop and the coins after a round
+js/online.js        online rooms, and the friends' ghost balls that replay their putts
 js/game.js          menu, difficulties, rounds, rivals, scoring, camera, controls and screens
+docs/               the back-end contracts and the prompts for building them
 tools/test-holes.js the hole-testing bot
 tools/test-rivals.js the rivals' shot search on every hole
 ```

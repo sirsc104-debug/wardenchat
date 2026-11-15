@@ -3,6 +3,7 @@
 
     python3 build-artifact.py OUT.html               (for publishing as a claude.ai Artifact)
     python3 build-artifact.py OUT.html --standalone  (a complete page to download and open anywhere)
+    python3 build-artifact.py OUT.html --wallet-demo (with a pretend Warden Chat back end, js/wallet-mock.js)
 
 The Artifact host wraps the page in its own <html>/<head>/<body>, so the default bundle leaves those
 out: the <title>, the claude: meta tags, the Google Fonts link, the CSS inlined into <style>, the body's
@@ -15,7 +16,7 @@ import sys
 HERE = pathlib.Path(__file__).resolve().parent
 
 
-def main(out, standalone=False):
+def main(out, standalone=False, demo=False):
     html = (HERE / 'index.html').read_text(encoding='utf-8')
     title = re.search(r'<title>.*?</title>', html, re.S).group(0)
     metas = ''.join(m.group(0) + '\n' for m in re.finditer(r'<meta name="claude:[^>]+>', html))
@@ -26,6 +27,8 @@ def main(out, standalone=False):
     srcs = re.findall(r'<script src="([^"]+)"></script>', body)
     external = [s for s in srcs if s.startswith('http')]
     local = [s for s in srcs if not s.startswith('http')]
+    if demo:
+        local.insert(local.index('js/wallet.js') + 1, 'js/wallet-mock.js')
     body = re.sub(r'\s*<script src="[^"]+"></script>', '', body).strip()
     js = '\n'.join((HERE / src).read_text(encoding='utf-8') for src in local)
     if '</script' in js or '</style' in css:
@@ -41,7 +44,7 @@ def main(out, standalone=False):
 
 
 if __name__ == '__main__':
-    args = [a for a in sys.argv[1:] if a != '--standalone']
+    args = [a for a in sys.argv[1:] if a not in ('--standalone', '--wallet-demo')]
     if len(args) != 1:
         sys.exit(__doc__)
-    main(args[0], standalone='--standalone' in sys.argv)
+    main(args[0], standalone='--standalone' in sys.argv, demo='--wallet-demo' in sys.argv)

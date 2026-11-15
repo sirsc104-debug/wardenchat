@@ -366,7 +366,7 @@
       const a = rnd() * TAU, d = 120 + rnd() * 60, x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d, h = 50 + rnd() * 20;
       for (let k = 0; k < 4; k++) clouds.push({ x: x + (rnd() - 0.5) * 30, y: h + rnd() * 3, z: -(y + (rnd() - 0.5) * 8), s: 9 + rnd() * 8, sy: 1.6 + rnd(), c: sunset ? '#ffd8c0' : '#ffffff' });
     }
-    VIS.instanced(world, new THREE.IcosahedronGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xffffff, fog: false, transparent: true, opacity: 0.8 }), clouds, false);
+    VIS.instanced(world, new THREE.IcosahedronGeometry(1, 1), new THREE.MeshBasicMaterial({ color: col((world.L && world.L.cloud) || '#ffffff'), fog: false, transparent: true, opacity: 0.8, userData: { cloud: true } }), clouds, false);
     const birds = [];
     for (let i = 0; i < 3; i++) {
       const b = new THREE.Group(), wm = M('#2a2220', { side: THREE.DoubleSide });

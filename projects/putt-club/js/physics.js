@@ -66,6 +66,7 @@
       this.opts = opts || {};
       this.assist = this.opts.assist || 1;
       this.t = 0;
+      this.steps = 0;       // physics steps since the hole began (online replays start putts on the same step)
       this.events = [];
       this.feats = (this.hole.features || []).map(f => {
         const def = PC.FEAT[f.type];
@@ -246,6 +247,7 @@
     step(dt) {
       dt = dt || C.DT;
       this.t += dt;
+      this.steps++;
       const b = this.ball;
       for (let i = 0; i < this.feats.length; i++) if (this.feats[i].update) this.feats[i].update(this.t, this);
       if (b.mode === 'tunnel') {
@@ -384,12 +386,13 @@
     snapshot() {
       const copy = v => JSON.parse(JSON.stringify(v));
       return {
-        t: this.t, ball: copy(this.ball), safe: this.safe.slice(),
+        t: this.t, steps: this.steps, ball: copy(this.ball), safe: this.safe.slice(),
         feats: this.feats.map(f => { const o = {}; Object.keys(f).forEach(k => { if (typeof f[k] !== 'function' && k !== 'spec' && k !== 'type' && k !== 'line') o[k] = f[k]; }); return copy(o); }),
       };
     }
     load(snap) {
       this.t = snap.t;
+      this.steps = snap.steps || 0;
       this.feats.forEach((f, i) => Object.assign(f, snap.feats[i]));
       this.feats.forEach(f => f.update && f.update(this.t, this));
       Object.assign(this.ball, snap.ball);

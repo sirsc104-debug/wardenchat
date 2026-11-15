@@ -56,6 +56,11 @@
   <!-- Title menu: the same layout as Bigger Fish, Tower Defense and Brain Rocket -->
   <section class="screen title" id="title">
     <div class="menu-stage" id="menuStage">
+      <div class="corner-l" id="topBar">
+        <div class="acct-chip" id="acctChip" hidden></div>
+        <button class="pill" data-shop="open" type="button">🛍️ <span>Shop</span></button>
+        <button class="pill" id="openBook" type="button" title="Practise any of the 99 holes on its own">🎯 <span>Training</span></button>
+      </div>
       <div class="corner-r">
         <button class="pill" data-sfx type="button" aria-pressed="true">🔊 <span>Sound</span></button>
         <button class="pill" data-music type="button" aria-pressed="true">🎵 <span>Music</span></button>
@@ -69,10 +74,9 @@
               <div class="type-glider instant" id="typeGlider"></div>
               <button class="type-btn" data-tab="9" role="tab" type="button"><span class="type-icon">⛳</span><span class="type-name">9 holes</span><span class="type-sub">About 10 minutes</span></button>
               <button class="type-btn" data-tab="18" role="tab" type="button"><span class="type-icon">🏌️</span><span class="type-name">18 holes</span><span class="type-sub">The full round</span></button>
-              <button class="type-btn soon" data-tab="online" role="tab" type="button"><span class="type-icon">🌐</span><span class="type-name">Play online</span><span class="type-sub">Coming soon</span></button>
+              <button class="type-btn" data-tab="online" role="tab" type="button"><span class="type-icon">🌐</span><span class="type-name">Play online</span><span class="type-sub">With friends</span></button>
             </div>
-            <div class="type-toggle"><button class="type-btn" id="openBook" type="button"><span class="type-icon">📖</span><span class="type-name">Course book</span><span class="type-sub">All 99 holes</span></button></div>
-          </div>
+                      </div>
           <div class="modes" id="modes"></div>
           <div class="how" id="how"></div>
         </div>
@@ -85,7 +89,7 @@
     <div class="book-inner">
       <header class="book-head">
         <div>
-          <span class="eyebrow">The course book</span>
+          <span class="eyebrow">Training</span>
           <h2>Practise any hole</h2>
           <p>Pick a hole to play it on its own. Rounds deal holes at random from these.</p>
         </div>
@@ -114,12 +118,55 @@
       <p class="sc-key"><span class="pencil birdie">2</span> birdie <span class="pencil eagle">1</span> eagle or better <span class="pencil bogey">4</span> bogey <span class="pencil double">5</span> double or worse</p>
       <ol class="board" id="cardBoard"></ol>
       <p class="sc-summary" id="cardSummary"></p>
+      <div class="rw" id="rewardBox" hidden></div>
       <div class="sc-actions">
         <button class="btn primary" id="cardNext" type="button">Next hole</button>
         <button class="btn" id="cardAlt" type="button" hidden>Menu</button>
       </div>
     </div>
   </section>
+
+  <!-- Shop: the practice green stays live behind the panel and wears whatever you preview -->
+  <section class="screen shop" id="shop" hidden>
+    <div class="shop-pv"><span class="shop-pv-cap" id="shopPvCap">Pick anything to try it on the green.</span></div>
+    <div class="shop-panel" id="shopPanel">
+      <header class="shop-head">
+        <div><span class="eyebrow">SirSC wallet</span><h2>Shop</h2></div>
+        <button class="btn small" data-shop="close" type="button">Back</button>
+      </header>
+      <div class="shop-wallet" id="shopWallet"></div>
+      <div class="shop-featured" id="shopFeatured"></div>
+      <div class="shop-tabs" role="tablist">
+        <button type="button" data-tab-shop="ball">Balls</button><button type="button" data-tab-shop="trail">Trails</button><button type="button" data-tab-shop="sink">Hole-outs</button>
+        <button type="button" data-tab-shop="flag">Flags</button><button type="button" data-tab-shop="scene">Scenery</button><button type="button" data-tab-shop="avatar">Avatars</button>
+        <button type="button" data-tab-shop="member">👑 Membership</button><button type="button" data-tab-shop="diamonds">💎 Diamonds</button>
+      </div>
+      <div class="shop-grid" id="shopGrid"></div>
+      <p class="shop-foot">Coins, diamonds and membership are your SirSC wallet, shared with Wildcard Chess, Downhill Death Run and SirSC's other games. Win coins by finishing rounds against the rivals: 400 for a 9 on Owen up to 3,000 on Ultra, doubled for 18 holes, less for 2nd to 4th place, plus 150 for every stroke under par, 500 for each hole in one and 1,500 for your first win each day. Members get 1.5×. Up to 25,000 coins a day. Everything here is looks only: no ball putts any differently.</p>
+    </div>
+  </section>
+
+  <!-- Online room: waiting for friends to join -->
+  <section class="screen room" id="room" hidden>
+    <div class="room-card" id="roomBody"></div>
+  </section>
+
+  <!-- Sign in with a Warden Chat account -->
+  <div class="modal" id="signin" hidden>
+    <form class="modal-card" id="signinForm" role="dialog" aria-modal="true" aria-labelledby="siTitle">
+      <h2 id="siTitle">Sign in</h2>
+      <p class="why" id="siWhy">Use your Warden Chat account. Your coins, diamonds and membership are shared with Wildcard Chess and SirSC's other games, and the same account plays friends online.</p>
+      <label class="si-field">Username <input id="siUser" autocomplete="username" maxlength="24" required></label>
+      <label class="si-field">Password <input id="siPass" type="password" autocomplete="current-password" required></label>
+      <p class="si-err" id="siErr" role="alert"></p>
+      <div class="modal-btns">
+        <button class="btn primary" type="submit">Sign in</button>
+        <button class="btn" type="button" id="siCreate">Create account</button>
+        <button class="btn ghost" type="button" id="siClose">Cancel</button>
+      </div>
+      <p class="si-foot">Changing your password or deleting your account happens on <a id="siChat" href="https://chat.sirsc104.com/" target="_blank" rel="noopener">Warden Chat</a>.</p>
+    </form>
+  </div>
 
   <!-- Pause -->
   <section class="screen pause" id="pause" hidden>
@@ -158,8 +205,13 @@
 <script src="js/vis-abyss.js"></script>
 <script src="js/vis-canyon.js"></script>
 <script src="js/vis-winter.js"></script>
+<script src="js/vis-cosmetics.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/bots.js"></script>
+<script src="js/wallet.js"></script>
+<script src="js/cosmetics.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/online.js"></script>
 <script src="js/game.js"></script>
 </body>
 </html>

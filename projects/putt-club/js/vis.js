@@ -192,7 +192,7 @@
       const a = rnd() * TAU, d = 120 + rnd() * 60, cx = box.cx + Math.cos(a) * d, cy = box.cy + Math.sin(a) * d, h = 38 + rnd() * 22;
       for (let k = 0; k < 5; k++) clouds.push({ x: cx + (rnd() - 0.5) * 24, y: h + rnd() * 4, z: -(cy + (rnd() - 0.5) * 10), s: 7 + rnd() * 6, sy: 3 + rnd() * 2, c: '#ffffff' });
     }
-    instanced(world, g.blob, new THREE.MeshBasicMaterial({ color: 0xffffff, fog: false, transparent: true, opacity: 0.92 }), clouds, false);
+    instanced(world, g.blob, new THREE.MeshBasicMaterial({ color: col((world.L && world.L.cloud) || '#ffffff'), fog: false, transparent: true, opacity: 0.92, userData: { cloud: true } }), clouds, false);
 
     // Stepping stones up to the tee, and the hole's sign
     const ta = Math.atan2(hole.cup[1] - hole.tee[1], hole.cup[0] - hole.tee[0]);

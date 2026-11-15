@@ -23,8 +23,14 @@
   const poolOf = course => ({ abyss: PC.ABYSS, canyon: PC.CANYON, winter: PC.WINTER })[course] || PC.HOLES;
 
   const world = new PC.World($('view'));
+  // Wear the cosmetics you own (cosmetics.js); a new look applies at once, scenery included.
+  if (typeof Look !== 'undefined') { world.setLook(Look.current()); Look.on(l => world.setLook(l, true)); }
   const audio = new PC.Audio(save);
   const rivals = new PC.Rivals();
+  const remote = new PC.Remote();          // friends' balls in an online round
+  const opp = () => (round && round.online ? remote : rivals);
+  const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const hasWallet = typeof Shop !== 'undefined';
   const raycaster = new THREE.Raycaster();
 
   let state = 'title';
@@ -67,7 +73,7 @@
   function startRound(n, diff) {
     const pool = poolOf(DIFFS[diff].course);
     const ids = U.shuffle(pool.map(h => h.id)).slice(0, n);
-    round = { ids, idx: 0, diff, practice: false, players: newPlayers(diff) };
+    round = { ids, idx: 0, diff, practice: false, players: newPlayers(diff), started: Date.now() };
     beginHole();
   }
 
@@ -77,13 +83,93 @@
     beginHole();
   }
 
+  // ---------- the Shop's practice green: the ball keeps putting in, wearing whatever you preview ----------
+  const SHOWCASE = { id: 'showcase', num: 7, course: 'garden', name: 'Practice Green', par: 2, special: 'Shop preview', tip: '', tee: [0, 1.2], cup: [0, 7.8],
+    floors: [U.roundPoly(U.rect(-1.9, 0, 1.9, 9.4), 0.9)], look: { rail: 'white', light: 'day', flowers: ['#ff7aa8', '#ffd23f', '#ffffff'] }, features: [] };
+  let showcaseT = 0;
+  function showcase(on) {
+    if (!on) { toTitle(); return; }
+    clearTimers(); rivals.clear(); remote.clear();
+    $('hud').hidden = true; $('intro').hidden = true; $('toast').hidden = true; $('waitBar').hidden = true;
+    loadHole(SHOWCASE, DIFFS.owen);
+    world.cup.flag.material.map = PC.TEX.flagStyled(7, '#e2463b', world.look && world.look.flag);
+    state = 'shop';
+    cam.cur = null;
+    show(null);
+    showcaseT = 0.8;
+  }
+  function showcasePutt() {
+    if (state !== 'shop') return;
+    showcaseT = 0;
+    sim.place(hole.tee[0], hole.tee[1]);
+  }
+  function stepShowcase(dt) {
+    if (state !== 'shop') return;
+    showcaseT -= dt;
+    const b = sim.ball;
+    if (showcaseT > 0) return;
+    if (b.mode === 'sunk' || b.mode === 'lost') { sim.place(hole.tee[0], hole.tee[1]); showcaseT = 0.6; return; }
+    if (!sim.resting()) return;
+    if (Math.hypot(b.x - hole.tee[0], b.y - hole.tee[1]) > 0.2) sim.place(hole.tee[0], hole.tee[1]);
+    const cp = sim.cupPos(), d = Math.hypot(cp[0] - b.x, cp[1] - b.y);
+    sim.shoot(Math.atan2(cp[1] - b.y, cp[0] - b.x) + (Math.random() - 0.5) * 0.01, PC.Nav.powerFor(d + 1.1));
+    showcaseT = 9;
+  }
+
+  // ---------- online rounds (online.js talks to the server) ----------
+  function startOnline(st) {
+    clearTimers();
+    const players = st.players.filter(p => !p.left).map(p => ({
+      name: p.username, you: p.seat === st.you, seat: p.seat, icon: avatarIcon(p.avatar), member: p.member,
+      color: p.seat === st.you ? '#ffffff' : Online.colorOf(p.seat), scores: [],
+    })).sort((a, b) => (b.you - a.you) || a.seat - b.seat);
+    round = { ids: st.hole_ids, idx: 0, diff: st.diff, practice: false, online: true, players, stash: {}, started: Date.now() };
+    (st.shots || []).forEach(s => { if (s.seat !== st.you) (round.stash[s.hole] = round.stash[s.hole] || []).push(s); });
+    beginHole();
+  }
+  // Scores and who's still here, from the latest room state.
+  function syncOnline() {
+    const st = hasWallet && Online.room;
+    if (!round || !round.online || !st) return;
+    for (const sc of st.scores || []) {
+      const pl = round.players.find(p => p.seat === sc.seat);
+      if (!pl || pl.you) continue;
+      pl.scores[sc.hole] = sc.strokes;
+      if (sc.hole === round.idx) remote.setReported(sc.seat, sc.strokes);
+    }
+    for (const p of st.players) if (p.seat !== st.you) remote.setAway(p.seat, !!p.left || (p.seen != null && p.seen > 120));
+  }
+  if (hasWallet) {
+    Online.onShots(s => {
+      if (!round || !round.online) return;
+      if (s.hole === round.idx) remote.addShot(s); else (round.stash[s.hole] = round.stash[s.hole] || []).push(s);
+    });
+    Online.onState(() => syncOnline());
+  }
+  // A putt you made in an online round, sent once it has stopped (or dropped, or been lost).
+  function sendShot(result) {
+    const p = round && round.pending;
+    if (!p) return;
+    round.pending = null;
+    const b = sim.ball, cp = sim.cupPos();
+    const end = result === 'sunk' ? [cp[0], cp[1]] : [b.x, b.y];
+    Online.shot(Object.assign({}, p, { ex: +end[0].toFixed(4), ey: +end[1].toFixed(4), result }));
+  }
+
   function beginHole() {
     clearTimers();
     show(null);
     round.waiting = false;
     const spec = PC.holeById(round.ids[round.idx]);
     loadHole(spec, DIFFS[round.diff]);
-    if (!round.practice) {
+    round.pending = null;
+    if (round.online) {
+      rivals.clear();
+      const roster = round.players.filter(p => !p.you).map(p => ({ name: p.name, color: p.color, icon: p.icon, seat: p.seat }));
+      world.setGhosts(remote.setHole(hole, roster, { assist: DIFFS[round.diff].assist }));
+      (round.stash[round.idx] || []).forEach(s => remote.addShot(s));
+      syncOnline();
+    } else if (!round.practice) {
       const roster = round.players.filter(p => !p.you).map(p => ({ name: p.name, color: p.color, skill: p.skill }));
       world.setGhosts(rivals.setHole(hole, roster, { assist: 1 }));
     } else rivals.clear();
@@ -151,12 +237,16 @@
     audio.play(score === 1 ? 'ace' : d < 0 ? 'good' : d === 0 ? 'par' : 'meh');
     toast(picked ? 'Picked up' : label(score, hole.par), picked ? `${max} strokes is the most on this hole` : `${score} stroke${score === 1 ? '' : 's'} · ${vsPar(d)}${!picked && prev && score < prev ? ' · your best here' : ''}`, score === 1 || d < 0 ? 'good' : d === 0 ? 'even' : 'bad');
     updateHud();
-    if (round.practice || rivals.allDone()) later(score === 1 ? 2600 : 1900, showCard);
+    if (round.online) {
+      sendShot(picked ? 'rest' : 'sunk');
+      Online.hole(round.idx, score);
+    }
+    if (round.practice || opp().allDone()) later(score === 1 ? 2600 : 1900, showCard);
     else { round.waiting = true; later(1600, () => { if (state === 'play' && round.waiting) { timeScale = 3; showWaiting(); } }); }
   }
 
   function showWaiting() {
-    const left = rivals.list.filter(r => !r.done).map(r => r.name);
+    const left = opp().list.filter(r => !r.done && !r.away).map(r => r.name);
     if (!left.length) { $('waitBar').hidden = true; return; }
     $('waitText').textContent = `Waiting for ${listNames(left)}…`;
     $('waitBar').hidden = false;
@@ -176,6 +266,7 @@
     else if (kind === 'cactus') { const h = sim.ball.z; world.burst('spark', e.x, e.y, h, { color: '#ffffff', n: 30 }); world.burst('puff', e.x, e.y, h - 0.1, { color: '#f4f0dc', n: 12 }); audio.play('pop'); }
     else if (kind === 'chasm' && hole.course === 'canyon') { world.burst('puff', e.x, e.y, -0.4, { color: '#d8b88a', n: 20 }); audio.play('flowers'); }
     else { world.burst('puff', e.x, e.y, -0.2, { color: kind === 'flowers' ? '#ffb3c6' : '#e9e1cf', n: 20 }); audio.play('flowers'); }
+    if (round && round.online) sendShot('lost');
     strokes += 1;
     updateHud();
     toast(lostMsg(kind, e), 'One penalty stroke. Back to where you putted from.', 'bad');
@@ -189,6 +280,7 @@
 
   function onRest() {
     shotLive = false;
+    if (round && round.online) sendShot('rest');
     const b = sim.ball;
     const cp = sim.cupPos();
     cam.aimAz = Math.atan2(cp[1] - b.y, cp[0] - b.x);
@@ -224,11 +316,12 @@
 
   function renderRivalsHud() {
     const box = $('hudRivals');
-    if (!round || round.practice || !rivals.list.length) { box.hidden = true; return; }
+    const R = opp();
+    if (!round || round.practice || !R.list.length) { box.hidden = true; return; }
     box.hidden = false;
-    box.innerHTML = rivals.list.map(r => {
+    box.innerHTML = R.list.map(r => {
       const tot = totalsFor(round.players.find(p => p.name === r.name), round.idx).d + (r.done ? r.strokes - hole.par : 0);
-      return `<div class="rv${r.done ? ' done' : ''}"><i style="background:${r.color}"></i><b>${r.name}</b><span>${r.done ? (r.picked ? 'picked up' : 'in ' + r.strokes) : r.strokes ? r.strokes + (r.strokes === 1 ? ' stroke' : ' strokes') : 'lining up'}</span><em>${vsPar(tot)}</em></div>`;
+      return `<div class="rv${r.done ? ' done' : ''}${r.away ? ' away' : ''}"><i style="background:${r.color}"></i><b>${r.icon ? r.icon + ' ' : ''}${esc(r.name)}</b><span>${r.done ? (r.picked ? 'picked up' : 'in ' + r.strokes) : r.strokes ? r.strokes + (r.strokes === 1 ? ' stroke' : ' strokes') : 'lining up'}</span><em>${vsPar(tot)}</em></div>`;
     }).join('');
   }
 
@@ -316,10 +409,17 @@
       $('cardTitle').textContent = place === 1 ? `You win! ${vsPar(tY.d)}` : `${ordinal(place)} place · ${vsPar(tY.d)}`;
       const aces = you().scores.filter(s => s === 1).length;
       $('cardSummary').textContent = `${tY.s} strokes. ` + (better ? (prev ? `A new best for ${n} holes on ${DIFFS[round.diff].name} (was ${prev.s}).` : `Your first ${n}-hole round on ${DIFFS[round.diff].name} is on the board.`) : `Your best for ${n} holes on ${DIFFS[round.diff].name} is ${prev.s} (${vsPar(prev.d)}).`) + (aces ? ` ${aces} hole${aces > 1 ? 's' : ''} in one!` : '');
-      $('cardNext').textContent = 'New round';
+      $('cardNext').textContent = round.online ? 'Back to menu' : 'New round';
       $('cardAlt').textContent = 'Menu';
-      $('cardAlt').hidden = false;
+      $('cardAlt').hidden = !!round.online;
       round.finished = true;
+    }
+    // Coins: only at the end of a round against the rivals (never practice; online says it doesn't pay yet).
+    const rb = $('rewardBox');
+    if (rb) { rb.hidden = true; rb.innerHTML = ''; }
+    if (round.finished && hasWallet) {
+      const board2 = standings(), place = board2.findIndex(r => r.p.you) + 1, t = totalsFor(you());
+      Shop.reward({ online: !!round.online, diff: round.diff, holes: round.ids.length, strokes: t.s, par: t.p, place, aces: you().scores.filter(x => x === 1).length, durationMs: Date.now() - (round.started || Date.now()) });
     }
     show('card');
     $('cardNext').focus();
@@ -328,7 +428,7 @@
   function cardNext() {
     audio.play('click');
     if (round.practice) { beginHole(); return; }
-    if (round.finished) { startRound(round.ids.length, round.diff); return; }
+    if (round.finished) { if (round.online) { toTitle(); return; } startRound(round.ids.length, round.diff); return; }
     round.idx++;
     beginHole();
   }
@@ -338,18 +438,19 @@
   const TAG = {
     9: 'Mini golf with a trick on every hole. Putt against three rivals over a fresh 9. Medium heads out to the Canyon, Hard to the Winter Wonderland.',
     18: 'The full round: 18 holes, three rivals, one scorecard. Ultra takes you down into the Abyss.',
-    online: 'Putt against your friends on the same holes at the same time. Online play is coming soon.',
+    online: 'Make a room on any course, send friends the code, and putt the same holes at the same time.',
   };
   const HOW = `<div><b>⛳ Drag back to putt.</b> Press anywhere, pull back and let go. The further you pull, the harder you hit.</div>
     <div><b>👻 Beat your rivals.</b> They play the same hole at the same time as see-through ghost balls.</div>
     <div><b>🌵 Cacti, water, lava and edges</b> cost a stroke and put you back where you putted from.</div>
     <div><b>🎥 C shows the whole hole.</b> Q and E turn the camera. Arrow keys aim and Space putts.</div>`;
-  const HOW_ONLINE = `<div><b>🌐 Rooms with friends.</b> Share a code, everyone plays the same holes, and your friends show as ghost balls.</div>
-    <div><b>🏆 One scorecard.</b> The lowest total after the round wins. Online play is coming soon.</div>`;
+  const HOW_ONLINE = `<div><b>🌐 Rooms with friends.</b> Pick a course to make a room, or type a friend's code to join. Up to 4 players.</div>
+    <div><b>👻 Same holes, same time.</b> Everyone plays their own ball; friends show as ghost balls with their avatars.</div>
+    <div><b>🏆 One scorecard.</b> The lowest total after the round wins. Online rounds don't earn coins yet.</div>`;
 
   function bestText(n, d) { const b = save.best[n + '-' + d]; return b ? `Best: ${b.s} (${vsPar(b.d)})` : 'Not played yet'; }
   function modeCards() {
-    if (menuTab === 'online') return ORDER.map(id => { const m = DIFFS[id]; return `<div class="mode-card ${m.cls} locked"><span class="mode-lock">🔒</span><span class="mode-icon">${m.icon}</span><span class="mode-name">${m.name}</span><span class="mode-tag">Coming soon</span><span class="mode-info">Play friends<br>in the ${COURSE[m.course]}</span><span class="mode-best"></span></div>`; }).join('');
+    if (menuTab === 'online') return hasWallet ? Online.menuCards(DIFFS, ORDER, COURSE) : '';
     return ORDER.map(id => {
       const m = DIFFS[id];
       return `<button class="mode-card ${m.cls}" type="button" data-diff="${id}"><span class="mode-icon">${m.icon}</span><span class="mode-name">${m.name}</span><span class="mode-tag">The ${COURSE[m.course]}</span><span class="mode-info">${m.info}<br><small>vs ${m.rivals.join(', ')}</small></span><span class="mode-best">${bestText(menuTab, id)}</span></button>`;
@@ -393,9 +494,11 @@
 
   function toTitle() {
     clearTimers();
+    if (round && round.online && hasWallet) Online.leave();
     round = null;
-    rivals.clear();
+    rivals.clear(); remote.clear();
     $('hud').hidden = true; $('intro').hidden = true; $('toast').hidden = true; $('waitBar').hidden = true;
+    if (hasWallet) Shop.renderChip();
     const spec = PC.HOLES[Math.floor(Math.random() * PC.HOLES.length)];
     loadHole(spec, DIFFS.medium);
     document.body.classList.remove('abyss', 'canyon', 'winter');
@@ -495,6 +598,14 @@
       const o = overviewCam();
       return { tx: o.tx, ty: o.ty, th: 0, az: clock * 0.07 + 1.2, el: 0.72, dist: o.dist * 0.95 };
     }
+    if (state === 'shop') {
+      // The view is shifted beside the panel (shopShift), so this frames the green in what's left.
+      // Previewing scenery, the camera looks up past the cup so the sky shows too.
+      const side = shopShift.side, sky = typeof Look !== 'undefined' && Look.previewing && Look.previewing.kind === 'scene';
+      const az = Math.PI / 2 + 0.62 + Math.sin(clock * 0.15) * 0.08;
+      if (sky) return { tx: 0.6, ty: 9.5, th: 3.3, az: az - 0.2, el: -0.09, dist: side ? 11.5 : 13 };
+      return { tx: 0, ty: 4.3, th: 0.1, az, el: side ? 0.62 : 0.72, dist: side ? 11 : 13 };
+    }
     if (state === 'intro' && clock - cam.t0 < 1.3) return overviewCam();
     if (cam.mode === 'overview') { const o = overviewCam(); o.dist *= cam.zoom; return o; }
     let bx = b.x, by = b.y, bz = b.z;
@@ -507,6 +618,22 @@
     return { tx: bx + Math.cos(az) * 1.5, ty: by + Math.sin(az) * 1.5, th: bz, az, el: 0.6, dist: 6.2 * cam.zoom };
   }
 
+  // In the Shop the panel covers part of the screen: move the picture's centre into the part you can see.
+  const shopShift = { key: '', side: true };
+  function shiftForShop(camera) {
+    const panel = state === 'shop' && $('shopPanel');
+    const r = panel && !$('shop').hidden ? panel.getBoundingClientRect() : null;
+    const W = window.innerWidth, H = window.innerHeight;
+    const side = !r || r.height > H * 0.8;
+    const dx = r && side ? Math.round(r.width / 2) : 0, dy = r && !side ? Math.round(r.height / 2) : 0;
+    const key = r ? `${W}x${H}:${dx}:${dy}` : '';
+    shopShift.side = side;
+    if (key === shopShift.key) return;
+    shopShift.key = key;
+    if (key) camera.setViewOffset(W, H, dx, dy, W, H); else camera.clearViewOffset();
+    camera.updateProjectionMatrix();
+  }
+
   function updateCam(dt) {
     const w = camWant();
     if (!cam.cur) cam.cur = Object.assign({}, w);
@@ -517,6 +644,7 @@
     c.el += (w.el - c.el) * k; c.dist += (w.dist - c.dist) * k;
     const hd = Math.cos(c.el) * c.dist;
     const camera = world.camera;
+    shiftForShop(camera);
     camera.position.set(c.tx - Math.cos(c.az) * hd, c.th + Math.sin(c.el) * c.dist + 0.2, -(c.ty - Math.sin(c.az) * hd));
     camera.lookAt(c.tx, c.th + 0.15, -c.ty);
   }
@@ -606,6 +734,7 @@
   function shoot(angle, power) {
     if (!canAim()) return;
     audio.unlock();
+    if (round && round.online) round.pending = { hole: round.idx, stroke: strokes + 1, step: sim.steps, angle: +angle.toFixed(6), power: +power.toFixed(6), x: +sim.ball.x.toFixed(4), y: +sim.ball.y.toFixed(4) };
     sim.shoot(angle, power);
     strokes++;
     shotLive = true;
@@ -718,6 +847,10 @@
   function handleEvents() {
     for (const e of sim.events) {
       if (state === 'title') continue;
+      if (state === 'shop') {
+        if (e.type === 'sink') { const cp = sim.cupPos(); audio.play('sink'); world.burst('sink', cp[0], cp[1], sim.floorHeight(cp[0], cp[1])); showcaseT = 1.8; }
+        continue;
+      }
       if (SOUND[e.type]) audio.play(SOUND[e.type], { k: (e.speed || 2) / 2.5 });
       else if (e.type === 'bumper') { audio.play('bumper'); world.burst('spark', e.x, e.y, 0.3, { color: hole.course === 'abyss' ? '#ff8a2a' : '#ffd27a', n: 12 }); }
       else if (e.type === 'launch') { audio.play('launch'); world.burst('puff', sim.ball.x, sim.ball.y, 0.1, { color: '#ffffff' }); }
@@ -738,7 +871,8 @@
 
   function handleRivals(dt) {
     if (!round || round.practice) return;
-    const evs = rivals.update(dt, timeScale);
+    const R = opp();
+    const evs = R.update(dt, timeScale);
     evs.forEach(ev => {
       const r = ev.rival, pl = round.players.find(p => p.name === r.name);
       if (ev.type === 'sink' || ev.type === 'pickup') {
@@ -760,10 +894,10 @@
     if (finished && state === 'play') {
       waitT += dt;
       if (!$('waitBar').hidden) showWaiting();
-      if (waitT > 40) rivals.forceFinish();
-      if (round.waiting && rivals.allDone()) {
+      if (waitT > (round.online ? 150 : 40)) R.forceFinish();
+      if (round.waiting && R.allDone()) {
         round.waiting = false;
-        rivals.list.forEach(r => { round.players.find(p => p.name === r.name).scores[round.idx] = r.strokes; });
+        R.list.forEach(r => { const pl = round.players.find(p => p.name === r.name); if (pl.scores[round.idx] === undefined || !round.online) pl.scores[round.idx] = r.done ? r.strokes : PC.maxStrokes(hole); });
         renderRivalsHud();
         timeScale = 1;
         later(900, showCard);
@@ -781,10 +915,11 @@
       clock += sdt;
       acc += sdt;
       let n = 0;
-      while (acc >= C.DT && n < 90) { sim.step(C.DT); if (state === 'play' || state === 'intro') rivals.stepPhysics(C.DT); acc -= C.DT; n++; }
+      while (acc >= C.DT && n < 90) { sim.step(C.DT); if (state === 'play' || state === 'intro') opp().stepPhysics(C.DT); acc -= C.DT; n++; }
       if (n >= 90) acc = 0;
       handleEvents();
       if (state === 'play' || state === 'intro') handleRivals(dt);
+      stepShowcase(dt);
     }
     if (kb.on && canAim()) {
       kb.angle += kb.rot * (kb.fine ? 0.25 : 1.1) * dt;
@@ -810,7 +945,7 @@
   $('modes').addEventListener('click', e => {
     const card = e.target.closest('[data-diff]');
     audio.unlock();
-    if (!card) { if (e.target.closest('.mode-card')) { audio.play('click'); toast('Coming soon', 'Online play with friends is on its way.', 'even'); } return; }
+    if (!card) return;
     audio.play('click');
     startRound(+menuTab, card.dataset.diff);
   });
@@ -823,7 +958,7 @@
   bind('resume', resume);
   bind('quit', () => { audio.play('click'); toTitle(); });
   bind('introGo', go);
-  bind('skipWait', () => { rivals.forceFinish(); });
+  bind('skipWait', () => { opp().forceFinish(); });
   document.querySelectorAll('[data-sfx]').forEach(el => el.addEventListener('click', toggleSound));
   document.querySelectorAll('[data-music]').forEach(el => el.addEventListener('click', toggleMusic));
   bind('rotL', () => { if (cam.mode === 'overview') cam.overAz += 0.35; else { cam.aimAz += 0.35; kb.angle = cam.aimAz; } });
@@ -834,10 +969,11 @@
   // When the published page is updated while someone is mid-round, keep their round: the holes dealt,
   // the difficulty and everyone's scores so far. The hole in play starts again from the tee.
   const hot = window.claude && window.claude.hot;
-  if (hot && hot.snapshot) hot.snapshot(() => (round && !round.finished ? { round: { ids: round.ids, idx: round.idx, diff: round.diff, practice: round.practice, players: round.players } } : {}));
+  if (hot && hot.snapshot) hot.snapshot(() => (round && !round.finished && !round.online ? { round: { ids: round.ids, idx: round.idx, diff: round.diff, practice: round.practice, players: round.players } } : {}));
 
   function boot(data) {
     syncSoundUi();
+    if (hasWallet) { Shop.init(); Online.init(); }
     requestAnimationFrame(t => { last = t; frame(t); });
     document.body.classList.add('ready');
     const r = data && data.round;
@@ -850,5 +986,6 @@
   fontsReady.then(() => { if (hot && hot.ready) hot.ready(boot); else boot((hot && hot.data) || {}); });
 
   // for tests
-  PC.game = { startRound, startPractice, get state() { return state; }, get sim() { return sim; }, get round() { return round; }, rivals, go, shoot, cam, world, toTitle, openBook, showCard, setTab };
+  PC.game = { startRound, startPractice, get state() { return state; }, get sim() { return sim; }, get round() { return round; }, rivals, remote, go, shoot, cam, world, toTitle, openBook, showCard, setTab,
+    toast, sfx: n => audio.play(n), showcase, showcasePutt, startOnline, renderMenu: () => { if (state === 'title') renderMenu(false); }, DIFFS, COURSE };
 })(window.PC = window.PC || {});
