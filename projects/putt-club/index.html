@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Putt Club</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Outfit:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="view" aria-label="The mini golf course"></canvas>
+
+  <!-- In-game heads-up display -->
+  <div id="hud" hidden>
+    <div class="hud-hole">
+      <span class="eyebrow" id="hudNo">Hole 1 of 9</span>
+      <h2 id="hudName">Pinwheel Patch</h2>
+      <span class="chip" id="hudSpecial">Spinning pinwheel</span>
+    </div>
+    <div class="hud-score" role="status" aria-live="polite">
+      <div><span class="lab">Par</span><b id="hudPar">2</b></div>
+      <div><span class="lab">Strokes</span><b id="hudStrokes">0</b></div>
+      <div><span class="lab">Round</span><b id="hudTotal">E</b></div>
+    </div>
+    <div class="hud-tools">
+      <button class="tool" id="rotL" type="button" aria-label="Turn the camera left">⟲</button>
+      <button class="tool wide" id="btnView" type="button" aria-pressed="false"><span id="btnViewLabel">Whole hole</span></button>
+      <button class="tool" id="rotR" type="button" aria-label="Turn the camera right">⟳</button>
+      <button class="tool wide" id="btnMenu" type="button">Menu</button>
+    </div>
+    <div class="power" id="power" hidden><span class="power-bar"><i></i></span><span id="powerVal">0%</span></div>
+    <p class="hint" id="hint"><b>Drag back</b> from anywhere and let go to putt. <span class="keys">Keys: arrows aim and set power, Space putts, C shows the whole hole.</span></p>
+  </div>
+
+  <!-- Hole title card -->
+  <div class="intro" id="intro" hidden>
+    <span class="eyebrow" id="introNo">Hole 1 of 9</span>
+    <h2 id="introName">Pinwheel Patch</h2>
+    <p class="intro-special"><span class="chip" id="introSpecial">Spinning pinwheel</span><span class="par" id="introPar">Par 2</span></p>
+    <p class="intro-tip" id="introTip"></p>
+    <button class="btn primary" id="introGo" type="button">Tee off</button>
+  </div>
+
+  <div class="toast" id="toast" hidden><b id="toastBig">Birdie!</b><span id="toastSmall"></span></div>
+
+  <!-- Title screen -->
+  <section class="screen title" id="title">
+    <div class="title-panel">
+      <span class="sirsc">SirSC's</span>
+      <h1 class="logo">Putt<br>Club</h1>
+      <p class="tagline">Garden mini golf. 27 holes, each with a trick of its own, and every round deals you a fresh handful.</p>
+      <div class="menu">
+        <button class="btn primary big" id="play9" type="button"><span>Play 9 holes</span><small>About 10 minutes</small></button>
+        <div class="menu-row">
+          <button class="btn" id="play3" type="button"><span>Quick 3</span></button>
+          <button class="btn" id="play18" type="button"><span>Full 18</span></button>
+          <button class="btn" id="openBook" type="button"><span>Course book</span></button>
+        </div>
+      </div>
+      <p class="bests" id="bests"></p>
+      <div class="toggles">
+        <button class="btn-text" data-sfx type="button" aria-pressed="true">Sound on</button>
+        <button class="btn-text" data-music type="button" aria-pressed="true">Music on</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Course book: all 27 holes -->
+  <section class="screen book" id="book" hidden>
+    <div class="book-inner">
+      <header class="book-head">
+        <div>
+          <span class="eyebrow">The course book</span>
+          <h2>All 27 holes</h2>
+          <p>Pick any hole to practise it on its own. Rounds deal holes at random from this book.</p>
+        </div>
+        <button class="btn" id="bookBack" type="button"><span>Back</span></button>
+      </header>
+      <div class="book-grid" id="bookGrid"></div>
+    </div>
+  </section>
+
+  <!-- Scorecard between holes and at the end -->
+  <section class="screen card" id="card" hidden>
+    <div class="scorecard">
+      <header class="sc-head">
+        <span class="club">Putt Club · Garden Course</span>
+        <span class="eyebrow" id="cardEyebrow">After 1 of 9</span>
+        <h2 id="cardTitle">E so far</h2>
+      </header>
+      <div class="sheet-wrap" id="cardSheet"></div>
+      <p class="sc-key"><span class="pencil birdie">2</span> birdie <span class="pencil eagle">1</span> eagle or better <span class="pencil bogey">4</span> bogey <span class="pencil double">5</span> double or worse</p>
+      <p class="sc-summary" id="cardSummary"></p>
+      <div class="sc-actions">
+        <button class="btn primary" id="cardNext" type="button">Next hole</button>
+        <button class="btn" id="cardAlt" type="button" hidden>Menu</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pause -->
+  <section class="screen pause" id="pause" hidden>
+    <div class="pause-panel">
+      <h2>Paused</h2>
+      <ul class="howto">
+        <li><b>Putt:</b> press anywhere, drag back, and let go. Drag further for more power.</li>
+        <li><b>Keys:</b> left and right aim, up and down set power, Space putts.</li>
+        <li><b>Camera:</b> C or <i>Whole hole</i> to see everything; Q and E or the arrows turn; scroll or pinch to zoom.</li>
+        <li><b>Water or flowerbeds</b> cost a stroke and put you back where you putted from. 8 strokes is the most on a hole.</li>
+      </ul>
+      <div class="pause-actions">
+        <button class="btn primary" id="resume" type="button">Resume</button>
+        <button class="btn" id="quit" type="button">Quit to menu</button>
+      </div>
+      <div class="toggles">
+        <button class="btn-text" data-sfx type="button" aria-pressed="true">Sound on</button>
+        <button class="btn-text" data-music type="button" aria-pressed="true">Music on</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/util.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/features.js"></script>
+<script src="js/holes.js"></script>
+<script src="js/textures.js"></script>
+<script src="js/world.js"></script>
+<script src="js/vis.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
