@@ -62,7 +62,7 @@ then the daily cap.
 - **under_par_bonus** = 150 × (par − strokes) when the round is under par, at most 3,000; else 0.
 - **ace_bonus** = 500 × min(aces, 3) (holes in one this round).
 - **first_win_bonus** 1,500 on the player's first 1st place of the UTC day in Putt Club, else 0.
-- **Plausibility and limits** (else `sirsc_bad_reward`): `strokes` from `holes` to `holes × 16`; `par`
+- **Plausibility and limits** (else `sirsc_bad_reward`): `strokes` from `holes` to `holes × 40` (there's no stroke limit on a hole: past 8, or par + 5, the player can keep putting or give up for 2 penalty strokes); `par`
   from `holes × 2` to `holes × 11`; `aces` from 0 to `holes`; `duration_ms` at least `holes × 20,000`
   and at most 14,400,000 (4 hours). At most 12 rewarded rounds an hour per player →
   `sirsc_rate_limited`.

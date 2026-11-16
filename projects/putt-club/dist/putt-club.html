@@ -161,6 +161,11 @@ h1, h2, h3 { margin: 0; text-wrap: balance; }
 .power { position: absolute; left: 50%; bottom: calc(var(--bottom) + 58px); transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 999px; background: rgba(23, 63, 47, 0.88); color: var(--paper); font-weight: 700; font-variant-numeric: tabular-nums; pointer-events: none; }
 .power-bar { position: relative; width: 180px; height: 10px; border-radius: 999px; background: rgba(251, 246, 231, 0.2); overflow: hidden; }
 .power-bar i { position: absolute; inset: 0 auto 0 0; width: calc(var(--p, 0) * 100%); border-radius: inherit; background: linear-gradient(90deg, #7ed957, #f2b632 60%, #e2463b); }
+.give-up { white-space: nowrap; position: absolute; left: 50%; top: calc(var(--top) + 6px); transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 10px 18px; border: 0; border-radius: 999px; background: linear-gradient(#ff7a6a, #d9412f); color: #fff; font-weight: 700; font-size: 17px; box-shadow: 0 4px 0 #8f2116, 0 10px 24px rgba(0, 0, 0, 0.25); animation: give-pop 0.4s cubic-bezier(.2, .9, .3, 1.3); }
+.give-up small { font-size: 13px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: rgba(0, 0, 0, 0.2); }
+.give-up:hover { filter: brightness(1.08); }
+.give-up:active { transform: translateX(-50%) translateY(2px); box-shadow: 0 2px 0 #8f2116; }
+@keyframes give-pop { from { opacity: 0; transform: translateX(-50%) scale(0.8); } }
 .wait-bar { position: absolute; left: 50%; top: calc(var(--top) + 6px); transform: translateX(-50%); display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; border-radius: 999px; background: rgba(12, 36, 24, 0.9); color: #fff; font-weight: 600; }
 .wait-bar button { border: 0; border-radius: 999px; padding: 6px 14px; background: linear-gradient(#ffe27a, #ffb52e); color: #3b2300; font-weight: 700; }
 .hint { position: absolute; left: var(--gutter-l); bottom: var(--bottom); margin: 0; max-width: min(560px, calc(100% - 300px)); padding: 10px 14px; border-radius: 14px; background: rgba(251, 246, 231, 0.92); color: var(--ink); font-size: 14.5px; line-height: 1.35; box-shadow: 0 4px 14px rgba(23, 63, 47, 0.16); transition: opacity .5s, transform .5s; }
@@ -471,7 +476,7 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
   .tool.wide { padding: 0 10px; font-size: 14px; }
   .power { bottom: auto; top: calc(var(--top) + 92px); }
   .power-bar { width: 130px; }
-  .wait-bar { top: auto; bottom: calc(var(--bottom) + 56px); }
+  .wait-bar, .give-up { top: auto; bottom: calc(var(--bottom) + 56px); }
   .intro { top: 12%; }
   .shop-panel { top: auto; left: 0; width: 100%; height: 64%; padding: 14px var(--gutter-r) calc(var(--bottom) + 16px) var(--gutter-l); border-radius: 22px 22px 0 0; box-shadow: 0 -14px 40px rgba(10, 30, 22, 0.28); animation-name: shop-up; }
   .shop-pv { bottom: auto; top: var(--top); }
@@ -485,7 +490,7 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
 @media (hover: none) { .hint .keys { display: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .intro, .toast.pop, .scorecard, .title-panel, .feed-item, .shop-panel, .modal-card, .room-card { animation: none; }
+  .intro, .toast.pop, .scorecard, .title-panel, .feed-item, .shop-panel, .modal-card, .room-card, .give-up { animation: none; }
   .thinking i { animation: none; opacity: 0.6; }
   .logo .by, .logo .l2, .mode-icon { animation: none; }
   .hint, .intro.out, .type-glider { transition: none; }
@@ -518,6 +523,7 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
       <button class="tool wide" id="btnMenu" type="button">Menu</button>
     </div>
     <div class="power" id="power" hidden><span class="power-bar"><i></i></span><span id="powerVal">0%</span></div>
+    <button class="give-up" id="giveUp" type="button" hidden>🏳️ Give up <small>+2 strokes</small></button>
     <div class="wait-bar" id="waitBar" hidden><span id="waitText">Waiting for rivals…</span><button type="button" id="skipWait">Skip</button></div>
     <p class="hint" id="hint"><b>Drag back</b> from anywhere and let go to putt. <span class="keys">Keys: arrows aim and set power, Space putts, C shows the whole hole.</span></p>
   </div>
@@ -658,6 +664,7 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
         <li><b>Keys:</b> left and right aim, up and down set power, Space putts.</li>
         <li><b>Camera:</b> C or <i>Whole hole</i> to see everything; Q and E or the arrows turn; scroll or pinch to zoom.</li>
         <li><b>Hazards</b> (water, flowerbeds, lava and the edges of the Abyss) cost a stroke and put you back where you putted from.</li>
+        <li><b>Stuck?</b> After 8 strokes (par + 5 in the Abyss) you can keep putting, or press <i>Give up</i> (or G) to end the hole with 2 penalty strokes.</li>
       </ul>
       <div class="pause-actions">
         <button class="btn primary" id="resume" type="button">Resume</button>
@@ -9647,10 +9654,11 @@ body.winter .hint b, body.winter .toast b, body.winter .tool { color: #b81e2e; }
       r.state = 'rolling';
     }
 
-    pickUp(r, events) { r.done = true; r.picked = true; r.state = 'done'; r.strokes = this.max; if (events) events.push({ type: 'pickup', rival: r }); }
+    // At the stroke limit a rival gives up, and takes the same 2-stroke penalty you would.
+    pickUp(r, events) { r.done = true; r.picked = true; r.state = 'done'; r.strokes = Math.max(this.max, r.strokes) + 2; if (events) events.push({ type: 'pickup', rival: r }); }
     allDone() { return this.list.every(r => r.done); }
-    // If you have waited long enough, the stragglers finish with two more strokes (never past the limit).
-    forceFinish() { this.list.forEach(r => { if (!r.done) { r.done = true; r.picked = true; r.strokes = Math.min(this.max, r.strokes + 2); } }); }
+    // If you have waited long enough, the stragglers finish with two more strokes (never more than giving up).
+    forceFinish() { this.list.forEach(r => { if (!r.done) { r.done = true; r.picked = true; r.strokes = Math.min(this.max + 2, r.strokes + 2); } }); }
   }
   PC.Rivals = Rivals;
 })(window.PC = window.PC || {});
@@ -10289,7 +10297,7 @@ const Shop = (() => {
       if (x.coins > 0) sfx('good');
       renderChip();
     }, e => {
-      const msg = e.code === 'sirsc_bad_reward' ? 'That round was too quick to earn coins.'
+      const msg = e.code === 'sirsc_bad_reward' ? 'That round can’t earn coins (it was too quick, or far too long).'
         : e.code === 'sirsc_rate_limited' ? 'That’s a lot of rounds this hour. Coins come back shortly.'
           : e.offline ? 'Couldn’t reach Warden Chat, so no coins this time.' : 'No coins this time: Warden Chat didn’t answer.';
       box.innerHTML = `<p class="rw-note">${msg}</p>`;
@@ -10645,6 +10653,7 @@ PC.Remote = class Remote {
     sim = new PC.Sim(hole, { assist: D.assist });
     world.build(hole, sim);
     strokes = 0; shotLive = false; finished = false; waitT = 0; timeScale = 1;
+    giveUpNoted = false;
     aim = null; kb.on = false; world.hideAim();
     cam.aimAz = Math.atan2(hole.cup[1] - hole.tee[1], hole.cup[0] - hole.tee[0]);
     kb.angle = cam.aimAz;
@@ -10808,11 +10817,29 @@ PC.Remote = class Remote {
   }
   const you = () => round.players[0];
 
+  // Online the stroke limit ends the hole for you; on your own you can keep putting, and past the limit
+  // a Give up button ends it with 2 penalty strokes.
+  const limited = () => !!(round && round.online);
+  function giveUp() {
+    if (state !== 'play' || finished || !round || limited() || strokes < PC.maxStrokes(hole) || !canAim()) return;
+    audio.play('click');
+    holeOut('gaveup');
+  }
+  let giveUpShown = false, giveUpNoted = false;
+  function updateGiveUp() {
+    const show = !!(state === 'play' && round && !limited() && !finished && strokes >= PC.maxStrokes(hole) && canAim());
+    if (show === giveUpShown) return;
+    giveUpShown = show;
+    $('giveUp').hidden = !show;
+    if (show) $('hint').classList.add('gone');
+    if (show && !giveUpNoted) { giveUpNoted = true; feed(`${strokes} strokes: keep putting, or give up for +2`, '#ff7a6a'); }
+  }
+
   function holeOut(picked) {
     if (finished) return;
     finished = true;
-    const max = PC.maxStrokes(hole);
-    const score = picked ? max : Math.max(1, strokes);
+    const max = PC.maxStrokes(hole), gave = picked === 'gaveup';
+    const score = gave ? strokes + 2 : picked ? max : Math.max(1, strokes);
     you().scores[round.idx] = score;
     const prev = save.holeBest[hole.id];
     if (!picked && (!prev || score < prev)) save.holeBest[hole.id] = score;
@@ -10822,7 +10849,7 @@ PC.Remote = class Remote {
     const cp = sim.cupPos(), h = sim.floorHeight(cp[0], cp[1]);
     if (!picked) world.burst(score === 1 ? 'ace' : 'sink', cp[0], cp[1], h);
     audio.play(score === 1 ? 'ace' : d < 0 ? 'good' : d === 0 ? 'par' : 'meh');
-    toast(picked ? 'Picked up' : label(score, hole.par), picked ? `${max} strokes is the most on this hole` : `${score} stroke${score === 1 ? '' : 's'} · ${vsPar(d)}${!picked && prev && score < prev ? ' · your best here' : ''}`, score === 1 || d < 0 ? 'good' : d === 0 ? 'even' : 'bad');
+    toast(gave ? 'Gave up' : picked ? 'Picked up' : label(score, hole.par), gave ? `${strokes} strokes + 2 penalty = ${score}` : picked ? `${max} strokes is the most on this hole` : `${score} stroke${score === 1 ? '' : 's'} · ${vsPar(d)}${!picked && prev && score < prev ? ' · your best here' : ''}`, score === 1 || d < 0 ? 'good' : d === 0 ? 'even' : 'bad');
     updateHud();
     if (round.online) {
       sendShot(picked ? 'rest' : 'sunk');
@@ -10861,7 +10888,7 @@ PC.Remote = class Remote {
       if (finished) return;
       sim.restore();
       shotLive = false;
-      if (strokes >= PC.maxStrokes(hole)) holeOut(true);
+      if (limited() && strokes >= PC.maxStrokes(hole)) holeOut(true);
     });
   }
 
@@ -10872,7 +10899,7 @@ PC.Remote = class Remote {
     const cp = sim.cupPos();
     cam.aimAz = Math.atan2(cp[1] - b.y, cp[0] - b.x);
     kb.angle = cam.aimAz;
-    if (strokes >= PC.maxStrokes(hole) && !finished) holeOut(true);
+    if (limited() && strokes >= PC.maxStrokes(hole) && !finished) holeOut(true);
   }
 
   // Rivals' news down the left of the screen.
@@ -10908,7 +10935,7 @@ PC.Remote = class Remote {
     box.hidden = false;
     box.innerHTML = R.list.map(r => {
       const tot = totalsFor(round.players.find(p => p.name === r.name), round.idx).d + (r.done ? r.strokes - hole.par : 0);
-      return `<div class="rv${r.done ? ' done' : ''}${r.away ? ' away' : ''}"><i style="background:${r.color}"></i><b>${r.icon ? r.icon + ' ' : ''}${esc(r.name)}</b><span>${r.done ? (r.picked ? 'picked up' : 'in ' + r.strokes) : r.strokes ? r.strokes + (r.strokes === 1 ? ' stroke' : ' strokes') : 'lining up'}</span><em>${vsPar(tot)}</em></div>`;
+      return `<div class="rv${r.done ? ' done' : ''}${r.away ? ' away' : ''}"><i style="background:${r.color}"></i><b>${r.icon ? r.icon + ' ' : ''}${esc(r.name)}</b><span>${r.done ? (r.picked ? (round.online ? 'picked up' : 'gave up') : 'in ' + r.strokes) : r.strokes ? r.strokes + (r.strokes === 1 ? ' stroke' : ' strokes') : 'lining up'}</span><em>${vsPar(tot)}</em></div>`;
     }).join('');
   }
 
@@ -11389,6 +11416,7 @@ PC.Remote = class Remote {
     if (state !== 'play') return;
     if (k === 'Escape') { pause(); return; }
     if (k === 'c' || k === 'C') { toggleView(); return; }
+    if (k === 'g' || k === 'G') { giveUp(); return; }
     if (k === 'q' || k === 'Q') { cam.aimAz += 0.3; kb.angle = cam.aimAz; if (cam.mode === 'overview') cam.overAz += 0.3; return; }
     if (k === 'e' || k === 'E') { cam.aimAz -= 0.3; kb.angle = cam.aimAz; if (cam.mode === 'overview') cam.overAz -= 0.3; return; }
     const dirKeys = { ArrowLeft: 1, a: 1, A: 1, ArrowRight: -1, d: -1, D: -1 };
@@ -11469,7 +11497,7 @@ PC.Remote = class Remote {
           world.burst('spark', cp[0], cp[1], sim.floorHeight(cp[0], cp[1]), { color: r.color, n: 18 });
           audio.play('lip');
           feed(`${r.name}: ${label(r.strokes, hole.par).replace('!', '')} (${r.strokes})`, r.color);
-        } else feed(`${r.name} picked up`, r.color);
+        } else feed(round.online ? `${r.name} picked up` : `${r.name} gave up (+2)`, r.color);
       } else if (ev.type === 'lost') {
         if (ev.kind === 'water') world.burst('splash', ev.x, ev.y, C.WATER_TOP);
         else world.burst('puff', ev.x, ev.y, 0, { n: 10, color: ev.kind === 'lava' ? '#ff8a2a' : ev.kind === 'cactus' ? '#ffffff' : '#e9e1cf' });
@@ -11507,6 +11535,7 @@ PC.Remote = class Remote {
       handleEvents();
       if (state === 'play' || state === 'intro') handleRivals(dt);
       stepShowcase(dt);
+      updateGiveUp();
     }
     if (kb.on && canAim()) {
       kb.angle += kb.rot * (kb.fine ? 0.25 : 1.1) * dt;
@@ -11542,6 +11571,7 @@ PC.Remote = class Remote {
   bind('cardAlt', cardAlt);
   bind('btnView', toggleView);
   bind('btnMenu', pause);
+  bind('giveUp', giveUp);
   bind('resume', resume);
   bind('quit', () => { audio.play('click'); toTitle(); });
   bind('introGo', go);

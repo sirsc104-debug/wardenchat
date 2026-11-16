@@ -15,7 +15,7 @@ The title screen copies the SirSC games' menu (Bigger Fish, Tower Defense, Brain
 | Owen | Garden | The whole putt, played out in a copy of the hole, so it shows every bounce, slope and current exactly. The cup also pulls a little harder. | Owen, Clover, Fern |
 | Medium | Canyon | A line to the first wall and one bounce. Cacti pop the ball. | Fern, Bramble, Blaze |
 | Hard | Winter Wonderland | A short line that only shows direction. Ice, thin ice, snowdrifts, penguins and snowballs. | Bramble, Blaze, Thorn |
-| Ultra | The Abyss | None: just the arrow. No rails anywhere, so any edge is a drop. Springs: gold ones jump walls, red ones throw you off the edge. Par 6 to 11, and you pick up at par + 5. | Thorn, Cinder, SirSC |
+| Ultra | The Abyss | None: just the arrow. No rails anywhere, so any edge is a drop. Springs: gold ones jump walls, red ones throw you off the edge. Par 6 to 11; past par + 5 you can give up for 2 penalty strokes. | Thorn, Cinder, SirSC |
 
 ## Rivals
 
@@ -31,7 +31,7 @@ Rivals play the same hole at the same time as you, each in its own copy of the h
 | Q / E or the ⟲ ⟳ buttons, right-drag | Turn the camera. Scroll or pinch to zoom. |
 | Esc or *Menu* | Pause, with the how-to and sound toggles. M toggles music, N toggles sound. |
 
-Water, flowerbeds, cacti, gulches, thin ice that gives way, lava, fire pits and the edges of the Abyss cost one penalty stroke and put the ball back where it was putted from. Eight strokes is the most on a Garden hole and par + 5 in the Abyss. After each hole a scorecard is filled in, golf style: birdies are circled, eagles double circled, bogeys boxed. Best rounds for each length and difficulty, your best on each hole and holes in one are kept in the browser.
+Water, flowerbeds, cacti, gulches, thin ice that gives way, lava, fire pits and the edges of the Abyss cost one penalty stroke and put the ball back where it was putted from. There's no stroke limit against the rivals or in Training: after 8 strokes (par + 5 in the Abyss) a **Give up** button (or G) appears, which ends the hole with 2 penalty strokes on top of the strokes you've taken. Rivals give up at the same point and take the same penalty. Online rooms keep a hard limit (the hole ends at 8, or par + 5) so everyone's games stay in step. After each hole a scorecard is filled in, golf style: birdies are circled, eagles double circled, bogeys boxed. Best rounds for each length and difficulty, your best on each hole and holes in one are kept in the browser.
 
 ## The Garden: 27 holes (Owen)
 

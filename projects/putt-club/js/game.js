@@ -58,6 +58,7 @@
     sim = new PC.Sim(hole, { assist: D.assist });
     world.build(hole, sim);
     strokes = 0; shotLive = false; finished = false; waitT = 0; timeScale = 1;
+    giveUpNoted = false;
     aim = null; kb.on = false; world.hideAim();
     cam.aimAz = Math.atan2(hole.cup[1] - hole.tee[1], hole.cup[0] - hole.tee[0]);
     kb.angle = cam.aimAz;
@@ -221,11 +222,29 @@
   }
   const you = () => round.players[0];
 
+  // Online the stroke limit ends the hole for you; on your own you can keep putting, and past the limit
+  // a Give up button ends it with 2 penalty strokes.
+  const limited = () => !!(round && round.online);
+  function giveUp() {
+    if (state !== 'play' || finished || !round || limited() || strokes < PC.maxStrokes(hole) || !canAim()) return;
+    audio.play('click');
+    holeOut('gaveup');
+  }
+  let giveUpShown = false, giveUpNoted = false;
+  function updateGiveUp() {
+    const show = !!(state === 'play' && round && !limited() && !finished && strokes >= PC.maxStrokes(hole) && canAim());
+    if (show === giveUpShown) return;
+    giveUpShown = show;
+    $('giveUp').hidden = !show;
+    if (show) $('hint').classList.add('gone');
+    if (show && !giveUpNoted) { giveUpNoted = true; feed(`${strokes} strokes: keep putting, or give up for +2`, '#ff7a6a'); }
+  }
+
   function holeOut(picked) {
     if (finished) return;
     finished = true;
-    const max = PC.maxStrokes(hole);
-    const score = picked ? max : Math.max(1, strokes);
+    const max = PC.maxStrokes(hole), gave = picked === 'gaveup';
+    const score = gave ? strokes + 2 : picked ? max : Math.max(1, strokes);
     you().scores[round.idx] = score;
     const prev = save.holeBest[hole.id];
     if (!picked && (!prev || score < prev)) save.holeBest[hole.id] = score;
@@ -235,7 +254,7 @@
     const cp = sim.cupPos(), h = sim.floorHeight(cp[0], cp[1]);
     if (!picked) world.burst(score === 1 ? 'ace' : 'sink', cp[0], cp[1], h);
     audio.play(score === 1 ? 'ace' : d < 0 ? 'good' : d === 0 ? 'par' : 'meh');
-    toast(picked ? 'Picked up' : label(score, hole.par), picked ? `${max} strokes is the most on this hole` : `${score} stroke${score === 1 ? '' : 's'} · ${vsPar(d)}${!picked && prev && score < prev ? ' · your best here' : ''}`, score === 1 || d < 0 ? 'good' : d === 0 ? 'even' : 'bad');
+    toast(gave ? 'Gave up' : picked ? 'Picked up' : label(score, hole.par), gave ? `${strokes} strokes + 2 penalty = ${score}` : picked ? `${max} strokes is the most on this hole` : `${score} stroke${score === 1 ? '' : 's'} · ${vsPar(d)}${!picked && prev && score < prev ? ' · your best here' : ''}`, score === 1 || d < 0 ? 'good' : d === 0 ? 'even' : 'bad');
     updateHud();
     if (round.online) {
       sendShot(picked ? 'rest' : 'sunk');
@@ -274,7 +293,7 @@
       if (finished) return;
       sim.restore();
       shotLive = false;
-      if (strokes >= PC.maxStrokes(hole)) holeOut(true);
+      if (limited() && strokes >= PC.maxStrokes(hole)) holeOut(true);
     });
   }
 
@@ -285,7 +304,7 @@
     const cp = sim.cupPos();
     cam.aimAz = Math.atan2(cp[1] - b.y, cp[0] - b.x);
     kb.angle = cam.aimAz;
-    if (strokes >= PC.maxStrokes(hole) && !finished) holeOut(true);
+    if (limited() && strokes >= PC.maxStrokes(hole) && !finished) holeOut(true);
   }
 
   // Rivals' news down the left of the screen.
@@ -321,7 +340,7 @@
     box.hidden = false;
     box.innerHTML = R.list.map(r => {
       const tot = totalsFor(round.players.find(p => p.name === r.name), round.idx).d + (r.done ? r.strokes - hole.par : 0);
-      return `<div class="rv${r.done ? ' done' : ''}${r.away ? ' away' : ''}"><i style="background:${r.color}"></i><b>${r.icon ? r.icon + ' ' : ''}${esc(r.name)}</b><span>${r.done ? (r.picked ? 'picked up' : 'in ' + r.strokes) : r.strokes ? r.strokes + (r.strokes === 1 ? ' stroke' : ' strokes') : 'lining up'}</span><em>${vsPar(tot)}</em></div>`;
+      return `<div class="rv${r.done ? ' done' : ''}${r.away ? ' away' : ''}"><i style="background:${r.color}"></i><b>${r.icon ? r.icon + ' ' : ''}${esc(r.name)}</b><span>${r.done ? (r.picked ? (round.online ? 'picked up' : 'gave up') : 'in ' + r.strokes) : r.strokes ? r.strokes + (r.strokes === 1 ? ' stroke' : ' strokes') : 'lining up'}</span><em>${vsPar(tot)}</em></div>`;
     }).join('');
   }
 
@@ -802,6 +821,7 @@
     if (state !== 'play') return;
     if (k === 'Escape') { pause(); return; }
     if (k === 'c' || k === 'C') { toggleView(); return; }
+    if (k === 'g' || k === 'G') { giveUp(); return; }
     if (k === 'q' || k === 'Q') { cam.aimAz += 0.3; kb.angle = cam.aimAz; if (cam.mode === 'overview') cam.overAz += 0.3; return; }
     if (k === 'e' || k === 'E') { cam.aimAz -= 0.3; kb.angle = cam.aimAz; if (cam.mode === 'overview') cam.overAz -= 0.3; return; }
     const dirKeys = { ArrowLeft: 1, a: 1, A: 1, ArrowRight: -1, d: -1, D: -1 };
@@ -882,7 +902,7 @@
           world.burst('spark', cp[0], cp[1], sim.floorHeight(cp[0], cp[1]), { color: r.color, n: 18 });
           audio.play('lip');
           feed(`${r.name}: ${label(r.strokes, hole.par).replace('!', '')} (${r.strokes})`, r.color);
-        } else feed(`${r.name} picked up`, r.color);
+        } else feed(round.online ? `${r.name} picked up` : `${r.name} gave up (+2)`, r.color);
       } else if (ev.type === 'lost') {
         if (ev.kind === 'water') world.burst('splash', ev.x, ev.y, C.WATER_TOP);
         else world.burst('puff', ev.x, ev.y, 0, { n: 10, color: ev.kind === 'lava' ? '#ff8a2a' : ev.kind === 'cactus' ? '#ffffff' : '#e9e1cf' });
@@ -920,6 +940,7 @@
       handleEvents();
       if (state === 'play' || state === 'intro') handleRivals(dt);
       stepShowcase(dt);
+      updateGiveUp();
     }
     if (kb.on && canAim()) {
       kb.angle += kb.rot * (kb.fine ? 0.25 : 1.1) * dt;
@@ -955,6 +976,7 @@
   bind('cardAlt', cardAlt);
   bind('btnView', toggleView);
   bind('btnMenu', pause);
+  bind('giveUp', giveUp);
   bind('resume', resume);
   bind('quit', () => { audio.play('click'); toTitle(); });
   bind('introGo', go);

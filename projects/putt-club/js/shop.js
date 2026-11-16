@@ -256,7 +256,7 @@ const Shop = (() => {
       if (x.coins > 0) sfx('good');
       renderChip();
     }, e => {
-      const msg = e.code === 'sirsc_bad_reward' ? 'That round was too quick to earn coins.'
+      const msg = e.code === 'sirsc_bad_reward' ? 'That round can’t earn coins (it was too quick, or far too long).'
         : e.code === 'sirsc_rate_limited' ? 'That’s a lot of rounds this hour. Coins come back shortly.'
           : e.offline ? 'Couldn’t reach Warden Chat, so no coins this time.' : 'No coins this time: Warden Chat didn’t answer.';
       box.innerHTML = `<p class="rw-note">${msg}</p>`;

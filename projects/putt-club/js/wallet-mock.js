@@ -43,7 +43,7 @@
   const BASE = { owen: 400, medium: 800, hard: 1500, ultra: 3000 }, PLACE = [1, 0.6, 0.4, 0.25];
   function reward(b, id, w) {
     const base = BASE[b.diff], holes = b.holes | 0;
-    const ok = base && (holes === 9 || holes === 18) && b.strokes >= holes && b.strokes <= holes * 16 && b.par >= holes * 2 && b.par <= holes * 11 &&
+    const ok = base && (holes === 9 || holes === 18) && b.strokes >= holes && b.strokes <= holes * 40 && b.par >= holes * 2 && b.par <= holes * 11 &&
       b.place >= 1 && b.place <= 4 && b.aces >= 0 && b.aces <= holes && b.duration_ms >= holes * 20000 && b.duration_ms <= 4 * 3600e3;
     if (!ok) return fail('sirsc_bad_reward');
     if (mem.rewards.filter(r => r.user_id === id && Date.now() - r.at < 3600e3).length >= 12) return fail('sirsc_rate_limited');

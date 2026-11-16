@@ -152,10 +152,11 @@
       r.state = 'rolling';
     }
 
-    pickUp(r, events) { r.done = true; r.picked = true; r.state = 'done'; r.strokes = this.max; if (events) events.push({ type: 'pickup', rival: r }); }
+    // At the stroke limit a rival gives up, and takes the same 2-stroke penalty you would.
+    pickUp(r, events) { r.done = true; r.picked = true; r.state = 'done'; r.strokes = Math.max(this.max, r.strokes) + 2; if (events) events.push({ type: 'pickup', rival: r }); }
     allDone() { return this.list.every(r => r.done); }
-    // If you have waited long enough, the stragglers finish with two more strokes (never past the limit).
-    forceFinish() { this.list.forEach(r => { if (!r.done) { r.done = true; r.picked = true; r.strokes = Math.min(this.max, r.strokes + 2); } }); }
+    // If you have waited long enough, the stragglers finish with two more strokes (never more than giving up).
+    forceFinish() { this.list.forEach(r => { if (!r.done) { r.done = true; r.picked = true; r.strokes = Math.min(this.max + 2, r.strokes + 2); } }); }
   }
   PC.Rivals = Rivals;
 })(window.PC = window.PC || {});
