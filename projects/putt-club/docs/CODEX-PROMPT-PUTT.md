@@ -2,6 +2,8 @@ Build the back end that lets Putt Club (SirSC's 3D mini golf) pay out and spend 
 
 The full contract is pasted below this prompt, between the two `=====` lines (it is also `projects/putt-club/docs/ECONOMY-PUTT.md` in `sirsc104-debug/wardenchat`, branch `claude/epic-bell-0rhxfv`). It builds on `docs/ECONOMY-API.md` in `sirsc104-debug/claude`, the SirSC wallet contract you already built. Read both fully first and build exactly what ECONOMY-PUTT.md specifies: names, parameters, JSON keys and error codes. The game's front end is already built against it, so don't change the interface; if something in it can't work, stop and say what and why.
 
+Where to start: `main` in `sirsc104-debug/warden-chat` does not have the game migrations. They are on the `codex/*` branches, which match what is live: start a new branch `codex/putt-club` from `codex/sirsc-equipped` (it has the SirSC economy, Downhill Death Run, Wildcard Chess economy and online, the casino and `sirsc_equip`), and note that Downhill Death Run's Turkey Trot migration (`20261104032142`) is only on `codex/sirsc-economy`. Give the new migration a timestamp after every existing one, and run `supabase migration list` against the live project before deploying so nothing already there is redone or skipped. Don't redefine `sirsc_me`, `sirsc_buy` or any other existing function.
+
 Where it goes: one new migration in `sirsc104-debug/warden-chat`, on top of the SirSC economy migration (and the Wildcard Chess one, if it is there), with the same conventions (RLS on every table and no client grants, `SECURITY DEFINER` with `set search_path = public, pg_temp`, the `warden_private.game_session_valid()` session check refusing as `sirsc_not_signed_in`, errors as `raise exception '<code>' using errcode = 'P0001'`, helpers in `warden_private`).
 
 What to build (the checklist at the end of ECONOMY-PUTT.md is the definition of done):
@@ -78,7 +80,8 @@ Examples: win 9 holes on Owen at par: 400. Win 18 on Hard 3 under par as a membe
 ## The catalog to seed (game `putt`)
 
 Priced like the other games: 1 💎 = 5,000 coins, and coin prices are 75% of that. Every item has
-`target = ''`. Everything is looks only; nothing changes how a ball plays.
+`target = ''`, and `slot` set to the part before the colon (`ball`, `trail`, `sink`, `flag`, `scene`, `avatar`),
+as Wildcard Chess's rows have, so `sirsc_equip('putt', …)` works for them. Everything is looks only; nothing changes how a ball plays.
 
 | item_id | coins | 💎 | notes |
 |---|---|---|---|

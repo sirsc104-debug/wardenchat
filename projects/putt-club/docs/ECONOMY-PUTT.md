@@ -61,7 +61,8 @@ Examples: win 9 holes on Owen at par: 400. Win 18 on Hard 3 under par as a membe
 ## The catalog to seed (game `putt`)
 
 Priced like the other games: 1 💎 = 5,000 coins, and coin prices are 75% of that. Every item has
-`target = ''`. Everything is looks only; nothing changes how a ball plays.
+`target = ''`, and `slot` set to the part before the colon (`ball`, `trail`, `sink`, `flag`, `scene`, `avatar`),
+as Wildcard Chess's rows have, so `sirsc_equip('putt', …)` works for them. Everything is looks only; nothing changes how a ball plays.
 
 | item_id | coins | 💎 | notes |
 |---|---|---|---|
