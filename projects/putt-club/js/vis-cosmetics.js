@@ -13,11 +13,78 @@
 
   // ---------- Ball designs ----------
   // Equirectangular canvases wrapped round the ball.
+  // A texture painted per point of the sphere, in the layout three.js's SphereGeometry maps it on.
+  function sphereTex(w, h, paint) {
+    const c = canvas(w, h), g = c.getContext('2d'), img = g.createImageData(w, h), d = img.data;
+    for (let py = 0; py < h; py++) {
+      const th = (py + 0.5) / h * Math.PI, st = Math.sin(th), ct = Math.cos(th);
+      for (let px = 0; px < w; px++) {
+        const ph = (px + 0.5) / w * TAU, rgb = paint(-Math.cos(ph) * st, ct, Math.sin(ph) * st), i = (py * w + px) * 4;
+        d[i] = rgb[0]; d[i + 1] = rgb[1]; d[i + 2] = rgb[2]; d[i + 3] = 255;
+      }
+    }
+    g.putImageData(img, 0, 0);
+    return tex(c);
+  }
+  // The faces of a truncated icosahedron: unit normal and distance (pentagons at the icosahedron's
+  // corners, hexagons at its face centres). A point belongs to the face whose plane the ray meets first.
+  const SOCCER_FACES = (() => {
+    const f = (1 + Math.sqrt(5)) / 2, out = [];
+    const add = (v, d, pent) => { const l = Math.hypot(v[0], v[1], v[2]); out.push([v[0] / l, v[1] / l, v[2] / l, d, pent]); };
+    for (const a of [-1, 1]) for (const b of [-1, 1]) { add([0, a, b * f], 1, true); add([a, b * f, 0], 1, true); add([a * f, 0, b], 1, true); }
+    for (const a of [-1, 1]) for (const b of [-1, 1]) {
+      for (const c of [-1, 1]) add([a, b, c], 0.97415, false);
+      add([0, a * f, b / f], 0.97415, false); add([a / f, 0, b * f], 0.97415, false); add([a * f, b / f, 0], 0.97415, false);
+    }
+    return out;
+  })();
+  // The baseball seam: the closed curve where two figure-eight pieces of leather meet, with the
+  // direction across the seam at each point (for the stitches).
+  const BASEBALL_SEAM = (() => {
+    const a = 0.69, b = 0.31, n = 360, pts = [];
+    const at = t => [a * Math.cos(t) + b * Math.cos(3 * t), 2 * Math.sqrt(a * b) * Math.sin(2 * t) * 0.999, a * Math.sin(t) - b * Math.sin(3 * t)];
+    for (let k = 0; k < n; k++) {
+      const t = k / n * TAU, p = at(t), q = at(t + 0.001);
+      const tg = [q[0] - p[0], q[1] - p[1], q[2] - p[2]];
+      const cr = [tg[1] * p[2] - tg[2] * p[1], tg[2] * p[0] - tg[0] * p[2], tg[0] * p[1] - tg[1] * p[0]], l = Math.hypot(cr[0], cr[1], cr[2]) || 1;
+      pts.push([p[0], p[1], p[2], [cr[0] / l, cr[1] / l, cr[2] / l]]);
+    }
+    return pts;
+  })();
   const BALL_TEX = {
     beach: () => { const c = canvas(256, 128), g = c.getContext('2d'); const cols = ['#e8384f', '#ffd23f', '#2f7fe0', '#ffffff', '#2fbf71', '#ff8a2a']; cols.forEach((k, i) => { g.fillStyle = k; g.fillRect(i * 256 / 6, 0, 256 / 6 + 1, 128); }); g.fillStyle = '#ffffff'; g.fillRect(0, 0, 256, 10); g.fillRect(0, 118, 256, 10); return tex(c); },
-    soccer: () => { const c = canvas(256, 128), g = c.getContext('2d'), rnd = U.rng(5); g.fillStyle = '#f8f8f4'; g.fillRect(0, 0, 256, 128);
-      g.fillStyle = '#1a1a1e'; for (let i = 0; i < 12; i++) { const x = (i % 6) * 43 + (i > 5 ? 21 : 0), y = i > 5 ? 86 : 40, r = 13; g.beginPath(); for (let k = 0; k < 5; k++) { const a = (k / 5) * TAU + rnd() * 0.2; g.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r * 0.8); } g.closePath(); g.fill(); }
-      g.strokeStyle = 'rgba(0,0,0,0.25)'; g.lineWidth = 1.5; for (let i = 0; i < 18; i++) { g.beginPath(); g.moveTo(rnd() * 256, rnd() * 128); g.lineTo(rnd() * 256, rnd() * 128); g.stroke(); } return tex(c); },
+    // A real football: the 12 black pentagons and 20 white hexagons of a truncated icosahedron, with seams.
+    soccer: () => sphereTex(512, 256, (x, y, z) => {
+      let best = -1e9, second = -1e9, pent = false;
+      for (const f of SOCCER_FACES) {
+        const sc = (x * f[0] + y * f[1] + z * f[2]) / f[3];
+        if (sc > best) { second = best; best = sc; pent = f[4]; } else if (sc > second) second = sc;
+      }
+      if (best - second < 0.012) return [70, 70, 74];
+      return pent ? [24, 24, 28] : [246, 246, 240];
+    }),
+    // A baseball: white leather and the red-stitched figure-eight seam.
+    baseball: () => sphereTex(512, 256, (x, y, z) => {
+      // nearest point of the seam: every 6th point first, then the ones around the best of those
+      const S = BASEBALL_SEAM, n = S.length, dist = k => { const c = S[(k + n) % n]; return (x - c[0]) ** 2 + (y - c[1]) ** 2 + (z - c[2]) ** 2; };
+      let bd = 9, bk = 0;
+      for (let k = 0; k < n; k += 6) { const d = dist(k); if (d < bd) { bd = d; bk = k; } }
+      for (let k = bk - 6, k0 = bk; k <= k0 + 6; k++) { const d = dist(k); if (d < bd) { bd = d; bk = (k + n) % n; } }
+      const c = BASEBALL_SEAM[bk], t = c[3];
+      const o = x * t[0] + y * t[1] + z * t[2], a = Math.abs(o), along = bk / BASEBALL_SEAM.length * 46;
+      const leather = 236 - ((x * 37 + y * 71 + z * 53) * 100 % 6);
+      if (a < 0.012) return [205, 200, 190];
+      if (a < 0.085 && ((along + a * 9) % 1) < 0.42) return [204, 34, 40];
+      return [leather, leather - 4, leather - 14];
+    }),
+    // A basketball: pebbly orange with its black seams.
+    basketball: () => sphereTex(512, 256, (x, y, z) => {
+      const w = 0.022;
+      if (Math.abs(y) < w || Math.abs(z) < w || Math.abs(Math.abs(x) - 0.72) < w * 1.1) return [26, 18, 14];
+      const n = Math.sin(x * 211) * Math.sin(y * 197) * Math.sin(z * 223);
+      const k = n > 0.55 ? -18 : n < -0.6 ? 10 : 0;
+      return [222 + k, 108 + k * 0.6, 42 + k * 0.3];
+    }),
     moon: () => { const c = canvas(256, 128), g = c.getContext('2d'), rnd = U.rng(9); g.fillStyle = '#b8b6b0'; g.fillRect(0, 0, 256, 128);
       for (let i = 0; i < 900; i++) { g.fillStyle = `rgba(${rnd() < 0.5 ? '80,78,74' : '230,228,222'},${0.15 + rnd() * 0.2})`; g.fillRect(rnd() * 256, rnd() * 128, 2, 2); }
       for (let i = 0; i < 26; i++) { const x = rnd() * 256, y = 10 + rnd() * 108, r = 3 + rnd() * 10; const gr = g.createRadialGradient(x - r * 0.3, y - r * 0.3, 0, x, y, r); gr.addColorStop(0, '#8e8c86'); gr.addColorStop(0.8, '#9c9a94'); gr.addColorStop(1, '#d8d6d0'); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill(); } return tex(c); },
@@ -28,20 +95,52 @@
     diamond: () => { const c = canvas(256, 128), g = c.getContext('2d'), rnd = U.rng(31); for (let y = 0; y < 128; y += 16) for (let x = 0; x < 256; x += 16) { for (let k = 0; k < 2; k++) { const v = rnd(); g.fillStyle = `hsl(${200 + rnd() * 25},${70 + rnd() * 25}%,${55 + v * 40}%)`; g.beginPath(); if (k) { g.moveTo(x, y); g.lineTo(x + 16, y); g.lineTo(x + 16, y + 16); } else { g.moveTo(x, y); g.lineTo(x, y + 16); g.lineTo(x + 16, y + 16); } g.closePath(); g.fill(); } } return tex(c); },
   };
   PC.ballSwatch = id => (BALL_TEX[id] ? once('ball-' + id, BALL_TEX[id]).image : null);
-  W.setBallSkin = function (id) {
-    const m = this.ball.material, c = PC.COSMETIC_BALL && PC.COSMETIC_BALL[id];
+  // How a ball design dresses a material: the ball in play, and the Shop's pictures of it.
+  function skin(m, id) {
     const def = COSMETICS.ball[id] || {};
     m.map = BALL_TEX[id] ? once('ball-' + id, BALL_TEX[id]) : null;
     m.color = col(def.color || (BALL_TEX[id] ? '#ffffff' : '#fbfbf7'));
     m.metalness = id === 'gold' ? 0.75 : id === 'disco' ? 0.55 : id === 'diamond' ? 0.3 : 0;
-    m.roughness = id === 'gold' ? 0.28 : id === 'disco' ? 0.18 : id === 'diamond' ? 0.12 : id === 'ruby' ? 0.18 : 0.32;
-    m.emissive = col(id === 'galaxy' ? '#ffffff' : id === 'diamond' ? '#2a6aff' : id === 'gold' ? '#4a3200' : '#222222');
+    m.roughness = id === 'gold' ? 0.28 : id === 'disco' ? 0.18 : id === 'diamond' ? 0.12 : id === 'ruby' ? 0.18 : id === 'basketball' ? 0.7 : id === 'baseball' ? 0.55 : 0.32;
+    m.emissive = col(id === 'galaxy' ? '#ffffff' : id === 'diamond' ? '#2a6aff' : id === 'gold' ? '#4a3200' : id === 'basketball' || id === 'soccer' ? '#141414' : '#222222');
     m.emissiveMap = id === 'galaxy' ? m.map : null;
     m.emissiveIntensity = id === 'galaxy' ? 0.55 : id === 'diamond' ? 0.35 : 1;
     m.bumpScale = BALL_TEX[id] ? 0.002 : 0.004;
     m.needsUpdate = true;
-    void c;
-  };
+  }
+  W.setBallSkin = function (id) { skin(this.ball.material, id); };
+
+  // The Shop's ball pictures: each design rendered once on a real sphere, lit like the course, and
+  // tipped towards you so patterns that meet at the poles (the beach ball's panels) read properly.
+  let studio = null;
+  function ballStudio() {
+    if (studio) return studio;
+    try {
+      const r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+      r.setPixelRatio(1); r.setSize(192, 192, false); r.setClearColor(0x000000, 0);
+      r.outputEncoding = THREE.sRGBEncoding; r.toneMapping = THREE.ACESFilmicToneMapping;
+      const scene = new THREE.Scene();
+      scene.add(new THREE.HemisphereLight(col('#d6ecff'), col('#5d7a3c'), 0.95));
+      const sun = new THREE.DirectionalLight(col('#fff1da'), 2.4); sun.position.set(-2, 3, 3); scene.add(sun);
+      const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 10); cam.position.set(0, 0.9, 3); cam.lookAt(0, 0, 0);
+      const mat = new THREE.MeshStandardMaterial({ bumpMap: T.dimples ? T.dimples() : null });
+      const ball = new THREE.Mesh(new THREE.SphereGeometry(0.62, 48, 32), mat);
+      ball.rotation.set(0.5, -0.5, 0.3);
+      scene.add(ball);
+      studio = { r, scene, cam, mat };
+    } catch (e) { studio = { failed: true }; }
+    return studio;
+  }
+  PC.ballPreview = id => once('ballpv-' + id, () => {
+    const st = ballStudio();
+    if (st.failed) return null;
+    skin(st.mat, id);
+    st.mat.bumpScale *= 0.62 / C.R;
+    st.r.render(st.scene, st.cam);
+    const c = canvas(192, 192);
+    c.getContext('2d').drawImage(st.r.domElement, 0, 0);
+    return c;
+  });
 
   // ---------- Trails ----------
   const RAINBOW = ['#ff4d4d', '#ff9a2a', '#ffe24a', '#4ade80', '#38bdf8', '#a78bfa'];

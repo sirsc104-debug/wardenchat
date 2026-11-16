@@ -77,7 +77,7 @@ const Shop = (() => {
   const TRAIL_COLS = { plain: ['#ffffff', '#e8eef0'], sparkle: ['#ffe27a', '#ffffff'], bubbles: ['#bfe8ff', '#e8f8ff'], petals: ['#ffb3c6', '#ffffff'], rainbow: ['#ff4d4d', '#38bdf8'], fire: ['#ff7a1a', '#ffd25a'], stardust: ['#c4b5fd', '#93c5fd'], diamond: ['#7fd8ff', '#e9fbff'] };
   function swatch(item) {
     const c = cosmeticOf(item);
-    if (c.kind === 'ball') return `<canvas class="sw-ball" data-ball="${c.id}" width="96" height="96"></canvas>`;
+    if (c.kind === 'ball') return `<canvas class="sw-ball" data-ball="${c.id}" width="192" height="192"></canvas>`;
     if (c.kind === 'flag') return `<canvas class="sw-flag" data-flag="${c.id}" width="128" height="96"></canvas>`;
     if (c.kind === 'scene') return `<div class="sw-scene" style="--a:${SKY[c.id][0]};--b:${SKY[c.id][1]}"><span>${SCENE_ICON[c.id]}</span></div>`;
     if (c.kind === 'sink') return `<div class="sw-icon">${SINK_ICON[c.id]}</div>`;
@@ -88,11 +88,16 @@ const Shop = (() => {
   function paintSwatches(root) {
     for (const cv of root.querySelectorAll('canvas.sw-ball')) {
       const g = cv.getContext('2d'), id = cv.dataset.ball, def = COSMETICS.ball[id];
+      const pv = PC.ballPreview && PC.ballPreview(id);
+      if (pv) { g.clearRect(0, 0, 192, 192); g.drawImage(pv, 0, 0); continue; }
+      // No WebGL for the picture: a flat drawing instead.
+      g.setTransform(2, 0, 0, 2, 0, 0);
       const img = PC.ballSwatch ? PC.ballSwatch(id) : null;
       g.clearRect(0, 0, 96, 96); g.save(); g.beginPath(); g.arc(48, 48, 40, 0, Math.PI * 2); g.clip();
       if (img) g.drawImage(img, -30, 8, 192, 80); else { g.fillStyle = def.color || '#fbfbf7'; g.fillRect(0, 0, 96, 96); }
       const sh = g.createRadialGradient(34, 32, 4, 48, 48, 44); sh.addColorStop(0, 'rgba(255,255,255,0.75)'); sh.addColorStop(0.35, 'rgba(255,255,255,0.08)'); sh.addColorStop(1, 'rgba(0,0,0,0.35)');
       g.fillStyle = sh; g.fillRect(0, 0, 96, 96); g.restore();
+      g.setTransform(1, 0, 0, 1, 0, 0);
     }
     for (const cv of root.querySelectorAll('canvas.sw-flag')) {
       const g = cv.getContext('2d'), t = PC.TEX.flagStyled(7, '#e2463b', cv.dataset.flag);

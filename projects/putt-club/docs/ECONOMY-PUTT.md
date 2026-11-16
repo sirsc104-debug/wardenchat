@@ -70,6 +70,8 @@ Priced like the other games: 1 💎 = 5,000 coins, and coin prices are 75% of th
 | ball:mint | 7,500 | 2 | |
 | ball:beach | 15,000 | 4 | |
 | ball:soccer | 15,000 | 4 | |
+| ball:baseball | 15,000 | 4 | |
+| ball:basketball | 15,000 | 4 | |
 | ball:moon | 22,500 | 6 | |
 | ball:gold | 30,000 | 8 | |
 | ball:disco | – | 10 | diamonds only |
