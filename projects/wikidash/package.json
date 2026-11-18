@@ -1,0 +1,13 @@
+{
+  "name": "wikidash-artifact",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "build:live": "node build.mjs --live",
+    "build:standalone": "node build.mjs --standalone"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.0"
+  }
+}

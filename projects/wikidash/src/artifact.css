@@ -1,0 +1,60 @@
+/* ── artifact additions: things the hosted site didn't need ── */
+
+/* The wordmark is a button here (it leaves the game), drawn exactly like the link was. */
+button.brand { background: none; border: 0; padding: 0; color: inherit; cursor: pointer; }
+button.brand:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 2px; }
+button.subtle-link { background: none; border: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 4px; }
+
+.start-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.start-row .btn { width: 100%; }
+@media (max-width: 420px) { .start-row { grid-template-columns: 1fr; } }
+.party-note { margin: 2px 0 0; line-height: 1.45; }
+.edition { margin: 18px 0 0; max-width: 46ch; line-height: 1.5; }
+
+.room-chip.solo { cursor: default; }
+html[data-conn="solo"] .conn { display: none; }
+
+/* In-page confirm and prompt */
+.dlg { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 16px; background: rgba(20, 19, 15, 0.5); opacity: 0; transition: opacity 140ms ease; }
+.dlg.in { opacity: 1; }
+.dlg-card { width: min(100%, 400px); background: var(--card); color: var(--ink); border: 1px solid var(--edge); border-radius: 10px; box-shadow: 6px 6px 0 var(--edge); padding: 20px; display: grid; gap: 12px; }
+.dlg-msg { margin: 0; font: 400 22px/1.25 var(--display); }
+.dlg-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.copy-box { font: 13px/1.5 var(--mono); resize: vertical; }
+.btn.danger-fill { background: var(--bad); color: #fff; border-color: var(--edge); box-shadow: 0 3px 0 var(--edge); }
+
+/* Articles are text only in this edition: a picture's caption stays, marked as one. */
+.article figure { float: none; max-width: none; margin: 0.4em 0 1.1em; padding: 2px 0 2px 12px; border-left: 3px solid var(--line-2); }
+.article figure figcaption { padding-top: 0; }
+.article figure figcaption::before { content: "Picture: "; font-weight: 600; color: var(--ink-2); }
+.article .tbl-wrap { overflow-x: auto; max-width: 100%; margin: 1em 0; }
+.article .tbl-wrap > .wikitable { display: table; margin: 0; }
+.article .infobox { max-width: 100%; }
+.article .div-col, .article .multicol { columns: 2 220px; }
+.article math { font-size: 1.05em; }
+
+/* Navigation boxes, rebuilt from the article's own link tables */
+.article .navboxes { clear: both; margin-top: 2em; display: grid; gap: 10px; }
+.article .navboxes .navbox { margin: 0; border-collapse: separate; border-spacing: 0; display: table; }
+.article .navboxes caption { caption-side: top; background: var(--paper-2); font: 700 13px/1.4 var(--ui); padding: 6px 10px; text-align: center; border: 1px solid var(--line-2); border-bottom: 0; border-radius: 6px 6px 0 0; }
+.article .navboxes th { width: 1%; white-space: nowrap; text-align: right; font: 600 12px/1.5 var(--ui); color: var(--ink-2); padding: 5px 10px; vertical-align: top; border-top: 1px solid var(--line); }
+.article .navboxes td { padding: 5px 10px; border-top: 1px solid var(--line); }
+.article .navboxes ul { margin: 0; padding: 0; list-style: none; display: inline; }
+.article .navboxes li { display: inline; }
+.article .navboxes li:not(:last-child)::after { content: " · "; font-weight: 700; color: var(--muted); }
+.article .navboxes a.self { font-weight: 700; color: var(--ink); cursor: default; }
+@media (max-width: 560px) {
+  .article .navboxes th { white-space: normal; width: 30%; }
+}
+
+/* Page cards have no pictures in this edition. */
+.page-card:has(.pc-thumb.none) { grid-template-columns: 1fr; }
+.pc-thumb.none { display: none; }
+
+/* Long infobox rows never widen the page. */
+.racebody > * { min-width: 0; }
+.article { overflow-wrap: break-word; }
+@media (max-width: 720px) {
+  .article .infobox { float: none; width: 100%; margin: 0 0 1.2em; }
+  .article .infobox .nowrap { white-space: normal; }
+}
