@@ -490,6 +490,47 @@ console.log('opponent cards level up one at a time with trophies; no lines: ok')
   console.log('rubies from old coins, wallet Coins to Rubies with daily caps by arena: ok');
 }
 
+// Coin Cards: card packs for wallet Coins, on the same daily Coin limit as the Ruby swap
+{
+  const day = new Date(2026, 10, 12, 10).getTime(), C = G.ECONOMY.coinShop, per = G.ECONOMY.shop.perCopy;
+  // Arena 1 (a 500-Coin day): only packs that fit the limit; no epics (2,000 a copy) or legendaries
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 100, best: 100, claimed: { 0: true }, wallet: 100000 }) }));
+  let Q = G.state, sh = G.shop(day, KCSim.mulberry(8));
+  assert(sh.coinCards.length > 0 && sh.coinCards.length <= C.perDay, 'Coin Cards on sale');
+  for (const o of sh.coinCards) {
+    const r = KC_CARDS[o.card].rarity;
+    assert(Q.found.includes(o.card) && Q.cards[o.card].level < 15, 'cards you have found, below level 15');
+    assert(r !== 'legendary' && o.qty >= 1 && o.qty <= C.maxQty[r] && o.price === o.qty * per[r] * C.rate, `priced like the Shop: ${o.card} ×${o.qty} for ${o.price}`);
+    assert(o.price <= 500, 'every pack fits the day\'s Coin limit');
+  }
+  assert(sh.coinCards.filter(o => Q.deck.includes(o.card)).length === Math.min(C.perDay, Q.deck.length), 'your deck\'s cards first');
+  // buying: the copies, the Coins, the shared daily limit, once a day
+  const o0 = sh.coinCards[0], before = Q.cards[o0.card].count;
+  let r = G.buyCoinCard(0, day);
+  assert(r.ok && Q.cards[o0.card].count === before + o0.qty && Q.wallet === 100000 - o0.price, 'copies for Coins');
+  assert.strictEqual(G.exchangeInfo(day).used, o0.price, 'the Coins count toward the day\'s limit');
+  assert.strictEqual(G.buyCoinCard(0, day).error, 'sold', 'once a day');
+  // the limit is shared with the Ruby swap
+  assert(G.exchange(G.exchangeInfo(day).left, day).ok && G.exchangeInfo(day).left === 0);
+  const next = sh.coinCards.findIndex((o, i) => i > 0);
+  if (next > 0) assert.strictEqual(G.buyCoinCard(next, day).error, 'cap', 'no Coin Cards past the day\'s limit');
+  // the wallet already took the Coins (signed in): the purchase uses the balance the server reported
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 5200, best: 5200, claimed: { 0: true }, wallet: 30000, found: KC_ALL_CARDS.slice() }) }));
+  Q = G.state; sh = G.shop(day, KCSim.mulberry(9));
+  assert(sh.coinCards.length === C.perDay && sh.coinCards.every(o => o.price <= 10000), 'four packs within a 10,000-Coin day in Arena 9');
+  const e = sh.coinCards.findIndex(o => KC_CARDS[o.card].rarity === 'epic');
+  const k = sh.coinCards[1], c1 = Q.cards[k.card].count;
+  r = G.buyCoinCard(1, day, 30000 - k.price);
+  assert(r.ok && Q.wallet === 30000 - k.price && Q.cards[k.card].count === c1 + k.qty && G.exchangeInfo(day).used === k.price, 'paid through the wallet');
+  // nothing found yet that can be sold: an empty row, no error
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 100, best: 100, claimed: { 0: true }, cards: Object.fromEntries(KC_STARTER_DECK.map(id => [id, { level: 15, count: 0 }])) }) }));
+  assert.strictEqual(G.shop(day, KCSim.mulberry(1)).coinCards.length, 0, 'no packs when every found card is at level 15');
+  // an older save's shop of the day gains the row
+  G.load(mem({ 'kc.progress': JSON.stringify({ beaten: { owen: true, romeo: true, luc: true }, trophies: 100, best: 100, claimed: { 0: true }, shop: Object.assign({}, sh, { coinCards: undefined, cBought: undefined }) }) }));
+  assert(Array.isArray(G.shop(day).coinCards), 'the row appears in a shop made before it existed');
+  console.log(`Coin Cards: ${C.perDay} packs a day from found cards (deck first), priced like the Shop, on the shared Coin limit${e >= 0 ? ', epics high up' : ''}: ok`);
+}
+
 // The diamond-only Shop sections: Daily Deals, the Magic Shop, the Card Shop
 {
   const day = new Date(2026, 10, 12, 10).getTime();

@@ -727,7 +727,59 @@ const KCMenu = (() => {
     }).join('');
     for (const b of $$('#shopEmotes .buy-btn[data-emote]')) b.addEventListener('click', e => { e.stopPropagation(); buyEmoteClick(b.dataset.emote, b.dataset.cur); });
     renderDiamondShop();
+    renderCoinCards();
     shopTimer();
+  }
+  /* Coin Cards: card packs for SirSC Coins. Coins spent here count toward the day's Coin limit, shared with
+     the Ruby swap; each pack sells once a day; a Coin purchase takes a second click to confirm. */
+  let cConfirm = -1, cConfirmT = 0;
+  function renderCoinCards() {
+    const s = G.shop(), p = P(), x = G.exchangeInfo();
+    $('#coinLeft').innerHTML = `<i class="wcoin-i" aria-hidden="true"></i>Coins only · ${fmt(x.left)} of ${fmt(x.cap)} left today`;
+    $('#coinLeft').title = "Today's Coin limit grows with your arena. Swapping Coins for Rubies uses it too.";
+    $('#shopCoinCards').innerHTML = s.coinCards.length ? s.coinCards.map((c, i) => {
+      const K = KC_CARDS[c.card], u = G.upgradeInfo(c.card), sold = !!s.cBought[c.id], after = u.count + (sold ? 0 : c.qty);
+      const pct = u.max ? 100 : Math.min(100, after / u.need * 100), ask = cConfirm === i;
+      const prog = `<span class="of-prog${!u.max && after >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.max ? 'Max level' : `Lv ${u.level} · ${fmt(after)} / ${fmt(u.need)}`}</em></span>`;
+      const poor = c.price > p.wallet || c.price > x.left;
+      const btn = sold ? '<button class="buy-btn" type="button" disabled>Bought today</button>' : u.max ? '<button class="buy-btn" type="button" disabled>Max level</button>'
+        : `<button class="buy-btn coin${poor ? ' poor' : ''}${ask ? ' confirm' : ''}" type="button" data-ci="${i}" aria-label="${ask ? 'Confirm: buy' : 'Buy'} ${c.qty} ${esc(K.name)} for ${fmt(c.price)} Coins">${ask ? 'Confirm ' : ''}<i class="wcoin-i" aria-hidden="true"></i>${fmt(c.price)}</button>`;
+      return `<div class="offer coins${sold ? ' sold' : ''}"><span class="of-tag">${K.rarity[0].toUpperCase() + K.rarity.slice(1)}</span>
+        <div class="of-art ${K.rarity}"><img src="${cardImg(c.card)}" alt=""><span class="of-qty">×${fmt(c.qty)}</span></div><b>${esc(K.name)}</b>${prog}${btn}</div>`;
+    }).join('') : '<p class="dim">No Coin Cards today: they come from the cards you have found that are not at level 15 yet.</p>';
+    for (const b of $$('#shopCoinCards .buy-btn[data-ci]')) b.addEventListener('click', e => { e.stopPropagation(); buyCoinCardClick(+b.dataset.ci); });
+  }
+  const noCoins = n => `That costs ${fmt(n)} Coins. ` + (KCBackend.wallet() ? `You have ${fmt(P().wallet)}; Coins come from your SirSC wallet on Warden Chat.`
+    : KCBackend.connected() ? 'Sign in with your WardenChat account to use your SirSC Coins.' : 'Coins will come from the SirSC wallet.');
+  async function buyCoinCardClick(i) {
+    if (paying) return;
+    const s = G.shop(), o = s.coinCards[i], x = G.exchangeInfo();
+    if (!o) return;
+    if (s.cBought[o.id]) { KCSound.play('error'); toast('You already bought that today. New ones arrive at midnight.'); return; }
+    if (o.price > x.left) { KCSound.play('error'); toast(`That is over today's Coin limit: ${fmt(x.left)} of ${fmt(x.cap)} Coins left today. The limit grows with your arena.`); return; }
+    if (P().wallet < o.price) { KCSound.play('error'); toast(noCoins(o.price)); return; }
+    if (cConfirm !== i) {   // Coins take a second click to confirm
+      cConfirm = i; clearTimeout(cConfirmT);
+      cConfirmT = setTimeout(() => { cConfirm = -1; if (tabNow === 'shop') renderCoinCards(); }, 4000);
+      renderCoinCards();
+      const again = $(`#shopCoinCards .buy-btn[data-ci="${i}"]`); if (again) again.focus();
+      return;
+    }
+    clearTimeout(cConfirmT); cConfirm = -1;
+    paying = true;
+    const pay = await KCBackend.payCoins('cards', o.price);
+    paying = false;
+    if (!pay.ok) {
+      KCSound.play('error');
+      toast(pay.error === 'cap' ? "That is over today's Coin limit. Nothing was spent." : pay.error === 'coins' ? 'Not enough Coins in your SirSC wallet. Nothing was spent.'
+        : pay.error === 'offline' ? "Can't reach the SirSC wallet right now. Nothing was spent." : 'The SirSC wallet said no. Nothing was spent.');
+      refresh(); return;
+    }
+    const r = G.buyCoinCard(i, Date.now(), pay.local ? undefined : pay.coinsLeft);
+    if (!r.ok) { KCSound.play('error'); toast(r.error === 'sold' ? 'You already bought that today.' : 'That is not available.'); refresh(); return; }
+    KCSound.play('buy');
+    refresh();
+    showChest(null, r, 'Coin Cards');
   }
   /* the diamond-only sections: Daily Deals, the Magic Shop and the Card Shop (one of each item a day) */
   let dConfirm = '', dConfirmT = 0;
@@ -805,7 +857,7 @@ const KCMenu = (() => {
   }
   function shopTimer() {
     const left = clock(G.shopEnds() - Date.now());
-    for (const el of [$('#shopTimer'), $('#freeClock'), $('#emoteTimer'), $('#dealTimer'), $('#magicTimer'), $('#cardTimer')]) if (el) el.textContent = left;
+    for (const el of [$('#shopTimer'), $('#freeClock'), $('#emoteTimer'), $('#dealTimer'), $('#magicTimer'), $('#cardTimer'), $('#coinTimer')]) if (el) el.textContent = left;
   }
 
   /* ---------- the King Tower ---------- */

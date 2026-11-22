@@ -56,7 +56,7 @@ an Edge Function.
 >    - a player's trophies are adopted from their save once, the first time;
 >    - `kc_get_progress` returns them, and `kc_exchange` reads `best` from them.
 > 2. The other tables: `kc_progress` with its private history, `kc_presence`, `kc_invites`, and the private spend and exchange logs.
-> 3. The other functions: `kc_ping`, `kc_get_progress`, `kc_save_progress`, `kc_friends`, `kc_friend_request`, `kc_friend_respond`, `kc_poll`, `kc_invite`, `kc_invite_respond`, `kc_spend` and `kc_exchange`. Also check that `sirsc_me` and `sirsc_member_claim` work with `game = 'kc'`.
+> 3. The other functions: `kc_ping`, `kc_get_progress`, `kc_save_progress`, `kc_friends`, `kc_friend_request`, `kc_friend_respond`, `kc_poll`, `kc_invite`, `kc_invite_respond`, `kc_spend`, `kc_exchange` and `kc_coin_spend`. Also check that `sirsc_me` and `sirsc_member_claim` work with `game = 'kc'`.
 > 4. The Realtime authorization policies for the private channels `kc-<code>`, used by battles with friends.
 > 5. Wallet safety: every balance change locks the wallet row, never goes below zero, and writes a ledger row in the same transaction. `kc_spend` is idempotent on `ref`.
 > 6. Tests, all passing with every existing test still passing:
@@ -180,12 +180,19 @@ create table public.kc_invites (
   status     text not null default 'pending' check (status in ('pending', 'accepted', 'declined', 'cancelled')),
   created_at timestamptz not null default now()
 );
--- diamonds spent in the game (idempotent on ref), and coins swapped for Rubies per UTC day
+-- diamonds spent in the game, and coins spent on Coin Cards (each idempotent on ref)
 create table warden_private.kc_spends (
   user_id uuid not null references auth.users(id) on delete cascade,
   ref text not null, kind text not null, diamonds integer not null check (diamonds > 0),
   created_at timestamptz not null default now(), primary key (user_id, ref)
 );
+create table warden_private.kc_coin_spends (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  ref text not null, kind text not null, coins integer not null check (coins > 0),
+  created_at timestamptz not null default now(), primary key (user_id, ref)
+);
+-- the coins a player used each UTC day: swapped for Rubies (kc_exchange) plus spent on Coin Cards
+-- (kc_coin_spend); both share the one daily limit
 create table warden_private.kc_exchanges (
   user_id uuid not null references auth.users(id) on delete cascade,
   day date not null, coins integer not null default 0 check (coins >= 0), primary key (user_id, day)
@@ -385,8 +392,9 @@ the highest arena the player has reached.
 | arena | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
 | coins a day | 500 | 1,000 | 2,000 | 4,000 | 6,000 | 7,000 | 8,000 | 9,000 | 10,000 | 10,000 |
 
-- The coins swapped today (UTC) plus `coins` must stay within the limit; otherwise
-  `kc_exchange_cap`. The table is `ECONOMY.exchange` in `js/progress.js`.
+- The coins used today (UTC: swapped here plus spent on Coin Cards, `kc_coin_spend`) plus `coins` must
+  stay within the limit; otherwise `kc_exchange_cap`. The table is `ECONOMY.exchange` in
+  `js/progress.js`.
 - Fewer coins than `coins` → `kc_not_enough_coins`.
 - Otherwise:
   1. lock the wallet row;
@@ -396,6 +404,29 @@ the highest arena the player has reached.
   5. return `{ "ok": true, "coins": <n>, "rubies": <n>, "used": <today's total>, "cap": <limit>, "me": <sirsc_me('kc')> }`.
 
   The game adds the Rubies to the save.
+
+#### `kc_coin_spend(kind text, coins integer, ref text) returns json`
+Takes coins from the caller's SirSC wallet for the Shop's **Coin Cards**, **before** the game hands the
+cards over. Coin Cards is a row of card packs for coins: copies of cards the player has found, priced
+1 coin per Ruby of value (`ECONOMY.coinShop` in `js/progress.js`). The game makes them; the server only
+takes the coins and keeps the limit.
+- `kind` must be `cards`, `coins` a whole number from 1 to 10,000, and `ref` a random id from the
+  browser (at most 64 characters); otherwise `kc_bad_spend`.
+- A `ref` already in `warden_private.kc_coin_spends` → take nothing and return
+  `{ "ok": true, "spent": 0, "repeated": true, "used", "cap", "me" }`.
+- **The same daily limit as `kc_exchange`**: the coins used today (UTC, swaps plus Coin Cards) plus
+  `coins` must stay within the arena's limit (the table above); otherwise `kc_exchange_cap`.
+- Fewer coins than `coins` → `kc_not_enough_coins`.
+- At most 120 an hour → `kc_rate_limited`.
+- Otherwise:
+  1. lock the wallet row;
+  2. take the coins;
+  3. add them to today's `warden_private.kc_exchanges` row;
+  4. write the `kc_coin_spends` row and a ledger row (`spend`, game `kc`, note `cards`), in the same
+     transaction;
+  5. return `{ "ok": true, "spent": <coins>, "used": <today's total>, "cap": <limit>, "me": <sirsc_me('kc')> }`.
+
+  The game then adds the copies to the save.
 
 ### Trophy battles checked by the server: the `kc-battle` Edge Function
 
@@ -583,10 +614,10 @@ create policy "kc rooms: write" on realtime.messages for insert to authenticated
 5. Invites: only to friends, expire after 120 s, a newer one cancels the older one to the same friend,
    only the invited player can answer.
 6. Wallet:
-   - `kc_spend` and `kc_exchange` lock the wallet row, never go below zero, and write the ledger row
-     in the same transaction;
-   - `kc_spend` is idempotent on `ref` and enforces the kind table;
-   - `kc_exchange` enforces the arena limit per UTC day;
+   - `kc_spend`, `kc_exchange` and `kc_coin_spend` lock the wallet row, never go below zero, and write
+     the ledger row in the same transaction;
+   - `kc_spend` and `kc_coin_spend` are idempotent on `ref`, and `kc_spend` enforces the kind table;
+   - `kc_exchange` and `kc_coin_spend` share one arena limit per UTC day;
    - `sirsc_me` and `sirsc_member_claim` work with `game = 'kc'`.
 7. Realtime policies: a signed-in player can join `kc-abcde` and a restricted or anonymous one can't.
 8. Tests (native PostgreSQL, no Docker), with the existing tests still passing. Cover:
@@ -594,7 +625,8 @@ create policy "kc rooms: write" on realtime.messages for insert to authenticated
    - friends' visibility, presence;
    - invites: expiry, cancel, respond, not friends;
    - spends: each kind's limits, idempotency, not enough diamonds;
-   - exchange: limit by arena, UTC day, not enough coins;
+   - exchange and Coin Cards: limit by arena, shared between the two, UTC day, not enough coins,
+     `kc_coin_spend` idempotency;
    - restricted accounts refused.
 9. `scripts/verify.mjs` checks:
    - anon can call `kc_ping` but nothing else;
@@ -750,13 +782,18 @@ All the rules are here, with no screen code. Every change calls `save()`, which 
   - **Rubies**: the game's own; they never leave it.
   - **Diamonds**: the SirSC wallet's. They pay for the Pass, chest skips, diamond offers, Daily
     Deals, the Magic Shop, the Card Shop and emotes.
-  - **Coins**: the SirSC wallet's, swapped one way for Rubies within the daily limit.
+  - **Coins**: the SirSC wallet's. They are swapped one way for Rubies, or spent on Coin Cards; both
+    count toward one daily limit by arena.
   - Rubies and Coins never buy Diamonds. The game never pays out Coins or Diamonds.
 - **The Shop**, made fresh each local day (`shop`):
   - five daily offers (one is a 1-diamond 5,000-Ruby bundle);
   - one free Wooden Chest;
   - chests for Rubies, one of each a day;
   - diamond-only Daily Deals, Magic Shop and Card Shop;
+  - **Coin Cards**: four card packs a day for Coins. Each is a card you have found (your deck's first),
+    with the copies toward its next level (up to 50 commons, 10 rares or 2 epics, no legendaries),
+    priced 1 Coin per Ruby of value. A pack is offered only when it fits the day's Coin limit. Each
+    sells once a day (`coinCards`, `cBought` in `shop`; `buyCoinCard`);
   - three emotes a day for 5,000 Rubies or 1 diamond.
 - **Magic items** (`magic`): Wild Cards (count as copies of their rarity), Books (fill a level's
   copies), the Hammer of Books (a free level), and Evolution Shards.
@@ -805,7 +842,7 @@ document:
   - the `kc_ping` gate;
   - the cloud save: pull on sign-in, push 2 s after the last change, merge on conflict;
   - the wallet mirror: `sirsc_me` on sign-in, on returning to the tab, and every eighth poll;
-  - `kc_spend` and `kc_exchange`;
+  - `kc_spend`, `kc_exchange` and `kc_coin_spend`;
   - the friends provider and `kc_poll`;
   - the Realtime room transport;
   - trophy battles: `kc-battle` `start` and `finish`, the queue of finishes waiting for a connection,
@@ -816,6 +853,7 @@ document:
   - `status`, `account`, `login`, `signOut`, `saved`, `restore`;
   - `pay(kind, diamonds)`: before every diamond purchase;
   - `exchange(coins)`;
+  - `payCoins('cards', coins)`: before every Coin Cards purchase;
   - `friends()`, `transport()`, `wallet()`;
   - `ranked()`, `battleStart()`, `battleFinish()`: trophy battles checked by the server (used by
     `js/game.js`).

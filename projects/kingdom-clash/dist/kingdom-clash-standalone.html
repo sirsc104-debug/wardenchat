@@ -2360,6 +2360,23 @@ button.slot:hover { transform: translateY(-3px); }
 /* a trophy battle being fetched from the server */
 body.kc-wait, body.kc-wait button { cursor: progress; }
 
+/* Coin Cards: card packs for SirSC Coins */
+.cshop-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 900; color: #ffcf6b; white-space: nowrap; }
+.cshop-tag .wcoin-i { width: 16px; height: 16px; border-width: 1.5px; }
+.dshop.coin-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.offer.coins { background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 40%), linear-gradient(#7a5220, #4a2f10); box-shadow: inset 0 0 0 2px #ffcf6b, 0 5px 0 rgba(0, 0, 0, 0.35); }
+.offer.coins .of-tag { background: #ffcf6b; }
+.buy-btn.coin { background: linear-gradient(#ffc98a, #e5832a 55%, #ad5310); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), 0 5px 0 #6b3006; }
+.buy-btn.coin.confirm { background: linear-gradient(#ffe98f, #f6b81f 55%, #cf8106); box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.6), 0 5px 0 #8a5a05; }
+.buy-btn .wcoin-i { width: 20px; height: 20px; border-width: 2px; }
+@media (max-width: 760px) { .dshop.coin-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cshop-tag { white-space: normal; text-align: right; } }
+/* phones: the Shop sections' timers and tags sit below the ribbon instead of under it */
+@media (max-width: 760px) {
+  .shop-head { position: static; justify-content: space-between; flex-wrap: wrap; gap: 2px 10px; margin: 0 2px 16px; font-size: 13px; }
+  .shop-head:has(> :only-child) { justify-content: flex-end; }
+  .cshop-tag { white-space: nowrap; text-align: left; }
+}
+
 </style>
 </head>
 <body>
@@ -2516,7 +2533,7 @@ body.kc-wait, body.kc-wait button { cursor: progress; }
           </div>
         </section>
         <section class="tab shop-tab" id="tab-shop" hidden>
-          <nav class="shop-jump" aria-label="Shop sections"><button type="button" data-jump="shopOffersPlaque">Daily Offers</button><button type="button" data-jump="shopDealsPlaque">Daily Deals</button><button type="button" data-jump="shopMagicPlaque">Magic Shop</button><button type="button" data-jump="shopCardsPlaque">Card Shop</button><button type="button" data-jump="shopChestPlaque">Chests</button><button type="button" data-jump="shopEmotePlaque">Emotes</button></nav>
+          <nav class="shop-jump" aria-label="Shop sections"><button type="button" data-jump="shopOffersPlaque">Daily Offers</button><button type="button" data-jump="shopDealsPlaque">Daily Deals</button><button type="button" data-jump="shopMagicPlaque">Magic Shop</button><button type="button" data-jump="shopCardsPlaque">Card Shop</button><button type="button" data-jump="shopCoinPlaque">Coin Cards</button><button type="button" data-jump="shopChestPlaque">Chests</button><button type="button" data-jump="shopEmotePlaque">Emotes</button></nav>
           <div class="plaque shop-plaque" id="shopOffersPlaque">
             <div class="ribbon"><span>Daily Offers</span></div>
             <div class="shop-head">
@@ -2540,6 +2557,12 @@ body.kc-wait, body.kc-wait button { cursor: progress; }
             <div class="shop-head"><span class="shop-timer">New cards in <b id="cardTimer">0:00</b></span><span class="dshop-tag"><i class="gem-i" aria-hidden="true"></i>Diamonds only</span></div>
             <div class="dshop cards" id="shopCards"></div>
           </div>
+          <!-- Coin Cards: card packs for SirSC Coins, on the same daily Coin limit as the Ruby swap -->
+          <div class="plaque shop-plaque cshop-plaque" id="shopCoinPlaque">
+            <div class="ribbon"><span>Coin Cards</span></div>
+            <div class="shop-head"><span class="shop-timer">New cards in <b id="coinTimer">0:00</b></span><span class="cshop-tag" id="coinLeft"><i class="wcoin-i" aria-hidden="true"></i>Coins only</span></div>
+            <div class="dshop coin-cards" id="shopCoinCards"></div>
+          </div>
           <div class="plaque shop-plaque chest-plaque" id="shopChestPlaque">
             <div class="ribbon"><span>Chests</span></div>
             <div class="shop-chests" id="shopChests"></div>
@@ -2549,7 +2572,7 @@ body.kc-wait, body.kc-wait button { cursor: progress; }
             <div class="shop-head"><span class="shop-timer">New emotes in <b id="emoteTimer">0:00</b></span></div>
             <div class="shop-emotes" id="shopEmotes"></div>
           </div>
-          <p class="dim shop-note">Offers show exactly what you get. Chests cost rubies, one of each a day; what is inside stays hidden until you open them, and their contents and price grow with your trophies and account level. 1 diamond = 5,000 rubies. Swap SirSC Coins for rubies with the ⇄ button at the top.</p>
+          <p class="dim shop-note">Offers show exactly what you get. Chests cost rubies, one of each a day; what is inside stays hidden until you open them, and their contents and price grow with your trophies and account level. 1 diamond = 5,000 rubies. Swap SirSC Coins for rubies with the ⇄ button at the top, or buy cards with them in Coin Cards: both use the same daily Coin limit, which grows with your arena.</p>
         </section>
         <section class="tab info-tab" id="tab-clan" hidden>
           <div class="plaque info-plaque">
@@ -2645,7 +2668,7 @@ body.kc-wait, body.kc-wait button { cursor: progress; }
       <div class="ex-card plaque" role="dialog" aria-modal="true" aria-labelledby="exTitle">
         <button class="modal-x" id="exX" type="button" aria-label="Close">&#x2715;</button>
         <h3 id="exTitle">Coins to Rubies</h3>
-        <p>Rubies are Kingdom Clash's own currency: chests, battles and the Trophy Road pay them, and upgrades, the Shop and emotes cost them. Your SirSC Coins can be swapped for Rubies, up to a daily limit that grows with your arena. Rubies can't be turned back into Coins.</p>
+        <p>Rubies are Kingdom Clash's own currency: chests, battles and the Trophy Road pay them, and upgrades, the Shop and emotes cost them. Your SirSC Coins can be swapped for Rubies, up to a daily limit that grows with your arena; Coin Cards in the Shop use the same limit. Rubies can't be turned back into Coins.</p>
         <div class="ex-rate"><span class="wcoin-i" aria-hidden="true"></span>1 Coin = <span id="exRate">1</span><span class="ruby-i" aria-hidden="true"></span></div>
         <div class="ex-cap" id="exCap"></div>
         <div class="ex-row"><input id="exAmount" type="number" min="1" step="1" inputmode="numeric" aria-label="Coins to swap"><button class="pill" id="exMax" type="button">Max</button></div>
@@ -2843,6 +2866,7 @@ body.kc-wait, body.kc-wait button { cursor: progress; }
        wallet              -> the SirSC wallet, or null when signed out:
                                 spend(kind, diamonds, ref) -> Promise of { me } (the server takes the diamonds)
                                 exchange(coins)            -> Promise of { coins, rubies, me }
+                                spendCoins(kind, coins, ref) -> Promise of { me } (Coin Cards: the server takes the coins)
        ranked()            -> true when the server keeps the player's trophies (trophy battles are checked)
        battles             -> start() -> Promise of { battle_id, seed, bot_seed, foe, setup, trophies }
                               finish(battleId, plays, end, claimed) -> Promise of { trophies, ... }
@@ -2924,6 +2948,20 @@ const KCBackend = (() => {
       return { error: e && e.code === 'kc_not_enough_diamonds' ? 'diamonds' : e && e.offline ? 'offline' : 'wallet', code: e && e.code };
     }
   }
+  /* Coins for something in the game (kind 'cards': the Shop's Coin Cards): with the wallet connected the
+     server takes them first, counting them toward the same daily limit as the Ruby swap, and the purchase
+     then runs here with the balance it reports ({ ok, coinsLeft }). Without it, this device's Coins
+     ({ ok, local }). Or { error: 'cap' | 'coins' | 'offline' | 'wallet' }. */
+  async function payCoins(kind, coins, ref) {
+    const W = wallet();
+    if (!W) return { ok: true, local: true };
+    try {
+      const r = await W.spendCoins(kind, coins, ref || newRef());
+      return { ok: true, coinsLeft: r && r.me ? Math.max(0, r.me.coins | 0) : Math.max(0, KCProgress.state.wallet - coins) };
+    } catch (e) {
+      return { error: e && e.code === 'kc_exchange_cap' ? 'cap' : e && e.code === 'kc_not_enough_coins' ? 'coins' : e && e.offline ? 'offline' : 'wallet', code: e && e.code };
+    }
+  }
   /* Coins to Rubies: with the wallet connected the server takes the coins (and checks the daily limit);
      the Rubies are then added here. Without it, the coins on this device, as before. */
   async function exchange(coins) {
@@ -2967,7 +3005,7 @@ const KCBackend = (() => {
   }
   const newRef = () => 'kc-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
   return {
-    connect, connected, status, account, restriction, login, signOut, changed, saved, flush, restore, transport, friends, wallet, pay, exchange,
+    connect, connected, status, account, restriction, login, signOut, changed, saved, flush, restore, transport, friends, wallet, pay, payCoins, exchange,
     ranked, battleStart, battleFinish,
     get rules() { return (impl && impl.rules) || { nameMin: 3, nameMax: 24, nameRe: /^[a-zA-Z0-9_.-]+$/, passwordMin: 10 }; },
     get chatUrl() { return (impl && impl.chatUrl) || 'https://chat.sirsc104.com/'; },
@@ -5094,7 +5132,7 @@ const KCProgress = (() => {
   // The version of the battle rules (cards, simulation, computer player and this file). The builds stamp it
   // (build-artifact.py, build-server.py) from those files, so the server only checks a trophy battle with
   // the same rules the game played it with. 'dev' when running from the folder.
-  const RULES = 'a10c8b5a6465';
+  const RULES = 'e99c51fa825a';
   const MAX_LEVEL = 15;
   const XP_PER_LEVEL = 100;
   const XP = { win: 20, draw: 10, loss: 6, firstWin: 30 };
@@ -5210,6 +5248,12 @@ const KCProgress = (() => {
       // what each counts as when the deals' value is shown, in diamonds (the mega bundle's and the ruby bundle's rates)
       worth: { common: 1 / 100, rare: 1 / 20, epic: 1 / 2, legendary: 8, ruby: 1 / 5000 },
     },
+    // Coin Cards, a Shop row of card packs for wallet Coins: `perDay` packs a day from cards you have found
+    // (your deck first), each the copies toward that card's next level up to `maxQty`, priced like the
+    // Shop's card offers (`rate` Coins for each Ruby of value: ECONOMY.shop.perCopy). Coins spent here count
+    // toward the same daily Coin limit as the Ruby swap (exchange.cap), so a pack is only offered when it
+    // fits that limit. No legendaries.
+    coinShop: { perDay: 4, maxQty: { common: 50, rare: 10, epic: 2, legendary: 0 }, rate: 1 },
     // wallet Coins (SirSC) to Rubies, one way: `rate` rubies a coin, up to a daily cap set by the highest
     // arena reached; past the last arena the cap grows by `beyond.add` every `beyond.every` trophies.
     exchange: { rate: 1, cap: { 1: 500, 2: 1000, 3: 2000, 4: 4000, 5: 6000, 6: 7000, 7: 8000, 8: 9000, 9: 10000, 10: 10000 }, beyond: { every: 500, add: 0, max: 10000 } },
@@ -6071,6 +6115,19 @@ const KCProgress = (() => {
     pool.sort((a, b) => RARITY_RANK[KC_CARDS[b].rarity] - RARITY_RANK[KC_CARDS[a].rarity]);
     return pool.slice(0, 3).map((id, i) => { const pk = ECONOMY.diamondShop.cardPacks[KC_CARDS[id].rarity]; return { id: 'c' + i, card: id, qty: pk.qty, price: pk.price }; });
   }
+  // Coin Cards: today's packs (see ECONOMY.coinShop)
+  function makeCoinCards(rand = Math.random) {
+    const C = ECONOMY.coinShop, per = ECONOMY.shop.perCopy, cap = exchangeCap();
+    const price1 = id => per[KC_CARDS[id].rarity] * C.rate;
+    const pool = P.found.filter(id => KC_CARDS[id] && !KC_CARDS[id].hidden && P.cards[id].level < MAX_LEVEL && (C.maxQty[KC_CARDS[id].rarity] || 0) > 0 && price1(id) <= cap);
+    for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+    pool.sort((a, b) => (P.deck.includes(b) ? 1 : 0) - (P.deck.includes(a) ? 1 : 0));   // your deck's cards first
+    return pool.slice(0, C.perDay).map((id, i) => {
+      const r = KC_CARDS[id].rarity, u = upgradeInfo(id), missing = Math.max(0, u.need - u.count);
+      const qty = Math.max(1, Math.min(C.maxQty[r], missing > 0 ? missing : u.need, Math.floor(cap / price1(id))));
+      return { id: 'k' + i, card: id, qty, price: qty * price1(id) };
+    });
+  }
   // Today's offers (made the first time they are asked for each day), and today's diamond sections.
   function shop(now = Date.now(), rand) {
     const day = dayKey(now);
@@ -6080,7 +6137,27 @@ const KCProgress = (() => {
       P.shop.dBought = P.shop.dBought || {};
       save();
     }
+    if (!Array.isArray(P.shop.coinCards)) { P.shop.coinCards = makeCoinCards(rand); P.shop.cBought = P.shop.cBought || {}; save(); }
     return P.shop;
+  }
+  /* Buy Coin Cards pack i. With the SirSC wallet connected the server has already taken the Coins (and
+     checked the day's limit): paidLeft is the wallet's balance it reported. Without it, this device's Coins.
+     Returns what it gave (like a chest) or { error: 'none' | 'sold' | 'max' | 'cap' | 'coins' }. */
+  function buyCoinCard(i, now = Date.now(), paidLeft) {
+    const s = shop(now), o = s.coinCards[i];
+    if (!o) return { error: 'none' };
+    if (s.cBought[o.id]) return { error: 'sold' };
+    if (P.cards[o.card].level >= MAX_LEVEL) return { error: 'max' };
+    const x = exchangeInfo(now), paid = paidLeft !== undefined && paidLeft !== null;
+    if (!paid && o.price > x.left) return { error: 'cap', left: x.left };
+    if (!paid && P.wallet < o.price) return { error: 'coins', have: P.wallet };
+    P.wallet = paid ? Math.max(0, paidLeft | 0) : P.wallet - o.price;
+    P.walletDay = { day: dayKey(now), n: x.used + o.price };   // the same daily limit as the Ruby swap
+    const before = P.found.slice(), got = { rubies: 0, cards: [{ id: o.card, n: o.qty }], items: [] };
+    apply(got);
+    s.cBought[o.id] = true;
+    save();
+    return { ok: true, price: o.price, rubies: 0, items: [], cards: got.cards.map(x2 => Object.assign({ isNew: !before.includes(x2.id) }, x2)) };
   }
   // Buy from a diamond section: 'deals', 'magic' or 'cards', item i. Diamonds only, once each a day.
   // Returns what it gave (like a chest: { rubies, cards, items }) or { error: 'none' | 'sold' | 'diamonds' | 'max' }.
@@ -6725,7 +6802,7 @@ const KCProgress = (() => {
     arena, nextArena, roadState, claimable, claim,
     trophyFoe, foeUpgrades, spreadLevels, recordTrophy, SIRSC, sirscFoe, RULES, trophyBattleOpts, battleSetup, trophyState, setTrophies,
     roll, chestState, unlockingSlot, startUnlock, openChest,
-    SHOP, shop, shopEnds, refreshShop, buy, buyChest,
+    SHOP, shop, shopEnds, refreshShop, buy, buyChest, buyCoinCard,
     upgradeInfo, upgradable, upgrade, cardLevels, trainingDeck, setDeck, unlockAt,
     DECK_SLOTS, useDeckSlot, setWholeDeck, deckWarnings, suggestDeck, practiceFoe,
     CHALLENGES, CHALLENGE_PAY, challenge, challengeLevel, draftPairs, challengeFoe, recordChallenge,
@@ -13436,7 +13513,59 @@ const KCMenu = (() => {
     }).join('');
     for (const b of $$('#shopEmotes .buy-btn[data-emote]')) b.addEventListener('click', e => { e.stopPropagation(); buyEmoteClick(b.dataset.emote, b.dataset.cur); });
     renderDiamondShop();
+    renderCoinCards();
     shopTimer();
+  }
+  /* Coin Cards: card packs for SirSC Coins. Coins spent here count toward the day's Coin limit, shared with
+     the Ruby swap; each pack sells once a day; a Coin purchase takes a second click to confirm. */
+  let cConfirm = -1, cConfirmT = 0;
+  function renderCoinCards() {
+    const s = G.shop(), p = P(), x = G.exchangeInfo();
+    $('#coinLeft').innerHTML = `<i class="wcoin-i" aria-hidden="true"></i>Coins only · ${fmt(x.left)} of ${fmt(x.cap)} left today`;
+    $('#coinLeft').title = "Today's Coin limit grows with your arena. Swapping Coins for Rubies uses it too.";
+    $('#shopCoinCards').innerHTML = s.coinCards.length ? s.coinCards.map((c, i) => {
+      const K = KC_CARDS[c.card], u = G.upgradeInfo(c.card), sold = !!s.cBought[c.id], after = u.count + (sold ? 0 : c.qty);
+      const pct = u.max ? 100 : Math.min(100, after / u.need * 100), ask = cConfirm === i;
+      const prog = `<span class="of-prog${!u.max && after >= u.need ? ' full' : ''}"><i style="width:${pct.toFixed(0)}%"></i><em>${u.max ? 'Max level' : `Lv ${u.level} · ${fmt(after)} / ${fmt(u.need)}`}</em></span>`;
+      const poor = c.price > p.wallet || c.price > x.left;
+      const btn = sold ? '<button class="buy-btn" type="button" disabled>Bought today</button>' : u.max ? '<button class="buy-btn" type="button" disabled>Max level</button>'
+        : `<button class="buy-btn coin${poor ? ' poor' : ''}${ask ? ' confirm' : ''}" type="button" data-ci="${i}" aria-label="${ask ? 'Confirm: buy' : 'Buy'} ${c.qty} ${esc(K.name)} for ${fmt(c.price)} Coins">${ask ? 'Confirm ' : ''}<i class="wcoin-i" aria-hidden="true"></i>${fmt(c.price)}</button>`;
+      return `<div class="offer coins${sold ? ' sold' : ''}"><span class="of-tag">${K.rarity[0].toUpperCase() + K.rarity.slice(1)}</span>
+        <div class="of-art ${K.rarity}"><img src="${cardImg(c.card)}" alt=""><span class="of-qty">×${fmt(c.qty)}</span></div><b>${esc(K.name)}</b>${prog}${btn}</div>`;
+    }).join('') : '<p class="dim">No Coin Cards today: they come from the cards you have found that are not at level 15 yet.</p>';
+    for (const b of $$('#shopCoinCards .buy-btn[data-ci]')) b.addEventListener('click', e => { e.stopPropagation(); buyCoinCardClick(+b.dataset.ci); });
+  }
+  const noCoins = n => `That costs ${fmt(n)} Coins. ` + (KCBackend.wallet() ? `You have ${fmt(P().wallet)}; Coins come from your SirSC wallet on Warden Chat.`
+    : KCBackend.connected() ? 'Sign in with your WardenChat account to use your SirSC Coins.' : 'Coins will come from the SirSC wallet.');
+  async function buyCoinCardClick(i) {
+    if (paying) return;
+    const s = G.shop(), o = s.coinCards[i], x = G.exchangeInfo();
+    if (!o) return;
+    if (s.cBought[o.id]) { KCSound.play('error'); toast('You already bought that today. New ones arrive at midnight.'); return; }
+    if (o.price > x.left) { KCSound.play('error'); toast(`That is over today's Coin limit: ${fmt(x.left)} of ${fmt(x.cap)} Coins left today. The limit grows with your arena.`); return; }
+    if (P().wallet < o.price) { KCSound.play('error'); toast(noCoins(o.price)); return; }
+    if (cConfirm !== i) {   // Coins take a second click to confirm
+      cConfirm = i; clearTimeout(cConfirmT);
+      cConfirmT = setTimeout(() => { cConfirm = -1; if (tabNow === 'shop') renderCoinCards(); }, 4000);
+      renderCoinCards();
+      const again = $(`#shopCoinCards .buy-btn[data-ci="${i}"]`); if (again) again.focus();
+      return;
+    }
+    clearTimeout(cConfirmT); cConfirm = -1;
+    paying = true;
+    const pay = await KCBackend.payCoins('cards', o.price);
+    paying = false;
+    if (!pay.ok) {
+      KCSound.play('error');
+      toast(pay.error === 'cap' ? "That is over today's Coin limit. Nothing was spent." : pay.error === 'coins' ? 'Not enough Coins in your SirSC wallet. Nothing was spent.'
+        : pay.error === 'offline' ? "Can't reach the SirSC wallet right now. Nothing was spent." : 'The SirSC wallet said no. Nothing was spent.');
+      refresh(); return;
+    }
+    const r = G.buyCoinCard(i, Date.now(), pay.local ? undefined : pay.coinsLeft);
+    if (!r.ok) { KCSound.play('error'); toast(r.error === 'sold' ? 'You already bought that today.' : 'That is not available.'); refresh(); return; }
+    KCSound.play('buy');
+    refresh();
+    showChest(null, r, 'Coin Cards');
   }
   /* the diamond-only sections: Daily Deals, the Magic Shop and the Card Shop (one of each item a day) */
   let dConfirm = '', dConfirmT = 0;
@@ -13514,7 +13643,7 @@ const KCMenu = (() => {
   }
   function shopTimer() {
     const left = clock(G.shopEnds() - Date.now());
-    for (const el of [$('#shopTimer'), $('#freeClock'), $('#emoteTimer'), $('#dealTimer'), $('#magicTimer'), $('#cardTimer')]) if (el) el.textContent = left;
+    for (const el of [$('#shopTimer'), $('#freeClock'), $('#emoteTimer'), $('#dealTimer'), $('#magicTimer'), $('#cardTimer'), $('#coinTimer')]) if (el) el.textContent = left;
   }
 
   /* ---------- the King Tower ---------- */
@@ -17955,6 +18084,7 @@ const KCAccount = (() => {
   const wallet = {
     spend: (kind, diamonds, ref) => rpc('kc_spend', { kind, diamonds: diamonds | 0, ref: String(ref) }).then(r => { if (r && r.me) wal = r.me; return r; }),
     exchange: coins => rpc('kc_exchange', { coins: coins | 0 }).then(r => { if (r && r.me) wal = r.me; return r; }),
+    spendCoins: (kind, coins, ref) => rpc('kc_coin_spend', { kind, coins: coins | 0, ref: String(ref) }).then(r => { if (r && r.me) wal = r.me; return r; }),
     get me() { return wal; },
   };
 

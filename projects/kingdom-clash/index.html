@@ -164,7 +164,7 @@
           </div>
         </section>
         <section class="tab shop-tab" id="tab-shop" hidden>
-          <nav class="shop-jump" aria-label="Shop sections"><button type="button" data-jump="shopOffersPlaque">Daily Offers</button><button type="button" data-jump="shopDealsPlaque">Daily Deals</button><button type="button" data-jump="shopMagicPlaque">Magic Shop</button><button type="button" data-jump="shopCardsPlaque">Card Shop</button><button type="button" data-jump="shopChestPlaque">Chests</button><button type="button" data-jump="shopEmotePlaque">Emotes</button></nav>
+          <nav class="shop-jump" aria-label="Shop sections"><button type="button" data-jump="shopOffersPlaque">Daily Offers</button><button type="button" data-jump="shopDealsPlaque">Daily Deals</button><button type="button" data-jump="shopMagicPlaque">Magic Shop</button><button type="button" data-jump="shopCardsPlaque">Card Shop</button><button type="button" data-jump="shopCoinPlaque">Coin Cards</button><button type="button" data-jump="shopChestPlaque">Chests</button><button type="button" data-jump="shopEmotePlaque">Emotes</button></nav>
           <div class="plaque shop-plaque" id="shopOffersPlaque">
             <div class="ribbon"><span>Daily Offers</span></div>
             <div class="shop-head">
@@ -188,6 +188,12 @@
             <div class="shop-head"><span class="shop-timer">New cards in <b id="cardTimer">0:00</b></span><span class="dshop-tag"><i class="gem-i" aria-hidden="true"></i>Diamonds only</span></div>
             <div class="dshop cards" id="shopCards"></div>
           </div>
+          <!-- Coin Cards: card packs for SirSC Coins, on the same daily Coin limit as the Ruby swap -->
+          <div class="plaque shop-plaque cshop-plaque" id="shopCoinPlaque">
+            <div class="ribbon"><span>Coin Cards</span></div>
+            <div class="shop-head"><span class="shop-timer">New cards in <b id="coinTimer">0:00</b></span><span class="cshop-tag" id="coinLeft"><i class="wcoin-i" aria-hidden="true"></i>Coins only</span></div>
+            <div class="dshop coin-cards" id="shopCoinCards"></div>
+          </div>
           <div class="plaque shop-plaque chest-plaque" id="shopChestPlaque">
             <div class="ribbon"><span>Chests</span></div>
             <div class="shop-chests" id="shopChests"></div>
@@ -197,7 +203,7 @@
             <div class="shop-head"><span class="shop-timer">New emotes in <b id="emoteTimer">0:00</b></span></div>
             <div class="shop-emotes" id="shopEmotes"></div>
           </div>
-          <p class="dim shop-note">Offers show exactly what you get. Chests cost rubies, one of each a day; what is inside stays hidden until you open them, and their contents and price grow with your trophies and account level. 1 diamond = 5,000 rubies. Swap SirSC Coins for rubies with the ⇄ button at the top.</p>
+          <p class="dim shop-note">Offers show exactly what you get. Chests cost rubies, one of each a day; what is inside stays hidden until you open them, and their contents and price grow with your trophies and account level. 1 diamond = 5,000 rubies. Swap SirSC Coins for rubies with the ⇄ button at the top, or buy cards with them in Coin Cards: both use the same daily Coin limit, which grows with your arena.</p>
         </section>
         <section class="tab info-tab" id="tab-clan" hidden>
           <div class="plaque info-plaque">
@@ -293,7 +299,7 @@
       <div class="ex-card plaque" role="dialog" aria-modal="true" aria-labelledby="exTitle">
         <button class="modal-x" id="exX" type="button" aria-label="Close">&#x2715;</button>
         <h3 id="exTitle">Coins to Rubies</h3>
-        <p>Rubies are Kingdom Clash's own currency: chests, battles and the Trophy Road pay them, and upgrades, the Shop and emotes cost them. Your SirSC Coins can be swapped for Rubies, up to a daily limit that grows with your arena. Rubies can't be turned back into Coins.</p>
+        <p>Rubies are Kingdom Clash's own currency: chests, battles and the Trophy Road pay them, and upgrades, the Shop and emotes cost them. Your SirSC Coins can be swapped for Rubies, up to a daily limit that grows with your arena; Coin Cards in the Shop use the same limit. Rubies can't be turned back into Coins.</p>
         <div class="ex-rate"><span class="wcoin-i" aria-hidden="true"></span>1 Coin = <span id="exRate">1</span><span class="ruby-i" aria-hidden="true"></span></div>
         <div class="ex-cap" id="exCap"></div>
         <div class="ex-row"><input id="exAmount" type="number" min="1" step="1" inputmode="numeric" aria-label="Coins to swap"><button class="pill" id="exMax" type="button">Max</button></div>

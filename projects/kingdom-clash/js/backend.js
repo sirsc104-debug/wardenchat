@@ -16,6 +16,7 @@
        wallet              -> the SirSC wallet, or null when signed out:
                                 spend(kind, diamonds, ref) -> Promise of { me } (the server takes the diamonds)
                                 exchange(coins)            -> Promise of { coins, rubies, me }
+                                spendCoins(kind, coins, ref) -> Promise of { me } (Coin Cards: the server takes the coins)
        ranked()            -> true when the server keeps the player's trophies (trophy battles are checked)
        battles             -> start() -> Promise of { battle_id, seed, bot_seed, foe, setup, trophies }
                               finish(battleId, plays, end, claimed) -> Promise of { trophies, ... }
@@ -97,6 +98,20 @@ const KCBackend = (() => {
       return { error: e && e.code === 'kc_not_enough_diamonds' ? 'diamonds' : e && e.offline ? 'offline' : 'wallet', code: e && e.code };
     }
   }
+  /* Coins for something in the game (kind 'cards': the Shop's Coin Cards): with the wallet connected the
+     server takes them first, counting them toward the same daily limit as the Ruby swap, and the purchase
+     then runs here with the balance it reports ({ ok, coinsLeft }). Without it, this device's Coins
+     ({ ok, local }). Or { error: 'cap' | 'coins' | 'offline' | 'wallet' }. */
+  async function payCoins(kind, coins, ref) {
+    const W = wallet();
+    if (!W) return { ok: true, local: true };
+    try {
+      const r = await W.spendCoins(kind, coins, ref || newRef());
+      return { ok: true, coinsLeft: r && r.me ? Math.max(0, r.me.coins | 0) : Math.max(0, KCProgress.state.wallet - coins) };
+    } catch (e) {
+      return { error: e && e.code === 'kc_exchange_cap' ? 'cap' : e && e.code === 'kc_not_enough_coins' ? 'coins' : e && e.offline ? 'offline' : 'wallet', code: e && e.code };
+    }
+  }
   /* Coins to Rubies: with the wallet connected the server takes the coins (and checks the daily limit);
      the Rubies are then added here. Without it, the coins on this device, as before. */
   async function exchange(coins) {
@@ -140,7 +155,7 @@ const KCBackend = (() => {
   }
   const newRef = () => 'kc-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
   return {
-    connect, connected, status, account, restriction, login, signOut, changed, saved, flush, restore, transport, friends, wallet, pay, exchange,
+    connect, connected, status, account, restriction, login, signOut, changed, saved, flush, restore, transport, friends, wallet, pay, payCoins, exchange,
     ranked, battleStart, battleFinish,
     get rules() { return (impl && impl.rules) || { nameMin: 3, nameMax: 24, nameRe: /^[a-zA-Z0-9_.-]+$/, passwordMin: 10 }; },
     get chatUrl() { return (impl && impl.chatUrl) || 'https://chat.sirsc104.com/'; },

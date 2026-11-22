@@ -338,6 +338,7 @@ const KCAccount = (() => {
   const wallet = {
     spend: (kind, diamonds, ref) => rpc('kc_spend', { kind, diamonds: diamonds | 0, ref: String(ref) }).then(r => { if (r && r.me) wal = r.me; return r; }),
     exchange: coins => rpc('kc_exchange', { coins: coins | 0 }).then(r => { if (r && r.me) wal = r.me; return r; }),
+    spendCoins: (kind, coins, ref) => rpc('kc_coin_spend', { kind, coins: coins | 0, ref: String(ref) }).then(r => { if (r && r.me) wal = r.me; return r; }),
     get me() { return wal; },
   };
 

@@ -44,6 +44,12 @@
   const CAP = { 1: 500, 2: 1000, 3: 2000, 4: 4000, 5: 6000, 6: 7000, 7: 8000, 8: 9000, 9: 10000, 10: 10000 };
   const ARENA_AT = [0, 300, 600, 900, 2000, 2600, 3300, 4100, 5000, 6000];
 
+  // the day's Coin limit by the highest arena reached, and what has been used of it (swaps and Coin Cards)
+  function coinDay(d, u) {
+    const tr = (d.trophies || {})[u.id], best = tr ? tr.best | 0 : (d.progress[u.id] && d.progress[u.id].doc && d.progress[u.id].doc.best) | 0;
+    const arena = ARENA_AT.filter(t => best >= t).length || 1;
+    return { cap: CAP[arena], x: d.exchanged[u.id] && d.exchanged[u.id].day === day() ? d.exchanged[u.id] : { day: day(), n: 0 } };
+  }
   const RPC = {
     kc_ping: () => ok(true),
     my_account_state: () => ok({ active: true }),
@@ -110,12 +116,22 @@
       u.diamonds -= n; done[a.ref] = { kind: a.kind, n, at: Date.now() };
       return ok({ ok: true, spent: n, me: me(d, u) });
     },
+    // Coin Cards: coins for card packs, on the same daily limit as the Ruby swap (idempotent on ref)
+    kc_coin_spend(d, u, a) {
+      const n = a.coins;
+      if (a.kind !== 'cards' || !Number.isInteger(n) || n < 1 || n > 10000 || typeof a.ref !== 'string' || !a.ref || a.ref.length > 64) return fail('kc_bad_spend');
+      const done = (d.coinSpends = d.coinSpends || {})[u.id] = d.coinSpends[u.id] || {};
+      const { cap, x } = coinDay(d, u);
+      if (done[a.ref]) return ok({ ok: true, spent: 0, repeated: true, used: x.n, cap, me: me(d, u) });
+      if (x.n + n > cap) return fail('kc_exchange_cap');
+      if (u.coins < n) return fail('kc_not_enough_coins');
+      u.coins -= n; x.n += n; d.exchanged[u.id] = x; done[a.ref] = { kind: a.kind, n, at: Date.now() };
+      return ok({ ok: true, spent: n, used: x.n, cap, me: me(d, u) });
+    },
     kc_exchange(d, u, a) {
       const n = a.coins;
       if (!Number.isInteger(n) || n <= 0) return fail('kc_bad_amount');
-      const tr = (d.trophies || {})[u.id], best = tr ? tr.best | 0 : (d.progress[u.id] && d.progress[u.id].doc && d.progress[u.id].doc.best) | 0;
-      const arena = ARENA_AT.filter(t => best >= t).length || 1, cap = CAP[arena];
-      const x = d.exchanged[u.id] && d.exchanged[u.id].day === day() ? d.exchanged[u.id] : { day: day(), n: 0 };
+      const { cap, x } = coinDay(d, u);
       if (x.n + n > cap) return fail('kc_exchange_cap');
       if (u.coins < n) return fail('kc_not_enough_coins');
       u.coins -= n; x.n += n; d.exchanged[u.id] = x;
