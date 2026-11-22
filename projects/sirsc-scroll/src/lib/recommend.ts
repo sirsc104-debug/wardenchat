@@ -78,6 +78,8 @@ interface Ctx {
   hidden: Set<string>;
   friendLikes: Map<string, string[]>;
   seen: Map<string, HistoryEntry>;
+  /** Liked or saved: already watched, so feeds lead with something new. */
+  done: Set<string>;
   now: number;
 }
 
@@ -100,6 +102,7 @@ function context(p: Persisted): Ctx {
     hidden: new Set(acct.hiddenCreators),
     friendLikes,
     seen: new Map(acct.history.map((h) => [h.videoId, h])),
+    done: new Set([...acct.liked, ...acct.saved]),
     now: Date.now(),
   };
 }
@@ -153,7 +156,7 @@ function score(ctx: Ctx, v: Video, nonce: number): { s: number; reason: string }
   const pop = 0.25 * (Math.log10(likeCount(ctx.p, v) + 10) / 6) + 0.5 * v.meta.momentum;
   if (v.meta.momentum > 0.6) parts.push([pop, `Trending in ${categoryLabel(v.category)}`]);
   const seen = ctx.seen.get(v.id);
-  const seenPenalty = seen ? 1.2 + seen.progress * 1.3 + Math.min(2, seen.completions) * 0.5 : 0;
+  const seenPenalty = (seen ? 1.2 + seen.progress * 1.3 + Math.min(2, seen.completions) * 0.5 : 0) + (ctx.done.has(v.id) ? 3 : 0);
   const jitter = (hash01(`${nonce}:${ctx.p.activeId}:${v.id}`) - 0.5) * 1.6;
   const s = cat + also + tag + follow + social + fresh + pop + 0.4 * v.meta.quality - seenPenalty + jitter;
   parts.sort((a, b) => b[0] - a[0]);
@@ -190,7 +193,7 @@ export function rankFollowing(p: Persisted): FeedItem[] {
   const ctx = context(p);
   return allVideos(p)
     .filter((v) => ctx.following.has(v.creatorId) && eligible(ctx, v))
-    .map((v) => ({ v, seen: ctx.seen.has(v.id) }))
+    .map((v) => ({ v, seen: ctx.seen.has(v.id) || ctx.done.has(v.id) }))
     .sort((a, b) => Number(a.seen) - Number(b.seen) || b.v.uploadedAt - a.v.uploadedAt)
     .map(({ v, seen }) => {
       const u = USER_MAP.get(v.creatorId);
@@ -225,15 +228,16 @@ export function rankFriends(p: Persisted): FeedItem[] {
     e.at = Math.max(e.at, a.at);
     byVideo.set(a.videoId, e);
   }
-  const out: FeedItem[] = [];
+  const fresh: FeedItem[] = [];
+  const watched: FeedItem[] = [];
   const sorted = [...byVideo.entries()].sort((a, b) => b[1].at + b[1].likes.length * 3_600_000 - (a[1].at + a[1].likes.length * 3_600_000));
   for (const [id, e] of sorted) {
     const v = getVideo(p, id);
     if (!v || !eligible(ctx, v) || v.creatorId === p.activeId) continue;
     const reason = e.posts.length ? `Posted by ${firstName(e.posts[0], p)}` : e.shares.length ? friendsPhrase(p, e.shares, 'Shared') : friendsPhrase(p, e.likes);
-    out.push({ id, reason });
+    (ctx.done.has(id) || ctx.seen.has(id) ? watched : fresh).push({ id, reason });
   }
-  return out;
+  return [...fresh, ...watched];
 }
 
 export function applyFilters(p: Persisted, items: FeedItem[], category: Category | 'all', sort: SortKey): FeedItem[] {

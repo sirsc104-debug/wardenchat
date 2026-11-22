@@ -97,12 +97,17 @@ export function seedAccount(id: string): AccountState {
     createdAt: now - (20 - i * 6) * DAY,
     videoIds: saved.filter((vid) => cats.includes(SEED_VIDEOS.find((v) => v.id === vid)!.category)).slice(0, 4),
   }));
-  const history: HistoryEntry[] = interestedPicks(`hist:${id}`, plan.interests, 14).map((videoId, i) => ({
-    videoId,
-    at: now - Math.round((i * 3.2 + between(r, 0.2, 2)) * HOUR),
-    progress: Number(between(r, 0.35, 1).toFixed(2)),
-    completions: r() < 0.5 ? 1 : 0,
-  }));
+  // Everything the account liked or saved was watched first, so it's in the history too.
+  const watched = Array.from(new Set([...interestedPicks(`hist:${id}`, plan.interests, 8, new Set([...liked, ...saved])), ...liked, ...saved]));
+  const history: HistoryEntry[] = watched.map((videoId, i) => {
+    const kept = liked.includes(videoId) || saved.includes(videoId);
+    return {
+      videoId,
+      at: now - Math.round((i * 3.2 + between(r, 0.2, 2)) * HOUR),
+      progress: kept ? 1 : Number(between(r, 0.35, 1).toFixed(2)),
+      completions: kept ? 1 + (r() < 0.3 ? 1 : 0) : r() < 0.5 ? 1 : 0,
+    };
+  });
   return {
     profile: { name: user.name, bio: user.bio, avatar: { ...user.avatar } },
     following: plan.follows.slice(),
