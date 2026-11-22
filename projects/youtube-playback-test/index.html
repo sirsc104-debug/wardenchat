@@ -305,7 +305,7 @@
   // Widely published public videos. They were NOT checked from the machine that built this page
   // (YouTube was blocked there). Press "Check list" on the device under test: the player itself
   // confirms each one. Replace or extend freely; never rely on these being available everywhere.
-  var DEFAULT_LIST = [
+  var DEFAULT_LINES = [
     '# Default sample: well-known public videos (landscape). Verify with “Check list”.',
     'M7lc1UVf-VE  # YouTube Developers: the IFrame API documentation sample video',
     'jNQXAC9IVRw  # “Me at the zoo”, the first video on YouTube',
@@ -320,7 +320,13 @@
     'hT_nvWreIhg  # OneRepublic, Counting Stars',
     'JGwWNGJdvx8  # Ed Sheeran, Shape of You',
     '# Add youtube.com/shorts/... links here for a true vertical test.'
-  ].join('\n');
+  ];
+  // A video the tester reported as blocked at school, second in the list so it comes up straight away.
+  var BLOCKED_EXAMPLE = '_N2CPJS-mHw  # Blocked at school (your example)';
+  var DEFAULT_LIST = DEFAULT_LINES.slice(0, 2).concat(BLOCKED_EXAMPLE, DEFAULT_LINES.slice(2)).join('\n');
+  // The default before that video was added. A saved list that is still exactly this was never edited,
+  // so it is replaced by the current default instead of hiding the new video.
+  var PREVIOUS_DEFAULT_LIST = DEFAULT_LINES.join('\n');
 
   var ERROR_TEXT = {
     2: 'Invalid parameter (for example, not an 11-character video ID).',
@@ -370,7 +376,7 @@
       var saved = JSON.parse(localStorage.getItem(STORE) || 'null');
       if (saved) {
         if (saved.settings) Object.keys(settings).forEach(function (k) { if (k in saved.settings) settings[k] = saved.settings[k]; });
-        if (typeof saved.listText === 'string' && saved.listText.trim()) listText = saved.listText;
+        if (typeof saved.listText === 'string' && saved.listText.trim() && saved.listText !== PREVIOUS_DEFAULT_LIST) listText = saved.listText;
       }
     } catch (e) { /* storage blocked: defaults */ }
   }
