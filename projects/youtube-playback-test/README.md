@@ -17,7 +17,7 @@ Everything is in one file, `index.html`: no build step, no backend, no API key. 
 - **Video list:** paste links or IDs, one per line. Watch, `youtu.be`, `/shorts/`, `/embed/` and `/live/` links all work. Anything after `#` is your label (for example `# works on youtube.com` or `# blocked at school`). Labels are carried into every result so you can compare expected and actual behaviour. The list and options are saved in the browser.
 - **Check list:** cues every video once without playing it and records whether the player accepted it (CUED, an error code, or no response) and how long that took. It's a quick way to confirm the IDs on the device you're testing.
 - **Error-handling test:** loads the text `not a video id`, which can never be a YouTube ID, to confirm errors are caught. It is never added to your list.
-- **Results:** Export results downloads everything as JSON. Copy JSON is there for managed Chromebooks that block downloads.
+- **Results:** Export results downloads everything as JSON. Copy JSON and Show JSON (a box you can select and copy from) cover managed Chromebooks and embeds that block downloads.
 
 ## What it measures, exactly
 
@@ -41,7 +41,9 @@ The IFrame API doesn't report network requests, bitrate, resolution actually pla
 
 ## Hosting it
 
-The page has to be opened from a normal **https** web address. YouTube identifies embeds by the page's origin and Referer. Opened straight from a file (`file://`) there is neither, and videos will mostly fail (the page shows a warning). It also shouldn't be wrapped inside another site's embed, because that changes the origin being tested.
+The page has to be opened from an **https** web address. YouTube identifies embeds by the page's origin and Referer. Opened straight from a file (`file://`) there is neither, and videos will mostly fail (the page shows a warning).
+
+**Google Sites works:** pasted into a Google Site with Insert → Embed → Embed code, the videos load. That's the same way the other SirSC projects are published, so it's the most realistic setup to test. The page then runs inside Google's embed frame, and the Environment panel shows "In a frame: yes" (recorded in the results). Chrome often blocks downloads from embed frames, so if **Export results** does nothing there, use **Copy JSON** or **Show JSON** (select the text in the box and copy it). Drag the embed's corners to make it tall enough for the 9:16 player.
 
 Any static https host works. Two easy options:
 
@@ -70,7 +72,7 @@ For a quick check on a computer first, a local server is fine: run `python3 -m h
 5. Watch through the list using the wheel or trackpad, the arrow keys and the buttons. Try a fast run of several switches in a row, then a slower run that lets each video play for a while.
 6. Test sound and autoplay: untick **Start muted**, reload the page, and note whether **Autoplay blocked** goes up before you've clicked anything.
 7. Optionally tick **Gesture layer** and try scrolling and swiping directly over the picture, to feel the difference.
-8. Press **Export results**, or **Copy JSON** if downloads are blocked, and keep the file.
+8. Press **Export results**. If downloads are blocked (common inside Google Sites), use **Copy JSON** or **Show JSON** instead, and keep the text.
 9. Repeat on an unmanaged device or a home network if you can, so school restrictions can be told apart from YouTube or performance problems.
 
 Rough guide for reading the numbers: a median switch under about 1 second feels close to instant; 1 to 2 seconds is workable if SirSC Scroll shows its own placeholder while loading; consistently over 2 seconds, or frequent rebuffers, would argue for preloading the next video in a second, hidden player (worth testing next if needed). Errors 101 and 150 mean the owner disallows embedding. Error 100 means the video is unavailable, which on a school account can also mean it's restricted. Error 153 points to a missing Referer.

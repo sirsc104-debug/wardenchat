@@ -134,6 +134,8 @@
   dl.env { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 12px; margin: 0; font-size: 12px; }
   dl.env dt { color: var(--text-3); }
   dl.env dd { margin: 0; word-break: break-word; }
+  .json-card { margin: 10px 14px 0; }
+  .json-card textarea { min-height: 220px; }
   .toast {
     position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 50; padding: 9px 14px;
     border-radius: 99px; background: #2a313b; border: 1px solid var(--line-2); font-weight: 700; font-size: 13px; display: none;
@@ -154,10 +156,16 @@
   <button class="btn" id="btnPreflight" type="button" title="Cue every video in the list and record whether the player accepts it">Check list</button>
   <button class="btn" id="btnReset" type="button">Reset results</button>
   <button class="btn" id="btnCopy" type="button" title="Copies the results JSON, for devices that block downloads">Copy JSON</button>
+  <button class="btn" id="btnShow" type="button" title="Shows the results JSON in a box you can select and copy (works inside Google Sites and other embeds)" aria-expanded="false">Show JSON</button>
   <button class="btn accent" id="btnExport" type="button">Export results</button>
 </header>
 <div class="banner bad" id="bannerOrigin" hidden></div>
 <div class="banner bad" id="bannerApi" hidden></div>
+<div class="card json-card" id="jsonCard" hidden>
+  <h2>Results JSON <span class="grow"></span><button class="btn small" id="btnSelectJson" type="button">Select all</button><button class="btn small" id="btnCloseJson" type="button">Close</button></h2>
+  <p class="note" style="margin: 0 0 8px">Select everything in the box and copy it (Ctrl+C). Useful when the page sits inside a Google Site or another embed, where downloads are often blocked.</p>
+  <textarea id="jsonOut" readonly spellcheck="false" aria-label="Results JSON"></textarea>
+</div>
 
 <main class="layout">
   <section class="player-col" aria-label="Player">
@@ -1069,6 +1077,21 @@
     $('btnExport').addEventListener('click', exportJson);
     $('btnCopy').addEventListener('click', copyJson);
     $('btnReset').addEventListener('click', resetResults);
+    $('btnShow').addEventListener('click', function () {
+      var card = $('jsonCard');
+      var open = card.hidden;
+      card.hidden = !open;
+      this.setAttribute('aria-expanded', String(open));
+      if (open) {
+        $('jsonOut').value = JSON.stringify(results(), null, 2);
+        $('jsonOut').focus();
+        $('jsonOut').select();
+        card.scrollIntoView({ block: 'nearest' });
+        log('export', 'Showed results JSON');
+      }
+    });
+    $('btnSelectJson').addEventListener('click', function () { $('jsonOut').value = JSON.stringify(results(), null, 2); $('jsonOut').focus(); $('jsonOut').select(); });
+    $('btnCloseJson').addEventListener('click', function () { $('jsonCard').hidden = true; $('btnShow').setAttribute('aria-expanded', 'false'); });
     $('btnPreflight').addEventListener('click', runPreflight);
     $('btnClearLog').addEventListener('click', function () { $('log').innerHTML = ''; });
     $('btnApply').addEventListener('click', function () {
