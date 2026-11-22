@@ -663,7 +663,7 @@
     }
     stopPoll();
     log('error', 'onError ' + code + ' · ' + (ERROR_TEXT[code] || 'Code not listed in the IFrame API reference') + (rec ? ' · ' + rec.id : ''));
-    message('<b>This video can’t play here (error ' + esc(code) + ').</b><span class="hint">' + esc(ERROR_TEXT[code] || 'Unlisted error code.') + '</span><div class="row"><button class="btn small accent" data-act="next" type="button">Next video</button><button class="btn small" data-act="retry" type="button">Retry</button></div>');
+    message('<b>This video can’t play here (error ' + esc(code) + ').</b><span class="hint">' + esc(ERROR_TEXT[code] || 'This error code isn’t in YouTube’s documentation, so its exact meaning isn’t known. (This is about the code, not the video.)') + '</span><div class="row"><button class="btn small accent" data-act="next" type="button">Next video</button><button class="btn small" data-act="retry" type="button">Retry</button></div>');
     if (settings.onError === 'skip' && rec && rec.reason !== 'error test') {
       setTimeout(function () { if (current === rec) go(1, 'auto-skip after error'); }, 2000);
     }
@@ -857,7 +857,7 @@
       return '<tr><td class="num">' + l.n + '</td><td class="mono">' + esc(l.id) + '</td><td class="lbl" title="' + esc(l.label) + '">' + esc(l.label) + '</td><td>' + outcomePill(l) + '</td><td class="num">' + ms(l.firstEventMs) + '</td><td class="num">' + ms(l.playingMs) + '</td><td class="num">' + ms(l.bufferingMs + (l.bufferingSince != null ? now() - l.bufferingSince : 0)) + '</td><td>' + (l.error != null ? 'code ' + esc(l.error) : '') + '</td></tr>';
     }).join('');
     $('errRows').innerHTML = codes.length
-      ? codes.map(function (c) { return '<tr><td class="mono">' + esc(c) + '</td><td class="num">' + errorCounts[c] + '</td><td class="wrap">' + esc(ERROR_TEXT[c] || 'Not listed in the IFrame API reference.') + '</td></tr>'; }).join('')
+      ? codes.map(function (c) { return '<tr><td class="mono">' + esc(c) + '</td><td class="num">' + errorCounts[c] + '</td><td class="wrap">' + esc(ERROR_TEXT[c] || 'Not in YouTube’s documentation; exact meaning unknown.') + '</td></tr>'; }).join('')
       : '<tr><td colspan="3" class="hint">No errors yet.</td></tr>';
   }
 
