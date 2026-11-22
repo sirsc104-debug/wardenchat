@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "test \"$CLAUDE_CODE_REMOTE\" = true && python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/claude_lights_cloud.py\" working || true", "timeout": 15, "async": true } ] }
+    ],
+    "PostToolUse": [
+      { "hooks": [ { "type": "command", "command": "test \"$CLAUDE_CODE_REMOTE\" = true && python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/claude_lights_cloud.py\" working || true", "timeout": 15, "async": true } ] }
+    ],
+    "PostToolUseFailure": [
+      { "hooks": [ { "type": "command", "command": "test \"$CLAUDE_CODE_REMOTE\" = true && python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/claude_lights_cloud.py\" working || true", "timeout": 15, "async": true } ] }
+    ],
+    "PermissionRequest": [
+      { "hooks": [ { "type": "command", "command": "test \"$CLAUDE_CODE_REMOTE\" = true && python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/claude_lights_cloud.py\" input || true", "timeout": 15, "async": true } ] }
+    ],
+    "PreToolUse": [
+      { "matcher": "AskUserQuestion|ExitPlanMode", "hooks": [ { "type": "command", "command": "test \"$CLAUDE_CODE_REMOTE\" = true && python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/claude_lights_cloud.py\" input || true", "timeout": 15, "async": true } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "test \"$CLAUDE_CODE_REMOTE\" = true && python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/claude_lights_cloud.py\" done || true", "timeout": 15, "async": true } ] }
+    ],
+    "StopFailure": [
+      { "hooks": [ { "type": "command", "command": "test \"$CLAUDE_CODE_REMOTE\" = true && python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/claude_lights_cloud.py\" failed || true", "timeout": 15, "async": true } ] }
+    ],
+    "SessionEnd": [
+      { "hooks": [ { "type": "command", "command": "test \"$CLAUDE_CODE_REMOTE\" = true && python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/claude_lights_cloud.py\" end || true", "timeout": 10 } ] }
+    ]
+  }
+}
