@@ -5,6 +5,7 @@ import { SEED_VIDEOS, SEED_VIDEO_MAP } from '../data/videos';
 import { DEMO_IDS, FRIENDS_OF, HANDLE_MAP, USER_MAP } from '../data/users';
 import { seedComments } from '../data/comments';
 import { lurkerLikeTime, lurkerLikes } from '../data/seeds';
+import { isMemoryRouter } from './router';
 
 let lastUser: Video[] | null = null;
 let lastAll: Video[] = SEED_VIDEOS;
@@ -157,7 +158,18 @@ export function friendActivity(p: Persisted, accountId = p.activeId): FriendAct[
   }).sort((a, b) => b.at - a.at);
 }
 
+function pageBase(): string | null {
+  if (isMemoryRouter || typeof location === 'undefined' || !location.protocol.startsWith('http')) return null;
+  return location.origin + location.pathname;
+}
+
+/** A link to a video. Inside the Artifact frame (or from file://) there's no public page URL, so it's an app-style deep link. */
 export function shareLink(videoId: string): string {
-  const base = typeof location !== 'undefined' && location.protocol.startsWith('http') ? location.origin + location.pathname : 'https://scroll.sirsc.app/';
-  return `${base}#/video/${videoId}`;
+  const base = pageBase();
+  return base ? `${base}#/video/${videoId}` : `sirsc-scroll://video/${videoId}`;
+}
+
+export function profileLink(handle: string): string {
+  const base = pageBase();
+  return base ? `${base}#/profile/${handle}` : `sirsc-scroll://profile/${handle}`;
 }

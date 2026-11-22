@@ -2,8 +2,7 @@
 .app {
   display: grid;
   grid-template-columns: var(--sb-w) minmax(0, 1fr);
-  height: 100vh;
-  height: 100dvh;
+  height: 100%;
   overflow: hidden;
 }
 .app.sb-collapsed {

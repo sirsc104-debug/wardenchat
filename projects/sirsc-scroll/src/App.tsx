@@ -62,7 +62,8 @@ export function App() {
 
   useEffect(() => {
     const r = document.documentElement;
-    r.dataset.theme = theme;
+    // data-look, not data-theme: the Artifact host owns data-theme on the root element.
+    r.dataset.look = theme;
     r.dataset.density = density;
     r.dataset.motion = reduced ? 'reduced' : 'full';
   }, [theme, density, reduced]);

@@ -41,7 +41,7 @@
   --sb-w: 196px;
   --shadow: 0 14px 40px rgb(0 0 0 / 0.5);
 }
-:root[data-theme='dim'] {
+:root[data-look='dim'] {
   --bg: #161b22;
   --bg-1: #1c222b;
   --bg-2: #222934;
@@ -52,7 +52,7 @@
   --text-3: #8591a0;
   --glass: rgb(22 27 34 / 0.6);
 }
-:root[data-theme='contrast'] {
+:root[data-look='contrast'] {
   --bg: #000;
   --bg-1: #000;
   --bg-2: #0d0d0d;
@@ -98,6 +98,11 @@ html,
 body,
 #root {
   height: 100%;
+}
+:root {
+  /* Phone safe areas are kept clear here once (the Artifact host does the same). */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 body {
   margin: 0;

@@ -2,6 +2,8 @@
 
 **Your Feed. Your Way.** A short-form video app for the SirSC ecosystem (SirSC Games, Warden Chat, SirSC AI), built for school Chromebooks and desktop browsers first, with a proper phone layout too.
 
+**Live demo:** [claude.ai Artifact](https://claude.ai/artifact/QfMUocCP4F4Pt7ttW4h4ii) (private until shared from its Share menu).
+
 V1 is a frontend demo. There are no real videos, accounts, uploads or servers: 162 fictional clips are animated CSS placeholders, four demo accounts stand in for sign-in, and everything you do is saved in the browser's localStorage.
 
 React 19 + TypeScript + Vite. Runtime dependencies are React, `lucide-react` (tree-shaken icons) and one locally bundled font (Manrope, latin subset). No backend, no Supabase, no Warden Chat sign-in, no video files.
@@ -14,7 +16,10 @@ npm install
 npm run dev            # http://localhost:5173
 npm run build          # type-check + multi-file build in dist/app
 npm run build:single   # type-check + one self-contained file: dist/sirsc-scroll.html
+npm run build:artifact # the same, shaped for a claude.ai Artifact: dist/sirsc-scroll-artifact.html
 ```
+
+`dist/sirsc-scroll-artifact.html` is what the Artifact link above serves. It differs from the single file in three ways: no `<html>`/`<head>`/`<body>` (the host adds them), routes live in memory instead of `#/paths` (the frame only passes plain `#names`; `#video-v010`, `#explore`, `#trending` and similar still work as entry points), and share links use the app-style `sirsc-scroll://video/…` form since the page can't know its public URL. The app's own theme setting is stored on `data-look` so it never clashes with the host's `data-theme`.
 
 `dist/sirsc-scroll.html` (about 600 KB) is the whole app in one file. It opens straight from disk (`file://`), makes no network requests, and can be pasted into a Google Sites embed. Progress is saved per browser.
 

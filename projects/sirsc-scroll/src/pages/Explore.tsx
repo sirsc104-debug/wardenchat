@@ -14,7 +14,7 @@ import { search } from '../lib/search';
 import { followerCount, getUser, visibleVideos } from '../lib/catalog';
 import { rankForYou, trendingHashtags, trendingScore } from '../lib/recommend';
 import { compact } from '../lib/format';
-import { href, navigate, type Route } from '../lib/router';
+import { getRoute, href, navigate, type Route } from '../lib/router';
 import { useLayout } from '../lib/hooks';
 import { CATEGORIES, categoryInfo } from '../data/categories';
 import { USERS } from '../data/users';
@@ -26,7 +26,7 @@ export function useOpenList(videos: Video[], label: string) {
       videos.map((x) => x.id),
       v.id,
       label,
-      location.hash || '#/',
+      getRoute().hash || '#/',
     );
     navigate('#/watch');
   };

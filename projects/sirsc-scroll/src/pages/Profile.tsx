@@ -10,7 +10,7 @@ import { RecommendedCreators } from '../components/panel/Sections';
 import { AccountSwitcher } from '../components/shell/Sidebar';
 import { useAcct, usePersisted } from '../state/store';
 import { openModal, toast, toggleFollow, updateProfile } from '../state/actions';
-import { followerCount, followingCount, getVideo, totalLikes, userByHandle, videosBy } from '../lib/catalog';
+import { followerCount, followingCount, getVideo, profileLink, totalLikes, userByHandle, videosBy } from '../lib/catalog';
 import { full } from '../lib/format';
 import { href, type Route } from '../lib/router';
 import { useLayout } from '../lib/hooks';
@@ -211,7 +211,7 @@ export function Profile({ route }: { route: Route }) {
               type="button"
               className="btn btn-ghost btn-sm"
               onClick={() => {
-                const link = `${location.origin}${location.pathname}${href.profile(user.handle)}`;
+                const link = profileLink(user.handle);
                 navigator.clipboard?.writeText(link).then(
                   () => toast('Profile link copied'),
                   () => toast(link),
