@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Bookmark, Check, ChevronDown, ChevronUp, Ellipsis, Eye, Hash, Heart, Link2, MessageCircle, Music2, Plus, Send, Share2, Sparkles, UserPlus } from 'lucide-react';
 import type { FeedState, Video } from '../../state/types';
 import { Avatar } from '../common/Avatar';
@@ -16,7 +16,7 @@ import { agoLong, compact, full, ago } from '../../lib/format';
 import { href } from '../../lib/router';
 import { categoryLabel } from '../../data/categories';
 import { FRIENDS_OF } from '../../data/users';
-import { useNow } from '../../lib/hooks';
+import { useHeightTween, useNow } from '../../lib/hooks';
 
 /* ---------------------------------------------------------------- now playing */
 
@@ -115,6 +115,8 @@ export const StatTiles = memo(function StatTiles({ video, withViews }: { video: 
 export const VideoDetails = memo(function VideoDetails({ video, reason, compactMode, hideStats, openMore }: { video: Video; reason?: string; compactMode?: boolean; hideStats?: boolean; openMore?: number }) {
   const p = usePersisted();
   const [more, setMore] = useState(false);
+  const descRef = useRef<HTMLParagraphElement>(null);
+  useHeightTween(descRef, more);
   const long = video.description.length > 120;
   // Clicking the title on the video asks for the full description.
   useEffect(() => {
@@ -130,7 +132,7 @@ export const VideoDetails = memo(function VideoDetails({ video, reason, compactM
   return (
     <div className="details">
       <h2 className="details-title">{video.title}</h2>
-      <p className={`details-desc${!more && long ? ' clamp' : ''}`}>
+      <p ref={descRef} className={`details-desc${!more && long ? ' clamp' : ''}`}>
         <RichText text={video.description} />
       </p>
       {long && (
@@ -242,7 +244,7 @@ export const UpNext = memo(function UpNext({ feed, count = 5, bare }: { feed: Fe
       <div className="upnext">
         {next.map((it, i) => {
           const v = getVideo(p, it.id);
-          return v ? <VideoCard key={it.id} video={v} layout="row" onOpen={() => goTo(feed.index + 1 + i)} sub={it.reason} /> : null;
+          return v ? <VideoCard key={it.id} video={v} layout="row" onOpen={() => goTo(feed.index + 1 + i)} sub={it.reason} index={i} /> : null;
         })}
       </div>
     </Section>

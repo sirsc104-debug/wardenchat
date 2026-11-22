@@ -23,7 +23,8 @@ import { BrandMark, Wordmark } from '../common/Brand';
 import { useAcct, useApp, usePersisted } from '../../state/store';
 import { confirmAction, resetAll, switchAccount, updateSettings } from '../../state/actions';
 import { getUser } from '../../lib/catalog';
-import { useDismiss, isDue, useNow } from '../../lib/hooks';
+import { useDismiss, useExit, isDue, useNow } from '../../lib/hooks';
+import { withViewTransition } from '../../lib/motion';
 import { href, type Route } from '../../lib/router';
 import { DEMO_IDS } from '../../data/users';
 import { categoryLabel } from '../../data/categories';
@@ -139,6 +140,7 @@ export function AccountSwitcher({ collapsed, upward = true }: { collapsed: boole
   const btn = useRef<HTMLButtonElement>(null);
   const pop = useRef<HTMLDivElement>(null);
   useDismiss(open, () => setOpen(false), [btn, pop]);
+  const pres = useExit(open, 150);
   const me = getUser(p, p.activeId)!;
   return (
     <div className={`acct${open ? ' open' : ''}`}>
@@ -150,8 +152,8 @@ export function AccountSwitcher({ collapsed, upward = true }: { collapsed: boole
         </span>
         <ChevronsUpDown size={15} className="acct-chev" />
       </button>
-      {open && (
-        <div ref={pop} className={`acct-pop${upward ? ' up' : ''}`} role="dialog" aria-label="Switch demo account">
+      {pres.mounted && (
+        <div ref={pop} className={`acct-pop${upward ? ' up' : ''}${pres.closing ? ' closing' : ''}`} role="dialog" aria-label="Switch demo account">
           <p className="acct-pop-head">Demo accounts</p>
           <ul>
             {DEMO_IDS.map((id) => {
@@ -165,7 +167,7 @@ export function AccountSwitcher({ collapsed, upward = true }: { collapsed: boole
                     className={`acct-row${on ? ' on' : ''}`}
                     onClick={() => {
                       setOpen(false);
-                      switchAccount(id);
+                      if (id !== p.activeId) withViewTransition(() => switchAccount(id));
                     }}
                   >
                     <Avatar user={u} size={34} />
@@ -190,7 +192,7 @@ export function AccountSwitcher({ collapsed, upward = true }: { collapsed: boole
               className="link-btn danger"
               onClick={() => {
                 setOpen(false);
-                confirmAction('Reset all demo data?', 'Likes, follows, comments, saves, uploads and history for all four demo accounts go back to how they started. Settings are kept.', 'Reset everything', resetAll);
+                confirmAction('Reset all demo data?', 'Likes, follows, comments, saves, uploads and history for all four demo accounts go back to how they started. Settings are kept.', 'Reset everything', () => withViewTransition(resetAll));
               }}
             >
               <RotateCcw size={12} /> Reset demo data

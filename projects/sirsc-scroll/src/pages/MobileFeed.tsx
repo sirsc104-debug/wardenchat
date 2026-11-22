@@ -1,4 +1,5 @@
-import { memo, useState, type ReactNode } from 'react';
+import { memo, useRef, useState, type ReactNode } from 'react';
+import { useHeightTween } from '../lib/hooks';
 import { ArrowLeft, Music2, Volume2, VolumeX, X } from 'lucide-react';
 import type { FeedKind, Video } from '../state/types';
 import { FeedTrack } from '../components/player/FeedTrack';
@@ -23,9 +24,15 @@ const TABS: [FeedKind, string, string][] = [
   ['friends', 'Friends', '#/friends'],
 ];
 
-export function Sheet({ title, onClose, children, tall }: { title: string; onClose: () => void; children: ReactNode; tall?: boolean }) {
+export function Sheet({ title, onClose: done, children, tall }: { title: string; onClose: () => void; children: ReactNode; tall?: boolean }) {
+  const [closing, setClosing] = useState(false);
+  const onClose = () => {
+    if (closing) return;
+    setClosing(true);
+    window.setTimeout(done, 220);
+  };
   return (
-    <div className="sheet-back" onPointerDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className={`sheet-back${closing ? ' closing' : ''}`} onPointerDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className={`sheet${tall ? ' tall' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
         <div className="sheet-grip" aria-hidden="true" />
         <header className="sheet-head">
@@ -44,13 +51,15 @@ const Overlay = memo(function Overlay({ video }: { video: Video }) {
   const p = usePersisted();
   const creator = getUser(p, video.creatorId);
   const [more, setMore] = useState(false);
+  const desc = useRef<HTMLParagraphElement>(null);
+  useHeightTween(desc, more);
   return (
     <div className="m-info" onClick={(e) => e.stopPropagation()}>
       <button type="button" className="m-handle" onClick={() => openSheet('creator')}>
         <Avatar user={creator} size={22} /> @{creator?.handle}
       </button>
       <p className="m-title">{video.title}</p>
-      <p className={`m-desc${more ? '' : ' clamp'}`} onClick={() => setMore((m) => !m)}>
+      <p ref={desc} className={`m-desc${more ? '' : ' clamp'}`} onClick={() => setMore((m) => !m)}>
         <RichText text={video.description} /> {video.hashtags.map((t) => `#${t}`).join(' ')}
       </p>
       <p className="m-sound">

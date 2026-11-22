@@ -50,6 +50,18 @@ Each feed keeps its own position. Switching feeds slides the new feed in from th
 
 On phones nothing changes: full-screen swipe feed, feed tabs on top, and slide-up sheets for comments and creator info.
 
+## Motion
+
+Everything you can click answers with movement, from one shared layer (`src/lib/motion.ts` + `src/styles/motion.css`) instead of per-component code:
+
+- **Press:** every button, link, tab, chip, card, menu item, checkbox and toggle squishes and springs back, scaled to its size (small icons more, big cards barely). Icons react to what they mean: refresh, reset and shuffle spin, send flies forward, arrows nudge their way, hearts, bookmarks, checks and close icons pop.
+- **State changes:** toggles pop when they switch on or off, swapped icons (play/pause, mute, expand) pop in, and counters (likes, comments, badges, stats, percentages) roll to their new number. Liking bursts a ring around the heart, unliking deflates it, saving drops the bookmark in, following spins the check in.
+- **Selection:** highlights glide instead of jumping: the sidebar's active item, the feed pill, category and filter chips, every segmented control (sorts, ranges, theme, density, speed), profile and Studio tabs, Saved and Settings navigation, upload steps, clip styles, covers, stickers, colour swatches, visibility cards, and on phones the feed-tab underline and bottom-nav marker.
+- **Opening and closing:** modals, menus, popovers, the search dropdown, toasts and phone sheets all animate out as well as in. "More/Less" and reply threads ease their height. New comments, replies, notifications, grid cards, up-next rows and chips rise in, staggered. Removed items fold away and the rest glide into the gap (history, recent searches, saved videos, drafts, uploads, comments, hashtags, hidden creators).
+- **Bigger changes:** pages and tabs ease in, the feed fades in, a filter, sort or Up Next pick cross-fades the video, charts draw their line and grow their bars, the seek bar glides to where you click, and switching account, theme or density cross-fades the whole app (View Transitions, where the browser supports them).
+- **Hover:** buttons, cards and chips lift slightly, icons grow, close buttons turn, and list rows lean in.
+- **Reduced animations** (Settings, or the system setting) turns all of this off, along with the placeholder animations.
+
 ## Features
 
 - **Feeds**: For You (local recommendations, endless, re-ranked after every swipe), Following, Trending (engagement over time), Friends (what each account's friends liked, shared or posted), plus lists opened from any grid (profile, search, hashtag, saved, history) with a Back button. Category filter and sort (recommended, newest, most liked, most viewed, shortest) apply to every feed.

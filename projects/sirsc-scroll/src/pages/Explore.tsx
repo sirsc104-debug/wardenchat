@@ -16,6 +16,7 @@ import { rankForYou, trendingHashtags, trendingScore } from '../lib/recommend';
 import { compact } from '../lib/format';
 import { getRoute, href, navigate, type Route } from '../lib/router';
 import { useLayout } from '../lib/hooks';
+import { exitThen } from '../lib/motion';
 import { CATEGORIES, categoryInfo } from '../data/categories';
 import { USERS } from '../data/users';
 
@@ -39,7 +40,7 @@ export function VideoGrid({ videos, label, stat, limit, rankStart }: { videos: V
   return (
     <div className="vgrid">
       {list.map((v, i) => (
-        <VideoCard key={v.id} video={v} onOpen={open} stat={stat} rank={rankStart !== undefined ? rankStart + i : undefined} />
+        <VideoCard key={v.id} video={v} onOpen={open} stat={stat} rank={rankStart !== undefined ? rankStart + i : undefined} index={i} />
       ))}
     </div>
   );
@@ -149,7 +150,7 @@ function ExploreAside() {
                 <a href={r.startsWith('#') ? href.tag(r.slice(1)) : r.startsWith('@') ? href.profile(r.slice(1)) : href.explore(r)}>
                   <Search size={13} /> {r}
                 </a>
-                <button type="button" className="icon-btn xs" onClick={() => removeRecentSearch(r)} aria-label={`Remove ${r}`}>
+                <button type="button" className="icon-btn xs" onClick={(e) => exitThen(e.currentTarget.closest('li'), () => removeRecentSearch(r))} aria-label={`Remove ${r}`}>
                   <X size={12} />
                 </button>
               </li>

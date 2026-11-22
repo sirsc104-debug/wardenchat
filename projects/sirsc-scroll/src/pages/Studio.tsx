@@ -14,6 +14,7 @@ import { ago, compact, duration, full } from '../lib/format';
 import { categoryLabel } from '../data/categories';
 import { useNow } from '../lib/hooks';
 import type { Route } from '../lib/router';
+import { exitThen } from '../lib/motion';
 
 type Tab = 'overview' | 'content' | 'drafts';
 const RANGES = [7, 28, 90];
@@ -52,7 +53,7 @@ function Overview({ videos }: { videos: Video[] }) {
       <div className="filter-row" role="toolbar" aria-label="Date range">
         <div className="seg seg-sm">
           {RANGES.map((r) => (
-            <button key={r} type="button" aria-pressed={days === r} aria-selected={days === r} onClick={() => setDays(r)}>
+            <button key={r} type="button" aria-selected={days === r} onClick={() => setDays(r)}>
               Last {r} days
             </button>
           ))}
@@ -193,7 +194,7 @@ function Content({ videos }: { videos: Video[] }) {
         </thead>
         <tbody>
           {videos.map((v) => (
-            <tr key={v.id}>
+            <tr key={v.id} data-row={v.id}>
               <td>
                 <button type="button" className="row-video" onClick={() => open(v)}>
                   <span className="mini-thumb">
@@ -230,7 +231,7 @@ function Content({ videos }: { videos: Video[] }) {
                   <Play size={14} />
                 </button>
                 {v.local && (
-                  <button type="button" className="icon-btn xs" onClick={() => confirmAction('Delete this video?', `“${v.title}” will be removed everywhere on this device.`, 'Delete', () => deleteUserVideo(v.id))} aria-label={`Delete ${v.title}`} title="Delete">
+                  <button type="button" className="icon-btn xs" onClick={() => confirmAction('Delete this video?', `“${v.title}” will be removed everywhere on this device.`, 'Delete', () => exitThen(document.querySelector(`[data-row="${v.id}"]`), () => deleteUserVideo(v.id)))} aria-label={`Delete ${v.title}`} title="Delete">
                     <Trash2 size={14} />
                   </button>
                 )}
@@ -255,7 +256,7 @@ function Drafts() {
   return (
     <ul className="drafts">
       {drafts.map((d) => (
-        <li key={d.id} className="draft card">
+        <li key={d.id} className="draft card" data-draft={d.id}>
           <span className="mini-thumb lg">
             <Placeholder video={{ template: d.template, palette: d.palette, caption: (d.title || 'DRAFT').toUpperCase(), glyph: d.glyph, variant: d.variant }} running={false} />
           </span>
@@ -270,7 +271,7 @@ function Drafts() {
             <button type="button" className="btn btn-accent btn-sm" onClick={() => openModal({ type: 'upload', draftId: d.id })}>
               <Pencil size={14} /> Continue
             </button>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={() => confirmAction('Delete draft?', `“${d.title || 'Untitled draft'}” will be deleted.`, 'Delete draft', () => deleteDraft(d.id))}>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => confirmAction('Delete draft?', `“${d.title || 'Untitled draft'}” will be deleted.`, 'Delete draft', () => exitThen(document.querySelector(`[data-draft="${d.id}"]`), () => deleteDraft(d.id)))}>
               <Trash2 size={14} /> Delete
             </button>
           </div>

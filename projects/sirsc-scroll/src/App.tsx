@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import type { FeedKind } from './state/types';
 import { Sidebar } from './components/shell/Sidebar';
 import { MobileNav } from './components/shell/MobileNav';
@@ -62,7 +62,7 @@ export function App() {
   const collapsedNarrow = useP((p) => p.settings.sidebarCollapsedNarrow);
   const listEmpty = useS((s) => s.feeds.list.items.length === 0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const r = document.documentElement;
     // data-look, not data-theme: the Artifact host owns data-theme on the root element.
     r.dataset.look = theme;

@@ -12,6 +12,7 @@ import { duration } from '../../lib/format';
 import { uid } from '../../lib/rng';
 import { href, navigate } from '../../lib/router';
 import { getUser } from '../../lib/catalog';
+import { exitThen } from '../../lib/motion';
 
 type Step = 'clip' | 'details' | 'cover' | 'publish' | 'processing' | 'done';
 const STEPS: [Step, string][] = [
@@ -290,7 +291,7 @@ export function UploadDialog({ draftId }: { draftId?: string }) {
                   </span>
                   <input type="range" min={5} max={90} value={d.duration} onChange={(e) => set('duration', Number(e.target.value))} />
                 </label>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={shuffle}>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={shuffle} data-tap="spin">
                   <Shuffle size={14} /> Shuffle look
                 </button>
               </div>
@@ -335,7 +336,7 @@ export function UploadDialog({ draftId }: { draftId?: string }) {
                   {d.hashtags.map((t) => (
                     <span key={t} className="tag-chip">
                       #{t}
-                      <button type="button" onClick={() => set('hashtags', d.hashtags.filter((x) => x !== t))} aria-label={`Remove #${t}`}>
+                      <button type="button" onClick={(e) => exitThen(e.currentTarget.closest('.tag-chip'), () => set('hashtags', d.hashtags.filter((x) => x !== t)))} aria-label={`Remove #${t}`}>
                         <X size={11} />
                       </button>
                     </span>

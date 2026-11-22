@@ -228,9 +228,6 @@ kbd {
     color 0.15s,
     transform 0.1s;
 }
-.btn:active:not(:disabled) {
-  transform: scale(0.97);
-}
 .btn-sm {
   height: 32px;
   padding: 0 12px;

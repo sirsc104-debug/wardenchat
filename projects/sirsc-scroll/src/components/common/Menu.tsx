@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import type { LucideIcon } from 'lucide-react';
-import { useDismiss } from '../../lib/hooks';
+import { useDismiss, useExit } from '../../lib/hooks';
 
 export interface MenuItem {
   label: string;
@@ -30,6 +30,7 @@ export function Menu({ items, label, children, className = '', placement = 'belo
   const btn = useRef<HTMLButtonElement>(null);
   const pop = useRef<HTMLDivElement>(null);
   useDismiss(open, () => setOpen(false), [btn, pop]);
+  const { mounted, closing } = useExit(open, 130);
 
   useLayoutEffect(() => {
     if (!open || !btn.current || !pop.current) return;
@@ -79,9 +80,9 @@ export function Menu({ items, label, children, className = '', placement = 'belo
       >
         {children}
       </button>
-      {open &&
+      {mounted &&
         createPortal(
-          <div ref={pop} className="menu" role="menu" aria-label={label} style={pos ? { top: pos.top, left: pos.left } : { top: -9999, left: -9999 }} onKeyDown={onKey}>
+          <div ref={pop} className={`menu${closing ? ' closing' : ''}`} role="menu" aria-label={label} style={pos ? { top: pos.top, left: pos.left } : { top: -9999, left: -9999 }} onKeyDown={onKey}>
             {items.map((it, i) => (
               <div key={i} role="none">
                 {it.divider && <hr className="menu-div" />}

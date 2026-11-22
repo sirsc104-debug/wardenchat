@@ -18,16 +18,18 @@ interface Props {
   active?: boolean;
   actions?: ReactNode;
   rank?: number;
+  /** Position in its list, for the staggered entrance. */
+  index?: number;
 }
 
-export const VideoCard = memo(function VideoCard({ video, onOpen, layout = 'grid', sub, badge, showCreator = true, stat = 'views', active, actions, rank }: Props) {
+export const VideoCard = memo(function VideoCard({ video, onOpen, layout = 'grid', sub, badge, showCreator = true, stat = 'views', active, actions, rank, index }: Props) {
   const [hover, setHover] = useState(false);
   const p = usePersisted();
   const creator = getUser(p, video.creatorId);
   const statVal = stat === 'likes' ? likeCount(p, video) : viewCount(p, video);
   const StatIcon = stat === 'likes' ? Heart : Eye;
   return (
-    <div className={`vcard vcard-${layout}${active ? ' is-active' : ''}`} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
+    <div className={`vcard vcard-${layout}${active ? ' is-active' : ''}`} data-vid={video.id} style={index !== undefined ? ({ '--n': index } as React.CSSProperties) : undefined} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       <button type="button" className="vcard-hit" onClick={() => onOpen(video)} aria-label={`Play ${video.title} by @${creator?.handle}`}>
         <span className="vthumb">
           <Placeholder video={video} running={hover && layout !== 'row'} handle={creator?.handle} />

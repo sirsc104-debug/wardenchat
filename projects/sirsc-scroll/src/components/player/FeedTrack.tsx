@@ -31,17 +31,20 @@ export function FeedTrack({ feed, render, empty, endNote, className = '', live =
   const wheel = useRef({ acc: 0, locked: false, last: 0, lastAbs: 0, lockedAt: 0 });
   const touch = useRef<{ id: number; y: number; x: number; t: number; moved: boolean } | null>(null);
   const prevIndex = useRef(feed.index);
+  const currentId = feed.items[feed.index]?.id;
+  const prevId = useRef(currentId);
   const [jump, setJump] = useState(false);
 
-  // Far jumps (clicking an Up Next item) fade in instead of sliding through.
+  // Far jumps (an Up Next pick) and in-place swaps (filter, sort, refresh) fade instead of sliding.
   useEffect(() => {
-    const far = Math.abs(feed.index - prevIndex.current) > 1;
+    const far = Math.abs(feed.index - prevIndex.current) > 1 || (feed.index === prevIndex.current && currentId !== prevId.current);
     prevIndex.current = feed.index;
+    prevId.current = currentId;
     if (!far) return;
     setJump(true);
     const id = window.setTimeout(() => setJump(false), 260);
     return () => window.clearTimeout(id);
-  }, [feed.index]);
+  }, [feed.index, currentId]);
 
   useEffect(() => {
     const el = box.current;

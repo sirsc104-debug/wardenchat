@@ -1,4 +1,7 @@
 /* ---------- modal */
+.modal-layer {
+  display: contents;
+}
 .modal-back {
   position: fixed;
   inset: 0;

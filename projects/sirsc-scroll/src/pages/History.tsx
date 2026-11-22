@@ -10,6 +10,7 @@ import { clearHistory, confirmAction, removeHistory, setHistoryPaused } from '..
 import { getUser, getVideo } from '../lib/catalog';
 import { ago, dayBucket } from '../lib/format';
 import { useNow } from '../lib/hooks';
+import { exitThen } from '../lib/motion';
 
 export function History() {
   const p = usePersisted();
@@ -67,8 +68,8 @@ export function History() {
               {label} <span className="muted">· {list.length}</span>
             </h2>
             <ul className="hist-list">
-              {list.map(({ h, v }) => (
-                <li key={v.id} className="hist-row">
+              {list.map(({ h, v }, i) => (
+                <li key={v.id} className="hist-row" style={{ '--n': i } as React.CSSProperties}>
                   <VideoCard
                     video={v}
                     layout="row"
@@ -82,7 +83,7 @@ export function History() {
                       </>
                     }
                   />
-                  <button type="button" className="icon-btn xs" onClick={() => removeHistory(v.id)} aria-label={`Remove ${v.title} from history`} title="Remove from history">
+                  <button type="button" className="icon-btn xs" onClick={(e) => exitThen(e.currentTarget.closest('.hist-row'), () => removeHistory(v.id))} aria-label={`Remove ${v.title} from history`} title="Remove from history">
                     <X size={14} />
                   </button>
                 </li>

@@ -7,7 +7,8 @@ import { suggestions, type Suggestion } from '../../lib/search';
 import { getUser, userByHandle } from '../../lib/catalog';
 import { trendingHashtags } from '../../lib/recommend';
 import { href, navigate } from '../../lib/router';
-import { useDismiss } from '../../lib/hooks';
+import { useDismiss, useExit } from '../../lib/hooks';
+import { exitThen } from '../../lib/motion';
 
 export function TopBar({ children, className = '' }: { children?: ReactNode; className?: string }) {
   return (
@@ -52,6 +53,8 @@ export function SearchBox({ autoFocus = false }: { autoFocus?: boolean }) {
     ? [{ kind: 'query', label: `Search for “${q.trim()}”`, value: q.trim() }, ...sugg]
     : [...recent.map((r) => ({ kind: 'query' as const, label: r, value: r, sub: 'recent' })), ...hot.map((t) => ({ kind: 'tag' as const, label: `#${t.tag}`, value: t.tag, sub: 'trending' }))];
 
+  const showPop = open && rows.length > 0;
+  const pres = useExit(showPop, 140);
   const go = (s: Suggestion) => {
     setOpen(false);
     setHi(-1);
@@ -124,8 +127,8 @@ export function SearchBox({ autoFocus = false }: { autoFocus?: boolean }) {
           <kbd className="search-kbd">/</kbd>
         )}
       </form>
-      {open && rows.length > 0 && (
-        <div className="search-pop" id="search-pop" role="listbox">
+      {pres.mounted && (
+        <div className={`search-pop${pres.closing ? ' closing' : ''}`} id="search-pop" role="listbox">
           {!q.trim() && recent.length > 0 && (
             <div className="search-pop-head">
               <span>Recent searches</span>
@@ -146,7 +149,7 @@ export function SearchBox({ autoFocus = false }: { autoFocus?: boolean }) {
                   {s.sub && <span className="search-row-sub">{s.sub}</span>}
                 </button>
                 {s.sub === 'recent' && (
-                  <button type="button" className="icon-btn xs" onClick={() => removeRecentSearch(s.value)} aria-label={`Remove ${s.label} from recent searches`}>
+                  <button type="button" className="icon-btn xs" onClick={(e) => exitThen(e.currentTarget.closest('.search-row'), () => removeRecentSearch(s.value))} aria-label={`Remove ${s.label} from recent searches`}>
                     <X size={13} />
                   </button>
                 )}

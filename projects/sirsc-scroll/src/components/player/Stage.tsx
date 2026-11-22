@@ -212,6 +212,9 @@ function Timeline({ active, bar, seek, thin, label }: { active: boolean; bar: Re
         e.stopPropagation();
         dragging.current = true;
         track.current?.setPointerCapture(e.pointerId);
+        const fill = bar.current;
+        fill?.classList.add('seeking');
+        window.setTimeout(() => fill?.classList.remove('seeking'), 220);
         seek(frac(e.clientX));
       }}
       onPointerMove={(e) => dragging.current && seek(frac(e.clientX))}

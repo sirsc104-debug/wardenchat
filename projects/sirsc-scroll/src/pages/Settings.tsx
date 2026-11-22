@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { Check, Database, Eye, Keyboard, LayoutGrid, MonitorPlay, Palette, RotateCcw, SlidersHorizontal } from 'lucide-react';
 import { WidgetControls } from '../components/widgets/CustomizeWidgets';
+import { exitThen, withViewTransition } from '../lib/motion';
 import type { Density, Settings as SettingsT, ThemeName } from '../state/types';
 import { PageShell, Panel } from './PageShell';
 import { InterestEditor } from '../components/modals/InterestEditor';
@@ -142,7 +143,7 @@ export function Settings({ route }: { route: Route }) {
             <Choice<ThemeName>
               label="Theme"
               value={s.theme}
-              onChange={(v) => set({ theme: v })}
+              onChange={(v) => withViewTransition(() => set({ theme: v }))}
               options={[
                 ['dark', 'Dark'],
                 ['dim', 'Dim'],
@@ -152,7 +153,7 @@ export function Settings({ route }: { route: Route }) {
             <Choice<Density>
               label="Layout density"
               value={s.density}
-              onChange={(v) => set({ density: v })}
+              onChange={(v) => withViewTransition(() => set({ density: v }))}
               options={[
                 ['compact', 'Compact', 'Smaller text and spacing'],
                 ['standard', 'Standard'],
@@ -193,7 +194,7 @@ export function Settings({ route }: { route: Route }) {
                           <span className="person-sub">@{u.handle}</span>
                         </span>
                       </span>
-                      <button type="button" className="btn btn-xs btn-outline" onClick={() => unhideCreator(id)}>
+                      <button type="button" className="btn btn-xs btn-outline" onClick={(e) => exitThen(e.currentTarget.closest('.person'), () => unhideCreator(id))}>
                         Unhide
                       </button>
                     </li>
@@ -241,7 +242,7 @@ export function Settings({ route }: { route: Route }) {
                     {on ? (
                       <span className="pill pill-you">Active</span>
                     ) : (
-                      <button type="button" className="btn btn-xs btn-outline" onClick={() => switchAccount(id)}>
+                      <button type="button" className="btn btn-xs btn-outline" onClick={() => withViewTransition(() => switchAccount(id))}>
                         Switch
                       </button>
                     )}
@@ -250,10 +251,10 @@ export function Settings({ route }: { route: Route }) {
               })}
             </div>
             <div className="btn-row">
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => confirmAction(`Reset ${getUser(p, p.activeId)?.name}?`, 'This account’s likes, follows, saves, collections, comments, uploads, drafts, history and notifications go back to how they started.', 'Reset account', () => resetAccount())}>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => confirmAction(`Reset ${getUser(p, p.activeId)?.name}?`, 'This account’s likes, follows, saves, collections, comments, uploads, drafts, history and notifications go back to how they started.', 'Reset account', () => withViewTransition(() => resetAccount()))}>
                 <RotateCcw size={14} /> Reset this account
               </button>
-              <button type="button" className="btn btn-danger btn-sm" onClick={() => confirmAction('Reset all demo data?', 'All four demo accounts go back to how they started. Settings are kept.', 'Reset everything', resetAll)}>
+              <button type="button" className="btn btn-danger btn-sm" onClick={() => confirmAction('Reset all demo data?', 'All four demo accounts go back to how they started. Settings are kept.', 'Reset everything', () => withViewTransition(resetAll))}>
                 <RotateCcw size={14} /> Reset all demo data
               </button>
             </div>

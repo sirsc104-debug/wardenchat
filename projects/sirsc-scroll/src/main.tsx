@@ -10,7 +10,11 @@ import './styles/placeholders.css';
 import './styles/pages.css';
 import './styles/modals.css';
 import './styles/mobile.css';
+import './styles/motion.css';
 import { App } from './App';
+import { initMotion } from './lib/motion';
+
+initMotion();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

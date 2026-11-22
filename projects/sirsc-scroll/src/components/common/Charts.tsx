@@ -103,7 +103,7 @@ export function LineChart({ data, height = 180, format = (v) => v.toLocaleString
           }}
         >
           {w > 0 && (
-            <svg width={w} height={height} aria-hidden="true">
+            <svg key={`${data.length}:${data[0]?.label}`} width={w} height={height} aria-hidden="true">
               <defs>
                 <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stopColor="var(--viz-1)" stopOpacity="0.14" />
@@ -126,7 +126,7 @@ export function LineChart({ data, height = 180, format = (v) => v.toLocaleString
                 ) : null,
               )}
               <path d={area} fill={`url(#${gid})`} />
-              <path d={path} className="line" />
+              <path d={path} className="line" pathLength={1} />
               <circle cx={x(last)} cy={y(data[last]?.value ?? 0)} r={4} className="dot" />
               {active !== null && (
                 <>

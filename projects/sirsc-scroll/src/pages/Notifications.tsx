@@ -37,7 +37,7 @@ const ICON: Record<NotificationType, typeof Heart> = {
   system: Bell,
 };
 
-function NoteRow({ n }: { n: AppNotification }) {
+function NoteRow({ n, index }: { n: AppNotification; index: number }) {
   const p = usePersisted();
   const now = useNow();
   const actor = n.actorId ? getUser(p, n.actorId) : undefined;
@@ -52,7 +52,7 @@ function NoteRow({ n }: { n: AppNotification }) {
   };
   const selfActor = n.type === 'trending' && n.actorId === p.activeId;
   return (
-    <li className={`note${n.read ? '' : ' unread'}`}>
+    <li className={`note${n.read ? '' : ' unread'}`} style={{ '--n': index } as React.CSSProperties}>
       <button type="button" className="note-hit" onClick={open}>
         <span className="note-av">
           {actor && !selfActor ? <Avatar user={actor} size={40} /> : <span className="note-sys"><Icon size={18} /></span>}
@@ -207,9 +207,9 @@ export function Notifications() {
         groups.map(([label, list]) => (
           <section key={label} className="note-group">
             <h2 className="hist-label">{label}</h2>
-            <ul className="notes">
-              {list.map((n) => (
-                <NoteRow key={n.id} n={n} />
+            <ul className="notes" key={filter}>
+              {list.map((n, i) => (
+                <NoteRow key={n.id} n={n} index={i} />
               ))}
             </ul>
           </section>

@@ -1,0 +1,571 @@
+/* ---------- motion layer (see lib/motion.ts) */
+:root {
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --spring-soft: cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+
+/* gliders: one highlight per group that slides to the selected item */
+.has-glider {
+  position: relative;
+}
+.has-glider > :not(.glider) {
+  position: relative;
+  z-index: 1;
+}
+.glider {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    transform 0.36s var(--spring-soft),
+    width 0.36s var(--spring-soft),
+    height 0.36s var(--spring-soft),
+    opacity 0.2s;
+}
+.g-pill {
+  border-radius: 99px;
+  background: var(--bg-4);
+}
+.seg.has-glider > [aria-selected='true'],
+.seg.has-glider > [aria-checked='true'],
+.seg.has-glider > [aria-pressed='true'],
+.steps.has-glider li.on button {
+  background: transparent;
+}
+.steps .g-pill {
+  background: var(--bg-2);
+}
+.g-line::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.tabs-line.has-glider > a.on {
+  border-bottom-color: transparent;
+}
+.m-tabs.has-glider > a.on {
+  box-shadow: none;
+}
+.m-tabs .g-line::after {
+  background: #fff;
+  left: 8px;
+  right: 8px;
+}
+.g-nav {
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+}
+.g-nav::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 9px;
+  bottom: 9px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent);
+}
+.sb-scroll.has-glider .nav-item.on {
+  background: transparent;
+}
+.sb-scroll.has-glider .nav-item.on::before {
+  display: none;
+}
+.g-soft {
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+}
+.saved-nav.has-glider > .on,
+.settings-nav.has-glider > .on {
+  background: transparent;
+}
+.g-chip {
+  border-radius: 99px;
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent-line);
+}
+.chips.has-glider > .chip.on {
+  background: transparent;
+  border-color: transparent;
+}
+.g-ring,
+.g-ring-round {
+  z-index: 3;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 4px rgb(34 211 238 / 0.15);
+}
+.g-ring-round {
+  border-radius: 50%;
+  border-color: #fff;
+}
+.tpl-grid .g-ring {
+  border-radius: 9px;
+}
+.radio-cards.has-glider > .on,
+.cover-grid.has-glider > .on,
+.tpl-grid.has-glider .on .tpl-thumb,
+.glyphs.has-glider > .on {
+  border-color: transparent;
+}
+.swatches.has-glider > [aria-checked='true'] {
+  border-color: transparent;
+  box-shadow: none;
+}
+.g-dot::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 22px;
+  height: 3px;
+  margin-left: -11px;
+  border-radius: 0 0 3px 3px;
+  background: var(--accent);
+}
+
+/* hover and press: everything clickable responds, with a little spring */
+.btn,
+.chip,
+.chip-btn,
+.cat-tile,
+.ccard,
+.col-card,
+.acct-card,
+.tag-lg,
+.radio-card,
+.friend-pick,
+.chat-pick,
+.note,
+.recent a,
+.activity-row,
+.search-row-btn,
+.saved-nav-item,
+.settings-nav a,
+.cat-chip,
+.stat,
+.wctl-row,
+.check-row,
+.toggle-row,
+.menu-item {
+  transition:
+    background-color 0.18s,
+    border-color 0.18s,
+    color 0.18s,
+    box-shadow 0.22s,
+    opacity 0.2s,
+    translate 0.22s var(--spring);
+}
+.btn:hover:not(:disabled),
+.chip:hover,
+.chip-btn:hover,
+.cat-tile:hover,
+.ccard:hover,
+.col-card:hover,
+.tag-lg:hover,
+.radio-card:hover,
+.friend-pick:hover,
+.cat-chip:hover {
+  translate: 0 -1px;
+}
+.btn-accent:hover:not(:disabled) {
+  box-shadow: 0 4px 14px rgb(34 211 238 / 0.3);
+}
+.menu-item:hover,
+.search-row-btn:hover,
+.recent a:hover,
+.activity-row:hover,
+.wctl-row:hover {
+  translate: 2px 0;
+}
+.icon-btn svg,
+.w-btn svg,
+.fbar-btn svg,
+.sc-btn svg,
+.rail-ico svg,
+.nav-ico svg,
+.rail-step svg,
+.toast-x svg,
+.chips-arrow svg {
+  transition:
+    scale 0.22s var(--spring),
+    rotate 0.3s var(--spring);
+}
+.icon-btn:hover svg,
+.w-btn:hover svg,
+.fbar-btn:hover svg,
+.sc-btn:hover svg,
+.rail-btn:hover .rail-ico svg,
+.nav-item:hover .nav-ico svg,
+.rail-step:hover:not(:disabled) svg,
+.toast-x:hover svg,
+.chips-arrow:hover svg {
+  scale: 1.14;
+}
+.w-close:hover svg,
+.modal-x:hover svg,
+.toast-x:hover svg {
+  rotate: 90deg;
+}
+.rail-step:hover:not(:disabled):first-child svg {
+  translate: 0 -2px;
+}
+.rail-step:hover:not(:disabled):last-child svg {
+  translate: 0 2px;
+}
+.rail-step svg {
+  transition:
+    scale 0.22s var(--spring),
+    translate 0.22s var(--spring);
+}
+.link-btn {
+  transition:
+    color 0.18s,
+    translate 0.2s var(--spring);
+}
+.link-btn:hover {
+  translate: 1px 0;
+}
+.vthumb {
+  transition:
+    transform 0.25s var(--spring),
+    box-shadow 0.25s;
+}
+.vcard-hit:hover .vthumb {
+  box-shadow: 0 10px 24px rgb(0 0 0 / 0.35);
+}
+.avatar {
+  transition:
+    scale 0.22s var(--spring),
+    box-shadow 0.22s;
+}
+a:hover > .avatar,
+button:hover > .avatar,
+.creator-link:hover .avatar,
+.person-link:hover .avatar {
+  scale: 1.06;
+}
+.note {
+  transition:
+    background-color 0.35s,
+    translate 0.22s var(--spring);
+}
+.nav-item,
+.nav-badge {
+  transition:
+    background-color 0.18s,
+    color 0.18s,
+    translate 0.2s var(--spring);
+}
+.nav-item:hover {
+  translate: 2px 0;
+}
+.nav-badge {
+  animation: pop-in-soft 0.3s var(--spring);
+}
+
+/* likes: a ring bursts out when liked, the heart deflates when unliked */
+.rail-btn.like .rail-ico {
+  position: relative;
+}
+.rail-btn.like.on .rail-ico::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--like);
+  animation: like-ring 0.55s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes like-ring {
+  from {
+    scale: 0.6;
+    opacity: 1;
+  }
+  to {
+    scale: 1.45;
+    opacity: 0;
+  }
+}
+.rail-btn.like:not(.on) .rail-ico {
+  animation: unpop 0.3s var(--ease);
+}
+@keyframes unpop {
+  40% {
+    scale: 0.85;
+  }
+}
+.rail-btn.save.on .rail-ico svg,
+.stat.save.on svg {
+  animation: drop-in 0.4s var(--spring);
+}
+@keyframes drop-in {
+  from {
+    translate: 0 -6px;
+    scale: 0.7;
+  }
+}
+.rail-follow {
+  transition:
+    transform 0.25s var(--spring),
+    background-color 0.25s,
+    color 0.25s;
+}
+.rail-follow svg {
+  animation: spin-in 0.35s var(--spring);
+}
+@keyframes spin-in {
+  from {
+    rotate: -90deg;
+    scale: 0.4;
+  }
+}
+
+/* switches with a little overshoot, and a knob that stretches while pressed */
+input.switch::after {
+  transition:
+    transform 0.3s var(--spring),
+    width 0.2s var(--ease),
+    background 0.2s;
+}
+input.switch:active::after {
+  width: 21px;
+}
+input.switch:checked:active::after {
+  transform: translateX(11px);
+}
+
+/* custom check boxes and radios that animate their mark */
+input[type='checkbox']:not(.switch),
+input[type='radio'] {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--line-2);
+  border-radius: 5px;
+  background: var(--bg-2);
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+input[type='radio'] {
+  border-radius: 50%;
+}
+input[type='checkbox']:not(.switch)::after {
+  content: '';
+  width: 5px;
+  height: 9px;
+  margin-top: -2px;
+  border: solid var(--accent-ink);
+  border-width: 0 2px 2px 0;
+  rotate: 45deg;
+  scale: 0;
+  transition: scale 0.25s var(--spring);
+}
+input[type='radio']::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-ink);
+  scale: 0;
+  transition: scale 0.25s var(--spring);
+}
+input[type='checkbox']:not(.switch):checked,
+input[type='radio']:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+input[type='checkbox']:not(.switch):checked::after,
+input[type='radio']:checked::after {
+  scale: 1;
+}
+
+/* things that arrive */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+@keyframes pop-in-soft {
+  from {
+    opacity: 0;
+    scale: 0.92;
+  }
+}
+.comment.local,
+.replies .comment.reply,
+.composer-reply,
+.endnote,
+.empty,
+.notice,
+.reason {
+  animation: rise-in 0.32s var(--ease) backwards;
+}
+.tag-chip,
+.pill-hot,
+.stage-end > * {
+  animation: pop-in-soft 0.3s var(--spring) backwards;
+}
+.stage-end > :nth-child(2) {
+  animation-delay: 0.05s;
+}
+.vgrid > .vcard,
+.notes > .note,
+.hist-list > .hist-row,
+.upnext > .vcard,
+.activity > li,
+.people > li,
+.tag-cloud > *,
+.cat-tiles > *,
+.ccards > *,
+.col-grid > *,
+.drafts > *,
+.top10 > li {
+  animation: rise-in 0.34s var(--ease) backwards;
+  animation-delay: calc(min(var(--n, 0), 14) * 24ms);
+}
+.upload-form > .form,
+.publish-state,
+.chart-table-wrap,
+.chart-plot,
+.sheet-body > *,
+.customize-pop .wctl,
+.acct-pop ul {
+  animation: rise-in 0.28s var(--ease) backwards;
+}
+.chart-plot .line {
+  stroke-dasharray: 1;
+  animation: draw 0.8s var(--ease) both;
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.chart-plot svg > path:not(.line) {
+  animation: fade-in 0.6s 0.2s backwards;
+}
+.chart-plot .dot {
+  animation: pop-in-soft 0.4s 0.6s var(--spring) backwards;
+}
+.barlist-bar {
+  transform-origin: 0 50%;
+  transition: width 0.45s var(--spring-soft);
+  animation: grow-x 0.6s var(--ease) backwards;
+}
+@keyframes grow-x {
+  from {
+    scale: 0 1;
+  }
+}
+.hist-bar i,
+.cat-chip-bar,
+.bars i {
+  transform-origin: 0 50%;
+  animation: grow-x 0.6s var(--ease) backwards;
+}
+
+/* things that leave */
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes pop-out {
+  to {
+    opacity: 0;
+    scale: 0.96;
+    translate: 0 4px;
+  }
+}
+.modal-layer.closing .modal-back {
+  animation: fade-out 0.18s ease forwards;
+  pointer-events: none;
+}
+.modal-layer.closing .modal {
+  animation: pop-out 0.18s ease forwards;
+}
+.menu.closing,
+.acct-pop.closing,
+.customize-pop.closing,
+.search-pop.closing {
+  animation: pop-out 0.14s ease forwards;
+  pointer-events: none;
+}
+.toast.leaving {
+  animation: toast-out 0.22s ease forwards;
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    translate: 0 10px;
+    scale: 0.96;
+  }
+}
+.sheet-back.closing {
+  animation: fade-out 0.22s ease forwards;
+}
+.sheet-back.closing .sheet {
+  animation: sheet-down 0.22s ease-in forwards;
+}
+@keyframes sheet-down {
+  to {
+    translate: 0 100%;
+  }
+}
+
+/* the seek bar glides when you click it */
+.tl-fill.seeking {
+  transition: transform 0.2s var(--ease);
+}
+
+/* whole-app cross-fades (account switch, theme) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.32s;
+  animation-timing-function: var(--ease);
+}
+
+[data-motion='reduced'] .glider,
+[data-motion='reduced'] *::after {
+  transition: none !important;
+}
+/* Reduced animations: decorative motion ends instantly (frozen video placeholders keep their frame). */
+[data-motion='reduced'] :not(.ph, .ph *),
+[data-motion='reduced'] :not(.ph, .ph *)::before,
+[data-motion='reduced'] :not(.ph, .ph *)::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+}
+[data-motion='reduced'] ::view-transition-old(root),
+[data-motion='reduced'] ::view-transition-new(root) {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .glider {
+    transition: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+  }
+}

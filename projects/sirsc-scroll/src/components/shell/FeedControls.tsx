@@ -62,7 +62,7 @@ export function FeedControls() {
           ))}
         </select>
       </label>
-      <button type="button" className="icon-btn" onClick={refreshFeed} aria-label="Refresh feed" title="Refresh feed">
+      <button type="button" className="icon-btn" onClick={refreshFeed} aria-label="Refresh feed" title="Refresh feed" data-tap="spin">
         <RefreshCw size={16} />
       </button>
       <button type="button" className="icon-btn" onClick={() => openModal({ type: 'interests' })} aria-label="Feed preferences" title="Feed preferences">

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { EASE, reducedMotion } from '../lib/motion';
 import { Compass, Filter, House, UsersRound } from 'lucide-react';
 import type { FeedKind, Video } from '../state/types';
 import { FeedStack } from '../components/player/FeedStack';
@@ -157,6 +158,9 @@ export function FeedView({ kind }: { kind: FeedKind }) {
   const visible = useMemo(() => visibleWidgets(prefs), [prefs]);
 
   useEffect(() => setActiveFeed(kind), [kind]);
+  useLayoutEffect(() => {
+    if (!reducedMotion()) layout.current?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, easing: EASE });
+  }, []);
   useFeedKeys(true);
   useAutoplayRule(video?.id);
 

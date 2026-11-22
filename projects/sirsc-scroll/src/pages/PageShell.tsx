@@ -1,4 +1,6 @@
-import { useMemo, type ReactNode } from 'react';
+import { useLayoutEffect, useMemo, useRef, type ReactNode } from 'react';
+import { EASE, reducedMotion } from '../lib/motion';
+import { useRoute } from '../lib/router';
 import { Bell, Flame } from 'lucide-react';
 import { TopBar } from '../components/shell/TopBar';
 import { useLayout, isDue, useNow } from '../lib/hooks';
@@ -36,6 +38,12 @@ function TopStrip() {
 /** Non-feed pages: top bar plus a scrolling content area. */
 export function PageShell({ title, actions, children, aside, className = '' }: { title?: ReactNode; actions?: ReactNode; children: ReactNode; aside?: ReactNode; className?: string }) {
   const layout = useLayout();
+  const route = useRoute();
+  const grid = useRef<HTMLDivElement>(null);
+  // Every page (and every tab or filter that changes the address) eases in.
+  useLayoutEffect(() => {
+    if (!reducedMotion()) grid.current?.animate([{ opacity: 0, translate: '0 10px' }, { opacity: 1, translate: '0 0' }], { duration: 320, easing: EASE });
+  }, [route.hash]);
   return (
     <div className={`page ${className}`}>
       {layout !== 'mobile' && (
@@ -44,7 +52,7 @@ export function PageShell({ title, actions, children, aside, className = '' }: {
         </TopBar>
       )}
       <div className="page-scroll">
-        <div className={`page-grid${aside ? ' has-aside' : ''}`}>
+        <div ref={grid} className={`page-grid${aside ? ' has-aside' : ''}`}>
           <main className="page-main">
             {(title || actions) && (
               <div className="page-head">

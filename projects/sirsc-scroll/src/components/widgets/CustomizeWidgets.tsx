@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import { Eye, EyeOff, LayoutGrid, RotateCcw, Undo2 } from 'lucide-react';
 import { useP } from '../../state/store';
 import { WIDGET_IDS, WIDGET_LABEL, hideAllWidgets, isFocusMode, restoreDefaultLayout, restorePreviousLayout, setCustomizeOpen, showAllWidgets, toggleWidget } from '../../state/widgets';
-import { useDismiss } from '../../lib/hooks';
+import { useDismiss, useExit } from '../../lib/hooks';
 
 /** Checklist of every widget plus the layout presets. Used in the popover and in Settings. */
 export function WidgetControls({ compact }: { compact?: boolean }) {
@@ -27,10 +27,10 @@ export function WidgetControls({ compact }: { compact?: boolean }) {
         <button type="button" className="btn btn-ghost btn-xs" onClick={hideAllWidgets} disabled={focus}>
           <EyeOff size={13} /> Hide all
         </button>
-        <button type="button" className="btn btn-ghost btn-xs" onClick={restorePreviousLayout} disabled={!w.previous} title="Go back to the layout before the last Focus Mode, Show all or Default">
+        <button type="button" className="btn btn-ghost btn-xs" onClick={restorePreviousLayout} disabled={!w.previous} title="Go back to the layout before the last Focus Mode, Show all or Default" data-tap="spin">
           <Undo2 size={13} /> Previous layout
         </button>
-        <button type="button" className="btn btn-ghost btn-xs" onClick={restoreDefaultLayout}>
+        <button type="button" className="btn btn-ghost btn-xs" onClick={restoreDefaultLayout} data-tap="spin">
           <RotateCcw size={13} /> Default layout
         </button>
       </div>
@@ -43,13 +43,14 @@ export function CustomizeWidgets({ open }: { open: boolean }) {
   const btn = useRef<HTMLButtonElement>(null);
   const pop = useRef<HTMLDivElement>(null);
   useDismiss(open, () => setCustomizeOpen(false), [btn, pop]);
+  const { mounted, closing } = useExit(open, 150);
   return (
     <div className="customize">
       <button ref={btn} type="button" className={`fbar-btn${open ? ' on' : ''}`} onClick={() => setCustomizeOpen(!open)} aria-haspopup="dialog" aria-expanded={open} aria-label="Customize widgets" title="Customize widgets">
         <LayoutGrid size={16} />
       </button>
-      {open && (
-        <div ref={pop} className="customize-pop" role="dialog" aria-label="Customize widgets">
+      {mounted && (
+        <div ref={pop} className={`customize-pop${closing ? ' closing' : ''}`} role="dialog" aria-label="Customize widgets">
           <p className="customize-head">Widgets beside the video</p>
           <WidgetControls compact />
           <p className="customize-note">Layout is saved in this browser. Press V for video-only Focus Mode.</p>

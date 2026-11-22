@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useExit } from '../../lib/hooks';
 import { Check, Copy, Flag, FolderPlus, Hash, MessagesSquare, Send, Users } from 'lucide-react';
 import type { ModalState } from '../../state/types';
 import { Modal } from '../common/Modal';
@@ -330,8 +331,18 @@ function EditProfile() {
 }
 
 export function ModalHost() {
-  const m = useS((s) => s.modal);
-  if (!m) return null;
+  const current = useS((s) => s.modal);
+  const [last, setLast] = useState(current);
+  useEffect(() => {
+    if (current) setLast(current);
+  }, [current]);
+  const { mounted, closing } = useExit(!!current, 180);
+  const m = current ?? last;
+  if (!mounted || !m) return null;
+  return <div className={`modal-layer${closing ? ' closing' : ''}`}>{renderModal(m)}</div>;
+}
+
+function renderModal(m: ModalState) {
   switch (m.type) {
     case 'share':
       return <ShareDialog videoId={m.videoId} />;

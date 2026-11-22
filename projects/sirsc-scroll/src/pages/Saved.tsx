@@ -10,6 +10,7 @@ import { useAcct, usePersisted } from '../state/store';
 import { confirmAction, deleteCollection, moveToCollection, openModal, renameCollection, toggleInCollection, toggleSave } from '../state/actions';
 import { getVideo } from '../lib/catalog';
 import { href, navigate, type Route } from '../lib/router';
+import { exitThen, flipChildren } from '../lib/motion';
 
 export function Saved({ route }: { route: Route }) {
   const p = usePersisted();
@@ -24,19 +25,24 @@ export function Saved({ route }: { route: Route }) {
   const label = col ? col.name : 'All saved';
   const open = useOpenList(videos, `Saved · ${label}`);
 
+  // Remove a card from this view: it folds away, then the others glide into the gap.
+  const removeCard = (v: Video, change: () => void) => {
+    const card = document.querySelector(`.saved-main .vgrid > [data-vid="${v.id}"]`);
+    exitThen(card, () => flipChildren(card?.parentElement, change));
+  };
   const itemMenu = (v: Video): MenuItem[] => {
     const items: MenuItem[] = [];
     for (const c of acct.collections) {
       if (c.id === colId) continue;
       items.push(
         col
-          ? { label: `Move to “${c.name}”`, icon: FolderInput, onSelect: () => moveToCollection(col.id, c.id, v.id) }
+          ? { label: `Move to “${c.name}”`, icon: FolderInput, onSelect: () => removeCard(v, () => moveToCollection(col.id, c.id, v.id)) }
           : { label: c.videoIds.includes(v.id) ? `In “${c.name}”` : `Add to “${c.name}”`, icon: c.videoIds.includes(v.id) ? Check : FolderPlus, onSelect: () => toggleInCollection(c.id, v.id) },
       );
     }
     items.push({ label: 'New collection…', icon: FolderPlus, onSelect: () => openModal({ type: 'new-collection', videoId: v.id }) });
-    if (col) items.push({ label: `Remove from “${col.name}”`, icon: X, onSelect: () => toggleInCollection(col.id, v.id), divider: true });
-    items.push({ label: 'Unsave', icon: BookmarkX, danger: true, onSelect: () => toggleSave(v.id), divider: !col });
+    if (col) items.push({ label: `Remove from “${col.name}”`, icon: X, onSelect: () => removeCard(v, () => toggleInCollection(col.id, v.id)), divider: true });
+    items.push({ label: 'Unsave', icon: BookmarkX, danger: true, onSelect: () => removeCard(v, () => toggleSave(v.id)), divider: !col });
     return items;
   };
 
@@ -113,8 +119,9 @@ export function Saved({ route }: { route: Route }) {
             </Empty>
           ) : videos.length ? (
             <div className="vgrid">
-              {videos.map((v) => (
+              {videos.map((v, i) => (
                 <VideoCard
+                  index={i}
                   key={v.id}
                   video={v}
                   onOpen={open}

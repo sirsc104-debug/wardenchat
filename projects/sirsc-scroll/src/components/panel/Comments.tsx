@@ -1,4 +1,4 @@
-import { Fragment, memo, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, memo, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Heart, MessageCircleOff, MessageSquare, Pin, Send, Trash2, X } from 'lucide-react';
 import type { Comment, Persisted, Video } from '../../state/types';
 import { Avatar } from '../common/Avatar';
@@ -8,7 +8,8 @@ import { addComment, deleteComment, toggleCommentLike } from '../../state/action
 import { commentCount, commentLikes, commentsFor, getUser } from '../../lib/catalog';
 import { ago, compact, full } from '../../lib/format';
 import { href } from '../../lib/router';
-import { useNow } from '../../lib/hooks';
+import { useHeightTween, useNow } from '../../lib/hooks';
+import { exitThen } from '../../lib/motion';
 import { HANDLE_MAP } from '../../data/users';
 
 /** Turns @handles and #tags into links. */
@@ -36,6 +37,17 @@ export function RichText({ text }: { text: string }) {
 }
 
 type Sort = 'top' | 'new';
+
+/** The replies under a comment; opening and closing them animates the height. */
+function Replies({ open, children }: { open: boolean; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useHeightTween(ref, open);
+  return (
+    <div className="replies" ref={ref}>
+      {children}
+    </div>
+  );
+}
 
 function sortComments(p: Persisted, list: Comment[], sort: Sort, me: string): Comment[] {
   const top = list.filter((c) => !c.parentId);
@@ -101,7 +113,7 @@ export const Comments = memo(function Comments({ video, mode, onExpand, autoFocu
           <li key={c.id}>
             <CommentRow c={c} video={video} onReply={() => setReplyTo(c)} />
             {reps.length > 0 && (
-              <div className="replies">
+              <Replies open={isOpen}>
                 {isOpen && reps.map((r) => <CommentRow key={r.id} c={r} video={video} reply onReply={() => setReplyTo(c)} />)}
                 <button
                   type="button"
@@ -117,7 +129,7 @@ export const Comments = memo(function Comments({ video, mode, onExpand, autoFocu
                 >
                   {isOpen ? 'Hide replies' : `View ${reps.length} ${reps.length === 1 ? 'reply' : 'replies'}`}
                 </button>
-              </div>
+              </Replies>
             )}
           </li>
         );
@@ -185,7 +197,7 @@ export const Comments = memo(function Comments({ video, mode, onExpand, autoFocu
             <li key={c.id}>
               <CommentRow c={c} video={video} onReply={mode === 'full' ? () => setReplyTo(c) : onExpand} />
               {reps.length > 0 && (
-                <div className="replies">
+                <Replies open={isOpen}>
                   {isOpen && reps.map((r) => <CommentRow key={r.id} c={r} video={video} reply onReply={mode === 'full' ? () => setReplyTo(c) : onExpand} />)}
                   <button
                     type="button"
@@ -199,7 +211,7 @@ export const Comments = memo(function Comments({ video, mode, onExpand, autoFocu
                   >
                     {isOpen ? 'Hide replies' : `View ${reps.length} ${reps.length === 1 ? 'reply' : 'replies'}`}
                   </button>
-                </div>
+                </Replies>
               )}
             </li>
           );
@@ -257,7 +269,7 @@ function CommentRow({ c, video, reply, onReply }: { c: Comment; video: Video; re
             </button>
           )}
           {isMe && c.local && (
-            <button type="button" className="link-btn" onClick={() => deleteComment(c.id)} aria-label="Delete comment">
+            <button type="button" className="link-btn" onClick={(e) => exitThen(e.currentTarget.closest('.comment'), () => deleteComment(c.id))} aria-label="Delete comment">
               <Trash2 size={12} /> Delete
             </button>
           )}

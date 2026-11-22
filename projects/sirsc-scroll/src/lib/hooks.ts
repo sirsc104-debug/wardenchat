@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type RefObject } from 'react';
+import { reducedMotion, tweenHeight } from './motion';
 
 /* ---------- viewport (one shared resize listener) */
 let vp = { w: typeof window !== 'undefined' ? window.innerWidth : 1366, h: typeof window !== 'undefined' ? window.innerHeight : 768 };
@@ -113,4 +114,33 @@ export function isTyping(e: KeyboardEvent): boolean {
   if (!t) return false;
   const tag = t.tagName;
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || t.isContentEditable;
+}
+
+/** Keep something mounted for a short exit animation after it closes. */
+export function useExit(open: boolean, ms = 160): { mounted: boolean; closing: boolean } {
+  const [mounted, setMounted] = useState(open);
+  useEffect(() => {
+    if (open) {
+      setMounted(true);
+      return;
+    }
+    const t = window.setTimeout(() => setMounted(false), reducedMotion() ? 0 : ms);
+    return () => window.clearTimeout(t);
+  }, [open, ms]);
+  return { mounted: open || mounted, closing: !open && mounted };
+}
+
+/** Animate an element's height whenever `dep` changes (expand/collapse). */
+export function useHeightTween<T extends HTMLElement>(ref: RefObject<T | null>, dep: unknown) {
+  const last = useRef<number | null>(null);
+  const prev = useRef(dep);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (prev.current !== dep) {
+      prev.current = dep;
+      tweenHeight(el, last.current);
+    }
+    last.current = el.getBoundingClientRect().height;
+  });
 }
