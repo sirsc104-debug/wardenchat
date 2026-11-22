@@ -453,8 +453,21 @@
       controls: settings.controls ? 1 : 0,
       enablejsapi: 1
     };
-    if (/^https?:$/.test(location.protocol)) v.origin = location.origin;
+    var o = pageOrigin();
+    if (o) v.origin = o;
     return v;
+  }
+
+  // The page's real https origin. Normally location.origin; in a tab written by the Google Sites
+  // launcher (about:blank + document.write) the document keeps the launcher's origin even if the
+  // URL reads about:blank, which self.origin reports.
+  function pageOrigin() {
+    if (/^https?:$/.test(location.protocol)) return location.origin;
+    var so = typeof self !== 'undefined' && self.origin;
+    return so && /^https?:\/\//.test(so) ? so : null;
+  }
+  function openedByLauncher() {
+    try { return !!window.opener && window.opener !== window; } catch (e) { return true; }
   }
 
   function createPlayer() {
@@ -946,8 +959,10 @@
         href: location.href,
         origin: location.origin,
         protocol: location.protocol,
+        documentOrigin: pageOrigin(),
         referrerPolicy: (document.querySelector('meta[name=referrer]') || {}).content || null,
-        embeddedInFrame: window.top !== window.self
+        embeddedInFrame: window.top !== window.self,
+        openedInNewTabByLauncher: openedByLauncher()
       },
       environment: environment(),
       timingsMs: {
@@ -1046,14 +1061,15 @@
   function renderEnv() {
     var e = environment();
     var rows = [
-      ['Page origin', location.origin === 'null' ? location.protocol + ' (no origin)' : location.origin],
+      ['Page origin', pageOrigin() || location.protocol + ' (no web origin)'],
       ['Device', (e.chromeOS ? 'ChromeOS · ' : '') + e.platform],
       ['Browser', e.userAgent],
       ['CPU threads', e.hardwareConcurrency || 'not reported'],
       ['Memory', e.deviceMemoryGB ? '≈' + e.deviceMemoryGB + ' GB (approximate, from the browser)' : 'not reported'],
       ['Screen', e.screen + ' · viewport ' + e.viewport],
       ['Network', e.connection ? e.connection.effectiveType + ' · ~' + e.connection.downlinkMbps + ' Mbps · rtt ~' + e.connection.rttMs + ' ms (browser estimate)' : 'not reported'],
-      ['In a frame', window.top !== window.self ? 'yes (embedded in another page)' : 'no']
+      ['In a frame', window.top !== window.self ? 'yes (embedded in another page)' : 'no'],
+      ['Opened by', openedByLauncher() ? 'the Google Sites launcher (new tab)' : 'directly']
     ];
     $('env').innerHTML = rows.map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('');
   }
@@ -1152,7 +1168,7 @@
 
   function checkOrigin() {
     var proto = location.protocol;
-    $('originLabel').textContent = proto === 'file:' ? 'opened from a file' : location.origin;
+    $('originLabel').textContent = proto === 'file:' ? 'opened from a file' : (pageOrigin() || location.origin) + (openedByLauncher() ? ' · new tab' : '');
     if (proto === 'file:') {
       $('bannerOrigin').hidden = false;
       $('bannerOrigin').innerHTML = '<b>Opened from a file.</b> YouTube needs an http(s) page origin and Referer to identify embeds, so most videos will fail here (often with error 153). Host this page over https (see the README) or run a local server.';
