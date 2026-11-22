@@ -56,6 +56,12 @@ export function useNow(): number {
   return useSyncExternalStore(subscribeNow, () => nowVal, () => nowVal);
 }
 
+/** Has this moment arrived? The shared clock ticks every 15s, so also check the real time
+ *  (a notification created a second ago must count as now, not as the future). */
+export function isDue(at: number, now: number): boolean {
+  return at <= Math.max(now, Date.now());
+}
+
 /* ---------- element size via ResizeObserver */
 export function useSize<T extends HTMLElement>(ref: RefObject<T | null>): { w: number; h: number } {
   const [size, setSize] = useState({ w: 0, h: 0 });

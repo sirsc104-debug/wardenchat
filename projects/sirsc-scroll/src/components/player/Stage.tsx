@@ -4,6 +4,7 @@ import type { Video } from '../../state/types';
 import { Placeholder } from '../placeholders/Placeholder';
 import { usePlayback } from './usePlayback';
 import { go, likeOnly, setMuted, setPlaying, togglePlay, updateSettings } from '../../state/actions';
+import { focusWidget } from '../../state/widgets';
 import { useP, useS } from '../../state/store';
 import { duration } from '../../lib/format';
 import { synth } from '../../lib/audio';
@@ -132,6 +133,16 @@ export const Stage = memo(function Stage({ video, active, chrome, children }: Pr
       )}
       {children}
       <div className="stage-bottom" onClick={(e) => e.stopPropagation()}>
+        {chrome === 'desktop' && active && (
+          <div className="stage-cap">
+            <button type="button" className="cap-handle" onClick={() => focusWidget('creator')} title="About the creator">
+              @{creator?.handle}
+            </button>
+            <button type="button" className="cap-title" onClick={() => focusWidget('info')} title="Video information">
+              {video.title}
+            </button>
+          </div>
+        )}
         {chrome === 'desktop' && active && (
           <div className="stage-controls">
             <button type="button" className="sc-btn" onClick={() => (pb.ended ? (pb.replay(), setPlaying(true)) : togglePlay())} aria-label={playing && !pb.ended ? 'Pause (Space)' : 'Play (Space)'} title={playing ? 'Pause (Space)' : 'Play (Space)'}>

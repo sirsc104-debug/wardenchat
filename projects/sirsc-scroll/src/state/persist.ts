@@ -3,6 +3,7 @@
 import type { AccountState, Persisted } from './types';
 import { DEMO_IDS } from '../data/users';
 import { DEFAULT_SETTINGS, seedAccount } from '../data/seeds';
+import { DEFAULT_WIDGETS, normalizeWidgets } from './widgetDefaults';
 
 export const STORAGE_KEY = 'sirsc-scroll:v1';
 const VERSION = 1;
@@ -10,7 +11,7 @@ const VERSION = 1;
 export function freshPersisted(activeId = 'alex'): Persisted {
   const accounts: Record<string, AccountState> = {};
   for (const id of DEMO_IDS) accounts[id] = seedAccount(id);
-  return { v: VERSION, activeId, accounts, userVideos: [], userComments: [], settings: { ...DEFAULT_SETTINGS } };
+  return { v: VERSION, activeId, accounts, userVideos: [], userComments: [], settings: { ...DEFAULT_SETTINGS }, widgets: normalizeWidgets(DEFAULT_WIDGETS) };
 }
 
 export function load(): Persisted {
@@ -30,6 +31,7 @@ export function load(): Persisted {
       userVideos: Array.isArray(data.userVideos) ? data.userVideos : [],
       userComments: Array.isArray(data.userComments) ? data.userComments : [],
       settings: { ...base.settings, ...data.settings },
+      widgets: normalizeWidgets(data.widgets),
     };
   } catch {
     return freshPersisted();

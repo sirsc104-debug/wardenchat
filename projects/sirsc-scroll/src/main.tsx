@@ -5,6 +5,7 @@ import './styles/base.css';
 import './styles/shell.css';
 import './styles/feed.css';
 import './styles/panel.css';
+import './styles/widgets.css';
 import './styles/placeholders.css';
 import './styles/pages.css';
 import './styles/modals.css';

@@ -1,29 +1,10 @@
 import { useRef } from 'react';
 import { ArrowLeft, ChevronLeft, ChevronRight, RefreshCw, SlidersHorizontal } from 'lucide-react';
-import type { FeedKind, SortKey } from '../../state/types';
+import type { SortKey } from '../../state/types';
 import { CATEGORIES } from '../../data/categories';
 import { CATEGORY_ICON } from '../common/icons';
 import { useS } from '../../state/store';
 import { openModal, refreshFeed, setCategory, setSort } from '../../state/actions';
-
-const TABS: [FeedKind, string, string][] = [
-  ['foryou', 'For You', '#/'],
-  ['following', 'Following', '#/following'],
-  ['trending', 'Trending', '#/trending'],
-  ['friends', 'Friends', '#/friends'],
-];
-
-export function FeedTabs({ active, className = '' }: { active: FeedKind; className?: string }) {
-  return (
-    <nav className={`feed-tabs ${className}`} aria-label="Feeds">
-      {TABS.map(([kind, label, to]) => (
-        <a key={kind} href={to} className={active === kind ? 'on' : ''} aria-current={active === kind ? 'page' : undefined}>
-          {label}
-        </a>
-      ))}
-    </nav>
-  );
-}
 
 export function ListHeader({ label, back }: { label: string; back: string }) {
   return (

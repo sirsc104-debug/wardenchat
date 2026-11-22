@@ -1,4 +1,4 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { Bookmark, Check, ChevronDown, ChevronUp, Ellipsis, Eye, Hash, Heart, Link2, MessageCircle, Music2, Plus, Send, Share2, Sparkles, UserPlus } from 'lucide-react';
 import type { FeedState, Video } from '../../state/types';
 import { Avatar } from '../common/Avatar';
@@ -63,12 +63,63 @@ export const CreatorRow = memo(function CreatorRow({ video }: { video: Video }) 
   );
 });
 
-export const VideoDetails = memo(function VideoDetails({ video, reason, compactMode }: { video: Video; reason?: string; compactMode?: boolean }) {
+/** Likes, comments, saves and shares as exact numbers (like and save are toggles). */
+export const StatTiles = memo(function StatTiles({ video, withViews }: { video: Video; withViews?: boolean }) {
   const p = usePersisted();
-  const [more, setMore] = useState(false);
   const liked = useAcct((a) => a.liked.includes(video.id));
   const saved = useAcct((a) => a.saved.includes(video.id));
+  const views = viewCount(p, video);
+  const likes = likeCount(p, video);
+  const comments = commentCount(p, video);
+  const shares = shareCount(p, video);
+  return (
+    <div className={`stats${withViews ? ' stats-6' : ''}`}>
+      {withViews && (
+        <span className="stat">
+          <Eye size={15} />
+          <b>{full(views)}</b>
+          <span>views</span>
+        </span>
+      )}
+      <button type="button" className={`stat like${liked ? ' on' : ''}`} onClick={() => toggleLike(video.id)} aria-pressed={liked}>
+        <Heart size={15} fill={liked ? 'currentColor' : 'none'} />
+        <b>{full(likes)}</b>
+        <span>likes</span>
+      </button>
+      <span className="stat">
+        <MessageCircle size={15} />
+        <b>{full(comments)}</b>
+        <span>comments</span>
+      </span>
+      <button type="button" className={`stat save${saved ? ' on' : ''}`} onClick={() => toggleSave(video.id)} aria-pressed={saved}>
+        <Bookmark size={15} fill={saved ? 'currentColor' : 'none'} />
+        <b>{full(saveCount(p, video))}</b>
+        <span>saves</span>
+      </button>
+      <span className="stat">
+        <Share2 size={15} />
+        <b>{full(shares)}</b>
+        <span>shares</span>
+      </span>
+      {withViews && (
+        <span className="stat" title="Likes, comments and shares per view">
+          <Sparkles size={15} />
+          <b>{views ? ((100 * (likes + comments + shares)) / views).toFixed(1) : '0.0'}%</b>
+          <span>engagement</span>
+        </span>
+      )}
+    </div>
+  );
+});
+
+export const VideoDetails = memo(function VideoDetails({ video, reason, compactMode, hideStats, openMore }: { video: Video; reason?: string; compactMode?: boolean; hideStats?: boolean; openMore?: number }) {
+  const p = usePersisted();
+  const [more, setMore] = useState(false);
   const long = video.description.length > 120;
+  // Clicking the title on the video asks for the full description.
+  useEffect(() => {
+    if (openMore) setMore(true);
+  }, [openMore]);
   if (compactMode) {
     return (
       <div className="details details-compact">
@@ -117,28 +168,7 @@ export const VideoDetails = memo(function VideoDetails({ video, reason, compactM
           <span>{video.sound}</span>
         </span>
       </div>
-      <div className="stats">
-        <button type="button" className={`stat like${liked ? ' on' : ''}`} onClick={() => toggleLike(video.id)} aria-pressed={liked}>
-          <Heart size={15} fill={liked ? 'currentColor' : 'none'} />
-          <b>{full(likeCount(p, video))}</b>
-          <span>likes</span>
-        </button>
-        <span className="stat">
-          <MessageCircle size={15} />
-          <b>{full(commentCount(p, video))}</b>
-          <span>comments</span>
-        </span>
-        <button type="button" className={`stat save${saved ? ' on' : ''}`} onClick={() => toggleSave(video.id)} aria-pressed={saved}>
-          <Bookmark size={15} fill={saved ? 'currentColor' : 'none'} />
-          <b>{full(saveCount(p, video))}</b>
-          <span>saves</span>
-        </button>
-        <span className="stat">
-          <Share2 size={15} />
-          <b>{full(shareCount(p, video))}</b>
-          <span>shares</span>
-        </span>
-      </div>
+      {!hideStats && <StatTiles video={video} />}
       {reason && (
         <p className="reason">
           <Sparkles size={13} /> <span>{reason}</span>
@@ -188,7 +218,8 @@ export const ShareRow = memo(function ShareRow({ video }: { video: Video }) {
 
 /* ---------------------------------------------------------------- discovery */
 
-function Section({ title, children, action, icon: Icon }: { title: string; children: React.ReactNode; action?: React.ReactNode; icon?: typeof Hash }) {
+function Section({ title, children, action, icon: Icon, bare }: { title: string; children: React.ReactNode; action?: React.ReactNode; icon?: typeof Hash; bare?: boolean }) {
+  if (bare) return <div className="psec bare">{children}</div>;
   return (
     <section className="psec">
       <header className="psec-head">
@@ -202,12 +233,12 @@ function Section({ title, children, action, icon: Icon }: { title: string; child
   );
 }
 
-export const UpNext = memo(function UpNext({ feed, count = 5 }: { feed: FeedState; count?: number }) {
+export const UpNext = memo(function UpNext({ feed, count = 5, bare }: { feed: FeedState; count?: number; bare?: boolean }) {
   const p = usePersisted();
   const next = feed.items.slice(feed.index + 1, feed.index + 1 + count);
   if (!next.length) return null;
   return (
-    <Section title="Up next" action={<span className="psec-note">{feed.items.length - feed.index - 1 > 50 ? 'endless' : `${feed.items.length - feed.index - 1} more`}</span>}>
+    <Section bare={bare} title="Up next" action={<span className="psec-note">{feed.items.length - feed.index - 1 > 50 ? 'endless' : `${feed.items.length - feed.index - 1} more`}</span>}>
       <div className="upnext">
         {next.map((it, i) => {
           const v = getVideo(p, it.id);
@@ -218,7 +249,7 @@ export const UpNext = memo(function UpNext({ feed, count = 5 }: { feed: FeedStat
   );
 });
 
-export const Related = memo(function Related({ video, feed, columns }: { video: Video; feed: FeedState; columns: number }) {
+export const Related = memo(function Related({ video, feed, columns, bare }: { video: Video; feed: FeedState; columns: number; bare?: boolean }) {
   const p = usePersisted();
   const list = useMemo(() => {
     const exclude = new Set(feed.items.slice(feed.index, feed.index + 6).map((i) => i.id));
@@ -227,8 +258,8 @@ export const Related = memo(function Related({ video, feed, columns }: { video: 
   }, [p.userVideos, p.activeId, p.accounts[p.activeId].hiddenCreators, video.id, columns]);
   if (!list.length) return null;
   return (
-    <Section title="Related videos">
-      <div className="tile-grid" style={{ '--cols': columns } as React.CSSProperties}>
+    <Section bare={bare} title="Related videos">
+      <div className={`tile-grid${bare ? ' auto' : ''}`} style={{ '--cols': columns } as React.CSSProperties}>
         {list.map((v) => (
           <VideoCard key={v.id} video={v} layout="tile" onOpen={() => playInFeed(v.id)} />
         ))}
@@ -253,13 +284,13 @@ export const MoreFromCreator = memo(function MoreFromCreator({ video }: { video:
   );
 });
 
-export const FriendsActivity = memo(function FriendsActivity({ limit = 5 }: { limit?: number }) {
+export const FriendsActivity = memo(function FriendsActivity({ limit = 5, bare }: { limit?: number; bare?: boolean }) {
   const p = usePersisted();
   const now = useNow();
   const acts = useMemo(() => friendActivity(p).slice(0, limit), [p, limit]);
   if (!acts.length) return null;
   return (
-    <Section title="Friends’ activity" action={<a className="link-btn" href="#/friends">Friends feed</a>}>
+    <Section bare={bare} title="Friends’ activity" action={<a className="link-btn" href="#/friends">Friends feed</a>}>
       <ul className="activity">
         {acts.map((a, i) => {
           const u = getUser(p, a.friendId);

@@ -11,6 +11,8 @@ interface Props {
   empty?: ReactNode;
   /** Shown over the last clip ("you're all caught up"). */
   endNote?: ReactNode;
+  /** False while this track slides away during a feed switch: nothing in it plays. */
+  live?: boolean;
   className?: string;
 }
 
@@ -21,7 +23,7 @@ const QUIET_MS = 170;
  * Vertical, one-at-a-time video track. Only the current clip and its two neighbours are mounted.
  * Wheel/trackpad gestures move exactly one clip per gesture; touch drags follow the finger.
  */
-export function FeedTrack({ feed, render, empty, endNote, className = '' }: Props) {
+export function FeedTrack({ feed, render, empty, endNote, className = '', live = true }: Props) {
   const p = usePersisted();
   const box = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState(0);
@@ -132,7 +134,7 @@ export function FeedTrack({ feed, render, empty, endNote, className = '' }: Prop
         if (!v) return null;
         return (
           <div key={id} className="track-item" style={{ '--o': offset } as React.CSSProperties} aria-hidden={offset !== 0}>
-            {render(v, offset === 0)}
+            {render(v, live && offset === 0)}
           </div>
         );
       })}

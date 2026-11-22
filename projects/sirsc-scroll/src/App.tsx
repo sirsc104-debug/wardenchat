@@ -14,7 +14,8 @@ import { Notifications } from './pages/Notifications';
 import { Studio } from './pages/Studio';
 import { Settings } from './pages/Settings';
 import { getState, useP, useS } from './state/store';
-import { applyInterestChanges, closeModal, focusSearch, openModal, openSheet, openVideo, rebuildFeeds, setCommentsOpen } from './state/actions';
+import { applyInterestChanges, closeModal, focusSearch, openModal, openSheet, openVideo, rebuildFeeds } from './state/actions';
+import { toggleSidebar } from './components/shell/Sidebar';
 import { navigate, useRoute, type Route } from './lib/router';
 import { isTyping, useLayout, type LayoutMode } from './lib/hooks';
 import { getVideo } from './lib/catalog';
@@ -57,7 +58,8 @@ export function App() {
   const theme = useP((p) => p.settings.theme);
   const density = useP((p) => p.settings.density);
   const reduced = useP((p) => p.settings.reducedMotion);
-  const collapsedSetting = useP((p) => p.settings.sidebarCollapsed);
+  const collapsedWide = useP((p) => p.settings.sidebarCollapsed);
+  const collapsedNarrow = useP((p) => p.settings.sidebarCollapsedNarrow);
   const listEmpty = useS((s) => s.feeds.list.items.length === 0);
 
   useEffect(() => {
@@ -98,7 +100,6 @@ export function App() {
           if (st.s.modal.type === 'interests') applyInterestChanges();
           closeModal();
         } else if (st.s.sheet) openSheet(null);
-        else if (st.s.commentsOpen) setCommentsOpen(false);
         else if (isTyping(e)) (e.target as HTMLElement).blur();
         return;
       }
@@ -110,14 +111,18 @@ export function App() {
       } else if (e.key === '?') {
         e.preventDefault();
         openModal({ type: 'shortcuts' });
+      } else if (e.key === '[' && layout !== 'mobile') {
+        e.preventDefault();
+        const narrow = layout === 'tablet';
+        toggleSidebar(narrow, narrow ? st.p.settings.sidebarCollapsedNarrow : st.p.settings.sidebarCollapsed);
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [layout]);
 
-  const forced = layout === 'tablet';
-  const collapsed = forced || collapsedSetting;
+  const narrow = layout === 'tablet';
+  const collapsed = narrow ? collapsedNarrow : collapsedWide;
 
   if (layout === 'mobile') {
     const feed = !!feedKind(route);
@@ -135,7 +140,7 @@ export function App() {
 
   return (
     <div className={`app app-${layout}${collapsed ? ' sb-collapsed' : ''}`}>
-      <Sidebar route={route} collapsed={collapsed} forced={forced} />
+      <Sidebar route={route} collapsed={collapsed} narrow={narrow} />
       <div className="main">
         <Page route={route} layout={layout} />
       </div>

@@ -1,7 +1,7 @@
 import { useMemo, type ReactNode } from 'react';
 import { Bell, Flame } from 'lucide-react';
 import { TopBar } from '../components/shell/TopBar';
-import { useLayout, useNow } from '../lib/hooks';
+import { useLayout, isDue, useNow } from '../lib/hooks';
 import { useAcct, usePersisted } from '../state/store';
 import { trendingHashtags } from '../lib/recommend';
 import { href } from '../lib/router';
@@ -10,7 +10,7 @@ import { href } from '../lib/router';
 function TopStrip() {
   const p = usePersisted();
   const now = useNow();
-  const unread = useAcct((a) => a.notifications.filter((n) => !n.read && n.at <= now).length);
+  const unread = useAcct((a) => a.notifications.filter((n) => !n.read && isDue(n.at, now)).length);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const tags = useMemo(() => trendingHashtags(p, 6), [p.userVideos]);
   return (

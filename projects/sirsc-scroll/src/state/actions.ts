@@ -56,9 +56,7 @@ export function focusSearch() {
   setS((s) => ({ ...s, searchFocus: s.searchFocus + 1 }));
 }
 
-export function setCommentsOpen(open: boolean, focus = false) {
-  setS((s) => ({ ...s, commentsOpen: open, composerFocus: focus ? s.composerFocus + 1 : s.composerFocus }));
-}
+
 
 /* ---------------------------------------------------------------- playback */
 
@@ -114,7 +112,7 @@ export function rebuildFeeds(keepCurrent = false) {
 }
 
 export function setActiveFeed(kind: FeedKind) {
-  setS((s) => (s.activeFeed === kind ? s : { ...s, activeFeed: kind, commentsOpen: false }));
+  setS((s) => (s.activeFeed === kind ? s : { ...s, activeFeed: kind }));
 }
 
 /** Re-rank the For You tail after the next item, so new signals shape what comes up. */
@@ -176,7 +174,6 @@ export function openList(ids: string[], startId: string, label: string, back: st
     ...s,
     activeFeed: 'list',
     playing: true,
-    commentsOpen: false,
     feeds: { ...s.feeds, list: { kind: 'list', items: ids.map((id) => ({ id, reason: label })), index: Math.max(0, ids.indexOf(startId)), label, back } },
   }));
 }
@@ -589,7 +586,7 @@ export function switchAccount(id: string) {
   setBoth((st) => {
     if (st.p.activeId === id) return st;
     const p = { ...st.p, activeId: id };
-    const s: Session = { ...st.s, activeFeed: st.s.activeFeed === 'list' ? 'foryou' : st.s.activeFeed, category: 'all', sort: 'recommended', commentsOpen: false, sheet: null, modal: null };
+    const s: Session = { ...st.s, activeFeed: st.s.activeFeed === 'list' ? 'foryou' : st.s.activeFeed, category: 'all', sort: 'recommended', sheet: null, modal: null, customizeOpen: false };
     return { p, s: rebuilt(p, s) };
   });
   toast(`Switched to ${getState().p.accounts[id].profile.name}`);

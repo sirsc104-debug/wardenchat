@@ -59,9 +59,11 @@ interface Props {
   autoFocus?: boolean;
   /** How many comments the preview shows. */
   previewCount?: number;
+  /** Widget layout: sort bar, a thread that scrolls on its own, composer pinned underneath. */
+  variant?: 'widget';
 }
 
-export const Comments = memo(function Comments({ video, mode, onExpand, autoFocus, previewCount = 3 }: Props) {
+export const Comments = memo(function Comments({ video, mode, onExpand, autoFocus, previewCount = 3, variant }: Props) {
   const p = usePersisted();
   const me = p.activeId;
   const [sort, setSort] = useState<Sort>('top');
@@ -86,6 +88,67 @@ export const Comments = memo(function Comments({ video, mode, onExpand, autoFocu
         <div className="comments-off">
           <MessageCircleOff size={18} /> The creator turned off comments for this video.
         </div>
+      </div>
+    );
+  }
+
+  const list = (
+    <ul className="comment-list">
+      {shown.map((c) => {
+        const reps = replies.get(c.id) ?? [];
+        const isOpen = open.has(c.id) || reps.some((r) => r.authorId === me && r.local);
+        return (
+          <li key={c.id}>
+            <CommentRow c={c} video={video} onReply={() => setReplyTo(c)} />
+            {reps.length > 0 && (
+              <div className="replies">
+                {isOpen && reps.map((r) => <CommentRow key={r.id} c={r} video={video} reply onReply={() => setReplyTo(c)} />)}
+                <button
+                  type="button"
+                  className="link-btn replies-toggle"
+                  onClick={() =>
+                    setOpen((s) => {
+                      const n = new Set(s);
+                      if (n.has(c.id)) n.delete(c.id);
+                      else n.add(c.id);
+                      return n;
+                    })
+                  }
+                >
+                  {isOpen ? 'Hide replies' : `View ${reps.length} ${reps.length === 1 ? 'reply' : 'replies'}`}
+                </button>
+              </div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+
+  if (variant === 'widget') {
+    return (
+      <div className="comments comments-widget">
+        <div className="cw-bar">
+          <span className="cw-count">{full(total)} comments</span>
+          <div className="seg seg-sm" role="tablist" aria-label="Sort comments">
+            <button type="button" role="tab" aria-selected={sort === 'top'} onClick={() => setSort('top')}>
+              Top
+            </button>
+            <button type="button" role="tab" aria-selected={sort === 'new'} onClick={() => setSort('new')}>
+              Newest
+            </button>
+          </div>
+        </div>
+        <div className="cw-scroll">
+          {list}
+          {!shown.length && (
+            <div className="comments-empty">
+              <MessageSquare size={18} /> No comments yet. Start the conversation.
+            </div>
+          )}
+          {sorted.length > 0 && <p className="comments-foot">Showing {sorted.length} of {full(total)} · sample comments are simulated</p>}
+        </div>
+        <Composer video={video} replyTo={replyTo} clearReply={() => setReplyTo(null)} focusKey={0} onPosted={(c) => c.parentId && setOpen((s) => new Set(s).add(c.parentId!))} />
       </div>
     );
   }

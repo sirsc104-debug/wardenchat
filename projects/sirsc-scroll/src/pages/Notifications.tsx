@@ -10,7 +10,7 @@ import { markAllRead, markRead, openVideo, toggleRead } from '../state/actions';
 import { getUser, getVideo } from '../lib/catalog';
 import { ago, agoLong, dayBucket } from '../lib/format';
 import { href, navigate } from '../lib/router';
-import { useLayout, useNow } from '../lib/hooks';
+import { useLayout, isDue, useNow } from '../lib/hooks';
 
 type Filter = 'all' | 'unread' | 'follow' | 'like' | 'comment' | 'mention' | 'share' | 'updates';
 
@@ -133,7 +133,7 @@ export function Notifications() {
   const layout = useLayout();
   const all = useAcct((a) => a.notifications);
   const [filter, setFilter] = useState<Filter>('all');
-  const due = useMemo(() => all.filter((n) => n.at <= now).sort((a, b) => b.at - a.at), [all, now]);
+  const due = useMemo(() => all.filter((n) => isDue(n.at, now)).sort((a, b) => b.at - a.at), [all, now]);
   const counts = useMemo(() => {
     const m = new Map<Filter, number>();
     for (const [f, , types] of FILTERS) m.set(f, f === 'all' ? due.length : f === 'unread' ? due.filter((n) => !n.read).length : due.filter((n) => types.includes(n.type)).length);

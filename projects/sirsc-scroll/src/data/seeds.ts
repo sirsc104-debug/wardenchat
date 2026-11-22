@@ -162,5 +162,5 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: 'dark',
   density: 'standard',
   sidebarCollapsed: false,
-  showDiscovery: true,
+  sidebarCollapsedNarrow: true,
 };

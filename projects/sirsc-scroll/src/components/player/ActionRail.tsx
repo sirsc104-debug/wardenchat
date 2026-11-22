@@ -1,14 +1,14 @@
 import { memo, useState } from 'react';
-import { Bookmark, ChevronDown, ChevronUp, Ellipsis, Heart, MessageCircle, Plus, Check, Share2 } from 'lucide-react';
+import { BarChart3, Bookmark, ChevronDown, ChevronUp, Ellipsis, Heart, LayoutGrid, ListVideo, MessageCircle, Plus, Check, Shapes, Share2 } from 'lucide-react';
 import type { Video } from '../../state/types';
 import { Avatar } from '../common/Avatar';
 import { Menu } from '../common/Menu';
 import { videoMenuItems } from './videoMenu';
 import { useAcct, usePersisted } from '../../state/store';
-import { go, openModal, openSheet, setCommentsOpen, toggleFollow, toggleLike, toggleSave } from '../../state/actions';
-import { commentCount, getUser, likeCount, saveCount, shareCount } from '../../lib/catalog';
+import { go, openModal, openSheet, toggleFollow, toggleLike, toggleSave } from '../../state/actions';
+import { focusWidget, setCustomizeOpen } from '../../state/widgets';
+import { commentCount, getUser, likeCount, saveCount, shareCount, viewCount } from '../../lib/catalog';
 import { compact } from '../../lib/format';
-import { href } from '../../lib/router';
 
 interface Props {
   video: Video;
@@ -26,14 +26,25 @@ export const ActionRail = memo(function ActionRail({ video, index, total, layout
   const self = video.creatorId === p.activeId;
   const [pop, setPop] = useState(0);
 
-  const openComments = () => (layout === 'mobile' ? openSheet('comments') : setCommentsOpen(true, true));
+  const desktop = layout === 'desktop';
+  // On desktop these controls open (or highlight) the matching widget; on phones they open sheets.
+  const openComments = () => (desktop ? focusWidget('comments', true) : openSheet('comments'));
+  const openCreator = () => (desktop ? focusWidget('creator') : openSheet('creator'));
+  const menu = desktop
+    ? [
+        ...videoMenuItems(video, p.activeId),
+        { label: 'Show up next', icon: ListVideo, onSelect: () => focusWidget('upnext'), divider: true },
+        { label: 'Show related videos', icon: Shapes, onSelect: () => focusWidget('related') },
+        { label: 'Customize widgets…', icon: LayoutGrid, onSelect: () => setCustomizeOpen(true) },
+      ]
+    : videoMenuItems(video, p.activeId);
 
   return (
     <div className={`rail rail-${layout}`}>
       <div className="rail-creator">
-        <a href={href.profile(creator?.handle ?? '')} className="rail-avatar" aria-label={`View @${creator?.handle}`} title={`@${creator?.handle}`}>
+        <button type="button" className="rail-avatar" onClick={openCreator} aria-label={`About @${creator?.handle}`} title={`About @${creator?.handle}`}>
           <Avatar user={creator} size={layout === 'mobile' ? 44 : 42} ring />
-        </a>
+        </button>
         {!self && (
           <button type="button" className={`rail-follow${following ? ' on' : ''}`} onClick={() => toggleFollow(video.creatorId)} aria-label={following ? `Unfollow @${creator?.handle} (F)` : `Follow @${creator?.handle} (F)`} title={following ? 'Following' : 'Follow (F)'}>
             {following ? <Check size={12} strokeWidth={3} /> : <Plus size={12} strokeWidth={3} />}
@@ -74,7 +85,15 @@ export const ActionRail = memo(function ActionRail({ video, index, total, layout
         </span>
         <span className="rail-n">{compact(shareCount(p, video))}</span>
       </button>
-      <Menu className="rail-btn rail-more" label="More options" items={videoMenuItems(video, p.activeId)} placement="left">
+      {desktop && (
+        <button type="button" className="rail-btn" onClick={() => focusWidget('stats')} aria-label={`Video statistics, ${viewCount(p, video)} views`} title="Statistics">
+          <span className="rail-ico">
+            <BarChart3 size={22} />
+          </span>
+          <span className="rail-n">{compact(viewCount(p, video))}</span>
+        </button>
+      )}
+      <Menu className="rail-btn rail-more" label="More options" items={menu} placement="left">
         <span className="rail-ico">
           <Ellipsis size={24} />
         </span>
@@ -84,10 +103,10 @@ export const ActionRail = memo(function ActionRail({ video, index, total, layout
           <button type="button" className="rail-step" onClick={() => go(-1)} disabled={index === 0} aria-label="Previous video (Up or K)" title="Previous (↑ / K)">
             <ChevronUp size={20} />
           </button>
-          <span className="rail-pos" aria-label={`Video ${index + 1} of ${total}`}>
+          <button type="button" className="rail-pos" onClick={() => focusWidget('upnext')} aria-label={`Video ${index + 1} of ${total}. Show up next`} title="Up next">
             {index + 1}
             <small>/{total}</small>
-          </span>
+          </button>
           <button type="button" className="rail-step" onClick={() => go(1)} aria-label="Next video (Down or J)" title="Next (↓ / J)">
             <ChevronDown size={20} />
           </button>

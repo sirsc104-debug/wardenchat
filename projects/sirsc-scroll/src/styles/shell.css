@@ -4,6 +4,7 @@
   grid-template-columns: var(--sb-w) minmax(0, 1fr);
   height: 100%;
   overflow: hidden;
+  transition: grid-template-columns 0.26s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 .app.sb-collapsed {
   grid-template-columns: 64px minmax(0, 1fr);
@@ -28,14 +29,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 4px;
-  padding: 2px 4px 8px 6px;
+  padding: 2px 4px 8px 10px;
   min-height: 44px;
 }
-.sidebar.collapsed .sb-head {
-  flex-direction: column;
-  padding: 2px 0 6px;
-  gap: 6px;
-}
+
 .brand {
   display: flex;
   align-items: center;
@@ -43,6 +40,11 @@
   min-width: 0;
 }
 .wordmark {
+  overflow: hidden;
+  max-width: 140px;
+  transition:
+    max-width 0.26s cubic-bezier(0.25, 0.8, 0.25, 1),
+    opacity 0.2s;
   display: flex;
   align-items: baseline;
   gap: 4px;
@@ -77,9 +79,11 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 12px;
+  width: 100%;
   height: 38px;
-  padding: 0 10px;
+  padding: 0 10px 0 14px;
+  text-align: left;
   border-radius: var(--radius);
   color: var(--text-2);
   font-weight: 700;
@@ -116,6 +120,10 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 160px;
+  transition:
+    max-width 0.26s cubic-bezier(0.25, 0.8, 0.25, 1),
+    opacity 0.2s;
 }
 .nav-badge {
   min-width: 20px;
@@ -147,35 +155,28 @@
   margin: 8px 6px;
   background: var(--line);
 }
-.sidebar.collapsed .nav-item {
-  justify-content: center;
-  padding: 0;
+/* Collapsed: icons stay exactly where they were; labels fold away. */
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .wordmark,
+.sidebar.collapsed .acct-names {
+  max-width: 0;
+  opacity: 0;
 }
-.sidebar.collapsed .nav-label {
+.sidebar.collapsed .nav-badge,
+.sidebar.collapsed .acct-chev {
   display: none;
 }
-[data-tip] {
-  position: relative;
+.nav-dot {
+  opacity: 0;
+  transition: opacity 0.2s;
 }
-[data-tip]:hover::after,
-[data-tip]:focus-visible::after {
-  content: attr(data-tip);
-  position: absolute;
-  left: calc(100% + 10px);
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 5px 9px;
-  border-radius: 6px;
-  background: var(--bg-4);
-  color: var(--text);
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 60;
-  box-shadow: var(--shadow);
+.sidebar.collapsed .nav-dot {
+  opacity: 1;
 }
-
+.sb-toggle {
+  flex: none;
+  color: var(--text-3);
+}
 /* account switcher */
 .acct {
   position: relative;
@@ -187,7 +188,7 @@
   align-items: center;
   gap: 9px;
   width: 100%;
-  padding: 6px;
+  padding: 6px 6px 6px 8px;
   border-radius: var(--radius);
   text-align: left;
 }
@@ -195,14 +196,17 @@
 .acct.open .acct-btn {
   background: var(--bg-2);
 }
-.sidebar.collapsed .acct-btn {
-  justify-content: center;
-}
+
 .acct-names {
   display: grid;
   min-width: 0;
   flex: 1;
   line-height: 1.25;
+  overflow: hidden;
+  max-width: 160px;
+  transition:
+    max-width 0.26s cubic-bezier(0.25, 0.8, 0.25, 1),
+    opacity 0.2s;
 }
 .acct-name {
   font-weight: 800;

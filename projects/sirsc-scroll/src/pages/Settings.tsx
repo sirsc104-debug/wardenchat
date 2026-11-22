@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
-import { Check, Database, Eye, Keyboard, MonitorPlay, Palette, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { Check, Database, Eye, Keyboard, LayoutGrid, MonitorPlay, Palette, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { WidgetControls } from '../components/widgets/CustomizeWidgets';
 import type { Density, Settings as SettingsT, ThemeName } from '../state/types';
 import { PageShell, Panel } from './PageShell';
 import { InterestEditor } from '../components/modals/InterestEditor';
@@ -96,6 +97,7 @@ export function Settings({ route }: { route: Route }) {
   const nav: [string, string, typeof Eye][] = [
     ['playback', 'Playback', MonitorPlay],
     ['appearance', 'Appearance', Palette],
+    ['widgets', 'Widgets', LayoutGrid],
     ['feed', 'Feed', SlidersHorizontal],
     ['demo', 'Demo data', Database],
     ['keys', 'Keyboard shortcuts', Keyboard],
@@ -157,8 +159,13 @@ export function Settings({ route }: { route: Route }) {
                 ['expanded', 'Expanded', 'Larger text and spacing'],
               ]}
             />
-            <Toggle label="Collapsed sidebar" hint="Icons only (screens under 1100px always collapse)" checked={s.sidebarCollapsed} onChange={(v) => set({ sidebarCollapsed: v })} />
-            <Toggle label="Discovery column" hint="Show Up Next, related videos and trends beside the comments on wide screens" checked={s.showDiscovery} onChange={(v) => set({ showDiscovery: v })} />
+            <Toggle label="Collapsed sidebar" hint="Icons only on wide screens ([ toggles it anywhere)" checked={s.sidebarCollapsed} onChange={(v) => set({ sidebarCollapsed: v })} />
+            <Toggle label="Collapsed sidebar on small screens" hint="Under 1100px wide, where it starts collapsed" checked={s.sidebarCollapsedNarrow} onChange={(v) => set({ sidebarCollapsedNarrow: v })} />
+          </Section>
+
+          <Section id="widgets" title="Widgets" icon={LayoutGrid}>
+            <p className="muted small">Choose what sits beside the video on desktop. Close a widget with its X; the others take its space. Hide everything for video-only Focus Mode (V).</p>
+            <WidgetControls />
           </Section>
 
           <Section id="feed" title="Feed" icon={SlidersHorizontal}>

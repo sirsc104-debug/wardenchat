@@ -23,7 +23,7 @@ import { BrandMark, Wordmark } from '../common/Brand';
 import { useAcct, useApp, usePersisted } from '../../state/store';
 import { confirmAction, resetAll, switchAccount, updateSettings } from '../../state/actions';
 import { getUser } from '../../lib/catalog';
-import { useDismiss, useNow } from '../../lib/hooks';
+import { useDismiss, isDue, useNow } from '../../lib/hooks';
 import { href, type Route } from '../../lib/router';
 import { DEMO_IDS } from '../../data/users';
 import { categoryLabel } from '../../data/categories';
@@ -46,14 +46,22 @@ function activeId(route: Route, me: string): string {
   return a;
 }
 
-export function Sidebar({ route, collapsed, forced }: { route: Route; collapsed: boolean; forced: boolean }) {
+export function Sidebar({ route, collapsed, narrow }: { route: Route; collapsed: boolean; narrow: boolean }) {
   const p = usePersisted();
   const now = useNow();
   const me = getUser(p, p.activeId)!;
-  const unread = useAcct((a) => a.notifications.filter((n) => !n.read && n.at <= now).length);
+  const unread = useAcct((a) => a.notifications.filter((n) => !n.read && isDue(n.at, now)).length);
   const saved = useAcct((a) => a.saved.length);
   const feed = useApp((st) => st.s.activeFeed);
   const current = activeId(route, me.handle);
+  // Collapsed icons get a tooltip; it's position: fixed so the scrolling nav never clips it.
+  const [tip, setTip] = useState<{ text: string; y: number } | null>(null);
+  const showTip = (e: React.SyntheticEvent) => {
+    const el = (e.target as HTMLElement).closest<HTMLElement>('[data-tip]');
+    if (!collapsed || !el) return setTip(null);
+    const r = el.getBoundingClientRect();
+    setTip({ text: el.dataset.tip!, y: r.top + r.height / 2 });
+  };
 
   const main: NavItem[] = [
     { id: 'foryou', label: 'For You', icon: House, to: '#/' },
@@ -78,36 +86,51 @@ export function Sidebar({ route, collapsed, forced }: { route: Route; collapsed:
         <a href={it.to} className={`nav-item${on ? ' on' : ''}`} aria-current={on ? 'page' : undefined} data-tip={collapsed ? it.label : undefined}>
           <span className="nav-ico">
             <it.icon size={19} />
-            {collapsed && !!it.badge && it.id === 'notifications' && <span className="nav-dot" />}
+            {!!it.badge && it.id === 'notifications' && <span className="nav-dot" />}
           </span>
           <span className="nav-label">{it.label}</span>
-          {!collapsed && !!it.badge && <span className={`nav-badge${it.id === 'notifications' ? ' hot' : ''}`}>{it.badge > 99 ? '99+' : it.badge}</span>}
+          {!!it.badge && <span className={`nav-badge${it.id === 'notifications' ? ' hot' : ''}`}>{it.badge > 99 ? '99+' : it.badge}</span>}
         </a>
       </li>
     );
   };
 
   return (
-    <nav className={`sidebar${collapsed ? ' collapsed' : ''}`} aria-label="Main">
+    <nav className={`sidebar${collapsed ? ' collapsed' : ''}`} aria-label="Main" onPointerOver={showTip} onPointerLeave={() => setTip(null)} onFocus={showTip} onBlur={() => setTip(null)} onClick={() => setTip(null)}>
+      {tip && collapsed && (
+        <span className="sb-tip" style={{ top: tip.y }} role="tooltip">
+          {tip.text}
+        </span>
+      )}
       <div className="sb-head">
         <a href="#/" className="brand" aria-label="SirSC Scroll, For You">
-          <BrandMark size={collapsed ? 30 : 28} />
-          {!collapsed && <Wordmark />}
+          <BrandMark size={28} />
+          <Wordmark />
         </a>
-        {!forced && (
-          <button type="button" className="icon-btn sb-toggle" onClick={() => updateSettings({ sidebarCollapsed: !collapsed })} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-            {collapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
-          </button>
-        )}
       </div>
       <div className="sb-scroll">
         <ul className="nav-list">{main.map(item)}</ul>
         <div className="nav-sep" />
         <ul className="nav-list">{library.map(item)}</ul>
       </div>
+      <button
+        type="button"
+        className="nav-item sb-toggle"
+        onClick={() => toggleSidebar(narrow, collapsed)}
+        aria-label={collapsed ? 'Expand sidebar ([)' : 'Collapse sidebar ([)'}
+        aria-expanded={!collapsed}
+        data-tip={collapsed ? 'Expand sidebar' : undefined}
+      >
+        <span className="nav-ico">{collapsed ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}</span>
+        <span className="nav-label">Collapse</span>
+      </button>
       <AccountSwitcher collapsed={collapsed} />
     </nav>
   );
+}
+
+export function toggleSidebar(narrow: boolean, collapsed: boolean) {
+  updateSettings(narrow ? { sidebarCollapsedNarrow: !collapsed } : { sidebarCollapsed: !collapsed });
 }
 
 export function AccountSwitcher({ collapsed, upward = true }: { collapsed: boolean; upward?: boolean }) {
@@ -121,15 +144,11 @@ export function AccountSwitcher({ collapsed, upward = true }: { collapsed: boole
     <div className={`acct${open ? ' open' : ''}`}>
       <button ref={btn} type="button" className="acct-btn" onClick={() => setOpen((o) => !o)} aria-haspopup="dialog" aria-expanded={open} aria-label={`Demo account: ${me.name}. Switch account`} data-tip={collapsed ? 'Switch demo account' : undefined}>
         <Avatar user={me} size={32} ring />
-        {!collapsed && (
-          <>
-            <span className="acct-names">
-              <span className="acct-name">{me.name}</span>
-              <span className="acct-handle">@{me.handle} · demo</span>
-            </span>
-            <ChevronsUpDown size={15} className="acct-chev" />
-          </>
-        )}
+        <span className="acct-names">
+          <span className="acct-name">{me.name}</span>
+          <span className="acct-handle">@{me.handle} · demo</span>
+        </span>
+        <ChevronsUpDown size={15} className="acct-chev" />
       </button>
       {open && (
         <div ref={pop} className={`acct-pop${upward ? ' up' : ''}`} role="dialog" aria-label="Switch demo account">

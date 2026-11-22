@@ -3,14 +3,14 @@ import { Avatar } from '../common/Avatar';
 import { useAcct, usePersisted } from '../../state/store';
 import { openModal } from '../../state/actions';
 import { getUser } from '../../lib/catalog';
-import { useNow } from '../../lib/hooks';
+import { isDue, useNow } from '../../lib/hooks';
 import { href, type Route } from '../../lib/router';
 
 export function MobileNav({ route }: { route: Route }) {
   const p = usePersisted();
   const now = useNow();
   const me = getUser(p, p.activeId)!;
-  const unread = useAcct((a) => a.notifications.filter((n) => !n.read && n.at <= now).length);
+  const unread = useAcct((a) => a.notifications.filter((n) => !n.read && isDue(n.at, now)).length);
   const a = route.path[0] ?? '';
   const feed = ['', 'following', 'trending', 'friends', 'watch', 'video'].includes(a);
   return (

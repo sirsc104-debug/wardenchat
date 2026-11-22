@@ -240,6 +240,21 @@ export interface AccountState {
 export type ThemeName = 'dark' | 'dim' | 'contrast';
 export type Density = 'compact' | 'standard' | 'expanded';
 
+export type WidgetId = 'info' | 'creator' | 'stats' | 'comments' | 'upnext' | 'related' | 'friends' | 'discovery';
+
+export interface WidgetSnapshot {
+  visible: Record<WidgetId, boolean>;
+  expanded: WidgetId | null;
+}
+
+/** Desktop widget workspace: which information widgets show beside the player, and how. */
+export interface WidgetPrefs extends WidgetSnapshot {
+  /** Display order (also the order inside each column). */
+  order: WidgetId[];
+  /** The layout before the last Focus Mode / Show all / Default, for one-click restore. */
+  previous: WidgetSnapshot | null;
+}
+
 export interface Settings {
   autoplay: boolean;
   autoAdvance: boolean;
@@ -251,8 +266,8 @@ export interface Settings {
   theme: ThemeName;
   density: Density;
   sidebarCollapsed: boolean;
-  /** Show the right-hand discovery column on wide screens. */
-  showDiscovery: boolean;
+  /** Separate preference for screens under 1100px, where the sidebar starts collapsed. */
+  sidebarCollapsedNarrow: boolean;
 }
 
 export interface Persisted {
@@ -262,6 +277,7 @@ export interface Persisted {
   userVideos: Video[];
   userComments: Comment[];
   settings: Settings;
+  widgets: WidgetPrefs;
 }
 
 export type FeedKind = 'foryou' | 'following' | 'trending' | 'friends' | 'list';
@@ -307,8 +323,10 @@ export interface Session {
   sort: SortKey;
   playing: boolean;
   muted: boolean;
-  /** Desktop panel: comments expanded to the full column. */
-  commentsOpen: boolean;
+  /** Bumped to draw attention to a widget (scroll into view, highlight, maybe focus its input). */
+  widgetFocus: { id: WidgetId; n: number; input: boolean } | null;
+  /** Desktop "Customize widgets" popover. */
+  customizeOpen: boolean;
   /** Mobile sheets. */
   sheet: 'comments' | 'creator' | null;
   modal: ModalState | null;

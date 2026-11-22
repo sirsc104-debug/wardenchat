@@ -1,4 +1,4 @@
-# SirSC Scroll
+# SirSC Scroll (V1.1)
 
 **Your Feed. Your Way.** A short-form video app for the SirSC ecosystem (SirSC Games, Warden Chat, SirSC AI), built for school Chromebooks and desktop browsers first, with a proper phone layout too.
 
@@ -23,17 +23,32 @@ npm run build:artifact # the same, shaped for a claude.ai Artifact: dist/sirsc-s
 
 `dist/sirsc-scroll.html` (about 600 KB) is the whole app in one file. It opens straight from disk (`file://`), makes no network requests, and can be pasted into a Google Sites embed. Progress is saved per browser.
 
-## Layout
+## Layout (V1.1)
 
 The desktop layout is built around the screen, not a stretched phone:
 
-| Column | What's in it |
+| Area | What's in it |
 | --- | --- |
-| Left (196px, or 64px collapsed) | Brand, For You / Following / Trending / Friends / Explore, Saved, History, Notifications (unread badge), Creator Studio, Profile, Settings, and the demo account switcher. Collapses to icons with tooltips; forced to icons under 1100px. |
-| Center | The 9:16 player sized from the available **height** (a ResizeObserver works out the width), with an overlay timeline (seek by click or drag), play/pause, time, speed, loop and volume. Beside it is the action rail: creator (follow +), like, comments, save, share, more, and previous/next with the position (`12/160`). |
-| Right (everything left over) | A top bar (search with suggestions, feed tabs, Upload), category filter chips + sort + refresh + feed preferences, then a panel tied to the current clip. When it's 600px or wider it splits in two: **Now playing** (creator card, title, description, hashtags, views/date/category, sound, exact likes/comments/saves/shares, why it was recommended, share row, and a comment preview that expands to the full thread in place with `C`) and **Discover** (Up next with reasons, related videos, friends' activity, more from the creator, trending hashtags, creators you might like, categories). Narrower, it becomes tabs: Overview, Comments, Up next, Discover. |
+| Sidebar (196px, or 64px collapsed) | Brand, For You / Following / Trending / Friends / Explore, Saved, History, Notifications (unread badge), Creator Studio, Profile, Settings, the Collapse control and the demo account switcher. Collapsing animates; icons stay put while labels fold away, and tooltips appear on hover or keyboard focus. The choice is remembered, with a separate setting for screens under 1100px (collapsed by default there, still expandable). `[` toggles it. |
+| Player column | The **feed bar** (For You / Following / Trending / Friends, with a cyan pill that glides to the active feed), and beside it **Focus Mode** and **Customize widgets**. Under it, the 9:16 player sized from the available height, and the action rail: creator, like, comments, save, share, statistics, more, and previous / position / next. The feed bar can't be closed or hidden. |
+| Widget area | Search and Upload, category chips and sort, then the **widgets**: Creator, Video information, Comments, Video statistics, Up next, Related videos, Friends' activity and Discovery. Each has a header with expand, an options menu (more room, move up/down, customize, hide) and close. |
 
-At 1366×768 (about 1366×657 inside Chrome) the player is ~358px wide at full height and the right column gets ~710px. At 1920×1080 the player is ~590px and the discovery grid goes to three columns; the comment preview also grows with screen height. On phones (under 720px) it switches to a full-screen swipe feed with overlay actions, creator info and sound, top feed tabs, bottom navigation, and slide-up sheets for comments and creator info.
+### How the widgets share space
+
+- Widgets are laid out in up to three columns, depending on how wide the area is (one under ~610px, two up to ~1000px, three beyond). At 1366×768 that's two: Video information above Comments, and Creator above Up next and Related.
+- Small widgets (Creator, Video information, Statistics) take the height they need, capped so they can't crowd the rest. Comments, Up next, Related, Friends and Discovery share whatever is left, and Comments gets the biggest share.
+- Close a widget and it folds away while its neighbours grow into the space. A column left with only small widgets merges into its neighbour, and an empty column collapses, so no blank box or column is ever left behind.
+- The area is only as wide as its columns can use (about 500px each). On a wide screen with few widgets, the player and widgets are centered together instead of stretching.
+- **Focus Mode** (the target button above the player, or `V`) hides every widget at once. The widget area collapses completely and the player centers. Pressing it again brings the previous layout back.
+- Controls bring widgets back without a trip to Settings: the title on the video opens Video information (with the full description), the creator's avatar or @handle opens Creator, the comments button (or `C`) opens Comments and puts the cursor in the box, the statistics button opens Video statistics, the position counter opens Up next, and the rail's More menu has Related videos. A widget that's already open is scrolled into view and highlighted instead of duplicated.
+- **Customize widgets** (beside Focus Mode, and in Settings → Widgets) has a switch per widget plus Show all, Hide all, Previous layout and Default layout.
+- The layout is saved in localStorage (separately from the demo accounts) and comes back after a refresh. Opening and closing widgets never restarts the video.
+
+### Switching feeds
+
+Each feed keeps its own position. Switching feeds slides the new feed in from the side of its tab while the old one slides out (about 240ms), the pill glides across, and the widgets update to the new video. Only the video area changes; the sidebar, feed bar and widget layout stay put. Rapid switching settles on the last tab clicked, with one playing clip.
+
+On phones nothing changes: full-screen swipe feed, feed tabs on top, and slide-up sheets for comments and creator info.
 
 ## Features
 
@@ -47,7 +62,7 @@ At 1366×768 (about 1366×657 inside Chrome) the player is ~358px wide at full h
 - **Notifications**: followers, likes, comments and replies, mentions, shares, trending alerts, new posts; filters, read/unread per item, mark all read, timestamps, a weekly summary and your own activity history.
 - **Creator Studio**: a 4-step upload dialog (clip style, sticker, colour, length; title, caption, category, hashtag editor; cover frame; visibility and comments) with a live preview, drafts, a simulated publishing flow, and analytics labelled as simulated (views per day with hover and table view, audience retention per video, engagement, traffic sources, audience interests, top videos). Published clips appear on your profile, in Explore and search, and in followers' feeds, and their (fake) audience arrives over the next few minutes.
 - **Recommendations**: category weights and hashtag affinity move with likes, saves, follows, comments, shares, full watches, replays, quick skips and Not interested. Every clip shows why it was picked. Feed preferences show your strongest interests and let you raise or lower any category, or reset. This is transparent weighted scoring, not machine learning.
-- **Settings**: playback (autoplay, auto-advance, loop, start muted, speed, volume, reduced animations), appearance (Dark, Dim, High contrast; Compact, Standard, Expanded; collapsed sidebar; discovery column), feed (interests, reset, hidden creators, Not interested, history pause and clear), demo data (switch, reset one account, reset all) and the shortcut reference.
+- **Settings**: playback (autoplay, auto-advance, loop, start muted, speed, volume, reduced animations), appearance (Dark, Dim, High contrast; Compact, Standard, Expanded; collapsed sidebar for wide and small screens), widgets, feed (interests, reset, hidden creators, Not interested, history pause and clear), demo data (switch, reset one account, reset all) and the shortcut reference.
 
 ## Keyboard
 
@@ -58,10 +73,12 @@ At 1366×768 (about 1366×657 inside Chrome) the player is ~358px wide at full h
 | Space | Play / pause |
 | ← / → | Seek 5 seconds |
 | L | Like |
-| C | Open / close comments |
+| C | Show comments and start typing |
 | S | Save |
 | F | Follow creator |
 | M | Mute / unmute |
+| V | Focus Mode: hide or bring back every widget |
+| [ | Collapse or expand the sidebar |
 | / | Search |
 | ? | Shortcut overlay |
 | Esc | Close dialog, menu, sheet or comments |
@@ -76,6 +93,8 @@ src/
   state/persist.ts      localStorage load/save (the layer to swap for an API)
   state/store.ts        tiny external store + selector hooks (useSyncExternalStore)
   state/actions.ts      every mutation: feeds, likes, comments, collections, studio, accounts
+  state/widgets.ts      the widget manager: show, hide, expand, focus, Focus Mode, presets, order
+  state/widgetDefaults.ts  widget ids, labels, sizing roles and the default layout
   data/                 fictional catalog: categories, users, 162 videos, comments, account seeds
   lib/catalog.ts        read helpers over seeded + local data (counts, visibility, friend activity)
   lib/recommend.ts      scoring, feeds, related videos, trending, creator suggestions
@@ -83,10 +102,12 @@ src/
   lib/analytics.ts      simulated Studio statistics
   lib/audio.ts          generated soundtrack for unmuted clips
   lib/router.ts         hash router (#/explore, #/profile/alex, #/video/v010, ...)
+  lib/widgetLayout.ts   plans the widget columns and how wide the widget area should be
   components/placeholders/  the 11 animated clip templates
-  components/player/    feed track (wheel/touch), stage + playback clock, action rail
-  components/panel/     side panel, comments, discovery sections
-  components/shell/     sidebar, top bar + search, feed controls, mobile nav
+  components/player/    feed track (wheel/touch), feed stack (switch animation), stage + playback clock, action rail
+  components/widgets/   widget frame, widget area (columns + fold/unfold), customize popover
+  components/panel/     comments and the sections the widgets are built from
+  components/shell/     sidebar, feed bar, top bar + search, feed controls, mobile nav
   components/modals/    upload, share, collections, report, preferences, confirm
   pages/                feed (desktop + mobile), Explore, Profile, Saved, History, Notifications, Studio, Settings
   styles/               tokens/themes, shell, feed, panel, placeholders, pages, modals, mobile
@@ -97,3 +118,5 @@ The fake data and demo logic live in `data/`, `lib/` and `state/`, separate from
 ## Checked
 
 Tested in headless Chromium at 1366×657, 1280×720, 1024×700, 1920×1080 and a Pixel/iPhone viewport: no console errors and no horizontal overflow; one wheel notch and one 40-event trackpad gesture each move exactly one clip; touch swipes work both ways; likes, saves, follows, comments (with a mention notifying another account), collections, sharing, Not interested, account switching, upload → publish → watch, deep links, themes, reset and persistence after reload all work; after 80 clip changes and several page visits, DOM nodes and event listeners stay flat and only the visible clip animates.
+
+V1.1 adds the widget workspace, Focus Mode, the permanent feed bar, animated feed switching and the animated sidebar. The acceptance checks for it (closing Video information grows Comments with no gap and no video restart; Comments alone fills the area; Focus Mode with a collapsed sidebar leaves only the player, feed bar, rail and icon sidebar, centered, with scrolling intact; the title and comments button bring their widgets back; rapid feed switching keeps the bar still, each feed's position and the widget layout; rapid sidebar toggling causes no overflow; widgets and sidebar survive a refresh with account data intact; 1280×720, 1366×768, 1920×1080, tablet and phone) all pass in headless Chromium, along with the V1 feature checks. Notifications created in the last few seconds now show immediately (they used to wait for the next 15-second clock tick).
