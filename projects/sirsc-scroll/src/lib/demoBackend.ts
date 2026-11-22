@@ -6,6 +6,8 @@
 import type { HttpResult, Transport } from './warden';
 
 interface DComment {
+  /** A made-up classmate comment (sorted after real ones). */
+  seed?: boolean;
   id: number;
   video_id: string;
   user: string;
@@ -39,6 +41,16 @@ const LINES = [
   'no because why is this so accurate',
   'saving this for later',
   'the timing on this is perfect',
+  'I need this on repeat',
+  'this deserves more views',
+  'who else is watching at lunch',
+  'the editing is so clean',
+  'okay that was impressive',
+  'never gets old',
+  'this made me smile',
+  'I was not ready for that',
+  'more of this please',
+  'certified classic',
 ];
 const REPLIES = ['fr', 'same honestly', 'LOL', 'wait you’re right', 'agreed', 'this ^'];
 
@@ -73,16 +85,21 @@ function seed(video: string) {
   if (s.seeded.includes(video)) return;
   s.seeded.push(video);
   const h = hash(video);
-  const n = h % 6;
+  // Like the real catalog: every video starts with 7 to 20 sample comments, up to a third of them replies.
+  const n = 7 + (h % 14);
+  const replies = Math.floor((n * ((h >>> 9) % 30)) / 100);
   const base = Date.now() - 3 * 86_400_000;
-  for (let i = 0; i < n; i++) {
+  const tops: DComment[] = [];
+  for (let i = 0; i < n - replies; i++) {
     const user = CLASSMATES[(h >>> (i + 2)) % CLASSMATES.length];
-    const c: DComment = { id: s.next++, video_id: video, user, parent_id: null, reply_to: null, body: LINES[(h >>> i) % LINES.length], at: base + i * 3_600_000 + (h % 1000) * 1000, likes: CLASSMATES.slice(0, (h >>> (i * 3)) % 5) };
+    const c: DComment = { seed: true, id: s.next++, video_id: video, user, parent_id: null, reply_to: null, body: LINES[(i + h) % LINES.length], at: base + i * 3_600_000 + (h % 1000) * 1000, likes: CLASSMATES.slice(0, (h >>> (i % 10)) % 5) };
     s.comments.push(c);
-    if ((h >>> (i + 5)) % 3 === 0) {
-      const ru = CLASSMATES[(h >>> (i + 7)) % CLASSMATES.length];
-      if (ru !== user) s.comments.push({ id: s.next++, video_id: video, user: ru, parent_id: c.id, reply_to: null, body: REPLIES[(h >>> i) % REPLIES.length], at: c.at + 1_800_000, likes: [] });
-    }
+    tops.push(c);
+  }
+  for (let i = 0; i < replies; i++) {
+    const parent = tops[i % Math.min(tops.length, 4)];
+    const ru = CLASSMATES[(h >>> (i + 7)) % CLASSMATES.length];
+    s.comments.push({ seed: true, id: s.next++, video_id: video, user: ru, parent_id: parent.id, reply_to: null, body: REPLIES[(h + i) % REPLIES.length], at: parent.at + 1_800_000, likes: [] });
   }
   s.likes[video] = CLASSMATES.slice(0, h % 7);
 }
@@ -176,7 +193,8 @@ function rpc(fn: string, b: Record<string, unknown>, user: string): HttpResult {
       seed(v);
       const all = visible(v);
       const top = all.filter((c) => c.parent_id == null);
-      top.sort((x, y) => (b.p_sort === 'top' ? y.likes.length - x.likes.length : 0) || y.at - x.at);
+      // Real comments first, then the sample ones.
+      top.sort((x, y) => Number(!!x.seed) - Number(!!y.seed) || (b.p_sort === 'top' ? y.likes.length - x.likes.length : 0) || y.at - x.at);
       const off = Number(b.p_offset) || 0;
       const lim = Number(b.p_limit) || 30;
       return ok({ video_id: v, sort: b.p_sort, offset: off, top_level: top.length, total: all.length, items: top.slice(off, off + lim).map((c) => json(c, user)) });

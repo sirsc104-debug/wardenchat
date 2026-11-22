@@ -18,6 +18,8 @@ interface ModItem {
   video_id: string;
   video_title: string | null;
   parent_id: number | null;
+  /** A sample comment (no Warden Chat account behind it). */
+  seeded?: boolean;
   author: { id: string; username: string };
   author_banned: boolean;
   body: string;
@@ -125,7 +127,8 @@ export function ModerateComments({ reviewKey }: { reviewKey: string }) {
       }
     >
       <p className="muted small rv-intro">
-        People report comments from the comment’s Report button; reported ones show here first. Removing a comment hides it from everyone (you can restore it). Stopping an account
+        People report comments from the comment’s Report button; reported ones show here first. Sample comments (the ones every video starts with) only show here if
+        someone reports them. Removing a comment hides it from everyone (you can restore it). Stopping an account
         hides all its comments and blocks new likes and comments on SirSC Scroll only. Comments from accounts suspended or banned on Warden Chat are already hidden.
       </p>
       <div className="seg rv-tabs" role="tablist" aria-label="Which comments">
@@ -153,6 +156,7 @@ export function ModerateComments({ reviewKey }: { reviewKey: string }) {
           <li key={c.id} className={`mod-item${c.deleted_at ? ' removed' : ''}`}>
             <div className="mod-top">
               <b>{c.author.username}</b>
+              {c.seeded && <span className="pill" title="A sample comment, not from a real account">sample</span>}
               {c.author_banned && <span className="pill pill-hot">stopped</span>}
               {c.parent_id != null && <span className="pill">reply</span>}
               <span className="muted small">{ago(Date.parse(c.created_at), now)}</span>
@@ -190,9 +194,11 @@ export function ModerateComments({ reviewKey }: { reviewKey: string }) {
                   <Check size={12} /> Keep it (close reports)
                 </button>
               )}
-              <button type="button" className="btn btn-ghost btn-xs" onClick={() => ban(c.author.id, c.author.username, !c.author_banned)}>
-                <Ban size={12} /> {c.author_banned ? `Allow ${c.author.username} again` : `Stop ${c.author.username}`}
-              </button>
+              {!c.seeded && (
+                <button type="button" className="btn btn-ghost btn-xs" onClick={() => ban(c.author.id, c.author.username, !c.author_banned)}>
+                  <Ban size={12} /> {c.author_banned ? `Allow ${c.author.username} again` : `Stop ${c.author.username}`}
+                </button>
+              )}
             </div>
           </li>
         ))}

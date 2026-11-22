@@ -171,12 +171,40 @@ Migration `supabase/migrations/20261122210000_scroll_social.sql` (applied as `sc
 
 **Checked** inside transactions that always roll back, with throwaway accounts created through Warden Chat's own sign-up triggers. Everything above behaved as described, and `anon` gets "permission denied" on every signed-in function. Supabase's security advisor lists only the expected items for these objects: "RLS enabled, no policy" (on purpose) and "SECURITY DEFINER callable" (the API).
 
+### Sample comments
+
+Migration `20261122220000_scroll_sample_comments.sql` (applied as `scroll_sample_comments` and `scroll_sample_comment_data`, then seeded):
+- **What:** every approved video gets 7 to 20 sample comments, so no video looks empty.
+  - Up to about a third of them are replies.
+  - The lines come from `scroll_private.seed_lines`: 331 lines (general ones, ones for each category, short replies, some naming the channel).
+  - The authors come from `scroll_private.seed_authors`: 460 made-up usernames, skipping any that a real Warden Chat account uses.
+  - Each video's set is deterministic, has no repeated lines, and is spread over the last 45 days.
+  - Likes are skewed low and scale with the video's views.
+- **Sample accounts aren't Warden Chat accounts:**
+  - They have no auth user or profile, so they never show up in Warden Chat.
+  - Their comments have `user_id` null and `seed_author` set.
+  - They never create notifications.
+- **Order:** real comments always come first (`scroll_comments_list` sorts by "is it a sample" before anything else), in Top and Newest.
+- **Moderation:** samples show only when reported or removed, marked `seeded`.
+- **New videos:** the trigger `scroll_videos_seed_comments` seeds a video when it becomes approved. Seeding a video twice does nothing.
+- **Seeded on 2026-11-22:** 14,078 comments across all 1,054 approved videos (min 7, max 20, 1,556 replies, median 37 likes).
+
+```sql
+-- remove every sample comment (real ones stay)
+delete from scroll_private.comments where seed_author is not null;
+-- stop seeding newly approved videos
+drop trigger scroll_videos_seed_comments on public.scroll_videos;
+-- seed (or re-seed after deleting) every approved video
+select sum(scroll_private.seed_video_comments(video_id)) from public.scroll_videos where review_status = 'approved';
+```
+
 Useful SQL:
 
 ```sql
 -- latest comments, with author and video
 select c.id, p.username, v.title, c.body, c.created_at, c.deleted_by
 from scroll_private.comments c join public.profiles p on p.id = c.user_id join public.scroll_videos v using (video_id)
+where c.seed_author is null
 order by c.created_at desc limit 50;
 
 -- open reports
