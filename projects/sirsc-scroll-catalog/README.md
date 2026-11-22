@@ -29,7 +29,7 @@ SirSC Scroll ──► scroll_feed / scroll_categories (read-only, approved + ac
 | Vault | `scroll_discovery_trigger_secret`, a random value created inside the database. |
 | Extension | `pg_net` (added; the documented way for pg_cron to call an Edge Function). |
 
-The migrations in `supabase/migrations/` are exactly what was applied, in order: `scroll_video_catalog`, `scroll_feed`, `scroll_schedule` and `scroll_preview_access`.
+The migrations in `supabase/migrations/` are exactly what was applied, in order: `scroll_video_catalog`, `scroll_feed`, `scroll_schedule`, `scroll_preview_access` and `scroll_review`.
 
 `scroll_preview_access` adds the owner **preview key**: a random value in Vault named `scroll_preview_key`.
 - **With the key:** `scroll_feed`, `scroll_categories` and the new `scroll_videos_lookup` (details for up to 200 IDs) also return pending videos, never rejected or inactive ones.
@@ -52,7 +52,26 @@ The migrations in `supabase/migrations/` are exactly what was applied, in order:
   - The function has no CORS headers and rejects the publishable and legacy anon keys.
 - **The YouTube key:** `YOUTUBE_API_KEY` is read only by the Edge Function. It's sent in the `x-goog-api-key` header, never in a URL, and any error text is redacted before it's logged.
 
-## Review before anything is public
+## Review statuses and the review page
+
+`review_status` moves from **pending** → **shortlisted** (the owner picked it for the school's list; only the owner sees it) → **approved** (the school agreed; public), or to **rejected** at any point.
+
+SirSC Scroll's review page (`#/review`) uses three functions. Each requires the **review key** (`scroll_review_key` in Vault):
+- `scroll_review_list`: pages of one status, with filters, counts and categories.
+- `scroll_review_set`: up to 1,000 IDs at a time.
+- `scroll_review_export`: the whole list for one status, for the school.
+
+How the keys work:
+- The preview key can only read, so it can't approve anything.
+- The review key also works as a preview key.
+- Every change is recorded in `scroll_private.review_log`.
+
+**Tested:**
+- **Refused (`401`):** the review functions with no key or with the preview key. The preview key could not approve anything.
+- **With the review key:** the list showed all 1,055 pending videos, search and export worked, and shortlisting saved and was logged.
+- **Visibility:** a shortlisted video was visible with the preview key, but not to the public lookup or a direct table read. It was then set back to pending.
+
+## Review before anything is public (SQL editor)
 
 Every discovered video starts as **`pending`** and is invisible to the app until someone approves it.
 

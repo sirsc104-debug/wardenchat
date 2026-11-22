@@ -167,4 +167,5 @@ export const DEFAULT_SETTINGS: Settings = {
   videoSource: typeof __MEMORY_ROUTER__ !== 'undefined' && __MEMORY_ROUTER__ ? 'demo' : 'catalog',
   playerHost: 'nocookie',
   catalogPreviewKey: '',
+  catalogReviewKey: '',
 };

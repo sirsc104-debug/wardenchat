@@ -148,6 +148,14 @@ export function configureCatalog(opts: { enabled: boolean; previewKey: string; i
   void loadInitial(gen);
 }
 
+/** Load the catalog again from scratch (after review changes, so rejected videos leave the feed). */
+export function reloadCatalog(interests: Category[]) {
+  if (!conf.enabled) return;
+  const previewKey = conf.previewKey;
+  conf = { enabled: false, previewKey };
+  configureCatalog({ enabled: true, previewKey, interests });
+}
+
 /** Retry after an error (for example when the network comes back). */
 export function retryCatalog(interests: Category[]) {
   conf = { enabled: false, previewKey: conf.previewKey };

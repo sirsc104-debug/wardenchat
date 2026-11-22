@@ -13,6 +13,7 @@ import { History } from './pages/History';
 import { Notifications } from './pages/Notifications';
 import { Studio } from './pages/Studio';
 import { Settings } from './pages/Settings';
+import { Review } from './pages/Review';
 import { getState, useP, useS } from './state/store';
 import { applyInterestChanges, closeModal, focusSearch, openModal, openSheet, openVideo, rebuildFeeds, toast } from './state/actions';
 import { toggleSidebar } from './components/shell/Sidebar';
@@ -50,6 +51,8 @@ function Page({ route, layout }: { route: Route; layout: LayoutMode }) {
       return <Studio route={route} />;
     case 'settings':
       return <Settings route={route} />;
+    case 'review':
+      return <Review />;
     default:
       return layout === 'mobile' ? <MobileFeed kind="foryou" /> : <FeedView kind="foryou" />;
   }

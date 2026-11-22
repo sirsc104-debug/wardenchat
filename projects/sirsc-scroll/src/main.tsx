@@ -12,6 +12,7 @@ import './styles/modals.css';
 import './styles/mobile.css';
 import './styles/motion.css';
 import './styles/youtube.css';
+import './styles/review.css';
 import { App } from './App';
 import { initMotion } from './lib/motion';
 

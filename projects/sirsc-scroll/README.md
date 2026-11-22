@@ -26,6 +26,26 @@ React 19 + TypeScript + Vite. Runtime dependencies are React, `lucide-react` (tr
   - Errors that look like the network or device (152, 153, the player script not loading) don't hide anything. After three in a row the app stops skipping and shows Next / Try again / Settings.
 - **Counts:** likes, comments, shares and saves on real videos start at 0 and come only from SirSC Scroll's own actions. Views are YouTube's, and no comments are generated for real videos.
 - **Channels:** they appear as creators, so you can follow them and open their profile, which links to the channel on YouTube.
+
+### Reviewing videos (owner only)
+
+Open **Settings › Videos › Review videos** (`#/review`). It needs the **review key**, a second random value in Vault. Get it with `select decrypted_secret from vault.decrypted_secrets where name = 'scroll_review_key';`.
+- **Why a separate key:** approving makes videos public, so the preview key can't approve anything. The review key also works as a preview key, and is saved as one when none is set.
+
+**The flow:**
+1. **To review:** most-watched first, filterable by category and searchable by title or channel. Shortlist what you'd put on the school's list, and reject the rest.
+2. **Shortlisted:** only you can see these.
+   - **List for the school** gives a copyable list by category, each video with its YouTube link, plus a CSV download.
+   - When the school agrees, **The school approved these** approves the whole shortlist. It asks first, because approved videos are public.
+3. **Approved:** public. **Unapprove** sends a video back to the shortlist.
+4. **Rejected:** never shown. **Back to review** undoes a rejection.
+
+**Ways to work:**
+- Every card has its own buttons. You can also tick several cards and use the actions in the selection row, which stays at the top while you scroll.
+- **Review one by one** plays each video with YouTube's embed. Keys: **A** shortlist, **R** reject, **J** or **→** skip, **K** or **←** back, **Esc** close.
+- Single changes can be undone from the notice that appears.
+- Every change is logged in the database.
+- When you leave the page, the feed reloads so rejected videos leave it.
 - **More videos:** they load in pages as you watch, so the browser never asks YouTube for anything except the player.
 - **Not covered:** scrolling or clicking over the video goes to YouTube's player, as with any embed. Use the keyboard, the rail or the area beside the video to move between videos.
 

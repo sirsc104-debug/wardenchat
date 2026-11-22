@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Check, Clapperboard, Database, Eye, Keyboard, KeyRound, LayoutGrid, MonitorPlay, Palette, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { Check, Clapperboard, Database, Eye, Keyboard, KeyRound, LayoutGrid, ListChecks, MonitorPlay, Palette, RotateCcw, SlidersHorizontal } from 'lucide-react';
 import { clearUnplayable, retryCatalog, unplayableCount, useCatalog } from '../lib/remoteCatalog';
 import { WidgetControls } from '../components/widgets/CustomizeWidgets';
 import { exitThen, withViewTransition } from '../lib/motion';
@@ -244,6 +244,12 @@ export function Settings({ route }: { route: Route }) {
                 : 'Standard youtube.com embeds. On the school Chromebooks these failed with error 152-4 in the playback test.'}
             </p>
             <PreviewKey value={s.catalogPreviewKey} onSave={(k) => set({ catalogPreviewKey: k })} />
+            <div className="btn-row">
+              <a className="btn btn-ghost btn-sm" href="#/review">
+                <ListChecks size={14} /> Review videos
+              </a>
+              <span className="muted small">Shortlist, reject and approve videos, and export the list for the school. Needs the review key.</span>
+            </div>
             <HiddenVideos />
           </Section>
 

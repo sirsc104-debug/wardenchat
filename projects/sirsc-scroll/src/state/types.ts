@@ -291,6 +291,8 @@ export interface Settings {
   playerHost: 'nocookie' | 'youtube';
   /** Owner preview key (from Vault). Lets this browser also see videos still pending review. */
   catalogPreviewKey: string;
+  /** Owner review key (from Vault). Lets the review page shortlist, approve and reject videos. */
+  catalogReviewKey: string;
 }
 
 export interface Persisted {
