@@ -1,5 +1,6 @@
-import { useEffect, type ReactNode } from 'react';
-import { Check, Database, Eye, Keyboard, LayoutGrid, MonitorPlay, Palette, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Check, Clapperboard, Database, Eye, Keyboard, KeyRound, LayoutGrid, MonitorPlay, Palette, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { clearUnplayable, retryCatalog, unplayableCount, useCatalog } from '../lib/remoteCatalog';
 import { WidgetControls } from '../components/widgets/CustomizeWidgets';
 import { exitThen, withViewTransition } from '../lib/motion';
 import type { Density, Settings as SettingsT, ThemeName } from '../state/types';
@@ -58,6 +59,83 @@ function Section({ id, title, icon: Icon, children }: { id: string; title: strin
   );
 }
 
+/** Where the real videos stand: loading, how many, preview or approved-only, or why demo clips are showing. */
+function CatalogStatus({ interests }: { interests: Parameters<typeof retryCatalog>[0] }) {
+  const c = useCatalog();
+  let text: string;
+  if (c.status === 'loading') text = 'Loading the catalog…';
+  else if (c.status === 'ready') text = `${c.count.toLocaleString()} real videos loaded${c.exhausted ? ' (all of them)' : ', more load as you scroll'}. ${c.preview ? 'Preview: includes videos not yet approved for students.' : 'Approved videos only.'}`;
+  else if (c.status === 'empty') text = 'No approved videos yet, so the demo clips are showing. Add the preview key below to see the videos waiting for review.';
+  else if (c.status === 'error') text = `Couldn’t reach the catalog (${c.error ?? 'network error'}), so the demo clips are showing.`;
+  else text = 'Off.';
+  return (
+    <div className="catalog-status" role="status">
+      <span>{text}</span>
+      {c.keyRejected && <span className="warn-text">The preview key wasn’t accepted. Check it and save it again.</span>}
+      {c.status === 'error' && (
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => retryCatalog(interests)}>
+          <RotateCcw size={14} /> Try again
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** The owner's preview key. Kept in this browser's saved settings only; never in the site's code. */
+function PreviewKey({ value, onSave }: { value: string; onSave: (k: string) => void }) {
+  const [draft, setDraft] = useState(value);
+  useEffect(() => setDraft(value), [value]);
+  const changed = draft.trim() !== value;
+  return (
+    <div className="preview-key">
+      <label htmlFor="preview-key">
+        <KeyRound size={14} /> <b>Preview key</b>
+      </label>
+      <p className="muted small">
+        Lets this browser also see videos that are still waiting for review. Get it in the Supabase SQL editor with{' '}
+        <code>select decrypted_secret from vault.decrypted_secrets where name = 'scroll_preview_key';</code> It’s saved in this browser only.
+      </p>
+      <div className="btn-row">
+        <input
+          id="preview-key"
+          type="password"
+          autoComplete="off"
+          spellCheck={false}
+          placeholder="Paste the preview key"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && changed) onSave(draft.trim());
+          }}
+        />
+        <button type="button" className="btn btn-accent btn-sm" disabled={!changed} onClick={() => onSave(draft.trim())}>
+          Save
+        </button>
+        {value && (
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => onSave('')}>
+            Remove
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Videos YouTube said can't be embedded (or are gone) are hidden on this device; this brings them back. */
+function HiddenVideos() {
+  const c = useCatalog();
+  const n = c.version >= 0 ? unplayableCount() : 0;
+  if (!n) return null;
+  return (
+    <div className="btn-row">
+      <span className="muted small">{n} video{n === 1 ? '' : 's'} hidden on this device because YouTube wouldn’t play them.</span>
+      <button type="button" className="btn btn-ghost btn-sm" onClick={clearUnplayable}>
+        Show them again
+      </button>
+    </div>
+  );
+}
+
 export function ShortcutTable() {
   return (
     <table className="shortcut-table">
@@ -97,6 +175,7 @@ export function Settings({ route }: { route: Route }) {
 
   const nav: [string, string, typeof Eye][] = [
     ['playback', 'Playback', MonitorPlay],
+    ['videos', 'Videos', Clapperboard],
     ['appearance', 'Appearance', Palette],
     ['widgets', 'Widgets', LayoutGrid],
     ['feed', 'Feed', SlidersHorizontal],
@@ -118,7 +197,7 @@ export function Settings({ route }: { route: Route }) {
         )}
         <div className="settings-body">
           <Section id="playback" title="Playback" icon={MonitorPlay}>
-            <Toggle label="Autoplay simulated videos" hint="Start each clip as soon as it’s on screen" checked={s.autoplay} onChange={(v) => set({ autoplay: v })} />
+            <Toggle label="Autoplay" hint="Start each video as soon as it’s on screen" checked={s.autoplay} onChange={(v) => set({ autoplay: v })} />
             <Toggle label="Auto-advance" hint="Go to the next video when one ends (takes priority over loop)" checked={s.autoAdvance} onChange={(v) => set({ autoAdvance: v })} />
             <Toggle label="Loop current video" hint={s.autoAdvance ? 'Off while auto-advance is on' : 'Replay a clip when it ends'} checked={s.loop} onChange={(v) => set({ loop: v })} />
             <Toggle label="Start muted" hint="Clips open with the generated soundtrack off" checked={s.startMuted} onChange={(v) => (set({ startMuted: v }), setMuted(v))} />
@@ -137,6 +216,35 @@ export function Settings({ route }: { route: Route }) {
               <input type="range" min={0} max={1} step={0.05} value={s.volume} onChange={(e) => set({ volume: Number(e.target.value) })} aria-label="Volume" />
             </label>
             <Toggle label="Reduced animations" hint="Freeze placeholder animations and use quick fades instead of slides" checked={s.reducedMotion} onChange={(v) => set({ reducedMotion: v })} />
+          </Section>
+
+          <Section id="videos" title="Videos" icon={Clapperboard}>
+            <Choice
+              label="Video source"
+              value={s.videoSource}
+              options={[
+                ['catalog', 'Real videos', 'From the SirSC Scroll catalog, played with YouTube’s own player'],
+                ['demo', 'Demo clips', 'The animated placeholder videos'],
+              ]}
+              onChange={(v) => set({ videoSource: v })}
+            />
+            {s.videoSource === 'catalog' && <CatalogStatus interests={topInterests(p.accounts[p.activeId]).slice(0, 3).map((x) => x.category)} />}
+            <Choice
+              label="Player address"
+              value={s.playerHost}
+              options={[
+                ['nocookie', 'youtube-nocookie.com', 'YouTube’s privacy-enhanced embeds. Played on school Chromebooks in the playback test; needs the school’s approval before the site is public.'],
+                ['youtube', 'youtube.com', 'Standard embeds. Failed with error 152-4 on school Chromebooks.'],
+              ]}
+              onChange={(v) => set({ playerHost: v })}
+            />
+            <p className="muted small">
+              {s.playerHost === 'nocookie'
+                ? 'youtube-nocookie.com is YouTube’s own privacy-enhanced embed address. It doesn’t use your YouTube sign-in, so YouTube restrictions tied to a school account may not apply in it. The school reviews this before the site goes public.'
+                : 'Standard youtube.com embeds. On the school Chromebooks these failed with error 152-4 in the playback test.'}
+            </p>
+            <PreviewKey value={s.catalogPreviewKey} onSave={(k) => set({ catalogPreviewKey: k })} />
+            <HiddenVideos />
           </Section>
 
           <Section id="appearance" title="Appearance" icon={Palette}>

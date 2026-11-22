@@ -1,7 +1,7 @@
 import { memo, useState, type ReactNode } from 'react';
 import { Eye, Heart, Play } from 'lucide-react';
 import type { Video } from '../../state/types';
-import { Placeholder } from '../placeholders/Placeholder';
+import { VideoArt } from './VideoArt';
 import { usePersisted } from '../../state/store';
 import { getUser, likeCount, viewCount } from '../../lib/catalog';
 import { compact, duration } from '../../lib/format';
@@ -32,7 +32,7 @@ export const VideoCard = memo(function VideoCard({ video, onOpen, layout = 'grid
     <div className={`vcard vcard-${layout}${active ? ' is-active' : ''}`} data-vid={video.id} style={index !== undefined ? ({ '--n': index } as React.CSSProperties) : undefined} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
       <button type="button" className="vcard-hit" onClick={() => onOpen(video)} aria-label={`Play ${video.title} by @${creator?.handle}`}>
         <span className="vthumb">
-          <Placeholder video={video} running={hover && layout !== 'row'} handle={creator?.handle} />
+          <VideoArt video={video} running={hover && layout !== 'row'} handle={creator?.handle} />
           <span className="vthumb-shade" />
           {rank !== undefined && <span className="vthumb-rank">{rank}</span>}
           {badge && <span className="vthumb-badge">{badge}</span>}

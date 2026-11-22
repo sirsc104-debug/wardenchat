@@ -3,7 +3,7 @@ import { AtSign, Bell, BellOff, CheckCheck, Flame, Heart, MessageSquareText, Sen
 import type { ActivityEntry, AppNotification, NotificationType } from '../state/types';
 import { PageShell, Panel } from './PageShell';
 import { Avatar } from '../components/common/Avatar';
-import { Placeholder } from '../components/placeholders/Placeholder';
+import { VideoArt } from '../components/common/VideoArt';
 import { Empty } from '../components/common/Empty';
 import { useAcct, usePersisted } from '../state/store';
 import { markAllRead, markRead, openVideo, toggleRead } from '../state/actions';
@@ -71,7 +71,7 @@ function NoteRow({ n, index }: { n: AppNotification; index: number }) {
         </span>
         {video && (
           <span className="note-thumb">
-            <Placeholder video={video} running={false} />
+            <VideoArt video={video} running={false} />
           </span>
         )}
       </button>

@@ -1,6 +1,18 @@
 # Connecting SirSC Scroll to the real catalog
 
-This is the plan for replacing fake video records with real ones **without rewriting the social interface**. Nothing in `projects/sirsc-scroll` has been changed yet. Per the brief, the fake player stays until the real catalog has been tested.
+**Status: done.** SirSC Scroll now plays real videos by default; see "Real videos" in `projects/sirsc-scroll/README.md`.
+
+The client files moved into the app as `src/lib/scrollCatalog.ts` and `src/lib/videoSource.ts`, alongside new code:
+- `src/lib/remoteCatalog.ts` (the video pool)
+- `src/lib/youtube.ts`
+- `src/components/player/YouTubeScreen.tsx`
+- `src/components/common/VideoArt.tsx`
+
+It follows the plan below, with two additions:
+- **Preview key:** an owner preview key (`scroll_preview_key` in Vault, migration `scroll_preview_access`) lets the owner's browser see videos still pending review. "Approved" keeps meaning approved for students.
+- **Lookup by ID:** `scroll_videos_lookup` reloads saved, liked and history items that aren't in the loaded pages.
+
+The plan, as written before the work:
 
 ## Connection details
 

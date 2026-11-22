@@ -1,9 +1,9 @@
 // Read-only client for the SirSC Scroll catalog (Supabase). No dependencies: plain fetch to PostgREST.
-// Needs only the project URL and the public publishable key; the database only ever returns approved,
-// active videos to this key (Row Level Security), and it cannot write anything.
+// It needs only the project URL and the public publishable key. With that key the database returns
+// approved, active videos only and accepts no writes; the owner's preview key (typed into Settings,
+// kept in this browser) also lets pending videos through. YouTube is never searched from here.
 
 export interface CatalogConfig {
-  /** e.g. https://djmyvnaragfwoaljzexn.supabase.co */
   url: string;
   /** The project's publishable key (sb_publishable_...). Safe to ship in browser code. */
   publishableKey: string;
@@ -16,7 +16,7 @@ export type CatalogCategory =
   | 'gaming' | 'memes' | 'comedy' | 'sports' | 'technology' | 'animals'
   | 'science' | 'music' | 'viral' | 'internet_humor' | 'trending_entertainment';
 
-/** One item from scroll_feed. Metadata comes from the YouTube Data API and is refreshed by the server. */
+/** One catalog record. Metadata comes from the YouTube Data API and is refreshed by the server. */
 export interface CatalogVideo {
   video_id: string;
   title: string;
@@ -39,6 +39,8 @@ export interface CatalogVideo {
 export interface FeedPage {
   feed: CatalogFeed;
   category: CatalogCategory | null;
+  /** True when the preview key was accepted (pending videos included). */
+  preview: boolean;
   items: CatalogVideo[];
   /** Opaque. Pass it back to get the next page; null when there are no more. */
   next_cursor: string | null;
@@ -53,8 +55,9 @@ export interface FeedRequest {
   limit?: number;
   /** IDs already shown, so they aren't returned again (max 1000 are used). */
   exclude?: string[];
-  /** for_you only: categories to favour, e.g. the local recommender's top interests. */
+  /** for_you only: categories to favour (pass the same list for every page of one feed). */
   boostCategories?: CatalogCategory[];
+  previewKey?: string;
   signal?: AbortSignal;
 }
 
@@ -78,12 +81,12 @@ async function rpc<T>(cfg: CatalogConfig, fn: string, body: Record<string, unkno
     } catch {
       /* not JSON */
     }
-    throw new CatalogError(res.status, message);
+    throw new CatalogError(res.status, message || `HTTP ${res.status}`);
   }
   return (await res.json()) as T;
 }
 
-/** One page of a feed. The server never runs a YouTube search for this; it only reads the catalog. */
+/** One page of a feed. The server only reads the stored catalog. */
 export function fetchFeed(cfg: CatalogConfig, req: FeedRequest): Promise<FeedPage> {
   return rpc<FeedPage>(cfg, 'scroll_feed', {
     p_feed: req.feed,
@@ -92,10 +95,16 @@ export function fetchFeed(cfg: CatalogConfig, req: FeedRequest): Promise<FeedPag
     p_limit: req.limit ?? 20,
     p_exclude: req.exclude ?? [],
     p_boost_categories: req.boostCategories ?? [],
+    p_preview_key: req.previewKey || null,
   }, req.signal);
 }
 
-/** Approved video counts per category. */
-export function fetchCategories(cfg: CatalogConfig, signal?: AbortSignal): Promise<{ category: CatalogCategory; videos: number }[]> {
-  return rpc(cfg, 'scroll_categories', {}, signal);
+/** Details for specific YouTube IDs (at most 200 per call), with the same visibility rule. */
+export function lookupVideos(cfg: CatalogConfig, ids: string[], previewKey?: string, signal?: AbortSignal): Promise<{ preview: boolean; items: CatalogVideo[] }> {
+  return rpc(cfg, 'scroll_videos_lookup', { p_ids: ids.slice(0, 200), p_preview_key: previewKey || null }, signal);
+}
+
+/** Video counts per category. */
+export function fetchCategories(cfg: CatalogConfig, previewKey?: string, signal?: AbortSignal): Promise<{ category: CatalogCategory; videos: number }[]> {
+  return rpc(cfg, 'scroll_categories', { p_preview_key: previewKey || null }, signal);
 }

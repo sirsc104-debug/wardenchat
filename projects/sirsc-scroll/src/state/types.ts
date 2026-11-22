@@ -47,6 +47,21 @@ export interface RecoMeta {
 
 export type Visibility = 'public' | 'friends' | 'private';
 
+/** A real video from the SirSC Scroll catalog, played with YouTube's official embedded player. */
+export interface YouTubeSource {
+  kind: 'youtube';
+  youtubeId: string;
+  thumbnailUrl: string | null;
+  /** From the embed size YouTube reports; vertical alone doesn't prove it's a YouTube Short. */
+  orientation: 'vertical' | 'horizontal' | 'square' | null;
+  aspectRatio: number | null;
+  channelId: string | null;
+  channelTitle: string | null;
+}
+
+/** How a video plays: demo videos (no source) use the animated placeholder. */
+export type VideoSource = YouTubeSource;
+
 export interface Video {
   id: string;
   creatorId: string;
@@ -79,6 +94,8 @@ export interface Video {
   local?: boolean;
   visibility?: Visibility;
   allowComments?: boolean;
+  /** Set for real catalog videos; absent for the demo clips and local uploads. */
+  source?: VideoSource;
 }
 
 export type UserKind = 'creator' | 'demo' | 'friend';
@@ -268,6 +285,12 @@ export interface Settings {
   sidebarCollapsed: boolean;
   /** Separate preference for screens under 1100px, where the sidebar starts collapsed. */
   sidebarCollapsedNarrow: boolean;
+  /** Real YouTube videos from the SirSC Scroll catalog, or the animated demo clips. */
+  videoSource: 'catalog' | 'demo';
+  /** Embed address for real videos. */
+  playerHost: 'nocookie' | 'youtube';
+  /** Owner preview key (from Vault). Lets this browser also see videos still pending review. */
+  catalogPreviewKey: string;
 }
 
 export interface Persisted {

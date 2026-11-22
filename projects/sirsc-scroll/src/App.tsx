@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import type { FeedKind } from './state/types';
 import { Sidebar } from './components/shell/Sidebar';
 import { MobileNav } from './components/shell/MobileNav';
@@ -14,11 +14,14 @@ import { Notifications } from './pages/Notifications';
 import { Studio } from './pages/Studio';
 import { Settings } from './pages/Settings';
 import { getState, useP, useS } from './state/store';
-import { applyInterestChanges, closeModal, focusSearch, openModal, openSheet, openVideo, rebuildFeeds } from './state/actions';
+import { applyInterestChanges, closeModal, focusSearch, openModal, openSheet, openVideo, rebuildFeeds, toast } from './state/actions';
 import { toggleSidebar } from './components/shell/Sidebar';
 import { navigate, useRoute, type Route } from './lib/router';
 import { isTyping, useLayout, type LayoutMode } from './lib/hooks';
-import { getVideo } from './lib/catalog';
+import { getVideo, videoMode, type VideoMode } from './lib/catalog';
+import { configureCatalog, lookupCatalogIds, useCatalog } from './lib/remoteCatalog';
+import { topInterests } from './lib/recommend';
+import type { AccountState } from './state/types';
 
 const FEEDS: Record<string, FeedKind> = { '': 'foryou', following: 'following', trending: 'trending', friends: 'friends', watch: 'list' };
 
@@ -61,6 +64,12 @@ export function App() {
   const collapsedWide = useP((p) => p.settings.sidebarCollapsed);
   const collapsedNarrow = useP((p) => p.settings.sidebarCollapsedNarrow);
   const listEmpty = useS((s) => s.feeds.list.items.length === 0);
+  const videoSource = useP((p) => p.settings.videoSource);
+  const previewKey = useP((p) => p.settings.catalogPreviewKey);
+  const activeId = useP((p) => p.activeId);
+  const catalog = useCatalog();
+  const lastMode = useRef<VideoMode | null>(null);
+  const triedLinks = useRef(new Set<string>());
 
   useLayoutEffect(() => {
     const r = document.documentElement;
@@ -70,21 +79,71 @@ export function App() {
     r.dataset.motion = reduced ? 'reduced' : 'full';
   }, [theme, density, reduced]);
 
-  // Build every feed once on boot.
+  // Real videos: switch the catalog on or off, or apply a new preview key, from Settings.
   useEffect(() => {
-    rebuildFeeds();
-  }, []);
+    const { p } = getState();
+    const interests = topInterests(p.accounts[p.activeId]).slice(0, 3).map((x) => x.category);
+    configureCatalog({ enabled: videoSource === 'catalog', previewKey, interests });
+  }, [videoSource, previewKey]);
 
-  // Deep links (#/video/:id) open the clip, then For You continues after it.
+  // Build every feed on boot, and again whenever the set of videos changes (catalog loaded, more pages,
+  // a video hidden as unplayable). Within the same mode, what's on screen stays put.
+  useEffect(() => {
+    const mode = videoMode(getState().p);
+    rebuildFeeds(lastMode.current === mode);
+    lastMode.current = mode;
+  }, [catalog.version, catalog.status]);
+
+  // Say once per visit why demo clips are showing, or that the feed includes unreviewed videos.
+  const noticed = useRef('');
+  useEffect(() => {
+    if (videoSource !== 'catalog') return;
+    let note = '';
+    if (catalog.status === 'empty') note = 'No approved real videos yet, so demo clips are showing. Add your preview key in Settings › Videos.';
+    else if (catalog.status === 'error') note = 'Couldn’t reach the video catalog, so demo clips are showing.';
+    else if (catalog.status === 'ready' && catalog.preview) note = 'Preview: your feed includes videos not yet approved for students.';
+    if (note && noticed.current !== note) {
+      noticed.current = note;
+      toast(note, 'Settings', () => navigate('#/settings/videos'));
+    }
+  }, [catalog.status, catalog.preview, videoSource]);
+
+  // Saved, liked and watched real videos that aren't in the loaded pages yet: fetch their details.
+  useEffect(() => {
+    if (catalog.status !== 'ready' && catalog.status !== 'empty') return;
+    const a: AccountState = getState().p.accounts[activeId];
+    void lookupCatalogIds([
+      ...a.liked,
+      ...a.saved,
+      ...a.collections.flatMap((c) => c.videoIds),
+      ...a.history.map((h) => h.videoId),
+      ...a.shares.map((x) => x.videoId),
+    ]);
+  }, [catalog.status, activeId]);
+
+  // Deep links (#/video/:id) open the clip, then For You continues after it. A real video that isn't
+  // loaded yet is looked up first.
   useEffect(() => {
     if (route.path[0] === 'video' && route.path[1]) {
+      const id = route.path[1];
       const { p } = getState();
-      if (getVideo(p, route.path[1])) openVideo(route.path[1]);
-      navigate(getVideo(p, route.path[1]) ? '#/watch' : '#/', true);
+      if (getVideo(p, id)) {
+        openVideo(id);
+        navigate('#/watch', true);
+      } else if (id.startsWith('yt-') && catalog.status === 'loading') {
+        // Wait for the catalog.
+      } else if (id.startsWith('yt-') && catalog.status === 'ready' && !triedLinks.current.has(id)) {
+        triedLinks.current.add(id);
+        void lookupCatalogIds([id]).then(() => {
+          if (!getVideo(getState().p, id)) navigate('#/', true);
+        });
+      } else {
+        navigate('#/', true);
+      }
     } else if (route.path[0] === 'watch' && listEmpty) {
       navigate('#/', true);
     }
-  }, [route.hash, listEmpty, route.path]);
+  }, [route.hash, listEmpty, route.path, catalog.status, catalog.version]);
 
   // Page changes scroll the new page to the top and close any sheet.
   useEffect(() => {

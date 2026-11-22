@@ -2,6 +2,21 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Video } from '../../state/types';
 import { endWatch, startWatch } from '../../state/actions';
 
+/** A real player (YouTube) that owns the time for the clip on screen. */
+export interface ExternalClock {
+  /** Seconds into the video. */
+  time(): number;
+  /** Seconds, or 0 while unknown. */
+  duration(): number;
+  /** The player is actually playing (not buffering, paused or ended). */
+  isPlaying(): boolean;
+  /** True once after the player reports the video ended; reading it clears it. */
+  consumeEnded(): boolean;
+  seek(seconds: number): void;
+  /** Back to the start and play (replay, loop). */
+  restart(): void;
+}
+
 interface Options {
   video: Video;
   active: boolean;
@@ -10,13 +25,16 @@ interface Options {
   loop: boolean;
   autoAdvance: boolean;
   onAdvance: () => void;
+  /** Set for real videos: time comes from the player instead of the simulated clock. */
+  clock?: React.RefObject<ExternalClock | null>;
 }
 
 /**
- * Simulated playback clock for the clip on screen. Time lives in a ref and the progress bar is
- * painted directly (transform only), so React re-renders at most once per second of clip time.
+ * Playback clock for the clip on screen: simulated for demo clips, read from the YouTube player for real
+ * videos. Time lives in a ref and the progress bar is painted directly (transform only), so React re-renders
+ * at most once per second of clip time.
  */
-export function usePlayback({ video, active, playing, speed, loop, autoAdvance, onAdvance }: Options) {
+export function usePlayback({ video, active, playing, speed, loop, autoAdvance, onAdvance, clock }: Options) {
   const t = useRef(0);
   const bar = useRef<HTMLSpanElement>(null);
   const [sec, setSec] = useState(0);
@@ -25,9 +43,12 @@ export function usePlayback({ video, active, playing, speed, loop, autoAdvance, 
   const advanceRef = useRef(onAdvance);
   advanceRef.current = onAdvance;
   const d = video.duration;
+  const dur = useRef(d);
+  dur.current = clock?.current?.duration() || d;
+  const external = !!clock;
 
   const paint = useCallback(() => {
-    if (bar.current) bar.current.style.transform = `scaleX(${Math.min(1, t.current / d)})`;
+    if (bar.current) bar.current.style.transform = `scaleX(${Math.min(1, t.current / (dur.current || d))})`;
   }, [d]);
 
   // Fresh start whenever this clip becomes the active one; report the watch when it leaves.
@@ -54,31 +75,45 @@ export function usePlayback({ video, active, playing, speed, loop, autoAdvance, 
     let last = performance.now();
     let raf = 0;
     let shown = Math.floor(t.current);
+    const finishOrLoop = (length: number): boolean => {
+      stats.current.completions++;
+      stats.current.max = 1;
+      if (autoAdvance) {
+        t.current = length;
+        paint();
+        advanceRef.current();
+        return true;
+      }
+      if (loop) {
+        t.current = 0;
+        if (external) clock?.current?.restart();
+        return false;
+      }
+      t.current = length;
+      paint();
+      setSec(Math.floor(length));
+      setEnded(true);
+      return true;
+    };
     const tick = (now: number) => {
       const real = Math.min(250, now - last);
       last = now;
-      t.current += (real / 1000) * speed;
-      stats.current.watchedMs += real;
-      if (t.current >= d) {
-        stats.current.completions++;
-        stats.current.max = 1;
-        if (autoAdvance) {
-          t.current = d;
-          paint();
-          advanceRef.current();
-          return;
+      if (external) {
+        const c = clock?.current;
+        if (c) {
+          const length = c.duration() || d;
+          dur.current = length;
+          if (c.isPlaying()) stats.current.watchedMs += real;
+          t.current = Math.min(length, c.time());
+          if (c.consumeEnded() && finishOrLoop(length)) return;
+          stats.current.max = Math.max(stats.current.max, t.current / length);
         }
-        if (loop) {
-          t.current = 0;
-        } else {
-          t.current = d;
-          paint();
-          setSec(Math.floor(d));
-          setEnded(true);
-          return;
-        }
+      } else {
+        t.current += (real / 1000) * speed;
+        stats.current.watchedMs += real;
+        if (t.current >= d && finishOrLoop(d)) return;
+        stats.current.max = Math.max(stats.current.max, t.current / d);
       }
-      stats.current.max = Math.max(stats.current.max, t.current / d);
       paint();
       const s = Math.floor(t.current);
       if (s !== shown) {
@@ -89,24 +124,34 @@ export function usePlayback({ video, active, playing, speed, loop, autoAdvance, 
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [active, playing, ended, speed, loop, autoAdvance, d, paint]);
+  }, [active, playing, ended, speed, loop, autoAdvance, d, paint, external, clock]);
 
   const seek = useCallback(
     (frac: number) => {
-      t.current = Math.max(0, Math.min(d - 0.05, frac * d));
+      const length = dur.current || d;
+      t.current = Math.max(0, Math.min(length - 0.05, frac * length));
+      if (external) clock?.current?.seek(t.current);
       paint();
       setSec(Math.floor(t.current));
       setEnded(false);
     },
-    [d, paint],
+    [d, paint, external, clock],
   );
 
-  const nudge = useCallback((delta: number) => seek((t.current + delta) / d), [seek, d]);
+  const nudge = useCallback((delta: number) => seek((t.current + delta) / (dur.current || d)), [seek, d]);
 
   const replay = useCallback(() => {
     stats.current.completions = Math.max(1, stats.current.completions);
+    if (external) {
+      t.current = 0;
+      clock?.current?.restart();
+      paint();
+      setSec(0);
+      setEnded(false);
+      return;
+    }
     seek(0);
-  }, [seek]);
+  }, [seek, external, clock, paint]);
 
-  return { bar, sec, ended, seek, nudge, replay, timeRef: t };
+  return { bar, sec, ended, seek, nudge, replay, timeRef: t, durationRef: dur };
 }

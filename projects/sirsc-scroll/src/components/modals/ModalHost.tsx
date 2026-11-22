@@ -4,7 +4,7 @@ import { Check, Copy, Flag, FolderPlus, Hash, MessagesSquare, Send, Users } from
 import type { ModalState } from '../../state/types';
 import { Modal } from '../common/Modal';
 import { Avatar } from '../common/Avatar';
-import { Placeholder } from '../placeholders/Placeholder';
+import { VideoArt } from '../common/VideoArt';
 import { UploadDialog } from './UploadDialog';
 import { InterestEditor } from './InterestEditor';
 import { ShortcutTable } from '../../pages/Settings';
@@ -28,7 +28,7 @@ function VideoChip({ id }: { id: string }) {
   return (
     <div className="video-chip">
       <span className="mini-thumb">
-        <Placeholder video={v} running={false} />
+        <VideoArt video={v} running={false} />
       </span>
       <span>
         <b>{v.title}</b>

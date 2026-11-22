@@ -2,7 +2,7 @@
 
 The backend that finds real YouTube videos for SirSC Scroll and serves them to the app. It stores **video IDs and metadata only**. Videos play through YouTube's official embeds, and nothing is downloaded or hosted.
 
-It lives in the existing Supabase project **Warden Chat** (`djmyvnaragfwoaljzexn`). Everything is new and prefixed `scroll_`, and no other app's tables, functions or jobs were changed. The SirSC Scroll frontend is unchanged too: [INTEGRATION.md](INTEGRATION.md) says how it will connect.
+It lives in the existing Supabase project **Warden Chat** (`djmyvnaragfwoaljzexn`). Everything is new and prefixed `scroll_`, and no other app's tables, functions or jobs were changed. SirSC Scroll is now connected to it; see [INTEGRATION.md](INTEGRATION.md).
 
 ```
 pg_cron (daily) ──► scroll-discover-videos (Edge Function) ──► YouTube Data API v3
@@ -29,7 +29,15 @@ SirSC Scroll ──► scroll_feed / scroll_categories (read-only, approved + ac
 | Vault | `scroll_discovery_trigger_secret`, a random value created inside the database. |
 | Extension | `pg_net` (added; the documented way for pg_cron to call an Edge Function). |
 
-The migrations in `supabase/migrations/` are exactly what was applied, in order: `scroll_video_catalog`, `scroll_feed`, `scroll_schedule`.
+The migrations in `supabase/migrations/` are exactly what was applied, in order: `scroll_video_catalog`, `scroll_feed`, `scroll_schedule` and `scroll_preview_access`.
+
+`scroll_preview_access` adds the owner **preview key**: a random value in Vault named `scroll_preview_key`.
+- **With the key:** `scroll_feed`, `scroll_categories` and the new `scroll_videos_lookup` (details for up to 200 IDs) also return pending videos, never rejected or inactive ones.
+- **Without it:** they return approved videos only.
+- **Why security definer:** the three functions are security definer so they can apply that rule, and each filters explicitly. The advisor will list them as security-definer functions callable by `anon`; that's intended.
+- **Direct table reads** still go through RLS (approved only).
+- **To read the key:** `select decrypted_secret from vault.decrypted_secrets where name = 'scroll_preview_key';`
+- **Tested:** no key or a wrong key returned 0 videos with `preview: false`; the real key returned pending videos with `preview: true`.
 
 ## Who can do what
 

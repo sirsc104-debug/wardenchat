@@ -163,4 +163,8 @@ export const DEFAULT_SETTINGS: Settings = {
   density: 'standard',
   sidebarCollapsed: false,
   sidebarCollapsedNarrow: true,
+  // The claude.ai Artifact build stays on demo clips (it runs sandboxed, without network access).
+  videoSource: typeof __MEMORY_ROUTER__ !== 'undefined' && __MEMORY_ROUTER__ ? 'demo' : 'catalog',
+  playerHost: 'nocookie',
+  catalogPreviewKey: '',
 };

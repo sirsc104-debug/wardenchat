@@ -281,12 +281,14 @@ export function recommendedCreators(p: Persisted, n = 5, focus?: Category): stri
   const acct = p.accounts[p.activeId];
   const following = new Set(acct.following);
   const hidden = new Set(acct.hiddenCreators);
+  // Only creators with something to watch right now (real channels when the catalog is in use).
+  const withVideos = new Set(allVideos(p).map((v) => v.creatorId));
   return [...USER_MAP.values()]
-    .filter((u) => u.kind === 'creator' && !following.has(u.id) && !hidden.has(u.id))
+    .filter((u) => u.kind === 'creator' && withVideos.has(u.id) && !following.has(u.id) && !hidden.has(u.id))
     .map((u) => {
       let s = u.categories.reduce((sum, c, i) => sum + acct.interests[c] * (i === 0 ? 1 : 0.4), 0);
       if (focus && u.categories.includes(focus)) s += 3;
-      s += Math.log10(u.followers) * 0.15 + hash01(`${p.activeId}:${u.id}:${acct.nonce}`) * 0.5;
+      s += Math.log10(u.followers + 10) * 0.15 + hash01(`${p.activeId}:${u.id}:${acct.nonce}`) * 0.5;
       return { id: u.id, s };
     })
     .sort((a, b) => b.s - a.s)

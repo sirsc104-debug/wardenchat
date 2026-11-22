@@ -1,20 +1,40 @@
-// Read-side helpers over the seeded catalog plus everything created on this device.
-// When a backend arrives, these are the functions to point at an API.
+// Read-side helpers over the videos the app can show: the real catalog (or, in demo mode or when the
+// catalog can't be reached, the seeded demo clips) plus everything created on this device.
 import type { Comment, Persisted, User, Video } from '../state/types';
 import { SEED_VIDEOS, SEED_VIDEO_MAP } from '../data/videos';
 import { DEMO_IDS, FRIENDS_OF, HANDLE_MAP, USER_MAP } from '../data/users';
 import { seedComments } from '../data/comments';
 import { lurkerLikeTime, lurkerLikes } from '../data/seeds';
 import { isMemoryRouter } from './router';
+import { catalogSnapshot, catalogVersion, catalogVideos } from './remoteCatalog';
+import { hash01 } from './rng';
 
 let lastUser: Video[] | null = null;
 let lastAll: Video[] = SEED_VIDEOS;
 let lastMap = SEED_VIDEO_MAP;
+let lastMode: VideoMode = 'demo';
+let lastVersion = -1;
+
+export type VideoMode = 'catalog' | 'demo';
+
+/**
+ * Real videos when the catalog is switched on and is loading or has videos. Demo clips when it's off,
+ * can't be reached, or has nothing to show (so the app is never empty by accident).
+ */
+export function videoMode(p: Persisted): VideoMode {
+  if (p.settings.videoSource !== 'catalog') return 'demo';
+  const st = catalogSnapshot().status;
+  return st === 'loading' || st === 'ready' ? 'catalog' : 'demo';
+}
 
 function refresh(p: Persisted) {
-  if (p.userVideos === lastUser) return;
+  const mode = videoMode(p);
+  const version = catalogVersion();
+  if (p.userVideos === lastUser && mode === lastMode && (mode === 'demo' || version === lastVersion)) return;
   lastUser = p.userVideos;
-  lastAll = [...p.userVideos, ...SEED_VIDEOS];
+  lastMode = mode;
+  lastVersion = version;
+  lastAll = [...p.userVideos, ...(mode === 'catalog' ? catalogVideos() ?? [] : SEED_VIDEOS)];
   lastMap = new Map(lastAll.map((v) => [v.id, v]));
 }
 
@@ -110,9 +130,10 @@ export function videosBy(p: Persisted, userId: string): Video[] {
     .sort((a, b) => b.uploadedAt - a.uploadedAt);
 }
 
-/** Top-level comments and replies for a video, seeded plus local. */
+/** Top-level comments and replies for a video, seeded plus local. Real videos only have comments made here. */
 export function commentsFor(p: Persisted, v: Video): Comment[] {
   const local = p.userComments.filter((c) => c.videoId === v.id);
+  if (v.source) return local;
   return local.length ? [...seedComments(v), ...local] : seedComments(v);
 }
 
@@ -146,7 +167,8 @@ export function friendActivity(p: Persisted, accountId = p.activeId): FriendAct[
         if (!seen.has(vid)) out.push({ friendId: f, videoId: vid, type: 'like', at: lurkerLikeTime(f, vid) - i * 600_000 });
       });
     } else {
-      lurkerLikes(f).forEach((vid, i) => out.push({ friendId: f, videoId: vid, type: i % 6 === 2 ? 'share' : 'like', at: lurkerLikeTime(f, vid) }));
+      const likes = videoMode(p) === 'catalog' ? catalogLurkerLikes(p, f) : lurkerLikes(f);
+      likes.forEach((vid, i) => out.push({ friendId: f, videoId: vid, type: i % 6 === 2 ? 'share' : 'like', at: lurkerLikeTime(f, vid) }));
     }
     for (const v of allVideos(p)) {
       if (v.creatorId === f && canSee(p, v, accountId)) out.push({ friendId: f, videoId: v.id, type: 'post', at: v.uploadedAt });
@@ -156,6 +178,28 @@ export function friendActivity(p: Persisted, accountId = p.activeId): FriendAct[
     const v = getVideo(p, a.videoId);
     return v && canSee(p, v, accountId);
   }).sort((a, b) => b.at - a.at);
+}
+
+/**
+ * With real videos, the fictional friends' "likes" are picked from the loaded catalog, leaning to their
+ * favourite categories, the same way their demo likes are picked from the demo clips. They're part of the
+ * demo's simulated social layer; they don't change any real video's numbers.
+ */
+const lurkerCache = new Map<string, string[]>();
+function catalogLurkerLikes(p: Persisted, friendId: string): string[] {
+  const key = `${friendId}:${catalogVersion()}`;
+  const hit = lurkerCache.get(key);
+  if (hit) return hit;
+  if (lurkerCache.size > 50) lurkerCache.clear();
+  const cats = USER_MAP.get(friendId)?.categories ?? [];
+  const ids = allVideos(p)
+    .filter((v) => v.source)
+    .map((v) => ({ id: v.id, s: hash01(`lurk:${friendId}:${v.id}`) + (cats.includes(v.category) ? 1 : 0) }))
+    .sort((a, b) => b.s - a.s)
+    .slice(0, 22)
+    .map((x) => x.id);
+  lurkerCache.set(key, ids);
+  return ids;
 }
 
 function pageBase(): string | null {

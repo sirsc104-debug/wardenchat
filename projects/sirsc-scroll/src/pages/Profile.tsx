@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { Bookmark, CalendarDays, Clapperboard, FolderOpen, Grid3x3, Heart, History, Link2, MapPin, Pencil, Settings as SettingsIcon, UserRoundX } from 'lucide-react';
+import { Bookmark, CalendarDays, Clapperboard, ExternalLink, FolderOpen, Grid3x3, Heart, History, Link2, MapPin, Pencil, Settings as SettingsIcon, UserRoundX } from 'lucide-react';
+import { youtubeChannelUrl } from '../lib/videoSource';
 import type { User } from '../state/types';
 import { PageShell, Panel } from './PageShell';
 import { VideoGrid } from './Explore';
@@ -129,9 +130,18 @@ export function Profile({ route }: { route: Route }) {
     <>
       <Panel title="About">
         <ul className="about">
-          <li>
-            <CalendarDays size={14} /> Joined {new Date(user.joined).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-          </li>
+          {user.id.startsWith('yt:') ? (
+            <li>
+              <ExternalLink size={14} />{' '}
+              <a href={youtubeChannelUrl(user.id.slice(3))} target="_blank" rel="noopener noreferrer">
+                Open the channel on YouTube
+              </a>
+            </li>
+          ) : (
+            <li>
+              <CalendarDays size={14} /> Joined {new Date(user.joined).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            </li>
+          )}
           {user.location && (
             <li>
               <MapPin size={14} /> {user.location}

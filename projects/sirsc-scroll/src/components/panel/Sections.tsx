@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { Bookmark, Check, ChevronDown, ChevronUp, Ellipsis, Eye, Hash, Heart, Link2, MessageCircle, Music2, Plus, Send, Share2, Sparkles, UserPlus } from 'lucide-react';
+import { Bookmark, Check, ChevronDown, ChevronUp, Ellipsis, Eye, Hash, Heart, Link2, MessageCircle, Music2, Plus, Send, Share2, Sparkles, UserPlus, ExternalLink } from 'lucide-react';
 import type { FeedState, Video } from '../../state/types';
 import { Avatar } from '../common/Avatar';
 import { Verified } from '../common/Verified';
@@ -14,6 +14,7 @@ import { commentCount, followerCount, friendActivity, getUser, getVideo, likeCou
 import { recommendedCreators, relatedTo, trendingHashtags, topInterests } from '../../lib/recommend';
 import { agoLong, compact, full, ago } from '../../lib/format';
 import { href } from '../../lib/router';
+import { youtubeWatchUrl } from '../../lib/videoSource';
 import { categoryLabel } from '../../data/categories';
 import { FRIENDS_OF } from '../../data/users';
 import { useHeightTween, useNow } from '../../lib/hooks';
@@ -164,6 +165,11 @@ export const VideoDetails = memo(function VideoDetails({ video, reason, compactM
           {categoryLabel(video.category)}
         </a>
       </div>
+      {video.source && (
+        <a className="details-yt" href={youtubeWatchUrl(video.source.youtubeId)} target="_blank" rel="noopener noreferrer">
+          <ExternalLink size={13} /> Watch on YouTube{video.source.channelTitle ? ` · ${video.source.channelTitle}` : ''}
+        </a>
+      )}
       <div className="sound">
         <Music2 size={13} />
         <span className="sound-track">

@@ -2,7 +2,9 @@ import { memo, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Heart, Pause, Play, Repeat, RotateCcw, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import type { Video } from '../../state/types';
 import { Placeholder } from '../placeholders/Placeholder';
-import { usePlayback } from './usePlayback';
+import { usePlayback, type ExternalClock } from './usePlayback';
+import { YouTubeScreen } from './YouTubeScreen';
+import { isRealVideo } from '../../lib/videoSource';
 import { go, likeOnly, setMuted, setPlaying, togglePlay, updateSettings } from '../../state/actions';
 import { focusWidget } from '../../state/widgets';
 import { useP, useS } from '../../state/store';
@@ -36,7 +38,10 @@ export const Stage = memo(function Stage({ video, active, chrome, children }: Pr
   const autoAdvance = useP((p) => p.settings.autoAdvance);
   const volume = useP((p) => p.settings.volume);
   const reduced = useP((p) => p.settings.reducedMotion);
-  const pb = usePlayback({ video, active, playing, speed, loop, autoAdvance, onAdvance: () => go(1) });
+  const host = useP((p) => p.settings.playerHost);
+  const real = isRealVideo(video) ? video : null;
+  const clockRef = useRef<ExternalClock | null>(null);
+  const pb = usePlayback({ video, active, playing, speed, loop, autoAdvance, onAdvance: () => go(1), clock: real ? clockRef : undefined });
   const [bursts, setBursts] = useState<Burst[]>([]);
   const clickTimer = useRef<number | undefined>(undefined);
   const burstTimers = useRef<number[]>([]);
@@ -51,8 +56,8 @@ export const Stage = memo(function Stage({ video, active, chrome, children }: Pr
     };
   }, [active, pb.nudge, pb.replay]);
 
-  // Generated soundtrack for the active clip while unmuted.
-  const audible = active && playing && !muted && !pb.ended;
+  // Generated soundtrack for the active demo clip while unmuted (real videos have their own sound).
+  const audible = active && playing && !muted && !pb.ended && !real;
   useEffect(() => {
     if (!audible) return;
     synth.start(video.id, video.template, speed);
@@ -104,7 +109,11 @@ export const Stage = memo(function Stage({ video, active, chrome, children }: Pr
   return (
     <div className={`stage stage-${chrome}${active ? ' is-active' : ''}`}>
       <div className="stage-screen" onClick={onClick}>
-        <Placeholder video={video} running={running} tag={active} handle={creator?.handle} speed={speed} />
+        {real ? (
+          <YouTubeScreen video={real} active={active} playing={playing && !pb.ended} muted={muted} volume={volume} speed={speed} host={host} clock={clockRef} />
+        ) : (
+          <Placeholder video={video} running={running} tag={active} handle={creator?.handle} speed={speed} />
+        )}
         {bursts.map((b) => (
           <span key={b.id} className="burst" style={{ left: b.x, top: b.y }}>
             <Heart size={84} fill="currentColor" strokeWidth={0} />
@@ -149,7 +158,7 @@ export const Stage = memo(function Stage({ video, active, chrome, children }: Pr
               {playing && !pb.ended ? <Pause size={17} fill="currentColor" /> : <Play size={17} fill="currentColor" />}
             </button>
             <span className="sc-time">
-              {duration(pb.sec)} <span>/ {duration(video.duration)}</span>
+              {duration(pb.sec)} <span>/ {duration(pb.durationRef.current || video.duration)}</span>
             </span>
             <span className="sc-spacer" />
             <button

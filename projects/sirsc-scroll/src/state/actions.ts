@@ -19,7 +19,8 @@ import { getState, setAcct, setBoth, setP, setS } from './store';
 import { clearStorage, freshPersisted } from './persist';
 import { seedAccount } from '../data/seeds';
 import { DEMO_IDS, FRIENDS_OF, HANDLE_MAP, USER_MAP } from '../data/users';
-import { getVideo, getUser, shareLink } from '../lib/catalog';
+import { getVideo, getUser, shareLink, videoMode } from '../lib/catalog';
+import { catalogVideos, loadMoreCatalog } from '../lib/remoteCatalog';
 import { applyFilters, applySignal, INTEREST_MAX, INTEREST_MIN, rankFollowing, rankForYou, rankFriends, rankTrending, type SignalKind } from '../lib/recommend';
 import { between, rng, uid } from '../lib/rng';
 import { clamp } from '../lib/format';
@@ -95,11 +96,12 @@ function rebuilt(p: Persisted, s: Session, kinds: FeedKind[] = RANKED, keepCurre
     let items = applyFilters(p, rank(kind, p), s.category, s.sort);
     let index = 0;
     if (keepCurrent && prev.items[prev.index]) {
-      // Keep what's on screen (and what came before it) and re-rank only what comes after.
-      const head = prev.items.slice(0, prev.index + 1);
+      // Keep what's on screen (and what came before it) and re-rank only what comes after. Entries whose
+      // video is gone (a real video hidden as unplayable, say) drop out.
+      const head = prev.items.slice(0, prev.index + 1).filter((i) => getVideo(p, i.id));
       const headIds = new Set(head.map((i) => i.id));
       items = [...head, ...items.filter((i) => !headIds.has(i.id))];
-      index = prev.index;
+      index = Math.max(0, head.length - 1);
     }
     feeds[kind] = { ...prev, items, index };
   }
@@ -148,6 +150,19 @@ export function go(delta: number) {
     s = { ...s, feeds: { ...s.feeds, [kind]: { ...s.feeds[kind], items, index } } };
     return { p, s };
   });
+  if (delta > 0) topUpCatalog();
+}
+
+/** Real videos: fetch another catalog page once fewer than 25 loaded videos are still unwatched. */
+function topUpCatalog() {
+  const { p } = getState();
+  if (videoMode(p) !== 'catalog') return;
+  const pool = catalogVideos();
+  if (!pool) return;
+  const seen = new Set(p.accounts[p.activeId].history.map((h) => h.videoId));
+  let unseen = 0;
+  for (const v of pool) if (!seen.has(v.id) && ++unseen >= 25) return;
+  void loadMoreCatalog();
 }
 
 export function goTo(index: number) {

@@ -15,6 +15,7 @@ import { getState, useP, usePersisted, useS } from '../state/store';
 import { go, openSheet, setActiveFeed, setCategory, setPlaying, toggleFollow, toggleLike, toggleMute, togglePlay, toggleSave } from '../state/actions';
 import { focusWidget, toggleFocusMode, visibleWidgets } from '../state/widgets';
 import { getVideo } from '../lib/catalog';
+import { useCatalog } from '../lib/remoteCatalog';
 import { isTyping, useSize } from '../lib/hooks';
 import { preferredRegionWidth } from '../lib/widgetLayout';
 import { categoryLabel } from '../data/categories';
@@ -104,6 +105,14 @@ export function useAutoplayRule(videoId: string | undefined) {
 
 export function EmptyFeed({ kind }: { kind: FeedKind }) {
   const category = useS((s) => s.category);
+  const catalogOn = useP((p) => p.settings.videoSource === 'catalog');
+  const catalog = useCatalog();
+  if (catalogOn && catalog.status === 'loading')
+    return (
+      <Empty icon={Compass} title="Loading videos…">
+        Getting videos from the SirSC Scroll catalog.
+      </Empty>
+    );
   if (category !== 'all')
     return (
       <Empty icon={Filter} title={`No ${categoryLabel(category)} videos in ${FEED_NAMES[kind]}`} action={<button type="button" className="btn btn-accent btn-sm" onClick={() => setCategory('all')}>Show all categories</button>}>

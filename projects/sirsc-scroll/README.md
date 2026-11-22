@@ -4,9 +4,30 @@
 
 **Live demo:** [claude.ai Artifact](https://claude.ai/artifact/QfMUocCP4F4Pt7ttW4h4ii) (private until shared from its Share menu).
 
-V1 is a frontend demo. There are no real videos, accounts, uploads or servers: 162 fictional clips are animated CSS placeholders, four demo accounts stand in for sign-in, and everything you do is saved in the browser's localStorage.
+**Real videos.** By default SirSC Scroll plays real YouTube videos from the SirSC Scroll catalog (`projects/sirsc-scroll-catalog`). They play through YouTube's official embedded player, and no video files are downloaded or hosted. See [Real videos](#real-videos) below.
 
-React 19 + TypeScript + Vite. Runtime dependencies are React, `lucide-react` (tree-shaken icons) and one locally bundled font (Manrope, latin subset). No backend, no Supabase, no Warden Chat sign-in, no video files.
+The social side is still a demo: four demo accounts stand in for sign-in, and likes, saves, comments, follows and history are saved in the browser's localStorage. The 162 animated placeholder clips are still there as **Demo clips** (Settings › Videos). They also stand in automatically whenever the catalog can't be reached or has nothing to show.
+
+React 19 + TypeScript + Vite. Runtime dependencies are React, `lucide-react` (tree-shaken icons) and one locally bundled font (Manrope, latin subset). No Warden Chat sign-in.
+
+## Real videos
+
+- **Catalog:** the app reads it from Supabase with the project URL and its public publishable key, through `scroll_feed` and `scroll_videos_lookup`. It never searches YouTube or holds an API key.
+- **Who sees what:**
+  - Only videos marked **approved** in the catalog are served to everyone. Today none are, because the list goes to the school first.
+  - Until then, the owner previews everything with the **preview key**. Get it in the Supabase SQL editor with `select decrypted_secret from vault.decrypted_secrets where name = 'scroll_preview_key';` and paste it into **Settings › Videos**. It's saved in that browser only and appears nowhere in the code.
+  - With the key, the feed also includes videos still waiting for review, never rejected ones. A notice says so.
+- **Playing:**
+  - Only the video on screen has a player. Each video gets a new one, because switching videos inside one player kept the previous video playing on school Chromebooks.
+  - The thumbnail shows until YouTube reports PLAYING. The app's own play/pause, mute, volume, speed, loop, auto-advance, progress bar and watch history all follow the YouTube player.
+- **Player address:** **Settings › Videos › Player address** chooses `youtube-nocookie.com` (default) or `youtube.com`. Standard `youtube.com` embeds failed with error 152-4 on the school Chromebooks; youtube-nocookie.com worked. The school reviews that choice before the site is public.
+- **Errors:**
+  - A video YouTube refuses (gone, private, embedding off) is reported, skipped after 1.6 s, and hidden on that device. **Settings › Videos** can bring hidden videos back.
+  - Errors that look like the network or device (152, 153, the player script not loading) don't hide anything. After three in a row the app stops skipping and shows Next / Try again / Settings.
+- **Counts:** likes, comments, shares and saves on real videos start at 0 and come only from SirSC Scroll's own actions. Views are YouTube's, and no comments are generated for real videos.
+- **Channels:** they appear as creators, so you can follow them and open their profile, which links to the channel on YouTube.
+- **More videos:** they load in pages as you watch, so the browser never asks YouTube for anything except the player.
+- **Not covered:** scrolling or clicking over the video goes to YouTube's player, as with any embed. Use the keyboard, the rail or the area beside the video to move between videos.
 
 ## Run it
 
@@ -21,7 +42,10 @@ npm run build:artifact # the same, shaped for a claude.ai Artifact: dist/sirsc-s
 
 `dist/sirsc-scroll-artifact.html` is what the Artifact link above serves. It differs from the single file in three ways: no `<html>`/`<head>`/`<body>` (the host adds them), routes live in memory instead of `#/paths` (the frame only passes plain `#names`; `#video-v010`, `#explore`, `#trending` and similar still work as entry points), and share links use the app-style `sirsc-scroll://video/…` form since the page can't know its public URL. The app's own theme setting is stored on `data-look` so it never clashes with the host's `data-theme`.
 
-`dist/sirsc-scroll.html` (about 600 KB) is the whole app in one file. It opens straight from disk (`file://`), makes no network requests, and can be pasted into a Google Sites embed. Progress is saved per browser.
+`dist/sirsc-scroll.html` (about 670 KB) is the whole app in one file and can be pasted into a Google Sites embed. Progress is saved per browser.
+- **Network requests:** it calls the catalog on Supabase and loads YouTube's player script and embeds. It needs an http(s) page for YouTube to accept the embeds.
+- **Opened from disk (`file://`):** catalog calls still work, but YouTube will mostly refuse to play.
+- **Artifact build:** it stays on demo clips, because the Artifact runs sandboxed.
 
 ## Layout (V1.1)
 
