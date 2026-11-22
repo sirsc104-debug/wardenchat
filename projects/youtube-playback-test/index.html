@@ -1,0 +1,1181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- YouTube embeds need the page's origin in the Referer header; this is the browser default, stated explicitly. -->
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>SirSC Scroll · YouTube Playback Test</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0a0c0f;
+    --bg-1: #101318;
+    --bg-2: #161a20;
+    --bg-3: #1f242c;
+    --line: rgb(255 255 255 / 0.08);
+    --line-2: rgb(255 255 255 / 0.14);
+    --text: #e9eef4;
+    --text-2: #a9b3bf;
+    --text-3: #76818f;
+    --accent: #22d3ee;
+    --accent-ink: #00141a;
+    --ok: #34d399;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --mono: ui-monospace, 'Cascadia Mono', 'Roboto Mono', Menlo, monospace;
+    --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 500 13.5px/1.45 var(--font); }
+  button, input, textarea, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  code, .mono { font-family: var(--mono); font-size: 0.92em; }
+
+  header {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
+    padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--bg-1);
+  }
+  header h1 { margin: 0; font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
+  header h1 span { color: var(--accent); }
+  .tag { padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; background: rgb(251 191 36 / 0.15); color: #fcd34d; }
+  .origin { color: var(--text-3); font-size: 12px; }
+  .grow { flex: 1; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 99px;
+    border: 1px solid var(--line-2); background: var(--bg-3); font-weight: 700; font-size: 12.5px; white-space: nowrap;
+  }
+  .btn:hover:not(:disabled) { background: #2a313b; }
+  .btn.accent { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+  .btn.accent:hover:not(:disabled) { background: #4fe0f5; }
+  .btn.small { height: 28px; padding: 0 10px; font-size: 12px; }
+
+  .banner { margin: 10px 14px 0; padding: 9px 12px; border-radius: 10px; font-size: 13px; }
+  .banner.bad { background: rgb(248 113 113 / 0.12); border: 1px solid rgb(248 113 113 / 0.35); color: #fecaca; }
+  .banner.warn { background: rgb(251 191 36 / 0.1); border: 1px solid rgb(251 191 36 / 0.3); color: #fde68a; }
+
+  .layout {
+    display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px;
+    padding: 12px 14px 20px; align-items: start;
+  }
+  .player-col { display: grid; gap: 8px; width: var(--pw, 320px); position: sticky; top: 12px; }
+  .stage {
+    position: relative; width: 100%; aspect-ratio: 9 / 16; border-radius: 14px; overflow: hidden;
+    background: #000; box-shadow: 0 0 0 1px var(--line);
+  }
+  .stage > div, .stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .stage.gesture iframe { pointer-events: none; }
+  .stage-msg {
+    position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 2; display: none;
+    padding: 10px 12px; border-radius: 10px; background: rgb(10 12 15 / 0.92); border: 1px solid var(--line-2);
+    font-size: 13px;
+  }
+  .stage-msg.show { display: grid; gap: 8px; }
+  .stage-msg .row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .controls { display: flex; align-items: center; gap: 6px; }
+  .icon {
+    display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid var(--line-2); background: var(--bg-2); font-size: 15px; flex: none;
+  }
+  .icon:hover:not(:disabled) { background: var(--bg-3); }
+  .icon.play { width: 44px; height: 44px; background: var(--accent); color: var(--accent-ink); border-color: transparent; font-size: 17px; }
+  .time { font: 700 12px var(--mono); color: var(--text-2); min-width: 92px; text-align: center; }
+  .progress { position: relative; flex: 1; height: 26px; cursor: pointer; display: flex; align-items: center; }
+  .progress .rail { position: relative; flex: 1; height: 5px; border-radius: 5px; background: var(--bg-3); overflow: hidden; }
+  .progress .loaded, .progress .played { position: absolute; left: 0; top: 0; bottom: 0; width: 0; }
+  .progress .loaded { background: rgb(255 255 255 / 0.18); }
+  .progress .played { background: var(--accent); }
+  .nowline { display: grid; gap: 2px; font-size: 12px; color: var(--text-2); }
+  .nowline b { color: var(--text); font-size: 13px; }
+  .hint { font-size: 12px; color: var(--text-3); }
+  .hint.focus { color: var(--warn); }
+
+  .dash { display: grid; gap: 12px; min-width: 0; }
+  .card { border-radius: 14px; background: var(--bg-1); border: 1px solid var(--line); padding: 12px 14px; min-width: 0; }
+  .card h2 { margin: 0 0 8px; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2); display: flex; align-items: center; gap: 8px; }
+  .card h2 .grow + * { text-transform: none; letter-spacing: 0; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .tile { padding: 8px 10px; border-radius: 10px; background: var(--bg-2); border: 1px solid var(--line); min-width: 0; }
+  .tile .k { font-size: 11px; color: var(--text-3); font-weight: 700; }
+  .tile .v { font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tile .s { font-size: 11px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .v.ok { color: var(--ok); } .v.bad { color: var(--bad); } .v.warn { color: var(--warn); }
+  .note { margin: 8px 0 0; font-size: 12px; color: var(--text-3); }
+  .table-wrap { overflow-x: auto; max-height: 320px; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { padding: 5px 7px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+  th { position: sticky; top: 0; background: var(--bg-1); color: var(--text-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.lbl { max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+  td.wrap { white-space: normal; min-width: 220px; }
+  .pill { display: inline-block; padding: 1px 7px; border-radius: 99px; font-size: 11px; font-weight: 800; }
+  .pill.ok { background: rgb(52 211 153 / 0.15); color: var(--ok); }
+  .pill.bad { background: rgb(248 113 113 / 0.15); color: var(--bad); }
+  .pill.warn { background: rgb(251 191 36 / 0.15); color: var(--warn); }
+  .pill.dim { background: var(--bg-3); color: var(--text-2); }
+  .log { max-height: 220px; overflow-y: auto; font: 11.5px/1.5 var(--mono); color: var(--text-2); margin: 0; padding: 0; list-style: none; }
+  .log li { white-space: pre-wrap; word-break: break-word; }
+  .log .t { color: var(--text-3); }
+  textarea {
+    width: 100%; min-height: 170px; resize: vertical; padding: 8px 10px; border-radius: 10px;
+    background: var(--bg-2); border: 1px solid var(--line-2); font: 12px/1.5 var(--mono);
+  }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 14px; margin-top: 10px; }
+  .opts label { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-2); }
+  .opts label b { color: var(--text); font-weight: 700; }
+  .opts select, .opts input[type=number] { background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 7px; padding: 3px 6px; }
+  .opts input[type=number] { width: 64px; }
+  input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; }
+  .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
+  dl.env { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 12px; margin: 0; font-size: 12px; }
+  dl.env dt { color: var(--text-3); }
+  dl.env dd { margin: 0; word-break: break-word; }
+  .toast {
+    position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 50; padding: 9px 14px;
+    border-radius: 99px; background: #2a313b; border: 1px solid var(--line-2); font-weight: 700; font-size: 13px; display: none;
+  }
+  .toast.show { display: block; }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .player-col { position: static; width: min(100%, var(--pw, 320px)); justify-self: center; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>SirSC Scroll · <span>YouTube playback test</span></h1>
+  <span class="tag">Experiment</span>
+  <span class="origin" id="originLabel"></span>
+  <span class="grow"></span>
+  <button class="btn" id="btnPreflight" type="button" title="Cue every video in the list and record whether the player accepts it">Check list</button>
+  <button class="btn" id="btnReset" type="button">Reset results</button>
+  <button class="btn" id="btnCopy" type="button" title="Copies the results JSON, for devices that block downloads">Copy JSON</button>
+  <button class="btn accent" id="btnExport" type="button">Export results</button>
+</header>
+<div class="banner bad" id="bannerOrigin" hidden></div>
+<div class="banner bad" id="bannerApi" hidden></div>
+
+<main class="layout">
+  <section class="player-col" aria-label="Player">
+    <div class="stage" id="stage">
+      <div id="yt"></div>
+      <div class="stage-msg" id="stageMsg" role="status" aria-live="polite"></div>
+    </div>
+    <div class="controls">
+      <button class="icon" id="btnPrev" type="button" aria-label="Previous video (Up arrow or K)" title="Previous (↑ / K)">▲</button>
+      <button class="icon play" id="btnPlay" type="button" aria-label="Play or pause (Space)" title="Play / pause (Space)">▶</button>
+      <button class="icon" id="btnNext" type="button" aria-label="Next video (Down arrow or J)" title="Next (↓ / J)">▼</button>
+      <button class="icon" id="btnMute" type="button" aria-label="Mute or unmute (M)" title="Mute / unmute (M)">🔇</button>
+      <span class="time" id="time">0:00 / 0:00</span>
+    </div>
+    <div class="progress" id="progress" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+      <div class="rail"><div class="loaded" id="loadedBar"></div><div class="played" id="playedBar"></div></div>
+    </div>
+    <div class="nowline">
+      <b id="nowTitle">—</b>
+      <span id="nowSub">Video 0 of 0</span>
+    </div>
+    <p class="hint" id="hint">Scroll, use ↑ ↓ / J K, or the buttons to change videos.</p>
+  </section>
+
+  <section class="dash">
+    <div class="card">
+      <h2>Live measurements <span class="grow"></span><span class="pill dim" id="pillState">no player</span></h2>
+      <div class="tiles">
+        <div class="tile"><div class="k">Current video ID</div><div class="v mono" id="mId">—</div><div class="s" id="mLabel">&nbsp;</div></div>
+        <div class="tile"><div class="k">Player state</div><div class="v" id="mState">—</div><div class="s" id="mStateCode">&nbsp;</div></div>
+        <div class="tile"><div class="k">Request → PLAYING (this video)</div><div class="v" id="mReqPlay">—</div><div class="s" id="mReqFirst">first event: —</div></div>
+        <div class="tile"><div class="k">Time in BUFFERING (this video)</div><div class="v" id="mBuf">—</div><div class="s" id="mRebuf">rebuffers after start: 0</div></div>
+        <div class="tile"><div class="k">Average switch time</div><div class="v" id="mAvg">—</div><div class="s" id="mAvgSub">median — · p90 —</div></div>
+        <div class="tile"><div class="k">Successful loads</div><div class="v ok" id="mOk">0</div><div class="s" id="mOkSub">reached PLAYING</div></div>
+        <div class="tile"><div class="k">Failed loads</div><div class="v bad" id="mFail">0</div><div class="s" id="mFailSub">onError events</div></div>
+        <div class="tile"><div class="k">Autoplay blocked</div><div class="v warn" id="mAuto">0</div><div class="s" id="mAutoSub">onAutoplayBlocked events</div></div>
+        <div class="tile"><div class="k">No-start timeouts</div><div class="v warn" id="mTimeout">0</div><div class="s" id="mTimeoutSub">no PLAYING, no error</div></div>
+        <div class="tile"><div class="k">Position</div><div class="v" id="mPos">—</div><div class="s" id="mLoaded">loaded fraction —</div></div>
+        <div class="tile"><div class="k">Player ready</div><div class="v" id="mReady">—</div><div class="s" id="mApi">API script —</div></div>
+        <div class="tile"><div class="k">Error codes seen</div><div class="v mono" id="mCodes">none</div><div class="s">see table below</div></div>
+      </div>
+      <p class="note">
+        Timings are measured in this page with <code>performance.now()</code>. <b>Request → PLAYING</b> runs from this page's
+        <code>loadVideoById()</code> call to the moment the player <i>reports</i> state PLAYING through the IFrame API, so it includes
+        the player's own loading and the message hop back to this page. The API does not expose first-frame time, network
+        requests, bitrate or dropped frames, so none are claimed here. <b>Buffering</b> is the time between BUFFERING and the next
+        state the player reports. <b>Average switch time</b> covers every video after the first that started without a manual press.
+      </p>
+    </div>
+
+    <div class="card">
+        <h2>Loads <span class="grow"></span><span class="pill dim" id="pillLoads">0</span></h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Video ID</th><th>Your label</th><th>Outcome</th><th class="num">→ first event</th><th class="num">→ PLAYING</th><th class="num">Buffering</th><th>Error</th></tr></thead>
+            <tbody id="loadRows"></tbody>
+          </table>
+        </div>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <h2>Errors</h2>
+        <div class="table-wrap" style="max-height: 150px">
+          <table>
+            <thead><tr><th>Code</th><th class="num">Count</th><th>Meaning (IFrame API)</th></tr></thead>
+            <tbody id="errRows"><tr><td colspan="3" class="hint">No errors yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Cue check <span class="grow"></span><span class="pill dim" id="pillPre">not run</span></h2>
+        <div class="table-wrap" style="max-height: 170px">
+          <table>
+            <thead><tr><th>Video ID</th><th>Your label</th><th>Result</th><th class="num">→ CUED</th></tr></thead>
+            <tbody id="preRows"><tr><td colspan="4" class="hint">Press “Check list” to cue every video once (no playback).</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Videos to test</h2>
+      <p class="note" style="margin: 0 0 8px">
+        Paste YouTube links or 11-character IDs, one per line. Anything after <code>#</code> is your label (for example
+        <code># works on youtube.com</code> or <code># blocked at school</code>), and is carried into the results so you can compare
+        expected and actual behaviour. Watch, <code>youtu.be</code>, <code>/shorts/</code>, <code>/embed/</code> and <code>/live/</code> links all work.
+        Shorts links give a true vertical test; regular videos are shown letterboxed in the 9:16 player.
+      </p>
+      <textarea id="listInput" spellcheck="false" aria-label="Videos to test"></textarea>
+      <div class="row" style="margin-top: 8px">
+        <button class="btn accent small" id="btnApply" type="button">Use this list</button>
+        <button class="btn small" id="btnDefaults" type="button">Restore default list</button>
+        <button class="btn small" id="btnErrTest" type="button" title="Loads the text “not a video id”, which can never be a YouTube ID, to check error handling">Error-handling test</button>
+        <span class="hint" id="listStatus"></span>
+      </div>
+      <div class="opts">
+        <label><input type="checkbox" id="optMuted"> <span><b>Start muted</b> (muted autoplay is allowed by browsers)</span></label>
+        <label><input type="checkbox" id="optAutoplay"> <span><b>Autoplay on switch</b> (<code>loadVideoById</code>; off = <code>cueVideoById</code>)</span></label>
+        <label><input type="checkbox" id="optControls"> <span><b>YouTube’s own controls</b> (changing this rebuilds the player once)</span></label>
+        <label><input type="checkbox" id="optGesture"> <span><b>Gesture layer</b> (experimental, see note)</span></label>
+        <label><span><b>On end</b></span>
+          <select id="optEnd"><option value="next">next video</option><option value="loop">replay</option><option value="stop">stop</option></select></label>
+        <label><span><b>On error</b></span>
+          <select id="optErr"><option value="wait">show message, wait</option><option value="skip">skip after 2 s</option></select></label>
+        <label><span><b>No-start timeout</b></span> <input type="number" id="optTimeout" min="3" max="60" step="1"> s</label>
+      </div>
+      <p class="note">
+        <b>About scrolling over the video:</b> the player is a YouTube iframe, and the browser sends scroll, clicks and keys that
+        happen over it to YouTube, not to this page. By default, scroll anywhere outside the picture (on the controls, beside it, or
+        on this panel’s margin) and use the keyboard while focus is on this page. The <b>gesture layer</b> option lets scroll,
+        swipes and clicks over the picture reach this page instead, so YouTube’s on-video controls stop responding. It exists only
+        to measure that experience; check YouTube’s embedded-player policies before using that pattern in SirSC Scroll.
+      </p>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <h2>Event log <span class="grow"></span><button class="btn small" id="btnClearLog" type="button">Clear</button></h2>
+        <ul class="log" id="log"></ul>
+      </div>
+      <div class="card">
+        <h2>Environment</h2>
+        <dl class="env" id="env"></dl>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------ defaults */
+
+  // Widely published public videos. They were NOT checked from the machine that built this page
+  // (YouTube was blocked there). Press "Check list" on the device under test: the player itself
+  // confirms each one. Replace or extend freely; never rely on these being available everywhere.
+  var DEFAULT_LIST = [
+    '# Default sample: well-known public videos (landscape). Verify with “Check list”.',
+    'M7lc1UVf-VE  # YouTube Developers: the IFrame API documentation sample video',
+    'jNQXAC9IVRw  # “Me at the zoo”, the first video on YouTube',
+    'aqz-KE-bpKQ  # Big Buck Bunny 60fps 4K, Blender Foundation',
+    'eRsGyueVLvQ  # Sintel, Blender Foundation',
+    'R6MlUcmOul8  # Tears of Steel, Blender Foundation',
+    'dQw4w9WgXcQ  # Rick Astley, Never Gonna Give You Up',
+    '9bZkp7q19f0  # PSY, Gangnam Style',
+    'kJQP7kiw5Fk  # Luis Fonsi, Despacito',
+    'OPf0YbXqDm0  # Mark Ronson ft. Bruno Mars, Uptown Funk',
+    'fJ9rUzIMcZQ  # Queen, Bohemian Rhapsody',
+    'hT_nvWreIhg  # OneRepublic, Counting Stars',
+    'JGwWNGJdvx8  # Ed Sheeran, Shape of You',
+    '# Add youtube.com/shorts/... links here for a true vertical test.'
+  ].join('\n');
+
+  var ERROR_TEXT = {
+    2: 'Invalid parameter (for example, not an 11-character video ID).',
+    5: 'HTML5 player error: the content can’t be played in an HTML5 player.',
+    100: 'Video not found: removed or marked private.',
+    101: 'The owner does not allow playback in embedded players.',
+    150: 'The owner does not allow playback in embedded players (same as 101).',
+    153: 'Player configuration error, reported when the embed request carries no Referer / client identification. Host the page over https, not file://.'
+  };
+  var STATE_NAME = { '-1': 'UNSTARTED', 0: 'ENDED', 1: 'PLAYING', 2: 'PAUSED', 3: 'BUFFERING', 5: 'CUED' };
+  var STORE = 'sirsc-yt-playback-test:v1';
+  // Deliberately malformed (spaces are never valid in a YouTube ID), so the player should answer with error 2.
+  var ERROR_TEST_ID = 'not a video id';
+
+  /* ------------------------------------------------------------------ state */
+
+  var T0 = performance.now();
+  var startedAt = new Date().toISOString();
+  var settings = { startMuted: true, autoplay: true, controls: false, gesture: false, onEnd: 'next', onError: 'wait', timeoutSec: 12 };
+  var listText = DEFAULT_LIST;
+  var list = [];
+  var index = 0;
+  var player = null;
+  var playerReady = false;
+  var apiReadyAt = null;
+  var playerReadyAt = null;
+  var apiFailed = false;
+  var loads = [];
+  var current = null;
+  var events = [];
+  var errorCounts = {};
+  var autoplayBlocked = 0;
+  var preflight = [];
+  var preflightRunning = null;
+  var pollTimer = 0;
+  var lastState = null;
+  var focusInPlayer = false;
+
+  function $(id) { return document.getElementById(id); }
+  function now() { return performance.now(); }
+  function ms(v) { return v == null ? '—' : v < 1000 ? Math.round(v) + ' ms' : (v / 1000).toFixed(2) + ' s'; }
+  function clock(s) { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  function load() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORE) || 'null');
+      if (saved) {
+        if (saved.settings) Object.keys(settings).forEach(function (k) { if (k in saved.settings) settings[k] = saved.settings[k]; });
+        if (typeof saved.listText === 'string' && saved.listText.trim()) listText = saved.listText;
+      }
+    } catch (e) { /* storage blocked: defaults */ }
+  }
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify({ settings: settings, listText: listText })); } catch (e) { /* ignore */ }
+  }
+
+  /* ------------------------------------------------------------------ list parsing */
+
+  function parseList(text) {
+    var items = [];
+    var rejected = [];
+    text.split(/\r?\n/).forEach(function (raw) {
+      var line = raw.trim();
+      if (!line || line.charAt(0) === '#') return;
+      var hash = line.indexOf('#');
+      var label = hash >= 0 ? line.slice(hash + 1).trim() : '';
+      var src = (hash >= 0 ? line.slice(0, hash) : line).trim();
+      var m = src.match(/(?:[?&]v=|\/shorts\/|youtu\.be\/|\/embed\/|\/live\/|\/v\/)([A-Za-z0-9_-]{11})(?![A-Za-z0-9_-])/);
+      var id = m ? m[1] : /^[A-Za-z0-9_-]{11}$/.test(src) ? src : null;
+      if (id) items.push({ id: id, label: label, shorts: /\/shorts\//.test(src) });
+      else rejected.push(src);
+    });
+    return { items: items, rejected: rejected };
+  }
+
+  function applyList(text, quiet) {
+    var r = parseList(text);
+    if (!r.items.length) {
+      $('listStatus').textContent = 'No video IDs found. Paste YouTube links or 11-character IDs.';
+      return false;
+    }
+    listText = text;
+    list = r.items;
+    index = 0;
+    save();
+    $('listStatus').textContent = r.items.length + ' videos' + (r.rejected.length ? ' · ignored ' + r.rejected.length + ' line(s) that are not YouTube links: ' + r.rejected.slice(0, 3).join(', ') : '');
+    if (!quiet) log('list', 'Using ' + r.items.length + ' videos' + (r.rejected.length ? ', ignored ' + r.rejected.length : ''));
+    return true;
+  }
+
+  /* ------------------------------------------------------------------ logging */
+
+  function log(kind, text) {
+    var t = now() - T0;
+    events.push({ t: Math.round(t), kind: kind, text: text });
+    if (events.length > 600) events.shift();
+    var li = document.createElement('li');
+    li.innerHTML = '<span class="t">' + (t / 1000).toFixed(2).padStart(7, ' ') + 's</span> ' + esc(kind) + ' · ' + esc(text);
+    var ul = $('log');
+    ul.appendChild(li);
+    while (ul.children.length > 200) ul.removeChild(ul.firstChild);
+    ul.scrollTop = ul.scrollHeight;
+  }
+
+  var toastTimer = 0;
+  function toast(text) {
+    var el = $('toast');
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2400);
+  }
+
+  function message(html) {
+    var el = $('stageMsg');
+    if (!html) { el.classList.remove('show'); el.innerHTML = ''; return; }
+    el.innerHTML = html;
+    el.classList.add('show');
+  }
+
+  /* ------------------------------------------------------------------ the player */
+
+  function playerVars() {
+    var v = {
+      autoplay: settings.autoplay ? 1 : 0,
+      mute: settings.startMuted ? 1 : 0,
+      playsinline: 1,
+      rel: 0,
+      controls: settings.controls ? 1 : 0,
+      enablejsapi: 1
+    };
+    if (/^https?:$/.test(location.protocol)) v.origin = location.origin;
+    return v;
+  }
+
+  function createPlayer() {
+    var first = list[index];
+    playerReady = false;
+    var t = now();
+    current = newLoad(first, 'player start', t);
+    log('player', 'Creating player with ' + first.id + ' (' + (settings.controls ? 'YouTube controls' : 'no YouTube controls') + ')');
+    player = new YT.Player('yt', {
+      width: '100%',
+      height: '100%',
+      videoId: first.id,
+      playerVars: playerVars(),
+      events: {
+        onReady: onReady,
+        onStateChange: onStateChange,
+        onError: onError,
+        onAutoplayBlocked: onAutoplayBlocked
+      }
+    });
+    applyGesture();
+  }
+
+  function rebuildPlayer() {
+    if (!window.YT || !YT.Player) return;
+    stopPoll();
+    finishLoad('left before playing');
+    try { player && player.destroy(); } catch (e) { /* ignore */ }
+    var host = document.createElement('div');
+    host.id = 'yt';
+    var old = $('yt');
+    if (old) old.replaceWith(host); else $('stage').prepend(host);
+    createPlayer();
+  }
+
+  function onReady() {
+    playerReady = true;
+    playerReadyAt = now();
+    $('mReady').textContent = ms(playerReadyAt - T0);
+    log('ready', 'Player ready ' + ms(playerReadyAt - T0) + ' after page start');
+    syncMute();
+    if (current && current.reason === 'player start') armTimeout(current);
+    render();
+  }
+
+  function newLoad(item, reason, t) {
+    var rec = {
+      n: loads.length + 1,
+      id: item.id,
+      label: item.label || '',
+      reason: reason,
+      requestedAt: t,
+      firstEventMs: null,
+      playingMs: null,
+      bufferingMs: 0,
+      bufferingSince: null,
+      rebuffers: 0,
+      manualStart: false,
+      autoplayBlocked: false,
+      error: null,
+      outcome: 'pending',
+      states: []
+    };
+    loads.push(rec);
+    return rec;
+  }
+
+  function armTimeout(rec) {
+    clearTimeout(rec.timer);
+    rec.timer = setTimeout(function () {
+      if (rec.outcome === 'pending' && current === rec) {
+        rec.outcome = rec.autoplayBlocked ? 'autoplay blocked' : settings.autoplay ? 'no start' : 'cued';
+        if (settings.autoplay) {
+          log('timeout', rec.id + ': no PLAYING within ' + settings.timeoutSec + ' s' + (rec.autoplayBlocked ? ' (autoplay was blocked)' : ''));
+          if (!rec.autoplayBlocked) message('<b>Video didn’t start within ' + settings.timeoutSec + ' s.</b><span class="hint">No error was reported. Press play, or skip.</span><div class="row"><button class="btn small accent" data-act="play" type="button">Play</button><button class="btn small" data-act="next" type="button">Skip</button></div>');
+        }
+        render();
+      }
+    }, settings.timeoutSec * 1000);
+  }
+
+  function finishLoad(outcome) {
+    if (!current) return;
+    closeBuffering(current, now());
+    clearTimeout(current.timer);
+    if (current.outcome === 'pending') current.outcome = outcome;
+  }
+
+  function closeBuffering(rec, t) {
+    if (rec.bufferingSince != null) {
+      rec.bufferingMs += t - rec.bufferingSince;
+      rec.bufferingSince = null;
+    }
+  }
+
+  function go(delta, reason) {
+    if (!list.length) return;
+    var next = (index + delta + list.length) % list.length;
+    loadIndex(next, reason || (delta > 0 ? 'next' : 'previous'));
+  }
+
+  function loadIndex(i, reason) {
+    if (!player || !playerReady) { index = i; render(); return; }
+    finishLoad('left before playing');
+    index = i;
+    message('');
+    var item = list[i];
+    var t = now();
+    current = newLoad(item, reason, t);
+    try {
+      if (settings.autoplay) player.loadVideoById(item.id);
+      else player.cueVideoById(item.id);
+    } catch (e) {
+      log('exception', String(e));
+    }
+    log('request', (settings.autoplay ? 'loadVideoById' : 'cueVideoById') + '(' + item.id + ') · ' + reason);
+    armTimeout(current);
+    render();
+  }
+
+  function loadArbitrary(id, label) {
+    if (!player || !playerReady) return;
+    finishLoad('left before playing');
+    message('');
+    current = newLoad({ id: id, label: label }, 'error test', now());
+    try { player.loadVideoById(id); } catch (e) { log('exception', String(e)); }
+    log('request', 'loadVideoById(' + id + ') · error-handling test');
+    armTimeout(current);
+    render();
+  }
+
+  function onStateChange(e) {
+    var t = now();
+    var s = e.data;
+    lastState = s;
+    // A cue check in progress gets the events first.
+    if (preflightRunning && preflightRunning.onState(s, t)) return;
+    var rec = current;
+    if (rec) {
+      if (rec.firstEventMs == null) rec.firstEventMs = t - rec.requestedAt;
+      rec.states.push([Math.round(t - rec.requestedAt), s]);
+      if (s === 3) {
+        if (rec.bufferingSince == null) rec.bufferingSince = t;
+      } else {
+        closeBuffering(rec, t);
+      }
+      if (s === 1) {
+        if (rec.playingMs == null) {
+          rec.playingMs = t - rec.requestedAt;
+          rec.outcome = 'ok';
+          clearTimeout(rec.timer);
+          message('');
+          log('playing', rec.id + ' playing ' + ms(rec.playingMs) + ' after the request' + (rec.manualStart ? ' (started by a manual press)' : ''));
+        } else if (rec.sawBufferingAfterStart) {
+          rec.rebuffers++;
+          rec.sawBufferingAfterStart = false;
+        }
+        startPoll();
+      } else if (s === 3 && rec.playingMs != null) {
+        rec.sawBufferingAfterStart = true;
+      }
+    }
+    if (s !== 1) stopPoll();
+    if (s === 0) onEnded();
+    log('state', STATE_NAME[s] + ' (' + s + ')' + (rec ? ' · ' + rec.id + ' +' + ms(t - rec.requestedAt) : ''));
+    render();
+    tickPosition();
+  }
+
+  function onEnded() {
+    if (settings.onEnd === 'next') go(1, 'auto-advance after end');
+    else if (settings.onEnd === 'loop') { try { player.seekTo(0, true); player.playVideo(); } catch (e) { /* ignore */ } }
+  }
+
+  function onError(e) {
+    var code = e.data;
+    var t = now();
+    if (preflightRunning && preflightRunning.onError(code, t)) return;
+    errorCounts[code] = (errorCounts[code] || 0) + 1;
+    var rec = current;
+    if (rec) {
+      rec.error = code;
+      rec.outcome = 'error';
+      if (rec.firstEventMs == null) rec.firstEventMs = t - rec.requestedAt;
+      closeBuffering(rec, t);
+      clearTimeout(rec.timer);
+    }
+    stopPoll();
+    log('error', 'onError ' + code + ' · ' + (ERROR_TEXT[code] || 'Code not listed in the IFrame API reference') + (rec ? ' · ' + rec.id : ''));
+    message('<b>This video can’t play here (error ' + esc(code) + ').</b><span class="hint">' + esc(ERROR_TEXT[code] || 'Unlisted error code.') + '</span><div class="row"><button class="btn small accent" data-act="next" type="button">Next video</button><button class="btn small" data-act="retry" type="button">Retry</button></div>');
+    if (settings.onError === 'skip' && rec && rec.reason !== 'error test') {
+      setTimeout(function () { if (current === rec) go(1, 'auto-skip after error'); }, 2000);
+    }
+    render();
+  }
+
+  function onAutoplayBlocked() {
+    autoplayBlocked++;
+    if (current) current.autoplayBlocked = true;
+    log('autoplay', 'onAutoplayBlocked: the browser blocked automatic playback' + (current ? ' of ' + current.id : ''));
+    message('<b>The browser blocked autoplay.</b><span class="hint">Press play to start this video. Starting muted usually avoids this.</span><div class="row"><button class="btn small accent" data-act="play" type="button">Play</button><button class="btn small" data-act="muteplay" type="button">Play muted</button></div>');
+    render();
+  }
+
+  /* ------------------------------------------------------------------ playback controls */
+
+  function togglePlay() {
+    if (!player || !playerReady) return;
+    var s = safe(function () { return player.getPlayerState(); }, -1);
+    if (s === 1 || s === 3) { player.pauseVideo(); return; }
+    if (current && current.playingMs == null) current.manualStart = true;
+    player.playVideo();
+    message('');
+  }
+
+  function toggleMute() {
+    if (!player || !playerReady) return;
+    if (player.isMuted()) { player.unMute(); log('audio', 'unMute()'); }
+    else { player.mute(); log('audio', 'mute()'); }
+    setTimeout(syncMute, 80);
+  }
+
+  function syncMute() {
+    var muted = safe(function () { return player.isMuted(); }, true);
+    $('btnMute').textContent = muted ? '🔇' : '🔊';
+    $('btnMute').setAttribute('aria-pressed', String(!muted));
+  }
+
+  function safe(fn, fallback) { try { var v = fn(); return v == null ? fallback : v; } catch (e) { return fallback; } }
+
+  function startPoll() {
+    if (pollTimer) return;
+    pollTimer = setInterval(tickPosition, 250);
+  }
+  function stopPoll() {
+    clearInterval(pollTimer);
+    pollTimer = 0;
+  }
+  function tickPosition() {
+    if (!player || !playerReady) return;
+    var cur = safe(function () { return player.getCurrentTime(); }, 0);
+    var dur = safe(function () { return player.getDuration(); }, 0);
+    var frac = safe(function () { return player.getVideoLoadedFraction(); }, 0);
+    $('time').textContent = clock(cur) + ' / ' + clock(dur);
+    $('mPos').textContent = clock(cur) + ' / ' + clock(dur);
+    $('mLoaded').textContent = 'loaded fraction ' + (frac * 100).toFixed(0) + '% (getVideoLoadedFraction)';
+    $('playedBar').style.width = (dur ? (cur / dur) * 100 : 0) + '%';
+    $('loadedBar').style.width = frac * 100 + '%';
+    $('progress').setAttribute('aria-valuenow', String(Math.round(dur ? (cur / dur) * 100 : 0)));
+  }
+
+  function seekTo(frac) {
+    if (!player || !playerReady) return;
+    var dur = safe(function () { return player.getDuration(); }, 0);
+    if (!dur) return;
+    player.seekTo(frac * dur, true);
+    log('seek', 'seekTo(' + (frac * dur).toFixed(1) + ' s)');
+    setTimeout(tickPosition, 120);
+  }
+
+  /* ------------------------------------------------------------------ cue check (preflight) */
+
+  function runPreflight() {
+    if (!player || !playerReady || preflightRunning) return;
+    stopPoll();
+    finishLoad('left before playing');
+    try { player.pauseVideo(); } catch (e) { /* ignore */ }
+    preflight = [];
+    var i = 0;
+    $('btnPreflight').disabled = true;
+    $('pillPre').textContent = 'running';
+    log('check', 'Cue check started for ' + list.length + ' videos');
+    function step() {
+      if (i >= list.length) return done();
+      var item = list[i++];
+      var t = now();
+      var rec = { id: item.id, label: item.label || '', result: 'pending', cuedMs: null };
+      preflight.push(rec);
+      renderPreflight();
+      var timer = setTimeout(function () { finish('no response in 8 s'); }, 8000);
+      function finish(result, cuedMs) {
+        if (rec.result !== 'pending') return;
+        clearTimeout(timer);
+        rec.result = result;
+        rec.cuedMs = cuedMs == null ? null : Math.round(cuedMs);
+        renderPreflight();
+        setTimeout(step, 150);
+      }
+      preflightRunning = {
+        onState: function (s, tt) { if (s === 5) finish('cued', tt - t); return true; },
+        onError: function (code) { finish('error ' + code); return true; }
+      };
+      try { player.cueVideoById(item.id); } catch (e) { finish('exception'); }
+    }
+    function done() {
+      preflightRunning = null;
+      $('btnPreflight').disabled = false;
+      var ok = preflight.filter(function (p) { return p.result === 'cued'; }).length;
+      $('pillPre').textContent = ok + ' of ' + preflight.length + ' cued';
+      log('check', 'Cue check finished: ' + ok + ' of ' + preflight.length + ' cued');
+      toast('Cue check finished: ' + ok + ' of ' + preflight.length + ' accepted');
+      loadIndex(index, 'after cue check');
+    }
+    step();
+  }
+
+  function renderPreflight() {
+    var rows = preflight.map(function (p) {
+      var cls = p.result === 'cued' ? 'ok' : p.result === 'pending' ? 'dim' : 'bad';
+      var text = p.result === 'error 2' ? 'error 2 (invalid ID)' : p.result;
+      return '<tr><td class="mono">' + esc(p.id) + '</td><td class="lbl" title="' + esc(p.label) + '">' + esc(p.label) + '</td><td><span class="pill ' + cls + '">' + esc(text) + '</span></td><td class="num">' + ms(p.cuedMs) + '</td></tr>';
+    });
+    $('preRows').innerHTML = rows.join('') || '<tr><td colspan="4" class="hint">Press “Check list” to cue every video once (no playback).</td></tr>';
+  }
+
+  /* ------------------------------------------------------------------ summary and rendering */
+
+  function summary() {
+    var ok = loads.filter(function (l) { return l.playingMs != null; });
+    var switches = ok.filter(function (l) { return l.reason !== 'player start' && !l.manualStart; }).map(function (l) { return l.playingMs; }).sort(function (a, b) { return a - b; });
+    var pick = function (q) { return switches.length ? switches[Math.min(switches.length - 1, Math.floor(q * switches.length))] : null; };
+    var first = loads.length && loads[0].reason === 'player start' ? loads[0] : null;
+    return {
+      loadsRequested: loads.length,
+      successfulLoads: ok.length,
+      failedLoads: loads.filter(function (l) { return l.error != null; }).length,
+      noStartTimeouts: loads.filter(function (l) { return l.outcome === 'no start'; }).length,
+      autoplayBlockedEvents: autoplayBlocked,
+      manualStarts: ok.filter(function (l) { return l.manualStart; }).length,
+      firstVideoRequestToPlayingMs: first && first.playingMs != null ? Math.round(first.playingMs) : null,
+      switchTimeMs: {
+        definition: 'loadVideoById() call to the PLAYING state event, for videos after the first that started without a manual press',
+        samples: switches.length,
+        mean: switches.length ? Math.round(switches.reduce(function (a, b) { return a + b; }, 0) / switches.length) : null,
+        median: pick(0.5) == null ? null : Math.round(pick(0.5)),
+        p90: pick(0.9) == null ? null : Math.round(pick(0.9)),
+        min: switches.length ? Math.round(switches[0]) : null,
+        max: switches.length ? Math.round(switches[switches.length - 1]) : null
+      },
+      bufferingMsTotal: Math.round(loads.reduce(function (a, l) { return a + l.bufferingMs + (l.bufferingSince != null ? now() - l.bufferingSince : 0); }, 0)),
+      rebuffersAfterStart: loads.reduce(function (a, l) { return a + l.rebuffers; }, 0),
+      errorCodes: errorCounts
+    };
+  }
+
+  function outcomePill(l) {
+    var map = { ok: 'ok', error: 'bad', 'no start': 'warn', 'autoplay blocked': 'warn', pending: 'dim', cued: 'dim', 'left before playing': 'dim' };
+    var text = l.outcome === 'ok' && l.manualStart ? 'ok (manual start)' : l.outcome;
+    return '<span class="pill ' + (map[l.outcome] || 'dim') + '">' + esc(text) + '</span>';
+  }
+
+  function render() {
+    var item = list[index];
+    var rec = current;
+    var sum = summary();
+    $('mId').textContent = rec ? rec.id : item ? item.id : '—';
+    $('mLabel').textContent = (rec ? rec.label : item && item.label) || ' ';
+    var stateName = lastState == null ? (playerReady ? '—' : apiFailed ? 'API failed' : 'loading') : STATE_NAME[lastState] || String(lastState);
+    $('mState').textContent = stateName;
+    $('mStateCode').textContent = lastState == null ? ' ' : 'state code ' + lastState;
+    $('pillState').textContent = stateName.toLowerCase();
+    $('mReqPlay').textContent = rec && rec.playingMs != null ? ms(rec.playingMs) : rec && rec.outcome === 'pending' ? 'waiting…' : '—';
+    $('mReqFirst').textContent = 'first event: ' + (rec ? ms(rec.firstEventMs) : '—') + (rec && rec.reason === 'player start' ? ' (includes player start)' : '');
+    var liveBuf = rec ? rec.bufferingMs + (rec.bufferingSince != null ? now() - rec.bufferingSince : 0) : null;
+    $('mBuf').textContent = rec ? ms(liveBuf) : '—';
+    $('mRebuf').textContent = 'rebuffers after start: ' + (rec ? rec.rebuffers : 0);
+    $('mAvg').textContent = sum.switchTimeMs.mean == null ? '—' : ms(sum.switchTimeMs.mean);
+    $('mAvgSub').textContent = sum.switchTimeMs.samples + ' samples · median ' + ms(sum.switchTimeMs.median) + ' · p90 ' + ms(sum.switchTimeMs.p90);
+    $('mOk').textContent = sum.successfulLoads;
+    $('mOkSub').textContent = 'reached PLAYING' + (sum.manualStarts ? ' · ' + sum.manualStarts + ' after a manual press' : '');
+    $('mFail').textContent = sum.failedLoads;
+    $('mAuto').textContent = autoplayBlocked;
+    $('mTimeout').textContent = sum.noStartTimeouts;
+    var codes = Object.keys(errorCounts);
+    $('mCodes').textContent = codes.length ? codes.join(', ') : 'none';
+    $('nowTitle').textContent = item ? (item.label || item.id) : '—';
+    $('nowSub').textContent = list.length ? 'Video ' + (index + 1) + ' of ' + list.length + (item && item.shorts ? ' · Shorts link' : '') : 'No videos';
+    $('btnPlay').textContent = lastState === 1 || lastState === 3 ? '❚❚' : '▶';
+    $('pillLoads').textContent = String(loads.length);
+    $('loadRows').innerHTML = loads.slice(-60).reverse().map(function (l) {
+      return '<tr><td class="num">' + l.n + '</td><td class="mono">' + esc(l.id) + '</td><td class="lbl" title="' + esc(l.label) + '">' + esc(l.label) + '</td><td>' + outcomePill(l) + '</td><td class="num">' + ms(l.firstEventMs) + '</td><td class="num">' + ms(l.playingMs) + '</td><td class="num">' + ms(l.bufferingMs + (l.bufferingSince != null ? now() - l.bufferingSince : 0)) + '</td><td>' + (l.error != null ? 'code ' + esc(l.error) : '') + '</td></tr>';
+    }).join('');
+    $('errRows').innerHTML = codes.length
+      ? codes.map(function (c) { return '<tr><td class="mono">' + esc(c) + '</td><td class="num">' + errorCounts[c] + '</td><td class="wrap">' + esc(ERROR_TEXT[c] || 'Not listed in the IFrame API reference.') + '</td></tr>'; }).join('')
+      : '<tr><td colspan="3" class="hint">No errors yet.</td></tr>';
+  }
+
+  /* ------------------------------------------------------------------ navigation: wheel, keys, touch */
+
+  // One wheel or trackpad gesture moves exactly one video, however long its momentum lasts.
+  var wheel = { acc: 0, locked: false, last: 0, lastAbs: 0, lockedAt: 0 };
+  function onWheel(e) {
+    if (e.ctrlKey) return;
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    var t = now();
+    var dy = e.deltaY * (e.deltaMode === 1 ? 32 : e.deltaMode === 2 ? 600 : 1);
+    var gap = t - wheel.last;
+    var abs = Math.abs(dy);
+    wheel.last = t;
+    if (wheel.locked) {
+      var fresh = gap > 170 || (t - wheel.lockedAt > 420 && abs > Math.max(28, wheel.lastAbs * 1.8));
+      wheel.lastAbs = abs;
+      if (!fresh) return;
+      wheel.locked = false;
+      wheel.acc = 0;
+    }
+    if (gap > 170) wheel.acc = 0;
+    wheel.acc += dy;
+    wheel.lastAbs = abs;
+    if (Math.abs(wheel.acc) >= 45) {
+      go(wheel.acc > 0 ? 1 : -1, wheel.acc > 0 ? 'scroll down' : 'scroll up');
+      wheel.locked = true;
+      wheel.lockedAt = t;
+      wheel.acc = 0;
+    }
+  }
+
+  var touch = null;
+  function onPointerDown(e) {
+    if (e.pointerType === 'mouse' || !settings.gesture) return;
+    touch = { id: e.pointerId, x: e.clientX, y: e.clientY, t: now() };
+  }
+  function onPointerUp(e) {
+    if (!touch || touch.id !== e.pointerId) return;
+    var dy = e.clientY - touch.y;
+    var dx = e.clientX - touch.x;
+    var v = dy / Math.max(1, now() - touch.t);
+    touch = null;
+    if (Math.abs(dy) < 30 || Math.abs(dx) > Math.abs(dy)) return;
+    if (dy < -80 || v < -0.45) go(1, 'swipe up');
+    else if (dy > 80 || v > 0.45) go(-1, 'swipe down');
+  }
+
+  var lastKey = 0;
+  function onKey(e) {
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.altKey || e.ctrlKey || e.metaKey) return;
+    var k = e.key;
+    var navStep = function (d, why) {
+      e.preventDefault();
+      var t = now();
+      if (e.repeat && t - lastKey < 250) return;
+      lastKey = t;
+      go(d, why);
+    };
+    if (k === 'ArrowDown' || k === 'PageDown' || k === 'j' || k === 'J') return navStep(1, 'key ' + k);
+    if (k === 'ArrowUp' || k === 'PageUp' || k === 'k' || k === 'K') return navStep(-1, 'key ' + k);
+    if (k === ' ' && tag !== 'BUTTON') { e.preventDefault(); if (!e.repeat) togglePlay(); return; }
+    if (k === 'm' || k === 'M') toggleMute();
+  }
+
+  // When someone clicks into the YouTube iframe, this page stops receiving keys. Say so, and log it.
+  function watchFocus() {
+    window.addEventListener('blur', function () {
+      setTimeout(function () {
+        var a = document.activeElement;
+        if (a && a.tagName === 'IFRAME' && $('stage').contains(a)) {
+          focusInPlayer = true;
+          $('hint').textContent = 'Keyboard focus is inside the YouTube player, so arrow keys go to YouTube. Click outside the video to use them here.';
+          $('hint').className = 'hint focus';
+          log('focus', 'Keyboard focus moved into the YouTube iframe');
+        }
+      }, 0);
+    });
+    window.addEventListener('focus', function () {
+      if (!focusInPlayer) return;
+      focusInPlayer = false;
+      $('hint').textContent = 'Scroll, use ↑ ↓ / J K, or the buttons to change videos.';
+      $('hint').className = 'hint';
+      log('focus', 'Keyboard focus back on this page');
+    });
+  }
+
+  function applyGesture() {
+    $('stage').classList.toggle('gesture', !!settings.gesture);
+  }
+
+  /* ------------------------------------------------------------------ export */
+
+  function results() {
+    var s = summary();
+    return {
+      tool: 'SirSC Scroll YouTube playback test',
+      version: 1,
+      startedAt: startedAt,
+      exportedAt: new Date().toISOString(),
+      page: {
+        href: location.href,
+        origin: location.origin,
+        protocol: location.protocol,
+        referrerPolicy: (document.querySelector('meta[name=referrer]') || {}).content || null,
+        embeddedInFrame: window.top !== window.self
+      },
+      environment: environment(),
+      timingsMs: {
+        apiScriptReady: apiReadyAt == null ? null : Math.round(apiReadyAt - T0),
+        playerReady: playerReadyAt == null ? null : Math.round(playerReadyAt - T0)
+      },
+      measurementNotes: {
+        requestToPlaying: 'From this page calling loadVideoById()/creating the player to receiving the PLAYING (1) state event. Includes player loading and postMessage delivery. Not a first-frame time; the IFrame API does not expose that.',
+        buffering: 'Sum of intervals from a BUFFERING (3) state event to the next state event, as reported by the API.',
+        loadedFraction: 'getVideoLoadedFraction() at export time, as reported by the API.',
+        autoplayBlocked: 'Count of onAutoplayBlocked events.',
+        noStart: 'Loads with neither a PLAYING event nor an error within the timeout.'
+      },
+      settings: settings,
+      list: list,
+      summary: s,
+      loads: loads.map(function (l) {
+        return {
+          n: l.n, id: l.id, label: l.label, reason: l.reason, outcome: l.outcome,
+          requestToFirstEventMs: l.firstEventMs == null ? null : Math.round(l.firstEventMs),
+          requestToPlayingMs: l.playingMs == null ? null : Math.round(l.playingMs),
+          bufferingMs: Math.round(l.bufferingMs), rebuffersAfterStart: l.rebuffers,
+          manualStart: l.manualStart, autoplayBlocked: l.autoplayBlocked, errorCode: l.error,
+          stateTimeline: l.states
+        };
+      }),
+      cueCheck: preflight,
+      events: events
+    };
+  }
+
+  function exportJson() {
+    var blob = new Blob([JSON.stringify(results(), null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    var stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    a.href = URL.createObjectURL(blob);
+    a.download = 'sirsc-youtube-playback-' + stamp + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    log('export', 'Downloaded results JSON');
+  }
+
+  function copyJson() {
+    var text = JSON.stringify(results(), null, 2);
+    var done = function (ok) { toast(ok ? 'Results copied to the clipboard' : 'Copy failed: use Export results'); log('export', ok ? 'Copied results JSON' : 'Copy failed'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(fallbackCopy(text)); });
+    else done(fallbackCopy(text));
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    return ok;
+  }
+
+  function resetResults() {
+    stopPoll();
+    if (current) clearTimeout(current.timer);
+    loads = [];
+    events = [];
+    errorCounts = {};
+    autoplayBlocked = 0;
+    preflight = [];
+    current = null;
+    $('log').innerHTML = '';
+    $('pillPre').textContent = 'not run';
+    renderPreflight();
+    log('reset', 'Results cleared');
+    render();
+  }
+
+  /* ------------------------------------------------------------------ environment */
+
+  function environment() {
+    var c = navigator.connection || {};
+    return {
+      userAgent: navigator.userAgent,
+      platform: navigator.userAgentData ? navigator.userAgentData.platform : navigator.platform,
+      chromeOS: /CrOS/.test(navigator.userAgent),
+      language: navigator.language,
+      hardwareConcurrency: navigator.hardwareConcurrency || null,
+      deviceMemoryGB: navigator.deviceMemory || null,
+      screen: screen.width + '×' + screen.height + ' @' + (window.devicePixelRatio || 1) + 'x',
+      viewport: innerWidth + '×' + innerHeight,
+      connection: c.effectiveType ? { effectiveType: c.effectiveType, downlinkMbps: c.downlink, rttMs: c.rtt, saveData: !!c.saveData } : null
+    };
+  }
+
+  function renderEnv() {
+    var e = environment();
+    var rows = [
+      ['Page origin', location.origin === 'null' ? location.protocol + ' (no origin)' : location.origin],
+      ['Device', (e.chromeOS ? 'ChromeOS · ' : '') + e.platform],
+      ['Browser', e.userAgent],
+      ['CPU threads', e.hardwareConcurrency || 'not reported'],
+      ['Memory', e.deviceMemoryGB ? '≈' + e.deviceMemoryGB + ' GB (approximate, from the browser)' : 'not reported'],
+      ['Screen', e.screen + ' · viewport ' + e.viewport],
+      ['Network', e.connection ? e.connection.effectiveType + ' · ~' + e.connection.downlinkMbps + ' Mbps · rtt ~' + e.connection.rttMs + ' ms (browser estimate)' : 'not reported'],
+      ['In a frame', window.top !== window.self ? 'yes (embedded in another page)' : 'no']
+    ];
+    $('env').innerHTML = rows.map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('');
+  }
+
+  /* ------------------------------------------------------------------ layout */
+
+  function sizePlayer() {
+    var narrow = innerWidth <= 900;
+    var h = narrow ? Math.min(innerHeight * 0.72, 640) : innerHeight - 190;
+    var w = Math.max(220, Math.min(narrow ? innerWidth - 28 : 460, Math.round((h * 9) / 16)));
+    document.documentElement.style.setProperty('--pw', w + 'px');
+  }
+
+  /* ------------------------------------------------------------------ boot */
+
+  function wire() {
+    $('btnPrev').addEventListener('click', function () { go(-1, 'button previous'); });
+    $('btnNext').addEventListener('click', function () { go(1, 'button next'); });
+    $('btnPlay').addEventListener('click', togglePlay);
+    $('btnMute').addEventListener('click', toggleMute);
+    $('btnExport').addEventListener('click', exportJson);
+    $('btnCopy').addEventListener('click', copyJson);
+    $('btnReset').addEventListener('click', resetResults);
+    $('btnPreflight').addEventListener('click', runPreflight);
+    $('btnClearLog').addEventListener('click', function () { $('log').innerHTML = ''; });
+    $('btnApply').addEventListener('click', function () {
+      if (applyList($('listInput').value)) { loadIndex(0, 'new list'); toast('Using ' + list.length + ' videos'); }
+    });
+    $('btnDefaults').addEventListener('click', function () {
+      $('listInput').value = DEFAULT_LIST;
+      if (applyList(DEFAULT_LIST)) loadIndex(0, 'default list');
+    });
+    $('btnErrTest').addEventListener('click', function () { loadArbitrary(ERROR_TEST_ID, 'deliberately invalid ID (error-handling test)'); });
+    $('progress').addEventListener('click', function (e) {
+      var r = this.getBoundingClientRect();
+      seekTo(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)));
+    });
+    $('progress').addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      e.stopPropagation();
+      var cur = safe(function () { return player.getCurrentTime(); }, 0);
+      var dur = safe(function () { return player.getDuration(); }, 0);
+      if (dur) seekTo((cur + (e.key === 'ArrowRight' ? 5 : -5)) / dur);
+    });
+    $('stageMsg').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-act]');
+      if (!b) return;
+      var act = b.getAttribute('data-act');
+      if (act === 'next') go(1, 'skip from message');
+      else if (act === 'retry') loadIndex(index, 'retry');
+      else if (act === 'play') togglePlay();
+      else if (act === 'muteplay') { player.mute(); syncMute(); togglePlay(); }
+    });
+    // Options
+    $('optMuted').checked = settings.startMuted;
+    $('optAutoplay').checked = settings.autoplay;
+    $('optControls').checked = settings.controls;
+    $('optGesture').checked = settings.gesture;
+    $('optEnd').value = settings.onEnd;
+    $('optErr').value = settings.onError;
+    $('optTimeout').value = settings.timeoutSec;
+    $('optMuted').addEventListener('change', function () { settings.startMuted = this.checked; save(); log('setting', 'Start muted: ' + this.checked + ' (applies to the next player start; use the mute button now)'); });
+    $('optAutoplay').addEventListener('change', function () { settings.autoplay = this.checked; save(); log('setting', 'Autoplay on switch: ' + this.checked); });
+    $('optControls').addEventListener('change', function () { settings.controls = this.checked; save(); log('setting', 'YouTube controls: ' + this.checked + ' · rebuilding the player'); rebuildPlayer(); });
+    $('optGesture').addEventListener('change', function () { settings.gesture = this.checked; save(); applyGesture(); log('setting', 'Gesture layer: ' + this.checked); });
+    $('optEnd').addEventListener('change', function () { settings.onEnd = this.value; save(); });
+    $('optErr').addEventListener('change', function () { settings.onError = this.value; save(); });
+    $('optTimeout').addEventListener('change', function () { settings.timeoutSec = Math.max(3, Math.min(60, Number(this.value) || 12)); this.value = settings.timeoutSec; save(); });
+    // Navigation
+    document.querySelector('.player-col').addEventListener('wheel', onWheel, { passive: false });
+    $('stage').addEventListener('pointerdown', onPointerDown);
+    $('stage').addEventListener('pointerup', onPointerUp);
+    $('stage').addEventListener('click', function (e) {
+      if (settings.gesture && !e.target.closest('.stage-msg')) togglePlay();
+    });
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', sizePlayer);
+    watchFocus();
+  }
+
+  function checkOrigin() {
+    var proto = location.protocol;
+    $('originLabel').textContent = proto === 'file:' ? 'opened from a file' : location.origin;
+    if (proto === 'file:') {
+      $('bannerOrigin').hidden = false;
+      $('bannerOrigin').innerHTML = '<b>Opened from a file.</b> YouTube needs an http(s) page origin and Referer to identify embeds, so most videos will fail here (often with error 153). Host this page over https (see the README) or run a local server.';
+    } else if (proto === 'http:' && !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+      $('bannerOrigin').hidden = false;
+      $('bannerOrigin').className = 'banner warn';
+      $('bannerOrigin').innerHTML = '<b>Served over plain http.</b> Use https for the real Chromebook test; school networks and the player behave differently on insecure pages.';
+    }
+  }
+
+  function boot() {
+    load();
+    sizePlayer();
+    checkOrigin();
+    $('listInput').value = listText;
+    if (!applyList(listText, true)) { listText = DEFAULT_LIST; $('listInput').value = listText; applyList(listText, true); }
+    wire();
+    renderEnv();
+    render();
+    log('page', 'Loaded at ' + location.origin + ' · ' + list.length + ' videos in the list');
+
+    window.onYouTubeIframeAPIReady = function () {
+      apiReadyAt = now();
+      $('mApi').textContent = 'API script ready ' + ms(apiReadyAt - T0);
+      log('api', 'YouTube IFrame API ready ' + ms(apiReadyAt - T0) + ' after page start');
+      createPlayer();
+    };
+    var s = document.createElement('script');
+    s.src = 'https://www.youtube.com/iframe_api';
+    s.async = true;
+    s.onerror = function () { apiFail('The YouTube IFrame API script could not be loaded (offline, or www.youtube.com is blocked on this network).'); };
+    document.head.appendChild(s);
+    setTimeout(function () { if (!apiReadyAt && !apiFailed) apiFail('The YouTube IFrame API did not become ready within 15 s.'); }, 15000);
+  }
+
+  function apiFail(text) {
+    apiFailed = true;
+    $('bannerApi').hidden = false;
+    $('bannerApi').textContent = text + ' Nothing can be measured until it loads.';
+    $('mApi').textContent = 'API script failed';
+    log('api', text);
+    render();
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
