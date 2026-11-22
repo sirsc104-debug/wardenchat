@@ -7,7 +7,8 @@ Everything is in one file, `index.html`: no build step, no backend, no API key. 
 ## What it does
 
 - **One 9:16 player.** By default, one YouTube iframe is created once and reused. Every switch is `loadVideoById()` (or `cueVideoById()` when "Autoplay on switch" is off), so there are no page reloads and no new iframes. The iframe is also rebuilt when you change the "YouTube's own controls" option, because YouTube reads that setting only when the player is created.
-- **Switching option.** **Switching: new player per video** destroys the player and creates a new one for each video, the same way the first video is always loaded. It was added because on a school Chromebook the first video played but every later `loadVideoById()` failed with error 152. Each load records which method was used (the **Switch** column, and `method` in the results), and the average switch time is kept separately for each method.
+- **Switching option.** **Switching: new player per video** destroys the player and creates a new one for each video, the same way the first video is always loaded. It was added because on a school Chromebook the first video played but every later `loadVideoById()` failed with error 152. Each load records which method was used (the **How** column, and `method` in the results), and the average switch time is kept separately for each method.
+- **Player address option.** **Player address: youtube-nocookie.com** creates the player at YouTube's privacy-enhanced embed address instead of www.youtube.com (the page passes `host: 'https://www.youtube-nocookie.com'` to `YT.Player`). The API script itself still comes from www.youtube.com. Changing it rebuilds the player. Each load records the address it asked for (`playerAddress`) and where the player's iframe actually pointed, read back from `getIframe()` (`playerIframeOrigin`). The **How** column and the Environment panel show it too. See "For the school" below.
 - **Navigation:**
   - Mouse wheel and trackpad: one gesture moves exactly one video, however much momentum it has.
   - Keyboard: ↑ ↓, J K and Page Up / Page Down.
@@ -49,7 +50,7 @@ The page has to be opened from an **https** web address. YouTube identifies embe
 - **Open in a new tab (recommended).** Paste the contents of `dist/youtube-playback-test-google-sites.html` as the embed code. The site shows a small card with an **Open the test in a new tab** button. Pressing it opens a blank (`about:blank`) tab and writes the whole test into it, so the player gets the full window and full screen works. The tab runs from the same embed origin as the card, so YouTube sees the same origin and Referer as an embedded run. In that tab, the Environment panel shows "Opened by: the Google Sites launcher (new tab)", and the results record `openedInNewTabByLauncher` and `documentOrigin`. Two things to know:
   - Reloading or closing that tab clears it, because there's no address to reload. Go back to the site and press the button again. The video list and options are kept.
   - If the browser blocks the pop-up, the card says so and offers **Run it here instead**, which runs the test inside the embed.
-- **Inside the embed.** Paste `index.html` itself as the embed code. The page then runs inside Google's embed frame, and the Environment panel shows "In a frame: yes". Drag the embed's corners to make it tall enough for the 9:16 player.
+- **Inside the embed.** Press **or run it inside this page** on the launcher card. It's always offered, so the two can be compared on the same device. Or paste `index.html` itself as the embed code. The page then runs inside Google's embed frame, and the Environment panel shows "In a frame: yes". Drag the embed's corners to make it tall enough for the 9:16 player.
 
 The launcher file is generated from `index.html`. After changing `index.html`, run `python3 build-sites.py` in this folder to rebuild it. Chrome often blocks downloads from Google Sites pages, so if **Export results** does nothing, use **Copy JSON** or **Show JSON** (select the text in the box and copy it).
 
@@ -78,7 +79,10 @@ For a quick check on a computer first, a local server is fine: run `python3 -m h
 
    Then press **Use this list**.
 5. Watch through the list using the wheel or trackpad, the arrow keys and the buttons. Try a fast run of several switches in a row, then a slower run that lets each video play for a while.
-6. If the first video plays but later ones fail (error 152 was reported on a school Chromebook), set **Switching** to **new player per video**, switch a few times and compare. Note which videos still fail: a video the school blocks should keep failing either way.
+6. If videos fail with error 152 (reported on a school Chromebook), compare one change at a time and note which videos still fail:
+   - **Switching: new player per video.**
+   - **Player address: youtube-nocookie.com.**
+   - The launcher's new tab against **or run it inside this page**.
 7. Test sound and autoplay: untick **Start muted**, reload the page, and note whether **Autoplay blocked** goes up before you've clicked anything.
 8. Optionally tick **Gesture layer** and try scrolling and swiping directly over the picture, to feel the difference.
 9. Press **Export results**. If downloads are blocked (common inside Google Sites), use **Copy JSON** or **Show JSON** instead, and keep the text.
@@ -91,5 +95,17 @@ Rough guide for reading the numbers: a median switch under about 1 second feels 
 - **Default list:** the default IDs are widely published, well-known public videos (YouTube's own API documentation sample, "Me at the zoo", Blender Foundation films and several of the most-viewed music videos). They were not verified from the machine that built this page, because YouTube was blocked there. Press **Check list** on the device under test. All of them are landscape, so they're letterboxed in the 9:16 player. Add Shorts links for the true vertical case. The second entry, `_N2CPJS-mHw`, is a video the tester reported as blocked at school, included to see what a blocked video does in the embed. A saved list that is still the earlier, unedited default is switched to the new one automatically; an edited list is left as it is (use **Restore default list** to get the new default).
 - **Scrolling over the video:** the browser sends scrolls, clicks and key presses over the YouTube iframe to YouTube, not to this page. Normally you scroll on the controls or beside the video, and use the keyboard while focus is on the page. The page notices when focus moves into the player and says so. The gesture layer routes input over the picture to the page instead, which stops YouTube's on-video controls responding. It's only there to measure that experience: check YouTube's embedded-player policies before using that pattern in SirSC Scroll.
 - **Error 153:** the description in the page comes from memory, because Google's developer documentation couldn't be fetched from the build machine.
-- **Error 152** isn't in Google's documentation, so the page doesn't give it a meaning. On the school Chromebook it came from every `loadVideoById()` after the first video.
+- **Error 152** isn't in Google's documentation, so the page doesn't give it a meaning. YouTube's own message inside the player reads "152-4".
+  - On the school Chromebook it first came from every `loadVideoById()` after the first video. Then it also came with Big Buck Bunny as the first video.
+  - "Me at the zoo" plays in Google Slides on the same school computer. So the school isn't blocking the video itself; the embedding page makes the difference.
+  - The only explanations found online are developer reports linking 152 to YouTube rejecting how the embedding page identifies itself (origin / Referer).
+
+## For the school
+
+The youtube-nocookie.com option was added at the tester's request, with the school's permission to experiment, and the school will review it before anything is published. So that the review has the full picture:
+
+- youtube-nocookie.com is YouTube's own privacy-enhanced embed mode, documented by YouTube. It isn't a proxy or a third-party service, and the page uses only the official IFrame API.
+- In that mode the player doesn't use the viewer's YouTube cookies. YouTube settings tied to a student's signed-in account, such as Restricted Mode applied to school accounts, **may therefore not apply** in that player. This hasn't been confirmed either way.
+- If videos play at youtube-nocookie.com but not at www.youtube.com, the school's filter or Chrome settings may simply not cover that address yet. The school could close it at any time.
+- Whether to allow it is the school's decision. The results show exactly which address every video used.
 - **How it was tested:** every page behaviour above was tested in headless Chromium against a local stand-in for the IFrame API that imitates the player's events (including error codes, blocked autoplay and video end), without contacting YouTube. That covers navigation, one-gesture-one-video, controls, error handling, the cue check, the autoplay-blocked path, export and the file:// warning. The Google Sites launcher was tested in a sandboxed, cross-origin frame like Google's: the new tab, playback in it, the recorded origin, and the blocked-pop-up fallback. It has **not** yet played real YouTube video. That's what the Chromebook run is for.

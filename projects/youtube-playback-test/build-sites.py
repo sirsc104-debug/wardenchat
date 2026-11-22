@@ -47,6 +47,8 @@ page = '''<!doctype html>
   button:focus-visible, a:focus-visible { outline: 2px solid #22d3ee; outline-offset: 2px; }
   .note { font-size: 13px; color: #c9d2dc; padding: 10px 12px; border-radius: 10px; background: #161a20; border: 1px solid rgb(255 255 255 / 0.1); }
   .note a { color: #22d3ee; font-weight: 700; cursor: pointer; text-decoration: underline; }
+  .alt { justify-self: center; font-size: 12.5px; color: #a9b3bf; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .alt:hover { color: #e9eef4; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -56,6 +58,7 @@ page = '''<!doctype html>
   <h1>SirSC Scroll · <span>YouTube playback test</span></h1>
   <p>Measures how quickly and reliably YouTube videos load and switch on this device. It opens in its own tab so the player has room and full screen works.</p>
   <button id="open" type="button">Open the test in a new tab</button>
+  <a class="alt" id="inline" role="button" tabindex="0">or run it inside this page</a>
   <p class="note" id="note" role="status" aria-live="polite" hidden></p>
 </main>
 <script>
@@ -71,10 +74,14 @@ page = '''<!doctype html>
   }
   function offerHere(prefix) {
     say(prefix + ' <a id="here" role="button" tabindex="0">Run it here instead</a>.');
-    var a = document.getElementById('here');
-    a.addEventListener('click', runHere);
-    a.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); runHere(); } });
+    onActivate(document.getElementById('here'), runHere);
   }
+  function onActivate(el, fn) {
+    el.addEventListener('click', fn);
+    el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } });
+  }
+  // Always offered, so the new tab and the embed can be compared on the same device.
+  onActivate(document.getElementById('inline'), runHere);
   document.getElementById('open').addEventListener('click', function () {
     var w = null;
     try { w = window.open('about:blank', '_blank'); } catch (e) { w = null; }

@@ -131,6 +131,7 @@
   .opts select, .opts input[type=number] { background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 7px; padding: 3px 6px; }
   .opts input[type=number] { width: 64px; }
   .opts select { min-width: 0; max-width: 100%; }
+  .opts label > span:first-child { white-space: nowrap; }
   input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; }
   .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
   dl.env { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 12px; margin: 0; font-size: 12px; }
@@ -224,7 +225,7 @@
         <h2>Loads <span class="grow"></span><span class="pill dim" id="pillLoads">0</span></h2>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>#</th><th>Video ID</th><th>Your label</th><th>Outcome</th><th>Switch</th><th class="num">→ first event</th><th class="num">→ PLAYING</th><th class="num">Buffering</th><th>Error</th></tr></thead>
+            <thead><tr><th>#</th><th>Video ID</th><th>Your label</th><th>Outcome</th><th title="How the video was requested, and from which player address">How</th><th class="num">→ first event</th><th class="num">→ PLAYING</th><th class="num">Buffering</th><th>Error</th></tr></thead>
             <tbody id="loadRows"></tbody>
           </table>
         </div>
@@ -277,6 +278,8 @@
           <select id="optErr"><option value="wait">show message, wait</option><option value="skip">skip after 2 s</option></select></label>
         <label title="Reuse: every video after the first is loaded into the same player with loadVideoById(). New player: the player is destroyed and created again with each video, the way the first video is loaded."><span><b>Switching</b></span>
           <select id="optSwitch"><option value="reuse">reuse one player</option><option value="new">new player per video</option></select></label>
+        <label title="Where the player itself is loaded from. youtube-nocookie.com is YouTube's own privacy-enhanced embed address; it doesn't use the viewer's YouTube cookies. The API script always comes from www.youtube.com. Changing this rebuilds the player."><span><b>Player address</b></span>
+          <select id="optHost"><option value="youtube">youtube.com</option><option value="nocookie">youtube-nocookie.com</option></select></label>
         <label><span><b>No-start timeout</b></span> <input type="number" id="optTimeout" min="3" max="60" step="1"> s</label>
       </div>
       <p class="note">
@@ -351,7 +354,11 @@
 
   var T0 = performance.now();
   var startedAt = new Date().toISOString();
-  var settings = { startMuted: true, autoplay: true, controls: false, gesture: false, onEnd: 'next', onError: 'wait', timeoutSec: 12, switchMethod: 'reuse' };
+  var settings = { startMuted: true, autoplay: true, controls: false, gesture: false, onEnd: 'next', onError: 'wait', timeoutSec: 12, switchMethod: 'reuse', host: 'youtube' };
+  // Player addresses. youtube-nocookie.com is YouTube's own privacy-enhanced embed mode.
+  var HOSTS = { youtube: 'https://www.youtube.com', nocookie: 'https://www.youtube-nocookie.com' };
+  var playerHost = 'youtube'; // the address the current player was asked to use
+  var playerIframeOrigin = null; // where its iframe actually points, read from getIframe() once ready
   var listText = DEFAULT_LIST;
   var list = [];
   var index = 0;
@@ -382,6 +389,7 @@
       var saved = JSON.parse(localStorage.getItem(STORE) || 'null');
       if (saved) {
         if (saved.settings) Object.keys(settings).forEach(function (k) { if (k in saved.settings) settings[k] = saved.settings[k]; });
+        if (!HOSTS[settings.host]) settings.host = 'youtube';
         if (typeof saved.listText === 'string' && saved.listText.trim() && saved.listText !== PREVIOUS_DEFAULT_LIST) listText = saved.listText;
       }
     } catch (e) { /* storage blocked: defaults */ }
@@ -487,11 +495,13 @@
   function createPlayer(reason, muted) {
     var first = list[index];
     playerReady = false;
+    playerHost = HOSTS[settings.host] ? settings.host : 'youtube';
+    playerIframeOrigin = null;
     var t = now();
     current = newLoad(first, reason || 'player start', t);
     current.method = 'new player';
-    log('player', 'Creating player with ' + first.id + ' (' + (settings.controls ? 'YouTube controls' : 'no YouTube controls') + ')');
-    player = new YT.Player('yt', {
+    log('player', 'Creating player with ' + first.id + ' at ' + HOSTS[playerHost].replace('https://', '') + ' (' + (settings.controls ? 'YouTube controls' : 'no YouTube controls') + ')');
+    var config = {
       width: '100%',
       height: '100%',
       videoId: first.id,
@@ -502,7 +512,9 @@
         onError: onError,
         onAutoplayBlocked: onAutoplayBlocked
       }
-    });
+    };
+    if (playerHost !== 'youtube') config.host = HOSTS[playerHost];
+    player = new YT.Player('yt', config);
     applyGesture();
   }
 
@@ -522,9 +534,13 @@
     playerReady = true;
     playerReadyAt = now();
     $('mReady').textContent = ms(playerReadyAt - T0);
-    log('ready', 'Player ready ' + ms(playerReadyAt - T0) + ' after page start');
+    var src = safe(function () { return player.getIframe().src; }, '');
+    try { playerIframeOrigin = new URL(src).origin; } catch (e) { playerIframeOrigin = null; }
+    log('ready', 'Player ready ' + ms(playerReadyAt - T0) + ' after page start' + (playerIframeOrigin ? ' · player iframe at ' + playerIframeOrigin.replace('https://', '') : ''));
+    if (playerIframeOrigin && playerIframeOrigin !== HOSTS[playerHost]) log('warning', 'Asked for ' + HOSTS[playerHost].replace('https://', '') + ' but the player iframe is at ' + playerIframeOrigin.replace('https://', ''));
+    if (current && current.method === 'new player') { current.iframeOrigin = playerIframeOrigin; armTimeout(current); }
+    renderEnv();
     syncMute();
-    if (current && current.method === 'new player') armTimeout(current);
     render();
   }
 
@@ -545,6 +561,8 @@
       error: null,
       outcome: 'pending',
       method: null,
+      host: playerHost,
+      iframeOrigin: playerIframeOrigin,
       states: []
     };
     loads.push(rec);
@@ -825,14 +843,20 @@
       max: v.length ? Math.round(v[v.length - 1]) : null
     };
   }
+  function methodKey(method, host) { return method + (host === 'nocookie' ? ' · nocookie' : ''); }
   function currentMethod() {
-    return settings.switchMethod === 'new' ? 'new player' : settings.autoplay ? 'loadVideoById' : 'cueVideoById';
+    return methodKey(settings.switchMethod === 'new' ? 'new player' : settings.autoplay ? 'loadVideoById' : 'cueVideoById', settings.host);
   }
   function summary() {
     var ok = loads.filter(function (l) { return l.playingMs != null; });
     var switchLoads = ok.filter(function (l) { return l.reason !== 'player start' && !l.manualStart; });
     var byMethod = {};
-    switchLoads.forEach(function (l) { (byMethod[l.method] = byMethod[l.method] || []).push(l.playingMs); });
+    switchLoads.forEach(function (l) { var k = methodKey(l.method, l.host); (byMethod[k] = byMethod[k] || []).push(l.playingMs); });
+    var byHost = {};
+    loads.forEach(function (l) {
+      var h = byHost[l.host] = byHost[l.host] || { requested: 0, playing: 0, failed: 0 };
+      h.requested++; if (l.playingMs != null) h.playing++; if (l.error != null) h.failed++;
+    });
     Object.keys(byMethod).forEach(function (k) { byMethod[k] = stats(byMethod[k]); });
     var first = loads.length && loads[0].reason === 'player start' ? loads[0] : null;
     return {
@@ -847,7 +871,8 @@
         definition: 'Request (loadVideoById() call, or creating a new player) to the PLAYING state event, for videos after the first that started without a manual press. All switching methods together.'
       }, stats(switchLoads.map(function (l) { return l.playingMs; }))),
       switchTimeByMethodMs: byMethod,
-      failedLoadsByMethod: loads.reduce(function (a, l) { if (l.error != null) a[l.method] = (a[l.method] || 0) + 1; return a; }, {}),
+      failedLoadsByMethod: loads.reduce(function (a, l) { if (l.error != null) { var k = methodKey(l.method, l.host); a[k] = (a[k] || 0) + 1; } return a; }, {}),
+      loadsByPlayerAddress: byHost,
       bufferingMsTotal: Math.round(loads.reduce(function (a, l) { return a + l.bufferingMs + (l.bufferingSince != null ? now() - l.bufferingSince : 0); }, 0)),
       rebuffersAfterStart: loads.reduce(function (a, l) { return a + l.rebuffers; }, 0),
       errorCodes: errorCounts
@@ -877,7 +902,7 @@
     $('mRebuf').textContent = 'rebuffers after start: ' + (rec ? rec.rebuffers : 0);
     var avg = sum.switchTimeByMethodMs[currentMethod()] || stats([]);
     $('mAvg').textContent = avg.mean == null ? '—' : ms(avg.mean);
-    $('mAvgSub').textContent = (settings.switchMethod === 'new' ? 'new player each · ' : '') + avg.samples + ' samples · median ' + ms(avg.median) + ' · p90 ' + ms(avg.p90);
+    $('mAvgSub').textContent = (settings.host === 'nocookie' ? 'nocookie · ' : '') + (settings.switchMethod === 'new' ? 'new player each · ' : '') + avg.samples + ' samples · median ' + ms(avg.median) + ' · p90 ' + ms(avg.p90);
     $('mOk').textContent = sum.successfulLoads;
     $('mOkSub').textContent = 'reached PLAYING' + (sum.manualStarts ? ' · ' + sum.manualStarts + ' after a manual press' : '');
     $('mFail').textContent = sum.failedLoads;
@@ -890,7 +915,7 @@
     $('btnPlay').textContent = lastState === 1 || lastState === 3 ? '❚❚' : '▶';
     $('pillLoads').textContent = String(loads.length);
     $('loadRows').innerHTML = loads.slice(-60).reverse().map(function (l) {
-      return '<tr><td class="num">' + l.n + '</td><td class="mono">' + esc(l.id) + '</td><td class="lbl" title="' + esc(l.label) + '">' + esc(l.label) + '</td><td>' + outcomePill(l) + '</td><td class="dimtext">' + esc(l.method === 'new player' ? 'new player' : l.method === 'cueVideoById' ? 'cue' : l.method ? 'reuse' : '') + '</td><td class="num">' + ms(l.firstEventMs) + '</td><td class="num">' + ms(l.playingMs) + '</td><td class="num">' + ms(l.bufferingMs + (l.bufferingSince != null ? now() - l.bufferingSince : 0)) + '</td><td>' + (l.error != null ? 'code ' + esc(l.error) : '') + '</td></tr>';
+      return '<tr><td class="num">' + l.n + '</td><td class="mono">' + esc(l.id) + '</td><td class="lbl" title="' + esc(l.label) + '">' + esc(l.label) + '</td><td>' + outcomePill(l) + '</td><td class="dimtext">' + esc((l.method === 'new player' ? 'new player' : l.method === 'cueVideoById' ? 'cue' : l.method ? 'reuse' : '') + (l.host === 'nocookie' ? ' · nocookie' : '')) + '</td><td class="num">' + ms(l.firstEventMs) + '</td><td class="num">' + ms(l.playingMs) + '</td><td class="num">' + ms(l.bufferingMs + (l.bufferingSince != null ? now() - l.bufferingSince : 0)) + '</td><td>' + (l.error != null ? 'code ' + esc(l.error) : '') + '</td></tr>';
     }).join('');
     $('errRows').innerHTML = codes.length
       ? codes.map(function (c) { return '<tr><td class="mono">' + esc(c) + '</td><td class="num">' + errorCounts[c] + '</td><td class="wrap">' + esc(ERROR_TEXT[c] || 'Not in YouTube’s documentation; exact meaning unknown.') + '</td></tr>'; }).join('')
@@ -1017,14 +1042,15 @@
         loadedFraction: 'getVideoLoadedFraction() at export time, as reported by the API.',
         autoplayBlocked: 'Count of onAutoplayBlocked events.',
         noStart: 'Loads with neither a PLAYING event nor an error within the timeout.',
-        method: 'How each video was requested: loadVideoById/cueVideoById into the existing player, or "new player" (the player destroyed and created again with that video, as for the first video).'
+        method: 'How each video was requested: loadVideoById/cueVideoById into the existing player, or "new player" (the player destroyed and created again with that video, as for the first video).',
+        playerAddress: 'Where the player was loaded from: www.youtube.com, or www.youtube-nocookie.com (YouTube privacy-enhanced embed mode, which does not use the viewer\'s YouTube cookies). The IFrame API script always comes from www.youtube.com.'
       },
       settings: settings,
       list: list,
       summary: s,
       loads: loads.map(function (l) {
         return {
-          n: l.n, id: l.id, label: l.label, reason: l.reason, method: l.method, outcome: l.outcome,
+          n: l.n, id: l.id, label: l.label, reason: l.reason, method: l.method, playerAddress: HOSTS[l.host], playerIframeOrigin: l.iframeOrigin, outcome: l.outcome,
           requestToFirstEventMs: l.firstEventMs == null ? null : Math.round(l.firstEventMs),
           requestToPlayingMs: l.playingMs == null ? null : Math.round(l.playingMs),
           bufferingMs: Math.round(l.bufferingMs), rebuffersAfterStart: l.rebuffers,
@@ -1112,7 +1138,8 @@
       ['Screen', e.screen + ' · viewport ' + e.viewport],
       ['Network', e.connection ? e.connection.effectiveType + ' · ~' + e.connection.downlinkMbps + ' Mbps · rtt ~' + e.connection.rttMs + ' ms (browser estimate)' : 'not reported'],
       ['In a frame', window.top !== window.self ? 'yes (embedded in another page)' : 'no'],
-      ['Opened by', openedByLauncher() ? 'the Google Sites launcher (new tab)' : 'directly']
+      ['Opened by', openedByLauncher() ? 'the Google Sites launcher (new tab)' : 'directly'],
+      ['Player address', HOSTS[settings.host].replace('https://', '') + (settings.host === 'nocookie' ? ' (privacy-enhanced mode)' : '') + (playerIframeOrigin ? ' · player iframe at ' + playerIframeOrigin.replace('https://', '') : '')]
     ];
     $('env').innerHTML = rows.map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('');
   }
@@ -1191,8 +1218,10 @@
     $('optErr').value = settings.onError;
     $('optTimeout').value = settings.timeoutSec;
     $('optSwitch').value = settings.switchMethod;
+    $('optHost').value = HOSTS[settings.host] ? settings.host : 'youtube';
     $('optMuted').addEventListener('change', function () { settings.startMuted = this.checked; save(); log('setting', 'Start muted: ' + this.checked + ' (applies to the next player start; use the mute button now)'); });
     $('optAutoplay').addEventListener('change', function () { settings.autoplay = this.checked; save(); log('setting', 'Autoplay on switch: ' + this.checked); });
+    $('optHost').addEventListener('change', function () { settings.host = this.value; save(); renderEnv(); log('setting', 'Player address: ' + HOSTS[settings.host].replace('https://', '') + ' · rebuilding the player'); rebuildPlayer(); render(); });
     $('optControls').addEventListener('change', function () { settings.controls = this.checked; save(); log('setting', 'YouTube controls: ' + this.checked + ' · rebuilding the player'); rebuildPlayer(); });
     $('optGesture').addEventListener('change', function () { settings.gesture = this.checked; save(); applyGesture(); log('setting', 'Gesture layer: ' + this.checked); });
     $('optEnd').addEventListener('change', function () { settings.onEnd = this.value; save(); });
