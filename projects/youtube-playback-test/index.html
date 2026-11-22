@@ -91,6 +91,7 @@
   .nowline { display: grid; gap: 2px; font-size: 12px; color: var(--text-2); }
   .nowline b { color: var(--text); font-size: 13px; }
   .hint { font-size: 12px; color: var(--text-3); }
+  td.dimtext { font-size: 12px; color: var(--text-3); white-space: nowrap; }
   .hint.focus { color: var(--warn); }
 
   .dash { display: grid; gap: 12px; min-width: 0; }
@@ -125,10 +126,11 @@
   }
   .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
   .opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 14px; margin-top: 10px; }
-  .opts label { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-2); }
+  .opts label { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-2); min-width: 0; }
   .opts label b { color: var(--text); font-weight: 700; }
   .opts select, .opts input[type=number] { background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 7px; padding: 3px 6px; }
   .opts input[type=number] { width: 64px; }
+  .opts select { min-width: 0; max-width: 100%; }
   input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; }
   .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; }
   dl.env { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 12px; margin: 0; font-size: 12px; }
@@ -209,10 +211,12 @@
       </div>
       <p class="note">
         Timings are measured in this page with <code>performance.now()</code>. <b>Request → PLAYING</b> runs from this page's
-        <code>loadVideoById()</code> call to the moment the player <i>reports</i> state PLAYING through the IFrame API, so it includes
-        the player's own loading and the message hop back to this page. The API does not expose first-frame time, network
+        <code>loadVideoById()</code> call (or, with <b>Switching: new player for each video</b>, from creating that player) to the
+        moment the player <i>reports</i> state PLAYING through the IFrame API, so it includes the player's own loading and the
+        message hop back to this page. The API does not expose first-frame time, network
         requests, bitrate or dropped frames, so none are claimed here. <b>Buffering</b> is the time between BUFFERING and the next
-        state the player reports. <b>Average switch time</b> covers every video after the first that started without a manual press.
+        state the player reports. <b>Average switch time</b> covers every video after the first that started without a manual press, for the switching
+        method currently selected.
       </p>
     </div>
 
@@ -220,7 +224,7 @@
         <h2>Loads <span class="grow"></span><span class="pill dim" id="pillLoads">0</span></h2>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>#</th><th>Video ID</th><th>Your label</th><th>Outcome</th><th class="num">→ first event</th><th class="num">→ PLAYING</th><th class="num">Buffering</th><th>Error</th></tr></thead>
+            <thead><tr><th>#</th><th>Video ID</th><th>Your label</th><th>Outcome</th><th>Switch</th><th class="num">→ first event</th><th class="num">→ PLAYING</th><th class="num">Buffering</th><th>Error</th></tr></thead>
             <tbody id="loadRows"></tbody>
           </table>
         </div>
@@ -271,6 +275,8 @@
           <select id="optEnd"><option value="next">next video</option><option value="loop">replay</option><option value="stop">stop</option></select></label>
         <label><span><b>On error</b></span>
           <select id="optErr"><option value="wait">show message, wait</option><option value="skip">skip after 2 s</option></select></label>
+        <label title="Reuse: every video after the first is loaded into the same player with loadVideoById(). New player: the player is destroyed and created again with each video, the way the first video is loaded."><span><b>Switching</b></span>
+          <select id="optSwitch"><option value="reuse">reuse one player</option><option value="new">new player per video</option></select></label>
         <label><span><b>No-start timeout</b></span> <input type="number" id="optTimeout" min="3" max="60" step="1"> s</label>
       </div>
       <p class="note">
@@ -345,7 +351,7 @@
 
   var T0 = performance.now();
   var startedAt = new Date().toISOString();
-  var settings = { startMuted: true, autoplay: true, controls: false, gesture: false, onEnd: 'next', onError: 'wait', timeoutSec: 12 };
+  var settings = { startMuted: true, autoplay: true, controls: false, gesture: false, onEnd: 'next', onError: 'wait', timeoutSec: 12, switchMethod: 'reuse' };
   var listText = DEFAULT_LIST;
   var list = [];
   var index = 0;
@@ -450,10 +456,10 @@
 
   /* ------------------------------------------------------------------ the player */
 
-  function playerVars() {
+  function playerVars(muted) {
     var v = {
       autoplay: settings.autoplay ? 1 : 0,
-      mute: settings.startMuted ? 1 : 0,
+      mute: (muted == null ? settings.startMuted : muted) ? 1 : 0,
       playsinline: 1,
       rel: 0,
       controls: settings.controls ? 1 : 0,
@@ -476,17 +482,20 @@
     try { return !!window.opener && window.opener !== window; } catch (e) { return true; }
   }
 
-  function createPlayer() {
+  // reason: 'player start' for the page's first player (and a rebuild for the controls option);
+  // a navigation reason when "Switching: new player for each video" creates one per video.
+  function createPlayer(reason, muted) {
     var first = list[index];
     playerReady = false;
     var t = now();
-    current = newLoad(first, 'player start', t);
+    current = newLoad(first, reason || 'player start', t);
+    current.method = 'new player';
     log('player', 'Creating player with ' + first.id + ' (' + (settings.controls ? 'YouTube controls' : 'no YouTube controls') + ')');
     player = new YT.Player('yt', {
       width: '100%',
       height: '100%',
       videoId: first.id,
-      playerVars: playerVars(),
+      playerVars: playerVars(muted),
       events: {
         onReady: onReady,
         onStateChange: onStateChange,
@@ -497,7 +506,7 @@
     applyGesture();
   }
 
-  function rebuildPlayer() {
+  function rebuildPlayer(reason, muted) {
     if (!window.YT || !YT.Player) return;
     stopPoll();
     finishLoad('left before playing');
@@ -506,7 +515,7 @@
     host.id = 'yt';
     var old = $('yt');
     if (old) old.replaceWith(host); else $('stage').prepend(host);
-    createPlayer();
+    createPlayer(reason, muted);
   }
 
   function onReady() {
@@ -515,7 +524,7 @@
     $('mReady').textContent = ms(playerReadyAt - T0);
     log('ready', 'Player ready ' + ms(playerReadyAt - T0) + ' after page start');
     syncMute();
-    if (current && current.reason === 'player start') armTimeout(current);
+    if (current && current.method === 'new player') armTimeout(current);
     render();
   }
 
@@ -535,6 +544,7 @@
       autoplayBlocked: false,
       error: null,
       outcome: 'pending',
+      method: null,
       states: []
     };
     loads.push(rec);
@@ -576,6 +586,16 @@
   }
 
   function loadIndex(i, reason) {
+    if (settings.switchMethod === 'new' && player && window.YT && YT.Player) {
+      // Same as the page's first video: destroy the player and create a new one with this video.
+      var muted = safe(function () { return player.isMuted(); }, settings.startMuted);
+      index = i;
+      message('');
+      log('request', 'new player(' + list[i].id + ') · ' + reason);
+      rebuildPlayer(reason, muted);
+      render();
+      return;
+    }
     if (!player || !playerReady) { index = i; render(); return; }
     finishLoad('left before playing');
     index = i;
@@ -583,6 +603,7 @@
     var item = list[i];
     var t = now();
     current = newLoad(item, reason, t);
+    current.method = settings.autoplay ? 'loadVideoById' : 'cueVideoById';
     try {
       if (settings.autoplay) player.loadVideoById(item.id);
       else player.cueVideoById(item.id);
@@ -599,6 +620,7 @@
     finishLoad('left before playing');
     message('');
     current = newLoad({ id: id, label: label }, 'error test', now());
+    current.method = 'loadVideoById';
     try { player.loadVideoById(id); } catch (e) { log('exception', String(e)); }
     log('request', 'loadVideoById(' + id + ') · error-handling test');
     armTimeout(current);
@@ -791,10 +813,27 @@
 
   /* ------------------------------------------------------------------ summary and rendering */
 
+  function stats(values) {
+    var v = values.slice().sort(function (a, b) { return a - b; });
+    var pick = function (q) { return v.length ? Math.round(v[Math.min(v.length - 1, Math.floor(q * v.length))]) : null; };
+    return {
+      samples: v.length,
+      mean: v.length ? Math.round(v.reduce(function (a, b) { return a + b; }, 0) / v.length) : null,
+      median: pick(0.5),
+      p90: pick(0.9),
+      min: v.length ? Math.round(v[0]) : null,
+      max: v.length ? Math.round(v[v.length - 1]) : null
+    };
+  }
+  function currentMethod() {
+    return settings.switchMethod === 'new' ? 'new player' : settings.autoplay ? 'loadVideoById' : 'cueVideoById';
+  }
   function summary() {
     var ok = loads.filter(function (l) { return l.playingMs != null; });
-    var switches = ok.filter(function (l) { return l.reason !== 'player start' && !l.manualStart; }).map(function (l) { return l.playingMs; }).sort(function (a, b) { return a - b; });
-    var pick = function (q) { return switches.length ? switches[Math.min(switches.length - 1, Math.floor(q * switches.length))] : null; };
+    var switchLoads = ok.filter(function (l) { return l.reason !== 'player start' && !l.manualStart; });
+    var byMethod = {};
+    switchLoads.forEach(function (l) { (byMethod[l.method] = byMethod[l.method] || []).push(l.playingMs); });
+    Object.keys(byMethod).forEach(function (k) { byMethod[k] = stats(byMethod[k]); });
     var first = loads.length && loads[0].reason === 'player start' ? loads[0] : null;
     return {
       loadsRequested: loads.length,
@@ -804,15 +843,11 @@
       autoplayBlockedEvents: autoplayBlocked,
       manualStarts: ok.filter(function (l) { return l.manualStart; }).length,
       firstVideoRequestToPlayingMs: first && first.playingMs != null ? Math.round(first.playingMs) : null,
-      switchTimeMs: {
-        definition: 'loadVideoById() call to the PLAYING state event, for videos after the first that started without a manual press',
-        samples: switches.length,
-        mean: switches.length ? Math.round(switches.reduce(function (a, b) { return a + b; }, 0) / switches.length) : null,
-        median: pick(0.5) == null ? null : Math.round(pick(0.5)),
-        p90: pick(0.9) == null ? null : Math.round(pick(0.9)),
-        min: switches.length ? Math.round(switches[0]) : null,
-        max: switches.length ? Math.round(switches[switches.length - 1]) : null
-      },
+      switchTimeMs: Object.assign({
+        definition: 'Request (loadVideoById() call, or creating a new player) to the PLAYING state event, for videos after the first that started without a manual press. All switching methods together.'
+      }, stats(switchLoads.map(function (l) { return l.playingMs; }))),
+      switchTimeByMethodMs: byMethod,
+      failedLoadsByMethod: loads.reduce(function (a, l) { if (l.error != null) a[l.method] = (a[l.method] || 0) + 1; return a; }, {}),
       bufferingMsTotal: Math.round(loads.reduce(function (a, l) { return a + l.bufferingMs + (l.bufferingSince != null ? now() - l.bufferingSince : 0); }, 0)),
       rebuffersAfterStart: loads.reduce(function (a, l) { return a + l.rebuffers; }, 0),
       errorCodes: errorCounts
@@ -840,8 +875,9 @@
     var liveBuf = rec ? rec.bufferingMs + (rec.bufferingSince != null ? now() - rec.bufferingSince : 0) : null;
     $('mBuf').textContent = rec ? ms(liveBuf) : '—';
     $('mRebuf').textContent = 'rebuffers after start: ' + (rec ? rec.rebuffers : 0);
-    $('mAvg').textContent = sum.switchTimeMs.mean == null ? '—' : ms(sum.switchTimeMs.mean);
-    $('mAvgSub').textContent = sum.switchTimeMs.samples + ' samples · median ' + ms(sum.switchTimeMs.median) + ' · p90 ' + ms(sum.switchTimeMs.p90);
+    var avg = sum.switchTimeByMethodMs[currentMethod()] || stats([]);
+    $('mAvg').textContent = avg.mean == null ? '—' : ms(avg.mean);
+    $('mAvgSub').textContent = (settings.switchMethod === 'new' ? 'new player each · ' : '') + avg.samples + ' samples · median ' + ms(avg.median) + ' · p90 ' + ms(avg.p90);
     $('mOk').textContent = sum.successfulLoads;
     $('mOkSub').textContent = 'reached PLAYING' + (sum.manualStarts ? ' · ' + sum.manualStarts + ' after a manual press' : '');
     $('mFail').textContent = sum.failedLoads;
@@ -854,7 +890,7 @@
     $('btnPlay').textContent = lastState === 1 || lastState === 3 ? '❚❚' : '▶';
     $('pillLoads').textContent = String(loads.length);
     $('loadRows').innerHTML = loads.slice(-60).reverse().map(function (l) {
-      return '<tr><td class="num">' + l.n + '</td><td class="mono">' + esc(l.id) + '</td><td class="lbl" title="' + esc(l.label) + '">' + esc(l.label) + '</td><td>' + outcomePill(l) + '</td><td class="num">' + ms(l.firstEventMs) + '</td><td class="num">' + ms(l.playingMs) + '</td><td class="num">' + ms(l.bufferingMs + (l.bufferingSince != null ? now() - l.bufferingSince : 0)) + '</td><td>' + (l.error != null ? 'code ' + esc(l.error) : '') + '</td></tr>';
+      return '<tr><td class="num">' + l.n + '</td><td class="mono">' + esc(l.id) + '</td><td class="lbl" title="' + esc(l.label) + '">' + esc(l.label) + '</td><td>' + outcomePill(l) + '</td><td class="dimtext">' + esc(l.method === 'new player' ? 'new player' : l.method === 'cueVideoById' ? 'cue' : l.method ? 'reuse' : '') + '</td><td class="num">' + ms(l.firstEventMs) + '</td><td class="num">' + ms(l.playingMs) + '</td><td class="num">' + ms(l.bufferingMs + (l.bufferingSince != null ? now() - l.bufferingSince : 0)) + '</td><td>' + (l.error != null ? 'code ' + esc(l.error) : '') + '</td></tr>';
     }).join('');
     $('errRows').innerHTML = codes.length
       ? codes.map(function (c) { return '<tr><td class="mono">' + esc(c) + '</td><td class="num">' + errorCounts[c] + '</td><td class="wrap">' + esc(ERROR_TEXT[c] || 'Not in YouTube’s documentation; exact meaning unknown.') + '</td></tr>'; }).join('')
@@ -980,14 +1016,15 @@
         buffering: 'Sum of intervals from a BUFFERING (3) state event to the next state event, as reported by the API.',
         loadedFraction: 'getVideoLoadedFraction() at export time, as reported by the API.',
         autoplayBlocked: 'Count of onAutoplayBlocked events.',
-        noStart: 'Loads with neither a PLAYING event nor an error within the timeout.'
+        noStart: 'Loads with neither a PLAYING event nor an error within the timeout.',
+        method: 'How each video was requested: loadVideoById/cueVideoById into the existing player, or "new player" (the player destroyed and created again with that video, as for the first video).'
       },
       settings: settings,
       list: list,
       summary: s,
       loads: loads.map(function (l) {
         return {
-          n: l.n, id: l.id, label: l.label, reason: l.reason, outcome: l.outcome,
+          n: l.n, id: l.id, label: l.label, reason: l.reason, method: l.method, outcome: l.outcome,
           requestToFirstEventMs: l.firstEventMs == null ? null : Math.round(l.firstEventMs),
           requestToPlayingMs: l.playingMs == null ? null : Math.round(l.playingMs),
           bufferingMs: Math.round(l.bufferingMs), rebuffersAfterStart: l.rebuffers,
@@ -1153,12 +1190,14 @@
     $('optEnd').value = settings.onEnd;
     $('optErr').value = settings.onError;
     $('optTimeout').value = settings.timeoutSec;
+    $('optSwitch').value = settings.switchMethod;
     $('optMuted').addEventListener('change', function () { settings.startMuted = this.checked; save(); log('setting', 'Start muted: ' + this.checked + ' (applies to the next player start; use the mute button now)'); });
     $('optAutoplay').addEventListener('change', function () { settings.autoplay = this.checked; save(); log('setting', 'Autoplay on switch: ' + this.checked); });
     $('optControls').addEventListener('change', function () { settings.controls = this.checked; save(); log('setting', 'YouTube controls: ' + this.checked + ' · rebuilding the player'); rebuildPlayer(); });
     $('optGesture').addEventListener('change', function () { settings.gesture = this.checked; save(); applyGesture(); log('setting', 'Gesture layer: ' + this.checked); });
     $('optEnd').addEventListener('change', function () { settings.onEnd = this.value; save(); });
     $('optErr').addEventListener('change', function () { settings.onError = this.value; save(); });
+    $('optSwitch').addEventListener('change', function () { settings.switchMethod = this.value; save(); log('setting', 'Switching: ' + (this.value === 'new' ? 'new player for each video' : 'reuse one player') + ' (from the next switch)'); render(); });
     $('optTimeout').addEventListener('change', function () { settings.timeoutSec = Math.max(3, Math.min(60, Number(this.value) || 12)); this.value = settings.timeoutSec; save(); });
     // Navigation
     document.querySelector('.player-col').addEventListener('wheel', onWheel, { passive: false });

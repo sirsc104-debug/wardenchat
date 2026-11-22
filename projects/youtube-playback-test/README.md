@@ -6,7 +6,8 @@ Everything is in one file, `index.html`: no build step, no backend, no API key. 
 
 ## What it does
 
-- **One 9:16 player.** One YouTube iframe is created once and reused. Every switch is `loadVideoById()` (or `cueVideoById()` when "Autoplay on switch" is off), so there are no page reloads and no new iframes. The only time the iframe is rebuilt is when you change the "YouTube's own controls" option, because YouTube reads that setting only when the player is created.
+- **One 9:16 player.** By default, one YouTube iframe is created once and reused. Every switch is `loadVideoById()` (or `cueVideoById()` when "Autoplay on switch" is off), so there are no page reloads and no new iframes. The iframe is also rebuilt when you change the "YouTube's own controls" option, because YouTube reads that setting only when the player is created.
+- **Switching option.** **Switching: new player per video** destroys the player and creates a new one for each video, the same way the first video is always loaded. It was added because on a school Chromebook the first video played but every later `loadVideoById()` failed with error 152. Each load records which method was used (the **Switch** column, and `method` in the results), and the average switch time is kept separately for each method.
 - **Navigation:**
   - Mouse wheel and trackpad: one gesture moves exactly one video, however much momentum it has.
   - Keyboard: ↑ ↓, J K and Page Up / Page Down.
@@ -25,7 +26,7 @@ All times are taken in the page with `performance.now()`.
 
 | Measurement | Definition |
 | --- | --- |
-| Request → PLAYING | From the page calling `loadVideoById()` (or creating the player, for the first video) until the player **reports** state PLAYING (1) to the page. It includes YouTube's own loading and the message hop from the iframe. It is not time to first frame; the API doesn't expose that. |
+| Request → PLAYING | From the page calling `loadVideoById()` (or creating the player, for the first video and with **new player per video**) until the player **reports** state PLAYING (1) to the page. It includes YouTube's own loading and the message hop from the iframe. It is not time to first frame; the API doesn't expose that. |
 | Request → first event | Until the first state event of any kind: how quickly the player reacts at all. |
 | Time in BUFFERING | The sum of the gaps between each BUFFERING (3) event and the next state event, as reported. "Rebuffers after start" counts returns to BUFFERING after playback began. |
 | Average switch time | Mean, median and p90 of Request → PLAYING for every video after the first that started on its own. Videos you had to start by pressing Play (after an autoplay block, for example) are kept out of this average. The first video is reported on its own, because it includes the player's startup. |
@@ -77,10 +78,11 @@ For a quick check on a computer first, a local server is fine: run `python3 -m h
 
    Then press **Use this list**.
 5. Watch through the list using the wheel or trackpad, the arrow keys and the buttons. Try a fast run of several switches in a row, then a slower run that lets each video play for a while.
-6. Test sound and autoplay: untick **Start muted**, reload the page, and note whether **Autoplay blocked** goes up before you've clicked anything.
-7. Optionally tick **Gesture layer** and try scrolling and swiping directly over the picture, to feel the difference.
-8. Press **Export results**. If downloads are blocked (common inside Google Sites), use **Copy JSON** or **Show JSON** instead, and keep the text.
-9. Repeat on an unmanaged device or a home network if you can, so school restrictions can be told apart from YouTube or performance problems.
+6. If the first video plays but later ones fail (error 152 was reported on a school Chromebook), set **Switching** to **new player per video**, switch a few times and compare. Note which videos still fail: a video the school blocks should keep failing either way.
+7. Test sound and autoplay: untick **Start muted**, reload the page, and note whether **Autoplay blocked** goes up before you've clicked anything.
+8. Optionally tick **Gesture layer** and try scrolling and swiping directly over the picture, to feel the difference.
+9. Press **Export results**. If downloads are blocked (common inside Google Sites), use **Copy JSON** or **Show JSON** instead, and keep the text.
+10. Repeat on an unmanaged device or a home network if you can, so school restrictions can be told apart from YouTube or performance problems.
 
 Rough guide for reading the numbers: a median switch under about 1 second feels close to instant; 1 to 2 seconds is workable if SirSC Scroll shows its own placeholder while loading; consistently over 2 seconds, or frequent rebuffers, would argue for preloading the next video in a second, hidden player (worth testing next if needed). Errors 101 and 150 mean the owner disallows embedding. Error 100 means the video is unavailable, which on a school account can also mean it's restricted. Error 153 points to a missing Referer.
 
@@ -89,4 +91,5 @@ Rough guide for reading the numbers: a median switch under about 1 second feels 
 - **Default list:** the default IDs are widely published, well-known public videos (YouTube's own API documentation sample, "Me at the zoo", Blender Foundation films and several of the most-viewed music videos). They were not verified from the machine that built this page, because YouTube was blocked there. Press **Check list** on the device under test. All of them are landscape, so they're letterboxed in the 9:16 player. Add Shorts links for the true vertical case. The second entry, `_N2CPJS-mHw`, is a video the tester reported as blocked at school, included to see what a blocked video does in the embed. A saved list that is still the earlier, unedited default is switched to the new one automatically; an edited list is left as it is (use **Restore default list** to get the new default).
 - **Scrolling over the video:** the browser sends scrolls, clicks and key presses over the YouTube iframe to YouTube, not to this page. Normally you scroll on the controls or beside the video, and use the keyboard while focus is on the page. The page notices when focus moves into the player and says so. The gesture layer routes input over the picture to the page instead, which stops YouTube's on-video controls responding. It's only there to measure that experience: check YouTube's embedded-player policies before using that pattern in SirSC Scroll.
 - **Error 153:** the description in the page comes from memory, because Google's developer documentation couldn't be fetched from the build machine.
+- **Error 152** isn't in Google's documentation, so the page doesn't give it a meaning. On the school Chromebook it came from every `loadVideoById()` after the first video.
 - **How it was tested:** every page behaviour above was tested in headless Chromium against a local stand-in for the IFrame API that imitates the player's events (including error codes, blocked autoplay and video end), without contacting YouTube. That covers navigation, one-gesture-one-video, controls, error handling, the cue check, the autoplay-blocked path, export and the file:// warning. The Google Sites launcher was tested in a sandboxed, cross-origin frame like Google's: the new tab, playback in it, the recorded origin, and the blocked-pop-up fallback. It has **not** yet played real YouTube video. That's what the Chromebook run is for.
