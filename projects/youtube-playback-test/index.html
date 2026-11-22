@@ -660,7 +660,19 @@
       } else {
         closeBuffering(rec, t);
       }
-      if (s === 1) {
+      // getVideoUrl() (documented) says which video the player actually has. A switch that leaves the
+      // previous video playing reports PLAYING too, so it must not be counted as a successful load.
+      var playingId = s === 1 ? currentVideoId() : null;
+      if (s === 1 && playingId && playingId !== rec.id) {
+        if (rec.outcome !== 'wrong video') {
+          rec.outcome = 'wrong video';
+          rec.playingIdReported = playingId;
+          clearTimeout(rec.timer);
+          log('warning', 'Asked for ' + rec.id + ' but the player reports it is playing ' + playingId + ' (getVideoUrl). Not counted as a load.');
+          message('<b>The player didn’t switch.</b><span class="hint">It reports PLAYING, but for ' + esc(playingId) + ', not ' + esc(rec.id) + '. This is not counted as a successful load.</span><div class="row"><button class="btn small accent" data-act="next" type="button">Next video</button><button class="btn small" data-act="retry" type="button">Retry</button></div>');
+        }
+        startPoll();
+      } else if (s === 1) {
         if (rec.playingMs == null) {
           rec.playingMs = t - rec.requestedAt;
           rec.outcome = 'ok';
@@ -740,6 +752,12 @@
     var muted = safe(function () { return player.isMuted(); }, true);
     $('btnMute').textContent = muted ? '🔇' : '🔊';
     $('btnMute').setAttribute('aria-pressed', String(!muted));
+  }
+
+  function currentVideoId() {
+    var url = safe(function () { return player.getVideoUrl(); }, '');
+    var m = /[?&]v=([A-Za-z0-9_-]{11})/.exec(url);
+    return m ? m[1] : null;
   }
 
   function safe(fn, fallback) { try { var v = fn(); return v == null ? fallback : v; } catch (e) { return fallback; } }
@@ -864,6 +882,7 @@
       successfulLoads: ok.length,
       failedLoads: loads.filter(function (l) { return l.error != null; }).length,
       noStartTimeouts: loads.filter(function (l) { return l.outcome === 'no start'; }).length,
+      wrongVideoLoads: loads.filter(function (l) { return l.outcome === 'wrong video'; }).length,
       autoplayBlockedEvents: autoplayBlocked,
       manualStarts: ok.filter(function (l) { return l.manualStart; }).length,
       firstVideoRequestToPlayingMs: first && first.playingMs != null ? Math.round(first.playingMs) : null,
@@ -880,7 +899,7 @@
   }
 
   function outcomePill(l) {
-    var map = { ok: 'ok', error: 'bad', 'no start': 'warn', 'autoplay blocked': 'warn', pending: 'dim', cued: 'dim', 'left before playing': 'dim' };
+    var map = { ok: 'ok', error: 'bad', 'wrong video': 'bad', 'no start': 'warn', 'autoplay blocked': 'warn', pending: 'dim', cued: 'dim', 'left before playing': 'dim' };
     var text = l.outcome === 'ok' && l.manualStart ? 'ok (manual start)' : l.outcome;
     return '<span class="pill ' + (map[l.outcome] || 'dim') + '">' + esc(text) + '</span>';
   }
@@ -1042,6 +1061,7 @@
         loadedFraction: 'getVideoLoadedFraction() at export time, as reported by the API.',
         autoplayBlocked: 'Count of onAutoplayBlocked events.',
         noStart: 'Loads with neither a PLAYING event nor an error within the timeout.',
+        wrongVideo: 'Loads where the player reported PLAYING but getVideoUrl() named a different video (the previous one kept playing). Not counted as successful.',
         method: 'How each video was requested: loadVideoById/cueVideoById into the existing player, or "new player" (the player destroyed and created again with that video, as for the first video).',
         playerAddress: 'Where the player was loaded from: www.youtube.com, or www.youtube-nocookie.com (YouTube privacy-enhanced embed mode, which does not use the viewer\'s YouTube cookies). The IFrame API script always comes from www.youtube.com.'
       },
@@ -1050,7 +1070,7 @@
       summary: s,
       loads: loads.map(function (l) {
         return {
-          n: l.n, id: l.id, label: l.label, reason: l.reason, method: l.method, playerAddress: HOSTS[l.host], playerIframeOrigin: l.iframeOrigin, outcome: l.outcome,
+          n: l.n, id: l.id, label: l.label, reason: l.reason, method: l.method, playerAddress: HOSTS[l.host], playerIframeOrigin: l.iframeOrigin, outcome: l.outcome, playingIdReported: l.playingIdReported || null,
           requestToFirstEventMs: l.firstEventMs == null ? null : Math.round(l.firstEventMs),
           requestToPlayingMs: l.playingMs == null ? null : Math.round(l.playingMs),
           bufferingMs: Math.round(l.bufferingMs), rebuffersAfterStart: l.rebuffers,

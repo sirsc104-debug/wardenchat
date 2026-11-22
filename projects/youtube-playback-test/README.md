@@ -35,6 +35,7 @@ All times are taken in the page with `performance.now()`.
 | Failed loads | Loads that got an `onError` event. The code, count and meaning are listed in the Errors table. |
 | Autoplay blocked | Count of `onAutoplayBlocked` events from the player. |
 | No-start timeouts | Loads with neither PLAYING nor an error within the timeout (12 s by default). |
+| Wrong video | Loads where the player reported PLAYING but `getVideoUrl()` named a different video, because the previous one kept playing. Seen at school with **reuse one player** at youtube-nocookie.com. These aren't counted as successful and get no switch time. |
 | Position | `getCurrentTime()` / `getDuration()`, read four times a second only while a video is playing. |
 | Loaded fraction | `getVideoLoadedFraction()`, as the player reports it. |
 | API script ready, Player ready | Time from page start to `onYouTubeIframeAPIReady`, and to the player's `onReady`. |
