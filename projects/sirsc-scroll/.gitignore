@@ -4,3 +4,4 @@ dist/single
 *.tsbuildinfo
 dist/artifact
 dist/demo
+tests/e2e/out

@@ -1,0 +1,12 @@
+<!doctype html><html><body style="margin:0">
+<!-- Loads dist/sirsc-scroll.html the way an embed does: #srcdoc (like Google Sites) or #write (document.write into about:blank).
+     Serve projects/sirsc-scroll with `python3 -m http.server 4180`, then run embed-check.cjs. -->
+<iframe id="f" style="width:1300px;height:740px;border:0" allow="autoplay; encrypted-media; fullscreen"></iframe>
+<script>
+fetch('../../dist/sirsc-scroll.html').then(r => r.text()).then(html => {
+  const mode = location.hash.slice(1) || 'srcdoc';
+  const f = document.getElementById('f');
+  if (mode === 'srcdoc') f.srcdoc = html;
+  else { const d = f.contentDocument; d.open(); d.write(html); d.close(); }
+});
+</script></body></html>
