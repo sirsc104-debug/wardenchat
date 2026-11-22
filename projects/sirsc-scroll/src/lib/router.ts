@@ -1,7 +1,11 @@
 // Minimal router over "#/path/segments?query" strings.
-// Normal builds keep the route in location.hash (works from file://, in embeds and offline).
-// The claude.ai Artifact build (__MEMORY_ROUTER__) keeps it in memory instead, because the
-// artifact frame only passes plain "#name" hashes; it still reads a plain "#name" on load.
+// Normal pages keep the route in location.hash (works from file:// and offline).
+// It's kept in memory instead, with in-app "#/..." links routed here, in two cases:
+// - the claude.ai Artifact build (__MEMORY_ROUTER__): the artifact frame only passes plain "#name"
+//   hashes; it still reads a plain "#name" on load;
+// - a frame with no address of its own, like a Google Sites embed (about:srcdoc or about:blank). Its
+//   links resolve against the host page's address, so clicking href="#/explore" would navigate the
+//   frame to the host page (which Google Sites refuses to show in a frame) instead of changing the hash.
 import { useSyncExternalStore } from 'react';
 
 export interface Route {
@@ -10,11 +14,23 @@ export interface Route {
   hash: string;
 }
 
-const MEMORY = typeof __MEMORY_ROUTER__ !== 'undefined' && __MEMORY_ROUTER__;
+/** True in a document whose links don't resolve against its own address (about:srcdoc, about:blank embeds). */
+function borrowedAddress(): boolean {
+  if (typeof location === 'undefined' || typeof document === 'undefined') return false;
+  if (location.protocol === 'about:') return true;
+  try {
+    return document.baseURI.split('#')[0] !== location.href.split('#')[0];
+  } catch {
+    return false;
+  }
+}
+
+const MEMORY = (typeof __MEMORY_ROUTER__ !== 'undefined' && __MEMORY_ROUTER__) || borrowedAddress();
 const PLAIN_ROUTES = ['explore', 'following', 'trending', 'notifications', 'history', 'saved'];
 
 /** "#video-v010" → "#/video/v010", "#explore" → "#/explore". */
 function fromPlainHash(h: string): string {
+  if (h.startsWith('#/')) return h;
   const name = h.replace(/^#/, '');
   const video = name.match(/^video-([a-z0-9]+)$/i);
   if (video) return `#/video/${video[1]}`;

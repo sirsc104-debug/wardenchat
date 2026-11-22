@@ -101,7 +101,7 @@ The Artifact and demo builds use `src/lib/demoBackend.ts`, a pretend Warden Chat
 
 `dist/sirsc-scroll-artifact.html` is what the Artifact link above serves. It differs from the single file in three ways: no `<html>`/`<head>`/`<body>` (the host adds them), routes live in memory instead of `#/paths` (the frame only passes plain `#names`; `#video-v010`, `#explore`, `#trending` and similar still work as entry points), and share links use the app-style `sirsc-scroll://video/…` form since the page can't know its public URL. The app's own theme setting is stored on `data-look` so it never clashes with the host's `data-theme`.
 
-`dist/sirsc-scroll.html` (about 670 KB) is the whole app in one file and can be pasted into a Google Sites embed. Progress is saved per browser.
+`dist/sirsc-scroll.html` (about 700 KB) is the whole app in one file and can be pasted into a Google Sites embed. Google Sites runs embed code in a frame without an address of its own (`about:srcdoc`), where `#/…` links would point at the Google Sites page; the router notices and keeps the route in memory there, so the sidebar and every in-app link work (Back in the browser doesn't move between pages inside the embed). Progress is saved per browser.
 - **Network requests:** it calls the catalog on Supabase and loads YouTube's player script and embeds. It needs an http(s) page for YouTube to accept the embeds.
 - **Opened from disk (`file://`):** catalog calls still work, but YouTube will mostly refuse to play.
 - **Artifact build:** it stays on demo clips, because the Artifact runs sandboxed.
