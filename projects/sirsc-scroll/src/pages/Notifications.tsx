@@ -1,70 +1,66 @@
-import { useMemo, useState } from 'react';
-import { AtSign, Bell, BellOff, CheckCheck, Flame, Heart, MessageSquareText, Send, Sparkles, UserPlus, Circle, CircleDot } from 'lucide-react';
-import type { ActivityEntry, AppNotification, NotificationType } from '../state/types';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AtSign, BellOff, CheckCheck, Heart, MessageSquareText, RotateCcw } from 'lucide-react';
+import type { ActivityEntry } from '../state/types';
 import { PageShell, Panel } from './PageShell';
 import { Avatar } from '../components/common/Avatar';
 import { VideoArt } from '../components/common/VideoArt';
 import { Empty } from '../components/common/Empty';
 import { useAcct, usePersisted } from '../state/store';
-import { markAllRead, markRead, openVideo, toggleRead } from '../state/actions';
+import { openSheet, openVideo, toast } from '../state/actions';
+import { focusWidget } from '../state/widgets';
 import { getUser, getVideo } from '../lib/catalog';
+import { lookupCatalogIds } from '../lib/remoteCatalog';
 import { ago, agoLong, dayBucket } from '../lib/format';
 import { href, navigate } from '../lib/router';
-import { useLayout, isDue, useNow } from '../lib/hooks';
+import { useLayout, useNow } from '../lib/hooks';
+import { memberUser } from '../data/users';
+import { loadNotices, markNoticesSeen, noticesSnapshot, useSocialVersion, type Notice } from '../lib/social';
 
-type Filter = 'all' | 'unread' | 'follow' | 'like' | 'comment' | 'mention' | 'share' | 'updates';
+type Filter = 'all' | 'reply' | 'mention' | 'comment_like';
 
-const FILTERS: [Filter, string, NotificationType[]][] = [
-  ['all', 'All', []],
-  ['unread', 'Unread', []],
-  ['follow', 'Followers', ['follow']],
-  ['like', 'Likes', ['like']],
-  ['comment', 'Comments', ['comment', 'reply']],
-  ['mention', 'Mentions', ['mention']],
-  ['share', 'Shares', ['share']],
-  ['updates', 'Trending & updates', ['trending', 'post', 'system']],
+const FILTERS: [Filter, string][] = [
+  ['all', 'All'],
+  ['reply', 'Replies'],
+  ['mention', 'Mentions'],
+  ['comment_like', 'Likes on your comments'],
 ];
 
-const ICON: Record<NotificationType, typeof Heart> = {
-  follow: UserPlus,
-  like: Heart,
-  reply: MessageSquareText,
-  comment: MessageSquareText,
-  mention: AtSign,
-  share: Send,
-  trending: Flame,
-  post: Sparkles,
-  system: Bell,
-};
+const ICON: Record<Notice['kind'], typeof Heart> = { reply: MessageSquareText, mention: AtSign, comment_like: Heart };
+const TEXT: Record<Notice['kind'], string> = { reply: 'replied to your comment', mention: 'mentioned you in a comment', comment_like: 'liked your comment' };
+const TYPE_CLASS: Record<Notice['kind'], string> = { reply: 'reply', mention: 'mention', comment_like: 'like' };
 
-function NoteRow({ n, index }: { n: AppNotification; index: number }) {
+function NoteRow({ n, index, unread }: { n: Notice; index: number; unread: boolean }) {
   const p = usePersisted();
   const now = useNow();
-  const actor = n.actorId ? getUser(p, n.actorId) : undefined;
-  const video = n.videoId ? getVideo(p, n.videoId) : undefined;
-  const Icon = ICON[n.type];
-  const open = () => {
-    markRead(n.id);
-    if (video) {
-      openVideo(video.id);
-      navigate('#/watch');
-    } else if (actor) navigate(href.profile(actor.handle));
+  const layout = useLayout();
+  const actor = memberUser(n.actor.id, n.actor.username);
+  const video = getVideo(p, n.videoId);
+  const Icon = ICON[n.kind];
+  const open = async () => {
+    if (!getVideo(p, n.videoId)) await lookupCatalogIds([n.videoId]);
+    if (!getVideo(p, n.videoId)) {
+      toast('That video isn’t available anymore.');
+      return;
+    }
+    openVideo(n.videoId);
+    navigate('#/watch');
+    // The comments, where the reply or like happened.
+    window.setTimeout(() => (layout === 'mobile' ? openSheet('comments') : focusWidget('comments')), 350);
   };
-  const selfActor = n.type === 'trending' && n.actorId === p.activeId;
   return (
-    <li className={`note${n.read ? '' : ' unread'}`} style={{ '--n': index } as React.CSSProperties}>
-      <button type="button" className="note-hit" onClick={open}>
+    <li className={`note${unread ? ' unread' : ''}`} style={{ '--n': index } as React.CSSProperties}>
+      <button type="button" className="note-hit" onClick={() => void open()}>
         <span className="note-av">
-          {actor && !selfActor ? <Avatar user={actor} size={40} /> : <span className="note-sys"><Icon size={18} /></span>}
-          <span className={`note-type t-${n.type}`}>
+          <Avatar user={actor} size={40} />
+          <span className={`note-type t-${TYPE_CLASS[n.kind]}`}>
             <Icon size={11} />
           </span>
         </span>
         <span className="note-text">
           <span>
-            {actor && !selfActor && n.type !== 'system' && <b>{actor.name}</b>} {n.text}
+            <b>{n.actor.username}</b> {TEXT[n.kind]}
           </span>
-          {n.quote && <span className="note-quote">“{n.quote}”</span>}
+          <span className="note-quote">“{n.text}”</span>
           <span className="note-time" title={agoLong(n.at, now)}>
             {ago(n.at, now)}
           </span>
@@ -74,9 +70,6 @@ function NoteRow({ n, index }: { n: AppNotification; index: number }) {
             <VideoArt video={video} running={false} />
           </span>
         )}
-      </button>
-      <button type="button" className="icon-btn xs note-read" onClick={() => toggleRead(n.id)} aria-label={n.read ? 'Mark as unread' : 'Mark as read'} title={n.read ? 'Mark as unread' : 'Mark as read'}>
-        {n.read ? <Circle size={12} /> : <CircleDot size={12} />}
       </button>
     </li>
   );
@@ -90,8 +83,6 @@ const ACT_TEXT: Record<ActivityEntry['type'], string> = {
   reply: 'You replied on',
   follow: 'You followed',
   unfollow: 'You unfollowed',
-  share: 'You shared',
-  publish: 'You published',
   'not-interested': 'Not interested:',
   'hide-creator': 'You hid',
   report: 'You reported',
@@ -114,7 +105,6 @@ function ActivityLog() {
                 <span className="act-text">
                   {ACT_TEXT[a.type]}{' '}
                   {u ? <a href={href.profile(u.handle)}>@{u.handle}</a> : v ? <b>{v.title}</b> : a.detail ? <b>“{a.detail}”</b> : null}
-                  {a.type === 'share' && a.detail && !u && <span className="muted"> via {a.detail === 'link' ? 'link' : a.detail === 'warden' ? 'Warden Chat' : a.detail}</span>}
                 </span>
                 <span className="act-time">{ago(a.at, now)}</span>
               </li>
@@ -122,59 +112,62 @@ function ActivityLog() {
           })}
         </ul>
       ) : (
-        <p className="muted small">Likes, follows, comments and shares you make show up here.</p>
+        <p className="muted small">Likes, follows, saves and comments you make show up here.</p>
       )}
     </Panel>
   );
 }
 
 export function Notifications() {
+  useSocialVersion();
   const now = useNow();
   const layout = useLayout();
-  const all = useAcct((a) => a.notifications);
+  const st = noticesSnapshot();
   const [filter, setFilter] = useState<Filter>('all');
-  const due = useMemo(() => all.filter((n) => isDue(n.at, now)).sort((a, b) => b.at - a.at), [all, now]);
+  // What was new when the page opened stays highlighted while you're here.
+  const newSince = useRef<number | null>(null);
+  if (newSince.current === null && st.status === 'ready') newSince.current = st.seenAt;
+
+  useEffect(() => {
+    void loadNotices();
+  }, []);
+  // Opening the inbox counts as seeing everything in it.
+  useEffect(() => {
+    if (st.status === 'ready') void markNoticesSeen();
+  }, [st.status, st.items.length]);
+
   const counts = useMemo(() => {
     const m = new Map<Filter, number>();
-    for (const [f, , types] of FILTERS) m.set(f, f === 'all' ? due.length : f === 'unread' ? due.filter((n) => !n.read).length : due.filter((n) => types.includes(n.type)).length);
+    for (const [f] of FILTERS) m.set(f, f === 'all' ? st.items.length : st.items.filter((n) => n.kind === f).length);
     return m;
-  }, [due]);
-  const shown = useMemo(() => {
-    const def = FILTERS.find((f) => f[0] === filter)!;
-    if (filter === 'all') return due;
-    if (filter === 'unread') return due.filter((n) => !n.read);
-    return due.filter((n) => def[2].includes(n.type));
-  }, [due, filter]);
+  }, [st.items]);
+  const shown = useMemo(() => (filter === 'all' ? st.items : st.items.filter((n) => n.kind === filter)), [st.items, filter]);
   const groups = useMemo(() => {
-    const m = new Map<string, AppNotification[]>();
+    const m = new Map<string, Notice[]>();
     for (const n of shown) {
       const b = dayBucket(n.at, now);
       m.set(b, [...(m.get(b) ?? []), n]);
     }
     return [...m.entries()];
   }, [shown, now]);
-  const unread = counts.get('unread') ?? 0;
-  const week = due.filter((n) => now - n.at < 7 * 86_400_000);
+  const fresh = st.items.filter((n) => n.at > (newSince.current ?? st.seenAt)).length;
+  const week = st.items.filter((n) => now - n.at < 7 * 86_400_000);
 
   const aside = (
     <>
       <Panel title="This week">
         <div className="mini-stats">
           <div>
-            <b>{week.filter((n) => n.type === 'follow').length}</b>
-            <span>new followers</span>
+            <b>{week.filter((n) => n.kind === 'reply').length}</b>
+            <span>replies</span>
           </div>
           <div>
-            <b>{week.filter((n) => n.type === 'like').length}</b>
-            <span>likes</span>
+            <b>{week.filter((n) => n.kind === 'mention').length}</b>
+            <span>mentions</span>
           </div>
           <div>
-            <b>{week.filter((n) => n.type === 'comment' || n.type === 'reply' || n.type === 'mention').length}</b>
-            <span>comments</span>
-          </div>
-          <div>
-            <b>{week.filter((n) => n.type === 'share').length}</b>
-            <span>videos sent</span>
+            <b>{week.filter((n) => n.kind === 'comment_like').length}</b>
+            <span>comment likes</span>
           </div>
         </div>
       </Panel>
@@ -186,12 +179,12 @@ export function Notifications() {
     <PageShell
       title={
         <>
-          Notifications {unread > 0 && <span className="pill pill-hot">{unread} new</span>}
+          Notifications {fresh > 0 && <span className="pill pill-hot">{fresh} new</span>}
         </>
       }
       actions={
-        <button type="button" className="btn btn-ghost btn-sm" onClick={markAllRead} disabled={!unread}>
-          <CheckCheck size={14} /> Mark all as read
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => void loadNotices()} disabled={st.status === 'loading'}>
+          <RotateCcw size={14} /> Refresh
         </button>
       }
       aside={layout === 'desktop' ? aside : undefined}
@@ -203,22 +196,31 @@ export function Notifications() {
           </button>
         ))}
       </div>
-      {groups.length ? (
+      {st.status === 'loading' && !st.items.length && <p className="muted small">Loading…</p>}
+      {st.status === 'error' && (
+        <Empty icon={BellOff} title="Couldn’t load notifications" action={<button type="button" className="btn btn-accent btn-sm" onClick={() => void loadNotices()}>Try again</button>}>
+          Check your connection.
+        </Empty>
+      )}
+      {groups.length > 0 &&
         groups.map(([label, list]) => (
           <section key={label} className="note-group">
             <h2 className="hist-label">{label}</h2>
             <ul className="notes" key={filter}>
               {list.map((n, i) => (
-                <NoteRow key={n.id} n={n} index={i} />
+                <NoteRow key={`${n.kind}${n.commentId}${n.actor.id}${n.at}`} n={n} index={i} unread={n.at > (newSince.current ?? st.seenAt)} />
               ))}
             </ul>
           </section>
-        ))
-      ) : (
-        <Empty icon={BellOff} title={filter === 'unread' ? 'You’re all caught up' : 'Nothing here yet'}>
-          {filter === 'all' ? 'Follows, likes, replies and shares from other accounts appear here.' : 'Try another filter.'}
+        ))}
+      {st.status === 'ready' && !groups.length && (
+        <Empty icon={BellOff} title="Nothing here yet">
+          {filter === 'all' ? 'When someone replies to your comments, mentions you with @ or likes one of your comments, it shows up here. Notifications from the last 30 days are kept.' : 'Try another filter.'}
         </Empty>
       )}
+      <p className="muted small note-foot">
+        <CheckCheck size={12} /> Opening this page marks everything as seen.
+      </p>
       {layout !== 'desktop' && aside}
     </PageShell>
   );

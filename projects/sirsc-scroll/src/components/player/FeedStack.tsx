@@ -3,7 +3,7 @@ import type { FeedKind, Video } from '../../state/types';
 import { FeedTrack } from './FeedTrack';
 import { useP, useS } from '../../state/store';
 
-const ORDER: FeedKind[] = ['foryou', 'following', 'trending', 'friends', 'list'];
+const ORDER: FeedKind[] = ['foryou', 'following', 'trending', 'list'];
 const SWAP_MS = 240;
 
 interface Layer {

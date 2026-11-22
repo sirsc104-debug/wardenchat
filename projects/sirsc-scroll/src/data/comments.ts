@@ -63,7 +63,7 @@ export function seedComments(video: Video): Comment[] {
   if (hit) return hit;
   const r = rng(`comments:${video.id}`);
   const authors = [...CREATOR_IDS.filter((id) => id !== video.creatorId), ...FRIEND_IDS];
-  const count = video.local ? 0 : Math.min(16, Math.max(5, Math.round(Math.log10(video.comments + 10) * 3.4)));
+  const count = Math.min(16, Math.max(5, Math.round(Math.log10(video.comments + 10) * 3.4)));
   const pool = [...BY_CATEGORY[video.category], ...pickN(r, GENERAL, 10)];
   const texts = pickN(r, pool, count);
   const age = Math.max(HOUR, Date.now() - video.uploadedAt);

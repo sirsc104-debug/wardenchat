@@ -13,10 +13,17 @@ import './styles/mobile.css';
 import './styles/motion.css';
 import './styles/youtube.css';
 import './styles/review.css';
+import './styles/auth.css';
 import { App } from './App';
 import { initMotion } from './lib/motion';
+import { startAccounts } from './lib/accounts';
+import { setTransport } from './lib/warden';
+import { demoTransport } from './lib/demoBackend';
 
 initMotion();
+// The demo builds (the claude.ai Artifact) talk to a pretend Warden Chat instead of Supabase.
+if (__DEMO_BACKEND__) setTransport(demoTransport);
+startAccounts();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

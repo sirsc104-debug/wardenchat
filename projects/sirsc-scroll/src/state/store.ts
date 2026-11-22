@@ -14,7 +14,6 @@ function initialSession(p: Persisted): Session {
       foryou: EMPTY_FEED('foryou'),
       following: EMPTY_FEED('following'),
       trending: EMPTY_FEED('trending'),
-      friends: EMPTY_FEED('friends'),
       list: EMPTY_FEED('list'),
     },
     activeFeed: 'foryou',

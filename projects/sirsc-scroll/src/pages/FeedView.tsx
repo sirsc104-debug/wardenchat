@@ -26,7 +26,7 @@ const GAP = 12;
 const BAR = 44;
 const REGION_MIN = 320;
 
-const FEED_NAMES: Record<FeedKind, string> = { foryou: 'For You', following: 'Following', trending: 'Trending', friends: 'Friends', list: 'this list' };
+const FEED_NAMES: Record<FeedKind, string> = { foryou: 'For You', following: 'Following', trending: 'Trending', list: 'this list' };
 
 /** Shortcuts shared by the desktop and mobile feeds. */
 export function useFeedKeys(enabled: boolean, mobile = false) {
@@ -127,12 +127,6 @@ export function EmptyFeed({ kind }: { kind: FeedKind }) {
         </Empty>
         <RecommendedCreators limit={5} />
       </div>
-    );
-  if (kind === 'friends')
-    return (
-      <Empty icon={UsersRound} title="No friend activity yet" action={<a className="btn btn-accent btn-sm" href="#/">Go to For You</a>}>
-        When your friends like, share or post videos, they appear here.
-      </Empty>
     );
   return (
     <Empty icon={Compass} title="Nothing to show here" action={<a className="btn btn-accent btn-sm" href="#/explore">Explore</a>}>

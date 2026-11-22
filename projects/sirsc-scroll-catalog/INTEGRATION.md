@@ -42,7 +42,7 @@ Feeds: `for_you`, `trending`, `newest`, `category` (with `category`) and `random
 | --- | --- | --- |
 | Video and user shapes | `src/state/types.ts` (`Video`, `User`) | Every component speaks these. |
 | Where videos come from | `src/lib/catalog.ts` `refresh()`, `allVideos()`, `getVideo()` | Returns `p.userVideos` + `SEED_VIDEOS` (`src/data/videos.ts`). The file already says: "When a backend arrives, these are the functions to point at an API." |
-| Users | `getUser()` → `USER_MAP` (`src/data/users.ts`) | Fictional creators, demo accounts, friends. |
+| Users | `getUser()` → `USER_MAP` (`src/data/users.ts`) | Fictional creators of the demo clips, sample commenters, and the signed-in Warden Chat account. |
 | Feeds | `src/lib/recommend.ts` `rankForYou`, `rankFollowing`, `rankTrending`, `rankFriends`, called from `src/state/actions.ts:82-85` | They rank whatever `allVideos()` returns. |
 | The track | `src/components/player/FeedTrack.tsx` | Mounts the current clip and its two neighbours. |
 | The picture | `src/components/player/Stage.tsx:107` `<Placeholder …/>` | The animated fake video. |

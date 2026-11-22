@@ -1,19 +1,20 @@
 import { memo, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { BarChart3, Compass, Info, ListVideo, MessageCircle, Shapes, UserRound, Users } from 'lucide-react';
+import { BarChart3, Compass, Info, ListVideo, MessageCircle, Shapes, UserRound } from 'lucide-react';
 import type { FeedState, Video, WidgetId } from '../../state/types';
 import { Widget, type Phase } from './Widget';
 import { Verified } from '../common/Verified';
 import { Comments } from '../panel/Comments';
-import { CreatorRow, FriendsActivity, MoreFromCreator, RecommendedCreators, Related, ShareRow, StatTiles, SuggestedCategories, TrendingTags, UpNext, VideoDetails } from '../panel/Sections';
+import { CreatorRow, MoreFromCreator, RecommendedCreators, Related, StatTiles, SuggestedCategories, TrendingTags, UpNext, VideoDetails } from '../panel/Sections';
 import { useP, usePersisted, useS } from '../../state/store';
 import { visibleWidgets } from '../../state/widgets';
 import { commentCount, getUser, totalLikes, videosBy } from '../../lib/catalog';
 import { maxColumnsFor, planColumns } from '../../lib/widgetLayout';
 import { compact, full } from '../../lib/format';
+import { useSocialVersion } from '../../lib/social';
 import { href } from '../../lib/router';
 
-const ICON = { creator: UserRound, info: Info, stats: BarChart3, comments: MessageCircle, upnext: ListVideo, related: Shapes, friends: Users, discovery: Compass } as const;
-const MIN: Record<WidgetId, number> = { creator: 96, info: 120, stats: 96, comments: 250, upnext: 150, related: 180, friends: 150, discovery: 180 };
+const ICON = { creator: UserRound, info: Info, stats: BarChart3, comments: MessageCircle, upnext: ListVideo, related: Shapes, discovery: Compass } as const;
+const MIN: Record<WidgetId, number> = { creator: 96, info: 120, stats: 96, comments: 250, upnext: 150, related: 180, discovery: 180 };
 const LEAVE_MS = 280;
 
 interface Rendered {
@@ -84,7 +85,6 @@ const InfoBody = memo(function InfoBody({ video, reason }: { video: Video; reaso
   return (
     <div className="wb-info">
       <VideoDetails video={video} reason={reason} hideStats openMore={openMore} />
-      <ShareRow video={video} />
     </div>
   );
 });
@@ -121,6 +121,7 @@ interface Props {
 /** The flexible workspace beside the player: visible widgets laid out in columns that share the space. */
 export const WidgetArea = memo(function WidgetArea({ video, reason, feed, width }: Props) {
   const p = usePersisted();
+  useSocialVersion();
   const prefs = useP((pp) => pp.widgets);
   const reduced = useP((pp) => pp.settings.reducedMotion);
   const visible = useMemo(() => visibleWidgets(prefs), [prefs]);
@@ -159,19 +160,17 @@ export const WidgetArea = memo(function WidgetArea({ video, reason, feed, width 
       case 'stats':
         return <StatTiles video={video} withViews />;
       case 'comments':
-        return <Comments video={video} mode="full" variant="widget" />;
+        return <Comments video={video} variant="widget" />;
       case 'upnext':
         return <UpNext feed={feed} count={14} bare />;
       case 'related':
         return <RelatedBody video={video} feed={feed} />;
-      case 'friends':
-        return <FriendsActivity limit={14} bare />;
       case 'discovery':
         return <DiscoveryBody video={video} />;
     }
   };
   const extra = (id: WidgetId) => {
-    if (id === 'comments') return video.allowComments === false ? 'off' : compact(commentCount(p, video));
+    if (id === 'comments') return compact(commentCount(p, video));
     if (id === 'upnext') return `${feed.index + 1} of ${feed.items.length}`;
     if (id === 'creator') {
       const u = getUser(p, video.creatorId);

@@ -1,9 +1,9 @@
 // A small, transparent, local recommendation engine. No machine learning: weighted interests,
-// hashtag affinity, follows, friends' activity, freshness and watch history, plus a seeded shuffle.
+// hashtag affinity, follows, freshness and watch history, plus a seeded shuffle.
 import type { AccountState, Category, FeedItem, HistoryEntry, Persisted, SortKey, Video } from '../state/types';
 import { CATEGORY_IDS, categoryLabel } from '../data/categories';
-import { FRIENDS_OF, USER_MAP } from '../data/users';
-import { allVideos, canSee, friendActivity, getVideo, likeCount } from './catalog';
+import { USER_MAP } from '../data/users';
+import { allVideos, getVideo, likeCount } from './catalog';
 import { clamp } from './format';
 import { hash01 } from './rng';
 
@@ -16,7 +16,6 @@ export type SignalKind =
   | 'unsave'
   | 'follow'
   | 'comment'
-  | 'share'
   | 'complete'
   | 'replay'
   | 'skip'
@@ -29,7 +28,6 @@ const WEIGHTS: Record<SignalKind, [cat: number, tag: number]> = {
   unsave: [-0.15, -0.1],
   follow: [0.3, 0.1],
   comment: [0.25, 0.2],
-  share: [0.3, 0.25],
   complete: [0.1, 0.06],
   replay: [0.18, 0.12],
   skip: [-0.07, -0.05],
@@ -41,7 +39,6 @@ const COUNTER: Partial<Record<SignalKind, keyof AccountState['signals']>> = {
   save: 'saves',
   follow: 'follows',
   comment: 'comments',
-  share: 'shares',
   complete: 'completions',
   replay: 'replays',
   skip: 'skips',
@@ -76,7 +73,6 @@ interface Ctx {
   following: Set<string>;
   blocked: Set<string>;
   hidden: Set<string>;
-  friendLikes: Map<string, string[]>;
   seen: Map<string, HistoryEntry>;
   /** Liked or saved: already watched, so feeds lead with something new. */
   done: Set<string>;
@@ -86,13 +82,6 @@ interface Ctx {
 function context(p: Persisted): Ctx {
   const acct = p.accounts[p.activeId];
   const mean = CATEGORY_IDS.reduce((s, c) => s + acct.interests[c], 0) / CATEGORY_IDS.length || 1;
-  const friendLikes = new Map<string, string[]>();
-  for (const a of friendActivity(p)) {
-    if (a.type === 'post') continue;
-    const list = friendLikes.get(a.videoId) ?? [];
-    if (!list.includes(a.friendId)) list.push(a.friendId);
-    friendLikes.set(a.videoId, list);
-  }
   return {
     p,
     acct,
@@ -100,7 +89,6 @@ function context(p: Persisted): Ctx {
     following: new Set(acct.following),
     blocked: new Set([...acct.notInterested, ...acct.reported]),
     hidden: new Set(acct.hiddenCreators),
-    friendLikes,
     seen: new Map(acct.history.map((h) => [h.videoId, h])),
     done: new Set([...acct.liked, ...acct.saved]),
     now: Date.now(),
@@ -108,20 +96,7 @@ function context(p: Persisted): Ctx {
 }
 
 function eligible(ctx: Ctx, v: Video): boolean {
-  return !ctx.blocked.has(v.id) && !ctx.hidden.has(v.creatorId) && canSee(ctx.p, v);
-}
-
-function firstName(id: string, p: Persisted): string {
-  const acct = p.accounts[id];
-  return (acct?.profile.name ?? USER_MAP.get(id)?.name ?? id).split(' ')[0];
-}
-
-export function friendsPhrase(p: Persisted, ids: string[], verb = 'Liked'): string {
-  if (!ids.length) return '';
-  const names = ids.map((id) => firstName(id, p));
-  if (names.length === 1) return `${verb} by ${names[0]}`;
-  if (names.length === 2) return `${verb} by ${names[0]} and ${names[1]}`;
-  return `${verb} by ${names[0]} and ${names.length - 1} friends`;
+  return !ctx.blocked.has(v.id) && !ctx.hidden.has(v.creatorId);
 }
 
 function score(ctx: Ctx, v: Video, nonce: number): { s: number; reason: string } {
@@ -147,9 +122,6 @@ function score(ctx: Ctx, v: Video, nonce: number): { s: number; reason: string }
   const creator = USER_MAP.get(v.creatorId);
   const follow = ctx.following.has(v.creatorId) ? 1.1 : 0;
   if (follow) parts.push([follow, `From @${creator?.handle ?? v.creatorId}, who you follow`]);
-  const friends = ctx.friendLikes.get(v.id);
-  const social = friends?.length ? 0.5 + 0.15 * Math.min(3, friends.length) : 0;
-  if (friends?.length) parts.push([social, friendsPhrase(ctx.p, friends)]);
   const ageDays = (ctx.now - v.uploadedAt) / DAY;
   const fresh = 0.6 * Math.exp(-ageDays / 7);
   if (fresh > 0.4) parts.push([fresh, `New from @${creator?.handle ?? v.creatorId}`]);
@@ -158,7 +130,7 @@ function score(ctx: Ctx, v: Video, nonce: number): { s: number; reason: string }
   const seen = ctx.seen.get(v.id);
   const seenPenalty = (seen ? 1.2 + seen.progress * 1.3 + Math.min(2, seen.completions) * 0.5 : 0) + (ctx.done.has(v.id) ? 3 : 0);
   const jitter = (hash01(`${nonce}:${ctx.p.activeId}:${v.id}`) - 0.5) * 1.6;
-  const s = cat + also + tag + follow + social + fresh + pop + 0.4 * v.meta.quality - seenPenalty + jitter;
+  const s = cat + also + tag + follow + fresh + pop + 0.4 * v.meta.quality - seenPenalty + jitter;
   parts.sort((a, b) => b[0] - a[0]);
   let reason = parts[0] && parts[0][0] > 0.05 ? parts[0][1] : '';
   if (!reason) reason = norm < 0.8 ? `Something new: ${categoryLabel(v.category)}` : `Popular in ${categoryLabel(v.category)}`;
@@ -204,40 +176,17 @@ export function rankFollowing(p: Persisted): FeedItem[] {
 
 export function trendingScore(p: Persisted, v: Video, now = Date.now()): number {
   const hours = (now - v.uploadedAt) / 3_600_000;
-  const engagement = likeCount(p, v) + 4 * v.comments + 6 * v.shares + 2 * v.saves;
+  const engagement = likeCount(p, v) + 4 * v.comments + 2 * v.saves;
   return (engagement / Math.pow(hours + 8, 0.55)) * (1 + v.meta.momentum) * (v.category === 'trending' ? 1.25 : 1);
 }
 
 export function rankTrending(p: Persisted): FeedItem[] {
   const ctx = context(p);
   return allVideos(p)
-    .filter((v) => eligible(ctx, v) && (v.visibility ?? 'public') === 'public')
+    .filter((v) => eligible(ctx, v))
     .map((v) => ({ v, s: trendingScore(p, v, ctx.now) }))
     .sort((a, b) => b.s - a.s)
     .map((x, i) => ({ id: x.v.id, reason: `#${i + 1} on Trending · ${categoryLabel(x.v.category)}` }));
-}
-
-export function rankFriends(p: Persisted): FeedItem[] {
-  const ctx = context(p);
-  const acts = friendActivity(p);
-  const byVideo = new Map<string, { likes: string[]; shares: string[]; posts: string[]; at: number }>();
-  for (const a of acts) {
-    const e = byVideo.get(a.videoId) ?? { likes: [], shares: [], posts: [], at: 0 };
-    const list = a.type === 'like' ? e.likes : a.type === 'share' ? e.shares : e.posts;
-    if (!list.includes(a.friendId)) list.push(a.friendId);
-    e.at = Math.max(e.at, a.at);
-    byVideo.set(a.videoId, e);
-  }
-  const fresh: FeedItem[] = [];
-  const watched: FeedItem[] = [];
-  const sorted = [...byVideo.entries()].sort((a, b) => b[1].at + b[1].likes.length * 3_600_000 - (a[1].at + a[1].likes.length * 3_600_000));
-  for (const [id, e] of sorted) {
-    const v = getVideo(p, id);
-    if (!v || !eligible(ctx, v) || v.creatorId === p.activeId) continue;
-    const reason = e.posts.length ? `Posted by ${firstName(e.posts[0], p)}` : e.shares.length ? friendsPhrase(p, e.shares, 'Shared') : friendsPhrase(p, e.likes);
-    (ctx.done.has(id) || ctx.seen.has(id) ? watched : fresh).push({ id, reason });
-  }
-  return [...fresh, ...watched];
 }
 
 export function applyFilters(p: Persisted, items: FeedItem[], category: Category | 'all', sort: SortKey): FeedItem[] {
@@ -261,7 +210,7 @@ export function relatedTo(p: Persisted, v: Video, n = 8, exclude: Set<string> = 
   const blocked = new Set(acct.notInterested);
   const tags = new Set(v.hashtags);
   return allVideos(p)
-    .filter((x) => x.id !== v.id && !exclude.has(x.id) && !hidden.has(x.creatorId) && !blocked.has(x.id) && canSee(p, x))
+    .filter((x) => x.id !== v.id && !exclude.has(x.id) && !hidden.has(x.creatorId) && !blocked.has(x.id))
     .map((x) => {
       let s = 0;
       if (x.category === v.category) s += 2;
@@ -300,7 +249,6 @@ export function trendingHashtags(p: Persisted, n = 10): { tag: string; count: nu
   const map = new Map<string, { count: number; views: number; heat: number }>();
   const now = Date.now();
   for (const v of allVideos(p)) {
-    if (!canSee(p, v)) continue;
     const heat = trendingScore(p, v, now);
     for (const t of v.hashtags) {
       const e = map.get(t) ?? { count: 0, views: 0, heat: 0 };
@@ -315,8 +263,4 @@ export function trendingHashtags(p: Persisted, n = 10): { tag: string; count: nu
     .sort((a, b) => b[1].heat - a[1].heat)
     .slice(0, n)
     .map(([tag, e]) => ({ tag, count: e.count, views: e.views }));
-}
-
-export function friendsOf(id: string): string[] {
-  return FRIENDS_OF[id] ?? [];
 }

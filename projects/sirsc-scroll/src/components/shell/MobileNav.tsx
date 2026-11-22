@@ -1,18 +1,16 @@
-import { Bell, Compass, House, Plus } from 'lucide-react';
+import { Bell, Bookmark, Compass, House } from 'lucide-react';
 import { Avatar } from '../common/Avatar';
-import { useAcct, usePersisted } from '../../state/store';
-import { openModal } from '../../state/actions';
+import { usePersisted } from '../../state/store';
 import { getUser } from '../../lib/catalog';
-import { isDue, useNow } from '../../lib/hooks';
+import { useUnreadNotices } from '../../lib/social';
 import { href, type Route } from '../../lib/router';
 
 export function MobileNav({ route }: { route: Route }) {
   const p = usePersisted();
-  const now = useNow();
-  const me = getUser(p, p.activeId)!;
-  const unread = useAcct((a) => a.notifications.filter((n) => !n.read && isDue(n.at, now)).length);
+  const me = getUser(p, p.activeId);
+  const unread = useUnreadNotices();
   const a = route.path[0] ?? '';
-  const feed = ['', 'following', 'trending', 'friends', 'watch', 'video'].includes(a);
+  const feed = ['', 'following', 'trending', 'watch', 'video'].includes(a);
   return (
     <nav className="m-nav" aria-label="Main">
       <a href="#/" className={feed ? 'on' : ''} aria-current={feed ? 'page' : undefined}>
@@ -23,9 +21,10 @@ export function MobileNav({ route }: { route: Route }) {
         <Compass size={22} />
         <span>Explore</span>
       </a>
-      <button type="button" className="m-create" onClick={() => openModal({ type: 'upload' })} aria-label="Upload a simulated video">
-        <Plus size={22} strokeWidth={2.6} />
-      </button>
+      <a href="#/saved" className={a === 'saved' ? 'on' : ''}>
+        <Bookmark size={22} />
+        <span>Saved</span>
+      </a>
       <a href="#/notifications" className={a === 'notifications' ? 'on' : ''}>
         <span className="m-nav-ico">
           <Bell size={22} />
@@ -33,7 +32,7 @@ export function MobileNav({ route }: { route: Route }) {
         </span>
         <span>Inbox</span>
       </a>
-      <a href={href.profile(me.handle)} className={a === 'profile' && route.path[1] === me.handle ? 'on' : ''}>
+      <a href={href.profile('me')} className={a === 'profile' && route.path[1] === 'me' ? 'on' : ''}>
         <Avatar user={me} size={24} />
         <span>Profile</span>
       </a>

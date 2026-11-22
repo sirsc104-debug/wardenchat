@@ -1,14 +1,49 @@
-# SirSC Scroll (V1.1)
+# SirSC Scroll (V1.2)
 
 **Your Feed. Your Way.** A short-form video app for the SirSC ecosystem (SirSC Games, Warden Chat, SirSC AI), built for school Chromebooks and desktop browsers first, with a proper phone layout too.
 
-**Live demo:** [claude.ai Artifact](https://claude.ai/artifact/QfMUocCP4F4Pt7ttW4h4ii) (private until shared from its Share menu).
+**Live demo:** [claude.ai Artifact](https://claude.ai/artifact/QfMUocCP4F4Pt7ttW4h4ii) (private until shared from its Share menu). The Artifact build signs in against a pretend Warden Chat: any username and a password of 4 or more characters.
 
 **Real videos.** By default SirSC Scroll plays real YouTube videos from the SirSC Scroll catalog (`projects/sirsc-scroll-catalog`). They play through YouTube's official embedded player, and no video files are downloaded or hosted. See [Real videos](#real-videos) below.
 
-The social side is still a demo: four demo accounts stand in for sign-in, and likes, saves, comments, follows and history are saved in the browser's localStorage. The 162 animated placeholder clips are still there as **Demo clips** (Settings › Videos). They also stand in automatically whenever the catalog can't be reached or has nothing to show.
+**Sign in with Warden Chat.** Nobody sees anything until they sign in with their Warden Chat username and password. Likes, comments and notifications are saved with that account in Warden Chat's database, so they're real and shared by everyone; follows, saves, collections, history and feed preferences stay in each browser, per account. See [Accounts](#accounts-sign-in-with-warden-chat) and [Likes and comments](#likes-and-comments).
 
-React 19 + TypeScript + Vite. Runtime dependencies are React, `lucide-react` (tree-shaken icons) and one locally bundled font (Manrope, latin subset). No Warden Chat sign-in.
+There are no uploads and no sharing: both were simulated, and they're gone. The 162 animated placeholder clips are still there as **Demo clips** (Settings › Videos). They also stand in automatically whenever the catalog can't be reached or has nothing to show; their counts and sample comments are made up and read-only.
+
+React 19 + TypeScript + Vite. Runtime dependencies are React, `lucide-react` (tree-shaken icons) and one locally bundled font (Manrope, latin subset). The SirSC logo is `src/assets/sirsc-logo.webp` (256 px, 20 KB) and the tab icon is a 64 px PNG inlined in `index.html`.
+
+## Accounts: sign in with Warden Chat
+
+- **The sign-in screen** comes first, with the SirSC logo: Warden Chat username and password. It signs in against Warden Chat's Supabase project the same way Warden Chat, Brain Rocket and Apples to Oranges do (`<username>@warden.invalid` with Supabase Auth's password grant), and the password goes only to Supabase Auth.
+- **No account yet?** The screen links to Warden Chat (chat.sirsc104.com). Warden Chat's sign-up needs a one-time permission from its own sign-up page, so accounts can't be created from SirSC Scroll. Passwords, profile pictures and deleting an account are also on Warden Chat.
+- **Staying signed in:** the session is kept in localStorage (`sirsc-scroll:session`) and refreshed about 90 seconds before it expires. Signing out in one tab signs out the others. If Warden Chat can't be reached when the page opens, a saved sign-in still opens the app.
+- **Suspended or banned on Warden Chat:** SirSC Scroll's functions refuse the account, the app asks Warden Chat's `my_account_state`, and a screen shows the reason and the end date, with **Check again** and **Sign out**. Nothing of the app shows meanwhile.
+- **An expired sign-in** returns to the sign-in screen with a note.
+- **Signing out** (account menu at the bottom of the sidebar, or Settings › Account) ends the session on this browser only (`/auth/v1/logout?scope=local`). **Sign out and remove data from this browser** also deletes that account's follows, saves, collections and history here, for shared computers.
+- **First sign-in on a browser** opens the feed preferences, so For You has something to go on.
+- **Your profile** is `#/profile/me`: liked videos and collections, plus links to Warden Chat for the picture and password.
+
+## Likes and comments
+
+- **Where they live:** Warden Chat's database, through the `scroll_*` functions in `projects/sirsc-scroll-catalog/supabase/migrations/20261122210000_scroll_social.sql`. The tables sit in a private schema the API can't reach, and every rule is enforced there. Counts on real videos are the real numbers from SirSC Scroll's own users; views are YouTube's.
+- **Which videos:** approved catalog videos only. Videos still waiting for review (owner preview) show "Likes and comments open once this video is approved", and demo clips keep their made-up counts and read-only sample comments.
+- **Comments:**
+  - Up to 300 characters; Top or Newest; replies are one level deep, and a reply to a reply joins the thread with "@name" in front.
+  - Like comments, delete your own (its replies go with it), and **Report** anyone else's (bullying, hateful, not appropriate for school, spam, something else).
+  - At most 6 comments a minute and 150 a day; the same comment twice within two minutes is refused.
+- **Warden Chat's rules carry over:**
+  - People who blocked each other on Warden Chat don't see each other's comments and can't reply to each other.
+  - An account a Warden Chat admin muted can't comment (it can still like).
+  - Comments from suspended or banned accounts are hidden.
+- **Notifications** (sidebar, top bar and phone Inbox badges): replies to your comments, @mentions of your username and likes on your comments, from the last 30 days. Opening the page marks them seen; the badge checks every two minutes.
+
+### Moderating comments (owner only)
+
+**Review videos › Comments** (`#/review/comments`) uses the same review key as the video review page:
+- **Reported** first, with how many reports and why; **All comments**; **Removed**.
+- **Remove** hides a comment from everyone (and closes its reports). **Restore** undoes it. **Keep it** closes the reports and leaves the comment up.
+- **Stop account** blocks an account from liking and commenting on SirSC Scroll and hides its comments, until **Allow again**. Its Warden Chat account isn't affected.
+- Deleted and removed comments are kept in the database (hidden), so you can still see what was said. Every moderation action is logged.
 
 ## Real videos
 
@@ -58,7 +93,10 @@ npm run dev            # http://localhost:5173
 npm run build          # type-check + multi-file build in dist/app
 npm run build:single   # type-check + one self-contained file: dist/sirsc-scroll.html
 npm run build:artifact # the same, shaped for a claude.ai Artifact: dist/sirsc-scroll-artifact.html
+npx vite build --mode demo   # the multi-file app with the pretend Warden Chat, in dist/demo (for tests)
 ```
+
+The Artifact and demo builds use `src/lib/demoBackend.ts`, a pretend Warden Chat that answers the same requests in the browser: any username with a password of 4+ characters, `banned` shows the banned screen, and made-up classmates comment, like and reply so notifications have something in them. The normal and single-file builds don't include it.
 
 `dist/sirsc-scroll-artifact.html` is what the Artifact link above serves. It differs from the single file in three ways: no `<html>`/`<head>`/`<body>` (the host adds them), routes live in memory instead of `#/paths` (the frame only passes plain `#names`; `#video-v010`, `#explore`, `#trending` and similar still work as entry points), and share links use the app-style `sirsc-scroll://video/…` form since the page can't know its public URL. The app's own theme setting is stored on `data-look` so it never clashes with the host's `data-theme`.
 
@@ -73,9 +111,9 @@ The desktop layout is built around the screen, not a stretched phone:
 
 | Area | What's in it |
 | --- | --- |
-| Sidebar (196px, or 64px collapsed) | Brand, For You / Following / Trending / Friends / Explore, Saved, History, Notifications (unread badge), Creator Studio, Profile, Settings, the Collapse control and the demo account switcher. Collapsing animates; icons stay put while labels fold away, and tooltips appear on hover or keyboard focus. The choice is remembered, with a separate setting for screens under 1100px (collapsed by default there, still expandable). `[` toggles it. |
-| Player column | The **feed bar** (For You / Following / Trending / Friends, with a cyan pill that glides to the active feed), and beside it **Focus Mode** and **Customize widgets**. Under it, the 9:16 player sized from the available height, and the action rail: creator, like, comments, save, share, statistics, more, and previous / position / next. The feed bar can't be closed or hidden. |
-| Widget area | Search and Upload, category chips and sort, then the **widgets**: Creator, Video information, Comments, Video statistics, Up next, Related videos, Friends' activity and Discovery. Each has a header with expand, an options menu (more room, move up/down, customize, hide) and close. |
+| Sidebar (196px, or 64px collapsed) | The SirSC logo and wordmark, For You / Following / Trending / Explore, Saved, History, Notifications (unread badge), Profile, Settings, the Collapse control and the account menu (your profile, account settings, Warden Chat, sign out). Collapsing animates; icons stay put while labels fold away, and tooltips appear on hover or keyboard focus. The choice is remembered, with a separate setting for screens under 1100px (collapsed by default there, still expandable). `[` toggles it. |
+| Player column | The **feed bar** (For You / Following / Trending, with a cyan pill that glides to the active feed), and beside it **Focus Mode** and **Customize widgets**. Under it, the 9:16 player sized from the available height, and the action rail: creator, like, comments, save, statistics, more, and previous / position / next. The feed bar can't be closed or hidden. |
+| Widget area | Search, category chips and sort, then the **widgets**: Creator, Video information, Comments, Video statistics, Up next, Related videos and Discovery. Each has a header with expand, an options menu (more room, move up/down, customize, hide) and close. |
 
 ### How the widgets share space
 
@@ -108,17 +146,15 @@ Everything you can click answers with movement, from one shared layer (`src/lib/
 
 ## Features
 
-- **Feeds**: For You (local recommendations, endless, re-ranked after every swipe), Following, Trending (engagement over time), Friends (what each account's friends liked, shared or posted), plus lists opened from any grid (profile, search, hashtag, saved, history) with a Back button. Category filter and sort (recommended, newest, most liked, most viewed, shortest) apply to every feed.
+- **Feeds**: For You (local recommendations, endless, re-ranked after every swipe), Following, Trending (engagement over time), plus lists opened from any grid (profile, search, hashtag, saved, history) with a Back button. Category filter and sort (recommended, newest, most liked, most viewed, shortest) apply to every feed.
 - **Scrolling**: mouse wheel, trackpad, ↑/↓, J/K, Page Up/Down, touch swipe and on-screen buttons. A trackpad or wheel gesture moves exactly one clip, however much momentum it carries. Only the current clip and its two neighbours are mounted, and only the current one animates or runs a timer.
 - **Playback (simulated)**: progress, seeking, ±5s with ←/→, speed 0.5–2×, loop, auto-advance, autoplay on/off, replay screen. Unmuting plays a quiet procedurally generated loop (Web Audio) so Mute and Volume do something real.
-- **Social**: like (button, `L`, or double-click/double-tap with a heart burst), comments (post, reply, like, delete your own, Top/Newest, @mentions and #tags become links), follow, save, collections (create, rename, delete, add, move between), share (copy link, send to friends, simulated Warden Chat conversations), Not interested, Hide creator (undo from the toast or Settings), Report (demo only).
-- **Demo accounts**: Alex (gaming, memes, tech), Jordan (sports, comedy, gaming), Sam (music, trends, comedy), Taylor (school, science, memes). Each has its own profile, avatar, interests, follows, likes, saves, collections, comments, history, notifications, drafts and recommendations. Actions reach the other accounts on the same device: like Jordan's video, follow Sam, reply to Taylor, mention `@alex`, or send a clip, and that account gets the notification.
+- **Social**: like (button, `L`, or double-click/double-tap with a heart burst) and comments, both saved with your Warden Chat account (see [Likes and comments](#likes-and-comments)); follow, save, collections (create, rename, delete, add, move between), Not interested, Hide creator (undo from the toast or Settings), Report video (removes it from your feeds; kept in this browser).
 - **Explore & search**: categories, trending hashtags, popular creators, recommended and popular videos, recent searches and a top 10. Search covers titles, descriptions, captions, hashtags, creators and sounds, with live suggestions, `@handle` and `#tag` queries, and result tabs.
-- **Profiles**: stats, follow, share, videos, liked videos (demo accounts), collections and profile settings (name, bio, avatar colours) for your own account.
-- **Notifications**: followers, likes, comments and replies, mentions, shares, trending alerts, new posts; filters, read/unread per item, mark all read, timestamps, a weekly summary and your own activity history.
-- **Creator Studio**: a 4-step upload dialog (clip style, sticker, colour, length; title, caption, category, hashtag editor; cover frame; visibility and comments) with a live preview, drafts, a simulated publishing flow, and analytics labelled as simulated (views per day with hover and table view, audience retention per video, engagement, traffic sources, audience interests, top videos). Published clips appear on your profile, in Explore and search, and in followers' feeds, and their (fake) audience arrives over the next few minutes.
-- **Recommendations**: category weights and hashtag affinity move with likes, saves, follows, comments, shares, full watches, replays, quick skips and Not interested. Every clip shows why it was picked. Feed preferences show your strongest interests and let you raise or lower any category, or reset. This is transparent weighted scoring, not machine learning.
-- **Settings**: playback (autoplay, auto-advance, loop, start muted, speed, volume, reduced animations), appearance (Dark, Dim, High contrast; Compact, Standard, Expanded; collapsed sidebar for wide and small screens), widgets, feed (interests, reset, hidden creators, Not interested, history pause and clear), demo data (switch, reset one account, reset all) and the shortcut reference.
+- **Profiles**: creators and YouTube channels (stats, follow, videos, a link to the channel); your own at `#/profile/me` (liked videos, collections, interests).
+- **Notifications**: replies, @mentions and likes on your comments (from the server), filters, a weekly summary and your own activity history.
+- **Recommendations**: category weights and hashtag affinity move with likes, saves, follows, comments, full watches, replays, quick skips and Not interested. Every clip shows why it was picked. Feed preferences show your strongest interests and let you raise or lower any category, or reset. This is transparent weighted scoring, not machine learning.
+- **Settings**: playback (autoplay, auto-advance, loop, start muted, speed, volume, reduced animations), appearance (Dark, Dim, High contrast; Compact, Standard, Expanded; collapsed sidebar for wide and small screens), widgets, feed (interests, reset, hidden creators, Not interested, history pause and clear), account (who's signed in, sign out, sign out and remove data from this browser, clear this browser's data) and the shortcut reference.
 
 ## Keyboard
 
@@ -148,30 +184,41 @@ src/
   state/types.ts        every data shape (Video, User, AccountState, Settings, ...)
   state/persist.ts      localStorage load/save (the layer to swap for an API)
   state/store.ts        tiny external store + selector hooks (useSyncExternalStore)
-  state/actions.ts      every mutation: feeds, likes, comments, collections, studio, accounts
+  state/actions.ts      every mutation: feeds, likes, collections, signing in and out of an account's data
   state/widgets.ts      the widget manager: show, hide, expand, focus, Focus Mode, presets, order
   state/widgetDefaults.ts  widget ids, labels, sizing roles and the default layout
-  data/                 fictional catalog: categories, users, 162 videos, comments, account seeds
-  lib/catalog.ts        read helpers over seeded + local data (counts, visibility, friend activity)
+  data/                 demo clips: categories, fictional creators, 162 videos, sample comments, a fresh account
+  lib/config.ts         Warden Chat's Supabase URL and publishable key
+  lib/warden.ts         Sign in with Warden Chat: password grant, refresh, sign out, banned check, rpc()
+  lib/accounts.ts       ties a sign-in to that account's data in this browser
+  lib/social.ts         likes, comments, replies, reports and notifications from the scroll_* functions
+  lib/demoBackend.ts    the pretend Warden Chat for the Artifact and demo builds
+  lib/catalog.ts        read helpers over the videos on show (counts, creators)
   lib/recommend.ts      scoring, feeds, related videos, trending, creator suggestions
   lib/search.ts         local search and suggestions
-  lib/analytics.ts      simulated Studio statistics
   lib/audio.ts          generated soundtrack for unmuted clips
-  lib/router.ts         hash router (#/explore, #/profile/alex, #/video/v010, ...)
+  lib/router.ts         hash router (#/explore, #/profile/me, #/video/yt-…, ...)
   lib/widgetLayout.ts   plans the widget columns and how wide the widget area should be
   components/placeholders/  the 11 animated clip templates
   components/player/    feed track (wheel/touch), feed stack (switch animation), stage + playback clock, action rail
   components/widgets/   widget frame, widget area (columns + fold/unfold), customize popover
   components/panel/     comments and the sections the widgets are built from
   components/shell/     sidebar, feed bar, top bar + search, feed controls, mobile nav
-  components/modals/    upload, share, collections, report, preferences, confirm
-  pages/                feed (desktop + mobile), Explore, Profile, Saved, History, Notifications, Studio, Settings
+  components/modals/    collections, report video, report comment, preferences, confirm
+  pages/                sign-in, feed (desktop + mobile), Explore, Profile, Saved, History, Notifications, Settings, Review, ModerateComments
   styles/               tokens/themes, shell, feed, panel, placeholders, pages, modals, mobile
 ```
 
-The fake data and demo logic live in `data/`, `lib/` and `state/`, separate from the components. To connect a backend later, replace `persist.ts` and the functions in `lib/catalog.ts` and `state/actions.ts`; the placeholder renderer can be swapped for a `<video>` element inside `Stage.tsx`.
+Follows, saves, collections, history and interests are still per browser (`state/persist.ts`); moving them to the server would follow the same pattern as `lib/social.ts`.
 
 ## Checked
+
+V1.2 (Warden Chat sign-in, real likes and comments, no uploads or sharing), in headless Chromium:
+- **Demo build, 43 checks:** sign-in errors; signing in; first-run preferences; logo; no Friends, Upload, Share or Creator Studio; like count; post, duplicate refused, reply, report, delete; classmates' like and reply show as notifications; still signed in after a reload; `#/profile/me`; sign out; the banned screen; phone layout and comments sheet; no page errors.
+- **Real build against a stand-in Supabase, 28 checks:** the exact sign-in request (lowercased `@warden.invalid`, publishable key, no Authorization), every call with the person's token, YouTube ids without the `yt-` prefix, server counts, a not-yet-approved video refusing likes without sending anything, rate-limit message, an expired token refreshed before the first call, suspended screen with reason and date, Check again, expired sign-in, offline start, sign out with `scope=local`.
+- **Comment moderation, 10 checks** with the review key.
+- **Database, run inside transactions that always roll back** (throwaway accounts created the way Warden Chat's sign-up does): likes, comments, replies to replies, cleanup of control characters, duplicates, length, closed videos, notifications (reply, mention, comment like), blocks both ways, muted, suspended (signed out, comments hidden), owner remove, restore, stop and allow, a stopped account can still unlike, 6-a-minute limit, and anon can't call any signed-in function.
+- The earlier catalog (34/35) and review (33/34) suites still pass, run with a saved sign-in. The one failure in each expects the old behaviour: liking saved in the browser, and a stand-in API without the new functions.
 
 Tested in headless Chromium at 1366×657, 1280×720, 1024×700, 1920×1080 and a Pixel/iPhone viewport: no console errors and no horizontal overflow; one wheel notch and one 40-event trackpad gesture each move exactly one clip; touch swipes work both ways; likes, saves, follows, comments (with a mention notifying another account), collections, sharing, Not interested, account switching, upload → publish → watch, deep links, themes, reset and persistence after reload all work; after 80 clip changes and several page visits, DOM nodes and event listeners stay flat and only the visible clip animates.
 

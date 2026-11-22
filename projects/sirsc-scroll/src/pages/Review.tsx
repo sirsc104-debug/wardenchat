@@ -37,6 +37,8 @@ import { compact, duration } from '../lib/format';
 import { pageOrigin, YT_HOSTS } from '../lib/youtube';
 import { youtubeWatchUrl } from '../lib/videoSource';
 import { topInterests } from '../lib/recommend';
+import { useRoute } from '../lib/router';
+import { ModerateComments } from './ModerateComments';
 
 const TABS: [ReviewStatus, string][] = [
   ['pending', 'To review'],
@@ -79,7 +81,9 @@ const PAGE = 60;
 
 export function Review() {
   const reviewKey = useP((p) => p.settings.catalogReviewKey);
+  const route = useRoute();
   if (!reviewKey) return <KeyGate />;
+  if (route.path[1] === 'comments') return <ModerateComments reviewKey={reviewKey} />;
   return <ReviewBoard reviewKey={reviewKey} />;
 }
 
@@ -290,9 +294,14 @@ function ReviewBoard({ reviewKey }: { reviewKey: string }) {
       title="Review videos"
       className="review-page"
       actions={
-        <a className="btn btn-ghost btn-sm" href="#/settings/videos">
-          Settings
-        </a>
+        <>
+          <a className="btn btn-ghost btn-sm" href="#/review/comments">
+            Comments
+          </a>
+          <a className="btn btn-ghost btn-sm" href="#/settings/videos">
+            Settings
+          </a>
+        </>
       }
     >
       <p className="muted small rv-intro">

@@ -11,9 +11,9 @@ import { Profile } from './pages/Profile';
 import { Saved } from './pages/Saved';
 import { History } from './pages/History';
 import { Notifications } from './pages/Notifications';
-import { Studio } from './pages/Studio';
 import { Settings } from './pages/Settings';
 import { Review } from './pages/Review';
+import { SignIn } from './pages/SignIn';
 import { getState, useP, useS } from './state/store';
 import { applyInterestChanges, closeModal, focusSearch, openModal, openSheet, openVideo, rebuildFeeds, toast } from './state/actions';
 import { toggleSidebar } from './components/shell/Sidebar';
@@ -21,10 +21,13 @@ import { navigate, useRoute, type Route } from './lib/router';
 import { isTyping, useLayout, type LayoutMode } from './lib/hooks';
 import { getVideo, videoMode, type VideoMode } from './lib/catalog';
 import { configureCatalog, lookupCatalogIds, useCatalog } from './lib/remoteCatalog';
+import { useAuth } from './lib/warden';
+import { accountEnded } from './lib/accounts';
+import { SIGNED_OUT } from './state/persist';
 import { topInterests } from './lib/recommend';
 import type { AccountState } from './state/types';
 
-const FEEDS: Record<string, FeedKind> = { '': 'foryou', following: 'following', trending: 'trending', friends: 'friends', watch: 'list' };
+const FEEDS: Record<string, FeedKind> = { '': 'foryou', following: 'following', trending: 'trending', watch: 'list' };
 
 function feedKind(route: Route): FeedKind | null {
   const k = FEEDS[route.path[0] ?? ''];
@@ -47,8 +50,6 @@ function Page({ route, layout }: { route: Route; layout: LayoutMode }) {
       return <History />;
     case 'notifications':
       return <Notifications />;
-    case 'studio':
-      return <Studio route={route} />;
     case 'settings':
       return <Settings route={route} />;
     case 'review':
@@ -59,6 +60,7 @@ function Page({ route, layout }: { route: Route; layout: LayoutMode }) {
 }
 
 export function App() {
+  const auth = useAuth();
   const route = useRoute();
   const layout = useLayout();
   const theme = useP((p) => p.settings.theme);
@@ -120,9 +122,13 @@ export function App() {
       ...a.saved,
       ...a.collections.flatMap((c) => c.videoIds),
       ...a.history.map((h) => h.videoId),
-      ...a.shares.map((x) => x.videoId),
     ]);
   }, [catalog.status, activeId]);
+
+  // Signed out, expired or suspended: nothing of the account stays behind the sign-in screen.
+  useEffect(() => {
+    if (auth.status !== 'signed-in' && auth.status !== 'checking' && getState().p.activeId !== SIGNED_OUT) accountEnded();
+  }, [auth.status]);
 
   // Deep links (#/video/:id) open the clip, then For You continues after it. A real video that isn't
   // loaded yet is looked up first.
@@ -157,6 +163,7 @@ export function App() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const st = getState();
+      if (st.p.activeId === SIGNED_OUT) return;
       if (e.key === 'Escape') {
         if (st.s.modal) {
           if (st.s.modal.type === 'interests') applyInterestChanges();
@@ -185,6 +192,9 @@ export function App() {
 
   const narrow = layout === 'tablet';
   const collapsed = narrow ? collapsedNarrow : collapsedWide;
+
+  // Everyone signs in with Warden Chat before seeing anything.
+  if (auth.status !== 'signed-in' || activeId === SIGNED_OUT) return <SignIn auth={auth} />;
 
   if (layout === 'mobile') {
     const feed = !!feedKind(route);

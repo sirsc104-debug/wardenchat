@@ -3,3 +3,4 @@ dist/app
 dist/single
 *.tsbuildinfo
 dist/artifact
+dist/demo

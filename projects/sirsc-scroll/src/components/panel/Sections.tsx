@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { Bookmark, Check, ChevronDown, ChevronUp, Ellipsis, Eye, Hash, Heart, Link2, MessageCircle, Music2, Plus, Send, Share2, Sparkles, UserPlus, ExternalLink } from 'lucide-react';
+import { Bookmark, Check, ChevronDown, ChevronUp, Ellipsis, Eye, Hash, Heart, MessageCircle, Music2, Plus, Sparkles, UserPlus, ExternalLink } from 'lucide-react';
 import type { FeedState, Video } from '../../state/types';
 import { Avatar } from '../common/Avatar';
 import { Verified } from '../common/Verified';
@@ -9,15 +9,15 @@ import { CATEGORY_ICON } from '../common/icons';
 import { videoMenuItems } from '../player/videoMenu';
 import { RichText } from './Comments';
 import { useAcct, usePersisted } from '../../state/store';
-import { copyLink, goTo, openModal, playInFeed, setCategory, shareTo, toast, toggleFollow, toggleLike, toggleSave } from '../../state/actions';
-import { commentCount, followerCount, friendActivity, getUser, getVideo, likeCount, saveCount, shareCount, videosBy, viewCount } from '../../lib/catalog';
+import { goTo, openModal, playInFeed, setCategory, toggleFollow, toggleLike, toggleSave } from '../../state/actions';
+import { commentCount, followerCount, getUser, getVideo, likeCount, saveCount, videosBy, viewCount } from '../../lib/catalog';
+import { useVideoSocial } from '../../lib/social';
 import { recommendedCreators, relatedTo, trendingHashtags, topInterests } from '../../lib/recommend';
-import { agoLong, compact, full, ago } from '../../lib/format';
+import { agoLong, compact, full } from '../../lib/format';
 import { href } from '../../lib/router';
 import { youtubeWatchUrl } from '../../lib/videoSource';
 import { categoryLabel } from '../../data/categories';
-import { FRIENDS_OF } from '../../data/users';
-import { useHeightTween, useNow } from '../../lib/hooks';
+import { useHeightTween } from '../../lib/hooks';
 
 /* ---------------------------------------------------------------- now playing */
 
@@ -64,15 +64,16 @@ export const CreatorRow = memo(function CreatorRow({ video }: { video: Video }) 
   );
 });
 
-/** Likes, comments, saves and shares as exact numbers (like and save are toggles). */
+/** Likes, comments and saves as exact numbers (like and save are toggles). */
 export const StatTiles = memo(function StatTiles({ video, withViews }: { video: Video; withViews?: boolean }) {
   const p = usePersisted();
-  const liked = useAcct((a) => a.liked.includes(video.id));
+  const social = useVideoSocial(video.id);
+  const localLiked = useAcct((a) => a.liked.includes(video.id));
+  const liked = social && social !== 'closed' ? social.liked : localLiked;
   const saved = useAcct((a) => a.saved.includes(video.id));
   const views = viewCount(p, video);
   const likes = likeCount(p, video);
   const comments = commentCount(p, video);
-  const shares = shareCount(p, video);
   return (
     <div className={`stats${withViews ? ' stats-6' : ''}`}>
       {withViews && (
@@ -97,15 +98,10 @@ export const StatTiles = memo(function StatTiles({ video, withViews }: { video: 
         <b>{full(saveCount(p, video))}</b>
         <span>saves</span>
       </button>
-      <span className="stat">
-        <Share2 size={15} />
-        <b>{full(shares)}</b>
-        <span>shares</span>
-      </span>
       {withViews && (
-        <span className="stat" title="Likes, comments and shares per view">
+        <span className="stat" title="Likes and comments per view">
           <Sparkles size={15} />
-          <b>{views ? ((100 * (likes + comments + shares)) / views).toFixed(1) : '0.0'}%</b>
+          <b>{views ? ((100 * (likes + comments)) / views).toFixed(2) : '0.00'}%</b>
           <span>engagement</span>
         </span>
       )}
@@ -189,41 +185,6 @@ export const VideoDetails = memo(function VideoDetails({ video, reason, compactM
   );
 });
 
-export const ShareRow = memo(function ShareRow({ video }: { video: Video }) {
-  const p = usePersisted();
-  const friends = (FRIENDS_OF[p.activeId] ?? []).slice(0, 3);
-  return (
-    <div className="share-row">
-      <button type="button" className="chip-btn" onClick={() => void copyLink(video.id)}>
-        <Link2 size={14} /> Copy link
-      </button>
-      <button type="button" className="chip-btn warden" onClick={() => openModal({ type: 'share', videoId: video.id })}>
-        <Send size={14} /> Warden Chat
-      </button>
-      <span className="share-quick" aria-label="Quick send to friends">
-        {friends.map((f) => {
-          const u = getUser(p, f);
-          return (
-            <button
-              key={f}
-              type="button"
-              className="share-face"
-              title={`Send to ${u?.name}`}
-              aria-label={`Send to ${u?.name}`}
-              onClick={() => {
-                shareTo(video.id, [f], '');
-                toast(`Sent to ${u?.name.split(' ')[0]} (demo)`);
-              }}
-            >
-              <Avatar user={u} size={26} />
-            </button>
-          );
-        })}
-      </span>
-    </div>
-  );
-});
-
 /* ---------------------------------------------------------------- discovery */
 
 function Section({ title, children, action, icon: Icon, bare }: { title: string; children: React.ReactNode; action?: React.ReactNode; icon?: typeof Hash; bare?: boolean }) {
@@ -263,7 +224,7 @@ export const Related = memo(function Related({ video, feed, columns, bare }: { v
     const exclude = new Set(feed.items.slice(feed.index, feed.index + 6).map((i) => i.id));
     return relatedTo(p, video, columns >= 3 ? 9 : 6, exclude);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [p.userVideos, p.activeId, p.accounts[p.activeId].hiddenCreators, video.id, columns]);
+  }, [p.activeId, p.accounts[p.activeId].hiddenCreators, video.id, columns]);
   if (!list.length) return null;
   return (
     <Section bare={bare} title="Related videos">
@@ -292,38 +253,10 @@ export const MoreFromCreator = memo(function MoreFromCreator({ video }: { video:
   );
 });
 
-export const FriendsActivity = memo(function FriendsActivity({ limit = 5, bare }: { limit?: number; bare?: boolean }) {
-  const p = usePersisted();
-  const now = useNow();
-  const acts = useMemo(() => friendActivity(p).slice(0, limit), [p, limit]);
-  if (!acts.length) return null;
-  return (
-    <Section bare={bare} title="Friends’ activity" action={<a className="link-btn" href="#/friends">Friends feed</a>}>
-      <ul className="activity">
-        {acts.map((a, i) => {
-          const u = getUser(p, a.friendId);
-          const v = getVideo(p, a.videoId)!;
-          return (
-            <li key={`${a.friendId}${a.videoId}${i}`}>
-              <button type="button" className="activity-row" onClick={() => playInFeed(v.id)}>
-                <Avatar user={u} size={28} />
-                <span className="activity-text">
-                  <b>{u?.name.split(' ')[0]}</b> {a.type === 'like' ? 'liked' : a.type === 'share' ? 'shared' : 'posted'} <span className="activity-title">{v.title}</span>
-                </span>
-                <span className="activity-time">{ago(a.at, now)}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </Section>
-  );
-});
-
 export const TrendingTags = memo(function TrendingTags({ limit = 8 }: { limit?: number }) {
   const p = usePersisted();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const tags = useMemo(() => trendingHashtags(p, limit), [p.userVideos, limit]);
+  const tags = useMemo(() => trendingHashtags(p, limit), [p.settings.videoSource, limit]);
   return (
     <Section title="Trending hashtags" icon={Hash} action={<a className="link-btn" href="#/explore">Explore</a>}>
       <div className="tag-cloud">

@@ -329,8 +329,6 @@ function build(category: Category, entry: Entry, index: number, id: string): Vid
       momentum: Number(momentum.toFixed(2)),
       alsoFor: Array.from(new Set([...also, ...RELATED[category].slice(0, 1)])),
     },
-    visibility: 'public',
-    allowComments: true,
   };
 }
 

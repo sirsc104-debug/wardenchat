@@ -1,0 +1,336 @@
+/* ---------- the SirSC logo */
+.brand-mark {
+  flex: none;
+  object-fit: contain;
+  user-select: none;
+}
+
+/* ---------- sign in with Warden Chat */
+.auth-page {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  overflow-y: auto;
+  background: radial-gradient(1200px 700px at 50% -10%, rgb(34 211 238 / 0.1), transparent 60%), var(--bg);
+}
+.auth-glow {
+  position: fixed;
+  inset: auto 0 0 0;
+  height: 40vh;
+  pointer-events: none;
+  background: radial-gradient(800px 300px at 50% 120%, rgb(59 130 246 / 0.12), transparent 70%);
+}
+.auth-card {
+  position: relative;
+  width: min(100%, 400px);
+  padding: 28px 26px 22px;
+  border: 1px solid var(--line-2);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.03), transparent 40%), var(--bg-1);
+  box-shadow: var(--shadow);
+  animation: auth-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.auth-card.wide {
+  width: min(100%, 460px);
+}
+@keyframes auth-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+}
+.auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 18px;
+  text-align: center;
+}
+.auth-logo {
+  width: 84px;
+  height: 84px;
+  filter: drop-shadow(0 6px 22px rgb(34 211 238 / 0.35));
+  animation: auth-logo 0.7s cubic-bezier(0.2, 0.9, 0.25, 1.2) both 0.05s;
+}
+@keyframes auth-logo {
+  from {
+    opacity: 0;
+    transform: scale(0.7) rotate(-8deg);
+  }
+}
+.auth-title {
+  margin: 8px 0 0;
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.auth-tag {
+  margin: 0;
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.02em;
+}
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.auth-h {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 750;
+  text-align: center;
+}
+.auth-sub {
+  margin: -6px 0 2px;
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+  text-align: center;
+  line-height: 1.5;
+}
+.auth-note {
+  margin: 0;
+  padding: 9px 11px;
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+.auth-note.demo {
+  border-color: rgb(251 191 36 / 0.45);
+  background: rgb(251 191 36 / 0.1);
+}
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: var(--fs-sm);
+  font-weight: 650;
+  color: var(--text-2);
+}
+.auth-field input {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.auth-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.auth-field input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+.auth-pass {
+  position: relative;
+  display: block;
+}
+.auth-pass input {
+  padding-right: 42px;
+}
+.auth-pass .icon-btn {
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  transform: translateY(-50%);
+}
+.auth-error {
+  margin: 0;
+  padding: 9px 11px;
+  border: 1px solid rgb(240 82 82 / 0.45);
+  border-radius: var(--radius);
+  background: rgb(240 82 82 / 0.1);
+  color: #ffb4b4;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+.auth-submit {
+  height: 44px;
+  margin-top: 2px;
+  font-size: 15px;
+  gap: 8px;
+}
+.auth-alt,
+.auth-fine {
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-sm);
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.auth-alt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.auth-alt a {
+  color: var(--accent);
+  font-weight: 650;
+  text-decoration: none;
+}
+.auth-alt a:hover {
+  text-decoration: underline;
+}
+.auth-alt a svg {
+  display: inline-block;
+  vertical-align: -1px;
+}
+.auth-fine {
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+.auth-checking {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px 0 8px;
+  color: var(--text-2);
+}
+.auth-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--line-2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: auth-spin 0.8s linear infinite;
+}
+.auth-spinner.sm {
+  width: 14px;
+  height: 14px;
+  border-top-color: var(--accent-ink);
+}
+@keyframes auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.restricted {
+  align-items: center;
+}
+.auth-alert-ico {
+  color: var(--danger);
+}
+.auth-reason {
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--danger);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--bg-2);
+  font-size: var(--fs);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.auth-reason span {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.auth-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+:root[data-motion='reduced'] .auth-card,
+:root[data-motion='reduced'] .auth-logo {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-card,
+  .auth-logo {
+    animation: none;
+  }
+}
+
+/* ---------- account menu (sidebar) */
+.acct-pop-who {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 6px 10px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 6px;
+}
+.acct-pop-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.acct-pop-list .acct-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* ---------- comments: real ones */
+.comments-loading {
+  margin: 8px 0;
+  color: var(--text-3);
+  font-size: var(--fs-sm);
+}
+.comments-loading.small {
+  margin: 4px 0;
+  font-size: var(--fs-xs);
+}
+.comment .reply-to {
+  color: var(--accent);
+  font-weight: 650;
+}
+.comment-sub {
+  margin: 4px 0 0;
+  color: var(--text-3);
+  font-size: var(--fs-xs);
+}
+.comment.sample .comment-like {
+  cursor: default;
+}
+.composer-locked {
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--bg-2);
+  color: var(--text-2);
+  font-size: var(--fs-sm);
+}
+.comments-empty .btn {
+  margin-left: 8px;
+}
+.quote-chip {
+  margin: 0 0 10px;
+  padding: 9px 11px;
+  border-left: 3px solid var(--line-2);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--bg-2);
+  font-size: var(--fs);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.note-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+}

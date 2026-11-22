@@ -354,3 +354,70 @@
     margin-left: 0;
   }
 }
+
+/* ---------- comment moderation (#/review/comments) */
+.mod-list {
+  list-style: none;
+  margin: 12px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mod-item {
+  padding: 12px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg);
+  background: var(--bg-1);
+}
+.mod-item.removed {
+  opacity: 0.7;
+  border-style: dashed;
+}
+.mod-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.mod-reports {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--danger);
+  font-size: var(--fs-sm);
+  font-weight: 650;
+}
+.mod-body {
+  margin: 8px 0 6px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+.mod-video a {
+  color: var(--text-2);
+}
+.mod-acts {
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.mod-banned ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.mod-banned li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.mod-banned li .btn {
+  margin-left: auto;
+}
+.mod-video a svg {
+  display: inline-block;
+  vertical-align: -1px;
+}

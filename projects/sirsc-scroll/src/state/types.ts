@@ -1,5 +1,6 @@
-// Shared data shapes. The fake catalog, the local store and the UI all speak these types, so a real
-// backend can later replace src/data + src/state/persist.ts without touching the components.
+// Shared data shapes. Videos come from the real catalog (or the demo clips), accounts are Warden Chat
+// accounts, likes and comments live in Warden Chat's database (lib/social.ts), and everything else an
+// account does (follows, saves, history, interests) is kept in this browser per account.
 
 export type Category =
   | 'memes'
@@ -45,8 +46,6 @@ export interface RecoMeta {
   alsoFor: Category[];
 }
 
-export type Visibility = 'public' | 'friends' | 'private';
-
 /** A real video from the SirSC Scroll catalog, played with YouTube's official embedded player. */
 export interface YouTubeSource {
   kind: 'youtube';
@@ -59,7 +58,7 @@ export interface YouTubeSource {
   channelTitle: string | null;
 }
 
-/** How a video plays: demo videos (no source) use the animated placeholder. */
+/** How a video plays: demo clips (no source) use the animated placeholder. */
 export type VideoSource = YouTubeSource;
 
 export interface Video {
@@ -90,15 +89,12 @@ export interface Video {
   frame: number;
   sound: string;
   meta: RecoMeta;
-  /** Published from Creator Studio on this device. */
-  local?: boolean;
-  visibility?: Visibility;
-  allowComments?: boolean;
-  /** Set for real catalog videos; absent for the demo clips and local uploads. */
+  /** Set for real catalog videos; absent for the demo clips. */
   source?: VideoSource;
 }
 
-export type UserKind = 'creator' | 'demo' | 'friend';
+/** creator: a channel or demo-clip creator. member: a Warden Chat account (you, or a commenter). */
+export type UserKind = 'creator' | 'demo' | 'friend' | 'member';
 
 export interface Avatar {
   h1: number;
@@ -111,7 +107,6 @@ export interface User {
   name: string;
   bio: string;
   avatar: Avatar;
-  /** Base counts before demo-account follows are added. */
   followers: number;
   following: number;
   likes: number;
@@ -122,6 +117,7 @@ export interface User {
   location?: string;
 }
 
+/** A made-up sample comment on a demo clip (real comments are RemoteComment in lib/social.ts). */
 export interface Comment {
   id: string;
   videoId: string;
@@ -131,8 +127,6 @@ export interface Comment {
   likes: number;
   parentId?: string;
   pinned?: boolean;
-  /** Posted from this device by a demo account. */
-  local?: boolean;
 }
 
 export interface Collection {
@@ -151,20 +145,6 @@ export interface HistoryEntry {
   completions: number;
 }
 
-export type NotificationType = 'follow' | 'like' | 'reply' | 'mention' | 'share' | 'trending' | 'comment' | 'post' | 'system';
-
-export interface AppNotification {
-  id: string;
-  type: NotificationType;
-  actorId?: string;
-  videoId?: string;
-  text: string;
-  /** Quoted snippet, for replies and mentions. */
-  quote?: string;
-  at: number;
-  read: boolean;
-}
-
 export type ActivityType =
   | 'like'
   | 'unlike'
@@ -173,8 +153,6 @@ export type ActivityType =
   | 'reply'
   | 'follow'
   | 'unfollow'
-  | 'share'
-  | 'publish'
   | 'not-interested'
   | 'hide-creator'
   | 'report'
@@ -189,50 +167,20 @@ export interface ActivityEntry {
   at: number;
 }
 
-export interface Draft {
-  id: string;
-  title: string;
-  caption: string;
-  category: Category;
-  hashtags: string[];
-  template: TemplateKind;
-  palette: Palette;
-  glyph: string;
-  variant: number;
-  frame: number;
-  duration: number;
-  visibility: Visibility;
-  allowComments: boolean;
-  updatedAt: number;
-}
-
-export interface ShareEntry {
-  videoId: string;
-  to: string;
-  at: number;
-}
-
 export interface Signals {
   likes: number;
   saves: number;
   follows: number;
   comments: number;
-  shares: number;
   completions: number;
   replays: number;
   skips: number;
   notInterested: number;
 }
 
-export interface ProfileEdits {
-  name: string;
-  bio: string;
-  avatar: Avatar;
-}
-
 export interface AccountState {
-  profile: ProfileEdits;
   following: string[];
+  /** Videos this account liked. Real videos follow the server (lib/social.ts); this copy drives recommendations. */
   liked: string[];
   saved: string[];
   collections: Collection[];
@@ -244,20 +192,18 @@ export interface AccountState {
   interests: Record<Category, number>;
   tagAffinity: Record<string, number>;
   signals: Signals;
-  likedComments: string[];
-  notifications: AppNotification[];
   activity: ActivityEntry[];
-  drafts: Draft[];
   recentSearches: string[];
-  shares: ShareEntry[];
   /** Bumped by Refresh Feed so the For You shuffle changes. */
   nonce: number;
+  /** When this browser first saw the account (ms). */
+  createdAt: number;
 }
 
 export type ThemeName = 'dark' | 'dim' | 'contrast';
 export type Density = 'compact' | 'standard' | 'expanded';
 
-export type WidgetId = 'info' | 'creator' | 'stats' | 'comments' | 'upnext' | 'related' | 'friends' | 'discovery';
+export type WidgetId = 'info' | 'creator' | 'stats' | 'comments' | 'upnext' | 'related' | 'discovery';
 
 export interface WidgetSnapshot {
   visible: Record<WidgetId, boolean>;
@@ -297,15 +243,14 @@ export interface Settings {
 
 export interface Persisted {
   v: number;
+  /** "w:<Warden Chat user id>" while signed in; "signed-out" otherwise (an empty placeholder account). */
   activeId: string;
   accounts: Record<string, AccountState>;
-  userVideos: Video[];
-  userComments: Comment[];
   settings: Settings;
   widgets: WidgetPrefs;
 }
 
-export type FeedKind = 'foryou' | 'following' | 'trending' | 'friends' | 'list';
+export type FeedKind = 'foryou' | 'following' | 'trending' | 'list';
 
 export type SortKey = 'recommended' | 'newest' | 'liked' | 'viewed' | 'shortest';
 
@@ -324,13 +269,11 @@ export interface FeedState {
 }
 
 export type ModalState =
-  | { type: 'share'; videoId: string }
   | { type: 'collection'; videoId: string }
   | { type: 'report'; videoId: string }
+  | { type: 'report-comment'; commentId: number; videoId: string; author: string; text: string }
   | { type: 'shortcuts' }
-  | { type: 'upload'; draftId?: string }
-  | { type: 'interests' }
-  | { type: 'edit-profile' }
+  | { type: 'interests'; welcome?: boolean }
   | { type: 'new-collection'; videoId?: string }
   | { type: 'confirm'; title: string; body: string; confirm: string; danger?: boolean; action: () => void };
 

@@ -1,25 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useExit } from '../../lib/hooks';
-import { Check, Copy, Flag, FolderPlus, Hash, MessagesSquare, Send, Users } from 'lucide-react';
+import { Flag, FolderPlus } from 'lucide-react';
 import type { ModalState } from '../../state/types';
 import { Modal } from '../common/Modal';
-import { Avatar } from '../common/Avatar';
 import { VideoArt } from '../common/VideoArt';
-import { UploadDialog } from './UploadDialog';
 import { InterestEditor } from './InterestEditor';
 import { ShortcutTable } from '../../pages/Settings';
-import { ProfileEditor } from '../../pages/Profile';
 import { useAcct, usePersisted, useS } from '../../state/store';
-import { applyInterestChanges, closeModal, copyLink, createCollection, recordShare, reportVideo, resetRecommendations, shareTo, toast, toggleInCollection } from '../../state/actions';
-import { getUser, getVideo, shareLink } from '../../lib/catalog';
-import { FRIENDS_OF } from '../../data/users';
-
-const CHATS = [
-  { id: 'warden:squad', name: 'The Squad', icon: '🎮', members: 6 },
-  { id: 'warden:study', name: 'Bio study group', icon: '🧪', members: 4 },
-  { id: 'warden:general', name: '#sirsc-general', icon: '#', members: 1280 },
-  { id: 'warden:memes', name: '#memes-only', icon: '😂', members: 342 },
-];
+import { applyInterestChanges, closeModal, createCollection, reportVideo, resetRecommendations, toast, toggleInCollection } from '../../state/actions';
+import { getUser, getVideo } from '../../lib/catalog';
+import { reportComment, socialErrorText, type ReportReason } from '../../lib/social';
 
 function VideoChip({ id }: { id: string }) {
   const p = usePersisted();
@@ -35,89 +25,6 @@ function VideoChip({ id }: { id: string }) {
         <span className="muted small">@{getUser(p, v.creatorId)?.handle}</span>
       </span>
     </div>
-  );
-}
-
-function ShareDialog({ videoId }: { videoId: string }) {
-  const p = usePersisted();
-  const friends = FRIENDS_OF[p.activeId] ?? [];
-  const [picked, setPicked] = useState<string[]>([]);
-  const [chat, setChat] = useState<string | null>(null);
-  const [note, setNote] = useState('');
-  const toggle = (id: string) => setPicked((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));
-  const send = () => {
-    const names = picked.map((id) => getUser(p, id)?.name.split(' ')[0]);
-    if (picked.length) shareTo(videoId, picked, note);
-    if (chat) {
-      recordShare(videoId, 'warden');
-    }
-    const parts = [names.length ? `Sent to ${names.join(', ')}` : '', chat ? `shared to “${CHATS.find((c) => c.id === chat)?.name}” in Warden Chat (simulated)` : ''].filter(Boolean);
-    toast(parts.join(' and ') || 'Nothing selected');
-    closeModal();
-  };
-  return (
-    <Modal
-      title="Share video"
-      width={520}
-      footer={
-        <>
-          <span className="muted small foot-spacer">Demo only: nothing is sent outside this browser.</span>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={closeModal}>
-            Cancel
-          </button>
-          <button type="button" className="btn btn-accent btn-sm" disabled={!picked.length && !chat} onClick={send}>
-            <Send size={14} /> Send
-          </button>
-        </>
-      }
-    >
-      <VideoChip id={videoId} />
-      <h3 className="sub">
-        <Users size={14} /> Send to friends
-      </h3>
-      <div className="friend-picks">
-        {friends.map((f) => {
-          const u = getUser(p, f)!;
-          const on = picked.includes(f);
-          return (
-            <button key={f} type="button" className={`friend-pick${on ? ' on' : ''}`} onClick={() => toggle(f)} aria-pressed={on}>
-              <Avatar user={u} size={40} />
-              <span>{u.name.split(' ')[0]}</span>
-              {on && (
-                <span className="pick-check">
-                  <Check size={11} strokeWidth={3} />
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-      <h3 className="sub">
-        <MessagesSquare size={14} /> Warden Chat <span className="pill pill-sim">simulated</span>
-      </h3>
-      <ul className="chat-picks" role="radiogroup" aria-label="Warden Chat conversation">
-        {CHATS.map((c) => (
-          <li key={c.id}>
-            <button type="button" role="radio" aria-checked={chat === c.id} className={`chat-pick${chat === c.id ? ' on' : ''}`} onClick={() => setChat(chat === c.id ? null : c.id)}>
-              <span className="chat-ico">{c.icon === '#' ? <Hash size={15} /> : c.icon}</span>
-              <span className="chat-name">{c.name}</span>
-              <span className="muted small">{c.members} members</span>
-              {chat === c.id && <Check size={15} className="chat-check" />}
-            </button>
-          </li>
-        ))}
-      </ul>
-      <label className="field">
-        <span>Add a message (optional)</span>
-        <input value={note} maxLength={120} onChange={(e) => setNote(e.target.value)} placeholder="you have to see this" />
-      </label>
-      <div className="link-field">
-        <input readOnly value={shareLink(videoId)} aria-label="Video link" onFocus={(e) => e.target.select()} />
-        <button type="button" className="btn btn-ghost btn-sm" onClick={() => void copyLink(videoId)}>
-          <Copy size={14} /> Copy link
-        </button>
-      </div>
-    </Modal>
   );
 }
 
@@ -190,7 +97,7 @@ function ReportDialog({ videoId }: { videoId: string }) {
       }
     >
       <VideoChip id={videoId} />
-      <p className="notice">Demo only. The report is recorded on this device and the video is removed from your feeds. Nothing is sent to a moderator.</p>
+      <p className="notice">The video leaves your feeds right away. Video reports stay in this browser for now: to get a video taken down for everyone, tell the SirSC Scroll owner.</p>
       <div className="radio-list" role="radiogroup" aria-label="Reason">
         {REASONS.map((r) => (
           <label key={r} className="check-row">
@@ -250,10 +157,68 @@ function NewCollection({ videoId }: { videoId?: string }) {
   );
 }
 
-function Interests() {
+const COMMENT_REASONS: [ReportReason, string][] = [
+  ['bullying', 'Bullying or harassment'],
+  ['hate', 'Hateful'],
+  ['inappropriate', 'Not appropriate for school'],
+  ['spam', 'Spam'],
+  ['other', 'Something else'],
+];
+
+function ReportCommentDialog({ m }: { m: Extract<ModalState, { type: 'report-comment' }> }) {
+  const [reason, setReason] = useState<ReportReason | ''>('');
+  const [busy, setBusy] = useState(false);
   return (
     <Modal
-      title="Feed preferences"
+      title="Report comment"
+      width={440}
+      footer={
+        <>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={closeModal}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger btn-sm"
+            disabled={!reason || busy}
+            onClick={async () => {
+              if (!reason) return;
+              setBusy(true);
+              try {
+                await reportComment(m.commentId, reason);
+                closeModal();
+                toast('Thanks. The SirSC Scroll owner will look at it.');
+              } catch (e) {
+                toast(socialErrorText(e));
+                setBusy(false);
+              }
+            }}
+          >
+            <Flag size={14} /> {busy ? 'Sending…' : 'Send report'}
+          </button>
+        </>
+      }
+    >
+      <blockquote className="quote-chip">
+        <b>@{m.author}</b> {m.text}
+      </blockquote>
+      <p className="notice">Reports go to the SirSC Scroll owner. They see who reported it, but {m.author} doesn’t.</p>
+      <div className="radio-list" role="radiogroup" aria-label="Reason">
+        {COMMENT_REASONS.map(([id, label]) => (
+          <label key={id} className="check-row">
+            <input type="radio" name="comment-reason" checked={reason === id} onChange={() => setReason(id)} />
+            <span>{label}</span>
+          </label>
+        ))}
+      </div>
+    </Modal>
+  );
+}
+
+function Interests({ welcome }: { welcome?: boolean }) {
+  return (
+    <Modal
+      title={welcome ? 'Welcome to SirSC Scroll' : 'Feed preferences'}
       width={560}
       onClose={() => {
         applyInterestChanges();
@@ -285,7 +250,11 @@ function Interests() {
         </>
       }
     >
-      <p className="muted small">Your strongest interests are on top. Raise or lower any category and For You re-ranks what comes next.</p>
+      <p className="muted small">
+        {welcome
+          ? 'Tell For You what you’re into: raise the topics you like and lower the ones you don’t. It keeps learning from what you watch, like and save, and you can change this any time in Settings.'
+          : 'Your strongest interests are on top. Raise or lower any category and For You re-ranks what comes next.'}
+      </p>
       <InterestEditor />
     </Modal>
   );
@@ -320,16 +289,6 @@ function Confirm({ m }: { m: Extract<ModalState, { type: 'confirm' }> }) {
   );
 }
 
-function EditProfile() {
-  const p = usePersisted();
-  const user = getUser(p, p.activeId)!;
-  return (
-    <Modal title="Edit profile" width={480}>
-      <ProfileEditor key={p.activeId} user={user} />
-    </Modal>
-  );
-}
-
 export function ModalHost() {
   const current = useS((s) => s.modal);
   const [last, setLast] = useState(current);
@@ -344,8 +303,6 @@ export function ModalHost() {
 
 function renderModal(m: ModalState) {
   switch (m.type) {
-    case 'share':
-      return <ShareDialog videoId={m.videoId} />;
     case 'collection':
       return <CollectionDialog videoId={m.videoId} />;
     case 'report':
@@ -356,12 +313,10 @@ function renderModal(m: ModalState) {
           <ShortcutTable />
         </Modal>
       );
-    case 'upload':
-      return <UploadDialog draftId={m.draftId} />;
+    case 'report-comment':
+      return <ReportCommentDialog m={m} />;
     case 'interests':
-      return <Interests />;
-    case 'edit-profile':
-      return <EditProfile />;
+      return <Interests welcome={m.welcome} />;
     case 'new-collection':
       return <NewCollection videoId={m.videoId} />;
     case 'confirm':

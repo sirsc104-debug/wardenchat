@@ -11,7 +11,7 @@ export interface Route {
 }
 
 const MEMORY = typeof __MEMORY_ROUTER__ !== 'undefined' && __MEMORY_ROUTER__;
-const PLAIN_ROUTES = ['explore', 'following', 'trending', 'friends', 'studio', 'notifications', 'history', 'saved'];
+const PLAIN_ROUTES = ['explore', 'following', 'trending', 'notifications', 'history', 'saved'];
 
 /** "#video-v010" → "#/video/v010", "#explore" → "#/explore". */
 function fromPlainHash(h: string): string {

@@ -40,7 +40,7 @@ const CREATORS: Row[] = [
   ['sirscgames', 'sirsc.games', 'SirSC Games', 210, 280, 36_500, ['community', 'gaming'], 'Wildcard Chess, Apples to Oranges and more. Devlogs, sneak peeks and tournaments.', true],
 ];
 
-// The four demo accounts you can switch between.
+// Fictional students who posted a few of the demo clips (they used to be the switchable demo accounts).
 const DEMO: Row[] = [
   ['alex', 'alex', 'Alex Rivera', 188, 230, 1_284, ['gaming', 'memes', 'technology'], 'Building a PC one allowance at a time. Gaming, memes and gadgets.', false, 'Room 214'],
   ['jordan', 'jordan', 'Jordan Brooks', 140, 25, 2_031, ['sports', 'comedy', 'gaming'], 'JV point guard. Will trade snacks for highlight clips.', false, 'Gym, probably'],
@@ -48,7 +48,7 @@ const DEMO: Row[] = [
   ['taylor', 'taylor', 'Taylor Kim', 175, 45, 967, ['school', 'science', 'memes'], 'Science fair survivor. Mitochondria enthusiast. Memes between labs.', false, 'Chem lab'],
 ];
 
-// Friends of the demo accounts who don't post much but like and share a lot.
+// Fictional people who wrote the sample comments on demo clips.
 const FRIENDS: Row[] = [
   ['riley', 'riley.q', 'Riley Quinn', 30, 340, 402, ['memes', 'gaming', 'animals'], 'Professional lurker.'],
   ['max', 'maxwell.b', 'Max Bennett', 220, 120, 655, ['technology', 'gaming', 'science'], 'I fix the school printers. Nobody asked me to.'],
@@ -80,24 +80,60 @@ function make(row: Row, kind: User['kind'], i: number): User {
 
 export const USERS: User[] = [
   ...CREATORS.map((r, i) => make(r, 'creator', i)),
-  ...DEMO.map((r, i) => make(r, 'demo', i + 40)),
+  ...DEMO.map((r, i) => make(r, 'creator', i + 40)),
   ...FRIENDS.map((r, i) => make(r, 'friend', i + 60)),
 ];
 
 export const USER_MAP = new Map(USERS.map((u) => [u.id, u]));
 export const HANDLE_MAP = new Map(USERS.map((u) => [u.handle, u]));
 
-export const DEMO_IDS = DEMO.map((r) => r[0]);
 export const CREATOR_IDS = CREATORS.map((r) => r[0]);
 export const FRIEND_IDS = FRIENDS.map((r) => r[0]);
 
-/** Each demo account's friends: two other demo accounts and two lurkers. */
-export const FRIENDS_OF: Record<string, string[]> = {
-  alex: ['jordan', 'taylor', 'riley', 'max'],
-  jordan: ['alex', 'sam', 'casey', 'eli'],
-  sam: ['jordan', 'taylor', 'nova', 'priya'],
-  taylor: ['alex', 'sam', 'priya', 'riley'],
-};
+/** Avatar colours for a Warden Chat account, picked from its id so they stay the same everywhere. */
+function huesFor(id: string): { h1: number; h2: number } {
+  let h = 2166136261;
+  for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619);
+  const h1 = (h >>> 0) % 360;
+  return { h1, h2: (h1 + 40 + ((h >>> 9) % 80)) % 360 };
+}
+
+/** The app's user record for a Warden Chat account ("w:<id>"). Not registered anywhere. */
+export function memberUser(userId: string, username: string): User {
+  return {
+    id: `w:${userId}`,
+    handle: username.toLowerCase(),
+    name: username,
+    bio: '',
+    avatar: huesFor(userId),
+    followers: 0,
+    following: 0,
+    likes: 0,
+    categories: [],
+    kind: 'member',
+    joined: Date.now(),
+  };
+}
+
+let signedIn: User | null = null;
+
+/** Register the signed-in Warden Chat account so profiles, avatars and the composer can find it. */
+export function setSignedInUser(u: User | null) {
+  if (signedIn) {
+    USER_MAP.delete(signedIn.id);
+    if (HANDLE_MAP.get(signedIn.handle) === signedIn) HANDLE_MAP.delete(signedIn.handle);
+  }
+  signedIn = u;
+  if (u) {
+    USER_MAP.set(u.id, u);
+    // A creator with the same handle keeps it; your profile is still reachable as #/profile/me.
+    if (!HANDLE_MAP.has(u.handle)) HANDLE_MAP.set(u.handle, u);
+  }
+}
+
+export function signedInUser(): User | null {
+  return signedIn;
+}
 
 export function getUser(id: string): User | undefined {
   return USER_MAP.get(id);

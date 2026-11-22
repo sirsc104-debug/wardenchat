@@ -1,13 +1,14 @@
 import { memo, useState } from 'react';
-import { BarChart3, Bookmark, ChevronDown, ChevronUp, Ellipsis, Heart, LayoutGrid, ListVideo, MessageCircle, Plus, Check, Shapes, Share2 } from 'lucide-react';
+import { BarChart3, Bookmark, ChevronDown, ChevronUp, Ellipsis, Heart, LayoutGrid, ListVideo, MessageCircle, Plus, Check, Shapes } from 'lucide-react';
 import type { Video } from '../../state/types';
 import { Avatar } from '../common/Avatar';
 import { Menu } from '../common/Menu';
 import { videoMenuItems } from './videoMenu';
 import { useAcct, usePersisted } from '../../state/store';
-import { go, openModal, openSheet, toggleFollow, toggleLike, toggleSave } from '../../state/actions';
+import { go, openSheet, toggleFollow, toggleLike, toggleSave } from '../../state/actions';
 import { focusWidget, setCustomizeOpen } from '../../state/widgets';
-import { commentCount, getUser, likeCount, saveCount, shareCount, viewCount } from '../../lib/catalog';
+import { commentCount, getUser, likeCount, saveCount, viewCount } from '../../lib/catalog';
+import { useVideoSocial } from '../../lib/social';
 import { compact } from '../../lib/format';
 
 interface Props {
@@ -19,7 +20,9 @@ interface Props {
 
 export const ActionRail = memo(function ActionRail({ video, index, total, layout }: Props) {
   const p = usePersisted();
-  const liked = useAcct((a) => a.liked.includes(video.id));
+  const social = useVideoSocial(video.id);
+  const localLiked = useAcct((a) => a.liked.includes(video.id));
+  const liked = social && social !== 'closed' ? social.liked : localLiked;
   const saved = useAcct((a) => a.saved.includes(video.id));
   const following = useAcct((a) => a.following.includes(video.creatorId));
   const creator = getUser(p, video.creatorId);
@@ -67,23 +70,17 @@ export const ActionRail = memo(function ActionRail({ video, index, total, layout
         </span>
         <span className="rail-n">{compact(likeCount(p, video))}</span>
       </button>
-      <button type="button" className="rail-btn" onClick={openComments} aria-label={`Comments (C), ${commentCount(p, video)}`} title="Comments (C)" disabled={video.allowComments === false}>
+      <button type="button" className="rail-btn" onClick={openComments} aria-label={`Comments (C), ${commentCount(p, video)}`} title="Comments (C)">
         <span className="rail-ico">
           <MessageCircle size={24} />
         </span>
-        <span className="rail-n">{video.allowComments === false ? 'Off' : compact(commentCount(p, video))}</span>
+        <span className="rail-n">{compact(commentCount(p, video))}</span>
       </button>
       <button type="button" className={`rail-btn save${saved ? ' on' : ''}`} onClick={() => toggleSave(video.id)} aria-pressed={saved} aria-label={`${saved ? 'Unsave' : 'Save'} (S)`} title="Save (S)">
         <span className="rail-ico">
           <Bookmark size={24} fill={saved ? 'currentColor' : 'none'} />
         </span>
         <span className="rail-n">{compact(saveCount(p, video))}</span>
-      </button>
-      <button type="button" className="rail-btn" onClick={() => openModal({ type: 'share', videoId: video.id })} aria-label="Share" title="Share">
-        <span className="rail-ico">
-          <Share2 size={23} />
-        </span>
-        <span className="rail-n">{compact(shareCount(p, video))}</span>
       </button>
       {desktop && (
         <button type="button" className="rail-btn" onClick={() => focusWidget('stats')} aria-label={`Video statistics, ${viewCount(p, video)} views`} title="Statistics">

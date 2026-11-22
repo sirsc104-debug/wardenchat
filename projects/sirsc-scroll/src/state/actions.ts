@@ -1,29 +1,16 @@
 // Every state change in the app goes through here.
-import type {
-  AccountState,
-  ActivityEntry,
-  AppNotification,
-  Category,
-  Comment,
-  Draft,
-  FeedItem,
-  FeedKind,
-  ModalState,
-  Persisted,
-  Session,
-  Settings,
-  SortKey,
-  Video,
-} from './types';
+import type { AccountState, ActivityEntry, Category, FeedItem, FeedKind, ModalState, Persisted, Session, Settings, SortKey, Video } from './types';
 import { getState, setAcct, setBoth, setP, setS } from './store';
-import { clearStorage, freshPersisted } from './persist';
-import { seedAccount } from '../data/seeds';
-import { DEMO_IDS, FRIENDS_OF, HANDLE_MAP, USER_MAP } from '../data/users';
-import { getVideo, getUser, shareLink, videoMode } from '../lib/catalog';
+import { SIGNED_OUT } from './persist';
+import { freshAccount } from '../data/seeds';
+import { USER_MAP, memberUser, setSignedInUser } from '../data/users';
+import { getVideo, getUser, videoMode } from '../lib/catalog';
 import { catalogVideos, loadMoreCatalog } from '../lib/remoteCatalog';
-import { applyFilters, applySignal, INTEREST_MAX, INTEREST_MIN, rankFollowing, rankForYou, rankFriends, rankTrending, type SignalKind } from '../lib/recommend';
-import { between, rng, uid } from '../lib/rng';
+import { applyFilters, applySignal, INTEREST_MAX, INTEREST_MIN, rankFollowing, rankForYou, rankTrending, type SignalKind } from '../lib/recommend';
+import { uid } from '../lib/rng';
 import { clamp } from '../lib/format';
+import { fetchMyLikes, onLikedFromServer, resetSocial, setVideoLiked, socialErrorText, socialFor } from '../lib/social';
+import type { WardenUser } from '../lib/warden';
 
 /* ---------------------------------------------------------------- toasts & modals */
 
@@ -83,11 +70,10 @@ function rank(kind: FeedKind, p: Persisted): FeedItem[] {
   if (kind === 'foryou') return rankForYou(p);
   if (kind === 'following') return rankFollowing(p);
   if (kind === 'trending') return rankTrending(p);
-  if (kind === 'friends') return rankFriends(p);
   return [];
 }
 
-const RANKED: FeedKind[] = ['foryou', 'following', 'trending', 'friends'];
+const RANKED: FeedKind[] = ['foryou', 'following', 'trending'];
 
 function rebuilt(p: Persisted, s: Session, kinds: FeedKind[] = RANKED, keepCurrent = false): Session {
   const feeds = { ...s.feeds };
@@ -108,7 +94,7 @@ function rebuilt(p: Persisted, s: Session, kinds: FeedKind[] = RANKED, keepCurre
   return { ...s, feeds };
 }
 
-/** Rebuild every ranked feed from scratch (account switch, filter change, refresh). */
+/** Rebuild every ranked feed from scratch (sign-in, filter change, refresh). */
 export function rebuildFeeds(keepCurrent = false) {
   setBoth((st) => ({ ...st, s: rebuilt(st.p, st.s, RANKED, keepCurrent) }));
 }
@@ -197,7 +183,7 @@ export function openList(ids: string[], startId: string, label: string, back: st
 export function openVideo(id: string) {
   const { p, s } = getState();
   const rest = s.feeds.foryou.items.length ? s.feeds.foryou.items : rankForYou(p);
-  openList([id, ...rest.filter((i) => i.id !== id).map((i) => i.id)], id, 'Shared with you', '#/');
+  openList([id, ...rest.filter((i) => i.id !== id).map((i) => i.id)], id, 'Opened from a link', '#/');
 }
 
 export function setCategory(category: Category | 'all') {
@@ -251,17 +237,6 @@ function signal(a: AccountState, videoId: string, kind: SignalKind): AccountStat
   return v ? applySignal(a, v, kind) : a;
 }
 
-/** Deliver a notification to another demo account on this device. */
-function notify(accountId: string, n: Omit<AppNotification, 'id' | 'read' | 'at'> & { at?: number }) {
-  if (accountId === getState().p.activeId) return;
-  setP((p) => {
-    const acct = p.accounts[accountId];
-    if (!acct) return p;
-    const note: AppNotification = { ...n, at: n.at ?? now(), id: uid('n'), read: false };
-    return { ...p, accounts: { ...p.accounts, [accountId]: { ...acct, notifications: [note, ...acct.notifications].slice(0, 150) } } };
-  });
-}
-
 function me() {
   const { p } = getState();
   return { p, id: p.activeId, acct: p.accounts[p.activeId] };
@@ -269,20 +244,58 @@ function me() {
 
 /* ---------------------------------------------------------------- likes, saves, follows */
 
-export function toggleLike(videoId: string) {
-  const { acct, id } = me();
-  const liked = acct.liked.includes(videoId);
+/** Why a video can't be liked or commented on, or null if it can. */
+export function socialClosedReason(v: Video): string | null {
+  if (socialFor(v.id) !== 'closed') return null;
+  return v.source ? 'Likes and comments open once this video is approved.' : 'This is a demo clip. Likes and comments work on real videos.';
+}
+
+function setLikedLocally(videoId: string, liked: boolean) {
   setAcct((a) => {
-    const next = { ...a, liked: liked ? a.liked.filter((x) => x !== videoId) : [videoId, ...a.liked] };
-    return activity(signal(next, videoId, liked ? 'unlike' : 'like'), { type: liked ? 'unlike' : 'like', videoId });
+    if (a.liked.includes(videoId) === liked) return a;
+    const next = { ...a, liked: liked ? [videoId, ...a.liked] : a.liked.filter((x) => x !== videoId) };
+    return activity(signal(next, videoId, liked ? 'like' : 'unlike'), { type: liked ? 'like' : 'unlike', videoId });
   });
-  const v = getVideo(getState().p, videoId);
-  if (!liked && v && DEMO_IDS.includes(v.creatorId)) notify(v.creatorId, { type: 'like', actorId: id, videoId, text: 'liked your video' });
+}
+
+/** Like or unlike. Saved in Warden Chat's database; the account's own list follows for recommendations. */
+export function toggleLike(videoId: string) {
+  const { acct, p } = me();
+  const v = getVideo(p, videoId);
+  if (!v) return;
+  const closedWhy = socialClosedReason(v);
+  if (closedWhy) {
+    toast(closedWhy);
+    return;
+  }
+  const s = socialFor(videoId);
+  const liked = s && s !== 'closed' ? s.liked : acct.liked.includes(videoId);
+  setLikedLocally(videoId, !liked);
+  setVideoLiked(videoId, !liked).catch((e) => {
+    setLikedLocally(videoId, liked);
+    toast(socialErrorText(e));
+  });
 }
 
 export function likeOnly(videoId: string) {
-  if (!me().acct.liked.includes(videoId)) toggleLike(videoId);
+  const s = socialFor(videoId);
+  const liked = s && s !== 'closed' ? s.liked : me().acct.liked.includes(videoId);
+  if (!liked) toggleLike(videoId);
 }
+
+// What the server says you liked (counts for videos on screen) keeps the local list in step, e.g. after
+// liking on another device.
+onLikedFromServer((map) => {
+  setAcct((a) => {
+    let liked = a.liked;
+    for (const [id, on] of map) {
+      const has = liked.includes(id);
+      if (on && !has) liked = [id, ...liked];
+      else if (!on && has) liked = liked.filter((x) => x !== id);
+    }
+    return liked === a.liked ? a : { ...a, liked };
+  });
+});
 
 export function toggleSave(videoId: string) {
   const saved = me().acct.saved.includes(videoId);
@@ -311,7 +324,6 @@ export function toggleFollow(userId: string) {
     }
     return activity(next, { type: following ? 'unfollow' : 'follow', userId });
   });
-  if (!following && DEMO_IDS.includes(userId)) notify(userId, { type: 'follow', actorId: id, text: 'started following you' });
   setBoth((st) => ({ ...st, s: rebuilt(st.p, st.s, ['following'], st.s.activeFeed === 'following') }));
   const name = getUser(getState().p, userId)?.handle ?? userId;
   toast(following ? `Unfollowed @${name}` : `Following @${name}`);
@@ -373,80 +385,9 @@ export function deleteCollection(colId: string) {
 
 /* ---------------------------------------------------------------- comments */
 
-export function addComment(videoId: string, text: string, parentId?: string): Comment | null {
-  const clean = text.trim().slice(0, 300);
-  if (!clean) return null;
-  const { p, id } = me();
-  const c: Comment = { id: uid('c'), videoId, authorId: id, text: clean, at: now(), likes: 0, parentId, local: true };
-  setP((pp) => ({ ...pp, userComments: [...pp.userComments, c] }));
-  setAcct((a) => activity(signal(a, videoId, 'comment'), { type: parentId ? 'reply' : 'comment', videoId, detail: clean.slice(0, 80) }));
-  const v = getVideo(p, videoId);
-  const notified = new Set<string>();
-  if (parentId) {
-    const parent = p.userComments.find((x) => x.id === parentId);
-    if (parent && DEMO_IDS.includes(parent.authorId) && parent.authorId !== id) {
-      notify(parent.authorId, { type: 'reply', actorId: id, videoId, text: 'replied to your comment', quote: clean });
-      notified.add(parent.authorId);
-    }
-  }
-  for (const m of clean.matchAll(/@([a-z0-9._]+)/gi)) {
-    const u = HANDLE_MAP.get(m[1].toLowerCase());
-    if (u && DEMO_IDS.includes(u.id) && !notified.has(u.id)) {
-      notify(u.id, { type: 'mention', actorId: id, videoId, text: 'mentioned you in a comment', quote: clean });
-      notified.add(u.id);
-    }
-  }
-  if (v && DEMO_IDS.includes(v.creatorId) && !notified.has(v.creatorId)) notify(v.creatorId, { type: 'comment', actorId: id, videoId, text: 'commented on your video', quote: clean });
-  return c;
-}
-
-export function deleteComment(commentId: string) {
-  setP((p) => ({ ...p, userComments: p.userComments.filter((c) => c.id !== commentId && c.parentId !== commentId) }));
-  toast('Comment deleted');
-}
-
-export function toggleCommentLike(commentId: string) {
-  setAcct((a) => ({ ...a, likedComments: a.likedComments.includes(commentId) ? a.likedComments.filter((x) => x !== commentId) : [commentId, ...a.likedComments] }));
-}
-
-/* ---------------------------------------------------------------- sharing */
-
-export async function copyLink(videoId: string) {
-  const link = shareLink(videoId);
-  let ok = false;
-  try {
-    await navigator.clipboard.writeText(link);
-    ok = true;
-  } catch {
-    // Clipboard API blocked (e.g. inside an embed): fall back to a hidden textarea.
-    const ta = document.createElement('textarea');
-    ta.value = link;
-    ta.setAttribute('readonly', '');
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-      ok = document.execCommand('copy');
-    } catch {
-      ok = false;
-    }
-    ta.remove();
-  }
-  recordShare(videoId, 'link');
-  toast(ok ? 'Link copied to clipboard' : `Copy this link: ${link}`);
-}
-
-export function recordShare(videoId: string, to: string) {
-  setAcct((a) => activity(signal({ ...a, shares: [{ videoId, to, at: now() }, ...a.shares].slice(0, 200) }, videoId, 'share'), { type: 'share', videoId, userId: USER_MAP.has(to) ? to : undefined, detail: to }));
-}
-
-export function shareTo(videoId: string, targets: string[], note: string) {
-  const { id } = me();
-  for (const t of targets) {
-    recordShare(videoId, t);
-    if (DEMO_IDS.includes(t)) notify(t, { type: 'share', actorId: id, videoId, text: 'sent you a video', quote: note.trim() || undefined });
-  }
+/** A comment was posted: it teaches recommendations like any other interaction. */
+export function notePosted(videoId: string, reply: boolean, text: string) {
+  setAcct((a) => activity(signal(a, videoId, 'comment'), { type: reply ? 'reply' : 'comment', videoId, detail: text.slice(0, 80) }));
 }
 
 /* ---------------------------------------------------------------- feed controls */
@@ -557,25 +498,10 @@ export function applyInterestChanges() {
 }
 
 export function resetRecommendations() {
-  const seed = seedAccount(getState().p.activeId);
+  const seed = freshAccount();
   setAcct((a) => ({ ...a, interests: seed.interests, tagAffinity: {}, notInterested: [], signals: seed.signals, nonce: a.nonce + 1 }));
   rebuildFeeds();
-  toast('Recommendations reset to this account’s starting interests');
-}
-
-/* ---------------------------------------------------------------- notifications */
-
-export function markRead(id: string) {
-  setAcct((a) => (a.notifications.some((n) => n.id === id && !n.read) ? { ...a, notifications: a.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)) } : a));
-}
-
-export function markAllRead() {
-  const t = now();
-  setAcct((a) => ({ ...a, notifications: a.notifications.map((n) => (n.at <= t ? { ...n, read: true } : n)) }));
-}
-
-export function toggleRead(id: string) {
-  setAcct((a) => ({ ...a, notifications: a.notifications.map((n) => (n.id === id ? { ...n, read: !n.read } : n)) }));
+  toast('Recommendations reset: every topic counts the same again');
 }
 
 /* ---------------------------------------------------------------- search */
@@ -596,121 +522,51 @@ export function clearRecentSearches() {
 
 /* ---------------------------------------------------------------- accounts & settings */
 
-export function switchAccount(id: string) {
-  if (!DEMO_IDS.includes(id)) return;
+/** Signed in with Warden Chat: switch to that account's data on this browser (new accounts start empty). */
+export function enterAccount(u: WardenUser) {
+  const id = `w:${u.id}`;
+  setSignedInUser(memberUser(u.id, u.username));
+  const isNew = !getState().p.accounts[id];
   setBoth((st) => {
-    if (st.p.activeId === id) return st;
-    const p = { ...st.p, activeId: id };
-    const s: Session = { ...st.s, activeFeed: st.s.activeFeed === 'list' ? 'foryou' : st.s.activeFeed, category: 'all', sort: 'recommended', sheet: null, modal: null, customizeOpen: false };
+    if (st.p.activeId === id && !isNew) return st;
+    const accounts = isNew ? { ...st.p.accounts, [id]: freshAccount() } : st.p.accounts;
+    const p = { ...st.p, activeId: id, accounts };
+    const s: Session = { ...st.s, activeFeed: 'foryou', category: 'all', sort: 'recommended', sheet: null, modal: null, customizeOpen: false };
     return { p, s: rebuilt(p, s) };
   });
-  toast(`Switched to ${getState().p.accounts[id].profile.name}`);
+  // Real likes from the server, so recommendations and "Liked" match every device.
+  fetchMyLikes()
+    .then((ids) => {
+      setAcct((a) => {
+        const local = a.liked.filter((x) => !x.startsWith('yt-'));
+        return { ...a, liked: [...ids, ...local.filter((x) => !ids.includes(x))] };
+      });
+    })
+    .catch(() => {});
+  if (isNew) openModal({ type: 'interests', welcome: true });
 }
 
-export function updateProfile(edits: Partial<AccountState['profile']>) {
-  setAcct((a) => ({ ...a, profile: { ...a.profile, ...edits, name: (edits.name ?? a.profile.name).trim().slice(0, 30) || a.profile.name, bio: (edits.bio ?? a.profile.bio).slice(0, 160) } }));
-}
-
-export function resetAccount(id = getState().p.activeId) {
-  setP((p) => ({
-    ...p,
-    accounts: { ...p.accounts, [id]: seedAccount(id) },
-    userComments: p.userComments.filter((c) => c.authorId !== id),
-    userVideos: p.userVideos.filter((v) => v.creatorId !== id),
-  }));
-  rebuildFeeds();
-  toast(`${getState().p.accounts[id].profile.name}’s demo data was reset`);
-}
-
-export function resetAll() {
-  clearStorage();
+/** Signed out: show nothing of the account behind the sign-in screen. */
+export function leaveAccount(forget = false) {
+  resetSocial();
+  setSignedInUser(null);
   setBoth((st) => {
-    const p = { ...freshPersisted(st.p.activeId), settings: st.p.settings };
-    return { p, s: rebuilt(p, { ...st.s, activeFeed: 'foryou', category: 'all', sort: 'recommended', modal: null }) };
+    const old = st.p.activeId;
+    const accounts: Record<string, AccountState> = { ...st.p.accounts, [SIGNED_OUT]: freshAccount() };
+    if (forget && old !== SIGNED_OUT) delete accounts[old];
+    const p = { ...st.p, activeId: SIGNED_OUT, accounts };
+    const s: Session = { ...st.s, activeFeed: 'foryou', category: 'all', sort: 'recommended', sheet: null, modal: null, customizeOpen: false, toasts: [] };
+    return { p, s: rebuilt(p, s) };
   });
-  toast('All demo data reset');
+}
+
+/** Clear this account's follows, saves, collections, history and interests on this browser. */
+export function resetAccount() {
+  setAcct(() => freshAccount());
+  rebuildFeeds();
+  toast('This account’s data on this browser was cleared');
 }
 
 export function updateSettings(patch: Partial<Settings>) {
   setP((p) => ({ ...p, settings: { ...p.settings, ...patch } }));
-}
-
-/* ---------------------------------------------------------------- studio */
-
-export function saveDraft(d: Draft) {
-  setAcct((a) => ({ ...a, drafts: [{ ...d, updatedAt: now() }, ...a.drafts.filter((x) => x.id !== d.id)] }));
-}
-
-export function deleteDraft(id: string) {
-  setAcct((a) => ({ ...a, drafts: a.drafts.filter((x) => x.id !== id) }));
-}
-
-export function publishDraft(d: Draft): Video {
-  const { id } = me();
-  const r = rng(`${d.id}:${d.title}`);
-  const followers = USER_MAP.get(id)?.followers ?? 1000;
-  const views = Math.round(followers * between(r, 0.6, 2.2) + between(r, 200, 900));
-  const likes = Math.round(views * between(r, 0.07, 0.13));
-  const video: Video = {
-    id: uid('u'),
-    creatorId: id,
-    title: d.title.trim() || 'Untitled clip',
-    description: d.caption.trim(),
-    hashtags: d.hashtags.length ? d.hashtags : [d.category],
-    category: d.category,
-    duration: d.duration,
-    views,
-    likes,
-    comments: Math.round(likes * between(r, 0.02, 0.05)),
-    shares: Math.round(likes * between(r, 0.03, 0.07)),
-    saves: Math.round(likes * between(r, 0.02, 0.06)),
-    uploadedAt: now(),
-    template: d.template,
-    palette: d.palette,
-    caption: d.caption.trim() ? (d.title.trim() || d.caption).toUpperCase().slice(0, 28) : (d.title || 'MY CLIP').toUpperCase().slice(0, 28),
-    glyph: d.glyph,
-    variant: d.variant,
-    frame: d.frame,
-    sound: `Original sound — @${USER_MAP.get(id)?.handle ?? id}`,
-    meta: { quality: 0.8, momentum: 0.7, alsoFor: [] },
-    local: true,
-    visibility: d.visibility,
-    allowComments: d.allowComments,
-  };
-  setP((p) => ({ ...p, userVideos: [video, ...p.userVideos] }));
-  setAcct((a) => {
-    // The simulated audience arrives over the next few minutes.
-    const t = now();
-    const strangers = [...USER_MAP.values()].filter((u) => u.kind !== 'demo');
-    const pickU = () => strangers[Math.floor(r() * strangers.length)].id;
-    const incoming: AppNotification[] = [
-      { id: uid('n'), type: 'system', actorId: 'sirsc', videoId: video.id, text: `Your video “${video.title}” is live`, at: t, read: false },
-      { id: uid('n'), type: 'like', actorId: pickU(), videoId: video.id, text: 'liked your video', at: t + 25_000, read: false },
-      { id: uid('n'), type: 'comment', actorId: pickU(), videoId: video.id, text: 'commented on your video', quote: 'okay this is actually so good', at: t + 70_000, read: false },
-      { id: uid('n'), type: 'follow', actorId: pickU(), text: 'started following you', at: t + 120_000, read: false },
-      { id: uid('n'), type: 'trending', actorId: id, videoId: video.id, text: 'Your video is picking up views (simulated)', at: t + 240_000, read: false },
-    ];
-    return activity({ ...a, drafts: a.drafts.filter((x) => x.id !== d.id), notifications: [...incoming, ...a.notifications] }, { type: 'publish', videoId: video.id, detail: video.title });
-  });
-  // Friends who follow this account hear about it.
-  if (d.visibility !== 'private') {
-    for (const other of DEMO_IDS) {
-      if (other === id) continue;
-      const follows = getState().p.accounts[other].following.includes(id);
-      const isFriend = (FRIENDS_OF[id] ?? []).includes(other);
-      if ((follows || isFriend) && (d.visibility === 'public' || isFriend)) notify(other, { type: 'post', actorId: id, videoId: video.id, text: 'posted a new video' });
-    }
-  }
-  rebuildFeeds(true);
-  return video;
-}
-
-export function deleteUserVideo(videoId: string) {
-  setP((p) => ({ ...p, userVideos: p.userVideos.filter((v) => v.id !== videoId), userComments: p.userComments.filter((c) => c.videoId !== videoId) }));
-  prune((v) => v.id === videoId);
-  toast('Video deleted');
-}
-
-export function setVideoVisibility(videoId: string, visibility: Video['visibility']) {
-  setP((p) => ({ ...p, userVideos: p.userVideos.map((v) => (v.id === videoId ? { ...v, visibility } : v)) }));
 }

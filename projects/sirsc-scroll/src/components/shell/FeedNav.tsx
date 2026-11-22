@@ -9,10 +9,9 @@ export const FEED_TABS: [FeedKind, string, string][] = [
   ['foryou', 'For You', '#/'],
   ['following', 'Following', '#/following'],
   ['trending', 'Trending', '#/trending'],
-  ['friends', 'Friends', '#/friends'],
 ];
 
-/** The permanent bar above the player: the four feeds (with a gliding pill), Focus Mode and widget settings. */
+/** The permanent bar above the player: the three feeds (with a gliding pill), Focus Mode and widget settings. */
 export function FeedNav({ kind, back, label }: { kind: FeedKind; back?: string; label?: string }) {
   const i = FEED_TABS.findIndex((t) => t[0] === kind);
   const focus = useP((p) => isFocusMode(p.widgets));

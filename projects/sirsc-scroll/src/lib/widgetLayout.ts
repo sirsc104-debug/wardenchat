@@ -18,9 +18,9 @@ export interface PlannedColumn {
 // Which column a widget prefers for each column count. Column keys stay stable so a widget that
 // stays in its column is never remounted (comments always live in "ctx").
 const HOME: Record<1 | 2 | 3, Record<WidgetId, ColumnKey>> = {
-  1: { creator: 'ctx', info: 'ctx', stats: 'ctx', comments: 'ctx', upnext: 'ctx', related: 'ctx', friends: 'ctx', discovery: 'ctx' },
-  2: { info: 'ctx', comments: 'ctx', creator: 'next', stats: 'next', upnext: 'next', related: 'next', friends: 'next', discovery: 'next' },
-  3: { creator: 'ctx', info: 'ctx', comments: 'ctx', stats: 'next', upnext: 'next', friends: 'next', related: 'disc', discovery: 'disc' },
+  1: { creator: 'ctx', info: 'ctx', stats: 'ctx', comments: 'ctx', upnext: 'ctx', related: 'ctx', discovery: 'ctx' },
+  2: { info: 'ctx', comments: 'ctx', creator: 'next', stats: 'next', upnext: 'next', related: 'next', discovery: 'next' },
+  3: { creator: 'ctx', info: 'ctx', comments: 'ctx', stats: 'next', upnext: 'next', related: 'disc', discovery: 'disc' },
 };
 
 const KEYS: ColumnKey[] = ['ctx', 'next', 'disc'];

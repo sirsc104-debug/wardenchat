@@ -1,34 +1,15 @@
 import { useRef, useState } from 'react';
-import {
-  Bell,
-  Bookmark,
-  ChevronsUpDown,
-  Clapperboard,
-  Compass,
-  Flame,
-  History,
-  House,
-  PanelLeftClose,
-  PanelLeftOpen,
-  RotateCcw,
-  Settings,
-  UserRound,
-  Users,
-  UsersRound,
-  Check,
-  type LucideIcon,
-} from 'lucide-react';
+import { Bell, Bookmark, ChevronsUpDown, Compass, ExternalLink, Flame, History, House, LogOut, PanelLeftClose, PanelLeftOpen, Settings, UserRound, UsersRound, type LucideIcon } from 'lucide-react';
 import { Avatar } from '../common/Avatar';
 import { BrandMark, Wordmark } from '../common/Brand';
 import { useAcct, useApp, usePersisted } from '../../state/store';
-import { confirmAction, resetAll, switchAccount, updateSettings } from '../../state/actions';
+import { updateSettings } from '../../state/actions';
 import { getUser } from '../../lib/catalog';
-import { useDismiss, useExit, isDue, useNow } from '../../lib/hooks';
-import { withViewTransition } from '../../lib/motion';
+import { useDismiss, useExit } from '../../lib/hooks';
 import { href, type Route } from '../../lib/router';
-import { DEMO_IDS } from '../../data/users';
-import { categoryLabel } from '../../data/categories';
-import { topInterests } from '../../lib/recommend';
+import { useUnreadNotices } from '../../lib/social';
+import { WARDEN_CHAT_URL } from '../../lib/warden';
+import { signOutHere } from '../../lib/accounts';
 
 interface NavItem {
   id: string;
@@ -38,23 +19,20 @@ interface NavItem {
   badge?: number;
 }
 
-function activeId(route: Route, me: string): string {
+function activeId(route: Route): string {
   const [a, b] = route.path;
   if (!a) return 'foryou';
   if (a === 'video' || a === 'watch') return 'watch';
-  if (a === 'profile') return b === me ? 'profile' : 'creator';
+  if (a === 'profile') return b === 'me' ? 'profile' : 'creator';
   if (a === 'tag') return 'explore';
   return a;
 }
 
 export function Sidebar({ route, collapsed, narrow }: { route: Route; collapsed: boolean; narrow: boolean }) {
-  const p = usePersisted();
-  const now = useNow();
-  const me = getUser(p, p.activeId)!;
-  const unread = useAcct((a) => a.notifications.filter((n) => !n.read && isDue(n.at, now)).length);
+  const unread = useUnreadNotices();
   const saved = useAcct((a) => a.saved.length);
   const feed = useApp((st) => st.s.activeFeed);
-  const current = activeId(route, me.handle);
+  const current = activeId(route);
   // Collapsed icons get a tooltip; it's position: fixed so the scrolling nav never clips it.
   const [tip, setTip] = useState<{ text: string; y: number } | null>(null);
   const showTip = (e: React.SyntheticEvent) => {
@@ -68,15 +46,13 @@ export function Sidebar({ route, collapsed, narrow }: { route: Route; collapsed:
     { id: 'foryou', label: 'For You', icon: House, to: '#/' },
     { id: 'following', label: 'Following', icon: UsersRound, to: '#/following' },
     { id: 'trending', label: 'Trending', icon: Flame, to: '#/trending' },
-    { id: 'friends', label: 'Friends', icon: Users, to: '#/friends' },
     { id: 'explore', label: 'Explore', icon: Compass, to: '#/explore' },
   ];
   const library: NavItem[] = [
     { id: 'saved', label: 'Saved', icon: Bookmark, to: '#/saved', badge: saved },
     { id: 'history', label: 'History', icon: History, to: '#/history' },
     { id: 'notifications', label: 'Notifications', icon: Bell, to: '#/notifications', badge: unread },
-    { id: 'studio', label: 'Creator Studio', icon: Clapperboard, to: '#/studio' },
-    { id: 'profile', label: 'Profile', icon: UserRound, to: href.profile(me.handle) },
+    { id: 'profile', label: 'Profile', icon: UserRound, to: href.profile('me') },
     { id: 'settings', label: 'Settings', icon: Settings, to: '#/settings' },
   ];
 
@@ -141,64 +117,57 @@ export function AccountSwitcher({ collapsed, upward = true }: { collapsed: boole
   const pop = useRef<HTMLDivElement>(null);
   useDismiss(open, () => setOpen(false), [btn, pop]);
   const pres = useExit(open, 150);
-  const me = getUser(p, p.activeId)!;
+  const me = getUser(p, p.activeId);
+  if (!me) return null;
   return (
     <div className={`acct${open ? ' open' : ''}`}>
-      <button ref={btn} type="button" className="acct-btn" onClick={() => setOpen((o) => !o)} aria-haspopup="dialog" aria-expanded={open} aria-label={`Demo account: ${me.name}. Switch account`} data-tip={collapsed ? 'Switch demo account' : undefined}>
+      <button ref={btn} type="button" className="acct-btn" onClick={() => setOpen((o) => !o)} aria-haspopup="dialog" aria-expanded={open} aria-label={`Signed in as ${me.name}. Account menu`} data-tip={collapsed ? me.name : undefined}>
         <Avatar user={me} size={32} ring />
         <span className="acct-names">
           <span className="acct-name">{me.name}</span>
-          <span className="acct-handle">@{me.handle} · demo</span>
+          <span className="acct-handle">Warden Chat account</span>
         </span>
         <ChevronsUpDown size={15} className="acct-chev" />
       </button>
       {pres.mounted && (
-        <div ref={pop} className={`acct-pop${upward ? ' up' : ''}${pres.closing ? ' closing' : ''}`} role="dialog" aria-label="Switch demo account">
-          <p className="acct-pop-head">Demo accounts</p>
-          <ul>
-            {DEMO_IDS.map((id) => {
-              const u = getUser(p, id)!;
-              const top = topInterests(p.accounts[id]).slice(0, 3).map((x) => categoryLabel(x.category));
-              const on = id === p.activeId;
-              return (
-                <li key={id}>
-                  <button
-                    type="button"
-                    className={`acct-row${on ? ' on' : ''}`}
-                    onClick={() => {
-                      setOpen(false);
-                      if (id !== p.activeId) withViewTransition(() => switchAccount(id));
-                    }}
-                  >
-                    <Avatar user={u} size={34} />
-                    <span className="acct-names">
-                      <span className="acct-name">{u.name}</span>
-                      <span className="acct-handle">
-                        @{u.handle} · {top.join(', ')}
-                      </span>
-                    </span>
-                    {on && <Check size={16} className="acct-check" />}
-                  </button>
-                </li>
-              );
-            })}
+        <div ref={pop} className={`acct-pop${upward ? ' up' : ''}${pres.closing ? ' closing' : ''}`} role="dialog" aria-label="Account">
+          <div className="acct-pop-who">
+            <Avatar user={me} size={38} />
+            <span className="acct-names">
+              <span className="acct-name">{me.name}</span>
+              <span className="acct-handle">Signed in with Warden Chat</span>
+            </span>
+          </div>
+          <ul className="acct-pop-list">
+            <li>
+              <a href={href.profile('me')} className="acct-row" onClick={() => setOpen(false)}>
+                <UserRound size={16} /> Your profile
+              </a>
+            </li>
+            <li>
+              <a href="#/settings/account" className="acct-row" onClick={() => setOpen(false)}>
+                <Settings size={16} /> Account settings
+              </a>
+            </li>
+            <li>
+              <a href={WARDEN_CHAT_URL} className="acct-row" target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)}>
+                <ExternalLink size={16} /> Manage on Warden Chat
+              </a>
+            </li>
           </ul>
           <div className="acct-pop-foot">
-            <a href="#/settings/demo" className="link-btn" onClick={() => setOpen(false)}>
-              Manage demo data
-            </a>
             <button
               type="button"
-              className="link-btn danger"
+              className="btn btn-ghost btn-sm btn-block"
               onClick={() => {
                 setOpen(false);
-                confirmAction('Reset all demo data?', 'Likes, follows, comments, saves, uploads and history for all four demo accounts go back to how they started. Settings are kept.', 'Reset everything', () => withViewTransition(resetAll));
+                void signOutHere();
               }}
             >
-              <RotateCcw size={12} /> Reset demo data
+              <LogOut size={14} /> Sign out
             </button>
           </div>
-          <p className="acct-pop-note">No passwords. Everything stays in this browser.</p>
+          <p className="acct-pop-note">Your password, picture and account live on Warden Chat.</p>
         </div>
       )}
     </div>

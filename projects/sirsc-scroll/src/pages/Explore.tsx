@@ -84,7 +84,7 @@ function CategoryTiles() {
     for (const v of visibleVideos(p)) m.set(v.category, (m.get(v.category) ?? 0) + 1);
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [p.userVideos]);
+  }, [p.settings.videoSource]);
   return (
     <div className="cat-tiles">
       {CATEGORIES.map((c) => {
@@ -106,7 +106,7 @@ function CategoryTiles() {
 function TagChips({ limit = 14 }: { limit?: number }) {
   const p = usePersisted();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const tags = useMemo(() => trendingHashtags(p, limit), [p.userVideos, limit]);
+  const tags = useMemo(() => trendingHashtags(p, limit), [p.settings.videoSource, limit]);
   return (
     <div className="tag-cloud">
       {tags.map((t, i) => (
@@ -130,7 +130,7 @@ function ExploreAside() {
         .slice(0, 10)
         .map((x) => x.v),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [p.userVideos],
+    [p.settings.videoSource],
   );
   const open = useOpenList(top, 'Top 10 today');
   return (
@@ -241,7 +241,7 @@ function CategoryView({ cat }: { cat: Category }) {
     if (sort === 'liked') return list.sort((a, b) => b.likes - a.likes);
     return list.map((v) => ({ v, s: trendingScore(p, v) })).sort((a, b) => b.s - a.s).map((x) => x.v);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [p.userVideos, cat, sort]);
+  }, [p.settings.videoSource, cat, sort]);
   const creators = USERS.filter((u) => u.kind === 'creator' && u.categories.includes(cat)).map((u) => u.id);
   return (
     <>
@@ -280,7 +280,7 @@ export function TagView({ tag }: { tag: string }) {
   const vids = useMemo(
     () => visibleVideos(p).filter((v) => v.hashtags.includes(tag)).sort((a, b) => trendingScore(p, b) - trendingScore(p, a)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [p.userVideos, tag],
+    [p.settings.videoSource, tag],
   );
   const views = vids.reduce((s, v) => s + v.views, 0);
   return (
@@ -303,7 +303,7 @@ export function TagView({ tag }: { tag: string }) {
         <VideoGrid videos={vids} label={`#${tag}`} />
       ) : (
         <Empty icon={Hash} title={`No videos with #${tag} yet`}>
-          Be the first: add it to a video in Creator Studio.
+          No video uses it right now.
         </Empty>
       )}
     </PageShell>
@@ -323,7 +323,7 @@ export function Explore({ route }: { route: Route }) {
   const popular = useMemo(
     () => visibleVideos(p).slice().sort((a, b) => b.views - a.views).slice(0, 12),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [p.userVideos],
+    [p.settings.videoSource],
   );
   const creators = useMemo(
     () =>

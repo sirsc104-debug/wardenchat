@@ -12,6 +12,7 @@ pg_cron (daily) ──► scroll-discover-videos (Edge Function) ──► YouTu
                  public.scroll_videos  (review_status: pending → approved by a person)
                          │
 SirSC Scroll ──► scroll_feed / scroll_categories (read-only, approved + active rows only)
+             ──► scroll_like_set / scroll_comment_post / … (signed in with Warden Chat; scroll_private tables)
                          │
                  YouTube IFrame player plays the ID
 ```
@@ -134,6 +135,57 @@ Every day, `scroll-refresh-daily` handles stored metadata:
 - **Expiring:** anything still not refreshed after `max_metadata_age_days` (30) is blanked and hidden until a later refresh succeeds. Its ID and review decision are kept.
 
 This follows the YouTube API Services Developer Policies' limits on keeping API data without refreshing it, as I understand them. Check the current policy text before relying on this.
+
+## Likes and comments (Warden Chat accounts)
+
+Migration `supabase/migrations/20261122210000_scroll_social.sql` (applied as `scroll_social`, plus `scroll_social_unlike_when_stopped`, which is already folded into the file). People sign in to SirSC Scroll with their Warden Chat account; nothing in Warden Chat's own tables, functions or Auth settings changed.
+
+**Tables:** all in `scroll_private`, which the API doesn't expose; RLS is on, with no grants to `anon` or `authenticated`.
+
+| Table | Holds |
+| --- | --- |
+| `video_likes` | one row per account and liked video |
+| `comments` | comments and replies (one level), soft-deleted by the author or the owner |
+| `comment_likes`, `comment_reports` | likes on comments; reports (reason, resolved or not) |
+| `social_bans` | accounts the owner stopped from liking and commenting |
+| `social_events`, `notices_seen`, `mod_log` | rate limiting; when each account last read notifications; every moderation action |
+
+**Functions** (`public`, `SECURITY DEFINER`, `search_path = ''`):
+
+| For | Functions | Who can call |
+| --- | --- | --- |
+| Signed-in people | `scroll_me`, `scroll_social_counts`, `scroll_like_set`, `scroll_my_likes`, `scroll_comments_list`, `scroll_comment_replies`, `scroll_comment_post`, `scroll_comment_delete`, `scroll_comment_like_set`, `scroll_comment_report`, `scroll_notifications`, `scroll_notifications_seen` | `authenticated` only; each checks `warden_private.game_session_valid()` (an active Warden Chat account and a live session) and raises `scroll_not_signed_in` otherwise |
+| The owner | `scroll_mod_comments`, `scroll_mod_set`, `scroll_mod_ban` | anyone with the review key (Vault `scroll_review_key`), like the review page |
+| The app | `scroll_social_ping` | anyone |
+
+**Rules enforced in SQL:**
+- Likes and comments only on approved, active catalog videos.
+- Comments are 1 to 300 characters, with control characters stripped and at most two blank lines in a row. Replies are one level deep. The same text twice within two minutes is refused.
+- Rate limits: 6 comments a minute and 150 a day; 60 likes a minute.
+- Warden Chat blocks hide comments both ways and stop replies.
+- `muted_by_admin` accounts can't comment.
+- Suspended or banned accounts can't do anything, and their comments are hidden.
+- Accounts the owner stopped can't like or comment (they can still unlike), and their comments are hidden.
+
+**Errors** come back as `P0001` with a message the app explains: `scroll_not_signed_in`, `scroll_banned`, `scroll_muted`, `scroll_blocked`, `scroll_rate_limited`, `scroll_duplicate`, `scroll_comment_empty`, `scroll_comment_too_long`, `scroll_comment_gone`, `scroll_video_unavailable`, `scroll_bad_request`.
+
+**Checked** inside transactions that always roll back, with throwaway accounts created through Warden Chat's own sign-up triggers. Everything above behaved as described, and `anon` gets "permission denied" on every signed-in function. Supabase's security advisor lists only the expected items for these objects: "RLS enabled, no policy" (on purpose) and "SECURITY DEFINER callable" (the API).
+
+Useful SQL:
+
+```sql
+-- latest comments, with author and video
+select c.id, p.username, v.title, c.body, c.created_at, c.deleted_by
+from scroll_private.comments c join public.profiles p on p.id = c.user_id join public.scroll_videos v using (video_id)
+order by c.created_at desc limit 50;
+
+-- open reports
+select r.comment_id, count(*) as reports, array_agg(r.reason) as reasons
+from scroll_private.comment_reports r where r.resolved_at is null group by 1 order by 2 desc;
+
+-- most liked videos
+select video_id, count(*) from scroll_private.video_likes group by 1 order by 2 desc limit 20;
+```
 
 ## Operating it (Supabase SQL editor)
 

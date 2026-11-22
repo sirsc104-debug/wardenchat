@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Check, Clapperboard, Database, Eye, Keyboard, KeyRound, LayoutGrid, ListChecks, MonitorPlay, Palette, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { Check, Clapperboard, ExternalLink, Eye, Keyboard, KeyRound, LayoutGrid, ListChecks, LogOut, MonitorPlay, Palette, RotateCcw, SlidersHorizontal, UserRound } from 'lucide-react';
 import { clearUnplayable, retryCatalog, unplayableCount, useCatalog } from '../lib/remoteCatalog';
 import { WidgetControls } from '../components/widgets/CustomizeWidgets';
 import { exitThen, withViewTransition } from '../lib/motion';
@@ -8,10 +8,11 @@ import { PageShell, Panel } from './PageShell';
 import { InterestEditor } from '../components/modals/InterestEditor';
 import { Avatar } from '../components/common/Avatar';
 import { useAcct, usePersisted } from '../state/store';
-import { applyInterestChanges, clearHistory, confirmAction, openModal, resetAccount, resetAll, resetRecommendations, setHistoryPaused, setMuted, switchAccount, unhideCreator, updateSettings } from '../state/actions';
+import { applyInterestChanges, clearHistory, confirmAction, openModal, resetAccount, resetRecommendations, setHistoryPaused, setMuted, unhideCreator, updateSettings } from '../state/actions';
 import { getUser, getVideo } from '../lib/catalog';
 import { categoryLabel } from '../data/categories';
-import { DEMO_IDS } from '../data/users';
+import { signOutHere } from '../lib/accounts';
+import { useAuth, WARDEN_CHAT_URL } from '../lib/warden';
 import { topInterests } from '../lib/recommend';
 import { SHORTCUTS } from '../lib/shortcuts';
 import { useLayout } from '../lib/hooks';
@@ -179,7 +180,7 @@ export function Settings({ route }: { route: Route }) {
     ['appearance', 'Appearance', Palette],
     ['widgets', 'Widgets', LayoutGrid],
     ['feed', 'Feed', SlidersHorizontal],
-    ['demo', 'Demo data', Database],
+    ['account', 'Account', UserRound],
     ['keys', 'Keyboard shortcuts', Keyboard],
   ];
 
@@ -334,45 +335,7 @@ export function Settings({ route }: { route: Route }) {
             </div>
           </Section>
 
-          <Section id="demo" title="Demo data" icon={Database}>
-            <p className="muted small">SirSC Scroll V1 runs on four fictional demo accounts. There are no passwords and nothing leaves this browser; it’s all kept in localStorage.</p>
-            <div className="acct-cards">
-              {DEMO_IDS.map((id) => {
-                const u = getUser(p, id)!;
-                const a = p.accounts[id];
-                const on = id === p.activeId;
-                return (
-                  <div key={id} className={`acct-card${on ? ' on' : ''}`}>
-                    <Avatar user={u} size={40} />
-                    <div>
-                      <b>{u.name}</b>
-                      <span className="muted small">
-                        @{u.handle} · {topInterests(a).slice(0, 3).map((x) => categoryLabel(x.category)).join(', ')}
-                      </span>
-                      <span className="muted small">
-                        {a.liked.length} liked · {a.saved.length} saved · {a.following.length} following
-                      </span>
-                    </div>
-                    {on ? (
-                      <span className="pill pill-you">Active</span>
-                    ) : (
-                      <button type="button" className="btn btn-xs btn-outline" onClick={() => withViewTransition(() => switchAccount(id))}>
-                        Switch
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            <div className="btn-row">
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => confirmAction(`Reset ${getUser(p, p.activeId)?.name}?`, 'This account’s likes, follows, saves, collections, comments, uploads, drafts, history and notifications go back to how they started.', 'Reset account', () => withViewTransition(() => resetAccount()))}>
-                <RotateCcw size={14} /> Reset this account
-              </button>
-              <button type="button" className="btn btn-danger btn-sm" onClick={() => confirmAction('Reset all demo data?', 'All four demo accounts go back to how they started. Settings are kept.', 'Reset everything', () => withViewTransition(resetAll))}>
-                <RotateCcw size={14} /> Reset all demo data
-              </button>
-            </div>
-          </Section>
+          <AccountSection />
 
           <Section id="keys" title="Keyboard shortcuts" icon={Keyboard}>
             <ShortcutTable />
@@ -384,5 +347,59 @@ export function Settings({ route }: { route: Route }) {
         </div>
       </div>
     </PageShell>
+  );
+}
+
+/** Who's signed in, signing out, and what this browser keeps for the account. */
+function AccountSection() {
+  const p = usePersisted();
+  const auth = useAuth();
+  const me = getUser(p, p.activeId);
+  const a = p.accounts[p.activeId];
+  return (
+    <Section id="account" title="Account" icon={UserRound}>
+      <div className="acct-cards">
+        <div className="acct-card on">
+          <Avatar user={me} size={40} />
+          <div>
+            <b>{me?.name}</b>
+            <span className="muted small">Signed in with Warden Chat</span>
+            <span className="muted small">
+              {a.liked.length} liked · {a.saved.length} saved · {a.following.length} following · top: {topInterests(a).slice(0, 3).map((x) => categoryLabel(x.category)).join(', ')}
+            </span>
+          </div>
+          <a className="btn btn-xs btn-outline" href={WARDEN_CHAT_URL} target="_blank" rel="noopener noreferrer">
+            <ExternalLink size={12} /> Warden Chat
+          </a>
+        </div>
+      </div>
+      {auth.standing?.banned && <p className="notice">The SirSC Scroll owner stopped this account from liking and commenting{auth.standing.banReason ? `: ${auth.standing.banReason}` : '.'}</p>}
+      {auth.standing?.muted && <p className="notice">A Warden Chat admin muted this account, so it can’t comment right now.</p>}
+      <p className="muted small">
+        Likes, comments and notifications are saved with your Warden Chat account, so they follow you to any computer. Follows, saves, collections, watch history and feed
+        preferences are kept in this browser, per account. Your password, picture and account itself are managed on Warden Chat.
+      </p>
+      <div className="btn-row">
+        <button type="button" className="btn btn-ghost btn-sm" onClick={() => void signOutHere()}>
+          <LogOut size={14} /> Sign out
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={() =>
+            confirmAction('Sign out and remove your data from this browser?', 'Signs out, then deletes this account’s follows, saves, collections, history and feed preferences from this browser. Use it on a shared computer. Likes and comments stay with your Warden Chat account.', 'Sign out and remove', () => void signOutHere(true))
+          }
+        >
+          <LogOut size={14} /> Sign out and remove data from this browser
+        </button>
+        <button
+          type="button"
+          className="btn btn-danger btn-sm"
+          onClick={() => confirmAction('Clear this browser’s data for your account?', 'Your follows, saves, collections, watch history and feed preferences in this browser go back to empty. Likes and comments aren’t affected.', 'Clear', () => withViewTransition(() => resetAccount()))}
+        >
+          <RotateCcw size={14} /> Clear this browser’s data
+        </button>
+      </div>
+    </Section>
   );
 }

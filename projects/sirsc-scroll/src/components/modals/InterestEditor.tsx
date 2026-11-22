@@ -13,7 +13,7 @@ export function InterestEditor() {
   const top3 = new Set(ranked.slice(0, 3).map((x) => x.category));
   const list = [...ranked].sort((a, b) => CATEGORY_IDS.indexOf(a.category) - CATEGORY_IDS.indexOf(b.category));
   const signals = acct.signals;
-  const learned = signals.likes + signals.saves + signals.follows + signals.comments + signals.shares + signals.completions + signals.skips + signals.notInterested;
+  const learned = signals.likes + signals.saves + signals.follows + signals.comments + signals.completions + signals.skips + signals.notInterested;
   return (
     <div className="interests">
       <ul className="interest-list">
@@ -37,7 +37,7 @@ export function InterestEditor() {
         })}
       </ul>
       <p className="muted small">
-        Learned from {learned} interactions on this device: {signals.likes} likes, {signals.saves} saves, {signals.follows} follows, {signals.comments} comments, {signals.shares} shares, {signals.completions} full watches, {signals.replays} replays, {signals.skips} quick skips and {signals.notInterested} “not interested”. This is simple weighted scoring, not machine learning.
+        Learned from {learned} interactions in this browser: {signals.likes} likes, {signals.saves} saves, {signals.follows} follows, {signals.comments} comments, {signals.completions} full watches, {signals.replays} replays, {signals.skips} quick skips and {signals.notInterested} “not interested”. This is simple weighted scoring, not machine learning.
       </p>
     </div>
   );

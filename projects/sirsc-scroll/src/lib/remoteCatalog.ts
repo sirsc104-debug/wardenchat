@@ -7,13 +7,11 @@ import { useSyncExternalStore } from 'react';
 import type { Category } from '../state/types';
 import { HANDLE_MAP, USER_MAP } from '../data/users';
 import { fetchFeed, lookupVideos, type CatalogCategory, type CatalogConfig, type CatalogFeed, type CatalogVideo } from './scrollCatalog';
+import { SUPABASE } from './config';
 import { catalogCategoriesFor, channelToUser, toSirscVideo, YT_PREFIX, type RealVideo } from './videoSource';
 
 /** Public by design: the publishable key can only read approved videos (or pending ones with the preview key). */
-export const CATALOG: CatalogConfig = {
-  url: 'https://djmyvnaragfwoaljzexn.supabase.co',
-  publishableKey: 'sb_publishable_cKmFKnmgDTlUNm9hGui2mQ_j_rs0oni',
-};
+export const CATALOG: CatalogConfig = SUPABASE;
 
 export type CatalogStatus = 'off' | 'loading' | 'ready' | 'empty' | 'error';
 

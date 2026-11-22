@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { Clock, Hash, Plus, Search, X, Play } from 'lucide-react';
+import { Clock, Hash, Search, X, Play } from 'lucide-react';
 import { Avatar } from '../common/Avatar';
 import { useAcct, usePersisted, useS } from '../../state/store';
-import { addRecentSearch, clearRecentSearches, openModal, openVideo, removeRecentSearch } from '../../state/actions';
+import { addRecentSearch, clearRecentSearches, openVideo, removeRecentSearch } from '../../state/actions';
 import { suggestions, type Suggestion } from '../../lib/search';
 import { getUser, userByHandle } from '../../lib/catalog';
 import { trendingHashtags } from '../../lib/recommend';
@@ -15,9 +15,6 @@ export function TopBar({ children, className = '' }: { children?: ReactNode; cla
     <header className={`topbar ${className}`}>
       <SearchBox />
       {children}
-      <button type="button" className="btn btn-accent btn-sm topbar-upload" onClick={() => openModal({ type: 'upload' })} title="Upload a simulated video">
-        <Plus size={15} strokeWidth={2.6} /> <span>Upload</span>
-      </button>
     </header>
   );
 }
@@ -48,7 +45,7 @@ export function SearchBox({ autoFocus = false }: { autoFocus?: boolean }) {
 
   const sugg = useMemo(() => (q.trim().length >= 1 ? suggestions(p, q) : []), [p, q]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const hot = useMemo(() => trendingHashtags(p, 5), [p.userVideos]);
+  const hot = useMemo(() => trendingHashtags(p, 5), [p.settings.videoSource]);
   const rows: Suggestion[] = q.trim()
     ? [{ kind: 'query', label: `Search for “${q.trim()}”`, value: q.trim() }, ...sugg]
     : [...recent.map((r) => ({ kind: 'query' as const, label: r, value: r, sub: 'recent' })), ...hot.map((t) => ({ kind: 'tag' as const, label: `#${t.tag}`, value: t.tag, sub: 'trending' }))];

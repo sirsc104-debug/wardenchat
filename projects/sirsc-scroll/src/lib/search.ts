@@ -2,7 +2,7 @@
 import type { Persisted, User, Video } from '../state/types';
 import { USERS } from '../data/users';
 import { CATEGORIES } from '../data/categories';
-import { allVideos, canSee, getUser, likeCount } from './catalog';
+import { allVideos, getUser, likeCount } from './catalog';
 
 export interface TagHit {
   tag: string;
@@ -44,7 +44,6 @@ function fieldScore(text: string, toks: string[], weight: number): number {
 export function allTags(p: Persisted): TagHit[] {
   const map = new Map<string, TagHit>();
   for (const v of allVideos(p)) {
-    if (!canSee(p, v)) continue;
     for (const tag of v.hashtags) {
       const e = map.get(tag) ?? { tag, count: 0, views: 0 };
       e.count++;
@@ -84,7 +83,7 @@ export function search(p: Persisted, query: string): SearchResults {
 
   const catMatch = CATEGORIES.filter((c) => toks.some((t) => norm(c.label).startsWith(t.replace(/^#/, '')) && t.length > 2)).map((c) => c.id);
   const videos = allVideos(p)
-    .filter((v) => canSee(p, v) && !hidden.has(v.creatorId))
+    .filter((v) => !hidden.has(v.creatorId))
     .map((v) => {
       const creator = users.find((u) => u.id === v.creatorId);
       let s = onlyUser

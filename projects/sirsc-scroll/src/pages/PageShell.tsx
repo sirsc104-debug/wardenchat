@@ -3,18 +3,18 @@ import { EASE, reducedMotion } from '../lib/motion';
 import { useRoute } from '../lib/router';
 import { Bell, Flame } from 'lucide-react';
 import { TopBar } from '../components/shell/TopBar';
-import { useLayout, isDue, useNow } from '../lib/hooks';
-import { useAcct, usePersisted } from '../state/store';
+import { useLayout } from '../lib/hooks';
+import { usePersisted } from '../state/store';
+import { useUnreadNotices } from '../lib/social';
 import { trendingHashtags } from '../lib/recommend';
 import { href } from '../lib/router';
 
 /** Fills the top bar beside the search box with live trends and the notification count. */
 function TopStrip() {
   const p = usePersisted();
-  const now = useNow();
-  const unread = useAcct((a) => a.notifications.filter((n) => !n.read && isDue(n.at, now)).length);
+  const unread = useUnreadNotices();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const tags = useMemo(() => trendingHashtags(p, 6), [p.userVideos]);
+  const tags = useMemo(() => trendingHashtags(p, 6), [p.settings.videoSource]);
   return (
     <div className="top-strip">
       <span className="top-strip-label">

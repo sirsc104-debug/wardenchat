@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react';
-import { Bookmark, CalendarDays, Clapperboard, ExternalLink, FolderOpen, Grid3x3, Heart, History, Link2, MapPin, Pencil, Settings as SettingsIcon, UserRoundX } from 'lucide-react';
+import { useMemo } from 'react';
+import { Bookmark, CalendarDays, Clapperboard, ExternalLink, FolderOpen, Grid3x3, Heart, History, MapPin, Settings as SettingsIcon, UserRoundX } from 'lucide-react';
 import { youtubeChannelUrl } from '../lib/videoSource';
-import type { User } from '../state/types';
 import { PageShell, Panel } from './PageShell';
 import { VideoGrid } from './Explore';
 import { Avatar } from '../components/common/Avatar';
@@ -10,105 +9,32 @@ import { Empty } from '../components/common/Empty';
 import { RecommendedCreators } from '../components/panel/Sections';
 import { AccountSwitcher } from '../components/shell/Sidebar';
 import { useAcct, usePersisted } from '../state/store';
-import { openModal, toast, toggleFollow, updateProfile } from '../state/actions';
-import { followerCount, followingCount, getVideo, profileLink, totalLikes, userByHandle, videosBy } from '../lib/catalog';
+import { openModal, toggleFollow } from '../state/actions';
+import { followerCount, followingCount, getVideo, totalLikes, userByHandle, videosBy } from '../lib/catalog';
 import { full } from '../lib/format';
 import { href, type Route } from '../lib/router';
 import { useLayout } from '../lib/hooks';
 import { categoryLabel } from '../data/categories';
 import { topInterests } from '../lib/recommend';
-import { FRIENDS_OF } from '../data/users';
+import { signedInUser } from '../data/users';
+import { WARDEN_CHAT_URL } from '../lib/warden';
 
-type Tab = 'videos' | 'liked' | 'collections' | 'settings';
-
-export function ProfileEditor({ user }: { user: User }) {
-  const [name, setName] = useState(user.name);
-  const [bio, setBio] = useState(user.bio);
-  const [h1, setH1] = useState(user.avatar.h1);
-  const [h2, setH2] = useState(user.avatar.h2);
-  const presets: [number, number][] = [
-    [188, 230],
-    [265, 205],
-    [140, 25],
-    [315, 265],
-    [175, 45],
-    [20, 330],
-    [48, 10],
-    [95, 170],
-  ];
-  const dirty = name !== user.name || bio !== user.bio || h1 !== user.avatar.h1 || h2 !== user.avatar.h2;
-  return (
-    <form
-      className="form profile-form"
-      onSubmit={(e) => {
-        e.preventDefault();
-        updateProfile({ name, bio, avatar: { h1, h2 } });
-        toast('Profile saved');
-      }}
-    >
-      <div className="profile-form-av">
-        <Avatar user={{ name: name || user.name, avatar: { h1, h2 } }} size={72} ring />
-        <div className="swatches" role="radiogroup" aria-label="Avatar color">
-          {presets.map(([a, b]) => (
-            <button
-              key={`${a}-${b}`}
-              type="button"
-              role="radio"
-              aria-checked={h1 === a && h2 === b}
-              className="swatch"
-              style={{ background: `linear-gradient(135deg, hsl(${a} 70% 50%), hsl(${b} 70% 36%))` }}
-              onClick={() => (setH1(a), setH2(b))}
-              aria-label={`Color preset ${a}`}
-            />
-          ))}
-        </div>
-      </div>
-      <label className="field">
-        <span>Display name</span>
-        <input value={name} maxLength={30} onChange={(e) => setName(e.target.value)} />
-      </label>
-      <label className="field">
-        <span>
-          Bio <em>{bio.length}/160</em>
-        </span>
-        <textarea rows={3} value={bio} maxLength={160} onChange={(e) => setBio(e.target.value)} />
-      </label>
-      <div className="field-row">
-        <label className="field">
-          <span>Avatar hue</span>
-          <input type="range" min={0} max={359} value={h1} onChange={(e) => setH1(Number(e.target.value))} style={{ '--track': `linear-gradient(90deg, hsl(0 70% 50%), hsl(60 70% 50%), hsl(120 70% 50%), hsl(180 70% 50%), hsl(240 70% 50%), hsl(300 70% 50%), hsl(359 70% 50%))` } as React.CSSProperties} className="hue" />
-        </label>
-        <label className="field">
-          <span>Gradient hue</span>
-          <input type="range" min={0} max={359} value={h2} onChange={(e) => setH2(Number(e.target.value))} className="hue" />
-        </label>
-      </div>
-      <p className="muted small">Your @handle stays @{user.handle}. Changes are stored in this browser only.</p>
-      <div className="form-actions">
-        <button type="button" className="btn btn-ghost btn-sm" disabled={!dirty} onClick={() => (setName(user.name), setBio(user.bio), setH1(user.avatar.h1), setH2(user.avatar.h2))}>
-          Discard
-        </button>
-        <button type="submit" className="btn btn-accent btn-sm" disabled={!dirty || !name.trim()}>
-          Save profile
-        </button>
-      </div>
-    </form>
-  );
-}
+type Tab = 'videos' | 'liked' | 'collections';
 
 export function Profile({ route }: { route: Route }) {
   const p = usePersisted();
   const layout = useLayout();
   const handle = route.path[1] ?? '';
-  const user = userByHandle(p, handle);
-  const tabParam = (route.path[2] as Tab) ?? 'videos';
+  // Your own profile is #/profile/me (a creator could share your Warden Chat username).
+  const user = handle === 'me' ? (signedInUser() ?? undefined) : userByHandle(p, handle);
+  const own = !!user && user.id === p.activeId;
+  const base = own ? 'me' : (user?.handle ?? handle);
+  const tabParam = (route.path[2] as Tab) ?? (own ? 'liked' : 'videos');
   const following = useAcct((a) => (user ? a.following.includes(user.id) : false));
   const hidden = useAcct((a) => (user ? a.hiddenCreators.includes(user.id) : false));
-  const own = user?.id === p.activeId;
-  const demo = user ? !!p.accounts[user.id] : false;
 
-  const videos = useMemo(() => (user ? videosBy(p, user.id) : []), [p, user]);
-  const liked = useMemo(() => (user && p.accounts[user.id] ? p.accounts[user.id].liked.map((id) => getVideo(p, id)!).filter(Boolean) : []), [p, user]);
+  const videos = useMemo(() => (user && !own ? videosBy(p, user.id) : []), [p, user, own]);
+  const liked = useMemo(() => (own ? p.accounts[p.activeId].liked.map((id) => getVideo(p, id)!).filter(Boolean) : []), [p, own]);
   const collections = own ? p.accounts[p.activeId].collections : [];
 
   if (!user)
@@ -120,17 +46,26 @@ export function Profile({ route }: { route: Route }) {
       </PageShell>
     );
 
-  const tabs: [Tab, string, number | null, typeof Grid3x3][] = [['videos', 'Videos', videos.length, Grid3x3]];
-  if (demo) tabs.push(['liked', 'Liked', liked.length, Heart]);
-  if (own) tabs.push(['collections', 'Collections', collections.length, FolderOpen], ['settings', 'Profile settings', null, SettingsIcon]);
-  const tab = tabs.some((t) => t[0] === tabParam) ? tabParam : 'videos';
-  const friends = FRIENDS_OF[p.activeId]?.includes(user.id);
+  const tabs: [Tab, string, number | null, typeof Grid3x3][] = own
+    ? [
+        ['liked', 'Liked', liked.length, Heart],
+        ['collections', 'Collections', collections.length, FolderOpen],
+      ]
+    : [['videos', 'Videos', videos.length, Grid3x3]];
+  const tab = tabs.some((t) => t[0] === tabParam) ? tabParam : tabs[0][0];
 
   const aside = (
     <>
       <Panel title="About">
         <ul className="about">
-          {user.id.startsWith('yt:') ? (
+          {own ? (
+            <li>
+              <ExternalLink size={14} />{' '}
+              <a href={WARDEN_CHAT_URL} target="_blank" rel="noopener noreferrer">
+                Your Warden Chat account
+              </a>
+            </li>
+          ) : user.id.startsWith('yt:') ? (
             <li>
               <ExternalLink size={14} />{' '}
               <a href={youtubeChannelUrl(user.id.slice(3))} target="_blank" rel="noopener noreferrer">
@@ -147,6 +82,7 @@ export function Profile({ route }: { route: Route }) {
               <MapPin size={14} /> {user.location}
             </li>
           )}
+          {user.categories.length > 0 && (
           <li>
             <span>
               Posts about{' '}
@@ -158,6 +94,7 @@ export function Profile({ route }: { route: Route }) {
               ))}
             </span>
           </li>
+          )}
         </ul>
       </Panel>
       {own && (
@@ -186,30 +123,37 @@ export function Profile({ route }: { route: Route }) {
         <div className="profile-info">
           <h1>
             {user.name} {user.verified && <Verified size={18} />}
-            {own && <span className="pill pill-you">You · demo account</span>}
-            {!own && friends && <span className="pill">Friend</span>}
+            {own && <span className="pill pill-you">You</span>}
           </h1>
-          <p className="profile-handle">@{user.handle}</p>
+          <p className="profile-handle">{own ? 'Warden Chat account' : `@${user.handle}`}</p>
           <ul className="profile-stats">
             <li>
               <b>{full(followingCount(p, user))}</b> Following
             </li>
-            <li>
-              <b>{full(followerCount(p, user))}</b> Followers
-            </li>
-            <li>
-              <b>{full(totalLikes(p, user))}</b> Likes
-            </li>
+            {own ? (
+              <li>
+                <b>{full(liked.length)}</b> Liked
+              </li>
+            ) : (
+              <>
+                <li>
+                  <b>{full(followerCount(p, user))}</b> Followers
+                </li>
+                <li>
+                  <b>{full(totalLikes(p, user))}</b> Likes
+                </li>
+              </>
+            )}
           </ul>
-          <p className="profile-bio">{user.bio}</p>
+          {user.bio && <p className="profile-bio">{user.bio}</p>}
           <div className="profile-actions">
             {own ? (
               <>
-                <a className="btn btn-accent btn-sm" href={href.profile(user.handle, 'settings')}>
-                  <Pencil size={14} /> Edit profile
+                <a className="btn btn-ghost btn-sm" href={WARDEN_CHAT_URL} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink size={14} /> Picture and password on Warden Chat
                 </a>
-                <a className="btn btn-ghost btn-sm" href="#/studio">
-                  <Clapperboard size={14} /> Creator Studio
+                <a className="btn btn-ghost btn-sm" href="#/settings/account">
+                  <SettingsIcon size={14} /> Account settings
                 </a>
               </>
             ) : (
@@ -217,19 +161,6 @@ export function Profile({ route }: { route: Route }) {
                 {following ? 'Following' : 'Follow'}
               </button>
             )}
-            <button
-              type="button"
-              className="btn btn-ghost btn-sm"
-              onClick={() => {
-                const link = profileLink(user.handle);
-                navigator.clipboard?.writeText(link).then(
-                  () => toast('Profile link copied'),
-                  () => toast(link),
-                );
-              }}
-            >
-              <Link2 size={14} /> Share profile
-            </button>
           </div>
           {hidden && <p className="notice">You’ve hidden @{user.handle} from your feeds. Unhide them in Settings → Feed.</p>}
         </div>
@@ -242,9 +173,6 @@ export function Profile({ route }: { route: Route }) {
           <a href="#/history">
             <History size={18} /> History
           </a>
-          <a href="#/studio">
-            <Clapperboard size={18} /> Studio
-          </a>
           <a href="#/settings">
             <SettingsIcon size={18} /> Settings
           </a>
@@ -253,7 +181,7 @@ export function Profile({ route }: { route: Route }) {
       )}
       <div className="tabs-line" role="tablist" aria-label="Profile sections">
         {tabs.map(([id, label, n, Icon]) => (
-          <a key={id} href={href.profile(user.handle, id === 'videos' ? undefined : id)} role="tab" aria-selected={tab === id} className={tab === id ? 'on' : ''}>
+          <a key={id} href={href.profile(base, id === tabs[0][0] ? undefined : id)} role="tab" aria-selected={tab === id} className={tab === id ? 'on' : ''}>
             <Icon size={15} /> {label} {n !== null && <span className="seg-n">{n}</span>}
           </a>
         ))}
@@ -262,13 +190,13 @@ export function Profile({ route }: { route: Route }) {
         (videos.length ? (
           <VideoGrid videos={videos} label={`@${user.handle} · Videos`} />
         ) : (
-          <Empty icon={Clapperboard} title={own ? 'You haven’t posted yet' : 'No videos yet'} action={own && <button type="button" className="btn btn-accent btn-sm" onClick={() => openModal({ type: 'upload' })}>Upload a simulated video</button>}>
-            {own ? 'Publish one from Creator Studio and it appears here and in your followers’ feeds.' : `@${user.handle} hasn’t posted anything.`}
+          <Empty icon={Clapperboard} title="No videos to show">
+            Nothing from @{user.handle} is in the feed right now.
           </Empty>
         ))}
       {tab === 'liked' &&
         (liked.length ? (
-          <VideoGrid videos={liked} label={`Liked by @${user.handle}`} stat="likes" />
+          <VideoGrid videos={liked} label="Videos you liked" stat="likes" />
         ) : (
           <Empty icon={Heart} title="No liked videos yet">
             Double-click a video or press L to like it.
@@ -297,11 +225,6 @@ export function Profile({ route }: { route: Route }) {
             <b>New collection</b>
           </button>
         </div>
-      )}
-      {tab === 'settings' && own && (
-        <Panel title="Profile settings">
-          <ProfileEditor key={p.activeId} user={user} />
-        </Panel>
       )}
     </PageShell>
   );

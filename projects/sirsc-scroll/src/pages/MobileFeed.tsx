@@ -6,7 +6,7 @@ import { FeedTrack } from '../components/player/FeedTrack';
 import { Stage } from '../components/player/Stage';
 import { ActionRail } from '../components/player/ActionRail';
 import { Comments } from '../components/panel/Comments';
-import { CreatorRow, ShareRow, VideoDetails } from '../components/panel/Sections';
+import { CreatorRow, VideoDetails } from '../components/panel/Sections';
 import { VideoCard } from '../components/common/VideoCard';
 import { Avatar } from '../components/common/Avatar';
 import { RichText } from '../components/panel/Comments';
@@ -14,6 +14,7 @@ import { usePersisted, useS } from '../state/store';
 import { openSheet, playInFeed, toggleMute, setActiveFeed } from '../state/actions';
 import { commentCount, getUser, getVideo, videosBy } from '../lib/catalog';
 import { full } from '../lib/format';
+import { useSocialVersion } from '../lib/social';
 import { EmptyFeed, EndNote, useAutoplayRule, useFeedKeys } from './FeedView';
 import { useEffect } from 'react';
 
@@ -21,7 +22,6 @@ const TABS: [FeedKind, string, string][] = [
   ['following', 'Following', '#/following'],
   ['foryou', 'For You', '#/'],
   ['trending', 'Trending', '#/trending'],
-  ['friends', 'Friends', '#/friends'],
 ];
 
 export function Sheet({ title, onClose: done, children, tall }: { title: string; onClose: () => void; children: ReactNode; tall?: boolean }) {
@@ -74,6 +74,7 @@ export function MobileFeed({ kind }: { kind: FeedKind }) {
   const sheet = useS((s) => s.sheet);
   const muted = useS((s) => s.muted);
   const p = usePersisted();
+  useSocialVersion();
   const item = feed.items[feed.index];
   const video = item ? getVideo(p, item.id) : undefined;
   useEffect(() => setActiveFeed(kind), [kind]);
@@ -115,14 +116,13 @@ export function MobileFeed({ kind }: { kind: FeedKind }) {
       </div>
       {video && sheet === 'comments' && (
         <Sheet title={`${full(commentCount(p, video))} comments`} onClose={() => openSheet(null)} tall>
-          <Comments video={video} mode="full" />
+          <Comments video={video} autoFocus />
         </Sheet>
       )}
       {video && sheet === 'creator' && (
         <Sheet title="About this video" onClose={() => openSheet(null)}>
           <CreatorRow video={video} />
           <VideoDetails video={video} reason={item?.reason} />
-          <ShareRow video={video} />
           <h3 className="sheet-sub">More from @{getUser(p, video.creatorId)?.handle}</h3>
           <div className="tile-grid" style={{ '--cols': 3 } as React.CSSProperties}>
             {videosBy(p, video.creatorId)
