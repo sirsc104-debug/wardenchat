@@ -1,0 +1,28 @@
+{
+  "name": "sirsc-scroll",
+  "private": true,
+  "version": "1.0.0",
+  "description": "SirSC Scroll: a frontend-only short-form video platform running on demo data.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "build:single": "tsc -b && vite build --mode single && node -e \"require('fs').copyFileSync('dist/single/index.html','dist/sirsc-scroll.html')\"",
+    "typecheck": "tsc -b",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/manrope": "^5.3.0",
+    "lucide-react": "^1.77.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.8",
+    "vite-plugin-singlefile": "^2.3.4"
+  }
+}
